@@ -26,7 +26,7 @@ public class PureApiBuild extends JkRun {
         javaProject.setDependencies(deps).setSourceVersion(JkJavaVersion.V6);
 
         javaProject.maker().clean();
-        javaProject.maker().makeArtifact(javaProject.get().mainArtifactId());
+        javaProject.maker().makeArtifact(javaProject.get().getMainArtifactId());
         javaProject.maker().makeJavadocJar(Paths.get("javadoc.jar"));
     }
 

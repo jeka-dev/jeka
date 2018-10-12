@@ -87,7 +87,7 @@ public class JkEclipseClasspathGeneratorTest {
         final List<Path> resFiles = base2Layout.resources().getFiles();
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
-        assertEquals(5, baseProject2.getDependencies().list().size());
+        assertEquals(5, baseProject2.getDependencies().toList().size());
 
         final JkJavaProject coreProject2 = JkJavaProject.ofMavenLayout(core);
 
@@ -95,10 +95,10 @@ public class JkEclipseClasspathGeneratorTest {
         //JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
         JkEclipseProject.ofJavaNature("core").writeTo(core.resolve(".project"));
         classpathApplier.apply(coreProject2);
-        final List<JkScopedDependency> coreDeps2 = coreProject2.getDependencies().list();
+        final List<JkScopedDependency> coreDeps2 = coreProject2.getDependencies().toList();
         assertEquals(1, coreDeps2.size());
-        final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).dependency();
-        assertEquals(base, baseProjectDep.ideProjectBaseDir());
+        final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).getDependency();
+        assertEquals(base, baseProjectDep.getIdeProjectBaseDir());
 
         JkPathTree.of(top).deleteContent();
     }

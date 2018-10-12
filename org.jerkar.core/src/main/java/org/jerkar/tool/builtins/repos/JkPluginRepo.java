@@ -18,8 +18,8 @@ import java.util.Map;
         "    - the 'repos#downloadRepoName' option which designate the name of the configured plugin\n" +
         "    - the 'repos#downloadUrl', 'repos#downloadUsername' and 'repos#downloadPassword' options to instantiate a repo based on these values\n" +
         "    - the 'Repos.download.url', 'Repos.download.username' and 'Repo.download.password' options to instantiate repo based on these values\n" +
-        "    - the default repo returned by JkRepo#mavenCentral() for downloading and local repository for publishing.\n" +
-        "  To afterPluginsActivated a named repository, add following properties into your [Jerkar_user_home]/options.properties file :\n" +
+        "    - the default repo returned by JkRepo#ofMavenCentral() for downloading and local repository for publishing.\n" +
+        "  To postPluginSetup a named repository, add following properties into your [Jerkar_user_home]/options.properties file :\n" +
         "    'Repos.[name].url', 'Repos.[value].username' and 'Repos.[of].password'"
 )
 public class JkPluginRepo extends JkPlugin {
@@ -65,7 +65,7 @@ public class JkPluginRepo extends JkPlugin {
             return JkRepo.of(publishUrl).withOptionalCredentials(publishUsername, publishPassword);
         }
         JkRepo optionRepo = JkRepoConfigOptionLoader.publishRepository();
-        return optionRepo != null ? optionRepo : JkRepo.local();
+        return optionRepo != null ? optionRepo : JkRepo.ofLocal();
     }
 
     public JkRepo downloadRepository() {
@@ -85,10 +85,10 @@ public class JkPluginRepo extends JkPlugin {
         JkRepo download = downloadRepository();
 
         sb.append("Download repository")
-                .append("\n  url : " + download.url());
-        if (download.credential() != null) {
-            String downloadPwd = JkUtilsString.isBlank(download.credential().password()) ? "" : downloadPassword.substring(0, 1) + "*******";
-            sb.append("\n  username : " + download.credential().userName())
+                .append("\n  url : " + download.getUrl());
+        if (download.getCredential() != null) {
+            String downloadPwd = JkUtilsString.isBlank(download.getCredential().getPassword()) ? "" : downloadPassword.substring(0, 1) + "*******";
+            sb.append("\n  username : " + download.getCredential().getUserName())
                     .append("\n  password : " + downloadPwd);
         }
 

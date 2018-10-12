@@ -25,15 +25,15 @@ public class MergeFileDepIT {
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource( "dep1").toURI());
         Path dep2File = Paths.get(MergeFileDepIT.class.getResource( "dep2").toURI());
         JkDependencySet deps = JkDependencySet.of()
-                .and(dep0File, TEST)
+                .andFile(dep0File, TEST)
                 .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
-                .and(dep1File, TEST)
+                .andFile(dep1File, TEST)
                 .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE)
-                .and(dep2File, COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
+                .andFile(dep2File, COMPILE);
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
+        JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
         System.out.println(tree.toStringComplete());
 
@@ -65,7 +65,7 @@ public class MergeFileDepIT {
 
         // Now check that file dependencies with Test Scope are not present in compile
 
-        tree = resolver.resolve(deps, COMPILE).dependencyTree();
+        tree = resolver.resolve(deps, COMPILE).getDependencyTree();
         System.out.println(tree.toStringComplete());
 
         root = tree.moduleInfo();
@@ -81,13 +81,13 @@ public class MergeFileDepIT {
         Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource("dep1").toURI());
         JkDependencySet deps = JkDependencySet.of()
-                .and(dep0File, TEST)
-                .and(dep1File, TEST);
+                .andFile(dep0File, TEST)
+                .andFile(dep1File, TEST);
         JkDependencyResolver resolver = JkDependencyResolver.of();
-        JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
+        JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
         assertEquals(2, tree.flatten().size());
-        resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet());
-        assertEquals(2, resolver.resolve(deps).dependencyTree().flatten().size());
+        resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
+        assertEquals(2, resolver.resolve(deps).getDependencyTree().flatten().size());
 
     }
 

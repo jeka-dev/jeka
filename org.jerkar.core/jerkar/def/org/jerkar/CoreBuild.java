@@ -32,7 +32,7 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private Path distribFolder;
 
-    public String githubSiteRoot = "../../jerkar-site-source";
+    public String githubSiteRoot = "../../jerkar.github.io";
 
     protected CoreBuild() {
         java().tests.fork = false;
@@ -40,8 +40,8 @@ public class CoreBuild extends JkJavaProjectBuild {
     }
 
     @Override
-    protected void afterOptionsInjected()  {
-        project().setVersionedModule(JkModuleId.of("org.jerkar:core").version(VERSION));
+    protected void setup()  {
+        project().setVersionedModule(JkModuleId.of("org.jerkar:core").getVersion(VERSION));
         project().setSourceVersion(JkJavaVersion.V8);
         project().setMavenPublicationInfo(mavenPublication());
 
@@ -55,21 +55,21 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private void doDistrib() {
         final JkJavaProjectMaker maker = this.java().project().maker();
-        maker.makeArtifactsIfAbsent(maker.mainArtifactId(), SOURCES_ARTIFACT_ID);
+        maker.makeArtifactsIfAbsent(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
         distrib.copyIn(baseDir().getParent().resolve("LICENSE"));
         distrib.merge(baseDir().resolve("src/main/dist"));
         distrib.merge(baseDir().resolve("src/main/java/META-INF/bin"));
-        distrib.copyIn(maker.artifactPath(maker.mainArtifactId()));
+        distrib.copyIn(maker.getArtifactPath(maker.getMainArtifactId()));
         final List<Path> ivySourceLibs = baseTree().goTo("build/libs-sources").andAccept("apache-ivy*.jar").getFiles();
         distrib.goTo("libs-sources")
             .copyIn(ivySourceLibs)
-            .copyIn(maker.artifactPath(SOURCES_ARTIFACT_ID));
+            .copyIn(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
         if (java().pack.javadoc) {
-            maker.makeArtifactsIfAbsent(maker.mainArtifactId(), JAVADOC_ARTIFACT_ID);
-            distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_ARTIFACT_ID));
+            maker.makeArtifactsIfAbsent(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
+            distrib.goTo("libs-javadoc").copyIn(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         JkLog.execute("Making documentation", () -> new DocMaker(baseDir(), distribFolder,
                 project().getVersionedModule().version().value()).assembleAllDoc());
@@ -77,7 +77,7 @@ public class CoreBuild extends JkJavaProjectBuild {
             testSamples();
         }
         JkLog.info("Distribution created in " + distrib.root());
-        final Path distripZipFile = maker.artifactPath(DISTRIB_FILE_ID);
+        final Path distripZipFile = maker.getArtifactPath(DISTRIB_FILE_ID);
         distrib.zipTo(distripZipFile);
         JkLog.info("Distribution zipped in " + distripZipFile);
         JkLog.endTask();
@@ -96,10 +96,12 @@ public class CoreBuild extends JkJavaProjectBuild {
         Path root = Paths.get(githubSiteRoot);
         JkProcess git = JkProcess.of("git").withWorkingDir(root).withLogCommand(true);
         git.withExtraParams("pull").runSync();
-        JkPathTree target = JkPathTree.of(root.resolve("documentation"));
-        target.deleteRoot();
+        JkPathTree target = JkPathTree.of(root.resolve("documentation-latest"));
+        if (target.exists()) {
+            target.deleteRoot();
+        }
         JkPathTree.of(distribFolder.resolve("doc")).copyTo(target.root());
-        git.withExtraParams("add", "documentation").runSync();
+        git.withExtraParams("add", "documentation-latest").runSync();
         git.withExtraParams("commit", "-m", "Doc").runSync();
         git.withExtraParams("push").runSync();
     }
@@ -114,7 +116,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     }
 
     private static JkRepoSet publishRepos() {
-        return JkRepoSet.local();
+        return JkRepoSet.ofLocal();
     }
 
     void testSamples()  {

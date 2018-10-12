@@ -69,7 +69,7 @@ final class Engine {
      * Pre-compile and compile run classes (if needed) then execute methods mentioned in command line
      */
     void execute(CommandLine commandLine, String runClassHint, JkLog.Verbosity verbosityToRestore) {
-        runDependencies = runDependencies.andUnscoped(commandLine.dependencies());
+        runDependencies = runDependencies.andScopelessDependencies(commandLine.dependencies());
         long start = System.nanoTime();
         JkLog.startTask("Compile and initialise run classes");
         JkRun jkRun = null;
@@ -107,7 +107,7 @@ final class Engine {
         for (JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
-        return JkDependencyResolver.of(this.runRepos).get(deps);
+        return JkDependencyResolver.of(this.runRepos).fetch(deps);
     }
 
     private void preCompile() {
@@ -135,7 +135,7 @@ final class Engine {
         long start = System.nanoTime();
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
-        final JkPathSequence runPath = runDependencyResolver.get(this.computeRunDependencies());
+        final JkPathSequence runPath = runDependencyResolver.fetch(this.computeRunDependencies());
         path.addAll(runPath.getEntries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
         this.compileDef(JkPathSequence.ofMany(path));
@@ -219,7 +219,7 @@ final class Engine {
     }
 
     private JkDependencyResolver getRunDependencyResolver() {
-        if (this.computeRunDependencies().containsModules()) {
+        if (this.computeRunDependencies().hasModules()) {
             return JkDependencyResolver.of(this.runRepos);
         }
         return JkDependencyResolver.of();
@@ -274,7 +274,7 @@ final class Engine {
     }
 
     private static JkRepoSet repos() {
-        return JkRepoSet.of(JkRepoConfigOptionLoader.runRepository(), JkRepo.local());
+        return JkRepoSet.of(JkRepoConfigOptionLoader.runRepository(), JkRepo.ofLocal());
     }
 
     private static List<String> toRelativePaths(Path from, List<Path>  files) {

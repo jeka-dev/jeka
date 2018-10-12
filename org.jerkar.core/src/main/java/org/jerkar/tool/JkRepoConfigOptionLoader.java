@@ -51,7 +51,7 @@ public class JkRepoConfigOptionLoader {
      */
     public static JkRepo downloadRepository() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.downloadName"), "download");
-        return JkUtilsObject.firstNonNull(repoFromOptions(repoName), JkRepo.mavenCentral());
+        return JkUtilsObject.firstNonNull(repoFromOptions(repoName), JkRepo.ofMavenCentral());
     }
 
     /**

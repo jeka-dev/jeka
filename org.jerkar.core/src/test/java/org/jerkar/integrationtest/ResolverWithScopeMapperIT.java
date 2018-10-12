@@ -22,10 +22,10 @@ public class ResolverWithScopeMapperIT {
 
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", TEST);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
-        Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();
+        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().flattenToVersionProvider().moduleIds();
 
         // Unresolved issue happen on Travis : Junit is not part of the result.
         // To unblock linux build, we do a specific check uniquely for linux
@@ -41,10 +41,10 @@ public class ResolverWithScopeMapperIT {
     public void resolveWithJunit() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
-        Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();
+        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().flattenToVersionProvider().moduleIds();
         assertEquals("Wrong modules size " + moduleIds, 2, moduleIds.size());
     }
 
@@ -63,10 +63,10 @@ public class ResolverWithScopeMapperIT {
 
                 .and(springCoreModule, directCoreVersion, COMPILE)  // force a projectVersion lower than the transitive jump starterWeb module
                 .and(starterWebModule, "1.5.3.RELEASE", COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
-        assertEquals(directCoreVersion, resolveResult.versionOf(springCoreModule).value());
+        assertEquals(directCoreVersion, resolveResult.getVersionOf(springCoreModule).value());
     }
 
     /*
@@ -79,12 +79,12 @@ public class ResolverWithScopeMapperIT {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularModules.GUAVA, "19.0", COMPILE)
                 .and (JkPopularModules.JAVAX_SERVLET_API, "3.1.0", PROVIDED);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE, PROVIDED);
         assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
-        assertEquals(2, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
+        assertEquals(2, resolveResult.getDependencyTree().flattenToVersionProvider().moduleIds().size());
     }
 
     @Test
@@ -92,8 +92,8 @@ public class ResolverWithScopeMapperIT {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion2");
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", COMPILE, RUNTIME);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
@@ -105,8 +105,8 @@ public class ResolverWithScopeMapperIT {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", COMPILE, RUNTIME);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
@@ -117,9 +117,9 @@ public class ResolverWithScopeMapperIT {
     public void treeRootIsCorrectWhenAnonymous() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularModules.GUAVA, "19.0", COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
-        JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
+        JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
         assertTrue(tree.moduleInfo().declaredScopes().isEmpty());
     }
 

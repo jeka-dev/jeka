@@ -58,13 +58,13 @@ public final class JkMavenPublication implements Serializable {
      * Creates a Maven publication to publish all artifacts referenced in the specified artifact locator.
      */
     public static JkMavenPublication of(JkArtifactLocator artifactLocator, Set<JkArtifactId> excludedArtifacts) {
-        JkMavenPublication result = JkMavenPublication.of(artifactLocator.artifactPath(artifactLocator.mainArtifactId()));
-        for (final JkArtifactId artifactFileId : artifactLocator.artifactIds()) {
-            if (excludedArtifacts.contains(artifactFileId) || artifactFileId.classifier() == null) {
+        JkMavenPublication result = JkMavenPublication.of(artifactLocator.getArtifactPath(artifactLocator.getMainArtifactId()));
+        for (final JkArtifactId artifactFileId : artifactLocator.getArtifactIds()) {
+            if (excludedArtifacts.contains(artifactFileId) || artifactFileId.getClassifier() == null) {
                 continue;
             }
-            final Path file = artifactLocator.artifactPath(artifactFileId);
-            result = result.andOptional(file, artifactFileId.classifier());
+            final Path file = artifactLocator.getArtifactPath(artifactFileId);
+            result = result.andOptional(file, artifactFileId.getClassifier());
         }
         return result;
     }

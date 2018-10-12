@@ -20,9 +20,9 @@ public class SimpleScopeBuild extends JkJavaProjectBuild {
     private static final JkScope BAR = JkScope.of("bar");
 
     @Override
-    protected void afterOptionsInjected() {
+    protected void setup() {
         java().project().setDependencies(JkDependencySet.of()
-                .and(baseDir().resolve("libs/foo.jar"))
+                .andFile(baseDir().resolve("libs/foo.jar"))
                 .and(JERSEY_SERVER, "1.19", JkScopeMapping
                     .of(COMPILE).to(RUNTIME)
                     .and(FOO, PROVIDED).to(BAR, PROVIDED)));

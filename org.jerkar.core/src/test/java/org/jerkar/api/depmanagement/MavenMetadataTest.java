@@ -13,7 +13,7 @@ public class MavenMetadataTest {
     @Test
     public void testupdateSnapshot() throws UnsupportedEncodingException {
         final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("org.jerkar", "core")
-                .version("0.1-SNAPSHOT"), "11111111.222222");
+                .getVersion("0.1-SNAPSHOT"), "11111111.222222");
         mavenMetadata.updateSnapshot("20151023145532");
         mavenMetadata.addSnapshotVersion("jar", "source");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

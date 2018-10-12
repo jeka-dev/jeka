@@ -11,20 +11,18 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 class Build extends JkJavaProjectBuild {
 
     protected Build() {
-        java().projectVersion = "0.0.1-SNAPSHOT";
+        java().projectVersion = "0.1-SNAPSHOT";
     }
 
     /*
-     * Configures plugins to be bound to this run class. When this method is called, run option
+     * Configures plugins to be bound to this run class. When this method is called, option
      * fields have already been populated.
      */
     @Override
-    protected void afterOptionsInjected() {
-        project()   // Configure project structure and dependencies using project() instance.
-                .setVersionedModule("${group}:${name}", java().projectVersion)
+    protected void setup() {
+        project()   // Configure project structure and dependencies
                 .setSourceVersion(JkJavaVersion.V8)
                 .setDependencies(dependencies());
-        maker().setTestRunner(maker().getTestRunner().forked(true));  // force tu run test in forked process
     }
 
     private JkDependencySet dependencies() {  // Example of dependencies.

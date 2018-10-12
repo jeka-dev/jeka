@@ -3,7 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.Serializable;
 
 /**
- * CInstances of this class are used to parameter the dependency resolution
+ * Instances of this class are used to parameter the dependency resolution
  */
 public final class JkResolutionParameters implements Serializable {
 
@@ -13,8 +13,8 @@ public final class JkResolutionParameters implements Serializable {
      * Creates resolution parameters without default mapping and no dynamic
      * projectVersion resolving refresh.
      * 
-     * @see JkResolutionParameters#defaultMapping()
-     * @see #refreshed()
+     * @see JkResolutionParameters#getDefaultMapping()
+     * @see #isRefreshed()
      */
     public static JkResolutionParameters of() {
         return new JkResolutionParameters(null, true);
@@ -24,10 +24,10 @@ public final class JkResolutionParameters implements Serializable {
      * Creates resolution parameters with the specified default scope mapping
      * and no dynamic projectVersion resolving refresh.
      * 
-     * @see JkResolutionParameters#defaultMapping()
-     * @see #refreshed()
+     * @see JkResolutionParameters#getDefaultMapping()
+     * @see #isRefreshed()
      */
-    public static JkResolutionParameters defaultScopeMapping(JkScopeMapping scopeMapping) {
+    public static JkResolutionParameters of(JkScopeMapping scopeMapping) {
         return new JkResolutionParameters(scopeMapping, true);
     }
 
@@ -43,7 +43,7 @@ public final class JkResolutionParameters implements Serializable {
      *      "http://ant.apache.org/ivy/history/2.3.0/ivyfile/configurations.html">
      *      Ivy configuration doc</a>
      */
-    public JkScopeMapping defaultMapping() {
+    public JkScopeMapping getDefaultMapping() {
         return defaultMapping;
     }
 
@@ -51,19 +51,19 @@ public final class JkResolutionParameters implements Serializable {
      * Returns <code>true</code> if during the resolution phase, the dynamic
      * projectVersion must be resolved as well or the cache can be reused.
      */
-    public boolean refreshed() {
+    public boolean isRefreshed() {
         return refreshed;
     }
 
     /**
-     * @see JkResolutionParameters#refreshed()
+     * @see JkResolutionParameters#isRefreshed()
      */
-    public JkResolutionParameters refreshed(boolean refreshed) {
+    public JkResolutionParameters isRefreshed(boolean refreshed) {
         return new JkResolutionParameters(defaultMapping, refreshed);
     }
 
     /**
-     * @see #defaultMapping()
+     * @see #getDefaultMapping()
      */
     public JkResolutionParameters withDefault(JkScopeMapping defaultMapping) {
         return new JkResolutionParameters(defaultMapping, refreshed);
@@ -77,7 +77,7 @@ public final class JkResolutionParameters implements Serializable {
 
     @Override
     public String toString() {
-        return "default mapping : " + defaultMapping + ", refreshed : " + refreshed;
+        return "default mapping : " + defaultMapping + ", isRefreshed : " + refreshed;
     }
 
 }

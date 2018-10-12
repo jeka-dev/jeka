@@ -29,7 +29,7 @@ import com.google.common.base.MoreObjects;
 public class HttpClientTaskBuild extends JkJavaProjectBuild {
     
     @Override
-    protected void afterOptionsInjected() {
+    protected void setup() {
         java().project().setDependencies(dependencies());
     }
 

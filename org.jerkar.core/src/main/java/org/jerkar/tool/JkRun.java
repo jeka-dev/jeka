@@ -89,7 +89,7 @@ public class JkRun {
            jkRun.plugins.injectOptions(plugin);
         }
 
-        run.afterOptionsInjected();
+        run.setup();
 
         jkRun.plugins.loadCommandLinePlugins();
         for (JkPlugin plugin : jkRun.plugins().all()) {
@@ -105,7 +105,7 @@ public class JkRun {
         }
 
         // Extra run configuration
-        run.afterPluginsActivated();
+        run.postPluginSetup();
         List<ProjectDef.RunOptionDef> defs = ProjectDef.RunClassDef.of(run).optionDefs();
         JkLog.info("Run instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask();
@@ -119,14 +119,14 @@ public class JkRun {
      * This method is invoked right after options has been injected into this instance. You will typically
      * setup plugins here before they decorate this run.
      */
-    protected void afterOptionsInjected() {
+    protected void setup() {
         // Do nothing by default
     }
 
     /**
      * This method is called once all plugin has decorated this run.
      */
-    protected void afterPluginsActivated() {
+    protected void postPluginSetup() {
         // Do nothing by default
     }
 

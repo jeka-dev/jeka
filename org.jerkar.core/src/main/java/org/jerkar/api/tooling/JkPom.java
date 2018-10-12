@@ -8,8 +8,6 @@ import java.util.Map;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.depmanagement.JkRepoSet;
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsXml;
@@ -103,7 +101,7 @@ public final class JkPom {
         final JkDependencySet dependencies = dependencies(dependenciesEl, properties());
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .dependency();
+                    .getDependency();
             final JkVersionedModule versionedModule = JkVersionedModule.of(
                     moduleDependency.moduleId(),
                     JkVersion.of(moduleDependency.version().value()));
@@ -145,7 +143,7 @@ public final class JkPom {
         final JkDependencySet dependencies = dependencies(dependenciesEl, properties());
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .dependency();
+                    .getDependency();
             if (!moduleDependency.excludes().isEmpty()) {
                 builder.on(moduleDependency.moduleId(), moduleDependency.excludes());
             }
@@ -159,7 +157,7 @@ public final class JkPom {
     public JkRepoSet repos() {
         final List<String> urls = new LinkedList<>();
         if (repositoriesEl() == null) {
-            return JkRepoSet.empty();
+            return JkRepoSet.ofEmpty();
         }
         for (final Element repositoryEl : JkUtilsXml.directChildren(repositoriesEl(), "repository")) {
             urls.add(JkUtilsXml.directChildText(repositoryEl, "url"));

@@ -19,13 +19,13 @@ public interface JkArtifactLocator {
      * Returns file system path where is supposed to be produced the specified artifact file id. This method is supposed
      * to only returns the file reference and not generate it.
      */
-    Path artifactPath(JkArtifactId jkArtifactId);
+    Path getArtifactPath(JkArtifactId jkArtifactId);
 
     /**
      * Returns the main artifact file id for this producer. By default it returns a artifact file id with no
      * classifier and 'jar" extension.
      */
-    default JkArtifactId mainArtifactId() {
+    default JkArtifactId getMainArtifactId() {
         return JkArtifactId.of(null, "jar");
     }
 
@@ -33,33 +33,33 @@ public interface JkArtifactLocator {
      * Returns all the artifact ids likely to be produced by this artifact producer. By default it returns
      * a single element list containing the main artifact file id
      */
-    default Iterable<JkArtifactId> artifactIds() {
-        return JkUtilsIterable.listOf(mainArtifactId());
+    default Iterable<JkArtifactId> getArtifactIds() {
+        return JkUtilsIterable.listOf(getMainArtifactId());
     }
 
     /**
      * Returns the main artifact path.
      */
-    default Path mainArtifactPath() {
-        return artifactPath(mainArtifactId());
+    default Path getMainArtifactPath() {
+        return getArtifactPath(getMainArtifactId());
     }
 
     /**
      * Returns all artifact files likely to be produced by this artifact producer.
      */
-    default List<Path> allArtifactPaths() {
+    default List<Path> getAllArtifactPaths() {
         final List<Path> result = new LinkedList<>();
-        artifactIds().forEach(artifactFileId -> result.add(artifactPath(artifactFileId)));
+        getArtifactIds().forEach(artifactFileId -> result.add(getArtifactPath(artifactFileId)));
         return result;
     }
 
     /**
      * Returns the arifact file ids having the specified classifier.
      */
-    default Set<JkArtifactId> artifactIdsWithClassifier(String ... classifiers) {
+    default Set<JkArtifactId> getArtifactIdsWithClassifier(String ... classifiers) {
         final Set<JkArtifactId> result = new LinkedHashSet<>();
-        artifactIds().forEach((fid) -> {
-            if (JkUtilsString.equalsAny(fid.classifier(), classifiers)) {
+        getArtifactIds().forEach((fid) -> {
+            if (JkUtilsString.equalsAny(fid.getClassifier(), classifiers)) {
                 result.add(fid);
             }
         });

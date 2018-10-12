@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
@@ -33,8 +32,8 @@ public final class JkDependencyResolver {
      * the specified JkRepo contains no {@link JkRepo} then the created.
      */
     public static JkDependencyResolver of(JkRepoSet repos) {
-        if (repos.list().isEmpty()) {
-            return new JkDependencyResolver(null, null, null, JkRepoSet.empty());
+        if (repos.getRepoList().isEmpty()) {
+            return new JkDependencyResolver(null, null, null, JkRepoSet.ofEmpty());
         }
         final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
         return new JkDependencyResolver(ivyResolver,  null, null, repos);
@@ -73,16 +72,15 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Resolves the of dependencies (dependencies declared as external
-     * module) for the specified scopes. If no scope is specified, then it is
-     * resolved for all scopes.
+     * Resolves the module dependencies (dependencies declared as module) for the specified scopes.
+     * If no scope is specified, then it is resolved for all scopes.
      */
     public JkResolveResult resolve(JkDependencySet dependencies, JkScope... scopes) {
         if (internalResolver == null) {
             final List<JkDependencyNode> nodes = new LinkedList<>();
             for (final JkScopedDependency scopedDependency : dependencies) {
-                nodes.add(JkDependencyNode.ofFileDep((JkFileDependency) scopedDependency.dependency(),
-                        scopedDependency.scopes()));
+                nodes.add(JkDependencyNode.ofFileDep((JkFileDependency) scopedDependency.getDependency(),
+                        scopedDependency.getScopes()));
             }
             final JkDependencyNode.ModuleNodeInfo info;
             if (this.module == null) {
@@ -93,13 +91,13 @@ public final class JkDependencyResolver {
             final JkDependencyNode root = JkDependencyNode.ofModuleDep(info, nodes);
             return JkResolveResult.of(root, JkResolveResult.JkErrorReport.allFine());
         }
-        return resolveWithInternalResolver(dependencies, dependencies.versionProvider(), scopes);
+        return resolveWithInternalResolver(dependencies, dependencies.getVersionProvider(), scopes);
     }
 
     /**
      * Returns the repositories the resolution is made on.
      */
-    public JkRepoSet repositories() {
+    public JkRepoSet getRepos() {
         return this.repos;
     }
 
@@ -117,18 +115,18 @@ public final class JkDependencyResolver {
      * of the second one and so on.
      * @throws IllegalStateException if the resolution has not been achieved successfully
      */
-    public JkPathSequence get(JkDependencySet dependencies, JkScope... scopes) {
+    public JkPathSequence fetch(JkDependencySet dependencies, JkScope... scopes) {
         JkResolveResult resolveResult = null;
-        if (internalResolver != null && dependencies.containsModules()) {
-            resolveResult = resolveWithInternalResolver(dependencies, dependencies.versionProvider(), scopes).assertNoError();
-            return JkPathSequence.ofMany(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
+        if (internalResolver != null && dependencies.hasModules()) {
+            resolveResult = resolveWithInternalResolver(dependencies, dependencies.getVersionProvider(), scopes).assertNoError();
+            return JkPathSequence.ofMany(resolveResult.getDependencyTree().allFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {
             if (scopedDependency.isInvolvedInAnyOf(scopes) || scopes.length == 0) {
-                final JkDependency dependency = scopedDependency.dependency();
+                final JkDependency dependency = scopedDependency.getDependency();
                 final JkFileDependency fileDependency = (JkFileDependency) dependency;
-                result.addAll(fileDependency.paths());
+                result.addAll(fileDependency.getPaths());
             }
         }
         return JkPathSequence.ofMany(result).withoutDuplicates();
@@ -142,16 +140,16 @@ public final class JkDependencyResolver {
         JkLog.startTask(msg);
         JkResolveResult resolveResult = internalResolver.resolve(module, dependencies.onlyModules(),
                     parameters, transitiveVersionOverride, scopes);
-        final JkDependencyNode mergedNode = resolveResult.dependencyTree().mergeNonModules(dependencies,
+        final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies,
                     JkUtilsIterable.setOf(scopes));
-        resolveResult = JkResolveResult.of(mergedNode, resolveResult.errorReport());
+        resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.info(plurialize(resolveResult.involvedModules().size(), "module")
-                    + resolveResult.involvedModules());
-            JkLog.info(plurialize(resolveResult.localFiles().size(), "artifact") + ".");
+            JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module")
+                    + resolveResult.getInvolvedModules());
+            JkLog.info(plurialize(resolveResult.getLocalFiles().size(), "artifact") + ".");
         } else {
-            JkLog.info(plurialize(resolveResult.involvedModules().size(), "module") + " leading to " +
-                    plurialize(resolveResult.localFiles().size(), "artifact") + ".");
+            JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " leading to " +
+                    plurialize(resolveResult.getLocalFiles().size(), "artifact") + ".");
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         return resolveResult;
@@ -196,7 +194,7 @@ public final class JkDependencyResolver {
     /**
      * Returns the parameters of this dependency resolver.
      */
-    public JkResolutionParameters params() {
+    public JkResolutionParameters getParams() {
         return this.parameters;
     }
 

@@ -62,7 +62,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Creates a {@link JkModuleDependency} to the specified moduleId and
+     * Creates a {@link JkModuleDependency} to the specified getModuleId and
      * <code>JkVersionrange</code>.
      */
     @SuppressWarnings("unchecked")
@@ -79,7 +79,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Creates a {@link JkModuleDependency} to its moduleId and
+     * Creates a {@link JkModuleDependency} to its getModuleId and
      * <code>JkVersionrange</code>.
      */
     @SuppressWarnings("unchecked")
@@ -138,7 +138,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Returns the moduleId of this dependency.
+     * Returns the getModuleId of this dependency.
      */
     public JkModuleId moduleId() {
         return module;

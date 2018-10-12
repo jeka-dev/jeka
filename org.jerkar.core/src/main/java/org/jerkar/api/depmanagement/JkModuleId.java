@@ -8,7 +8,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Identifier for project. The identifier will be used to name the generated
- * artifacts and as a moduleId for Maven or Ivy.
+ * artifacts and as a getModuleId for Maven or Ivy.
  *
  * @author Jerome Angibaud
  */
@@ -65,21 +65,21 @@ public final class JkModuleId implements Serializable {
     /**
      * Group of this module.
      */
-    public String group() {
+    public String getGroup() {
         return group;
     }
 
     /**
      * Name of this module.
      */
-    public String name() {
+    public String getName() {
         return name;
     }
 
     /**
      * A concatenation of the group and name of the module as '[group].[name]'.
      */
-    public String dotedName() {
+    public String getDotedName() {
         if (group.equals(name)) {
             return name;
         }
@@ -97,15 +97,15 @@ public final class JkModuleId implements Serializable {
      * Creates a {@link JkVersionedModule} from this module and the specified
      * projectVersion.
      */
-    public JkVersionedModule version(String version) {
-        return version(JkVersion.of(version));
+    public JkVersionedModule getVersion(String version) {
+        return getVersion(JkVersion.of(version));
     }
 
     /**
      * Creates a {@link JkVersionedModule} from this module and the specified
      * projectVersion.
      */
-    public JkVersionedModule version(JkVersion version) {
+    public JkVersionedModule getVersion(JkVersion version) {
         return JkVersionedModule.of(this, version);
     }
 

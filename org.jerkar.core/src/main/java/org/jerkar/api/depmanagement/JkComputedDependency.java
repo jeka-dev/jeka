@@ -115,13 +115,13 @@ public class JkComputedDependency implements JkFileDependency {
      * Returns <code>true</code> if at least one of these files is missing or one of these directory is empty.
      */
     public final boolean hasMissingFilesOrEmptyDirs() {
-        return !missingFilesOrEmptyDirs().isEmpty();
+        return !getMissingFilesOrEmptyDirs().isEmpty();
     }
 
     /**
      * Returns the missing files or empty directory for this dependency.
      */
-    public final Set<Path> missingFilesOrEmptyDirs() {
+    public final Set<Path> getMissingFilesOrEmptyDirs() {
         final Set<Path> files = new LinkedHashSet<>();
         for (final Path file : this.files) {
             if (!Files.exists(file)
@@ -133,11 +133,11 @@ public class JkComputedDependency implements JkFileDependency {
     }
 
     @Override
-    public List<Path> paths() {
+    public List<Path> getPaths() {
         if (this.hasMissingFilesOrEmptyDirs()) {
             JkLog.execute("Building dependency : " + this, runnable);
         }
-        final Set<Path> missingFiles = this.missingFilesOrEmptyDirs();
+        final Set<Path> missingFiles = this.getMissingFilesOrEmptyDirs();
         if (!missingFiles.isEmpty()) {
             throw new IllegalStateException(this + " didn't generate " + missingFiles);
         }
@@ -151,7 +151,7 @@ public class JkComputedDependency implements JkFileDependency {
      * If this dependency can be represented as a project dependency in a IDE,
      * this field mentions the baseTree dir of the project.
      */
-    public Path ideProjectBaseDir() {
+    public Path getIdeProjectBaseDir() {
         return ideProjectBaseDir;
     }
 

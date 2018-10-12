@@ -240,7 +240,7 @@ final class IvyPublisherForMaven {
         final JkModuleId moduleId = versionedModule.moduleId();
         final String version = versionedModule.version().value();
         final StringBuilder result = new StringBuilder(moduleBasePath(moduleId)).append("/")
-                .append(version).append("/").append(moduleId.name()).append("-")
+                .append(version).append("/").append(moduleId.getName()).append("-")
                 .append(uniqueVersion);
         if (classifier != null) {
             result.append("-").append(classifier);
@@ -287,7 +287,7 @@ final class IvyPublisherForMaven {
     }
 
     private static String moduleBasePath(JkModuleId module) {
-        return module.group().replace(".", "/") + "/" + module.name();
+        return module.getGroup().replace(".", "/") + "/" + module.getName();
     }
 
     private static String snapshotMetadataPath(JkVersionedModule module) {

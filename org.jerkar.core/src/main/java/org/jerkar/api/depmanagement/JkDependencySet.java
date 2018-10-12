@@ -10,6 +10,7 @@ import org.jerkar.api.utils.JkUtilsString;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -76,7 +77,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     /**
      * Returns the unmodifiable list list of scoped dependencies for this object.
      */
-    public List<JkScopedDependency> list() {
+    public List<JkScopedDependency> toList() {
         return this.dependencies;
     }
 
@@ -85,7 +86,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         if (dep == null) {
             return null;
         }
-        JkModuleDependency moduleDependency = (JkModuleDependency) dep.dependency();
+        JkModuleDependency moduleDependency = (JkModuleDependency) dep.getDependency();
         JkVersion version = moduleDependency.version();
         if (!version.isUnspecified()) {
             return version;
@@ -198,11 +199,19 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         return and(JkFileSystemDependency.ofPaths(files), scopes);
     }
 
-    public JkDependencySet and(Path files, JkScope... scopes) {
-        return and(JkFileSystemDependency.ofPaths(files), scopes);
+
+    public JkDependencySet andFile(String path, JkScope... scopes) {
+        return andFile(Paths.get(path), scopes);
     }
 
-    public JkDependencySet andUnscoped(Iterable<? extends JkDependency> dependencies) {
+    /**
+     * If specified path is relative, JkDependencyResolver will resolve it upon its base dir.
+     */
+    public JkDependencySet andFile(Path file, JkScope... scopes) {
+        return and(JkFileSystemDependency.ofPaths(file), scopes);
+    }
+
+    public JkDependencySet andScopelessDependencies(Iterable<? extends JkDependency> dependencies) {
         List<JkScopedDependency> deps = new LinkedList<>(this.dependencies);
         for(JkDependency dependency : dependencies) {
             deps.add(JkScopedDependency.of(dependency));
@@ -218,7 +227,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     private JkDependencySet minus(JkModuleId jkModuleId) {
         final List<JkScopedDependency> result = new LinkedList<>(dependencies);
         for (final Iterator<JkScopedDependency> it = result.iterator(); it.hasNext();) {
-            final JkDependency dependency = it.next().dependency();
+            final JkDependency dependency = it.next().getDependency();
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) dependency;
                 if (externalModule.moduleId().equals(jkModuleId)) {
@@ -230,9 +239,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     }
 
     /**
-     * Returns a clone of this dep
-     * @param condition
-     * @return
+     * Returns a clone of this dependencySet but removing the last element if the specified condition is not met.
      */
     public JkDependencySet onlyIf(boolean condition) {
         if (condition) {
@@ -250,7 +257,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     public JkDependencySet withDefaultScope(JkScope... scopes) {
         final List<JkScopedDependency> list = new LinkedList<>();
         for (JkScopedDependency dep : this) {
-            if (dep.scopeType().equals(ScopeType.UNSET)) {
+            if (dep.getScopeType().equals(ScopeType.UNSET)) {
                 dep = dep.withScopes(scopes);
             }
             list.add(dep);
@@ -265,7 +272,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     public JkDependencySet withDefaultScope(JkScopeMapping scopeMapping) {
         final List<JkScopedDependency> list = new LinkedList<>();
         for (JkScopedDependency dep : this) {
-            if (dep.scopeType().equals(ScopeType.UNSET) && (dep.dependency() instanceof JkModuleDependency)) {
+            if (dep.getScopeType().equals(ScopeType.UNSET) && (dep.getDependency() instanceof JkModuleDependency)) {
                 dep = dep.withScopeMapping(scopeMapping);
             }
             list.add(dep);
@@ -279,7 +286,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * by the specified one, there is no addition.
      */
     public JkDependencySet withVersionProvider(JkVersionProvider versionProvider) {
-        return new JkDependencySet(this.dependencies, this.excludes(), versionProvider);
+        return new JkDependencySet(this.dependencies, this.getGlobalExclusions(), versionProvider);
     }
 
     /**
@@ -288,16 +295,16 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * to the specified one.
      */
     public JkDependencySet andVersionProvider(JkVersionProvider versionProvider) {
-        return new JkDependencySet(this.dependencies, this.excludes(), this.versionProvider.and(versionProvider));
+        return new JkDependencySet(this.dependencies, this.getGlobalExclusions(), this.versionProvider.and(versionProvider));
     }
 
     /**
      * Returns <code>true</code> if this object contains dependencies whose are
      * {@link JkModuleDependency}.
      */
-    public boolean containsModules() {
+    public boolean hasModules() {
         for (final JkScopedDependency scopedDependency : dependencies) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 return true;
             }
         }
@@ -312,7 +319,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     /**
      * Returns the dependencies to be excluded to the transitive chain when using this dependency.
      */
-    public Set<JkDepExclude> excludes() {
+    public Set<JkDepExclude> getGlobalExclusions() {
         return this.globalExclusions;
     }
 
@@ -320,7 +327,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * Returns overridden versions for transitive dependencies. Versions present here will
      * overwrite versions found in transitive dependencies.
      */
-    public JkVersionProvider versionProvider() {
+    public JkVersionProvider getVersionProvider() {
         return this.versionProvider;
     }
 
@@ -333,15 +340,15 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * Returns the set of {@link JkDependency} involved for the specified
      * {@link JkScope}.
      */
-    public Set<JkDependency> dependenciesDeclaredWith(JkScope scope) {
+    public Set<JkDependency> getDependenciesDeclaredWith(JkScope scope) {
         final Set<JkDependency> depList = new HashSet<>();
         for (final JkScopedDependency scopedDependency : this) {
-            if ((scopedDependency.scopeType().equals(ScopeType.SIMPLE)
-                    && scopedDependency.scopes().contains(scope))
+            if ((scopedDependency.getScopeType().equals(ScopeType.SIMPLE)
+                    && scopedDependency.getScopes().contains(scope))
                     ||
-                    (scopedDependency.scopeType().equals(ScopeType.MAPPED)
-                            && scopedDependency.scopeMapping().entries().contains(scope))) {
-                depList.add(scopedDependency.dependency());
+                    (scopedDependency.getScopeType().equals(ScopeType.MAPPED)
+                            && scopedDependency.getScopeMapping().entries().contains(scope))) {
+                depList.add(scopedDependency.getDependency());
             }
         }
         return depList;
@@ -354,7 +361,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      */
     public JkScopedDependency get(JkModuleId moduleId) {
         for (final JkScopedDependency scopedDependency : this) {
-            final JkDependency dependency = scopedDependency.dependency();
+            final JkDependency dependency = scopedDependency.getDependency();
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) dependency;
                 if (externalModule.moduleId().equals(moduleId)) {
@@ -368,13 +375,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     /**
      * Returns the set of scopes involved in these dependencies.
      */
-    public Set<JkScope> declaredScopes() {
+    public Set<JkScope> getDeclaredScopes() {
         final Set<JkScope> result = new HashSet<>();
         for (final JkScopedDependency dep : this.dependencies) {
-            if (dep.scopeType() == ScopeType.MAPPED) {
-                result.addAll(dep.scopeMapping().entries());
-            } else if (dep.scopeType() == ScopeType.SIMPLE) {
-                result.addAll(dep.scopes());
+            if (dep.getScopeType() == ScopeType.MAPPED) {
+                result.addAll(dep.getScopeMapping().entries());
+            } else if (dep.getScopeType() == ScopeType.SIMPLE) {
+                result.addAll(dep.getScopes());
             }
         }
         return Collections.unmodifiableSet(result);
@@ -385,8 +392,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * dependencies is declared with scope 'FOO' and scope 'BAR' extends scope 'FOO', then 'FOO' and 'BAR' is
      * part of involved scopes.
      */
-    public Set<JkScope> involvedScopes() {
-        return JkScope.involvedScopes(declaredScopes());
+    public Set<JkScope> getInvolvedScopes() {
+        return JkScope.getInvolvedScopes(getDeclaredScopes());
     }
 
     /**
@@ -397,9 +404,9 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      */
     public boolean hasDynamicVersions() {
         for (final JkScopedDependency scopedDependency : this) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency
-                        .dependency();
+                        .getDependency();
                 final JkVersion version = externalModule.version();
                 if (version.isDynamic()) {
                     return true;
@@ -418,9 +425,9 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      */
     public boolean hasDynamicAndResolvableVersions() {
         for (final JkScopedDependency scopedDependency : this) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency
-                        .dependency();
+                        .getDependency();
                 final JkVersion version = externalModule.version();
                 if (version.isDynamicAndResovable()) {
                     return true;
@@ -437,7 +444,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     public JkDependencySet onlyModules() {
         final List<JkScopedDependency> deps = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : this) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 deps.add(scopedDependency);
             }
         }
@@ -457,9 +464,9 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     public JkDependencySet withLocalExclusion(JkModuleId fromModule, JkDepExclude exclude) {
         final List<JkScopedDependency> list = new LinkedList<>();
         for (JkScopedDependency dep : this) {
-            if (dep.dependency() instanceof JkModuleDependency) {
-                JkModuleDependency moduleDependency = (JkModuleDependency) dep.dependency();
-                dep = dep.dependency(moduleDependency.andExclude(exclude));
+            if (dep.getDependency() instanceof JkModuleDependency) {
+                JkModuleDependency moduleDependency = (JkModuleDependency) dep.getDependency();
+                dep = dep.getDependency(moduleDependency.andExclude(exclude));
             }
             list.add(dep);
         }
@@ -497,20 +504,20 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         final StringBuilder builder = new StringBuilder();
         builder.append("JkDependencySet.of()");
         for (final JkScopedDependency scopedDependency : this) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency
-                        .dependency();
+                        .getDependency();
                 builder.append("\n").append(indent).append(".and(\"")
-                .append(moduleDep.moduleId().group()).append(":")
-                .append(moduleDep.moduleId().name());
+                .append(moduleDep.moduleId().getGroup()).append(":")
+                .append(moduleDep.moduleId().getName());
                 if (!moduleDep.version().isUnspecified()) {
                     builder.append(":" + moduleDep.version().value());
                 }
                 builder.append('"');
-                if (!scopedDependency.scopes().isEmpty()) {
+                if (!scopedDependency.getScopes().isEmpty()) {
                     builder.append(", ");
-                    for (final JkScope scope : scopedDependency.scopes()) {
-                        builder.append(scope.name().toUpperCase()).append(", ");
+                    for (final JkScope scope : scopedDependency.getScopes()) {
+                        builder.append(scope.getName().toUpperCase()).append(", ");
                     }
                     builder.delete(builder.length() - 2, builder.length());
                 }
@@ -526,7 +533,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     public JkDependencySet modulesOnly() {
         final List<JkScopedDependency> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : this) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 result.add(scopedDependency);
             }
         }
@@ -536,27 +543,55 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     private List<JkModuleDependency> extractModuleDependencies() {
         final List<JkModuleDependency> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : this) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
-                result.add((JkModuleDependency) scopedDependency.dependency());
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
+                result.add((JkModuleDependency) scopedDependency.getDependency());
             }
         }
         return result;
     }
 
-    public static JkDependencySet fromDescription(Path path) {
+    /**
+     * @see #ofTextDescription(String)
+     */
+    public static JkDependencySet ofTextDescription(Path path) {
         try (InputStream inputStream = Files.newInputStream(path)) {
-            return fromDescription(inputStream);
+            return ofTextDescription(inputStream);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    public static JkDependencySet fromDescription(InputStream inputStream) {
+    /**
+     * @see #ofTextDescription(String)
+     */
+    public static JkDependencySet ofTextDescription(InputStream inputStream) {
         String content = JkUtilsIO.readAsString(inputStream);
-        return fromDescription(content);
+        return ofTextDescription(content);
     }
 
-    public static JkDependencySet fromDescription(String description) {
+    /**
+     * Creates a dependencySet from a flat file formatted as :
+     * <pre>
+     * - COMPILE RUNTIME
+     * org.springframework.boot:spring-boot-starter-thymeleaf
+     * org.springframework.boot:spring-boot-starter-data-jpa
+     *
+     * - RUNTIME
+     * com.h2database:h2
+     * org.liquibase:liquibase-core
+     * com.oracle:ojdbc6:12.1.0
+     *
+     * - TEST
+     * org.springframework.boot:spring-boot-starter-test
+     * org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
+     * org.fluentlenium:fluentlenium-assertj:3.2.0
+     * org.fluentlenium:fluentlenium-junit:3.2.0
+     *
+     * - PROVIDED
+     * org.projectlombok:lombok:1.16.16
+     * </pre>
+     */
+    public static JkDependencySet ofTextDescription(String description) {
         String[] lines = description.split(System.lineSeparator());
         JkScope[] currentScopes = JkJavaDepScopes.COMPILE_AND_RUNTIME;
         List<JkScopedDependency> list = new LinkedList<>();

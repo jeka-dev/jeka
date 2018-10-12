@@ -47,7 +47,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private List<String> javadocOptions = new LinkedList<>();
 
-    private JkRepoSet publishRepos = JkRepoSet.local();
+    private JkRepoSet publishRepos = JkRepoSet.ofLocal();
 
     private boolean skipTests = false;
 
@@ -95,7 +95,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
 
         // defines artifacts
-        this.defineArtifact(mainArtifactId(), () -> makeBinJar(getArtifactFile(mainArtifactId())));
+        this.defineArtifact(getMainArtifactId(), () -> makeBinJar(getArtifactFile(getMainArtifactId())));
         this.defineArtifact(SOURCES_ARTIFACT_ID, () -> makeSourceJar(getArtifactFile(SOURCES_ARTIFACT_ID)));
         this.defineArtifact(JAVADOC_ARTIFACT_ID, () -> makeJavadocJar(getArtifactFile(JAVADOC_ARTIFACT_ID)));
         this.defineArtifact(TEST_ARTIFACT_ID, () -> makeTestJar(getArtifactFile(TEST_ARTIFACT_ID)));
@@ -105,8 +105,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkDependencyResolver dependencyResolver() {
         if (dependencyResolver == null) {
-            dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral())
-                  .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
+            dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral())
+                  .withParams(JkResolutionParameters.of(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
         }
         return dependencyResolver;
     }
@@ -136,7 +136,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkPathSequence getDependenciesFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return this.depCache.computeIfAbsent(scopeSet,
-                scopes1 -> this.dependencyResolver().get(getDeclaredDependencies(), scopes));
+                scopes1 -> this.dependencyResolver().fetch(getDeclaredDependencies(), scopes));
     }
 
     /**
@@ -272,8 +272,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     Path getArtifactFile(JkArtifactId artifactId) {
         final String namePart = artifactFileNameSupplier.get();
-        final String classifier = artifactId.classifier() == null ? "" : "-" + artifactId.classifier();
-        final String extension = artifactId.extension() == null ? "" : "." + artifactId.extension();
+        final String classifier = artifactId.getClassifier() == null ? "" : "-" + artifactId.getClassifier();
+        final String extension = artifactId.getExtension() == null ? "" : "." + artifactId.getExtension();
         return getOutLayout().outputPath().resolve(namePart + classifier + extension);
     }
 
@@ -284,7 +284,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return () -> {
             String version = this.project.getVersionedModule().version().isUnspecified() ? "" : "-"
                     + this.project.getVersionedModule().version().value();
-            return this.project.getVersionedModule().moduleId().dotedName() + version;
+            return this.project.getVersionedModule().moduleId().getDotedName() + version;
         };
     }
 
@@ -292,7 +292,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Returns an artifact file name supplier for NOT including version in artifact file names.
      */
     public Supplier<String> getModuleNameFileNameSupplier() {
-        return () -> project.getVersionedModule().moduleId().dotedName();
+        return () -> project.getVersionedModule().moduleId().getDotedName();
     }
 
 
@@ -329,7 +329,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Invokes {@link #pack(Iterable)} for all artifacts defined in this maker.
      */
     public JkJavaProjectMaker packAllDefinedArtifacts() {
-       return pack(artifactIds());
+       return pack(getArtifactIds());
     }
 
     /**
@@ -349,7 +349,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Known working algorithm working on JDK8 platform includes <code>md5, sha-1, sha-2 and sha-256</code>.
      */
     public void checksum(String ...algorithms) {
-        this.allArtifactPaths().stream().filter(Files::exists)
+        this.getAllArtifactPaths().stream().filter(Files::exists)
                 .forEach((file) -> JkPathFile.of(file).checksum(algorithms));
     }
 
@@ -357,7 +357,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Signs each existing defined artifact files with the specified pgp signer.
      */
     public void signArtifactFiles(JkPgp pgp) {
-        this.allArtifactPaths().stream().filter(Files::exists).forEach((file) -> pgp.sign(file));
+        this.getAllArtifactPaths().stream().filter(Files::exists).forEach((file) -> pgp.sign(file));
     }
 
     // ----------------------- publish
@@ -386,13 +386,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         JkException.throwIf(project.getVersionedModule() == null, "No versionedModule has been set on "
                 + project + ". Can't publish.");
         final JkDependencySet dependencies = getDeclaredDependencies();
-        final JkIvyPublication publication = JkIvyPublication.of(mainArtifactPath(), JkJavaDepScopes.COMPILE)
-                .andOptional(artifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES)
-                .andOptional(artifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC)
-                .andOptional(artifactPath(TEST_ARTIFACT_ID), JkJavaDepScopes.TEST)
-                .andOptional(artifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES);
+        final JkIvyPublication publication = JkIvyPublication.of(getMainArtifactPath(), JkJavaDepScopes.COMPILE)
+                .andOptional(getArtifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES)
+                .andOptional(getArtifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC)
+                .andOptional(getArtifactPath(TEST_ARTIFACT_ID), JkJavaDepScopes.TEST)
+                .andOptional(getArtifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES);
         final JkVersionProvider resolvedVersions = this.dependencyResolver()
-                .resolve(dependencies, dependencies.involvedScopes()).resolvedVersionProvider();
+                .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
         JkPublisher.of(this.publishRepos, getOutLayout().outputPath())
         .publishIvy(project.getVersionedModule(), publication, dependencies,
                 JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
@@ -431,7 +431,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public void makeTestJar() {
-        makeTestJar(artifactPath(TEST_ARTIFACT_ID));
+        makeTestJar(getArtifactPath(TEST_ARTIFACT_ID));
     }
 
 
@@ -565,22 +565,22 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     // artifact producers -----------------------------------------------------------
 
     @Override
-    public Path artifactPath(JkArtifactId artifactId) {
+    public Path getArtifactPath(JkArtifactId artifactId) {
         return getArtifactFile(artifactId);
     }
 
     @Override
-    public final Iterable<JkArtifactId> artifactIds() {
+    public final Iterable<JkArtifactId> getArtifactIds() {
         return this.artifactProducers.keySet();
     }
 
     @Override
-    public JkPathSequence runtimeDependencies(JkArtifactId artifactFileId) {
-        if (artifactFileId.equals(mainArtifactId())) {
-            return this.getDependencyResolver().get(
+    public JkPathSequence fetchRuntimeDependencies(JkArtifactId artifactFileId) {
+        if (artifactFileId.equals(getMainArtifactId())) {
+            return this.getDependencyResolver().fetch(
                     this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME);
         } else if (artifactFileId.isClassifier("test") && artifactFileId.isExtension("jar")) {
-            return this.getDependencyResolver().get(
+            return this.getDependencyResolver().fetch(
                     this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST);
         } else {
             return JkPathSequence.of();

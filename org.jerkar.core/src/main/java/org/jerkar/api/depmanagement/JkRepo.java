@@ -91,14 +91,14 @@ public final class JkRepo implements Serializable {
     /**
      * Creates the Maven central repository.
      */
-    public static JkRepo mavenCentral() {
+    public static JkRepo ofMavenCentral() {
         return of(MAVEN_CENTRAL_URL);
     }
 
     /**
      * Creates an OSSRH repository for both deploying snapshot and download artifacts.
      */
-    public static JkRepo mavenOssrhDownloadAndDeploySnapshot(String jiraId, String jiraPassword) {
+    public static JkRepo ofMavenOssrhDownloadAndDeploySnapshot(String jiraId, String jiraPassword) {
         return of(MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT)
                 .with(JkRepoCredential.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"));
     }
@@ -106,7 +106,7 @@ public final class JkRepo implements Serializable {
     /**
      * Creates an OSSRH repository for deploying released artifacts.
      */
-    public static JkRepo mavenOssrhDeployRelease(String jiraId, String jiraPassword) {
+    public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword) {
         return of(MAVEN_OSSRH_DEPLOY_RELEASE).with(
                 JkRepoCredential.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"));
     }
@@ -114,14 +114,14 @@ public final class JkRepo implements Serializable {
     /**
      * Creates a OSSRH repository for downloading both snapshot and released artifacts.
      */
-    public static JkRepo mavenOssrhPublicDownload() {
+    public static JkRepo ofMavenOssrhPublicDownload() {
         return of(MAVEN_OSSRH_PUBLIC_DOWNLOAD_RELEASE_AND_SNAPSHOT);
     }
 
     /**
      * Creates a JCenter repository.
      */
-    public static JkRepo mavenJCenter() {
+    public static JkRepo ofMavenJCenter() {
         return of(JCENTERL_URL);
     }
 
@@ -130,7 +130,7 @@ public final class JkRepo implements Serializable {
     /**
      * Creates a Maven repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
      */
-    public static JkRepo local() {
+    public static JkRepo ofLocal() {
         final Path file = JkLocator.jerkarUserHomeDir().resolve("maven-publish-dir");
         return JkRepo.ofMaven(file);
     }
@@ -138,7 +138,7 @@ public final class JkRepo implements Serializable {
     /**
      * Returns the url of this repository.
      */
-    public final URL url() {
+    public final URL getUrl() {
         return url;
     }
 
@@ -153,7 +153,7 @@ public final class JkRepo implements Serializable {
      * Returns configuration specific to Ivy repository. Returns <code>null</code> if this configuration stands
      * for a Maven repository.
      */
-    public JkRepoIvyConfig ivyConfig() {
+    public JkRepoIvyConfig getIvyConfig() {
         return this.ivyConfig;
     }
 
@@ -162,13 +162,13 @@ public final class JkRepo implements Serializable {
     }
 
     /**
-     * Returns the realm of this repository.
+     * Returns the getRealm of this repository.
      */
-    public final JkRepoCredential credential() {
+    public final JkRepoCredential getCredential() {
         return credential;
     }
 
-    public JkPublishConfig publishConfig() {
+    public JkPublishConfig getPublishConfig() {
         return publishConfig;
     }
 
@@ -190,7 +190,7 @@ public final class JkRepo implements Serializable {
         return new JkRepo(this.url, this.credential, this.ivyConfig, publishConfig);
     }
 
-    public JkRepoSet asSet() {
+    public JkRepoSet toSet() {
         return JkRepoSet.of(this);
     }
 
@@ -265,15 +265,15 @@ public final class JkRepo implements Serializable {
             return new JkRepoCredential(realm, username, password);
         }
 
-        public String realm() {
+        public String getRealm() {
             return realm;
         }
 
-        public String userName() {
+        public String getUserName() {
             return userName;
         }
 
-        public String password() {
+        public String getPassword() {
             return password;
         }
     }

@@ -84,7 +84,7 @@ public final class JkScopedDependency implements Serializable {
     /**
      * Returns the dependency object of this scoped dependency.
      */
-    public JkDependency dependency() {
+    public JkDependency getDependency() {
         return dependency;
     }
 
@@ -124,7 +124,7 @@ public final class JkScopedDependency implements Serializable {
      * Return wether this scoped dependency is declared with either scope nor scope mapping.
      * If no scopes and scope mapping is declared, this method returns {@link ScopeType#UNSET}.
      */
-    public ScopeType scopeType() {
+    public ScopeType getScopeType() {
         if (this.scopes != null && !this.scopes.isEmpty()) {
             return ScopeType.SIMPLE;
         }
@@ -138,7 +138,7 @@ public final class JkScopedDependency implements Serializable {
      * Returns a the scopes this scoped dependency. If this scoped dependency declares either a mapping scope
      * nor no scope at all then this method returns an empty set.
      */
-    public Set<JkScope> scopes() {
+    public Set<JkScope> getScopes() {
         return this.scopes;
     }
 
@@ -173,8 +173,8 @@ public final class JkScopedDependency implements Serializable {
      * Returns the scope mapping this scoped dependency is declared with. It returns null, if no scope mapping
      * is declared with this scoped dependency (dependency declared with 0,1 or many scopes).
      */
-    public JkScopeMapping scopeMapping() {
-        JkUtilsAssert.isTrue(this.scopeType() == ScopeType.MAPPED,
+    public JkScopeMapping getScopeMapping() {
+        JkUtilsAssert.isTrue(this.getScopeType() == ScopeType.MAPPED,
                 "This dependency does not declare scope mappings.");
         return this.scopeMapping;
     }
@@ -183,7 +183,7 @@ public final class JkScopedDependency implements Serializable {
      * Returns a scoped dependency formed of the scope/scopeMapping of this scoped dependency
      * and the specified dependency.
      */
-    public JkScopedDependency dependency(JkDependency dependency) {
+    public JkScopedDependency getDependency(JkDependency dependency) {
         return new JkScopedDependency(dependency, scopes, scopeMapping);
     }
 

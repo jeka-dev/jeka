@@ -29,7 +29,7 @@ public class AClassicBuild extends JkJavaProjectBuild {
     }
     
     @Override
-    protected void afterOptionsInjected() {
+    protected void setup() {
         project()
                 .setSourceVersion(JkJavaVersion.V7)
                 .setDependencies(JkDependencySet.of()

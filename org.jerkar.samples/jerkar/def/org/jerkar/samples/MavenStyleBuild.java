@@ -20,11 +20,11 @@ import static org.jerkar.api.depmanagement.JkPopularModules.*;
 public class MavenStyleBuild extends JkJavaProjectBuild {
 
     @Override
-    protected void afterOptionsInjected() {
+    protected void setup() {
         java().project()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());
-        java().project().maker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.mavenCentral()));
+        java().project().maker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.ofMavenCentral()));
         java().project().maker().setPublishRepos(publishRepositories());
     }
 
@@ -36,7 +36,7 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
     }
 
     JkRepoSet publishRepositories() {
-        return JkRepoSet.ossrhSnapshotAndRelease("myusername", "mypasword");
+        return JkRepoSet.ofOssrhSnapshotAndRelease("myusername", "mypasword");
     }
 
 }

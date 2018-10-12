@@ -25,7 +25,7 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
     }
     
     @Override
-    protected void afterOptionsInjected() {
+    protected void setup() {
         java().project()
                 .setVersionedModule("org.jerkar:samples", "0.1")
                 .setDependencies(JkDependencySet.of()

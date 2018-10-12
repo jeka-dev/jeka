@@ -26,7 +26,7 @@ class VersionConstanter {
         final Map<String, String> groupToVersion = new HashMap<>();
         final Set<String> dismissedGroups = new HashSet<>();
         for (final JkModuleId moduleId : jkVersionProvider.moduleIds()) {
-            final String group = moduleId.group();
+            final String group = moduleId.getGroup();
             if (dismissedGroups.contains(group)) {
                 continue;
             }

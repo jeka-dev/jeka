@@ -35,7 +35,7 @@ public class JavaSourceParserTest {
                 JavaSourceParserTest.class.getResource("with3MultiImports.javasource"));
         final JkDependencySet dependencies = parser.dependencies();
         Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
-        Assert.assertEquals(2, JkUtilsIterable.listOf(parser.importRepos().list()).size());
+        Assert.assertEquals(2, JkUtilsIterable.listOf(parser.importRepos().getRepoList()).size());
     }
 
     @Test

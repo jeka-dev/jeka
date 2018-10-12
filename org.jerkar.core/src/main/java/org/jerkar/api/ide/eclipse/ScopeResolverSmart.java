@@ -41,16 +41,16 @@ class ScopeResolverSmart implements ScopeResolver {
 
     private JkScope scopeOfLibAccordingLocation(Path libFile) {
         final String parent = libFile.getParent().getFileName().toString();
-        if (parent.equalsIgnoreCase(COMPILE.name())) {
+        if (parent.equalsIgnoreCase(COMPILE.getName())) {
             return COMPILE;
         }
-        if (parent.equalsIgnoreCase(TEST.name())) {
+        if (parent.equalsIgnoreCase(TEST.getName())) {
             return TEST;
         }
-        if (parent.equalsIgnoreCase(PROVIDED.name())) {
+        if (parent.equalsIgnoreCase(PROVIDED.getName())) {
             return PROVIDED;
         }
-        if (parent.equalsIgnoreCase(RUNTIME.name())) {
+        if (parent.equalsIgnoreCase(RUNTIME.getName())) {
             return RUNTIME;
         }
         final String path = libFile.toString();

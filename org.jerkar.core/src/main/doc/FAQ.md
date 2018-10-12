@@ -8,7 +8,7 @@ folder and mention where is located the project to build.
 public class Build extends JkJavaProjectBuild {
 
    @Override
-    protected void afterOptionsInjected() {
+    protected void setup() {
          Path projectPath = this.baseDir().resolve("../myProject");   // project to build lies in a sibling folder. 
          project().setSourceLayout(JkProjectSourceLayout.ofMavenStyle().withBaseDir(projectPath));
          ...

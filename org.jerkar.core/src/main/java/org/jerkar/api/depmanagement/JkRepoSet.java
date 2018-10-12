@@ -72,23 +72,23 @@ public final class JkRepoSet implements Serializable {
         return new JkRepoSet(list);
     }
 
-    public static JkRepoSet local() {
-        return of(JkRepo.local());
+    public static JkRepoSet ofLocal() {
+        return of(JkRepo.ofLocal());
     }
 
     /**
      * Creates a JkPublishRepos tailored for <a
      * href="http://central.sonatype.org/">OSSRH</a>
      */
-    public static JkRepoSet ossrhSnapshotAndRelease(String userName, String password) {
-        return of(JkRepo.mavenOssrhDownloadAndDeploySnapshot(userName, password),
-                JkRepo.mavenOssrhDeployRelease(userName, password));
+    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password) {
+        return of(JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(userName, password),
+                JkRepo.ofMavenOssrhDeployRelease(userName, password));
     }
 
     /**
      * Crates an empty {@link JkRepoSet}
      */
-    public static JkRepoSet empty() {
+    public static JkRepoSet ofEmpty() {
         return new JkRepoSet(Collections.emptyList());
     }
 
@@ -98,14 +98,14 @@ public final class JkRepoSet implements Serializable {
      */
     public JkRepo getRepoConfigHavingUrl(String url) {
         for (final JkRepo config : this.repoConfigs) {
-            if (url.equals(config.url().toExternalForm())) {
+            if (url.equals(config.getUrl().toExternalForm())) {
                 return config;
             }
         }
         return null;
     }
 
-    public List<JkRepo> list() {
+    public List<JkRepo> getRepoList() {
         return repoConfigs;
     }
 
@@ -118,7 +118,7 @@ public final class JkRepoSet implements Serializable {
      * Retrieves directly the file embodying the specified the external dependency.
      */
     public Path get(JkModuleDependency moduleDependency) {
-        final InternalDepResolver depResolver = ivyResolver();
+        final InternalDepResolver depResolver = getIvyResolver();
         File file = depResolver.get(moduleDependency);
         if (file == null) {
             return null;
@@ -140,7 +140,7 @@ public final class JkRepoSet implements Serializable {
         return get(JkModuleDependency.of(moduleGroupVersion));
     }
 
-    private InternalDepResolver ivyResolver() {
+    private InternalDepResolver getIvyResolver() {
         if (ivyResolver == null) {
             ivyResolver = InternalDepResolvers.ivy(this);
         }

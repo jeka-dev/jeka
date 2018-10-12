@@ -9,7 +9,7 @@ import java.util.Set;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
- * Association between moduleIds and projectVersion.
+ * Association between getModuleIds and projectVersion.
  *
  * @author Jerome Angibaud
  */

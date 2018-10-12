@@ -27,7 +27,7 @@ public final class JkResolveResult implements Serializable {
     /**
      * Creates an empty {@link JkResolveResult}
      */
-    public static JkResolveResult empty() {
+    public static JkResolveResult ofEmpty() {
         return of(JkDependencyNode.empty());
     }
 
@@ -56,7 +56,7 @@ public final class JkResolveResult implements Serializable {
     /**
      * Shorthand for <code>dependencyTree.allFiles()</code>
      */
-    public List<Path> localFiles() {
+    public List<Path> getLocalFiles() {
         return this.depTree.allFiles();
     }
 
@@ -68,30 +68,30 @@ public final class JkResolveResult implements Serializable {
     }
 
     /**
-     * Shorthand for <code>resolvedVersion.versionOf(JkModuleId)</code>
+     * Shorthand for <code>resolvedVersion.getVersionOf(JkModuleId)</code>
      */
-    public JkVersion versionOf(JkModuleId moduleId) {
-        return this.resolvedVersionProvider().versionOf(moduleId);
+    public JkVersion getVersionOf(JkModuleId moduleId) {
+        return this.getResolvedVersionProvider().versionOf(moduleId);
     }
 
     /**
      * Shorthand for <code>dependencyTree.childModules(JkModuleId)</code>
      */
-    public Set<JkVersionedModule> involvedModules() {
+    public Set<JkVersionedModule> getInvolvedModules() {
         return this.depTree.childModules();
     }
 
     /**
-     * Shorthand for <code>dependencyTree.resolvedVersions(JkModuleId)</code>
+     * Shorthand for <code>dependencyTree.getResolvedVersions(JkModuleId)</code>
      */
-    public JkVersionProvider resolvedVersionProvider() {
+    public JkVersionProvider getResolvedVersionProvider() {
         return this.depTree.flattenToVersionProvider();
     }
 
     /**
-     * Returns the publishLocalOnly files the specified module turns to.
+     * Returns files the specified module is resolved to.
      */
-    public List<Path> filesOf(JkModuleId moduleId) {
+    public List<Path> getResolvedFilesFor(JkModuleId moduleId) {
         final JkDependencyNode dependencyNode = this.depTree.find(moduleId);
         if (dependencyNode == null) {
             return new LinkedList<>();
@@ -110,14 +110,14 @@ public final class JkResolveResult implements Serializable {
     /**
      * Returns the dependency tree for this dependency resolution.
      */
-    public JkDependencyNode dependencyTree() {
+    public JkDependencyNode getDependencyTree() {
         return this.depTree;
     }
 
     /**
      * Returns an error report if the resolution failed.
      **/
-    public JkErrorReport errorReport() {
+    public JkErrorReport getErrorReport() {
         return errorReport;
     }
 

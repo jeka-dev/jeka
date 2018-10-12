@@ -85,7 +85,7 @@ public final class JkPublisher {
      * publisher.
      *
      * @param versionedModule
-     *            The target moduleId and projectVersion for the specified publication
+     *            The target getModuleId and projectVersion for the specified publication
      * @param publication
      *            The content of the publication
      * @param dependencies
@@ -107,7 +107,7 @@ public final class JkPublisher {
     /**
      * Publishes all artifact files for the specified artifact producer for the specified versioned module.
      *
-     * @param versionedModule The target moduleId and projectVersion for the specified publication
+     * @param versionedModule The target getModuleId and projectVersion for the specified publication
      * @param dependencies The dependencies to specify in the generated pom file.
      * @param extraPublishInfo Extra information about authors, licensing, source control management, ...
      * @param artifactLocator Object producing artifacts to be deployed. This object is used only to find

@@ -27,12 +27,12 @@ public class ResolveWithArtifactIT {
                 .and(JkPopularModules.GUAVA, "19.0" )
                 .and("org.lwjgl:lwjgl:3.1.1")
                 .withDefaultScope(COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
-        JkDependencyNode treeRoot = resolveResult.dependencyTree();
-        System.out.println(resolveResult.localFiles());
+        JkDependencyNode treeRoot = resolveResult.getDependencyTree();
+        System.out.println(resolveResult.getLocalFiles());
         System.out.println(treeRoot.toStringComplete());
 
         // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
@@ -55,18 +55,18 @@ public class ResolveWithArtifactIT {
                 .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
                 .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
-        JkDependencyNode tree = resolveResult.dependencyTree();
+        JkDependencyNode tree = resolveResult.getDependencyTree();
         System.out.println(tree.toStringComplete());
-        System.out.println(JkUtilsString.join(resolveResult.localFiles(), "\n"));
+        System.out.println(JkUtilsString.join(resolveResult.getLocalFiles(), "\n"));
         System.out.println("-----");
         System.out.println(JkUtilsString.join(tree.allFiles(), "\n"));
         //assertEquals(resolveResult.localFiles().size(), tree.allFiles().size());
         System.out.println("-----");
-        for (Path file : resolveResult.localFiles()) {
+        for (Path file : resolveResult.getLocalFiles()) {
             if (!tree.allFiles().contains(file)) {
                 System.out.println(file);
             }

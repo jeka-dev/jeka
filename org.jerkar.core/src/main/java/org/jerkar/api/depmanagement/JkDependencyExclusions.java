@@ -34,7 +34,7 @@ public class JkDependencyExclusions {
     /**
      * Returns the modules on which some transitive dependencies are excluded.
      */
-    public Set<JkModuleId> moduleIds() {
+    public Set<JkModuleId> getModuleIds() {
         return this.exclusions.keySet();
     }
 

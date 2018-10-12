@@ -275,13 +275,13 @@ public final class JkImlGenerator {
                                    boolean forceTest) throws XMLStreamException {
 
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
-        final JkDependencyNode tree = resolveResult.dependencyTree();
+        final JkDependencyNode tree = resolveResult.getDependencyTree();
         for (final JkDependencyNode node : tree.flatten()) {
 
             // Maven dependency
             if (node.isModuleNode()) {
                 final String ideScope = forceTest ? "TEST" : ideScope(node.moduleInfo().resolvedScopes());
-                final List<LibPath> paths = toLibPath(node.moduleInfo(), resolver.repositories(), ideScope);
+                final List<LibPath> paths = toLibPath(node.moduleInfo(), resolver.getRepos(), ideScope);
                 for (final LibPath libPath : paths) {
                     if (!allPaths.contains(libPath.bin)) {
                         writeOrderEntryForLib(libPath);
@@ -294,7 +294,7 @@ public final class JkImlGenerator {
                 final String ideScope = forceTest ? "TEST" : ideScope(node.nodeInfo().declaredScopes());
                 final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
                 if (fileNodeInfo.isComputed()) {
-                    final Path projectDir = fileNodeInfo.computationOrigin().ideProjectBaseDir();
+                    final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectBaseDir();
                     if (projectDir != null && !allModules.contains(projectDir)) {
                         writeOrderEntryForModule(projectDir.getFileName().toString(), ideScope);
                         allModules.add(projectDir);
@@ -339,23 +339,23 @@ public final class JkImlGenerator {
     private static Set<String> toStringScopes(Set<JkScope> scopes) {
         final Set<String> result = new HashSet<>();
         for (final JkScope scope : scopes) {
-            result.add(scope.name());
+            result.add(scope.getName());
         }
         return result;
     }
 
     private static String ideScope(Set<JkScope> scopesArg) {
         final Set<String> scopes = toStringScopes(scopesArg);
-        if (scopes.contains(JkJavaDepScopes.COMPILE.name())) {
+        if (scopes.contains(JkJavaDepScopes.COMPILE.getName())) {
             return "COMPILE";
         }
-        if (scopes.contains(JkJavaDepScopes.PROVIDED.name())) {
+        if (scopes.contains(JkJavaDepScopes.PROVIDED.getName())) {
             return "PROVIDED";
         }
-        if (scopes.contains(JkJavaDepScopes.RUNTIME.name())) {
+        if (scopes.contains(JkJavaDepScopes.RUNTIME.getName())) {
             return "RUNTIME";
         }
-        if (scopes.contains(JkJavaDepScopes.TEST.name())) {
+        if (scopes.contains(JkJavaDepScopes.TEST.getName())) {
             return "TEST";
         }
         return "COMPILE";

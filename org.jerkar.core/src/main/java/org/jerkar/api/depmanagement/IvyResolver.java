@@ -108,15 +108,15 @@ final class IvyResolver implements InternalDepResolver {
             versionProvider = JkVersionProvider.empty();
         }
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
-                parameters.defaultMapping(), versionProvider);
+                parameters.getDefaultMapping(), versionProvider);
 
-        final String[] confs = toConfs(deps.declaredScopes(), resolvedScopes);
+        final String[] confs = toConfs(deps.getDeclaredScopes(), resolvedScopes);
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);
         resolveOptions.setOutputReport(JkLog.verbosity() == JkLog.Verbosity.VERBOSE);
         resolveOptions.setLog(logLevel());
-        resolveOptions.setRefresh(parameters.refreshed());
+        resolveOptions.setRefresh(parameters.isRefreshed());
         resolveOptions.setCheckIfChanged(true);
         if (resolvedScopes.length == 0) {   // if no scope, verbose ivy report turns in exception
             resolveOptions.setOutputReport(false);
@@ -186,14 +186,14 @@ final class IvyResolver implements InternalDepResolver {
         final String typeAndExt = JkUtilsObject.firstNonNull(dependency.ext(), "jar");
         final DefaultArtifact artifact;
         if (isMetadata) {
-            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
+            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().getName(), typeAndExt,
                     typeAndExt, true);
         } else {
             final Map<String, String> extra = new HashMap<>();
             if (dependency.classifier() != null) {
                 extra.put("classifier", dependency.classifier());
             }
-            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
+            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().getName(), typeAndExt,
                     typeAndExt, extra);
         }
         final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());
@@ -229,7 +229,7 @@ final class IvyResolver implements InternalDepResolver {
 
                 List<Path> artifacts;
                 if (!node.isCompletelyEvicted()) {
-                    artifacts = artifactContainer.getArtifacts(moduleId.version(resolvedVersion.value()));
+                    artifacts = artifactContainer.getArtifacts(moduleId.getVersion(resolvedVersion.value()));
                 } else {
                     artifacts = new LinkedList<>();
                 }
@@ -303,9 +303,9 @@ final class IvyResolver implements InternalDepResolver {
         }
         final Set<String> result = new HashSet<>();
         for (final JkScope resolvedScope : resolvedScopes) {
-            final List<JkScope> scopes = resolvedScope.commonScopes(declaredScopes);
+            final List<JkScope> scopes = resolvedScope.getCommonScopes(declaredScopes);
             for (final JkScope scope : scopes) {
-                result.add(scope.name());
+                result.add(scope.getName());
             }
         }
         return JkUtilsIterable.arrayOf(result, String.class);

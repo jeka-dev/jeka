@@ -149,7 +149,7 @@ public class JkDependencyNode implements Serializable {
     private Set<JkVersionedModule> resolvedModules(boolean root) {
         final Set<JkVersionedModule> result = new HashSet<>();
         if (!root && this.isModuleNode() && !this.moduleInfo().isEvicted()) {
-            result.add(this.moduleInfo().moduleId.version(this.moduleInfo().resolvedVersion.value()));
+            result.add(this.moduleInfo().moduleId.getVersion(this.moduleInfo().resolvedVersion.value()));
         }
         for (final JkDependencyNode child : this.children) {
             result.addAll(child.resolvedModules(false));
@@ -158,7 +158,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns the children nodes for this node having the specified moduleId.
+     * Returns the children nodes for this node having the specified getModuleId.
      */
     public List<JkDependencyNode> children(JkModuleId moduleId) {
         final List<JkDependencyNode> result = new LinkedList<>();
@@ -171,7 +171,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns the child node having the specified moduleId.
+     * Returns the child node having the specified getModuleId.
      */
     public JkDependencyNode child(JkModuleId moduleId) {
         for (final JkDependencyNode node : children) {
@@ -200,9 +200,9 @@ public class JkDependencyNode implements Serializable {
                                           Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
         for (final JkScopedDependency scopedDependency : depsUntilLast(dependencies, moduleId)) {
             if (scopes.isEmpty() || scopedDependency.isInvolvedInAnyOf(scopes)) {
-                final JkFileDependency fileDep = (JkFileDependency) scopedDependency.dependency();
+                final JkFileDependency fileDep = (JkFileDependency) scopedDependency.getDependency();
                 if (!addedFileDeps.contains(fileDep)) {
-                    final JkDependencyNode fileNode = JkDependencyNode.ofFileDep(fileDep, scopedDependency.scopes());
+                    final JkDependencyNode fileNode = JkDependencyNode.ofFileDep(fileDep, scopedDependency.getScopes());
                     addedFileDeps.add(fileDep);
                     result.add(fileNode);
                 }
@@ -223,7 +223,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns first node descendant of this one standing for the specified moduleId, deep first.
+     * Returns first node descendant of this one standing for the specified getModuleId, deep first.
      */
     public JkDependencyNode find(JkModuleId moduleId) {
         if (this.isModuleNode() && moduleId.equals(this.moduleId())) {
@@ -348,7 +348,7 @@ public class JkDependencyNode implements Serializable {
          * Shorthand for {@link #moduleId} + {@link #resolvedVersion()}
          */
         public JkVersionedModule resolvedVersionedModule() {
-            return moduleId.version(resolvedVersion.value());
+            return moduleId.getVersion(resolvedVersion.value());
         }
 
         public JkVersion declaredVersion() {
@@ -395,13 +395,13 @@ public class JkDependencyNode implements Serializable {
         final List<JkScopedDependency> result = new LinkedList<>();
         final List<JkScopedDependency> partialResult = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : deps) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
-                final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
+                final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.getDependency();
                 if (moduleDependency.moduleId().equals(to)) {
                     result.addAll(partialResult);
                     partialResult.clear();
                 }
-            } else if (scopedDependency.dependency() instanceof JkFileDependency) {
+            } else if (scopedDependency.getDependency() instanceof JkFileDependency) {
                 partialResult.add(scopedDependency);
             }
         }
@@ -432,9 +432,9 @@ public class JkDependencyNode implements Serializable {
         public static FileNodeInfo of(Set<JkScope> scopes, JkFileDependency dependency) {
             if (dependency instanceof JkComputedDependency) {
                 final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
-                return new FileNodeInfo(computedDependency.paths(), scopes, computedDependency);
+                return new FileNodeInfo(computedDependency.getPaths(), scopes, computedDependency);
             }
-            return new FileNodeInfo(dependency.paths() ,scopes, null);
+            return new FileNodeInfo(dependency.getPaths() ,scopes, null);
         }
 
         // for serialization we need to use File class instead of Path

@@ -26,7 +26,7 @@ public class JkModuleDepProblem implements Serializable {
     }
 
     /**
-     * Returns the moduleId related to this problem.
+     * Returns the getModuleId related to this problem.
      */
     public JkModuleId moduleId() {
         return moduleId;

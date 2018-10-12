@@ -23,7 +23,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      * Returns the runtime dependencies of the specified artifact file. This is usefull to use the artifact file as
      * a transitive dependency.
      */
-    JkPathSequence runtimeDependencies(JkArtifactId jkArtifactId);
+    JkPathSequence fetchRuntimeDependencies(JkArtifactId jkArtifactId);
 
     /**
      * Produces all the artifact files for the specified artifact file ids.
@@ -45,7 +45,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      * Produces all the artifact files for this producer.
      */
     default void makeAllArtifacts() {
-        makeArtifacts(artifactIds());
+        makeArtifacts(getArtifactIds());
     }
 
     /**
@@ -60,7 +60,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      */
     default void makeArtifactsIfAbsent(Iterable<JkArtifactId> artifactFileIds) {
         for (final JkArtifactId artifactFileId : artifactFileIds) {
-            final Path path = artifactPath(artifactFileId);
+            final Path path = getArtifactPath(artifactFileId);
             if (!Files.exists(path)) {
                 makeArtifact(artifactFileId);
             } else {

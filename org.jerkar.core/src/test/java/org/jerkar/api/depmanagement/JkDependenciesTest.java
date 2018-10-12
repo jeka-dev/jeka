@@ -28,11 +28,11 @@ public class JkDependenciesTest {
                 .and("klklkl:lklk:mlml")
                 .and("hhhhh:ll:ppp").withDefaultScope(run2run);
         final JkScopedDependency springDependency = deps.get(JkModuleId.of("spring", "spring"));
-        Assert.assertEquals(JkUtilsIterable.setOf(COMPILE), springDependency.scopes());
+        Assert.assertEquals(JkUtilsIterable.setOf(COMPILE), springDependency.getScopes());
         final JkScopedDependency hibernateDep = deps.get(JkModuleId.of("hibernate", "hjmlm"));
-        Assert.assertEquals(run2run, hibernateDep.scopeMapping());
+        Assert.assertEquals(run2run, hibernateDep.getScopeMapping());
         final JkScopedDependency llDep = deps.get(JkModuleId.of("hhhhh", "ll"));
-        Assert.assertEquals(run2run, llDep.scopeMapping());
+        Assert.assertEquals(run2run, llDep.getScopeMapping());
     }
 
     @Test
@@ -51,8 +51,8 @@ public class JkDependenciesTest {
         Path root = Files.createTempDirectory("jerkartestproject");
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(root);
         JkDependencySet dependencies = JkDependencySet.of().and(javaProject);
-        JkComputedDependency computedDependency = (JkComputedDependency) dependencies.list().get(0).dependency();
-        Assert.assertEquals(root, computedDependency.ideProjectBaseDir());
+        JkComputedDependency computedDependency = (JkComputedDependency) dependencies.toList().get(0).getDependency();
+        Assert.assertEquals(root, computedDependency.getIdeProjectBaseDir());
     }
 
 }

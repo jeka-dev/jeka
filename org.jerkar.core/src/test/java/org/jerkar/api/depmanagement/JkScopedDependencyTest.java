@@ -38,11 +38,11 @@ public class JkScopedDependencyTest {
 
         final Set<JkScope> sampleSet = new HashSet<>();
         sampleSet.add(PROVIDED);
-        assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(RUNTIME));
+        assertEquals(sampleSet, scopedDep.getScopeMapping().mappedScopes(RUNTIME));
 
         boolean failed = false;
         try {
-            scopedDep.scopeMapping().mappedScopes(JkScope.of("notInvolvedScope"));
+            scopedDep.getScopeMapping().mappedScopes(JkScope.of("notInvolvedScope"));
         } catch (final IllegalArgumentException e) {
             failed = true;
         }

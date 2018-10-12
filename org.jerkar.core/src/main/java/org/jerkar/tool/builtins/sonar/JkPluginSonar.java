@@ -26,12 +26,12 @@ public class JkPluginSonar extends JkPlugin {
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
         final Path baseDir = sourceLayout.baseDir();
-        final JkPathSequence libs = project.maker().getDependencyResolver().get(project.getDependencies(),
+        final JkPathSequence libs = project.maker().getDependencyResolver().fetch(project.getDependencies(),
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED);
         final Path testReportDir = project.maker().getOutLayout().testReportDir();
         final JkVersionedModule module = project.getVersionedModule();
-        final String fullName = module != null ? module.moduleId().dotedName() : project.baseDir().getFileName().toString();
-        final String name = module != null ? module.moduleId().name() : project.baseDir().getFileName().toString();
+        final String fullName = module != null ? module.moduleId().getDotedName() : project.baseDir().getFileName().toString();
+        final String name = module != null ? module.moduleId().getName() : project.baseDir().getFileName().toString();
         final JkVersion version = module != null ? module.version() : JkVersion.of("");
         return JkSonar
                 .of(fullName, name, version)
@@ -59,7 +59,7 @@ public class JkPluginSonar extends JkPlugin {
     }
 
     /**
-     * Adds a property to afterPluginsActivated sonar instance to run. You'll find predefined keys in {@link JkSonar}.
+     * Adds a property to postPluginSetup sonar instance to run. You'll find predefined keys in {@link JkSonar}.
      */
     public JkPluginSonar prop(String key, String value) {
         this.properties.put(key, value);

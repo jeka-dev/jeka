@@ -9,8 +9,8 @@ public class JkDependencyTest {
     @Test
     public void test() {
         final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
-        Assert.assertEquals("org.hibernate", dep.moduleId().group());
-        Assert.assertEquals("hibernate-core", dep.moduleId().name());
+        Assert.assertEquals("org.hibernate", dep.moduleId().getGroup());
+        Assert.assertEquals("hibernate-core", dep.moduleId().getName());
     }
 
 }

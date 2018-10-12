@@ -129,7 +129,7 @@ public final class JkVersionedModule implements Serializable {
      * Fills the manifest with <code>implementation</code> infoString.
      */
     public void populateManifest(JkManifest manifest) {
-        manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, moduleId().dotedName())
+        manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, moduleId().getDotedName())
         .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, version().value());
     }
 

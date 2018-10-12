@@ -33,9 +33,9 @@ public final class JkJavaProjectPackager {
      * @param classifier Can be <code>null</code>, id so the fat jar will stands for the main artifact file.
      */
     public Path fatJar(String classifier) {
-        JkClasspath classpath = JkClasspath.ofMany(project.maker().runtimeDependencies(project.maker().mainArtifactId()));
+        JkClasspath classpath = JkClasspath.ofMany(project.maker().fetchRuntimeDependencies(project.maker().getMainArtifactId()));
         JkArtifactId artifactFileId = JkArtifactId.of(classifier, "jar");
-        Path result = project.maker().artifactPath(artifactFileId);
+        Path result = project.maker().getArtifactPath(artifactFileId);
         JkJarMaker.fatJar(result, project.getManifest(), project.maker().getOutLayout().classDir(),
                 project.getExtraFilesToIncludeInJar(), classpath);
         return result;

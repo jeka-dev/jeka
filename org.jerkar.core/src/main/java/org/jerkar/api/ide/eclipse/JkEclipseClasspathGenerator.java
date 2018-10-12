@@ -191,7 +191,7 @@ public final class JkEclipseClasspathGenerator {
 
         // add build dependencies
         if (hasBuildDef() && runDependencyResolver != null) {
-            final Iterable<Path> files = runDependencyResolver.get(runDependencies);
+            final Iterable<Path> files = runDependencyResolver.fetch(runDependencies);
             writeFileDepsEntries(writer, files, paths);
         }
 
@@ -347,8 +347,8 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
-        final JkRepoSet repos = resolver.repositories();
-        for (final JkDependencyNode node : resolveResult.dependencyTree().flatten()) {
+        final JkRepoSet repos = resolver.getRepos();
+        for (final JkDependencyNode node : resolveResult.getDependencyTree().flatten()) {
             // Maven dependency
             if (node.isModuleNode()) {
                 final JkDependencyNode.ModuleNodeInfo moduleNodeInfo = node.moduleInfo();
@@ -361,7 +361,7 @@ public final class JkEclipseClasspathGenerator {
                 final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
-                    final Path ideProjectBaseDir = computedDependency.ideProjectBaseDir();
+                    final Path ideProjectBaseDir = computedDependency.getIdeProjectBaseDir();
                     if (ideProjectBaseDir != null) {
                         if (!allPaths.contains(ideProjectBaseDir.toAbsolutePath().toString())) {
                             writeProjectEntryIfNeeded(ideProjectBaseDir, writer, allPaths);

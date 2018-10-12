@@ -58,7 +58,7 @@ public final class JkDepExclude implements Serializable {
      * Types generally corresponds to extension or classifier but not always.
      * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
      */
-    public JkDepExclude type(String typeArg) {
+    public JkDepExclude withType(String typeArg) {
         return new JkDepExclude(moduleId, typeArg, ext, scopes);
     }
 
@@ -67,7 +67,7 @@ public final class JkDepExclude implements Serializable {
      * Types generally corresponds to extension or classifier but not always.
      * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
      */
-    public JkDepExclude ext(String extension) {
+    public JkDepExclude withExt(String extension) {
         return new JkDepExclude(moduleId, type, extension, scopes);
     }
 
@@ -76,22 +76,22 @@ public final class JkDepExclude implements Serializable {
      * When some scopes are defined, the exclusion is effective only if the dependency
      * likely to hold the module to exclude is declared with one of the specified scopes.
      */
-    public JkDepExclude scopes(JkScope... scopes) {
+    public JkDepExclude withScopes(JkScope... scopes) {
         return new JkDepExclude(moduleId, type, ext, JkUtilsIterable.setOf(scopes));
     }
 
     /**
      * Returns the module id to exclude.
      */
-    public JkModuleId moduleId() {
+    public JkModuleId getModuleId() {
         return moduleId;
     }
 
     /**
      * Returns the type of the artifact file to exclude.
-     * @see #type(String)
+     * @see #getType(String)
      */
-    public String type() {
+    public String getType() {
         return type;
     }
 
@@ -99,13 +99,13 @@ public final class JkDepExclude implements Serializable {
      * Returns the extension for the artifact files to exclude. If not <code>null</code>
      * only file artifact having this extension will be effectively excluded.
      */
-    public String ext() {
+    public String getExt() {
         return ext;
     }
 
     /**
      * Returns the scopes that render the exclusion effective.
-     * @see #scopes(JkScope...)
+     * @see #withScopes(JkScope...)
      */
     public Set<JkScope> getScopes() {
         return scopes;

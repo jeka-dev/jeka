@@ -22,15 +22,15 @@ public class JkDependencyResolverTest {
         JkJavaProject coreProject = JkJavaProject.ofMavenLayout(core);
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.GUAVA, "19.0"));
         coreProject.setDependencies(JkDependencySet.of().and(baseProject));
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet());
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
 
         JkResolveResult resolveResult = dependencyResolver.resolve(coreProject.getDependencies());
 
-        Assert.assertEquals(1, resolveResult.dependencyTree().children().size());
-        JkDependencyNode dependencyNode = resolveResult.dependencyTree().children().get(0);
+        Assert.assertEquals(1, resolveResult.getDependencyTree().children().size());
+        JkDependencyNode dependencyNode = resolveResult.getDependencyTree().children().get(0);
         Assert.assertFalse(dependencyNode.isModuleNode());
         JkDependencyNode.FileNodeInfo nodeInfo = (JkDependencyNode.FileNodeInfo) dependencyNode.nodeInfo();
-        Assert.assertEquals(baseProject.baseDir(), nodeInfo.computationOrigin().ideProjectBaseDir());
+        Assert.assertEquals(baseProject.baseDir(), nodeInfo.computationOrigin().getIdeProjectBaseDir());
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {

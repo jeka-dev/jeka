@@ -1,8 +1,10 @@
 package org.jerkar.api.depmanagement;
 
 /**
+ * Artifacts are files produced by projects in order to be published or reused by other projects.
+ * This class stands for an identifier for an artifact within a project.
  * An artifact producer is likely to produce several artifact files (main jar, sources, javadoc, native jars, ...). <br/>
- * To distinguish them one use the notion of 'classifier' and 'extension'. <br/>
+ * To distinguish them, Jerkar uses the notion of 'classifier' and 'extension'. <br/>
  * Extension is simply the char sequence at the end of of file to determine its technical type (.exe, .jar, .zip, ...). <br/>
  * Classifier is to mention the purpose of the file (main artifact, sources, javadoc, uberjar, native lib, ...).
  */
@@ -27,14 +29,14 @@ public final class JkArtifactId {
     /**
      * Returns the classifier of this object.
      */
-    public String classifier() {
+    public String getClassifier() {
         return classifier;
     }
 
     /**
      * Returns the file extension of this object.
      */
-    public String extension() {
+    public String getExtension() {
         return extension;
     }
 

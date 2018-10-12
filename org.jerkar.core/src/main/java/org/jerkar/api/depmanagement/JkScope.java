@@ -65,14 +65,14 @@ public final class JkScope implements Serializable {
     /**
      * Returns the name of this scope. Name is used as identifier for scopes.
      */
-    public String name() {
+    public String getName() {
         return name;
     }
 
     /**
      * Human description for the purpose of this scope, can be <code>null</code>.
      */
-    public String description() {
+    public String getDescription() {
         return description;
     }
 
@@ -80,7 +80,7 @@ public final class JkScope implements Serializable {
      * Scopes that are extended by this one.
      *
      */
-    public Set<JkScope> extendedScopes() {
+    public Set<JkScope> getExtendedScopes() {
         return this.extendedScopes;
     }
 
@@ -88,7 +88,7 @@ public final class JkScope implements Serializable {
      * Returns <code>true</code> if the dependencies defined with this scope should be resolved recursively
      * (meaning returning the dependencies of the dependencies and so on)
      */
-    public boolean transitive() {
+    public boolean isTransitive() {
         return this.transitive;
     }
 
@@ -96,11 +96,11 @@ public final class JkScope implements Serializable {
      * Returns scopes this scope inherits from. It returns recursively parent scopes, parent of parent scopes
      * and so on.
      */
-    public List<JkScope> ancestorScopes() {
+    public List<JkScope> getAncestorScopes() {
         final List<JkScope> list = new LinkedList<>();
         list.add(this);
         for (final JkScope scope : this.extendedScopes) {
-            for (final JkScope jkScope : scope.ancestorScopes()) {
+            for (final JkScope jkScope : scope.getAncestorScopes()) {
                 if (!list.contains(jkScope)) {
                     list.add(jkScope);
                 }
@@ -112,7 +112,7 @@ public final class JkScope implements Serializable {
     /**
      * Returns this scope or its first ancestors found present in the specified scopes.
      */
-    public List<JkScope> commonScopes(Collection<JkScope> scopes) {
+    public List<JkScope> getCommonScopes(Collection<JkScope> scopes) {
         if (scopes.contains(this)) {
             return JkUtilsIterable.listOf(this);
         }
@@ -121,7 +121,7 @@ public final class JkScope implements Serializable {
             if (scopes.contains(scope)) {
                 result.add(scope);
             } else {
-                result.addAll(scope.commonScopes(scopes));
+                result.addAll(scope.getCommonScopes(scopes));
             }
         }
         return result;
@@ -213,10 +213,10 @@ public final class JkScope implements Serializable {
     /**
      * returns all specified scopes and all of their ancestors.
      */
-    public static Set<JkScope> involvedScopes(Iterable<JkScope> scopes) {
+    public static Set<JkScope> getInvolvedScopes(Iterable<JkScope> scopes) {
         final Set<JkScope> result = JkUtilsIterable.setOf(scopes);
         for (final JkScope jkScope : scopes) {
-            result.addAll(jkScope.ancestorScopes());
+            result.addAll(jkScope.getAncestorScopes());
         }
         return result;
     }

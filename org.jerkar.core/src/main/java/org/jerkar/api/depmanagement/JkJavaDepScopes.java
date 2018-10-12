@@ -19,7 +19,7 @@ public final class JkJavaDepScopes {
      *
      * <b>CAUTION :</b> When resolving {@link #RUNTIME} dependencies, transitive 'runtime' dependencies won't be fetched if
      * it's coming to a 'compile' one. <b/>
-     * In such it differs to Maven 'compile' scope (resolving 'runtime' in Maven will fetch transitive 'runtime' dependencies coming to 'compile' ones).<b/>
+     * In such it differs from Maven 'compile' scope (resolving 'runtime' in Maven will fetch transitive 'runtime' dependencies coming from 'compile' ones).<b/>
      * If you want to have a dependency scope equivalent to Maven 'compile', you need to declare dependencies with
      * two scopes : {@link #COMPILE} and {@link #RUNTIME} or their shorthand {@link #COMPILE_AND_RUNTIME}.
      */
@@ -83,10 +83,10 @@ public final class JkJavaDepScopes {
      * Scope mapping used
      */
     public static final JkScopeMapping DEFAULT_SCOPE_MAPPING = JkScopeMapping
-            .of(COMPILE).to(ARCHIVE_MASTER, COMPILE.name() + "(default)")
-            .and(PROVIDED).to(ARCHIVE_MASTER, COMPILE.name() + "(default)")
-            .and(RUNTIME).to(ARCHIVE_MASTER, RUNTIME.name() + "(default)")
-            .and(TEST).to(ARCHIVE_MASTER, RUNTIME.name() + "(default)", TEST.name() + "(default)");
+            .of(COMPILE).to(ARCHIVE_MASTER, COMPILE.getName() + "(default)")
+            .and(PROVIDED).to(ARCHIVE_MASTER, COMPILE.getName() + "(default)")
+            .and(RUNTIME).to(ARCHIVE_MASTER, RUNTIME.getName() + "(default)")
+            .and(TEST).to(ARCHIVE_MASTER, RUNTIME.getName() + "(default)", TEST.getName() + "(default)");
 
 
     /**

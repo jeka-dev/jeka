@@ -15,7 +15,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 public class JacocoPluginBuild extends JkJavaProjectBuild {
 
     @Override
-    protected void afterOptionsInjected() {
+    protected void setup() {
         java().project()
                 .setDependencies(JkDependencySet.of()
                 .and(GUAVA, "18.0")

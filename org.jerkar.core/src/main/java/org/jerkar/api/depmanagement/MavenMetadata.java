@@ -31,8 +31,8 @@ final class MavenMetadata {
 
     static MavenMetadata of(JkVersionedModule versionedModule, String timestamp) {
         final MavenMetadata metadata = new MavenMetadata();
-        metadata.groupId = versionedModule.moduleId().group();
-        metadata.artifactId = versionedModule.moduleId().name();
+        metadata.groupId = versionedModule.moduleId().getGroup();
+        metadata.artifactId = versionedModule.moduleId().getName();
         metadata.modelVersion = "1.1.0";
         metadata.version = versionedModule.version().value();
         metadata.versioning = new Versioning();
@@ -42,8 +42,8 @@ final class MavenMetadata {
 
     static MavenMetadata of(JkModuleId moduleId) {
         final MavenMetadata metadata = new MavenMetadata();
-        metadata.groupId = moduleId.group();
-        metadata.artifactId = moduleId.name();
+        metadata.groupId = moduleId.getGroup();
+        metadata.artifactId = moduleId.getName();
         metadata.modelVersion = "1.1.0";
         return metadata;
     }

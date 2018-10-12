@@ -153,7 +153,7 @@ final class IvyPublisher implements InternalPublisher {
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
-            if (!isMaven(resolver) && publishRepo.publishConfig().filter().accept(versionedModule)) {
+            if (!isMaven(resolver) && publishRepo.getPublishConfig().filter().accept(versionedModule)) {
                 JkLog.execute("Publishing for repository " + resolver, () ->
                     this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor));
                 count++;
@@ -205,11 +205,11 @@ final class IvyPublisher implements InternalPublisher {
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
-            if (isMaven(resolver) && publishRepo.publishConfig().filter().accept(versionedModule)) {
+            if (isMaven(resolver) && publishRepo.getPublishConfig().filter().accept(versionedModule)) {
                 JkLog.execute("Publishing to " + resolver, () -> {
                     final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
                             publication.signer(), resolver, descriptorOutputDir,
-                            publishRepo.publishConfig().isUniqueSnapshot(),
+                            publishRepo.getPublishConfig().isUniqueSnapshot(),
                             publication.checksumAlgos());
                     ivyPublisherForMaven.publish(moduleDescriptor, publication);
                 });

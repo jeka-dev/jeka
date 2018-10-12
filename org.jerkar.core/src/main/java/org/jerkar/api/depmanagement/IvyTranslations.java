@@ -52,7 +52,7 @@ final class IvyTranslations {
                                                            JkDependencySet dependencies, JkScopeMapping defaultMapping,
                                                            JkVersionProvider resolvedVersions) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
-                .moduleId().group(), module.moduleId().name(), module.version().value());
+                .moduleId().getGroup(), module.moduleId().getName(), module.version().value());
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
                 thisModuleRevisionId, "integration", null);
 
@@ -63,16 +63,16 @@ final class IvyTranslations {
 
 
     private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude, Iterable<String> allRootConfs) {
-        final String type = depExclude.type() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
-                .type();
-        final String ext = depExclude.ext() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
-                .ext();
-        final ArtifactId artifactId = new ArtifactId(toModuleId(depExclude.moduleId()), "*", type,
+        final String type = depExclude.getType() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
+                .getType();
+        final String ext = depExclude.getExt() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
+                .getExt();
+        final ArtifactId artifactId = new ArtifactId(toModuleId(depExclude.getModuleId()), "*", type,
                 ext);
         final DefaultExcludeRule result = new DefaultExcludeRule(artifactId,
                 ExactPatternMatcher.INSTANCE, null);
         for (final JkScope scope : depExclude.getScopes()) {
-            result.addConfiguration(scope.name());
+            result.addConfiguration(scope.getName());
         }
         if (depExclude.getScopes().isEmpty()) {
             for (final String conf : allRootConfs) {
@@ -85,23 +85,23 @@ final class IvyTranslations {
 
     private static Configuration toConfiguration(JkScope jkScope) {
         final List<String> extendedScopes = new LinkedList<>();
-        for (final JkScope parent : jkScope.extendedScopes()) {
-            extendedScopes.add(parent.name());
+        for (final JkScope parent : jkScope.getExtendedScopes()) {
+            extendedScopes.add(parent.getName());
         }
         final Visibility visibility = Visibility.PUBLIC;
-        return new Configuration(jkScope.name(), visibility, jkScope.description(),
-                extendedScopes.toArray(new String[0]), jkScope.transitive(), null);
+        return new Configuration(jkScope.getName(), visibility, jkScope.getDescription(),
+                extendedScopes.toArray(new String[0]), jkScope.isTransitive(), null);
     }
 
 
     static ModuleRevisionId toModuleRevisionId(JkModuleId moduleId, JkVersion version) {
         final String originalVersion = version.value();
         final Map<String, String> extra = new HashMap<>();
-        return ModuleRevisionId.newInstance(moduleId.group(), moduleId.name(), originalVersion, extra);
+        return ModuleRevisionId.newInstance(moduleId.getGroup(), moduleId.getName(), originalVersion, extra);
     }
 
     private static ModuleId toModuleId(JkModuleId moduleId) {
-        return new ModuleId(moduleId.group(), moduleId.name());
+        return new ModuleId(moduleId.getGroup(), moduleId.getName());
     }
 
     static ModuleRevisionId toModuleRevisionId(JkVersionedModule jkVersionedModule) {
@@ -119,36 +119,36 @@ final class IvyTranslations {
     // http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
     private static DependencyResolver toResolver(JkRepo repo, boolean download) {
         if (! repo.isIvyRepo()) {
-            if (!isFileSystem(repo.url()) || download) {
+            if (!isFileSystem(repo.getUrl()) || download) {
                 return ibiblioResolver(repo);
             }
             return mavenFileSystemResolver(repo);
         }
-        final JkRepo.JkRepoIvyConfig ivyRepoConfig = repo.ivyConfig();
-        if (isFileSystem(repo.url())) {
-            final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
+        final JkRepo.JkRepoIvyConfig ivyRepoConfig = repo.getIvyConfig();
+        if (isFileSystem(repo.getUrl())) {
+            final FileRepository fileRepo = new FileRepository(new File(repo.getUrl().getPath()));
             final FileSystemResolver result = new FileSystemResolver();
             result.setRepository(fileRepo);
             for (final String pattern : ivyRepoConfig.artifactPatterns()) {
-                result.addArtifactPattern(completePattern(repo.url().getPath(), pattern));
+                result.addArtifactPattern(completePattern(repo.getUrl().getPath(), pattern));
             }
             for (final String pattern : ivyRepoConfig.ivyPatterns()) {
-                result.addIvyPattern(completePattern(repo.url().getPath(), pattern));
+                result.addIvyPattern(completePattern(repo.getUrl().getPath(), pattern));
             }
             return result;
         }
-        if (repo.url().getProtocol().equals("http")) {
+        if (repo.getUrl().getProtocol().equals("http")) {
             final IvyRepResolver result = new IvyRepResolver();
-            result.setIvyroot(repo.url().toString());
-            result.setArtroot(repo.url().toString());
+            result.setIvyroot(repo.getUrl().toString());
+            result.setArtroot(repo.getUrl().toString());
             result.setArtpattern(IvyRepResolver.DEFAULT_IVYPATTERN);
             result.setIvypattern(IvyRepResolver.DEFAULT_IVYPATTERN);
             result.setM2compatible(false);
-            if (isHttp(repo.url())) {
-                if (!CredentialsStore.INSTANCE.hasCredentials(repo.url().getHost()) ) {
-                    final JkRepo.JkRepoCredential credential = repo.credential();
-                    CredentialsStore.INSTANCE.addCredentials(credential.realm(), repo.url().getHost(),
-                            credential.userName(), credential.password());
+            if (isHttp(repo.getUrl())) {
+                if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) ) {
+                    final JkRepo.JkRepoCredential credential = repo.getCredential();
+                    CredentialsStore.INSTANCE.addCredentials(credential.getRealm(), repo.getUrl().getHost(),
+                            credential.getUserName(), credential.getPassword());
 
                 }
             }
@@ -163,13 +163,13 @@ final class IvyTranslations {
         final IBiblioResolver result = new IBiblioResolver();
         result.setM2compatible(true);
         result.setUseMavenMetadata(true);
-        result.setRoot(repo.url().toString());
+        result.setRoot(repo.getUrl().toString());
         result.setUsepoms(true);
-        if (isHttp(repo.url())) {
-            final JkRepo.JkRepoCredential credential = repo.credential();
-            if (!CredentialsStore.INSTANCE.hasCredentials(repo.url().getHost()) && credential != null) {
-                CredentialsStore.INSTANCE.addCredentials(credential.realm(),
-                        repo.url().getHost(), credential.userName(), credential.password());
+        if (isHttp(repo.getUrl())) {
+            final JkRepo.JkRepoCredential credential = repo.getCredential();
+            if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credential != null) {
+                CredentialsStore.INSTANCE.addCredentials(credential.getRealm(),
+                        repo.getUrl().getHost(), credential.getUserName(), credential.getPassword());
 
             }
         }
@@ -179,10 +179,10 @@ final class IvyTranslations {
     }
 
     private static FileSystemResolver mavenFileSystemResolver(JkRepo repo) {
-        final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
+        final FileRepository fileRepo = new FileRepository(new File(repo.getUrl().getPath()));
         final FileSystemResolver result = new FileSystemResolver();
         result.setRepository(fileRepo);
-        result.addArtifactPattern(completePattern(repo.url().getPath(), MAVEN_ARTIFACT_PATTERN));
+        result.addArtifactPattern(completePattern(repo.getUrl().getPath(), MAVEN_ARTIFACT_PATTERN));
         result.setM2compatible(true);
         return result;
     }
@@ -212,9 +212,9 @@ final class IvyTranslations {
 
     static void populateIvySettingsWithPublishRepo(IvySettings ivySettings,
                                                    JkRepoSet repos) {
-        for (final JkRepo publishRepo : repos.list()) {
+        for (final JkRepo publishRepo : repos.getRepoList()) {
             final DependencyResolver resolver = toResolver(publishRepo,false);
-            resolver.setName(PUBLISH_RESOLVER_NAME + publishRepo.url());
+            resolver.setName(PUBLISH_RESOLVER_NAME + publishRepo.getUrl());
             ivySettings.addResolver(resolver);
         }
     }
@@ -237,7 +237,7 @@ final class IvyTranslations {
     @SuppressWarnings("unchecked")
     private static ChainResolver toChainResolver(JkRepoSet repos) {
         final ChainResolver chainResolver = new ChainResolver();
-        for (final JkRepo jkRepo : repos.list()) {
+        for (final JkRepo jkRepo : repos.getRepoList()) {
             final DependencyResolver resolver = toResolver(jkRepo, true);
             resolver.setName(jkRepo.toString());
             chainResolver.add(resolver);
@@ -250,9 +250,9 @@ final class IvyTranslations {
         for (final JkScope scope : scopeMapping.entries()) {
             final List<String> targets = new LinkedList<>();
             for (final JkScope target : scopeMapping.mappedScopes(scope)) {
-                targets.add(target.name());
+                targets.add(target.getName());
             }
-            final String item = scope.name() + " -> " + JkUtilsString.join(targets, ",");
+            final String item = scope.getName() + " -> " + JkUtilsString.join(targets, ",");
             list.add(item);
         }
         return JkUtilsString.join(list, "; ");
@@ -263,11 +263,11 @@ final class IvyTranslations {
                                                  JkVersionProvider resolvedVersions) {
 
         // Add configuration definitions
-        for (final JkScope involvedScope : dependencies.involvedScopes()) {
+        for (final JkScope involvedScope : dependencies.getInvolvedScopes()) {
             final Configuration configuration = toConfiguration(involvedScope);
             moduleDescriptor.addConfiguration(configuration);
         }
-        if (dependencies.involvedScopes().isEmpty()) {
+        if (dependencies.getInvolvedScopes().isEmpty()) {
             moduleDescriptor.addConfiguration(DEFAULT_CONFIGURATION);
         }
         if (defaultMapping != null) {
@@ -281,7 +281,7 @@ final class IvyTranslations {
         // Add dependencies
         final DependenciesContainer dependencyContainer = new DependenciesContainer(defaultMapping, dependencies);
         for (final JkScopedDependency scopedDependency : dependencies) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 dependencyContainer.populate(scopedDependency);
             }
         }
@@ -294,7 +294,7 @@ final class IvyTranslations {
         }
 
         // -- Add dependency exclusion
-        for (final JkDepExclude exclude : dependencies.excludes()) {
+        for (final JkDepExclude exclude : dependencies.getGlobalExclusions()) {
             final DefaultExcludeRule rule = toExcludeRule(exclude, Arrays.asList(moduleDescriptor.getConfigurationsNames()));
             moduleDescriptor.addExcludeRule(rule);
         }
@@ -324,7 +324,7 @@ final class IvyTranslations {
                 if (defaultMapping.entries().contains(scope)) {
                     result = JkScopeMapping.of(scope).to(defaultMapping.mappedScopes(scope));
                 } else {
-                    result = scope.mapTo(scope.name() + "(default)");
+                    result = scope.mapTo(scope.getName() + "(default)");
                 }
 
             }
@@ -339,15 +339,15 @@ final class IvyTranslations {
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
             JkIvyPublication publication, Instant publishDate) {
         for (final JkIvyPublication.Artifact artifact : publication) {
-            for (final JkScope jkScope : JkScope.involvedScopes(artifact.jkScopes)) {
-                if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.name())) {
+            for (final JkScope jkScope : JkScope.getInvolvedScopes(artifact.jkScopes)) {
+                if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.getName())) {
                     descriptor.addConfiguration(toConfiguration(jkScope));
                 }
             }
             final Artifact ivyArtifact = toPublishedArtifact(artifact,
                     descriptor.getModuleRevisionId(), publishDate);
-            for (final JkScope jkScope : JkScope.involvedScopes(artifact.jkScopes)) {
-                descriptor.addArtifact(jkScope.name(), ivyArtifact);
+            for (final JkScope jkScope : JkScope.getInvolvedScopes(artifact.jkScopes)) {
+                descriptor.addArtifact(jkScope.getName(), ivyArtifact);
             }
         }
     }
@@ -441,7 +441,7 @@ final class IvyTranslations {
                 }
                 final DependencyArtifactDescriptor artifactDescriptor = new DefaultDependencyArtifactDescriptor(
                         result,
-                        moduleId.name(),
+                        moduleId.getName(),
                         extension,
                         extension,
                         null,
@@ -459,7 +459,7 @@ final class IvyTranslations {
             if (!artifacts.isEmpty() && includeMainArtifact) {
                 final DependencyArtifactDescriptor artifactDescriptor = new DefaultDependencyArtifactDescriptor(
                         result,
-                        moduleId.name(),
+                        moduleId.getName(),
                         DEFAULT_EXTENSION,
                         DEFAULT_EXTENSION,
                         null,
@@ -497,7 +497,7 @@ final class IvyTranslations {
 
         void populate(JkScopedDependency scopedDependency) {
 
-            final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
+            final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.getDependency();
             final JkModuleId moduleId = moduleDep.moduleId();
             final boolean mainArtifact = moduleDep.classifier() == null && moduleDep.ext() == null;
             JkVersion version = dependencySet.getVersion(moduleId);
@@ -505,39 +505,39 @@ final class IvyTranslations {
 
             // fill configuration
             final List<Conf> confs = new LinkedList<>();
-            if (scopedDependency.scopeType() == ScopeType.UNSET) {
+            if (scopedDependency.getScopeType() == ScopeType.UNSET) {
                 if (defaultMapping == null || defaultMapping.entries().isEmpty()) {
                     confs.add(new Conf("*", "*"));
                 } else {
                     for (final JkScope entryScope : defaultMapping.entries()) {
                         for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
-                            confs.add(new Conf(entryScope.name(), mappedScope.name()));
+                            confs.add(new Conf(entryScope.getName(), mappedScope.getName()));
                         }
                     }
                 }
             }
-            else if (scopedDependency.scopeType() == ScopeType.SIMPLE) {
-                for (final JkScope scope : scopedDependency.scopes()) {
+            else if (scopedDependency.getScopeType() == ScopeType.SIMPLE) {
+                for (final JkScope scope : scopedDependency.getScopes()) {
                     final JkScopeMapping mapping = resolveSimple(scope, defaultMapping);
                     for (final JkScope fromScope : mapping.entries()) {
                         for (final JkScope mappedScope : mapping.mappedScopes(fromScope)) {
-                            confs.add(new Conf(fromScope.name(), mappedScope.name()));
+                            confs.add(new Conf(fromScope.getName(), mappedScope.getName()));
                         }
                     }
 
                 }
-            } else if (scopedDependency.scopeType() == ScopeType.MAPPED) {
-                for (final JkScope scope : scopedDependency.scopeMapping().entries()) {
-                    for (final JkScope mappedScope : scopedDependency.scopeMapping()
+            } else if (scopedDependency.getScopeType() == ScopeType.MAPPED) {
+                for (final JkScope scope : scopedDependency.getScopeMapping().entries()) {
+                    for (final JkScope mappedScope : scopedDependency.getScopeMapping()
                             .mappedScopes(scope)) {
-                        confs.add(new Conf(scope.name(), mappedScope.name()));
+                        confs.add(new Conf(scope.getName(), mappedScope.getName()));
                     }
                 }
             } else {
                 if (defaultMapping != null) {
                     for (final JkScope entryScope : defaultMapping.entries()) {
                         for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
-                            confs.add(new Conf(entryScope.name(), mappedScope.name()));
+                            confs.add(new Conf(entryScope.getName(), mappedScope.getName()));
                         }
                     }
                 }

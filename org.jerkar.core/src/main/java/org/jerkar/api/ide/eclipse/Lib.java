@@ -49,7 +49,7 @@ class Lib {
         JkDependencySet result = JkDependencySet.of();
         for (final Lib lib : libs) {
             if (lib.projectRelativePath == null) {
-                result = result.and(lib.file, lib.scope);
+                result = result.andFile(lib.file, lib.scope);
 
             } else { // This is a dependency on an eclipse project
                 final Path projectDir = parentDir.resolve(lib.projectRelativePath);

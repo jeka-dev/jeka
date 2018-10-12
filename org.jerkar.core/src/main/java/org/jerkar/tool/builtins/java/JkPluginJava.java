@@ -61,9 +61,9 @@ public class JkPluginJava extends JkPlugin {
                 .baseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
         final Path path = this.project.getSourceLayout().baseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
         if (Files.exists(path)) {
-            this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.fromDescription(path)));
+            this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.ofTextDescription(path)));
         }
-        this.producedArtifacts.add(this.project.maker().mainArtifactId());
+        this.producedArtifacts.add(this.project.maker().getMainArtifactId());
         this.scaffoldPlugin = run.plugins().get(JkPluginScaffold.class);
     }
 
@@ -80,16 +80,16 @@ public class JkPluginJava extends JkPlugin {
         }
         if (!publish.sources) {
             project.maker().getArtifactFileIdsToNotPublish().addAll(
-                    project.maker().artifactIdsWithClassifier("sources"));
+                    project.maker().getArtifactIdsWithClassifier("sources"));
         }
         if (!publish.tests) {
             project.maker().getArtifactFileIdsToNotPublish().addAll(
-                    project.maker().artifactIdsWithClassifier("test"));
+                    project.maker().getArtifactIdsWithClassifier("test"));
         }
         project.maker().setCompiler(compiler());
         project.maker().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
         if (publish.localOnly) {
-            project.maker().setPublishRepos(JkRepoSet.local());
+            project.maker().setPublishRepos(JkRepoSet.ofLocal());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         JkDependencyResolver resolver = project.maker().getDependencyResolver();
@@ -190,7 +190,7 @@ public class JkPluginJava extends JkPlugin {
     public final void showDependencies() {
         final JkResolveResult resolveResult = this.project().maker().getDependencyResolver()
                 .resolve(this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
-        final JkDependencyNode tree = resolveResult.dependencyTree();
+        final JkDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
     }
 

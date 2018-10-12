@@ -17,11 +17,11 @@ public class ResolveHandleErrorIT {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularModules.JAVAX_SERVLET_API, "2.5.3", COMPILE_AND_RUNTIME);  // does not exist
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
-        JkResolveResult.JkErrorReport errorReport = resolveResult.errorReport();
+        JkResolveResult.JkErrorReport errorReport = resolveResult.getErrorReport();
         System.out.println(errorReport.moduleProblems());
         assertEquals(1, errorReport.moduleProblems().size());
 

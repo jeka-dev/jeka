@@ -26,10 +26,10 @@ public class ResolveTreeIT {
                 .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
                 .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
+        JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
         System.out.println(tree.toStringComplete());
 
@@ -71,10 +71,10 @@ public class ResolveTreeIT {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkModuleId moduleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkDependencySet deps = JkDependencySet.of().and(moduleId, "1.4.+", TEST);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve(deps, TEST).dependencyTree();
+        JkDependencyNode tree = resolver.resolve(deps, TEST).getDependencyTree();
         System.out.println(tree.toStrings());
         JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.find(moduleId).moduleInfo();
         assertTrue(moduleNodeInfo.declaredVersion().value().equals("1.4.+"));
@@ -90,10 +90,10 @@ public class ResolveTreeIT {
         JkDependencySet deps = JkDependencySet.of()
                 .and(starterWebModule, "1.5.10.RELEASE", COMPILE)
                 .and(springCoreModule, directCoreVersion, COMPILE);  // force a projectVersion lower than the transitive above
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
-        JkDependencyNode tree = resolveResult.dependencyTree();
+        JkDependencyNode tree = resolveResult.getDependencyTree();
 
         JkDependencyNode bootNode = tree.children().get(0);
         JkDependencyNode.ModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.find(springCoreModule).moduleInfo();
@@ -113,12 +113,12 @@ public class ResolveTreeIT {
                 .and("com.googlecode.playn:playn-core:1.4")
                 .and("com.threerings:tripleplay:1.4")
                 .withDefaultScope(COMPILE_AND_RUNTIME);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
-        JkDependencyNode tree = resolveResult.dependencyTree();
+        JkDependencyNode tree = resolveResult.getDependencyTree();
         System.out.println(tree.toStringComplete());
-        System.out.println(resolveResult.localFiles());
+        System.out.println(resolveResult.getLocalFiles());
     }
 
     @Test
@@ -127,10 +127,10 @@ public class ResolveTreeIT {
                 .and("com.google.guava:guava")
                 .withVersionProvider(JkVersionProvider.of("com.google.guava:guava", "22.0"))
                 .withDefaultScope(COMPILE_AND_RUNTIME);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
-                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
+                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
-        JkDependencyNode tree = resolveResult.dependencyTree();
+        JkDependencyNode tree = resolveResult.getDependencyTree();
         JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.children().get(0).moduleInfo();
         assertEquals("22.0", moduleNodeInfo.declaredVersion().value());
     }
