@@ -300,8 +300,8 @@ final class IvyTranslations {
         }
 
         // -- Add projectVersion override for transitive dependency
-        for (final JkModuleId moduleId : resolvedVersions.moduleIds()) {
-            final JkVersion version = resolvedVersions.versionOf(moduleId);
+        for (final JkModuleId moduleId : resolvedVersions.getModuleIds()) {
+            final JkVersion version = resolvedVersions.getVersionOf(moduleId);
             moduleDescriptor.addDependencyDescriptorMediator(toModuleId(moduleId),
                     ExactOrRegexpPatternMatcher.INSTANCE,
                     new OverrideDependencyDescriptorMediator(null, version.getValue()));

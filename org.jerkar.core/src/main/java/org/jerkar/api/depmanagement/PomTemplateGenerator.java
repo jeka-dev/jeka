@@ -50,9 +50,9 @@ final class PomTemplateGenerator {
                 stringWriter);
         final JkProjectInfo projectInfo = publicationInfo.project;
         if (projectInfo != null) {
-            writeElement("  ", writer, "name", projectInfo.name);
-            writeElement("  ", writer, "description", projectInfo.description);
-            writeElement("  ", writer, "url", projectInfo.url);
+            writeElement("  ", writer, "name", projectInfo.getName());
+            writeElement("  ", writer, "description", projectInfo.getDescription());
+            writeElement("  ", writer, "url", projectInfo.getUrl());
         }
         final List<JkLicenseInfo> licenses = publicationInfo.licenses;
         if (!licenses.isEmpty()) {
@@ -63,8 +63,8 @@ final class PomTemplateGenerator {
                 writer.writeCharacters("\n    ");
                 writer.writeStartElement("license");
                 writer.writeCharacters("\n");
-                writeElement("      ", writer, "name", license.name);
-                writeElement("      ", writer, "url", license.url);
+                writeElement("      ", writer, "name", license.getName());
+                writeElement("      ", writer, "url", license.getUrl());
                 writer.writeCharacters("    ");
                 writer.writeEndElement();
             }
@@ -80,10 +80,10 @@ final class PomTemplateGenerator {
                 writer.writeCharacters("\n    ");
                 writer.writeStartElement("developer");
                 writer.writeCharacters("\n");
-                writeElement("      ", writer, "name", developer.name);
-                writeElement("      ", writer, "email", developer.email);
-                writeElement("      ", writer, "organization", developer.organisation);
-                writeElement("      ", writer, "organizationUrl", developer.organisationUrl);
+                writeElement("      ", writer, "name", developer.getName());
+                writeElement("      ", writer, "email", developer.getEmail());
+                writeElement("      ", writer, "organization", developer.getOrganisation());
+                writeElement("      ", writer, "organizationUrl", developer.getOrganisationUrl());
                 writer.writeCharacters("    ");
                 writer.writeEndElement();
             }
@@ -95,9 +95,9 @@ final class PomTemplateGenerator {
             writer.writeCharacters("\n\n  ");
             writer.writeStartElement("scm");
             writer.writeCharacters("\n");
-            writeElement("    ", writer, "connection", scm.connection);
-            writeElement("    ", writer, "developerConnection", scm.developerConnection);
-            writeElement("    ", writer, "url", scm.url);
+            writeElement("    ", writer, "connection", scm.getConnection());
+            writeElement("    ", writer, "developerConnection", scm.getDeveloperConnection());
+            writeElement("    ", writer, "url", scm.getUrl());
             writer.writeCharacters("  ");
             writer.writeEndElement();
         }

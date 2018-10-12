@@ -25,13 +25,13 @@ class VersionConstanter {
         final Map<String, String> electedGroupToVersion = new HashMap<>();
         final Map<String, String> groupToVersion = new HashMap<>();
         final Set<String> dismissedGroups = new HashSet<>();
-        for (final JkModuleId moduleId : jkVersionProvider.moduleIds()) {
+        for (final JkModuleId moduleId : jkVersionProvider.getModuleIds()) {
             final String group = moduleId.getGroup();
             if (dismissedGroups.contains(group)) {
                 continue;
             }
             final String registeredVersion = groupToVersion.get(group);
-            final String currentVersion = jkVersionProvider.versionOf(moduleId).getValue();
+            final String currentVersion = jkVersionProvider.getVersionOf(moduleId).getValue();
             if (registeredVersion == null) {
                 groupToVersion.put(group, currentVersion);
             } else if (!registeredVersion.equals(currentVersion)) {

@@ -208,7 +208,7 @@ final class IvyPublisher implements InternalPublisher {
             if (isMaven(resolver) && publishRepo.getPublishConfig().filter().accept(versionedModule)) {
                 JkLog.execute("Publishing to " + resolver, () -> {
                     final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
-                            publication.signer(), resolver, descriptorOutputDir,
+                            publication.getSigner(), resolver, descriptorOutputDir,
                             publishRepo.getPublishConfig().isUniqueSnapshot(),
                             publication.getChecksumAlgos());
                     ivyPublisherForMaven.publish(moduleDescriptor, publication);

@@ -93,7 +93,7 @@ public final class JkMavenPublication implements Serializable {
         return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo, this.signer, this.checksumAlgos);
     }
 
-    public UnaryOperator<Path> signer() {
+    public UnaryOperator<Path> getSigner() {
         return signer;
     }
 

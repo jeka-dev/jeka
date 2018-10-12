@@ -129,24 +129,40 @@ public final  class JkMavenPublicationInfo implements Serializable {
         private static final long serialVersionUID = 1L;
 
         /** Read-only connection string to project sources */
-        public final String connection;
+        private final String connection;
 
         /** Read-write connection string to project sources */
-        public final String developerConnection;
+        private final String developerConnection;
 
         /** Publicly browsable repository url */
-        public final String url;
+        private final String url;
 
         /**
          * Constructs a {@link JkScmInfo} specifying its connection, developerConnection and url.
          */
-        public JkScmInfo(String connection, String developerConnection, String url) {
+        private JkScmInfo(String connection, String developerConnection, String url) {
             super();
             this.connection = connection;
             this.developerConnection = developerConnection;
             this.url = url;
         }
 
+        public static JkScmInfo of(String connection, String developerConnection, String url) {
+            return new JkScmInfo(connection, developerConnection, url);
+        }
+
+
+        public String getConnection() {
+            return connection;
+        }
+
+        public String getDeveloperConnection() {
+            return developerConnection;
+        }
+
+        public String getUrl() {
+            return url;
+        }
     }
 
     /**
@@ -157,22 +173,22 @@ public final  class JkMavenPublicationInfo implements Serializable {
         private static final long serialVersionUID = 1L;
 
         /** Name of developer */
-        public final String name;
+        private final String name;
 
         /** Email we can contact the developer */
-        public final String email;
+        private final String email;
 
         /** Organization name the developer belong to */
-        public final String organisation;
+        private final String organisation;
 
         /** Organization url the developer belong to */
-        public final String organisationUrl;
+        private final String organisationUrl;
 
         /**
          * Constructs a {@link JkDeveloperInfo} specifying its name, email, organization value
          * and organization url.
          */
-        public JkDeveloperInfo(String name, String email, String organisation,
+        private JkDeveloperInfo(String name, String email, String organisation,
                 String organisationUrl) {
             super();
             this.name = name;
@@ -181,6 +197,27 @@ public final  class JkMavenPublicationInfo implements Serializable {
             this.organisationUrl = organisationUrl;
         }
 
+        private static JkDeveloperInfo of(String name, String email, String organisation,
+                                String organisationUrl) {
+            return new JkDeveloperInfo(name, email, organisation, organisationUrl);
+        }
+
+
+        public String getName() {
+            return name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getOrganisation() {
+            return organisation;
+        }
+
+        public String getOrganisationUrl() {
+            return organisationUrl;
+        }
     }
 
     /**
@@ -191,18 +228,30 @@ public final  class JkMavenPublicationInfo implements Serializable {
         private static final long serialVersionUID = 1L;
 
         /** Name of the license (as Apache 2) */
-        public final String name;
+        private final String name;
 
         /** An url pointing on the license terms */
-        public final String url;
+        private final String url;
 
         /**
          * Constructs a {@link JkLicenseInfo} specifying its name and URL.
          */
-        public JkLicenseInfo(String name, String url) {
+        private JkLicenseInfo(String name, String url) {
             super();
             this.name = name;
             this.url = url;
+        }
+
+        public static JkLicenseInfo of(String name, String url) {
+            return new JkLicenseInfo(name, url);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getUrl() {
+            return url;
         }
     }
 
@@ -216,28 +265,43 @@ public final  class JkMavenPublicationInfo implements Serializable {
         /**
          * Public name of the project.
          */
-        public final String name;
+        private final String name;
 
         /**
          * Description for the project.
          */
-        public final String description;
+        private final String description;
 
         /**
          * Url site of the project.
          */
-        public final String url;
+        private final String url;
 
         /**
          * Constructs a {@link JkProjectInfo} specifying its name, description and url.
          */
-        public JkProjectInfo(String name, String description, String url) {
+        private JkProjectInfo(String name, String description, String url) {
             super();
             this.name = name;
             this.description = description;
             this.url = url;
         }
 
+        public static JkProjectInfo of(String name, String description, String url) {
+            return new JkProjectInfo(name, description, url);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getUrl() {
+            return url;
+        }
     }
 
 }

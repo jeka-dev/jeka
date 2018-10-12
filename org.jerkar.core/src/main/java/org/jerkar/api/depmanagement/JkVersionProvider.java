@@ -75,7 +75,7 @@ public final class JkVersionProvider implements Serializable {
     /**
      * Returns the projectVersion to use with specified module.
      */
-    public JkVersion versionOf(JkModuleId moduleId) {
+    public JkVersion getVersionOf(JkModuleId moduleId) {
         return this.map.get(moduleId);
     }
 
@@ -128,7 +128,7 @@ public final class JkVersionProvider implements Serializable {
     /**
      * Returns all modules that this object provides projectVersion for.
      */
-    public Set<JkModuleId> moduleIds() {
+    public Set<JkModuleId> getModuleIds() {
         return map.keySet();
     }
 

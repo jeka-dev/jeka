@@ -71,7 +71,7 @@ public final class JkResolveResult implements Serializable {
      * Shorthand for <code>resolvedVersion.getVersionOf(JkModuleId)</code>
      */
     public JkVersion getVersionOf(JkModuleId moduleId) {
-        return this.getResolvedVersionProvider().versionOf(moduleId);
+        return this.getResolvedVersionProvider().getVersionOf(moduleId);
     }
 
     /**

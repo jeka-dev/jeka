@@ -91,7 +91,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         if (!version.isUnspecified()) {
             return version;
         }
-        version =  this.versionProvider.versionOf(moduleId);
+        version =  this.versionProvider.getVersionOf(moduleId);
         if (version != null) {
             return version;
         }

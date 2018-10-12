@@ -25,7 +25,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
-        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().moduleIds();
+        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().getModuleIds();
 
         // Unresolved issue happen on Travis : Junit is not part of the result.
         // To unblock linux build, we do a specific check uniquely for linux
@@ -44,7 +44,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
-        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().moduleIds();
+        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().getModuleIds();
         assertEquals("Wrong modules size " + moduleIds, 2, moduleIds.size());
     }
 
@@ -84,7 +84,7 @@ public class ResolverWithScopeMapperIT {
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE, PROVIDED);
         assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
-        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersion().moduleIds().size());
+        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersion().getModuleIds().size());
     }
 
     @Test
