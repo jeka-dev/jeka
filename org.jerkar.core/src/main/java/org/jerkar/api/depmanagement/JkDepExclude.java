@@ -55,7 +55,7 @@ public final class JkDepExclude implements Serializable {
 
     /**
      * Returns an exclusion identical to this one but with the specified type.
-     * Types generally corresponds to extension or classifier but not always.
+     * Types generally corresponds to getExtension or classifier but not always.
      * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
      */
     public JkDepExclude withType(String typeArg) {
@@ -63,8 +63,8 @@ public final class JkDepExclude implements Serializable {
     }
 
     /**
-     * Returns an exclusion identical to this one but with the specified extension.
-     * Types generally corresponds to extension or classifier but not always.
+     * Returns an exclusion identical to this one but with the specified getExtension.
+     * Types generally corresponds to getExtension or classifier but not always.
      * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
      */
     public JkDepExclude withExt(String extension) {
@@ -96,8 +96,8 @@ public final class JkDepExclude implements Serializable {
     }
 
     /**
-     * Returns the extension for the artifact files to exclude. If not <code>null</code>
-     * only file artifact having this extension will be effectively excluded.
+     * Returns the getExtension for the artifact files to exclude. If not <code>null</code>
+     * only file artifact having this getExtension will be effectively excluded.
      */
     public String getExt() {
         return ext;

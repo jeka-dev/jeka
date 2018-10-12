@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsJdk;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -34,13 +35,6 @@ public final class JkScope implements Serializable {
         return new JkScope(name, new HashSet<>(), "", true);
     }
 
-    /**
-     * Returns a builder to create a scope instance fluently.
-     */
-    public static JkScopeBuilder build(String name) {
-        return new JkScopeBuilder(name);
-    }
-
     private final Set<JkScope> extendedScopes;
 
     private final String name;
@@ -60,6 +54,10 @@ public final class JkScope implements Serializable {
         this.name = name;
         this.description = description;
         this.transitive = transitive;
+    }
+
+    public static JkScope of(String name, String description, boolean transitive, JkScope ... extending) {
+        return new JkScope(name, JkUtilsIterable.setOf(extending), description, transitive);
     }
 
     /**
@@ -221,63 +219,5 @@ public final class JkScope implements Serializable {
         return result;
     }
 
-    /**
-     * A {@link JkScope} allowing to define other scope from it. It exists only
-     * to serve the fluent API purpose as for clarity we can't create derived
-     * <code>scopes</scope> directly from a {@link JkScope} .<br/>
-     * Use the {@link #descr(String)} method last as it returns a
-     * {@link JkScope}.
-     *
-     * @author Jerome Angibaud
-     */
-    public static class JkScopeBuilder {
-
-        private Set<JkScope> extendedScopes = new HashSet<>();
-
-        private final String name;
-
-        private String description;
-
-        private boolean transitive = true;
-
-        private JkScopeBuilder(String name) {
-            this.name = name;
-            this.extendedScopes = new HashSet<>();
-        }
-
-        /**
-         * Returns a {@link JkScopeBuilder} identical to this one but extending the specified scopes.
-         */
-        public JkScopeBuilder extending(JkScope... scopes) {
-            this.extendedScopes = new HashSet<>(Arrays.asList(scopes));
-            return this;
-        }
-
-        /**
-         * Returns a {@link JkScopeBuilder} identical to this one with the specified transitivity.
-         */
-        public JkScopeBuilder transitive(boolean transitive) {
-            this.transitive = transitive;
-            return this;
-        }
-
-        /**
-         * Returns a {@link JkScopeBuilder} identical to this one with the specified description.
-         */
-        public JkScopeBuilder descr(String description) {
-            this.description = description;
-            return this;
-        }
-
-        /**
-         * Returns a {@link JkScope} built on this builder attribute.
-         */
-        public JkScope build() {
-            return new JkScope(name, new HashSet<>(extendedScopes), description, transitive);
-        }
-
-
-
-    }
 
 }

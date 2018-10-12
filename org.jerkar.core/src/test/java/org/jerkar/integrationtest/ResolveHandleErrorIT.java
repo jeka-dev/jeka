@@ -22,8 +22,8 @@ public class ResolveHandleErrorIT {
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolveResult.JkErrorReport errorReport = resolveResult.getErrorReport();
-        System.out.println(errorReport.moduleProblems());
-        assertEquals(1, errorReport.moduleProblems().size());
+        System.out.println(errorReport.getModuleProblems());
+        assertEquals(1, errorReport.getModuleProblems().size());
 
     }
 

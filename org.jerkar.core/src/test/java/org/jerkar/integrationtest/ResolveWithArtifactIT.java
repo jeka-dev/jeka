@@ -38,11 +38,11 @@ public class ResolveWithArtifactIT {
         // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
         // it should results in a single node.
         // The classpath order will also place all artifacts jump a same module subsequently
-        assertEquals(2, treeRoot.children().size());
-        assertEquals(3, treeRoot.allFiles().size());
+        assertEquals(2, treeRoot.getChildren().size());
+        assertEquals(3, treeRoot.getAllResolvedFiles().size());
 
-        JkDependencyNode lwjglNode = treeRoot.children().get(0);
-        List<Path> lwjglFiles = lwjglNode.nodeInfo().files();
+        JkDependencyNode lwjglNode = treeRoot.getChildren().get(0);
+        List<Path> lwjglFiles = lwjglNode.getNodeInfo().getFiles();
         System.out.println(lwjglFiles);
         assertEquals(2, lwjglFiles.size());
 
@@ -63,11 +63,11 @@ public class ResolveWithArtifactIT {
         System.out.println(tree.toStringComplete());
         System.out.println(JkUtilsString.join(resolveResult.getLocalFiles(), "\n"));
         System.out.println("-----");
-        System.out.println(JkUtilsString.join(tree.allFiles(), "\n"));
+        System.out.println(JkUtilsString.join(tree.getAllResolvedFiles(), "\n"));
         //assertEquals(resolveResult.localFiles().size(), tree.allFiles().size());
         System.out.println("-----");
         for (Path file : resolveResult.getLocalFiles()) {
-            if (!tree.allFiles().contains(file)) {
+            if (!tree.getAllResolvedFiles().contains(file)) {
                 System.out.println(file);
             }
         }

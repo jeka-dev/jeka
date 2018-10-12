@@ -99,7 +99,7 @@ public final class JkUtilsXml {
     }
 
     /**
-     * Returns the direct child node of the specified element having specified
+     * Returns the direct getChild node of the specified element having specified
      * name.
      */
     public static Element directChild(Element parent, String childName) {
@@ -117,7 +117,7 @@ public final class JkUtilsXml {
     }
 
     /**
-     * Returns specified element direct child node elements.
+     * Returns specified element direct getChild node elements.
      */
     public static List<Element> directChildren(Element parent, String childName) {
         final List<Element> result = new LinkedList<>();
@@ -135,7 +135,7 @@ public final class JkUtilsXml {
     }
 
     /**
-     * Returns the text of the specified direct child of the specified element.
+     * Returns the text of the specified direct getChild of the specified element.
      */
     public static String directChildText(Element parent, String childName) {
         final Element child = directChild(parent, childName);

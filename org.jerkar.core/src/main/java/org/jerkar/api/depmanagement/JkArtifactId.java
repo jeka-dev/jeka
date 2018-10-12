@@ -4,16 +4,16 @@ package org.jerkar.api.depmanagement;
  * Artifacts are files produced by projects in order to be published or reused by other projects.
  * This class stands for an identifier for an artifact within a project.
  * An artifact producer is likely to produce several artifact files (main jar, sources, javadoc, native jars, ...). <br/>
- * To distinguish them, Jerkar uses the notion of 'classifier' and 'extension'. <br/>
+ * To distinguish them, Jerkar uses the notion of 'classifier' and 'getExtension'. <br/>
  * Extension is simply the char sequence at the end of of file to determine its technical type (.exe, .jar, .zip, ...). <br/>
  * Classifier is to mention the purpose of the file (main artifact, sources, javadoc, uberjar, native lib, ...).
  */
 public final class JkArtifactId {
 
     /**
-     * Creates an artifact file id with the specified classifier and extension. Both can be <code>null</code>. <br/>
+     * Creates an artifact file id with the specified classifier and getExtension. Both can be <code>null</code>. <br/>
      * A <code>null</code> or empty classifier generally means the main artifact. <br/>
-     * A <code>extension</code> or empty extension generally means that the file has no extension.<br/>
+     * A <code>getExtension</code> or empty getExtension generally means that the file has no getExtension.<br/>
      */
     public static JkArtifactId of(String classifier, String extension) {
         return new JkArtifactId(classifier, extension);
@@ -34,7 +34,7 @@ public final class JkArtifactId {
     }
 
     /**
-     * Returns the file extension of this object.
+     * Returns the file getExtension of this object.
      */
     public String getExtension() {
         return extension;
@@ -53,7 +53,7 @@ public final class JkArtifactId {
     }
 
     /**
-     * Returns <code>true</code> if any of the specified extension is equals to this extension.
+     * Returns <code>true</code> if any of the specified getExtension is equals to this getExtension.
      */
     public boolean isExtension(String... extensions) {
         for (String extension : extensions) {

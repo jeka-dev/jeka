@@ -75,7 +75,7 @@ public final class JkModuleDependency implements JkDependency {
      * Creates a {@link JkModuleDependency} to the specified versioned module.
      */
     public static JkModuleDependency of(JkVersionedModule versionedModule) {
-        return of(versionedModule.moduleId(), versionedModule.version().value());
+        return of(versionedModule.getModuleId(), versionedModule.getVersion().getValue());
     }
 
     /**
@@ -120,11 +120,11 @@ public final class JkModuleDependency implements JkDependency {
             return JkModuleDependency.of(moduleId, JkVersion.of(strings[2]));
         }
         if (strings.length ==4) {
-            return JkModuleDependency.of(moduleId, JkVersion.of(strings[3])).ext(strings[2]);
+            return JkModuleDependency.of(moduleId, JkVersion.of(strings[3])).withExt(strings[2]);
         }
         if (strings.length ==5) {
             return JkModuleDependency.of(moduleId, JkVersion.of(strings[4]))
-                    .classifier(strings[3]).ext(strings[2]);
+                    .withClassifier(strings[3]).withExt(strings[2]);
         }
         throw new JkException(errorMessage);
     }
@@ -133,28 +133,28 @@ public final class JkModuleDependency implements JkDependency {
      * Returns <code>true</code> if this dependency should be resolved transitively (returning the dependencies
      * of this dependency recursively).
      */
-    public boolean transitive() {
+    public boolean isTransitive() {
         return transitive;
     }
 
     /**
      * Returns the getModuleId of this dependency.
      */
-    public JkModuleId moduleId() {
+    public JkModuleId getModuleId() {
         return module;
     }
 
     /**
      * Returns the projectVersion of the module this dependencies is constrained to.
      */
-    public JkVersion version() {
+    public JkVersion getVersion() {
         return version;
     }
 
     /**
      * Returns a {@link JkModuleDependency} identical to this one but with the specified 'transitive' property.
      */
-    public JkModuleDependency transitive(boolean transitive) {
+    public JkModuleDependency isTransitive(boolean transitive) {
         return new JkModuleDependency(module, version, classifier, transitive, extension,
                 excludes);
     }
@@ -171,11 +171,11 @@ public final class JkModuleDependency implements JkDependency {
      * static projectVersion. If the specified projectVersion is <code>null</code> then returned projectVersion is this one.
      *
      */
-    public JkModuleDependency resolvedTo(JkVersion version) {
+    public JkModuleDependency withResolvedVersion(JkVersion version) {
         if (version == null) {
             return this;
         }
-        return new JkModuleDependency(module, JkVersion.of(version.value()), classifier,
+        return new JkModuleDependency(module, version, classifier,
                 transitive, extension, excludes);
     }
 
@@ -183,7 +183,7 @@ public final class JkModuleDependency implements JkDependency {
      * Returns a JkModuleDependency identical to this one but with the specified
      * classifier. This has meaning only for Maven module.
      */
-    public JkModuleDependency classifier(String classifier) {
+    public JkModuleDependency withClassifier(String classifier) {
         return new JkModuleDependency(module, version, classifier, transitive, extension,
                 excludes);
     }
@@ -192,15 +192,15 @@ public final class JkModuleDependency implements JkDependency {
      * Returns the classifier for this module dependency or <code>null</code> if
      * the dependency is done on the main artifact.
      */
-    public String classifier() {
+    public String withClassifier() {
         return this.classifier;
     }
 
     /**
      * Returns a JkModuleDependency identical to this one but with the specified
-     * artifact extension.
+     * artifact getExtension.
      */
-    public JkModuleDependency ext(String extension) {
+    public JkModuleDependency withExt(String extension) {
         String ext = JkUtilsString.isBlank(extension) ? null : extension;
         return new JkModuleDependency(module, version, classifier, transitive, ext,
                 excludes);
@@ -234,17 +234,17 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Returns the extension for this module dependency or <code>null</code> if
-     * the dependency is done on the the default extension.
+     * Returns the getExtension for this module dependency or <code>null</code> if
+     * the dependency is done on the the default getExtension.
      */
-    public String ext() {
+    public String withExt() {
         return this.extension;
     }
 
     /**
      * Returns modules to exclude to the transitive chain.
      */
-    public List<JkDepExclude> excludes() {
+    public List<JkDepExclude> getExcludes() {
         return excludes;
     }
 
@@ -260,7 +260,7 @@ public final class JkModuleDependency implements JkDependency {
 
         @Override
         public int compare(JkModuleDependency o1, JkModuleDependency o2) {
-            return JkModuleId.GROUP_NAME_COMPARATOR.compare(o1.moduleId(), o2.moduleId());
+            return JkModuleId.GROUP_NAME_COMPARATOR.compare(o1.getModuleId(), o2.getModuleId());
         }
 
     }

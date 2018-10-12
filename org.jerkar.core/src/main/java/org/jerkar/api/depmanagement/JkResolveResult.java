@@ -28,7 +28,7 @@ public final class JkResolveResult implements Serializable {
      * Creates an empty {@link JkResolveResult}
      */
     public static JkResolveResult ofEmpty() {
-        return of(JkDependencyNode.empty());
+        return of(JkDependencyNode.ofEmpty());
     }
 
     /**
@@ -57,7 +57,7 @@ public final class JkResolveResult implements Serializable {
      * Shorthand for <code>dependencyTree.allFiles()</code>
      */
     public List<Path> getLocalFiles() {
-        return this.depTree.allFiles();
+        return this.depTree.getAllResolvedFiles();
     }
 
     /**
@@ -78,32 +78,32 @@ public final class JkResolveResult implements Serializable {
      * Shorthand for <code>dependencyTree.childModules(JkModuleId)</code>
      */
     public Set<JkVersionedModule> getInvolvedModules() {
-        return this.depTree.childModules();
+        return this.depTree.getChildModules();
     }
 
     /**
      * Shorthand for <code>dependencyTree.getResolvedVersions(JkModuleId)</code>
      */
     public JkVersionProvider getResolvedVersionProvider() {
-        return this.depTree.flattenToVersionProvider();
+        return this.depTree.getResolvedVersion();
     }
 
     /**
      * Returns files the specified module is resolved to.
      */
     public List<Path> getResolvedFilesFor(JkModuleId moduleId) {
-        final JkDependencyNode dependencyNode = this.depTree.find(moduleId);
+        final JkDependencyNode dependencyNode = this.depTree.getFirst(moduleId);
         if (dependencyNode == null) {
             return new LinkedList<>();
         }
-        return dependencyNode.moduleInfo().files();
+        return dependencyNode.getModuleInfo().getFiles();
     }
 
     /**
      * Returns a concatenation of this resolve result and the specified one.
      */
     public JkResolveResult and(JkResolveResult other) {
-        return new JkResolveResult(this.depTree.merge(other.depTree),
+        return new JkResolveResult(this.depTree.getMerge(other.depTree),
                 this.errorReport.merge(other.errorReport));
     }
 
@@ -164,7 +164,7 @@ public final class JkResolveResult implements Serializable {
         /**
          * Returns the list of problems.
          */
-        public List<JkModuleDepProblem> moduleProblems() {
+        public List<JkModuleDepProblem> getModuleProblems() {
             return moduleProblems;
         }
 

@@ -50,21 +50,21 @@ public final class JkVersionedModule implements Serializable {
      * Creates a <code>JkVersionedModule</code> from a string formatted as
      * <code>groupId:name:projectVersion</code>.
      */
-    public static final JkVersionedModule defaultFor(String rootDirName) {
+    public static final JkVersionedModule ofRootDirName(String rootDirName) {
         return of(JkModuleId.of(rootDirName), JkVersion.UNSPECIFIED);
     }
 
     /**
      * Returns the module.
      */
-    public JkModuleId moduleId() {
+    public JkModuleId getModuleId() {
         return moduleId;
     }
 
     /**
      * Returns the projectVersion.
      */
-    public JkVersion version() {
+    public JkVersion getVersion() {
         return version;
     }
 
@@ -129,8 +129,8 @@ public final class JkVersionedModule implements Serializable {
      * Fills the manifest with <code>implementation</code> infoString.
      */
     public void populateManifest(JkManifest manifest) {
-        manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, moduleId().getDotedName())
-        .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, version().value());
+        manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, getModuleId().getDotedName())
+        .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, getVersion().getValue());
     }
 
 }

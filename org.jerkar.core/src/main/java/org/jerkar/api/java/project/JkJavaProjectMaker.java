@@ -282,9 +282,9 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      */
     public Supplier<String> getIncludingVersionFileNameSupplier() {
         return () -> {
-            String version = this.project.getVersionedModule().version().isUnspecified() ? "" : "-"
-                    + this.project.getVersionedModule().version().value();
-            return this.project.getVersionedModule().moduleId().getDotedName() + version;
+            String version = this.project.getVersionedModule().getVersion().isUnspecified() ? "" : "-"
+                    + this.project.getVersionedModule().getVersion().getValue();
+            return this.project.getVersionedModule().getModuleId().getDotedName() + version;
         };
     }
 
@@ -292,7 +292,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Returns an artifact file name supplier for NOT including version in artifact file names.
      */
     public Supplier<String> getModuleNameFileNameSupplier() {
-        return () -> project.getVersionedModule().moduleId().getDotedName();
+        return () -> project.getVersionedModule().getModuleId().getDotedName();
     }
 
 

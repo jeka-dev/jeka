@@ -119,7 +119,7 @@ public final class JkDependencyResolver {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.hasModules()) {
             resolveResult = resolveWithInternalResolver(dependencies, dependencies.getVersionProvider(), scopes).assertNoError();
-            return JkPathSequence.ofMany(resolveResult.getDependencyTree().allFiles()).withoutDuplicates();
+            return JkPathSequence.ofMany(resolveResult.getDependencyTree().getAllResolvedFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {

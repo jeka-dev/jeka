@@ -87,7 +87,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             return null;
         }
         JkModuleDependency moduleDependency = (JkModuleDependency) dep.getDependency();
-        JkVersion version = moduleDependency.version();
+        JkVersion version = moduleDependency.getVersion();
         if (!version.isUnspecified()) {
             return version;
         }
@@ -173,8 +173,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
 
     public JkDependencySet and(String moduleDescription, JkScope ... scopes) {
         JkModuleDependency moduleDependency = JkModuleDependency.of(moduleDescription);
-        if (moduleDependency.classifier() != null) {
-            moduleDependency = moduleDependency.transitive(false);
+        if (moduleDependency.withClassifier() != null) {
+            moduleDependency = moduleDependency.isTransitive(false);
         }
         return and(moduleDependency, scopes);
     }
@@ -230,7 +230,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             final JkDependency dependency = it.next().getDependency();
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) dependency;
-                if (externalModule.moduleId().equals(jkModuleId)) {
+                if (externalModule.getModuleId().equals(jkModuleId)) {
                     it.remove();
                 }
             }
@@ -364,7 +364,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             final JkDependency dependency = scopedDependency.getDependency();
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) dependency;
-                if (externalModule.moduleId().equals(moduleId)) {
+                if (externalModule.getModuleId().equals(moduleId)) {
                     return scopedDependency;
                 }
             }
@@ -407,7 +407,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency
                         .getDependency();
-                final JkVersion version = externalModule.version();
+                final JkVersion version = externalModule.getVersion();
                 if (version.isDynamic()) {
                     return true;
                 }
@@ -428,7 +428,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency
                         .getDependency();
-                final JkVersion version = externalModule.version();
+                final JkVersion version = externalModule.getVersion();
                 if (version.isDynamicAndResovable()) {
                     return true;
                 }
@@ -508,10 +508,10 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency
                         .getDependency();
                 builder.append("\n").append(indent).append(".and(\"")
-                .append(moduleDep.moduleId().getGroup()).append(":")
-                .append(moduleDep.moduleId().getName());
-                if (!moduleDep.version().isUnspecified()) {
-                    builder.append(":" + moduleDep.version().value());
+                .append(moduleDep.getModuleId().getGroup()).append(":")
+                .append(moduleDep.getModuleId().getName());
+                if (!moduleDep.getVersion().isUnspecified()) {
+                    builder.append(":" + moduleDep.getVersion().getValue());
                 }
                 builder.append('"');
                 if (!scopedDependency.getScopes().isEmpty()) {

@@ -210,7 +210,7 @@ final class IvyPublisher implements InternalPublisher {
                     final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
                             publication.signer(), resolver, descriptorOutputDir,
                             publishRepo.getPublishConfig().isUniqueSnapshot(),
-                            publication.checksumAlgos());
+                            publication.getChecksumAlgos());
                     ivyPublisherForMaven.publish(moduleDescriptor, publication);
                 });
                 count++;

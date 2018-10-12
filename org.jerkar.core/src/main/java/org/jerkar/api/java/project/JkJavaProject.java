@@ -63,7 +63,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
         this.dependencies = JkDependencySet.of();
-        this.versionedModule = JkVersionedModule.defaultFor(sourceLayout.baseDir().getFileName().toString());
+        this.versionedModule = JkVersionedModule.ofRootDirName(sourceLayout.baseDir().getFileName().toString());
         this.maker = new JkJavaProjectMaker(this);
     }
 

@@ -39,7 +39,7 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     /**
      * Returns the value of the projectVersion.
      */
-    public String value() {
+    public String getValue() {
         return value;
     }
 

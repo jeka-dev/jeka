@@ -125,7 +125,7 @@ public final class JkScopeMapping implements Serializable {
     /**
      * Returns the right side scope mapped to the specified left scope.
      */
-    public Set<JkScope> mappedScopes(JkScope sourceScope) {
+    public Set<JkScope> getMappedScopes(JkScope sourceScope) {
         final Set<JkScope> result = this.map.get(sourceScope);
         if (result != null && !result.isEmpty()) {
             return result;
@@ -145,7 +145,7 @@ public final class JkScopeMapping implements Serializable {
      * Returns all scopes : the ones declared on left side plus yhe ones declared
      * on right side.
      */
-    public Set<JkScope> declaredScopes() {
+    public Set<JkScope> getDeclaredScopes() {
         final Set<JkScope> result = new HashSet<>();
         result.addAll(entries());
         for (final JkScope scope : entries()) {

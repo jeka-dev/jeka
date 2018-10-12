@@ -276,12 +276,12 @@ public final class JkImlGenerator {
 
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         final JkDependencyNode tree = resolveResult.getDependencyTree();
-        for (final JkDependencyNode node : tree.flatten()) {
+        for (final JkDependencyNode node : tree.toFlattenList()) {
 
             // Maven dependency
             if (node.isModuleNode()) {
-                final String ideScope = forceTest ? "TEST" : ideScope(node.moduleInfo().resolvedScopes());
-                final List<LibPath> paths = toLibPath(node.moduleInfo(), resolver.getRepos(), ideScope);
+                final String ideScope = forceTest ? "TEST" : ideScope(node.getModuleInfo().getResolvedScopes());
+                final List<LibPath> paths = toLibPath(node.getModuleInfo(), resolver.getRepos(), ideScope);
                 for (final LibPath libPath : paths) {
                     if (!allPaths.contains(libPath.bin)) {
                         writeOrderEntryForLib(libPath);
@@ -291,8 +291,8 @@ public final class JkImlGenerator {
 
                 // File dependencies (file system + computed)
             } else {
-                final String ideScope = forceTest ? "TEST" : ideScope(node.nodeInfo().declaredScopes());
-                final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
+                final String ideScope = forceTest ? "TEST" : ideScope(node.getNodeInfo().getDeclaredScopes());
+                final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectBaseDir();
                     if (projectDir != null && !allModules.contains(projectDir)) {
@@ -321,16 +321,16 @@ public final class JkImlGenerator {
     private List<LibPath> toLibPath(JkDependencyNode.ModuleNodeInfo moduleInfo, JkRepoSet repos,
             String scope) {
         final List<LibPath> result = new LinkedList<>();
-        final JkModuleId moduleId = moduleInfo.moduleId();
-        final JkVersion version = moduleInfo.resolvedVersion();
+        final JkModuleId moduleId = moduleInfo.getModuleId();
+        final JkVersion version = moduleInfo.getResolvedVersion();
         final JkVersionedModule versionedModule = JkVersionedModule.of(moduleId, version);
-        final List<Path> files = moduleInfo.paths();
+        final List<Path> files = moduleInfo.getPaths();
         for (final Path file : files) {
             final LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = scope;
-            libPath.source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
-            libPath.javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
+            libPath.source = repos.get(JkModuleDependency.of(versionedModule).withClassifier("sources"));
+            libPath.javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifier("javadoc"));
             result.add(libPath);
         }
         return result;

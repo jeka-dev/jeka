@@ -141,7 +141,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Creates a <code>JkClassLoader</code>, child of this one and having the
+     * Creates a <code>JkClassLoader</code>, getChild of this one and having the
      * specified entries.
      */
     public JkClassLoader childWithMany(Iterable<Path> entries) {

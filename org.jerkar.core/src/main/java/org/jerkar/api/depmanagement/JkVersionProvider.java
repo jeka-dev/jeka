@@ -60,7 +60,7 @@ public final class JkVersionProvider implements Serializable {
     public static JkVersionProvider of(Iterable<JkVersionedModule> modules) {
         final Map<JkModuleId, JkVersion> result = new HashMap<>();
         for (final JkVersionedModule module : modules) {
-            result.put(module.moduleId(), module.version());
+            result.put(module.getModuleId(), module.getVersion());
         }
         return new JkVersionProvider(result);
     }

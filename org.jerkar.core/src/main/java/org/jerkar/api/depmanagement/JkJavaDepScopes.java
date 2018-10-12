@@ -9,9 +9,9 @@ public final class JkJavaDepScopes {
      * A dependency declared with this scope will be available at compile time but won't be part of the packaged
      * product (similar to Maven scope 'provided').
      */
-    public static final JkScope PROVIDED = JkScope.build("provided")
-            .transitive(false)
-            .descr("Dependencies to compile the project but that should not be embedded in produced artifacts.").build();
+    public static final JkScope PROVIDED = JkScope.of("provided",
+            "Dependencies to compile the project but that should not be embedded in produced artifacts.",
+            false);
 
     /**
      * A dependency resolution made with this scope will only fetch dependencies declared with {@link #COMPILE} scope and
@@ -23,8 +23,8 @@ public final class JkJavaDepScopes {
      * If you want to have a dependency scope equivalent to Maven 'compile', you need to declare dependencies with
      * two scopes : {@link #COMPILE} and {@link #RUNTIME} or their shorthand {@link #COMPILE_AND_RUNTIME}.
      */
-    public static final JkScope COMPILE = JkScope.build("compile").descr(
-            "Dependencies to compile the project.").build();
+    public static final JkScope COMPILE = JkScope.of("compile",
+            "Dependencies to compile the project.", true);
 
     /**
      * A dependency declared with this scope will be present in the classpath for packaging or running the module.<b/>
@@ -35,8 +35,9 @@ public final class JkJavaDepScopes {
      * A dependency resolution made with this scope will fetch dependencies declared with {@link #COMPILE} or {@link #RUNTIME}
      * plus their transitive dependencies declared with {@link #COMPILE } or {@link #RUNTIME}.
      */
-    public static final JkScope RUNTIME = JkScope.build("runtime").extending(COMPILE)
-            .descr("Dependencies to embed in produced artifacts (as war or fat jar * files).").build();
+    public static final JkScope RUNTIME = JkScope.of("runtime",
+            "Dependencies to compile the project but that should not be embedded in produced artifacts.",
+            true, COMPILE);
 
     /**
      * A dependency declared with this scope will be present in testing classpath only.
@@ -44,16 +45,20 @@ public final class JkJavaDepScopes {
      * A dependency resolution made with this scope will fetch dependencies declared with {@link #COMPILE}, {@link #RUNTIME} or  {@link #TEST}
      * plus their transitive dependencies declared with {@link #COMPILE }, {@link #RUNTIME} or {@link #TEST}.
      */
-    public static final JkScope TEST = JkScope.build("test").extending(RUNTIME, PROVIDED)
-            .descr("Dependencies necessary to compile and run tests.").build();
+    public static final JkScope TEST = JkScope.of("test",
+            "Dependencies necessary to compile and run tests.",
+            true,
+            RUNTIME, PROVIDED);
 
     /** This scope is used for publication purpose */
-    public static final JkScope SOURCES = JkScope.build("sources").transitive(false)
-            .descr("Contains the source artifacts.").build();
+    public static final JkScope SOURCES = JkScope.of("sources",
+            "Contains the source artifacts.",
+            false);
 
     /** This scope is used for publication purpose */
-    public static final JkScope JAVADOC = JkScope.build("javadoc").transitive(false)
-            .descr("Contains the javadoc of this project").build();
+    public static final JkScope JAVADOC = JkScope.of("javadoc",
+            "Contains the javadoc of this project",
+            false);
 
     public static JkScope of(String name) {
         if (name.equalsIgnoreCase("compile")) {

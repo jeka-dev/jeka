@@ -26,10 +26,10 @@ public class JkDependencyResolverTest {
 
         JkResolveResult resolveResult = dependencyResolver.resolve(coreProject.getDependencies());
 
-        Assert.assertEquals(1, resolveResult.getDependencyTree().children().size());
-        JkDependencyNode dependencyNode = resolveResult.getDependencyTree().children().get(0);
+        Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
+        JkDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);
         Assert.assertFalse(dependencyNode.isModuleNode());
-        JkDependencyNode.FileNodeInfo nodeInfo = (JkDependencyNode.FileNodeInfo) dependencyNode.nodeInfo();
+        JkDependencyNode.FileNodeInfo nodeInfo = (JkDependencyNode.FileNodeInfo) dependencyNode.getNodeInfo();
         Assert.assertEquals(baseProject.baseDir(), nodeInfo.computationOrigin().getIdeProjectBaseDir());
     }
 

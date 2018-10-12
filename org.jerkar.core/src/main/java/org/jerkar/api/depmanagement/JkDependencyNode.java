@@ -40,7 +40,7 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns an empty instance of tree.
      */
-    public static JkDependencyNode empty() {
+    public static JkDependencyNode ofEmpty() {
         return new JkDependencyNode(null, new LinkedList<>());
     }
 
@@ -73,11 +73,11 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns all files resulting of this dependency node (this node itself plus all descendants).
      */
-    public List<Path> allFiles() {
+    public List<Path> getAllResolvedFiles() {
         final List<Path> list = new LinkedList<>();
-        JkUtilsIterable.addAllWithoutDuplicate(list, this.nodeInfo.files());
+        JkUtilsIterable.addAllWithoutDuplicate(list, this.nodeInfo.getFiles());
         for (final JkDependencyNode child : children) {
-            JkUtilsIterable.addAllWithoutDuplicate(list, child.allFiles());
+            JkUtilsIterable.addAllWithoutDuplicate(list, child.getAllResolvedFiles());
         }
         return list;
     }
@@ -93,7 +93,7 @@ public class JkDependencyNode implements Serializable {
     /**
      * Convenient method to return relative information about this node, assuming this node stands for a module dependency.
      */
-    public ModuleNodeInfo moduleInfo() {
+    public ModuleNodeInfo getModuleInfo() {
         if (this.nodeInfo instanceof ModuleNodeInfo) {
             return (ModuleNodeInfo) this.nodeInfo;
         }
@@ -104,14 +104,14 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns information relative to this dependency node.
      */
-    public NodeInfo nodeInfo() {
+    public NodeInfo getNodeInfo() {
         return this.nodeInfo;
     }
 
     /**
      * Returns the children nodes for this node in the tree structure.
      */
-    public List<JkDependencyNode> children() {
+    public List<JkDependencyNode> getChildren() {
         return children;
     }
 
@@ -120,7 +120,7 @@ public class JkDependencyNode implements Serializable {
      * Evicted nodes are not taken in account.
      */
     public boolean contains(JkModuleId moduleId) {
-        if (this.isModuleNode() && moduleId.equals(this.moduleInfo().moduleId()) && !this.moduleInfo().isEvicted()) {
+        if (this.isModuleNode() && moduleId.equals(this.getModuleInfo().getModuleId()) && !this.getModuleInfo().isEvicted()) {
             return true;
         }
         for (final JkDependencyNode child : this.children) {
@@ -133,23 +133,23 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns the resolved projectVersion for this node and all its flatten.
+     * Returns the resolved version for this node and all its flatten.
      */
-    public JkVersionProvider flattenToVersionProvider() {
+    public JkVersionProvider getResolvedVersion() {
         return this.resolvedVersions;
     }
 
     /**
      * Returns the versioned modules which with this result has been created.
      */
-    public Set<JkVersionedModule> childModules() {
+    public Set<JkVersionedModule> getChildModules() {
         return resolvedModules(true);
     }
 
     private Set<JkVersionedModule> resolvedModules(boolean root) {
         final Set<JkVersionedModule> result = new HashSet<>();
-        if (!root && this.isModuleNode() && !this.moduleInfo().isEvicted()) {
-            result.add(this.moduleInfo().moduleId.getVersion(this.moduleInfo().resolvedVersion.value()));
+        if (!root && this.isModuleNode() && !this.getModuleInfo().isEvicted()) {
+            result.add(this.getModuleInfo().moduleId.getVersion(this.getModuleInfo().resolvedVersion.getValue()));
         }
         for (final JkDependencyNode child : this.children) {
             result.addAll(child.resolvedModules(false));
@@ -160,10 +160,10 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns the children nodes for this node having the specified getModuleId.
      */
-    public List<JkDependencyNode> children(JkModuleId moduleId) {
+    public List<JkDependencyNode> getChildren(JkModuleId moduleId) {
         final List<JkDependencyNode> result = new LinkedList<>();
-        for (final JkDependencyNode child : children()) {
-            if (child.moduleInfo().moduleId().equals(moduleId)) {
+        for (final JkDependencyNode child : getChildren()) {
+            if (child.getModuleInfo().getModuleId().equals(moduleId)) {
                 result.add(child);
             }
         }
@@ -171,9 +171,9 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns the child node having the specified getModuleId.
+     * Returns the getChild node having the specified getModuleId.
      */
-    public JkDependencyNode child(JkModuleId moduleId) {
+    public JkDependencyNode getChild(JkModuleId moduleId) {
         for (final JkDependencyNode node : children) {
             if (node.moduleId().equals(moduleId)) {
                 return node;
@@ -186,10 +186,10 @@ public class JkDependencyNode implements Serializable {
      * Returns a merge of this dependency node with the specified one. The
      * children of the merged node is a union of the two node children.
      */
-    public JkDependencyNode merge(JkDependencyNode other) {
+    public JkDependencyNode getMerge(JkDependencyNode other) {
         final List<JkDependencyNode> resultChildren = new LinkedList<>(this.children);
         for (final JkDependencyNode otherNodeChild : other.children) {
-            if (!otherNodeChild.isModuleNode() || !directChildrenContains(otherNodeChild.moduleInfo().moduleId())) {
+            if (!otherNodeChild.isModuleNode() || !directChildrenContains(otherNodeChild.getModuleInfo().getModuleId())) {
                 resultChildren.add(otherNodeChild);
             }
         }
@@ -213,11 +213,11 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns all nodes descendant of this one, deep first.
      */
-    public List<JkDependencyNode> flatten() {
+    public List<JkDependencyNode> toFlattenList() {
         final List<JkDependencyNode> result = new LinkedList<>();
-        for (final JkDependencyNode child : this.children()) {
+        for (final JkDependencyNode child : this.getChildren()) {
             result.add(child);
-            result.addAll(child.flatten());
+            result.addAll(child.toFlattenList());
         }
         return result;
     }
@@ -225,11 +225,11 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns first node descendant of this one standing for the specified getModuleId, deep first.
      */
-    public JkDependencyNode find(JkModuleId moduleId) {
+    public JkDependencyNode getFirst(JkModuleId moduleId) {
         if (this.isModuleNode() && moduleId.equals(this.moduleId())) {
             return this;
         }
-        for (final JkDependencyNode child : this.flatten()) {
+        for (final JkDependencyNode child : this.toFlattenList()) {
             if (child.isModuleNode() && moduleId.equals(child.moduleId())) {
                 return child;
             }
@@ -254,7 +254,7 @@ public class JkDependencyNode implements Serializable {
         if (this.isModuleNode()) {
             return this.toStrings(false, -1, new HashSet<>());
         }
-        return JkUtilsIterable.listOf(this.moduleInfo().toString());
+        return JkUtilsIterable.listOf(this.getModuleInfo().toString());
     }
 
     private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> expandeds) {
@@ -286,19 +286,19 @@ public class JkDependencyNode implements Serializable {
     }
 
     private JkModuleId moduleId() {
-        return moduleInfo().moduleId();
+        return getModuleInfo().getModuleId();
     }
 
     @Override
     public String toString() {
-        return this.nodeInfo().toString();
+        return this.getNodeInfo().toString();
     }
 
     public interface NodeInfo extends Serializable {
 
-        List<Path> files();
+        List<Path> getFiles();
 
-        Set<JkScope> declaredScopes();
+        Set<JkScope> getDeclaredScopes();
 
     }
 
@@ -312,8 +312,8 @@ public class JkDependencyNode implements Serializable {
         }
 
         static ModuleNodeInfo root(JkVersionedModule versionedModule) {
-            return new ModuleNodeInfo(versionedModule.moduleId(), JkVersion.of("-"),
-                    new HashSet<>(), new HashSet<>(), versionedModule.version(), new LinkedList<>());
+            return new ModuleNodeInfo(versionedModule.getModuleId(), JkVersion.of("-"),
+                    new HashSet<>(), new HashSet<>(), versionedModule.getVersion(), new LinkedList<>());
         }
 
         private final JkModuleId moduleId;
@@ -340,38 +340,38 @@ public class JkDependencyNode implements Serializable {
             this.treeRoot = treeRoot;
         }
 
-        public JkModuleId moduleId() {
+        public JkModuleId getModuleId() {
             return moduleId;
         }
 
         /**
-         * Shorthand for {@link #moduleId} + {@link #resolvedVersion()}
+         * Shorthand for {@link #moduleId} + {@link #getResolvedVersion()}
          */
         public JkVersionedModule resolvedVersionedModule() {
-            return moduleId.getVersion(resolvedVersion.value());
+            return moduleId.getVersion(resolvedVersion.getValue());
         }
 
-        public JkVersion declaredVersion() {
+        public JkVersion getDeclaredVersion() {
             return declaredVersion;
         }
 
         @Override
-        public Set<JkScope> declaredScopes() {
+        public Set<JkScope> getDeclaredScopes() {
             return declaredScopes;
         }
 
-        public Set<JkScope> resolvedScopes() {
+        public Set<JkScope> getResolvedScopes() {
             return rootScopes;
         }
 
-        public JkVersion resolvedVersion() {
+        public JkVersion getResolvedVersion() {
             return resolvedVersion;
         }
 
         @Override
         public String toString() {
-            final String resolvedVersionName = isEvicted() ? "(evicted)" : resolvedVersion.value();
-            final String declaredVersionLabel = declaredVersion().value().equals(resolvedVersionName) ? "" : " as " + declaredVersion();
+            final String resolvedVersionName = isEvicted() ? "(evicted)" : resolvedVersion.getValue();
+            final String declaredVersionLabel = getDeclaredVersion().getValue().equals(resolvedVersionName) ? "" : " as " + getDeclaredVersion();
             return moduleId + ":" + resolvedVersion
                     + " (present in " + rootScopes + ")"
                     + " (declared" + declaredVersionLabel + " for scope " + declaredScopes + ")";
@@ -382,11 +382,11 @@ public class JkDependencyNode implements Serializable {
         }
 
         @Override
-        public List<Path> files() {
+        public List<Path> getFiles() {
             return JkUtilsPath.toPaths(artifacts);
         }
 
-        public List<Path> paths() {
+        public List<Path> getPaths() {
             return artifacts.stream().map(file -> file.toPath()).collect(Collectors.toList());
         }
     }
@@ -397,7 +397,7 @@ public class JkDependencyNode implements Serializable {
         for (final JkScopedDependency scopedDependency : deps) {
             if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.getDependency();
-                if (moduleDependency.moduleId().equals(to)) {
+                if (moduleDependency.getModuleId().equals(to)) {
                     result.addAll(partialResult);
                     partialResult.clear();
                 }
@@ -420,7 +420,7 @@ public class JkDependencyNode implements Serializable {
             }
         }
         for (final JkDependencyNode child : children) {
-            result = result.and(compute(child.nodeInfo(), child.children()));
+            result = result.and(compute(child.getNodeInfo(), child.getChildren()));
         }
         return result;
     }
@@ -466,7 +466,7 @@ public class JkDependencyNode implements Serializable {
 
         @Override
         @Deprecated
-        public List<Path> files() {
+        public List<Path> getFiles() {
             return JkUtilsPath.toPaths(files);
         }
 
@@ -475,7 +475,7 @@ public class JkDependencyNode implements Serializable {
         }
 
         @Override
-        public Set<JkScope> declaredScopes() {
+        public Set<JkScope> getDeclaredScopes() {
             return scopes;
         }
 

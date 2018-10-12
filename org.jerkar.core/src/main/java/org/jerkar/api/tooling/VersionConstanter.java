@@ -31,7 +31,7 @@ class VersionConstanter {
                 continue;
             }
             final String registeredVersion = groupToVersion.get(group);
-            final String currentVersion = jkVersionProvider.versionOf(moduleId).value();
+            final String currentVersion = jkVersionProvider.versionOf(moduleId).getValue();
             if (registeredVersion == null) {
                 groupToVersion.put(group, currentVersion);
             } else if (!registeredVersion.equals(currentVersion)) {

@@ -103,8 +103,8 @@ public final class JkPom {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
                     .getDependency();
             final JkVersionedModule versionedModule = JkVersionedModule.of(
-                    moduleDependency.moduleId(),
-                    JkVersion.of(moduleDependency.version().value()));
+                    moduleDependency.getModuleId(),
+                    JkVersion.of(moduleDependency.getVersion().getValue()));
             versionedModules.add(versionedModule);
         }
         return JkVersionProvider.of(versionedModules);
@@ -144,8 +144,8 @@ public final class JkPom {
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
                     .getDependency();
-            if (!moduleDependency.excludes().isEmpty()) {
-                builder.on(moduleDependency.moduleId(), moduleDependency.excludes());
+            if (!moduleDependency.getExcludes().isEmpty()) {
+                builder.on(moduleDependency.getModuleId(), moduleDependency.getExcludes());
             }
         }
         return builder.build();
@@ -181,11 +181,11 @@ public final class JkPom {
         JkModuleDependency moduleDependency = JkModuleDependency.of(groupId, artifactId, version);
         final String type = JkUtilsXml.directChildText(mvnDependency, "type");
         if (type != null) {
-            moduleDependency = moduleDependency.ext(type);
+            moduleDependency = moduleDependency.withExt(type);
         }
         final String classifier = JkUtilsXml.directChildText(mvnDependency, "classifier");
         if (classifier != null) {
-            moduleDependency = moduleDependency.classifier(classifier);
+            moduleDependency = moduleDependency.withClassifier(classifier);
         }
         final Element exclusionsEl = JkUtilsXml.directChild(mvnDependency, "exclusions");
         if (exclusionsEl != null) {

@@ -25,7 +25,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
-        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().flattenToVersionProvider().moduleIds();
+        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().moduleIds();
 
         // Unresolved issue happen on Travis : Junit is not part of the result.
         // To unblock linux build, we do a specific check uniquely for linux
@@ -44,7 +44,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
-        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().flattenToVersionProvider().moduleIds();
+        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().moduleIds();
         assertEquals("Wrong modules size " + moduleIds, 2, moduleIds.size());
     }
 
@@ -66,7 +66,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
-        assertEquals(directCoreVersion, resolveResult.getVersionOf(springCoreModule).value());
+        assertEquals(directCoreVersion, resolveResult.getVersionOf(springCoreModule).getValue());
     }
 
     /*
@@ -84,7 +84,7 @@ public class ResolverWithScopeMapperIT {
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE, PROVIDED);
         assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
-        assertEquals(2, resolveResult.getDependencyTree().flattenToVersionProvider().moduleIds().size());
+        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersion().moduleIds().size());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
-        assertTrue(tree.moduleInfo().declaredScopes().isEmpty());
+        assertTrue(tree.getModuleInfo().getDeclaredScopes().isEmpty());
     }
 
 }

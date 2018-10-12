@@ -33,36 +33,36 @@ public class ResolveTreeIT {
 
         System.out.println(tree.toStringComplete());
 
-        JkDependencyNode.ModuleNodeInfo root = tree.moduleInfo();
-        assertTrue(root.declaredScopes().isEmpty());
-        assertEquals(holder.moduleId(), tree.moduleInfo().moduleId());
-        assertEquals(3, tree.children().size());
+        JkDependencyNode.ModuleNodeInfo root = tree.getModuleInfo();
+        assertTrue(root.getDeclaredScopes().isEmpty());
+        assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
+        assertEquals(3, tree.getChildren().size());
 
-        JkDependencyNode starterwebNode = tree.children().get(0);
-        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.moduleInfo().moduleId());
-        assertEquals(2, starterwebNode.moduleInfo().declaredScopes().size());
-        assertTrue(starterwebNode.moduleInfo().declaredScopes().contains(COMPILE));
-        assertTrue(starterwebNode.moduleInfo().declaredScopes().contains(RUNTIME));
+        JkDependencyNode starterwebNode = tree.getChildren().get(0);
+        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getModuleId());
+        assertEquals(2, starterwebNode.getModuleInfo().getDeclaredScopes().size());
+        assertTrue(starterwebNode.getModuleInfo().getDeclaredScopes().contains(COMPILE));
+        assertTrue(starterwebNode.getModuleInfo().getDeclaredScopes().contains(RUNTIME));
 
-        JkDependencyNode starterNode = starterwebNode.children().get(0);
-        assertEquals(2, starterNode.moduleInfo().declaredScopes().size());
-        Set<JkScope> scopes = starterNode.moduleInfo().declaredScopes();
+        JkDependencyNode starterNode = starterwebNode.getChildren().get(0);
+        assertEquals(2, starterNode.getModuleInfo().getDeclaredScopes().size());
+        Set<JkScope> scopes = starterNode.getModuleInfo().getDeclaredScopes();
         assertTrue(scopes.contains(COMPILE));
         assertTrue(scopes.contains(RUNTIME));
 
-        List<JkDependencyNode> snakeYamlNodes = starterNode.children(JkModuleId.of("org.yaml:snakeyaml"));
+        List<JkDependencyNode> snakeYamlNodes = starterNode.getChildren(JkModuleId.of("org.yaml:snakeyaml"));
         assertEquals(1, snakeYamlNodes.size());
         JkDependencyNode snakeYamlNode = snakeYamlNodes.get(0);
-        assertEquals(1, snakeYamlNode.moduleInfo().declaredScopes().size());
-        scopes = snakeYamlNode.moduleInfo().declaredScopes();
+        assertEquals(1, snakeYamlNode.getModuleInfo().getDeclaredScopes().size());
+        scopes = snakeYamlNode.getModuleInfo().getDeclaredScopes();
         assertTrue(scopes.contains(RUNTIME));
 
-        assertEquals(5, starterNode.children().size());
+        assertEquals(5, starterNode.getChildren().size());
 
-        List<JkDependencyNode> springCoreNodes = starterNode.children(JkModuleId.of("org.springframework:spring-core"));
+        List<JkDependencyNode> springCoreNodes = starterNode.getChildren(JkModuleId.of("org.springframework:spring-core"));
         assertEquals(1, springCoreNodes.size());
         JkDependencyNode springCoreNode = springCoreNodes.get(0);
-        List<JkDependencyNode> commonLoggingNodes = springCoreNode.children(JkModuleId.of("commons-logging:commons-logging"));
+        List<JkDependencyNode> commonLoggingNodes = springCoreNode.getChildren(JkModuleId.of("commons-logging:commons-logging"));
         assertEquals(1, commonLoggingNodes.size());
     }
 
@@ -76,9 +76,9 @@ public class ResolveTreeIT {
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps, TEST).getDependencyTree();
         System.out.println(tree.toStrings());
-        JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.find(moduleId).moduleInfo();
-        assertTrue(moduleNodeInfo.declaredVersion().value().equals("1.4.+"));
-        String resolvedVersionName = moduleNodeInfo.resolvedVersion().value();
+        JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.getFirst(moduleId).getModuleInfo();
+        assertTrue(moduleNodeInfo.getDeclaredVersion().getValue().equals("1.4.+"));
+        String resolvedVersionName = moduleNodeInfo.getResolvedVersion().getValue();
         assertEquals("1.4.7.RELEASE", resolvedVersionName);
     }
 
@@ -95,16 +95,16 @@ public class ResolveTreeIT {
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         JkDependencyNode tree = resolveResult.getDependencyTree();
 
-        JkDependencyNode bootNode = tree.children().get(0);
-        JkDependencyNode.ModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.find(springCoreModule).moduleInfo();
-        assertEquals("4.3.14.RELEASE", springCoreTransitiveModuleNodeInfo.declaredVersion().value());
-        assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.resolvedVersion().value());  // cause evicted
+        JkDependencyNode bootNode = tree.getChildren().get(0);
+        JkDependencyNode.ModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.getFirst(springCoreModule).getModuleInfo();
+        assertEquals("4.3.14.RELEASE", springCoreTransitiveModuleNodeInfo.getDeclaredVersion().getValue());
+        assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.getResolvedVersion().getValue());  // cause evicted
 
         // As the spring-core projectVersion is declared as direct dependency and the declared projectVersion is exact (not dynamic)
         // then the resolved projectVersion should the one declared.
-        JkDependencyNode.ModuleNodeInfo springCoreDirectModuleNodeInfo = tree.children().get(1).moduleInfo();
-        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.declaredVersion().value());
-        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.resolvedVersion().value());
+        JkDependencyNode.ModuleNodeInfo springCoreDirectModuleNodeInfo = tree.getChildren().get(1).getModuleInfo();
+        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getDeclaredVersion().getValue());
+        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getResolvedVersion().getValue());
     }
 
     @Test
@@ -131,8 +131,8 @@ public class ResolveTreeIT {
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         JkDependencyNode tree = resolveResult.getDependencyTree();
-        JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.children().get(0).moduleInfo();
-        assertEquals("22.0", moduleNodeInfo.declaredVersion().value());
+        JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.getChildren().get(0).getModuleInfo();
+        assertEquals("22.0", moduleNodeInfo.getDeclaredVersion().getValue());
     }
 
 }

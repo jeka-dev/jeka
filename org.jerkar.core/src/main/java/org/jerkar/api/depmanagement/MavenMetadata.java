@@ -31,10 +31,10 @@ final class MavenMetadata {
 
     static MavenMetadata of(JkVersionedModule versionedModule, String timestamp) {
         final MavenMetadata metadata = new MavenMetadata();
-        metadata.groupId = versionedModule.moduleId().getGroup();
-        metadata.artifactId = versionedModule.moduleId().getName();
+        metadata.groupId = versionedModule.getModuleId().getGroup();
+        metadata.artifactId = versionedModule.getModuleId().getName();
         metadata.modelVersion = "1.1.0";
-        metadata.version = versionedModule.version().value();
+        metadata.version = versionedModule.getVersion().getValue();
         metadata.versioning = new Versioning();
         metadata.versioning.snapshot = new Snapshot(timestamp, 0);
         return metadata;
@@ -316,7 +316,7 @@ final class MavenMetadata {
 
             SnapshotVersion(Element element) {
                 this.classifier = subValue(element, "classifier");
-                this.extension = subValue(element, "extension");
+                this.extension = subValue(element, "getExtension");
                 this.updated = subValue(element, "updated");
                 this.value = subValue(element, "value");
             }
@@ -330,7 +330,7 @@ final class MavenMetadata {
                 }
                 ln(writer);
                 indent(writer, 8);
-                writeElement(writer, "extension", extension);
+                writeElement(writer, "getExtension", extension);
                 ln(writer);
                 indent(writer, 8);
                 writeElement(writer, "updated", updated);

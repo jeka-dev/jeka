@@ -52,7 +52,7 @@ final class IvyTranslations {
                                                            JkDependencySet dependencies, JkScopeMapping defaultMapping,
                                                            JkVersionProvider resolvedVersions) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
-                .moduleId().getGroup(), module.moduleId().getName(), module.version().value());
+                .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
                 thisModuleRevisionId, "integration", null);
 
@@ -95,7 +95,7 @@ final class IvyTranslations {
 
 
     static ModuleRevisionId toModuleRevisionId(JkModuleId moduleId, JkVersion version) {
-        final String originalVersion = version.value();
+        final String originalVersion = version.getValue();
         final Map<String, String> extra = new HashMap<>();
         return ModuleRevisionId.newInstance(moduleId.getGroup(), moduleId.getName(), originalVersion, extra);
     }
@@ -105,8 +105,8 @@ final class IvyTranslations {
     }
 
     static ModuleRevisionId toModuleRevisionId(JkVersionedModule jkVersionedModule) {
-        return new ModuleRevisionId(toModuleId(jkVersionedModule.moduleId()), jkVersionedModule
-                .version().value());
+        return new ModuleRevisionId(toModuleId(jkVersionedModule.getModuleId()), jkVersionedModule
+                .getVersion().getValue());
     }
 
     static JkVersionedModule toJkVersionedModule(ModuleRevisionId moduleRevisionId) {
@@ -249,7 +249,7 @@ final class IvyTranslations {
         final List<String> list = new LinkedList<>();
         for (final JkScope scope : scopeMapping.entries()) {
             final List<String> targets = new LinkedList<>();
-            for (final JkScope target : scopeMapping.mappedScopes(scope)) {
+            for (final JkScope target : scopeMapping.getMappedScopes(scope)) {
                 targets.add(target.getName());
             }
             final String item = scope.getName() + " -> " + JkUtilsString.join(targets, ",");
@@ -304,7 +304,7 @@ final class IvyTranslations {
             final JkVersion version = resolvedVersions.versionOf(moduleId);
             moduleDescriptor.addDependencyDescriptorMediator(toModuleId(moduleId),
                     ExactOrRegexpPatternMatcher.INSTANCE,
-                    new OverrideDependencyDescriptorMediator(null, version.value()));
+                    new OverrideDependencyDescriptorMediator(null, version.getValue()));
         }
 
     }
@@ -322,7 +322,7 @@ final class IvyTranslations {
                 result = JkScopeMapping.of(scope).to(scope);
             } else {
                 if (defaultMapping.entries().contains(scope)) {
-                    result = JkScopeMapping.of(scope).to(defaultMapping.mappedScopes(scope));
+                    result = JkScopeMapping.of(scope).to(defaultMapping.getMappedScopes(scope));
                 } else {
                     result = scope.mapTo(scope.getName() + "(default)");
                 }
@@ -357,14 +357,14 @@ final class IvyTranslations {
 
         final ModuleRevisionId moduleRevisionId = descriptor.getModuleRevisionId();
         final String artifactName = moduleRevisionId.getName();
-        final Artifact mavenMainArtifact = toPublishedMavenArtifact(publication.mainArtifactFiles()
+        final Artifact mavenMainArtifact = toPublishedMavenArtifact(publication.getMainArtifactFiles()
                 .get(0), artifactName, null, moduleRevisionId, publishDate);
         final String mainConf = "default";
         populateDescriptorWithMavenArtifact(descriptor, mainConf, mavenMainArtifact);
 
-        for (final JkClassifiedFileArtifact artifactEntry : publication.classifiedArtifacts()) {
-            final Path file = artifactEntry.file();
-            final String classifier = artifactEntry.classifier();
+        for (final JkClassifiedFileArtifact artifactEntry : publication.getClassifiedArtifacts()) {
+            final Path file = artifactEntry.getFile();
+            final String classifier = artifactEntry.getClassifier();
             final Artifact mavenArtifact = toPublishedMavenArtifact(file, artifactName, classifier,
                     descriptor.getModuleRevisionId(), publishDate);
             populateDescriptorWithMavenArtifact(descriptor, classifier, mavenArtifact);
@@ -426,7 +426,7 @@ final class IvyTranslations {
         @SuppressWarnings("rawtypes")
         DefaultDependencyDescriptor toDescriptor(JkModuleId moduleId) {
             final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleId, version);
-            final boolean changing = version.value().endsWith("-SNAPSHOT");
+            final boolean changing = version.getValue().endsWith("-SNAPSHOT");
             final boolean forceVersion = !version.isDynamic();
             final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null,
                     moduleRevisionId, forceVersion, changing, transitive);
@@ -498,10 +498,10 @@ final class IvyTranslations {
         void populate(JkScopedDependency scopedDependency) {
 
             final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.getDependency();
-            final JkModuleId moduleId = moduleDep.moduleId();
-            final boolean mainArtifact = moduleDep.classifier() == null && moduleDep.ext() == null;
+            final JkModuleId moduleId = moduleDep.getModuleId();
+            final boolean mainArtifact = moduleDep.withClassifier() == null && moduleDep.withExt() == null;
             JkVersion version = dependencySet.getVersion(moduleId);
-            this.put(moduleId, moduleDep.transitive(), version, mainArtifact);
+            this.put(moduleId, moduleDep.isTransitive(), version, mainArtifact);
 
             // fill configuration
             final List<Conf> confs = new LinkedList<>();
@@ -510,7 +510,7 @@ final class IvyTranslations {
                     confs.add(new Conf("*", "*"));
                 } else {
                     for (final JkScope entryScope : defaultMapping.entries()) {
-                        for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
+                        for (final JkScope mappedScope : defaultMapping.getMappedScopes(entryScope)) {
                             confs.add(new Conf(entryScope.getName(), mappedScope.getName()));
                         }
                     }
@@ -520,7 +520,7 @@ final class IvyTranslations {
                 for (final JkScope scope : scopedDependency.getScopes()) {
                     final JkScopeMapping mapping = resolveSimple(scope, defaultMapping);
                     for (final JkScope fromScope : mapping.entries()) {
-                        for (final JkScope mappedScope : mapping.mappedScopes(fromScope)) {
+                        for (final JkScope mappedScope : mapping.getMappedScopes(fromScope)) {
                             confs.add(new Conf(fromScope.getName(), mappedScope.getName()));
                         }
                     }
@@ -529,14 +529,14 @@ final class IvyTranslations {
             } else if (scopedDependency.getScopeType() == ScopeType.MAPPED) {
                 for (final JkScope scope : scopedDependency.getScopeMapping().entries()) {
                     for (final JkScope mappedScope : scopedDependency.getScopeMapping()
-                            .mappedScopes(scope)) {
+                            .getMappedScopes(scope)) {
                         confs.add(new Conf(scope.getName(), mappedScope.getName()));
                     }
                 }
             } else {
                 if (defaultMapping != null) {
                     for (final JkScope entryScope : defaultMapping.entries()) {
-                        for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
+                        for (final JkScope mappedScope : defaultMapping.getMappedScopes(entryScope)) {
                             confs.add(new Conf(entryScope.getName(), mappedScope.getName()));
                         }
                     }
@@ -547,13 +547,13 @@ final class IvyTranslations {
                 this.addConf(moduleId, conf);
                 masterConfs.add(conf.masterConf);
             }
-            this.addArtifact(moduleId, masterConfs, moduleDep.classifier(), moduleDep.ext());
+            this.addArtifact(moduleId, masterConfs, moduleDep.withClassifier(), moduleDep.withExt());
 
-            final boolean mainArtifactFlag = moduleDep.classifier() == null && moduleDep.ext() == null;
+            final boolean mainArtifactFlag = moduleDep.withClassifier() == null && moduleDep.withExt() == null;
             this.flagAsMainArtifact(moduleId, mainArtifactFlag);
 
             // fill artifact exclusion
-            for (final JkDepExclude depExclude : moduleDep.excludes()) {
+            for (final JkDepExclude depExclude : moduleDep.getExcludes()) {
                 this.addExludes(moduleId, depExclude);
             }
         }

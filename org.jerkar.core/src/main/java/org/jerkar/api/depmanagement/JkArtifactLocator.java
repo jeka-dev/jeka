@@ -23,7 +23,7 @@ public interface JkArtifactLocator {
 
     /**
      * Returns the main artifact file id for this producer. By default it returns a artifact file id with no
-     * classifier and 'jar" extension.
+     * classifier and 'jar" getExtension.
      */
     default JkArtifactId getMainArtifactId() {
         return JkArtifactId.of(null, "jar");

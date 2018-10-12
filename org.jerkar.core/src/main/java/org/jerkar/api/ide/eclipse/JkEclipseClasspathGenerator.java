@@ -348,17 +348,17 @@ public final class JkEclipseClasspathGenerator {
     private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         final JkRepoSet repos = resolver.getRepos();
-        for (final JkDependencyNode node : resolveResult.getDependencyTree().flatten()) {
+        for (final JkDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency
             if (node.isModuleNode()) {
-                final JkDependencyNode.ModuleNodeInfo moduleNodeInfo = node.moduleInfo();
+                final JkDependencyNode.ModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
                 writeModuleEntry(writer,
                         moduleNodeInfo.resolvedVersionedModule(),
-                        moduleNodeInfo.files(), repos, allPaths);
+                        moduleNodeInfo.getFiles(), repos, allPaths);
 
                 // File dependencies (file system + computed)
             } else {
-                final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
+                final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
                     final Path ideProjectBaseDir = computedDependency.getIdeProjectBaseDir();
@@ -367,10 +367,10 @@ public final class JkEclipseClasspathGenerator {
                             writeProjectEntryIfNeeded(ideProjectBaseDir, writer, allPaths);
                         }
                     } else {
-                        writeFileDepsEntries(writer, node.allFiles(), allPaths);
+                        writeFileDepsEntries(writer, node.getAllResolvedFiles(), allPaths);
                     }
                 } else {
-                    writeFileDepsEntries(writer, node.allFiles(), allPaths);
+                    writeFileDepsEntries(writer, node.getAllResolvedFiles(), allPaths);
                 }
             }
         }
@@ -378,10 +378,10 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<Path> files,
                                   JkRepoSet repos, Set<String> paths) throws XMLStreamException {
-        final Path source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
+        final Path source = repos.get(JkModuleDependency.of(versionedModule).withClassifier("sources"));
         Path javadoc = null;
         if (source == null || !Files.exists(source)) {
-            javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
+            javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifier("javadoc"));
         }
         for (final Path file : files) {
             writeClasspathEl(writer, file, source, javadoc, paths);

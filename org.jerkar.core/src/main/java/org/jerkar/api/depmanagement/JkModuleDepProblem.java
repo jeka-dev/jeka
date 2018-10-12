@@ -28,21 +28,21 @@ public class JkModuleDepProblem implements Serializable {
     /**
      * Returns the getModuleId related to this problem.
      */
-    public JkModuleId moduleId() {
+    public JkModuleId getModuleId() {
         return moduleId;
     }
 
     /**
      * Returns the projectVersion range for which the problematic module dependency has been declared.
      */
-    public JkVersion version() {
+    public JkVersion getVersion() {
         return version;
     }
 
     /**
      * Returns the text explaining this problem.
      */
-    public String problemText() {
+    public String getProblemText() {
         return problemText;
     }
 

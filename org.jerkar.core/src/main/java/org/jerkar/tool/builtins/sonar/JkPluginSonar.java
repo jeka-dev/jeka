@@ -30,9 +30,9 @@ public class JkPluginSonar extends JkPlugin {
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED);
         final Path testReportDir = project.maker().getOutLayout().testReportDir();
         final JkVersionedModule module = project.getVersionedModule();
-        final String fullName = module != null ? module.moduleId().getDotedName() : project.baseDir().getFileName().toString();
-        final String name = module != null ? module.moduleId().getName() : project.baseDir().getFileName().toString();
-        final JkVersion version = module != null ? module.version() : JkVersion.of("");
+        final String fullName = module != null ? module.getModuleId().getDotedName() : project.baseDir().getFileName().toString();
+        final String name = module != null ? module.getModuleId().getName() : project.baseDir().getFileName().toString();
+        final JkVersion version = module != null ? module.getVersion() : JkVersion.of("");
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)

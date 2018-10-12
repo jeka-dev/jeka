@@ -28,7 +28,7 @@ public final class JkMavenPublication implements Serializable {
 
     private final List<JkClassifiedFileArtifact> classifiedArtifacts;
 
-    private final List<File> mainArtifacts; // can't have 2 artifacts with same extension
+    private final List<File> mainArtifacts; // can't have 2 artifacts with same getExtension
 
     private final JkMavenPublicationInfo extraInfo;
 
@@ -78,11 +78,11 @@ public final class JkMavenPublication implements Serializable {
         final String fileExt = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
         if (JkUtilsString.isBlank(fileExt)) {
             throw new IllegalArgumentException("File " + file
-            + " must have an extension (as .jar, .zip, ...");
+            + " must have an getExtension (as .jar, .zip, ...");
         }
         if (contains(fileExt, classifier)) {
             throw new IllegalArgumentException(
-                    "Can't add artifact with extension/classifier equals to [" + fileExt + "/"
+                    "Can't add artifact with getExtension/classifier equals to [" + fileExt + "/"
                             + classifier
                             + "] as this combination is yet present in this publication " + this);
         }
@@ -97,13 +97,13 @@ public final class JkMavenPublication implements Serializable {
         return signer;
     }
 
-    public Set<String> checksumAlgos() {
+    public Set<String> getChecksumAlgos() {
         return checksumAlgos;
     }
 
     private boolean contains(String ext, String classifier) {
         for (final JkClassifiedFileArtifact classifiedArtifact : this.classifiedArtifacts) {
-            if (classifier.equals(classifiedArtifact.classifier) && classifiedArtifact.extension().equals(ext)) {
+            if (classifier.equals(classifiedArtifact.classifier) && classifiedArtifact.getExtension().equals(ext)) {
                 return true;
             }
         }
@@ -156,17 +156,17 @@ public final class JkMavenPublication implements Serializable {
     }
 
     /** Files constituting main artifact */
-    public List<Path> mainArtifactFiles() {
+    public List<Path> getMainArtifactFiles() {
         return JkUtilsPath.toPaths(this.mainArtifacts);
     }
 
     /** Files constituting classified artifacts */
-    public List<JkClassifiedFileArtifact> classifiedArtifacts() {
+    public List<JkClassifiedFileArtifact> getClassifiedArtifacts() {
         return Collections.unmodifiableList(classifiedArtifacts);
     }
 
     /**  */
-    public JkMavenPublicationInfo extraInfo() {
+    public JkMavenPublicationInfo getExtraInfo() {
         return this.extraInfo;
     }
 
@@ -207,17 +207,17 @@ public final class JkMavenPublication implements Serializable {
         }
 
         /** Classifier string for this classified artifact */
-        public String classifier() {
+        public String getClassifier() {
             return classifier;
         }
 
         /** File for this classified artifact */
-        public Path file() {
+        public Path getFile() {
             return file.toPath();
         }
 
-        /** File extension */
-        public String extension() {
+        /** File getExtension */
+        public String getExtension() {
             return JkUtilsString.substringAfterLast(file.getName(), ".");
         }
 

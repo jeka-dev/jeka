@@ -19,11 +19,11 @@ public class TransitiveExcludeIT {
     public void handleNonTransitive() {
 
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").transitive(false));
+                .and(JkModuleDependency.of("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").isTransitive(false));
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps);
-        List<JkDependencyNode> nodes = resolveResult.getDependencyTree().flatten();
+        List<JkDependencyNode> nodes = resolveResult.getDependencyTree().toFlattenList();
         assertEquals(1, nodes.size());
     }
 
@@ -36,7 +36,7 @@ public class TransitiveExcludeIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps);
-        List<JkDependencyNode> nodes = resolveResult.getDependencyTree().flatten();
+        List<JkDependencyNode> nodes = resolveResult.getDependencyTree().toFlattenList();
         assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
     }
 
