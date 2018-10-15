@@ -56,7 +56,7 @@ public final class JkScopeMapping implements Serializable {
      * Creates an empty scope mapping.
      */
     @SuppressWarnings("unchecked")
-    public static JkScopeMapping empty() {
+    public static JkScopeMapping ofEmpty() {
         return new JkScopeMapping(Collections.EMPTY_MAP);
     }
 
@@ -131,13 +131,13 @@ public final class JkScopeMapping implements Serializable {
             return result;
         }
         throw new IllegalArgumentException("No mapped scope declared for " + sourceScope
-                + ". Declared scopes are " + this.entries());
+                + ". Declared scopes are " + this.getEntries());
     }
 
     /**
      * Returns all the scopes declared on the left side of this scope mapping.
      */
-    public Set<JkScope> entries() {
+    public Set<JkScope> getEntries() {
         return Collections.unmodifiableSet(this.map.keySet());
     }
 
@@ -147,8 +147,8 @@ public final class JkScopeMapping implements Serializable {
      */
     public Set<JkScope> getDeclaredScopes() {
         final Set<JkScope> result = new HashSet<>();
-        result.addAll(entries());
-        for (final JkScope scope : entries()) {
+        result.addAll(getEntries());
+        for (final JkScope scope : getEntries()) {
             result.addAll(this.map.get(scope));
         }
         return result;

@@ -24,11 +24,8 @@ public class JkDependencyExclusions {
         this.exclusions = Collections.unmodifiableMap(exclusions);
     }
 
-    /**
-     * Creates a builder for {@link JkDependencyExclusions}.
-     */
-    public static Builder builder() {
-        return new Builder();
+    public static JkDependencyExclusions of() {
+        return new JkDependencyExclusions(Collections.emptyMap());
     }
 
     /**
@@ -53,60 +50,36 @@ public class JkDependencyExclusions {
     }
 
     /**
-     * A builder for {@link JkDependencyExclusions}.
+     * Adds specified exclusions on the specified module.
      */
-    public static class Builder {
+    public JkDependencyExclusions and(String groupAndName, String... excludedModuleIds) {
+        return and(JkModuleId.of(groupAndName), excludedModuleIds);
+    }
 
-        Builder() {
+    /**
+     * Adds specified exclusions on the specified module.
+     */
+    public JkDependencyExclusions and(JkModuleId moduleId, String... excludedModuleIds) {
+        final List<JkDepExclude> depExcludes = new LinkedList<>();
+        for (final String excludeId : excludedModuleIds) {
+            depExcludes.add(JkDepExclude.of(excludeId));
         }
+        return and(moduleId, depExcludes);
+    }
 
-        private final Map<JkModuleId, List<JkDepExclude>> exclusions = new HashMap<>();
 
-        /**
-         * Adds specified exclusions on the specified module.
-         */
-        public Builder on(JkModuleId moduleId, JkDepExclude... depExcludes) {
-            return on(moduleId, Arrays.asList(depExcludes));
+    /**
+     * Adds specified exclusions on the specified module.
+     */
+    public JkDependencyExclusions and(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
+        List<JkDepExclude> excludes = exclusions.get(moduleId);
+        if (excludes == null) {
+            excludes = new LinkedList<>();
         }
-
-        /**
-         * Adds specified exclusions on the specified module.
-         */
-        public Builder on(JkModuleId moduleId, String... excludedModuleIds) {
-            final List<JkDepExclude> depExcludes = new LinkedList<>();
-            for (final String excludeId : excludedModuleIds) {
-                depExcludes.add(JkDepExclude.of(excludeId));
-            }
-            return on(moduleId, depExcludes);
-        }
-
-        /**
-         * Adds specified exclusions on the specified module.
-         */
-        public Builder on(String groupAndName, String... excludedModuleIds) {
-            return on(JkModuleId.of(groupAndName), excludedModuleIds);
-        }
-
-        /**
-         * Adds specified exclusions on the specified module.
-         */
-        public Builder on(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
-            List<JkDepExclude> excludes = exclusions.computeIfAbsent(moduleId, k -> new LinkedList<>());
-            excludes.addAll(JkUtilsIterable.listOf(depExcludes));
-            return this;
-        }
-
-        /**
-         * Creates a {@link JkDependencyExclusions} based on this builder content.
-         */
-        public JkDependencyExclusions build() {
-            final Map<JkModuleId, List<JkDepExclude>> map = new HashMap<>();
-            for (final Map.Entry<JkModuleId, List<JkDepExclude>> entry : exclusions.entrySet()) {
-                map.put(entry.getKey(), Collections.unmodifiableList(entry.getValue()));
-            }
-            return new JkDependencyExclusions(map);
-        }
-
+        excludes.addAll(JkUtilsIterable.listOf(depExcludes));
+        Map map = new HashMap(this.exclusions);
+        map.put(moduleId, excludes);
+        return new JkDependencyExclusions(map);
     }
 
 }

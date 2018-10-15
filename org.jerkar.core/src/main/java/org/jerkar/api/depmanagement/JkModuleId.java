@@ -89,7 +89,7 @@ public final class JkModuleId implements Serializable {
     /**
      * A concatenation of the group and name of this module as '[group]:[value]'.
      */
-    public String groupAndName() {
+    public String getGroupAndName() {
         return group + ":" + name;
     }
 

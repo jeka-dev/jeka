@@ -94,7 +94,7 @@ public final class JkPublisher {
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencySet dependencies) {
         assertFilesToPublishExist(publication);
-        this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());
+        this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.withModulesOnly());
     }
 
     private void assertFilesToPublishExist(JkMavenPublication publication) {

@@ -166,8 +166,8 @@ final class Engine {
         final boolean devMode = Files.isDirectory(JkLocator.jerkarJarPath());
         return JkDependencySet.of(runDependencies
                 .andFiles(localRunPath())
-                .andFiles(JkClasspath.current()).onlyIf(devMode)
-                .andFiles(jerkarLibs()).onlyIf(!devMode)
+                .andFiles(JkClasspath.current()).withLastIf(devMode)
+                .andFiles(jerkarLibs()).withLastIf(!devMode)
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT));
     }
 

@@ -241,7 +241,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     /**
      * Returns a clone of this dependencySet but removing the last element if the specified condition is not met.
      */
-    public JkDependencySet onlyIf(boolean condition) {
+    public JkDependencySet withLastIf(boolean condition) {
         if (condition) {
             return this;
         }
@@ -347,7 +347,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                     && scopedDependency.getScopes().contains(scope))
                     ||
                     (scopedDependency.getScopeType().equals(ScopeType.MAPPED)
-                            && scopedDependency.getScopeMapping().entries().contains(scope))) {
+                            && scopedDependency.getScopeMapping().getEntries().contains(scope))) {
                 depList.add(scopedDependency.getDependency());
             }
         }
@@ -379,7 +379,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         final Set<JkScope> result = new HashSet<>();
         for (final JkScopedDependency dep : this.dependencies) {
             if (dep.getScopeType() == ScopeType.MAPPED) {
-                result.addAll(dep.getScopeMapping().entries());
+                result.addAll(dep.getScopeMapping().getEntries());
             } else if (dep.getScopeType() == ScopeType.SIMPLE) {
                 result.addAll(dep.getScopes());
             }
@@ -435,20 +435,6 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             }
         }
         return false;
-    }
-
-    /**
-     * Returns a set of dependencies that contains all and only module
-     * dependencies declared in this object.
-     */
-    public JkDependencySet onlyModules() {
-        final List<JkScopedDependency> deps = new LinkedList<>();
-        for (final JkScopedDependency scopedDependency : this) {
-            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
-                deps.add(scopedDependency);
-            }
-        }
-        return new JkDependencySet(deps, this.globalExclusions, this.versionProvider);
     }
 
     public JkDependencySet withGlobalExclusion(JkDepExclude exclude) {
@@ -530,7 +516,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     /**
      * Returns all dependencies declared as {@link JkModuleDependency}.
      */
-    public JkDependencySet modulesOnly() {
+    public JkDependencySet withModulesOnly() {
         final List<JkScopedDependency> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : this) {
             if (scopedDependency.getDependency() instanceof JkModuleDependency) {

@@ -134,9 +134,9 @@ public final class JkPom {
      * section of this POM.
      */
     public JkDependencyExclusions dependencyExclusion() {
-        final JkDependencyExclusions.Builder builder = JkDependencyExclusions.builder();
+        JkDependencyExclusions result = JkDependencyExclusions.of();
         if (dependencyManagementEl() == null) {
-            return builder.build();
+            return result;
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
@@ -145,10 +145,10 @@ public final class JkPom {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
                     .getDependency();
             if (!moduleDependency.getExcludes().isEmpty()) {
-                builder.on(moduleDependency.getModuleId(), moduleDependency.getExcludes());
+                result = result.and(moduleDependency.getModuleId(), moduleDependency.getExcludes());
             }
         }
-        return builder.build();
+        return result;
     }
 
     /**

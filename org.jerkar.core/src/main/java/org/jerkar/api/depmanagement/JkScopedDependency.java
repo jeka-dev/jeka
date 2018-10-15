@@ -96,7 +96,7 @@ public final class JkScopedDependency implements Serializable {
         if (scopeMapping == null) {
             return scope.isInOrIsExtendingAnyOf(scopes);
         }
-        return scope.isInOrIsExtendingAnyOf(scopeMapping.entries());
+        return scope.isInOrIsExtendingAnyOf(scopeMapping.getEntries());
     }
 
     /**
@@ -128,7 +128,7 @@ public final class JkScopedDependency implements Serializable {
         if (this.scopes != null && !this.scopes.isEmpty()) {
             return ScopeType.SIMPLE;
         }
-        if (this.scopeMapping != null && !this.scopeMapping.entries().isEmpty()) {
+        if (this.scopeMapping != null && !this.scopeMapping.getEntries().isEmpty()) {
             return ScopeType.MAPPED;
         }
         return ScopeType.UNSET;
