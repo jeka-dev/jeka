@@ -28,7 +28,7 @@ public class JkImlGeneratorTest {
                 .withResources("res").withTestResources("res-test").withBaseDir(base);
         final JkJavaProject baseProject = JkJavaProject.of(sourceLayout);
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
-        final JkImlGenerator baseGenerator = new JkImlGenerator(baseProject);
+        final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject);
         final String result0 = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(result0);
@@ -39,7 +39,7 @@ public class JkImlGeneratorTest {
         coreProject.setDependencies(coreDeps);
         coreProject.maker().setTestRunner(
                 coreProject.maker().getTestRunner().forked(true));
-        final JkImlGenerator coreGenerator = new JkImlGenerator(coreProject);
+        final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject);
         final String result1 = coreGenerator.generate();
         System.out.println("\ncore .classpath");
         System.out.println(result1);
@@ -47,7 +47,7 @@ public class JkImlGeneratorTest {
         final Path desktop = top.resolve("desktop");
         final JkDependencySet deps = JkDependencySet.of().and(coreProject);
         final JkImlGenerator desktopGenerator =
-                new JkImlGenerator(sourceLayout.withBaseDir(desktop), deps,
+                JkImlGenerator.of(sourceLayout.withBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver());
         final String result2 = desktopGenerator.generate();
 

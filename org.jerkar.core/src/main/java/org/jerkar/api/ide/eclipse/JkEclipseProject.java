@@ -44,7 +44,7 @@ public final class JkEclipseProject {
         return new JkEclipseProject(name, new HashSet<>());
     }
 
-    public static Map<String, Path> findProjectPath(Path parent) {
+    static Map<String, Path> findProjectPath(Path parent) {
         final Map<String, Path> map = new HashMap<>();
         for (final Path file : JkUtilsPath.listDirectChildren(parent)) {
             final Path dotProject = file.resolve(".project");

@@ -68,8 +68,8 @@ public final class JkEclipseClasspathGenerator {
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
-                                       JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
+    private JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
+                                        JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
         this.sourceLayout = sourceLayout;
         this.dependencies = dependencies;
         this.dependencyResolver = resolver;
@@ -80,15 +80,24 @@ public final class JkEclipseClasspathGenerator {
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    public JkEclipseClasspathGenerator(JkJavaProjectDefinition project, JkDependencyResolver resolver) {
-        this(project.getSourceLayout(), project.getDependencies(), resolver, project.getSourceVersion());
+    public static JkEclipseClasspathGenerator of(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
+                                        JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
+        return new JkEclipseClasspathGenerator(sourceLayout, dependencies, resolver, sourceVersion);
+
     }
 
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    public JkEclipseClasspathGenerator(JkJavaProject javaProject) {
-        this(javaProject, javaProject.maker().getDependencyResolver());
+    public static JkEclipseClasspathGenerator of(JkJavaProjectDefinition project, JkDependencyResolver resolver) {
+        return new JkEclipseClasspathGenerator(project.getSourceLayout(), project.getDependencies(), resolver, project.getSourceVersion());
+    }
+
+    /**
+     * Constructs a {@link JkEclipseClasspathGenerator}.
+     */
+    public static JkEclipseClasspathGenerator of(JkJavaProject javaProject) {
+        return of(javaProject, javaProject.maker().getDependencyResolver());
     }
 
     private boolean hasBuildDef() {
@@ -356,7 +365,7 @@ public final class JkEclipseClasspathGenerator {
                         moduleNodeInfo.resolvedVersionedModule(),
                         moduleNodeInfo.getFiles(), repos, allPaths);
 
-                // File dependencies (file system + computed)
+                // File dependencies (file ofSystem + computed)
             } else {
                 final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {

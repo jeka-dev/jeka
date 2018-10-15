@@ -65,7 +65,7 @@ public final class JkPluginEclipse extends JkPlugin {
             for (final JkRun depRun : owner.importedRuns().directs()) {
                 importedRunProjects.add(depRun.baseTree().getRoot());
             }
-            final JkEclipseClasspathGenerator classpathGenerator = new JkEclipseClasspathGenerator(javaProject);
+            final JkEclipseClasspathGenerator classpathGenerator = JkEclipseClasspathGenerator.of(javaProject);
             classpathGenerator.setRunDependencies(owner.runDependencyResolver(), owner.runDependencies());
             classpathGenerator.setIncludeJavadoc(true);
             classpathGenerator.setJreContainer(this.jreContainer);

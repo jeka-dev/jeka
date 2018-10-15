@@ -16,7 +16,7 @@ public interface JkArtifactLocator {
 
 
     /**
-     * Returns file system path where is supposed to be produced the specified artifact file id. This method is supposed
+     * Returns file ofSystem path where is supposed to be produced the specified artifact file id. This method is supposed
      * to only returns the file reference and not generate it.
      */
     Path getArtifactPath(JkArtifactId jkArtifactId);

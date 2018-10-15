@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Utility class to deal with the underlying system.
+ * Utility class to deal with the underlying ofSystem.
  *
  * @author Jerome Angibaud
  */
@@ -20,7 +20,7 @@ public final class JkUtilsSystem {
     }
 
     /**
-     * Flag valuing <code>true</code> if the running underlying system is
+     * Flag valuing <code>true</code> if the running underlying ofSystem is
      * Windows.
      */
     public static final boolean IS_WINDOWS = isWindows();

@@ -345,7 +345,7 @@ public final class JkUtilsPath {
                 return FileVisitResult.CONTINUE;
             }
             final String relativePath = fromPath.relativize(file).toString();
-            final Path target = toPath.getFileSystem().getPath(toPath.toString(), relativePath); // necessary to deal with both regular file system and zip
+            final Path target = toPath.getFileSystem().getPath(toPath.toString(), relativePath); // necessary to deal with both regular file ofSystem and zip
             Files.copy(file, target , options);
             count ++;
             return FileVisitResult.CONTINUE;

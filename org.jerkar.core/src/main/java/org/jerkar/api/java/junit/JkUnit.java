@@ -228,7 +228,7 @@ public final class JkUnit {
             return JkTestSuiteResult.empty((Properties) System.getProperties().clone(), name, 0);
         }
         final long start = System.nanoTime();
-        final JkClassLoader classLoader = JkClassLoader.of(classes.iterator().next());
+        final JkClassLoader classLoader = JkClassLoader.ofLoaderOf(classes.iterator().next());
         final AtomicReference<JkTestSuiteResult> result = new AtomicReference<>();
         Runnable task = () -> {
             if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
@@ -254,7 +254,7 @@ public final class JkUnit {
                 final long duration = (end - start) / 1000000;
                 result.set(fromJunit3Result(properties, name, testResult, duration));
             } else {
-                JkUtilsIO.closeifClosable(classLoader.classloader());
+                JkUtilsIO.closeifClosable(classLoader.getClassloader());
                 throw new JkException("No Junit found on test classpath.");
             }
 
@@ -262,7 +262,7 @@ public final class JkUnit {
                 if (breakOnFailure) {
                     JkLog.error(String.join("\n",
                             result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
-                    JkUtilsIO.closeifClosable(classLoader.classloader());
+                    JkUtilsIO.closeifClosable(classLoader.getClassloader());
                     throw new JkException("Test failed : " + result.toString());
                 } else {
                     JkLog.warn(String.join("\n",
@@ -283,18 +283,18 @@ public final class JkUnit {
             }
         };
         JkLog.execute("Executing JUnit tests", task);
-        JkUtilsIO.closeifClosable(classLoader.classloader());
+        JkUtilsIO.closeifClosable(classLoader.getClassloader());
         return result.get();
     }
 
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestBulk testSpec) {
         final JkClasspath classpath = testSpec.classpath().andManyFirst(testSpec.classesToTest().getRootDirsOrZipFiles());
-        final JkClassLoader classLoader = JkClassLoader.system().parent().childWithMany(classpath)
-                .loadAllServices();
+        final JkClassLoader classLoader = JkClassLoader.ofSystem().getParent().getChildWithEntries(classpath);
+        classLoader.loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.classesToTest());
         if (result.isEmpty()) {
-            JkUtilsIO.closeifClosable(classLoader.classloader());
+            JkUtilsIO.closeifClosable(classLoader.getClassloader());
         }
         return result;
     }

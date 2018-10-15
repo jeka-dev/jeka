@@ -88,7 +88,7 @@ final class LogHandler implements JkLog.EventLogHandler, Serializable {
 
         private int lineLength;
 
-        private int lastByte = LINE_SEPARATOR;  // Display margin at first use (relevant for system.err)
+        private int lastByte = LINE_SEPARATOR;  // Display margin at first use (relevant for ofSystem.err)
 
         private boolean handlingStart;
 

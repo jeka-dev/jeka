@@ -77,7 +77,7 @@ final class RunResolver {
                 if (simpleName.startsWith("_")) {
                     continue;
                 }
-                final Class<?> clazz = JkClassLoader.current()
+                final Class<?> clazz = JkClassLoader.ofCurrent()
                         .loadGivenClassSourcePathIfExist(pathName);
                 if (clazz == null) {
                     return true;
@@ -89,7 +89,7 @@ final class RunResolver {
 
     private JkRun resolve(String classNameHint, Class<? extends JkRun> baseClass) {
 
-        final JkClassLoader classLoader = JkClassLoader.current();
+        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
 
         // If class name specified in options.
         if (!JkUtilsString.isBlank(classNameHint)) {
@@ -143,7 +143,7 @@ final class RunResolver {
 
     private List<Class<?>> resolveRunClasses(Class<? extends JkRun> baseClass) {
 
-        final JkClassLoader classLoader = JkClassLoader.current();
+        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
         final List<Class<?>> result = new LinkedList<>();
 
         // If there is a def sources

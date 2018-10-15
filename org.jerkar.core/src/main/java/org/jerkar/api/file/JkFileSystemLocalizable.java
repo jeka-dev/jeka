@@ -3,7 +3,7 @@ package org.jerkar.api.file;
 import java.nio.file.Path;
 
 /**
- * Provides an information about its localisation on the file system.
+ * Provides an information about its localisation on the file ofSystem.
  */
 public interface JkFileSystemLocalizable {
 

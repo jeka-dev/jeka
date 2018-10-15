@@ -14,21 +14,21 @@ public final class JkUtilsTime {
     private JkUtilsTime() {}
 
     /**
-     * Returns the current system date
+     * Returns the current ofSystem date
      */
     public static Date now() {
         return new Date();
     }
 
     /**
-     * Returns the current system date as string with the specified format
+     * Returns the current ofSystem date as string with the specified format
      */
     public static String now(String pattern) {
         return new SimpleDateFormat(pattern).format(now());
     }
 
     /**
-     * Returns the current system date as string with the specified format
+     * Returns the current ofSystem date as string with the specified format
      */
     public static String nowUtc(String pattern) {
         final SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);

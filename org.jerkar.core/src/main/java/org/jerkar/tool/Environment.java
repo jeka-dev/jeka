@@ -26,8 +26,8 @@ class Environment {
         // Parse command line
         final CommandLine commandLine = CommandLine.parse(commandLineArgs);
 
-        // Take all defined system properties (command line, system.properties files) and
-        // inject them in the system.
+        // Take all defined ofSystem properties (command line, ofSystem.properties files) and
+        // inject them in the ofSystem.
         final Map<String, String> sysProps = getSpecifiedSystemProps();
         sysProps.putAll(commandLine.getSystemProperties());
         setSystemProperties(sysProps);
@@ -51,7 +51,7 @@ class Environment {
 
     private static Map<String, String> userSystemProperties() {
         final Map<String, String> result = new HashMap<>();
-        final Path userPropFile = JkLocator.jerkarUserHomeDir().resolve("system.properties");
+        final Path userPropFile = JkLocator.jerkarUserHomeDir().resolve("ofSystem.properties");
         if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }
@@ -61,7 +61,7 @@ class Environment {
 
     private static Map<String, String> getSpecifiedSystemProps() {
         final Map<String, String> result = new TreeMap<>();
-        final Path propFile = JkLocator.jerkarHomeDir().resolve("system.properties");
+        final Path propFile = JkLocator.jerkarHomeDir().resolve("ofSystem.properties");
         if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }

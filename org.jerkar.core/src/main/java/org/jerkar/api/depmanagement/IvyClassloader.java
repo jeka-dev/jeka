@@ -13,10 +13,10 @@ final class IvyClassloader {
     }
 
     private static JkClassLoader classloader() {
-        if (JkClassLoader.current().isDefined("org.apache.ivy.Ivy")) {
-            return JkClassLoader.current();
+        if (JkClassLoader.ofCurrent().isDefined("org.apache.ivy.Ivy")) {
+            return JkClassLoader.ofCurrent();
         }
-        return JkClassLoader.current().sibling(IvyClassloader.class.getResource(IVY_JAR_NAME));
+        return JkClassLoader.ofCurrent().getSibling(IvyClassloader.class.getResource(IVY_JAR_NAME));
     }
 
 }

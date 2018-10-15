@@ -8,7 +8,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 /**
  * Simple build demonstrating how Jerkar can handle multi-project build.
  * <p>
- * Here, the project depends on the <code>org.jerkar.samples</code> sibling project.
+ * Here, the project depends on the <code>org.jerkar.samples</code> getSibling project.
  * More precisely, on the jar file produced by <code>MavenStyleBuild</code>.
  * <p>
  * Compilation depends on a jar produced by <code>org.jerkar.samples</code>

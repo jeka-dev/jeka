@@ -74,29 +74,34 @@ public final class JkImlGenerator {
 
     private XMLStreamWriter writer;
 
-    /**
-     * Constructs a {@link JkImlGenerator} to the project base directory
-     */
-    public JkImlGenerator(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
-                          JkDependencyResolver resolver) {
-        super();
-        this.sourceLayout = sourceLayout;
-        this.baseDir = sourceLayout.baseDir();
-        this.projectDependencies = dependencies;
-        this.projectDependencyResolver = resolver;
-    }
-
-    public JkImlGenerator(Path baseDir) {
-        super();
+    private JkImlGenerator(Path baseDir) {
         this.baseDir = baseDir;
         this.projectDependencies = JkDependencySet.of();
         this.projectDependencyResolver = JkDependencyResolver.of();
     }
 
-    public JkImlGenerator(JkJavaProject javaProject) {
-        this(javaProject.getSourceLayout(), javaProject.getDependencies(),
+    /**
+     * Constructs a {@link JkImlGenerator} to the project base directory
+     */
+    public static JkImlGenerator of(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
+                          JkDependencyResolver resolver) {
+        JkImlGenerator result = new JkImlGenerator(sourceLayout.baseDir());
+        result.sourceLayout = sourceLayout;
+        result.projectDependencies = dependencies;
+        result.projectDependencyResolver = resolver;
+        return result;
+    }
+
+    public static JkImlGenerator of(Path baseDir) {
+        return new JkImlGenerator(baseDir);
+    }
+
+    public static JkImlGenerator of (JkJavaProject javaProject) {
+        return of(javaProject.getSourceLayout(), javaProject.getDependencies(),
                 javaProject.maker().getDependencyResolver());
     }
+
+
 
     /** Generate the .classpath file */
     public String generate() {
@@ -289,7 +294,7 @@ public final class JkImlGenerator {
                     }
                 }
 
-                // File dependencies (file system + computed)
+                // File dependencies (file ofSystem + computed)
             } else {
                 final String ideScope = forceTest ? "TEST" : ideScope(node.getNodeInfo().getDeclaredScopes());
                 final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.getNodeInfo();

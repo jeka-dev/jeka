@@ -41,7 +41,7 @@ public final class JkManifest {
     public static final String CREATED_BY = "Created-By";
 
     /**
-     * The user has created this manifest. Normally system property
+     * The user has created this manifest. Normally ofSystem property
      * <code>user.name</code>
      */
     private static final String BUILT_BY = "Built-By";

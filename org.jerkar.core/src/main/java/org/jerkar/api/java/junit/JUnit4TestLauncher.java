@@ -56,7 +56,7 @@ class JUnit4TestLauncher {
      */
     public static JkTestSuiteResult launchInProcess(Iterable<Class> classes, boolean logRunningTest,
                                                     JunitReportDetail reportDetail, File reportDir) {
-        final JkClassLoader classloader = JkClassLoader.of(classes.iterator().next());
+        final JkClassLoader classloader = JkClassLoader.ofLoaderOf(classes.iterator().next());
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
         classloader.addEntry(JkLocator.jerkarJarPath());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {

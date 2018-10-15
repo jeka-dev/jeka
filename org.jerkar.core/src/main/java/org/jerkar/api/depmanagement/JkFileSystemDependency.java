@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A dependency on files located on file system.
+ * A dependency on files located on file ofSystem.
  */
 public final class JkFileSystemDependency implements JkFileDependency {
 

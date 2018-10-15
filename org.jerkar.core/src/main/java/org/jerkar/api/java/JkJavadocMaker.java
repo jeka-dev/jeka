@@ -176,7 +176,7 @@ public final class JkJavadocMaker {
     }
 
     private static Class<?> getJavadocMainClass() {
-        final JkClassLoader classLoader = JkClassLoader.current();
+        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
         Class<?> mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
         if (mainClass == null) {
             classLoader.addEntry(JkUtilsJdk.toolsJar());

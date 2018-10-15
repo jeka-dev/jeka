@@ -33,21 +33,21 @@ public final class JkPathMatcher implements PathMatcher {
     }
 
     /**
-     * A matcher accepting specified glob pattern within specified file system.
+     * A matcher accepting specified glob pattern within specified file ofSystem.
      */
     public static JkPathMatcher ofAccept(FileSystem fileSystem, String ... globPattern) {
         return ofAccept(fileSystem, Arrays.asList(globPattern));
     }
 
     /**
-     * A matcher accepting specified glob patterns within default file system.
+     * A matcher accepting specified glob patterns within default file ofSystem.
      */
     public static JkPathMatcher ofAccept(String ... globPattern) {
         return ofAccept(FileSystems.getDefault(), Arrays.asList(globPattern));
     }
 
     /**
-     * A matcher accepting specified glob patterns within specified file system.
+     * A matcher accepting specified glob patterns within specified file ofSystem.
      */
     public static JkPathMatcher ofAccept(FileSystem fileSystem, Iterable<String> globPatterns) {
         PathMatcher result = empty();
@@ -58,21 +58,21 @@ public final class JkPathMatcher implements PathMatcher {
     }
 
     /**
-     * A matcher refusing specified glob pattern within specified file system.
+     * A matcher refusing specified glob pattern within specified file ofSystem.
      */
     public static JkPathMatcher ofReject(FileSystem fileSystem, String ... globPatterns) {
         return ofReject(fileSystem, Arrays.asList(globPatterns));
     }
 
     /**
-     * A matcher refusing specified glob patterns within default file system.
+     * A matcher refusing specified glob patterns within default file ofSystem.
      */
     public static JkPathMatcher ofReject(String ... globPatterns) {
         return ofReject(FileSystems.getDefault(), Arrays.asList(globPatterns));
     }
 
     /**
-     * A matcher refusing specified glob patterns within specified file system.
+     * A matcher refusing specified glob patterns within specified file ofSystem.
      */
     public static JkPathMatcher ofReject(FileSystem fileSystem, Iterable<String> globPatterns) {
         PathMatcher result = path -> true;

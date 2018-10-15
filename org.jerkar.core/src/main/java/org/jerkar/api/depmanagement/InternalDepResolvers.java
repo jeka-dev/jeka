@@ -9,7 +9,7 @@ class InternalDepResolvers {
      * This resolver is loaded in a dedicated classloader containing Ivy classes.
      */
     public static InternalDepResolver ivy(JkRepoSet repos) {
-        return IvyClassloader.CLASSLOADER.transClassloaderProxy(
+        return IvyClassloader.CLASSLOADER.createTransClassloaderProxy(
                 InternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
     }
 

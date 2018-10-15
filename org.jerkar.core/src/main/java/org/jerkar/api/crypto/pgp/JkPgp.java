@@ -30,8 +30,8 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
 
     // We don't want to add Bouncycastle in the Jerkar classpath, so we create a
     // specific classloader just for launching the Bouncy castle methods.
-    private static final Class<?> PGPUTILS_CLASS = JkClassLoader.current()
-            .siblingWithOptional(JkPgp.class.getResource("bouncycastle-pgp-152.jar"))
+    private static final Class<?> PGPUTILS_CLASS = JkClassLoader.ofCurrent()
+            .getSiblingWithOptional(JkPgp.class.getResource("bouncycastle-pgp-152.jar"))
             .load(PGPUTILS_CLASS_NAME);
 
     /**

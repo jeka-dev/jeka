@@ -122,7 +122,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
     }
 
     /**
-     * Information about source control system managing the project sources.
+     * Information about source control ofSystem managing the project sources.
      */
     public static final class JkScmInfo implements Serializable {
 

@@ -41,7 +41,7 @@ public final class JkPublisher {
      * ivy.xml are generated.
      */
     public static JkPublisher of(JkRepoSet publishRepos, Path artifactDir) {
-        final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(
+        final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.createTransClassloaderProxy(
                 InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos,
                 artifactDir == null ? null : artifactDir.toFile());
         return new JkPublisher(ivyPublisher);

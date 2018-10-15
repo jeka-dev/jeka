@@ -252,7 +252,7 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     /**
-     * Returns the system properties in use during the test suite execution.
+     * Returns the ofSystem properties in use during the test suite execution.
      */
     public Properties getSystemProperties() {
         return systemProperties;

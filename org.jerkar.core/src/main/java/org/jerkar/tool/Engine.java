@@ -144,9 +144,9 @@ final class Engine {
     }
 
     private JkRun getRunInstance(String runClassHint, JkPathSequence runtimePath) {
-        final JkClassLoader classLoader = JkClassLoader.current();
+        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
-        JkLog.trace("Setting run execution classpath to : " + classLoader.childClasspath());
+        JkLog.trace("Setting run execution classpath to : " + classLoader.getChildClasspath());
         final JkRun run = resolver.resolve(runClassHint);
         if (run == null) {
             return null;

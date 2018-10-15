@@ -41,9 +41,9 @@ public final class JkPluginIntellij extends JkPlugin {
     public void generateIml() {
         final JkImlGenerator generator;
         if (owner.plugins().hasLoaded(JkPluginJava.class)) {
-            generator = new JkImlGenerator(owner.plugins().get(JkPluginJava.class).project());
+            generator = JkImlGenerator.of(owner.plugins().get(JkPluginJava.class).project());
         } else {
-            generator = new JkImlGenerator(owner.baseDir());
+            generator = JkImlGenerator.of(owner.baseDir());
         }
         final List<Path> depProjects = new LinkedList<>();
         for (final JkRun depRun : owner.importedRuns().directs()) {

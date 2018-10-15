@@ -15,7 +15,7 @@ public class JkImlGeneratorTest {
 
     @Test
     public void withoutJavaProject() {
-        JkImlGenerator imlGenerator = new JkImlGenerator(Paths.get(""));
+        JkImlGenerator imlGenerator = JkImlGenerator.of(Paths.get(""));
         String result = imlGenerator.generate();
         System.out.println(result);
     }
@@ -25,7 +25,7 @@ public class JkImlGeneratorTest {
         JkJavaProject project = JkJavaProject.ofMavenLayout(Paths.get(""));
         project.setDependencies(dependencies());
        // project.maker().setDependencyResolver(JkDependencyResolver.of(JkRepo.maven("http://194.253.70.251:8081/nexus/content/groups/multipharma")));
-        JkImlGenerator imlGenerator = new JkImlGenerator(project);
+        JkImlGenerator imlGenerator = JkImlGenerator.of(project);
         String result = imlGenerator.generate();
         System.out.println(result);
     }
