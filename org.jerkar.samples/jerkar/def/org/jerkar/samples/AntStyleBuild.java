@@ -65,7 +65,7 @@ public class AntStyleBuild extends JkRun {
         .withReportDir(reportDir)
         .withReport(JunitReportDetail.FULL)
         .run(JkJavaTestBulk.of(
-                classpath.andFirst(jarFile),
+                classpath.andPrepending(jarFile),
                 JkPathTree.of(classDir).andAccept("**/*Test.class", "*Test.class") ));
     }
 

@@ -25,8 +25,10 @@ public final class JkJavaProjectPackager {
     }
 
     public void mainJar(Path target) {
-        JkJarMaker.jar(target, project.getManifest(), project.maker().getOutLayout().classDir(),
-                project.getExtraFilesToIncludeInJar());
+        JkJarMaker.of(project.maker().getOutLayout().classDir())
+                .withManifest(project.getManifest())
+                .withExtraFiles(project.getExtraFilesToIncludeInJar())
+                .makeJar(target);
     }
 
     /**
@@ -36,8 +38,10 @@ public final class JkJavaProjectPackager {
         JkClasspath classpath = JkClasspath.ofMany(project.maker().fetchRuntimeDependencies(project.maker().getMainArtifactId()));
         JkArtifactId artifactFileId = JkArtifactId.of(classifier, "jar");
         Path result = project.maker().getArtifactPath(artifactFileId);
-        JkJarMaker.fatJar(result, project.getManifest(), project.maker().getOutLayout().classDir(),
-                project.getExtraFilesToIncludeInJar(), classpath);
+        JkJarMaker.of( project.maker().getOutLayout().classDir())
+                .withManifest(project.getManifest())
+                .withExtraFiles(project.getExtraFilesToIncludeInJar())
+                .makeFatJar(result, classpath);
         return result;
     }
 
@@ -55,7 +59,9 @@ public final class JkJavaProjectPackager {
     }
 
     public void testJar(Path target) {
-        JkJarMaker.jar(target, project.getManifest(), project.maker().getOutLayout().testClassDir(),  null);
+        JkJarMaker.of(project.maker().getOutLayout().testClassDir())
+                .withManifest(project.getManifest())
+                .makeJar(target);
     }
 
     public void testSourceJar(Path target) {

@@ -191,7 +191,7 @@ public final class JkClassLoader {
      */
     public JkClassLoader withPrintingSearchedClasses(Set<String> searchedClassContainer) {
         return new JkClassLoader(new TrackingClassLoader(searchedClassContainer, this
-                .getChildClasspath().asArrayOfUrl(), (URLClassLoader) this.getParent().delegate));
+                .getChildClasspath().toArrayOfUrl(), (URLClassLoader) this.getParent().delegate));
     }
 
     /**
@@ -362,7 +362,7 @@ public final class JkClassLoader {
      */
     private Set<Class<?>> loadClasses(Iterable<String> patterns) {
         final Set<Class<?>> result = new HashSet<>();
-        final Set<Path> classFiles = this.getFullClasspath().allPathMatching(patterns);
+        final Set<Path> classFiles = this.getFullClasspath().getAllPathMatching(patterns);
         for (final Path classFile : classFiles) {
             final String className = getAsClassName(classFile.toString());
             result.add(this.load(className));

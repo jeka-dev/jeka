@@ -58,7 +58,7 @@ public final class JkClasspath implements Iterable<Path> {
      * Returns the current classpath as given by
      * <code>System.getProperty("java.class.path")</code>.
      */
-    public static JkClasspath current() {
+    public static JkClasspath ofCurrentRuntime() {
         final List<Path> files = new LinkedList<>();
         final String classpath = System.getProperty("java.class.path");
         final String[] classpathEntries = classpath.split(PATH_SEPARATOR);
@@ -85,7 +85,7 @@ public final class JkClasspath implements Iterable<Path> {
     /**
      * Returns this classpath as an array of URL.
      */
-    public URL[] asArrayOfUrl() {
+    public URL[] toArrayOfUrl() {
         final URL[] result = new URL[this.entries.size()];
         int i = 0;
         for (final Path file : this.entries) {
@@ -125,7 +125,7 @@ public final class JkClasspath implements Iterable<Path> {
         return null;
     }
 
-    Set<Path> allPathMatching(Iterable<String> globPatterns) {
+    Set<Path> getAllPathMatching(Iterable<String> globPatterns) {
         final Set<Path> result = new LinkedHashSet<>();
         for (final Path classpathEntry : this.entries) {
             JkPathTree tree = Files.isDirectory(classpathEntry) ?
@@ -141,7 +141,7 @@ public final class JkClasspath implements Iterable<Path> {
      * Returns a <code>JkClasspath</code> made of, in the order, the specified
      * entries plus the entries of this one.
      */
-    public JkClasspath andManyFirst(Iterable<Path> otherEntries) {
+    public JkClasspath andPrependingMany(Iterable<Path> otherEntries) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
         final LinkedList<Path> list = new LinkedList<>();
         paths.forEach(path -> list.add(path));
@@ -168,9 +168,9 @@ public final class JkClasspath implements Iterable<Path> {
     }
 
     /**
-     * See {@link #andManyFirst(Iterable)}
+     * See {@link #andPrependingMany(Iterable)}
      */
-    public JkClasspath andFirst(Path ... paths) {
+    public JkClasspath andPrepending(Path ... paths) {
         return andMany(Arrays.asList(paths));
     }
     

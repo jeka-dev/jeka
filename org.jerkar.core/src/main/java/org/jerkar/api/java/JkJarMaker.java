@@ -2,6 +2,8 @@ package org.jerkar.api.java;
 
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathMatcher;
+import org.jerkar.api.ide.intellij.JkImlGenerator;
+import org.jerkar.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 
@@ -16,23 +18,45 @@ public final class JkJarMaker {
     public static final JkPathMatcher EXCLUDE_SIGNATURE_MATCHER =
             JkPathMatcher.ofReject("meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf");
 
-    private JkJarMaker() {
-        // Not instantiable
+    private final JkPathTreeSet classtrees;
+
+    private final JkManifest manifest;
+
+    private final JkPathTreeSet extraFiles;
+
+    private JkJarMaker(JkPathTreeSet classTrees, JkManifest manifest, JkPathTreeSet extraFiles) {
+        this.classtrees = classTrees;
+        this.manifest = manifest;
+        this.extraFiles = extraFiles;
+    }
+
+    public static JkJarMaker of(JkPathTreeSet classTrees) {
+        JkUtilsAssert.isTrue(!classTrees.getPathTrees().isEmpty(), "Nothing to create jar from : " + classTrees);
+        return new JkJarMaker(classTrees, null, null);
+    }
+
+    public static JkJarMaker of(Path classDir) {
+        return of(JkPathTreeSet.of(classDir));
+    }
+
+    public JkJarMaker withManifest(JkManifest manifest) {
+        return new JkJarMaker(this.classtrees, manifest, this.extraFiles);
+    }
+
+    public JkJarMaker withExtraFiles(JkPathTreeSet extraFiles) {
+        return new JkJarMaker(this.classtrees, this.manifest, extraFiles);
     }
 
     /**
      * Creates a jar file according specified parameters.
      * @param resultFile Result file
-     * @param classDir The folder containing elements to zip.
-     * @param manifest Can be <code>null</code>.
-     * @param extraFiles Extra files to embed in jar. Can be empty or <code>null</code>.
      */
-    public static void jar(Path resultFile, JkManifest manifest, Path classDir, JkPathTreeSet extraFiles) {
+    public void makeJar(Path resultFile) {
         if (manifest != null && !manifest.isEmpty()) {
-            manifest.writeToStandardLocation(classDir);
+            manifest.writeToStandardLocation(classtrees.getPathTrees().get(0).getRoot());
         }
         JkPathTreeSet treeSet = extraFiles == null ? JkPathTreeSet.ofEmpty() : extraFiles;
-        JkPathTreeSet.of(classDir).and(treeSet).zipTo(resultFile);
+        classtrees.and(treeSet).zipTo(resultFile);
     }
 
     /**
@@ -40,20 +64,13 @@ public final class JkJarMaker {
      * The result jar does not contains other jars as zip entry but content of the other jars is merged with the content
      * of original jar.
      * @param resultFile Result file
-     * @param classDir The folder containing elements to zip.
-     * @param manifest Can be <code>null</code>.
-     * @param extraFiles Extra files to embed in jar. Can be empty or <code>null</code>.
      * @param otherJars content of other jar to merge with the original jar
      */
-    public static void fatJar(Path resultFile, JkManifest manifest, Path classDir,
-                              JkPathTreeSet extraFiles, Iterable<Path> otherJars) {
+    public void makeFatJar(Path resultFile, Iterable<Path> otherJars) {
         if (manifest != null && !manifest.isEmpty()) {
-            manifest.writeToStandardLocation(classDir);
+            manifest.writeToStandardLocation(classtrees.getPathTrees().get(0).getRoot());
         }
-
-        JkPathTreeSet.of(classDir).and(extraFiles).andZips(otherJars)
-                .andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(resultFile);
-
+        classtrees.and(extraFiles).andZips(otherJars).andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(resultFile);
     }
 
 }

@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 public class JkUnitRunner {
 
     public static void main(String[] args) {
-        JkJavaTestBulk testSpec = JkJavaTestBulk.of(JkClasspath.current(), JkPathTree.of(Paths.get("./idea-output/test-classes")).andAccept("**/*MyTest.class"));
+        JkJavaTestBulk testSpec = JkJavaTestBulk.of(JkClasspath.ofCurrentRuntime(), JkPathTree.of(Paths.get("./idea-output/test-classes")).andAccept("**/*MyTest.class"));
         JkTestSuiteResult result = JkUnit.of().withBreakOnFailure(false).run(testSpec);
         result.failures().forEach(testCaseFailure -> System.out.println(testCaseFailure.getExceptionDescription().getMessage()));
     }

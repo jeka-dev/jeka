@@ -289,7 +289,7 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestBulk testSpec) {
-        final JkClasspath classpath = testSpec.classpath().andManyFirst(testSpec.classesToTest().getRootDirsOrZipFiles());
+        final JkClasspath classpath = testSpec.classpath().andPrependingMany(testSpec.classesToTest().getRootDirsOrZipFiles());
         final JkClassLoader classLoader = JkClassLoader.ofSystem().getParent().getChildWithEntries(classpath);
         classLoader.loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.classesToTest());
