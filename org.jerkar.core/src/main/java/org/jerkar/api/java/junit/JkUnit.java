@@ -235,7 +235,7 @@ public final class JkUnit {
                 File report = reportDir == null ? null : reportDir.toFile();
                 if (this.forkedProcess != null) {
                     JkLog.info("Test are executed in forked mode");
-                    JkClasspath classpath = testSpec.classpath();
+                    JkClasspath classpath = testSpec.getClasspath();
                     result.set(JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(classpath),
                             printOutputOnConsole, reportDetail, classes, report));
                 } else {
@@ -289,10 +289,10 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestBulk testSpec) {
-        final JkClasspath classpath = testSpec.classpath().andPrependingMany(testSpec.classesToTest().getRootDirsOrZipFiles());
+        final JkClasspath classpath = testSpec.getClasspath().andPrependingMany(testSpec.getClassesToTest().getRootDirsOrZipFiles());
         final JkClassLoader classLoader = JkClassLoader.ofSystem().getParent().getChildWithEntries(classpath);
         classLoader.loadAllServices();
-        final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.classesToTest());
+        final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.getClassesToTest());
         if (result.isEmpty()) {
             JkUtilsIO.closeifClosable(classLoader.getClassloader());
         }

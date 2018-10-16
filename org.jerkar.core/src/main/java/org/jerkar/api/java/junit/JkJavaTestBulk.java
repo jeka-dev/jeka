@@ -32,11 +32,11 @@ public final class JkJavaTestBulk {
     /**
      * Returns the classpath to run these tests.
      */
-    public JkClasspath classpath() {
+    public JkClasspath getClasspath() {
         return classpath;
     }
 
-    public JkPathTreeSet classesToTest() {
+    public JkPathTreeSet getClassesToTest() {
         return classesToTest;
     }
 

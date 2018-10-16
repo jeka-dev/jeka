@@ -69,7 +69,7 @@ public final class JkResourceProcessor {
                 resourceTree.stream().forEach(path -> {
                     final Path relativePath = resourceTree.getRoot().relativize(path);
                     final Path out = outputDir.resolve(relativePath);
-                    final Map<String, String> data = JkInterpolator.interpolateData(relativePath.toString(),
+                    final Map<String, String> data = JkInterpolator.of(relativePath.toString(),
                             interpolators);
                     if (Files.isDirectory(path)) {
                         JkUtilsPath.createDirectories(out);
@@ -154,8 +154,8 @@ public final class JkResourceProcessor {
             return new JkInterpolator(this.matcher, map);
         }
 
-        private static Map<String, String> interpolateData(String path,
-                Iterable<JkInterpolator> interpolators) {
+        private static Map<String, String> of(String path,
+                                              Iterable<JkInterpolator> interpolators) {
             final Map<String, String> result = new HashMap<>();
             for (final JkInterpolator interpolator : interpolators) {
                 if (interpolator.matcher.matches(Paths.get(path))) {
