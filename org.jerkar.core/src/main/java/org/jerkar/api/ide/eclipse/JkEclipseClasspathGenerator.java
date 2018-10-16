@@ -236,7 +236,7 @@ public final class JkEclipseClasspathGenerator {
         if (JkJavaVersion.V8 == compilerVersion) {
             return "1.8";
         }
-        return compilerVersion.name();
+        return compilerVersion.get();
     }
 
     private void writeProjectEntryIfNeeded(Path projectDir, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {

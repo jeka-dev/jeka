@@ -189,7 +189,7 @@ public final class JkJavaProcess {
         return builder;
     }
 
-    private String runningJavaCommand() {
+    private String getRunningJavaCommand() {
         return this.javaDir.toAbsolutePath()+ this.javaDir.getFileSystem().getSeparator() + "java";
     }
 
@@ -209,7 +209,7 @@ public final class JkJavaProcess {
                 "main class name and jar can't be both null while launching a Java process, please set at least one of them.");
         final List<String> command = new LinkedList<>();
         final OptionAndEnv optionAndEnv = optionsAndEnv();
-        command.add(runningJavaCommand());
+        command.add(getRunningJavaCommand());
         command.addAll(optionAndEnv.options);
         String execPart = "";
         if (jar != null) {
@@ -310,7 +310,7 @@ public final class JkJavaProcess {
      * Returns the classpth of this {@link JkJavaProcess}.
      * @return
      */
-    public JkClasspath classpath() {
+    public JkClasspath getClasspath() {
         return classpath;
 
     }

@@ -52,7 +52,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     private final List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<>();
 
-    private JkManifest manifest = JkManifest.empty();
+    private JkManifest manifest = JkManifest.ofEmpty();
 
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 

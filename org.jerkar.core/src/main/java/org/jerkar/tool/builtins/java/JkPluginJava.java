@@ -225,10 +225,10 @@ public class JkPluginJava extends JkPlugin {
 
     private JkJavaCompiler compiler() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
-        final JkProcess process =  JkJavaCompiler.getForkedProcessIfNeeded(jdkOptions,
-                project().getCompileSpec().getSourceVersion().name());
+        final JkProcess process =  JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
+                project().getCompileSpec().getSourceVersion().get());
         if (process != null) {
-            return project().maker().getCompiler().fork(process);
+            return project().maker().getCompiler().withForking(process);
         }
         return project.maker().getCompiler();
     }

@@ -64,7 +64,7 @@ public final class JkJavaCompileSpec {
         if (rawResult == null) {
             return null;
         }
-        return JkJavaVersion.name(rawResult);
+        return JkJavaVersion.of(rawResult);
     }
 
     public JkJavaVersion getTargetVersion() {
@@ -72,7 +72,7 @@ public final class JkJavaCompileSpec {
         if (rawResult == null) {
             return null;
         }
-        return JkJavaVersion.name(rawResult);
+        return JkJavaVersion.of(rawResult);
     }
 
     /**
@@ -82,7 +82,7 @@ public final class JkJavaCompileSpec {
         if (version == null) {
             return this;
         }
-        return setOption(SOURCE_OPTS, version.name());
+        return setOption(SOURCE_OPTS, version.get());
     }
 
     /**
@@ -95,7 +95,7 @@ public final class JkJavaCompileSpec {
         if (version == null) {
             return this;
         }
-        return setOption(TARGET_OPTS, version.name());
+        return setOption(TARGET_OPTS, version.get());
     }
 
     /**

@@ -56,7 +56,7 @@ public final class JkJavaCompiler {
      * failed-on-error parameter. If <code>true</code> then
      * a compilation error will throw a {@link IllegalStateException}.
      */
-    public JkJavaCompiler failOnError(boolean fail) {
+    public JkJavaCompiler withFailOnError(boolean fail) {
         return new JkJavaCompiler(fail, fork, compiler, compilerBinRepo);
     }
 
@@ -66,16 +66,16 @@ public final class JkJavaCompiler {
      * process. The javac process is created using specified argument defined in
      * {@link JkProcess#ofJavaTool(String, String...)}
      */
-    public JkJavaCompiler fork(String... parameters) {
+    public JkJavaCompiler withForking(String... parameters) {
         return new JkJavaCompiler(failOnError,
                 JkProcess.ofJavaTool("javac", parameters), compiler, compilerBinRepo);
     }
 
     /**
-     * As {@link #fork(String...)} but the fork is actually done only if the
+     * As {@link #withForking(String...)} but the fork is actually done only if the
      * <code>fork</code> parameter is <code>true</code>.
      */
-    public JkJavaCompiler fork(boolean fork, String... parameters) {
+    public JkJavaCompiler withForking(boolean fork, String... parameters) {
         if (fork) {
             final JkProcess compileProcess = JkProcess.ofJavaTool("javac", parameters);
             return new JkJavaCompiler(failOnError, compileProcess , compiler, compilerBinRepo);
@@ -84,16 +84,16 @@ public final class JkJavaCompiler {
         }
     }
 
-    public JkJavaCompiler fork(JkProcess compileProcess) {
+    public JkJavaCompiler withForking(JkProcess compileProcess) {
         return new JkJavaCompiler(failOnError, compileProcess , compiler, compilerBinRepo);
     }
 
     /**
-     * As {@link #fork(String...)} but specifying the executable for the compileRunner.
+     * As {@link #withForking(String...)} but specifying the executable for the compileRunner.
      *
      * @param executable The executable for the compileRunner as 'jike' or '/my/specific/jdk/javac'
      */
-    public JkJavaCompiler forkOnCompiler(String executable, String... parameters) {
+    public JkJavaCompiler withForkingOnCompiler(String executable, String... parameters) {
         final JkProcess compileProcess = JkProcess.of(executable, parameters);
         return new JkJavaCompiler(failOnError, compileProcess, compiler, compilerBinRepo);
     }
@@ -123,7 +123,7 @@ public final class JkJavaCompiler {
      *
      * @return <code>false</code> if a compilation error occurred.
      *
-     * @throws IllegalStateException if a compilation error occurred and the 'failOnError' flag is <code>true</code>.
+     * @throws IllegalStateException if a compilation error occurred and the 'withFailOnError' flag is <code>true</code>.
      */
     @SuppressWarnings("unchecked")
     public boolean compile(JkJavaCompileSpec compileSpec) {
@@ -225,7 +225,7 @@ public final class JkJavaCompiler {
                 version = fullVersion.substring(0, secondDot);
             }
         }
-        if (version.equals(JkJavaVersion.V1_3.name()) || version.equals(JkJavaVersion.V1_4.name())) {
+        if (version.equals(JkJavaVersion.V1_3.get()) || version.equals(JkJavaVersion.V1_4.get())) {
             return version;
         }
         String shortVersion;
@@ -245,7 +245,7 @@ public final class JkJavaCompiler {
      * The keys must be formatted as "jdk.[source projectVersion]". For example, "jdk.1.4" or
      * "jdk.7". The values must absolute path.
      */
-    public static JkProcess getForkedProcessIfNeeded(Map<String, String> jdkLocations, String version) {
+    public static JkProcess getForkedProcessOnJavaSourceVersion(Map<String, String> jdkLocations, String version) {
         if (version.equals(currentJdkSourceVersion())) {
             JkLog.info("Current JDK matches with source projectVersion (" + version + "). Don't need to fork.");
             return null;

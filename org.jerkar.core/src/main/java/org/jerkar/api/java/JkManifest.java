@@ -77,7 +77,7 @@ public final class JkManifest {
     public static JkManifest ofClassDir(Path classDir) {
         final Path manifestFile = classDir.resolve(PATH);
         if (!Files.exists(manifestFile)) {
-            return JkManifest.empty();
+            return JkManifest.ofEmpty();
         }
         return of(manifestFile);
     }
@@ -95,7 +95,7 @@ public final class JkManifest {
      * Returns an empty manifest containing only the "Manifest-Version=1.0"
      * attribute.
      */
-    public static JkManifest empty() {
+    public static JkManifest ofEmpty() {
         final Manifest manifest = new Manifest();
         manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
         return of(manifest);
@@ -150,39 +150,17 @@ public final class JkManifest {
     }
 
     /**
-     * Creates a manifest identical to this one but adding attributes of an
-     * other one. Attributes of this one are overrided by those of the specified
-     * manifest if same attribute exist.
+     * Returns the value of the main attribute having the specified name.
      */
-    public JkManifest merge(JkManifest other) {
-        final Map<String, Attributes> otherEntryAttributes = other.manifest.getEntries();
-        for (final String entry : otherEntryAttributes.keySet()) {
-            final Attributes otherAttributes = otherEntryAttributes.get(entry);
-            final Attributes attributes = this.manifest.getAttributes(entry);
-            merge(attributes, otherAttributes);
-        }
-        merge(this.manifest.getMainAttributes(), other.manifest.getMainAttributes());
-        return this;
-    }
-
-    private static void merge(Attributes attributes, Attributes others) {
-        for (final Object key : others.entrySet()) {
-            attributes.putValue(key.toString(), others.getValue(key.toString()));
-        }
+    public String setMainAttribute(String key) {
+        return this.getManifest().getMainAttributes().getValue(key);
     }
 
     /**
      * Returns the value of the main attribute having the specified name.
      */
-    public String mainAttribute(String key) {
-        return this.manifest().getMainAttributes().getValue(key);
-    }
-
-    /**
-     * Returns the value of the main attribute having the specified name.
-     */
-    public String mainAttribute(Name name) {
-        return this.manifest().getMainAttributes().getValue(name);
+    public String setMainAttribute(Name name) {
+        return this.getManifest().getMainAttributes().getValue(name);
     }
 
     private static Manifest read(Path file) {
@@ -233,7 +211,7 @@ public final class JkManifest {
     /**
      * Returns the underlying JDK {@link Manifest} object.
      */
-    public Manifest manifest() {
+    public Manifest getManifest() {
         return manifest;
     }
 

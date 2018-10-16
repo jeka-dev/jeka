@@ -497,7 +497,7 @@ public final class JkImlGenerator {
         if (JkJavaVersion.V10.equals(javaVersion)) {
             return "1.10";
         }
-        return javaVersion.name();
+        return javaVersion.get();
     }
 
     private static class LibPath {

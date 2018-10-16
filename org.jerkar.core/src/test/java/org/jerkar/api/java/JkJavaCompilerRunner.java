@@ -13,7 +13,7 @@ public class JkJavaCompilerRunner {
 
         JkJavaCompiler.of().compile(new JkJavaCompileSpec()
                 .setOutputDir(Paths.get("build/output/bin"))
-                .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V6.name()));
+                .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V6.get()));
     }
 
 }

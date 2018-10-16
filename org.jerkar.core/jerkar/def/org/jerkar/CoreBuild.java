@@ -45,8 +45,8 @@ public class CoreBuild extends JkJavaProjectBuild {
         project().setSourceVersion(JkJavaVersion.V8);
         project().setMavenPublicationInfo(mavenPublication());
 
-        maker().setCompiler(JkJavaCompiler.of().fork(true));  // Fork to avoid compile failure bug on github/travis
-        maker().setTestCompiler(JkJavaCompiler.of().fork(true));
+        maker().setCompiler(JkJavaCompiler.of().withForking(true));  // Fork to avoid compile failure bug on github/travis
+        maker().setTestCompiler(JkJavaCompiler.of().withForking(true));
         maker().setPublishRepos(publishRepos());
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
 
