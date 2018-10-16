@@ -34,7 +34,7 @@ public class JkJavaProjectTest {
         JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
         coreProject.setDependencies(coreDeps);
         coreProject.maker().setTestRunner(
-                coreProject.maker().getTestRunner().forked(true));
+                coreProject.maker().getTestRunner().withForking(true));
 
         final Path desktop = top.resolve("desktop");
         final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));

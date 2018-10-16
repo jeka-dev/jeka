@@ -1,9 +1,9 @@
 package org.jerkar.api.java.junit;
 
-import org.jerkar.api.java.junit.JkTestSuiteResult.ExceptionDescription;
-import org.jerkar.api.java.junit.JkTestSuiteResult.IgnoredCase;
-import org.jerkar.api.java.junit.JkTestSuiteResult.TestCaseFailure;
-import org.jerkar.api.java.junit.JkTestSuiteResult.TestCaseResult;
+import org.jerkar.api.java.junit.JkTestSuiteResult.JkExceptionDescription;
+import org.jerkar.api.java.junit.JkTestSuiteResult.JkIgnoredCase;
+import org.jerkar.api.java.junit.JkTestSuiteResult.JkTestCaseFailure;
+import org.jerkar.api.java.junit.JkTestSuiteResult.JkTestCaseResult;
 import org.jerkar.api.utils.JkUtilsTime;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
@@ -17,7 +17,7 @@ import java.util.Properties;
 
 class JUnitReportListener extends RunListener {
 
-    private List<JkTestSuiteResult.TestCaseResult> cases;
+    private List<JkTestCaseResult> cases;
 
     private Properties properties;
 
@@ -55,7 +55,7 @@ class JUnitReportListener extends RunListener {
     @Override
     public void testIgnored(Description description) throws Exception {
         ignoreCount++;
-        final IgnoredCase ignoredCase = new IgnoredCase(currentClass.getName(), currentTestName);
+        final JkIgnoredCase ignoredCase = JkIgnoredCase.of(currentClass.getName(), currentTestName);
         this.cases.add(ignoredCase);
     }
 
@@ -63,7 +63,7 @@ class JUnitReportListener extends RunListener {
     public void testFinished(Description description) throws Exception {
         final float duration = (JkUtilsTime.durationInMillis(testTimeNano)) / 1000f;
         if (!failureFlag) {
-            final TestCaseResult result = new TestCaseResult(currentClass.getName(),
+            final JkTestCaseResult result = JkTestCaseResult.of(currentClass.getName(),
                     currentTestName, duration);
             cases.add(result);
         }
@@ -73,8 +73,8 @@ class JUnitReportListener extends RunListener {
     public void testFailure(Failure failure) throws Exception {
         failureFlag = true;
         final float duration = (JkUtilsTime.durationInMillis(testTimeNano)) / 1000f;
-        final TestCaseFailure caseFailure = new TestCaseFailure(currentClass.getName(),
-                currentTestName, duration, new ExceptionDescription(failure.getException()));
+        final JkTestCaseFailure caseFailure = JkTestCaseFailure.of(currentClass.getName(),
+                currentTestName, duration, JkExceptionDescription.of(failure.getException()));
         cases.add(caseFailure);
     }
 

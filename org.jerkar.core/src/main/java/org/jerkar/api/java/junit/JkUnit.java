@@ -136,23 +136,23 @@ public final class JkUnit {
     }
 
     /**
-     * Creates a forked JkUnit from this one but using the specified process. If
+     * Creates a withForking JkUnit from this one but using the specified process. If
      * <code>appendClasspath</code> is <code>true</code> then the classpath
      * already defined in this object is appended to the specified process
      * classpath.
      */
-    public JkUnit forked(JkJavaProcess process) {
+    public JkUnit withForking(JkJavaProcess process) {
         return new JkUnit(reportDetail, reportDir, process, this.breakOnFailure, this.printOutputOnConsole);
     }
 
     /**
-     * Creates an identical JkUnit to this one but specifying the forked mode.
-     * If the forked mode is <code>true<code> then the specified
+     * Creates an identical JkUnit to this one but specifying the withForking mode.
+     * If the withForking mode is <code>true<code> then the specified
      * {@link JkJavaProcess} is used to run the tests..
      */
-    public JkUnit forked(boolean fork, JkJavaProcess process) {
+    public JkUnit withForking(boolean fork, JkJavaProcess process) {
         if (fork && !isForked()) {
-            return forked(process);
+            return withForking(process);
         }
         if (!fork && isForked()) {
             return new JkUnit(reportDetail, reportDir, null,
@@ -162,19 +162,19 @@ public final class JkUnit {
     }
 
     /**
-     * Short-hand to #forked(true)
+     * Short-hand to #withForking(true)
      */
-    public JkUnit forked() {
-        return forked(true);
+    public JkUnit withForking() {
+        return withForking(true);
     }
 
     /**
-     * Creates an identical JkUnit to this one but specifying the forked mode.
-     * If the forked mode is <code>true<code> then default {@link JkJavaProcess}
+     * Creates an identical JkUnit to this one but specifying the withForking mode.
+     * If the withForking mode is <code>true<code> then default {@link JkJavaProcess}
      * is used to run the tests (java process launched without any option).
      */
-    public JkUnit forked(boolean fork) {
-        return forked(fork, JkJavaProcess.of());
+    public JkUnit withForking(boolean fork) {
+        return withForking(fork, JkJavaProcess.of());
     }
 
     /**
@@ -185,7 +185,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns <code>true</code> if this launcher is forked.
+     * Returns <code>true</code> if this launcher is withForking.
      */
     public boolean isForked() {
         return this.forkedProcess != null;
@@ -194,21 +194,21 @@ public final class JkUnit {
     /**
      * Returns the report detail level for this launcher.
      */
-    public JunitReportDetail reportDetail() {
+    public JunitReportDetail getReportDetail() {
         return reportDetail;
     }
 
     /**
      * Returns the output report dir.
      */
-    public Path reportDir() {
+    public Path getReportDir() {
         return reportDir;
     }
 
     /**
-     * Returns the process description if this launcher is forked.
+     * Returns the process description if this launcher is withForking.
      */
-    public JkJavaProcess forkedProcess() {
+    public JkJavaProcess getForkedProcess() {
         return forkedProcess;
     }
 
@@ -225,7 +225,7 @@ public final class JkUnit {
 
         if (!classes.iterator().hasNext()) {
             JkLog.warn("No test class found.");
-            return JkTestSuiteResult.empty((Properties) System.getProperties().clone(), name, 0);
+            return JkTestSuiteResult.ofEmpty((Properties) System.getProperties().clone(), name, 0);
         }
         final long start = System.nanoTime();
         final JkClassLoader classLoader = JkClassLoader.ofLoaderOf(classes.iterator().next());
@@ -234,7 +234,7 @@ public final class JkUnit {
             if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
                 File report = reportDir == null ? null : reportDir.toFile();
                 if (this.forkedProcess != null) {
-                    JkLog.info("Test are executed in forked mode");
+                    JkLog.info("Test are executed in withForking mode");
                     JkClasspath classpath = testSpec.getClasspath();
                     result.set(JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(classpath),
                             printOutputOnConsole, reportDetail, classes, report));
@@ -258,7 +258,7 @@ public final class JkUnit {
                 throw new JkException("No Junit found on test classpath.");
             }
 
-            if (result.get().failureCount() > 0) {
+            if (result.get().getFailureCount() > 0) {
                 if (breakOnFailure) {
                     JkLog.error(String.join("\n",
                             result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
@@ -272,7 +272,7 @@ public final class JkUnit {
                 JkLog.info(String.join("/n",
                         result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
             }
-            if (JkLog.Verbosity.VERBOSE != JkLog.verbosity() && result.get().failureCount() > 0) {
+            if (JkLog.Verbosity.VERBOSE != JkLog.verbosity() && result.get().getFailureCount() > 0) {
                 JkLog.info("Launch Jerkar in verbose mode to display failure stack traces andAccept console.");
             }
             if (reportDetail.equals(JunitReportDetail.BASIC)) {
@@ -369,7 +369,7 @@ public final class JkUnit {
         final Integer ignoreCount = 0;
         final Enumeration<Object> junitFailures = JkUtilsReflect.invoke(result, "failures");
         final Enumeration<Object> junitErrors = JkUtilsReflect.invoke(result, "errors");
-        final List<JkTestSuiteResult.TestCaseFailure> failures = new ArrayList<>();
+        final List<JkTestSuiteResult.JkTestCaseFailure> failures = new ArrayList<>();
         while (junitFailures.hasMoreElements()) {
             final Object junitFailure = junitFailures.nextElement();
             failures.add(JkTestSuiteResult.fromJunit3Failure(junitFailure));

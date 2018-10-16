@@ -10,8 +10,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.file.JkPathFile;
-import org.jerkar.api.java.junit.JkTestSuiteResult.IgnoredCase;
-import org.jerkar.api.java.junit.JkTestSuiteResult.TestCaseFailure;
+import org.jerkar.api.java.junit.JkTestSuiteResult.JkIgnoredCase;
+import org.jerkar.api.java.junit.JkTestSuiteResult.JkTestCaseFailure;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
@@ -33,8 +33,8 @@ final class TestReportBuilder {
 
     public void writeToFileSystem(Path folder)  {
         JkUtilsPath.createDirectories(folder);
-        final Path xmlFile = folder.resolve("TEST-" + result.suiteName() + ".xml");
-        final Path textFile = folder.resolve(result.suiteName() + ".txt");
+        final Path xmlFile = folder.resolve("TEST-" + result.getSuiteName() + ".xml");
+        final Path textFile = folder.resolve(result.getSuiteName() + ".txt");
         try {
             JkPathFile.of(xmlFile).createIfNotExist();
             JkPathFile.of(textFile).createIfNotExist();
@@ -49,12 +49,12 @@ final class TestReportBuilder {
 
     private void writeTxtFile(Path txtFile) throws IOException {
         String builder = TEXT_HEAD + "\n" +
-                "Test set: " + result.suiteName() + "\n" + TEXT_HEAD +
-                "\n" + "Tests run: " + result.runCount() + ", " +
+                "Test set: " + result.getSuiteName() + "\n" + TEXT_HEAD +
+                "\n" + "Tests run: " + result.getRunCount() + ", " +
                 "Failures: " + result.assertErrorCount() + ", " +
-                "Errors: " + result.errorCount() + ", " + "Skipped: " +
-                result.ignoreCount() + ", " + "Time elapsed: " +
-                result.durationInMillis() / 1000f + " sec";
+                "Errors: " + result.getErrorCount() + ", " + "Skipped: " +
+                result.getIgnoreCount() + ", " + "Time elapsed: " +
+                result.getDurationInMillis() / 1000f + " sec";
         Files.write(txtFile, builder.getBytes());
     }
 
@@ -63,12 +63,12 @@ final class TestReportBuilder {
         writer.writeStartDocument();
         writer.writeCharacters("\n");
         writer.writeStartElement("testsuite");
-        writer.writeAttribute("skipped", Integer.toString(result.ignoreCount()));
-        writer.writeAttribute("tests", Integer.toString(result.runCount()));
+        writer.writeAttribute("skipped", Integer.toString(result.getIgnoreCount()));
+        writer.writeAttribute("tests", Integer.toString(result.getRunCount()));
         writer.writeAttribute("failures", Integer.toString(result.assertErrorCount()));
-        writer.writeAttribute("errors", Integer.toString(result.errorCount()));
-        writer.writeAttribute("name", result.suiteName());
-        writer.writeAttribute("time", Float.toString(result.durationInMillis() / 1000f));
+        writer.writeAttribute("errors", Integer.toString(result.getErrorCount()));
+        writer.writeAttribute("name", result.getSuiteName());
+        writer.writeAttribute("time", Float.toString(result.getDurationInMillis() / 1000f));
         writer.writeCharacters("\n");
 
         writeProperties(writer);
@@ -95,7 +95,7 @@ final class TestReportBuilder {
     }
 
     private void writeTestCases(XMLStreamWriter writer) throws XMLStreamException {
-        for (final JkTestSuiteResult.TestCaseResult testCaseResult : this.result.testCaseResults()) {
+        for (final JkTestSuiteResult.JkTestCaseResult testCaseResult : this.result.testCaseResults()) {
             writer.writeCharacters("\n  ");
             writer.writeStartElement("testcase");
             writer.writeAttribute("classname", testCaseResult.getClassName());
@@ -105,8 +105,8 @@ final class TestReportBuilder {
             } else {
                 writer.writeAttribute("time", "0.000");
             }
-            if (testCaseResult instanceof TestCaseFailure) {
-                final TestCaseFailure failure = (TestCaseFailure) testCaseResult;
+            if (testCaseResult instanceof JkTestCaseFailure) {
+                final JkTestCaseFailure failure = (JkTestCaseFailure) testCaseResult;
                 final String errorFailure = failure.getExceptionDescription().isAssertError() ? "failure"
                         : "error";
                 writer.writeCharacters("\n    ");
@@ -115,14 +115,14 @@ final class TestReportBuilder {
                         JkUtilsString.escapeHtml(failure.getExceptionDescription().getMessage()));
                 writer.writeAttribute("type", failure.getExceptionDescription().getClassName());
                 final StringBuilder stringBuilder = new StringBuilder();
-                for (final String line : failure.getExceptionDescription().stackTracesAsStrings()) {
+                for (final String line : failure.getExceptionDescription().getStackTraceAsStrings()) {
                     stringBuilder.append(line).append("\n");
                 }
                 stringBuilder.append("      ");
                 writer.writeCData(stringBuilder.toString());
                 writer.writeCharacters("\n    ");
                 writer.writeEndElement();
-            } else if (testCaseResult instanceof IgnoredCase) {
+            } else if (testCaseResult instanceof JkIgnoredCase) {
                 writer.writeCharacters("\n    ");
                 writer.writeEmptyElement("skipped");
             }

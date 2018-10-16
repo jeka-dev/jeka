@@ -115,7 +115,7 @@ public class JkPluginJava extends JkPlugin {
         JkUnit tester = (JkUnit) project.maker().getTestRunner();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
-            tester = tester.forked(javaProcess);
+            tester = tester.withForking(javaProcess);
         }
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);

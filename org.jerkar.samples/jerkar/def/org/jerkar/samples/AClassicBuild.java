@@ -38,7 +38,7 @@ public class AClassicBuild extends JkJavaProjectBuild {
                         .and("junit:junit:4.11", TEST));
         maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
         maker().defineFatJarArtifact("fat");  // project will produce a fat jar as well.
-        maker().setTestRunner(maker().getTestRunner().forked(true));
+        maker().setTestRunner(maker().getTestRunner().withForking(true));
     }
     
     public static void main(String[] args) {

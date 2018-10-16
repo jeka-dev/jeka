@@ -47,7 +47,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
         coreProject.setDependencies(coreDeps);
         coreProject.maker().setTestRunner(
-                coreProject.maker().getTestRunner().forked(true));
+                coreProject.maker().getTestRunner().withForking(true));
         final JkEclipseClasspathGenerator coreGenerator =
                 JkEclipseClasspathGenerator.of(coreProject);
         final String coreClasspath = coreGenerator.generate();

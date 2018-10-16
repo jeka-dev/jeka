@@ -56,12 +56,12 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
             return jkUnit;
         }
         if (jkUnit.isForked()) {
-            JkJavaProcess process = jkUnit.forkedProcess();
+            JkJavaProcess process = jkUnit.getForkedProcess();
             process = process.andAgent(destFile, options());
-            return jkUnit.forked(process);
+            return jkUnit.withForking(process);
         }
         final JkJavaProcess process = JkJavaProcess.of().andAgent(agent, options());
-        return jkUnit.forked(process).withPostAction(new Reporter());
+        return jkUnit.withForking(process).withPostAction(new Reporter());
     }
 
     private String options() {

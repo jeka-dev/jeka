@@ -100,7 +100,7 @@ public final class JkJavaCompiler {
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified compileRunner instance.
-     * Since in-process compilers cannot be run andAccept a forked process, this method disables any
+     * Since in-process compilers cannot be run andAccept a withForking process, this method disables any
      * previous fork options that may have been set.
      */
     public JkJavaCompiler withCompiler(JavaCompiler compiler) {
@@ -163,7 +163,7 @@ public final class JkJavaCompiler {
                 return true;
             }
         } else {
-            JkLog.info("Use a forked process to perform compilation : " + fork.getCommand());
+            JkLog.info("Use a withForking process to perform compilation : " + fork.getCommand());
             result = runOnFork(compileSpec);
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -238,7 +238,7 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Returns a {@link JkProcess} standing for a forked compileRunner with relevant JDK if this specified source projectVersion
+     * Returns a {@link JkProcess} standing for a withForking compileRunner with relevant JDK if this specified source projectVersion
      * does not match with the current running JDK. The specified map may include
      * the JDK location for this source projectVersion.
      * If no need to fork, cause current JDK is aligned with target projectVersion, then this method returns <code>null</code>.

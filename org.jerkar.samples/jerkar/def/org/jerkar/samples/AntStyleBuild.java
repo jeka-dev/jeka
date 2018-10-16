@@ -61,7 +61,7 @@ public class AntStyleBuild extends JkRun {
 
     public void junit() {
         jar();
-        JkUnit.of().forked()
+        JkUnit.of().withForking()
         .withReportDir(reportDir)
         .withReport(JunitReportDetail.FULL)
         .run(JkJavaTestBulk.of(

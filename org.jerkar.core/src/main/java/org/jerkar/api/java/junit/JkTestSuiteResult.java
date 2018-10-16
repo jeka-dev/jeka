@@ -19,7 +19,7 @@ public class JkTestSuiteResult implements Serializable {
     private static final long serialVersionUID = -5353195584286473050L;
 
     private final String suiteName;
-    private final List<? extends TestCaseResult> testCaseResults;
+    private final List<? extends JkTestCaseResult> testCaseResults;
     private final int runCount;
     private final int ignoreCount;
     private final long durationInMilis;
@@ -29,7 +29,7 @@ public class JkTestSuiteResult implements Serializable {
      * Constructs a test suite execution result according specified information.
      */
     JkTestSuiteResult(Properties properties, String suiteName, int totaltestCount,
-            int ignoreCount, Iterable<? extends TestCaseResult> testCaseResult,
+            int ignoreCount, Iterable<? extends JkTestCaseResult> testCaseResult,
             long durationInMillis) {
         this.systemProperties = properties;
         this.suiteName = suiteName;
@@ -40,20 +40,20 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    static JkTestSuiteResult empty(Properties properties, String name, long durationInMillis) {
+    static JkTestSuiteResult ofEmpty(Properties properties, String name, long durationInMillis) {
         return new JkTestSuiteResult(properties, name, 0, 0, Collections.EMPTY_LIST,
                 durationInMillis);
     }
 
-    List<? extends TestCaseResult> testCaseResults() {
+    List<? extends JkTestCaseResult> testCaseResults() {
         return testCaseResults;
     }
 
-    List<TestCaseFailure> failures() {
-        final List<TestCaseFailure> result = new LinkedList<>();
-        for (final TestCaseResult caseResult : this.testCaseResults) {
-            if (caseResult instanceof TestCaseFailure) {
-                result.add((TestCaseFailure) caseResult);
+    List<JkTestCaseFailure> failures() {
+        final List<JkTestCaseFailure> result = new LinkedList<>();
+        for (final JkTestCaseResult caseResult : this.testCaseResults) {
+            if (caseResult instanceof JkTestCaseFailure) {
+                result.add((JkTestCaseFailure) caseResult);
             }
         }
         return result;
@@ -62,28 +62,28 @@ public class JkTestSuiteResult implements Serializable {
     /**
      * Returns how many test has been run.
      */
-    public int runCount() {
+    public int getRunCount() {
         return runCount;
     }
 
     /**
      * Returns how many test has been ignored.
      */
-    public int ignoreCount() {
+    public int getIgnoreCount() {
         return ignoreCount;
     }
 
     /**
      * Returns how many test has failed.
      */
-    public int failureCount() {
+    public int getFailureCount() {
         return failures().size();
     }
 
     /**
      * Returns the suite name.
      */
-    public String suiteName() {
+    public String getSuiteName() {
         return suiteName;
     }
 
@@ -92,7 +92,7 @@ public class JkTestSuiteResult implements Serializable {
      */
     public int assertErrorCount() {
         int result = 0;
-        for (final TestCaseFailure failure : failures()) {
+        for (final JkTestCaseFailure failure : failures()) {
             if (failure.getExceptionDescription().isAssertError()) {
                 result++;
             }
@@ -103,14 +103,14 @@ public class JkTestSuiteResult implements Serializable {
     /**
      * Returns error count (without counting assertion failures).
      */
-    public int errorCount() {
-        return failureCount() - assertErrorCount();
+    public int getErrorCount() {
+        return getFailureCount() - assertErrorCount();
     }
 
     /**
      * Returns duration of the suite execution.
      */
-    public long durationInMillis() {
+    public long getDurationInMillis() {
         return durationInMilis;
     }
 
@@ -121,13 +121,13 @@ public class JkTestSuiteResult implements Serializable {
         final List<String> lines = new LinkedList<>();
         lines.add(toString());
         int i = 0;
-        for (final TestCaseResult testCaseResult : this.testCaseResults) {
-            if (testCaseResult instanceof TestCaseFailure) {
-                final TestCaseFailure failure = (TestCaseFailure) testCaseResult;
+        for (final JkTestCaseResult testCaseResult : this.testCaseResults) {
+            if (testCaseResult instanceof JkTestCaseFailure) {
+                final JkTestCaseFailure failure = (JkTestCaseFailure) testCaseResult;
                 lines.add("-> " + failure.getClassName() + "." + failure.getTestName() + " : "
                         + failure.getExceptionDescription().message);
                 if (showStackTrace || i < 3) {
-                    lines.addAll(failure.exceptionDescription.stackTracesAsStrings());
+                    lines.addAll(failure.jkExceptionDescription.getStackTraceAsStrings());
                     lines.add("");
                 }
                 i++;
@@ -138,7 +138,7 @@ public class JkTestSuiteResult implements Serializable {
 
     @Override
     public String toString() {
-        return "" + runCount + " test(s) run, " + failureCount() + " failure(s), " + ignoreCount
+        return "" + runCount + " test(s) run, " + getFailureCount() + " failure(s), " + ignoreCount
                 + " ignored. In " + durationInMilis + " milliseconds.";
     }
 
@@ -146,19 +146,23 @@ public class JkTestSuiteResult implements Serializable {
      * A result for a single test case execution in case of success.
      */
     @SuppressWarnings("serial")
-    public static class TestCaseResult implements Serializable {
+    public static class JkTestCaseResult implements Serializable {
         private final String className;
         private final String testName;
         private final float durationInSecond;
 
-        /**
-         * Constructs a test case result.
-         */
-        public TestCaseResult(String className, String testName, float durationSec) {
+        private JkTestCaseResult(String className, String testName, float durationSec) {
             super();
             this.className = className;
             this.testName = testName;
             this.durationInSecond = durationSec;
+        }
+
+        /**
+         * Constructs a test case result.
+         */
+        public static JkTestCaseResult of(String className, String testName, float durationSec) {
+            return new JkTestCaseResult(className, testName, durationSec);
         }
 
         /**
@@ -187,43 +191,31 @@ public class JkTestSuiteResult implements Serializable {
     /**
      * A result for a single test case execution in case of failure.
      */
-    public static class TestCaseFailure extends TestCaseResult implements Serializable {
+    public static class JkTestCaseFailure extends JkTestCaseResult implements Serializable {
 
         private static final long serialVersionUID = 7089021299483181605L;
 
-        private final ExceptionDescription exceptionDescription;
+        private final JkExceptionDescription jkExceptionDescription;
+
+        private JkTestCaseFailure(String className, String testName, float duration,
+                                 JkExceptionDescription exception) {
+            super(className, testName, duration);
+            this.jkExceptionDescription = exception;
+        }
 
         /**
          * Constructs a test case result.
          */
-        public TestCaseFailure(String className, String testName, float duration,
-                ExceptionDescription exception) {
-            super(className, testName, duration);
-            this.exceptionDescription = exception;
+        public static JkTestCaseFailure of(String className, String testName, float duration,
+                                 JkExceptionDescription exception) {
+            return new JkTestCaseFailure(className, testName, duration, exception);
         }
 
         /**
          * Returns the description of the failure.
          */
-        public ExceptionDescription getExceptionDescription() {
-            return exceptionDescription;
-        }
-
-        /**
-         * Returns a multi line string representation of the test case execution result;
-         */
-        public List<String> toStrings(boolean withStackTrace) {
-            final List<String> result = new LinkedList<>();
-            final String intro = this.getClassName() + "#" + this.getTestName();
-
-            if (withStackTrace) {
-                final List<String> stack = exceptionDescription.stackTracesAsStrings();
-                result.add(intro + " > " + stack.get(0));
-                result.addAll(stack.subList(1, stack.size() - 1));
-            } else {
-                result.add(intro);
-            }
-            return result;
+        public JkExceptionDescription getExceptionDescription() {
+            return jkExceptionDescription;
         }
 
     }
@@ -231,15 +223,19 @@ public class JkTestSuiteResult implements Serializable {
     /**
      * A result for a single test case execution in case of ignore.
      */
-    public static class IgnoredCase extends TestCaseResult implements Serializable {
+    public static class JkIgnoredCase extends JkTestCaseResult implements Serializable {
 
         private static final long serialVersionUID = 1L;
+
+        private JkIgnoredCase(String className, String testName) {
+            super(className, testName, 0);
+        }
 
         /**
          * Constructs an ignored test case result.
          */
-        public IgnoredCase(String className, String testName) {
-            super(className, testName, 0);
+        public static JkIgnoredCase of(String className, String testName) {
+            return new JkIgnoredCase(className, testName);
         }
 
     }
@@ -261,32 +257,38 @@ public class JkTestSuiteResult implements Serializable {
     /**
      * Description of an execption occured during the test suite execution.
      */
-    public static class ExceptionDescription implements Serializable {
+    public static class JkExceptionDescription implements Serializable {
 
         private static final long serialVersionUID = -8619868712236132763L;
 
         private final String className;
         private final String message;
         private final StackTraceElement[] stackTrace;
-        private final ExceptionDescription cause;
+        private final JkExceptionDescription cause;
         private final boolean assertError;
 
-        /**
-         * Constructs an exception description.
-         */
-        public ExceptionDescription(Throwable throwable) {
+
+        private JkExceptionDescription(Throwable throwable) {
             super();
             this.className = throwable.getClass().getName();
             this.message = throwable.getMessage();
             this.stackTrace = throwable.getStackTrace();
             if (throwable.getCause() != null) {
-                this.cause = new ExceptionDescription(throwable.getCause());
+                this.cause = new JkExceptionDescription(throwable.getCause());
             } else {
                 this.cause = null;
             }
             assertError = AssertionError.class.isAssignableFrom(throwable.getClass());
 
         }
+
+        /**
+         * Constructs an exception description.
+         */
+        public static JkExceptionDescription of(Throwable throwable) {
+            return new JkExceptionDescription(throwable);
+        }
+
 
         /**
          * Returns the name of the exception.
@@ -312,7 +314,7 @@ public class JkTestSuiteResult implements Serializable {
         /**
          * Returns the cause of the exception.
          */
-        public ExceptionDescription getCause() {
+        public JkExceptionDescription getCause() {
             return cause;
         }
 
@@ -326,11 +328,11 @@ public class JkTestSuiteResult implements Serializable {
         /**
          * Returns a multi-line representation of the stack trace.
          */
-        public List<String> stackTracesAsStrings() {
-            return stackTracesAsStrings(className + ": " + message);
+        public List<String> getStackTraceAsStrings() {
+            return getStackTraceAsStrings(className + ": " + message);
         }
 
-        private List<String> stackTracesAsStrings(String prefix) {
+        private List<String> getStackTraceAsStrings(String prefix) {
             final List<String> result = new LinkedList<>();
             if (prefix != null) {
                 result.add(prefix);
@@ -339,7 +341,7 @@ public class JkTestSuiteResult implements Serializable {
                 result.add("  at " + element);
             }
             if (cause != null) {
-                result.addAll(cause.stackTracesAsStrings("Caused by : " + cause.getClassName()
+                result.addAll(cause.getStackTraceAsStrings("Caused by : " + cause.getClassName()
                 + ": " + messageOrEmpty(cause.getMessage())));
             }
             return result;
@@ -352,7 +354,7 @@ public class JkTestSuiteResult implements Serializable {
         final Integer runCount = JkUtilsReflect.invoke(result, "getRunCount");
         final Integer ignoreCount = JkUtilsReflect.invoke(result, "getIgnoreCount");
         final List<Object> junitFailures = JkUtilsReflect.invoke(result, "getFailures");
-        final List<JkTestSuiteResult.TestCaseFailure> failures = new ArrayList<>(
+        final List<JkTestCaseFailure> failures = new ArrayList<>(
                 junitFailures.size());
         for (final Object junitFailure : junitFailures) {
             failures.add(fromJunit4Failure(junitFailure));
@@ -362,23 +364,23 @@ public class JkTestSuiteResult implements Serializable {
 
     }
 
-    private static JkTestSuiteResult.TestCaseFailure fromJunit4Failure(Object junit4failure) {
+    private static JkTestCaseFailure fromJunit4Failure(Object junit4failure) {
         final Object junit4Description = JkUtilsReflect.invoke(junit4failure, "getDescription");
         final String testClassName = JkUtilsReflect.invoke(junit4Description, "getClassName");
         final String testMethodName = JkUtilsReflect.invoke(junit4Description, "getMethodName");
         final Throwable exception = JkUtilsReflect.invoke(junit4failure, "getException");
-        final ExceptionDescription description = new ExceptionDescription(exception);
-        return new JkTestSuiteResult.TestCaseFailure(testClassName, testMethodName, -1, description);
+        final JkExceptionDescription description = new JkExceptionDescription(exception);
+        return new JkTestCaseFailure(testClassName, testMethodName, -1, description);
     }
 
-    static JkTestSuiteResult.TestCaseFailure fromJunit3Failure(Object junit3failure) {
+    static JkTestCaseFailure fromJunit3Failure(Object junit3failure) {
         final Object failedTest = JkUtilsReflect.invoke(junit3failure, "failedTest");
         final Throwable exception = JkUtilsReflect.invoke(junit3failure, "thrownException");
-        final ExceptionDescription description = new ExceptionDescription(exception);
+        final JkExceptionDescription description = new JkExceptionDescription(exception);
         final String failedTestName = failedTest.toString();
         final int firstParenthesisIndex = failedTestName.indexOf("(");
         final String methodName = failedTestName.substring(0, firstParenthesisIndex);
-        return new JkTestSuiteResult.TestCaseFailure(failedTest.getClass().getName(), methodName,
+        return new JkTestCaseFailure(failedTest.getClass().getName(), methodName,
                 -1, description);
     }
 
