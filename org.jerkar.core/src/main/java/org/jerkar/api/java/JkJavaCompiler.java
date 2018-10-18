@@ -60,15 +60,13 @@ public final class JkJavaCompiler {
         return new JkJavaCompiler(fail, fork, compiler, compilerBinRepo);
     }
 
-
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with forking the javac
      * process. The javac process is created using specified argument defined in
      * {@link JkProcess#ofJavaTool(String, String...)}
      */
     public JkJavaCompiler withForking(String... parameters) {
-        return new JkJavaCompiler(failOnError,
-                JkProcess.ofJavaTool("javac", parameters), compiler, compilerBinRepo);
+        return withForking(JkProcess.ofJavaTool("javac", parameters));
     }
 
     /**
@@ -77,11 +75,9 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler withForking(boolean fork, String... parameters) {
         if (fork) {
-            final JkProcess compileProcess = JkProcess.ofJavaTool("javac", parameters);
-            return new JkJavaCompiler(failOnError, compileProcess , compiler, compilerBinRepo);
-        } else {
-            return new JkJavaCompiler(failOnError, null, compiler, compilerBinRepo);
+            return withForking(parameters);
         }
+        return withForking((JkProcess) null);
     }
 
     public JkJavaCompiler withForking(JkProcess compileProcess) {
@@ -95,7 +91,7 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler withForkingOnCompiler(String executable, String... parameters) {
         final JkProcess compileProcess = JkProcess.of(executable, parameters);
-        return new JkJavaCompiler(failOnError, compileProcess, compiler, compilerBinRepo);
+        return withForking(compileProcess);
     }
 
     /**
@@ -109,13 +105,20 @@ public final class JkJavaCompiler {
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but adding an external java compileRunner for
-     * the specified source projectVersion. The compileRunner will try to get compliant compileRunner to
+     * the specified source version. The compileRunner will try to get compliant compileRunner to
      * compile source.
      */
     public JkJavaCompiler withJavacBin(JkJavaVersion version, Path javacBin) {
         final HashMap<JkJavaVersion, Path> map = new HashMap<>(this.compilerBinRepo);
         map.put(version, javacBin);
         return new JkJavaCompiler(failOnError, fork, compiler, map);
+    }
+
+    /**
+     * Returns <code>true</code> if no compiler or fork has been set on.
+     */
+    public boolean isDefault() {
+        return compiler == null && fork == null;
     }
 
     /**
@@ -130,7 +133,7 @@ public final class JkJavaCompiler {
         final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
-            throw new IllegalStateException("Output dir option (-d) has not been specified on the compileRunner. Specified options : " + options);
+            throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
         }
         JkUtilsPath.createDirectories(outputDir);
         final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
@@ -155,15 +158,16 @@ public final class JkJavaCompiler {
             final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);
             if (files.size() > 0) {
-                JkLog.info("" + files.size() + " files to compile.");
+                JkLog.info("" + files.size() + " files to compile with " + compiler.getClass().getSimpleName());
+
                 result = task.call();
             } else {
-                JkLog.warn("" + files.size() + " files to compile.");
+                JkLog.warn("No file to compile.");
                 JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
                 return true;
             }
         } else {
-            JkLog.info("Use a withForking process to perform compilation : " + fork.getCommand());
+            JkLog.info("Use a forking process to perform compilation : " + fork.getCommand());
             result = runOnFork(compileSpec);
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -238,29 +242,29 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Returns a {@link JkProcess} standing for a withForking compileRunner with relevant JDK if this specified source projectVersion
+     * Returns a {@link JkProcess} standing for a forking compiler with relevant JDK if this specified source version
      * does not match with the current running JDK. The specified map may include
-     * the JDK location for this source projectVersion.
-     * If no need to fork, cause current JDK is aligned with target projectVersion, then this method returns <code>null</code>.
-     * The keys must be formatted as "jdk.[source projectVersion]". For example, "jdk.1.4" or
+     * the JDK location for this source version.
+     * If no need to fork, cause current JDK is aligned with target version, then this method returns <code>null</code>.
+     * The keys must be formatted as "jdk.[source version]". For example, "jdk.1.4" or
      * "jdk.7". The values must absolute path.
      */
     public static JkProcess getForkedProcessOnJavaSourceVersion(Map<String, String> jdkLocations, String version) {
         if (version.equals(currentJdkSourceVersion())) {
-            JkLog.info("Current JDK matches with source projectVersion (" + version + "). Don't need to fork.");
+            JkLog.info("Current JDK matches with source version (" + version + "). Don't need to fork.");
             return null;
         }
         final String key = "jdk." + version;
         final String path = jdkLocations.get(key);
         if (path == null) {
-            JkLog.warn("Current JDK does not match with source projectVersion " + version + ".\n" +
-                    " No exact matching JDK found for projectVersion " + version + ".\n" +
-                    " Will use the current one which is projectVersion " + currentJdkSourceVersion() + ".\n" +
-                    " Pass option -jdk." + version + "=[JDK location] to specify the JDK to use for Java projectVersion " + version);
+            JkLog.warn("Current JDK does not match with source version " + version + ".\n" +
+                    " No exact matching JDK found for version " + version + ".\n" +
+                    " Will use the current one which is version " + currentJdkSourceVersion() + ".\n" +
+                    " Pass option -jdk." + version + "=[JDK location] to specify the JDK to use for Java version " + version);
             return null;
         }
         final String cmd = path + "/bin/javac";
-        JkLog.info("Current JDK does not match with source projectVersion (" + version + "). Will use JDK "
+        JkLog.info("Current JDK does not match with source version (" + version + "). Will use JDK "
                 + path);
         return JkProcess.of(cmd);
     }

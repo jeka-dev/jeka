@@ -216,7 +216,7 @@ public final class JkUnit {
      * Runs specified test bulk.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public JkTestSuiteResult run(JkJavaTestBulk testSpec) {
+    public JkTestSuiteResult run(JkJavaTestClasses testSpec) {
         if (reportDir == null && reportDetail != JunitReportDetail.NONE) {
             throw new IllegalStateException("Report directory has not been set on JkUnit instance.");
         }
@@ -288,7 +288,7 @@ public final class JkUnit {
     }
 
     @SuppressWarnings("rawtypes")
-    private Collection<Class> getClassesToTest(JkJavaTestBulk testSpec) {
+    private Collection<Class> getClassesToTest(JkJavaTestClasses testSpec) {
         final JkClasspath classpath = testSpec.getClasspath().andPrependingMany(testSpec.getClassesToTest().getRootDirsOrZipFiles());
         final JkClassLoader classLoader = JkClassLoader.ofSystem().getParent().getChildWithEntries(classpath);
         classLoader.loadAllServices();

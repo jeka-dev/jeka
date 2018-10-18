@@ -24,7 +24,7 @@ public class JacocoPluginBuild extends JkJavaProjectBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(JacocoPluginBuild.class, args).java().project().maker().test();
+        JkInit.instanceOf(JacocoPluginBuild.class, args).java().project().getMaker().test();
     }
 
 }

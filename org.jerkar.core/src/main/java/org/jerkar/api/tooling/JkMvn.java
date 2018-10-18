@@ -42,7 +42,7 @@ public final class JkMvn implements Runnable {
 
     private static boolean exist(String cmd) {
         try {
-            final int result = Runtime.getRuntime().exec(cmd + " -projectVersion").waitFor();
+            final int result = Runtime.getRuntime().exec(cmd + " -version").waitFor();
             return result == 0;
         } catch (final Exception e) {
             return false;
@@ -164,10 +164,10 @@ public final class JkMvn implements Runnable {
      *
      * The following format are accepted for each line :
      * <ul>
-     * <li>group:name:classifier:projectVersion:scope (classifier "jar" equals to no
+     * <li>group:name:classifier:version:scope (classifier "jar" equals to no
      * classifier)</li>
-     * <li>group:name:projectVersion:scope (no classifier)</li>
-     * <li>group:name:projectVersion (default projectVersion is scope)</li>
+     * <li>group:name:version:scope (no classifier)</li>
+     * <li>group:name:version (default version is scope)</li>
      * </ul>
      *
      */

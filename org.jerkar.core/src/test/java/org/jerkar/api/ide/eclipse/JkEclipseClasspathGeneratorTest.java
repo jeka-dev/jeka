@@ -36,7 +36,7 @@ public class JkEclipseClasspathGeneratorTest {
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
         final JkEclipseClasspathGenerator baseGenerator =
                 JkEclipseClasspathGenerator.of(baseProject);
-        baseGenerator.setRunDependencies(baseProject.maker().getDependencyResolver(),
+        baseGenerator.setRunDependencies(baseProject.getMaker().getDependencyResolver(),
                 JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
@@ -46,8 +46,8 @@ public class JkEclipseClasspathGeneratorTest {
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
         coreProject.setDependencies(coreDeps);
-        coreProject.maker().setTestRunner(
-                coreProject.maker().getTestRunner().withForking(true));
+        coreProject.getMaker().getTestTasks().setRunner(
+                coreProject.getMaker().getTestTasks().getRunner().withForking(true));
         final JkEclipseClasspathGenerator coreGenerator =
                 JkEclipseClasspathGenerator.of(coreProject);
         final String coreClasspath = coreGenerator.generate();
@@ -58,7 +58,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkDependencySet deps = JkDependencySet.of().and(coreProject);
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(sourceLayout.withBaseDir(desktop), deps,
-                        coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);
+                        coreProject.getMaker().getDependencyResolver(), JkJavaVersion.V8);
         final String result2 = desktopGenerator.generate();
 
         System.out.println("\ndesktop .classpath");
@@ -66,7 +66,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
         desktopProject.setDependencies(deps);
-        desktopProject.maker().makeAllArtifacts();
+        desktopProject.getMaker().makeAllArtifacts();
 
         // ----------------- Now,  try to applyCommonSettings generated .classpath to projects and compare if it matches
 

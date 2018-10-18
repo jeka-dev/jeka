@@ -50,7 +50,7 @@ public class ResolverWithScopeMapperIT {
 
     /*
      * Spring-boot 1.5.3 has a dependency on spring-core which is higher than 4.0.0.
-     * Nevertheless, if we declare spring-core with projectVersion 4.0.0 as direct dependency,
+     * Nevertheless, if we declare spring-core with version 4.0.0 as direct dependency,
      * this one should be taken in account, and not the the higher one coming transitive dependency.
      */
     @Test
@@ -61,7 +61,7 @@ public class ResolverWithScopeMapperIT {
         String directCoreVersion = "4.0.0.RELEASE";
         JkDependencySet deps = JkDependencySet.of()
 
-                .and(springCoreModule, directCoreVersion, COMPILE)  // force a projectVersion lower than the transitive jump starterWeb module
+                .and(springCoreModule, directCoreVersion, COMPILE)  // force a version lower than the transitive jump starterWeb module
                 .and(starterWebModule, "1.5.3.RELEASE", COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
@@ -71,7 +71,7 @@ public class ResolverWithScopeMapperIT {
 
     /*
      * Spring-boot 1.5.3 has a dependency on spring-core which is higher than 4.0.0.
-     * Nevertheless, if we declare spring-core with projectVersion 4.0.0 as direct dependency,
+     * Nevertheless, if we declare spring-core with version 4.0.0 as direct dependency,
      * this one should be taken in account, and not the the higher one coming transitive dependency.
      */
     @Test

@@ -30,7 +30,7 @@ public class JkDependencyResolverTest {
         JkDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);
         Assert.assertFalse(dependencyNode.isModuleNode());
         JkDependencyNode.FileNodeInfo nodeInfo = (JkDependencyNode.FileNodeInfo) dependencyNode.getNodeInfo();
-        Assert.assertEquals(baseProject.baseDir(), nodeInfo.computationOrigin().getIdeProjectBaseDir());
+        Assert.assertEquals(baseProject.getBaseDir(), nodeInfo.computationOrigin().getIdeProjectBaseDir());
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {

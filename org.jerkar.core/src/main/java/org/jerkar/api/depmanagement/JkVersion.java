@@ -6,7 +6,7 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Used to specify a module projectVersion. Versions are comparable.
+ * Used to specify a module version. Versions are comparable.
  *
  * @author Jerome Angibaud
  */
@@ -14,7 +14,7 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /** Mention that the projectVersion is unspecified */
+    /** Mention that the version is unspecified */
     public static final JkVersion UNSPECIFIED = new JkVersion("UNSPECIFIED-SNAPSHOT");
 
     /**
@@ -37,14 +37,14 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     }
 
     /**
-     * Returns the value of the projectVersion.
+     * Returns the value of the version.
      */
     public String getValue() {
         return value;
     }
 
     /**
-     * Returns <code>true</code> if this projectVersion stands for a snapshot one.
+     * Returns <code>true</code> if this version stands for a snapshot one.
      */
     public boolean isSnapshot() {
         return this.value.toLowerCase().endsWith("-snapshot");
@@ -56,14 +56,14 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     }
 
     /**
-     * Returns <code>true</code> if this projectVersion is to be considered superior to the specified one.
+     * Returns <code>true</code> if this version is to be considered superior to the specified one.
      */
     public boolean isGreaterThan(JkVersion other) {
         return this.compareTo(other) > 0;
     }
 
     /**
-     * Returns <code>true</code> if the definition stands for a dynamic projectVersion
+     * Returns <code>true</code> if the definition stands for a dynamic version
      * (as "1.4.+", "[1.0,2.0[", "3.0-SNAPSHOT", ...) or <code>false</code> if
      * it stands for a fixed one (as "1.4.0, "2.0.3-23654114", ...).
      */
@@ -75,7 +75,7 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     }
 
     /**
-     * Returns <code>true</code> if this projectVersion range is unspecified.
+     * Returns <code>true</code> if this version range is unspecified.
      */
     public boolean isUnspecified() {
         return this.equals(UNSPECIFIED);
@@ -83,8 +83,8 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
 
     /**
      * Returns <code>true</code> if the definition stands for dynamic resolvable
-     * projectVersion (as 1.4.+, [1.0, 2.0[, ...).<br/>
-     * . Returns <code>false</code> if the projectVersion is static or snapshot (as
+     * version (as 1.4.+, [1.0, 2.0[, ...).<br/>
+     * . Returns <code>false</code> if the version is static or snapshot (as
      * 1.4.0, 3.1-SNAPSHOT) A snapshot is not considered as 'resolvable'.
      */
     public boolean isDynamicAndResovable() {

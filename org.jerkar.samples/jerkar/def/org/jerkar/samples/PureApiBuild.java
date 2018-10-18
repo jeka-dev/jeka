@@ -19,15 +19,15 @@ public class PureApiBuild extends JkRun {
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.baseDir());
 
         // We want to output stuff in another place than build/output
-        javaProject.maker().setOutLayout(javaProject.maker().getOutLayout().withOutputDir("build/output/alt-output"));
+        javaProject.getMaker().setOutLayout(javaProject.getMaker().getOutLayout().withOutputDir("build/output/alt-output"));
 
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12",JkJavaDepScopes.TEST);
 
         javaProject.setDependencies(deps).setSourceVersion(JkJavaVersion.V6);
 
-        javaProject.maker().clean();
-        javaProject.maker().makeArtifact(javaProject.get().getMainArtifactId());
-        javaProject.maker().makeJavadocJar(Paths.get("javadoc.jar"));
+        javaProject.getMaker().clean();
+        javaProject.getMaker().makeArtifact(javaProject.get().getMainArtifactId());
+        //javaProject.getMaker().getPackTasks().makeJavadocJar(Paths.get("javadoc.jar"));
     }
 
     public static void main(String[] args) {

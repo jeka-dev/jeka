@@ -36,7 +36,7 @@ final class PomTemplateGenerator {
             throw new RuntimeException(e);
         }
         String completeTemplate = firstTemplate.replace(TOKEN, extraXml);
-        final String jerkarVersion = JkUtilsObject.firstNonNull(JkInfo.jerkarVersion(), "Development projectVersion");
+        final String jerkarVersion = JkUtilsObject.firstNonNull(JkInfo.jerkarVersion(), "Development version");
         completeTemplate = completeTemplate.replace(VERSION_TOKEN, jerkarVersion);
         final Path result = JkUtilsPath.createTempFile("jerkar-pom", ".template");
         JkUtilsPath.write(result, completeTemplate.getBytes());

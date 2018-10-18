@@ -281,7 +281,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     }
 
     /**
-     * Returns a clone of this object but using specified projectVersion provider to override
+     * Returns a clone of this object but using specified version provider to override
      * versions of transitive dependencies. The previous version provider is replaced
      * by the specified one, there is no addition.
      */
@@ -290,7 +290,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     }
 
     /**
-     * Returns a clone of this object but using specified projectVersion provider to override
+     * Returns a clone of this object but using specified version provider to override
      * versions of transitive dependencies. The specified version provider is added
      * to the specified one.
      */
@@ -398,8 +398,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
 
     /**
      * Returns <code>true</code> if this object contains dependency on external
-     * module whose rely on dynamic projectVersion. It can be either dynamic projectVersion as
-     * "1.3.+", "[1.0, 2.0[" ,... or snapshot projectVersion as defined in Maven (as
+     * module whose rely on dynamic version. It can be either dynamic version as
+     * "1.3.+", "[1.0, 2.0[" ,... or snapshot version as defined in Maven (as
      * "1.0-SNAPSHOT).
      */
     public boolean hasDynamicVersions() {
@@ -418,7 +418,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
 
     /**
      * Returns <code>true</code> if this object contains dependency on external
-     * module whose rely on dynamic projectVersion that are resolvable (Maven Snapshot
+     * module whose rely on dynamic version that are resolvable (Maven Snapshot
      * versions are dynamic but not resolvable). It only stands for dynamic
      * versions as "1.3.+", "[1.0, 2.0[" ,... If so, when resolving, dynamic
      * versions are replaced by fixed resolved ones.

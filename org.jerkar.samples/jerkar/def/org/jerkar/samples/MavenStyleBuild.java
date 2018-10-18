@@ -24,8 +24,8 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
         java().project()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());
-        java().project().maker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.ofMavenCentral()));
-        java().project().maker().setPublishRepos(publishRepositories());
+        java().project().getMaker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.ofMavenCentral()));
+        java().project().getMaker().getPublishTasks().setPublishRepos(publishRepositories());
     }
 
     JkDependencySet dependencies() {

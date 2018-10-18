@@ -19,7 +19,7 @@ public class JkJavaProjectBuild extends JkRun {
     }
 
     public final JkJavaProjectMaker maker() {
-        return project().maker();
+        return project().getMaker();
     }
 
 }

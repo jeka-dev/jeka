@@ -10,21 +10,21 @@ import org.jerkar.api.java.JkClasspath;
  *
  * @author Jerome Angibaud
  */
-public final class JkJavaTestBulk {
+public final class JkJavaTestClasses {
 
     private final JkClasspath classpath;
 
     private final JkPathTreeSet classesToTest;
 
-    public static JkJavaTestBulk of(JkClasspath classpath, JkPathTreeSet testClasses) {
-        return new JkJavaTestBulk(classpath, testClasses);
+    public static JkJavaTestClasses of(JkClasspath classpath, JkPathTreeSet testClasses) {
+        return new JkJavaTestClasses(classpath, testClasses);
     }
 
-    public static JkJavaTestBulk of(JkClasspath classpath, JkPathTree testClasses) {
+    public static JkJavaTestClasses of(JkClasspath classpath, JkPathTree testClasses) {
         return of(classpath, testClasses.toSet());
     }
 
-    private JkJavaTestBulk(JkClasspath classpath, JkPathTreeSet testClasses) {
+    private JkJavaTestClasses(JkClasspath classpath, JkPathTreeSet testClasses) {
         this.classpath = classpath;
         this.classesToTest = testClasses;
     }
@@ -40,11 +40,11 @@ public final class JkJavaTestBulk {
         return classesToTest;
     }
 
-    public JkJavaTestBulk withClassesToTest(JkPathTreeSet classesToTest) {
-        return new JkJavaTestBulk(this.classpath, classesToTest);
+    public JkJavaTestClasses withClassesToTest(JkPathTreeSet classesToTest) {
+        return new JkJavaTestClasses(this.classpath, classesToTest);
     }
 
-    public JkJavaTestBulk withClassesToTest(String includePattern) {
+    public JkJavaTestClasses withClassesToTest(String includePattern) {
         return withClassesToTest(this.classesToTest.withMatcher(JkPathMatcher.ofAccept(includePattern)));
     }
 

@@ -18,13 +18,13 @@ import java.util.function.Supplier;
  * Container for a Java project with classic characteristic :
  * <ul>
  *     <li>Contains Java source files to be compiled</li>
- *     <li>All Java sources file (prod + test) are wrote against the same Java projectVersion and encoding</li>
+ *     <li>All Java sources file (prod + test) are wrote against the same Java version and encoding</li>
  *     <li>JkEclipseProject may contain unit tests</li>
  *     <li>It can depends on any accepted dependencies (Maven module, other project, files on fs, ...)</li>
  *
  *     <li>It produces a bin jar, a source jar and a javadoc jar</li>
  *     <li>It can produce any other artifact files (fat-jar, test jar, doc, ...)</li>
- *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, projectVersion) in order to be published/reused</li>
+ *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, version) in order to be published/reused</li>
  *     <li>It can be published on any Maven/Ivy repository, including Maven central</li>
  *
  *     <li>Part of the sources/resources may be generated</li>
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * </ul>
  *
  * Beside, java projects are highly extensible so you can add build tasks or alter existing ones. This
- * is done using {@link #maker()} object. For example you can easily add test cover or SonarQube analysis.
+ * is done using {@link #getMaker()} object. For example you can easily add test cover or SonarQube analysis.
  *
  * It provides cache mechanism in order compile or unit test phases are executed once when generating
  * several artifact files so be aware of clean it if you want to replay some tasks with different settings.
@@ -89,7 +89,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     // ---------------------------- Getters / setters --------------------------------------------
 
     @Override
-    public Path baseDir() {
+    public Path getBaseDir() {
         return this.getSourceLayout().baseDir();
     }
 
@@ -103,7 +103,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this.dependencies;
     }
 
-    public JkJavaProjectMaker maker() {
+    public JkJavaProjectMaker getMaker() {
         return maker;
     }
 
@@ -113,7 +113,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public JkJavaProject setDependencies(JkDependencySet dependencies) {
-        this.maker.cleanDepChache();
+        this.maker.cleanDependencyCache();
         this.dependencies = dependencies;
         return this;
     }
@@ -129,7 +129,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public JkJavaProject setSourceVersion(JkJavaVersion version ) {
-        compileSpec.setSourceAndTargetVersion(version);
+        this.compileSpec.setSourceAndTargetVersion(version);
         return this;
     }
 
@@ -181,16 +181,19 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public JkPathTreeSet getExtraFilesToIncludeInJar() {
-        return extraFilesToIncludeInFatJar;
+        return this.extraFilesToIncludeInFatJar;
     }
 
+    /**
+     * File trees specified here will be added to the fat jar.
+     */
     public JkJavaProject setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;
     }
 
     public JkMavenPublicationInfo getMavenPublicationInfo() {
-        return mavenPublicationInfo;
+        return this.mavenPublicationInfo;
     }
 
     public JkJavaProject setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
@@ -200,17 +203,18 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     @Override
     public JkArtifactProducer get() {
-        return maker();
+        return getMaker();
     }
 
-    public String info() {
-        return new StringBuilder("Project Location : " + this.baseDir() + "\n")
+    public String getInfo() {
+        return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + this.versionedModule + "\n")
                 .append(this.sourceLayout.info()).append("\n")
                 .append("Java Source Version : " + this.getSourceVersion() + "\n")
                 .append("Source Encoding : " + this.compileSpec.getEncoding() + "\n")
+                .append("Source file count : " + this.sourceLayout.sources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + this.maker.getDependencyResolver().getRepos() + "\n")
-                .append("Publish repositories : " + this.maker.getPublishRepos()  + "\n")
+                .append("Publish repositories : " + this.maker.getPublishTasks().getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + this.getDependencies().toList().size() + " elements.\n")
                 .append("Defined Artifacts : " + this.get().getArtifactIds())
                 .toString();

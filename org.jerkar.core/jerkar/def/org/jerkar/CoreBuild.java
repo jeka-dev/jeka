@@ -45,16 +45,16 @@ public class CoreBuild extends JkJavaProjectBuild {
         project().setSourceVersion(JkJavaVersion.V8);
         project().setMavenPublicationInfo(mavenPublication());
 
-        maker().setCompiler(JkJavaCompiler.of().withForking(true));  // Fork to avoid compile failure bug on github/travis
-        maker().setTestCompiler(JkJavaCompiler.of().withForking(true));
-        maker().setPublishRepos(publishRepos());
+        maker().getCompileTasks().setFork(true);  // Fork to avoid compile failure bug on github/travis
+        maker().getTestTasks().setFork(true);
+        maker().getPublishTasks().setPublishRepos(publishRepos());
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
 
         this.distribFolder = maker().getOutLayout().outputPath().resolve("distrib");
     }
 
     private void doDistrib() {
-        final JkJavaProjectMaker maker = this.java().project().maker();
+        final JkJavaProjectMaker maker = this.java().project().getMaker();
         maker.makeArtifactsIfAbsent(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();

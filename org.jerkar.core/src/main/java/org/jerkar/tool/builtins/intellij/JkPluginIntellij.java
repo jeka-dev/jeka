@@ -57,14 +57,14 @@ public final class JkPluginIntellij extends JkPlugin {
         if (owner.plugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = owner.plugins().get(JkPluginJava.class).project();
             if (!onlyRunDependencies) {
-                generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());
+                generator.setDependencies(project.getMaker().getDependencyResolver(), project.getDependencies());
             } else {
-                generator.setDependencies(project.maker().getDependencyResolver(), JkDependencySet.of());
+                generator.setDependencies(project.getMaker().getDependencyResolver(), JkDependencySet.of());
             }
             generator.setSourceJavaVersion(project.getSourceVersion());
             generator.setForceJdkVersion(true);
             if (externalDir) {
-                basePath = project.baseDir();
+                basePath = project.getBaseDir();
             }
         }
         final String xml = generator.generate();

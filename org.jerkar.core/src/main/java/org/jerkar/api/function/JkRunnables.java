@@ -48,7 +48,7 @@ public class JkRunnables implements Runnable {
      * Chains this specified {@link Runnable} with the underlying one. The specified runnable will
      * be executed first.
      */
-    public JkRunnables chainAtBeginning(Runnable chainedRunnable) {
+    public JkRunnables prependChain(Runnable chainedRunnable) {
         final Runnable oldRunnable = this.runnable;
         this.runnable = () -> {oldRunnable.run(); chainedRunnable.run();};
         return this;

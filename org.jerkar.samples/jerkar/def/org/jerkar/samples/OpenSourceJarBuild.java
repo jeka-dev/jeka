@@ -26,11 +26,11 @@ public class OpenSourceJarBuild extends JkJavaProjectBuild {
                 .of("my project", "my description", "https://github.com/jerkar/samples")
                 .withScm("https://github.com/jerkar/sample.git")
                 .andApache2License()
-                .andGitHubDeveloper("djeang", "dgeangdev@yahoo.fr");
+                .andGitHubDeveloper("John Doe", "johndoe6591@gmail.com");
         
         java().project()
                 .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
-                .setDependencies(deps)
+                .addDependencies(deps)
                 .setMavenPublicationInfo(info);
     }
    

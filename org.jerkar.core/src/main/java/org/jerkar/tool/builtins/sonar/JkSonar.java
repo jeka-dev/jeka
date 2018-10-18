@@ -64,14 +64,14 @@ public final class JkSonar {
         this.enabled = enabled;
     }
 
-    public static JkSonar of(String projectKey, String projectName, JkVersion projectVersion) {
-        JkUtilsAssert.notNull(projectName, "JkEclipseProject name can't be null.");
-        JkUtilsAssert.notNull(projectKey, "JkEclipseProject key can't be null.");
-        JkUtilsAssert.notNull(projectVersion, "JkEclipseProject projectVersion can't be null.");
+    public static JkSonar of(String projectKey, String projectName, JkVersion version) {
+        JkUtilsAssert.notNull(projectName, "Project name can't be null.");
+        JkUtilsAssert.notNull(projectKey, "Project key can't be null.");
+        JkUtilsAssert.notNull(version, "Project version can't be null.");
         final Map<String, String> map = new HashMap<>();
         map.put(PROJECT_KEY, projectKey);
         map.put(PROJECT_NAME, projectName);
-        map.put(PROJECT_VERSION, projectVersion.getValue());
+        map.put(PROJECT_VERSION, version.getValue());
         map.put(WORKING_DIRECTORY, ".sonarTempDir");
         map.put(VERBOSE, Boolean.toString(JkLog.Verbosity.VERBOSE == JkLog.verbosity()));
         final Properties properties = System.getProperties();

@@ -7,7 +7,7 @@ import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.utils.JkUtilsAssert;
 
 /**
- * Identifies a given module in a given projectVersion
+ * Identifies a given module in a given version
  *
  * @author Jerome Angibaud
  */
@@ -26,29 +26,29 @@ public final class JkVersionedModule implements Serializable {
     }
 
     /**
-     * Creates a {@link JkVersionedModule} from the specified module and projectVersion.
+     * Creates a {@link JkVersionedModule} from the specified module and version.
      */
     public static JkVersionedModule of(JkModuleId moduleId, JkVersion version) {
-        JkUtilsAssert.notNull(version, "No projectVersion specified for " + moduleId);
+        JkUtilsAssert.notNull(version, "No version specified for " + moduleId);
         return new JkVersionedModule(moduleId, version);
     }
 
     /**
      * Creates a <code>JkVersionedModule</code> from a string formatted as
-     * <code>groupId:name:projectVersion</code>.
+     * <code>groupId:name:version</code>.
      */
     public static final JkVersionedModule of(String description) {
         final String[] items = description.split(":");
         if (items.length != 3) {
             throw new IllegalArgumentException(description
-                    + " does not tespect format groupId:name:projectVersion");
+                    + " does not respect format groupId:name:version");
         }
         return JkVersionedModule.of(JkModuleId.of(items[0], items[1]), JkVersion.of(items[2]));
     }
 
     /**
      * Creates a <code>JkVersionedModule</code> from a string formatted as
-     * <code>groupId:name:projectVersion</code>.
+     * <code>groupId:name:version</code>.
      */
     public static final JkVersionedModule ofRootDirName(String rootDirName) {
         return of(JkModuleId.of(rootDirName), JkVersion.UNSPECIFIED);
@@ -62,14 +62,14 @@ public final class JkVersionedModule implements Serializable {
     }
 
     /**
-     * Returns the projectVersion.
+     * Returns the version.
      */
     public JkVersion getVersion() {
         return version;
     }
 
     /**
-     * Returns a {@link JkVersionedModule} identical to this one but with the specified projectVersion.
+     * Returns a {@link JkVersionedModule} identical to this one but with the specified version.
      */
     public JkVersionedModule withVersion(JkVersion version) {
         return new JkVersionedModule(this.moduleId, version);

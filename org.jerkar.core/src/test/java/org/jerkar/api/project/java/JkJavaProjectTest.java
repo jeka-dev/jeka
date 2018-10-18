@@ -33,15 +33,15 @@ public class JkJavaProjectTest {
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
         coreProject.setDependencies(coreDeps);
-        coreProject.maker().setTestRunner(
-                coreProject.maker().getTestRunner().withForking(true));
+        coreProject.getMaker().getTestTasks().setRunner(
+                coreProject.getMaker().getTestTasks().getRunner().withForking(true));
 
         final Path desktop = top.resolve("desktop");
         final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
         final JkDependencySet deps = JkDependencySet.of().and(coreProject);
         desktopProject.setDependencies(deps);
-        desktopProject.maker().defineFatJarArtifact("fat");
-        desktopProject.maker().makeAllArtifacts();
+        desktopProject.getMaker().defineMainArtifactAsFatJar(false);
+        desktopProject.getMaker().makeAllArtifacts();
 
 
         // Desktop.getDesktop().open(desktop);

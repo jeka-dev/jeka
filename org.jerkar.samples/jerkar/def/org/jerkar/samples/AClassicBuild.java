@@ -13,7 +13,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 /**
  * This build is equivalent to {@link MavenStyleBuild} but removing the needless
  * part cause we respect the convention project folder name =
- * groupName.projectName and the projectVersion number is taken from build.properties
+ * groupName.projectName and the version number is taken from build.properties
  * (default behavior)
  *
  * @author Jerome Angibaud
@@ -36,9 +36,9 @@ public class AClassicBuild extends JkJavaProjectBuild {
                         .and("com.google.guava:guava:21.0")
                         .and("com.sun.jersey:jersey-server:1.19")
                         .and("junit:junit:4.11", TEST));
-        maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
-        maker().defineFatJarArtifact("fat");  // project will produce a fat jar as well.
-        maker().setTestRunner(maker().getTestRunner().withForking(true));
+        maker().getCompileTasks().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
+        maker().defineMainArtifactAsFatJar(false);  // project will produce a fat jar as well.
+        maker().getTestTasks().setForkRun(true);
     }
     
     public static void main(String[] args) {

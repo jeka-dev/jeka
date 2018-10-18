@@ -97,7 +97,7 @@ public final class JkEclipseClasspathGenerator {
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
     public static JkEclipseClasspathGenerator of(JkJavaProject javaProject) {
-        return of(javaProject, javaProject.maker().getDependencyResolver());
+        return of(javaProject, javaProject.getMaker().getDependencyResolver());
     }
 
     private boolean hasBuildDef() {

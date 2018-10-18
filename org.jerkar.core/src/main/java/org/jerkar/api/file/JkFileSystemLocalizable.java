@@ -10,5 +10,5 @@ public interface JkFileSystemLocalizable {
     /**
      * Returns the base directory of this object.
      */
-    Path baseDir();
+    Path getBaseDir();
 }

@@ -98,7 +98,7 @@ public final class JkImlGenerator {
 
     public static JkImlGenerator of (JkJavaProject javaProject) {
         return of(javaProject.getSourceLayout(), javaProject.getDependencies(),
-                javaProject.maker().getDependencyResolver());
+                javaProject.getMaker().getDependencyResolver());
     }
 
 

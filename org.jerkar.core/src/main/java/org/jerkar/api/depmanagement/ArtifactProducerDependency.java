@@ -62,7 +62,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
 
     private static Path baseDir(JkArtifactProducer artifactProducer) {
         if (artifactProducer instanceof JkFileSystemLocalizable) {
-            return ((JkFileSystemLocalizable) artifactProducer).baseDir();
+            return ((JkFileSystemLocalizable) artifactProducer).getBaseDir();
         }
         return null;
     }

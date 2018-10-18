@@ -4,7 +4,7 @@ import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.*;
-import org.jerkar.api.java.junit.JkJavaTestBulk;
+import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.tool.JkRun;
@@ -64,7 +64,7 @@ public class AntStyleBuild extends JkRun {
         JkUnit.of().withForking()
         .withReportDir(reportDir)
         .withReport(JunitReportDetail.FULL)
-        .run(JkJavaTestBulk.of(
+        .run(JkJavaTestClasses.of(
                 classpath.andPrepending(jarFile),
                 JkPathTree.of(classDir).andAccept("**/*Test.class", "*Test.class") ));
     }

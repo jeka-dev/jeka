@@ -350,7 +350,7 @@ public final class JkRepo implements Serializable {
         }
 
         /**
-         * Creates a {@link JkPublishConfig} for publishing non-snapshot projectVersion on the specified {@link JkRepo}.
+         * Creates a {@link JkPublishConfig} for publishing non-snapshot version on the specified {@link JkRepo}.
          * Snapshot versions are not publishable on this {@link JkPublishConfig}
          */
         public static JkPublishConfig ofReleaseOnly(boolean needSignature) {

@@ -287,7 +287,7 @@ final class IvyTranslations {
         }
         for (final DependencyDescriptor dependencyDescriptor : dependencyContainer.toDependencyDescriptors()) {
 
-            // If we don't set parent, force projectVersion on resolution won't work
+            // If we don't set parent, force version on resolution won't work
             final Field field = JkUtilsReflect.getField(DefaultDependencyDescriptor.class, "parentId");
             JkUtilsReflect.setFieldValue(dependencyDescriptor, field, moduleDescriptor.getModuleRevisionId());
             moduleDescriptor.addDependency(dependencyDescriptor);
@@ -299,7 +299,7 @@ final class IvyTranslations {
             moduleDescriptor.addExcludeRule(rule);
         }
 
-        // -- Add projectVersion override for transitive dependency
+        // -- Add version override for transitive dependency
         for (final JkModuleId moduleId : resolvedVersions.getModuleIds()) {
             final JkVersion version = resolvedVersions.getVersionOf(moduleId);
             moduleDescriptor.addDependencyDescriptorMediator(toModuleId(moduleId),

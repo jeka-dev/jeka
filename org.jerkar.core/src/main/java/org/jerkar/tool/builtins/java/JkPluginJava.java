@@ -63,7 +63,7 @@ public class JkPluginJava extends JkPlugin {
         if (Files.exists(path)) {
             this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.ofTextDescription(path)));
         }
-        this.producedArtifacts.add(this.project.maker().getMainArtifactId());
+        this.producedArtifacts.add(this.project.getMaker().getMainArtifactId());
         this.scaffoldPlugin = run.plugins().get(JkPluginScaffold.class);
     }
 
@@ -78,23 +78,26 @@ public class JkPluginJava extends JkPlugin {
         if (project.getVersionedModule() != null && !JkUtilsString.isBlank(projectVersion)) {
             project.setVersionedModule(project.getVersionedModule().withVersion(projectVersion));
         }
+        final JkJavaProjectMaker maker = project.getMaker();
         if (!publish.sources) {
-            project.maker().getArtifactFileIdsToNotPublish().addAll(
-                    project.maker().getArtifactIdsWithClassifier("sources"));
+            project.getMaker().getPublishTasks().getUnpublishedArtifactIds().addAll(
+                    project.getMaker().getArtifactIdsWithClassifier("sources"));
         }
         if (!publish.tests) {
-            project.maker().getArtifactFileIdsToNotPublish().addAll(
-                    project.maker().getArtifactIdsWithClassifier("test"));
+            maker.getPublishTasks().getUnpublishedArtifactIds().addAll(
+                    project.getMaker().getArtifactIdsWithClassifier("test"));
         }
-        project.maker().setCompiler(compiler());
-        project.maker().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
+        if (maker.getCompileTasks().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
+            maker.getCompileTasks().setCompiler(compiler());
+        }
+        maker.getPublishTasks().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
         if (publish.localOnly) {
-            project.maker().setPublishRepos(JkRepoSet.ofLocal());
+            maker.getPublishTasks().setPublishRepos(JkRepoSet.ofLocal());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
-        JkDependencyResolver resolver = project.maker().getDependencyResolver();
+        JkDependencyResolver resolver = project.getMaker().getDependencyResolver();
         resolver = resolver.withRepos(downloadRepo); // always look in local repo
-        project.maker().setDependencyResolver(resolver);
+        project.getMaker().setDependencyResolver(resolver);
         if (pack.javadoc) {
             producedArtifacts.add(JkJavaProjectMaker.JAVADOC_ARTIFACT_ID);
         }
@@ -105,22 +108,22 @@ public class JkPluginJava extends JkPlugin {
             producedArtifacts.add(JkJavaProjectMaker.TEST_ARTIFACT_ID);
         }
         if (pack.checksums().length > 0) {
-            project.maker().postPack.chain(() -> project.maker().checksum(pack.checksums()));
+            project.getMaker().getPackTasks().getPostActions().chain(() -> project.getMaker().checksum(pack.checksums()));
         }
         /*
         if (publish.signArtifacts) {
             project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repoPlugin.pgpSigner()));
         }
         */
-        JkUnit tester = (JkUnit) project.maker().getTestRunner();
+        JkUnit tester = (JkUnit) project.getMaker().getTestTasks().getRunner();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             tester = tester.withForking(javaProcess);
         }
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);
-        project.maker().setTestRunner(tester);
-        project.maker().setSkipTests(tests.skip);
+        maker.getTestTasks().setRunner(tester);
+        maker.setSkipTests(tests.skip);
         if (this.compilerExtraArgs != null) {
             project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
@@ -153,7 +156,7 @@ public class JkPluginJava extends JkPlugin {
     }
 
     public JkPathTree ouputTree() {
-        return JkPathTree.of(this.project().maker().getOutLayout().outputPath());
+        return JkPathTree.of(this.project().getMaker().getOutLayout().outputPath());
     }
 
     public void addArtifactToProduce(JkArtifactId artifactId) {
@@ -168,19 +171,19 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
-        project.maker().compile();
+        project.getMaker().compile();
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
     public void test() {
-        project.maker().test();
+        project.getMaker().test();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
             "\nDoes not re-generate artifacts already generated : " +
             "execute 'clean java#pack' to re-generate artifacts.")
     public void pack() {
-        project.maker().pack(this.producedArtifacts);
+        project.getMaker().pack(this.producedArtifacts);
     }
 
     /**
@@ -188,7 +191,7 @@ public class JkPluginJava extends JkPlugin {
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        final JkResolveResult resolveResult = this.project().maker().getDependencyResolver()
+        final JkResolveResult resolveResult = this.project().getMaker().getDependencyResolver()
                 .resolve(this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
         final JkDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
@@ -196,7 +199,7 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Displays information about the Java project to build.")
     public void info() {
-        JkLog.info(this.project.info());
+        JkLog.info(this.project.getInfo());
         JkLog.info("Produced Artifacts : " + this.producedArtifacts);
         JkLog.info("\nExecute 'java#showDependencies' to display details on dependencies.");
 
@@ -204,7 +207,7 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
-        project.maker().publish();
+        project.getMaker().getPublishTasks().publish();
     }
 
     public static class JkPublishOptions {
@@ -228,9 +231,9 @@ public class JkPluginJava extends JkPlugin {
         final JkProcess process =  JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
                 project().getCompileSpec().getSourceVersion().get());
         if (process != null) {
-            return project().maker().getCompiler().withForking(process);
+            return project().getMaker().getCompileTasks().getCompiler().withForking(process);
         }
-        return project.maker().getCompiler();
+        return project.getMaker().getCompileTasks().getCompiler();
     }
 
 }

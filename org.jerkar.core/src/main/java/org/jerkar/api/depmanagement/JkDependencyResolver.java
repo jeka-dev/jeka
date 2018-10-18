@@ -158,7 +158,7 @@ public final class JkDependencyResolver {
     /**
      * The underlying dependency manager can cache the resolution on file ofSystem
      * for faster result. To make this caching possible, you must set the
-     * module+projectVersion for which the resolution is made. This is only relevant
+     * module+version for which the resolution is made. This is only relevant
      * for of dependencies and have no effect for of dependencies.
      */
     public JkDependencyResolver withModuleHolder(JkVersionedModule versionedModule) {

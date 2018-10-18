@@ -15,7 +15,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * <ul>
  *   <li>The list of publishLocalOnly file constituting the resolved dependencies (the jar
  *        files for instance)</li>
- *   <li>The {@link JkVersionProvider} that specify which static projectVersion has been
+ *   <li>The {@link JkVersionProvider} that specify which static version has been
  *        taken in account when a module dependency is declared using dynamic versions
  *        (as 1.0.+)</li>
  * </ul>

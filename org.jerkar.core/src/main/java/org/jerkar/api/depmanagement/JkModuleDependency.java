@@ -13,7 +13,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * A dependency on an external module. External modules are supposed to be
- * located in a repository. The projectVersion range identify which versions are likely
+ * located in a repository. The version range identify which versions are likely
  * to be compatible with the project to build.<br/>
  * For example, <code>org.hibernate:hibernate-core:3.0.+</code> is a legal
  * description for an external module dependency.
@@ -89,8 +89,8 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Creates a {@link JkModuleDependency} to its group, name and projectVersion
-     * range. The projectVersion range can be any string accepted by
+     * Creates a {@link JkModuleDependency} to its group, name and version
+     * range. The version range can be any string accepted by
      * {@link JkVersion#of(String)}.
      */
     public static JkModuleDependency of(String group, String name, String version) {
@@ -145,7 +145,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Returns the projectVersion of the module this dependencies is constrained to.
+     * Returns the version of the module this dependencies is constrained to.
      */
     public JkVersion getVersion() {
         return version;
@@ -160,7 +160,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Returns <code>true</code> if the projectVersion of the module for this dependency is not specified.
+     * Returns <code>true</code> if the version of the module for this dependency is not specified.
      */
     public boolean hasUnspecifedVersion() {
         return this.version.isUnspecified();
@@ -168,7 +168,7 @@ public final class JkModuleDependency implements JkDependency {
 
     /**
      * Returns a JkModuleDependency identical to this one but with the specified
-     * static projectVersion. If the specified projectVersion is <code>null</code> then returned projectVersion is this one.
+     * static version. If the specified version is <code>null</code> then returned version is this one.
      *
      */
     public JkModuleDependency withResolvedVersion(JkVersion version) {
