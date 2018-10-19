@@ -40,22 +40,22 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates Idea [my-module].iml file.")
     public void generateIml() {
         final JkImlGenerator generator;
-        if (owner.plugins().hasLoaded(JkPluginJava.class)) {
-            generator = JkImlGenerator.of(owner.plugins().get(JkPluginJava.class).project());
+        if (getOwner().plugins().hasLoaded(JkPluginJava.class)) {
+            generator = JkImlGenerator.of(getOwner().plugins().get(JkPluginJava.class).project());
         } else {
-            generator = JkImlGenerator.of(owner.baseDir());
+            generator = JkImlGenerator.of(getOwner().baseDir());
         }
         final List<Path> depProjects = new LinkedList<>();
-        for (final JkRun depRun : owner.importedRuns().directs()) {
+        for (final JkRun depRun : getOwner().importedRuns().directs()) {
             depProjects.add(depRun.baseTree().getRoot());
         }
         generator.setUseVarPath(useVarPath);
-        generator.setRunDependencies(externalDir ? null : owner.runDependencyResolver(), owner.runDependencies());
+        generator.setRunDependencies(externalDir ? null : getOwner().runDependencyResolver(), getOwner().runDependencies());
 
         generator.setImportedProjects(depProjects);
-        Path basePath = owner.baseDir();
-        if (owner.plugins().hasLoaded(JkPluginJava.class)) {
-            JkJavaProject project = owner.plugins().get(JkPluginJava.class).project();
+        Path basePath = getOwner().baseDir();
+        if (getOwner().plugins().hasLoaded(JkPluginJava.class)) {
+            JkJavaProject project = getOwner().plugins().get(JkPluginJava.class).project();
             if (!onlyRunDependencies) {
                 generator.setDependencies(project.getMaker().getDependencyResolver(), project.getDependencies());
             } else {
@@ -81,8 +81,8 @@ public final class JkPluginIntellij extends JkPlugin {
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file.")
     public void generateModulesXml() {
-        final Path current = owner.baseTree().getRoot();
-        final Iterable<Path> imls = owner.baseTree().andAccept("**.iml").getFiles();
+        final Path current = getOwner().baseTree().getRoot();
+        final Iterable<Path> imls = getOwner().baseTree().andAccept("**.iml").getFiles();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
         JkLog.info("File generated at : " + modulesXmlGenerator.outputFile());
@@ -90,7 +90,7 @@ public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void generateAllIml() {
-        final Iterable<Path> folders = owner.baseTree()
+        final Iterable<Path> folders = getOwner().baseTree()
                 .andAccept("**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andReject("**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());

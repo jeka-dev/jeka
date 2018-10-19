@@ -1,7 +1,9 @@
 package org.jerkar.api.java.project;
 
+import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkArtifactId;
 import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.JkClasspath;
@@ -17,8 +19,12 @@ public class JkJavaProjectPackTasks {
 
     private Supplier<String> artifactFileNameSupplier;
 
-    public final JkRunnables postPack = JkRunnables.of(() -> {
-    });
+    // Known working algorithm working on JDK8 platform includes <code>md5, sha-1, sha-2 and sha-256</code>
+    private String[] digestAlgorithms = new String[0];
+
+    private boolean signArtifacts;
+
+    private final JkRunnables postActions = JkRunnables.of(() -> {});
 
     JkJavaProjectPackTasks(JkJavaProjectMaker maker) {
         this.maker = maker;
@@ -101,12 +107,36 @@ public class JkJavaProjectPackTasks {
     }
 
     /**
+     * Defines the algorithms to sign the produced artifacts.
+     * @param algorithms Digest algorithm working on JDK8 platform including <code>md5, sha-1, sha-2 and sha-256</code>
+     */
+    public JkJavaProjectPackTasks setDigestAlgorithms(String ... algorithms) {
+        this.digestAlgorithms = algorithms;
+        return this;
+    }
+
+    public JkJavaProjectPackTasks setSignArtifacts(boolean signArtifacts) {
+        this.signArtifacts = signArtifacts;
+        return this;
+    }
+
+    /**
      * Chain of actions that will be executed at the end of {@link JkJavaProjectMaker#pack(Iterable)} method.
      */
     public final JkRunnables getPostActions() {
-        return postPack;
+        return postActions;
     }
 
+    /**
+     * Creates a checksum file of each specified digest algorithm and each existing defined artifact file.
+     * Checksum files will be created in same folder as their respecting artifact files with the same name suffixed
+     * by '.' and the name of the checksumm algorithm. <br/>
+     * Known working algorithm working on JDK8 platform includes <code>md5, sha-1, sha-2 and sha-256</code>.
+     */
+    void checksum() {
+        maker.getAllArtifactPaths().stream().filter(Files::exists)
+                .forEach((file) -> JkPathFile.of(file).checksum(digestAlgorithms));
+    }
 
 
 }

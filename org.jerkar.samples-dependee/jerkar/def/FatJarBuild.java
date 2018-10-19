@@ -8,16 +8,6 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * Simple build demonstrating of how Jerkar can handle multi-project build.
- * <p>
- * Here, the project depends on the <code>org.jerkar.samples</code> project.
- * More precisely, on the [fat
- * jar](http://stackoverflow.com/questions/19150811/what-is-a-fat-jar) file
- * produced by the <code>AClassicalBuild</code> build.
- * <p>
- * The compilation relies on a fat jar (a jar containing all the dependencies)
- * produced by <code>org.jerkar.samples</code> project. The build produces in
- * turns, produces a fat jar merging the fat jar dependency, the classes of this
- * project and its module dependencies.
  * 
  * @author Jerome Angibaud
  * 

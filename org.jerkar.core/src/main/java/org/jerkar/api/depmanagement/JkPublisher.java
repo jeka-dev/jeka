@@ -21,11 +21,11 @@ public final class JkPublisher {
 
     private static final JkClassLoader IVY_CLASS_LOADER = IvyClassloader.CLASSLOADER;
 
-    private final InternalPublisher ivyPublisher;
+    private final InternalPublisher internalPublisher;
 
-    private JkPublisher(InternalPublisher jkIvyPublisher) {
+    private JkPublisher(InternalPublisher internalPublisher) {
         super();
-        this.ivyPublisher = jkIvyPublisher;
+        this.internalPublisher = internalPublisher;
     }
 
     /**
@@ -76,7 +76,7 @@ public final class JkPublisher {
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
                            JkDependencySet dependencies, JkScopeMapping defaultMapping,
                            Instant deliveryDate, JkVersionProvider resolvedVersion) {
-        this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultMapping,
+        this.internalPublisher.publishIvy(versionedModule, publication, dependencies, defaultMapping,
                 deliveryDate, resolvedVersion);
     }
 
@@ -94,7 +94,7 @@ public final class JkPublisher {
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencySet dependencies) {
         assertFilesToPublishExist(publication);
-        this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.withModulesOnly());
+        this.internalPublisher.publishMaven(versionedModule, publication, dependencies.withModulesOnly());
     }
 
     private void assertFilesToPublishExist(JkMavenPublication publication) {
@@ -104,34 +104,20 @@ public final class JkPublisher {
         }
      }
 
-    /**
-     * Publishes all artifact files for the specified artifact producer for the specified versioned module.
-     *
-     * @param versionedModule The target getModuleId and version for the specified publication
-     * @param dependencies The dependencies to specify in the generated pom file.
-     * @param extraPublishInfo Extra information about authors, licensing, source control management, ...
-     * @param artifactLocator Object producing artifacts to be deployed. This object is used only to find
-     *               artifact files. If an artifact files is not present, it is not created by this method.
-     */
-    public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
-                             Set<JkArtifactId> excludedArtifacts,
-                             JkDependencySet dependencies, JkMavenPublicationInfo extraPublishInfo) {
-        JkMavenPublication publication = JkMavenPublication.of(artifactLocator, excludedArtifacts).with(extraPublishInfo);
-        this.publishMaven(versionedModule, publication, dependencies);
-    }
+
 
     /**
      * Returns <code>true</code> if this publisher contains Maven reposirories.
      */
     public boolean hasMavenPublishRepo() {
-        return this.ivyPublisher.hasMavenPublishRepo();
+        return this.internalPublisher.hasMavenPublishRepo();
     }
 
     /**
      * Returns <code>true</code> if this publisher contains Ivy reposirories.
      */
     public boolean hasIvyPublishRepo() {
-        return this.ivyPublisher.hasIvyPublishRepo();
+        return this.internalPublisher.hasIvyPublishRepo();
     }
 
 }

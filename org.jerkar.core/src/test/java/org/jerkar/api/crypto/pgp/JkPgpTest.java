@@ -1,12 +1,9 @@
 package org.jerkar.api.crypto.pgp;
 
-import java.io.File;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkConstants;
 import org.junit.Test;
 
@@ -24,7 +21,7 @@ public class JkPgpTest {
             Files.createFile(signatureFile);
         }
         final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
-        pgp.sign(sampleFile, signatureFile);
+        pgp.signMany(sampleFile, signatureFile);
     }
 
     @Test(expected = RuntimeException.class)

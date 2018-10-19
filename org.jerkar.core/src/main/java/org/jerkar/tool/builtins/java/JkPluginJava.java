@@ -1,5 +1,6 @@
 package org.jerkar.tool.builtins.java;
 
+import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompiler;
@@ -12,6 +13,7 @@ import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
+import org.jerkar.tool.builtins.repos.JkPluginPgp;
 import org.jerkar.tool.builtins.repos.JkPluginRepo;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
@@ -56,7 +58,7 @@ public class JkPluginJava extends JkPlugin {
     protected JkPluginJava(JkRun run) {
         super(run);
         this.repoPlugin = run.plugins().get(JkPluginRepo.class);
-        this.project = JkJavaProject.ofMavenLayout(this.owner.baseDir());
+        this.project = JkJavaProject.ofMavenLayout(this.getOwner().baseDir());
         this.project.setDependencies(JkDependencySet.ofLocal(project().getSourceLayout()
                 .baseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
         final Path path = this.project.getSourceLayout().baseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
@@ -91,9 +93,6 @@ public class JkPluginJava extends JkPlugin {
             maker.getCompileTasks().setCompiler(compiler());
         }
         maker.getPublishTasks().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
-        if (publish.localOnly) {
-            maker.getPublishTasks().setPublishRepos(JkRepoSet.ofLocal());
-        }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         JkDependencyResolver resolver = project.getMaker().getDependencyResolver();
         resolver = resolver.withRepos(downloadRepo); // always look in local repo
@@ -108,13 +107,13 @@ public class JkPluginJava extends JkPlugin {
             producedArtifacts.add(JkJavaProjectMaker.TEST_ARTIFACT_ID);
         }
         if (pack.checksums().length > 0) {
-            project.getMaker().getPackTasks().getPostActions().chain(() -> project.getMaker().checksum(pack.checksums()));
+            project.getMaker().getPackTasks().setDigestAlgorithms(pack.checksums());
         }
-        /*
         if (publish.signArtifacts) {
-            project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repoPlugin.pgpSigner()));
+            JkPluginPgp pgpPlugin = this.getOwner().plugins().get(JkPluginPgp.class);
+            JkPgp pgp = pgpPlugin.get();
+            project.getMaker().getPublishTasks().setSigner(pgp::sign);
         }
-        */
         JkUnit tester = (JkUnit) project.getMaker().getTestTasks().getRunner();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
@@ -131,7 +130,7 @@ public class JkPluginJava extends JkPlugin {
 
     private void setupScaffolder() {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
-        String baseDirName = owner.baseDir().getFileName().toString();
+        String baseDirName = getOwner().baseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
         project.getSourceLayout().sources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
@@ -207,7 +206,7 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
-        project.getMaker().getPublishTasks().publish();
+        project.getMaker().getPublishTasks().publish(publish.localOnly);
     }
 
     public static class JkPublishOptions {

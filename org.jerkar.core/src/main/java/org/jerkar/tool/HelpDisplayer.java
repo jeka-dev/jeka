@@ -76,7 +76,7 @@ final class HelpDisplayer {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         for (PluginDescription pluginDescription : pluginDescriptions) {
             if (pluginDescription.shortName().equals(plugin.name())) {
-                JkLog.info(helpPluginDescription(plugin.owner, pluginDescription));
+                JkLog.info(helpPluginDescription(plugin.getOwner(), pluginDescription));
                 return;
             }
         }

@@ -12,7 +12,7 @@ public abstract class JkPlugin {
 
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
-    protected final JkRun owner;
+    private final JkRun owner;
 
     /*
      * Right after to be instantiated, plugin instances are likely to be configured by the owning run.
@@ -42,6 +42,10 @@ public abstract class JkPlugin {
         }
         final String suffix = className.substring(CLASS_PREFIX.length());
         return JkUtilsString.uncapitalize(suffix);
+    }
+
+    protected JkRun getOwner() {
+        return owner;
     }
 
     @Override

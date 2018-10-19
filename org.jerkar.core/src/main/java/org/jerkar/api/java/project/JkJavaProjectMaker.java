@@ -300,16 +300,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
-    /**
-     * Creates a checksum file of each specified algorithm and each existing defined artifact file.
-     * Checksum files will be created in same folder as their respecting artifact files with the same name suffixed
-     * by '.' and the name of the checksumm algorithm. <br/>
-     * Known working algorithm working on JDK8 platform includes <code>md5, sha-1, sha-2 and sha-256</code>.
-     */
-    public void checksum(String ...algorithms) {
-        this.getAllArtifactPaths().stream().filter(Files::exists)
-                .forEach((file) -> JkPathFile.of(file).checksum(algorithms));
-    }
+
 
     private void compileAndTestIfNeeded() {
         if (!status.compileDone) {
@@ -320,13 +311,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         }
     }
 
-    public void makeMainJar() {
+    private void makeMainJar() {
         compileAndTestIfNeeded();
         Path target = packTasks.getArtifactFile(getMainArtifactId());
         packTasks.createJar(target);
     }
 
-    public void makeSourceJar() {
+    private void makeSourceJar() {
         if (!status.sourceGenerated) {
             compileTasks.getSourceGenerator().run();
             status.sourceGenerated = true;
@@ -338,13 +329,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     /**
      * Generates javadoc files (files + zip)
      */
-    public void generateJavadoc() {
+    private void generateJavadoc() {
         javadocTasks.run();
         status.javadocGenerated = true;
     }
 
 
-    public void makeJavadocJar() {
+    private void makeJavadocJar() {
         if (!status.javadocGenerated) {
             generateJavadoc();
         }
@@ -352,7 +343,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         packTasks.createJavadocJar(target);
     }
 
-    public void makeTestJar(Path target) {
+    private void makeTestJar(Path target) {
         compileAndTestIfNeeded();
         if (!status.unitTestDone) {
             test();
@@ -360,7 +351,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         packTasks.createTestJar(target);
     }
 
-    public void makeTestJar() {
+    private void makeTestJar() {
         makeTestJar(getArtifactPath(TEST_ARTIFACT_ID));
     }
 

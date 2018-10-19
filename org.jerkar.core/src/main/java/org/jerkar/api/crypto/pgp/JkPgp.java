@@ -108,7 +108,7 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
      * Signs the specified files in a detached signature file which will have
      * the same name of the signed file plus ".asc" suffix.
      */
-    public Path[] sign(Path... filesToSign) {
+    public Path[] signMany(Path... filesToSign) {
         final Path[] result = new Path[filesToSign.length];
         int i = 0;
         for (final Path file : filesToSign) {
@@ -121,6 +121,10 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
             i++;
         }
         return result;
+    }
+
+    public Path sign(Path fileToSign) {
+        return signMany(fileToSign)[0];
     }
 
     /**
