@@ -63,7 +63,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
         this.dependencies = JkDependencySet.of();
-        this.versionedModule = JkVersionedModule.ofRootDirName(sourceLayout.baseDir().getFileName().toString());
+        this.versionedModule = JkVersionedModule.ofRootDirName(sourceLayout.getBaseDir().getFileName().toString());
         this.maker = new JkJavaProjectMaker(this);
     }
 
@@ -83,14 +83,14 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     @Override
     public String toString() {
-        return "project " + this.sourceLayout.baseDir().getFileName();
+        return "project " + this.sourceLayout.getBaseDir().getFileName();
     }
 
     // ---------------------------- Getters / setters --------------------------------------------
 
     @Override
     public Path getBaseDir() {
-        return this.getSourceLayout().baseDir();
+        return this.getSourceLayout().getBaseDir();
     }
 
     @Override
@@ -209,10 +209,10 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + this.versionedModule + "\n")
-                .append(this.sourceLayout.info()).append("\n")
+                .append(this.sourceLayout.getInfo()).append("\n")
                 .append("Java Source Version : " + this.getSourceVersion() + "\n")
                 .append("Source Encoding : " + this.compileSpec.getEncoding() + "\n")
-                .append("Source file count : " + this.sourceLayout.sources().count(Integer.MAX_VALUE, false) + "\n")
+                .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + this.maker.getDependencyResolver().getRepos() + "\n")
                 .append("Publish repositories : " + this.maker.getPublishTasks().getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + this.getDependencies().toList().size() + " elements.\n")

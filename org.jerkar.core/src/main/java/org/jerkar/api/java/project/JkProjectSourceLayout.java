@@ -133,14 +133,14 @@ public class JkProjectSourceLayout {
     /**
      * Returns location of production source code (containing only edited sources, not generated sources).
      */
-    public final JkPathTreeSet sources() {
+    public final JkPathTreeSet getSources() {
         return sources.resolve(this.baseDir);
     }
 
     /**
      * Returns location of production resources.
      */
-    public final JkPathTreeSet resources() {
+    public final JkPathTreeSet getResources() {
         return resources.resolve(this.baseDir);
     }
 
@@ -148,18 +148,18 @@ public class JkProjectSourceLayout {
      * Returns location of test source code (containing edited + generated
      * sources).
      */
-    public final JkPathTreeSet tests() {
+    public final JkPathTreeSet getTests() {
         return tests.resolve(this.baseDir);
     }
 
     /**
      * Returns location of test resources.
      */
-    public final JkPathTreeSet testResources() {
+    public final JkPathTreeSet getTestResources() {
         return testResources.resolve(this.baseDir);
     }
 
-    public Path baseDir() {
+    public Path getBaseDir() {
         return baseDir;
     }
 
@@ -167,7 +167,7 @@ public class JkProjectSourceLayout {
     /**
      * Returns base directory as a {@link JkPathTree}.
      */
-    public JkPathTree baseTree() {
+    public JkPathTree getBaseTree() {
         return JkPathTree.of(baseDir);
     }
 
@@ -197,7 +197,7 @@ public class JkProjectSourceLayout {
         return testResources.equals(that.testResources);
     }
 
-    public String info() {
+    public String getInfo() {
         return new StringBuffer("Sources : " + this.sources + "\n")
                 .append("Resources : " + this.resources + "\n")
                 .append("Tests : " + this.tests + "\n")
@@ -218,7 +218,7 @@ public class JkProjectSourceLayout {
     private JkPathTreeSet toSet(String ... relativePaths) {
         List<JkPathTree> trees = new LinkedList<>();
         for (String relativePath : relativePaths) {
-            trees.add(baseTree().goTo(relativePath));
+            trees.add(getBaseTree().goTo(relativePath));
         }
         return JkPathTreeSet.of(trees);
     }

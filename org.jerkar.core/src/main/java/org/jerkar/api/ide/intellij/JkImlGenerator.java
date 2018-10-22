@@ -85,7 +85,7 @@ public final class JkImlGenerator {
      */
     public static JkImlGenerator of(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
                           JkDependencyResolver resolver) {
-        JkImlGenerator result = new JkImlGenerator(sourceLayout.baseDir());
+        JkImlGenerator result = new JkImlGenerator(sourceLayout.getBaseDir());
         result.sourceLayout = sourceLayout;
         result.projectDependencies = dependencies;
         result.projectDependencyResolver = resolver;
@@ -192,8 +192,8 @@ public final class JkImlGenerator {
         if (sourceLayout != null) {
 
             // Write test sources
-            final Path projectDir = this.sourceLayout.baseDir();
-            for (final JkPathTree fileTree : this.sourceLayout.tests().getPathTrees()) {
+            final Path projectDir = this.sourceLayout.getBaseDir();
+            for (final JkPathTree fileTree : this.sourceLayout.getTests().getPathTrees()) {
                 if (fileTree.exists()) {
                     writer.writeCharacters(T1);
                     writer.writeEmptyElement("sourceFolder");
@@ -206,8 +206,8 @@ public final class JkImlGenerator {
             }
 
             // write test resources
-            for (final JkPathTree fileTree : this.sourceLayout.testResources().getPathTrees()) {
-                if (fileTree.exists() && !contains(this.sourceLayout.tests(), fileTree.getRootDirOrZipFile())) {
+            for (final JkPathTree fileTree : this.sourceLayout.getTestResources().getPathTrees()) {
+                if (fileTree.exists() && !contains(this.sourceLayout.getTests(), fileTree.getRootDirOrZipFile())) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
                     final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
@@ -219,7 +219,7 @@ public final class JkImlGenerator {
 
             // Write production sources
 
-            for (final JkPathTree fileTree : this.sourceLayout.sources().getPathTrees()) {
+            for (final JkPathTree fileTree : this.sourceLayout.getSources().getPathTrees()) {
                 if (fileTree.exists()) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
@@ -231,8 +231,8 @@ public final class JkImlGenerator {
             }
 
             // Write production test resources
-            for (final JkPathTree fileTree : this.sourceLayout.resources().getPathTrees()) {
-                if (fileTree.exists() && !contains(this.sourceLayout.sources(), fileTree.getRootDirOrZipFile())) {
+            for (final JkPathTree fileTree : this.sourceLayout.getResources().getPathTrees()) {
+                if (fileTree.exists() && !contains(this.sourceLayout.getSources(), fileTree.getRootDirOrZipFile())) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
                     final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');

@@ -33,6 +33,7 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
+import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
@@ -97,13 +98,14 @@ final class PgpUtils {
         //JkUtilsFile.assertAllExist(fileToSign, secringFile);
         JkUtilsAssert.isTrue(Files.exists(fileToSign), fileToSign + " not found.");
         JkUtilsAssert.isTrue(Files.exists(secringFile), secringFile + " not found.");
+        JkPathFile.of(signatureFile).createIfNotExist();
         try (final InputStream toSign = Files.newInputStream(fileToSign);
              final InputStream keyRing = Files.newInputStream(secringFile);
              final OutputStream out = Files.newOutputStream(signatureFile)) {
 
             sign(toSign, keyRing, out, pass, armor);
         } catch (IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
 
     }

@@ -2,7 +2,6 @@ package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileSystemLocalizable;
-import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
@@ -37,6 +36,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private final Map<JkArtifactId, Runnable> artifactProducers = new LinkedHashMap<>();
 
+
     private final Map<Set<JkScope>, JkPathSequence> dependencyCache = new HashMap<>();
 
     private JkProjectOutLayout outLayout;
@@ -56,10 +56,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     private final JkRunnables cleaner;
 
     JkJavaProjectMaker(JkJavaProject project) {
-        outLayout = JkProjectOutLayout.classicJava().withOutputDir(project.getBaseDir().resolve("jerkar/output"));
+        outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(project.getBaseDir().resolve("jerkar/output"));
 
         cleaner = JkRunnables.of(
-                () -> JkPathTree.of(getOutLayout().outputPath()).deleteContent());
+                () -> JkPathTree.of(getOutLayout().getOutputPath()).deleteContent());
         final Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
                 Charset.forName(project.getCompileSpec().getEncoding());
         compileTasks = new JkJavaProjectCompileTasks(this, charset);
@@ -68,13 +68,9 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         publishTasks = new JkJavaProjectPublishTasks(this);
         javadocTasks = new JkJavaProjectJavadocTasks(this);
 
-        // defines artifacts
+        // define default artifacts
         defineArtifact(getMainArtifactId(), () -> makeMainJar());
         defineArtifact(SOURCES_ARTIFACT_ID, () -> makeSourceJar());
-        defineArtifact(JAVADOC_ARTIFACT_ID, () -> makeJavadocJar());
-        defineArtifact(TEST_ARTIFACT_ID, () -> makeTestJar());
-        defineArtifact(TEST_SOURCE_ARTIFACT_ID,
-                () -> packTasks.createTestSourceJar(packTasks.getArtifactFile(TEST_SOURCE_ARTIFACT_ID)));
         this.project = project;
     }
 
@@ -88,10 +84,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public JkJavaProjectMaker setOutLayout(JkProjectOutLayout outLayout) {
-        if (outLayout.outputPath().isAbsolute()) {
+        if (outLayout.getOutputPath().isAbsolute()) {
             this.outLayout = outLayout;
         } else {
-            this.outLayout = outLayout.withOutputDir(this.project.getBaseDir().resolve(outLayout.outputPath()));
+            this.outLayout = outLayout.withOutputDir(this.project.getBaseDir().resolve(outLayout.getOutputPath()));
         }
         return this;
     }
@@ -120,10 +116,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
+    @Override
     public void makeArtifact(JkArtifactId artifactId) {
         if (artifactProducers.containsKey(artifactId)) {
-            JkLog.execute("Producing artifact file " + project.getBaseDir().relativize(packTasks.getArtifactFile(artifactId)),
-                    this.artifactProducers.get(artifactId));
+            JkLog.startTask("Producing artifact file "
+                    + project.getBaseDir().relativize(packTasks.getArtifactFile(artifactId)));
+            this.artifactProducers.get(artifactId).run();
+            JkLog.endTask();
         } else {
             throw new IllegalArgumentException("No artifact " + artifactId + " is defined on project " + this.project);
         }
@@ -152,6 +151,19 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     @Override
     public final Iterable<JkArtifactId> getArtifactIds() {
         return this.artifactProducers.keySet();
+    }
+
+    public void defineTestArtifact() {
+        defineArtifact(TEST_ARTIFACT_ID, () -> makeTestJar());
+    }
+
+    public void defineTestSourceArtifact() {
+        defineArtifact(TEST_SOURCE_ARTIFACT_ID,
+                () -> packTasks.createTestSourceJar(packTasks.getArtifactFile(TEST_SOURCE_ARTIFACT_ID)));
+    }
+
+    public void defineJavadocArtifact() {
+        defineArtifact(JAVADOC_ARTIFACT_ID, () -> makeJavadocJar());
     }
 
     // Dependency management -----------------------------------------------------------
@@ -270,8 +282,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public JkJavaProjectMaker test() {
         JkLog.startTask("Running unit tests");
-        if (this.project.getSourceLayout().tests().count(0, false) == 0) {
-            JkLog.info("No unit test found in : " + project.getSourceLayout().tests());
+        if (this.project.getSourceLayout().getTests().count(0, false) == 0) {
+            JkLog.info("No unit test found in : " + project.getSourceLayout().getTests());
             JkLog.endTask();
             return this;
         }
@@ -279,7 +291,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
             compile();
         }
         testTasks.run();
-        status.unitTestDone = true;
+        status.testDone = true;
         JkLog.endTask();
         return this;
     }
@@ -295,18 +307,15 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Makes the missing specified artifacts (it won't re-generate already existing artifacts).
      */
     public JkJavaProjectMaker pack(Iterable<JkArtifactId> artifactIds) {
-        makeArtifactsIfAbsent(artifactIds);
-        packTasks.getPostActions().run();
+        makeMissingArtifacts(artifactIds);
         return this;
     }
-
-
 
     private void compileAndTestIfNeeded() {
         if (!status.compileDone) {
             compile();
         }
-        if (!skipTests && !status.unitTestDone) {
+        if (!skipTests && !status.testDone) {
             test();
         }
     }
@@ -318,25 +327,21 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     private void makeSourceJar() {
-        if (!status.sourceGenerated) {
+        if (!status.sourceGenerationDone) {
             compileTasks.getSourceGenerator().run();
-            status.sourceGenerated = true;
+            status.sourceGenerationDone = true;
         }
         Path target = packTasks.getArtifactFile(SOURCES_ARTIFACT_ID);
         packTasks.createSourceJar(target);
     }
 
-    /**
-     * Generates javadoc files (files + zip)
-     */
     private void generateJavadoc() {
         javadocTasks.run();
-        status.javadocGenerated = true;
+        status.javadocDone = true;
     }
 
-
     private void makeJavadocJar() {
-        if (!status.javadocGenerated) {
+        if (!status.javadocDone) {
             generateJavadoc();
         }
         Path target = packTasks.getArtifactFile(JAVADOC_ARTIFACT_ID);
@@ -345,7 +350,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private void makeTestJar(Path target) {
         compileAndTestIfNeeded();
-        if (!status.unitTestDone) {
+        if (!status.testDone) {
             test();
         }
         packTasks.createTestJar(target);
@@ -354,7 +359,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     private void makeTestJar() {
         makeTestJar(getArtifactPath(TEST_ARTIFACT_ID));
     }
-
 
     public boolean isTestSkipped() {
         return skipTests;
@@ -371,23 +375,23 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private class Status {
 
-        private boolean sourceGenerated = false;
+        private boolean sourceGenerationDone = false;
 
         private boolean compileDone = false;
 
-        private boolean unitTestDone = false;
+        private boolean testDone = false;
 
-        private boolean javadocGenerated = false;
+        private boolean javadocDone = false;
 
         void reset() {
-            sourceGenerated = false;
+            sourceGenerationDone = false;
             compileDone = false;
-            unitTestDone = false;
-            javadocGenerated = false;
+            testDone = false;
+            javadocDone = false;
         }
 
         boolean compileOutputPresent() {
-            return Files.exists(JkJavaProjectMaker.this.getOutLayout().classDir());
+            return Files.exists(JkJavaProjectMaker.this.getOutLayout().getClassDir());
         }
 
     }

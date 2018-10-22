@@ -60,8 +60,8 @@ public class JkPluginJava extends JkPlugin {
         this.repoPlugin = run.plugins().get(JkPluginRepo.class);
         this.project = JkJavaProject.ofMavenLayout(this.getOwner().baseDir());
         this.project.setDependencies(JkDependencySet.ofLocal(project().getSourceLayout()
-                .baseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
-        final Path path = this.project.getSourceLayout().baseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
+                .getBaseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
+        final Path path = this.project.getSourceLayout().getBaseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
         if (Files.exists(path)) {
             this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.ofTextDescription(path)));
         }
@@ -81,13 +81,17 @@ public class JkPluginJava extends JkPlugin {
             project.setVersionedModule(project.getVersionedModule().withVersion(projectVersion));
         }
         final JkJavaProjectMaker maker = project.getMaker();
-        if (!publish.sources) {
-            project.getMaker().getPublishTasks().getUnpublishedArtifactIds().addAll(
-                    project.getMaker().getArtifactIdsWithClassifier("sources"));
+        if (!pack.sources) {
+            project.getMaker().undefineArtifact(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
         }
-        if (!publish.tests) {
-            maker.getPublishTasks().getUnpublishedArtifactIds().addAll(
-                    project.getMaker().getArtifactIdsWithClassifier("test"));
+        if (pack.javadoc) {
+            project.getMaker().defineJavadocArtifact();
+        }
+        if (pack.tests) {
+            project.getMaker().defineTestArtifact();
+        }
+        if (pack.testSources) {
+            project.getMaker().defineTestSourceArtifact();
         }
         if (maker.getCompileTasks().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
             maker.getCompileTasks().setCompiler(compiler());
@@ -133,10 +137,10 @@ public class JkPluginJava extends JkPlugin {
         String baseDirName = getOwner().baseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
-        project.getSourceLayout().sources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().resources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().tests().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().testResources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().getSources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().getResources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().getTests().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().getTestResources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
         scaffoldPlugin.setRunClassClode(code);
     }
 
@@ -155,7 +159,7 @@ public class JkPluginJava extends JkPlugin {
     }
 
     public JkPathTree ouputTree() {
-        return JkPathTree.of(this.project().getMaker().getOutLayout().outputPath());
+        return JkPathTree.of(this.project().getMaker().getOutLayout().getOutputPath());
     }
 
     public void addArtifactToProduce(JkArtifactId artifactId) {
@@ -210,12 +214,6 @@ public class JkPluginJava extends JkPlugin {
     }
 
     public static class JkPublishOptions {
-
-        @JkDoc("If true, publishing to repository will include sources jar.")
-        public boolean sources = true;
-
-        @JkDoc("If true, publishing to repository will include tests jar.")
-        public boolean tests = false;
 
         @JkDoc("If true, publishing will occur only in the local repository.")
         public boolean localOnly = false;

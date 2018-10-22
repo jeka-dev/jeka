@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
@@ -50,12 +49,12 @@ public class CoreBuild extends JkJavaProjectBuild {
         maker().getPublishTasks().setPublishRepos(publishRepos());
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
 
-        this.distribFolder = maker().getOutLayout().outputPath().resolve("distrib");
+        this.distribFolder = maker().getOutLayout().getOutputPath().resolve("distrib");
     }
 
     private void doDistrib() {
         final JkJavaProjectMaker maker = this.java().project().getMaker();
-        maker.makeArtifactsIfAbsent(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID);
+        maker.makeMissingArtifacts(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
@@ -68,7 +67,7 @@ public class CoreBuild extends JkJavaProjectBuild {
             .copyIn(ivySourceLibs)
             .copyIn(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
         if (java().pack.javadoc) {
-            maker.makeArtifactsIfAbsent(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
+            maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.goTo("libs-javadoc").copyIn(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         JkLog.execute("Making documentation", () -> new DocMaker(baseDir(), distribFolder,

@@ -22,7 +22,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
      * one is interested on.
      */
     ArtifactProducerDependency(JkArtifactProducer producer, Iterable<JkArtifactId> fileIds) {
-        super(() -> producer.makeArtifactsIfAbsent(artifacts(producer, fileIds)),
+        super(() -> producer.makeMissingArtifacts(artifacts(producer, fileIds)),
                 baseDir(producer),
                 jars(producer, artifacts(producer, fileIds)), () -> runtimeDeps(producer, artifacts(producer, fileIds)));
         this.artifactProducer = producer;

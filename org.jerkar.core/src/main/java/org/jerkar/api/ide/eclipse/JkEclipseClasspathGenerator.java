@@ -101,7 +101,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private boolean hasBuildDef() {
-        return new File(this.sourceLayout.baseDir().toFile(), JkConstants.DEF_DIR).exists();
+        return new File(this.sourceLayout.getBaseDir().toFile(), JkConstants.DEF_DIR).exists();
     }
 
 
@@ -174,7 +174,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> paths = new HashSet<>();
 
         // Write sources for build classes
-        if (hasBuildDef() && new File(sourceLayout.baseDir().toFile(), JkConstants.DEF_DIR).exists()) {
+        if (hasBuildDef() && new File(sourceLayout.getBaseDir().toFile(), JkConstants.DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
@@ -298,11 +298,11 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
-        for (final JkPathTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).getPathTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.getTests().and(sourceLayout.getTestResources()).getPathTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = sourceLayout.baseDir().relativize(fileTree.getRoot()).toString().replace(File.separator, "/");
+            final String path = sourceLayout.getBaseDir().relativize(fileTree.getRoot()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -316,11 +316,11 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        for (final JkPathTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).getPathTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.getSources().and(sourceLayout.getResources()).getPathTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.getRoot());
+            final String path = relativePathIfPossible(sourceLayout.getBaseDir(), fileTree.getRoot());
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -411,7 +411,7 @@ public final class JkEclipseClasspathGenerator {
             binPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.jerkarHomeDir().relativize(bin).toString();
         } else {
             isVar = false;
-            binPath = sourceLayout.baseDir().relativize(bin).toString();
+            binPath = sourceLayout.getBaseDir().relativize(bin).toString();
         }
         binPath = binPath.replace(File.separator, "/");
         writer.writeCharacters("\t");
@@ -432,7 +432,7 @@ public final class JkEclipseClasspathGenerator {
             } else if (usePathVariables && source.startsWith(JkLocator.jerkarHomeDir())) {
                 srcPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.jerkarHomeDir().relativize(source).toString();
             }else {
-                srcPath = sourceLayout.baseDir().relativize(source).toString();
+                srcPath = sourceLayout.getBaseDir().relativize(source).toString();
             }
             srcPath = srcPath.replace(File.separator, "/");
             writer.writeAttribute("sourcepath", srcPath);

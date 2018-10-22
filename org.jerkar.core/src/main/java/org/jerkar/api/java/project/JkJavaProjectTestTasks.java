@@ -41,10 +41,10 @@ public class JkJavaProjectTestTasks {
 
     JkJavaProjectTestTasks(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
-        resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().testResources())
-                .and(maker.getOutLayout().generatedTestResourceDir())
+        resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().getTestResources())
+                .and(maker.getOutLayout().getGeneratedTestResourceDir())
                 .and(maker.project.getResourceInterpolators())
-                .generateTo(maker.getOutLayout().testClassDir(), charset));
+                .generateTo(maker.getOutLayout().getTestClassDir(), charset));
         compileRunner = JkRunnables.of(() -> {
             final JkJavaCompileSpec testCompileSpec = getTestCompileSpec();
             compiler.compile(testCompileSpec);
@@ -92,14 +92,14 @@ public class JkJavaProjectTestTasks {
     }
 
     private final JkUnit getDefaultTester() {
-        final Path junitReport = maker.getOutLayout().testReportDir().resolve("junit");
+        final Path junitReport = maker.getOutLayout().getTestReportDir().resolve("junit");
         return JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC)
                 .withReportDir(junitReport);
     }
 
     public JkJavaTestClasses getTestClasses() {
         return JkJavaTestClasses.of(getTestClasspath(),
-                JkPathTreeSet.of(maker.getOutLayout().testClassDir()).andMatcher(testClassMatcher));
+                JkPathTreeSet.of(maker.getOutLayout().getTestClassDir()).andMatcher(testClassMatcher));
     }
 
     public JkJavaProjectTestTasks setForkRun(boolean fork) {
@@ -123,16 +123,16 @@ public class JkJavaProjectTestTasks {
 
     private JkJavaCompileSpec getTestCompileSpec() {
         JkJavaCompileSpec result = maker.project.getCompileSpec().copy();
-        final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST).andPrepending(maker.getOutLayout().classDir());
+        final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST).andPrepending(maker.getOutLayout().getClassDir());
         return result
                 .setClasspath(classpath)
-                .addSources(maker.project.getSourceLayout().tests())
-                .setOutputDir(maker.getOutLayout().testClassDir());
+                .addSources(maker.project.getSourceLayout().getTests())
+                .setOutputDir(maker.getOutLayout().getTestClassDir());
     }
 
     public JkClasspath getTestClasspath() {
-        return JkClasspath.of(maker.getOutLayout().testClassDir())
-                .and(maker.getOutLayout().classDir())
+        return JkClasspath.of(maker.getOutLayout().getTestClassDir())
+                .and(maker.getOutLayout().getClassDir())
                 .andMany(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST));
     }
 

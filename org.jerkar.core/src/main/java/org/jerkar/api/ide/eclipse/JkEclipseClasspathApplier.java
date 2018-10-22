@@ -31,9 +31,9 @@ public class JkEclipseClasspathApplier {
      * Modifies the specified javaProject in a way it reflects its eclipse .classpath file.
      */
     public void apply(JkJavaProject javaProject) {
-        final Path dotClasspathFile = javaProject.getSourceLayout().baseDir().resolve(".classpath");
+        final Path dotClasspathFile = javaProject.getSourceLayout().getBaseDir().resolve(".classpath");
         if (!Files.exists(dotClasspathFile)) {
-            throw new JkException(".classpath file not found in " + javaProject.getSourceLayout().baseDir());
+            throw new JkException(".classpath file not found in " + javaProject.getSourceLayout().getBaseDir());
         }
         apply(javaProject, DotClasspathModel.from(dotClasspathFile));
     }
@@ -51,7 +51,7 @@ public class JkEclipseClasspathApplier {
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);
         final JkDependencySet dependencies = Lib.toDependencies(/*build*/
-                javaProject.getSourceLayout().baseDir(), libs, this);
+                javaProject.getSourceLayout().getBaseDir(), libs, this);
 
         javaProject.setSourceLayout(javaProject.getSourceLayout().withSources(sources).withResources(resources)
                 .withTests(testSources).withTestResources(testResources));

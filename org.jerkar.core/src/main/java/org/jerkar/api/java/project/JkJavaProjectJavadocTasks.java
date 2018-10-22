@@ -22,7 +22,7 @@ public class JkJavaProjectJavadocTasks {
      */
     void run() {
         JkJavaProject project = maker.project;
-        JkJavadocMaker.of(project.getSourceLayout().sources(), maker.getOutLayout().getJavadocDir())
+        JkJavadocMaker.of(project.getSourceLayout().getSources(), maker.getOutLayout().getJavadocDir())
                 .withClasspath(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
                 .andOptions(javadocOptions).process();
     }

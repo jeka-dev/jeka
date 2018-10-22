@@ -13,7 +13,7 @@ import java.nio.file.Paths;
  */
 public class JkProjectOutLayout {
 
-    public static JkProjectOutLayout classicJava() {
+    public static JkProjectOutLayout ofClassicJava() {
         final Path outputDir = Paths.get("");
         final Path generatedSourceDir = Paths.get( "generated-sources/java");
         final Path generatedResourceDir = Paths.get("generated-resources");
@@ -125,44 +125,44 @@ public class JkProjectOutLayout {
     // --------------------------- Views ---------------------------------
 
 
-    public final Path outputPath() {
+    public final Path getOutputPath() {
         return outputDir;
     }
 
-    public Path outputPath(String relativePath) {
+    public Path getOutputPath(String relativePath) {
         return outputDir.resolve(relativePath);
     }
 
-    public Path classDir() {
+    public Path getClassDir() {
         return outputDir.resolve(classDir);
     }
 
-    public Path testReportDir() {
+    public Path getTestReportDir() {
         return outputDir.resolve(testReportDir);
     }
 
-    public Path testClassDir() {
+    public Path getTestClassDir() {
         return outputDir.resolve(testClassDir);
     }
 
     /**
      * Returns location of generated sources.
      */
-    public Path generatedSourceDir() {
+    public Path getGeneratedSourceDir() {
         return outputDir.resolve(generatedSourceDir);
     }
 
     /**
      * Returns location of generated resources.
      */
-    public Path generatedResourceDir() {
+    public Path getGeneratedResourceDir() {
         return outputDir.resolve(generatedResourceDir);
     }
 
     /**
      * Returns location of generated resources for tests.
      */
-    public Path generatedTestResourceDir() {
+    public Path getGeneratedTestResourceDir() {
         return outputDir.resolve(generatedTestResourceDir);
     }
 

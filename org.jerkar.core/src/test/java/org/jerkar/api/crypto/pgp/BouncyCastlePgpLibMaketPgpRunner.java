@@ -3,6 +3,7 @@ package org.jerkar.api.crypto.pgp;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,14 +67,15 @@ public class BouncyCastlePgpLibMaketPgpRunner {
 
     }
 
+    @Test(expected = IllegalStateException.class)
     public void testSignWithBadSignature() throws Exception {
         final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
         final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
-        final JkPgp pgp = JkPgp.of(pubFile, secringFile, "basPassword");
-        final Path signatureFile = Files.createFile(Paths.get(
-                "build/output/test-out/signature-fake.asm"));
+        final JkPgp pgp = JkPgp.of(pubFile, secringFile, "badPassword");
+        final Path signatureFile = Paths.get(
+                "build/output/test-out/signature-fake.asm").toAbsolutePath();
         final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
-        pgp.signMany(sampleFile, signatureFile);
+        pgp.sign(sampleFile, signatureFile);
     }
 
     private static void sign(Path fileToSign, Path output, String password, Path secRing,

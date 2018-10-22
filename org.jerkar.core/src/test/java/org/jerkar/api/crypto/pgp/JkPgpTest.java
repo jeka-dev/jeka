@@ -5,13 +5,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.jerkar.tool.JkConstants;
+import org.junit.Assert;
 import org.junit.Test;
 
 @SuppressWarnings("javadoc")
 public class JkPgpTest {
 
     @Test
-    public void testSignAndVerify() throws Exception {
+    public void testSign() throws Exception {
         final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
         final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "jerkar");
@@ -21,11 +22,11 @@ public class JkPgpTest {
             Files.createFile(signatureFile);
         }
         final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
-        pgp.signMany(sampleFile, signatureFile);
+        pgp.sign(sampleFile);
     }
 
     @Test(expected = RuntimeException.class)
-    public void testSignWithBadSignature() throws Exception {
+    public void testSignWithBadPassword() throws Exception {
         final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
         final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "badPassword");
@@ -36,6 +37,7 @@ public class JkPgpTest {
         }
         final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
         pgp.sign(sampleFile, signatureFile, "badPassword");
+        Assert.assertTrue(pgp.verify(sampleFile, signatureFile));
     }
 
 }

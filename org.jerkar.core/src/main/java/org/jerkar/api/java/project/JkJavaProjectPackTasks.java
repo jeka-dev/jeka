@@ -1,11 +1,9 @@
 package org.jerkar.api.java.project;
 
-import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkArtifactId;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
 
@@ -21,10 +19,6 @@ public class JkJavaProjectPackTasks {
 
     // Known working algorithm working on JDK8 platform includes <code>md5, sha-1, sha-2 and sha-256</code>
     private String[] digestAlgorithms = new String[0];
-
-    private boolean signArtifacts;
-
-    private final JkRunnables postActions = JkRunnables.of(() -> {});
 
     JkJavaProjectPackTasks(JkJavaProjectMaker maker) {
         this.maker = maker;
@@ -54,7 +48,7 @@ public class JkJavaProjectPackTasks {
         final String namePart = artifactFileNameSupplier.get();
         final String classifier = artifactId.getClassifier() == null ? "" : "-" + artifactId.getClassifier();
         final String extension = artifactId.getExtension() == null ? "" : "." + artifactId.getExtension();
-        return maker.getOutLayout().outputPath().resolve(namePart + classifier + extension);
+        return maker.getOutLayout().getOutputPath().resolve(namePart + classifier + extension);
     }
 
     public Supplier<String> getArtifactFileNameSupplier() {
@@ -63,7 +57,7 @@ public class JkJavaProjectPackTasks {
 
     void createJar(Path target) {
         JkJavaProject project = maker.project;
-        JkJarMaker.of(maker.getOutLayout().classDir())
+        JkJarMaker.of(maker.getOutLayout().getClassDir())
                 .withManifest(project.getManifest())
                 .withExtraFiles(project.getExtraFilesToIncludeInJar())
                 .makeJar(target);
@@ -72,14 +66,14 @@ public class JkJavaProjectPackTasks {
 
     void createFatJar(Path target) {
         JkClasspath classpath = JkClasspath.ofMany(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
-        JkJarMaker.of( maker.getOutLayout().classDir())
+        JkJarMaker.of( maker.getOutLayout().getClassDir())
                 .withManifest(maker.project.getManifest())
                 .withExtraFiles(maker.project.getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath);
     }
 
     void createSourceJar(Path target) {
-        maker.project.getSourceLayout().sources().and(maker.getOutLayout().generatedSourceDir()).zipTo(target);
+        maker.project.getSourceLayout().getSources().and(maker.getOutLayout().getGeneratedSourceDir()).zipTo(target);
     }
 
     void createJavadocJar(Path target) {
@@ -92,15 +86,20 @@ public class JkJavaProjectPackTasks {
     }
 
     void createTestJar(Path target) {
-        JkJarMaker.of(maker.getOutLayout().testClassDir())
+        JkJarMaker.of(maker.getOutLayout().getTestClassDir())
                 .withManifest(maker.project.getManifest())
                 .makeJar(target);
     }
 
     void createTestSourceJar(Path target) {
-        maker.project.getSourceLayout().tests().zipTo(target);
+        maker.project.getSourceLayout().getTests().zipTo(target);
     }
 
+    /**
+     * Specifies how the name of the artifact files will be constructed.
+     * Given artifact file name are always structured as XXXXX-classifier.ext,
+     * this method acts on the XXXXX part.
+     */
     public JkJavaProjectPackTasks setArtifactFileNameSupplier(Supplier<String> artifactFileNameSupplier) {
         this.artifactFileNameSupplier = artifactFileNameSupplier;
         return this;
@@ -113,18 +112,6 @@ public class JkJavaProjectPackTasks {
     public JkJavaProjectPackTasks setDigestAlgorithms(String ... algorithms) {
         this.digestAlgorithms = algorithms;
         return this;
-    }
-
-    public JkJavaProjectPackTasks setSignArtifacts(boolean signArtifacts) {
-        this.signArtifacts = signArtifacts;
-        return this;
-    }
-
-    /**
-     * Chain of actions that will be executed at the end of {@link JkJavaProjectMaker#pack(Iterable)} method.
-     */
-    public final JkRunnables getPostActions() {
-        return postActions;
     }
 
     /**

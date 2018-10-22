@@ -86,6 +86,7 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         this.password = password;
     }
 
+    // Non private for testing
     void sign(Path fileToSign, Path output, String password) {
         final char[] pass;
         if (password == null) {
@@ -104,41 +105,21 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
                 secRing, output, pass, true);
     }
 
-    /**
-     * Signs the specified files in a detached signature file which will have
-     * the same name of the signed file plus ".asc" suffix.
-     */
-    public Path[] signMany(Path... filesToSign) {
-        final Path[] result = new Path[filesToSign.length];
-        int i = 0;
-        for (final Path file : filesToSign) {
-            if (!Files.exists(file)) {
-                continue;
-            }
-            final Path signatureFile = file.getParent().resolve(file.getFileName().toString() + ".asc");
-            result[i] = signatureFile;
-            sign(file, signatureFile, password);
-            i++;
-        }
-        return result;
+    public Path sign(Path fileToSign) {
+        final Path signatureFile = getSignatureFile(fileToSign);
+        sign(fileToSign, signatureFile);
+        return signatureFile;
     }
 
-    public Path sign(Path fileToSign) {
-        return signMany(fileToSign)[0];
+    public void sign(Path fileToSign, Path signatureFile) {
+        sign(fileToSign, signatureFile, password);
     }
 
     /**
      * Returns file that are created if a signature occurs on specified files.
      */
-    public static Path[] getSignatureFiles(Path... filesToSign) {
-        final Path[] result = new Path[filesToSign.length];
-        int i = 0;
-        for (final Path file : filesToSign) {
-            final Path signatureFile = file.getParent().resolve(file.getFileName().toString() + ".asc");
-            result[i] = signatureFile;
-            i++;
-        }
-        return result;
+    public static Path getSignatureFile(Path fileToSign) {
+        return fileToSign.getParent().resolve(fileToSign.getFileName().toString() + ".asc");
     }
 
     /**
@@ -157,7 +138,7 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
      * Creates a identical {@link JkPgp} but with the specified secret ring key
      * file.
      */
-    public JkPgp getSecretRing(Path file, String password) {
+    public JkPgp withSecretRing(Path file, String password) {
         return new JkPgp(pubRing, file, password);
     }
 
@@ -165,7 +146,7 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
      * Creates a identical {@link JkPgp} but with the specified public ring key
      * file.
      */
-    public JkPgp getPublicRing(Path file) {
+    public JkPgp withPublicRing(Path file) {
         return new JkPgp(file, secRing, password);
     }
 

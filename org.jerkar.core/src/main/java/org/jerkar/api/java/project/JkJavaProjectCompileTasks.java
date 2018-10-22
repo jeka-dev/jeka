@@ -29,10 +29,10 @@ public class JkJavaProjectCompileTasks {
 
     JkJavaProjectCompileTasks(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
-        resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().resources())
-                .and(maker.getOutLayout().generatedResourceDir())
+        resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().getResources())
+                .and(maker.getOutLayout().getGeneratedResourceDir())
                 .and(maker.project.getResourceInterpolators())
-                .generateTo(maker.getOutLayout().classDir(), charset));
+                .generateTo(maker.getOutLayout().getClassDir(), charset));
         compileRunner = JkRunnables.of(() -> {
             final JkJavaCompileSpec compileSpec = compileSourceSpec();
             compiler.compile(compileSpec);
@@ -91,8 +91,8 @@ public class JkJavaProjectCompileTasks {
         final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return result
                 .setClasspath(classpath)
-                .addSources(maker.project.getSourceLayout().sources())
-                .addSources(maker.getOutLayout().generatedSourceDir())
-                .setOutputDir(maker.getOutLayout().classDir());
+                .addSources(maker.project.getSourceLayout().getSources())
+                .addSources(maker.getOutLayout().getGeneratedSourceDir())
+                .setOutputDir(maker.getOutLayout().getClassDir());
     }
 }

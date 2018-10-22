@@ -5,8 +5,7 @@ import org.jerkar.api.system.JkException;
 
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Collections;
 import java.util.function.UnaryOperator;
 
 import static org.jerkar.api.java.project.JkJavaProjectMaker.*;
@@ -17,8 +16,6 @@ public class JkJavaProjectPublishTasks {
 
     private JkRepoSet publishRepos = JkRepoSet.ofLocal();
 
-    private final Set<JkArtifactId> unpublishedArtifactIds = new LinkedHashSet<>();
-
     private UnaryOperator<Path> signer;
 
     JkJavaProjectPublishTasks(JkJavaProjectMaker maker) {
@@ -26,7 +23,7 @@ public class JkJavaProjectPublishTasks {
     }
 
     /**
-     * Publishes all artifacts produced by the project maker expects those defined in {@link #unpublishedArtifactIds}
+     * Publishes all artifacts produced by the project maker expects those defined in {@link JkJavaProjectMaker#getProducedArtifacts()}
      * @param localOnly If true, the publication occurs in local repository only.
      */
     public void publish(boolean localOnly) {
@@ -44,9 +41,9 @@ public class JkJavaProjectPublishTasks {
         JkException.throwIf(project.getVersionedModule() == null, "No versionedModule has been set on "
                 + project + ". Can't publish.");
         JkRepoSet repos = localOnly ? JkRepo.ofLocal().toSet() : publishRepos;
-        JkMavenPublication publication = JkMavenPublication.of(maker, unpublishedArtifactIds)
+        JkMavenPublication publication = JkMavenPublication.of(maker, Collections.emptySet())
                 .with(project.getMavenPublicationInfo());
-        JkPublisher.of(repos, maker.getOutLayout().outputPath())
+        JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
                 .publishMaven(project.getVersionedModule(), publication, maker.getDefaultedDependencies());
     }
 
@@ -62,7 +59,7 @@ public class JkJavaProjectPublishTasks {
         final JkVersionProvider resolvedVersions = maker.getDependencyResolver()
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
         JkRepoSet repos = localOnly ? JkRepo.ofLocal().toSet() : publishRepos;
-        JkPublisher.of(repos, maker.getOutLayout().outputPath())
+        JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
                 .publishIvy(maker.project.getVersionedModule(), publication, dependencies,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }
@@ -76,9 +73,7 @@ public class JkJavaProjectPublishTasks {
         return this;
     }
 
-    public Set<JkArtifactId> getUnpublishedArtifactIds() {
-        return unpublishedArtifactIds;
-    }
+
 
     public void setSigner(UnaryOperator<Path> signer) {
         this.signer = signer;

@@ -20,7 +20,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     void makeArtifact(JkArtifactId jkArtifactId);
 
     /**
-     * Returns the runtime dependencies of the specified artifact file. This is usefull to use the artifact file as
+     * Returns the runtime dependencies of the specified artifact file. This is useful to use the artifact file as
      * a transitive dependency.
      */
     JkPathSequence fetchRuntimeDependencies(JkArtifactId jkArtifactId);
@@ -48,17 +48,21 @@ public interface JkArtifactProducer extends JkArtifactLocator {
         makeArtifacts(getArtifactIds());
     }
 
+    default void makeMainArtifact() {
+        makeArtifact(getMainArtifactId());
+    }
+
     /**
      * Produces specified artifact files. Only non existing files are created.
      */
-    default void makeArtifactsIfAbsent(JkArtifactId... artifactFileIds) {
-        makeArtifactsIfAbsent(Arrays.asList(artifactFileIds));
+    default void makeMissingArtifacts(JkArtifactId... artifactFileIds) {
+        makeMissingArtifacts(Arrays.asList(artifactFileIds));
     }
 
     /**
      * Same as {@link #makeArtifact(JkArtifactId)}
      */
-    default void makeArtifactsIfAbsent(Iterable<JkArtifactId> artifactFileIds) {
+    default void makeMissingArtifacts(Iterable<JkArtifactId> artifactFileIds) {
         for (final JkArtifactId artifactFileId : artifactFileIds) {
             final Path path = getArtifactPath(artifactFileId);
             if (!Files.exists(path)) {
@@ -67,6 +71,10 @@ public interface JkArtifactProducer extends JkArtifactLocator {
                 JkLog.info("Artifact " + path + " already exist ... won't process.");
             }
         }
+    }
+
+    default void makeAllMissingArtifacts() {
+        makeArtifacts(this.getArtifactIds());
     }
 
 }
