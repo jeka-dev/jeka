@@ -53,8 +53,6 @@ public class JkPluginJava extends JkPlugin {
 
     private JkJavaProject project;
 
-    private final List<JkArtifactId> producedArtifacts = new ArrayList<>();
-
     protected JkPluginJava(JkRun run) {
         super(run);
         this.repoPlugin = run.plugins().get(JkPluginRepo.class);
@@ -65,7 +63,6 @@ public class JkPluginJava extends JkPlugin {
         if (Files.exists(path)) {
             this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.ofTextDescription(path)));
         }
-        this.producedArtifacts.add(this.project.getMaker().getMainArtifactId());
         this.scaffoldPlugin = run.plugins().get(JkPluginScaffold.class);
     }
 
@@ -101,15 +98,6 @@ public class JkPluginJava extends JkPlugin {
         JkDependencyResolver resolver = project.getMaker().getDependencyResolver();
         resolver = resolver.withRepos(downloadRepo); // always look in local repo
         project.getMaker().setDependencyResolver(resolver);
-        if (pack.javadoc) {
-            producedArtifacts.add(JkJavaProjectMaker.JAVADOC_ARTIFACT_ID);
-        }
-        if (pack.sources) {
-            producedArtifacts.add(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
-        }
-        if (pack.tests) {
-            producedArtifacts.add(JkJavaProjectMaker.TEST_ARTIFACT_ID);
-        }
         if (pack.checksums().length > 0) {
             project.getMaker().getPackTasks().setDigestAlgorithms(pack.checksums());
         }
@@ -118,7 +106,7 @@ public class JkPluginJava extends JkPlugin {
             JkPgp pgp = pgpPlugin.get();
             project.getMaker().getPublishTasks().setSigner(pgp::sign);
         }
-        JkUnit tester = (JkUnit) project.getMaker().getTestTasks().getRunner();
+        JkUnit tester = project.getMaker().getTestTasks().getRunner();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             tester = tester.withForking(javaProcess);
@@ -154,20 +142,8 @@ public class JkPluginJava extends JkPlugin {
         this.project = javaProject;
     }
 
-    public List<JkArtifactId> producedArtifacts() {
-        return producedArtifacts;
-    }
-
     public JkPathTree ouputTree() {
         return JkPathTree.of(this.project().getMaker().getOutLayout().getOutputPath());
-    }
-
-    public void addArtifactToProduce(JkArtifactId artifactId) {
-        this.producedArtifacts.add(artifactId);
-    }
-
-    public void removeArtifactToProduce(JkArtifactId artifactId) {
-        this.producedArtifacts.remove(artifactId);
     }
 
     // ------------------------------- command line methods -----------------------------
@@ -186,7 +162,7 @@ public class JkPluginJava extends JkPlugin {
             "\nDoes not re-generate artifacts already generated : " +
             "execute 'clean java#pack' to re-generate artifacts.")
     public void pack() {
-        project.getMaker().pack(this.producedArtifacts);
+        project.getMaker().makeAllMissingArtifacts();
     }
 
     /**
@@ -203,7 +179,6 @@ public class JkPluginJava extends JkPlugin {
     @JkDoc("Displays information about the Java project to build.")
     public void info() {
         JkLog.info(this.project.getInfo());
-        JkLog.info("Produced Artifacts : " + this.producedArtifacts);
         JkLog.info("\nExecute 'java#showDependencies' to display details on dependencies.");
 
     }

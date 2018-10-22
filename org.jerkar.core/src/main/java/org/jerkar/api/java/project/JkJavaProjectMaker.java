@@ -296,21 +296,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
-    /**
-     * Invokes {@link #pack(Iterable)} for all artifacts defined in this maker.
-     */
-    public JkJavaProjectMaker packAllDefinedArtifacts() {
-       return pack(getArtifactIds());
-    }
-
-    /**
-     * Makes the missing specified artifacts (it won't re-generate already existing artifacts).
-     */
-    public JkJavaProjectMaker pack(Iterable<JkArtifactId> artifactIds) {
-        makeMissingArtifacts(artifactIds);
-        return this;
-    }
-
     private void compileAndTestIfNeeded() {
         if (!status.compileDone) {
             compile();

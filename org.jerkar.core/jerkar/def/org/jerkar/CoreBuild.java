@@ -53,7 +53,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     }
 
     private void doDistrib() {
-        final JkJavaProjectMaker maker = this.java().project().getMaker();
+        final JkJavaProjectMaker maker = this.maker();
         maker.makeMissingArtifacts(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
