@@ -21,7 +21,7 @@ public class JkIvyPublisherRunner {
     }
 
     public static void testPublishIvy() throws IOException {
-        final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepo().toSet(), Paths.get("build/output/test-out").toFile());
+        final IvyInternalPublisher jkIvyResolver = IvyInternalPublisher.of(ivyRepo().toSet(), Paths.get("build/output/test-out").toFile());
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup", "mymodule"), JkVersion.of("myVersion"));
         final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(),
@@ -33,7 +33,7 @@ public class JkIvyPublisherRunner {
     }
 
     public static void testPublishMaven() throws IOException {
-        final IvyPublisher jkIvyPublisher = IvyPublisher.of(mavenRepo().with(JkRepo.JkPublishConfig.of()
+        final IvyInternalPublisher jkIvyPublisher = IvyInternalPublisher.of(mavenRepo().with(JkRepo.JkPublishConfig.of()
                 .withUniqueSnapshot(false)).toSet(), Paths.get("build/output/test-out").toFile());
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup2", "mymodule2"), JkVersion.of("0.0.12-SNAPSHOT"));

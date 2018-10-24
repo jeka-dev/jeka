@@ -2,11 +2,13 @@ package org.jerkar.api.depmanagement;
 
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.project.JkJavaProject;
+import org.jerkar.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,9 +31,36 @@ public class JkDependencyResolverTest {
         Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
         JkDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);
         Assert.assertFalse(dependencyNode.isModuleNode());
-        JkDependencyNode.FileNodeInfo nodeInfo = (JkDependencyNode.FileNodeInfo) dependencyNode.getNodeInfo();
+        JkDependencyNode.JkFileNodeInfo nodeInfo = (JkDependencyNode.JkFileNodeInfo) dependencyNode.getNodeInfo();
         Assert.assertEquals(baseProject.getBaseDir(), nodeInfo.computationOrigin().getIdeProjectBaseDir());
     }
+
+    @Test
+    public void resolveMixedTypeDependencies() throws Exception {
+        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
+        URL sampleJarUrl = JkDependencyResolverTest.class.getResource("myArtifactSample.jar");
+        Path jarFile = Paths.get(sampleJarUrl.toURI());
+        JkDependencySet dependencies = JkDependencySet.of()
+                .and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION)
+                .andFiles(jarFile);
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
+        Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size());
+    }
+
+    @Test
+    public void resolveOnlyFilesDependencies() throws Exception {
+        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
+        URL sampleJarUrl = JkDependencyResolverTest.class.getResource("myArtifactSample.jar");
+        Path jarFile = Paths.get(sampleJarUrl.toURI());
+        JkDependencySet dependencies = JkDependencySet.of()
+                .andFiles(jarFile);
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
+        Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
+    }
+
+
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
         final Path dest = Files.createTempDirectory(JkDependencyResolverTest.class.getName());

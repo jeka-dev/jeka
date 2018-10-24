@@ -37,7 +37,7 @@ public class MergeFileDepIT {
 
         System.out.println(tree.toStringComplete());
 
-        JkDependencyNode.ModuleNodeInfo root = tree.getModuleInfo();
+        JkDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredScopes().isEmpty());
         assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(5, tree.getChildren().size());

@@ -47,6 +47,8 @@ public final class JkRepo implements Serializable {
      */
     public static final String JCENTERL_URL = "https://jcenter.bintray.com";
 
+    private static final String IVY_PREFIX = "ivy:";
+
     private final URL url;
 
     private final JkRepoCredential credential;
@@ -68,7 +70,7 @@ public final class JkRepo implements Serializable {
      * than the url should start with <code>ivy:</code> as <code>ivy:http://myrepolocation</code>.
      */
     public static JkRepo of(String url) {
-        if (url.toLowerCase().startsWith("ivy:")) {
+        if (url.toLowerCase().startsWith(IVY_PREFIX)) {
             return new JkRepo(toUrl(url.substring(4)), null, JkRepoIvyConfig.of(), JkPublishConfig.of());
         }
         return new JkRepo(toUrl(url), null, null, JkPublishConfig.of());

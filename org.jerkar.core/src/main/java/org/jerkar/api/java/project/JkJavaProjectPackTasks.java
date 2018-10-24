@@ -6,6 +6,7 @@ import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
+import org.jerkar.api.system.JkLog;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,8 +18,7 @@ public class JkJavaProjectPackTasks {
 
     private Supplier<String> artifactFileNameSupplier;
 
-    // Known working algorithm working on JDK8 platform includes <code>md5, sha-1, sha-2 and sha-256</code>
-    private String[] digestAlgorithms = new String[0];
+    private String[] checksumAlgorithms = new String[0];
 
     JkJavaProjectPackTasks(JkJavaProjectMaker maker) {
         this.maker = maker;
@@ -109,20 +109,25 @@ public class JkJavaProjectPackTasks {
      * Defines the algorithms to sign the produced artifacts.
      * @param algorithms Digest algorithm working on JDK8 platform including <code>md5, sha-1, sha-2 and sha-256</code>
      */
-    public JkJavaProjectPackTasks setDigestAlgorithms(String ... algorithms) {
-        this.digestAlgorithms = algorithms;
+    public JkJavaProjectPackTasks setChecksumAlgorithms(String ... algorithms) {
+        this.checksumAlgorithms = algorithms;
         return this;
     }
 
+
+
     /**
-     * Creates a checksum file of each specified digest algorithm and each existing defined artifact file.
+     * Creates a checksum file of each specified digest algorithm for the specified file.
      * Checksum files will be created in same folder as their respecting artifact files with the same name suffixed
-     * by '.' and the name of the checksumm algorithm. <br/>
-     * Known working algorithm working on JDK8 platform includes <code>md5, sha-1, sha-2 and sha-256</code>.
+     * by '.' and the name of the checksumm algorithm. <br/>.
      */
-    void checksum() {
-        maker.getAllArtifactPaths().stream().filter(Files::exists)
-                .forEach((file) -> JkPathFile.of(file).checksum(digestAlgorithms));
+    void checksum(Path fileToChecksum) {
+        for (String algo : checksumAlgorithms) {
+            JkLog.startTask("Creating checksum " + algo + " for file " + fileToChecksum);
+            JkPathFile.of(fileToChecksum).checksum(checksumAlgorithms);
+            JkLog.endTask();
+        }
+
     }
 
 

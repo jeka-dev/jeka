@@ -84,7 +84,7 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     /**
      * Returns <code>true</code> if the definition stands for dynamic resolvable
      * version (as 1.4.+, [1.0, 2.0[, ...).<br/>
-     * . Returns <code>false</code> if the version is static or snapshot (as
+     * Returns <code>false</code> if the version is static or snapshot (as
      * 1.4.0, 3.1-SNAPSHOT) A snapshot is not considered as 'resolvable'.
      */
     public boolean isDynamicAndResovable() {

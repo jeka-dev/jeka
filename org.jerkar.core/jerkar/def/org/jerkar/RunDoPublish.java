@@ -11,6 +11,6 @@ class RunDoPublish {
      * Wait some hours/days before see it on Maven central !
      */
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class, "-java#publish.signArtifacts=false, -java#publish.localOnly").maker().getPublishTasks().publish(false);
+        JkInit.instanceOf(CoreBuild.class, "-java#publish.signArtifacts=false, -java#publish.localOnly").maker().getPublishTasks().publish();
     }
 }

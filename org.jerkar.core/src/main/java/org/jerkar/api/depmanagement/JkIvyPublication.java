@@ -1,5 +1,6 @@
 package org.jerkar.api.depmanagement;
 
+import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -123,9 +124,6 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
         return this;
     }
 
-
-
-
     @Override
     public Iterator<Artifact> iterator() {
         return this.artifacts.iterator();
@@ -135,17 +133,17 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
 
         private static final long serialVersionUID = 1L;
 
-        private Artifact(String name, Path file, String type, Set<JkScope> jkScopes) {
+        private Artifact(String name, Path path, String type, Set<JkScope> jkScopes) {
             super();
-            this.file = file;
-            this.extension = file.getFileName().toString().contains(".") ? JkUtilsString.substringAfterLast(
-                    file.getFileName().toString(), ".") : null;
+            this.file = path.toFile();
+            this.extension = path.getFileName().toString().contains(".") ? JkUtilsString.substringAfterLast(
+                    path.getFileName().toString(), ".") : null;
                     this.type = type;
                     this.jkScopes = jkScopes;
                     this.name = name;
         }
 
-        public final Path file;
+        public final File file;  // path not serializable
 
         public final String type;
 

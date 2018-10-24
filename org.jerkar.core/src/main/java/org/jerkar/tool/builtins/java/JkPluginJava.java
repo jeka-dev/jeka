@@ -19,8 +19,6 @@ import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,7 +97,7 @@ public class JkPluginJava extends JkPlugin {
         resolver = resolver.withRepos(downloadRepo); // always look in local repo
         project.getMaker().setDependencyResolver(resolver);
         if (pack.checksums().length > 0) {
-            project.getMaker().getPackTasks().setDigestAlgorithms(pack.checksums());
+            project.getMaker().getPackTasks().setChecksumAlgorithms(pack.checksums());
         }
         if (publish.signArtifacts) {
             JkPluginPgp pgpPlugin = this.getOwner().plugins().get(JkPluginPgp.class);
@@ -185,7 +183,12 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
-        project.getMaker().getPublishTasks().publish(publish.localOnly);
+        project.getMaker().getPublishTasks().publish();
+    }
+
+    @JkDoc("Publishes produced artifacts to local repository.")
+    public void publishLocal() {
+        project.getMaker().getPublishTasks().publishLocal();
     }
 
     public static class JkPublishOptions {

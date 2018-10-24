@@ -3,7 +3,6 @@ package org.jerkar.api.depmanagement;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkException;
@@ -17,7 +16,7 @@ import org.jerkar.api.system.JkException;
  */
 public final class JkPublisher {
 
-    private static final String IVY_PUB_CLASS = "org.jerkar.api.depmanagement.IvyPublisher";
+    private static final String IVY_PUB_CLASS = "org.jerkar.api.depmanagement.IvyInternalPublisher";
 
     private static final JkClassLoader IVY_CLASS_LOADER = IvyClassloader.CLASSLOADER;
 
@@ -37,7 +36,7 @@ public final class JkPublisher {
 
     /**
      * Creates a {@link JkPublisher} with the specified {@link JkRepoSet}
-     * and output directory. <code>artifactDir</code> is the place where pom.xml andPrepending
+     * and artifact directory. <code>artifactDir</code> is the place where pom.xml and
      * ivy.xml are generated.
      */
     public static JkPublisher of(JkRepoSet publishRepos, Path artifactDir) {
@@ -51,7 +50,7 @@ public final class JkPublisher {
      * Creates a {@link JkPublisher} with the specified {@link JkRepoSet}.
      */
     public static JkPublisher of(JkRepoSet publishRepos) {
-        return of(publishRepos, (Path) null);
+        return of(publishRepos,  null);
     }
 
     /**
@@ -71,7 +70,7 @@ public final class JkPublisher {
      * @param resolvedVersion
      *            If the dependencies contains dynamic versions (as 1.0.+) then
      *            you can mention a static version replacement. If none, you can
-     *            just pass {@link JkVersionProvider#empty()}
+     *            just pass {@link JkVersionProvider#of()} }
      */
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
                            JkDependencySet dependencies, JkScopeMapping defaultMapping,
@@ -105,19 +104,5 @@ public final class JkPublisher {
      }
 
 
-
-    /**
-     * Returns <code>true</code> if this publisher contains Maven reposirories.
-     */
-    public boolean hasMavenPublishRepo() {
-        return this.internalPublisher.hasMavenPublishRepo();
-    }
-
-    /**
-     * Returns <code>true</code> if this publisher contains Ivy reposirories.
-     */
-    public boolean hasIvyPublishRepo() {
-        return this.internalPublisher.hasIvyPublishRepo();
-    }
 
 }

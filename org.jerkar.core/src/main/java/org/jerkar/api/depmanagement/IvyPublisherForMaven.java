@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 
 /**
- * {@link IvyPublisher} delegates to this class for publishing to Maven
+ * {@link IvyInternalPublisher} delegates to this class for publishing to Maven
  * repositories.
  */
 final class IvyPublisherForMaven {

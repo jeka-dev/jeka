@@ -360,14 +360,14 @@ public final class JkEclipseClasspathGenerator {
         for (final JkDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency
             if (node.isModuleNode()) {
-                final JkDependencyNode.ModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
+                final JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
                 writeModuleEntry(writer,
                         moduleNodeInfo.resolvedVersionedModule(),
                         moduleNodeInfo.getFiles(), repos, allPaths);
 
                 // File dependencies (file ofSystem + computed)
             } else {
-                final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.getNodeInfo();
+                final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
                     final Path ideProjectBaseDir = computedDependency.getIdeProjectBaseDir();

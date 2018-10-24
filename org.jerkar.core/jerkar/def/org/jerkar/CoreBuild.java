@@ -89,6 +89,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     public void doDefault() {
         clean();
         doDistrib();
+        maker().getPublishTasks().publishLocal();
     }
 
     public void publishDocOnGithub() {

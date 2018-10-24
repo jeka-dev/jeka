@@ -25,7 +25,7 @@ import org.apache.ivy.core.resolve.IvyNodeCallers.Caller;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.util.url.URLHandlerRegistry;
-import org.jerkar.api.depmanagement.JkDependencyNode.ModuleNodeInfo;
+import org.jerkar.api.depmanagement.JkDependencyNode.JkModuleNodeInfo;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -203,16 +203,14 @@ final class IvyResolver implements InternalDepResolver {
     private static JkDependencyNode createTree(Iterable<IvyNode> nodes, JkVersionedModule rootVersionedModule,
             IvyArtifactContainer artifactContainer) {
         final IvyTreeResolver treeResolver = new IvyTreeResolver(nodes, artifactContainer);
-        final ModuleNodeInfo treeRootNodeInfo = new ModuleNodeInfo(rootVersionedModule.getModuleId(),
-                JkVersion.of(rootVersionedModule.getVersion().getValue()), new HashSet<>(), new HashSet<>(),
-                rootVersionedModule.getVersion() , new LinkedList<>(), true);
+        final JkModuleNodeInfo treeRootNodeInfo = JkModuleNodeInfo.ofRoot(rootVersionedModule);
         return treeResolver.createNode(treeRootNodeInfo);
     }
 
     private static class IvyTreeResolver {
 
         // parent to children parentChildMap
-        private final Map<JkModuleId, List<ModuleNodeInfo>> parentChildMap = new HashMap<>();
+        private final Map<JkModuleId, List<JkModuleNodeInfo>> parentChildMap = new HashMap<>();
 
         IvyTreeResolver(Iterable<IvyNode> nodes, IvyArtifactContainer artifactContainer) {
 
@@ -237,12 +235,12 @@ final class IvyResolver implements InternalDepResolver {
                 for (final Caller caller : callers) {
                     final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
                     final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
-                    final List<ModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.getModuleId(), k -> new LinkedList<>());
+                    final List<JkModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.getModuleId(), k -> new LinkedList<>());
                     final Set<JkScope> declaredScopes = IvyTranslations.toJkScopes(dependencyDescriptor.getModuleConfigurations());
                     final JkVersion version = JkVersion.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());
 
-                    final ModuleNodeInfo moduleNodeInfo  = new ModuleNodeInfo(moduleId, version, declaredScopes,
+                    final JkModuleNodeInfo moduleNodeInfo  = new JkModuleNodeInfo(moduleId, version, declaredScopes,
                             rootScopes, resolvedVersion, artifacts);
                     if (!containSame(list, moduleId)) {
                         list.add(moduleNodeInfo);
@@ -251,8 +249,8 @@ final class IvyResolver implements InternalDepResolver {
             }
         }
 
-        private static boolean containSame(List<ModuleNodeInfo> list, JkModuleId moduleId) {
-            for (final ModuleNodeInfo moduleNodeInfo : list) {
+        private static boolean containSame(List<JkModuleNodeInfo> list, JkModuleId moduleId) {
+            for (final JkModuleNodeInfo moduleNodeInfo : list) {
                 if (moduleNodeInfo.getModuleId().equals(moduleId)) {
                     return true;
                 }
@@ -260,17 +258,17 @@ final class IvyResolver implements InternalDepResolver {
             return false;
         }
 
-        JkDependencyNode createNode(ModuleNodeInfo holder) {
+        JkDependencyNode createNode(JkModuleNodeInfo holder) {
             if (parentChildMap.get(holder.getModuleId()) == null || holder.isEvicted()) {
                 return JkDependencyNode.ofModuleDep(holder, new LinkedList<>());
             }
 
-            List<ModuleNodeInfo> moduleNodeInfos = parentChildMap.get(holder.getModuleId());
+            List<JkModuleNodeInfo> moduleNodeInfos = parentChildMap.get(holder.getModuleId());
             if (moduleNodeInfos == null) {
                 moduleNodeInfos = new LinkedList<>();
             }
             final List<JkDependencyNode> childNodes = new LinkedList<>();
-            for (final ModuleNodeInfo moduleNodeInfo : moduleNodeInfos) {
+            for (final JkModuleNodeInfo moduleNodeInfo : moduleNodeInfos) {
                 final JkDependencyNode childNode = createNode(moduleNodeInfo);
                 childNodes.add(childNode);
             }

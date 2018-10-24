@@ -11,7 +11,4 @@ interface InternalPublisher {
     void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencySet dependencies);
 
-    boolean hasMavenPublishRepo();
-
-    boolean hasIvyPublishRepo();
 }

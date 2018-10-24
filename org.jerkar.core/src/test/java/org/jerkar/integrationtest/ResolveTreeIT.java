@@ -33,7 +33,7 @@ public class ResolveTreeIT {
 
         System.out.println(tree.toStringComplete());
 
-        JkDependencyNode.ModuleNodeInfo root = tree.getModuleInfo();
+        JkDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredScopes().isEmpty());
         assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(3, tree.getChildren().size());
@@ -76,7 +76,7 @@ public class ResolveTreeIT {
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps, TEST).getDependencyTree();
         System.out.println(tree.toStrings());
-        JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.getFirst(moduleId).getModuleInfo();
+        JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getFirst(moduleId).getModuleInfo();
         assertTrue(moduleNodeInfo.getDeclaredVersion().getValue().equals("1.4.+"));
         String resolvedVersionName = moduleNodeInfo.getResolvedVersion().getValue();
         assertEquals("1.4.7.RELEASE", resolvedVersionName);
@@ -96,13 +96,13 @@ public class ResolveTreeIT {
         JkDependencyNode tree = resolveResult.getDependencyTree();
 
         JkDependencyNode bootNode = tree.getChildren().get(0);
-        JkDependencyNode.ModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.getFirst(springCoreModule).getModuleInfo();
+        JkDependencyNode.JkModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.getFirst(springCoreModule).getModuleInfo();
         assertEquals("4.3.14.RELEASE", springCoreTransitiveModuleNodeInfo.getDeclaredVersion().getValue());
         assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.getResolvedVersion().getValue());  // cause evicted
 
         // As the spring-core projectVersion is declared as direct dependency and the declared projectVersion is exact (not dynamic)
         // then the resolved projectVersion should the one declared.
-        JkDependencyNode.ModuleNodeInfo springCoreDirectModuleNodeInfo = tree.getChildren().get(1).getModuleInfo();
+        JkDependencyNode.JkModuleNodeInfo springCoreDirectModuleNodeInfo = tree.getChildren().get(1).getModuleInfo();
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getDeclaredVersion().getValue());
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getResolvedVersion().getValue());
     }
@@ -131,7 +131,7 @@ public class ResolveTreeIT {
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         JkDependencyNode tree = resolveResult.getDependencyTree();
-        JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.getChildren().get(0).getModuleInfo();
+        JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getChildren().get(0).getModuleInfo();
         assertEquals("22.0", moduleNodeInfo.getDeclaredVersion().getValue());
     }
 

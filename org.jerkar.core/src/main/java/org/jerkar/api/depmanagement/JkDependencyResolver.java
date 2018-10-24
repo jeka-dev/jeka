@@ -13,15 +13,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsTime;
 
 /**
- * A resolver for a given set of dependency. Each instance of
- * <code>JkDependencyResolver</code> defines the dependencies to resolve, this
- * means that you must instantiate one for each dependency set you want to
- * resolve. <br/>
- * Each instance of <code>JkDependencyResolver</code> keep in cache resolution
- * setting so a resolution o a given scope is never computed twice.
- *
- * The result of the resolution depends on the parameters you have set on it.
- * See {@link JkResolutionParameters}
+ * Class to resolve dependencies to files or dependency tree. Resolution is made upon binary repositories.
  *
  * @author Jerome Angibaud
  */
@@ -72,26 +64,13 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Resolves the module dependencies (dependencies declared as module) for the specified scopes.
-     * If no scope is specified, then it is resolved for all scopes.
+     * Resolves the specified dependencies (dependencies declared as module) for the specified scopes.
+     * @param dependencies the dependencies to resolve.
+     * @param scopes scope for resolution (compile, runtime, ...). If no scope is specified, then it is resolved for all scopes.
+     * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
     public JkResolveResult resolve(JkDependencySet dependencies, JkScope... scopes) {
-        if (internalResolver == null) {
-            final List<JkDependencyNode> nodes = new LinkedList<>();
-            for (final JkScopedDependency scopedDependency : dependencies) {
-                nodes.add(JkDependencyNode.ofFileDep((JkFileDependency) scopedDependency.getDependency(),
-                        scopedDependency.getScopes()));
-            }
-            final JkDependencyNode.ModuleNodeInfo info;
-            if (this.module == null) {
-                info = JkDependencyNode.ModuleNodeInfo.anonymousRoot();
-            } else {
-                info = JkDependencyNode.ModuleNodeInfo.root(this.module);
-            }
-            final JkDependencyNode root = JkDependencyNode.ofModuleDep(info, nodes);
-            return JkResolveResult.of(root, JkResolveResult.JkErrorReport.allFine());
-        }
-        return resolveWithInternalResolver(dependencies, dependencies.getVersionProvider(), scopes);
+        return resolveInternal(dependencies, dependencies.getVersionProvider(), scopes);
     }
 
     /**
@@ -118,7 +97,7 @@ public final class JkDependencyResolver {
     public JkPathSequence fetch(JkDependencySet dependencies, JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.hasModules()) {
-            resolveResult = resolveWithInternalResolver(dependencies, dependencies.getVersionProvider(), scopes).assertNoError();
+            resolveResult = resolveInternal(dependencies, dependencies.getVersionProvider(), scopes).assertNoError();
             return JkPathSequence.ofMany(resolveResult.getDependencyTree().getAllResolvedFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();
@@ -132,13 +111,14 @@ public final class JkDependencyResolver {
         return JkPathSequence.ofMany(result).withoutDuplicates();
     }
 
-    private JkResolveResult resolveWithInternalResolver(JkDependencySet dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
+    private JkResolveResult resolveInternal(JkDependencySet dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
         JkLog.trace("Preparing to resolve dependencies for module " + module);
         long start = System.nanoTime();
         final String msg = scopes.length == 0 ? "Resolving dependencies " :
                 "Resolving dependencies with specified scopes " + Arrays.asList(scopes);
         JkLog.startTask(msg);
-        JkResolveResult resolveResult = internalResolver.resolve(module, dependencies.withModulesOnly(),
+        JkResolveResult resolveResult = internalResolver == null ? JkResolveResult.ofRoot(module) :
+                internalResolver.resolve(module, dependencies.withModulesOnly(),
                     parameters, transitiveVersionOverride, scopes);
         final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies,
                     JkUtilsIterable.setOf(scopes));
@@ -201,7 +181,7 @@ public final class JkDependencyResolver {
     @Override
     public String toString() {
         if (repos == null) {
-            return "of depenedncy resolver";
+            return "No repo resolver";
         }
         return repos.toString();
     }

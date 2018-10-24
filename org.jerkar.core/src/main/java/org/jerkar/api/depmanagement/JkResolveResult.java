@@ -27,17 +27,19 @@ public final class JkResolveResult implements Serializable {
     /**
      * Creates an empty {@link JkResolveResult}
      */
-    public static JkResolveResult ofEmpty() {
-        return of(JkDependencyNode.ofEmpty());
+    static JkResolveResult ofRoot(JkVersionedModule module) {
+        JkDependencyNode.JkModuleNodeInfo nodeInfo = module == null ?
+                JkDependencyNode.JkModuleNodeInfo.ofAnonymousRoot() :
+                JkDependencyNode.JkModuleNodeInfo.ofRoot(module);
+        return of(JkDependencyNode.ofEmpty(nodeInfo));
     }
 
     /**
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
-    public static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
+    static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
         return new JkResolveResult(depTree, errorReport);
     }
-
 
     private static JkResolveResult of(JkDependencyNode dependencyTree) {
         return new JkResolveResult(dependencyTree, JkErrorReport.allFine());
@@ -130,11 +132,6 @@ public final class JkResolveResult implements Serializable {
                     + this.errorReport + "On following tree : \n" + depTree.toStringComplete());
         }
         return this;
-    }
-
-    @Override
-    public String toString() {
-        return this.depTree.toString();
     }
 
     /**

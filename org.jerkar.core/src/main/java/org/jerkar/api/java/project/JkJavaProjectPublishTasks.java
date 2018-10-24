@@ -23,31 +23,28 @@ public class JkJavaProjectPublishTasks {
     }
 
     /**
-     * Publishes all artifacts produced by the project maker expects those defined in {@link JkJavaProjectMaker#getProducedArtifacts()}
-     * @param localOnly If true, the publication occurs in local repository only.
+     * Publishes all defined artifacts.
      */
-    public void publish(boolean localOnly) {
-        final JkPublisher publisher = JkPublisher.of(this.publishRepos);
-        if (publisher.hasMavenPublishRepo()) {
-            publishMaven(localOnly);
-        }
-        if (publisher.hasIvyPublishRepo()) {
-            publishIvy(localOnly);
-        }
+    public void publish() {
+        publishMaven(this.publishRepos);
+        publishIvy();
     }
 
-    public void publishMaven(boolean localOnly) {
+    public void publishLocal() {
+        publishMaven(JkRepo.ofLocal().toSet());
+    }
+
+    private void publishMaven(JkRepoSet repos) {
         JkJavaProject project = maker.project;
         JkException.throwIf(project.getVersionedModule() == null, "No versionedModule has been set on "
                 + project + ". Can't publish.");
-        JkRepoSet repos = localOnly ? JkRepo.ofLocal().toSet() : publishRepos;
         JkMavenPublication publication = JkMavenPublication.of(maker, Collections.emptySet())
                 .with(project.getMavenPublicationInfo());
         JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
                 .publishMaven(project.getVersionedModule(), publication, maker.getDefaultedDependencies());
     }
 
-    public void publishIvy(boolean localOnly) {
+    private void publishIvy() {
         JkException.throwIf(maker.project.getVersionedModule() == null, "No versionedModule has been set on "
                 + maker.project + ". Can't publish.");
         final JkDependencySet dependencies = maker.getDefaultedDependencies();
@@ -58,8 +55,7 @@ public class JkJavaProjectPublishTasks {
                 .andOptional(maker.getArtifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES);
         final JkVersionProvider resolvedVersions = maker.getDependencyResolver()
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
-        JkRepoSet repos = localOnly ? JkRepo.ofLocal().toSet() : publishRepos;
-        JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
+        JkPublisher.of(publishRepos, maker.getOutLayout().getOutputPath())
                 .publishIvy(maker.project.getVersionedModule(), publication, dependencies,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }
@@ -72,8 +68,6 @@ public class JkJavaProjectPublishTasks {
         this.publishRepos = publishRepos;
         return this;
     }
-
-
 
     public void setSigner(UnaryOperator<Path> signer) {
         this.signer = signer;

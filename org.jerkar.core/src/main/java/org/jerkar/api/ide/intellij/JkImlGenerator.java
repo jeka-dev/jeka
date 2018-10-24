@@ -297,7 +297,7 @@ public final class JkImlGenerator {
                 // File dependencies (file ofSystem + computed)
             } else {
                 final String ideScope = forceTest ? "TEST" : ideScope(node.getNodeInfo().getDeclaredScopes());
-                final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.getNodeInfo();
+                final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectBaseDir();
                     if (projectDir != null && !allModules.contains(projectDir)) {
@@ -323,8 +323,8 @@ public final class JkImlGenerator {
         }
     }
 
-    private List<LibPath> toLibPath(JkDependencyNode.ModuleNodeInfo moduleInfo, JkRepoSet repos,
-            String scope) {
+    private List<LibPath> toLibPath(JkDependencyNode.JkModuleNodeInfo moduleInfo, JkRepoSet repos,
+                                    String scope) {
         final List<LibPath> result = new LinkedList<>();
         final JkModuleId moduleId = moduleInfo.getModuleId();
         final JkVersion version = moduleInfo.getResolvedVersion();

@@ -8,8 +8,8 @@ import org.junit.Test;
 public class JkRevisionTest {
 
     @Test
-    public void test() {
-        assertTrue(JkVersion.of("1.0.1").isGreaterThan(JkVersion.of("1.0.0")));
+    public void testComparable() {
+        assertTrue(JkVersion.of("1.0.1").compareTo(JkVersion.of("1.0.0")) > 0);
     }
 
 }
