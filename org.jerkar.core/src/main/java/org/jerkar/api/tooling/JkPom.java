@@ -101,7 +101,7 @@ public final class JkPom {
         final JkDependencySet dependencies = dependencies(dependenciesEl, properties());
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .getDependency();
+                    .withDependency();
             final JkVersionedModule versionedModule = JkVersionedModule.of(
                     moduleDependency.getModuleId(),
                     JkVersion.of(moduleDependency.getVersion().getValue()));
@@ -143,7 +143,7 @@ public final class JkPom {
         final JkDependencySet dependencies = dependencies(dependenciesEl, properties());
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .getDependency();
+                    .withDependency();
             if (!moduleDependency.getExcludes().isEmpty()) {
                 result = result.and(moduleDependency.getModuleId(), moduleDependency.getExcludes());
             }

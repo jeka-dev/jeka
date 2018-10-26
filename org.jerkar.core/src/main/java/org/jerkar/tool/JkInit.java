@@ -48,6 +48,7 @@ public final class JkInit {
             sb.append("\nJerkar Home : " + JkLocator.jerkarHomeDir());
         }
         sb.append("\nJerkar User Home : " + JkLocator.jerkarUserHomeDir().toAbsolutePath().normalize());
+        sb.append("\nJerkar Run Repositories : " + Engine.repos().toString());
         sb.append("\nJerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
         sb.append("\nJerkar Classpath : " + System.getProperty("java.class.path"));
         sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(Environment.commandLine.rawArgs()), " "));

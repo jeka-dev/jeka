@@ -3,6 +3,7 @@ package org.jerkar.api.depmanagement;
 import static org.jerkar.api.utils.JkUtilsString.plurialize;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,18 +19,6 @@ import org.jerkar.api.utils.JkUtilsTime;
  * @author Jerome Angibaud
  */
 public final class JkDependencyResolver {
-
-    /**
-     * Creates a dependency resolver fetching module dependencies in the specified repos. If
-     * the specified JkRepo contains no {@link JkRepo} then the created.
-     */
-    public static JkDependencyResolver of(JkRepoSet repos) {
-        if (repos.getRepoList().isEmpty()) {
-            return new JkDependencyResolver(null, null, null, JkRepoSet.ofEmpty());
-        }
-        final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
-        return new JkDependencyResolver(ivyResolver,  null, null, repos);
-    }
 
     /**
      * @See {@link #of(JkRepoSet)}
@@ -48,12 +37,27 @@ public final class JkDependencyResolver {
 
     private final JkRepoSet repos;
 
+    private final Path baseDir;
+
     private JkDependencyResolver(InternalDepResolver internalResolver,
-            JkVersionedModule module, JkResolutionParameters resolutionParameters, JkRepoSet repos) {
+            JkVersionedModule module, JkResolutionParameters resolutionParameters, JkRepoSet repos, Path baseDir) {
         this.internalResolver = internalResolver;
         this.module = module;
         this.parameters = resolutionParameters;
         this.repos = repos;
+        this.baseDir = baseDir;
+    }
+
+    /**
+     * Creates a dependency resolver fetching module dependencies in the specified repos. If
+     * the specified JkRepo contains no {@link JkRepo} then the created.
+     */
+    public static JkDependencyResolver of(JkRepoSet repos) {
+        if (repos.getRepoList().isEmpty()) {
+            return new JkDependencyResolver(null, null, null, JkRepoSet.ofEmpty(), Paths.get(""));
+        }
+        final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
+        return new JkDependencyResolver(ivyResolver,  null, null, repos, Paths.get(""));
     }
 
     /**
@@ -95,20 +99,19 @@ public final class JkDependencyResolver {
      * @throws IllegalStateException if the resolution has not been achieved successfully
      */
     public JkPathSequence fetch(JkDependencySet dependencies, JkScope... scopes) {
-        JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.hasModules()) {
-            resolveResult = resolveInternal(dependencies, dependencies.getVersionProvider(), scopes).assertNoError();
+            JkResolveResult resolveResult = resolveInternal(dependencies, dependencies.getVersionProvider(), scopes).assertNoError();
             return JkPathSequence.ofMany(resolveResult.getDependencyTree().getAllResolvedFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {
             if (scopedDependency.isInvolvedInAnyOf(scopes) || scopes.length == 0) {
-                final JkDependency dependency = scopedDependency.getDependency();
+                final JkDependency dependency = scopedDependency.withDependency();
                 final JkFileDependency fileDependency = (JkFileDependency) dependency;
                 result.addAll(fileDependency.getPaths());
             }
         }
-        return JkPathSequence.ofMany(result).withoutDuplicates();
+        return JkPathSequence.ofMany(result).withoutDuplicates().resolveTo(baseDir);
     }
 
     private JkResolveResult resolveInternal(JkDependencySet dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
@@ -143,32 +146,47 @@ public final class JkDependencyResolver {
      */
     public JkDependencyResolver withModuleHolder(JkVersionedModule versionedModule) {
         return new JkDependencyResolver(this.internalResolver, versionedModule,
-                this.parameters, this.repos);
+                this.parameters, this.repos, this.baseDir);
     }
 
     /**
-     * Change the repositories for dependency resolution
+     * Returns an dependency resolver identical to this one but with the specified repositories.
      */
     public JkDependencyResolver withRepos(JkRepoSet otherRepos) {
         return new JkDependencyResolver(InternalDepResolvers.ivy(otherRepos), this.module,
-                this.parameters, otherRepos);
+                this.parameters, otherRepos, this.baseDir);
     }
 
     /**
-     * Change the repositories for dependency resolution
+     * @see #withRepos(JkRepoSet)
      */
     public JkDependencyResolver withRepos(JkRepo... otherRepos) {
         return withRepos(JkRepoSet.of(otherRepos));
     }
 
     /**
-     * You can alter the resolver behavior through these settings. his is only
-     * relevant for of dependencies and have no effect for of
-     * dependencies.
+     * @see #withRepos(JkRepoSet)
+     */
+    public JkDependencyResolver andRepos(JkRepoSet repoSet) {
+        return withRepos(this.repos.and(repoSet));
+    }
+
+    /**
+     * Returns an dependency resolver identical to this one but with the specified repositories.
      */
     public JkDependencyResolver withParams(JkResolutionParameters params) {
         return new JkDependencyResolver(this.internalResolver, this.module,
-                params, this.repos);
+                params, this.repos, this.baseDir);
+    }
+
+    /**
+     * Returns an dependency resolver identical to this one but with the base directory. The base directory is used
+     * to resolve relative files to absolute files. This directory is used by
+     * {@link #fetch(JkDependencySet, JkScope...)} method as it returns only absolute files.
+     */
+    public JkDependencyResolver withBasedir(JkResolutionParameters params) {
+        return new JkDependencyResolver(this.internalResolver, this.module,
+                params, this.repos, this.baseDir);
     }
 
     /**

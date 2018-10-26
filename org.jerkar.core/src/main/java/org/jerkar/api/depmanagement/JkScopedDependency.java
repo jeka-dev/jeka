@@ -84,7 +84,7 @@ public final class JkScopedDependency implements Serializable {
     /**
      * Returns the dependency object of this scoped dependency.
      */
-    public JkDependency getDependency() {
+    public JkDependency withDependency() {
         return dependency;
     }
 
@@ -183,7 +183,7 @@ public final class JkScopedDependency implements Serializable {
      * Returns a scoped dependency formed of the scope/scopeMapping of this scoped dependency
      * and the specified dependency.
      */
-    public JkScopedDependency getDependency(JkDependency dependency) {
+    public JkScopedDependency withDependency(JkDependency dependency) {
         return new JkScopedDependency(dependency, scopes, scopeMapping);
     }
 

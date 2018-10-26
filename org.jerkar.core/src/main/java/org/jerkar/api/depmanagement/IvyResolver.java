@@ -182,16 +182,16 @@ final class IvyResolver implements InternalDepResolver {
     public File get(JkModuleDependency dependency) {
         final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(dependency.getModuleId(),
                 dependency.getVersion());
-        final boolean isMetadata = "pom".equalsIgnoreCase(dependency.withExt());
-        final String typeAndExt = JkUtilsObject.firstNonNull(dependency.withExt(), "jar");
+        final boolean isMetadata = "pom".equalsIgnoreCase(dependency.getExt());
+        final String typeAndExt = JkUtilsObject.firstNonNull(dependency.getExt(), "jar");
         final DefaultArtifact artifact;
         if (isMetadata) {
             artifact = new DefaultArtifact(moduleRevisionId, null, dependency.getModuleId().getName(), typeAndExt,
                     typeAndExt, true);
         } else {
             final Map<String, String> extra = new HashMap<>();
-            if (dependency.withClassifier() != null) {
-                extra.put("classifier", dependency.withClassifier());
+            if (dependency.getClassifier() != null) {
+                extra.put("classifier", dependency.getClassifier());
             }
             artifact = new DefaultArtifact(moduleRevisionId, null, dependency.getModuleId().getName(), typeAndExt,
                     typeAndExt, extra);

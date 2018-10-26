@@ -51,7 +51,7 @@ public class JkDependenciesTest {
         Path root = Files.createTempDirectory("jerkartestproject");
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(root);
         JkDependencySet dependencies = JkDependencySet.of().and(javaProject);
-        JkComputedDependency computedDependency = (JkComputedDependency) dependencies.toList().get(0).getDependency();
+        JkComputedDependency computedDependency = (JkComputedDependency) dependencies.toList().get(0).withDependency();
         Assert.assertEquals(root, computedDependency.getIdeProjectBaseDir());
     }
 

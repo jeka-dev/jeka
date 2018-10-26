@@ -281,7 +281,7 @@ final class IvyTranslations {
         // Add dependencies
         final DependenciesContainer dependencyContainer = new DependenciesContainer(defaultMapping, dependencies);
         for (final JkScopedDependency scopedDependency : dependencies) {
-            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
+            if (scopedDependency.withDependency() instanceof JkModuleDependency) {
                 dependencyContainer.populate(scopedDependency);
             }
         }
@@ -497,9 +497,9 @@ final class IvyTranslations {
 
         void populate(JkScopedDependency scopedDependency) {
 
-            final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.getDependency();
+            final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.withDependency();
             final JkModuleId moduleId = moduleDep.getModuleId();
-            final boolean mainArtifact = moduleDep.withClassifier() == null && moduleDep.withExt() == null;
+            final boolean mainArtifact = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
             JkVersion version = dependencySet.getVersion(moduleId);
             this.put(moduleId, moduleDep.isTransitive(), version, mainArtifact);
 
@@ -547,9 +547,9 @@ final class IvyTranslations {
                 this.addConf(moduleId, conf);
                 masterConfs.add(conf.masterConf);
             }
-            this.addArtifact(moduleId, masterConfs, moduleDep.withClassifier(), moduleDep.withExt());
+            this.addArtifact(moduleId, masterConfs, moduleDep.getClassifier(), moduleDep.getExt());
 
-            final boolean mainArtifactFlag = moduleDep.withClassifier() == null && moduleDep.withExt() == null;
+            final boolean mainArtifactFlag = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
             this.flagAsMainArtifact(moduleId, mainArtifactFlag);
 
             // fill artifact exclusion

@@ -171,7 +171,7 @@ public final class JkModuleDependency implements JkDependency {
      * static version. If the specified version is <code>null</code> then returned version is this one.
      *
      */
-    public JkModuleDependency withResolvedVersion(JkVersion version) {
+    public JkModuleDependency withVersion(JkVersion version) {
         if (version == null) {
             return this;
         }
@@ -192,7 +192,7 @@ public final class JkModuleDependency implements JkDependency {
      * Returns the classifier for this module dependency or <code>null</code> if
      * the dependency is done on the main artifact.
      */
-    public String withClassifier() {
+    public String getClassifier() {
         return this.classifier;
     }
 
@@ -237,7 +237,7 @@ public final class JkModuleDependency implements JkDependency {
      * Returns the getExtension for this module dependency or <code>null</code> if
      * the dependency is done on the the default getExtension.
      */
-    public String withExt() {
+    public String getExt() {
         return this.extension;
     }
 

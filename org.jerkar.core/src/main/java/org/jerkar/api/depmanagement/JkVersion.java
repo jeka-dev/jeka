@@ -101,6 +101,26 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
                 && JkUtilsString.endsWithAny(value, ")", "]", "[");
     }
 
+    /**
+     * If version name is formatted of blocks separated with '.', this methods returns the block at specified index.
+     * throw {@link IllegalArgumentException} if no such block found at specified index.
+     */
+    public String getBlock(int index) {
+        String[] items = this.value.split("\\.");
+        if (index >= items.length) {
+            throw new IllegalArgumentException("Version " + this.value + " does not contains " + (index+1) + " blocks separated with '.'.");
+        }
+        return items[index];
+    }
+
+    /**
+     * Returns true when {@link #getBlock(int)} won't throws an {@link IllegalArgumentException}.
+     */
+    public boolean hasBlockAt(int index) {
+        String[] items = this.value.split("\\.");
+        return index < items.length;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

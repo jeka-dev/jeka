@@ -273,7 +273,7 @@ final class Engine {
         }
     }
 
-    private static JkRepoSet repos() {
+    static JkRepoSet repos() {
         return JkRepoSet.of(JkRepoConfigOptionLoader.runRepository(), JkRepo.ofLocal());
     }
 

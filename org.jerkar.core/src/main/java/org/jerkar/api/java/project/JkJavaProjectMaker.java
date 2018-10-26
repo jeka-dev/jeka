@@ -167,6 +167,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         defineArtifact(JAVADOC_ARTIFACT_ID, () -> makeJavadocJar());
     }
 
+    /**
+     * Returns the runnable responsible for creating the specified artifactId.
+     */
+    public Runnable getRunnable(JkArtifactId artifactId) {
+        return this.artifactProducers.get(artifactId);
+    }
+
     // Dependency management -----------------------------------------------------------
 
     /**

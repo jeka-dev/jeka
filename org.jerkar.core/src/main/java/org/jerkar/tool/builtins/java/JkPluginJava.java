@@ -168,6 +168,9 @@ public class JkPluginJava extends JkPlugin {
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
+        JkLog.info("Declared dependencies : ");
+        project.getDependencies().toResolvedModuleVersions().toList().forEach(dep -> JkLog.info(dep.toString()));
+        JkLog.info("Resolved to : ");
         final JkResolveResult resolveResult = this.project().getMaker().getDependencyResolver()
                 .resolve(this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
         final JkDependencyNode tree = resolveResult.getDependencyTree();

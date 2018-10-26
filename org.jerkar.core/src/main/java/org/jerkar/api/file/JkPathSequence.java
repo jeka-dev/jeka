@@ -132,6 +132,24 @@ public final class JkPathSequence implements Iterable<Path> {
         return new JkPathSequence(list);
     }
 
+    // --------------- Misc ------------------------
+
+    /**
+     * Returns an identical path sequence but replacing relative paths with absolute paths resolved from the
+     * specified base directory.
+     */
+    public JkPathSequence resolveTo(Path baseDir) {
+        List<Path> result = new LinkedList<>();
+        for(Path entry : entries) {
+            if (entry.isAbsolute()) {
+                result.add(entry);
+            } else {
+                result.add(baseDir.toAbsolutePath().resolve(entry));
+            }
+        }
+        return new JkPathSequence(entries);
+    }
+
     // --------------- Canonical methods ------------------------------------------
 
     /**

@@ -17,6 +17,8 @@ public final class JkRepo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String LOCAL_NAME = "local";
+
     /**
      * URL of the Maven central repository.
      */
@@ -68,8 +70,12 @@ public final class JkRepo implements Serializable {
     /**
      * Creates a repository having the specified url. If the repository is an Ivy repository
      * than the url should start with <code>ivy:</code> as <code>ivy:http://myrepolocation</code>.
+     * If specified url is "local" then it returns the local repository.
      */
     public static JkRepo of(String url) {
+        if (url.equals(LOCAL_NAME)) {
+            return ofLocal();
+        }
         if (url.toLowerCase().startsWith(IVY_PREFIX)) {
             return new JkRepo(toUrl(url.substring(4)), null, JkRepoIvyConfig.of(), JkPublishConfig.of());
         }

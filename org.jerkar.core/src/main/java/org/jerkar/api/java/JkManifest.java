@@ -102,7 +102,7 @@ public final class JkManifest {
     }
 
     /**
-     * Add the specified attributes in the "main" attributes section.
+     * Adds the specified attributes in the "main" attributes section.
      * This method return this object.
      */
     public JkManifest addMainAttribute(Name key, String value) {
@@ -111,7 +111,7 @@ public final class JkManifest {
     }
 
     /**
-     * Add the main class entry by auto-detecting the class holding the main method.
+     * Adds the main class entry by auto-detecting the class holding the main method.
      */
     public JkManifest addAutodetectMain(Path classDir) {
         final String mainClassName = JkClassLoader.findMainClass(classDir);
@@ -132,7 +132,7 @@ public final class JkManifest {
     }
 
     /**
-     * Add the 'Main-Class' attribute to this manifest.
+     * Adds the 'Main-Class' attribute to this manifest.
      * This method returns this object.
      */
     public JkManifest addMainClass(String value) {
@@ -140,7 +140,7 @@ public final class JkManifest {
     }
 
     /**
-     * Fills the manifest with contextual infoString : {@link #CREATED_BY},
+     * Fills this manifest with contextual infoString : {@link #CREATED_BY},
      * {@link #BUILT_BY} and {@link #BUILD_JDK}
      */
     public JkManifest addContextualInfo() {
@@ -152,15 +152,36 @@ public final class JkManifest {
     /**
      * Returns the value of the main attribute having the specified name.
      */
-    public String setMainAttribute(String key) {
+    public String getMainAttribute(String key) {
         return this.getManifest().getMainAttributes().getValue(key);
     }
 
     /**
      * Returns the value of the main attribute having the specified name.
      */
-    public String setMainAttribute(Name name) {
+    public String getMainAttribute(Name name) {
         return this.getManifest().getMainAttributes().getValue(name);
+    }
+
+    /**
+     * Adds attributes of the specified manifest to this one. This manifest attributes are overrode by those of the specified
+     * one if same attribute exist.
+     */
+    public JkManifest merge(JkManifest other) {
+        final Map<String, Attributes> otherEntryAttributes = other.manifest.getEntries();
+        for (final String entry : otherEntryAttributes.keySet()) {
+            final Attributes otherAttributes = otherEntryAttributes.get(entry);
+            final Attributes attributes = this.manifest.getAttributes(entry);
+            merge(attributes, otherAttributes);
+        }
+        merge(this.manifest.getMainAttributes(), other.manifest.getMainAttributes());
+        return this;
+    }
+
+    private static void merge(Attributes attributes, Attributes others) {
+        for (final Object key : others.entrySet()) {
+            attributes.putValue(key.toString(), others.getValue(key.toString()));
+        }
     }
 
     private static Manifest read(Path file) {
