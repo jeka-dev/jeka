@@ -11,7 +11,7 @@ design, run, debug, reuse your automated tasks/builds. Exactly as you would do w
 Also, __Jerkar conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of code/configuration. 
 
 For example `jerkar java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
-performs a complete build running unit tests under Jacoco coverage tools and performs Sonar analysis on a project free 
+performs a complete build running unit tests under Jacoco coverage tools and performs Sonar analysis on a Java project free 
 of any build code/configuration/script. 
 
 # News
