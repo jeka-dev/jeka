@@ -13,5 +13,5 @@ import org.jerkar.api.utils.JkUtilsPath;
  */
 public interface JkFileDependency extends JkDependency {
 
-    List<Path> getPaths();
+    List<Path> getFiles();
 }

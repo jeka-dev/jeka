@@ -477,7 +477,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         for (JkScopedDependency dep : this) {
             if (dep.withDependency() instanceof JkModuleDependency) {
                 JkModuleDependency moduleDependency = (JkModuleDependency) dep.withDependency();
-                if (moduleDependency.getVersion() == null || moduleDependency.getVersion().isUnspecified()) {
+                if (moduleDependency.getVersion().isUnspecified()) {
                     JkVersion providedVersion = this.versionProvider.getVersionOf(moduleDependency.getModuleId());
                     if (providedVersion != null) {
                         moduleDependency = moduleDependency.withVersion(providedVersion);

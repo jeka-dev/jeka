@@ -22,15 +22,22 @@ public final class JkVersionedModule implements Serializable {
     private JkVersionedModule(JkModuleId moduleId, JkVersion version) {
         super();
         this.moduleId = moduleId;
-        this.version = version;
+        this.version = version == null ? JkVersion.UNSPECIFIED : version;
     }
 
     /**
      * Creates a {@link JkVersionedModule} from the specified module and version.
      */
     public static JkVersionedModule of(JkModuleId moduleId, JkVersion version) {
-        JkUtilsAssert.notNull(version, "No version specified for " + moduleId);
+        JkUtilsAssert.notNull(version, "Null version specified for " + moduleId + ". Must be at least UNSPECIFIED.");
         return new JkVersionedModule(moduleId, version);
+    }
+
+    /**
+     * Creates a an unspecified version of {@link JkVersionedModule}.
+     */
+    public static JkVersionedModule ofUnspecifiedVerion(JkModuleId moduleId) {
+        return of(moduleId, JkVersion.UNSPECIFIED);
     }
 
     /**
@@ -51,7 +58,7 @@ public final class JkVersionedModule implements Serializable {
      * <code>groupId:name:version</code>.
      */
     public static final JkVersionedModule ofRootDirName(String rootDirName) {
-        return of(JkModuleId.of(rootDirName), JkVersion.UNSPECIFIED);
+        return ofUnspecifiedVerion(JkModuleId.of(rootDirName));
     }
 
     /**
@@ -72,52 +79,32 @@ public final class JkVersionedModule implements Serializable {
      * Returns a {@link JkVersionedModule} identical to this one but with the specified version.
      */
     public JkVersionedModule withVersion(JkVersion version) {
-        return new JkVersionedModule(this.moduleId, version);
+        return of(this.moduleId, version);
     }
 
     /**
      * @see #withVersion(JkVersion)
      */
     public JkVersionedModule withVersion(String version) {
-        return new JkVersionedModule(this.moduleId, JkVersion.of(version));
+        return withVersion(JkVersion.of(version));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JkVersionedModule that = (JkVersionedModule) o;
+
+        if (!moduleId.equals(that.moduleId)) return false;
+        return version.equals(that.version);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((moduleId == null) ? 0 : moduleId.hashCode());
-        result = prime * result + ((version == null) ? 0 : version.hashCode());
+        int result = moduleId.hashCode();
+        result = 31 * result + version.hashCode();
         return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final JkVersionedModule other = (JkVersionedModule) obj;
-        if (moduleId == null) {
-            if (other.moduleId != null) {
-                return false;
-            }
-        } else if (!moduleId.equals(other.moduleId)) {
-            return false;
-        }
-        if (version == null) {
-            if (other.version != null) {
-                return false;
-            }
-        } else if (!version.equals(other.version)) {
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -126,7 +113,8 @@ public final class JkVersionedModule implements Serializable {
     }
 
     /**
-     * Fills the manifest with <code>implementation</code> infoString.
+     * Fills <code>implementation title</code> and <code>implentation version </code> attributes of the
+     * specified manifest.
      */
     public void populateManifest(JkManifest manifest) {
         manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, getModuleId().getDotedName())

@@ -305,7 +305,7 @@ public final class JkImlGenerator {
                         allModules.add(projectDir);
                     }
                 } else {
-                    writeFileEntries(fileNodeInfo.paths(), paths, ideScope);
+                    writeFileEntries(fileNodeInfo.getFiles(), paths, ideScope);
                 }
             }
         }
@@ -329,7 +329,7 @@ public final class JkImlGenerator {
         final JkModuleId moduleId = moduleInfo.getModuleId();
         final JkVersion version = moduleInfo.getResolvedVersion();
         final JkVersionedModule versionedModule = JkVersionedModule.of(moduleId, version);
-        final List<Path> files = moduleInfo.getPaths();
+        final List<Path> files = moduleInfo.getFiles();
         for (final Path file : files) {
             final LibPath libPath = new LibPath();
             libPath.bin = file;

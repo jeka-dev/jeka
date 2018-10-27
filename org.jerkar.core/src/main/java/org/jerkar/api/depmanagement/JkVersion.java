@@ -18,7 +18,8 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     public static final JkVersion UNSPECIFIED = new JkVersion("UNSPECIFIED-SNAPSHOT");
 
     /**
-     * Creates a {@link JkVersion} with the specified value.
+     * Creates a {@link JkVersion} with the specified value. If specified name is null, then it creates
+     * an {@link #UNSPECIFIED} version.
      */
     public static JkVersion of(String name) {
         if (name == null) {

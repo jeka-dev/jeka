@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -186,7 +185,7 @@ public class JkDependencyNode implements Serializable {
      * Returns a merge of this dependency node with the specified one. The
      * children of the merged node is a union of the two node children.
      */
-    public JkDependencyNode getMerge(JkDependencyNode other) {
+    public JkDependencyNode withMerging(JkDependencyNode other) {
         final List<JkDependencyNode> resultChildren = new LinkedList<>(this.children);
         for (final JkDependencyNode otherNodeChild : other.children) {
             if (!otherNodeChild.isModuleNode() || !directChildrenContains(otherNodeChild.getModuleInfo().getModuleId())) {
@@ -347,7 +346,7 @@ public class JkDependencyNode implements Serializable {
         /**
          * Shorthand for {@link #moduleId} + {@link #getResolvedVersion()}
          */
-        public JkVersionedModule resolvedVersionedModule() {
+        public JkVersionedModule getResolvedVersionedModule() {
             return moduleId.getVersion(resolvedVersion.getValue());
         }
 
@@ -389,9 +388,7 @@ public class JkDependencyNode implements Serializable {
             return JkUtilsPath.toPaths(artifacts);
         }
 
-        public List<Path> getPaths() {
-            return artifacts.stream().map(file -> file.toPath()).collect(Collectors.toList());
-        }
+
     }
 
     private static List<JkScopedDependency> depsUntilLast(JkDependencySet deps, JkModuleId to) {
@@ -435,9 +432,9 @@ public class JkDependencyNode implements Serializable {
         public static JkFileNodeInfo of(Set<JkScope> scopes, JkFileDependency dependency) {
             if (dependency instanceof JkComputedDependency) {
                 final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
-                return new JkFileNodeInfo(computedDependency.getPaths(), scopes, computedDependency);
+                return new JkFileNodeInfo(computedDependency.getFiles(), scopes, computedDependency);
             }
-            return new JkFileNodeInfo(dependency.getPaths() ,scopes, null);
+            return new JkFileNodeInfo(dependency.getFiles() ,scopes, null);
         }
 
         // for serialization we need to use File class instead of Path
@@ -468,13 +465,8 @@ public class JkDependencyNode implements Serializable {
         }
 
         @Override
-        @Deprecated
         public List<Path> getFiles() {
             return JkUtilsPath.toPaths(files);
-        }
-
-        public List<Path> paths() {
-            return files.stream().map(file -> file.toPath()).collect(Collectors.toList());
         }
 
         @Override

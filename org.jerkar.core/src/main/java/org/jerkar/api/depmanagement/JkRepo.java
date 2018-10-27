@@ -203,33 +203,16 @@ public final class JkRepo implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((url == null) ? 0 : url.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JkRepo jkRepo = (JkRepo) o;
+        return url.equals(jkRepo.url);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final JkRepo other = (JkRepo) obj;
-        if (url == null) {
-            if (other.url != null) {
-                return false;
-            }
-        } else if (!url.equals(other.url)) {
-            return false;
-        }
-        return true;
+    public int hashCode() {
+        return url.hashCode();
     }
 
     @Override

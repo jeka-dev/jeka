@@ -105,7 +105,7 @@ public final class JkResolveResult implements Serializable {
      * Returns a concatenation of this resolve result and the specified one.
      */
     public JkResolveResult and(JkResolveResult other) {
-        return new JkResolveResult(this.depTree.getMerge(other.depTree),
+        return new JkResolveResult(this.depTree.withMerging(other.depTree),
                 this.errorReport.merge(other.errorReport));
     }
 

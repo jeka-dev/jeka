@@ -31,7 +31,7 @@ public final class JkFileSystemDependency implements JkFileDependency {
     }
 
     @Override
-    public final List<Path> getPaths() {
+    public final List<Path> getFiles() {
         for (final Path file : files) {
             JkUtilsAssert.isTrue(Files.exists(file), "File " + file + " does not exist.");
         }

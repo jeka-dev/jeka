@@ -362,7 +362,7 @@ public final class JkEclipseClasspathGenerator {
             if (node.isModuleNode()) {
                 final JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
                 writeModuleEntry(writer,
-                        moduleNodeInfo.resolvedVersionedModule(),
+                        moduleNodeInfo.getResolvedVersionedModule(),
                         moduleNodeInfo.getFiles(), repos, allPaths);
 
                 // File dependencies (file ofSystem + computed)

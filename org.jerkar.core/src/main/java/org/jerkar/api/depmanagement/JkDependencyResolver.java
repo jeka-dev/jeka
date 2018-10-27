@@ -108,7 +108,7 @@ public final class JkDependencyResolver {
             if (scopedDependency.isInvolvedInAnyOf(scopes) || scopes.length == 0) {
                 final JkDependency dependency = scopedDependency.withDependency();
                 final JkFileDependency fileDependency = (JkFileDependency) dependency;
-                result.addAll(fileDependency.getPaths());
+                result.addAll(fileDependency.getFiles());
             }
         }
         return JkPathSequence.ofMany(result).withoutDuplicates().resolveTo(baseDir);
