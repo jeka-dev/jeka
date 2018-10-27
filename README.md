@@ -12,7 +12,7 @@ Also, __Jerkar conventions and plugin mechanism are so powerful__ that it can pe
 
 For example `jerkar java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
 performs a complete build running unit tests under Jacoco coverage tools and performs Sonar analysis on a Java project free 
-of any build code/configuration/script. 
+of any build-code/configuration/script. 
 
 # News
  
