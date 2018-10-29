@@ -97,7 +97,9 @@ public class JkRun {
             try {
                 plugin.activate();
             } catch (RuntimeException e) {
-                throw new RuntimeException("Plugin " + plugin.name() + " has caused build instantiation failure.", e);
+                JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
+                JkLog.error("Plugin " + plugin.name() + " has caused build instantiation failure.");
+                throw e;
             }
             String pluginInfo = "Instance decorated with plugin " + plugin.getClass()
                     + HelpDisplayer.optionValues(defs);
