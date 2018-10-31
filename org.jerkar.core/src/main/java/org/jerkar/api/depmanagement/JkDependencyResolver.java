@@ -68,16 +68,6 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Resolves the specified dependencies (dependencies declared as module) for the specified scopes.
-     * @param dependencies the dependencies to resolve.
-     * @param scopes scope for resolution (compile, runtime, ...). If no scope is specified, then it is resolved for all scopes.
-     * @return a result consisting in a dependency tree for modules and a set of files for non-module.
-     */
-    public JkResolveResult resolve(JkDependencySet dependencies, JkScope... scopes) {
-        return resolveInternal(dependencies, dependencies.getVersionProvider(), scopes);
-    }
-
-    /**
      * Returns the repositories the resolution is made on.
      */
     public JkRepoSet getRepos() {
@@ -100,7 +90,7 @@ public final class JkDependencyResolver {
      */
     public JkPathSequence fetch(JkDependencySet dependencies, JkScope... scopes) {
         if (internalResolver != null && dependencies.hasModules()) {
-            JkResolveResult resolveResult = resolveInternal(dependencies, dependencies.getVersionProvider(), scopes).assertNoError();
+            JkResolveResult resolveResult = resolve(dependencies, scopes).assertNoError();
             return JkPathSequence.ofMany(resolveResult.getDependencyTree().getAllResolvedFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();
@@ -114,7 +104,13 @@ public final class JkDependencyResolver {
         return JkPathSequence.ofMany(result).withoutDuplicates().resolveTo(baseDir);
     }
 
-    private JkResolveResult resolveInternal(JkDependencySet dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
+    /**
+     * Resolves the specified dependencies (dependencies declared as module) for the specified scopes.
+     * @param dependencies the dependencies to resolve.
+     * @param scopes scope for resolution (compile, runtime, ...). If no scope is specified, then it is resolved for all scopes.
+     * @return a result consisting in a dependency tree for modules and a set of files for non-module.
+     */
+    public JkResolveResult resolve(JkDependencySet dependencies, JkScope ... scopes) {
         JkLog.trace("Preparing to resolve dependencies for module " + module);
         long start = System.nanoTime();
         final String msg = scopes.length == 0 ? "Resolving dependencies " :
@@ -122,7 +118,7 @@ public final class JkDependencyResolver {
         JkLog.startTask(msg);
         JkResolveResult resolveResult = internalResolver == null ? JkResolveResult.ofRoot(module) :
                 internalResolver.resolve(module, dependencies.withModulesOnly(),
-                    parameters, transitiveVersionOverride, scopes);
+                    parameters, scopes);
         final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies,
                     JkUtilsIterable.setOf(scopes));
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());

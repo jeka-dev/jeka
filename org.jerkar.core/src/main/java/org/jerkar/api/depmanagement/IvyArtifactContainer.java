@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
+import org.jerkar.api.system.JkLog;
 
 /**
  * Created by angibaudj on 20-06-17.
@@ -20,7 +21,9 @@ class IvyArtifactContainer {
         IvyArtifactContainer result = new IvyArtifactContainer();
         for (ArtifactDownloadReport report : artifactDownloadReports) {
             if (report.getLocalFile() == null) {
-                throw new IllegalStateException("File for " + report.getArtifact() + " hasn't been downloaded.");
+                JkLog.warn("File for " + report.getArtifact() + " hasn't been downloaded.");
+                continue;
+                //throw new IllegalStateException("File for " + report.getArtifact() + " hasn't been downloaded.");
             }
             result.put(report.getArtifact().getModuleRevisionId(), report.getLocalFile().toPath());
         }

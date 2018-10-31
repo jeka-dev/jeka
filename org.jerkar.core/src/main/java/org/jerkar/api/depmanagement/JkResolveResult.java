@@ -165,6 +165,10 @@ public final class JkResolveResult implements Serializable {
             return moduleProblems;
         }
 
+        public boolean hasErrors() {
+            return this.hasErrors;
+        }
+
         @SuppressWarnings("unchecked")
         private JkErrorReport merge(JkErrorReport other) {
             return new JkErrorReport(JkUtilsIterable.concatLists(this.moduleProblems, other.moduleProblems),

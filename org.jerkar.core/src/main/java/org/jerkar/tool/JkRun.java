@@ -88,7 +88,6 @@ public class JkRun {
         for (JkPlugin plugin : jkRun.plugins().all()) {
            jkRun.plugins.injectOptions(plugin);
         }
-
         run.setup();
 
         jkRun.plugins.loadCommandLinePlugins();
@@ -112,7 +111,6 @@ public class JkRun {
         JkLog.info("Run instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask();
         baseDirContext(null);
-
 
         return run;
     }

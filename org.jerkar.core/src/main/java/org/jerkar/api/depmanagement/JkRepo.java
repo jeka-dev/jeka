@@ -22,7 +22,7 @@ public final class JkRepo implements Serializable {
     /**
      * URL of the Maven central repository.
      */
-    public static final String MAVEN_CENTRAL_URL = "http://repo1.maven.org/maven2";
+    public static final String MAVEN_CENTRAL_URL = "https://repo.maven.apache.org/maven2";
 
     /**
      * URL of the OSSRH repository for both deploying snapshot and download artifacts.

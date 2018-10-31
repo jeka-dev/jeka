@@ -36,6 +36,7 @@ public class JkEclipseClasspathGeneratorTest {
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
         final JkEclipseClasspathGenerator baseGenerator =
                 JkEclipseClasspathGenerator.of(baseProject);
+        baseGenerator.setUsePathVariables(true);
         baseGenerator.setRunDependencies(baseProject.getMaker().getDependencyResolver(),
                 JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
         final String baseClasspath = baseGenerator.generate();
@@ -68,7 +69,7 @@ public class JkEclipseClasspathGeneratorTest {
         desktopProject.setDependencies(deps);
         desktopProject.getMaker().makeAllArtifacts();
 
-        // ----------------- Now,  try to applyCommonSettings generated .classpath to projects and compare if it matches
+        // ----------------- Now, try to apply generated .classpath to projects and compare if it matches
 
         final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(false);
 
@@ -78,6 +79,7 @@ public class JkEclipseClasspathGeneratorTest {
         //JkUtilsFile.writeString(new File(base, ".classpath"), baseClasspath, false);
         JkEclipseProject.ofJavaNature("base").writeTo(base.resolve(".project"));
         classpathApplier.apply(baseProject2);
+        System.out.println(baseProject2.getDependencies().toList());
         final JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
         final JkProjectSourceLayout baseLayout = baseProject.getSourceLayout();
         assertEquals(baseLayout.getBaseDir(), base2Layout.getBaseDir());
@@ -87,7 +89,7 @@ public class JkEclipseClasspathGeneratorTest {
         final List<Path> resFiles = base2Layout.getResources().getFiles();
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
-        assertEquals(5, baseProject2.getDependencies().toList().size());
+        assertEquals(9, baseProject2.getDependencies().toList().size());
 
         final JkJavaProject coreProject2 = JkJavaProject.ofMavenLayout(core);
 

@@ -92,7 +92,7 @@ final class IvyResolver implements InternalDepResolver {
     @SuppressWarnings("unchecked")
     @Override
     public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencySet deps,
-            JkResolutionParameters parameters, JkVersionProvider versionProvider, JkScope ... resolvedScopes) {
+            JkResolutionParameters parameters, JkScope ... resolvedScopes) {
 
         final JkVersionedModule module;
         if (moduleArg == null) {
@@ -104,11 +104,8 @@ final class IvyResolver implements InternalDepResolver {
         if (parameters == null) {
             parameters = JkResolutionParameters.of();
         }
-        if (versionProvider == null) {
-            versionProvider = JkVersionProvider.empty();
-        }
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
-                parameters.getDefaultMapping(), versionProvider);
+                parameters.getDefaultMapping(), deps.getVersionProvider());
 
         final String[] confs = toConfs(deps.getDeclaredScopes(), resolvedScopes);
         final ResolveOptions resolveOptions = new ResolveOptions();

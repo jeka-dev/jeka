@@ -18,15 +18,6 @@
     <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/jerkar/libs/provided/ivy-2.4.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" scope="PROVIDED">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/jerkar/libs/provided/junit-4.11.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -65,6 +56,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/jerkar/boot/commonmark-0.11.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/jerkar/libs/provided/ivy-2.5.0-rc1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

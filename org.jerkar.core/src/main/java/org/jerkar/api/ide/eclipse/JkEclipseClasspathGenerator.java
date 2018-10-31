@@ -74,7 +74,6 @@ public final class JkEclipseClasspathGenerator {
         this.dependencies = dependencies;
         this.dependencyResolver = resolver;
         this.sourceVersion = sourceVersion;
-
     }
 
     /**
@@ -365,7 +364,7 @@ public final class JkEclipseClasspathGenerator {
                         moduleNodeInfo.getResolvedVersionedModule(),
                         moduleNodeInfo.getFiles(), repos, allPaths);
 
-                // File dependencies (file ofSystem + computed)
+                // File dependencies (file system + computed)
             } else {
                 final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {

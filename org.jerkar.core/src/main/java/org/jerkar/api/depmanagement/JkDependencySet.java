@@ -84,7 +84,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     public JkVersion getVersion(JkModuleId moduleId) {
         JkScopedDependency dep = this.get(moduleId);
         if (dep == null) {
-            return null;
+            throw new IllegalArgumentException("No module " + moduleId + " declared in this dependency set " + this.withModulesOnly());
         }
         JkModuleDependency moduleDependency = (JkModuleDependency) dep.withDependency();
         JkVersion version = moduleDependency.getVersion();
@@ -286,7 +286,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * by the specified one, there is no addition.
      */
     public JkDependencySet withVersionProvider(JkVersionProvider versionProvider) {
-        return new JkDependencySet(this.dependencies, this.getGlobalExclusions(), versionProvider);
+        JkUtilsAssert.notNull(versionProvider, "Version provider can't be null. Use an empty version provider instead.");
+        return new JkDependencySet(this.dependencies, this.globalExclusions, versionProvider);
     }
 
     /**
@@ -295,6 +296,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * to the specified one.
      */
     public JkDependencySet andVersionProvider(JkVersionProvider versionProvider) {
+        JkUtilsAssert.notNull(versionProvider, "Version provider can't be null. Use an empty version provider instead.");
         return new JkDependencySet(this.dependencies, this.getGlobalExclusions(), this.versionProvider.and(versionProvider));
     }
 
@@ -545,7 +547,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 result.add(scopedDependency);
             }
         }
-        return JkDependencySet.of(result);
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
     }
 
     private List<JkModuleDependency> extractModuleDependencies() {

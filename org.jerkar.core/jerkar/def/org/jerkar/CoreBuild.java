@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
@@ -27,7 +28,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     private static final String VERSION = "0.7-SNAPSHOT";
 
     @JkDoc("If true, executes black-box tests on sample projects prior ending the distrib.")
-    public boolean testSamples;
+    public boolean runIntegrationTests;
 
     private Path distribFolder;
 
@@ -48,6 +49,10 @@ public class CoreBuild extends JkJavaProjectBuild {
         maker().getTestTasks().setFork(true);
         maker().getPublishTasks().setPublishRepos(publishRepos());
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
+
+        if (runIntegrationTests) {
+            maker().getTestTasks().setTestClassMatcher(JkPathMatcher.of());
+        }
 
         this.distribFolder = maker().getOutLayout().getOutputPath().resolve("distrib");
     }
@@ -72,7 +77,7 @@ public class CoreBuild extends JkJavaProjectBuild {
         }
         JkLog.execute("Making documentation", () -> new DocMaker(baseDir(), distribFolder,
                 project().getVersionedModule().getVersion().getValue()).assembleAllDoc());
-        if (testSamples) {
+        if (runIntegrationTests) {
             testSamples();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());

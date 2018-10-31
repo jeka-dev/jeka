@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsSystem;
 import org.junit.Test;
 
@@ -19,7 +20,6 @@ public class ResolverWithScopeMapperIT {
 
     @Test
     public void resolveWithDefaultScopeMappingOnResolver() {
-
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", TEST);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
@@ -55,7 +55,6 @@ public class ResolverWithScopeMapperIT {
      */
     @Test
     public void explicitExactVersionWin() {
-        //JkLog.verbose(true);
         JkModuleId starterWebModule = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
         String directCoreVersion = "4.0.0.RELEASE";

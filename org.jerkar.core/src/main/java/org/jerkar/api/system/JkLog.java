@@ -52,6 +52,10 @@ public final class JkLog implements Serializable {
         errorStream = eventLogHandler.errorStream();
     }
 
+    public static void registerBasicConsoleHandler() {
+        register(new BasicConsoleHandler());
+    }
+
     public static void setVerbosity(Verbosity verbosityArg) {
         JkUtilsAssert.notNull(verbosityArg, "Verbosity can noot be set to null.");
         verbosity = verbosityArg;
@@ -212,6 +216,33 @@ public final class JkLog implements Serializable {
 
         OutputStream errorStream();
 
+    }
+
+    private static class BasicConsoleHandler implements EventLogHandler {
+
+        @Override
+        public OutputStream outStream() {
+            return System.out;
+        }
+
+        @Override
+        public OutputStream errorStream() {
+            return System.err;
+        }
+
+        @Override
+        public void accept(JkLogEvent event) {
+            if (event.type.equals(Type.ERROR)) {
+                System.err.print(event.type);
+                System.err.print(" ");
+                System.err.println(event.message());
+            } else {
+                System.out.print(event.type);
+                System.out.print(" ");
+                System.out.println(event.message());
+            }
+
+        }
     }
 
 
