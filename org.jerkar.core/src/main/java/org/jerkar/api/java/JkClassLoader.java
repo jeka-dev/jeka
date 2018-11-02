@@ -53,7 +53,7 @@ public final class JkClassLoader {
 
     private static final int JAVA_SUFFIX_LENGTH = ".java".length();
 
-    private static Path urlCacheDir = JkLocator.jerkarUserHomeDir().resolve("cache/url-content");
+    private static Path urlCacheDir = JkLocator.getJerkarUserHomeDir().resolve("cache/url-content");
 
     static {
         JkUtilsPath.createDirectories(urlCacheDir);
@@ -162,7 +162,7 @@ public final class JkClassLoader {
             if (JkUtilsString.isBlank(path)
                     || (!candidate.isFile() && !candidate.isDirectory())) {
                 PrintStream printStream =
-                        JkLog.Verbosity.VERBOSE == JkLog.verbosity() ? new PrintStream(JkLog.stream()) : null;
+                        JkLog.Verbosity.VERBOSE == JkLog.verbosity() ? new PrintStream(JkLog.getOutputStream()) : null;
                 final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, printStream, urlCacheDir);
                 files.add(file);
             } else {

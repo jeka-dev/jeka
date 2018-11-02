@@ -107,8 +107,8 @@ public final class JkProcess implements Runnable {
      * Returns a <code>JkProcess</code> identical to this one but with the
      * specified extra parameters.
      */
-    public JkProcess withExtraParams(String... parameters) {
-        return withExtraParams(Arrays.asList(parameters));
+    public JkProcess andParams(String... parameters) {
+        return andParams(Arrays.asList(parameters));
     }
 
     /**
@@ -126,17 +126,17 @@ public final class JkProcess implements Runnable {
      * specified extra parameters if the conditional is <code>true</code>.
      * Returns <code>this</code> otherwise.
      */
-    public JkProcess withExtraParamsIf(boolean conditional, String... parameters) {
+    public JkProcess andParamsIf(boolean conditional, String... parameters) {
         if (conditional) {
-            return withExtraParams(parameters);
+            return andParams(parameters);
         }
         return this;
     }
 
     /**
-     * @see #withExtraParams(String...)
+     * @see #andParams(String...)
      */
-    public JkProcess withExtraParams(Collection<String> parameters) {
+    public JkProcess andParams(Collection<String> parameters) {
         final List<String> list = new ArrayList<>(this.parameters);
         list.addAll(parameters);
         return new JkProcess(command, list, workingDir, failOnError, logCommand);
@@ -145,7 +145,7 @@ public final class JkProcess implements Runnable {
     /**
      * Returns a <code>JkProcess</code> identical to this one but with the
      * specified parameters in place of this parameters. Contrary to
-     * {@link #withExtraParams(String...)}, this method replaces this parameters
+     * {@link #andParams(String...)}, this method replaces this parameters
      * by the specified ones (not adding).
      */
     public JkProcess withParams(String... parameters) {
@@ -232,9 +232,9 @@ public final class JkProcess implements Runnable {
                 throw new UncheckedIOException(e);
             }
             final JkUtilsIO.StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getInputStream(), JkLog.stream());
+                        process.getInputStream(), JkLog.getOutputStream());
                 final JkUtilsIO.StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getErrorStream(), JkLog.errorStream());
+                        process.getErrorStream(), JkLog.getErrorStream());
             try {
                 process.waitFor();
             } catch (InterruptedException e) {
@@ -292,7 +292,7 @@ public final class JkProcess implements Runnable {
     /**
      * Returns the working directory of this process.
      */
-    public Path workingDir() {
+    public Path getWorkingDir() {
         return workingDir;
     }
 

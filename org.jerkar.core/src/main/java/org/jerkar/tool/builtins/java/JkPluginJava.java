@@ -53,15 +53,15 @@ public class JkPluginJava extends JkPlugin {
 
     protected JkPluginJava(JkRun run) {
         super(run);
-        this.repoPlugin = run.plugins().get(JkPluginRepo.class);
-        this.project = JkJavaProject.ofMavenLayout(this.getOwner().baseDir());
+        this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);
+        this.project = JkJavaProject.ofMavenLayout(this.getOwner().getBaseDir());
         this.project.setDependencies(JkDependencySet.ofLocal(project().getSourceLayout()
                 .getBaseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
         final Path path = this.project.getSourceLayout().getBaseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
         if (Files.exists(path)) {
             this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.ofTextDescription(path)));
         }
-        this.scaffoldPlugin = run.plugins().get(JkPluginScaffold.class);
+        this.scaffoldPlugin = run.getPlugins().get(JkPluginScaffold.class);
     }
 
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
@@ -100,7 +100,7 @@ public class JkPluginJava extends JkPlugin {
             project.getMaker().getPackTasks().setChecksumAlgorithms(pack.checksums());
         }
         if (publish.signArtifacts) {
-            JkPluginPgp pgpPlugin = this.getOwner().plugins().get(JkPluginPgp.class);
+            JkPluginPgp pgpPlugin = this.getOwner().getPlugins().get(JkPluginPgp.class);
             JkPgp pgp = pgpPlugin.get();
             project.getMaker().getPublishTasks().setSigner(pgp::sign);
         }
@@ -120,7 +120,7 @@ public class JkPluginJava extends JkPlugin {
 
     private void setupScaffolder() {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
-        String baseDirName = getOwner().baseDir().getFileName().toString();
+        String baseDirName = getOwner().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
         project.getSourceLayout().getSources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());

@@ -102,7 +102,7 @@ final class LogHandler implements JkLog.EventLogHandler, Serializable {
         public void write(int b) throws IOException {
             if (lastByte == LINE_SEPARATOR) {
                 lineLength = 0;
-                for (int j = 0; j < JkLog.currentNestedLevel(); j++) {
+                for (int j = 0; j < JkLog.getCurrentNestedLevel(); j++) {
                     delegate.write(MARGIN_UNIT);
                     lineLength += MARGIN_UNIT_LENGTH;
                 }

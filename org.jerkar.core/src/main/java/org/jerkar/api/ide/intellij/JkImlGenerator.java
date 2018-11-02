@@ -444,11 +444,11 @@ public final class JkImlGenerator {
         String type = jarFile ? "jar" : "file";
         Path basePath  = projectDir;
         String varName = "MODULE_DIR";
-        if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.jerkarHomeDir())) {
-            basePath = JkLocator.jerkarHomeDir();
+        if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJerkarHomeDir())) {
+            basePath = JkLocator.getJerkarHomeDir();
             varName = "JERKAR_HOME";
-        } else if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.jerkarRepositoryCache())) {
-            basePath = JkLocator.jerkarRepositoryCache();
+        } else if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJerkarRepositoryCache())) {
+            basePath = JkLocator.getJerkarRepositoryCache();
             varName = "JERKAR_REPO";
         }
         String result;
@@ -530,8 +530,8 @@ public final class JkImlGenerator {
         if (!useVarPath) {
             return path;
         }
-        final String repo = JkLocator.jerkarRepositoryCache().toAbsolutePath().normalize().toString().replace('\\', '/');
-        final String home = JkLocator.jerkarHomeDir().toAbsolutePath().normalize().toString().replace('\\', '/');
+        final String repo = JkLocator.getJerkarRepositoryCache().toAbsolutePath().normalize().toString().replace('\\', '/');
+        final String home = JkLocator.getJerkarHomeDir().toAbsolutePath().normalize().toString().replace('\\', '/');
         final String result = path.replace(repo, "$JERKAR_REPO$");
         if (!result.equals(path)) {
             return result;

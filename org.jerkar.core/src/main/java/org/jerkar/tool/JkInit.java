@@ -41,15 +41,15 @@ public final class JkInit {
                 .append("\nJava Home : " + System.getProperty("java.home"))
                 .append("\nJava Version : " + System.getProperty("java.version") + ", "
                         + System.getProperty("java.vendor"))
-                .append("\nJerkar Version : " + JkInfo.jerkarVersion());
-        if ( embedded(JkLocator.jerkarHomeDir())) {
+                .append("\nJerkar Version : " + JkInfo.getJerkarVersion());
+        if ( embedded(JkLocator.getJerkarHomeDir())) {
             sb.append("\nJerkar Home : " + bootDir() + " ( embedded !!! )");
         } else {
-            sb.append("\nJerkar Home : " + JkLocator.jerkarHomeDir());
+            sb.append("\nJerkar Home : " + JkLocator.getJerkarHomeDir());
         }
-        sb.append("\nJerkar User Home : " + JkLocator.jerkarUserHomeDir().toAbsolutePath().normalize());
+        sb.append("\nJerkar User Home : " + JkLocator.getJerkarUserHomeDir().toAbsolutePath().normalize());
         sb.append("\nJerkar Run Repositories : " + Engine.repos().toString());
-        sb.append("\nJerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
+        sb.append("\nJerkar Repository Cache : " + JkLocator.getJerkarRepositoryCache());
         sb.append("\nJerkar Classpath : " + System.getProperty("java.class.path"));
         sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(Environment.commandLine.rawArgs()), " "));
         sb.append(propsAsString("Specified System Properties", Environment.systemProps));

@@ -31,7 +31,7 @@ public final class JkLocator {
      * Returns the Jerkar jar file currently used in the running process. Returns a folder if the classes
      * are not packaged in jar.
      */
-    public static Path jerkarJarPath() {
+    public static Path getJerkarJarPath() {
         if (JERKAR_JAR_FILE != null) {
             return JERKAR_JAR_FILE;
         }
@@ -65,15 +65,15 @@ public final class JkLocator {
     /**
      * Returns the directory where is installed the running Jerkar instance.
      */
-    public static Path jerkarHomeDir() {
-        return jerkarJarPath().getParent();
+    public static Path getJerkarHomeDir() {
+        return getJerkarJarPath().getParent();
     }
 
 
     /**
      * Returns the Jerkar user directory.
      */
-    public static Path jerkarUserHomeDir() {
+    public static Path getJerkarUserHomeDir() {
         final Path result;
         final String env = System.getenv(JK_USER_HOM_ENV_NAME);
         if (!JkUtilsString.isBlank(env)) {
@@ -91,13 +91,13 @@ public final class JkLocator {
     /**
      * Returns the location of the artifact repository cache.
      */
-    public static Path jerkarRepositoryCache() {
+    public static Path getJerkarRepositoryCache() {
         final String jerkarCacheOption = System.getenv(JK_REPOSITORY_CACHE_ENV_NAME);
         final Path result;
         if (!JkUtilsString.isBlank(jerkarCacheOption)) {
             result = Paths.get(jerkarCacheOption);
         } else {
-            result = jerkarUserHomeDir().resolve("cache/repo");
+            result = getJerkarUserHomeDir().resolve("cache/repo");
         }
         JkUtilsPath.createDirectories(result);
         return result;

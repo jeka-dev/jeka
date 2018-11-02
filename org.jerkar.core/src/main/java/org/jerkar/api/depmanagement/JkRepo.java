@@ -139,7 +139,7 @@ public final class JkRepo implements Serializable {
      * Creates a Maven repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
      */
     public static JkRepo ofLocal() {
-        final Path file = JkLocator.jerkarUserHomeDir().resolve("maven-publish-dir");
+        final Path file = JkLocator.getJerkarUserHomeDir().resolve("maven-publish-dir");
         return JkRepo.ofMaven(file);
     }
 

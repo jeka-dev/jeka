@@ -62,7 +62,7 @@ public final class JkRunPlugins {
     /**
      * Returns a list of all loaded plugins in the holding JkRun instance.
      */
-    public List<JkPlugin> all() {
+    public List<JkPlugin> getAll() {
         return Collections.unmodifiableList(loadedPlugins);
     }
 

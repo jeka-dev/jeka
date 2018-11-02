@@ -22,7 +22,7 @@ public class SimpleScopeBuild extends JkJavaProjectBuild {
     @Override
     protected void setup() {
         java().project().setDependencies(JkDependencySet.of()
-                .andFile(baseDir().resolve("libs/foo.jar"))
+                .andFile(getBaseDir().resolve("libs/foo.jar"))
                 .and(JERSEY_SERVER, "1.19", JkScopeMapping
                     .of(COMPILE).to(RUNTIME)
                     .and(FOO, PROVIDED).to(BAR, PROVIDED)));

@@ -61,7 +61,7 @@ public class JkRun {
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
         // Instantiating imported runs
-        this.importedRuns = JkImportedRuns.of(this.baseTree().getRoot(), this);
+        this.importedRuns = JkImportedRuns.of(this.getBaseTree().getRoot(), this);
 
         this.plugins = new JkRunPlugins(this, Environment.commandLine.getPluginOptions());
     }
@@ -85,13 +85,13 @@ public class JkRun {
 
         // Load plugins declared in command line and inject options
         jkRun.plugins.loadCommandLinePlugins();
-        for (JkPlugin plugin : jkRun.plugins().all()) {
+        for (JkPlugin plugin : jkRun.getPlugins().getAll()) {
            jkRun.plugins.injectOptions(plugin);
         }
         run.setup();
 
         jkRun.plugins.loadCommandLinePlugins();
-        for (JkPlugin plugin : jkRun.plugins().all()) {
+        for (JkPlugin plugin : jkRun.getPlugins().getAll()) {
             List<ProjectDef.RunOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
             try {
                 plugin.activate();
@@ -138,28 +138,28 @@ public class JkRun {
      * Returns the base directory tree for this project. All file/directory path are
      * resolved to this directory. Short-hand for <code>JkPathTree.of(baseDir)</code>.
      */
-    public final JkPathTree baseTree() {
+    public final JkPathTree getBaseTree() {
         return JkPathTree.of(baseDir);
     }
 
     /**
      * Returns the base directory for this project.
      */
-    public final Path baseDir() {
+    public final Path getBaseDir() {
         return baseDir;
     }
 
     /**
-     * The output directory where all the final and intermediate artifacts are generated.
+     * Returns the output directory where all the final and intermediate artifacts are generated.
      */
-    public Path outputDir() {
+    public Path getOutputDir() {
         return baseDir.resolve(JkConstants.OUTPUT_PATH);
     }
 
     /**
      * Returns the container of loaded plugins for this instance.
      */
-    public JkRunPlugins plugins() {
+    public JkRunPlugins getPlugins() {
         return this.plugins;
     }
 
@@ -175,34 +175,34 @@ public class JkRun {
      * Returns the dependency resolver used to compile/run scripts of this
      * project.
      */
-    public final JkDependencyResolver runDependencyResolver() {
+    public final JkDependencyResolver getRunDependencyResolver() {
         return this.runDefDependencyResolver;
     }
 
     /**
      * Dependencies necessary to compile the this run class. It is not the dependencies for building the project.
      */
-    public final JkDependencySet runDependencies() {
+    public final JkDependencySet getRunDependencies() {
         return runDependencies;
     }
 
     /**
      * Returns imported runs with plugins applied on.
      */
-    public final JkImportedRuns importedRuns() {
+    public final JkImportedRuns getImportedRuns() {
         return importedRuns;
     }
 
     // ------------------------------ Command line methods ------------------------------
 
     /**
-     * Clean the output directory.
+     * Cleans the output directory.
      */
     @JkDoc("Cleans the output directory except the compiled run classes.")
     public void clean() {
-        JkLog.info("Clean output directory " + outputDir());
-        if (Files.exists(outputDir())) {
-            JkPathTree.of(outputDir()).andReject(JkConstants.DEF_BIN_DIR_NAME + "/**").deleteContent();
+        JkLog.info("Clean output directory " + getOutputDir());
+        if (Files.exists(getOutputDir())) {
+            JkPathTree.of(getOutputDir()).andReject(JkConstants.DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
     }
 

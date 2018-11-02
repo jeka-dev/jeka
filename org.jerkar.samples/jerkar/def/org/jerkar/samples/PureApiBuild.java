@@ -8,15 +8,13 @@ import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkInit;
 
-import java.nio.file.Paths;
-
 /**
  * This should be run with org.jerkar.samples as working dir.
  */
 public class PureApiBuild extends JkRun {
 
     public void doDefault() {
-        JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.baseDir());
+        JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.getBaseDir());
 
         // We want to output stuff in another place than build/output
         javaProject.getMaker().setOutLayout(javaProject.getMaker().getOutLayout().withOutputDir("build/output/alt-output"));

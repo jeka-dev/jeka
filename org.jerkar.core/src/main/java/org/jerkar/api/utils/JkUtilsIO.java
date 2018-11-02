@@ -23,7 +23,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Creates a no-op print stream.
+     * Creates a no-op print getOutputStream.
      */
     public static PrintStream nopPrintStream() {
         return new PrintStream(nopOuputStream());
@@ -133,7 +133,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Returns the content of the specified input stream, line by line.
+     * Returns the content of the specified input getOutputStream, line by line.
      */
     // TODO encoding ????
     public static List<String> readAsLines(InputStream in) {
@@ -162,7 +162,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Returns the content of the given input stream as a single string.
+     * Returns the content of the given input getOutputStream as a single string.
      */
     public static String readAsString(InputStream in) {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -231,8 +231,8 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Copies the content of the given input stream to a specified output
-     * stream.
+     * Copies the content of the given input getOutputStream to a specified output
+     * getOutputStream.
      */
     public static void copy(InputStream in, OutputStream out) {
         final byte[] buf = new byte[1024];
@@ -258,7 +258,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Serializes a given Java object to the specified output stream.
+     * Serializes a given Java object to the specified output getOutputStream.
      */
     public static void serialize(Object object, OutputStream outputStream) {
         try {
@@ -283,7 +283,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Deserializes the content of the specified input stream to a Java object.
+     * Deserializes the content of the specified input getOutputStream to a Java object.
      */
     public static Object deserialize(InputStream inputStream) {
         return deserialize(inputStream, JkUtilsIO.class.getClassLoader());
@@ -336,14 +336,14 @@ public final class JkUtilsIO {
 
     /**
      * Returns a thread that write each data read to the specified input
-     * stream to the specified output stream.
+     * getOutputStream to the specified output getOutputStream.
      */
     public static StreamGobbler newStreamGobbler(InputStream is, OutputStream os) {
         return new StreamGobbler(is, os);
     }
 
     /**
-     * Runs a thread copying all data to a stream to a specified writer. The
+     * Runs a thread copying all data to a getOutputStream to a specified writer. The
      * thread is started when the instance is created. You have to call
      * {@link #stop()} to stop the thread.
      */

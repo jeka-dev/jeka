@@ -163,7 +163,7 @@ final class Engine {
     private JkDependencySet computeRunDependencies() {
 
         // If true, we assume Jerkar is provided by IDE (development mode)
-        final boolean devMode = Files.isDirectory(JkLocator.jerkarJarPath());
+        final boolean devMode = Files.isDirectory(JkLocator.getJerkarJarPath());
         return JkDependencySet.of(runDependencies
                 .andFiles(localRunPath())
                 .andFiles(JkClasspath.ofCurrentRuntime()).withLastIf(devMode)
@@ -203,7 +203,7 @@ final class Engine {
 
     private void launch(JkRun jkRun, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkRun importedRun : jkRun.importedRuns().all()) {
+            for (final JkRun importedRun : jkRun.getImportedRuns().getAll()) {
                 runProject(importedRun, commandLine.getSubProjectMethods());
             }
             runProject(jkRun, commandLine.getSubProjectMethods());
@@ -227,7 +227,7 @@ final class Engine {
 
     private static JkPathSequence jerkarLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
-        extraLibs.add(JkLocator.jerkarJarPath());
+        extraLibs.add(JkLocator.getJerkarJarPath());
         return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
 
@@ -239,7 +239,7 @@ final class Engine {
 
     private static void invokeMethodOnRunClassOrPlugin(JkRun jkRun, MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
-            final JkPlugin plugin = jkRun.plugins().get(methodInvocation.pluginName);
+            final JkPlugin plugin = jkRun.getPlugins().get(methodInvocation.pluginName);
             invokeMethodOnRunOrPlugin(plugin, methodInvocation.methodName);
         } else {
             invokeMethodOnRunOrPlugin(jkRun, methodInvocation.methodName);

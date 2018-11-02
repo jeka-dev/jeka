@@ -20,7 +20,7 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
     protected SonarEnv sonarEnv = SonarEnv.DEV;
 
     public SonarPluginBuild() {
-        this.plugins().get(JkPluginSonar.class)
+        this.getPlugins().get(JkPluginSonar.class)
                 .prop(JkSonar.BRANCH, "myBranch");
     }
     
@@ -35,7 +35,7 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
 
 
     public void runSonar() {
-        this.plugins().get(JkPluginSonar.class).run();
+        this.getPlugins().get(JkPluginSonar.class).run();
     }
 
     enum SonarEnv {

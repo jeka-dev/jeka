@@ -146,7 +146,7 @@ public final class JkUtilsXml {
     }
 
     /**
-     * Prints the specified document in the specified output stream.
+     * Prints the specified document in the specified output getOutputStream.
      * The output is indented.
      */
     public static void output(Document doc, OutputStream outputStream) {

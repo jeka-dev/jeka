@@ -21,8 +21,8 @@ class PrintConsoleTestListener extends RunListener {
         JkLog.startTask("Running " + description.getClassName() + "." + description.getMethodName());
         out = System.out;
         err = System.err;
-        System.setOut(new PrintStream(JkLog.stream()));
-        System.setErr(new PrintStream(JkLog.errorStream()));
+        System.setOut(new PrintStream(JkLog.getOutputStream()));
+        System.setErr(new PrintStream(JkLog.getErrorStream()));
         startTs = System.nanoTime();
     }
 
@@ -40,12 +40,12 @@ class PrintConsoleTestListener extends RunListener {
 
     @Override
     public void testAssumptionFailure(Failure failure) {
-        failure.getException().printStackTrace(new PrintStream(JkLog.stream()));
+        failure.getException().printStackTrace(new PrintStream(JkLog.getOutputStream()));
     }
 
     @Override
     public void testFailure(Failure failure) {
-        failure.getException().printStackTrace(new PrintStream(JkLog.stream()));
+        failure.getException().printStackTrace(new PrintStream(JkLog.getOutputStream()));
     }
 
 }

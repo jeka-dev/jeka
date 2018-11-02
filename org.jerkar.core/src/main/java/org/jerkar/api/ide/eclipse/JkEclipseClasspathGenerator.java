@@ -402,12 +402,12 @@ public final class JkEclipseClasspathGenerator {
         if (!paths.add(binPath)) {
             return;
         }
-        boolean useRepoVariable = usePathVariables && bin.startsWith(JkLocator.jerkarRepositoryCache());
+        boolean useRepoVariable = usePathVariables && bin.startsWith(JkLocator.getJerkarRepositoryCache());
         boolean isVar = true;
         if (useRepoVariable) {
-            binPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().relativize(bin).toString();
-        } else if (usePathVariables && bin.startsWith(JkLocator.jerkarHomeDir())) {
-            binPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.jerkarHomeDir().relativize(bin).toString();
+            binPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.getJerkarRepositoryCache().relativize(bin).toString();
+        } else if (usePathVariables && bin.startsWith(JkLocator.getJerkarHomeDir())) {
+            binPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.getJerkarHomeDir().relativize(bin).toString();
         } else {
             isVar = false;
             binPath = sourceLayout.getBaseDir().relativize(bin).toString();
@@ -426,10 +426,10 @@ public final class JkEclipseClasspathGenerator {
         writer.writeAttribute("exported", "true");
         if (source != null && Files.exists(source)) {
             String srcPath;
-            if (usePathVariables && source.startsWith(JkLocator.jerkarRepositoryCache())) {
-                srcPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().relativize(source).toString();
-            } else if (usePathVariables && source.startsWith(JkLocator.jerkarHomeDir())) {
-                srcPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.jerkarHomeDir().relativize(source).toString();
+            if (usePathVariables && source.startsWith(JkLocator.getJerkarRepositoryCache())) {
+                srcPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.getJerkarRepositoryCache().relativize(source).toString();
+            } else if (usePathVariables && source.startsWith(JkLocator.getJerkarHomeDir())) {
+                srcPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.getJerkarHomeDir().relativize(source).toString();
             }else {
                 srcPath = sourceLayout.getBaseDir().relativize(source).toString();
             }

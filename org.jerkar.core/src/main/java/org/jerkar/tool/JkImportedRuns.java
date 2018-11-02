@@ -43,14 +43,14 @@ public final class JkImportedRuns {
     /**
      * Returns only the direct slave of this master run.
      */
-    public List<JkRun> directs() {
+    public List<JkRun> getDirects() {
         return Collections.unmodifiableList(directImportedRuns);
     }
 
     /**
      * Returns direct and transitive importedRuns.
      */
-    public List<JkRun> all() {
+    public List<JkRun> getAll() {
         if (transitiveImportedRuns == null) {
             transitiveImportedRuns = resolveTransitiveRuns(new HashSet<>());
         }
@@ -58,11 +58,11 @@ public final class JkImportedRuns {
     }
 
     /**
-     * Same as {@link #all()} but only returns run instance of the specified class or its subclasses.
+     * Same as {@link #getAll()} but only returns run instance of the specified class or its subclasses.
      */
-    public <T extends JkRun> List<T> allOf(Class<T> ofClass) {
+    public <T extends JkRun> List<T> getAllOf(Class<T> ofClass) {
         final List<T> result = new LinkedList<>();
-        for (final JkRun run : all()) {
+        for (final JkRun run : getAll()) {
             if (ofClass.isAssignableFrom(run.getClass())) {
                 result.add((T) run);
             }
@@ -73,9 +73,9 @@ public final class JkImportedRuns {
     private List<JkRun> resolveTransitiveRuns(Set<Path> files) {
         final List<JkRun> result = new LinkedList<>();
         for (final JkRun run : directImportedRuns) {
-            final Path dir = run.baseDir();
+            final Path dir = run.getBaseDir();
             if (!files.contains(dir)) {
-                result.addAll(run.importedRuns().resolveTransitiveRuns(files));
+                result.addAll(run.getImportedRuns().resolveTransitiveRuns(files));
                 result.add(run);
                 files.add(dir);
             }
@@ -91,7 +91,7 @@ public final class JkImportedRuns {
         for (final Field field : fields) {
             final JkImportRun jkProject = field.getAnnotation(JkImportRun.class);
             final JkRun importedRun = createImportedRun(
-                    (Class<? extends JkRun>) field.getType(), jkProject.value(), masterRun.baseDir());
+                    (Class<? extends JkRun>) field.getType(), jkProject.value(), masterRun.getBaseDir());
             try {
                 JkUtilsReflect.setFieldValue(masterRun, field, importedRun);
             } catch (final RuntimeException e) {
@@ -102,12 +102,12 @@ public final class JkImportedRuns {
                 if (currentClassBaseDir == null) {
                     throw new IllegalStateException("Can't inject imported run instance of type " + importedRun.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
-                            + "#" + field.getName() + " from directory " + masterRun.baseDir()
+                            + "#" + field.getName() + " from directory " + masterRun.getBaseDir()
                             + " while working dir is " + Paths.get("").toAbsolutePath());
                 }
                 throw new IllegalStateException("Can't inject imported run instance of type " + importedRun.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
-                        + "#" + field.getName() + " from directory " + masterRun.baseDir()
+                        + "#" + field.getName() + " from directory " + masterRun.getBaseDir()
                         + "\nRun class is located in " + currentClassBaseDir
                         + " while working dir is " + Paths.get("").toAbsolutePath()
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);

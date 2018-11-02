@@ -67,7 +67,7 @@ class JUnit4TestExecutor {
         if (printEachTestOnConsole) {
             jUnitCore.addListener(new PrintConsoleTestListener());
         } else {
-            jUnitCore.addListener(new ProgressTestListener(JkLog.stream()));
+            jUnitCore.addListener(new ProgressTestListener(JkLog.getOutputStream()));
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
             System.setErr(JkUtilsIO.nopPrintStream());
             System.setOut(JkUtilsIO.nopPrintStream());

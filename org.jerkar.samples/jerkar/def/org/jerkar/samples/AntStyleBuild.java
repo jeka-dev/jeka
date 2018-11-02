@@ -21,11 +21,11 @@ import java.nio.file.Paths;
  */
 public class AntStyleBuild extends JkRun {
 
-    Path src = baseDir().resolve("src/main/java");
-    Path buildDir = baseDir().resolve("build/output");
-    Path classDir = outputDir().resolve("classes");
-    Path jarFile = outputDir().resolve("jar/" + baseTree().getRoot().getFileName() + ".jar");
-    JkClasspath classpath = JkClasspath.ofMany(baseTree().andAccept("libs/**/*.jar").getFiles());
+    Path src = getBaseDir().resolve("src/main/java");
+    Path buildDir = getBaseDir().resolve("build/output");
+    Path classDir = getOutputDir().resolve("classes");
+    Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
+    JkClasspath classpath = JkClasspath.ofMany(getBaseTree().andAccept("libs/**/*.jar").getFiles());
     Path reportDir =buildDir.resolve("junitRreport");
 
     public void doDefault() {
@@ -96,7 +96,7 @@ public class AntStyleBuild extends JkRun {
                 .andGitHubDeveloper("myName", "myName@provider.com");
 
         // Optional : if you want publish sources
-        Path srcZip = outputDir().resolve("src.zip");
+        Path srcZip = getOutputDir().resolve("src.zip");
         JkPathTree.of(srcZip).zipTo(srcZip);
 
         JkMavenPublication publication = JkMavenPublication.of(jarFile)

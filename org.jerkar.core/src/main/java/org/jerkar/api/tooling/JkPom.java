@@ -62,43 +62,43 @@ public final class JkPom {
     /**
      * The groupId for this POM.
      */
-    public String groupId() {
+    public String getGroupId() {
         return JkUtilsXml.directChildText(projectEl(), "groupId");
     }
 
     /**
      * The artifzctId for this POM.
      */
-    public String artifactId() {
+    public String getArtifactId() {
         return JkUtilsXml.directChildText(projectEl(), "artifactId");
     }
 
     /**
      * The version for this POM.
      */
-    public String version() {
+    public String getVersion() {
         return JkUtilsXml.directChildText(projectEl(), "version");
     }
 
     /**
      * The dependencies declared in this POM.
      */
-    public JkDependencySet dependencies() {
-        return dependencies(dependenciesElement(), properties());
+    public JkDependencySet getDependencies() {
+        return dependencies(dependenciesElement(), getProperties());
     }
 
     /**
      * The map groupId:ArtifactId -> version provideded by the <code>dependencyManagement</code>
      * section of this POM.
      */
-    public JkVersionProvider versionProvider() {
+    public JkVersionProvider getVersionProvider() {
         final List<JkVersionedModule> versionedModules = new LinkedList<>();
         if (dependencyManagementEl() == null) {
             return JkVersionProvider.empty();
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
-        final JkDependencySet dependencies = dependencies(dependenciesEl, properties());
+        final JkDependencySet dependencies = dependencies(dependenciesEl, getProperties());
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
                     .withDependency();
@@ -113,7 +113,7 @@ public final class JkPom {
     /**
      * Returns properties declared in this POM.
      */
-    public Map<String, String> properties() {
+    public Map<String, String> getProperties() {
         final Map<String, String> result = new HashMap<>();
         if (propertiesEl() == null) {
             return result;
@@ -133,14 +133,14 @@ public final class JkPom {
      * The {@link JkDependencyExclusions} instance provided by the <code>dependencyManagement</code>
      * section of this POM.
      */
-    public JkDependencyExclusions dependencyExclusion() {
+    public JkDependencyExclusions getDependencyExclusion() {
         JkDependencyExclusions result = JkDependencyExclusions.of();
         if (dependencyManagementEl() == null) {
             return result;
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
-        final JkDependencySet dependencies = dependencies(dependenciesEl, properties());
+        final JkDependencySet dependencies = dependencies(dependenciesEl, getProperties());
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
                     .withDependency();
@@ -154,7 +154,7 @@ public final class JkPom {
     /**
      * Repositories declared in this POM.
      */
-    public JkRepoSet repos() {
+    public JkRepoSet getRepos() {
         final List<String> urls = new LinkedList<>();
         if (repositoriesEl() == null) {
             return JkRepoSet.ofEmpty();

@@ -117,12 +117,12 @@ public final class JkJavadocMaker {
                 return;
             }
             final String[] args = toArguments(outputDir);
-            OutputStream info = JkLog.stream();
+            OutputStream info = JkLog.getOutputStream();
             OutputStream warn = JkUtilsIO.nopPrintStream();   // error and log produces very verbose logs in jdoclet
             OutputStream error = JkUtilsIO.nopPrintStream();
             if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-                warn = JkLog.stream();
-                error = JkLog.errorStream();
+                warn = JkLog.getOutputStream();
+                error = JkLog.getErrorStream();
             }
             JkUtilsPath.createDirectories(outputDir);
             execute(doclet, info, warn, error, args);

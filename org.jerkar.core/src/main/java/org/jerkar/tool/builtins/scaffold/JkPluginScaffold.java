@@ -18,7 +18,7 @@ public class JkPluginScaffold extends JkPlugin {
 
     protected JkPluginScaffold(JkRun run) {
         super(run);
-        this.scaffolder = new JkScaffolder(run.baseDir(), false);
+        this.scaffolder = new JkScaffolder(run.getBaseDir(), false);
         this.scaffolder.setRunClassCode(JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));
     }
 

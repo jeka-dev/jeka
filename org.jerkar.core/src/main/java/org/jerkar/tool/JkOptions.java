@@ -104,12 +104,12 @@ public final class JkOptions {
     }
 
     static Map<String, String> readSystemAndUserOptions() {
-        final Path propFile = JkLocator.jerkarHomeDir().resolve("options.properties");
+        final Path propFile = JkLocator.getJerkarHomeDir().resolve("options.properties");
         final Map<String, String> result = new HashMap<>();
         if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }
-        final Path userPropFile = JkLocator.jerkarUserHomeDir().resolve("options.properties");
+        final Path userPropFile = JkLocator.getJerkarUserHomeDir().resolve("options.properties");
         if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }

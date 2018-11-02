@@ -123,9 +123,9 @@ final class DotClasspathModel {
                 final String var = JkUtilsString.substringBeforeFirst(classpathEntry.path, "/");
                 final String varFile;
                 if (JERKAR_HOME.equals(var)) {
-                    varFile = JkLocator.jerkarHomeDir().toAbsolutePath().normalize().toString();
+                    varFile = JkLocator.getJerkarHomeDir().toAbsolutePath().normalize().toString();
                 } else if (JERKAR_REPO.equals(var)) {
-                    varFile = JkLocator.jerkarRepositoryCache().normalize().toString();
+                    varFile = JkLocator.getJerkarRepositoryCache().normalize().toString();
                 } else {
                     final String optionName = OPTION_VAR_PREFIX + var;
                     varFile = JkOptions.get(optionName);

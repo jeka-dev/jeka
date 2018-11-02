@@ -61,7 +61,7 @@ public final class JkLog implements Serializable {
         verbosity = verbosityArg;
     }
 
-    public static int currentNestedLevel() {
+    public static int getCurrentNestedLevel() {
         return currentNestedTaskLevel.get();
     }
 
@@ -80,14 +80,14 @@ public final class JkLog implements Serializable {
         }
     }
 
-    public static OutputStream stream() {
+    public static OutputStream getOutputStream() {
         if (Verbosity.MUTE == verbosity()) {
             return JkUtilsIO.nopPrintStream();
         }
         return stream;
     }
 
-    public static OutputStream errorStream() {
+    public static OutputStream getErrorStream() {
         if (Verbosity.MUTE == verbosity()) {
             return JkUtilsIO.nopPrintStream();
         }

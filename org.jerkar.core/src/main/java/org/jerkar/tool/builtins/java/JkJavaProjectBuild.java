@@ -11,7 +11,7 @@ import org.jerkar.tool.JkRun;
 public class JkJavaProjectBuild extends JkRun {
 
     public final JkPluginJava java() {
-        return this.plugins().get(JkPluginJava.class);
+        return this.getPlugins().get(JkPluginJava.class);
     }
 
     public final JkJavaProject project() {

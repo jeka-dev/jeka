@@ -53,7 +53,7 @@ public class JkPathTreeTest {
     public void testStream() throws Exception {
         Path sampleDir = sampleDir();
 
-        // Root is included in the stream
+        // Root is included in the getOutputStream
         assertTrue(JkPathTree.of(sampleDir).stream().anyMatch(path -> path.equals(sampleDir)));
     }
 

@@ -106,9 +106,9 @@ public final class JkMvn implements Runnable {
     /**
      * Append a "-U" force update to the list of parameters
      */
-    public final JkMvn forceUpdate(boolean flag) {
+    public final JkMvn withForceUpdate(boolean flag) {
         if (flag) {
-            return new JkMvn(this.jkProcess.withExtraParams("-U"));
+            return new JkMvn(this.jkProcess.andParams("-U"));
         }
         return new JkMvn(this.jkProcess.withoutParam("-U"));
     }
@@ -116,9 +116,9 @@ public final class JkMvn implements Runnable {
     /**
      * Append or remove a "-X" verbose to the list of parameters
      */
-    public final JkMvn verbose(boolean flag) {
+    public final JkMvn withVerbose(boolean flag) {
         if (flag) {
-            return new JkMvn(this.jkProcess.withExtraParams("-X"));
+            return new JkMvn(this.jkProcess.andParams("-X"));
         }
         return new JkMvn(this.jkProcess.withoutParam("-X"));
     }
@@ -126,15 +126,8 @@ public final class JkMvn implements Runnable {
     /**
      * Returns the underlying process to execute mvn
      */
-    public JkProcess asProcess() {
+    public JkProcess toProcess() {
         return this.jkProcess;
-    }
-
-    /**
-     * Shorthand for {@link JkProcess#withFailOnError(boolean)}
-     */
-    public JkMvn failOnError(boolean flag) {
-        return new JkMvn(this.jkProcess.withFailOnError(flag));
     }
 
     @Override
@@ -143,8 +136,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Creates a {@link JkDependencySet} jump a file describing definition like.
-     *
+     * Creates a {@link JkDependencySet} from file describing dependencies the followiung way :
      * <pre>
      * <code>
      * org.springframework:spring-aop:jar:4.2.3.BUILD-SNAPSHOT:compile

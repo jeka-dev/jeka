@@ -83,8 +83,8 @@ public final class JkManifest {
     }
 
     /**
-     * Creates a <code>JkManifest</code> from the specified input stream. The
-     * specified stream is supposed to contains manifest information as present
+     * Creates a <code>JkManifest</code> from the specified input getOutputStream. The
+     * specified getOutputStream is supposed to contains manifest information as present
      * in a manifest file.
      */
     public static JkManifest of(InputStream inputStream) {

@@ -233,9 +233,9 @@ public final class JkJavaProcess {
                 final Process process = processBuilder(command, optionAndEnv.env).start();
 
                 final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getInputStream(), JkLog.stream());
+                        process.getInputStream(), JkLog.getOutputStream());
                 final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getErrorStream(), JkLog.errorStream());
+                        process.getErrorStream(), JkLog.getErrorStream());
                 process.waitFor();
                 outputStreamGobbler.stop();
                 errorStreamGobbler.stop();

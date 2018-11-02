@@ -122,9 +122,9 @@ public final class JkPathTree {
     // ----------------------- iterate over files ---------------------------------------------------
 
     /**
-     * Returns a path stream of all files of this tree. Returned paths are resolved against this tree root.
+     * Returns a path getOutputStream of all files of this tree. Returned paths are resolved against this tree root.
      * This means that if this tree root is absolute then streamed paths are absolute as well.
-     * Note that the root folder is included in the returned stream.
+     * Note that the root folder is included in the returned getOutputStream.
      * If this method is called for a zip tree instance, then it should be closed or called within
      * <i>try-with-resources</i> statement in order to avoid resource leaks.
      */

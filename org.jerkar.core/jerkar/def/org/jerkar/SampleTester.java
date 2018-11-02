@@ -73,8 +73,8 @@ class SampleTester {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-LV=true -RC=" + className)
-                .withExtraParams("clean", "java#pack", "java#publish", "-java#publish.localOnly")
-                .withExtraParams(args)
+                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly")
+                .andParams(args)
                 .withFailOnError(true).runSync();
     }
 
@@ -83,15 +83,15 @@ class SampleTester {
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.getRoot())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-RC=" + className)
                 .withParams("clean", "java#pack")
-                .withExtraParams(args)
+                .andParams(args)
                 .withFailOnError(true).runSync();
     }
 
     private void testScaffoldJava() {
         JkLog.info("Test scaffold Java");
         Path root = JkUtilsPath.createTempDirectory("jerkar");
-        process().withWorkingDir(root).withExtraParams("scaffold#run", "java#").runSync();
-        process().withWorkingDir(root).withExtraParams("java#pack").runSync();
+        process().withWorkingDir(root).andParams("scaffold#run", "java#").runSync();
+        process().withWorkingDir(root).andParams("java#pack").runSync();
         JkPathTree.of(root).deleteRoot();
     }
 

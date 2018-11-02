@@ -155,7 +155,7 @@ public final class JkJavaCompiler {
         if (this.fork == null) {
             List<File> files = toFiles(compileSpec.getSourceFiles());
             final Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
-            final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
+            final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutputStream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);
             if (files.size() > 0) {
                 JkLog.info("" + files.size() + " files to compile with " + compiler.getClass().getSimpleName());
@@ -201,7 +201,7 @@ public final class JkJavaCompiler {
                 sourcePaths.add(file.toAbsolutePath().toString());
             }
         }
-        final JkProcess jkProcess = this.fork.withExtraParams(compileSpec.getOptions()).withExtraParams(sourcePaths);
+        final JkProcess jkProcess = this.fork.andParams(compileSpec.getOptions()).andParams(sourcePaths);
         JkLog.info("" + sourcePaths.size() + " files to compile.");
         final int result = jkProcess.runSync();
         return (result == 0);

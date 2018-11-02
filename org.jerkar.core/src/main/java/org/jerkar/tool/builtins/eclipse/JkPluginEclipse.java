@@ -37,7 +37,7 @@ public final class JkPluginEclipse extends JkPlugin {
 
     protected JkPluginEclipse(JkRun run) {
         super(run);
-        this.scaffold = run.plugins().get(JkPluginScaffold.class);
+        this.scaffold = run.getPlugins().get(JkPluginScaffold.class);
     }
 
     // ------------------------- setters ----------------------------
@@ -58,36 +58,36 @@ public final class JkPluginEclipse extends JkPlugin {
     @JkDoc("Generates Eclipse files (.classpath and .project) in the current directory. The files reflect project " +
             "dependencies and source layout.")
     public void generateFiles() {
-        final Path dotProject = getOwner().baseDir().resolve(".project");
-        if (getOwner().plugins().hasLoaded(JkPluginJava.class)) {
-            final JkJavaProject javaProject = getOwner().plugins().get(JkPluginJava.class).project();
+        final Path dotProject = getOwner().getBaseDir().resolve(".project");
+        if (getOwner().getPlugins().hasLoaded(JkPluginJava.class)) {
+            final JkJavaProject javaProject = getOwner().getPlugins().get(JkPluginJava.class).project();
             final List<Path> importedRunProjects = new LinkedList<>();
-            for (final JkRun depRun : getOwner().importedRuns().directs()) {
-                importedRunProjects.add(depRun.baseTree().getRoot());
+            for (final JkRun depRun : getOwner().getImportedRuns().getDirects()) {
+                importedRunProjects.add(depRun.getBaseTree().getRoot());
             }
             final JkEclipseClasspathGenerator classpathGenerator = JkEclipseClasspathGenerator.of(javaProject);
-            classpathGenerator.setRunDependencies(getOwner().runDependencyResolver(), getOwner().runDependencies());
+            classpathGenerator.setRunDependencies(getOwner().getRunDependencyResolver(), getOwner().getRunDependencies());
             classpathGenerator.setIncludeJavadoc(true);
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedProjects(importedRunProjects);
             classpathGenerator.setUsePathVariables(this.useVarPath);
             final String result = classpathGenerator.generate();
-            final Path dotClasspath = getOwner().baseDir().resolve(".classpath");
+            final Path dotClasspath = getOwner().getBaseDir().resolve(".classpath");
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
 
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofJavaNature(getOwner().baseTree().getRoot().getFileName().toString()).writeTo(dotProject);
+                JkEclipseProject.ofJavaNature(getOwner().getBaseTree().getRoot().getFileName().toString()).writeTo(dotProject);
             }
         } else {
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofSimpleNature(getOwner().baseTree().getRoot().getFileName().toString()).writeTo(dotProject);
+                JkEclipseProject.ofSimpleNature(getOwner().getBaseTree().getRoot().getFileName().toString()).writeTo(dotProject);
             }
         }
     }
 
     @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jerkar/def directory are taken in account. See eclipse#generateFiles.")
     public void generateAll() {
-        final Iterable<Path> folders = getOwner().baseTree()
+        final Iterable<Path> folders = getOwner().getBaseTree()
                 .andAccept("**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andReject("**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());

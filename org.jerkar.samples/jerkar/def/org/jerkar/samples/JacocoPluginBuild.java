@@ -20,7 +20,7 @@ public class JacocoPluginBuild extends JkJavaProjectBuild {
                 .setDependencies(JkDependencySet.of()
                 .and(GUAVA, "18.0")
                 .and(JUNIT, "4.11", JkJavaDepScopes.TEST));
-        plugins().get(JkPluginJacoco.class);
+        getPlugins().get(JkPluginJacoco.class);
     }
 
     public static void main(String[] args) {

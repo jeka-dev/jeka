@@ -63,11 +63,11 @@ public class CoreBuild extends JkJavaProjectBuild {
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
-        distrib.copyIn(baseDir().getParent().resolve("LICENSE"));
-        distrib.merge(baseDir().resolve("src/main/dist"));
-        distrib.merge(baseDir().resolve("src/main/java/META-INF/bin"));
+        distrib.copyIn(getBaseDir().getParent().resolve("LICENSE"));
+        distrib.merge(getBaseDir().resolve("src/main/dist"));
+        distrib.merge(getBaseDir().resolve("src/main/java/META-INF/bin"));
         distrib.copyIn(maker.getArtifactPath(maker.getMainArtifactId()));
-        final List<Path> ivySourceLibs = baseTree().goTo("build/libs-sources").andAccept("apache-ivy*.jar").getFiles();
+        final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources").andAccept("apache-ivy*.jar").getFiles();
         distrib.goTo("libs-sources")
             .copyIn(ivySourceLibs)
             .copyIn(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
@@ -75,7 +75,7 @@ public class CoreBuild extends JkJavaProjectBuild {
             maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.goTo("libs-javadoc").copyIn(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
-        JkLog.execute("Making documentation", () -> new DocMaker(baseDir(), distribFolder,
+        JkLog.execute("Making documentation", () -> new DocMaker(getBaseDir(), distribFolder,
                 project().getVersionedModule().getVersion().getValue()).assembleAllDoc());
         if (runIntegrationTests) {
             testSamples();
@@ -100,15 +100,15 @@ public class CoreBuild extends JkJavaProjectBuild {
     public void publishDocOnGithub() {
         Path root = Paths.get(githubSiteRoot);
         JkProcess git = JkProcess.of("git").withWorkingDir(root).withLogCommand(true);
-        git.withExtraParams("pull").runSync();
+        git.andParams("pull").runSync();
         JkPathTree target = JkPathTree.of(root.resolve("documentation-latest"));
         if (target.exists()) {
             target.deleteRoot();
         }
         JkPathTree.of(distribFolder.resolve("doc")).copyTo(target.getRoot());
-        git.withExtraParams("add", "documentation-latest").runSync();
-        git.withExtraParams("commit", "-m", "Doc").runSync();
-        git.withExtraParams("push").runSync();
+        git.andParams("add", "documentation-latest").runSync();
+        git.andParams("commit", "-m", "Doc").runSync();
+        git.andParams("push").runSync();
     }
 
     // Necessary to publish on OSSRH
@@ -126,7 +126,7 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     void testSamples()  {
         JkLog.startTask("Launching integration tests on samples");
-        SampleTester sampleTester = new SampleTester(this.baseTree());
+        SampleTester sampleTester = new SampleTester(this.getBaseTree());
         sampleTester.restoreEclipseClasspathFile = true;
         sampleTester.doTest();
         JkLog.endTask();
