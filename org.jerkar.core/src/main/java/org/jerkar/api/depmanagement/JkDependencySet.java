@@ -286,8 +286,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * by the specified one, there is no addition.
      */
     public JkDependencySet withVersionProvider(JkVersionProvider versionProvider) {
-        JkUtilsAssert.notNull(versionProvider, "Version provider can't be null. Use an empty version provider instead.");
-        return new JkDependencySet(this.dependencies, this.globalExclusions, versionProvider);
+        return new JkDependencySet(this.dependencies, this.getGlobalExclusions(), versionProvider);
     }
 
     /**
@@ -296,7 +295,6 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * to the specified one.
      */
     public JkDependencySet andVersionProvider(JkVersionProvider versionProvider) {
-        JkUtilsAssert.notNull(versionProvider, "Version provider can't be null. Use an empty version provider instead.");
         return new JkDependencySet(this.dependencies, this.getGlobalExclusions(), this.versionProvider.and(versionProvider));
     }
 
@@ -547,7 +545,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 result.add(scopedDependency);
             }
         }
-        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
+        return JkDependencySet.of(result);
     }
 
     private List<JkModuleDependency> extractModuleDependencies() {

@@ -103,6 +103,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this.dependencies;
     }
 
+    @Override
+    public JkJavaVersion getSourceVersion() {
+        return compileSpec.getSourceVersion();
+    }
+
     public JkJavaProjectMaker getMaker() {
         return maker;
     }

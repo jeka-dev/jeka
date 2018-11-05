@@ -33,7 +33,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private final Map<JkArtifactId, Runnable> artifactProducers = new LinkedHashMap<>();
 
-
     private final Map<Set<JkScope>, JkPathSequence> dependencyCache = new HashMap<>();
 
     private JkProjectOutLayout outLayout;
