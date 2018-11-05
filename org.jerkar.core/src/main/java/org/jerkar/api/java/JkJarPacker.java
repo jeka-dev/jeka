@@ -2,7 +2,6 @@ package org.jerkar.api.java;
 
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathMatcher;
-import org.jerkar.api.ide.intellij.JkImlGenerator;
 import org.jerkar.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
@@ -10,7 +9,7 @@ import java.nio.file.Path;
 /**
  * Utilities class to produce Jar files with conventional naming
  */
-public final class JkJarMaker {
+public final class JkJarPacker {
 
     /**
      * Filter to exclude signature files from fat jar (aka uber jar).
@@ -24,27 +23,27 @@ public final class JkJarMaker {
 
     private final JkPathTreeSet extraFiles;
 
-    private JkJarMaker(JkPathTreeSet classTrees, JkManifest manifest, JkPathTreeSet extraFiles) {
+    private JkJarPacker(JkPathTreeSet classTrees, JkManifest manifest, JkPathTreeSet extraFiles) {
         this.classtrees = classTrees;
         this.manifest = manifest;
         this.extraFiles = extraFiles;
     }
 
-    public static JkJarMaker of(JkPathTreeSet classTrees) {
+    public static JkJarPacker of(JkPathTreeSet classTrees) {
         JkUtilsAssert.isTrue(!classTrees.getPathTrees().isEmpty(), "Nothing to create jar from : " + classTrees);
-        return new JkJarMaker(classTrees, null, null);
+        return new JkJarPacker(classTrees, null, null);
     }
 
-    public static JkJarMaker of(Path classDir) {
+    public static JkJarPacker of(Path classDir) {
         return of(JkPathTreeSet.of(classDir));
     }
 
-    public JkJarMaker withManifest(JkManifest manifest) {
-        return new JkJarMaker(this.classtrees, manifest, this.extraFiles);
+    public JkJarPacker withManifest(JkManifest manifest) {
+        return new JkJarPacker(this.classtrees, manifest, this.extraFiles);
     }
 
-    public JkJarMaker withExtraFiles(JkPathTreeSet extraFiles) {
-        return new JkJarMaker(this.classtrees, this.manifest, extraFiles);
+    public JkJarPacker withExtraFiles(JkPathTreeSet extraFiles) {
+        return new JkJarPacker(this.classtrees, this.manifest, extraFiles);
     }
 
     /**

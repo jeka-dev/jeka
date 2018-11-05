@@ -137,6 +137,10 @@ public final class JkLog implements Serializable {
     public static void endTask() {
         currentNestedTaskLevel.decrementAndGet();
         Long startTime = START_TIMES.get().pollLast();
+        if (startTime == null) {
+            throw new JkException("No start task found matching with this endTask. Check that you don't have " +
+                    "used an 'endTask' one too many in your code.");
+        }
         Long durationMillis = JkUtilsTime.durationInMillis(startTime);
         consume(JkLogEvent.regular(Type.END_TASK, "Done in " + durationMillis + " milliseconds."));
 

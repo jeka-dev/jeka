@@ -11,6 +11,7 @@ import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;
+import org.jerkar.api.system.JkLog;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -37,7 +38,9 @@ public class JkJavaProjectTestTasks {
 
     private JkPathMatcher testClassMatcher = JkPathMatcher.ofAccept("**/*Test.class");
 
-    private JkJavaProjectTestTasks testProcessors;
+    private boolean done;
+
+    private boolean skipTests;
 
     JkJavaProjectTestTasks(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
@@ -136,14 +139,57 @@ public class JkJavaProjectTestTasks {
                 .andMany(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST));
     }
 
+    public boolean isTestSkipped() {
+        return skipTests;
+    }
 
-    void run() {
-        preTest.run();
-        compileRunner.run();
-        resourceGenerator.run();
-        resourceProcessor.run();
-        testExecutor.run();
-        postTest.run();
+    public void setSkipTests(boolean skipTests) {
+        this.skipTests = skipTests;
+    }
+
+
+    /**
+     * Performs entire test phase, including : <ul>
+     *     <li>compile regular code if needed</li>
+     *     <li>perform pre test tasks if present</li>
+     *     <li>compile test code and process test resources</li>
+     *     <li>execute compiled tests</li>
+     *     <li>execute post tesks if present</li>
+     * </ul>
+     */
+    public void run() {
+        JkLog.startTask("Running unit tests");
+        if (maker.project.getSourceLayout().getTests().count(0, false) == 0) {
+            JkLog.info("No unit test found in : " + maker.project.getSourceLayout().getTests());
+            JkLog.endTask();
+        } else {
+            this.maker.getCompileTasks().runIfNecessary();
+            preTest.run();
+            compileRunner.run();
+            resourceGenerator.run();
+            resourceProcessor.run();
+            testExecutor.run();
+            postTest.run();
+            JkLog.endTask();
+        }
+    }
+
+    /**
+     * As #run but perfom only if not already done.
+     */
+    public void runIfNecessary() {
+        if (done) {
+            JkLog.info("Test task already done. Won't perfom again.");
+        } else if (skipTests) {
+            JkLog.info("Tests are skipped. Won't perfom.");
+        } else {
+            run();
+            done = true;
+        }
+    }
+
+    void reset() {
+        done = false;
     }
 
 }

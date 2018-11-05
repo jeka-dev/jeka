@@ -8,13 +8,14 @@ import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLog;
 
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
 /**
- * Objects responsible to build (to make) a java project. It provides methods to perform common build
- * tasks (compile, test, javadoc, package jars, publish artifacts) along methods to define how to build extra artifacts.
+ * Mainly an artifact producer for a Java project. It embeds also methods for publishing produced artifacts. <p>
+ * By default instances of this class include two artifacts : the main artifacts consisting in the binary jar and the source jar.<p>
+ * One can include extra artifacts to produce or remove already defined ones. Including new artifacts suppose to provides
+ * a {@link Runnable} responsible to actually create
  *
  * All defined tasks are extensible using {@link JkRunnables} mechanism.
  */
@@ -29,10 +30,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public static final JkArtifactId TEST_SOURCE_ARTIFACT_ID = JkArtifactId.of("test-sources", "jar");
 
     final JkJavaProject project;
-
-    private boolean skipTests = false;
-
-    private final Status status = new Status();
 
     private final Map<JkArtifactId, Runnable> artifactProducers = new LinkedHashMap<>();
 
@@ -98,7 +95,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Defines how to produce the specified artifact. <br/>
      * The specified artifact can be an already defined artifact (as 'main' artifact), in this
      * case the current definition will be overwritten. <br/>
-     * The specified artifact can also be a new artifact (as an Uber jar for example). <br/>
+     * The specified artifact can also be a new artifact (an Uber jar for example or a jar for a specific target platform). <br/>
      * {@link JkJavaProjectMaker} declares predefined artifact ids as {@link JkJavaProjectMaker#SOURCES_ARTIFACT_ID}
      * or {@link JkJavaProjectMaker#JAVADOC_ARTIFACT_ID}.
      */
@@ -136,7 +133,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkJavaProjectMaker defineMainArtifactAsFatJar(boolean defineOriginal) {
         Path mainPath = getArtifactPath(getMainArtifactId());
         Runnable originalRun = artifactProducers.get(getMainArtifactId());
-        defineArtifact(getMainArtifactId(), () -> {compileAndTestIfNeeded(); packTasks.createFatJar(mainPath);});
+        defineArtifact(getMainArtifactId(), () -> {
+            compileTasks.runIfNecessary();
+            testTasks.runIfNecessary();
+            packTasks.createFatJar(mainPath);});
         if (defineOriginal) {
             JkArtifactId original = JkArtifactId.of("original", "jar");
             defineArtifact(original, originalRun);
@@ -246,7 +246,9 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Deletes project build outputs.
      */
     public JkJavaProjectMaker clean() {
-        status.reset();
+        compileTasks.reset();
+        testTasks.reset();
+        javadocTasks.reset();
         cleaner.run();
         return this;
     }
@@ -272,80 +274,28 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     // Make -------------------------------------------------------
 
-    /**
-     * Performs the whole compilation phase including : <ul>
-     * <li>Generating resources</li>
-     * <li>Generating sources</li>
-     * <li>Processing resources (interpolation)</li>
-     * <li>Compiling sources</li>
-     * </ul>
-     */
-    public JkJavaProjectMaker compile() {
-        JkLog.startTask("Compilation and resource processing");
-        compileTasks.run();
-        this.status.compileDone = true;
-        JkLog.endTask();
-        return this;
-    }
-
-    public JkJavaProjectMaker test() {
-        JkLog.startTask("Running unit tests");
-        if (this.project.getSourceLayout().getTests().count(0, false) == 0) {
-            JkLog.info("No unit test found in : " + project.getSourceLayout().getTests());
-            JkLog.endTask();
-            return this;
-        }
-        if (!this.status.compileOutputPresent()) {
-            compile();
-        }
-        testTasks.run();
-        status.testDone = true;
-        JkLog.endTask();
-        return this;
-    }
-
-    private void compileAndTestIfNeeded() {
-        if (!status.compileDone) {
-            compile();
-        }
-        if (!skipTests && !status.testDone) {
-            test();
-        }
-    }
 
     private void makeMainJar() {
-        compileAndTestIfNeeded();
+        compileTasks.runIfNecessary();
+        testTasks.runIfNecessary();
         Path target = packTasks.getArtifactFile(getMainArtifactId());
         packTasks.createJar(target);
     }
 
     private void makeSourceJar() {
-        if (!status.sourceGenerationDone) {
-            compileTasks.getSourceGenerator().run();
-            status.sourceGenerationDone = true;
-        }
         Path target = packTasks.getArtifactFile(SOURCES_ARTIFACT_ID);
         packTasks.createSourceJar(target);
     }
 
-    private void generateJavadoc() {
-        javadocTasks.run();
-        status.javadocDone = true;
-    }
-
     private void makeJavadocJar() {
-        if (!status.javadocDone) {
-            generateJavadoc();
-        }
+        javadocTasks.runIfNecessary();
         Path target = packTasks.getArtifactFile(JAVADOC_ARTIFACT_ID);
         packTasks.createJavadocJar(target);
     }
 
     private void makeTestJar(Path target) {
-        compileAndTestIfNeeded();
-        if (!status.testDone) {
-            test();
-        }
+        compileTasks.runIfNecessary();
+        testTasks.runIfNecessary();;
         packTasks.createTestJar(target);
     }
 
@@ -353,39 +303,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         makeTestJar(getArtifactPath(TEST_ARTIFACT_ID));
     }
 
-    public boolean isTestSkipped() {
-        return skipTests;
-    }
-
-    public void setSkipTests(boolean skipTests) {
-        this.skipTests = skipTests;
-    }
-
     @Override
     public String toString() {
         return this.project.toString();
     }
 
-    private class Status {
 
-        private boolean sourceGenerationDone = false;
-
-        private boolean compileDone = false;
-
-        private boolean testDone = false;
-
-        private boolean javadocDone = false;
-
-        void reset() {
-            sourceGenerationDone = false;
-            compileDone = false;
-            testDone = false;
-            javadocDone = false;
-        }
-
-        boolean compileOutputPresent() {
-            return Files.exists(JkJavaProjectMaker.this.getOutLayout().getClassDir());
-        }
-
-    }
 }

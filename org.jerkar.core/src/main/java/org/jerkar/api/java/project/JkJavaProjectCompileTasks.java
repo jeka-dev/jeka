@@ -6,6 +6,7 @@ import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.system.JkLog;
 
 import java.nio.charset.Charset;
 
@@ -27,6 +28,8 @@ public class JkJavaProjectCompileTasks {
 
     private JkJavaCompiler compiler = JkJavaCompiler.of();
 
+    private boolean done;
+
     JkJavaProjectCompileTasks(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
         resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().getResources())
@@ -39,13 +42,39 @@ public class JkJavaProjectCompileTasks {
         });
     }
 
-    void run() {
+    void reset() {
+        done = false;
+    }
+
+    /**
+     * Performs entire compilation phase, including : <ul>
+     * <li>Generating resources</li>
+     * <li>Generating sources</li>
+     * <li>Processing resources (interpolation)</li>
+     * <li>Compiling sources</li>
+     * </ul>
+     */
+    public void run() {
+        JkLog.startTask("Compilation and resource processing");
         preCompile.run();
         sourceGenerator.run();
         resourceGenerator.run();
         compileRunner.run();
         resourceProcessor.run();
         postActions.run();
+        JkLog.endTask();
+    }
+
+    /**
+     * As #run but perform only if not already done.
+     */
+    public void runIfNecessary() {
+        if (done) {
+            JkLog.info("Compilation task already done. Won't perfom again.");
+        } else {
+            run();
+            done = true;
+        }
     }
 
     public JkRunnables getPreCompile() {

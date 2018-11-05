@@ -5,7 +5,7 @@ import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClasspath;
-import org.jerkar.api.java.JkJarMaker;
+import org.jerkar.api.java.JkJarPacker;
 import org.jerkar.api.system.JkLog;
 
 import java.nio.file.Files;
@@ -57,7 +57,7 @@ public class JkJavaProjectPackTasks {
 
     void createJar(Path target) {
         JkJavaProject project = maker.project;
-        JkJarMaker.of(maker.getOutLayout().getClassDir())
+        JkJarPacker.of(maker.getOutLayout().getClassDir())
                 .withManifest(project.getManifest())
                 .withExtraFiles(project.getExtraFilesToIncludeInJar())
                 .makeJar(target);
@@ -66,7 +66,7 @@ public class JkJavaProjectPackTasks {
 
     void createFatJar(Path target) {
         JkClasspath classpath = JkClasspath.ofMany(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
-        JkJarMaker.of( maker.getOutLayout().getClassDir())
+        JkJarPacker.of( maker.getOutLayout().getClassDir())
                 .withManifest(maker.project.getManifest())
                 .withExtraFiles(maker.project.getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath);
@@ -86,7 +86,7 @@ public class JkJavaProjectPackTasks {
     }
 
     void createTestJar(Path target) {
-        JkJarMaker.of(maker.getOutLayout().getTestClassDir())
+        JkJarPacker.of(maker.getOutLayout().getTestClassDir())
                 .withManifest(maker.project.getManifest())
                 .makeJar(target);
     }

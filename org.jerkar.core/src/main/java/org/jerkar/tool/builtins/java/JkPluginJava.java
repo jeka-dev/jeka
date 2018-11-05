@@ -112,7 +112,7 @@ public class JkPluginJava extends JkPlugin {
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);
         maker.getTestTasks().setRunner(tester);
-        maker.setSkipTests(tests.skip);
+        maker.getTestTasks().setSkipTests(tests.skip);
         if (this.compilerExtraArgs != null) {
             project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
@@ -148,12 +148,12 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
-        project.getMaker().compile();
+        project.getMaker().getCompileTasks().run();
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
     public void test() {
-        project.getMaker().test();
+        project.getMaker().getTestTasks().run();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +

@@ -9,7 +9,7 @@ import org.jerkar.api.system.JkLog;
 
 
 /**
- * Defines methods for enumerating artifact files likely to be produced by an object along methods to produce them.
+ * Interface to be implemented by classes responsible of producing artifacts. <p>
  */
 public interface JkArtifactProducer extends JkArtifactLocator {
 
