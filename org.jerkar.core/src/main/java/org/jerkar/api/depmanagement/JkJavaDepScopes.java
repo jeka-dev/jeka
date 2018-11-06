@@ -82,7 +82,10 @@ public final class JkJavaDepScopes {
      */
     public static final JkScope[] COMPILE_AND_RUNTIME = new JkScope[] {COMPILE, RUNTIME};
 
-    private static final String ARCHIVE_MASTER = "archives(master)";
+    /**
+     * Useful when using scope mapping. As documented in Ivy, it stands for the main archive.
+     */
+    public static final String ARCHIVE_MASTER = "archives(master)";
 
     /**
      * Scope mapping used
@@ -91,7 +94,7 @@ public final class JkJavaDepScopes {
             .of(COMPILE).to(ARCHIVE_MASTER, COMPILE.getName() + "(default)")
             .and(PROVIDED).to(ARCHIVE_MASTER, COMPILE.getName() + "(default)")
             .and(RUNTIME).to(ARCHIVE_MASTER, RUNTIME.getName() + "(default)")
-            .and(TEST).to(ARCHIVE_MASTER, RUNTIME.getName() + "(default)", TEST.getName() + "(default)");
+            .and(TEST).to(ARCHIVE_MASTER, RUNTIME.getName() + "(default)");
 
 
     /**

@@ -35,6 +35,16 @@ public final class JkScope implements Serializable {
         return new JkScope(name, new HashSet<>(), "", true);
     }
 
+    public static JkScope[] ofMany(String ... names) {
+        JkScope[] result = new JkScope[names.length];
+        int i = 0;
+        for (String name : names) {
+            result[i] = JkScope.of(name);
+            i++;
+        }
+        return result;
+    }
+
     private final Set<JkScope> extendedScopes;
 
     private final String name;
@@ -150,8 +160,8 @@ public final class JkScope implements Serializable {
     /**
      * Returns a {@link JkScopeMapping} from this {@link JkScope} to the specified one.
      */
-    public JkScopeMapping mapTo(String targetScope) {
-        return JkScopeMapping.of(this).to(JkScope.of(targetScope));
+    public JkScopeMapping mapTo(String ... targetScopes) {
+        return JkScopeMapping.of(this).to(JkScope.ofMany(targetScopes));
     }
 
     /**

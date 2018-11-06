@@ -33,7 +33,7 @@ public class ResolveWithArtifactIT {
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkDependencyNode treeRoot = resolveResult.getDependencyTree();
         System.out.println(resolveResult.getLocalFiles());
-        System.out.println(treeRoot.toStringComplete());
+        System.out.println(treeRoot.toStringTree());
 
         // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
         // it should results in a single node.
@@ -60,7 +60,7 @@ public class ResolveWithArtifactIT {
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkDependencyNode tree = resolveResult.getDependencyTree();
-        System.out.println(tree.toStringComplete());
+        System.out.println(tree.toStringTree());
         System.out.println(JkUtilsString.join(resolveResult.getLocalFiles(), "\n"));
         System.out.println("-----");
         System.out.println(JkUtilsString.join(tree.getAllResolvedFiles(), "\n"));

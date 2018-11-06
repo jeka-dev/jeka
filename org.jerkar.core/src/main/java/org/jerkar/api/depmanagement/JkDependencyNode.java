@@ -276,7 +276,7 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns a complete representation string of the tree.
      */
-    public String toStringComplete() {
+    public String toStringTree() {
         final StringBuilder builder = new StringBuilder();
         for (final String line: toStrings()) {
             builder.append(line).append("\n");

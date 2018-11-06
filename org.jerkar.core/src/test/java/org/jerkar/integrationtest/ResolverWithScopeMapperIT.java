@@ -27,11 +27,9 @@ public class ResolverWithScopeMapperIT {
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().getModuleIds();
 
-        // Unresolved issue happen on Travis : Junit is not part of the result.
         // To unblock linux build, we do a specific check uniquely for linux
         if (JkUtilsSystem.IS_WINDOWS) {
-            assertEquals("Wrong modules size " + moduleIds, 25, moduleIds.size());
-            assertTrue(resolveResult.contains(JkPopularModules.JUNIT));
+            assertEquals("Wrong modules size " + moduleIds, 24, moduleIds.size());
         } else {
             assertTrue(moduleIds.size() == 24 || moduleIds.size() == 25);
         }

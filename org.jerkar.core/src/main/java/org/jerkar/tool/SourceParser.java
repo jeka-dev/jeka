@@ -99,7 +99,7 @@ final class SourceParser {
     private static JkDependencySet dependenciesFromImports(Path baseDir, List<String> deps) {
         JkDependencySet result = JkDependencySet.of();
         for (final String dependency : deps) {
-            if (JkModuleDependency.isModuleDependencyDescription(dependency)) {
+            if (isModuleDependencyDescription(dependency)) {
                 result = result.and(JkModuleDependency.of(dependency));
             } else {
                 Path depFile = Paths.get(dependency);
@@ -118,6 +118,14 @@ final class SourceParser {
 
         }
         return result;
+    }
+
+    /**
+     * Returns <code>true</code> if the candidate string is a valid module dependency description.
+     */
+    private static boolean isModuleDependencyDescription(String candidate) {
+        final int colonCount = JkUtilsString.countOccurence(candidate, ':');
+        return colonCount == 2 || colonCount == 3;
     }
 
     private static List<Path>  projectDependencies(Path baseDir, List<String> deps) {

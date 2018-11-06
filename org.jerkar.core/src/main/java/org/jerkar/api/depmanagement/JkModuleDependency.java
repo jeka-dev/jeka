@@ -53,13 +53,7 @@ public final class JkModuleDependency implements JkDependency {
      */
     public static final Comparator<JkModuleDependency> GROUP_NAME_COMPARATOR = new NameComparator();
 
-    /**
-     * Returns <code>true</code> if the candidate string is a valid module dependency description.
-     */
-    public static boolean isModuleDependencyDescription(String candidate) {
-        final int colonCount = JkUtilsString.countOccurence(candidate, ':');
-        return colonCount == 2 || colonCount == 3;
-    }
+
 
     /**
      * Creates a {@link JkModuleDependency} to the specified getModuleId and
@@ -98,6 +92,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
+     * Description can be :
      * group:name
      * group:name:version
      * group:name:type:version
@@ -109,7 +104,7 @@ public final class JkModuleDependency implements JkDependency {
         final String[] strings = description.split( ":");
         final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
         ", group:name:version, 'group:value:type:version, group:of:type:artifact:version";
-        if (strings.length < 2) {
+        if (!isModuleDependencyDescription(description)) {
             throw new JkException(errorMessage);
         }
         JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
@@ -122,11 +117,19 @@ public final class JkModuleDependency implements JkDependency {
         if (strings.length ==4) {
             return JkModuleDependency.of(moduleId, JkVersion.of(strings[3])).withExt(strings[2]);
         }
-        if (strings.length ==5) {
+        else { // length = 5
             return JkModuleDependency.of(moduleId, JkVersion.of(strings[4]))
                     .withClassifier(strings[3]).withExt(strings[2]);
         }
-        throw new JkException(errorMessage);
+    }
+
+    /**
+     * Returns <code>true</code> if the specified candidate matches to a module description.
+     * @see #of(String)
+     */
+    public static boolean isModuleDependencyDescription(String candidate) {
+        final String[] strings = candidate.split( ":");
+        return strings.length >= 2 && strings.length <= 5;
     }
 
     /**

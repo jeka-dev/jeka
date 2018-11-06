@@ -270,13 +270,11 @@ final class IvyTranslations {
         if (dependencies.getInvolvedScopes().isEmpty()) {
             moduleDescriptor.addConfiguration(DEFAULT_CONFIGURATION);
         }
-        if (defaultMapping != null) {
-            for (final JkScope scope : defaultMapping.getEntries()) {
-                final Configuration configuration = toConfiguration(scope);
-                moduleDescriptor.addConfiguration(configuration);
-            }
-            moduleDescriptor.setDefaultConfMapping(toIvyExpression(defaultMapping));
+        for (final JkScope scope : defaultMapping.getEntries()) {
+            final Configuration configuration = toConfiguration(scope);
+            moduleDescriptor.addConfiguration(configuration);
         }
+        moduleDescriptor.setDefaultConfMapping(toIvyExpression(defaultMapping));
 
         // Add dependencies
         final DependenciesContainer dependencyContainer = new DependenciesContainer(defaultMapping, dependencies);
@@ -506,7 +504,7 @@ final class IvyTranslations {
             // fill configuration
             final List<Conf> confs = new LinkedList<>();
             if (scopedDependency.getScopeType() == ScopeType.UNSET) {
-                if (defaultMapping == null || defaultMapping.getEntries().isEmpty()) {
+                if (defaultMapping.getEntries().isEmpty()) {
                     confs.add(new Conf("*", "*"));
                 } else {
                     for (final JkScope entryScope : defaultMapping.getEntries()) {

@@ -33,6 +33,8 @@ public final class JkScopeMapping implements Serializable {
      */
     public static final JkScopeMapping ALL_TO_DEFAULT = JkScope.of("*").mapTo(JkScope.of("default(*)"));
 
+    private final Map<JkScope, Set<JkScope>> map;
+
     // -------- Factory methods ----------------------------
 
     /**
@@ -41,6 +43,14 @@ public final class JkScopeMapping implements Serializable {
      */
     public static JkScopeMapping.Partial of(JkScope... scopes) {
         return of(Arrays.asList(scopes));
+    }
+
+    /**
+     * Returns a partially constructed mapping specifying only scope entries and
+     * willing for the mapping values.
+     */
+    public static JkScopeMapping.Partial of(String scope) {
+        return of(JkScope.of(scope));
     }
 
     /**
@@ -62,7 +72,7 @@ public final class JkScopeMapping implements Serializable {
 
     // ---------------- Instance members ---------------------------
 
-    private final Map<JkScope, Set<JkScope>> map;
+
 
     private JkScopeMapping(Map<JkScope, Set<JkScope>> map) {
         super();
@@ -192,6 +202,7 @@ public final class JkScopeMapping implements Serializable {
             }
             return to(list);
         }
+
 
         /**
          * @see #to(JkScope...)

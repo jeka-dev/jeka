@@ -54,10 +54,10 @@ public final class JkDependencyResolver {
      */
     public static JkDependencyResolver of(JkRepoSet repos) {
         if (repos.getRepoList().isEmpty()) {
-            return new JkDependencyResolver(null, null, null, JkRepoSet.ofEmpty(), Paths.get(""));
+            return new JkDependencyResolver(null, null, JkResolutionParameters.of(), JkRepoSet.ofEmpty(), Paths.get(""));
         }
         final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
-        return new JkDependencyResolver(ivyResolver,  null, null, repos, Paths.get(""));
+        return new JkDependencyResolver(ivyResolver,  null, JkResolutionParameters.of(), repos, Paths.get(""));
     }
 
     /**
@@ -176,13 +176,13 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Returns an dependency resolver identical to this one but with the base directory. The base directory is used
-     * to resolve relative files to absolute files. This directory is used by
+     * Returns an dependency resolver identical to this one but with specified the base directory. The base directory is used
+     * to resolve relative files to absolute files for {@link JkFileSystemDependency}. This directory is used by
      * {@link #fetch(JkDependencySet, JkScope...)} method as it returns only absolute files.
      */
-    public JkDependencyResolver withBasedir(JkResolutionParameters params) {
+    public JkDependencyResolver withBasedir(Path baseDir) {
         return new JkDependencyResolver(this.internalResolver, this.module,
-                params, this.repos, this.baseDir);
+                this.parameters, this.repos, baseDir);
     }
 
     /**

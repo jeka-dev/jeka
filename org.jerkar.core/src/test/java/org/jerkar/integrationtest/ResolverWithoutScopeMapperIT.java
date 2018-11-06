@@ -10,7 +10,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.utils.JkUtilsSystem;
 import org.junit.Test;
 
 public class ResolverWithoutScopeMapperIT {
@@ -34,7 +33,7 @@ public class ResolverWithoutScopeMapperIT {
         resolver = JkDependencyResolver.of(REPOS)
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         resolveResult = resolver.resolve(deps, COMPILE);
-        System.out.println(resolveResult.getDependencyTree().toStringComplete());
+        System.out.println(resolveResult.getDependencyTree().toStringTree());
         assertEquals(10, resolveResult.getDependencyTree().getResolvedVersion().getModuleIds().size());
     }
 

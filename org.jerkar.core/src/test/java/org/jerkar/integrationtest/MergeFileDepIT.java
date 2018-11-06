@@ -35,7 +35,7 @@ public class MergeFileDepIT {
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
-        System.out.println(tree.toStringComplete());
+        System.out.println(tree.toStringTree());
 
         JkDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredScopes().isEmpty());
@@ -66,7 +66,7 @@ public class MergeFileDepIT {
         // Now check that file dependencies with Test Scope are not present in compile
 
         tree = resolver.resolve(deps, COMPILE).getDependencyTree();
-        System.out.println(tree.toStringComplete());
+        System.out.println(tree.toStringTree());
 
         root = tree.getModuleInfo();
         assertTrue(root.getDeclaredScopes().isEmpty());

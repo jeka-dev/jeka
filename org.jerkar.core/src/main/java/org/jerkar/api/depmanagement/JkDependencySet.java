@@ -37,11 +37,18 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         this.versionProvider = explicitVersions;
     }
 
-    /**
-     * Creates a {@link JkDependencySet} to the specified scoped dependencies.
-     */
-    public static JkDependencySet of(JkScopedDependency... scopedDependencies) {
-        return of(Arrays.asList(scopedDependencies));
+    public static JkDependencySet of(String ... dependencies) {
+        List<JkScopedDependency> scopedDependencies = new LinkedList<>();
+        for (String dependencyDesc : dependencies) {
+            final JkDependency dependency;
+            if (JkModuleDependency.isModuleDependencyDescription(dependencyDesc)) {
+                dependency = JkModuleDependency.of(dependencyDesc);
+            } else {
+                dependency = JkFileSystemDependency.of(Paths.get(dependencyDesc));
+            }
+            scopedDependencies.add(JkScopedDependency.of(dependency));
+        }
+        return of(scopedDependencies);
     }
 
     /**
@@ -63,13 +70,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             return JkDependencySet.of();
         }
         return JkDependencySet.of()
-                .and(JkFileSystemDependency.ofPaths(libDir.andAccept("*.jar", "compile/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andAccept("*.jar", "compile/*.jar").getFiles()))
                 .withDefaultScope(JkJavaDepScopes.COMPILE)
-                .and(JkFileSystemDependency.ofPaths(libDir.andAccept("provided/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andAccept("provided/*.jar").getFiles()))
                 .withDefaultScope(JkJavaDepScopes.PROVIDED)
-                .and(JkFileSystemDependency.ofPaths(libDir.andAccept("runtime/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andAccept("runtime/*.jar").getFiles()))
                 .withDefaultScope(JkJavaDepScopes.RUNTIME)
-                .and(JkFileSystemDependency.ofPaths(libDir.andAccept("test/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andAccept("test/*.jar").getFiles()))
                 .withDefaultScope(JkJavaDepScopes.TEST);
     }
 
@@ -196,7 +203,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     }
 
     public JkDependencySet andFiles(Iterable<Path> files, JkScope... scopes) {
-        return and(JkFileSystemDependency.ofPaths(files), scopes);
+        return and(JkFileSystemDependency.of(files), scopes);
     }
 
 
@@ -208,7 +215,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * If specified path is relative, JkDependencyResolver will resolve it upon its base dir.
      */
     public JkDependencySet andFile(Path file, JkScope... scopes) {
-        return and(JkFileSystemDependency.ofPaths(file), scopes);
+        return and(JkFileSystemDependency.of(file), scopes);
     }
 
     public JkDependencySet andScopelessDependencies(Iterable<? extends JkDependency> dependencies) {

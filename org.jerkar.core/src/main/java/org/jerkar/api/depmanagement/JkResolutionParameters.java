@@ -1,5 +1,7 @@
 package org.jerkar.api.depmanagement;
 
+import org.jerkar.api.utils.JkUtilsAssert;
+
 import java.io.Serializable;
 
 /**
@@ -13,25 +15,26 @@ public final class JkResolutionParameters implements Serializable {
      * Creates resolution parameters without default mapping and no dynamic
      * version resolving refresh.
      * 
-     * @see JkResolutionParameters#getDefaultMapping()
+     * @see JkResolutionParameters#getScopeMapping()
      * @see #isRefreshed()
      */
     public static JkResolutionParameters of() {
-        return new JkResolutionParameters(null, true);
+        return new JkResolutionParameters(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, true);
     }
 
     /**
      * Creates resolution parameters with the specified default scope mapping
      * and no dynamic version resolving refresh.
      * 
-     * @see JkResolutionParameters#getDefaultMapping()
+     * @see JkResolutionParameters#getScopeMapping()
      * @see #isRefreshed()
      */
     public static JkResolutionParameters of(JkScopeMapping scopeMapping) {
+        JkUtilsAssert.notNull(scopeMapping,"Scope mapping cannot be null.");
         return new JkResolutionParameters(scopeMapping, true);
     }
 
-    private final JkScopeMapping defaultMapping;
+    private final JkScopeMapping scopeMapping;
 
     private final boolean refreshed;
 
@@ -43,8 +46,8 @@ public final class JkResolutionParameters implements Serializable {
      *      "http://ant.apache.org/ivy/history/2.3.0/ivyfile/configurations.html">
      *      Ivy configuration doc</a>
      */
-    public JkScopeMapping getDefaultMapping() {
-        return defaultMapping;
+    public JkScopeMapping getScopeMapping() {
+        return scopeMapping;
     }
 
     /**
@@ -59,25 +62,25 @@ public final class JkResolutionParameters implements Serializable {
      * @see JkResolutionParameters#isRefreshed()
      */
     public JkResolutionParameters isRefreshed(boolean refreshed) {
-        return new JkResolutionParameters(defaultMapping, refreshed);
+        return new JkResolutionParameters(scopeMapping, refreshed);
     }
 
     /**
-     * @see #getDefaultMapping()
+     * @see #getScopeMapping()
      */
-    public JkResolutionParameters withDefault(JkScopeMapping defaultMapping) {
+    public JkResolutionParameters withScopeMapping(JkScopeMapping defaultMapping) {
         return new JkResolutionParameters(defaultMapping, refreshed);
     }
 
     private JkResolutionParameters(JkScopeMapping defaultMapping, boolean refreshed) {
         super();
-        this.defaultMapping = defaultMapping;
+        this.scopeMapping = defaultMapping;
         this.refreshed = refreshed;
     }
 
     @Override
     public String toString() {
-        return "default mapping : " + defaultMapping + ", isRefreshed : " + refreshed;
+        return "scope mapping : " + scopeMapping + ", isRefreshed : " + refreshed;
     }
 
 }

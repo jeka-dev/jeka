@@ -31,7 +31,7 @@ public class ResolveTreeIT {
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
-        System.out.println(tree.toStringComplete());
+        System.out.println(tree.toStringTree());
 
         JkDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredScopes().isEmpty());
@@ -117,7 +117,7 @@ public class ResolveTreeIT {
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         JkDependencyNode tree = resolveResult.getDependencyTree();
-        System.out.println(tree.toStringComplete());
+        System.out.println(tree.toStringTree());
         System.out.println(resolveResult.getLocalFiles());
     }
 

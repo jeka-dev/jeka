@@ -89,7 +89,7 @@ public class JkEclipseClasspathGeneratorTest {
         final List<Path> resFiles = base2Layout.getResources().getFiles();
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
-        assertEquals(9, baseProject2.getDependencies().toList().size());
+        assertEquals(5, baseProject2.getDependencies().toList().size());
 
         final JkJavaProject coreProject2 = JkJavaProject.ofMavenLayout(core);
 
@@ -102,7 +102,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).withDependency();
         assertEquals(base, baseProjectDep.getIdeProjectBaseDir());
 
-        JkPathTree.of(top).deleteContent();
+        //JkPathTree.of(top).deleteContent();
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {

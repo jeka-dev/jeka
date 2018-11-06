@@ -19,7 +19,7 @@ public final class JkFileSystemDependency implements JkFileDependency {
     /**
      * Creates a {@link JkFileSystemDependency} on the specified files.
      */
-    public static JkFileSystemDependency ofPaths(Iterable<Path> files) {
+    public static JkFileSystemDependency of(Iterable<Path> files) {
         Iterable<Path> trueFiles = JkUtilsPath.disambiguate(files);
         return new JkFileSystemDependency(trueFiles);
     }

@@ -129,7 +129,7 @@ public final class JkResolveResult implements Serializable {
     public JkResolveResult assertNoError() {
         if (this.errorReport.hasErrors) {
             throw new JkException("Error in dependency resolution : "
-                    + this.errorReport + "On following tree : \n" + depTree.toStringComplete());
+                    + this.errorReport + "On following tree : \n" + depTree.toStringTree());
         }
         return this;
     }

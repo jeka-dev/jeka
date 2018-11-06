@@ -272,7 +272,7 @@ final class IvyInternalPublisher implements InternalPublisher {
                                                            Instant deliveryDate,
                                                            JkVersionProvider resolvedVersions) {
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                jkVersionedModule, resolvedDependencies, null, resolvedVersions);
+                jkVersionedModule, resolvedDependencies, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, resolvedVersions);
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
                 deliveryDate);
         return moduleDescriptor;

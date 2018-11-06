@@ -100,12 +100,8 @@ final class IvyResolver implements InternalDepResolver {
         } else {
             module = moduleArg;
         }
-
-        if (parameters == null) {
-            parameters = JkResolutionParameters.of();
-        }
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
-                parameters.getDefaultMapping(), deps.getVersionProvider());
+                parameters.getScopeMapping(), deps.getVersionProvider());
 
         final String[] confs = toConfs(deps.getDeclaredScopes(), resolvedScopes);
         final ResolveOptions resolveOptions = new ResolveOptions();
