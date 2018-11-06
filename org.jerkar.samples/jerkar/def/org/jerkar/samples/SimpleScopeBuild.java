@@ -17,15 +17,13 @@ public class SimpleScopeBuild extends JkJavaProjectBuild {
 
     private static final JkScope FOO = JkScope.of("foo");
 
-    private static final JkScope BAR = JkScope.of("bar");
-
     @Override
     protected void setup() {
         java().project().setDependencies(JkDependencySet.of()
                 .andFile(getBaseDir().resolve("libs/foo.jar"))
                 .and(JERSEY_SERVER, "1.19", JkScopeMapping
-                    .of(COMPILE).to(RUNTIME)
-                    .and(FOO, PROVIDED).to(BAR, PROVIDED)));
+                    .of(COMPILE).to(RUNTIME.getName())
+                    .and(FOO, PROVIDED).to("bar", PROVIDED.getName())));
         BuildUtility.printHello();
     }
 

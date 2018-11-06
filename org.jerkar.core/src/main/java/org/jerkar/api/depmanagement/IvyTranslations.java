@@ -249,8 +249,8 @@ final class IvyTranslations {
         final List<String> list = new LinkedList<>();
         for (final JkScope scope : scopeMapping.getEntries()) {
             final List<String> targets = new LinkedList<>();
-            for (final JkScope target : scopeMapping.getMappedScopes(scope)) {
-                targets.add(target.getName());
+            for (final String target : scopeMapping.getMappedScopes(scope)) {
+                targets.add(target);
             }
             final String item = scope.getName() + " -> " + JkUtilsString.join(targets, ",");
             list.add(item);
@@ -317,7 +317,7 @@ final class IvyTranslations {
             }
         } else {
             if (defaultMapping == null) {
-                result = JkScopeMapping.of(scope).to(scope);
+                result = JkScopeMapping.of(scope).to(scope.getName());
             } else {
                 if (defaultMapping.getEntries().contains(scope)) {
                     result = JkScopeMapping.of(scope).to(defaultMapping.getMappedScopes(scope));
@@ -508,8 +508,8 @@ final class IvyTranslations {
                     confs.add(new Conf("*", "*"));
                 } else {
                     for (final JkScope entryScope : defaultMapping.getEntries()) {
-                        for (final JkScope mappedScope : defaultMapping.getMappedScopes(entryScope)) {
-                            confs.add(new Conf(entryScope.getName(), mappedScope.getName()));
+                        for (final String mappedScope : defaultMapping.getMappedScopes(entryScope)) {
+                            confs.add(new Conf(entryScope.getName(), mappedScope));
                         }
                     }
                 }
@@ -518,24 +518,24 @@ final class IvyTranslations {
                 for (final JkScope scope : scopedDependency.getScopes()) {
                     final JkScopeMapping mapping = resolveSimple(scope, defaultMapping);
                     for (final JkScope fromScope : mapping.getEntries()) {
-                        for (final JkScope mappedScope : mapping.getMappedScopes(fromScope)) {
-                            confs.add(new Conf(fromScope.getName(), mappedScope.getName()));
+                        for (final String mappedScope : mapping.getMappedScopes(fromScope)) {
+                            confs.add(new Conf(fromScope.getName(), mappedScope));
                         }
                     }
 
                 }
             } else if (scopedDependency.getScopeType() == ScopeType.MAPPED) {
                 for (final JkScope scope : scopedDependency.getScopeMapping().getEntries()) {
-                    for (final JkScope mappedScope : scopedDependency.getScopeMapping()
+                    for (final String mappedScope : scopedDependency.getScopeMapping()
                             .getMappedScopes(scope)) {
-                        confs.add(new Conf(scope.getName(), mappedScope.getName()));
+                        confs.add(new Conf(scope.getName(), mappedScope));
                     }
                 }
             } else {
                 if (defaultMapping != null) {
                     for (final JkScope entryScope : defaultMapping.getEntries()) {
-                        for (final JkScope mappedScope : defaultMapping.getMappedScopes(entryScope)) {
-                            confs.add(new Conf(entryScope.getName(), mappedScope.getName()));
+                        for (final String mappedScope : defaultMapping.getMappedScopes(entryScope)) {
+                            confs.add(new Conf(entryScope.getName(), mappedScope));
                         }
                     }
                 }

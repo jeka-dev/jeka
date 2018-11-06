@@ -150,18 +150,13 @@ public final class JkScope implements Serializable {
         return false;
     }
 
-    /**
-     * Returns a {@link JkScopeMapping} from this {@link JkScope} to the specified one.
-     */
-    public JkScopeMapping mapTo(JkScope targetScope) {
-        return JkScopeMapping.of(this).to(targetScope);
-    }
+
 
     /**
      * Returns a {@link JkScopeMapping} from this {@link JkScope} to the specified one.
      */
     public JkScopeMapping mapTo(String ... targetScopes) {
-        return JkScopeMapping.of(this).to(JkScope.ofMany(targetScopes));
+        return JkScopeMapping.of(this).to(targetScopes);
     }
 
     /**

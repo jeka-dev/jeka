@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Test;
 
 @SuppressWarnings("javadoc")
@@ -28,7 +29,7 @@ public class JkScopedDependencyTest {
         final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
         final JkScope aScope = JkScope.of("aScope");
         final JkScopedDependency scopedDep = JkScopedDependency.of(dep,
-                JkScopeMapping.of(aScope, RUNTIME).to(PROVIDED));
+                JkScopeMapping.of(aScope, RUNTIME).to(PROVIDED.getName()));
 
         assertTrue(!scopedDep.isInvolvedIn(COMPILE)); // cause RUNTIME inherits
         // jump COMPILE
@@ -36,9 +37,7 @@ public class JkScopedDependencyTest {
         assertTrue(scopedDep.isInvolvedIn(aScope));
         assertTrue(scopedDep.isInvolvedIn(TEST));
 
-        final Set<JkScope> sampleSet = new HashSet<>();
-        sampleSet.add(PROVIDED);
-        assertEquals(sampleSet, scopedDep.getScopeMapping().getMappedScopes(RUNTIME));
+        assertEquals(JkUtilsIterable.setOf(PROVIDED.getName()), scopedDep.getScopeMapping().getMappedScopes(RUNTIME));
 
         boolean failed = false;
         try {

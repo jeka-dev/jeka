@@ -20,7 +20,7 @@ public class JkDependenciesTest {
 
     @Test
     public void testAnd() {
-        final JkScopeMapping run2run = JkScopeMapping.of(RUNTIME).to(RUNTIME);
+        final JkScopeMapping run2run = JkScopeMapping.of(RUNTIME).to(RUNTIME.getName());
         final JkDependencySet deps = JkDependencySet.of()
                 .and("hibernate:hjmlm:1212.0")
                 .and("spring:spring:6.3", COMPILE)
@@ -37,8 +37,8 @@ public class JkDependenciesTest {
 
     @Test
     public void testEquals() {
-        final JkScopeMapping run2runA = JkScopeMapping.of(RUNTIME).to(COMPILE);
-        final JkScopeMapping run2runB = JkScopeMapping.of(RUNTIME).to(COMPILE);
+        final JkScopeMapping run2runA = JkScopeMapping.of(RUNTIME).to(COMPILE.getName());
+        final JkScopeMapping run2runB = JkScopeMapping.of(RUNTIME).to(COMPILE.getName());
         Assert.assertEquals(run2runA, run2runB);
     }
 

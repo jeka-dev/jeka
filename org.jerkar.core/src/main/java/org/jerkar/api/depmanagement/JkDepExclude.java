@@ -77,7 +77,7 @@ public final class JkDepExclude implements Serializable {
      * likely to hold the module to exclude is declared with one of the specified scopes.
      */
     public JkDepExclude withScopes(JkScope... scopes) {
-        return new JkDepExclude(moduleId, type, ext, JkUtilsIterable.setOf(scopes));
+        return new JkDepExclude(moduleId, type, ext, Collections.unmodifiableSet(JkUtilsIterable.setOf(scopes)));
     }
 
     /**
@@ -89,7 +89,6 @@ public final class JkDepExclude implements Serializable {
 
     /**
      * Returns the type of the artifact file to exclude.
-     * @see #getType(String)
      */
     public String getType() {
         return type;

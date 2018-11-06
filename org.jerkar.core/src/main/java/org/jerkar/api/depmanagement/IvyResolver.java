@@ -289,15 +289,15 @@ final class IvyResolver implements InternalDepResolver {
     }
 
     private String[] toConfs(Set<JkScope> declaredScopes, JkScope ... resolvedScopes) {
-        if (resolvedScopes.length == 0) {
-            return IVY_24_ALL_CONF;
-        }
         final Set<String> result = new HashSet<>();
         for (final JkScope resolvedScope : resolvedScopes) {
             final List<JkScope> scopes = resolvedScope.getCommonScopes(declaredScopes);
             for (final JkScope scope : scopes) {
                 result.add(scope.getName());
             }
+        }
+        if (result.isEmpty()) {
+            return IVY_24_ALL_CONF;
         }
         return JkUtilsIterable.arrayOf(result, String.class);
     }

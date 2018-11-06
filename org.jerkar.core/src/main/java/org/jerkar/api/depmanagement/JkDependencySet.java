@@ -552,7 +552,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 result.add(scopedDependency);
             }
         }
-        return JkDependencySet.of(result);
+        return new JkDependencySet(result, globalExclusions, versionProvider);
     }
 
     private List<JkModuleDependency> extractModuleDependencies() {

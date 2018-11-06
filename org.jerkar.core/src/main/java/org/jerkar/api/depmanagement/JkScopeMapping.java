@@ -31,9 +31,9 @@ public final class JkScopeMapping implements Serializable {
     /**
      * A scope mapping active for any scope that map to the default scope of the dependencies.
      */
-    public static final JkScopeMapping ALL_TO_DEFAULT = JkScope.of("*").mapTo(JkScope.of("default(*)"));
+    public static final JkScopeMapping ALL_TO_DEFAULT = JkScope.of("*").mapTo("default(*)");
 
-    private final Map<JkScope, Set<JkScope>> map;
+    private final Map<JkScope, Set<String>> map;
 
     // -------- Factory methods ----------------------------
 
@@ -74,7 +74,7 @@ public final class JkScopeMapping implements Serializable {
 
 
 
-    private JkScopeMapping(Map<JkScope, Set<JkScope>> map) {
+    private JkScopeMapping(Map<JkScope, Set<String>> map) {
         super();
         this.map = map;
     }
@@ -117,15 +117,15 @@ public final class JkScopeMapping implements Serializable {
         return new Partial(from, this);
     }
 
-    private JkScopeMapping andFromTo(JkScope from, Iterable<JkScope> to) {
-        final Map<JkScope, Set<JkScope>> result = new HashMap<>(map);
+    private JkScopeMapping andFromTo(JkScope from, Iterable<String> to) {
+        final Map<JkScope, Set<String>> result = new HashMap<>(map);
         if (result.containsKey(from)) {
-            final Set<JkScope> list = result.get(from);
-            final Set<JkScope> newList = new HashSet<>(list);
+            final Set<String> list = result.get(from);
+            final Set<String> newList = new HashSet<>(list);
             newList.addAll(JkUtilsIterable.listOf(to));
             result.put(from, Collections.unmodifiableSet(newList));
         } else {
-            final Set<JkScope> newList = new HashSet<>();
+            final Set<String> newList = new HashSet<>();
             newList.addAll(JkUtilsIterable.listOf(to));
             result.put(from, Collections.unmodifiableSet(newList));
         }
@@ -135,8 +135,8 @@ public final class JkScopeMapping implements Serializable {
     /**
      * Returns the right side scope mapped to the specified left scope.
      */
-    public Set<JkScope> getMappedScopes(JkScope sourceScope) {
-        final Set<JkScope> result = this.map.get(sourceScope);
+    public Set<String> getMappedScopes(JkScope sourceScope) {
+        final Set<String> result = this.map.get(sourceScope);
         if (result != null && !result.isEmpty()) {
             return result;
         }
@@ -151,18 +151,6 @@ public final class JkScopeMapping implements Serializable {
         return Collections.unmodifiableSet(this.map.keySet());
     }
 
-    /**
-     * Returns all scopes : the ones declared on left side plus yhe ones declared
-     * on right side.
-     */
-    public Set<JkScope> getDeclaredScopes() {
-        final Set<JkScope> result = new HashSet<>();
-        result.addAll(getEntries());
-        for (final JkScope scope : getEntries()) {
-            result.addAll(this.map.get(scope));
-        }
-        return result;
-    }
 
     @Override
     public String toString() {
@@ -185,32 +173,26 @@ public final class JkScopeMapping implements Serializable {
             this.mapping = mapping;
         }
 
-        /**
-         * Returns a scope mapping by by specifying the scope mapped to to this left one.
-         */
-        public JkScopeMapping to(JkScope... targets) {
-            return to(Arrays.asList(targets));
-        }
 
         /**
-         * Similar to {@link #to(JkScope...)} but allow raw string as parameter
+         * Similar to {@link #to(String...)} but allow raw string as parameter
          */
         public JkScopeMapping to(String... targets) {
-            final List<JkScope> list = new LinkedList<>();
+            final List<String> list = new LinkedList<>();
             for (final String target : targets) {
-                list.add(JkScope.of(target));
+                list.add(target);
             }
             return to(list);
         }
 
 
         /**
-         * @see #to(JkScope...)
+         * @see #to(String...)
          */
-        public JkScopeMapping to(Iterable<JkScope> targets) {
+        public JkScopeMapping to(Iterable<String> targets) {
             JkScopeMapping result = mapping;
             for (final JkScope fromScope : from) {
-                for (final JkScope toScope : targets) {
+                for (final String toScope : targets) {
                     result = result.andFromTo(fromScope, JkUtilsIterable.setOf(toScope));
                 }
             }
