@@ -181,7 +181,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkPathSequence fetchDependenciesFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return dependencyCache.computeIfAbsent(scopeSet,
-                scopes1 -> dependencyResolver().fetch(getDefaultedDependencies(), scopes));
+                scopes1 -> getDependencyResolver().fetch(getDefaultedDependencies(), scopes));
     }
 
     /**
@@ -192,16 +192,12 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME);
     }
 
-    private JkDependencyResolver dependencyResolver() {
+    public JkDependencyResolver getDependencyResolver() {
         if (dependencyResolver == null) {
             dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral())
-                  .withParams(JkResolutionParameters.of(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
+                    .withParams(JkResolutionParameters.of(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
         }
         return dependencyResolver;
-    }
-
-    public JkDependencyResolver getDependencyResolver() {
-        return dependencyResolver();
     }
 
     public JkJavaProjectMaker setDependencyResolver(JkDependencyResolver dependencyResolver) {
@@ -210,7 +206,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public JkJavaProjectMaker setDownloadRepos(JkRepoSet repos) {
-        this.dependencyResolver = this.dependencyResolver().withRepos(repos);
+        this.dependencyResolver = this.getDependencyResolver().withRepos(repos);
         return this;
     }
 
@@ -258,6 +254,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return compileTasks;
     }
 
+    public JkJavaProjectJavadocTasks getJavadocTasks() {
+        return javadocTasks;
+    }
+
     public JkJavaProjectTestTasks getTestTasks() {
         return testTasks;
     }
@@ -275,10 +275,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
 
     private void makeMainJar() {
-        compileTasks.runIfNecessary();
-        testTasks.runIfNecessary();
         Path target = packTasks.getArtifactFile(getMainArtifactId());
-        packTasks.createJar(target);
+        packTasks.createBinJar(target);
     }
 
     private void makeSourceJar() {
@@ -287,14 +285,11 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     private void makeJavadocJar() {
-        javadocTasks.runIfNecessary();
         Path target = packTasks.getArtifactFile(JAVADOC_ARTIFACT_ID);
         packTasks.createJavadocJar(target);
     }
 
     private void makeTestJar(Path target) {
-        compileTasks.runIfNecessary();
-        testTasks.runIfNecessary();;
         packTasks.createTestJar(target);
     }
 

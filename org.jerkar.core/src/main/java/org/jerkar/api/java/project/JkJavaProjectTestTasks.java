@@ -158,6 +158,7 @@ public class JkJavaProjectTestTasks {
      * </ul>
      */
     public void run() {
+        maker.getCompileTasks().runIfNecessary();
         JkLog.startTask("Running unit tests");
         if (maker.project.getSourceLayout().getTests().count(0, false) == 0) {
             JkLog.info("No unit test found in : " + maker.project.getSourceLayout().getTests());
@@ -179,7 +180,7 @@ public class JkJavaProjectTestTasks {
      */
     public void runIfNecessary() {
         if (done) {
-            JkLog.info("Test task already done. Won't perfom again.");
+            JkLog.trace("Test task already done. Won't perfom again.");
         } else if (skipTests) {
             JkLog.info("Tests are skipped. Won't perfom.");
         } else {

@@ -194,6 +194,11 @@ public class JkPluginJava extends JkPlugin {
         project.getMaker().getPublishTasks().publishLocal();
     }
 
+    @JkDoc("Fetches project dependencies in cache.")
+    public void refreshDeps() {
+        project.getMaker().getDependencyResolver().resolve(project.getMaker().getDefaultedDependencies());
+    }
+
     public static class JkPublishOptions {
 
         @JkDoc("If true, publishing will occur only in the local repository.")

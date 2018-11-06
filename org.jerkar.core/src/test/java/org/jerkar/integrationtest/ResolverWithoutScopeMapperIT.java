@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.utils.JkUtilsSystem;
 import org.junit.Test;
 
 public class ResolverWithoutScopeMapperIT {
@@ -62,7 +63,12 @@ public class ResolverWithoutScopeMapperIT {
                 .and(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE", JkScopeMapping.of(COMPILE).to("compile", "master", "optional"));
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
-        assertEquals(38, resolveResult.getDependencyTree().getResolvedVersion().getModuleIds().size());
+        System.out.println(resolveResult.getDependencyTree().toStringTree());
+        if (JkUtilsSystem.IS_WINDOWS) {
+            assertEquals(38, resolveResult.getDependencyTree().getResolvedVersion().getModuleIds().size());
+        } else {
+            assertEquals(37, resolveResult.getDependencyTree().getResolvedVersion().getModuleIds().size());
+        }
     }
 
     @Test
@@ -72,7 +78,11 @@ public class ResolverWithoutScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().getModuleIds();
-        assertEquals("Wrong modules size " + moduleIds, 24, moduleIds.size());
+        if (JkUtilsSystem.IS_WINDOWS) {
+            assertEquals("Wrong modules size " + moduleIds, 24, moduleIds.size());
+        } else {
+            assertEquals("Wrong modules size " + moduleIds, 25, moduleIds.size());
+        }
 
     }
 

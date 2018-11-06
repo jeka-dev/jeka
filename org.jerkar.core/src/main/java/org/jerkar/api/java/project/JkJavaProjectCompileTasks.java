@@ -70,7 +70,7 @@ public class JkJavaProjectCompileTasks {
      */
     public void runIfNecessary() {
         if (done) {
-            JkLog.info("Compilation task already done. Won't perfom again.");
+            JkLog.trace("Compilation task already done. Won't perfom again.");
         } else {
             run();
             done = true;

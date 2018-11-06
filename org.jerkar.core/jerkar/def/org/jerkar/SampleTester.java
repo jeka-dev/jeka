@@ -8,6 +8,7 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
 import org.jerkar.tool.JkConstants;
+import org.jerkar.tool.JkInit;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -115,6 +116,10 @@ class SampleTester {
     private void testFork() {
         testSamples("", "-java#tests.fork");
         JkUtilsAssert.isTrue(output.goTo("test-reports/junit").exists(), "No test report generated in test fork mode.");
+    }
+
+    public static void main(String[] args) throws Exception {
+        JkInit.instanceOf(CoreBuild.class, "-verbose=true").testSamples();
     }
 
 }

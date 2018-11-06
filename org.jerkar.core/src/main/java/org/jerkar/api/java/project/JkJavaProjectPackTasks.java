@@ -55,7 +55,9 @@ public class JkJavaProjectPackTasks {
         return artifactFileNameSupplier;
     }
 
-    void createJar(Path target) {
+    public void createBinJar(Path target) {
+        maker.getCompileTasks().runIfNecessary();
+        maker.getTestTasks().runIfNecessary();
         JkJavaProject project = maker.project;
         JkJarPacker.of(maker.getOutLayout().getClassDir())
                 .withManifest(project.getManifest())
@@ -64,7 +66,9 @@ public class JkJavaProjectPackTasks {
     }
 
 
-    void createFatJar(Path target) {
+    public void createFatJar(Path target) {
+        maker.getCompileTasks().runIfNecessary();
+        maker.getTestTasks().runIfNecessary();
         JkClasspath classpath = JkClasspath.ofMany(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
         JkJarPacker.of( maker.getOutLayout().getClassDir())
                 .withManifest(maker.project.getManifest())
@@ -72,11 +76,12 @@ public class JkJavaProjectPackTasks {
                 .makeFatJar(target, classpath);
     }
 
-    void createSourceJar(Path target) {
+    public void createSourceJar(Path target) {
         maker.project.getSourceLayout().getSources().and(maker.getOutLayout().getGeneratedSourceDir()).zipTo(target);
     }
 
     void createJavadocJar(Path target) {
+        maker.getJavadocTasks().runIfNecessary();
         Path javadocDir = maker.getOutLayout().getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
@@ -85,7 +90,9 @@ public class JkJavaProjectPackTasks {
         JkPathTree.of(javadocDir).zipTo(target);
     }
 
-    void createTestJar(Path target) {
+    public void createTestJar(Path target) {
+        maker.getCompileTasks().runIfNecessary();
+        maker.getTestTasks().runIfNecessary();
         JkJarPacker.of(maker.getOutLayout().getTestClassDir())
                 .withManifest(maker.project.getManifest())
                 .makeJar(target);
