@@ -35,16 +35,6 @@ public final class JkScope implements Serializable {
         return new JkScope(name, new HashSet<>(), "", true);
     }
 
-    public static JkScope[] ofMany(String ... names) {
-        JkScope[] result = new JkScope[names.length];
-        int i = 0;
-        for (String name : names) {
-            result[i] = JkScope.of(name);
-            i++;
-        }
-        return result;
-    }
-
     private final Set<JkScope> extendedScopes;
 
     private final String name;

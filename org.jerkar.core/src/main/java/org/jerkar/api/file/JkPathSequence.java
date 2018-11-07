@@ -26,13 +26,16 @@ public final class JkPathSequence implements Iterable<Path> {
     }
 
     /**
-     * Creates a <code>JkPathSequence</code> from an <code>Iterable</code> of paths.
+     * Creates a <code>JkPathSequence</code> from an <code>Iterable</code> of paths or a single Path.
+     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
-    public static JkPathSequence ofMany(Iterable<Path> entries) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(entries);
-        final LinkedHashSet<Path> files = new LinkedHashSet<>();
-        paths.forEach(path -> files.add(path));
-        return new JkPathSequence(files);
+    public static JkPathSequence of(Iterable<Path> paths) {
+        return new JkPathSequence(JkUtilsPath.disambiguate(paths));
+    }
+
+    public static JkPathSequence of() {
+        return new JkPathSequence(Collections.emptyList());
     }
 
     /**
@@ -49,14 +52,14 @@ public final class JkPathSequence implements Iterable<Path> {
             }
             result.add(file);
         }
-        return ofMany(result);
+        return of(result);
     }
 
     /**
      * Creates a <code>JkPathSequence</code> form specified entries
      */
-    public static JkPathSequence of(Path... entries) {
-        return JkPathSequence.ofMany(Arrays.asList(entries));
+    public static JkPathSequence of(Path path1, Path path2, Path... others) { ;
+        return JkPathSequence.of(JkUtilsIterable.listOfItems(path1, path2, others));
     }
 
 
@@ -94,30 +97,30 @@ public final class JkPathSequence implements Iterable<Path> {
     // ------------------------------ withers and adders ------------------------------------
 
     /**
-     * @see #andPrependingMany(Iterable)
+     * @see #andPrepending(Iterable)
      */
-    public JkPathSequence andPrepending(Path... entries) {
-        return andPrependingMany(Arrays.asList(entries));
+    public JkPathSequence andPrepending(Path path1, Path path2, Path... entries) {
+        return andPrepending(JkUtilsIterable.listOfItems(path1, path2, entries));
     }
 
     /**
-     * Returns a <code>JkPathSequence</code> made of the specified
-     * entries followed by this sequence entries.
+     * Returns a <code>JkPathSequence</code> made of the specified entries followed by the sequence entries of this object.
+     *
+     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
     @SuppressWarnings("unchecked")
-    public JkPathSequence andPrependingMany(Iterable<Path> otherEntries) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
-        List<Path> list = new LinkedList<>();
-        paths.forEach(path -> list.add(path));
-        list.addAll(entries);
-        return new JkPathSequence(list);
+    public JkPathSequence andPrepending(Iterable<Path> paths) {
+        List<Path> result = JkUtilsPath.disambiguate(paths);
+        result.addAll(entries);
+        return new JkPathSequence(result);
     }
 
     /**
-     * @see #andMany(Iterable)
+     * @see #and(Iterable)
      */
-    public JkPathSequence and(Path... files) {
-        return andMany(Arrays.asList(files));
+    public JkPathSequence and(Path path1, Path path2, Path... others) {
+        return and(JkUtilsIterable.listOfItems(path1, path2, others));
     }
 
     /**
@@ -125,11 +128,10 @@ public final class JkPathSequence implements Iterable<Path> {
      * one plus the specified ones.
      */
     @SuppressWarnings("unchecked")
-    public JkPathSequence andMany(Iterable<Path> otherEntries) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
-        final List<Path> list = new LinkedList<>(entries);
-        paths.forEach(path -> list.add(path));
-        return new JkPathSequence(list);
+    public JkPathSequence and(Iterable<Path> otherEntries) {
+        List<Path> result = JkUtilsPath.disambiguate(otherEntries);
+        result.addAll(0, entries);
+        return new JkPathSequence(result);
     }
 
     // --------------- Misc ------------------------

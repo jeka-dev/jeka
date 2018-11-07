@@ -7,6 +7,8 @@ import java.util.*;
 
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -125,8 +127,10 @@ public final class JkJavaCompileSpec {
 
     /**
      * Adds specified source files to the set of java sources to compile.
+     *
      **/
-    public JkJavaCompileSpec addSources(Collection<Path> files) {
+    public JkJavaCompileSpec addSources(Iterable<Path> paths) {
+        List<Path> files = JkUtilsPath.disambiguate(paths);
         for (final Path file : files) {
             if (Files.isDirectory(file)) {
                 this.sourceFiles.add(file);
@@ -150,10 +154,10 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * @see #addSources(Path...)
+     * @see #addSources(Iterable)
      */
-    public JkJavaCompileSpec addSources(Path ... files) {
-        return addSources(Arrays.asList(files));
+    public JkJavaCompileSpec addSources(Path path1, Path path2, Path... files) {
+        return addSources(JkUtilsIterable.listOfItems(path1, path2, files));
     }
 
     /**
@@ -170,7 +174,7 @@ public final class JkJavaCompileSpec {
      * classpath.
      */
     public JkJavaCompileSpec setClasspath(Iterable<Path> files) {
-        final String classpath = JkClasspath.ofMany(files).toString();
+        final String classpath = JkClasspath.of(files).toString();
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
 

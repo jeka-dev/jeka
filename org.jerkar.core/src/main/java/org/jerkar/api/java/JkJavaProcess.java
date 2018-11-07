@@ -151,12 +151,15 @@ public final class JkJavaProcess {
     /**
      * Returns a {@link JkJavaProcess} identical to this one but using the specified
      * classpath.
+     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * instance, if so it will be interpreted as a list containing a single element which is this argument.
+     *
      */
-    public JkJavaProcess withClasspaths(Iterable<Path> classpath) {
-        if (classpath == null) {
+    public JkJavaProcess withClasspath(Iterable<Path> paths) {
+        if (paths == null) {
             throw new IllegalArgumentException("Classpath can't be null.");
         }
-        final JkClasspath jkClasspath = JkClasspath.ofMany(JkUtilsPath.disambiguate(classpath));
+        final JkClasspath jkClasspath = JkClasspath.of(JkUtilsPath.disambiguate(paths));
         return new JkJavaProcess(this.javaDir, this.sytemProperties, jkClasspath, this.agents,
                 this.options, this.workingDir, this.environment);
     }
@@ -165,8 +168,8 @@ public final class JkJavaProcess {
      * Returns a {@link JkJavaProcess} identical to this one but using the specified
      * classpath.
      */
-    public JkJavaProcess withClasspath(Path... files) {
-        return withClasspaths(JkClasspath.of(files));
+    public JkJavaProcess withClasspath(Path path1, Path path2, Path... others) {
+        return withClasspath(JkClasspath.of(path1, path2, others));
     }
 
     /**
@@ -174,7 +177,7 @@ public final class JkJavaProcess {
      * classpath with the specified one.
      */
     public JkJavaProcess andClasspath(JkClasspath classpath) {
-        return withClasspaths(this.classpath.andMany(classpath));
+        return withClasspath(this.classpath.and(classpath));
     }
 
 

@@ -69,7 +69,7 @@ public class JkJavaProjectPackTasks {
     public void createFatJar(Path target) {
         maker.getCompileTasks().runIfNecessary();
         maker.getTestTasks().runIfNecessary();
-        JkClasspath classpath = JkClasspath.ofMany(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
+        JkClasspath classpath = JkClasspath.of(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
         JkJarPacker.of( maker.getOutLayout().getClassDir())
                 .withManifest(maker.project.getManifest())
                 .withExtraFiles(maker.project.getExtraFilesToIncludeInJar())

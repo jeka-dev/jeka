@@ -76,7 +76,7 @@ final class Engine {
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
-            path = path.andPrependingMany(cmdPath);
+            path = path.andPrepending(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
         if (!JkUtilsString.isBlank(runClassHint)) {  // First find a class in the existing classpath without compiling
@@ -84,7 +84,7 @@ final class Engine {
             jkRun = getRunInstance(runClassHint, path);
         }
         if (jkRun == null) {
-            path = compile().andMany(path);
+            path = compile().and(path);
             jkRun = getRunInstance(runClassHint, path);
         }
         if (jkRun == null) {
@@ -122,7 +122,7 @@ final class Engine {
     private JkPathSequence compile() {
         final LinkedHashSet<Path> entries = new LinkedHashSet<>();
         compile(new HashSet<>(), entries);
-        return JkPathSequence.ofMany(entries).withoutDuplicates();
+        return JkPathSequence.of(entries).withoutDuplicates();
     }
 
     private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path) {
@@ -138,7 +138,7 @@ final class Engine {
         final JkPathSequence runPath = runDependencyResolver.fetch(this.computeRunDependencies());
         path.addAll(runPath.getEntries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
-        this.compileDef(JkPathSequence.ofMany(path));
+        this.compileDef(JkPathSequence.of(path));
         path.add(this.resolver.runClassDir);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
@@ -177,7 +177,7 @@ final class Engine {
         if (Files.exists(localDefLibDir)) {
             extraLibs.addAll(JkPathTree.of(localDefLibDir).andAccept("**.jar").getFiles());
         }
-        return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
+        return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
@@ -228,7 +228,7 @@ final class Engine {
     private static JkPathSequence jerkarLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
         extraLibs.add(JkLocator.getJerkarJarPath());
-        return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
+        return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
     private static void runProject(JkRun jkRun, List<MethodInvocation> invokes) {

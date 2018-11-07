@@ -1,20 +1,8 @@
 package org.jerkar.api.utils;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * Utility class for dealing with {@link Iterable}.
@@ -46,6 +34,20 @@ public final class JkUtilsIterable {
     @SuppressWarnings("unchecked")
     public static <T> List<T> listOf(T... items) {
         return Arrays.asList(items);
+    }
+
+    /**
+     * @see #listOf(Iterable)
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> listOfItems(T item1, T item2, T... others) {
+        ArrayList<T> result = new ArrayList<>(others.length + 2);
+        result.set(0, item1);
+        result.set(1, item2);
+        for (int i = 0; i < others.length; i++) {
+            result.set(i + 2, others[i]);
+        }
+        return result;
     }
 
     /**

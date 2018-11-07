@@ -53,9 +53,9 @@ public final class JkDependencyResolver {
      * the specified JkRepo contains no {@link JkRepo} then the created.
      */
     public static JkDependencyResolver of(JkRepoSet repos) {
-        if (repos.getRepoList().isEmpty()) {
+       /* if (repos.getRepoList().isEmpty()) {
             return new JkDependencyResolver(null, null, JkResolutionParameters.of(), JkRepoSet.ofEmpty(), Paths.get(""));
-        }
+        } */
         final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
         return new JkDependencyResolver(ivyResolver,  null, JkResolutionParameters.of(), repos, Paths.get(""));
     }
@@ -91,7 +91,7 @@ public final class JkDependencyResolver {
     public JkPathSequence fetch(JkDependencySet dependencies, JkScope... scopes) {
         if (internalResolver != null && dependencies.hasModules()) {
             JkResolveResult resolveResult = resolve(dependencies, scopes).assertNoError();
-            return JkPathSequence.ofMany(resolveResult.getDependencyTree().getAllResolvedFiles()).withoutDuplicates();
+            return JkPathSequence.of(resolveResult.getDependencyTree().getAllResolvedFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {
@@ -101,7 +101,7 @@ public final class JkDependencyResolver {
                 result.addAll(fileDependency.getFiles());
             }
         }
-        return JkPathSequence.ofMany(result).withoutDuplicates().resolveTo(baseDir);
+        return JkPathSequence.of(result).withoutDuplicates().resolveTo(baseDir);
     }
 
     /**

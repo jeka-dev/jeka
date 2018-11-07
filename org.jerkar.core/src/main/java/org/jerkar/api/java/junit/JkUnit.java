@@ -236,7 +236,7 @@ public final class JkUnit {
                 if (this.forkedProcess != null) {
                     JkLog.info("Test are executed in withForking mode");
                     JkClasspath classpath = testSpec.getClasspath();
-                    result.set(JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(classpath),
+                    result.set(JUnit4TestLauncher.launchInFork(forkedProcess.withClasspath(classpath),
                             printOutputOnConsole, reportDetail, classes, report));
                 } else {
                     result.set(JUnit4TestLauncher.launchInProcess(classes, printOutputOnConsole,
@@ -289,7 +289,7 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestClasses testSpec) {
-        final JkClasspath classpath = testSpec.getClasspath().andPrependingMany(testSpec.getClassesToTest().getRootDirsOrZipFiles());
+        final JkClasspath classpath = testSpec.getClasspath().andPrepending(testSpec.getClassesToTest().getRootDirsOrZipFiles());
         final JkClassLoader classLoader = JkClassLoader.ofSystem().getParent().getChildWithEntries(classpath);
         classLoader.loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.getClassesToTest());

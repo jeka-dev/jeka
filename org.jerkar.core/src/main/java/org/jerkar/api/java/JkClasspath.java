@@ -2,10 +2,7 @@ package org.jerkar.api.java;
 
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsZip;
+import org.jerkar.api.utils.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -42,16 +39,22 @@ public final class JkClasspath implements Iterable<Path> {
 
     /**
      * Creates a <code>JkClasspath</code> form specified file entries.
+     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
-    public static JkClasspath ofMany(Iterable<Path> entries) {
-        return new JkClasspath(JkUtilsPath.disambiguate(entries));
+    public static JkClasspath of(Iterable<Path> paths) {
+        return new JkClasspath(JkUtilsPath.disambiguate(paths));
+    }
+
+    public static JkClasspath of() {
+        return of(Collections.emptyList());
     }
 
     /**
      * Creates a <code>JkClasspath</code> form specified file entries.
      */
-    public static JkClasspath of(Path ... paths) {
-        return ofMany(Arrays.asList(paths));
+    public static JkClasspath of(Path path1, Path path2, Path... others) {
+        return of(JkUtilsIterable.listOfItems(path1, path2, others));
     }
 
     /**
@@ -65,7 +68,7 @@ public final class JkClasspath implements Iterable<Path> {
         for (final String classpathEntry : classpathEntries) {
             files.addAll(resolveWildCard(classpathEntry));
         }
-        return JkClasspath.ofMany(files);
+        return JkClasspath.of(files);
     }
     
     // --------------------------------- Iterate -----------------------------
@@ -140,38 +143,41 @@ public final class JkClasspath implements Iterable<Path> {
     /**
      * Returns a <code>JkClasspath</code> made of, in the order, the specified
      * entries plus the entries of this one.
+     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
-    public JkClasspath andPrependingMany(Iterable<Path> otherEntries) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
-        final LinkedList<Path> list = new LinkedList<>();
-        paths.forEach(path -> list.add(path));
-        list.addAll(this.entries);
-        return new JkClasspath(list);
+    public JkClasspath andPrepending(Iterable<Path> paths) {
+        List<Path> result = JkUtilsPath.disambiguate(paths);
+        result.addAll(0, this.entries);
+        return new JkClasspath(result);
     }
 
     /**
      * Returns a <code>JkClasspath</code> made of, in the order, the entries of
      * this one plus the specified ones.
+     *
+     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
-    public JkClasspath andMany(Iterable<Path> otherEntries) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
+    public JkClasspath and(Iterable<Path> paths) {
+        List<Path> result = JkUtilsPath.disambiguate(paths);
         final List<Path> list = new LinkedList<>(this.entries);
-        paths.forEach(path -> list.add(path));
+        list.addAll(result);
         return new JkClasspath(list);
     }
 
     /**
-     * See {@link #andMany(Iterable)}
+     * See {@link #and(Iterable)}
      */
-    public JkClasspath and(Path ... paths) {
-        return andMany(Arrays.asList(paths));
+    public JkClasspath and(Path path1, Path path2, Path ... others) {
+        return and(JkUtilsIterable.listOfItems(path1, path2, others));
     }
 
     /**
-     * See {@link #andPrependingMany(Iterable)}
+     * See {@link #andPrepending(Iterable)}
      */
-    public JkClasspath andPrepending(Path ... paths) {
-        return andMany(Arrays.asList(paths));
+    public JkClasspath andPrepending(Path path1, Path path2, Path... others) {
+        return and(JkUtilsIterable.listOfItems(path1, path2, others));
     }
     
     // ------------------------- canonical methods --------------------------------------

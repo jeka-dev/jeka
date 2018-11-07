@@ -29,14 +29,25 @@ public final class JkUtilsPath {
         // Do nothing
     }
 
-    public static Iterable<Path> disambiguate(Iterable<Path> paths) {
+    /**
+     * As {@link Path} implements  {@link Iterable<Path>} it is not obvious if an {@link Iterable} of {@link Path} was
+     * intended to be a list of {@link Path} or a single {@link Path}.
+     * This methods helps by returning a list of Path containing either a single element if the argument was an instance
+     * of {@link Path} nor a list of elements contained in the iterable argument.
+     *
+     * @param paths
+     * @return
+     */
+    public static List<Path> disambiguate(Iterable<Path> paths) {
         if (paths instanceof Path) {
             Path path = (Path) paths;
             List<Path> result = new LinkedList();
             result.add(path);
             return result;
         }
-        return paths;
+        LinkedList result = new LinkedList();
+        paths.forEach(path -> result.add(path));
+        return result;
     }
 
     public static Path get(URL url) {

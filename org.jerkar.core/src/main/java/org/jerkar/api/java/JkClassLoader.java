@@ -169,7 +169,7 @@ public final class JkClassLoader {
                 files.add(candidate.toPath());
             }
         }
-        return getParent().getChildWithEntries(this.getChildClasspath().andMany(files));
+        return getParent().getChildWithEntries(this.getChildClasspath().and(files));
     }
 
     /**
@@ -199,7 +199,7 @@ public final class JkClassLoader {
      * the parent classloaders.
      */
     public JkClasspath getChildClasspath() {
-        return JkClasspath.ofMany(JkUtilsSystem.classloaderEntries((URLClassLoader) this.delegate));
+        return JkClasspath.of(JkUtilsSystem.classloaderEntries((URLClassLoader) this.delegate));
     }
 
     /**
@@ -212,7 +212,7 @@ public final class JkClassLoader {
         } else {
             classpath = JkClasspath.of();
         }
-        return classpath.andMany(getChildClasspath());
+        return classpath.and(getChildClasspath());
     }
 
     /**
@@ -509,18 +509,20 @@ public final class JkClassLoader {
      * Add a new entry to this class loader. WARN : This method has side effect
      * on this class loader : use it with caution !
      */
-    public void addEntry(Path entry) {
-        final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL",
-                URL.class);
-        JkUtilsReflect.invoke(this.delegate, method, JkUtilsPath.toUrl(entry));
+    public void addEntries(Path path1, Path path2, Path... others) {
+        addEntries(JkUtilsIterable.listOfItems(path1, path2, others));
     }
 
     /**
-     * Same as {@link #addEntry(Path)} but for several entries.
+     * Same as {@link #addEntries(Path, Path, Path...)}.
+     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
-    public void addEntries(Iterable<Path> entries) {
-        for (final Path file : JkUtilsPath.disambiguate(entries)) {
-            addEntry(file);
+    public void addEntries(Iterable<Path> paths) {
+        final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL",
+                URL.class);
+        for (final Path path : JkUtilsPath.disambiguate(paths)) {
+            JkUtilsReflect.invoke(this.delegate, method, JkUtilsPath.toUrl(path));
         }
     }
 

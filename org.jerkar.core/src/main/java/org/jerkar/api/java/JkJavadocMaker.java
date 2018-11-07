@@ -136,7 +136,7 @@ public final class JkJavadocMaker {
     private String[] toArguments(Path outputDir) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
-        list.add(JkPathSequence.ofMany(this.srcDirs.getRootDirsOrZipFiles()).toString());
+        list.add(JkPathSequence.of(this.srcDirs.getRootDirsOrZipFiles()).toString());
         list.add("-d");
         list.add(outputDir.toAbsolutePath().toString());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
@@ -148,7 +148,7 @@ public final class JkJavadocMaker {
         list.add(JkUtilsJdk.toolsJar().toString());
         if (classpath != null && classpath.iterator().hasNext()) {
             list.add("-classpath");
-            list.add(JkPathSequence.ofMany(this.classpath).toString());
+            list.add(JkPathSequence.of(this.classpath).toString());
         }
         list.addAll(extraArgs);
 
@@ -179,7 +179,7 @@ public final class JkJavadocMaker {
         final JkClassLoader classLoader = JkClassLoader.ofCurrent();
         Class<?> mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
         if (mainClass == null) {
-            classLoader.addEntry(JkUtilsJdk.toolsJar());
+            classLoader.addEntries(JkUtilsJdk.toolsJar());
             mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
             if (mainClass == null) {
                 throw new RuntimeException(

@@ -58,7 +58,7 @@ class JUnit4TestLauncher {
                                                     JunitReportDetail reportDetail, File reportDir) {
         final JkClassLoader classloader = JkClassLoader.ofLoaderOf(classes.iterator().next());
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
-        classloader.addEntry(JkLocator.getJerkarJarPath());
+        classloader.addEntries(JkLocator.getJerkarJarPath());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             JkLog.trace("Launching test using class loader : " + classloader.toString());
         }

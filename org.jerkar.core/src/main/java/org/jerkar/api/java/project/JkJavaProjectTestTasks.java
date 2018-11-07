@@ -136,7 +136,7 @@ public class JkJavaProjectTestTasks {
     public JkClasspath getTestClasspath() {
         return JkClasspath.of(maker.getOutLayout().getTestClassDir())
                 .and(maker.getOutLayout().getClassDir())
-                .andMany(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST));
+                .and(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST));
     }
 
     public boolean isTestSkipped() {
