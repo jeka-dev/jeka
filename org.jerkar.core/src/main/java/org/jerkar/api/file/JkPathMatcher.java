@@ -127,8 +127,12 @@ public final class JkPathMatcher implements PathMatcher {
                 this.label + " | " + other.toString());
     }
 
-    public JkPathMatcher andAccept(FileSystem fileSystem, String pattern) {
-        return this.and(JkPathMatcher.ofAccept(fileSystem, pattern));
+    public JkPathMatcher andAccept(FileSystem fileSystem, String ...patterns) {
+        return this.or(JkPathMatcher.ofAccept(fileSystem, patterns));
+    }
+
+    public JkPathMatcher andAccept(String ...patterns) {
+        return this.andAccept(FileSystems.getDefault(), patterns);
     }
 
     public JkPathMatcher andReject(FileSystem fileSystem, String ... patterns) {

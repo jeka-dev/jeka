@@ -72,11 +72,11 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns all files resulting of this dependency node (this node itself plus all descendants).
      */
-    public List<Path> getAllResolvedFiles() {
+    public List<Path> getResolvedFiles() {
         final List<Path> list = new LinkedList<>();
         JkUtilsIterable.addAllWithoutDuplicate(list, this.nodeInfo.getFiles());
         for (final JkDependencyNode child : children) {
-            JkUtilsIterable.addAllWithoutDuplicate(list, child.getAllResolvedFiles());
+            JkUtilsIterable.addAllWithoutDuplicate(list, child.getResolvedFiles());
         }
         return list;
     }

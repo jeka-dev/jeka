@@ -36,7 +36,7 @@ public class JkJavaProjectTestTasks {
 
     private JkJavaCompiler compiler = JkJavaCompiler.of();
 
-    private JkPathMatcher testClassMatcher = JkPathMatcher.ofAccept("**/*Test.class");
+    private JkPathMatcher testClassMatcher = JkPathMatcher.ofAccept("*Test.class", "**/*Test.class");
 
     private boolean done;
 

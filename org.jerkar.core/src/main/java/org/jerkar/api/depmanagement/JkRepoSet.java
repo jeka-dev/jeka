@@ -39,8 +39,8 @@ public final class JkRepoSet implements Serializable {
     /**
      * Creates a repository set from the specified configurations.
      */
-    public static JkRepoSet of(JkRepo... configs) {
-        return new JkRepoSet(Arrays.asList(configs));
+    public static JkRepoSet of(JkRepo repo, JkRepo... others) {
+        return new JkRepoSet(JkUtilsIterable.listOf1orMore(repo, others));
     }
 
     /**
@@ -83,13 +83,6 @@ public final class JkRepoSet implements Serializable {
     public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password) {
         return of(JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(userName, password),
                 JkRepo.ofMavenOssrhDeployRelease(userName, password));
-    }
-
-    /**
-     * Crates an empty {@link JkRepoSet}
-     */
-    public static JkRepoSet ofEmpty() {
-        return new JkRepoSet(Collections.emptyList());
     }
 
     /**

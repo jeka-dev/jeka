@@ -59,7 +59,7 @@ public final class JkPathSequence implements Iterable<Path> {
      * Creates a <code>JkPathSequence</code> form specified entries
      */
     public static JkPathSequence of(Path path1, Path path2, Path... others) { ;
-        return JkPathSequence.of(JkUtilsIterable.listOfItems(path1, path2, others));
+        return JkPathSequence.of(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
 
 
@@ -100,7 +100,7 @@ public final class JkPathSequence implements Iterable<Path> {
      * @see #andPrepending(Iterable)
      */
     public JkPathSequence andPrepending(Path path1, Path path2, Path... entries) {
-        return andPrepending(JkUtilsIterable.listOfItems(path1, path2, entries));
+        return andPrepending(JkUtilsIterable.listOf2orMore(path1, path2, entries));
     }
 
     /**
@@ -120,7 +120,7 @@ public final class JkPathSequence implements Iterable<Path> {
      * @see #and(Iterable)
      */
     public JkPathSequence and(Path path1, Path path2, Path... others) {
-        return and(JkUtilsIterable.listOfItems(path1, path2, others));
+        return and(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
 
     /**

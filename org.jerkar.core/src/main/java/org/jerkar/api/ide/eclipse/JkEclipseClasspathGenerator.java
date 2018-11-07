@@ -199,7 +199,7 @@ public final class JkEclipseClasspathGenerator {
 
         // add build dependencies
         if (hasBuildDef() && runDependencyResolver != null) {
-            final Iterable<Path> files = runDependencyResolver.fetch(runDependencies);
+            final Iterable<Path> files = runDependencyResolver.resolve(runDependencies).getFiles();
             writeFileDepsEntries(writer, files, paths);
         }
 
@@ -375,10 +375,10 @@ public final class JkEclipseClasspathGenerator {
                             writeProjectEntryIfNeeded(ideProjectBaseDir, writer, allPaths);
                         }
                     } else {
-                        writeFileDepsEntries(writer, node.getAllResolvedFiles(), allPaths);
+                        writeFileDepsEntries(writer, node.getResolvedFiles(), allPaths);
                     }
                 } else {
-                    writeFileDepsEntries(writer, node.getAllResolvedFiles(), allPaths);
+                    writeFileDepsEntries(writer, node.getResolvedFiles(), allPaths);
                 }
             }
         }

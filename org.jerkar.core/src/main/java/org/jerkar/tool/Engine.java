@@ -107,7 +107,7 @@ final class Engine {
         for (JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
-        return JkDependencyResolver.of(this.runRepos).fetch(deps);
+        return JkDependencyResolver.of(this.runRepos).resolve(deps).getFiles();
     }
 
     private void preCompile() {
@@ -135,7 +135,7 @@ final class Engine {
         long start = System.nanoTime();
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
-        final JkPathSequence runPath = runDependencyResolver.fetch(this.computeRunDependencies());
+        final JkPathSequence runPath = runDependencyResolver.resolve(this.computeRunDependencies()).getFiles();
         path.addAll(runPath.getEntries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
         this.compileDef(JkPathSequence.of(path));

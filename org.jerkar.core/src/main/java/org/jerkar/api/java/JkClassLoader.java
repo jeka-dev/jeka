@@ -510,7 +510,7 @@ public final class JkClassLoader {
      * on this class loader : use it with caution !
      */
     public void addEntries(Path path1, Path path2, Path... others) {
-        addEntries(JkUtilsIterable.listOfItems(path1, path2, others));
+        addEntries(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
 
     /**

@@ -40,15 +40,31 @@ public final class JkUtilsIterable {
      * @see #listOf(Iterable)
      */
     @SuppressWarnings("unchecked")
-    public static <T> List<T> listOfItems(T item1, T item2, T... others) {
+    public static <T> List<T> listOf2orMore(T item1, T item2, T... others) {
         ArrayList<T> result = new ArrayList<>(others.length + 2);
-        result.set(0, item1);
-        result.set(1, item2);
+        result.add(item1);
+        result.add(item2);
         for (int i = 0; i < others.length; i++) {
-            result.set(i + 2, others[i]);
+            result.add(others[i]);
         }
         return result;
     }
+
+    /**
+     * @see #listOf(Iterable)
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> listOf1orMore(T item1, T... others) {
+        ArrayList<T> result = new ArrayList<>(others.length + 1);
+        result.add(item1);
+        for (int i = 0; i < others.length; i++) {
+            result.add(others[i]);
+        }
+        return result;
+    }
+
+
+
 
     /**
      * Returns a duplicate free list of the given items

@@ -118,7 +118,7 @@ public class ResolveTreeIT {
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         JkDependencyNode tree = resolveResult.getDependencyTree();
         System.out.println(tree.toStringTree());
-        System.out.println(resolveResult.getLocalFiles());
+        System.out.println(resolveResult.getFiles());
     }
 
     @Test

@@ -157,7 +157,7 @@ public final class JkJavaCompileSpec {
      * @see #addSources(Iterable)
      */
     public JkJavaCompileSpec addSources(Path path1, Path path2, Path... files) {
-        return addSources(JkUtilsIterable.listOfItems(path1, path2, files));
+        return addSources(JkUtilsIterable.listOf2orMore(path1, path2, files));
     }
 
     /**

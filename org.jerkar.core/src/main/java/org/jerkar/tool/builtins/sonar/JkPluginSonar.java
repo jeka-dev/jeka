@@ -26,8 +26,8 @@ public class JkPluginSonar extends JkPlugin {
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
         final Path baseDir = sourceLayout.getBaseDir();
-        final JkPathSequence libs = project.getMaker().getDependencyResolver().fetch(project.getDependencies(),
-                JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED);
+        final JkPathSequence libs = project.getMaker().getDependencyResolver().resolve(project.getDependencies(),
+                JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED).getFiles();
         final Path testReportDir = project.getMaker().getOutLayout().getTestReportDir();
         final JkVersionedModule module = project.getVersionedModule();
         final String fullName = module != null ? module.getModuleId().getDotedName() : project.getBaseDir().getFileName().toString();

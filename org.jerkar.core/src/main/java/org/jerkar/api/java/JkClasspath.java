@@ -54,7 +54,7 @@ public final class JkClasspath implements Iterable<Path> {
      * Creates a <code>JkClasspath</code> form specified file entries.
      */
     public static JkClasspath of(Path path1, Path path2, Path... others) {
-        return of(JkUtilsIterable.listOfItems(path1, path2, others));
+        return of(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
 
     /**
@@ -170,14 +170,14 @@ public final class JkClasspath implements Iterable<Path> {
      * See {@link #and(Iterable)}
      */
     public JkClasspath and(Path path1, Path path2, Path ... others) {
-        return and(JkUtilsIterable.listOfItems(path1, path2, others));
+        return and(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
 
     /**
      * See {@link #andPrepending(Iterable)}
      */
     public JkClasspath andPrepending(Path path1, Path path2, Path... others) {
-        return and(JkUtilsIterable.listOfItems(path1, path2, others));
+        return and(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
     
     // ------------------------- canonical methods --------------------------------------

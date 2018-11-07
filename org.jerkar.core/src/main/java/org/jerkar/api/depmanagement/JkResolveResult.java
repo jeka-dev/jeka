@@ -1,11 +1,14 @@
 package org.jerkar.api.depmanagement;
 
+import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsIterable;
 
@@ -24,6 +27,19 @@ public final class JkResolveResult implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private final JkDependencyNode depTree;
+
+    private final JkErrorReport errorReport;
+
+    private final File baseDir;
+
+    private JkResolveResult(JkDependencyNode depTree, JkErrorReport errorReport, File baseDir) {
+        super();
+        this.depTree = depTree;
+        this.errorReport = errorReport;
+        this.baseDir = baseDir;
+    }
+
     /**
      * Creates an empty {@link JkResolveResult}
      */
@@ -38,28 +54,18 @@ public final class JkResolveResult implements Serializable {
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
     static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
-        return new JkResolveResult(depTree, errorReport);
+        return new JkResolveResult(depTree, errorReport, Paths.get("").toFile());
     }
 
     private static JkResolveResult of(JkDependencyNode dependencyTree) {
-        return new JkResolveResult(dependencyTree, JkErrorReport.allFine());
-    }
-
-    private final JkDependencyNode depTree;
-
-    private final JkErrorReport errorReport;
-
-    private JkResolveResult(JkDependencyNode depTree, JkErrorReport errorReport) {
-        super();
-        this.depTree = depTree;
-        this.errorReport = errorReport;
+        return new JkResolveResult(dependencyTree, JkErrorReport.allFine(), Paths.get(".").toFile());
     }
 
     /**
-     * Shorthand for <code>dependencyTree.allFiles()</code>
+     * Shorthand for {@link JkDependencyNode#getResolvedFiles()} on the tree root.
      */
-    public List<Path> getLocalFiles() {
-        return this.depTree.getAllResolvedFiles();
+    public JkPathSequence getFiles() {
+        return JkPathSequence.of(this.depTree.getResolvedFiles()).withoutDuplicates().resolveTo(baseDir.toPath());
     }
 
     /**
@@ -93,12 +99,12 @@ public final class JkResolveResult implements Serializable {
     /**
      * Returns files the specified module is resolved to.
      */
-    public List<Path> getResolvedFilesFor(JkModuleId moduleId) {
+    public JkPathSequence getFilesFor(JkModuleId moduleId) {
         final JkDependencyNode dependencyNode = this.depTree.getFirst(moduleId);
         if (dependencyNode == null) {
-            return new LinkedList<>();
+            return JkPathSequence.of();
         }
-        return dependencyNode.getModuleInfo().getFiles();
+        return JkPathSequence.of(dependencyNode.getModuleInfo().getFiles()).withoutDuplicates().resolveTo(baseDir.toPath());
     }
 
     /**
@@ -106,7 +112,11 @@ public final class JkResolveResult implements Serializable {
      */
     public JkResolveResult and(JkResolveResult other) {
         return new JkResolveResult(this.depTree.withMerging(other.depTree),
-                this.errorReport.merge(other.errorReport));
+                this.errorReport.merge(other.errorReport), this.baseDir);
+    }
+
+    JkResolveResult withBaseDir(Path baseDir) {
+        return new JkResolveResult(this.depTree, this.errorReport, baseDir.toFile());
     }
 
     /**

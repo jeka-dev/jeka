@@ -224,7 +224,7 @@ public final class JkUnit {
         final String name = getSuiteName(classes);
 
         if (!classes.iterator().hasNext()) {
-            JkLog.warn("No test class found.");
+            JkLog.warn("No test class found on " + testSpec.getClassesToTest());
             return JkTestSuiteResult.ofEmpty((Properties) System.getProperties().clone(), name, 0);
         }
         final long start = System.nanoTime();
@@ -279,7 +279,7 @@ public final class JkUnit {
                 TestReportBuilder.of(result.get()).writeToFileSystem(reportDir);
             }
             for (final Runnable runnable : this.postActions) {
-                runnable.run(); // NOSONAR
+                runnable.run();
             }
         };
         JkLog.execute("Executing JUnit tests", task);

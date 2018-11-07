@@ -20,12 +20,7 @@ import org.jerkar.api.utils.JkUtilsTime;
  */
 public final class JkDependencyResolver {
 
-    /**
-     * @See {@link #of(JkRepoSet)}
-     */
-    public static JkDependencyResolver of(JkRepo... repos) {
-        return of(JkRepoSet.of(repos));
-    }
+
 
     private final InternalDepResolver internalResolver;
 
@@ -53,18 +48,19 @@ public final class JkDependencyResolver {
      * the specified JkRepo contains no {@link JkRepo} then the created.
      */
     public static JkDependencyResolver of(JkRepoSet repos) {
-       /* if (repos.getRepoList().isEmpty()) {
-            return new JkDependencyResolver(null, null, JkResolutionParameters.of(), JkRepoSet.ofEmpty(), Paths.get(""));
-        } */
         final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
         return new JkDependencyResolver(ivyResolver,  null, JkResolutionParameters.of(), repos, Paths.get(""));
     }
 
     /**
-     * @see JkDependencyResolver#resolve(JkDependencySet, JkScope...)
+     * @See {@link #of(JkRepoSet)}
      */
-    public JkResolveResult resolve(JkDependencySet dependencies, Iterable<JkScope> scopes) {
-        return resolve(dependencies, JkUtilsIterable.arrayOf(scopes, JkScope.class));
+    public static JkDependencyResolver of(JkRepo repo1, JkRepo... repos) {
+        return of(JkRepoSet.of(repo1, repos));
+    }
+
+    public static JkDependencyResolver of() {
+        return of(JkRepoSet.of());
     }
 
     /**
@@ -75,33 +71,10 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Gets the path containing all the resolved dependencies as artifact files
-     * for the specified scopes.
-     * <p>
-     * If no scope is specified then return all file dependencies and the
-     * dependencies specified. About the of dependency the same rule than
-     * for {@link #resolve(JkDependencySet, JkScope...)} apply.
-     * </p>
-     * The result is ordered according the order dependencies has been declared.
-     * About ordering of transitive dependencies, they come after the explicit ones and
-     * the dependee of the first explicitly declared dependency come before the dependee
-     * of the second one and so on.
-     * @throws IllegalStateException if the resolution has not been achieved successfully
+     * @see JkDependencyResolver#resolve(JkDependencySet, JkScope...)
      */
-    public JkPathSequence fetch(JkDependencySet dependencies, JkScope... scopes) {
-        if (internalResolver != null && dependencies.hasModules()) {
-            JkResolveResult resolveResult = resolve(dependencies, scopes).assertNoError();
-            return JkPathSequence.of(resolveResult.getDependencyTree().getAllResolvedFiles()).withoutDuplicates();
-        }
-        final List<Path> result = new LinkedList<>();
-        for (final JkScopedDependency scopedDependency : dependencies) {
-            if (scopedDependency.isInvolvedInAnyOf(scopes) || scopes.length == 0) {
-                final JkDependency dependency = scopedDependency.withDependency();
-                final JkFileDependency fileDependency = (JkFileDependency) dependency;
-                result.addAll(fileDependency.getFiles());
-            }
-        }
-        return JkPathSequence.of(result).withoutDuplicates().resolveTo(baseDir);
+    public JkResolveResult resolve(JkDependencySet dependencies, Iterable<JkScope> scopes) {
+        return resolve(dependencies, JkUtilsIterable.arrayOf(scopes, JkScope.class));
     }
 
     /**
@@ -121,14 +94,14 @@ public final class JkDependencyResolver {
                     parameters, scopes);
         final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies,
                     JkUtilsIterable.setOf(scopes));
-        resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
+        resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport()).withBaseDir(baseDir);
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module")
                     + resolveResult.getInvolvedModules());
-            JkLog.info(plurialize(resolveResult.getLocalFiles().size(), "artifact") + ".");
+            JkLog.info(plurialize(resolveResult.getFiles().getEntries().size(), "artifact") + ".");
         } else {
             JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " leading to " +
-                    plurialize(resolveResult.getLocalFiles().size(), "artifact") + ".");
+                    plurialize(resolveResult.getFiles().getEntries().size(), "artifact") + ".");
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         return resolveResult;
@@ -156,8 +129,8 @@ public final class JkDependencyResolver {
     /**
      * @see #withRepos(JkRepoSet)
      */
-    public JkDependencyResolver withRepos(JkRepo... otherRepos) {
-        return withRepos(JkRepoSet.of(otherRepos));
+    public JkDependencyResolver withRepos(JkRepo repo, JkRepo... otherRepos) {
+        return withRepos(JkRepoSet.of(repo, otherRepos));
     }
 
     /**
@@ -178,7 +151,7 @@ public final class JkDependencyResolver {
     /**
      * Returns an dependency resolver identical to this one but with specified the base directory. The base directory is used
      * to resolve relative files to absolute files for {@link JkFileSystemDependency}. This directory is used by
-     * {@link #fetch(JkDependencySet, JkScope...)} method as it returns only absolute files.
+     * {@link #resolve(JkDependencySet, JkScope...)} method as it returns only absolute files.
      */
     public JkDependencyResolver withBasedir(Path baseDir) {
         return new JkDependencyResolver(this.internalResolver, this.module,

@@ -30,7 +30,7 @@ final class SourceParser {
     }
 
     public static SourceParser of(Path baseDir, Iterable<Path>  files) {
-        SourceParser result = new SourceParser(JkDependencySet.of(), JkRepoSet.ofEmpty(),
+        SourceParser result = new SourceParser(JkDependencySet.of(), JkRepoSet.of(),
                 new LinkedList<>());
         for (final Path code : files) {
             result = result.and(of(baseDir, code));

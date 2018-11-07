@@ -77,16 +77,16 @@ public class JkPluginJava extends JkPlugin {
         }
         final JkJavaProjectMaker maker = project.getMaker();
         if (!pack.sources) {
-            project.getMaker().undefineArtifact(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
+            maker.undefineArtifact(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
         }
         if (pack.javadoc) {
-            project.getMaker().defineJavadocArtifact();
+            maker.defineJavadocArtifact();
         }
         if (pack.tests) {
-            project.getMaker().defineTestArtifact();
+            maker.defineTestArtifact();
         }
         if (pack.testSources) {
-            project.getMaker().defineTestSourceArtifact();
+            maker.defineTestSourceArtifact();
         }
         if (maker.getCompileTasks().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
             maker.getCompileTasks().setCompiler(compiler());
@@ -95,19 +95,23 @@ public class JkPluginJava extends JkPlugin {
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         JkDependencyResolver resolver = project.getMaker().getDependencyResolver();
         resolver = resolver.withRepos(downloadRepo); // always look in local repo
-        project.getMaker().setDependencyResolver(resolver);
+        maker.setDependencyResolver(resolver);
         if (pack.checksums().length > 0) {
-            project.getMaker().getPackTasks().setChecksumAlgorithms(pack.checksums());
+            maker.getPackTasks().setChecksumAlgorithms(pack.checksums());
         }
         if (publish.signArtifacts) {
             JkPluginPgp pgpPlugin = this.getOwner().getPlugins().get(JkPluginPgp.class);
             JkPgp pgp = pgpPlugin.get();
-            project.getMaker().getPublishTasks().setSigner(pgp::sign);
+            maker.getPublishTasks().setSigner(pgp::sign);
         }
-        JkUnit tester = project.getMaker().getTestTasks().getRunner();
+        JkUnit tester = maker.getTestTasks().getRunner();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             tester = tester.withForking(javaProcess);
+        }
+        if (tests.runIT) {
+            maker.getTestTasks().setTestClassMatcher(maker.getTestTasks().getTestClassMatcher()
+                    .andAccept("*IT.class", "**/*IT.class"));
         }
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);

@@ -83,7 +83,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         if (outLayout.getOutputPath().isAbsolute()) {
             this.outLayout = outLayout;
         } else {
-            this.outLayout = outLayout.withOutputDir(this.project.getBaseDir().resolve(outLayout.getOutputPath()));
+            this.outLayout = outLayout.withOutputDir(getBaseDir().resolve(outLayout.getOutputPath()));
         }
         return this;
     }
@@ -181,7 +181,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkPathSequence fetchDependenciesFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return dependencyCache.computeIfAbsent(scopeSet,
-                scopes1 -> getDependencyResolver().fetch(getDefaultedDependencies(), scopes));
+                scopes1 -> getDependencyResolver().resolve(getDefaultedDependencies(), scopes).getFiles());
     }
 
     /**
@@ -195,13 +195,14 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkDependencyResolver getDependencyResolver() {
         if (dependencyResolver == null) {
             dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral())
-                    .withParams(JkResolutionParameters.of(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
+                    .withParams(JkResolutionParameters.of(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING))
+                    .withBasedir(getBaseDir());
         }
         return dependencyResolver;
     }
 
     public JkJavaProjectMaker setDependencyResolver(JkDependencyResolver dependencyResolver) {
-        this.dependencyResolver = dependencyResolver;
+        this.dependencyResolver = dependencyResolver.withBasedir(project.getBaseDir());
         return this;
     }
 
@@ -213,11 +214,11 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     @Override
     public JkPathSequence fetchRuntimeDependencies(JkArtifactId artifactFileId) {
         if (artifactFileId.equals(getMainArtifactId())) {
-            return this.getDependencyResolver().fetch(
-                    this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME);
+            return this.getDependencyResolver().resolve(
+                    this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME).getFiles();
         } else if (artifactFileId.isClassifier("test") && artifactFileId.isExtension("jar")) {
-            return this.getDependencyResolver().fetch(
-                    this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST);
+            return this.getDependencyResolver().resolve(
+                    this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST).getFiles();
         } else {
             return JkPathSequence.of();
         }

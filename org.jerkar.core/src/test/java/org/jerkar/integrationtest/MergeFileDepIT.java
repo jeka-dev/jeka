@@ -45,7 +45,7 @@ public class MergeFileDepIT {
         JkDependencyNode file0Node = tree.getChildren().get(0);
         List<Path> expected = new LinkedList<>();
         expected.add(dep0File);
-        assertEquals(expected, file0Node.getAllResolvedFiles());
+        assertEquals(expected, file0Node.getResolvedFiles());
 
         JkDependencyNode starterwebNode = tree.getChildren().get(1);
         assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getModuleId());
@@ -53,7 +53,7 @@ public class MergeFileDepIT {
         JkDependencyNode file1Node = tree.getChildren().get(2);
         List<Path> expected1 = new LinkedList<>();
         expected1.add(dep1File);
-        assertEquals(expected1, file1Node.getAllResolvedFiles());
+        assertEquals(expected1, file1Node.getResolvedFiles());
 
         JkDependencyNode jsonRpcNode = tree.getChildren().get(3);
         assertEquals(JkModuleId.of("com.github.briandilley.jsonrpc4j:jsonrpc4j"), jsonRpcNode.getModuleInfo().getModuleId());
@@ -61,7 +61,7 @@ public class MergeFileDepIT {
         JkDependencyNode file2Node = tree.getChildren().get(4);
         List<Path> expected2 = new LinkedList<>();
         expected2.add(dep2File);
-        assertEquals(expected2, file2Node.getAllResolvedFiles());
+        assertEquals(expected2, file2Node.getResolvedFiles());
 
         // Now check that file dependencies with Test Scope are not present in compile
 

@@ -157,7 +157,7 @@ public final class JkPom {
     public JkRepoSet getRepos() {
         final List<String> urls = new LinkedList<>();
         if (repositoriesEl() == null) {
-            return JkRepoSet.ofEmpty();
+            return JkRepoSet.of();
         }
         for (final Element repositoryEl : JkUtilsXml.directChildren(repositoriesEl(), "repository")) {
             urls.add(JkUtilsXml.directChildText(repositoryEl, "url"));
