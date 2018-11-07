@@ -5,16 +5,16 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 public class JkDependencySetTest {
 
     @Test
     public void testFromDescription() throws IOException {
-        InputStream is = JkDependencySetTest.class.getResourceAsStream("dependencies.txt");
-        JkDependencySet dependencySet = JkDependencySet.ofTextDescription(is);
+        URL url = JkDependencySetTest.class.getResource("dependencies.txt");
+        JkDependencySet dependencySet = JkDependencySet.ofTextDescription(url);
         Assert.assertEquals(4, dependencySet.getDeclaredScopes().size());
         Assert.assertEquals(10, dependencySet.toList().size());
-        is.close();
     }
 
 }

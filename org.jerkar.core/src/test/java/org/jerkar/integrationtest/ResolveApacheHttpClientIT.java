@@ -9,7 +9,7 @@ import org.junit.Test;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 
-public class ResolvePopularDependenciesIT {
+public class ResolveApacheHttpClientIT {
 
     private static final String HTTP_CLIENT = "org.apache.httpcomponents:httpclient:4.5.3";
 

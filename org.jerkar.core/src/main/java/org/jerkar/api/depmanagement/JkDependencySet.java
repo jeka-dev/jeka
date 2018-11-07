@@ -2,12 +2,10 @@ package org.jerkar.api.depmanagement;
 
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.*;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -569,19 +567,14 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * @see #ofTextDescription(String)
      */
     public static JkDependencySet ofTextDescription(Path path) {
-        try (InputStream inputStream = Files.newInputStream(path)) {
-            return ofTextDescription(inputStream);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return ofTextDescription(JkUtilsPath.toUrl(path));
     }
 
     /**
      * @see #ofTextDescription(String)
      */
-    public static JkDependencySet ofTextDescription(InputStream inputStream) {
-        String content = JkUtilsIO.readAsString(inputStream);
-        return ofTextDescription(content);
+    public static JkDependencySet ofTextDescription(URL url) {
+        return ofTextDescription(JkUtilsIO.read(url));
     }
 
     /**

@@ -18,6 +18,16 @@ import java.nio.file.Path;
 
 public class JkJavaProjectTestTasks {
 
+    /**
+     * File pattern for selecting Test classes.
+     */
+    public static final String[] TEST_CLASS_PATTERN = new String[] {"*Test.class", "**/*Test.class"};
+
+    /**
+     * File pattern for selecting Integration Test classes.
+     */
+    public static final String[] IT_CLASS_PATTERN = new String[] {"*IT.class", "**/*IT.class"};
+
     private final JkJavaProjectMaker maker;
 
     private final JkRunnables preTest = JkRunnables.of(() -> {});
@@ -36,7 +46,7 @@ public class JkJavaProjectTestTasks {
 
     private JkJavaCompiler compiler = JkJavaCompiler.of();
 
-    private JkPathMatcher testClassMatcher = JkPathMatcher.ofAccept("*Test.class", "**/*Test.class");
+    private JkPathMatcher testClassMatcher = JkPathMatcher.ofAccept(TEST_CLASS_PATTERN);
 
     private boolean done;
 

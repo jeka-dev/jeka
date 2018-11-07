@@ -150,7 +150,7 @@ public final class JkUnit {
      * If the withForking mode is <code>true<code> then the specified
      * {@link JkJavaProcess} is used to run the tests..
      */
-    public JkUnit withForking(boolean fork, JkJavaProcess process) {
+    private JkUnit withForking(boolean fork, JkJavaProcess process) {
         if (fork && !isForked()) {
             return withForking(process);
         }
@@ -159,6 +159,13 @@ public final class JkUnit {
                     this.breakOnFailure, this.printOutputOnConsole);
         }
         return this;
+    }
+
+    public JkUnit withForking(Path workingDir) {
+        if (isForked()) {
+            return withForking(forkedProcess.withWorkingDir(workingDir));
+        }
+        return withForking(JkJavaProcess.of().withWorkingDir(workingDir));
     }
 
     /**

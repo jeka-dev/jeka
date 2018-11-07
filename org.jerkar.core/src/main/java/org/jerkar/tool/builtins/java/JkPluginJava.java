@@ -8,6 +8,7 @@ import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
+import org.jerkar.api.java.project.JkJavaProjectTestTasks;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsIO;
@@ -111,7 +112,7 @@ public class JkPluginJava extends JkPlugin {
         }
         if (tests.runIT) {
             maker.getTestTasks().setTestClassMatcher(maker.getTestTasks().getTestClassMatcher()
-                    .andAccept("*IT.class", "**/*IT.class"));
+                    .andAccept(JkJavaProjectTestTasks.IT_CLASS_PATTERN));
         }
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);

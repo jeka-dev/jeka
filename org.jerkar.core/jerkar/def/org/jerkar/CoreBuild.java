@@ -79,16 +79,6 @@ public class CoreBuild extends JkJavaProjectBuild {
         JkLog.endTask();
     }
 
-    public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class, args).doDefault();
-    }
-
-    public void doDefault() {
-        clean();
-        doDistrib();
-        maker().getPublishTasks().publishLocal();
-    }
-
     public void publishDocOnGithub() {
         Path root = Paths.get(githubSiteRoot);
         JkProcess git = JkProcess.of("git").withWorkingDir(root).withLogCommand(true);
@@ -122,6 +112,16 @@ public class CoreBuild extends JkJavaProjectBuild {
         sampleTester.restoreEclipseClasspathFile = true;
         sampleTester.doTest();
         JkLog.endTask();
+    }
+
+    public static void main(String[] args) {
+        JkInit.instanceOf(CoreBuild.class, args).doDefault();
+    }
+
+    public void doDefault() {
+        clean();
+        doDistrib();
+        maker().getPublishTasks().publishLocal();
     }
 
 }
