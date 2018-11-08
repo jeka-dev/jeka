@@ -6,6 +6,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,6 @@ public class ResolveSpringBootStarterIT {
         JkLog.registerBasicConsoleHandler();
         JkResolveResult result = resolver().resolve(
                 JkDependencySet.of().and(SPRINGBOOT_STARTER, COMPILE_AND_RUNTIME)
-             //   .and(SLF4J_API.getGroupAndName() + ":1.7.25")
         );
         System.out.println(resolver().getParams().getScopeMapping());
         System.out.println(result.getDependencyTree().toStringTree());
@@ -36,6 +36,10 @@ public class ResolveSpringBootStarterIT {
             System.out.println(slf4japiNode);
             slf4japiNode.getResolvedFiles().forEach(System.out::println);
         }
+
+        // Does not contains test-jars
+        Assert.assertFalse(result.getFiles().getEntries().stream().anyMatch(path -> path.getFileName().toString().endsWith("-tests.jar")));
+
 
     }
 
