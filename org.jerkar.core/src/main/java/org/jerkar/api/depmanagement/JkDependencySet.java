@@ -35,18 +35,18 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         this.versionProvider = explicitVersions;
     }
 
-    public static JkDependencySet of(String ... dependencies) {
-        List<JkScopedDependency> scopedDependencies = new LinkedList<>();
-        for (String dependencyDesc : dependencies) {
-            final JkDependency dependency;
-            if (JkModuleDependency.isModuleDependencyDescription(dependencyDesc)) {
-                dependency = JkModuleDependency.of(dependencyDesc);
-            } else {
-                dependency = JkFileSystemDependency.of(Paths.get(dependencyDesc));
-            }
-            scopedDependencies.add(JkScopedDependency.of(dependency));
+    public static JkDependencySet of(String dependencyDesc, JkScope... scopes) {
+        final JkDependency dependency;
+        if (JkModuleDependency.isModuleDependencyDescription(dependencyDesc)) {
+            dependency = JkModuleDependency.of(dependencyDesc);
+        } else {
+            dependency = JkFileSystemDependency.of(Paths.get(dependencyDesc));
         }
-        return of(scopedDependencies);
+        return of(JkUtilsIterable.listOf(JkScopedDependency.of(dependency, scopes)));
+    }
+
+    public static JkDependencySet of() {
+        return of(Collections.emptyList());
     }
 
     /**

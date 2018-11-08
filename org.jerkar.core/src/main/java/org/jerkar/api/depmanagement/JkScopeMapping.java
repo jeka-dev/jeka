@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.utils.JkUtilsIterable;
 
@@ -41,16 +42,16 @@ public final class JkScopeMapping implements Serializable {
      * Returns a partially constructed mapping specifying only scope entries and
      * willing for the mapping values.
      */
-    public static JkScopeMapping.Partial of(JkScope... scopes) {
-        return of(Arrays.asList(scopes));
+    public static JkScopeMapping.Partial of(JkScope scope, JkScope... others) {
+        return of(JkUtilsIterable.listOf1orMore(scope, others));
     }
 
     /**
      * Returns a partially constructed mapping specifying only scope entries and
      * willing for the mapping values.
      */
-    public static JkScopeMapping.Partial of(String scope) {
-        return of(JkScope.of(scope));
+    public static JkScopeMapping.Partial of(String scope, String... others) {
+        return of(JkUtilsIterable.listOf1orMore(scope, others).stream().map(JkScope::of).collect(Collectors.toList()));
     }
 
     /**
@@ -66,7 +67,7 @@ public final class JkScopeMapping implements Serializable {
      * Creates an empty scope mapping.
      */
     @SuppressWarnings("unchecked")
-    public static JkScopeMapping ofEmpty() {
+    public static JkScopeMapping of() {
         return new JkScopeMapping(Collections.EMPTY_MAP);
     }
 
@@ -100,6 +101,12 @@ public final class JkScopeMapping implements Serializable {
         }
         final JkScopeMapping other = (JkScopeMapping) obj;
         return (map.equals(other.map));
+    }
+
+    public JkScopeMapping minus(JkScope scope) {
+        Map<JkScope, Set<String>> newMap = new HashMap<>(this.map);
+        newMap.remove(scope);
+        return new JkScopeMapping(newMap);
     }
 
     /**

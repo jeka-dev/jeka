@@ -23,8 +23,9 @@ public class ResolveSpringBootStarterIT {
     @Test
     public void resolveCompile() {
         JkLog.registerBasicConsoleHandler();
+        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkResolveResult result = resolver().resolve(
-                JkDependencySet.of().and(SPRINGBOOT_STARTER, COMPILE_AND_RUNTIME)
+                JkDependencySet.of(SPRINGBOOT_STARTER, COMPILE).withGlobalExclusion(JkDepExclude.of(SLF4J_API))
         );
         System.out.println(resolver().getParams().getScopeMapping());
         System.out.println(result.getDependencyTree().toStringTree());
@@ -44,6 +45,9 @@ public class ResolveSpringBootStarterIT {
     }
 
     private JkDependencyResolver resolver() {
-        return JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkScopeMapping mapping = JkScopeMapping.of("compile").to("compile");
+        resolver = resolver.withParams(resolver.getParams().withScopeMapping(mapping));
+        return resolver;
     }
 }
