@@ -6,5 +6,4 @@ public class Foo {
 		System.out.println("I am Foo. Isn't it ?");
 	}
 
-
 }

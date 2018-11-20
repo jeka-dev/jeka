@@ -107,10 +107,11 @@ final class IvyResolver implements InternalDepResolver {
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);
-        resolveOptions.setOutputReport(JkLog.verbosity() == JkLog.Verbosity.VERBOSE);
+        resolveOptions.setOutputReport(JkLog.verbosity().isVerbose());
         resolveOptions.setLog(logLevel());
         resolveOptions.setRefresh(parameters.isRefreshed());
         resolveOptions.setCheckIfChanged(true);
+        resolveOptions.setOutputReport(true);
         if (resolvedScopes.length == 0) {   // if no scope, verbose ivy report turns in exception
             resolveOptions.setOutputReport(false);
         }
@@ -212,8 +213,6 @@ final class IvyResolver implements InternalDepResolver {
                 if (node.isCompletelyBlacklisted()) {
                     continue;
                 }
-
-                final Caller[] callers = node.getAllCallers();
                 final JkModuleId moduleId = JkModuleId.of(node.getId().getOrganisation(), node.getId().getName());
                 final JkVersion resolvedVersion = JkVersion.of(node.getResolvedId().getRevision());
                 final Set<JkScope> rootScopes = IvyTranslations.toJkScopes(node.getRootModuleConfigurations());
@@ -225,14 +224,14 @@ final class IvyResolver implements InternalDepResolver {
                     artifacts = new LinkedList<>();
                 }
 
+                final Caller[] callers = node.getAllCallers();
                 for (final Caller caller : callers) {
-                    final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
                     final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
                     final List<JkModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.getModuleId(), k -> new LinkedList<>());
+                    final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
                     final Set<JkScope> declaredScopes = IvyTranslations.toJkScopes(dependencyDescriptor.getModuleConfigurations());
                     final JkVersion version = JkVersion.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());
-
                     final JkModuleNodeInfo moduleNodeInfo  = new JkModuleNodeInfo(moduleId, version, declaredScopes,
                             rootScopes, resolvedVersion, artifacts);
                     if (!containSame(list, moduleId)) {

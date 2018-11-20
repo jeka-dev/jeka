@@ -24,7 +24,7 @@ class SampleTester {
 
     private final JkPathTree sampleBaseDir;
 
-    private final JkPathTree sampleDependeeBaseDir;
+    private final JkPathTree sampleDependerBaseDir;
 
     private final JkPathTree output;
 
@@ -35,7 +35,7 @@ class SampleTester {
     SampleTester(JkPathTree buildDir) {
         super();
         this.sampleBaseDir = buildDir.goTo("../org.jerkar.samples");
-        this.sampleDependeeBaseDir = buildDir.goTo("../org.jerkar.samples-dependee");
+        this.sampleDependerBaseDir = buildDir.goTo("../org.jerkar.samples-depender");
         this.output = sampleBaseDir.goTo(JkConstants.OUTPUT_PATH);
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
         launchScript = buildDir.goTo(JkConstants.OUTPUT_PATH).get("distrib/" + scriptName);
@@ -81,7 +81,7 @@ class SampleTester {
 
     private void testDependee(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.getRoot())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependerBaseDir.getRoot())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-RC=" + className)
                 .withParams("clean", "java#pack")
                 .andParams(args)

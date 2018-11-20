@@ -140,7 +140,7 @@ public final class JkJavaCompiler {
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
         String message = "Compiling " + compileSpec.getSourceFiles() + " source files";
-        if (JkLog.isVerbose()) {
+        if (JkLog.verbosity().isVerbose()) {
             message = message + " to " + outputDir + " using options : " + JkUtilsString
                     .join(options, " ");
         }

@@ -25,7 +25,9 @@ class IvyMessageLogger extends AbstractMessageLogger {
             JkLog.trace(message);
             break;
         case Message.MSG_DEBUG:
-           JkLog.trace(message);
+            if (JkLog.Verbosity.QUITE_VERBOSE.equals(JkLog.verbosity())) {
+                JkLog.trace(message);
+            }
             break;
         default:
             JkLog.info("[" + level + "] " + message);

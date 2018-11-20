@@ -26,7 +26,11 @@ public final class JkLog implements Serializable {
     }
 
     public enum Verbosity {
-        MUTE, NORMAL, VERBOSE;
+        MUTE, NORMAL, VERBOSE, QUITE_VERBOSE;
+
+        public boolean isVerbose() {
+            return this == VERBOSE || this == QUITE_VERBOSE;
+        }
     }
 
     // Must not be replaced by EventLogHandler cause serialisation/classloader issues.
@@ -48,12 +52,12 @@ public final class JkLog implements Serializable {
 
     public static void register(EventLogHandler eventLogHandler) {
         consumer = eventLogHandler;
-        stream = eventLogHandler.outStream();
-        errorStream = eventLogHandler.errorStream();
+        stream = eventLogHandler.getOutStream();
+        errorStream = eventLogHandler.getErrorStream();
     }
 
-    public static void registerBasicConsoleHandler() {
-        register(new BasicConsoleHandler());
+    public static void registerHierarchicalConsoleHandler() {
+        register(new JkHierarchicalConsoleLogHandler());
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
@@ -95,42 +99,42 @@ public final class JkLog implements Serializable {
     }
 
     public static void info(String message) {
-        consume(JkLogEvent.regular(Type.INFO, message));
+        consume(JkLogEvent.ofRegular(Type.INFO, message));
     }
 
     public static void warn(String message) {
-        consume(JkLogEvent.regular(Type.WARN, message));
+        consume(JkLogEvent.ofRegular(Type.WARN, message));
     }
 
     public static void trace(String message) {
         if (verbosity() == Verbosity.VERBOSE) {
-            consume(JkLogEvent.regular(Type.TRACE, message));
+            consume(JkLogEvent.ofRegular(Type.TRACE, message));
         }
     }
 
     public static void error(String message) {
-        consume(JkLogEvent.regular(Type.ERROR, message));
+        consume(JkLogEvent.ofRegular(Type.ERROR, message));
     }
 
     public static void execute(String message, Runnable task) {
-        consume(JkLogEvent.regular(Type.START_TASK, message));
+        consume(JkLogEvent.ofRegular(Type.START_TASK, message));
         currentNestedTaskLevel.incrementAndGet();
         final long startTs = System.nanoTime();
         task.run();
         long durationMs = (System.nanoTime() - startTs) / 1000000;
         currentNestedTaskLevel.decrementAndGet();
-        consume((JkLogEvent.endTask(durationMs)));
+        consume((JkLogEvent.ofEndTask(durationMs)));
     }
 
     public static void startTask(String message) {
-        consume(JkLogEvent.regular(Type.START_TASK, message));
+        consume(JkLogEvent.ofRegular(Type.START_TASK, message));
         currentNestedTaskLevel.incrementAndGet();
         START_TIMES.get().push(System.nanoTime());
     }
 
     public static void endTask(String message) {
         currentNestedTaskLevel.decrementAndGet();
-        consume(JkLogEvent.regular(Type.END_TASK, message));
+        consume(JkLogEvent.ofRegular(Type.END_TASK, message));
         START_TIMES.get().pollLast();
     }
 
@@ -142,7 +146,7 @@ public final class JkLog implements Serializable {
                     "used an 'endTask' one too many in your code.");
         }
         Long durationMillis = JkUtilsTime.durationInMillis(startTime);
-        consume(JkLogEvent.regular(Type.END_TASK, "Done in " + durationMillis + " milliseconds."));
+        consume(JkLogEvent.ofRegular(Type.END_TASK, "Done in " + durationMillis + " milliseconds."));
 
     }
 
@@ -183,11 +187,11 @@ public final class JkLog implements Serializable {
             this.duration = duration;
         }
 
-        static JkLogEvent regular(Type type, String message) {
+        static JkLogEvent ofRegular(Type type, String message) {
             return new JkLogEvent(type, message,  -1);
         }
 
-        static JkLogEvent endTask(long duration) {
+        static JkLogEvent ofEndTask(long duration) {
             return new JkLogEvent(Type.END_TASK, "",  duration);
         }
 
@@ -197,15 +201,15 @@ public final class JkLog implements Serializable {
 
         private final long duration;
 
-        public Type type() {
+        public Type getType() {
             return type;
         }
 
-        public String message() {
+        public String getMessage() {
             return message;
         }
 
-        public long durationMs() {
+        public long getDurationMs() {
             return duration;
         }
     }
@@ -216,38 +220,42 @@ public final class JkLog implements Serializable {
 
     public interface EventLogHandler extends Consumer<JkLogEvent> {
 
-        OutputStream outStream();
+        OutputStream getOutStream();
 
-        OutputStream errorStream();
+        OutputStream getErrorStream();
 
     }
 
+    /*
     private static class BasicConsoleHandler implements EventLogHandler {
 
         @Override
-        public OutputStream outStream() {
+        public OutputStream getOutStream() {
             return System.out;
         }
 
         @Override
-        public OutputStream errorStream() {
+        public OutputStream getErrorStream() {
             return System.err;
         }
 
         @Override
         public void accept(JkLogEvent event) {
+            System.out.print(JkUtilsString.repeat("  ", currentNestedTaskLevel.get()));
             if (event.type.equals(Type.ERROR)) {
                 System.err.print(event.type);
-                System.err.print(" ");
-                System.err.println(event.message());
-            } else {
-                System.out.print(event.type);
-                System.out.print(" ");
-                System.out.println(event.message());
+                System.err.print(" : ");
+                System.err.println(event.getMessage());
+            } else if (!JkUtilsString.isBlank(event.getMessage())) {
+                //System.out.print(event.type);
+                //System.out.print(" : ");
+                System.out.println(event.getMessage());
             }
 
         }
-    }
+
+
+    } */
 
 
 }

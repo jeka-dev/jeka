@@ -219,7 +219,7 @@ public final class JkPathTree {
     }
 
     /**
-     * Deletes each and every files in this tree except the root andPrepending files not matching this tree filter.
+     * Deletes each and every files in this tree except the root and files not matching this tree filter.
      */
     public JkPathTree deleteContent() {
         if (!Files.exists(getRoot())) {

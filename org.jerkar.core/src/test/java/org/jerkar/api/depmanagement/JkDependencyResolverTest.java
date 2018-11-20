@@ -18,7 +18,7 @@ public class JkDependencyResolverTest {
     @Test
     public void resolveModuleDependencies() throws Exception {
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
-        JkLog.registerBasicConsoleHandler();
+        JkLog.registerHierarchicalConsoleHandler();
         JkDependencySet dependencies = JkDependencySet.of()
                 .and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());

@@ -32,7 +32,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void apacheHttpClientWithoutDeclaredScopeButResolvedScope() {
-        JkLog.registerBasicConsoleHandler();
+        JkLog.registerHierarchicalConsoleHandler();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkResolveResult result = resolver().resolve(JkDependencySet.of(HTTP_CLIENT), COMPILE);
         System.out.println(result.getDependencyTree().toStringTree());
@@ -59,7 +59,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void apacheHttpClientWithTestToTestScopeMapping() {
-        JkLog.registerBasicConsoleHandler();
+        JkLog.registerHierarchicalConsoleHandler();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkDependencySet deps =  JkDependencySet.of().and(HTTP_CLIENT,  TEST.mapTo("archive", "test"));
         JkResolveResult result = resolver().resolve(deps);

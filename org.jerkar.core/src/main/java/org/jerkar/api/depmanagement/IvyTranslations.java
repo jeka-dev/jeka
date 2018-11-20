@@ -279,7 +279,7 @@ final class IvyTranslations {
         // Add dependencies
         final DependenciesContainer dependencyContainer = new DependenciesContainer(defaultMapping, dependencies);
         for (final JkScopedDependency scopedDependency : dependencies) {
-            if (scopedDependency.withDependency() instanceof JkModuleDependency) {
+            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
                 dependencyContainer.populate(scopedDependency);
             }
         }
@@ -495,7 +495,7 @@ final class IvyTranslations {
 
         void populate(JkScopedDependency scopedDependency) {
 
-            final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.withDependency();
+            final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.getDependency();
             final JkModuleId moduleId = moduleDep.getModuleId();
             final boolean mainArtifact = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
             JkVersion version = dependencySet.getVersion(moduleId);

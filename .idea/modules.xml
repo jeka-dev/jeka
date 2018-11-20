@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/org.jerkar.core/.idea/org.jerkar.core.iml" filepath="$PROJECT_DIR$/org.jerkar.core/.idea/org.jerkar.core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples/.idea/org.jerkar.samples.iml" filepath="$PROJECT_DIR$/org.jerkar.samples/.idea/org.jerkar.samples.iml"/>
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples-dependee/.idea/org.jerkar.samples-dependee.iml" filepath="$PROJECT_DIR$/org.jerkar.samples-dependee/.idea/org.jerkar.samples-dependee.iml"/>
+      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples/.idea/org.jerkar.samples.iml" filepath="$PROJECT_DIR$/org.jerkar.samples/.idea/org.jerkar.samples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples-depender/.idea/org.jerkar.samples-depender.iml" filepath="$PROJECT_DIR$/org.jerkar.samples-depender/.idea/org.jerkar.samples-depender.iml" />
     </modules>
   </component>
 </project>

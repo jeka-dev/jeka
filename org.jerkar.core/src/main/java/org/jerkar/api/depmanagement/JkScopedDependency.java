@@ -41,6 +41,23 @@ public final class JkScopedDependency implements Serializable {
         UNSET
     }
 
+    // ------------------ Instance members --------------------
+
+    private final JkDependency dependency;
+
+    private final Set<JkScope> scopes;
+
+    private final JkScopeMapping scopeMapping;
+
+    private JkScopedDependency(JkDependency dependency, Set<JkScope> scopes,
+            JkScopeMapping scopeMapping) {
+        super();
+        JkUtilsAssert.notNull(dependency, "Dependency can't be null.");
+        this.dependency = dependency;
+        this.scopes = scopes;
+        this.scopeMapping = scopeMapping;
+    }
+
     /**
      * Creates a {@link JkScopedDependency} to the specified dependency and scope mapping.
      */
@@ -64,27 +81,10 @@ public final class JkScopedDependency implements Serializable {
                 scopes)), null);
     }
 
-    // ------------------ Instance members --------------------
-
-    private final JkDependency dependency;
-
-    private final Set<JkScope> scopes;
-
-    private final JkScopeMapping scopeMapping;
-
-    private JkScopedDependency(JkDependency dependency, Set<JkScope> scopes,
-            JkScopeMapping scopeMapping) {
-        super();
-        JkUtilsAssert.notNull(dependency, "Dependency can't be null.");
-        this.dependency = dependency;
-        this.scopes = scopes;
-        this.scopeMapping = scopeMapping;
-    }
-
     /**
      * Returns the dependency object of this scoped dependency.
      */
-    public JkDependency withDependency() {
+    public JkDependency getDependency() {
         return dependency;
     }
 

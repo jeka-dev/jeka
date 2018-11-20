@@ -10,6 +10,7 @@ import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -75,8 +76,16 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return JkJavaProject.of(JkProjectSourceLayout.ofMavenStyle().withBaseDir(baseDir));
     }
 
+    public static JkJavaProject ofMavenLayout(String baseDir) {
+        return ofMavenLayout(Paths.get(baseDir));
+    }
+
     public static JkJavaProject ofSimpleLayout(Path baseDir) {
         return JkJavaProject.of(JkProjectSourceLayout.ofSimpleStyle().withBaseDir(baseDir));
+    }
+
+    public static JkJavaProject ofSimpleLayout(String baseDir) {
+        return ofSimpleLayout(Paths.get(baseDir));
     }
 
     // -------------------------- Other -------------------------

@@ -1,12 +1,10 @@
-package org.jerkar.tool;
-
-import org.jerkar.api.system.JkLog;
+package org.jerkar.api.system;
 
 import java.io.*;
 import java.nio.charset.Charset;
 
 
-final class LogHandler implements JkLog.EventLogHandler, Serializable {
+public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHandler, Serializable {
 
     private static final PrintStream FORMER_OUT = System.out;
 
@@ -24,7 +22,7 @@ final class LogHandler implements JkLog.EventLogHandler, Serializable {
 
     private static final int MARGIN_UNIT_LENGTH = new String(MARGIN_UNIT, UTF8).length();
 
-    static int MAX_LENGTH = -1;
+    private static int maxLength = -1;
 
     private transient MarginStream out = new MarginStream(System.out);
 
@@ -35,7 +33,7 @@ final class LogHandler implements JkLog.EventLogHandler, Serializable {
         System.setErr(new PrintStream(err));
     }
 
-    static void restore() {
+    public static void restore() {
         System.setOut(FORMER_OUT);
         System.setErr(FORMER_ERR);
     }
@@ -45,23 +43,27 @@ final class LogHandler implements JkLog.EventLogHandler, Serializable {
         err = new MarginStream(System.err);
     }
 
+    public static void setMaxLength(int maxLength) {
+        JkHierarchicalConsoleLogHandler.maxLength = maxLength;
+    }
+
     @Override
     public void accept(JkLog.JkLogEvent event) {
-        String message = event.message();
-        if (event.type() == JkLog.Type.END_TASK) {
+        String message = event.getMessage();
+        if (event.getType() == JkLog.Type.END_TASK) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(BOX_DRAWINGS_LIGHT_UP_AND_RIGHT);
-                if (event.durationMs() >= 0) {
-                    sb.append(" Done in " + event.durationMs() + " milliseconds.");
+                if (event.getDurationMs() >= 0) {
+                    sb.append(" Done in " + event.getDurationMs() + " milliseconds.");
                 }
                 sb.append(" ").append(message);
                 message = sb.toString();
-        } else if (event.type() == JkLog.Type.START_TASK) {
+        } else if (event.getType() == JkLog.Type.START_TASK) {
                 message = message +  " ... ";
         }
-        final MarginStream marginStream = (event.type() == JkLog.Type.ERROR) ? err : out;
-        final PrintStream stream = (event.type() == JkLog.Type.ERROR) ? System.err : System.out;
-        marginStream.handlingStart = event.type() == JkLog.Type.START_TASK;
+        final MarginStream marginStream = (event.getType() == JkLog.Type.ERROR) ? err : out;
+        final PrintStream stream = (event.getType() == JkLog.Type.ERROR) ? System.err : System.out;
+        marginStream.handlingStart = event.getType() == JkLog.Type.START_TASK;
         try {
             stream.write(message.getBytes(UTF8));
             stream.write(LINE_SEPARATOR);
@@ -73,12 +75,12 @@ final class LogHandler implements JkLog.EventLogHandler, Serializable {
     }
 
     @Override
-    public OutputStream outStream() {
+    public OutputStream getOutStream() {
         return out;
     }
 
     @Override
-    public OutputStream errorStream() {
+    public OutputStream getErrorStream() {
         return err;
     }
 
@@ -110,7 +112,7 @@ final class LogHandler implements JkLog.EventLogHandler, Serializable {
             delegate.write(b);
             lastByte = b;
             lineLength ++;  // approximate 1 byte = 1 char (untrue for special characters).
-            if (LogHandler.MAX_LENGTH > -1 && lineLength > LogHandler.MAX_LENGTH) {
+            if (JkHierarchicalConsoleLogHandler.maxLength > -1 && lineLength > JkHierarchicalConsoleLogHandler.maxLength) {
                 lineLength = 0;
                 if (handlingStart) {
                     this.write(("\n" + new String(MARGIN_UNIT, UTF8) + "  ").getBytes(UTF8));

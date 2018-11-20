@@ -2,17 +2,13 @@ package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE_AND_RUNTIME;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 
 public class ResolveSpringBootStarterIT {
 
@@ -22,10 +18,10 @@ public class ResolveSpringBootStarterIT {
 
     @Test
     public void resolveCompile() {
-        JkLog.registerBasicConsoleHandler();
+        JkLog.registerHierarchicalConsoleHandler();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkResolveResult result = resolver().resolve(
-                JkDependencySet.of(SPRINGBOOT_STARTER, COMPILE).withGlobalExclusion(JkDepExclude.of(SLF4J_API))
+                JkDependencySet.of(SPRINGBOOT_STARTER, COMPILE)
         );
         System.out.println(resolver().getParams().getScopeMapping());
         System.out.println(result.getDependencyTree().toStringTree());

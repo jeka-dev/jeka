@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
 import org.jerkar.api.system.JkException;
+import org.jerkar.api.system.JkHierarchicalConsoleLogHandler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -41,7 +42,7 @@ class Environment {
         if (standardOptions.logVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
-        LogHandler.MAX_LENGTH = standardOptions.logMaxLength;
+        JkHierarchicalConsoleLogHandler.setMaxLength(standardOptions.logMaxLength);
 
         Environment.systemProps = sysProps;
         Environment.commandLine = commandLine;

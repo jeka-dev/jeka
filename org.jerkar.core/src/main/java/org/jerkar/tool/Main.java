@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.jerkar.api.system.JkException;
+import org.jerkar.api.system.JkHierarchicalConsoleLogHandler;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
@@ -25,7 +26,7 @@ public final class Main {
         final long start = System.nanoTime();
         try {
             Environment.initialize(args);
-            JkLog.register(new LogHandler());
+            JkLog.registerHierarchicalConsoleHandler();
             JkLog.Verbosity verbosity = JkLog.verbosity();
             if (!Environment.standardOptions.logHeaders) {
                 JkLog.setVerbosity(JkLog.Verbosity.MUTE);
@@ -40,7 +41,7 @@ public final class Main {
                 displayOutro(start);
             }
         } catch (final RuntimeException e) {
-            LogHandler.restore();
+            JkHierarchicalConsoleLogHandler.restore();
             if (e instanceof JkException) {
                 System.err.println(e.getMessage());
             } else {
