@@ -226,36 +226,4 @@ public final class JkLog implements Serializable {
 
     }
 
-    /*
-    private static class BasicConsoleHandler implements EventLogHandler {
-
-        @Override
-        public OutputStream getOutStream() {
-            return System.out;
-        }
-
-        @Override
-        public OutputStream getErrorStream() {
-            return System.err;
-        }
-
-        @Override
-        public void accept(JkLogEvent event) {
-            System.out.print(JkUtilsString.repeat("  ", currentNestedTaskLevel.get()));
-            if (event.type.equals(Type.ERROR)) {
-                System.err.print(event.type);
-                System.err.print(" : ");
-                System.err.println(event.getMessage());
-            } else if (!JkUtilsString.isBlank(event.getMessage())) {
-                //System.out.print(event.type);
-                //System.out.print(" : ");
-                System.out.println(event.getMessage());
-            }
-
-        }
-
-
-    } */
-
-
 }

@@ -2,6 +2,7 @@ package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.system.JkException;
+import org.jerkar.api.system.JkLog;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -45,8 +46,12 @@ public class JkJavaProjectPublishTasks {
     }
 
     private void publishIvy() {
+        if (!this.publishRepos.hasIvyRepo()) {
+            return;
+        }
         JkException.throwIf(maker.project.getVersionedModule() == null, "No versionedModule has been set on "
                 + maker.project + ". Can't publish.");
+        JkLog.startTask("Preparing Ivy publication");
         final JkDependencySet dependencies = maker.getDefaultedDependencies();
         final JkIvyPublication publication = JkIvyPublication.of(maker.getMainArtifactPath(), JkJavaDepScopes.COMPILE)
                 .andOptional(maker.getArtifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES)
@@ -55,7 +60,8 @@ public class JkJavaProjectPublishTasks {
                 .andOptional(maker.getArtifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES);
         final JkVersionProvider resolvedVersions = maker.getDependencyResolver()
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
-        JkPublisher.of(publishRepos, maker.getOutLayout().getOutputPath())
+        JkLog.endTask();
+        JkPublisher.of(this.publishRepos, maker.getOutLayout().getOutputPath())
                 .publishIvy(maker.project.getVersionedModule(), publication, dependencies,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }

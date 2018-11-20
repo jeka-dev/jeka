@@ -6,19 +6,21 @@ import org.jerkar.api.system.JkLog;
 public class PureApi {
 
     public static void main(String[] args) {
-        JkLog.registerHierarchicalConsoleHandler();
+        JkLog.registerHierarchicalConsoleHandler();  // activate console logging
 
-        JkJavaProject sampleProject = JkJavaProject.ofMavenLayout("../org.jerkar.samples");
-        sampleProject.addDependencies(
+        // A project with ala Maven layout (src/main/java, src/test/java, ...)
+        JkJavaProject coreProject = JkJavaProject.ofMavenLayout("../org.jerkar.samples");
+        coreProject.addDependencies(
                 JkDependencySet.of().and("junit:junit:4.11", JkJavaDepScopes.TEST));
 
+        // A project depending on the first project + Guava
         JkJavaProject dependerProject = JkJavaProject.ofMavenLayout(".");
         dependerProject.addDependencies(JkDependencySet.of()
                 .and("com.google.guava:guava:22.0")
-                .and(sampleProject));
+                .and(coreProject));
 
-        sampleProject.getMaker().clean();
-        dependerProject.getMaker().defineMainArtifactAsFatJar(false);
+        coreProject.getMaker().clean();
         dependerProject.getMaker().clean().makeAllArtifacts();
+        dependerProject.getMaker().getPublishTasks().publish();
     }
 }

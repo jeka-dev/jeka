@@ -3,7 +3,6 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,11 +21,11 @@ public final class JkRepoSet implements Serializable {
     // Cached resolver
     private transient InternalDepResolver ivyResolver;
 
-    private final List<JkRepo> repoConfigs;
+    private final List<JkRepo> repos;
 
     private JkRepoSet(List<JkRepo> repos) {
         super();
-        this.repoConfigs = Collections.unmodifiableList(repos);
+        this.repos = Collections.unmodifiableList(repos);
     }
 
     /**
@@ -58,7 +57,7 @@ public final class JkRepoSet implements Serializable {
      * Returns a repo identical to this one but with the extra specified repository.
      */
     public JkRepoSet and(JkRepo other) {
-        final List<JkRepo> list = new LinkedList<>(this.repoConfigs);
+        final List<JkRepo> list = new LinkedList<>(this.repos);
         list.add(other);
         return new JkRepoSet(list);
     }
@@ -67,8 +66,8 @@ public final class JkRepoSet implements Serializable {
      * Returns a merge of this repository and the specified one.
      */
     public JkRepoSet and(JkRepoSet other) {
-        final List<JkRepo> list = new LinkedList<>(this.repoConfigs);
-        list.addAll(other.repoConfigs);
+        final List<JkRepo> list = new LinkedList<>(this.repos);
+        list.addAll(other.repos);
         return new JkRepoSet(list);
     }
 
@@ -90,7 +89,7 @@ public final class JkRepoSet implements Serializable {
      * Returns <code>null</code> if no such repository found.
      */
     public JkRepo getRepoConfigHavingUrl(String url) {
-        for (final JkRepo config : this.repoConfigs) {
+        for (final JkRepo config : this.repos) {
             if (url.equals(config.getUrl().toExternalForm())) {
                 return config;
             }
@@ -99,12 +98,16 @@ public final class JkRepoSet implements Serializable {
     }
 
     public List<JkRepo> getRepoList() {
-        return repoConfigs;
+        return repos;
+    }
+
+    public boolean hasIvyRepo() {
+        return this.repos.stream().anyMatch(JkRepo::isIvyRepo);
     }
 
     @Override
     public String toString() {
-        return repoConfigs.toString();
+        return repos.toString();
     }
 
     /**

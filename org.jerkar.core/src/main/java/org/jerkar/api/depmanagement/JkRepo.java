@@ -90,7 +90,7 @@ public final class JkRepo implements Serializable {
     }
 
     /**
-     * Creates a Maven repository having the specified file location.
+     * Creates a Ivy repository having the specified file location.
      */
     public static JkRepo ofIvy(Path dir) {
         return new JkRepo(JkUtilsPath.toUrl(dir), null, JkRepoIvyConfig.of(), JkPublishConfig.of());
