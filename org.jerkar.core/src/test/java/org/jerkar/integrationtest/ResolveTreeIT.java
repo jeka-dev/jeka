@@ -112,7 +112,7 @@ public class ResolveTreeIT {
         JkDependencySet deps = JkDependencySet.of()
                 .and("com.googlecode.playn:playn-core:1.4")
                 .and("com.threerings:tripleplay:1.4")
-                .withDefaultScope(COMPILE_AND_RUNTIME);
+                .withDefaultScopes(COMPILE_AND_RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
@@ -126,7 +126,7 @@ public class ResolveTreeIT {
         JkDependencySet deps = JkDependencySet.of()
                 .and("com.google.guava:guava")
                 .withVersionProvider(JkVersionProvider.of("com.google.guava:guava", "22.0"))
-                .withDefaultScope(COMPILE_AND_RUNTIME);
+                .withDefaultScopes(COMPILE_AND_RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);

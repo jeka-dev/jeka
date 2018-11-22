@@ -135,6 +135,14 @@ public final class JkMavenPublication implements Serializable {
     }
 
     /**
+     * @see #withChecksums(Set)
+     */
+    public JkMavenPublication withChecksums(String ... algos) {
+        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo, this.signer,
+                JkUtilsIterable.setOf(algos));
+    }
+
+    /**
      * Same as {@link #and(Path, String)} but effective only if the specified file exists.
      * If not the case, this method returns this object.
      */

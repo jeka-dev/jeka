@@ -132,9 +132,9 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns the resolved version for this node and all its flatten.
+     * Returns the resolved version for this node and all its children.
      */
-    public JkVersionProvider getResolvedVersion() {
+    public JkVersionProvider getResolvedVersions() {
         return this.resolvedVersions;
     }
 
@@ -412,7 +412,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     private static JkVersionProvider compute(JkNodeInfo nodeInfo, List<JkDependencyNode> children) {
-        JkVersionProvider result = JkVersionProvider.empty();
+        JkVersionProvider result = JkVersionProvider.of();
         if (nodeInfo instanceof JkModuleNodeInfo) {
             final JkModuleNodeInfo moduleNodeInfo = (JkModuleNodeInfo) nodeInfo;
             if (!moduleNodeInfo.treeRoot && !moduleNodeInfo.isEvicted()) {

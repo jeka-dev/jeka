@@ -189,7 +189,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * scope are defaulted to scope {@link JkJavaDepScopes#COMPILE_AND_RUNTIME}
      */
     public JkDependencySet getDefaultedDependencies() {
-        return project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME);
+        return project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME);
     }
 
     public JkDependencyResolver getDependencyResolver() {
@@ -215,10 +215,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkPathSequence fetchRuntimeDependencies(JkArtifactId artifactFileId) {
         if (artifactFileId.equals(getMainArtifactId())) {
             return this.getDependencyResolver().resolve(
-                    this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME).getFiles();
+                    this.project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME).getFiles();
         } else if (artifactFileId.isClassifier("test") && artifactFileId.isExtension("jar")) {
             return this.getDependencyResolver().resolve(
-                    this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST).getFiles();
+                    this.project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST).getFiles();
         } else {
             return JkPathSequence.of();
         }

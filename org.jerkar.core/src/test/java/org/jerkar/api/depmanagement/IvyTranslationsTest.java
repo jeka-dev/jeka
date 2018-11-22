@@ -24,7 +24,7 @@ public class IvyTranslationsTest {
     @Test
     public void toPublicationLessModule() throws Exception {
         final JkScopeMapping mapping = DEFAULT_SCOPE_MAPPING;
-        final JkVersionProvider versionProvider = JkVersionProvider.empty();
+        final JkVersionProvider versionProvider = JkVersionProvider.of();
 
         // handle multiple artifacts properly
         JkDependencySet deps = deps();

@@ -26,6 +26,8 @@ public class ResolveSpringBootStarterIT {
         System.out.println(resolver().getParams().getScopeMapping());
         System.out.println(result.getDependencyTree().toStringTree());
         result.getFiles().forEach(System.out::println);
+        JkDependencyNode slfjApiNode = result.getDependencyTree().getFirst(JkModuleId.of("org.slf4j:slf4j-api"));
+        JkVersion version = slfjApiNode.getModuleInfo().getResolvedVersion();
         List<JkDependencyNode> slf4japiNodes = result.getDependencyTree().toFlattenList().stream()
                 .filter(node -> node.getModuleInfo().getModuleId().equals(SLF4J_API)).collect(Collectors.toList());
         for (JkDependencyNode slf4japiNode : slf4japiNodes) {

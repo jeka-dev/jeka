@@ -26,7 +26,7 @@ public class ResolveWithArtifactIT {
                 .and(jgllinux)
                 .and(JkPopularModules.GUAVA, "19.0" )
                 .and("org.lwjgl:lwjgl:3.1.1")
-                .withDefaultScope(COMPILE);
+                .withDefaultScopes(COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);

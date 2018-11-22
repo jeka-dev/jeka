@@ -12,7 +12,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsSystem;
 import org.junit.Test;
 
@@ -25,7 +24,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
-        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().getModuleIds();
+        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
 
         // To unblock linux build, we do a specific check uniquely for linux
         if (JkUtilsSystem.IS_WINDOWS) {
@@ -42,7 +41,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
                 .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
-        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersion().getModuleIds();
+        Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
         assertEquals("Wrong modules size " + moduleIds, 2, moduleIds.size());
     }
 
@@ -81,7 +80,7 @@ public class ResolverWithScopeMapperIT {
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE, PROVIDED);
         assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
-        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersion().getModuleIds().size());
+        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
     }
 
     @Test

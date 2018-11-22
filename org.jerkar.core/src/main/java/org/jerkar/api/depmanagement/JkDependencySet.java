@@ -68,13 +68,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         }
         return JkDependencySet.of()
                 .and(JkFileSystemDependency.of(libDir.andAccept("*.jar", "compile/*.jar").getFiles()))
-                .withDefaultScope(JkJavaDepScopes.COMPILE)
+                .withDefaultScopes(JkJavaDepScopes.COMPILE)
                 .and(JkFileSystemDependency.of(libDir.andAccept("provided/*.jar").getFiles()))
-                .withDefaultScope(JkJavaDepScopes.PROVIDED)
+                .withDefaultScopes(JkJavaDepScopes.PROVIDED)
                 .and(JkFileSystemDependency.of(libDir.andAccept("runtime/*.jar").getFiles()))
-                .withDefaultScope(JkJavaDepScopes.RUNTIME)
+                .withDefaultScopes(JkJavaDepScopes.RUNTIME)
                 .and(JkFileSystemDependency.of(libDir.andAccept("test/*.jar").getFiles()))
-                .withDefaultScope(JkJavaDepScopes.TEST);
+                .withDefaultScopes(JkJavaDepScopes.TEST);
     }
 
 
@@ -300,7 +300,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * Returns a clone of this dependencies but replacing the unscoped
      * dependencies with the specified ones.
      */
-    public JkDependencySet withDefaultScope(JkScope... scopes) {
+    public JkDependencySet withDefaultScopes(JkScope... scopes) {
         final List<JkScopedDependency> list = new LinkedList<>();
         for (JkScopedDependency dep : this) {
             if (dep.getScopeType().equals(ScopeType.UNSET)) {

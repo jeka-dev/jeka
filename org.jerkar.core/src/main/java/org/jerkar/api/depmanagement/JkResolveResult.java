@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -93,7 +92,7 @@ public final class JkResolveResult implements Serializable {
      * Shorthand for <code>dependencyTree.getResolvedVersions(JkModuleId)</code>
      */
     public JkVersionProvider getResolvedVersionProvider() {
-        return this.depTree.getResolvedVersion();
+        return this.depTree.getResolvedVersions();
     }
 
     /**

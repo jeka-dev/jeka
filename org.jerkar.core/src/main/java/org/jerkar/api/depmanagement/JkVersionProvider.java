@@ -18,14 +18,6 @@ public final class JkVersionProvider implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Returns <code>true</code> if this object provides no versions about any {@link JkModuleId}.
-     */
-    @SuppressWarnings("unchecked")
-    public static JkVersionProvider empty() {
-        return new JkVersionProvider(Collections.EMPTY_MAP);
-    }
-
-    /**
      * @see #of(JkModuleId, JkVersion)
      */
     public static JkVersionProvider of(String moduleId, String version) {
@@ -51,7 +43,7 @@ public final class JkVersionProvider implements Serializable {
      * Creates an empty version provider.
      */
     public static JkVersionProvider of() {
-        return new JkVersionProvider(new HashMap<>());
+        return new JkVersionProvider(Collections.emptyMap());
     }
 
     /**

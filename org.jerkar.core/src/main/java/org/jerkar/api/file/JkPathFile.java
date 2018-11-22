@@ -38,6 +38,10 @@ public final class JkPathFile {
         return new JkPathFile(path);
     }
 
+    public static JkPathFile of(String path) {
+        return of(Paths.get(path));
+    }
+
     /**
      * Returns the underlying path.
      */

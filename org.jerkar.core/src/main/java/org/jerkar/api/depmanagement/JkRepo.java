@@ -352,7 +352,7 @@ public final class JkRepo implements Serializable {
          * Returns the filter used for this {@link JkPublishConfig}.
          * Only modules accepted by this filter will pb published on this repo.
          */
-        public JkPublishFilter filter() {
+        public JkPublishFilter getFilter() {
             return filter;
         }
 
@@ -370,6 +370,10 @@ public final class JkRepo implements Serializable {
 
         public JkPublishConfig withNeedSignature(boolean needSignature) {
             return new JkPublishConfig(this.filter, needSignature, uniqueSnapshot);
+        }
+
+        public JkPublishConfig withFilter(JkPublishFilter filter) {
+            return new JkPublishConfig(filter, this.needSignature, this.uniqueSnapshot);
         }
     }
 

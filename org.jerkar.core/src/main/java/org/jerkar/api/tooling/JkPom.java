@@ -94,7 +94,7 @@ public final class JkPom {
     public JkVersionProvider getVersionProvider() {
         final List<JkVersionedModule> versionedModules = new LinkedList<>();
         if (dependencyManagementEl() == null) {
-            return JkVersionProvider.empty();
+            return JkVersionProvider.of();
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");

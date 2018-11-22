@@ -51,7 +51,7 @@ public class ResolveApacheHttpClientIT {
     @Test
     public void apacheHttpClientWithTestScope() {
         JkResolveResult result = resolver().resolve(
-                JkDependencySet.of().and(HTTP_CLIENT).withDefaultScope(TEST));
+                JkDependencySet.of().and(HTTP_CLIENT).withDefaultScopes(TEST));
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
         Assert.assertEquals(3, result.getDependencyTree().getChildren().get(0).getChildren().size());
