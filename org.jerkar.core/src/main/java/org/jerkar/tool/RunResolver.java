@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -89,7 +90,7 @@ final class RunResolver {
 
     private JkRun resolve(String classNameHint, Class<? extends JkRun> baseClass) {
 
-        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
+        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
 
         // If class name specified in options.
         if (!JkUtilsString.isBlank(classNameHint)) {
@@ -113,7 +114,7 @@ final class RunResolver {
             final JkPathTree dir = JkPathTree.of(runSourceDir);
             for (final Path path : dir.getRelativeFiles()) {
                 if (path.toString().endsWith(".java")) {
-                    final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
+                    final Class<?> clazz = classLoader.toJkClassLoader().loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
                         JkRun.baseDirContext(baseDir);

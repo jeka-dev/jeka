@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ public class PackageDependency {
     @Test
     public void testDependencies() throws IOException {
         final String packagePrefix = "org.jerkar";
-        final File classDir = JkClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("org.jerkar.tool.Main").toFile();
+        final File classDir = JkUrlClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("org.jerkar.tool.Main").toFile();
         final String cycle = PackageAnalyser.of(classDir, packagePrefix).cycle();
         Assert.assertTrue(cycle, cycle == null);
     }

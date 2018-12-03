@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
@@ -56,13 +56,13 @@ class JUnit4TestLauncher {
      */
     public static JkTestSuiteResult launchInProcess(Iterable<Class> classes, boolean logRunningTest,
                                                     JunitReportDetail reportDetail, File reportDir) {
-        final JkClassLoader classloader = JkClassLoader.ofLoaderOf(classes.iterator().next());
+        final JkUrlClassLoader classloader = JkUrlClassLoader.ofLoaderOf(classes.iterator().next());
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
         classloader.addEntries(JkLocator.getJerkarJarPath());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             JkLog.trace("Launching test using class loader : " + classloader.toString());
         }
-        return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
+        return classloader.toJkClassLoader().invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
                 "launchInProcess", classArray, logRunningTest, reportDetail, reportDir, true);
     }
 

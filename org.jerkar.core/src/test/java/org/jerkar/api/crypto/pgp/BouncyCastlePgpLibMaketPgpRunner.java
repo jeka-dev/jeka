@@ -1,6 +1,6 @@
 package org.jerkar.api.crypto.pgp;
 
-import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
 import org.junit.Test;
@@ -37,8 +37,8 @@ public class BouncyCastlePgpLibMaketPgpRunner {
     public static void main(String[] args) throws Exception {
         final URL jar = JkPgp.class.getResource("bouncycastle-all-152.jar");
         final Set<String> classNames = new HashSet<>();
-        final Class<?> PGPUTILS_CLASS = JkClassLoader.ofCurrent().getSibling(jar)
-                .withPrintingSearchedClasses(classNames).load(PGPUTILS_CLASS_NAME);
+        final Class<?> PGPUTILS_CLASS = JkUrlClassLoader.ofCurrent().getSibling(jar)
+                .getSiblingPrintingSearchedClasses(classNames).toJkClassLoader().load(PGPUTILS_CLASS_NAME);
         testSignAndVerify(PGPUTILS_CLASS);
 
         final List<String> list = new ArrayList<>(classNames);

@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
@@ -110,7 +111,7 @@ final class PluginDictionary {
     }
 
     private static Set<PluginDescription> loadPlugins(String... patterns) {
-        final Set<Class<?>> matchingClasses = JkClassLoader.ofLoaderOf(JkPlugin.class).loadClasses(patterns);
+        final Set<Class<?>> matchingClasses = JkUrlClassLoader.ofLoaderOf(JkPlugin.class).loadClasses(patterns);
         return toPluginSet(matchingClasses.stream()
                 .filter(clazz -> JkPlugin.class.isAssignableFrom(clazz))
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))

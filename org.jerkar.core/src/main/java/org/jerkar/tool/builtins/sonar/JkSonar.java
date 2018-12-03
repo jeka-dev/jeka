@@ -3,7 +3,7 @@ package org.jerkar.tool.builtins.sonar;
 
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.file.JkPathFile;
-import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -108,7 +108,7 @@ public final class JkSonar {
 
     private JkJavaProcess javaProcess() {
         final Path sonarRunnerJar = JkUtilsObject.firstNonNull(
-                JkClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("org.sonar.runner.Main"),
+                JkUrlClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("org.sonar.runner.Main"),
                 jarRunner());
 
         return JkJavaProcess.of().withClasspath(sonarRunnerJar)

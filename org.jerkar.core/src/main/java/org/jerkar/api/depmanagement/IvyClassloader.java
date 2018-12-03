@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 
 final class IvyClassloader {
 
@@ -16,7 +17,7 @@ final class IvyClassloader {
         if (JkClassLoader.ofCurrent().isDefined("org.apache.ivy.Ivy")) {
             return JkClassLoader.ofCurrent();
         }
-        return JkClassLoader.ofCurrent().getSibling(IvyClassloader.class.getResource(IVY_JAR_NAME));
+        return JkUrlClassLoader.ofCurrent().getSibling(IvyClassloader.class.getResource(IVY_JAR_NAME)).toJkClassLoader();
     }
 
 }

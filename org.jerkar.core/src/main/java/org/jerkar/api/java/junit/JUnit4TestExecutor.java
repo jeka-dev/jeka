@@ -1,6 +1,6 @@
 package org.jerkar.api.java.junit;
 
-import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
@@ -96,7 +96,7 @@ class JUnit4TestExecutor {
                 classes.add(Class.forName(className));
             } catch (final ClassNotFoundException e) {
                 throw new IllegalArgumentException("Class " + className + " not found in classloader "
-                        + JkClassLoader.ofCurrent());
+                        + JkUrlClassLoader.ofCurrent());
             }
         }
         return classes.toArray(new Class[0]);

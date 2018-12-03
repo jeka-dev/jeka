@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.system.JkException;
 
 /**

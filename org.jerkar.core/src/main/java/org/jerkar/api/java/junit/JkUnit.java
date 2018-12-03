@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkException;
@@ -297,7 +298,7 @@ public final class JkUnit {
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestClasses testSpec) {
         final JkClasspath classpath = testSpec.getClasspath().andPrepending(testSpec.getClassesToTest().getRootDirsOrZipFiles());
-        final JkClassLoader classLoader = JkClassLoader.ofSystem().getParent().getChildWithEntries(classpath);
+        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofSystem().getParent().getChild(classpath);
         classLoader.loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.getClassesToTest());
         if (result.isEmpty()) {
@@ -307,21 +308,21 @@ public final class JkUnit {
     }
 
     @SuppressWarnings("rawtypes")
-    private static Collection<Class> getJunitTestClassesInClassLoader(JkClassLoader classloader,
-            JkPathTreeSet jkPathTreeSet) {
+    private static Collection<Class> getJunitTestClassesInClassLoader(JkUrlClassLoader classloader,
+                                                                      JkPathTreeSet jkPathTreeSet) {
         final Iterable<Class<?>> classes = classloader.loadClassesIn(jkPathTreeSet);
         final List<Class> testClasses = new LinkedList<>();
-        if (classloader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
+        if (classloader.toJkClassLoader().isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             final Class<Annotation> testAnnotation = classloader
-                    .load(JUNIT4_TEST_ANNOTATION_CLASS_NAME);
-            final Class<?> testCaseClass = classloader.load(JUNIT3_TEST_CASE_CLASS_NAME);
+                    .toJkClassLoader().load(JUNIT4_TEST_ANNOTATION_CLASS_NAME);
+            final Class<?> testCaseClass = classloader.toJkClassLoader().load(JUNIT3_TEST_CASE_CLASS_NAME);
             for (final Class clazz : classes) {
                 if (isJunit3Test(clazz, testCaseClass) || isJunit4Test(clazz, testAnnotation)) {
                     testClasses.add(clazz);
                 }
             }
-        } else if (classloader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
-            final Class<?> testCaseClass = classloader.load(JUNIT3_TEST_CASE_CLASS_NAME);
+        } else if (classloader.toJkClassLoader().isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
+            final Class<?> testCaseClass = classloader.toJkClassLoader().load(JUNIT3_TEST_CASE_CLASS_NAME);
             for (final Class clazz : classes) {
                 if (isJunit3Test(clazz, testCaseClass)) {
                     testClasses.add(clazz);
@@ -359,7 +360,7 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private static Object createJunit3TestSuite(JkClassLoader classLoader,
-            Iterable<Class> testClasses) {
+                                                Iterable<Class> testClasses) {
         final Class<?>[] classArray = JkUtilsIterable.arrayOf(testClasses, Class.class);
         final Class<?> testSuiteClass = classLoader.load(JUNIT3_TEST_SUITE_CLASS_NAME);
         try {

@@ -4,7 +4,7 @@ import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
@@ -144,9 +144,9 @@ final class Engine {
     }
 
     private JkRun getRunInstance(String runClassHint, JkPathSequence runtimePath) {
-        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
+        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
-        JkLog.trace("Setting run execution classpath to : " + classLoader.getChildClasspath());
+        JkLog.trace("Setting run execution classpath to : " + classLoader.getDirectClasspath());
         final JkRun run = resolver.resolve(runClassHint);
         if (run == null) {
             return null;

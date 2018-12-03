@@ -176,11 +176,11 @@ public final class JkJavadocMaker {
     }
 
     private static Class<?> getJavadocMainClass() {
-        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
-        Class<?> mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
+        Class<?> mainClass = classLoader.toJkClassLoader().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
         if (mainClass == null) {
             classLoader.addEntries(JkUtilsJdk.toolsJar());
-            mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+            mainClass = classLoader.toJkClassLoader().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
             if (mainClass == null) {
                 throw new RuntimeException(
                         "It seems that you are running a JRE instead of a JDK, please run Jerkar using a JDK.");
