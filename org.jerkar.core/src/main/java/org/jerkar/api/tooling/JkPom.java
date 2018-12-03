@@ -126,7 +126,27 @@ public final class JkPom {
                 result.put(element.getTagName(), element.getTextContent());
             }
         }
+        interpolate(result, 0);
         return result;
+    }
+
+    private static void interpolate(Map<String, String> map, int count) {
+        boolean found = false;
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String value = entry.getValue();
+            for (String key : map.keySet()) {
+                String token = "${" + key + "}";
+                if (value.contains(token)) {
+                    found = true;
+                    String interpolatedValue = map.get(key);
+                    String newValue = value.replace(token, interpolatedValue);
+                    map.put(entry.getKey(), newValue);
+                }
+            }
+        }
+        if (count < 10 && found) {
+            interpolate(map, count+1);
+        }
     }
 
     /**
