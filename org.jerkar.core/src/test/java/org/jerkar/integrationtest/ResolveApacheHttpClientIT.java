@@ -61,12 +61,13 @@ public class ResolveApacheHttpClientIT {
     public void apacheHttpClientWithTestToTestScopeMapping() {
         JkLog.registerHierarchicalConsoleHandler();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
-        JkDependencySet deps =  JkDependencySet.of().and(HTTP_CLIENT,  TEST.mapTo("archive", "test"));
+        JkDependencySet deps =  JkDependencySet.of().and(HTTP_CLIENT,  TEST.mapTo( "test"));
         JkResolveResult result = resolver().resolve(deps);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
         if (JkUtilsSystem.IS_WINDOWS) {
-            Assert.assertEquals(5, result.getDependencyTree().getChildren().get(0).getChildren().size());
+            // Test conf is declared as private so no it should resolve in no dependency
+            Assert.assertEquals(0, result.getDependencyTree().getChildren().get(0).getChildren().size());
             // TODO fail on macos
         }
     }

@@ -5,7 +5,7 @@ import org.jerkar.api.java.JkUrlClassLoader;
 
 final class IvyClassloader {
 
-    private static final String IVY_JAR_NAME = "ivy-2.5.0-rc1.jar";
+    private static final String IVY_JAR_NAME = "ivy-2.4.0.jar";
 
     static final JkClassLoader CLASSLOADER = classloader();
 

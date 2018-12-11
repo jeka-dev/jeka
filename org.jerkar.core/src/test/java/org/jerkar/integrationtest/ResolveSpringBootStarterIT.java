@@ -37,7 +37,7 @@ public class ResolveSpringBootStarterIT {
         }
 
         // Does not contains test-jars
-        Assert.assertFalse(result.getFiles().getEntries().stream().anyMatch(path -> path.getFileName().toString().endsWith("-tests.jar")));
+       Assert.assertFalse(result.getFiles().getEntries().stream().anyMatch(path -> path.getFileName().toString().endsWith("-tests.jar")));
 
 
     }

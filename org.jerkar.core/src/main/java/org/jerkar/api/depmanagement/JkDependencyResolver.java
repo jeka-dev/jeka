@@ -20,8 +20,6 @@ import org.jerkar.api.utils.JkUtilsTime;
  */
 public final class JkDependencyResolver {
 
-
-
     private final InternalDepResolver internalResolver;
 
     private final JkResolutionParameters parameters;

@@ -61,11 +61,7 @@ public final class JkUrlClassLoader {
      * @see Class#getClassLoader()
      */
     public static JkUrlClassLoader ofCurrent() {
-        if (! (JkUrlClassLoader.class.getClassLoader() instanceof URLClassLoader)) {
-            throw new RuntimeException("You seem running on JDK9+, Jerkar is currently compatible with JDK8 only. " +
-                    "\nYou can build JDK9 project but Jerkar itself has to be run on JDK8.");
-        }
-        return new JkUrlClassLoader((URLClassLoader) JkUrlClassLoader.class.getClassLoader());
+        return createUrlClassLoaderFrom(JkUrlClassLoader.class.getClassLoader());
     }
 
     /**
@@ -74,7 +70,15 @@ public final class JkUrlClassLoader {
      * @see ClassLoader#getSystemClassLoader()
      */
     public static JkUrlClassLoader ofSystem() {
-        return new JkUrlClassLoader((URLClassLoader) ClassLoader.getSystemClassLoader());
+        return createUrlClassLoaderFrom(ClassLoader.getSystemClassLoader());
+    }
+
+    private static JkUrlClassLoader createUrlClassLoaderFrom(ClassLoader classLoader) {
+        if (! (classLoader instanceof URLClassLoader)) {
+            throw new IllegalStateException("The current or system classloader is not instance of URLClassLoader. It " +
+                    "is probably due that you are currently running on JDK9.");
+        }
+        return new JkUrlClassLoader((URLClassLoader) classLoader);
     }
 
     /**
@@ -457,7 +461,7 @@ public final class JkUrlClassLoader {
      * dynamically some service providers to the classpath.
      */
     public void loadAllServices() {
-        final Set<Class<?>> serviceClasses = new HashSet<>();
+            final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final Path file : this.getFullClasspath()) {
             if (Files.isRegularFile(file)) {
                 JkLog.trace("Scanning " + file + " for META-INF/services.");
@@ -499,7 +503,7 @@ public final class JkUrlClassLoader {
         }
     }
 
-    // Class loader that keep all the find classes in a given set
+    // Class loader that keep all the found classes in a given set
     private final class TrackingClassLoader extends URLClassLoader {
 
         private final Set<String> searchedClasses;

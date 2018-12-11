@@ -64,10 +64,12 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/jerkar/libs/provided/ivy-2.5.0-rc1.jar!/" />
+          <root url="jar://$MODULE_DIR$/jerkar/libs/provided/ivy-2.4.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/jerkar/libs-sources/ivy-2.4.0-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>

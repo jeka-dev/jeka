@@ -65,9 +65,9 @@ public class ResolverWithoutScopeMapperIT {
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         System.out.println(resolveResult.getDependencyTree().toStringTree());
         if (JkUtilsSystem.IS_WINDOWS) {
-            assertEquals(38, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
-        } else {
             assertEquals(37, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
+        } else {
+            assertEquals(36, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
         }
     }
 
