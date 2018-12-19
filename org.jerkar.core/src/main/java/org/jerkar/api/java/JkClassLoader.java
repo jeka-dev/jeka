@@ -1,6 +1,7 @@
 package org.jerkar.api.java;
 
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsReflect;
 
@@ -22,11 +23,15 @@ public class JkClassLoader {
     }
 
     public static JkClassLoader of(ClassLoader classLoader) {
+        JkUtilsAssert.notNull(classLoader, "Wrapped classloader cannot be null.");
         return new JkClassLoader(classLoader);
     }
 
+    /**
+     * Returns a {@link JkClassLoader} wrapping the current thread context classloader.
+     */
     public static JkClassLoader ofCurrent() {
-        return of(JkClassLoader.class.getClassLoader());
+        return of(Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -34,7 +39,7 @@ public class JkClassLoader {
      * the specified class.
      */
     public static JkClassLoader ofLoaderOf(Class<?> clazz) {
-        return new JkClassLoader(clazz.getClassLoader());
+        return of(clazz.getClassLoader() == null ? ClassLoader.getSystemClassLoader() : clazz.getClassLoader());
     }
 
     /**
@@ -125,6 +130,7 @@ public class JkClassLoader {
                     effectiveArgs);
             final T result;
             if (serializeResult) {
+                Thread.currentThread().setContextClassLoader(currentClassLoader);
                 result = (T) traverseClassLoader(returned, JkClassLoader.ofCurrent());
             } else {
                 result = (T) returned;
@@ -145,10 +151,26 @@ public class JkClassLoader {
         return (T) JkUtilsReflect.newInstance(clazz);
     }
 
+    @Override
+    public String toString() {
+        if (delegate instanceof URLClassLoader) {
+            return JkUrlClassLoader.of((URLClassLoader) delegate).toString();
+        }
+        else return delegate.toString();
+    }
+
     private static Object traverseClassLoader(Object object, JkClassLoader to) {
         if (object == null) {
             return null;
         }
+        System.out.println("****************************************************");
+        System.out.println(object);
+        System.out.println(object.getClass().getClassLoader());
+        System.out.println("----");
+        System.out.println(JkClassLoader.ofLoaderOf(object.getClass()));
+        System.out.println("-----------------------");
+        System.out.println(to);
+        System.out.println("****************************************************");
         final Class<?> clazz = object.getClass();
         final String className;
         if (clazz.isArray()) {
@@ -228,7 +250,6 @@ public class JkClassLoader {
         Thread.currentThread().setContextClassLoader(delegate);
         initLogInClassloader();
         try {
-
             final Object returned = JkUtilsReflect.invoke(object, method, effectiveArgs);
             final T result;
             if (serializeResult) {

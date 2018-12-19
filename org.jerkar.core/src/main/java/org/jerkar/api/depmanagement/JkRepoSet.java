@@ -19,7 +19,7 @@ public final class JkRepoSet implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // Cached resolver
-    private transient InternalDepResolver ivyResolver;
+    private transient ModuleDepResolver ivyResolver;
 
     private final List<JkRepo> repos;
 
@@ -114,7 +114,7 @@ public final class JkRepoSet implements Serializable {
      * Retrieves directly the file embodying the specified the external dependency.
      */
     public Path get(JkModuleDependency moduleDependency) {
-        final InternalDepResolver depResolver = getIvyResolver();
+        final ModuleDepResolver depResolver = getIvyResolver();
         File file = depResolver.get(moduleDependency);
         if (file == null) {
             return null;
@@ -136,7 +136,7 @@ public final class JkRepoSet implements Serializable {
         return get(JkModuleDependency.of(moduleGroupVersion));
     }
 
-    private InternalDepResolver getIvyResolver() {
+    private ModuleDepResolver getIvyResolver() {
         if (ivyResolver == null) {
             ivyResolver = InternalDepResolvers.ivy(this);
         }

@@ -49,7 +49,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     private JkDependencySet dependencies;
 
     private JkJavaCompileSpec compileSpec =
-            new JkJavaCompileSpec().setSourceAndTargetVersion(JkJavaVersion.V8).setEncoding("UTF-8");
+            JkJavaCompileSpec.of().setSourceAndTargetVersion(JkJavaVersion.V8).setEncoding("UTF-8");
 
     private final List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<>();
 

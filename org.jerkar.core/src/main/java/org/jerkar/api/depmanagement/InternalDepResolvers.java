@@ -8,9 +8,9 @@ class InternalDepResolvers {
      * Dependency resolver based on Apache Ivy.
      * This resolver is loaded in a dedicated classloader containing Ivy classes.
      */
-    public static InternalDepResolver ivy(JkRepoSet repos) {
+    public static ModuleDepResolver ivy(JkRepoSet repos) {
         return IvyClassloader.CLASSLOADER.createTransClassloaderProxy(
-                InternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
+                ModuleDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
     }
 
 }

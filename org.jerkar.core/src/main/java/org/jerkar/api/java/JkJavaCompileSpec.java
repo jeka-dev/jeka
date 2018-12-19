@@ -33,6 +33,13 @@ public final class JkJavaCompileSpec {
 
     private final List<Path> sourceFiles = new LinkedList<>();
 
+    private JkJavaCompileSpec() {
+    }
+
+    public static JkJavaCompileSpec of() {
+        return new JkJavaCompileSpec();
+    }
+
     public JkJavaCompileSpec copy() {
         JkJavaCompileSpec result = new JkJavaCompileSpec();
         result.options.addAll(options);

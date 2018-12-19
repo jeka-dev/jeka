@@ -214,7 +214,7 @@ final class Engine {
     private JkJavaCompileSpec defCompileSpec() {
         final JkPathTree defSource = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER);
         JkUtilsPath.createDirectories(resolver.runClassDir);
-        return new JkJavaCompileSpec().setOutputDir(resolver.runClassDir)
+        return JkJavaCompileSpec.of().setOutputDir(resolver.runClassDir)
                 .addSources(defSource.getFiles());
     }
 

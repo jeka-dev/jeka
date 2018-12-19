@@ -22,6 +22,14 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
 
     private static final long serialVersionUID = 1L;
 
+    private final Set<Artifact> artifacts;
+
+    private JkIvyPublication(Set<Artifact> artifacts) {
+        super();
+        this.artifacts = artifacts;
+    }
+
+
     /**
      * Creates a publication for a single artifact embodied by the specified file and
      * to published as the specified type and scopes. Here, scopes maps directly to
@@ -70,12 +78,6 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
         return new JkIvyPublication(new HashSet<>()).and(file, scopes);
     }
 
-    private final Set<Artifact> artifacts;
-
-    private JkIvyPublication(Set<Artifact> artifacts) {
-        super();
-        this.artifacts = artifacts;
-    }
 
     /**
      * Returns a {@link JkIvyPublication} identical to this one but adding the specified

@@ -3,6 +3,8 @@ package org.jerkar.api.depmanagement;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkUrlClassLoader;
 
+import java.net.URL;
+
 final class IvyClassloader {
 
     private static final String IVY_JAR_NAME = "ivy-2.4.0.jar";

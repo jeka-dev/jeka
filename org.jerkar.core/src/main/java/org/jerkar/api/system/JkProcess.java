@@ -236,15 +236,14 @@ public final class JkProcess implements Runnable {
                 final JkUtilsIO.StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
                         process.getErrorStream(), JkLog.getErrorStream());
             try {
-                process.waitFor();
+                result.set(process.waitFor());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             outputStreamGobbler.stop();
                 errorStreamGobbler.stop();
                 if (result.get() != 0 && failOnError) {
-                    throw new IllegalStateException("The process has returned with error code "
-                            + result);
+                    throw new JkException("The process has returned with error code " + result);
                 }
 
         };

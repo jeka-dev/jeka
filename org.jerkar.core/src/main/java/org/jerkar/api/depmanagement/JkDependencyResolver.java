@@ -5,10 +5,8 @@ import static org.jerkar.api.utils.JkUtilsString.plurialize;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
-import org.jerkar.api.file.JkPathSequence;
+import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsTime;
@@ -20,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsTime;
  */
 public final class JkDependencyResolver {
 
-    private final InternalDepResolver internalResolver;
+    private final ModuleDepResolver moduleDepResolver;
 
     private final JkResolutionParameters parameters;
 
@@ -32,9 +30,9 @@ public final class JkDependencyResolver {
 
     private final Path baseDir;
 
-    private JkDependencyResolver(InternalDepResolver internalResolver,
-            JkVersionedModule module, JkResolutionParameters resolutionParameters, JkRepoSet repos, Path baseDir) {
-        this.internalResolver = internalResolver;
+    private JkDependencyResolver(ModuleDepResolver moduleDepResolver,
+                                 JkVersionedModule module, JkResolutionParameters resolutionParameters, JkRepoSet repos, Path baseDir) {
+        this.moduleDepResolver = moduleDepResolver;
         this.module = module;
         this.parameters = resolutionParameters;
         this.repos = repos;
@@ -46,7 +44,7 @@ public final class JkDependencyResolver {
      * the specified JkRepo contains no {@link JkRepo} then the created.
      */
     public static JkDependencyResolver of(JkRepoSet repos) {
-        final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
+        final ModuleDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
         return new JkDependencyResolver(ivyResolver,  null, JkResolutionParameters.of(), repos, Paths.get(""));
     }
 
@@ -87,8 +85,8 @@ public final class JkDependencyResolver {
         final String msg = scopes.length == 0 ? "Resolving dependencies " :
                 "Resolving dependencies with specified scopes " + Arrays.asList(scopes);
         JkLog.startTask(msg);
-        JkResolveResult resolveResult = internalResolver == null ? JkResolveResult.ofRoot(module) :
-                internalResolver.resolve(module, dependencies.withModulesOnly(),
+        JkResolveResult resolveResult = (moduleDepResolver == null || !dependencies.hasModules()) ? JkResolveResult.ofRoot(module) :
+                moduleDepResolver.resolve(module, dependencies.withModulesOnly(),
                     parameters, scopes);
         final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies,
                     JkUtilsIterable.setOf(scopes));
@@ -112,7 +110,7 @@ public final class JkDependencyResolver {
      * for of dependencies and have no effect for of dependencies.
      */
     public JkDependencyResolver withModuleHolder(JkVersionedModule versionedModule) {
-        return new JkDependencyResolver(this.internalResolver, versionedModule,
+        return new JkDependencyResolver(this.moduleDepResolver, versionedModule,
                 this.parameters, this.repos, this.baseDir);
     }
 
@@ -142,7 +140,7 @@ public final class JkDependencyResolver {
      * Returns an dependency resolver identical to this one but with the specified repositories.
      */
     public JkDependencyResolver withParams(JkResolutionParameters params) {
-        return new JkDependencyResolver(this.internalResolver, this.module,
+        return new JkDependencyResolver(this.moduleDepResolver, this.module,
                 params, this.repos, this.baseDir);
     }
 
@@ -152,7 +150,7 @@ public final class JkDependencyResolver {
      * {@link #resolve(JkDependencySet, JkScope...)} method as it returns only absolute files.
      */
     public JkDependencyResolver withBasedir(Path baseDir) {
-        return new JkDependencyResolver(this.internalResolver, this.module,
+        return new JkDependencyResolver(this.moduleDepResolver, this.module,
                 this.parameters, this.repos, baseDir);
     }
 

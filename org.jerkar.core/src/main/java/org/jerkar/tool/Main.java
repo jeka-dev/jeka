@@ -1,14 +1,21 @@
 package org.jerkar.tool;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkHierarchicalConsoleLogHandler;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsTime;
 
@@ -22,7 +29,19 @@ public final class Main {
     /**
      * Entry point for Jerkar application when launched from command-line
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        /*
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (!(classLoader instanceof URLClassLoader)) {
+            URLClassLoader urlClassLoader = new URLClassLoader(new URL[0],classLoader);
+            Thread.currentThread().setContextClassLoader(urlClassLoader);
+            Class<?> mainClass = urlClassLoader.loadClass(Main.class.getName());
+            Method mainMethod = JkUtilsReflect.getMethod(mainClass, "main", String[].class);
+            Thread.currentThread().setContextClassLoader(urlClassLoader);
+            mainMethod.invoke(null, (Object) args);
+            return;
+        }
+        */
         final long start = System.nanoTime();
         try {
             Environment.initialize(args);

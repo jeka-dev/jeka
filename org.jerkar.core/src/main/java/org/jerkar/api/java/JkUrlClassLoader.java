@@ -55,13 +55,17 @@ public final class JkUrlClassLoader {
         this.delegate = delegate;
     }
 
+    public static JkUrlClassLoader of(URLClassLoader urlClassLoader) {
+        return new JkUrlClassLoader(urlClassLoader);
+    }
+
     /**
-     * Returns a {@link JkUrlClassLoader} wrapping the current class loader.
+     * Returns a {@link JkUrlClassLoader} wrapping the current thread context classloader.
      *
      * @see Class#getClassLoader()
      */
     public static JkUrlClassLoader ofCurrent() {
-        return createUrlClassLoaderFrom(JkUrlClassLoader.class.getClassLoader());
+        return createUrlClassLoaderFrom(Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -78,7 +82,7 @@ public final class JkUrlClassLoader {
             throw new IllegalStateException("The current or system classloader is not instance of URLClassLoader. It " +
                     "is probably due that you are currently running on JDK9.");
         }
-        return new JkUrlClassLoader((URLClassLoader) classLoader);
+        return of((URLClassLoader) classLoader);
     }
 
     /**
@@ -423,7 +427,7 @@ public final class JkUrlClassLoader {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append(delegate.getClass().getName());
+        builder.append(delegate);
         if (delegate instanceof URLClassLoader) {
             for (final URL url : ((URLClassLoader) delegate).getURLs()) {
                 builder.append("\n  ").append(url);

@@ -39,7 +39,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  *
  * @author Jerome Angibaud
  */
-final class IvyResolver implements InternalDepResolver {
+final class IvyResolver implements ModuleDepResolver {
 
     private static final Random RANDOM = new Random();
 
