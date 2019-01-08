@@ -35,8 +35,6 @@ public final class JkUrlClassLoader {
 
     private static final int CLASS_SUFFIX_LENGTH = CLASS_SUFFIX.length();
 
-    private static final int JAVA_SUFFIX_LENGTH = ".java".length();
-
     private static Path urlCacheDir = JkLocator.getJerkarUserHomeDir().resolve("cache/url-content");
 
     static {
@@ -106,7 +104,7 @@ public final class JkUrlClassLoader {
     /**
      * Return the {@link URLClassLoader} wrapped by this object.
      */
-    public ClassLoader getClassloader() {
+    public ClassLoader getDelegate() {
         return delegate;
     }
 

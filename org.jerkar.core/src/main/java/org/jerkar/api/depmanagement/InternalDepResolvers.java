@@ -1,5 +1,7 @@
 package org.jerkar.api.depmanagement;
 
+import org.jerkar.api.java.JkClassLoader;
+
 class InternalDepResolvers {
 
     private static final String IVYRESOLVER_CLASS_NAME = IvyResolver.class.getName();
@@ -8,8 +10,11 @@ class InternalDepResolvers {
      * Dependency resolver based on Apache Ivy.
      * This resolver is loaded in a dedicated classloader containing Ivy classes.
      */
-    public static ModuleDepResolver ivy(JkRepoSet repos) {
-        return IvyClassloader.CLASSLOADER.createTransClassloaderProxy(
+    static ModuleDepResolver ivy(JkRepoSet repos) {
+        if (JkClassLoader.ofCurrent().isDefined(IvyClassloader.IVY_CLASS_NAME)) {
+            return IvyResolver.of(repos);
+        }
+        return IvyClassloader.CLASSLOADER.createCrossClassloaderProxy(
                 ModuleDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
     }
 

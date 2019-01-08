@@ -45,7 +45,7 @@ public class JkClassLoader {
     /**
      * Return the {@link URLClassLoader} wrapped by this object.
      */
-    public ClassLoader getClassloader() {
+    public ClassLoader getDelegate() {
         return delegate;
     }
 
@@ -101,6 +101,19 @@ public class JkClassLoader {
     }
 
     /**
+     * Returns <code>true</code> if this classloader is descendant or same as the specified classloader.
+     */
+    public boolean isDescendantOf(ClassLoader classLoader) {
+        if (this.delegate.getParent() == null) {
+            return false;
+        }
+        if (this.delegate.equals(classLoader)) {
+            return true;
+        }
+        return JkClassLoader.of(delegate.getParent()).isDescendantOf(classLoader);
+    }
+
+    /**
      * Invokes a static method on the specified class using the provided
      * arguments. <br/>
      * If the argument classes are the same on the current class loader and this
@@ -114,24 +127,18 @@ public class JkClassLoader {
     @SuppressWarnings("unchecked")
     public <T> T invokeStaticMethod(boolean serializeResult, String className, String methodName,
                                     Object... args) {
-        if (args == null) {
-            args = new Object[0];
-        }
-        final Class<?> clazz = this.load(className);
-        final Object[] effectiveArgs = new Object[args.length];
-        for (int i = 0; i < args.length; i++) {
-            effectiveArgs[i] = traverseClassLoader(args[i], this);
-        }
+        final Object[] effectiveArgs = crossClassloaderArgs(args);
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
         initLogInClassloader();
+        final Class<?> clazz = this.load(className);
         try {
             final Object returned = JkUtilsReflect.invokeStaticMethod(clazz, methodName,
                     effectiveArgs);
             final T result;
             if (serializeResult) {
                 Thread.currentThread().setContextClassLoader(currentClassLoader);
-                result = (T) traverseClassLoader(returned, JkClassLoader.ofCurrent());
+                result = (T) crossClassLoader(returned, Thread.currentThread().getContextClassLoader());
             } else {
                 result = (T) returned;
             }
@@ -139,6 +146,17 @@ public class JkClassLoader {
         } finally {
             Thread.currentThread().setContextClassLoader(currentClassLoader);
         }
+    }
+
+    private Object[] crossClassloaderArgs(Object[] args) {
+        if (args == null) {
+            args = new Object[0];
+        }
+        final Object[] result = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            result[i] = crossClassLoader(args[i], delegate);
+        }
+        return result;
     }
 
     /**
@@ -159,18 +177,13 @@ public class JkClassLoader {
         else return delegate.toString();
     }
 
-    private static Object traverseClassLoader(Object object, JkClassLoader to) {
+    private static Object crossClassLoader(Object object, ClassLoader to) {
         if (object == null) {
             return null;
         }
-        System.out.println("****************************************************");
-        System.out.println(object);
-        System.out.println(object.getClass().getClassLoader());
-        System.out.println("----");
-        System.out.println(JkClassLoader.ofLoaderOf(object.getClass()));
-        System.out.println("-----------------------");
-        System.out.println(to);
-        System.out.println("****************************************************");
+        if (JkClassLoader.of(to).isDescendantOf(object.getClass().getClassLoader())) {
+            return object;
+        }
         final Class<?> clazz = object.getClass();
         final String className;
         if (clazz.isArray()) {
@@ -180,7 +193,7 @@ public class JkClassLoader {
         }
 
         final JkClassLoader from = JkClassLoader.ofLoaderOf(object.getClass());
-        final Class<?> toClass = to.load(className);
+        final Class<?> toClass = JkClassLoader.of(to).load(className);
         final boolean container = Collection.class.isAssignableFrom(clazz)
                 || Map.class.isAssignableFrom(clazz);
         if (from.delegate == null && !container) { // Class from JDK
@@ -190,70 +203,58 @@ public class JkClassLoader {
             return object;
         }
 
-        return JkUtilsIO.cloneBySerialization(object, to.getClassloader());
+        return JkUtilsIO.cloneBySerialization(object, to);
     }
 
-    private class TransClassloaderInvokationHandler implements InvocationHandler {
+    private class CrossClassloaderInvokationHandler implements InvocationHandler {
 
-        TransClassloaderInvokationHandler(Object target) {
-            super();
-            this.target = target;
+        CrossClassloaderInvokationHandler(Object target, ClassLoader fromClassLoader) {
+            this.targetObject = target;
+            this.fromClassLoader = fromClassLoader;
         }
 
-        private final Object target;
+        private final Object targetObject;
+
+        private final ClassLoader fromClassLoader;
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             final Method targetMethod = JkUtilsReflect.methodWithSameNameAndArgType(method,
-                    target.getClass());
-            return invokeInstanceMethod(true, target, targetMethod, args);
-
+                    targetObject.getClass());
+            return invokeInstanceMethod(fromClassLoader, targetObject, targetMethod, args);
         }
 
     }
 
     /**
-     * Creates an instance from the specified class in this classloader and
-     * callable from the current class loader. Arguments ans result are
+     * Creates an instance of the specified class in this classloader and
+     * callable from the current thread classloader. Arguments ans result are
      * serialized (if needed) so we keep compatibility between classes.
      */
     @SuppressWarnings("unchecked")
-    public <T> T createTransClassloaderProxy(Class<T> interfaze, String className,
+    public <T> T createCrossClassloaderProxy(Class<T> interfaze, String className,
                                              String staticMethodFactory, Object... args) {
         final Object target = this.invokeStaticMethod(false, className, staticMethodFactory, args);
-        return ((T) Proxy.newProxyInstance(JkClassLoader.ofCurrent().delegate,
-                new Class[]{interfaze}, new TransClassloaderInvokationHandler(target)));
+        ClassLoader from = Thread.currentThread().getContextClassLoader();
+        return ((T) Proxy.newProxyInstance(from,
+                new Class[]{interfaze}, new CrossClassloaderInvokationHandler(target, from)));
     }
 
-    /**
-     * Invokes an instance method on the specified object using the specified
-     * arguments. <br/>
-     * If the argument classes are the same on the current class loader and this
-     * one then arguments are passed as is, otherwise arguments are serialized
-     * in the current class loader and deserialized andAccept this class loader of
-     * order to be compliant with it. <br/>
-     * The current thread context class loader is switched to this for the
-     * method execution. <br/>
-     * It is then turned back to the former one when the execution is done.
+    /*
+     *
      */
     @SuppressWarnings("unchecked")
-    public <T> T invokeInstanceMethod(boolean serializeResult, Object object, Method method,
+    public <T> T invokeInstanceMethod(ClassLoader from, Object object, Method method,
                                       Object... args) {
-        if (args == null) {
-            args = new Object[0];
-        }
-        final Object[] effectiveArgs = new Object[args.length];
-        for (int i = 0; i < args.length; i++) {
-            effectiveArgs[i] = traverseClassLoader(args[i], this);
-        }
+        final Object[] effectiveArgs = crossClassloaderArgs(args);
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
         initLogInClassloader();
         try {
             final Object returned = JkUtilsReflect.invoke(object, method, effectiveArgs);
             final T result;
-            if (serializeResult) {
-                result = (T) traverseClassLoader(returned, JkClassLoader.ofCurrent());
+            if (from != null) {
+                result = (T) crossClassLoader(returned, from);
             } else {
                 result = (T) returned;
             }
@@ -278,7 +279,7 @@ public class JkClassLoader {
     }
 
     private void initLogInClassloader() {
-        JkLog.initializeInClassLoader(this.getClassloader());
+        JkLog.initializeInClassLoader(this.getDelegate());
     }
 
 

@@ -262,7 +262,7 @@ public final class JkUnit {
                 final long duration = (end - start) / 1000000;
                 result.set(fromJunit3Result(properties, name, testResult, duration));
             } else {
-                JkUtilsIO.closeifClosable(classLoader.getClassloader());
+                JkUtilsIO.closeifClosable(classLoader.getDelegate());
                 throw new JkException("No Junit found on test classpath.");
             }
 
@@ -270,7 +270,7 @@ public final class JkUnit {
                 if (breakOnFailure) {
                     JkLog.error(String.join("\n",
                             result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
-                    JkUtilsIO.closeifClosable(classLoader.getClassloader());
+                    JkUtilsIO.closeifClosable(classLoader.getDelegate());
                     throw new JkException("Test failed : " + result.toString());
                 } else {
                     JkLog.warn(String.join("\n",
@@ -291,7 +291,7 @@ public final class JkUnit {
             }
         };
         JkLog.execute("Executing JUnit tests", task);
-        JkUtilsIO.closeifClosable(classLoader.getClassloader());
+        JkUtilsIO.closeifClosable(classLoader.getDelegate());
         return result.get();
     }
 
@@ -302,7 +302,7 @@ public final class JkUnit {
         classLoader.loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.getClassesToTest());
         if (result.isEmpty()) {
-            JkUtilsIO.closeifClosable(classLoader.getClassloader());
+            JkUtilsIO.closeifClosable(classLoader.getDelegate());
         }
         return result;
     }

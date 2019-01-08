@@ -1,11 +1,11 @@
 package org.jerkar.api.depmanagement;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 
 import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.system.JkException;
 
 /**
@@ -18,8 +18,6 @@ import org.jerkar.api.system.JkException;
 public final class JkPublisher {
 
     private static final String IVY_PUB_CLASS = "org.jerkar.api.depmanagement.IvyInternalPublisher";
-
-    private static final JkClassLoader IVY_CLASS_LOADER = IvyClassloader.CLASSLOADER;
 
     private final InternalPublisher internalPublisher;
 
@@ -36,19 +34,25 @@ public final class JkPublisher {
     }
 
     /**
-     * Creates a {@link JkPublisher} with the specified {@link JkRepoSet}
+     * Creates a {@link JkPublisher} with the specified <code>JkRepoSet</code>.
      * and artifact directory. <code>artifactDir</code> is the place where pom.xml and
      * ivy.xml are generated.
      */
     public static JkPublisher of(JkRepoSet publishRepos, Path artifactDir) {
-        final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.createTransClassloaderProxy(
-                InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos,
-                artifactDir == null ? null : artifactDir.toFile());
+        File arg = artifactDir == null ? null : artifactDir.toFile();
+        final InternalPublisher ivyPublisher;
+        if (JkClassLoader.ofCurrent().isDefined(IvyClassloader.IVY_CLASS_NAME)) {
+            ivyPublisher = IvyInternalPublisher.of(publishRepos, arg);
+        } else {
+            ivyPublisher =IvyClassloader.CLASSLOADER.createCrossClassloaderProxy(
+                    InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos,
+                    artifactDir == null ? null : artifactDir.toFile());
+        }
         return new JkPublisher(ivyPublisher);
     }
 
     /**
-     * Creates a {@link JkPublisher} with the specified {@link JkRepoSet}.
+     * Creates a {@link JkPublisher} with the specified <code>JkRepoSet</code>.
      */
     public static JkPublisher of(JkRepoSet publishRepos) {
         return of(publishRepos,  null);
