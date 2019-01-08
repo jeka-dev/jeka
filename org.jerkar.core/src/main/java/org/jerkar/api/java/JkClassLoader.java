@@ -130,15 +130,15 @@ public class JkClassLoader {
         final Object[] effectiveArgs = crossClassloaderArgs(args);
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
-        initLogInClassloader();
-        final Class<?> clazz = this.load(className);
         try {
+            initLogInClassloader();
+            final Class<?> clazz = this.load(className);
             final Object returned = JkUtilsReflect.invokeStaticMethod(clazz, methodName,
                     effectiveArgs);
             final T result;
             if (serializeResult) {
                 Thread.currentThread().setContextClassLoader(currentClassLoader);
-                result = (T) crossClassLoader(returned, Thread.currentThread().getContextClassLoader());
+                result = (T) crossClassLoader(returned, currentClassLoader);
             } else {
                 result = (T) returned;
             }
@@ -240,9 +240,12 @@ public class JkClassLoader {
                 new Class[]{interfaze}, new CrossClassloaderInvokationHandler(target, from)));
     }
 
-    /*
+    /**
+     * Invoke instance method on specified object using this classloader as the curent context class loader.
      *
-     */
+     * @param from If not <code>null</code> the result is transformed to be used in a specified classloader.
+     *
+     **/
     @SuppressWarnings("unchecked")
     public <T> T invokeInstanceMethod(ClassLoader from, Object object, Method method,
                                       Object... args) {
