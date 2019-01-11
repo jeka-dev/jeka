@@ -11,7 +11,7 @@ public class JkJavaCompilerRunner {
         System.out.println(JkJavaCompiler.currentJdkSourceVersion());
         System.out.println(ToolProvider.getSystemJavaCompiler().getSourceVersions());
 
-        JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
+        JkJavaCompiler.ofJdk().compile(JkJavaCompileSpec.of()
                 .setOutputDir(Paths.get("build/output/bin"))
                 .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V6.get()));
     }

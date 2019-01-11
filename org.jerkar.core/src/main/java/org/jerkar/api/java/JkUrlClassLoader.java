@@ -1,6 +1,5 @@
 package org.jerkar.api.java;
 
-
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.system.JkLocator;
@@ -77,8 +76,8 @@ public final class JkUrlClassLoader {
 
     private static JkUrlClassLoader createUrlClassLoaderFrom(ClassLoader classLoader) {
         if (! (classLoader instanceof URLClassLoader)) {
-            throw new IllegalStateException("The current or system classloader is not instance of URLClassLoader. It " +
-                    "is probably due that you are currently running on JDK9.");
+            throw new IllegalStateException("The current or system classloader is not instance of URLClassLoader but "
+                    + classLoader.getClass() + ". It is probably due that you are currently running on JDK9.");
         }
         return of((URLClassLoader) classLoader);
     }

@@ -8,7 +8,7 @@ import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.file.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
@@ -44,7 +44,7 @@ public class JkJavaProjectTestTasks {
 
     public final JkRunnables testExecutor = JkRunnables.of(() -> runner.run(getTestClasses()));
 
-    private JkJavaCompiler compiler = JkJavaCompiler.of();
+    private JkJavaCompiler compiler = JkJavaCompiler.ofJdk();
 
     private JkPathMatcher testClassMatcher = JkPathMatcher.ofAccept(TEST_CLASS_PATTERN);
 

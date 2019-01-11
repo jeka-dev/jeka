@@ -39,6 +39,9 @@ public final class JkJavaVersion {
     /** Stands for Java Version  10 */
     public static final JkJavaVersion V10 = JkJavaVersion.of("10");
 
+    /** Stands for Java Version  11 */
+    public static final JkJavaVersion V11 = JkJavaVersion.of("11");
+
     private final String value;
 
     private JkJavaVersion(String value) {

@@ -1,22 +1,23 @@
 package org.jerkar;
 
-import static org.jerkar.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
-import static org.jerkar.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
-import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkPathMatcher;
+import org.jerkar.api.depmanagement.JkArtifactId;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
-import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+import static org.jerkar.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
+import static org.jerkar.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
 
 /**
  * Build class for Jerkar. Run main method to create full distrib.

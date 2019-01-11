@@ -43,7 +43,7 @@ public final class JkJavaCompiler {
     /**
      * Creates a {@link JkJavaCompiler} producing its output in the given directory.
      */
-    public static JkJavaCompiler of() {
+    public static JkJavaCompiler ofJdk() {
         return new JkJavaCompiler(true, null, null, new HashMap<>());
     }
 

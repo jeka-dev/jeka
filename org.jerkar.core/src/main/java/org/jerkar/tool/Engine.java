@@ -196,7 +196,7 @@ final class Engine {
 
     private void compileDef(JkPathSequence runPath) {
         JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath);
-        JkJavaCompiler.of().compile(compileSpec);
+        JkJavaCompiler.ofJdk().compile(compileSpec);
         JkPathTree.of(this.resolver.runSourceDir).andReject("**/*.java").copyTo(this.resolver.runClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }

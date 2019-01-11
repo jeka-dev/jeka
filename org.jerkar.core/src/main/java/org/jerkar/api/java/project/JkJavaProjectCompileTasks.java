@@ -5,7 +5,7 @@ import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.file.JkResourceProcessor;
 import org.jerkar.api.system.JkLog;
 
 import java.nio.charset.Charset;
@@ -26,7 +26,7 @@ public class JkJavaProjectCompileTasks {
 
     private final JkRunnables compileRunner;
 
-    private JkJavaCompiler compiler = JkJavaCompiler.of();
+    private JkJavaCompiler compiler = JkJavaCompiler.ofJdk();
 
     private boolean done;
 

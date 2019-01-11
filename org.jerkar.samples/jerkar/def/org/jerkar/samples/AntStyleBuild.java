@@ -3,6 +3,8 @@ package org.jerkar.samples;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
+import org.jerkar.api.file.JkResourceProcessor;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;
@@ -11,8 +13,11 @@ import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Equivalent to http://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html
@@ -34,11 +39,15 @@ public class AntStyleBuild extends JkRun {
     }
 
     public void compile() {
-        JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
+        JkJavaCompiler.ofJdk().compile(JkJavaCompileSpec.of()
                 .setOutputDir(classDir)
                 .setClasspath(classpath)
                 .setSourceAndTargetVersion(JkJavaVersion.V8)
                 .addSources(src));
+        Map<String, String> varReplacement = new HashMap<>();
+        varReplacement.put("${server.ip}", "123.211.11.0");
+        JkResourceProcessor.of(JkPathTreeSet.of(src)).andInterpolate("**/*.properties", varReplacement)
+                .generateTo(classDir, Charset.forName("UTF-8"));
         JkPathTree.of(src).andReject("**/*.java").copyTo(classDir);
     }
 
@@ -46,6 +55,10 @@ public class AntStyleBuild extends JkRun {
         compile();
         JkManifest.ofEmpty().addMainClass("org.jerkar.samples.RunClass").writeToStandardLocation(classDir);
         JkPathTree.of(classDir).zipTo(jarFile);
+    }
+
+    public void javadoc() {
+        JkJavadocMaker.of(JkPathTreeSet.of(src), buildDir.resolve("javadoc")).process();
     }
 
     public void run() {
