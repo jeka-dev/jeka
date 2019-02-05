@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkUrlClassLoader;
@@ -293,6 +294,14 @@ public final class JkUnit {
         JkLog.execute("Executing JUnit tests", task);
         JkUtilsIO.closeifClosable(classLoader.getDelegate());
         return result.get();
+    }
+
+    public JkTestSuiteResult run(JkClasspath classpath, JkPathTreeSet classesToTest) {
+        return run(JkJavaTestClasses.of(classpath, classesToTest));
+    }
+
+    public JkTestSuiteResult run(JkClasspath classpath, JkPathTree classesToTest) {
+        return run(JkJavaTestClasses.of(classpath, classesToTest));
     }
 
     @SuppressWarnings("rawtypes")

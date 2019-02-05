@@ -15,6 +15,7 @@ public class PureApi {
 
         // A project depending on the first project + Guava
         JkJavaProject dependerProject = JkJavaProject.ofMavenLayout(".");
+        dependerProject.setVersionedModule("mygroup:depender", "1.0-SNAPSHOT");
         dependerProject.addDependencies(JkDependencySet.of()
                 .and("com.google.guava:guava:22.0")
                 .and(coreProject));

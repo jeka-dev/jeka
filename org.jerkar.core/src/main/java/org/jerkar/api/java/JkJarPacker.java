@@ -7,7 +7,7 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import java.nio.file.Path;
 
 /**
- * Utilities class to produce Jar files with conventional naming
+ * Utilities class to produce Jar files.
  */
 public final class JkJarPacker {
 
