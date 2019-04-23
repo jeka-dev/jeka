@@ -129,7 +129,7 @@ public class JkPathTreeTest {
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
         Path tempFile = Files.createTempFile("example", ".txt");
-        tree.copyIn(tempFile);
+        tree.bring(tempFile);
         assertTrue(Files.exists(tree.get(tempFile.getFileName().toString())));
         Files.delete(tempFile);
     }

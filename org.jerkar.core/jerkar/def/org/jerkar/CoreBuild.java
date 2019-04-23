@@ -56,17 +56,17 @@ public class CoreBuild extends JkJavaProjectBuild {
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
-        distrib.copyIn(getBaseDir().getParent().resolve("LICENSE"));
+        distrib.bring(getBaseDir().getParent().resolve("LICENSE"));
         distrib.merge(getBaseDir().resolve("src/main/dist"));
         distrib.merge(getBaseDir().resolve("src/main/java/META-INF/bin"));
-        distrib.copyIn(maker.getArtifactPath(maker.getMainArtifactId()));
+        distrib.bring(maker.getArtifactPath(maker.getMainArtifactId()));
         final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources").andAccept("apache-ivy*.jar").getFiles();
         distrib.goTo("libs-sources")
-            .copyIn(ivySourceLibs)
-            .copyIn(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
+            .bring(ivySourceLibs)
+            .bring(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
         if (java().pack.javadoc) {
             maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
-            distrib.goTo("libs-javadoc").copyIn(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
+            distrib.goTo("libs-javadoc").bring(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         JkLog.execute("Making documentation", () -> new DocMaker(getBaseDir(), distribFolder,
                 project().getVersionedModule().getVersion().getValue()).assembleAllDoc());

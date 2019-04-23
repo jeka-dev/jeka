@@ -187,7 +187,7 @@ public final class JkPathTree {
 
     /**
      * Copies the content of the specified tree at the root of this one.
-     * Specified tree to copy might not exists. The structure of the specified tree
+     * Specified dir to copy to might not exists. The structure of the specified tree
      * is preserved.
      * Note that the the root of the specified tree is not part of the copied content.
      */
@@ -209,7 +209,7 @@ public final class JkPathTree {
     /**
      * Copies the specified files at the root of this tree.
      */
-    public JkPathTree copyIn(Iterable<Path> files, StandardCopyOption ... copyOptions) {
+    public JkPathTree bring(Iterable<Path> files, StandardCopyOption ... copyOptions) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(files);
         createIfNotExist();
         for (final Path file : paths) {

@@ -138,7 +138,7 @@ final class Engine {
         final JkPathSequence runPath = runDependencyResolver.resolve(this.computeRunDependencies()).getFiles();
         path.addAll(runPath.getEntries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
-        this.compileDef(JkPathSequence.of(path));
+        compileDef(JkPathSequence.of(path));
         path.add(this.resolver.runClassDir);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
@@ -196,7 +196,14 @@ final class Engine {
 
     private void compileDef(JkPathSequence runPath) {
         JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath);
-        JkJavaCompiler.ofJdk().compile(compileSpec);
+        try {
+            JkJavaCompiler.ofJdk().compile(compileSpec);
+        } catch (JkException e) {
+            JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
+            JkLog.info("Compilation of Jerkar files failed. You can run jerkar -RC=JkRun to use default Jerkar files" +
+                    " instead of the ones located in this project.");
+            throw e;
+        }
         JkPathTree.of(this.resolver.runSourceDir).andReject("**/*.java").copyTo(this.resolver.runClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
