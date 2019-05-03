@@ -77,7 +77,6 @@ if [ -z "$JERKAR_HOME" ] ; then
 
   # make it fully qualified
   JERKAR_HOME=`cd "$JERKAR_HOME" && pwd`
-  echo "---$JERKAR_HOME"
 
   cd "$saveddir"
 fi
