@@ -15,7 +15,7 @@ public final class JkJarPacker {
      * Filter to exclude signature files from fat jar (aka uber jar).
      */
     public static final JkPathMatcher EXCLUDE_SIGNATURE_MATCHER =
-            JkPathMatcher.ofReject("meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf");
+            JkPathMatcher.of(false, "meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf");
 
     private final JkPathTreeSet classtrees;
 

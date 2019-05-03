@@ -2,6 +2,7 @@ package org.jerkar.api.file;
 
 import java.nio.file.*;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.function.Predicate;
 
 /**
@@ -33,59 +34,51 @@ public final class JkPathMatcher implements PathMatcher {
     }
 
     /**
-     * A matcher accepting specified glob pattern within specified file ofSystem.
+     * @see #of(boolean, FileSystem, Iterable)
      */
-    public static JkPathMatcher ofAccept(FileSystem fileSystem, String ... globPattern) {
-        return ofAccept(fileSystem, Arrays.asList(globPattern));
+    public static JkPathMatcher of(boolean positive, FileSystem fileSystem, String ... globPattern) {
+        return of(positive, fileSystem, Arrays.asList(globPattern));
     }
 
     /**
-     * A matcher accepting specified glob patterns within default file ofSystem.
+     * Shorthand for <code>of(true, patterns)</code>.
      */
-    public static JkPathMatcher ofAccept(String ... globPattern) {
-        return ofAccept(FileSystems.getDefault(), Arrays.asList(globPattern));
+    public static JkPathMatcher of(String ... globPatterns) {
+        return of(true, globPatterns);
     }
 
     /**
-     * A matcher accepting specified glob patterns within specified file ofSystem.
+     * @see #of(boolean, FileSystem, Iterable)
      */
-    public static JkPathMatcher ofAccept(FileSystem fileSystem, Iterable<String> globPatterns) {
-        PathMatcher result = empty();
-        for (final String pattern : globPatterns) {
-            result = new OrMatcher(result, globMatcher(fileSystem, pattern));
+    public static JkPathMatcher of(boolean positive, String ... globPattern) {
+        return of(positive, FileSystems.getDefault(), Arrays.asList(globPattern));
+    }
+
+    /**
+     * A matcher accepting/refusing if path matches at least one of the specified glob patterns within specified file system.
+     * @param positive If <code>true</code> matcher will accept files matching at least one of the specified patterns.
+     *                 If <code>false</code> matcher will accept files matching none of the specified pattern.
+     */
+    public static JkPathMatcher of(boolean positive, FileSystem fileSystem, Iterable<String> globPatterns) {
+        Iterator<String> it = globPatterns.iterator();
+        if (!it.hasNext()) {
+            return JkPathMatcher.of();
         }
-        return new JkPathMatcher(result, "andAccept:" + globPatterns);
-    }
-
-    /**
-     * A matcher refusing specified glob pattern within specified file ofSystem.
-     */
-    public static JkPathMatcher ofReject(FileSystem fileSystem, String ... globPatterns) {
-        return ofReject(fileSystem, Arrays.asList(globPatterns));
-    }
-
-    /**
-     * A matcher refusing specified glob patterns within default file ofSystem.
-     */
-    public static JkPathMatcher ofReject(String ... globPatterns) {
-        return ofReject(FileSystems.getDefault(), Arrays.asList(globPatterns));
-    }
-
-    /**
-     * A matcher refusing specified glob patterns within specified file ofSystem.
-     */
-    public static JkPathMatcher ofReject(FileSystem fileSystem, Iterable<String> globPatterns) {
-        PathMatcher result = path -> true;
-        for (final String pattern : globPatterns) {
-            result = new AndMatcher(result, path -> !globMatcher(fileSystem, pattern).matches(path));
+        String pattern = it.next();
+        PathMatcher result = path -> positive == globMatcher(fileSystem, pattern).matches(path);
+        while (it.hasNext()) {
+            String itPattern = it.next();
+            if (positive) {
+                result = new OrMatcher(result, globMatcher(fileSystem, itPattern));
+            } else {
+                result = new AndMatcher(result, path -> !globMatcher(fileSystem, itPattern).matches(path));
+            }
         }
-        return new JkPathMatcher(result, "reject:" + globPatterns);
+        String name = positive ? "in" : "out";
+        return new JkPathMatcher(result, name + ":" + globPatterns);
     }
-
 
     // ---------------------------- fields and constructors
-
-
 
     private final PathMatcher matcher;
 
@@ -127,28 +120,15 @@ public final class JkPathMatcher implements PathMatcher {
                 this.label + " | " + other.toString());
     }
 
-    public JkPathMatcher andAccept(FileSystem fileSystem, String ...patterns) {
-        return this.or(JkPathMatcher.ofAccept(fileSystem, patterns));
+    public JkPathMatcher and(boolean positive, FileSystem fileSystem, String ...patterns) {
+        return this.or(JkPathMatcher.of(positive, fileSystem, patterns));
     }
 
-    public JkPathMatcher andAccept(String ...patterns) {
-        return this.andAccept(FileSystems.getDefault(), patterns);
+    public JkPathMatcher and(boolean positive, String ...patterns) {
+        return this.and(positive, FileSystems.getDefault(), patterns);
     }
-
-    public JkPathMatcher andReject(FileSystem fileSystem, String ... patterns) {
-        return this.and(JkPathMatcher.ofReject(fileSystem, patterns));
-    }
-
-    public JkPathMatcher andReject(String ... patterns) {
-        return andReject(FileSystems.getDefault(), patterns);
-    }
-
 
     // --------------------------------------------- matcher
-
-    private static PathMatcher empty() {
-        return path -> false;
-    }
 
     private static PathMatcher globMatcher(FileSystem fileSystem, String pattern) {
         return fileSystem.getPathMatcher("glob:" + pattern);

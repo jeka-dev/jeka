@@ -30,7 +30,7 @@ public class AntStyleBuild extends JkRun {
     Path buildDir = getBaseDir().resolve("build/output");
     Path classDir = getOutputDir().resolve("classes");
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
-    JkClasspath classpath = JkClasspath.of(getBaseTree().andAccept("libs/**/*.jar").getFiles());
+    JkClasspath classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles());
     Path reportDir = buildDir.resolve("junitRreport");
 
     public void doDefault() {
@@ -48,7 +48,7 @@ public class AntStyleBuild extends JkRun {
         varReplacement.put("${server.ip}", "123.211.11.0");
         JkResourceProcessor.of(JkPathTreeSet.of(src)).andInterpolate("**/*.properties", varReplacement)
                 .generateTo(classDir, Charset.forName("UTF-8"));
-        JkPathTree.of(src).andReject("**/*.java").copyTo(classDir);
+        JkPathTree.of(src).andMatching(false, "**/*.java").copyTo(classDir);
     }
 
     public void jar() {
@@ -80,7 +80,7 @@ public class AntStyleBuild extends JkRun {
         .withReport(JunitReportDetail.FULL)
         .run(JkJavaTestClasses.of(
                 classpath.andPrepending(jarFile),
-                JkPathTree.of(classDir).andAccept("**/*Test.class", "*Test.class") ));
+                JkPathTree.of(classDir).andMatching(true, "**/*Test.class", "*Test.class") ));
     }
 
     /*

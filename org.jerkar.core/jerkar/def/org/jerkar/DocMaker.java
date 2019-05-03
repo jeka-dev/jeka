@@ -47,7 +47,7 @@ class DocMaker {
     private void assembleHtmlDoc() {
         Path targetFolder = docDist;
         JkUtilsPath.createDirectories(targetFolder);
-        docSource.andAccept("*.md").getFiles().forEach(path -> {
+        docSource.andMatching(true,"*.md").getFiles().forEach(path -> {
             String content = new String(JkUtilsPath.readAllBytes(path), UTF8);
             String html = mdToHtml(content, JkUtilsString.substringBeforeLast(path.getFileName().toString(), "."));
             String name = path.getFileName().toString().replace(".md", ".html");
@@ -55,7 +55,7 @@ class DocMaker {
         });
         String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
         JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
-        JkPathTree.of(htmlTemplates).andAccept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist.resolve("style"));
+        JkPathTree.of(htmlTemplates).andMatching(true, "**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist.resolve("style"));
     }
 
     private String createSingleReferenceMdPage() {

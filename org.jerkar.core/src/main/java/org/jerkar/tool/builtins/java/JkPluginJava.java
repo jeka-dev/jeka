@@ -112,7 +112,7 @@ public class JkPluginJava extends JkPlugin {
         }
         if (tests.runIT) {
             maker.getTestTasks().setTestClassMatcher(maker.getTestTasks().getTestClassMatcher()
-                    .andAccept(JkJavaProjectTestTasks.IT_CLASS_PATTERN));
+                    .and(true, JkJavaProjectTestTasks.IT_CLASS_PATTERN));
         }
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);

@@ -19,7 +19,7 @@ public class JkProjectSourceLayout {
     /**
      * Filter to consider as resources everything but java source stuff.
      */
-    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.ofReject("**/*.java", "*.java",
+    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.of(false, "**/*.java", "*.java",
             "**/package.html", "package.html", "**/doc-files", "doc-files");
 
     /**

@@ -30,11 +30,11 @@ public class JkPathTreeTest {
 
         System.out.println(JkPathTree.of(sampleFolder).getRelativeFiles());
 
-        final JkPathTree subfolderTxt1 = JkPathTree.of(sampleFolder).andAccept("subfolder/*.txt");
+        final JkPathTree subfolderTxt1 = JkPathTree.of(sampleFolder).andMatching(true, "subfolder/*.txt");
         assertEquals(1, subfolderTxt1.getFiles().size());
         System.out.println(subfolderTxt1);
 
-        final JkPathTree subfolderTxt2 = JkPathTree.of(sampleFolder).andAccept("subfolder/*.txt");
+        final JkPathTree subfolderTxt2 = JkPathTree.of(sampleFolder).andMatching(true, "subfolder/*.txt");
         assertEquals(1, subfolderTxt2.getFiles().size());
     }
 
@@ -154,7 +154,7 @@ public class JkPathTreeTest {
         Path txt2 = foo.resolve("file2.txt");
         Files.copy(txt, txt2);
         assertTrue(Files.exists(txt));
-        JkPathTree fooTree = JkPathTree.of(foo).andReject("bar/**", "bar");
+        JkPathTree fooTree = JkPathTree.of(foo).andMatching(false, "bar/**", "bar");
         System.out.println(fooTree.getFiles());
         assertFalse(fooTree.getFiles().contains(txt));
         fooTree.deleteContent();

@@ -120,7 +120,7 @@ public final class JkResourceProcessor {
     }
 
     public JkResourceProcessor andInterpolate(String acceptPattern, Map<String, String> keyValues) {
-        return andInterpolate(JkPathMatcher.ofAccept(acceptPattern), keyValues);
+        return andInterpolate(JkPathMatcher.of(true, acceptPattern), keyValues);
     }
 
     /**

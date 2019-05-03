@@ -45,7 +45,7 @@ public final class JkJavaTestClasses {
     }
 
     public JkJavaTestClasses withClassesToTest(String includePattern) {
-        return withClassesToTest(this.classesToTest.withMatcher(JkPathMatcher.ofAccept(includePattern)));
+        return withClassesToTest(this.classesToTest.withMatcher(JkPathMatcher.of(true, includePattern)));
     }
 
 

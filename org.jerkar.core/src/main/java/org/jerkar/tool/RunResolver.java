@@ -58,7 +58,8 @@ final class RunResolver {
         if (!Files.exists(runSourceDir)) {
             return false;
         }
-        return JkPathTree.of(runSourceDir).andAccept("**.java", "*.java").count(0, false) > 0;
+        return JkPathTree.of(runSourceDir).andMatching(true,
+                "**.java", "*.java").count(0, false) > 0;
     }
 
     boolean needCompile() {

@@ -13,7 +13,9 @@ import java.nio.file.Paths;
 public class JkUnitRunner {
 
     public static void main(String[] args) {
-        JkJavaTestClasses testSpec = JkJavaTestClasses.of(JkClasspath.ofCurrentRuntime(), JkPathTree.of(Paths.get("./idea-output/test-classes")).andAccept("**/*MyTest.class"));
+        JkJavaTestClasses testSpec = JkJavaTestClasses.of(JkClasspath.ofCurrentRuntime(),
+                JkPathTree.of(Paths.get("./idea-output/test-classes"))
+                        .andMatching(true, "**/*MyTest.class"));
         JkTestSuiteResult result = JkUnit.of().withBreakOnFailure(false).run(testSpec);
         result.failures().forEach(testCaseFailure -> System.out.println(testCaseFailure.getExceptionDescription().getMessage()));
     }

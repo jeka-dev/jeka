@@ -60,7 +60,7 @@ public class CoreBuild extends JkJavaProjectBuild {
         distrib.merge(getBaseDir().resolve("src/main/dist"));
         distrib.merge(getBaseDir().resolve("src/main/java/META-INF/bin"));
         distrib.bring(maker.getArtifactPath(maker.getMainArtifactId()));
-        final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources").andAccept("apache-ivy*.jar").getFiles();
+        final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources").andMatching(true, "apache-ivy*.jar").getFiles();
         distrib.goTo("libs-sources")
             .bring(ivySourceLibs)
             .bring(maker.getArtifactPath(SOURCES_ARTIFACT_ID));

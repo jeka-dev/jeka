@@ -337,28 +337,24 @@ public final class JkPathTree {
     }
 
     /**
-     * Creates a copy of this {@link JkPathTree} augmented with the specified andAccept pattern.
+     * Creates a copy of this {@link JkPathTree} augmented with the specified pattern matcher.
      */
-    public JkPathTree andAccept(String... globPatterns) {
-        return andAccept(Arrays.asList(globPatterns));
+    public JkPathTree andMatching(boolean positive, String... globPatterns) {
+        return andMatching(positive, Arrays.asList(globPatterns));
     }
 
     /**
-     * Creates a copy of this {@link JkPathTree} augmented with the specified andAccept patterns.
+     * Shorthand to <code>andMatching(true, globPatterns...)</code>.
      */
-    public JkPathTree andAccept(Iterable<String> globPatterns) {
-        return andMatcher(JkPathMatcher.ofAccept(this.getRoot().getFileSystem(), globPatterns));
+    public JkPathTree andMatching(String... globPatterns) {
+        return andMatching(true, globPatterns);
     }
 
     /**
-     * Creates a copy of this {@link JkPathTree} augmented with the specified reject pattern.
+     * Creates a copy of this {@link JkPathTree} augmented with the specified pattern matcher.
      */
-    public JkPathTree andReject(Iterable<String> globPatterns) {
-        return andMatcher(JkPathMatcher.ofReject(this.getRoot().getFileSystem(), globPatterns));
-    }
-
-    public JkPathTree andReject(String... globPatterns) {
-        return andReject(Arrays.asList(globPatterns));
+    public JkPathTree andMatching(boolean positive, Iterable<String> globPatterns) {
+        return andMatcher(JkPathMatcher.of(positive, this.getRoot().getFileSystem(), globPatterns));
     }
 
     // ------------------------ Misc ---------------------------------------

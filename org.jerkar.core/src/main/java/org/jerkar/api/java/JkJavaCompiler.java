@@ -184,7 +184,7 @@ public final class JkJavaCompiler {
         List<File> result = new LinkedList<>();
         for (Path path : paths) {
             if (Files.isDirectory(path)) {
-                JkPathTree.of(path).andAccept("**/*.java").stream().forEach(pat -> result.add(pat.toFile()));
+                JkPathTree.of(path).andMatching(true, "**/*.java").stream().forEach(pat -> result.add(pat.toFile()));
             } else {
                 result.add(path.toFile());
             }
@@ -196,7 +196,7 @@ public final class JkJavaCompiler {
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSourceFiles()) {
             if (Files.isDirectory(file)) {
-                JkPathTree.of(file).andAccept("**/*.java").stream().forEach(path -> sourcePaths.add(path.toString()));
+                JkPathTree.of(file).andMatching(true, "**/*.java").stream().forEach(path -> sourcePaths.add(path.toString()));
             } else {
                 sourcePaths.add(file.toAbsolutePath().toString());
             }

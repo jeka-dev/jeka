@@ -236,11 +236,11 @@ final class DotClasspathModel {
             JkPathTree jkFileTree = JkPathTree.of(dir);
             if (!excluding.isEmpty()) {
                 final String[] patterns = excluding.split("\\|");
-                jkFileTree = jkFileTree.andReject(patterns);
+                jkFileTree = jkFileTree.andMatching(false, patterns);
             }
             if (!including.isEmpty()) {
                 final String[] patterns = including.split("\\|");
-                jkFileTree = jkFileTree.andAccept(patterns);
+                jkFileTree = jkFileTree.andMatching(true, patterns);
             }
             return jkFileTree;
         }
@@ -277,7 +277,7 @@ final class DotClasspathModel {
                     return Collections.emptyList();
                 }
             }
-            final JkPathTree dirView = JkPathTree.of(conFolder).andAccept("**.jar");
+            final JkPathTree dirView = JkPathTree.of(conFolder).andMatching(true, "**.jar");
             final List<Path> result = new LinkedList<>();
             result.addAll(dirView.getFiles());
             return result;

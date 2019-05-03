@@ -133,7 +133,7 @@ public final class JkClasspath implements Iterable<Path> {
         for (final Path classpathEntry : this.entries) {
             JkPathTree tree = Files.isDirectory(classpathEntry) ?
                     JkPathTree.of(classpathEntry) : JkPathTree.ofZip(classpathEntry);
-            result.addAll(tree.andAccept(globPatterns).getRelativeFiles());
+            result.addAll(tree.andMatching(true, globPatterns).getRelativeFiles());
         }
         return result;
     }
@@ -221,7 +221,7 @@ public final class JkClasspath implements Iterable<Path> {
                             + " does not exist : classpath entry " + file
                             + " will be ignored.");
                 } else {
-                    result.addAll(JkPathTree.of(parent).andAccept("*.jar").getFiles());
+                    result.addAll(JkPathTree.of(parent).andMatching(true,"*.jar").getFiles());
                 }
             } else if (!Files.exists(file)) {
                 JkLog.trace("File " + file + " does not exist : classpath entry "
@@ -250,7 +250,7 @@ public final class JkClasspath implements Iterable<Path> {
                         + " does not exist : classpath entry " + candidatePath
                         + " will be ignored.");
             } else {
-                result.addAll(JkPathTree.of(parent).andAccept("**.jar").getFiles());
+                result.addAll(JkPathTree.of(parent).andMatching(true,"**.jar").getFiles());
             }
         } else {
             result.add(Paths.get(candidatePath));

@@ -67,13 +67,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             return JkDependencySet.of();
         }
         return JkDependencySet.of()
-                .and(JkFileSystemDependency.of(libDir.andAccept("*.jar", "compile/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andMatching(true, "*.jar", "compile/*.jar").getFiles()))
                 .withDefaultScopes(JkJavaDepScopes.COMPILE)
-                .and(JkFileSystemDependency.of(libDir.andAccept("provided/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andMatching(true,"provided/*.jar").getFiles()))
                 .withDefaultScopes(JkJavaDepScopes.PROVIDED)
-                .and(JkFileSystemDependency.of(libDir.andAccept("runtime/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andMatching(true,"runtime/*.jar").getFiles()))
                 .withDefaultScopes(JkJavaDepScopes.RUNTIME)
-                .and(JkFileSystemDependency.of(libDir.andAccept("test/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andMatching(true,"test/*.jar").getFiles()))
                 .withDefaultScopes(JkJavaDepScopes.TEST);
     }
 

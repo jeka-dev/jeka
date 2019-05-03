@@ -33,7 +33,7 @@ import java.util.*;
  */
 final class Engine {
 
-    private final JkPathMatcher RUN_SOURCE_MATCHER = JkPathMatcher.ofAccept("**.java").andReject("**/_*", "_*");
+    private final JkPathMatcher RUN_SOURCE_MATCHER = JkPathMatcher.of(true,"**.java").and(false, "**/_*", "_*");
 
     private final Path projectBaseDir;
 
@@ -175,7 +175,7 @@ final class Engine {
         final List<Path>  extraLibs = new LinkedList<>();
         final Path localDefLibDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
         if (Files.exists(localDefLibDir)) {
-            extraLibs.addAll(JkPathTree.of(localDefLibDir).andAccept("**.jar").getFiles());
+            extraLibs.addAll(JkPathTree.of(localDefLibDir).andMatching(true,"**.jar").getFiles());
         }
         return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
@@ -204,7 +204,8 @@ final class Engine {
                     " instead of the ones located in this project.");
             throw e;
         }
-        JkPathTree.of(this.resolver.runSourceDir).andReject("**/*.java").copyTo(this.resolver.runClassDir,
+        JkPathTree.of(this.resolver.runSourceDir).andMatching(false, "**/*.java")
+                .copyTo(this.resolver.runClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
