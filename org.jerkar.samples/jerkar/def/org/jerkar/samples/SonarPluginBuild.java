@@ -33,13 +33,11 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
                     .and(JUNIT, "4.11", JkJavaDepScopes.TEST));
     }
 
-
     public void runSonar() {
         this.getPlugins().get(JkPluginSonar.class).run();
     }
 
     enum SonarEnv {
-        
         DEV("dev.myhost:81"), 
         QA("qa.myhost:81"), 
         PROD("prod.myhost:80");

@@ -44,7 +44,7 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
     static JkResourceProcessor.JkInterpolator interpolator() {
         Map<String, String> varReplacement = new HashMap<>();
         varReplacement.put("${server.ip}", "123.213.111.12");
-        return JkResourceProcessor.JkInterpolator.of(JkPathMatcher.of(true, "**/*.xml"), varReplacement);
+        return JkResourceProcessor.JkInterpolator.of(JkPathMatcher.of("**/*.xml"), varReplacement);
     }
 
     JkRepoSet publishRepositories() {
