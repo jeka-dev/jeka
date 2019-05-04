@@ -8,7 +8,7 @@ public class PureApi {
     public static void main(String[] args) {
         JkLog.registerHierarchicalConsoleHandler();  // activate console logging
 
-        // A project with ala Maven layout (src/main/java, src/test/java, ...)
+        // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
         JkJavaProject coreProject = JkJavaProject.ofMavenLayout("../org.jerkar.samples");
         coreProject.addDependencies(
                 JkDependencySet.of().and("junit:junit:4.11", JkJavaDepScopes.TEST));

@@ -5,7 +5,8 @@ import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkResourceProcessor;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,15 +23,17 @@ import static org.jerkar.api.depmanagement.JkPopularModules.*;
  * 
  * @author Jerome Angibaud
  */
-public class MavenStyleBuild extends JkJavaProjectBuild {
+public class MavenStyleBuild extends JkRun {
+
+    public final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     @Override
     protected void setup() {
-        java().project()
+        javaPlugin.getProject()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());
-        java().project().getMaker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.ofMavenCentral()));
-        java().project().getMaker().getPublishTasks().setPublishRepos(publishRepositories());
+        javaPlugin.getProject().getMaker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.ofMavenCentral()));
+        javaPlugin.getProject().getMaker().getPublishTasks().setPublishRepos(publishRepositories());
 
     }
 

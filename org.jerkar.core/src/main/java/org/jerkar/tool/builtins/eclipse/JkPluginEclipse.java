@@ -60,7 +60,7 @@ public final class JkPluginEclipse extends JkPlugin {
     public void generateFiles() {
         final Path dotProject = getOwner().getBaseDir().resolve(".project");
         if (getOwner().getPlugins().hasLoaded(JkPluginJava.class)) {
-            final JkJavaProject javaProject = getOwner().getPlugins().get(JkPluginJava.class).project();
+            final JkJavaProject javaProject = getOwner().getPlugins().get(JkPluginJava.class).getProject();
             final List<Path> importedRunProjects = new LinkedList<>();
             for (final JkRun depRun : getOwner().getImportedRuns().getDirects()) {
                 importedRunProjects.add(depRun.getBaseTree().getRoot());

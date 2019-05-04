@@ -56,7 +56,7 @@ public class JkPluginJava extends JkPlugin {
         super(run);
         this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);
         this.project = JkJavaProject.ofMavenLayout(this.getOwner().getBaseDir());
-        this.project.setDependencies(JkDependencySet.ofLocal(project().getSourceLayout()
+        this.project.setDependencies(JkDependencySet.ofLocal(getProject().getSourceLayout()
                 .getBaseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
         final Path path = this.project.getSourceLayout().getBaseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
         if (Files.exists(path)) {
@@ -137,7 +137,7 @@ public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ Accessors -----------------------------------------
 
-    public JkJavaProject project() {
+    public JkJavaProject getProject() {
         return project;
     }
 
@@ -146,7 +146,7 @@ public class JkPluginJava extends JkPlugin {
     }
 
     public JkPathTree ouputTree() {
-        return JkPathTree.of(this.project().getMaker().getOutLayout().getOutputPath());
+        return JkPathTree.of(this.getProject().getMaker().getOutLayout().getOutputPath());
     }
 
     // ------------------------------- command line methods -----------------------------
@@ -176,7 +176,7 @@ public class JkPluginJava extends JkPlugin {
         JkLog.info("Declared dependencies : ");
         project.getDependencies().toResolvedModuleVersions().toList().forEach(dep -> JkLog.info(dep.toString()));
         JkLog.info("Resolved to : ");
-        final JkResolveResult resolveResult = this.project().getMaker().getDependencyResolver()
+        final JkResolveResult resolveResult = this.getProject().getMaker().getDependencyResolver()
                 .resolve(this.project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME));
         final JkDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
@@ -217,9 +217,9 @@ public class JkPluginJava extends JkPlugin {
     private JkJavaCompiler compiler() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
         final JkProcess process =  JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
-                project().getCompileSpec().getSourceVersion().get());
+                getProject().getCompileSpec().getSourceVersion().get());
         if (process != null) {
-            return project().getMaker().getCompileTasks().getCompiler().withForking(process);
+            return getProject().getMaker().getCompileTasks().getCompiler().withForking(process);
         }
         return project.getMaker().getCompileTasks().getCompiler();
     }

@@ -27,7 +27,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
     protected void activate() {
         JkPluginJava pluginJava = getOwner().getPlugins().get(JkPluginJava.class);
         if (pluginJava != null) {
-            final JkJavaProject project = pluginJava.project();
+            final JkJavaProject project = pluginJava.getProject();
             final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(smartScope);
             classpathApplier.apply(project);
         } else {

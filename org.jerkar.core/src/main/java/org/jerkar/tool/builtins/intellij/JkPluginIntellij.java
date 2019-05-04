@@ -41,7 +41,7 @@ public final class JkPluginIntellij extends JkPlugin {
     public void generateIml() {
         final JkImlGenerator generator;
         if (getOwner().getPlugins().hasLoaded(JkPluginJava.class)) {
-            generator = JkImlGenerator.of(getOwner().getPlugins().get(JkPluginJava.class).project());
+            generator = JkImlGenerator.of(getOwner().getPlugins().get(JkPluginJava.class).getProject());
         } else {
             generator = JkImlGenerator.of(getOwner().getBaseDir());
         }
@@ -55,7 +55,7 @@ public final class JkPluginIntellij extends JkPlugin {
         generator.setImportedProjects(depProjects);
         Path basePath = getOwner().getBaseDir();
         if (getOwner().getPlugins().hasLoaded(JkPluginJava.class)) {
-            JkJavaProject project = getOwner().getPlugins().get(JkPluginJava.class).project();
+            JkJavaProject project = getOwner().getPlugins().get(JkPluginJava.class).getProject();
             if (!onlyRunDependencies) {
                 generator.setDependencies(project.getMaker().getDependencyResolver(), project.getDependencies());
             } else {

@@ -1,5 +1,4 @@
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.java.project.JkProjectSourceLayout;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
@@ -11,7 +10,7 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 class Build extends JkJavaProjectBuild {
 
     protected Build() {
-        java().projectVersion = "0.1-SNAPSHOT";
+        javaPlugin().projectVersion = "0.1-SNAPSHOT";
     }
 
     /*
@@ -33,6 +32,6 @@ class Build extends JkJavaProjectBuild {
     public static void main(String[] args) throws Exception {
         Build build = JkInit.instanceOf(Build.class, args);
         build.clean();
-        build.java().pack();
+        build.javaPlugin().pack();
     }
 }

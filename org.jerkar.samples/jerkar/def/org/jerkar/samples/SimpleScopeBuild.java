@@ -1,25 +1,26 @@
 package org.jerkar.samples;
 
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
-import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
-
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.builtins.java.JkPluginJava;
+
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
+import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 
 /**
  * This build illustrates how one can use other dependency scope mapping then the standard ones.
  */
-public class SimpleScopeBuild extends JkJavaProjectBuild {
+public class SimpleScopeBuild extends JkRun {
 
     private static final JkScope FOO = JkScope.of("foo");
 
+    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+
     @Override
     protected void setup() {
-        java().project().setDependencies(JkDependencySet.of()
+        javaPlugin.getProject().setDependencies(JkDependencySet.of()
                 .andFile(getBaseDir().resolve("libs/foo.jar"))
                 .and(JERSEY_SERVER, "1.19", JkScopeMapping
                     .of(COMPILE).to(RUNTIME.getName())

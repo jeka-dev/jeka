@@ -3,8 +3,9 @@ package org.jerkar.samples;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.tool.JkInit;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.jacoco.JkPluginJacoco;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
@@ -12,11 +13,13 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 /**
  * This build deletes artifacts, compiles, tests and launches SonarQube analyse.
  */
-public class JacocoPluginBuild extends JkJavaProjectBuild {
+public class JacocoPluginBuild extends JkRun {
+
+    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     @Override
     protected void setup() {
-        java().project()
+        javaPlugin.getProject()
                 .setDependencies(JkDependencySet.of()
                 .and(GUAVA, "18.0")
                 .and(JUNIT, "4.11", JkJavaDepScopes.TEST));
@@ -24,7 +27,7 @@ public class JacocoPluginBuild extends JkJavaProjectBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(JacocoPluginBuild.class, args).java().project().getMaker().getTestTasks().run();
+        JkInit.instanceOf(JacocoPluginBuild.class, args).javaPlugin.getProject().getMaker().getTestTasks().run();
     }
 
 }

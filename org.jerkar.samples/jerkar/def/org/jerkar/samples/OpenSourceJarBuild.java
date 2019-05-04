@@ -1,12 +1,13 @@
 package org.jerkar.samples;
 
+import org.jerkar.api.depmanagement.JkDependencySet;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.builtins.java.JkPluginJava;
+
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
-
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * This build demonstrates how to specify project metadata required to publish on
@@ -14,7 +15,9 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
  * 
  * @author Jerome Angibaud
  */
-public class OpenSourceJarBuild extends JkJavaProjectBuild {
+public class OpenSourceJarBuild extends JkRun {
+
+    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     @Override
     protected void setup() {
@@ -28,7 +31,7 @@ public class OpenSourceJarBuild extends JkJavaProjectBuild {
                 .andApache2License()
                 .andGitHubDeveloper("John Doe", "johndoe6591@gmail.com");
         
-        java().project()
+        javaPlugin.getProject()
                 .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
                 .addDependencies(deps)
                 .setMavenPublicationInfo(info);

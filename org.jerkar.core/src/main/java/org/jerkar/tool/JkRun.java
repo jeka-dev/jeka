@@ -163,6 +163,15 @@ public class JkRun {
         return this.plugins;
     }
 
+    /**
+     * Shorthand to <code>getPlugins().get(<Pluginclass>)</code>.
+     * Returns the plugin instance of the specified class loaded in the holding JkRun instance. If it does not hold
+     * a plugin of the specified class at call time, the plugin is loaded then returned.
+     */
+    public <T extends JkPlugin> T getPlugin(Class<T> pluginClass) {
+        return getPlugins().get(pluginClass);
+    }
+
 
     // ------------------------------ run dependencies --------------------------------
 

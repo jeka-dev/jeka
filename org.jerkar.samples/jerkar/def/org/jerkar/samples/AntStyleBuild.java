@@ -9,9 +9,9 @@ import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
+import org.jerkar.tool.JkRun;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class AntStyleBuild extends JkRun {
 
-    Path src = getBaseDir().resolve("src/main/java");
+    Path src = getBaseDir().resolve("src/main/javaPlugin");
     Path buildDir = getBaseDir().resolve("build/output");
     Path classDir = getOutputDir().resolve("classes");
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
@@ -48,7 +48,7 @@ public class AntStyleBuild extends JkRun {
         varReplacement.put("${server.ip}", "123.211.11.0");
         JkResourceProcessor.of(JkPathTreeSet.of(src)).andInterpolate("**/*.properties", varReplacement)
                 .generateTo(classDir, Charset.forName("UTF-8"));
-        JkPathTree.of(src).andMatching(false, "**/*.java").copyTo(classDir);
+        JkPathTree.of(src).andMatching(false, "**/*.javaPlugin").copyTo(classDir);
     }
 
     public void jar() {

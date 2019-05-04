@@ -64,11 +64,7 @@ public class ResolverWithoutScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         System.out.println(resolveResult.getDependencyTree().toStringTree());
-        if (JkUtilsSystem.IS_WINDOWS) {
-            assertEquals(37, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
-        } else {
-            assertEquals(36, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
-        }
+        assertEquals(37, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
     }
 
     @Test

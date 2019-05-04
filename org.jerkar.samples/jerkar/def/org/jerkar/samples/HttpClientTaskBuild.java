@@ -1,22 +1,19 @@
 package org.jerkar.samples;
 
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
-import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
-import static org.jerkar.api.depmanagement.JkPopularModules.JAVAX_SERVLET_API;
-import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
-import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
-
-import java.io.IOException;
-
+import com.google.common.base.MoreObjects;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImport;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
-import com.google.common.base.MoreObjects;
+import java.io.IOException;
+
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
+import static org.jerkar.api.depmanagement.JkPopularModules.*;
 
 /**
  * This build demonstrates how to use 3rd party dependencies into your build class.
@@ -26,11 +23,13 @@ import com.google.common.base.MoreObjects;
  */
 @JkImport("commons-httpclient:commons-httpclient:3.1")
 @JkImport("com.google.guava:guava:21.0")
-public class HttpClientTaskBuild extends JkJavaProjectBuild {
+public class HttpClientTaskBuild extends JkRun {
+
+    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
     
     @Override
     protected void setup() {
-        java().project().setDependencies(dependencies());
+        javaPlugin.getProject().setDependencies(dependencies());
     }
 
 

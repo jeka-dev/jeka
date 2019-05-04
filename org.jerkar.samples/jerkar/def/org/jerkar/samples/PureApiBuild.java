@@ -5,8 +5,8 @@ import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkInit;
+import org.jerkar.tool.JkRun;
 
 /**
  * This should be run with org.jerkar.samples as working dir.

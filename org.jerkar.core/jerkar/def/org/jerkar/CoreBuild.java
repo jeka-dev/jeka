@@ -6,11 +6,13 @@ import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,36 +24,40 @@ import static org.jerkar.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID
 /**
  * Build class for Jerkar. Run main method to create full distrib.
  */
-public class CoreBuild extends JkJavaProjectBuild {
+public class CoreBuild extends JkRun {
 
     public static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 
     private static final String VERSION = "0.7-SNAPSHOT";
+
+    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     private Path distribFolder;
 
     public String githubSiteRoot = "../../jerkar.github.io";
 
     protected CoreBuild() {
-        java().tests.fork = false;
-        java().pack.javadoc = true;
+        javaPlugin.tests.fork = false;
+        javaPlugin.pack.javadoc = true;
     }
 
     @Override
     protected void setup()  {
-        project().setVersionedModule(JkModuleId.of("org.jerkar:core").getVersion(VERSION));
-        project().setSourceVersion(JkJavaVersion.V8);
-        project().setMavenPublicationInfo(mavenPublication());
+        JkJavaProject project = javaPlugin.getProject();
+        project.setVersionedModule(JkModuleId.of("org.jerkar:core").getVersion(VERSION));
+        project.setSourceVersion(JkJavaVersion.V8);
+        project.setMavenPublicationInfo(mavenPublication());
 
-        maker().getCompileTasks().setFork(true);  // Fork to avoid compile failure bug on github/travis
-        maker().getTestTasks().setFork(true);
-        maker().getPublishTasks().setPublishRepos(publishRepos());
-        maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
-        this.distribFolder = maker().getOutLayout().getOutputPath().resolve("distrib");
+        JkJavaProjectMaker maker = project.getMaker();
+        maker.getCompileTasks().setFork(true);  // Fork to avoid compile failure bug on github/travis
+        maker.getTestTasks().setFork(true);
+        maker.getPublishTasks().setPublishRepos(publishRepos());
+        maker.defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
+        this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
     }
 
     private void doDistrib() {
-        final JkJavaProjectMaker maker = this.maker();
+        final JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
         maker.makeMissingArtifacts(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
@@ -64,13 +70,13 @@ public class CoreBuild extends JkJavaProjectBuild {
         distrib.goTo("libs-sources")
             .bring(ivySourceLibs)
             .bring(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
-        if (java().pack.javadoc) {
+        if (javaPlugin.pack.javadoc) {
             maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.goTo("libs-javadoc").bring(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         JkLog.execute("Making documentation", () -> new DocMaker(getBaseDir(), distribFolder,
-                project().getVersionedModule().getVersion().getValue()).assembleAllDoc());
-        if (java().tests.runIT) {
+                javaPlugin.getProject().getVersionedModule().getVersion().getValue()).assembleAllDoc());
+        if (javaPlugin.tests.runIT) {
             testSamples();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
@@ -122,7 +128,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     public void doDefault() {
         clean();
         doDistrib();
-        maker().getPublishTasks().publishLocal();
+        javaPlugin.getProject().getMaker().getPublishTasks().publishLocal();
     }
 
 }

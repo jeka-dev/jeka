@@ -3,7 +3,8 @@ import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.samples.MavenStyleBuild;
 import org.jerkar.tool.JkImportRun;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
 /**
  * Simple build demonstrating how Jerkar can handle multi-project build.
@@ -18,7 +19,9 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
  * 
  * @formatter:off
  */
-public class NormalJarBuild extends JkJavaProjectBuild {
+public class NormalJarBuild extends JkRun {
+
+    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.
@@ -30,13 +33,13 @@ public class NormalJarBuild extends JkJavaProjectBuild {
 
     @Override
     protected void setup() {
-        project()
-                .setDependencies(JkDependencySet.of().and(sampleBuild.java().project()))
+        javaPlugin.getProject()
+                .setDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()))
                 .setSourceVersion(JkJavaVersion.V7);
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(NormalJarBuild.class).maker().makeAllArtifacts();
+        JkInit.instanceOf(NormalJarBuild.class).javaPlugin.getProject().getMaker().makeAllArtifacts();
     }
 
 }
