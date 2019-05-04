@@ -52,7 +52,9 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 /**
  * @formatter:off
  */
-class Build extends JkJavaProjectBuild {
+class Build extends JkRun {
+
+    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     protected Build() {
         java().projectVersion = "0.1-SNAPSHOT";
@@ -64,7 +66,7 @@ class Build extends JkJavaProjectBuild {
      */
     @Override
     protected void setup() {
-        project()   // Configure project structure and dependencies
+        javaPlugin.getProject()   // Configure project structure and dependencies
                 .setSourceVersion(JkJavaVersion.V8)
                 .setDependencies(dependencies());
     }
@@ -78,7 +80,7 @@ class Build extends JkJavaProjectBuild {
     public static void main(String[] args) {   // To run conveniently from IDE
         Build build = JkInit.instanceOf(Build.class, args);
         build.clean();
-        build.java().pack();
+        build.javaPlugin.pack();
     }
 }
 ```
