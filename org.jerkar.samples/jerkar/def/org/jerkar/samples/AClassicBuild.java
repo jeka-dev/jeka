@@ -42,9 +42,9 @@ public class AClassicBuild extends JkRun {
                         .and("com.sun.jersey:jersey-server:1.19")
                         .and("junit:junit:4.11", TEST));
         JkJavaProjectMaker maker = project.getMaker();
-        maker.getCompileTasks().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
+        maker.getTasksForCompilation().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
         maker.defineMainArtifactAsFatJar(false);  // project will produce a fat jar as well.
-        maker.getTestTasks().setForkRun(true);
+        maker.getTasksForTesting().setForkRun(true);
     }
     
     public static void main(String[] args) {

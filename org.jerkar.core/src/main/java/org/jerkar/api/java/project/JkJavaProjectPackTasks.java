@@ -56,8 +56,8 @@ public class JkJavaProjectPackTasks {
     }
 
     public void createBinJar(Path target) {
-        maker.getCompileTasks().runIfNecessary();
-        maker.getTestTasks().runIfNecessary();
+        maker.getTasksForCompilation().runIfNecessary();
+        maker.getTasksForTesting().runIfNecessary();
         JkJavaProject project = maker.project;
         JkJarPacker.of(maker.getOutLayout().getClassDir())
                 .withManifest(project.getManifest())
@@ -67,8 +67,8 @@ public class JkJavaProjectPackTasks {
 
 
     public void createFatJar(Path target) {
-        maker.getCompileTasks().runIfNecessary();
-        maker.getTestTasks().runIfNecessary();
+        maker.getTasksForCompilation().runIfNecessary();
+        maker.getTasksForTesting().runIfNecessary();
         JkClasspath classpath = JkClasspath.of(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
         JkJarPacker.of( maker.getOutLayout().getClassDir())
                 .withManifest(maker.project.getManifest())
@@ -81,7 +81,7 @@ public class JkJavaProjectPackTasks {
     }
 
     void createJavadocJar(Path target) {
-        maker.getJavadocTasks().runIfNecessary();
+        maker.getTasksForJavadoc().runIfNecessary();
         Path javadocDir = maker.getOutLayout().getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
@@ -91,8 +91,8 @@ public class JkJavaProjectPackTasks {
     }
 
     public void createTestJar(Path target) {
-        maker.getCompileTasks().runIfNecessary();
-        maker.getTestTasks().runIfNecessary();
+        maker.getTasksForCompilation().runIfNecessary();
+        maker.getTasksForTesting().runIfNecessary();
         JkJarPacker.of(maker.getOutLayout().getTestClassDir())
                 .withManifest(maker.project.getManifest())
                 .makeJar(target);

@@ -49,10 +49,10 @@ public class CoreBuild extends JkRun {
         project.setMavenPublicationInfo(mavenPublication());
 
         JkJavaProjectMaker maker = project.getMaker();
-        maker.getCompileTasks().setFork(true);  // Fork to avoid compile failure bug on github/travis
-        maker.getTestTasks().setFork(true);
-        maker.getPublishTasks().setPublishRepos(publishRepos());
-        maker.defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
+        maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
+        maker.getTasksForTesting().setFork(true);
+        maker.getTasksForPublishing().setPublishRepos(publishRepos());
+        maker.addArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
     }
 
@@ -128,7 +128,7 @@ public class CoreBuild extends JkRun {
     public void doDefault() {
         clean();
         doDistrib();
-        javaPlugin.getProject().getMaker().getPublishTasks().publishLocal();
+        javaPlugin.getProject().getMaker().getTasksForPublishing().publishLocal();
     }
 
 }

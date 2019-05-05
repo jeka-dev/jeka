@@ -168,13 +168,13 @@ public class JkJavaProjectTestTasks {
      * </ul>
      */
     public void run() {
-        maker.getCompileTasks().runIfNecessary();
+        maker.getTasksForCompilation().runIfNecessary();
         JkLog.startTask("Running unit tests");
         if (maker.project.getSourceLayout().getTests().count(0, false) == 0) {
             JkLog.info("No unit test found in : " + maker.project.getSourceLayout().getTests());
             JkLog.endTask();
         } else {
-            this.maker.getCompileTasks().runIfNecessary();
+            this.maker.getTasksForCompilation().runIfNecessary();
             preTest.run();
             compileRunner.run();
             resourceGenerator.run();

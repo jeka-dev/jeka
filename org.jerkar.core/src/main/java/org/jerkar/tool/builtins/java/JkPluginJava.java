@@ -83,46 +83,46 @@ public class JkPluginJava extends JkPlugin {
     private void applyOptionsToUnderlyingProject() {
         final JkJavaProjectMaker maker = project.getMaker();
         if (!pack.sources) {
-            maker.undefineArtifact(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
+            maker.removeArtifact(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
         }
         if (pack.javadoc) {
-            maker.defineJavadocArtifact();
+            maker.addJavadocArtifact();
         }
         if (pack.tests) {
-            maker.defineTestArtifact();
+            maker.addTestArtifact();
         }
         if (pack.testSources) {
-            maker.defineTestSourceArtifact();
+            maker.addTestSourceArtifact();
         }
-        if (maker.getCompileTasks().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
-            maker.getCompileTasks().setCompiler(compiler());
+        if (maker.getTasksForCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
+            maker.getTasksForCompilation().setCompiler(compiler());
         }
-        maker.getPublishTasks().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
+        maker.getTasksForPublishing().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         JkDependencyResolver resolver = project.getMaker().getDependencyResolver();
         resolver = resolver.withRepos(downloadRepo); // always look in local repo
         maker.setDependencyResolver(resolver);
         if (pack.checksums().length > 0) {
-            maker.getPackTasks().setChecksumAlgorithms(pack.checksums());
+            maker.getTasksForPackaging().setChecksumAlgorithms(pack.checksums());
         }
         if (publish.signArtifacts) {
             JkPluginPgp pgpPlugin = this.getRun().getPlugins().get(JkPluginPgp.class);
             JkPgp pgp = pgpPlugin.get();
-            maker.getPublishTasks().setSigner(pgp::sign);
+            maker.getTasksForPublishing().setSigner(pgp::sign);
         }
-        JkUnit tester = maker.getTestTasks().getRunner();
+        JkUnit tester = maker.getTasksForTesting().getRunner();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             tester = tester.withForking(javaProcess);
         }
         if (tests.runIT) {
-            maker.getTestTasks().setTestClassMatcher(maker.getTestTasks().getTestClassMatcher()
+            maker.getTasksForTesting().setTestClassMatcher(maker.getTasksForTesting().getTestClassMatcher()
                     .and(true, JkJavaProjectTestTasks.IT_CLASS_PATTERN));
         }
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);
-        maker.getTestTasks().setRunner(tester);
-        maker.getTestTasks().setSkipTests(tests.skip);
+        maker.getTasksForTesting().setRunner(tester);
+        maker.getTasksForTesting().setSkipTests(tests.skip);
         if (this.compilerExtraArgs != null) {
             project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
@@ -168,12 +168,12 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
-        project.getMaker().getCompileTasks().run();
+        project.getMaker().getTasksForCompilation().run();
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
     public void test() {
-        project.getMaker().getTestTasks().run();
+        project.getMaker().getTasksForTesting().run();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
@@ -206,12 +206,12 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
-        project.getMaker().getPublishTasks().publish();
+        project.getMaker().getTasksForPublishing().publish();
     }
 
     @JkDoc("Publishes produced artifacts to local repository.")
     public void publishLocal() {
-        project.getMaker().getPublishTasks().publishLocal();
+        project.getMaker().getTasksForPublishing().publishLocal();
     }
 
     @JkDoc("Fetches project dependencies in cache.")
@@ -234,9 +234,9 @@ public class JkPluginJava extends JkPlugin {
         final JkProcess process =  JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
                 getProject().getCompileSpec().getSourceVersion().get());
         if (process != null) {
-            return getProject().getMaker().getCompileTasks().getCompiler().withForking(process);
+            return getProject().getMaker().getTasksForCompilation().getCompiler().withForking(process);
         }
-        return project.getMaker().getCompileTasks().getCompiler();
+        return project.getMaker().getTasksForCompilation().getCompiler();
     }
 
 }

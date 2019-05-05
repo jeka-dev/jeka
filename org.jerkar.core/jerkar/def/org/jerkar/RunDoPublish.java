@@ -12,6 +12,6 @@ class RunDoPublish {
      */
     public static void main(String[] args) {
         JkInit.instanceOf(CoreBuild.class, "-java#publish.signArtifacts=false, -java#publish.localOnly")
-                .javaPlugin.getProject().getMaker().getPublishTasks().publish();
+                .javaPlugin.getProject().getMaker().getTasksForPublishing().publish();
     }
 }
