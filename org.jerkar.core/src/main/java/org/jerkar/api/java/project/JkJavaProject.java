@@ -159,7 +159,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public void addResourceInterpolator(String acceptPattern, Map<String, String> valueReplacements) {
-        addResourceInterpolator(JkPathMatcher.of(true, acceptPattern), valueReplacements);
+        addResourceInterpolator(JkPathMatcher.of(acceptPattern), valueReplacements);
     }
 
     /**

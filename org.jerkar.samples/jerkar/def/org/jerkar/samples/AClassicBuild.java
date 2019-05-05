@@ -48,7 +48,7 @@ public class AClassicBuild extends JkRun {
     }
     
     public static void main(String[] args) {
-	    JkInit.instanceOf(AClassicBuild.class, args).javaPlugin.getProject().getMaker().makeAllArtifacts();
+	    JkInit.instanceOf(AClassicBuild.class, args).javaPlugin.clean().pack();
     }
 
 }

@@ -39,7 +39,7 @@ public class NormalJarBuild extends JkRun {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(NormalJarBuild.class).javaPlugin.getProject().getMaker().makeAllArtifacts();
+        JkInit.instanceOf(NormalJarBuild.class).javaPlugin.clean().pack();
     }
 
 }

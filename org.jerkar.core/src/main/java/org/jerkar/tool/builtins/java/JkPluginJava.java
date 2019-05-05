@@ -135,6 +135,16 @@ public class JkPluginJava extends JkPlugin {
         scaffoldPlugin.setRunClassClode(code);
     }
 
+    //  ----------------------------- Shorthands ---------------------------------------
+
+    /**
+     * Cleans the output directory for the project
+     */
+    public JkPluginJava clean() {
+        this.getOwner().clean();
+        return this;
+    }
+
     // ------------------------------ Accessors -----------------------------------------
 
     public JkJavaProject getProject() {

@@ -28,7 +28,7 @@ public class FatJarBuild extends JkRun {
     } 
     
     public static void main(String[] args) {
-		JkInit.instanceOf(FatJarBuild.class, "-javaPlugin#tests.fork").javaPlugin.getProject().getMaker().makeAllArtifacts();
+		JkInit.instanceOf(FatJarBuild.class, "-javaPlugin#tests.fork").javaPlugin.clean().pack();
 	}
 
    

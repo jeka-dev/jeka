@@ -27,7 +27,7 @@ public class JacocoPluginBuild extends JkRun {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(JacocoPluginBuild.class, args).javaPlugin.getProject().getMaker().getTestTasks().run();
+        JkInit.instanceOf(JacocoPluginBuild.class, args).javaPlugin.test();
     }
 
 }
