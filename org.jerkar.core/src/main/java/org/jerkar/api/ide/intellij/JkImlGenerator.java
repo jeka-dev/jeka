@@ -278,7 +278,6 @@ public final class JkImlGenerator {
 
     private void writeDependencies(JkDependencySet dependencies, JkDependencyResolver resolver, Set<Path> allPaths, Set<Path> allModules,
                                    boolean forceTest) throws XMLStreamException {
-
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         final JkDependencyNode tree = resolveResult.getDependencyTree();
         for (final JkDependencyNode node : tree.toFlattenList()) {

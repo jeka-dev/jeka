@@ -3,6 +3,7 @@ package org.jerkar.tool.builtins.intellij;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.ide.intellij.JkImlGenerator;
 import org.jerkar.api.java.project.JkJavaProject;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.*;
@@ -96,8 +97,18 @@ public final class JkPluginIntellij extends JkPlugin {
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
-            JkLog.execute("Generating iml file on " + projectFolder, () ->
-                Main.exec(projectFolder, "intellij#generateIml"));
+            JkLog.startTask("Generating iml file on " + projectFolder);
+            try {
+                Main.exec(projectFolder, "intellij#generateIml");
+            } catch (Exception e) {
+                JkLog.warn("Generating Iml failed : Try to generate it using -RC=JkRun option.");
+                try {
+                    Main.exec(projectFolder, "intellij#generateIml", "-RC=JkRun");
+                } catch (Exception e1) {
+                    JkLog.warn("Generatint Iml file failed;");
+                }
+            }
+            JkLog.endTask();
         }
     }
 
