@@ -30,11 +30,6 @@ import java.util.Map;
 @JkDocPluginDeps({JkPluginRepo.class, JkPluginScaffold.class})
 public class JkPluginJava extends JkPlugin {
 
-    // ------------------------------ options -------------------------------------------
-
-    @JkDoc("Version for the project to build.")
-    public String projectVersion;
-
     // ------------  Options injectable by command line --------------------------------
 
     /**
@@ -86,9 +81,6 @@ public class JkPluginJava extends JkPlugin {
     }
 
     private void applyOptionsToUnderlyingProject() {
-        if (project.getVersionedModule() != null && !JkUtilsString.isBlank(projectVersion)) {
-            project.setVersionedModule(project.getVersionedModule().withVersion(projectVersion));
-        }
         final JkJavaProjectMaker maker = project.getMaker();
         if (!pack.sources) {
             maker.undefineArtifact(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
