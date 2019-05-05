@@ -18,7 +18,7 @@ public class JkPluginPom extends JkPlugin {
 
     @JkDoc("Prints Java code for declaring dependencies on console based on pom.xml. The pom.xml file is supposed to be in root directory.")
     public void dependencyCode() {
-        Path pomPath = getOwner().getBaseDir().resolve("pom.xml");
+        Path pomPath = getRun().getBaseDir().resolve("pom.xml");
         if (!Files.exists(pomPath)) {
             throw new JkException("No pom file found at " + pomPath);
         }

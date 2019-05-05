@@ -20,7 +20,7 @@ public class SimpleScopeBuild extends JkRun {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().setDependencies(JkDependencySet.of()
+        javaPlugin.getProject().addDependencies(JkDependencySet.of()
                 .andFile(getBaseDir().resolve("libs/foo.jar"))
                 .and(JERSEY_SERVER, "1.19", JkScopeMapping
                     .of(COMPILE).to(RUNTIME.getName())

@@ -31,7 +31,7 @@ public class SonarPluginBuild extends JkRun {
     protected void setup() {
         javaPlugin.getProject()
                 .setVersionedModule("org.jerkar:samples", "0.1")
-                .setDependencies(JkDependencySet.of()
+                .addDependencies(JkDependencySet.of()
                     .and(GUAVA, "18.0")
                     .and(JUNIT, "4.11", JkJavaDepScopes.TEST));
     }

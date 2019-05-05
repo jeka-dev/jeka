@@ -20,7 +20,7 @@ public class JacocoPluginBuild extends JkRun {
     @Override
     protected void setup() {
         javaPlugin.getProject()
-                .setDependencies(JkDependencySet.of()
+                .addDependencies(JkDependencySet.of()
                 .and(GUAVA, "18.0")
                 .and(JUNIT, "4.11", JkJavaDepScopes.TEST));
         getPlugins().get(JkPluginJacoco.class);

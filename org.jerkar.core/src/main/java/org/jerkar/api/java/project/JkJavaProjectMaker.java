@@ -49,12 +49,12 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private final JkJavaProjectJavadocTasks javadocTasks;
 
-    private final JkRunnables cleaner;
+    private final JkRunnables outputCleaner;
 
     JkJavaProjectMaker(JkJavaProject project) {
         outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(project.getBaseDir().resolve("jerkar/output"));
 
-        cleaner = JkRunnables.of(
+        outputCleaner = JkRunnables.of(
                 () -> JkPathTree.of(getOutLayout().getOutputPath()).deleteContent());
         final Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
                 Charset.forName(project.getCompileSpec().getEncoding());
@@ -234,8 +234,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Holds runnables executed while {@link #clean()} method is invoked. Add your own runnable if you want to
      * improve the <code>clean</code> method.
      */
-    public JkRunnables getCleaner() {
-        return cleaner;
+    public JkRunnables getOutputCleaner() {
+        return outputCleaner;
     }
 
     /**
@@ -245,7 +245,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         compileTasks.reset();
         testTasks.reset();
         javadocTasks.reset();
-        cleaner.run();
+        outputCleaner.run();
         return this;
     }
 

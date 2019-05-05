@@ -29,7 +29,7 @@ public class HttpClientTaskBuild extends JkRun {
     
     @Override
     protected void setup() {
-        javaPlugin.getProject().setDependencies(dependencies());
+        javaPlugin.getProject().addDependencies(dependencies());
     }
 
 

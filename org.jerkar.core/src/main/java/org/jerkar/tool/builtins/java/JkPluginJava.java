@@ -35,10 +35,21 @@ public class JkPluginJava extends JkPlugin {
     @JkDoc("Version for the project to build.")
     public String projectVersion;
 
+    // ------------  Options injectable by command line --------------------------------
+
+    /**
+     * Options for the publish tasks. These options are injectable from command line.
+     */
     public final JkPublishOptions publish = new JkPublishOptions();
 
+    /**
+     * Options for the packaging tasks (jar creation). These options are injectable from command line.
+     */
     public final JkJavaPackOptions pack = new JkJavaPackOptions();
 
+    /**
+     * Options for the testing tasks. These options are injectable from command line.
+     */
     public final JkTestOptions tests = new JkTestOptions();
 
     @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
@@ -54,15 +65,17 @@ public class JkPluginJava extends JkPlugin {
 
     protected JkPluginJava(JkRun run) {
         super(run);
-        this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);
-        this.project = JkJavaProject.ofMavenLayout(this.getOwner().getBaseDir());
-        this.project.setDependencies(JkDependencySet.ofLocal(getProject().getSourceLayout()
-                .getBaseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
-        final Path path = this.project.getSourceLayout().getBaseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
-        if (Files.exists(path)) {
-            this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.ofTextDescription(path)));
-        }
         this.scaffoldPlugin = run.getPlugins().get(JkPluginScaffold.class);
+        this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);
+
+        // Pre-configure JkJavaProject instance
+        this.project = JkJavaProject.ofMavenLayout(this.getRun().getBaseDir());
+        this.project.setDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
+        final Path path = run.getBaseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
+        if (Files.exists(path)) {
+            this.project.addDependencies(JkDependencySet.ofTextDescription(path));
+        }
+        this.project.getMaker().getOutputCleaner().set(() -> run.clean());
     }
 
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
@@ -101,7 +114,7 @@ public class JkPluginJava extends JkPlugin {
             maker.getPackTasks().setChecksumAlgorithms(pack.checksums());
         }
         if (publish.signArtifacts) {
-            JkPluginPgp pgpPlugin = this.getOwner().getPlugins().get(JkPluginPgp.class);
+            JkPluginPgp pgpPlugin = this.getRun().getPlugins().get(JkPluginPgp.class);
             JkPgp pgp = pgpPlugin.get();
             maker.getPublishTasks().setSigner(pgp::sign);
         }
@@ -125,7 +138,7 @@ public class JkPluginJava extends JkPlugin {
 
     private void setupScaffolder() {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
-        String baseDirName = getOwner().getBaseDir().getFileName().toString();
+        String baseDirName = getRun().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
         project.getSourceLayout().getSources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
@@ -141,7 +154,7 @@ public class JkPluginJava extends JkPlugin {
      * Cleans the output directory for the project
      */
     public JkPluginJava clean() {
-        this.getOwner().clean();
+        this.project.getMaker().clean();
         return this;
     }
 

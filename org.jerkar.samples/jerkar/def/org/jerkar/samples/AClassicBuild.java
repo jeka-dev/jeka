@@ -37,7 +37,7 @@ public class AClassicBuild extends JkRun {
     protected void setup() {
         JkJavaProject project = javaPlugin.getProject();
         project.setSourceVersion(JkJavaVersion.V7)
-                .setDependencies(JkDependencySet.of()
+                .addDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
                         .and("com.sun.jersey:jersey-server:1.19")
                         .and("junit:junit:4.11", TEST));

@@ -31,7 +31,7 @@ public class MavenStyleBuild extends JkRun {
     protected void setup() {
         javaPlugin.getProject()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
-                .setDependencies(dependencies());
+                .addDependencies(dependencies());
         javaPlugin.getProject().getMaker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.ofMavenCentral()));
         javaPlugin.getProject().getMaker().getPublishTasks().setPublishRepos(publishRepositories());
 

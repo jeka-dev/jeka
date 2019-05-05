@@ -12,15 +12,15 @@ public abstract class JkPlugin {
 
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
-    private final JkRun owner;
+    private final JkRun run;
 
     /*
      * Right after to be instantiated, plugin instances are likely to be configured by the owning run.
      * Therefore, every plugin members that are likely to be configured by the owning run must be
      * initialized in the constructor.
      */
-    protected JkPlugin(JkRun owner) {
-        this.owner = owner;
+    protected JkPlugin(JkRun run) {
+        this.run = run;
     }
 
     @JkDoc("Displays help about this plugin.")
@@ -44,8 +44,8 @@ public abstract class JkPlugin {
         return JkUtilsString.uncapitalize(suffix);
     }
 
-    protected JkRun getOwner() {
-        return owner;
+    protected JkRun getRun() {
+        return run;
     }
 
     @Override
