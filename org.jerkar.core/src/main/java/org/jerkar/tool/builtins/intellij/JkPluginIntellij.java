@@ -45,8 +45,8 @@ public final class JkPluginIntellij extends JkPlugin {
         }
         final List<Path> depProjects = getRun().getImportedRuns().getImportedRunRoots();
         generator.setUseVarPath(useVarPath);
-        generator.setRunDependencies(externalDir ? null : getRun().getRunDependencyResolver(), getRun().getRunDependencies());
-
+        generator.setRunDependencies(externalDir ? null : getRun().getRunDependencyResolver(),
+                getRun().getRunDependencies());
         generator.setImportedProjects(depProjects);
         Path basePath = getRun().getBaseDir();
         if (getRun().getPlugins().hasLoaded(JkPluginJava.class)) {
