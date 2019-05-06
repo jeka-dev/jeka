@@ -1,26 +1,26 @@
 import org.jerkar.api.depmanagement.JkDependencySet;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 
 /**
  * @formatter:off
  */
-class Build extends JkJavaProjectBuild {
+class Build extends JkRun{
 
-    protected Build() {
-        javaPlugin().projectVersion = "0.1-SNAPSHOT";
-    }
+    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     /*
      * Configures plugins to be bound to this run class. When this method is called, option
-     * fields have already been populated.
+     * fields have already been injected from command line.
      */
     @Override
     protected void setup() {
-        project()   // Configure project structure and dependencies
-                .addDependencies(dependencies());
+        JkJavaProject project = javaPlugin.getProject();
+        project.addDependencies(dependencies());
     }
 
     private JkDependencySet dependencies() {  // Example of dependencies.
@@ -29,9 +29,7 @@ class Build extends JkJavaProjectBuild {
                 .and("junit:junit:4.11", TEST);
     }
 
-    public static void main(String[] args) throws Exception {
-        Build build = JkInit.instanceOf(Build.class, args);
-        build.clean();
-        build.javaPlugin().pack();
+    public static void main(String[] args) {
+        JkInit.instanceOf(Build.class, args).javaPlugin.clean().pack();
     }
 }
