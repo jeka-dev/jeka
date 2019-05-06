@@ -44,9 +44,6 @@ public final class JkPluginIntellij extends JkPlugin {
             generator = JkImlGenerator.of(getRun().getBaseDir());
         }
         final List<Path> depProjects = getRun().getImportedRuns().getImportedRunRoots();
-        /*for (final JkRun depRun : getRun().getImportedRuns().getDirects()) {
-            depProjects.add(depRun.getBaseTree().getRoot());
-        }*/
         generator.setUseVarPath(useVarPath);
         generator.setRunDependencies(externalDir ? null : getRun().getRunDependencyResolver(), getRun().getRunDependencies());
 
@@ -54,7 +51,6 @@ public final class JkPluginIntellij extends JkPlugin {
         Path basePath = getRun().getBaseDir();
         if (getRun().getPlugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = getRun().getPlugins().get(JkPluginJava.class).getProject();
-            generator.setDependencies(project.getMaker().getDependencyResolver(), JkDependencySet.of());
             generator.setSourceJavaVersion(project.getSourceVersion());
             generator.setForceJdkVersion(true);
             if (externalDir) {
