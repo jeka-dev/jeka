@@ -43,32 +43,25 @@ This will generate a project skeleton with the following build class at _[PROJEC
 
 ```Java
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 
-/**
- * @formatter:off
- */
 class Build extends JkRun {
 
-    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
-
-    protected Build() {
-        java().projectVersion = "0.1-SNAPSHOT";
-    }
+    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     /*
-     * Configures plugins to be bound to this build class. When this method is called, run option
-     * fields have already been populated.
+     * Configures plugins to be bound to this run class. When this method is called, option
+     * fields have already been injected from command line.
      */
     @Override
     protected void setup() {
-        javaPlugin.getProject()   // Configure project structure and dependencies
-                .setSourceVersion(JkJavaVersion.V8)
-                .setDependencies(dependencies());
+        JkJavaProject project = javaPlugin.getProject();
+        project.addDependencies(dependencies());
     }
 
     private JkDependencySet dependencies() {  // Example of dependencies.
@@ -77,11 +70,10 @@ class Build extends JkRun {
                 .and("junit:junit:4.11", TEST);
     }
 
-    public static void main(String[] args) {   // To run conveniently from IDE
-        Build build = JkInit.instanceOf(Build.class, args);
-        build.clean();
-        build.javaPlugin.pack();
+    public static void main(String[] args) {
+        JkInit.instanceOf(Build.class, args).javaPlugin.clean().pack();
     }
+    
 }
 ```
 
@@ -95,7 +87,7 @@ Execute `jerkar java#info` to see an abstract of the project setup.
 ## Build your project
 
 1. Edit the Build.java source file above. For example, you can add compile dependencies.
-2. Just execute `jerkar clean java#pack` under the project base directory. This will compile, run test and package your project in a jar file.
+2. Just execute `jerkar clean java#pack` under the project base directory. This will compile, run test and package your project in a jar file. You can also lauch the `main` method from your IDE.
 
 ## Extra function
 
@@ -109,10 +101,10 @@ You can also set it by default in the build class constructor :
 
 ```Java
     protected Build() {
-        java().pack.javadoc = true;
-        java().pack.sources = true;
-        java().pack.tests = true;
-        java().pack.checksums = "sha-256";
+        javaPlugin.pack.javadoc = true;
+        javaPlugin.pack.sources = true;
+        javaPlugin.pack.tests = true;
+        javaPlugin.pack.checksums = "sha-256";
     }
 ```
 

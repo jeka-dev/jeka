@@ -6,10 +6,7 @@ import org.jerkar.tool.builtins.java.JkPluginJava;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 
-/**
- * @formatter:off
- */
-class Build extends JkRun{
+class Build extends JkRun {
 
     final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
@@ -32,4 +29,5 @@ class Build extends JkRun{
     public static void main(String[] args) {
         JkInit.instanceOf(Build.class, args).javaPlugin.clean().pack();
     }
+
 }
