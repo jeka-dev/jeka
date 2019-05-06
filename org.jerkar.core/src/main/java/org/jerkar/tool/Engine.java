@@ -41,7 +41,7 @@ final class Engine {
 
     private JkRepoSet runRepos;
 
-    private List<Path> rootsOfImportedRuns = new LinkedList<>();
+    private List<Path> rootOfImportedRuns = new LinkedList<>();
 
     private final RunResolver resolver;
 
@@ -79,14 +79,15 @@ final class Engine {
             path = path.andPrepending(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
+        preCompile();  // Need to pre-compile to get the declared run dependencies
         if (!JkUtilsString.isBlank(runClassHint)) {  // First find a class in the existing classpath without compiling
-            preCompile();  // Need to pre-compile to get the declared run dependencies
             jkRun = getRunInstance(runClassHint, path);
         }
         if (jkRun == null) {
             path = compile().and(path);
             jkRun = getRunInstance(runClassHint, path);
         }
+        jkRun.getImportedRuns().setImportedRunRoots(this.rootOfImportedRuns);
         if (jkRun == null) {
             throw new JkException("Can't find or guess any run class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a Jerkar project ?");
@@ -115,7 +116,7 @@ final class Engine {
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.runDependencies = this.runDependencies.and(parser.dependencies());
         this.runRepos = parser.importRepos().and(runRepos);
-        this.rootsOfImportedRuns = parser.projects();
+        this.rootOfImportedRuns = parser.projects();
     }
 
     // Compiles and returns the runtime classpath
@@ -182,11 +183,11 @@ final class Engine {
 
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
-        if (!this.rootsOfImportedRuns.isEmpty()) {
+        if (!this.rootOfImportedRuns.isEmpty()) {
             JkLog.info("Compile run classes of dependent projects : "
-                        + toRelativePaths(this.projectBaseDir, this.rootsOfImportedRuns));
+                        + toRelativePaths(this.projectBaseDir, this.rootOfImportedRuns));
         }
-        for (final Path file : this.rootsOfImportedRuns) {
+        for (final Path file : this.rootOfImportedRuns) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries);
             pathSequence = pathSequence.and(file);

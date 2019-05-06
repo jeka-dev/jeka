@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
 
-
 /**
  * Dependency on computed resource. More concretely, this is a file dependency on files that might not
  * be present at the time of the build and that has to be generated. Instances of this class are
@@ -63,7 +62,7 @@ public class JkComputedDependency implements JkFileDependency {
     }
 
     /**
-     * Identical to {@link #of(Path, JkJavaProcess, String, String...)} but you specified a set of files
+     * Same as {@link #of(Path, JkJavaProcess, String, String...)} but you must specify a set of files
      * instead of a single one.
      */
     public static final JkComputedDependency of(Iterable<Path> files, final JkJavaProcess process,
@@ -96,19 +95,13 @@ public class JkComputedDependency implements JkFileDependency {
      * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
      * generating them.
      */
-    protected JkComputedDependency(Runnable runnable, Path ideProjectBaseDir, Iterable<Path> files, Supplier<Iterable<Path>> extraFileSupplier)  {
+    protected JkComputedDependency(Runnable runnable, Path ideProjectBaseDir, Iterable<Path> files,
+                                   Supplier<Iterable<Path>> extraFileSupplier)  {
         super();
         this.runnable = runnable;
         this.files = files;
         this.ideProjectBaseDir = ideProjectBaseDir;
         this.extraFileSupplier = extraFileSupplier;
-    }
-
-    /**
-     * Returns a duplicate of this computed dependency but specifying that it can be replaced by a project dependency in a IDE.
-     */
-    public JkComputedDependency withIdeProjectBaseDir(Path baseDir) {
-        return new JkComputedDependency(this.runnable, baseDir, this.files, EMPTY_SUPPLIER);
     }
 
     /**
@@ -169,9 +162,7 @@ public class JkComputedDependency implements JkFileDependency {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         final JkComputedDependency that = (JkComputedDependency) o;
-
         return files.equals(that.files);
     }
 

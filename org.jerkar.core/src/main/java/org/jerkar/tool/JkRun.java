@@ -3,6 +3,8 @@ package org.jerkar.tool;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +15,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
 
 /**
- * Base class for defining runs. All run classes must extend this class in order
- * to be run with Jerkar.
+ * Base class for defining runs. All run classes must extend this class in order to be run with Jerkar.
  *
  * @author Jerome Angibaud
  */
@@ -181,8 +182,7 @@ public class JkRun {
     }
 
     /**
-     * Returns the dependency resolver used to compile/run scripts of this
-     * project.
+     * Returns the dependency resolver used to compile/run scripts of this project.
      */
     public final JkDependencyResolver getRunDependencyResolver() {
         return this.runDefDependencyResolver;

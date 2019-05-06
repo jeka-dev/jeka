@@ -34,6 +34,9 @@ public final class JkImportedRuns {
 
     private final Path masterRunBaseDir;
 
+    // The declared @JkImportRun values, read at pre-compile time
+    private List<Path> importedRunRoots = Collections.emptyList();
+
     private JkImportedRuns(Path masterDir, List<JkRun> runDeps) {
         super();
         this.masterRunBaseDir = masterDir;
@@ -68,6 +71,14 @@ public final class JkImportedRuns {
             }
         }
         return result;
+    }
+
+    public List<Path> getImportedRunRoots() {
+        return importedRunRoots;
+    }
+
+    void setImportedRunRoots(List<Path> roots) {
+        this.importedRunRoots = Collections.unmodifiableList(roots);
     }
 
     private List<JkRun> resolveTransitiveRuns(Set<Path> files) {

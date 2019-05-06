@@ -24,9 +24,6 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("If true, dependency paths will be expressed relatively to $JERKAR_REPO$ and $JERKAR_HOME$ path variable instead of absolute paths.")
     public boolean useVarPath = true;
 
-    @JkDoc("If true, the project dependencies are not taken in account to generate iml, only run class dependencies are.")
-    public boolean onlyRunDependencies = false;
-
     @JkDoc("If true, the project taken in account is not the run project but the project configured in java plugin.")
     public boolean externalDir = false;
 
@@ -46,10 +43,10 @@ public final class JkPluginIntellij extends JkPlugin {
         } else {
             generator = JkImlGenerator.of(getRun().getBaseDir());
         }
-        final List<Path> depProjects = new LinkedList<>();
-        for (final JkRun depRun : getRun().getImportedRuns().getDirects()) {
+        final List<Path> depProjects = getRun().getImportedRuns().getImportedRunRoots();
+        /*for (final JkRun depRun : getRun().getImportedRuns().getDirects()) {
             depProjects.add(depRun.getBaseTree().getRoot());
-        }
+        }*/
         generator.setUseVarPath(useVarPath);
         generator.setRunDependencies(externalDir ? null : getRun().getRunDependencyResolver(), getRun().getRunDependencies());
 
@@ -57,11 +54,7 @@ public final class JkPluginIntellij extends JkPlugin {
         Path basePath = getRun().getBaseDir();
         if (getRun().getPlugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = getRun().getPlugins().get(JkPluginJava.class).getProject();
-            if (!onlyRunDependencies) {
-                generator.setDependencies(project.getMaker().getDependencyResolver(), project.getDependencies());
-            } else {
-                generator.setDependencies(project.getMaker().getDependencyResolver(), JkDependencySet.of());
-            }
+            generator.setDependencies(project.getMaker().getDependencyResolver(), JkDependencySet.of());
             generator.setSourceJavaVersion(project.getSourceVersion());
             generator.setForceJdkVersion(true);
             if (externalDir) {

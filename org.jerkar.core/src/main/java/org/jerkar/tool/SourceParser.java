@@ -53,20 +53,20 @@ final class SourceParser {
 
     private final JkRepoSet importRepos;
 
-    private final List<Path>  dependecyProjects;
+    private final List<Path> dependencyProjects;
 
     private SourceParser(JkDependencySet deps, JkRepoSet repos, List<Path>  dependencyProjects) {
         super();
         this.dependencies = deps;
         this.importRepos = repos;
-        this.dependecyProjects = Collections.unmodifiableList(dependencyProjects);
+        this.dependencyProjects = Collections.unmodifiableList(dependencyProjects);
     }
 
     @SuppressWarnings("unchecked")
     private SourceParser and(SourceParser other) {
         return new SourceParser(this.dependencies.and(other.dependencies),
                 this.importRepos.and(other.importRepos), JkUtilsIterable.concatLists(
-                this.dependecyProjects, other.dependecyProjects));
+                this.dependencyProjects, other.dependencyProjects));
     }
 
     public JkDependencySet dependencies() {
@@ -78,7 +78,7 @@ final class SourceParser {
     }
 
     public List<Path>  projects() {
-        return this.dependecyProjects;
+        return this.dependencyProjects;
     }
 
     private static JkDependencySet dependencies(String code, Path baseDir, URL url) {
