@@ -108,12 +108,33 @@ You can also set it by default in the build class constructor :
     }
 ```
 
-
 ## Explore functions and options provided out-of-thebox
 
 Execute `jerkar help` to display all what you can do from the command line for the current project. As told on the help screen,
 you can execute `jerkar aGivenPluginName#help` to display help on a specific plugin. 
 The list of available plugins on the Jerkar classpath is displayed in help screen.
+
+# Use with intellij
+
+## setup intellij
+
+As for Eclipse, you must declare the two path variable (go settings -> Apparence & behavior -> Path Variables)
+ * `JERKAR_HOME` which point to _[Jerkar Home]_, 
+ * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_
+
+## setup iml file
+
+Execute `jerkar intellij#generateIml` from project root folder to generate an iml file 
+according the Build.java file.
+
+## run/debug within Intellij
+
+You can go two ways :
+- Just execute your Build class main method.
+- Create a Run/Debug application configuration for class `org.jerkar.tool.Main` class.
+
+**Important :** Make sure you choose __$MODULE_DIR$__ as the working directory for the Run/Debug configuration.
+
 
 # Use with Eclipse
 
@@ -161,24 +182,3 @@ You can go two ways :
 - Configure a launcher on `org.jerkar.tool.Main` class that has your project root dir as working directory. This way you 
 can specify which method to execute along options and system properties.
 
-
-# Use with intellij
-
-## setup intellij
-
-As for Eclipse, you must declare the two path variable (go settings -> Apparence & behavior -> Path Variables)
- * `JERKAR_HOME` which point to _[Jerkar Home]_, 
- * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_
-
-## setup iml file
-
-Execute `jerkar intellij#generateIml` from project root folder to generate an iml file 
-according the Build.java file.
-
-## run/debug within Intellij
-
-You can go two ways :
-- Just execute your Build class main method.
-- Create a Run/Debug application configuration for class `org.jerkar.tool.Main` class.
-
-**Important :** Make sure you choose __$MODULE_DIR$__ as the working directory for the Run/Debug configuration.
