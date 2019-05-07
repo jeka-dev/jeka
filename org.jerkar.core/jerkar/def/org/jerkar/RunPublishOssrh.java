@@ -2,7 +2,7 @@ package org.jerkar;
 
 import org.jerkar.tool.JkInit;
 
-class RunDoPublish {
+class RunPublishOssrh {
 
     /**
      * To publish run this method then go to https://oss.sonatype.org and log with 'djeang' user name.
@@ -11,7 +11,6 @@ class RunDoPublish {
      * Wait some hours/days before see it on Maven central !
      */
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class, "-java#publish.signArtifacts=false, -java#publish.localOnly")
-                .javaPlugin.getProject().getMaker().getTasksForPublishing().publish();
+        JkInit.instanceOf(CoreBuild.class).javaPlugin.publish();
     }
 }

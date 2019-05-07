@@ -13,6 +13,7 @@ import org.jerkar.api.system.JkProcess;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
+import org.jerkar.tool.builtins.repos.JkPluginRepo;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,7 +33,11 @@ public class CoreBuild extends JkRun {
 
     final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
+    private final JkPluginRepo repoPlugin = getPlugin(JkPluginRepo.class);
+
     private Path distribFolder;
+
+    public String ossrhPwd = "";
 
     public String githubSiteRoot = "../../jerkar.github.io";
 
@@ -44,7 +49,7 @@ public class CoreBuild extends JkRun {
     @Override
     protected void setup()  {
         JkJavaProject project = javaPlugin.getProject();
-        project.setVersionedModule(JkModuleId.of("org.jerkar:core").getVersion(VERSION));
+        project.setVersionedModule(JkModuleId.of("org.jerkar:core").withVersion(VERSION));
         project.setSourceVersion(JkJavaVersion.V8);
         project.setMavenPublicationInfo(mavenPublication());
 
@@ -109,8 +114,8 @@ public class CoreBuild extends JkRun {
                 .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
-    private static JkRepoSet publishRepos() {
-        return JkRepoSet.ofLocal();
+    private JkRepoSet publishRepos() {
+        return JkRepoSet.ofOssrhSnapshotAndRelease("djeang", ossrhPwd);
     }
 
     void testSamples()  {

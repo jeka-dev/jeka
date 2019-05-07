@@ -184,7 +184,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
      * @see #setVersionedModule(JkVersionedModule)
      */
     public JkJavaProject setVersionedModule(String groupAndName, String version) {
-        return setVersionedModule(JkModuleId.of(groupAndName).getVersion(version));
+        return setVersionedModule(JkModuleId.of(groupAndName).withVersion(version));
     }
 
     public JkJavaCompileSpec getCompileSpec() {

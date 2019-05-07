@@ -181,14 +181,14 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkPathSequence fetchDependenciesFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return dependencyCache.computeIfAbsent(scopeSet,
-                scopes1 -> getDependencyResolver().resolve(getDefaultedDependencies(), scopes).getFiles());
+                scopes1 -> getDependencyResolver().resolve(getScopeDefaultedDependencies(), scopes).getFiles());
     }
 
     /**
      * Returns dependencies declared for this project. Dependencies declared without specifying
      * scope are defaulted to scope {@link JkJavaDepScopes#COMPILE_AND_RUNTIME}
      */
-    public JkDependencySet getDefaultedDependencies() {
+    public JkDependencySet getScopeDefaultedDependencies() {
         return project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME);
     }
 
@@ -250,15 +250,15 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     // Phase tasks -----------------------------
-
-    public JkJavaProjectCompileTasks getTasksForCompilation() {
-        return tasksForCompilation;
-    }
-
     public JkJavaProjectJavadocTasks getTasksForJavadoc() {
         return tasksForJavadoc;
     }
 
+
+
+    public JkJavaProjectCompileTasks getTasksForCompilation() {
+        return tasksForCompilation;
+    }
     public JkJavaProjectTestTasks getTasksForTesting() {
         return tasksForTesting;
     }

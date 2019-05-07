@@ -219,7 +219,7 @@ final class IvyResolver implements ModuleDepResolver {
 
                 List<Path> artifacts;
                 if (!node.isCompletelyEvicted()) {
-                    artifacts = artifactContainer.getArtifacts(moduleId.getVersion(resolvedVersion.getValue()));
+                    artifacts = artifactContainer.getArtifacts(moduleId.withVersion(resolvedVersion.getValue()));
                 } else {
                     artifacts = new LinkedList<>();
                 }

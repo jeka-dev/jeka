@@ -148,7 +148,7 @@ public class JkDependencyNode implements Serializable {
     private Set<JkVersionedModule> resolvedModules(boolean root) {
         final Set<JkVersionedModule> result = new HashSet<>();
         if (!root && this.isModuleNode() && !this.getModuleInfo().isEvicted()) {
-            result.add(this.getModuleInfo().moduleId.getVersion(this.getModuleInfo().resolvedVersion.getValue()));
+            result.add(this.getModuleInfo().moduleId.withVersion(this.getModuleInfo().resolvedVersion.getValue()));
         }
         for (final JkDependencyNode child : this.children) {
             result.addAll(child.resolvedModules(false));
@@ -347,7 +347,7 @@ public class JkDependencyNode implements Serializable {
          * Shorthand for {@link #moduleId} + {@link #getResolvedVersion()}
          */
         public JkVersionedModule getResolvedVersionedModule() {
-            return moduleId.getVersion(resolvedVersion.getValue());
+            return moduleId.withVersion(resolvedVersion.getValue());
         }
 
         public JkVersion getDeclaredVersion() {

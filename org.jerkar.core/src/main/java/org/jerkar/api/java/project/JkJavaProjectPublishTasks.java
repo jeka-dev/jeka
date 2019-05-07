@@ -42,7 +42,7 @@ public class JkJavaProjectPublishTasks {
         JkMavenPublication publication = JkMavenPublication.of(maker, Collections.emptySet())
                 .with(project.getMavenPublicationInfo());
         JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
-                .publishMaven(project.getVersionedModule(), publication, maker.getDefaultedDependencies());
+                .publishMaven(project.getVersionedModule(), publication, maker.getScopeDefaultedDependencies());
     }
 
     private void publishIvy() {
@@ -52,7 +52,7 @@ public class JkJavaProjectPublishTasks {
         JkException.throwIf(maker.project.getVersionedModule() == null, "No versionedModule has been set on "
                 + maker.project + ". Can't publish.");
         JkLog.startTask("Preparing Ivy publication");
-        final JkDependencySet dependencies = maker.getDefaultedDependencies();
+        final JkDependencySet dependencies = maker.getScopeDefaultedDependencies();
         final JkIvyPublication publication = JkIvyPublication.of(maker.getMainArtifactPath(), JkJavaDepScopes.COMPILE.getName())
                 .andOptional(maker.getArtifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES.getName())
                 .andOptional(maker.getArtifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC.getName())

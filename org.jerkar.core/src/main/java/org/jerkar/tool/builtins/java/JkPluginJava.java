@@ -216,7 +216,7 @@ public class JkPluginJava extends JkPlugin {
 
     @JkDoc("Fetches project dependencies in cache.")
     public void refreshDeps() {
-        project.getMaker().getDependencyResolver().resolve(project.getMaker().getDefaultedDependencies());
+        project.getMaker().getDependencyResolver().resolve(project.getMaker().getScopeDefaultedDependencies());
     }
 
     public static class JkPublishOptions {
