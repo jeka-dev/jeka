@@ -97,10 +97,10 @@ public class JkPluginJava extends JkPlugin {
         if (maker.getTasksForCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
             maker.getTasksForCompilation().setCompiler(compiler());
         }
-        maker.getTasksForPublishing().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
-        final JkRepo downloadRepo = repoPlugin.downloadRepository();
+        maker.getTasksForPublishing().setPublishRepos(repoPlugin.publishRepositories());
+        final JkRepoSet downloadRepos = repoPlugin.downloadRepositories();
         JkDependencyResolver resolver = project.getMaker().getDependencyResolver();
-        resolver = resolver.withRepos(downloadRepo); // always look in local repo
+        resolver = resolver.withRepos(downloadRepos); // always look in local repo
         maker.setDependencyResolver(resolver);
         if (pack.checksums().length > 0) {
             maker.getTasksForPackaging().setChecksumAlgorithms(pack.checksums());
@@ -162,6 +162,14 @@ public class JkPluginJava extends JkPlugin {
 
     public JkPathTree ouputTree() {
         return JkPathTree.of(this.getProject().getMaker().getOutLayout().getOutputPath());
+    }
+
+    public JkPluginRepo getRepoPlugin() {
+        return repoPlugin;
+    }
+
+    public  JkPluginScaffold getScaffoldPlugin() {
+        return scaffoldPlugin;
     }
 
     // ------------------------------- command line methods -----------------------------

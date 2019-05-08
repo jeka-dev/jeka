@@ -56,9 +56,13 @@ public class CoreBuild extends JkRun {
         JkJavaProjectMaker maker = project.getMaker();
         maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
         maker.getTasksForTesting().setFork(true);
-        maker.getTasksForPublishing().setPublishRepos(publishRepos());
         maker.addArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
+    }
+
+    @Override
+    protected void postPluginSetup() {
+        javaPlugin.getProject().getMaker().getTasksForPublishing().setPublishRepos(publishRepos());
     }
 
     private void doDistrib() {

@@ -11,6 +11,7 @@ class RunPublishOssrh {
      * Wait some hours/days before see it on Maven central !
      */
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class).javaPlugin.publish();
+        CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args);
+        coreBuild.javaPlugin.publish();
     }
 }

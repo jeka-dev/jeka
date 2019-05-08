@@ -1,6 +1,7 @@
 package org.jerkar.tool.builtins.repos;
 
 import org.jerkar.api.depmanagement.JkRepo;
+import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkRun;
@@ -44,10 +45,10 @@ public class JkPluginRepo extends JkPlugin {
     @JkDoc("Password for the download repository (if needed).")
     public String downloadPassword;
 
-    @JkDoc("Name of the configured repository to use for publishing artifacts. If null or empty, considered as not set.")
+    @JkDoc("Name of the configured repository to use for publishing artifacts. Null or empty means not set.")
     public String publishRepoName;
 
-    @JkDoc("\"Name of the configured repository to use for publishing artifacts. If null or empty, considered as not set.")
+    @JkDoc("Name of the configured repository to use for publishing artifacts. Null or empty means not set.")
     public String downloadRepoName;
 
     // ----------------------------------------------------------------------------------
@@ -56,51 +57,52 @@ public class JkPluginRepo extends JkPlugin {
         super(run);
     }
 
-    public JkRepo publishRepository() {
-        final JkRepo result;
+    public JkRepoSet publishRepositories() {
         if (!JkUtilsString.isBlank(publishRepoName)) {
-            return JkRepoConfigOptionLoader.repoFromOptions(publishRepoName);
+            return JkRepoConfigOptionLoader.repoFromOptions(publishRepoName).toSet();
         }
         if (!JkUtilsString.isBlank(publishUrl)) {
-            return JkRepo.of(publishUrl).withOptionalCredentials(publishUsername, publishPassword);
+            return JkRepo.of(publishUrl).withOptionalCredentials(publishUsername, publishPassword).toSet();
         }
         JkRepo optionRepo = JkRepoConfigOptionLoader.publishRepository();
-        return optionRepo != null ? optionRepo : JkRepo.ofLocal();
+        return optionRepo != null ? optionRepo.toSet() : JkRepo.ofLocal().toSet();
     }
 
-    public JkRepo downloadRepository() {
+    public JkRepoSet downloadRepositories() {
         if (!JkUtilsString.isBlank(downloadPassword)) {
-            return JkRepoConfigOptionLoader.repoFromOptions(downloadRepoName);
+            return JkRepoConfigOptionLoader.repoFromOptions(downloadRepoName).toSet();
         }
         if (!JkUtilsString.isBlank(downloadUrl)) {
-            return JkRepo.of(publishUrl).withOptionalCredentials(downloadUsername, downloadPassword);
+            return JkRepo.of(publishUrl).withOptionalCredentials(downloadUsername, downloadPassword).toSet();
         }
-        return JkRepoConfigOptionLoader.downloadRepository();
+        return JkRepoConfigOptionLoader.downloadRepository().toSet();
     }
 
     @JkDoc("Displays active and configured repositories.")
     public void info() {
         StringBuilder sb = new StringBuilder();
-        JkRepo download = downloadRepository();
-        sb.append("Download repository")
-                .append("\n  url : " + download.getUrl());
-        if (download.getCredential() != null) {
-            String downloadPwd = JkUtilsString.isBlank(download.getCredential().getPassword()) ? ""
-                    : downloadPassword.substring(0, 1) + "*******";
-            sb.append("\n  username : " + download.getCredential().getUserName())
-                    .append("\n  password : " + downloadPwd);
+        sb.append("Download repositories : \n");
+        JkRepoSet downloads = downloadRepositories();
+        for (JkRepo download : downloads.getRepoList()) {
+            sb.append("\n  url : " + download.getUrl());
+            if (download.getCredential() != null) {
+                String downloadPwd = JkUtilsString.isBlank(download.getCredential().getPassword()) ? ""
+                        : downloadPassword.substring(0, 1) + "*******";
+                sb.append("\n  username : " + download.getCredential().getUserName())
+                        .append("\n  password : " + downloadPwd);
+            }
         }
-        JkRepo publish = publishRepository();
-        sb.append("\n").append("Publish repository")
-                .append("\n  url : " + publish.getUrl());
-        if (publish.getCredential() != null) {
-            String publishPwd = JkUtilsString.isBlank(publish.getCredential().getPassword()) ? ""
-                    : publishPassword.substring(0, 1) + "*******";
-            sb.append("\n  username : " + publish.getCredential().getUserName())
-                    .append("\n  password : " + publishPwd);
-        }
-        for (Map.Entry<String, String> entry : JkRepoConfigOptionLoader.allRepositoryOptions().entrySet()) {
-            sb.append("\n" + entry.getKey() + " : ").append(entry.getValue());
+        sb.append("\n").append("Publish repositories : \n");
+        for(JkRepo publish : publishRepositories().getRepoList()) {
+            sb.append("\n  url : " + publish.getUrl());
+            if (publish.getCredential() != null) {
+                String publishPwd = JkUtilsString.isBlank(publish.getCredential().getPassword()) ? ""
+                        : publishPassword.substring(0, 1) + "*******";
+                sb.append("\n  username : " + publish.getCredential().getUserName()).append("\n  password : " + publishPwd);
+            }
+            for (Map.Entry<String, String> entry : JkRepoConfigOptionLoader.allRepositoryOptions().entrySet()) {
+                sb.append("\n" + entry.getKey() + " : ").append(entry.getValue());
+            }
         }
         JkLog.info(sb.toString());
     }

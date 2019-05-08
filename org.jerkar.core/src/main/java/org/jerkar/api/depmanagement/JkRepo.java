@@ -37,7 +37,7 @@ public final class JkRepo implements Serializable {
     /**
      * URL of the OSSRH repository for deploying released artifacts.
      */
-    public static final String MAVEN_OSSRH_DEPLOY_RELEASE = "https://oss.sonatype.org/service/publishLocalOnly/staging/deploy/maven2/";
+    public static final String MAVEN_OSSRH_DEPLOY_RELEASE = "https://oss.sonatype.org/service/publish/staging/deploy/maven2/";
 
     /**
      * URL of the OSSRH repository for downloading both snapshot and released artifacts.
@@ -108,7 +108,8 @@ public final class JkRepo implements Serializable {
      */
     public static JkRepo ofMavenOssrhDownloadAndDeploySnapshot(String jiraId, String jiraPassword) {
         return of(MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT)
-                .with(JkRepoCredential.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"));
+                .with(JkRepoCredential.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"))
+                .with(JkPublishConfig.ofSnapshotOnly(false));
     }
 
     /**
@@ -116,7 +117,8 @@ public final class JkRepo implements Serializable {
      */
     public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword) {
         return of(MAVEN_OSSRH_DEPLOY_RELEASE).with(
-                JkRepoCredential.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"));
+                JkRepoCredential.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"))
+                .with(JkPublishConfig.ofReleaseOnly(true));
     }
 
     /**
@@ -323,7 +325,7 @@ public final class JkRepo implements Serializable {
 
         private JkPublishConfig(JkPublishFilter filter, boolean needSignature, boolean uniqueSnapshot) {
             super();
-            this.filter = filter;;
+            this.filter = filter;
             this.uniqueSnapshot = uniqueSnapshot;
             this.needSignature = needSignature;
         }
