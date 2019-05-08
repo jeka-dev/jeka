@@ -61,7 +61,7 @@ public class CoreBuild extends JkRun {
     }
 
     @Override
-    protected void postPluginSetup() {
+    protected void setupAfterPluginActivations() {
         javaPlugin.getProject().getMaker().getTasksForPublishing().setPublishRepos(publishRepos());
     }
 

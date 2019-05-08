@@ -3,8 +3,6 @@ package org.jerkar.tool;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -107,7 +105,7 @@ public class JkRun {
         }
 
         // Extra run configuration
-        run.postPluginSetup();
+        run.setupAfterPluginActivations();
         List<ProjectDef.RunOptionDef> defs = ProjectDef.RunClassDef.of(run).optionDefs();
         JkLog.info("Run instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask();
@@ -117,17 +115,18 @@ public class JkRun {
     }
 
     /**
-     * This method is invoked right after options has been injected into this instance. You will typically
-     * setup plugins here before they decorate this run.
+     * This method is invoked right after options has been injected into this instance. Here, You will typically
+     * configure plugins before they are activated.
      */
     protected void setup() {
         // Do nothing by default
     }
 
     /**
-     * This method is called once all plugin has decorated this run.
+     * This method is called once all plugin has been activated. This method is intended to overwrite what plugin
+     * activation has setup.
      */
-    protected void postPluginSetup() {
+    protected void setupAfterPluginActivations() {
         // Do nothing by default
     }
 

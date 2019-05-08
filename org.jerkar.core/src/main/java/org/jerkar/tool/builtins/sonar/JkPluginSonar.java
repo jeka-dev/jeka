@@ -59,7 +59,7 @@ public class JkPluginSonar extends JkPlugin {
     }
 
     /**
-     * Adds a property to postPluginSetup sonar instance to run. You'll find predefined keys in {@link JkSonar}.
+     * Adds a property to setupAfterPluginActivations sonar instance to run. You'll find predefined keys in {@link JkSonar}.
      */
     public JkPluginSonar prop(String key, String value) {
         this.properties.put(key, value);

@@ -9,7 +9,7 @@ import org.jerkar.tool.JkDocPluginDeps;
 import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 
-@JkDoc("Use Eclipse .classpath file to postPluginSetup project structure and dependencies.")
+@JkDoc("Use Eclipse .classpath file to setupAfterPluginActivations project structure and dependencies.")
 @JkDocPluginDeps(JkPluginJava.class)
 public final class JkPluginEclipsePath extends JkPlugin {
 
