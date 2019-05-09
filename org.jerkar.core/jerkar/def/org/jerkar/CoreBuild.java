@@ -10,6 +10,7 @@ import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
@@ -35,7 +36,7 @@ public class CoreBuild extends JkRun {
 
     private Path distribFolder;
 
-    public String ossrhPwd = "";
+    public String ossrhPwd = "";  // Must be injected by command line
 
     public String githubSiteRoot = "../../jerkar.github.io";
 
@@ -50,7 +51,6 @@ public class CoreBuild extends JkRun {
         project.setVersionedModule(JkModuleId.of("org.jerkar:core").withVersion(VERSION));
         project.setSourceVersion(JkJavaVersion.V8);
         project.setMavenPublicationInfo(mavenPublication());
-
         JkJavaProjectMaker maker = project.getMaker();
         maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
         maker.getTasksForTesting().setFork(true);
@@ -73,7 +73,8 @@ public class CoreBuild extends JkRun {
         distrib.merge(getBaseDir().resolve("src/main/dist"));
         distrib.merge(getBaseDir().resolve("src/main/java/META-INF/bin"));
         distrib.bring(maker.getArtifactPath(maker.getMainArtifactId()));
-        final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources").andMatching(true, "apache-ivy*.jar").getFiles();
+        final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources")
+                .andMatching(true, "apache-ivy*.jar").getFiles();
         distrib.goTo("libs-sources")
             .bring(ivySourceLibs)
             .bring(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
@@ -91,20 +92,6 @@ public class CoreBuild extends JkRun {
         distrib.zipTo(distripZipFile);
         JkLog.info("Distribution zipped in " + distripZipFile);
         JkLog.endTask();
-    }
-
-    public void publishDocOnGithub() {
-        Path root = Paths.get(githubSiteRoot);
-        JkProcess git = JkProcess.of("git").withWorkingDir(root).withLogCommand(true);
-        git.andParams("pull").runSync();
-        JkPathTree target = JkPathTree.of(root.resolve("documentation-latest"));
-        if (target.exists()) {
-            target.deleteRoot();
-        }
-        JkPathTree.of(distribFolder.resolve("doc")).copyTo(target.getRoot());
-        git.andParams("add", "documentation-latest").runSync();
-        git.andParams("commit", "-m", "Doc").runSync();
-        git.andParams("push").runSync();
     }
 
     // Necessary to publish on OSSRH
@@ -135,7 +122,7 @@ public class CoreBuild extends JkRun {
     public void doDefault() {
         clean();
         doDistrib();
-        javaPlugin.getProject().getMaker().getTasksForPublishing().publishLocal();
+        javaPlugin.publishLocal();
     }
 
 }
