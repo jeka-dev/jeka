@@ -42,6 +42,9 @@ class Environment {
         if (standardOptions.logVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
+        if (standardOptions.logQuiteVerbose) {
+            JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
+        }
         JkHierarchicalConsoleLogHandler.setMaxLength(standardOptions.logMaxLength);
 
         Environment.systemProps = sysProps;
@@ -81,6 +84,8 @@ class Environment {
      */
     static class StandardOptions {
 
+        boolean logQuiteVerbose;
+
         boolean logVerbose;
 
         boolean logHeaders;
@@ -91,6 +96,7 @@ class Environment {
 
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "LogVerbose", "LV");
+            this.logQuiteVerbose = valueOf(Boolean.class, map, false, "LogQuiteVerbose", "LQV");
             this.logHeaders = valueOf(Boolean.class, map, false,"LogHeaders", "LH");
             this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
             this.runClass = valueOf(String.class, map, null, "RunClass", "RC");

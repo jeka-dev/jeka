@@ -45,6 +45,7 @@ final class HelpDisplayer {
         StringBuilder sb = new StringBuilder();
         sb.append("Built-in options (these options are not specific to a plugin or a run class) :\n");
         sb.append("  -LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.\n");
+        sb.append("  -LogQuiteVerbose (shorthand -LQV) : if true, logs will display 'trace' level logs and trace level Ivy logs.\n");
         sb.append("  -LogHeaders (shorthand -LH) : if true, meta-information about the run creation itself and method execution will be logged.\n");
         sb.append("  -LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");
         sb.append("  -RunClass (shorthand -RC) : Force to use the specified class as the run class to invoke. It can be the short name of the class (without package prefix).\n");

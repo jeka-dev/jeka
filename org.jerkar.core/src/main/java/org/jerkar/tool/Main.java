@@ -30,18 +30,6 @@ public final class Main {
      * Entry point for Jerkar application when launched from command-line
      */
     public static void main(String[] args) throws Exception {
-        /*
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if (!(classLoader instanceof URLClassLoader)) {
-            URLClassLoader urlClassLoader = new URLClassLoader(new URL[0],classLoader);
-            Thread.currentThread().setContextClassLoader(urlClassLoader);
-            Class<?> mainClass = urlClassLoader.loadClass(Main.class.getName());
-            Method mainMethod = JkUtilsReflect.getMethod(mainClass, "main", String[].class);
-            Thread.currentThread().setContextClassLoader(urlClassLoader);
-            mainMethod.invoke(null, (Object) args);
-            return;
-        }
-        */
         final long start = System.nanoTime();
         try {
             Environment.initialize(args);

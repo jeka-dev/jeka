@@ -119,7 +119,7 @@ final class IvyInternalPublisher implements InternalPublisher {
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
                            JkDependencySet dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,
                            JkVersionProvider resolvedVersions) {
-        JkLog.startTask( "Publishing for Ivy");
+        JkLog.startTask( "Publishing on Ivy repositories");
         final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
             publication, dependencies, defaultMapping, deliveryDate, resolvedVersions);
         int publishCount = publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
@@ -132,7 +132,7 @@ final class IvyInternalPublisher implements InternalPublisher {
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencySet dependencies) {
-        JkLog.startTask("Publishing for Maven");
+        JkLog.startTask("Publishing on Maven repositories");
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
                 publication, dependencies, Instant.now(), JkVersionProvider.of());
         final int count = publishMavenArtifacts(publication, moduleDescriptor);

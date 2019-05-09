@@ -29,11 +29,9 @@ public class CoreBuild extends JkRun {
 
     public static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 
-    private static final String VERSION = "0.7-SNAPSHOT";
+    private static final String VERSION = "0.7.0-SNAPSHOT";
 
     final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
-
-    private final JkPluginRepo repoPlugin = getPlugin(JkPluginRepo.class);
 
     private Path distribFolder;
 

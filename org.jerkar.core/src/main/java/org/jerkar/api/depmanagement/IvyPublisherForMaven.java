@@ -177,8 +177,7 @@ final class IvyPublisherForMaven {
         if (!mavenPublication.getMainArtifactFiles().isEmpty()) {
             final String pomDest = destination(versionedModule, "pom", null);
             if (existOnRepo(pomDest)) {
-                throw new IllegalArgumentException("The main artifact as already exist for "
-                        + versionedModule);
+                throw new IllegalArgumentException("The main artifact already exist for " + versionedModule);
             }
             for (final Path file : mavenPublication.getMainArtifactFiles()) {
                 final String ext = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");

@@ -107,7 +107,7 @@ public final class JkLog implements Serializable {
     }
 
     public static void trace(String message) {
-        if (verbosity() == Verbosity.VERBOSE) {
+        if (verbosity().isVerbose()) {
             consume(JkLogEvent.ofRegular(Type.TRACE, message));
         }
     }
