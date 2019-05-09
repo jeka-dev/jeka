@@ -27,6 +27,11 @@ Please visit [latest documentation](org.jerkar.core/src/main/doc).
 
 Note that you can still access Jerkar 0.6 documentation from [official web-site](http://project.jerkar.org/).
 
+# Get Jerkar
+
+* Latest Snapshot : [Version 0.7.0-SNAPSHOT](https://oss.sonatype.org/content/repositories/snapshots/org/jerkar/core/0.7.0-SNAPSHOT/core-0.7.0-SNAPSHOT-distrib.zip)
+* Releases : https://github.com/jerkar/jerkar/releases
+
 # How to use Jerkar
 
 Jerkar is designed to be easy to master for Java developers. In despite it offers rich functionalities, 
