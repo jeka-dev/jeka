@@ -220,11 +220,10 @@ public final class JkProcess implements Runnable {
         commands.addAll(parameters);
         final AtomicInteger result = new AtomicInteger();
         final Runnable runnable = () -> {
-
-                final ProcessBuilder processBuilder = processBuilder(commands);
-                if (workingDir != null) {
-                    processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
-                }
+            final ProcessBuilder processBuilder = processBuilder(commands);
+            if (workingDir != null) {
+                processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
+            }
             final Process process;
             try {
                 process = processBuilder.start();
@@ -245,10 +244,10 @@ public final class JkProcess implements Runnable {
                 if (result.get() != 0 && failOnError) {
                     throw new JkException("The process has returned with error code " + result);
                 }
-
         };
         if (logCommand) {
-            JkLog.execute("Starting program : " + commands.toString(), runnable);
+            String workingDirName = this.workingDir == null ? "" : this.workingDir.toString() +  ">";
+            JkLog.execute("Starting program : " + workingDirName + commands.toString(), runnable);
         } else {
             runnable.run();
         }
