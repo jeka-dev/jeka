@@ -5,8 +5,9 @@ Of course yes. If you prefer that your Jerkar run code lies in a distinct projec
 folder and mention where is located the project to build.
 
 ```java
+...
 @Override
- protected void setup() {
+protected void setup() {
       Path projectPath = this.baseDir().resolve("../myProject");   // project to build lies in a sibling folder. 
       project().setSourceLayout(JkProjectSourceLayout.ofMavenStyle().withBaseDir(projectPath));
       ...
