@@ -9,15 +9,11 @@ import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.system.JkProcess;
-import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
-import org.jerkar.tool.builtins.repos.JkPluginRepo;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import static org.jerkar.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
@@ -37,8 +33,6 @@ public class CoreBuild extends JkRun {
     private Path distribFolder;
 
     public String ossrhPwd = "";  // Must be injected by command line
-
-    public String githubSiteRoot = "../../jerkar.github.io";
 
     protected CoreBuild() {
         javaPlugin.tests.fork = false;
