@@ -76,12 +76,18 @@ public final class JkRepoSet implements Serializable {
     }
 
     /**
-     * Creates a JkPublishRepos tailored for <a
-     * href="http://central.sonatype.org/">OSSRH</a>
+     * Creates a JkRepoSet for publishing on <a href="http://central.sonatype.org/">OSSRH</a>
      */
     public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password) {
         return of(JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(userName, password),
                 JkRepo.ofMavenOssrhDeployRelease(userName, password));
+    }
+
+    /**
+     * Creates a JkRepoSet for downloading from <a href="http://central.sonatype.org/">OSSRH</a>
+     */
+    public static JkRepoSet ofOssrhSnapshotAndRelease() {
+        return ofOssrhSnapshotAndRelease(null, null);
     }
 
     /**

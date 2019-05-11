@@ -236,7 +236,7 @@ public final class JkRepo implements Serializable {
     }
 
 
-    public static final class JkRepoCredential {
+    public static final class JkRepoCredential implements Serializable {
 
         private final String realm;
 
