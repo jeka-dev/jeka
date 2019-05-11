@@ -118,7 +118,7 @@ The list of available plugins on the Jerkar classpath is displayed in help scree
 
 ## setup intellij
 
-As for Eclipse, you must declare the two path variable (go settings -> Apparence & behavior -> Path Variables)
+As for Eclipse, you must declare the two path variables (go settings -> Apparence & behavior -> Path Variables)
  * `JERKAR_HOME` which point to _[Jerkar Home]_, 
  * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_
 
