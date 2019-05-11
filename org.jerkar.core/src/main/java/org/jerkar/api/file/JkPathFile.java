@@ -81,9 +81,9 @@ public final class JkPathFile {
     }
 
     /**
-     * Copies the specified url at this location.
+     * Copies the content of the specified url into this files, replacing the previous content.
      */
-    public JkPathFile copyFrom(URL url) {
+    public JkPathFile replaceContentBy(URL url) {
         createIfNotExist();
         JkUtilsIO.copyUrlToFile(url, this.path);
         return this;

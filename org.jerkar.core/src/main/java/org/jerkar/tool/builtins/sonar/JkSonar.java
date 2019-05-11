@@ -86,7 +86,7 @@ public final class JkSonar {
 
     private static Path createRunnerJar(Path parent) {
         final Path file = parent.resolve(RUNNER_JAR_NAME_24);
-        return JkPathFile.of(file).copyFrom(JkSonar.class.getResource(RUNNER_JAR_NAME_24)).get();
+        return JkPathFile.of(file).replaceContentBy(JkSonar.class.getResource(RUNNER_JAR_NAME_24)).get();
     }
 
     public void run() {
