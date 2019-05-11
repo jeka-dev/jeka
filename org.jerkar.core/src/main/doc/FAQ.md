@@ -5,7 +5,9 @@ Of course yes. If you prefer that your Jerkar run code lies in a distinct projec
 folder and mention where is located the project to build.
 
 ```java
-public class Build extends JkJavaProjectBuild {
+public class Build extends JkRun {
+
+   ...
 
    @Override
     protected void setup() {
