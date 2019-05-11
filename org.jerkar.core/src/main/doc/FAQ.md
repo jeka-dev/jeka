@@ -5,17 +5,11 @@ Of course yes. If you prefer that your Jerkar run code lies in a distinct projec
 folder and mention where is located the project to build.
 
 ```java
-public class Build extends JkRun {
-
-   ...
-
-   @Override
-    protected void setup() {
-         Path projectPath = this.baseDir().resolve("../myProject");   // project to build lies in a sibling folder. 
-         project().setSourceLayout(JkProjectSourceLayout.ofMavenStyle().withBaseDir(projectPath));
-         ...
-    }
-
+@Override
+ protected void setup() {
+      Path projectPath = this.baseDir().resolve("../myProject");   // project to build lies in a sibling folder. 
+      project().setSourceLayout(JkProjectSourceLayout.ofMavenStyle().withBaseDir(projectPath));
+      ...
 ```
 
 ## My run class does not compile so I can't invoke any Jerkar method as 'help' or 'scaffold#run'. What can I do ?
