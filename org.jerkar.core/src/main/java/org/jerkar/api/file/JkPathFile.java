@@ -81,6 +81,15 @@ public final class JkPathFile {
     }
 
     /**
+     * Copies this file to the specified directory. If the specified directory does not exist, it is created.
+     */
+    public JkPathFile copyToDir(Path path, CopyOption ... options) {
+        Path target = path.resolve(this.path.getFileName());
+        JkUtilsPath.copy(this.path, target, options);
+        return this;
+    }
+
+    /**
      * Copies the content of the specified url into this files, replacing the previous content.
      */
     public JkPathFile replaceContentBy(URL url) {
