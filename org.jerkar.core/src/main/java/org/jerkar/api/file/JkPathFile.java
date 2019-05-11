@@ -83,8 +83,11 @@ public final class JkPathFile {
     /**
      * Copies this file to the specified directory. If the specified directory does not exist, it is created.
      */
-    public JkPathFile copyToDir(Path path, CopyOption ... options) {
-        Path target = path.resolve(this.path.getFileName());
+    public JkPathFile copyToDir(Path dir, CopyOption ... options) {
+        Path target = dir.resolve(this.path.getFileName());
+        if (!Files.exists(dir)) {
+            JkUtilsPath.createDirectories(dir);
+        }
         JkUtilsPath.copy(this.path, target, options);
         return this;
     }
