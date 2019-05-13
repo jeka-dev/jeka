@@ -41,7 +41,7 @@ public class JkJavaProjectPublishTasks {
                 + project + ". Can't publish.");
         JkMavenPublication publication = JkMavenPublication.of(maker, Collections.emptySet())
                 .with(project.getMavenPublicationInfo()).withSigner(signer);
-        JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
+        JkPublisher.of(repos, maker.getOutLayout().getOutputPath()).withSigner(this.signer)
                 .publishMaven(project.getVersionedModule(), publication, maker.getScopeDefaultedDependencies());
     }
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkException;
@@ -21,16 +22,19 @@ public final class JkPublisher {
 
     private final InternalPublisher internalPublisher;
 
-    private JkPublisher(InternalPublisher internalPublisher) {
+    private final UnaryOperator<Path> signer;
+
+    private JkPublisher(InternalPublisher internalPublisher, UnaryOperator<Path> signer) {
         super();
         this.internalPublisher = internalPublisher;
+        this.signer = signer;
     }
 
     /**
      * Creates a {@link JkPublisher} with the specified {@link JkRepo}.
      */
-    public static JkPublisher of(JkRepo repoConfig) {
-        return of(JkRepoSet.of(repoConfig));
+    public static JkPublisher of(JkRepo repo) {
+        return of(JkRepoSet.of(repo));
     }
 
     /**
@@ -48,7 +52,7 @@ public final class JkPublisher {
                     InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos,
                     artifactDir == null ? null : artifactDir.toFile());
         }
-        return new JkPublisher(ivyPublisher);
+        return new JkPublisher(ivyPublisher, null);
     }
 
     /**
@@ -56,6 +60,10 @@ public final class JkPublisher {
      */
     public static JkPublisher of(JkRepoSet publishRepos) {
         return of(publishRepos,  null);
+    }
+
+    public JkPublisher withSigner(UnaryOperator<Path> signer) {
+        return new JkPublisher(internalPublisher, signer);
     }
 
     /**
@@ -98,7 +106,7 @@ public final class JkPublisher {
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencySet dependencies) {
         assertFilesToPublishExist(publication);
-        this.internalPublisher.publishMaven(versionedModule, publication, dependencies.withModulesOnly());
+        this.internalPublisher.publishMaven(versionedModule, publication, dependencies.withModulesOnly(), this.signer);
     }
 
     private void assertFilesToPublishExist(JkMavenPublication publication) {
@@ -107,7 +115,5 @@ public final class JkPublisher {
             throw new JkException("One or several files to publish do not exist : " + missingFiles);
         }
      }
-
-
 
 }

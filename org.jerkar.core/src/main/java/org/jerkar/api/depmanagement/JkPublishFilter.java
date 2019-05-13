@@ -3,8 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.Serializable;
 
 /**
- * Defines filter to andAccept or not module to be published on a given
- * {@link JkRepo}
+ * Defines filter to accept or not module to be published on a given {@link JkRepo}
  * 
  * @author Jerome Angibaud
  */
