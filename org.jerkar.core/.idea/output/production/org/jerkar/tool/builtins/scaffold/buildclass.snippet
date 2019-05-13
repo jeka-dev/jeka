@@ -1,0 +1,14 @@
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.JkInit;
+
+/**
+ * @formatter:off
+ */
+class Run extends JkRun {
+
+    public static void main(String[] args) throws Exception {
+        Run run = JkInit.instanceOf(Run.class, args);
+        run.clean();
+    }
+
+}

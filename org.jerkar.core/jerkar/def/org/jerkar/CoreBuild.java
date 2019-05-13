@@ -1,14 +1,12 @@
 package org.jerkar;
 
-import org.jerkar.api.depmanagement.JkArtifactId;
-import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepoSet;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkProcess;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
@@ -110,6 +108,22 @@ public class CoreBuild extends JkRun {
         sampleTester.restoreEclipseClasspathFile = true;
         sampleTester.doTest();
         JkLog.endTask();
+    }
+
+    public void release() {
+        JkVersion version = javaPlugin.getProject().getVersionedModule().getVersion();
+        if (version.isSnapshot()) {
+            throw new IllegalStateException("Cannot release a snapshot version");
+        }
+        javaPlugin.pack.javadoc = true;
+        javaPlugin.pack.sources = true;
+        javaPlugin.clean().pack();
+        JkProcess git = JkProcess.of("git").withFailOnError(true);
+        git.andParams("pull").runSync();
+        git.andParams("add", "*").runSync();
+        git.andParams("commit", "-am", "Release " + version).runSync();
+        git.andParams("tag", "-a", version.toString());
+        git.andParams("push").runSync();
     }
 
     public static void main(String[] args) {
