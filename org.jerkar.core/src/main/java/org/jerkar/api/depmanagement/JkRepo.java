@@ -319,18 +319,18 @@ public final class JkRepo implements Serializable {
 
         private final JkPublishFilter filter;
 
-        private final boolean needSignature;
+        private final boolean signatureRequired;
 
         private final boolean uniqueSnapshot;
 
         private final Set<String> checksumAlgos;
 
-        private JkPublishConfig(JkPublishFilter filter, boolean needSignature, boolean uniqueSnapshot,
+        private JkPublishConfig(JkPublishFilter filter, boolean signatureRequired, boolean uniqueSnapshot,
                                 Set<String> checksumAlgos) {
             super();
             this.filter = filter;
             this.uniqueSnapshot = uniqueSnapshot;
-            this.needSignature = needSignature;
+            this.signatureRequired = signatureRequired;
             this.checksumAlgos = Collections.unmodifiableSet(new HashSet<>(checksumAlgos));
         }
 
@@ -365,8 +365,8 @@ public final class JkRepo implements Serializable {
             return filter;
         }
 
-        public boolean isNeedSignature() {
-            return needSignature;
+        public boolean isSignatureRequired() {
+            return signatureRequired;
         }
 
         public boolean isUniqueSnapshot() {
@@ -378,7 +378,7 @@ public final class JkRepo implements Serializable {
         }
 
         public JkPublishConfig withUniqueSnapshot(boolean uniqueSnapshot) {
-            return new JkPublishConfig(this.filter, this.needSignature, uniqueSnapshot, this.checksumAlgos);
+            return new JkPublishConfig(this.filter, this.signatureRequired, uniqueSnapshot, this.checksumAlgos);
         }
 
         public JkPublishConfig withNeedSignature(boolean needSignature) {
@@ -386,11 +386,11 @@ public final class JkRepo implements Serializable {
         }
 
         public JkPublishConfig withFilter(JkPublishFilter filter) {
-            return new JkPublishConfig(filter, this.needSignature, this.uniqueSnapshot, this.checksumAlgos);
+            return new JkPublishConfig(filter, this.signatureRequired, this.uniqueSnapshot, this.checksumAlgos);
         }
 
         public JkPublishConfig withChecksumAlgos(String... algos) {
-            return new JkPublishConfig(this.filter, this.needSignature, this.uniqueSnapshot, JkUtilsIterable.setOf(algos));
+            return new JkPublishConfig(this.filter, this.signatureRequired, this.uniqueSnapshot, JkUtilsIterable.setOf(algos));
         }
     }
 

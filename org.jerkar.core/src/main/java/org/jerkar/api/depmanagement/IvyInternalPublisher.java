@@ -9,7 +9,6 @@ import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
-import org.bouncycastle.crypto.Signer;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -209,6 +208,8 @@ final class IvyInternalPublisher implements InternalPublisher {
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (isMaven(resolver) && publishRepo.getPublishConfig().getFilter().accept(versionedModule)) {
                 JkLog.startTask("Publishing to " + resolver);
+                UnaryOperator<Path> effectiveSigner = publishRepo.getPublishConfig().isSignatureRequired() ? signer :
+                        null;
                 final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
                     signer, resolver, descriptorOutputDir,
                     publishRepo.getPublishConfig().isUniqueSnapshot(),
