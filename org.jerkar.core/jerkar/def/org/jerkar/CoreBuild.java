@@ -118,13 +118,14 @@ public class CoreBuild extends JkRun {
         javaPlugin.pack.javadoc = true;
         javaPlugin.pack.sources = true;
         javaPlugin.clean().pack();
+        String tagName = version.toString();
         JkProcess git = JkProcess.of("git").withFailOnError(true);
         git.andParams("pull").runSync();
         git.andParams("add", "*").runSync();
         git.andParams("commit", "-am", "Release " + version).runSync();
-        git.andParams("tag", "-a", version.toString(), "-m", "Release").runSync();
+        //git.andParams("tag", "-a", tagName, "-m", "Release").runSync();
         git.andParams("push").runSync();
-        git.andParams("push", "origin", "--tags").runSync();
+        git.andParams("push", "origin", tagName).runSync();
     }
 
     public static void main(String[] args) {
