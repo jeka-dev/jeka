@@ -37,10 +37,10 @@ public class JkJavaProjectPublishTasks {
 
     private void publishMaven(JkRepoSet repos) {
         JkJavaProject project = maker.project;
-        JkException.throwIf(project.getVersionedModule() == null, "No versionedModule has been set on "
+        JkException.throwIf(project.getVersionedModule() == null, "No versioned module has been set on "
                 + project + ". Can't publish.");
         JkMavenPublication publication = JkMavenPublication.of(maker, Collections.emptySet())
-                .with(project.getMavenPublicationInfo());
+                .with(project.getMavenPublicationInfo()).withSigner(signer);
         JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
                 .publishMaven(project.getVersionedModule(), publication, maker.getScopeDefaultedDependencies());
     }

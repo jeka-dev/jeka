@@ -122,8 +122,7 @@ final class IvyPublisherForMaven {
                 publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot,
                         mavenMetadata);
             }
-            for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication
-                    .getClassifiedArtifacts()) {
+            for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication.getClassifiedArtifacts()) {
                 publishUniqueSnapshot(versionedModule, classifiedArtifact.getClassifier(),
                         classifiedArtifact.getFile(), versionUniqueSnapshot, mavenMetadata);
             }
@@ -132,10 +131,8 @@ final class IvyPublisherForMaven {
             for (final Path file : mavenPublication.getMainArtifactFiles()) {
                 publishNormal(versionedModule, null, file);
             }
-            for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication
-                    .getClassifiedArtifacts()) {
-                publishNormal(versionedModule, classifiedArtifact.getClassifier(),
-                        classifiedArtifact.getFile());
+            for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication.getClassifiedArtifacts()) {
+                publishNormal(versionedModule, classifiedArtifact.getClassifier(), classifiedArtifact.getFile());
             }
             return null;
         }
@@ -335,7 +332,7 @@ final class IvyPublisherForMaven {
             }
             if (this.signer != null) {
                 final Path signed = signer.apply(source);
-                final String signedDest = destination + ".asc";
+                final String signedDest = dest + ".asc";
                 JkLog.info("Publish file " + signedDest);
                 repository.put(null, signed.toFile(), signedDest, overwrite);
             }

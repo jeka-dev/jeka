@@ -102,34 +102,26 @@ final class PgpUtils {
         try (final InputStream toSign = Files.newInputStream(fileToSign);
              final InputStream keyRing = Files.newInputStream(secringFile);
              final OutputStream out = Files.newOutputStream(signatureFile)) {
-
             sign(toSign, keyRing, out, pass, armor);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-
     }
-
 
     static void sign(InputStream toSign, InputStream keyRing, OutputStream out, char[] pass,
             boolean armor) {
-
         if (armor) {
             out = new ArmoredOutputStream(out);
         }
         final PGPSecretKey pgpSecretKey = readFirstSecretKey(keyRing);
         try {
-
             final PGPDigestCalculatorProvider pgpDigestCalculatorProvider = new BcPGPDigestCalculatorProvider();
             final PBESecretKeyDecryptor secretKeyDecryptor = new BcPBESecretKeyDecryptorBuilder(
                     pgpDigestCalculatorProvider).build(pass);
             final PGPPrivateKey pgpPrivKey = pgpSecretKey.extractPrivateKey(secretKeyDecryptor);
-
             final int secretKeyAlgo = pgpSecretKey.getPublicKey().getAlgorithm();
-            final PGPContentSignerBuilder contentSignerBuilder = new BcPGPContentSignerBuilder(
-                    secretKeyAlgo, HASH_ALGO);
-            final PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(
-                    contentSignerBuilder);
+            final PGPContentSignerBuilder signerBuilder = new BcPGPContentSignerBuilder(secretKeyAlgo, HASH_ALGO);
+            final PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(signerBuilder);
             signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
             final BCPGOutputStream bcpgOut = new BCPGOutputStream(out);
             final InputStream fileInputStream = new BufferedInputStream(toSign);

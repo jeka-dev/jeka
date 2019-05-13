@@ -12,6 +12,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
+import org.jerkar.tool.builtins.repos.JkPluginPgp;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -21,6 +22,7 @@ import static org.jerkar.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID
 
 /**
  * Build class for Jerkar. Run main method to create full distrib.
+ * For publishing in OSSRH the following options must be set : -ossrhPwd=Xxxxxx -pgp#secretKeyPassword=Xxxxxxx
  */
 public class CoreBuild extends JkRun {
 
@@ -37,6 +39,7 @@ public class CoreBuild extends JkRun {
     protected CoreBuild() {
         javaPlugin.tests.fork = false;
         javaPlugin.pack.javadoc = true;
+        javaPlugin.publish.signArtifacts = true;
     }
 
     @Override
@@ -110,13 +113,7 @@ public class CoreBuild extends JkRun {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class, args).doDefault();
-    }
-
-    public void doDefault() {
-        clean();
-        doDistrib();
-        javaPlugin.publishLocal();
+        JkInit.instanceOf(CoreBuild.class, args).javaPlugin.clean().pack();
     }
 
 }

@@ -16,7 +16,7 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Publication specific information to include in POM file andAccept order to be published of a Maven repository.
+ * Publication specific information to include in POM file in order to be published of a Maven repository.
  * These information contains : <ul>
  *   <li>The artifacts to be published (main artifact and artifacts with classifiers)</li>
  *   <li>Information about describing the project as some public repositories require</li>
