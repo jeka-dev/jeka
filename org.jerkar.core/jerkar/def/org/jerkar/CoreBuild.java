@@ -123,7 +123,7 @@ public class CoreBuild extends JkRun {
         git.andParams("pull").runSync();
         git.andParams("add", "*").runSync();
         git.andParams("commit", "-am", "Release " + version).runSync();
-        //git.andParams("tag", "-a", tagName, "-m", "Release").runSync();
+        git.andParams("tag", "-a", tagName, "-m", "Release").runSync();
         git.andParams("push").runSync();
         git.andParams("push", "origin", tagName).runSync();
     }
