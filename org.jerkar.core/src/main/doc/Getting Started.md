@@ -20,7 +20,7 @@ __[USER HOME]__ : User Home within the meaning of Windows or Unix.
 Usage:
 jerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
 
-Execute the specified methods defined in run class or plugins using the specified options and ofSystem properties.
+Execute the specified methods defined in run class or plugins using the specified options and system properties.
 Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
 ...
 ```
