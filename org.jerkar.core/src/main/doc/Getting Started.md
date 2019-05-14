@@ -22,6 +22,7 @@ jerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionNam
 
 Execute the specified methods defined in run class or plugins using the specified options and ofSystem properties.
 Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
+...
 ```
 
 # Use Jerkar with command line
@@ -34,12 +35,11 @@ This will generate a project skeleton with the following build class at _[PROJEC
 
 ```
 mygroup.myproject
-   |
-   + jerkar
-      + boot             <-------- Put extra jars here to augment run classpath.
+   + jerkar           
+      + boot            <-------- Put extra jars here to augment run classpath.
       + def
          + Build.java   <----- Build class extending JkRun 
-      + output              <---- Build artifacts are generated here
+      + output          <---- Build artifacts are generated here
    + src
       + main
           + java        <----- Your project java sources and resources for production go here
