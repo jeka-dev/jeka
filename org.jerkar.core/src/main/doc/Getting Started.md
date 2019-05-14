@@ -29,7 +29,7 @@ Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyPr
 
 ## Create a project
 
-1. Create a new directory named 'mygroup.myproject' as the root of your project.
+1. Create the root directory of your project (here 'mygroup.myproject').
 2. Execute `jerkar scaffold#run java#` under this directory. 
 This will generate a project skeleton with the following build class at _[PROJECT DIR]/build/def/Build.java_
 
