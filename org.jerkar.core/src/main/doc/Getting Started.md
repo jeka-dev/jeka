@@ -14,24 +14,15 @@ __[USER HOME]__ : User Home within the meaning of Windows or Unix.
 1. unzip the [distribution archive](http://jerkar.github.io/binaries/jerkar-distrib.zip) to the directory you want to install Jerkar (_[JERKAR HOME]_)
 2. make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on
 3. add _[JERKAR HOME]_ to your _PATH_ environment variable
-4. execute `jerkar -LH help` in the command line. You should get an output starting by : 
+4. execute `jerkar help` in the command line. You should get an output starting by : 
 
 ```
- _______           _
-(_______)         | |
-     _ _____  ____| |  _ _____  ____
- _  | | ___ |/ ___) |_/ |____ |/ ___)
-| |_| | ____| |   |  _ (/ ___ | |
- \___/|_____)_|   |_| \_)_____|_|
-                                     The 100% Java build tool.
-Java Home : C:\Program Files (x86)\Java\jdk1.8.0_121\jre
-Java Version : 1.8.0_121, Oracle Corporation
-Jerkar Home : C:\software\jerkar                             
-Jerkar User Home : C:\users\djeang\.jerkar
-...
-```
+Usage:
+jerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
 
-Note : -LH option stands for "Log Headers". In this mode, Jerkar displays meta-information about the running build.
+Execute the specified methods defined in run class or plugins using the specified options and ofSystem properties.
+Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
+```
 
 # Use Jerkar with command line
 
@@ -40,6 +31,24 @@ Note : -LH option stands for "Log Headers". In this mode, Jerkar displays meta-i
 1. Create a new directory named 'mygroup.myproject' as the root of your project.
 2. Execute `jerkar scaffold#run java#` under this directory. 
 This will generate a project skeleton with the following build class at _[PROJECT DIR]/build/def/Build.java_
+
+```
+mygroup.myproject
+   |
+   + jerkar
+      + boot             <-------- Put extra jars here to augment run classpath.
+      + def
+         + Build.java   <----- Build class extending JkRun 
+      + output              <---- Build artifacts are generated here
+   + src
+      + main
+          + java        <----- Your project java sources and resources for production go here
+      + test
+          + java        <----- Your project java sources and resources for testing go here    
+```
+
+This is the content of the poposed build class. Guava and Junit are pesent only fo demo purpose. You can remove it safely and add 
+any dependency you need.
 
 ```Java
 import org.jerkar.api.depmanagement.JkDependencySet;
@@ -80,7 +89,7 @@ class Build extends JkRun {
 Explanation : `scaffold#run` invokes 'run' method on the 'scaffold' plugin.  `java#` forces the `java` plugin to be loaded. When loaded, 
 'java' plugin has the effect to instruct scaffold plugin extra actions for generating a Java project.
 
-By default the project layout mimics the Maven one so sources are supposed to lie in _src/main/java_.
+By default the project mimics Maven layout convention so sources are supposed to lie in _src/main/java_.
 
 Execute `jerkar java#info` to see an abstract of the project setup. 
 
