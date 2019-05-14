@@ -36,7 +36,6 @@ This will generate a project skeleton with the following build class at _[PROJEC
 ```
 mygroup.myproject
    + jerkar           
-      + boot            <-------- Put extra jars here to augment run classpath.
       + def
          + Build.java   <----- Build class extending JkRun 
       + output          <---- Build artifacts are generated here
