@@ -35,9 +35,9 @@ This will generate a project skeleton with the following build class at _[PROJEC
 
 ```
 mygroup.myproject
-   + jerkar           
-      + def
-         + Build.java   <----- Build class extending JkRun 
+   + jerkar             
+      + def             <-----  Java code that build your project goes here
+         + Build.java   
       + output          <---- Build artifacts are generated here
    + src
       + main
@@ -45,9 +45,14 @@ mygroup.myproject
       + test
           + java        <----- Your project java sources and resources for testing go here    
 ```
+Explanation : `scaffold#run` invokes 'run' method on the 'scaffold' plugin.  `java#` forces the `java` plugin to be loaded. When loaded, 
+'java' plugin has the effect to instruct scaffold plugin extra actions for generating a Java project.
 
-This is the content of the poposed build class. Guava and Junit are pesent only fo demo purpose. You can remove it safely and add 
+By default the project mimics Maven layout convention so sources are supposed to lie in _src/main/java_.
+
+Below is the content of the generated build class. Guava and Junit are pesent only fo demo purpose. You can remove it safely and add 
 any dependency you need.
+
 
 ```Java
 import org.jerkar.api.depmanagement.JkDependencySet;
@@ -84,12 +89,6 @@ class Build extends JkRun {
     
 }
 ```
-
-Explanation : `scaffold#run` invokes 'run' method on the 'scaffold' plugin.  `java#` forces the `java` plugin to be loaded. When loaded, 
-'java' plugin has the effect to instruct scaffold plugin extra actions for generating a Java project.
-
-By default the project mimics Maven layout convention so sources are supposed to lie in _src/main/java_.
-
 Execute `jerkar java#info` to see an abstract of the project setup. 
 
 ## Build your project
