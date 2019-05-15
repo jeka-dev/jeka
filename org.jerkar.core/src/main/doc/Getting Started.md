@@ -120,6 +120,7 @@ sample1
 3. Import the project in your IDE. Eveything should be Ok, in particular *Build.java* should compile and execute within your IDE.
 
 ```java
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkInit;
 
