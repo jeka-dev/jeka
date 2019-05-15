@@ -237,7 +237,7 @@ You can mention inline the external library you need to compile and execute your
 1. Annotate your class with module you want to use. There can be many.
 
 ```java
-@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")  // Can import files hosted in binaries repos (along their dependencies)
+@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")  // Can import files from Maven repos
 @JkImport("../local_libs/my-utility.jar")   // or simply located locally
 class Build extends JkRun {
    ...
