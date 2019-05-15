@@ -119,12 +119,135 @@ sample1
 ```
 3. Import the project in your IDE. Eveything should be Ok, in particular *Build.java* should compile and execute within your IDE.
 
-## Edit Build class
+```
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.JkInit;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
+class Build extends JkRun {
+
+    public static void main(String[] args) throws Exception {
+        Build build = JkInit.instanceOf(Build.class, args);
+        build.clean();
+    }
+
+}
+```
+
+## Add a run method (method invokable from command line)
+
+Add add the following method to the Build java source.
+
+```
+public void displayGoogle() throws MalformedURLException {
+    String content = JkUtilsIO.read(new URL("https://www.google.com/"));
+    System.out.println(content);
+}
+```
+Execute `jerkar displayGoogle` on a terminal and you should see the Google source displayed.
+
+Execute `jerkar help` and the output should mention your new method.
+
+```
+...
+From class Build :
+  Methods :
+    displayGoogle : No description available.
+
+From class org.jerkar.tool.JkRun :
+  Methods :
+    clean : Cleans the output directory except the compiled run classes.
+    help : Displays all available methods and options defined for this run class.
+...
+```
+
+Any public instance method with no-args and returning `void` fits to be a run method.
+
+## Self document your method
+
+Add the following annotation to the newly created method.
+
+```
+@JkDoc("Fetch Google page and display its source on the console.")
+public void displayGoogle() throws MalformedURLException {
+    String content = JkUtilsIO.read(new URL("https://www.google.com/"));
+    System.out.println(content);
+}
+```
+
+Execute `jerkar help` and the output should mention doculentation.
+```
+From class Build :
+  Methods :
+    displayGoogle : Fetch Google page and display its source on the console.
+```
+
+## Add a parameter
+
+May you like to see Google page source but you probably want to apply this method to any other url.
+
+To make it parametrizable, just declare the url in a public field so its value can be injected from command line.
+
+```
+class Build extends JkRun {
+
+    public String url = "https://www.google.com/";
+
+    @JkDoc("Fetch Google page and display its source on the console.")
+    public void displayContent() throws MalformedURLException {
+        String content = JkUtilsIO.read(new URL(url));
+        System.out.println(content);
+    }
+
+    public static void main(String[] args) throws Exception {
+        Build build = JkInit.instanceOf(Build.class, args);
+        build.displayContent();
+    }
+
+}
+```
+
+Execute `jerkar displayContent -url=https://github.com/github` and you should see the Github page source displayed.
+
+## Use 3rd party libs in your build class
+
+You can mention directly in the build class, the external library you need to compile and execute your build class. For exemple, you main need *Apache HttpClient* library to perform some non basic HTTP tasks.
+
+1. Annotate your class with module you want to use. There can be many.
+
+```
+@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")
+class Build extends JkRun {
+   ...
+}
+```
+
+2. Execute `jerkar intellij#generateIml` or `jerkar eclipse#generateFiles` to add properly the dependencies to your IDE (You may need to refresh it).
+
+3. You can add code depending on the imported libs
+
+```
+import org.apache.http.client.methods.HttpPost;
+...
+public void post() {
+    HttpPost httpPost = new HttpPost();
+    httpPost.setHeader("content-type", "application/json");
+    ...
+}
+```
+
+## Import a jerkar build from another project
 
 
-# Use Jerkar with command line
 
-## Create a project
+## Restrictions
+
+There is not known restriction about what you can do with you build class. You can define as meny class you want into def directoy.
+Organise it within Java packages or not. 
+
+# Create a Java project
 
 1. Create the root directory of your project (here 'mygroup.myproject').
 2. Execute `jerkar scaffold#run java#` under this directory. 
@@ -218,71 +341,4 @@ Execute `jerkar help` to display all what you can do from the command line for t
 you can execute `jerkar aGivenPluginName#help` to display help on a specific plugin. 
 The list of available plugins on the Jerkar classpath is displayed in help screen.
 
-# Use with intellij
-
-## setup intellij
-
-As for Eclipse, you must declare the two path variables (go settings -> Apparence & behavior -> Path Variables)
- * `JERKAR_HOME` which point to _[Jerkar Home]_, 
- * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_
-
-## setup iml file
-
-Execute `jerkar intellij#generateIml` from project root folder to generate an iml file 
-according the Build.java file.
-
-## run/debug within Intellij
-
-You can go two ways :
-- Just execute your Build class main method.
-- Create a Run/Debug application configuration for class `org.jerkar.tool.Main` class.
-
-**Important :** Make sure you choose __$MODULE_DIR$__ as the working directory for the Run/Debug configuration.
-
-
-# Use with Eclipse
-
-## Setup Eclipse 
-
-To use Jerkar within Eclipse, you just have to set 2 classpath variables in Eclipse.
-
-1. Open the Eclipse preference window : _Window -> Preferences_
-2. Navigate to the classpath variable panel : _Java -> Build Path -> Classpath Variables_
-3. Add these 2 variables :
-    * `JERKAR_HOME` which point to _[Jerkar Home]_, 
-    * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_.
-    
-Note : By default _[Jerkar User Home]_ point to _[User Home]/.jerkar_ but can be overridden by defining the environment 
-variable `JERKAR_USER_HOME`. 
-  
-If you have any problem to figure out the last value, just execute `jerkar help -LH` from anywhere and it will start logging the relevant information :
-
-```
- _______    	   _
-(_______)         | |                
-     _ _____  ____| |  _ _____  ____ 
- _  | | ___ |/ ___) |_/ |____ |/ ___)
-| |_| | ____| |   |  _ (/ ___ | |    
- \___/|_____)_|   |_| \_)_____|_|
-                                     The 100% Java build tool.
-
-Java Home : C:\UserTemp\I19451\software\jdk1.6.0_24\jre
-Java Version : 1.6.0_24, Sun Microsystems Inc.
-Jerkar Home : C:\software\jerkar                               <-- This is the value for JERKAR_HOME
-Jerkar User Home : C:\users\djeang\.jerkar
-Jerkar Repository Cache : C:\users\djeang\.jerkar\cache\repo   <-- This is the value for JERKAR_REPO
-...
-```
-
-## setup _.classpath_ file
-
-Execute `jerkar eclipse#generateFiles` from project root folder to generate a _.classpath_ file 
-according the `Build.java` file.
-
-## run/debug within Eclipse
-
-You can go two ways :
-- Just execute your Build class main method.
-- Configure a launcher on `org.jerkar.tool.Main` class that has your project root dir as working directory. This way you 
-can specify which method to execute along options and system properties.
 
