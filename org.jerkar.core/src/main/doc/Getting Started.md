@@ -41,13 +41,13 @@ Java Version : 1.8.0_121, Oracle Corporation
 Jerkar Version : null
 Jerkar Home : C:\Users\djeang\IdeaProjects\jerkar\org.jerkar.core\jerkar\output\distrib
 Jerkar User Home : C:\Users\djeang\.jerkar
-Jerkar Run Repositories : [http://194.253.70.251:8081/nexus/content/groups/multipharma, file:/C:/Users/djeang/.jerkar/maven-publish-dir/]
+Jerkar Run Repositories : [https://repo.maven.apache.org/maven2/, file:/C:/Users/djeang/.jerkar/maven-publish-dir/]
 Jerkar Repository Cache : C:\Users\djeang\.jerkar\cache\repo
 Jerkar Classpath : C:\Users\djeang\IdeaProjects\jerkar\org.jerkar.core\jerkar\output\distrib\org.jerkar.core.jar
 Command Line : -LH help
 Specified System Properties : none.
 Standard Options : RunClass=null, LogVerbose=false, LogHeaders=true, LogMaxLength=230
-Options :   LH=null  LML=230  jdk.6=C:/Program Files (x86)/Java/jdk1.6.0_45  jdk.7=C:/Program Files (x86)/Java/jdk1.7.0_80  repo.download.url=http://194.253.70.251:8081/nexus/content/groups/multipharma
+Options :   LH=null  LML=230  jdk.6=C:/Program Files (x86)/Java/jdk1.6.0_45  jdk.7=C:/Program Files (x86)/Java/jdk1.7.0_80  repo.download.url=https://repo.maven.apache.org/maven2/
 Compile and initialise run classes ...
 │ Initializing class org.jerkar.tool.JkRun at C:\Users\djeang\IdeaProjects\jerkar ...
 │ │ Run instance initialized with options []
