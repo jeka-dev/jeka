@@ -167,8 +167,6 @@ Execute `jerkar displayGoogle` on a terminal and you should see the Google sourc
 
 Execute `jerkar help` and the output should mention your new method.
 
-You can also launch/debug the method directly from your IDE, using the *main* method.
-
 ```java
 ...
 From class Build :
@@ -183,6 +181,8 @@ From class org.jerkar.tool.JkRun :
 ```
 
 Any public instance method with no-args and returning `void` fits to be a run method.
+
+You can also launch/debug the method directly from your IDE, using the *main* method.
 
 ## Self document your method
 
