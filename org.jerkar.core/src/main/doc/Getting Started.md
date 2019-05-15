@@ -168,7 +168,7 @@ Execute `jerkar displayGoogle` on a terminal and you should see the Google sourc
 
 Execute `jerkar help` and the output should mention your new method.
 
-```java
+```
 ...
 From class Build :
   Methods :
