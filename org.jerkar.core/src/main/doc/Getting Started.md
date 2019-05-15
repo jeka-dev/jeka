@@ -61,6 +61,17 @@ jerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionNam
 Execute the specified methods defined in run class or plugins using the specified options and system properties.
 Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
 ...
+
+Method help succeeded in 660 milliseconds.
+  ______                                     _
+ / _____)                                   | |
+( (____  _   _  ____ ____ _____  ___  ___   | |
+ \____ \| | | |/ ___) ___) ___ |/___)/___)  |_|
+ _____) ) |_| ( (__( (___| ____|___ |___ |   _
+(______/|____/ \____)____)_____|___/(___/   |_|
+
+                                               Total run duration : 1.159 seconds.
+
 ```
 
 # Use Jerkar with command line
