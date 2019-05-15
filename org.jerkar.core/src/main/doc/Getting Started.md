@@ -106,7 +106,8 @@ First, let's create a simple automation project that read content from url and d
 ## Create a project
 
 1. Create the root directory of your project (here 'sample1').
-2. Execute `jerkar scaffold#run intellij#` under this directory (replace `intellij#` by `eclipse#` if you're using eclipse)  
+2. Open a terminal/console and cd to *sample1* directory. Jerkar should be always executed from the root of the project.
+3. Execute `jerkar scaffold#run intellij#` under this directory (replace `intellij#` by `eclipse#` if you're using eclipse)  
 This will generate a project skeleton as follow :
 ```
 sample1
@@ -117,7 +118,7 @@ sample1
          + Build.java   
       + output          <---- Genererated files are supposed to lie here  
 ```
-3. Import the project in your IDE. Eveything should be Ok, in particular *Build.java* should compile and execute within your IDE.
+4. Import the project in your IDE. Eveything should be Ok, in particular *Build.java* should compile and execute within your IDE.
 
 ```java
 import org.jerkar.tool.JkRun;
