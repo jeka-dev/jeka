@@ -119,7 +119,7 @@ sample1
 ```
 3. Import the project in your IDE. Eveything should be Ok, in particular *Build.java* should compile and execute within your IDE.
 
-```
+```java
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkInit;
 
@@ -140,7 +140,7 @@ class Build extends JkRun {
 
 Add the following method to the Build java source.
 
-```
+```java
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkInit;
 
@@ -168,7 +168,7 @@ Execute `jerkar help` and the output should mention your new method.
 
 You can also launch/debug the method directly from your IDE, using the *main* method.
 
-```
+```java
 ...
 From class Build :
   Methods :
@@ -187,7 +187,7 @@ Any public instance method with no-args and returning `void` fits to be a run me
 
 Add the following annotation to the newly created method.
 
-```
+```java
 @JkDoc("Fetch Google page and display its source on the console.")
 public void displayGoogle() throws MalformedURLException {
     String content = JkUtilsIO.read(new URL("https://www.google.com/"));
@@ -208,7 +208,7 @@ May you like to see Google page source but you probably want to apply this metho
 
 To make it parametrizable, just declare the url in a public field so its value can be injected from command line.
 
-```
+```java
 class Build extends JkRun {
 
     public String url = "https://www.google.com/";
@@ -235,7 +235,7 @@ You can mention inline the external library you need to compile and execute your
 
 1. Annotate your class with module you want to use. There can be many.
 
-```
+```java
 @JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")
 class Build extends JkRun {
    ...
@@ -246,7 +246,7 @@ class Build extends JkRun {
 
 3. You can add code depending on the imported libs
 
-```
+```java
 import org.apache.http.client.methods.HttpPost;
 ...
 public void post() {
