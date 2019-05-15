@@ -1,6 +1,8 @@
 package org.jerkar.api.depmanagement;
 
+import java.nio.file.Path;
 import java.time.Instant;
+import java.util.function.UnaryOperator;
 
 interface InternalPublisher {
 
@@ -9,6 +11,6 @@ interface InternalPublisher {
                     JkVersionProvider resolvedVersion);
 
     void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-            JkDependencySet dependencies);
+                      JkDependencySet dependencies, UnaryOperator<Path> signer);
 
 }

@@ -22,8 +22,7 @@ public final class JkDependencyResolver {
 
     private final JkResolutionParameters parameters;
 
-    // Not necessary but nice if present in order to let Ivy hide data
-    // efficiently.
+    // Not necessary but helps Ivy to hide data efficiently.
     private final JkVersionedModule module;
 
     private final JkRepoSet repos;

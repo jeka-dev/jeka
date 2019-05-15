@@ -4,11 +4,11 @@ import org.jerkar.tool.JkInit;
 /**
  * @formatter:off
  */
-class Run extends JkRun {
+class Build extends JkRun {
 
     public static void main(String[] args) throws Exception {
-        Run run = JkInit.instanceOf(Run.class, args);
-        run.clean();
+        Build build = JkInit.instanceOf(Build.class, args);
+        build.clean();
     }
 
 }

@@ -3,6 +3,8 @@ package org.jerkar.tool;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -84,13 +86,12 @@ public class JkRun {
 
         // Load plugins declared in command line and inject options
         jkRun.plugins.loadCommandLinePlugins();
-        for (JkPlugin plugin : jkRun.getPlugins().getAll()) {
+        List<JkPlugin> plugins = jkRun.getPlugins().getAll();
+        for (JkPlugin plugin : plugins) {
            jkRun.plugins.injectOptions(plugin);
         }
         run.setup();
-
-        jkRun.plugins.loadCommandLinePlugins();
-        for (JkPlugin plugin : jkRun.getPlugins().getAll()) {
+        for (JkPlugin plugin : new LinkedList<>(plugins)) {
             List<ProjectDef.RunOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
             try {
                 plugin.activate();

@@ -24,7 +24,7 @@ final class HelpDisplayer {
         }
         StringBuilder sb = new StringBuilder()
                 .append("Usage: \njerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
-                .append("Execute the specified methods defined in run class or plugins using the specified options and ofSystem properties.\n")
+                .append("Execute the specified methods defined in run class or plugins using the specified options and system properties.\n")
                 .append("Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
                 .append("\nAvailable methods and options :\n")
@@ -36,7 +36,7 @@ final class HelpDisplayer {
         sb.append("\nAvailable plugins in classpath : ").append(JkUtilsString.join(names, ", "))
                 .append(".\n");
 
-        sb.append("\nType 'jerkar [pluginName]#help' to get help on a perticular plugin (ex : 'jerkar java#help'). ");
+        sb.append("\nType 'jerkar [pluginName]#help' to get help on a particular plugin (ex : 'jerkar java#help'). ");
         sb.append("\nType 'jerkar help -Plugins' to get help on all available plugins in the classpath.\n");
         JkLog.info(sb.toString());
     }

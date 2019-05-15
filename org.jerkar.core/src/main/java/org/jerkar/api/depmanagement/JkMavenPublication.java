@@ -16,7 +16,7 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Publication specific information to include in POM file andAccept order to be published of a Maven repository.
+ * Publication specific information to include in POM file in order to be published of a Maven repository.
  * These information contains : <ul>
  *   <li>The artifacts to be published (main artifact and artifacts with classifiers)</li>
  *   <li>Information about describing the project as some public repositories require</li>
@@ -32,18 +32,12 @@ public final class JkMavenPublication implements Serializable {
 
     private final JkMavenPublicationInfo extraInfo;
 
-    private final UnaryOperator<Path> signer;
-
-    private final Set<String> checksumAlgos;
-
     private JkMavenPublication(List<File> mainArtifacts, List<JkClassifiedFileArtifact> classified,
-                               JkMavenPublicationInfo extraInfo, UnaryOperator<Path> signer, Set<String> checksumsAlgos) {
+                               JkMavenPublicationInfo extraInfo) {
         super();
         this.mainArtifacts = mainArtifacts;
         this.classifiedArtifacts = classified;
         this.extraInfo = extraInfo;
-        this.signer = signer;
-        this.checksumAlgos = checksumsAlgos;
     }
 
     /**
@@ -51,7 +45,7 @@ public final class JkMavenPublication implements Serializable {
      */
     public static JkMavenPublication of(Path file) {
         return new JkMavenPublication(JkUtilsIterable.listOf(file.toFile()),
-                Collections.emptyList(), null, null, Collections.emptySet());
+                Collections.emptyList(), null);
     }
 
     /**
@@ -90,16 +84,9 @@ public final class JkMavenPublication implements Serializable {
         final List<JkClassifiedFileArtifact> list = new LinkedList<>(
                 this.classifiedArtifacts);
         list.add(artifact);
-        return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo, this.signer, this.checksumAlgos);
+        return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo);
     }
 
-    public UnaryOperator<Path> getSigner() {
-        return signer;
-    }
-
-    public Set<String> getChecksumAlgos() {
-        return checksumAlgos;
-    }
 
     private boolean contains(String ext, String classifier) {
         for (final JkClassifiedFileArtifact classifiedArtifact : this.classifiedArtifacts) {
@@ -115,31 +102,28 @@ public final class JkMavenPublication implements Serializable {
      * publication extra infoString required to publish on Maven central repository.
      */
     public JkMavenPublication with(JkMavenPublicationInfo extraInfo) {
-        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, extraInfo, this.signer,
-                this.checksumAlgos);
+        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, extraInfo);
     }
 
     /**
      * Returns a new publication based on this one but with the specified signer to sign published artifacts.
      */
     public JkMavenPublication withSigner(UnaryOperator<Path> signer) {
-        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo, signer, this.checksumAlgos);
+        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo);
     }
 
     /**
      * Returns a new publication based on this one but with the specified signer to sign published artifacts.
      */
     public JkMavenPublication withChecksums(Set<String> checksumAlgos) {
-        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo, this.signer,
-                checksumAlgos);
+        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo);
     }
 
     /**
      * @see #withChecksums(Set)
      */
     public JkMavenPublication withChecksums(String ... algos) {
-        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo, this.signer,
-                JkUtilsIterable.setOf(algos));
+        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo);
     }
 
     /**

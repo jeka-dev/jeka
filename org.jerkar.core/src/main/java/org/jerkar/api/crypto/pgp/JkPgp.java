@@ -28,6 +28,19 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
+    private final Path pubRing;
+
+    private final Path secRing;
+
+    private final String password;
+
+    private JkPgp(Path pubRing, Path secRing, String password) {
+        super();
+        this.pubRing = pubRing;
+        this.secRing = secRing;
+        this.password = password;
+    }
+
     // We don't want to add Bouncycastle in the Jerkar classpath, so we create a
     // specific classloader just for launching the Bouncy castle methods.
     private static final Class<?> PGPUTILS_CLASS = JkUrlClassLoader.ofCurrent()
@@ -57,8 +70,6 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         return new JkPgp(pub, sec, null);
     }
 
-
-
     /**
      * Creates a JkPgp with the specified public key ring.
      */
@@ -73,21 +84,16 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         return of(null, secRing, password);
     }
 
-    private final Path pubRing;
-
-    private final Path secRing;
-
-    private final String password;
-
-    private JkPgp(Path pubRing, Path secRing, String password) {
-        super();
-        this.pubRing = pubRing;
-        this.secRing = secRing;
-        this.password = password;
+    public Path sign(Path fileToSign) {
+        final Path signatureFile = getSignatureFile(fileToSign);
+        sign(fileToSign, signatureFile);
+        return signatureFile;
     }
 
-    // Non private for testing
-    void sign(Path fileToSign, Path output, String password) {
+    /**
+     * Signs the specified file and write the signature in the specified signature file.
+     */
+    public void sign(Path fileToSign, Path signatureFile) {
         final char[] pass;
         if (password == null) {
             pass = new char[0];
@@ -102,17 +108,7 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         Method signMethod = JkUtilsReflect.getMethod(PGPUTILS_CLASS, "sign", Path.class, Path.class, Path.class,
                 char[].class, boolean.class);
         JkUtilsReflect.invoke(null, signMethod, fileToSign,
-                secRing, output, pass, true);
-    }
-
-    public Path sign(Path fileToSign) {
-        final Path signatureFile = getSignatureFile(fileToSign);
-        sign(fileToSign, signatureFile);
-        return signatureFile;
-    }
-
-    public void sign(Path fileToSign, Path signatureFile) {
-        sign(fileToSign, signatureFile, password);
+                secRing, signatureFile, pass, true);
     }
 
     /**
@@ -135,19 +131,24 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
     }
 
     /**
-     * Creates a identical {@link JkPgp} but with the specified secret ring key
-     * file.
+     * Creates a identical {@link JkPgp} but with the specified secret ring key file.
      */
     public JkPgp withSecretRing(Path file, String password) {
         return new JkPgp(pubRing, file, password);
     }
 
     /**
-     * Creates a identical {@link JkPgp} but with the specified public ring key
-     * file.
+     * Creates a identical {@link JkPgp} but with the specified public ring key file.
      */
     public JkPgp withPublicRing(Path file) {
         return new JkPgp(file, secRing, password);
+    }
+
+    /**
+     * Creates a identical {@link JkPgp} but with the specified password for secret ring.
+     */
+    public JkPgp withSecretRingPassword(String pwd) {
+        return new JkPgp(pubRing, secRing, pwd);
     }
 
     /**
@@ -170,7 +171,8 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
             return null;
         }
         final Path signatureFile = file.getParent().resolve(file.getFileName().toString() + ".asc");
-        sign(file, signatureFile, password);
+        sign(file, signatureFile);
         return signatureFile;
     }
+
 }

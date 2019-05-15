@@ -43,7 +43,7 @@ public class IvyInternalPublisherRunner {
         final JkDependencySet deps = JkDependencySet.of().and(spring, "2.0.+", JkScopedDependencyTest.COMPILE);
         final JkVersionProvider versionProvider = JkVersionProvider.of(spring, "2.0.5");
         jkIvyPublisher.publishMaven(versionedModule, publication,
-                deps.withVersionProvider(versionProvider));
+                deps.withVersionProvider(versionProvider), null);
     }
 
     private static Path sampleJarfile() {

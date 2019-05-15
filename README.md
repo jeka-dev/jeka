@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/jerkar/jerkar.svg?branch=master)](https://travis-ci.org/jerkar/jerkar)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core) <br/>
+[![Maven Central](https://img.shields.io/maven-central/v/org.jerkar/core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.jerkar%22%20AND%20a:%22core%22) <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jerkar.github.io/img/logo/PNG-01.png" width='350' height='420' align='middle'/>
 
@@ -29,8 +29,10 @@ Note that you can still access Jerkar 0.6 documentation from [official web-site]
 
 # Get Jerkar
 
-* Latest Snapshot : [Version 0.7.0-SNAPSHOT](https://oss.sonatype.org/content/repositories/snapshots/org/jerkar/core/0.7.0-SNAPSHOT/core-0.7.0-SNAPSHOT-distrib.zip)
-* Releases : https://github.com/jerkar/jerkar/releases
+* Snapshots : https://oss.sonatype.org/content/repositories/snapshots/org/jerkar/core/
+* Releases : https://repo1.maven.org/maven2/org/jerkar/core/
+
+The distribution is the file named core-x.x.x-distrib.zip. 
 
 # How to use Jerkar
 

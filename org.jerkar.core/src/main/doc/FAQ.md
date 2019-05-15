@@ -4,16 +4,13 @@
 Of course yes. If you prefer that your Jerkar run code lies in a distinct project, create a Jerkar project in a sibling 
 folder and mention where is located the project to build.
 
-```
-public class Build extends JkJavaProjectBuild {
-
-   @Override
-    protected void setup() {
-         Path projectPath = this.baseDir().resolve("../myProject");   // project to build lies in a sibling folder. 
-         project().setSourceLayout(JkProjectSourceLayout.ofMavenStyle().withBaseDir(projectPath));
-         ...
-    }
-
+```java
+...
+@Override
+protected void setup() {  // project to build lies in a sibling folder. 
+      Path projectPath = this.baseDir().resolve("../myProject");   
+      project().setSourceLayout(JkProjectSourceLayout.ofMavenStyle().withBaseDir(projectPath));
+      ...
 ```
 
 ## My run class does not compile so I can't invoke any Jerkar method as 'help' or 'scaffold#run'. What can I do ?
@@ -42,11 +39,11 @@ This way, if one of your project source code is declared to be in a specific Jav
 
 Jerkar can use any JSR199 Java compiler to compile your Java code. Just set the compiler instance you need as :
 
-```
+```java
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
-public class Build extends JkJavaProjectBuild {
+public class Build extends JkRun {
     ...
     maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
     ...
