@@ -138,7 +138,7 @@ class Build extends JkRun {
 
 ## Add a run method (method invokable from command line)
 
-Add add the following method to the Build java source.
+Add the following method to the Build java source.
 
 ```
 public void displayGoogle() throws MalformedURLException {
