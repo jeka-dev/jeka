@@ -157,8 +157,7 @@ class Build extends JkRun {
     }
 
     public static void main(String[] args) throws Exception {
-        Build build = JkInit.instanceOf(Build.class, args);
-        build.displayGoogle();
+        JkInit.instanceOf(Build.class, args).displayGoogle();
     }
 
 }
