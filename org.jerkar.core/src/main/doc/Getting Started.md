@@ -141,14 +141,32 @@ class Build extends JkRun {
 Add the following method to the Build java source.
 
 ```
-public void displayGoogle() throws MalformedURLException {
-    String content = JkUtilsIO.read(new URL("https://www.google.com/"));
-    System.out.println(content);
+import org.jerkar.tool.JkRun;
+import org.jerkar.tool.JkInit;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
+class Build extends JkRun {
+
+    public void displayGoogle() throws MalformedURLException {
+        String content = JkUtilsIO.read(new URL("https://www.google.com/"));
+        System.out.println(content);
+    }
+
+    public static void main(String[] args) throws Exception {
+        Build build = JkInit.instanceOf(Build.class, args);
+        build.displayGoogle();
+    }
+
 }
+
 ```
 Execute `jerkar displayGoogle` on a terminal and you should see the Google source displayed.
 
 Execute `jerkar help` and the output should mention your new method.
+
+You can also launch/debug the method directly from your IDE, using the *main* method.
 
 ```
 ...
@@ -213,7 +231,7 @@ Execute `jerkar displayContent -url=https://github.com/github` and you should se
 
 ## Use 3rd party libs in your build class
 
-You can mention directly in the build class, the external library you need to compile and execute your build class. For exemple, you main need *Apache HttpClient* library to perform some non basic HTTP tasks.
+You can mention inline the external library you need to compile and execute your build class. For exemple, you main need *Apache HttpClient* library to perform some non basic HTTP tasks.
 
 1. Annotate your class with module you want to use. There can be many.
 
@@ -237,17 +255,19 @@ public void post() {
     ...
 }
 ```
+Execute *post* method as usual : `jerkar post`.
 
 ## Import a jerkar build from another project
 
-
+// Todo ... Documentation in progress
 
 ## Restrictions
 
 There is not known restriction about what you can do with you build class. You can define as meny class you want into def directoy.
 Organise it within Java packages or not. 
 
-# Create a Java project
+
+# Build a Java project
 
 1. Create the root directory of your project (here 'mygroup.myproject').
 2. Execute `jerkar scaffold#run java#` under this directory. 
@@ -272,7 +292,6 @@ By default the project mimics Maven layout convention so sources are supposed to
 
 Below is the content of the generated build class. Guava and Junit are pesent only fo demo purpose. You can remove it safely and add 
 any dependency you need.
-
 
 ```Java
 import org.jerkar.api.depmanagement.JkDependencySet;
