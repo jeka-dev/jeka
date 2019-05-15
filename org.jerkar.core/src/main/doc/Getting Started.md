@@ -73,6 +73,54 @@ Method help succeeded in 660 milliseconds.
                                                Total run duration : 1.159 seconds.
 
 ```
+# Configure your IDE
+
+For now, there is no valuable Jerkar Visual Plugin for your IDE but you can work pretty well without thanks to Intellij and Eclipse Jerkar plugin whose generating IDE metadata files (.iml and .classpath among others).
+
+But first you have to instruct your IDE where is located Jerkar distribution and repositories.
+
+## Intellij
+
+Declare the 2 path variables (go settings -> Apparence & behavior -> Path Variables)
+ * `JERKAR_HOME` which point to _[Jerkar Home]_, 
+ * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_
+
+## Eclipse 
+Declare the 2 classpath variables in Eclipse.
+
+1. Open the Eclipse preference window : _Window -> Preferences_
+2. Navigate to the classpath variable panel : _Java -> Build Path -> Classpath Variables_
+3. Add these 2 variables :
+    * `JERKAR_HOME` which point to _[Jerkar Home]_, 
+    * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_.
+    
+## Note 
+By default _[Jerkar User Home]_ point to _[User Home]/.jerkar_ but can be overridden by defining the environment 
+variable `JERKAR_USER_HOME`. 
+
+
+# Basic automation project
+
+First, let's create a simple automation project that read content from url and display it on the console. 
+
+## Create a project
+
+1. Create the root directory of your project (here 'sample1').
+2. Execute `jerkar scaffold#run intellij#` under this directory (replace `intellij#` by `eclipse#` if you're using eclipse)  
+This will generate a project skeleton as follow :
+```
+sample1
+   + .idea
+       + sample1.iml    <----- Intellij metadata containing project dependencies (At least org.jerkar.core)
+   + jerkar             
+      + def             <-----  Java code that build your project goes here
+         + Build.java   
+      + output          <---- Genererated files are supposed to lie here  
+```
+3. Import the project in your IDE. Eveything should be Ok, in particular *Build.java* should compile and execute within your IDE.
+
+## Edit Build class
+
 
 # Use Jerkar with command line
 
