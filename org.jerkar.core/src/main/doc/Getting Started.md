@@ -213,6 +213,7 @@ To make it parametrizable, just declare the url in a public field so its value c
 ```java
 class Build extends JkRun {
 
+    @JkDoc("The url to display content.")   // Optional self documentation.
     public String url = "https://www.google.com/";
 
     @JkDoc("Fetch Google page and display its source on the console.")
@@ -222,8 +223,7 @@ class Build extends JkRun {
     }
 
     public static void main(String[] args) throws Exception {
-        Build build = JkInit.instanceOf(Build.class, args);
-        build.displayContent();
+        JkInit.instanceOf(Build.class, args).displayContent();
     }
 
 }
