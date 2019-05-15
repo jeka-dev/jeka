@@ -213,7 +213,7 @@ To make it parametrizable, just declare the url in a public field so its value c
 ```java
 class Build extends JkRun {
 
-    @JkDoc("The url to display content.")   // Optional self documentation.
+    @JkDoc("The url to display content.")   // Optional self documentation
     public String url = "https://www.google.com/";
 
     @JkDoc("Fetch Google page and display its source on the console.")
@@ -238,7 +238,8 @@ You can mention inline the external library you need to compile and execute your
 1. Annotate your class with module you want to use. There can be many.
 
 ```java
-@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")
+@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")  // Can import files hosted in binaries repos (alongs their dependencies)
+@JkImport("../local_libs/my-utility.jar")   // or simply located locally
 class Build extends JkRun {
    ...
 }
