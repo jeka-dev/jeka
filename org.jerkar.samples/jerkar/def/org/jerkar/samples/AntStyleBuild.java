@@ -10,6 +10,7 @@ import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkImport;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 
@@ -24,18 +25,28 @@ import java.util.Map;
  * 
  * @author Jerome Angibaud
  */
+@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.6")
 public class AntStyleBuild extends JkRun {
 
     Path src = getBaseDir().resolve("src/main/javaPlugin");
     Path buildDir = getBaseDir().resolve("build/output");
     Path classDir = getOutputDir().resolve("classes");
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
-    JkClasspath classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles());
+    JkClasspath classpath;
     Path reportDir = buildDir.resolve("junitRreport");
 
     public void doDefault() {
         clean();
         run();
+    }
+
+    @Override
+    protected void setup() {
+       JkResolveResult depResolution = JkDependencyResolver.of(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
+                .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
+       );
+       classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles())
+            .and(depResolution.getFiles());
     }
 
     public void compile() {
