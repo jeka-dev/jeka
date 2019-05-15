@@ -29,8 +29,10 @@ Note that you can still access Jerkar 0.6 documentation from [official web-site]
 
 # Get Jerkar
 
-* Latest Snapshot : [Version 0.7.0-SNAPSHOT](https://oss.sonatype.org/content/repositories/snapshots/org/jerkar/core/0.7.0-SNAPSHOT/core-0.7.0-SNAPSHOT-distrib.zip)
+* Snapshots : https://oss.sonatype.org/content/repositories/snapshots/org/jerkar/core/
 * Releases : https://repo1.maven.org/maven2/org/jerkar/core/
+
+The distribution is the file named core-x.x.x-distrib.zip. 
 
 # How to use Jerkar
 

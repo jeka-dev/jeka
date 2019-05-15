@@ -24,6 +24,55 @@ Execute the specified methods defined in run class or plugins using the specifie
 Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
 ...
 ```
+**Tips:** You can display Jerkar metadata information by adding `-LH` (or `-LogHeaders`) to the command line. You should get the following output.
+```
+ _______           _
+(_______)         | |
+     _ _____  ____| |  _ _____  ____
+ _  | | ___ |/ ___) |_/ |____ |/ ___)
+| |_| | ____| |   |  _ (/ ___ | |
+ \___/|_____)_|   |_| \_)_____|_|
+                                     The 100% Java build tool.
+
+
+Working Directory : C:\Users\djeang\IdeaProjects\jerkar
+Java Home : C:\Program Files (x86)\Java\jdk1.8.0_121\jre
+Java Version : 1.8.0_121, Oracle Corporation
+Jerkar Version : null
+Jerkar Home : C:\Users\djeang\IdeaProjects\jerkar\org.jerkar.core\jerkar\output\distrib
+Jerkar User Home : C:\Users\djeang\.jerkar
+Jerkar Run Repositories : [http://194.253.70.251:8081/nexus/content/groups/multipharma, file:/C:/Users/djeang/.jerkar/maven-publish-dir/]
+Jerkar Repository Cache : C:\Users\djeang\.jerkar\cache\repo
+Jerkar Classpath : C:\Users\djeang\IdeaProjects\jerkar\org.jerkar.core\jerkar\output\distrib\org.jerkar.core.jar
+Command Line : -LH help
+Specified System Properties : none.
+Standard Options : RunClass=null, LogVerbose=false, LogHeaders=true, LogMaxLength=230
+Options :   LH=null  LML=230  jdk.6=C:/Program Files (x86)/Java/jdk1.6.0_45  jdk.7=C:/Program Files (x86)/Java/jdk1.7.0_80  repo.download.url=http://194.253.70.251:8081/nexus/content/groups/multipharma
+Compile and initialise run classes ...
+│ Initializing class org.jerkar.tool.JkRun at C:\Users\djeang\IdeaProjects\jerkar ...
+│ │ Run instance initialized with options []
+│ └ Done in 57 milliseconds.
+└ Done in 336 milliseconds.
+Jerkar run is ready to start.
+Method : help on org.jerkar.tool.JkRun
+Usage:
+jerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
+
+Execute the specified methods defined in run class or plugins using the specified options and system properties.
+Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
+...
+
+Method help succeeded in 660 milliseconds.
+  ______                                     _
+ / _____)                                   | |
+( (____  _   _  ____ ____ _____  ___  ___   | |
+ \____ \| | | |/ ___) ___) ___ |/___)/___)  |_|
+ _____) ) |_| ( (__( (___| ____|___ |___ |   _
+(______/|____/ \____)____)_____|___/(___/   |_|
+
+                                               Total run duration : 1.159 seconds.
+
+```
 
 # Use Jerkar with command line
 
