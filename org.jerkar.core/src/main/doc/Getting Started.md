@@ -340,6 +340,24 @@ Except the following mentionned here, there is not known restriction about what 
 
 
 # Build a Java project
+Now let's start more complicated tasks as building a Java pojetc. It involves compilation, testing, packaging, dependency resolution, releasing, ...
+There's many option to handle it in Jerkar :
+
+* Use low level API (similar to ANT tasks)
+* Use high level _JkJavaProject_ API
+* Use Jerkar Java Plugin
+
+The one you should choose is a metter of taste, flexibility, verbosity, reusability and integration with existing tools.
+
+## Build Java project using low-level API
+
+_TODO_
+
+## Build Java project using high level API
+
+_TODO_
+
+## Build Java project using Jerkar Java plugin.
 
 1. Create the root directory of your project (here 'mygroup.myproject').
 2. Execute `jerkar scaffold#run java#` under this directory. 
