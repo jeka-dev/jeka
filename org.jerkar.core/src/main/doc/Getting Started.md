@@ -318,7 +318,7 @@ Content of https://www.google.com/
 ...
 ```
 
-You can set directly the value of the url on the command line as option values are injected on all imported build reccursively.
+You can set directly the value of the url on the command line as option values are injected on all imported build recursively.
 
 `jerkar printUrlContent -url=https://github.com/github` displays :
 
