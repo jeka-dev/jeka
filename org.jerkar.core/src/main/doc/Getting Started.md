@@ -329,8 +329,7 @@ Content of https://fr.wikipedia.org
 <head>
 <meta charset="UTF-8"/>
 <title>Wikipédia, l'encyclopédie libre</title>
-<script>document.documentElement.className = document.documentElement.className.replace( /(^|\s)client-nojs(\s|$)/, "$1client-js$2" );</script>
-
+...
 ```
 
 ## Restrictions
