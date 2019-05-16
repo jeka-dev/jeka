@@ -204,7 +204,7 @@ From class Build :
     displayGoogle : Fetch Google page and display its source on the console.
 ```
 
-## Add a parameter
+## Add an option (parameter)
 
 May you like to see Google page source but you probably want to apply this method to any other url.
 
@@ -230,6 +230,19 @@ class Build extends JkRun {
 ```
 
 Execute `jerkar displayContent -url=https://github.com/github` and you should see the Github page source displayed.
+
+If you execute `jerkar help` you should see the url option mentioned.
+
+```
+...
+From class Build :
+  Methods :
+    displayContent : Fetch Google page and display its source on the console.
+    post : No description available.
+  Options :
+    -url (String, default : https://www.google.com/) : The url to display content.
+...
+```
 
 ## Use 3rd party libs in your build class
 
