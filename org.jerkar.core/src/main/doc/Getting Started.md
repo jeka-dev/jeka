@@ -274,12 +274,70 @@ Execute *post* method as usual : `jerkar post`.
 
 ## Import a Jerkar build from another project
 
-// Todo ... Documentation in progress
+Imagine that you want to want to reuse *displayContent* method from project _sample1_ in another Jerkar project named _sample2_. Let's create a new _sample2_ project located in a sibling folder than _sample1_.
+
+1. Execute `mkdir sample2` then `cd sample2` followed by `jerkar scaffold#run intellij#` (or `jerkar scaffold#run eclipse#`)
+2. Rename sample2 Build class 'Sample2Build` to avoid name collision. Be carefull, rename its filename as well unless Jerkar will fail.
+3. Add add Field of type JkRUnn annoted with `JkImportRun` and the relative path of _sample1_ as value.
+ 
+```java
+class Sample2Build extends JkRun {
+
+    @JkImportRun("../sample1")
+    private JkRun project1Run;
+
+    public void hello() throws MalformedURLException {
+        System.out.println("Hello World");
+    }
+    
+}
+```
+4. Execute `jerkar intellij#generateIml` (or `jerkar eclipse#generateFiles`) to add _sample1_ dependencies to your IDE. Now _Sampl2Build_ can refer to the _Build_ class of _sample1_.
+
+5. Replace _JkRun_ Type by the _Build_ type from _sample1_ and use it in method implementation.
+
+```java
+class Sample2Build extends JkRun {
+
+    @JkImportRun("../sample1")
+    private Build project1Run;  // This Build come from sample1
+
+    public void printUrlContent() throws MalformedURLException {
+        System.out.println("Content of " + project1Run.url);
+        project1Run.displayContent();
+    }
+
+}
+```
+Executing `jerkar printUrlContent` displays :
+
+```
+Content of https://www.google.com/
+<!doctype html><html itemscope="" itemtype="http://schema.org/WebPage" lang="nl-BE"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"><meta content="/images/branding/googleg/1x/googleg_standard_color_128dp.pn
+    g" itemprop="image"><title>Google</title><script nonce="JkJFrHNh1i7pdGGBGDk/tw==">(function(){window.google={kEI:'AyndXKnDGrLgkgW-kp7gAw',kEXPI:'0,1353747,57,1958,1640,782,698,527,731,223,1575,1257,1894,58,320,207,1017,167,438,
+...
+```
+
+You can set directly the value of the url on the command line as option values are injected on all imported build reccursively.
+
+`jerkar printUrlContent -url=https://github.com/github` displays :
+
+```
+Content of https://fr.wikipedia.org
+<!DOCTYPE html>
+<html class="client-nojs" lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<title>Wikipédia, l'encyclopédie libre</title>
+<script>document.documentElement.className = document.documentElement.className.replace( /(^|\s)client-nojs(\s|$)/, "$1client-js$2" );</script>
+
+```
 
 ## Restrictions
 
-There is not known restriction about what you can do with you build class. You can define as meny class you want into def directoy.
-Organise it within Java packages or not. 
+Except the following mentionned here, there is not known restriction about what you can do with you build class. You can define as meny class you want into def directoy. Organise it within Java packages or not. 
+
+* Run classes file name must be the same than the class name.
 
 
 # Build a Java project
