@@ -347,7 +347,7 @@ There's many option to handle it in Jerkar :
 * Use high level _JkJavaProject_ API
 * Use Jerkar Java Plugin
 
-The one you should choose is a metter of taste, flexibility, verbosity, reusability and integration with existing tools.
+The one you choose is a matter of taste, flexibility, verbosity, reusability and integration with existing tools.
 
 ## Build Java project using low-level API
 
