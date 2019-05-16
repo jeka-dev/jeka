@@ -336,7 +336,7 @@ Content of https://fr.wikipedia.org
 
 Except the following mentionned here, there is not known restriction about what you can do with you build class. You can define as meny class you want into def directoy. Organise it within Java packages or not. 
 
-* Run classes file name must be the same than the class name.
+* Classes invoked from command lines must have the same name than their file.
 
 
 # Build a Java project
