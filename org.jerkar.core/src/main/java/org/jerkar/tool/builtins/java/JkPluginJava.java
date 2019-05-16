@@ -108,7 +108,7 @@ public class JkPluginJava extends JkPlugin {
         if (publish.signArtifacts) {
             JkPluginPgp pgpPlugin = this.getRun().getPlugins().get(JkPluginPgp.class);
             JkPgp pgp = pgpPlugin.get();
-            maker.getTasksForPublishing().setSigner(pgp::sign);
+            maker.getTasksForPublishing().setSigner(pgp);
         }
         JkUnit tester = maker.getTasksForTesting().getRunner();
         if (tests.fork) {
