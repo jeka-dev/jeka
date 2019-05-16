@@ -14,7 +14,7 @@ __[USER HOME]__ : User Home within the meaning of Windows or Unix.
 1. unzip the [distribution archive](http://jerkar.github.io/binaries/jerkar-distrib.zip) to the directory you want to install Jerkar (_[JERKAR HOME]_)
 2. make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on
 3. add _[JERKAR HOME]_ to your _PATH_ environment variable
-4. For now, Jerkar only runs with JDK8 (though it can build Java project of any Java version). If your defaulf JDK version is not 8 or your _JAVA_HOME_ environment variable does not point to a JDK8 then add a _JERKAR_JDK_ environment vatiable pointing on a JDK8 (_JERKAR_JDK_/bin/java must point on a java execuable). 
+4. For now, Jerkar only runs with JDK8 (though it can build Java project of any Java version). If your defaulf JDK version is not 8 or your _JAVA_HOME_ environment variable does not point to a JDK8 then add a _JERKAR_JDK_ environment variable pointing on a JDK8 (_JERKAR_JDK_/bin/java must point on a java execuable). 
 5. execute `jerkar help` in the command line. You should get an output starting by : 
 
 ```
