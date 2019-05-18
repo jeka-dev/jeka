@@ -274,9 +274,7 @@ public final class JkRepo implements Serializable {
     /**
      * Configuration specific to Ivy.
      */
-    public static final class JkRepoIvyConfig {
-
-        private static final long serialVersionUID = 1L;
+    public static final class JkRepoIvyConfig implements Serializable {
 
         public static final String DEFAULT_IVY_ARTIFACT_PATTERN = "[organisation]/[module]/[type]s/[artifact]-[revision](-[type]).[ext]";
 

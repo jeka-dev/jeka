@@ -1,6 +1,7 @@
 package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 
@@ -19,6 +20,8 @@ public class JkJavaProjectPublishTasks {
 
     private UnaryOperator<Path> signer;
 
+    private final JkRunnables postActions = JkRunnables.noOp();
+
     JkJavaProjectPublishTasks(JkJavaProjectMaker maker) {
         this.maker = maker;
     }
@@ -29,10 +32,16 @@ public class JkJavaProjectPublishTasks {
     public void publish() {
         publishMaven(this.publishRepos);
         publishIvy();
+        postActions.run();
     }
 
     public void publishLocal() {
         publishMaven(JkRepo.ofLocal().toSet());
+        postActions.run();
+    }
+
+    public JkRunnables getPostActions() {
+        return postActions;
     }
 
     private void publishMaven(JkRepoSet repos) {

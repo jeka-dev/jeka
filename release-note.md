@@ -1,4 +1,4 @@
-## Ongoing 0.7.0
+## 0.7.0
 
 * Move from jdk6 to jdk8
 * Documentation hosted in Jerkar repository for better sync.

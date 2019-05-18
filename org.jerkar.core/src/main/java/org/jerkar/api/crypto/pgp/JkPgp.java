@@ -1,5 +1,6 @@
 package org.jerkar.api.crypto.pgp;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -28,16 +29,16 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
-    private final Path pubRing;
+    private final File pubRing;
 
-    private final Path secRing;
+    private final File secRing;
 
     private final String password;
 
     private JkPgp(Path pubRing, Path secRing, String password) {
         super();
-        this.pubRing = pubRing;
-        this.secRing = secRing;
+        this.pubRing = pubRing.toFile();
+        this.secRing = secRing.toFile();
         this.password = password;
     }
 
@@ -103,12 +104,12 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         JkUtilsAssert.isTrue(secRing != null,
                 "You must supply a secret ring file (as secring.gpg) to sign files");
         if (!Files.exists(getSecretRing())) {
-            throw new IllegalStateException("Specified secret ring file not found.");
+            throw new IllegalStateException("Specified secret ring file " + secRing + " not found.");
         }
         Method signMethod = JkUtilsReflect.getMethod(PGPUTILS_CLASS, "sign", Path.class, Path.class, Path.class,
                 char[].class, boolean.class);
         JkUtilsReflect.invoke(null, signMethod, fileToSign,
-                secRing, signatureFile, pass, true);
+                secRing.toPath(), signatureFile, pass, true);
     }
 
     /**
@@ -127,42 +128,43 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         if (!Files.exists(getPublicRing())) {
             throw new IllegalStateException("Specified public ring file " + getPublicRing() + " not found.");
         }
-        return JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify", fileToVerify, pubRing, signature);
+        return JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify", fileToVerify,
+                pubRing.toPath(), signature);
     }
 
     /**
      * Creates a identical {@link JkPgp} but with the specified secret ring key file.
      */
     public JkPgp withSecretRing(Path file, String password) {
-        return new JkPgp(pubRing, file, password);
+        return new JkPgp(pubRing.toPath(), file, password);
     }
 
     /**
      * Creates a identical {@link JkPgp} but with the specified public ring key file.
      */
     public JkPgp withPublicRing(Path file) {
-        return new JkPgp(file, secRing, password);
+        return new JkPgp(file, secRing.toPath(), password);
     }
 
     /**
      * Creates a identical {@link JkPgp} but with the specified password for secret ring.
      */
     public JkPgp withSecretRingPassword(String pwd) {
-        return new JkPgp(pubRing, secRing, pwd);
+        return new JkPgp(pubRing.toPath(), secRing.toPath(), pwd);
     }
 
     /**
      * Returns the secret ring of this object.
      */
     public Path getSecretRing() {
-        return secRing;
+        return secRing.toPath();
     }
 
     /**
      * Returns the public ring of this object.
      */
     public Path getPublicRing() {
-        return pubRing;
+        return pubRing.toPath();
     }
 
     @Override

@@ -26,7 +26,7 @@ public class CoreBuild extends JkRun {
 
     public static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 
-    private static final String VERSION = "0.7.0-SNAPSHOT";
+    private static final String VERSION = "0.7.0.RC2";
 
     final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
@@ -37,13 +37,13 @@ public class CoreBuild extends JkRun {
     protected CoreBuild() {
         javaPlugin.tests.fork = false;
         javaPlugin.pack.javadoc = true;
-        javaPlugin.publish.signArtifacts = true;
     }
 
     @Override
     protected void setup()  {
         JkJavaProject project = javaPlugin.getProject();
         project.setVersionedModule(JkModuleId.of("org.jerkar:core").withVersion(VERSION));
+        javaPlugin.publish.signArtifacts = project.getVersionedModule().getVersion().isSnapshot();
         project.setSourceVersion(JkJavaVersion.V8);
         project.setMavenPublicationInfo(mavenPublication());
         JkJavaProjectMaker maker = project.getMaker();
@@ -51,6 +51,11 @@ public class CoreBuild extends JkRun {
         maker.getTasksForTesting().setFork(true);
         maker.addArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
+        JkVersion version = javaPlugin.getProject().getVersionedModule().getVersion();
+        if (!version.isSnapshot()) {
+            javaPlugin.pack.javadoc = true;
+            maker.getTasksForPublishing().getPostActions().chain(this::tagGit);
+        }
     }
 
     @Override
@@ -110,19 +115,10 @@ public class CoreBuild extends JkRun {
         JkLog.endTask();
     }
 
-    public void release() {
+    private void tagGit() {
         JkVersion version = javaPlugin.getProject().getVersionedModule().getVersion();
-        if (version.isSnapshot()) {
-            throw new IllegalStateException("Cannot release a snapshot version");
-        }
-        javaPlugin.pack.javadoc = true;
-        javaPlugin.pack.sources = true;
-        javaPlugin.clean().pack();
         String tagName = version.toString();
         JkProcess git = JkProcess.of("git").withFailOnError(true);
-        git.andParams("pull").runSync();
-        git.andParams("add", "*").runSync();
-        git.andParams("commit", "-am", "Release " + version).runSync();
         git.andParams("tag", "-a", tagName, "-m", "Release").runSync();
         git.andParams("push").runSync();
         git.andParams("push", "origin", tagName).runSync();
