@@ -2,10 +2,13 @@ package org.jerkar.api.java.junit;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
@@ -13,9 +16,7 @@ import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
 
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.*;
 
 class JUnit4TestLauncher {
 
@@ -25,17 +26,30 @@ class JUnit4TestLauncher {
             Iterable<Class> classes, File reportDir) {
         final List<String> args = new LinkedList<>();
         final Path file = JkUtilsPath.createTempFile("testResult-", ".ser");
-        args.add("\"" + file.toAbsolutePath() + "\"");
+        if (file.toAbsolutePath().toString().contains(" ")) {
+            args.add("\"" + file.toAbsolutePath() + "\"");
+        } else {
+            args.add(file.toAbsolutePath().toString());
+        }
         args.add(Boolean.toString(printEachTestOnConsole));
         args.add(reportDetail.name());
         String reportFileArg = reportDir == null ? JUnit4TestExecutor.NO_REPORT_FILE : reportDir.getAbsolutePath();
-        args.add("\"" + reportFileArg + "\"");
+        if (reportFileArg.contains(" ")) {
+            args.add("\"" + reportFileArg + "\"");
+        } else {
+            args.add(reportFileArg);
+        }
 
         // Serialize log handler
         if (JkLog.getLogConsumer() != null && (JkLog.getLogConsumer() instanceof Serializable)) {
             Path path = JkUtilsPath.createTempFile("jk-logHandler", ".ser");
             JkUtilsIO.serialize(JkLog.getLogConsumer(), path);
-            args.add("\"" + path.normalize().toAbsolutePath().toString() + "\"");
+            String pathString = path.normalize().toAbsolutePath().toString();
+            if (pathString.contains(" ")) {
+                args.add("\"" + pathString+ "\"");
+            } else {
+                args.add(pathString);
+            }
         } else {
             args.add("\"\"");
         }
