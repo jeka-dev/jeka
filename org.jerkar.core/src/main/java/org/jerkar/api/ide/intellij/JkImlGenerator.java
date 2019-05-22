@@ -21,6 +21,7 @@ import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkProjectSourceLayout;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.system.JkLocator;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
@@ -279,6 +280,10 @@ public final class JkImlGenerator {
     private void writeDependencies(JkDependencySet dependencies, JkDependencyResolver resolver, Set<Path> allPaths, Set<Path> allModules,
                                    boolean forceTest) throws XMLStreamException {
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
+        if (resolveResult.getErrorReport().hasErrors()) {
+            JkLog.warn(resolveResult.getErrorReport().toString());
+            JkLog.warn("The generated iml file won't take in account missing files.");
+        }
         final JkDependencyNode tree = resolveResult.getDependencyTree();
         for (final JkDependencyNode node : tree.toFlattenList()) {
 

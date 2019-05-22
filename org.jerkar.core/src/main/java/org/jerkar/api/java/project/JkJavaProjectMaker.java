@@ -5,6 +5,7 @@ import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 
 import java.nio.charset.Charset;
@@ -38,6 +39,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     private JkProjectOutLayout outLayout;
 
     private JkDependencyResolver dependencyResolver;
+
+    private boolean failOnDependencyResolutionError;
 
     private final JkJavaProjectCompileTasks tasksForCompilation;
 
@@ -85,6 +88,15 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         } else {
             this.outLayout = outLayout.withOutputDir(getBaseDir().resolve(outLayout.getOutputPath()));
         }
+        return this;
+    }
+
+    /**
+     * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise
+     * just log a warn message. <code>false</code> by default.
+     */
+    public JkJavaProjectMaker setFailOnDependencyResolutionError(boolean fail) {
+        this.failOnDependencyResolutionError = fail;
         return this;
     }
 
@@ -181,7 +193,18 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkPathSequence fetchDependenciesFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return dependencyCache.computeIfAbsent(scopeSet,
-                scopes1 -> getDependencyResolver().resolve(getScopeDefaultedDependencies(), scopes).getFiles());
+                scopes1 -> {
+                    JkResolveResult resolveResult =
+                            getDependencyResolver().resolve(getScopeDefaultedDependencies(), scopes);
+                    JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
+                    if (report.hasErrors()) {
+                        if (failOnDependencyResolutionError) {
+                            throw new JkException(report.toString());
+                        }
+                        JkLog.warn(report.toString());
+                    }
+                    return getDependencyResolver().resolve(getScopeDefaultedDependencies(), scopes).getFiles();
+                });
     }
 
     /**

@@ -29,7 +29,6 @@ import java.util.*;
  *     <li>located in [base dir]/jerkar/boot directory</li>
  *     <li>declared in {@link JkImport} annotation</li>
  * </ul>
- *
  */
 final class Engine {
 
@@ -136,7 +135,11 @@ final class Engine {
         long start = System.nanoTime();
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
-        final JkPathSequence runPath = runDependencyResolver.resolve(this.computeRunDependencies()).getFiles();
+        JkResolveResult resolveResult = runDependencyResolver.resolve(this.computeRunDependencies());
+        if (resolveResult.getErrorReport().hasErrors()) {
+            JkLog.warn(resolveResult.getErrorReport().toString());
+        }
+        final JkPathSequence runPath = resolveResult.getFiles();
         path.addAll(runPath.getEntries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
         compileDef(JkPathSequence.of(path));
