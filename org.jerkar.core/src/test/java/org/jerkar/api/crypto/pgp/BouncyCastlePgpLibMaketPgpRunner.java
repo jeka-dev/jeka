@@ -50,7 +50,7 @@ public class BouncyCastlePgpLibMaketPgpRunner {
     private static void testSignAndVerify(Class<?> pgpClass) throws Exception {
         final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
         final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
-        final Path signatureFile = Paths.get("build/output/test-out/signature-runner.asm");
+        final Path signatureFile = Paths.get("jerkar/output/test-out/signature-runner.asm");
         Files.createDirectories(signatureFile.getParent());
         if (!Files.exists(signatureFile)) {
             Files.createFile(signatureFile);
@@ -73,7 +73,7 @@ public class BouncyCastlePgpLibMaketPgpRunner {
         final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "badPassword");
         final Path signatureFile = Paths.get(
-                "build/output/test-out/signature-fake.asm").toAbsolutePath();
+                "jerkar/output/test-out/signature-fake.asm").toAbsolutePath();
         final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
         pgp.sign(sampleFile, signatureFile);
     }

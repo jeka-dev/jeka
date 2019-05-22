@@ -21,7 +21,7 @@ public class IvyInternalPublisherRunner {
     }
 
     public static void testPublishIvy() throws IOException {
-        final IvyInternalPublisher jkIvyInternalPublisher = IvyInternalPublisher.of(ivyRepo().toSet(), Paths.get("build/output/test-out").toFile());
+        final IvyInternalPublisher jkIvyInternalPublisher = IvyInternalPublisher.of(ivyRepo().toSet(), Paths.get("jerkar/output/test-out").toFile());
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup", "mymodule"), JkVersion.of("myVersion"));
         final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(),
@@ -34,7 +34,7 @@ public class IvyInternalPublisherRunner {
 
     public static void testPublishMaven() throws IOException {
         final IvyInternalPublisher jkIvyPublisher = IvyInternalPublisher.of(mavenRepo().with(JkRepo.JkPublishConfig.of()
-                .withUniqueSnapshot(false)).toSet(), Paths.get("build/output/test-out").toFile());
+                .withUniqueSnapshot(false)).toSet(), Paths.get("jerkar/output/test-out").toFile());
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup2", "mymodule2"), JkVersion.of("0.0.12-SNAPSHOT"));
         final JkMavenPublication publication = JkMavenPublication.of(sampleJarfile())
@@ -65,13 +65,13 @@ public class IvyInternalPublisherRunner {
     }
 
     private static JkRepo ivyRepo() throws IOException {
-        final Path baseDir = Paths.get("build/output/testIvyRepo");
+        final Path baseDir = Paths.get("jerkar/output/testIvyRepo");
         Files.createDirectories(baseDir);
         return JkRepo.ofIvy(baseDir);
     }
 
     private static JkRepo mavenRepo() throws IOException {
-        final Path baseDir = Paths.get( "build/output/mavenRepo");
+        final Path baseDir = Paths.get( "jerkar/output/mavenRepo");
         Files.createDirectories(baseDir);
         return JkRepo.ofMaven(baseDir);
     }
