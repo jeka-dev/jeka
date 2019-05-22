@@ -6,6 +6,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Specifies the repositories to use for resolving dependencies declared with @{@link JkImport} elements.
+ *
+ * @author Jerome Angibaud
+ */
 @Target(ElementType.TYPE)
 @Repeatable(JkImportRepo.ImportRepos.class)
 @Retention(RetentionPolicy.SOURCE)

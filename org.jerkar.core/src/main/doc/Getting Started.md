@@ -278,12 +278,12 @@ Imagine that you want to want to reuse *displayContent* method from project _sam
 
 1. Execute `mkdir sample2` then `cd sample2` followed by `jerkar scaffold#run intellij#` (or `jerkar scaffold#run eclipse#`)
 2. Rename sample2 Build class 'Sample2Build` to avoid name collision. Be carefull, rename its filename as well unless Jerkar will fail.
-3. Add add Field of type JkRUnn annoted with `JkImportRun` and the relative path of _sample1_ as value.
+3. Add add Field of type JkRUnn annoted with `JkImportProject` and the relative path of _sample1_ as value.
  
 ```java
 class Sample2Build extends JkRun {
 
-    @JkImportRun("../sample1")
+    @JkImportProject("../sample1")
     private JkRun project1Run;
 
     public void hello() throws MalformedURLException {
@@ -299,7 +299,7 @@ class Sample2Build extends JkRun {
 ```java
 class Sample2Build extends JkRun {
 
-    @JkImportRun("../sample1")
+    @JkImportProject("../sample1")
     private Build project1Run;  // This Build come from sample1
 
     public void printUrlContent() throws MalformedURLException {

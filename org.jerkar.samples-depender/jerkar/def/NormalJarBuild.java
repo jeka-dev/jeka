@@ -1,7 +1,7 @@
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.samples.MavenStyleBuild;
-import org.jerkar.tool.JkImportRun;
+import org.jerkar.tool.JkImportProject;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
@@ -28,7 +28,7 @@ public class NormalJarBuild extends JkRun {
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
-    @JkImportRun("../org.jerkar.samples")
+    @JkImportProject("../org.jerkar.samples")
     private MavenStyleBuild sampleBuild;  
 
     @Override

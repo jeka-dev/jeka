@@ -1,7 +1,7 @@
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.samples.AClassicBuild;
-import org.jerkar.tool.JkImportRun;
+import org.jerkar.tool.JkImportProject;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
@@ -17,7 +17,7 @@ public class FatJarBuild extends JkRun {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
     
-    @JkImportRun("../org.jerkar.samples")
+    @JkImportProject("../org.jerkar.samples")
     private AClassicBuild sampleBuild;
 
     @Override

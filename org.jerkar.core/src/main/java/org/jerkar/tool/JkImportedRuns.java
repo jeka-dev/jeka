@@ -34,7 +34,7 @@ public final class JkImportedRuns {
 
     private final Path masterRunBaseDir;
 
-    // The declared @JkImportRun values, read at pre-compile time
+    // The declared @JkImportProject values, read at pre-compile time
     private List<Path> importedRunRoots = Collections.emptyList();
 
     private JkImportedRuns(Path masterDir, List<JkRun> runDeps) {
@@ -97,10 +97,10 @@ public final class JkImportedRuns {
     @SuppressWarnings("unchecked")
     private static List<JkRun> getDirectImportedRuns(JkRun masterRun) {
         final List<JkRun> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterRun.getClass(), JkImportRun.class);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterRun.getClass(), JkImportProject.class);
 
         for (final Field field : fields) {
-            final JkImportRun jkProject = field.getAnnotation(JkImportRun.class);
+            final JkImportProject jkProject = field.getAnnotation(JkImportProject.class);
             final JkRun importedRun = createImportedRun(
                     (Class<? extends JkRun>) field.getType(), jkProject.value(), masterRun.getBaseDir());
             try {
