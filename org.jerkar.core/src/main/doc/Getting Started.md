@@ -331,13 +331,13 @@ Content of https://fr.wikipedia.org
 
 ## Restrictions
 
-Except the following mentionned here, there is not known restriction about what you can do with you build class. You can define as meny class you want into def directoy. Organise it within Java packages or not. 
+Except the following mentionned here, there is not known restriction about what you can do with you build class. You can define as many classes you want into def directoy. Organise them within Java packages or not. 
 
 * Classes invoked from command lines must have the same name than their file.
 
 
 # Build a Java project
-Now let's start more complicated tasks as building a Java pojetc. It involves compilation, testing, packaging, dependency resolution, releasing, ...
+Now let's start more complicated tasks as building a Java poject. It involves compilation, testing, packaging, dependency resolution, releasing, ...
 There's many option to handle it in Jerkar :
 
 * Use low level API (similar to ANT tasks)
