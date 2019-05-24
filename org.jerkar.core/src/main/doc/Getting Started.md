@@ -161,7 +161,7 @@ class Build extends JkRun {
 }
 
 ```
-Execute `jerkar displayGoogle` on a terminal and you should see the Google source displayed.
+Open a  console/:terminal in _sample1_ directory and execute `jerkar displayGoogle`. You should see the Google source displayed.
 
 Execute `jerkar help` and the output should mention your new method.
 
@@ -178,7 +178,7 @@ From class org.jerkar.tool.JkRun :
 ...
 ```
 
-Any public instance method with no-args and returning `void` fits to be a run method.
+Any public instance method with no-args and returning `void` fits to be a run method. You can call several run methods in a single row.
 
 You can also launch/debug the method directly from your IDE, using the *main* method.
 
