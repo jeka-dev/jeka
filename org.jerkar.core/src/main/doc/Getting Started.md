@@ -125,9 +125,6 @@ sample1
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkInit;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 class Build extends JkRun {
 
     public static void main(String[] args) throws Exception {
