@@ -108,7 +108,7 @@ First, let's create a simple automation project that read content from url and d
 
 1. Create the root directory of your project (here 'sample1').
 2. Open a terminal/console and cd to *sample1* directory. Jerkar should be always executed from the root of the project.
-3. Execute `jerkar scaffold#run intellij#` under this directory (replace `intellij#` by `eclipse#` if you're using eclipse)  
+3. Execute `jerkar scaffold#run intellij#` under this directory (replace `intellij#` by `eclipse#` if you're using Eclipse).  
 This will generate a project skeleton as follow :
 ```
 sample1
