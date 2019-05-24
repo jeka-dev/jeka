@@ -3,7 +3,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jeka.dev/images/logo-whole-bg.jpg" width='420' height='420' align='middle'/>
 
-# Rebranding
+<strong>Rebranding</strong>
 Jerkar is being rebranded as __Jeka__. While this rebranding is under process 'Jeka' and 'Jerkar' term may be used indifferently. 
 
 <strong>Jerkar</strong> is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
@@ -19,16 +19,15 @@ of any build-code / configuration / script.
 
 # News
  
-Master version now relies on JDK 8 while 0.6 and prior are relying on JDK 6.
-In order to leverage new features bring by these versions, **Jerkar is deeply reworked**. <br/>
+Jeka now relies on JDK 8 while versions 0.6 and prior are relying on JDK 6.
+In order to leverage new features bring by these versions, **Jeka has been deeply reworked**. <br/>
+Versions from 0.7.0 are pretty stables.
 
-To avoid bloating API with legacy stuff, Jerkar 0.7 won't be compatible with Jerkar 0.6 (you can still run current builds using embedded mode). 
+To avoid bloating API with legacy stuff, Jeka won't be compatible with Jerkar 0.6 (you can still run current builds using embedded mode). 
 We expect from this move a much more clean, polished and intuitive product.
 
 Documentation is now entirely hosted in this repository to better sync. Great progress has been done recently.
 Please visit [latest documentation](org.jerkar.core/src/main/doc).
-
-Note that you can still access Jerkar 0.6 documentation from [official web-site](http://project.jerkar.org/).
 
 # Get Jerkar
 
@@ -76,8 +75,3 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 * Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder, inside *org.jerkar.core* project.
 * This creates the full distrib in *org.jerkar.core/build/output/distrib* folder
 
-# Status
-
-Last release contains all features a self respecting build tool must have : from compilation to publication features.
-Currently Jerkar is undergoing a deep reworking in order to leverage of Java8 features. API is getting more polished 
-but cannot be considered as stable for now.
