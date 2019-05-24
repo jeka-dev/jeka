@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/jerkar/jerkar.svg?branch=master)](https://travis-ci.org/jerkar/jerkar)
 [![Maven Central](https://img.shields.io/maven-central/v/org.jerkar/core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.jerkar%22%20AND%20a:%22core%22) <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img src="http://jeka.dev/images/logo-whole.png" width='450' height='420' align='middle'/>
+<img src="http://jeka.dev/images/logo-whole-bg.jpg" width='420' height='420' align='middle'/>
 
 <strong>Jerkar</strong> is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
 
