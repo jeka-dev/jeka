@@ -3,7 +3,6 @@ package org.jerkar.api.system;
 import java.io.*;
 import java.nio.charset.Charset;
 
-
 public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHandler, Serializable {
 
     private static final PrintStream FORMER_OUT = System.out;
@@ -94,7 +93,6 @@ public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHand
 
         private boolean handlingStart;
 
-
         public MarginStream(PrintStream delegate) {
             super();
             this.delegate = delegate;
@@ -128,7 +126,5 @@ public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHand
         }
 
     }
-
-
 
 }

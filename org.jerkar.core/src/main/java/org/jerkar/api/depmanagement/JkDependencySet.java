@@ -242,9 +242,9 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     }
 
     /**
-     * Returns a clone of this dependencySet but removing the last element if the specified condition is not met.
+     * Returns a clone of this dependencySet but removing the last element if the specified condition is met.
      */
-    public JkDependencySet withLastIf(boolean condition) {
+    public JkDependencySet withoutLastIf(boolean condition) {
         if (condition) {
             return this;
         }
