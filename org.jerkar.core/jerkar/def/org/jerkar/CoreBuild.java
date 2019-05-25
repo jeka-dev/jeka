@@ -7,6 +7,7 @@ import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
+import org.jerkar.api.system.JkPrompt;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
@@ -61,6 +62,7 @@ public class CoreBuild extends JkRun {
     @Override
     protected void setupAfterPluginActivations() {
         javaPlugin.getProject().getMaker().getTasksForPublishing().setPublishRepos(publishRepos());
+
     }
 
     private void doDistrib() {
@@ -125,6 +127,8 @@ public class CoreBuild extends JkRun {
     }
 
     public static void main(String[] args) {
+        String response = JkPrompt.ask("Release :");
+        System.out.println(response);
         JkInit.instanceOf(CoreBuild.class, args).javaPlugin.clean().pack();
     }
 
