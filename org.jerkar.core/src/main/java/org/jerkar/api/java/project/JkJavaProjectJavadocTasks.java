@@ -3,6 +3,7 @@ package org.jerkar.api.java.project;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsIterable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +46,10 @@ public class JkJavaProjectJavadocTasks {
     public JkJavaProjectJavadocTasks setJavadocOptions(List<String> options) {
         this.javadocOptions = options;
         return this;
+    }
+
+    public JkJavaProjectJavadocTasks setJavadocOptions(String ... options) {
+        return this.setJavadocOptions(JkUtilsIterable.listOf(options));
     }
 
     void reset() {

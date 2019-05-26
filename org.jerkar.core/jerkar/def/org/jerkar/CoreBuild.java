@@ -1,6 +1,7 @@
 package org.jerkar;
 
 import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProject;
@@ -8,12 +9,16 @@ import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.system.JkPrompt;
+import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 import org.jerkar.tool.builtins.repos.JkPluginPgp;
 
+import java.nio.file.CopyOption;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import static org.jerkar.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
@@ -57,12 +62,33 @@ public class CoreBuild extends JkRun {
             javaPlugin.publish.signArtifacts = true;
             maker.getTasksForPublishing().getPostActions().chain(this::tagGit);
         }
+        maker.getTasksForJavadoc().setJavadocOptions("-notimestamp");
     }
 
     @Override
     protected void setupAfterPluginActivations() {
         javaPlugin.getProject().getMaker().getTasksForPublishing().setPublishRepos(publishRepos());
 
+    }
+
+    public void publishDocsOnGithubPage() {
+        clean();
+        JkJavaProject project = javaPlugin.getProject();
+        Path javadocSourceDir = project.getMaker().getOutLayout().getJavadocDir();
+        Path tempRepo = getOutputDir().resolve("pagesGitRepo");
+        JkProcess git = JkProcess.of("git").withFailOnError(true);
+        git.andParams("clone", "--depth=1", "https://github.com/jeka-dev/jeka-dev.github.io.git", tempRepo.toString())
+                .runSync();
+
+        project.getMaker().getTasksForJavadoc().runIfNecessary();
+        Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
+        JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
+        makeDocs();
+        JkPathTree.of(distribFolder.resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
+        git = git.withWorkingDir(tempRepo);
+        git.andParams("add", "*").runSync();
+        git.andParams("commit", "-am", "Doc").withFailOnError(false).runSync();
+        git.andParams("push").runSync();
     }
 
     private void doDistrib() {
@@ -84,8 +110,7 @@ public class CoreBuild extends JkRun {
             maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.goTo("libs-javadoc").bring(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
-        JkLog.execute("Making documentation", () -> new DocMaker(getBaseDir(), distribFolder,
-                javaPlugin.getProject().getVersionedModule().getVersion().getValue()).assembleAllDoc());
+        makeDocs();
         if (javaPlugin.tests.runIT) {
             testSamples();
         }
@@ -94,6 +119,11 @@ public class CoreBuild extends JkRun {
         distrib.zipTo(distripZipFile);
         JkLog.info("Distribution zipped in " + distripZipFile);
         JkLog.endTask();
+    }
+
+    private void makeDocs() {
+        JkLog.execute("Making documentation", () -> new DocMaker(getBaseDir(), distribFolder,
+                javaPlugin.getProject().getVersionedModule().getVersion().getValue()).assembleAllDoc());
     }
 
     // Necessary to publish on OSSRH
@@ -127,8 +157,6 @@ public class CoreBuild extends JkRun {
     }
 
     public static void main(String[] args) {
-        String response = JkPrompt.ask("Release :");
-        System.out.println(response);
         JkInit.instanceOf(CoreBuild.class, args).javaPlugin.clean().pack();
     }
 

@@ -26,6 +26,8 @@ body {
     padding-bottom: 10px;
     background-color: white;
     padding: 30px;
+    padding-left: 10%;
+    padding-right: 10%;
     color: #333;
     /* background-image: url("./bg-image.jpg"); */
 }
@@ -109,7 +111,8 @@ h6 tt, h6 code {
 }
 
 h1 {
-    font-size: 28px;
+    font-size: 40px;
+    border-bottom: 1px solid #cccccc;
 }
 
 h2 {
@@ -391,7 +394,6 @@ pre code {
     background: transparent;
     color: #333;
 }
-
 
 
 .highlight pre {

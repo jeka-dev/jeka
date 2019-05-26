@@ -117,8 +117,8 @@ class DocMaker {
                 htmlInline.setLiteral("<a name=\"" + anchorId + "\"></a>");
                 heading.insertBefore(htmlInline);
                 String numberedTitle = intro ? content : number + " " + content;
-                text.setLiteral(numberedTitle);
-                MenuItem menuItem = new MenuItem(numberedTitle, anchorId, heading.getLevel());
+                ////text.setLiteral(numberedTitle);
+                MenuItem menuItem = new MenuItem(content, anchorId, heading.getLevel());
                 menuItems.add(menuItem);
             }
         });

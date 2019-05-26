@@ -1,6 +1,6 @@
 # General
 
-## Can run classes and code to build be hosted in separate projects ?
+### Can run classes and code to build be hosted in separate projects ?
 Of course yes. If you prefer that your Jerkar run code lies in a distinct project, create a Jerkar project in a sibling 
 folder and mention where is located the project to build.
 
@@ -13,14 +13,14 @@ protected void setup() {  // project to build lies in a sibling folder.
       ...
 ```
 
-## My run class does not compile so I can't invoke any Jerkar method as 'help' or 'scaffold#run'. What can I do ?
+### My run class does not compile so I can't invoke any Jerkar method as 'help' or 'scaffold#run'. What can I do ?
 
 You can specify a built-in run class to run. This way, compilation won't occur.
 For example `jerkar -RunClass=JkRun help` or `jerkar -RC=JkRun scaffold#run java#"`.
 
 # Compilation
 
-## How can I choose the JDK used to compile ?
+### How can I choose the JDK used to compile ?
 
 Jerkar uses the JDK it is running on to compile production or test code. 
 If code must be build on a another JDK version, you can specify JDK path for different version.
@@ -35,7 +35,7 @@ jdk.9=/software/jdk9
 
 This way, if one of your project source code is declared to be in a specific Java version, the relevant JDK version will be used automatically to compile it.
 
-## How can I use Eclipse compiler in Jerkar ?
+### How can I use Eclipse compiler in Jerkar ?
 
 Jerkar can use any JSR199 Java compiler to compile your Java code. Just set the compiler instance you need as :
 
