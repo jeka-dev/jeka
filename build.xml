@@ -1,8 +1,8 @@
 <project name="Jerkar" default="test" basedir=".">
 
 	<description>
-    This ANT file is here to let Travis build Jerkar (as Jerkar is not supported by Travis).
-    </description>
+            This ANT file bootstraps Jerkar in order it builds itself from Travis.
+        </description>
 
 	<property name="bin" location="jerkar-bin" />
 
@@ -30,7 +30,7 @@
 
 	<target name="test" depends="create-bin">
 		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
-			<arg line="java#pack -java#pack.javadoc=false -testSamples=false -LogMaxLength=150 -LogHeaders -LogVerbose" />
+			<arg line="java#pack -java#pack.javadoc=false -testSamples=false -LogMaxLength=120 -LogHeaders -LogVerbose" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
