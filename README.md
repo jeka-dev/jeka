@@ -3,7 +3,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jeka.dev/images/logo-whole-bg.jpg" width='420' height='420' align='middle'/>
 
-__Jerkar__ is being rebranded as __Jeka__. While this rebranding is under process 'Jeka' and 'Jerkar' term may be used indifferently. 
+# What is Jerkar
 
 <strong>Jeka</strong> is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
 
@@ -17,6 +17,8 @@ performs a complete build running unit tests under Jacoco coverage tools and per
 of any build-code / configuration / script. 
 
 # News
+
+__Jerkar__ is being rebranded as __Jeka__. While this rebranding is under process 'Jeka' and 'Jerkar' term may be used indifferently. 
  
 Jeka now relies on JDK 8 while versions 0.6 and prior are relying on JDK 6.
 In order to leverage new features bring by these versions, **Jeka has been deeply reworked**. <br/>
