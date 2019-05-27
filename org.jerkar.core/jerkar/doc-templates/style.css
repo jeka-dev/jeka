@@ -19,7 +19,7 @@ SOFTWARE.
 */
 
 body {
-    font-family: Helvetica, arial, sans-serif;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
     font-size: 16px;
     line-height: 1.5;
     padding-top: 10px;
@@ -41,7 +41,7 @@ body > *:last-child {
 }
 
 a {
-    color: #4183C4;
+    color: #0366d6;
     text-decoration: none;
 }
 
@@ -67,7 +67,6 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-font-smoothing: antialiased;
     cursor: text;
     position: relative;
-    color: #317eac;
 }
 
 h2:first-child, h1:first-child, h1:first-child + h2, h3:first-child, h4:first-child, h5:first-child, h6:first-child {
@@ -107,25 +106,24 @@ h6 tt, h6 code {
     font-size: 42px;
     text-align: center;
     font-weight: bold;
-    color: #317eac;
 }
 
 h1 {
-    font-size: 40px;
+    font-size: 2em;
     border-bottom: 1px solid #cccccc;
 }
 
 h2 {
-    font-size: 24px;
+    font-size: 1.5em;
     border-bottom: 1px solid #cccccc;
 }
 
 h3 {
-    font-size: 18px;
+    font-size: 1.25em;
 }
 
 h4 {
-    font-size: 16px;
+    font-size: 1em ;
 }
 
 h5 {
@@ -374,7 +372,8 @@ span.float-right > span {
 }
 
 code {
-    color: darkred;
+    font-size: 85%;
+    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
 }
 
 code, tt {
@@ -391,8 +390,7 @@ pre code {
     padding: 0;
     white-space: pre;
     border: none;
-    background: transparent;
-    color: #333;
+    background: #f6f8fa;
 }
 
 
@@ -408,7 +406,6 @@ pre code {
 
 pre {
     background-color: #f8f8f8;
-    border: 1px solid #cccccc;
     font-size: 13px;
     line-height: 19px;
     overflow: auto;

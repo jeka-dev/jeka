@@ -85,7 +85,8 @@ class DocMaker {
     }
 
     public static void main(String[] args) {
-        new DocMaker(Paths.get("."), Paths.get(JkConstants.OUTPUT_PATH + "/distrib"), "unspecified").assembleAllDoc();
+        new DocMaker(Paths.get("."), Paths.get(JkConstants.OUTPUT_PATH + "/distrib"), "unspecified")
+                .assembleAllDoc();
     }
 
     private List<MenuItem> addAnchorAndNumberingToHeaders(Node node) {
