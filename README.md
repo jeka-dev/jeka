@@ -48,6 +48,7 @@ Visit following pages according your expectation :
 * [Getting Started](org.jerkar.core/src/main/doc/Getting%20Started.md)
 * [Reference Guide](org.jerkar.core/src/main/doc/Reference%20Guide)
 * [Frequently Asked Questions](org.jerkar.core/src/main/doc/FAQ.md)
+* [Working examples](../jerkar-examples)
 
 
 # How to build Jerkar
