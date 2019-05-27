@@ -120,7 +120,7 @@ class DocMaker {
                 String numberedTitle = intro ? content : number + " " + content;
                 String bulleteditle = heading.getLevel() < 3 ? content : "&bull;&nbsp;" + content;
                 ////text.setLiteral(numberedTitle);
-                MenuItem menuItem = new MenuItem(bulleteditle, anchorId, heading.getLevel());
+                MenuItem menuItem = new MenuItem(content, anchorId, heading.getLevel());
                 menuItems.add(menuItem);
             }
         });

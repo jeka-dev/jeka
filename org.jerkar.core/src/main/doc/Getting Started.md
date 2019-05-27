@@ -11,10 +11,10 @@ __[USER HOME]__ : User Home within the meaning of Windows or Unix.
 
 # Install Jerkar
 
-1. download and unzip the lastest *core-x.x.x-distrib.zip* file found on [snapshot](https://oss.sonatype.org/content/repositories/snapshots/org/jerkar/core/) or [release](https://repo1.maven.org/maven2/org/jerkar/core/) repository to the directory you want to install Jerkar (_[JERKAR HOME]_)
-2. make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on
-3. add _[JERKAR HOME]_ to your _PATH_ environment variable
-4. For now, Jerkar only runs with JDK8 (though it can build Java project of any Java version). If your defaulf JDK version is not 8 or your _JAVA_HOME_ environment variable does not point to a JDK8 then add a _JERKAR_JDK_ environment variable pointing on a JDK8 (_JERKAR_JDK_/bin/java must point on a java execuable). 
+1. Download and unzip the lastest *core-x.x.x-distrib.zip* file found on [snapshot](https://oss.sonatype.org/content/repositories/snapshots/org/jerkar/core/) or [release](https://repo1.maven.org/maven2/org/jerkar/core/) repository to the directory you want to install Jerkar
+2. Make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on.
+   For now, Jerkar only runs with JDK8 (though it can build Java project of any Java version). If your defaulf JDK version is not 8 or your _JAVA_HOME_ environment variable does not point to a JDK8 then add a _JERKAR_JDK_ environment variable pointing on a JDK8 (_JERKAR_JDK_/bin/java must point on a java execuable). 
+3. Add _[JERKAR HOME]_ to your _PATH_ environment variable
 5. execute `jerkar help` in the command line. You should get an output starting by : 
 
 ```
@@ -76,7 +76,7 @@ Method help succeeded in 660 milliseconds.
 ```
 # Configure your IDE
 
-For now, there is no valuable Jerkar Visual Plugin for your IDE but you can work pretty well without thanks to Intellij and Eclipse Jerkar plugin whose generating IDE metadata files (.iml and .classpath among others).
+For now, there is no valuable Jerkar Visual Plugin for your IDE but you can work pretty well without thanks to Intellij and Eclipse Jerkar plugin whose generating IDE metadata files (.iml and .classpath).
 
 But first you have to instruct your IDE where is located Jerkar distribution and repositories.
 
@@ -244,7 +244,7 @@ From class Build :
 
 You can mention inline the external library you need to compile and execute your build class. For exemple, you main need *Apache HttpClient* library to perform some non basic HTTP tasks.
 
-1. Annotate your class with module you want to use. There can be many.
+1. Annotate your class with modules or jar files you want to use.
 
 ```java
 @JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")  // Can import files from Maven repos
@@ -275,7 +275,7 @@ Imagine that you want to want to reuse *displayContent* method from project _sam
 
 1. Execute `mkdir sample2` then `cd sample2` followed by `jerkar scaffold#run intellij#` (or `jerkar scaffold#run eclipse#`)
 2. Rename sample2 Build class 'Sample2Build` to avoid name collision. Be carefull, rename its filename as well unless Jerkar will fail.
-3. Add add Field of type JkRUnn annoted with `JkImportProject` and the relative path of _sample1_ as value.
+3. Add a field of type JkRUn annoted with `JkImportProject` and the relative path of _sample1_ as value.
  
 ```java
 class Sample2Build extends JkRun {
@@ -331,7 +331,7 @@ Content of https://fr.wikipedia.org
 
 ## Restrictions
 
-Except the following mentionned here, there is not known restriction about what you can do with you build class. You can define as many classes you want into def directoy. Organise them within Java packages or not. 
+Except the following mentioned below, there is not known restriction about what you can do with you build class. You can define as many classes as you want into def directoy. Organise them within Java packages or not. 
 
 * Classes invoked from command lines must have the same name than their file.
 
