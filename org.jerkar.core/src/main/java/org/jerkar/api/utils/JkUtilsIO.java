@@ -343,7 +343,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Runs a thread copying all data to a getOutputStream to a specified writer. The
+     * Runs a thread copying all data from the specified input stream to sepecified  output streams. The
      * thread is started when the instance is created. You have to call
      * {@link #stop()} to stop the thread.
      */
@@ -351,17 +351,27 @@ public final class JkUtilsIO {
 
         private final InnerRunnable innerRunnable;
 
+        private final Thread thread;
+
         private StreamGobbler(InputStream is, OutputStream... outputStreams) {
             this.innerRunnable = new InnerRunnable(is, outputStreams);
-            new Thread(innerRunnable).start();
+            thread = new Thread(innerRunnable);
+            thread.start();
         }
 
         /**
          * Stop the gobbling, meaning stop the thread.
          */
-        public StreamGobbler stop() {
+        public void stop() {
             this.innerRunnable.stop.set(true);
-            return this;
+        }
+
+        public void join() {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
         }
 
         private static class InnerRunnable implements Runnable {
@@ -379,15 +389,14 @@ public final class JkUtilsIO {
 
             @Override
             public void run() {
-                try {
-                    final InputStreamReader isr = new InputStreamReader(in);
-                    final BufferedReader br = new BufferedReader(isr);
+                try (InputStreamReader isr = new InputStreamReader(in); BufferedReader br = new BufferedReader(isr)) {
                     String line = null;
                     while (!stop.get() && (line = br.readLine()) != null) {
                         final byte[] bytes = line.getBytes();
                         for (OutputStream out : outs) {
                             out.write(bytes, 0, bytes.length);
                             out.write('\n');
+                            out.flush();
                         }
                     }
                 } catch (final IOException e) {

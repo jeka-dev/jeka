@@ -9,8 +9,9 @@ public final class JkPrompt {
     private JkPrompt() {
     }
 
-    public static String ask(String question) {
-        System.out.print(question);
+    public static String ask(String prompt) {
+        System.out.print(prompt);
+        System.out.flush();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
             return br.readLine();
         } catch (IOException e) {

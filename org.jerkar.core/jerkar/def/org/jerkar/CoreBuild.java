@@ -11,6 +11,7 @@ import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.system.JkPrompt;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
@@ -147,13 +148,14 @@ public class CoreBuild extends JkRun {
         JkLog.endTask();
     }
 
-    private void tagGit() {
-        JkVersion version = javaPlugin.getProject().getVersionedModule().getVersion();
-        String tagName = version.toString();
+    @JkDoc("Create a new git tag for release purpose.")
+    public void tagGit() {
         JkProcess git = JkProcess.of("git").withFailOnError(true);
-        git.andParams("tag", "-a", tagName, "-m", "Release").runSync();
+        System.out.println("Existing tags :");
+        git.andParams("tag").runSync();
+        String newTag = JkPrompt.ask("Enter new tag : ");
+        git.andParams("tag", "-a", newTag, "-m", "Release").runSync();
         git.andParams("push").runSync();
-        git.andParams("push", "origin", tagName).runSync();
     }
 
     public static void main(String[] args) {

@@ -252,11 +252,11 @@ public final class JkProcess implements Runnable {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            outputStreamGobbler.stop();
-                errorStreamGobbler.stop();
-                if (exitCode.get() != 0 && failOnError) {
-                    throw new JkException("The process has returned with error code " + exitCode);
-                }
+            outputStreamGobbler.join();
+            errorStreamGobbler.join();
+            if (exitCode.get() != 0 && failOnError) {
+                throw new JkException("The process has returned with error code " + exitCode);
+            }
         };
         if (logCommand) {
             String workingDirName = this.workingDir == null ? "" : this.workingDir.toString() +  ">";

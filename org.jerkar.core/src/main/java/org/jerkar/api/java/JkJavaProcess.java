@@ -240,8 +240,8 @@ public final class JkJavaProcess {
                 final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
                         process.getErrorStream(), JkLog.getErrorStream());
                 process.waitFor();
-                outputStreamGobbler.stop();
-                errorStreamGobbler.stop();
+                outputStreamGobbler.join();
+                errorStreamGobbler.join();
                 result = process.exitValue();
             } catch (final Exception e) {
                 throw new RuntimeException(e);
