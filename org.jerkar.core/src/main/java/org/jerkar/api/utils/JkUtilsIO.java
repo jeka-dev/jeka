@@ -338,8 +338,8 @@ public final class JkUtilsIO {
      * Returns a thread that write each data read to the specified input
      * getOutputStream to the specified output getOutputStream.
      */
-    public static StreamGobbler newStreamGobbler(InputStream is, OutputStream os) {
-        return new StreamGobbler(is, os);
+    public static StreamGobbler newStreamGobbler(InputStream is, OutputStream ... outputStreams) {
+        return new StreamGobbler(is, outputStreams);
     }
 
     /**
@@ -351,8 +351,8 @@ public final class JkUtilsIO {
 
         private final InnerRunnable innerRunnable;
 
-        private StreamGobbler(InputStream is, OutputStream os) {
-            this.innerRunnable = new InnerRunnable(is, os);
+        private StreamGobbler(InputStream is, OutputStream... outputStreams) {
+            this.innerRunnable = new InnerRunnable(is, outputStreams);
             new Thread(innerRunnable).start();
         }
 
@@ -368,13 +368,13 @@ public final class JkUtilsIO {
 
             private final InputStream in;
 
-            private final OutputStream out;
+            private final OutputStream[] outs;
 
             private final AtomicBoolean stop = new AtomicBoolean(false);
 
-            private InnerRunnable(InputStream is, OutputStream os) {
+            private InnerRunnable(InputStream is, OutputStream[] outputStreams) {
                 this.in = is;
-                this.out = os;
+                this.outs = outputStreams;
             }
 
             @Override
@@ -385,8 +385,10 @@ public final class JkUtilsIO {
                     String line = null;
                     while (!stop.get() && (line = br.readLine()) != null) {
                         final byte[] bytes = line.getBytes();
-                        out.write(bytes, 0, bytes.length);
-                        out.write('\n');
+                        for (OutputStream out : outs) {
+                            out.write(bytes, 0, bytes.length);
+                            out.write('\n');
+                        }
                     }
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);

@@ -1,15 +1,13 @@
 package org.jerkar.api.system;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jerkar.api.utils.JkUtilsIO;
@@ -215,10 +213,24 @@ public final class JkProcess implements Runnable {
      * current output.
      */
     public int runSync() {
+        return runSync(false).exitCode;
+    }
+
+    public List<String> runAndReturnOutputAsLines() {
+        Result result = runSync(true);
+        if (result.output.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(result.output.split("\\r?\n"));
+    }
+
+    private Result runSync(boolean collectOutput) {
         final List<String> commands = new LinkedList<>();
         commands.add(this.command);
         commands.addAll(parameters);
-        final AtomicInteger result = new AtomicInteger();
+        final AtomicInteger exitCode = new AtomicInteger();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOuputStream();
         final Runnable runnable = () -> {
             final ProcessBuilder processBuilder = processBuilder(commands);
             if (workingDir != null) {
@@ -230,19 +242,20 @@ public final class JkProcess implements Runnable {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
+
             final JkUtilsIO.StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getInputStream(), JkLog.getOutputStream());
+                        process.getInputStream(), JkLog.getOutputStream(), collectOs);
                 final JkUtilsIO.StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getErrorStream(), JkLog.getErrorStream());
+                        process.getErrorStream(), JkLog.getErrorStream(), collectOs);
             try {
-                result.set(process.waitFor());
+                exitCode.set(process.waitFor());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             outputStreamGobbler.stop();
                 errorStreamGobbler.stop();
-                if (result.get() != 0 && failOnError) {
-                    throw new JkException("The process has returned with error code " + result);
+                if (exitCode.get() != 0 && failOnError) {
+                    throw new JkException("The process has returned with error code " + exitCode);
                 }
         };
         if (logCommand) {
@@ -251,7 +264,15 @@ public final class JkProcess implements Runnable {
         } else {
             runnable.run();
         }
-        return result.get();
+        Result out = new Result();
+        out.exitCode = exitCode.get();
+        out.output = collectOutput ? new String(byteArrayOutputStream.toByteArray()) : null;
+        return out;
+    }
+
+    private static class Result {
+        int exitCode;
+        String output;
     }
 
     private ProcessBuilder processBuilder(List<String> command) {
