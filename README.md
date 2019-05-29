@@ -75,13 +75,13 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 
 * Clone this repository in Eclipse. Project is already configured ( *.project* and *.classpath* are stored in git). 
 * Make sure the project is configured to compile using a JDK8 and not a JRE.
-* Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder. 
-* This creates the full distrib in *org.jerkar.core/build/output/distrib* folder
+* Run `org.jerkar.CoreBuild` class main method. This class is located in *jerkar/def* folder. 
+* This creates the full distrib in *org.jerkar.core/jerkar/output/distrib* folder
 
 ## Build Jerkar from IntelliJ
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
 * Make sure the project is configured with a JDK8.
-* Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder, inside *org.jerkar.core* project.
-* This creates the full distrib in *org.jerkar.core/build/output/distrib* folder
+* Run `org.jerkar.CoreBuild` class main method. This class is located in *jerkar/def* folder, inside *org.jerkar.core* project.
+* This creates the full distrib in *org.jerkar.core/jerkar/output/distrib* folder
 
