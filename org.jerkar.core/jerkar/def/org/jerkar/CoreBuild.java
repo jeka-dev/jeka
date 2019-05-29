@@ -86,10 +86,11 @@ public class CoreBuild extends JkRun {
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
         makeDocs();
         JkPathTree.of(distribFolder.resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
-        git = git.withWorkingDir(tempRepo);
+        git = git.withWorkingDir(tempRepo).withLogCommand(true);
         git.andParams("add", "*").runSync();
         git.andParams("commit", "-am", "Doc").withFailOnError(false).runSync();
         git.andParams("push").runSync();
+
     }
 
     private void doDistrib() {

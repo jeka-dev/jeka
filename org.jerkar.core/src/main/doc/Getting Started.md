@@ -274,8 +274,8 @@ Execute *post* method as usual : `jerkar post`.
 Imagine that you want to want to reuse *displayContent* method from project _sample1_ in another Jerkar project named _sample2_. Let's create a new _sample2_ project located in a sibling folder than _sample1_.
 
 1. Execute `mkdir sample2` then `cd sample2` followed by `jerkar scaffold#run intellij#` (or `jerkar scaffold#run eclipse#`)
-2. Rename sample2 Build class 'Sample2Build` to avoid name collision. Be carefull, rename its filename as well unless Jerkar will fail.
-3. Add a field of type JkRUn annoted with `JkImportProject` and the relative path of _sample1_ as value.
+2. Rename sample2 _Build_ class 'Sample2Build` to avoid name collision. Be carefull, rename its filename as well unless Jerkar will fail.
+3. Add a field of type JkRun annotated with `JkImportProject` and the relative path of _sample1_ as value.
  
 ```java
 class Sample2Build extends JkRun {
