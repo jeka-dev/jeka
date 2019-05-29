@@ -48,8 +48,16 @@ Visit following pages according your expectation :
 * [Getting Started](org.jerkar.core/src/main/doc/Getting%20Started.md)
 * [Reference Guide](org.jerkar.core/src/main/doc/Reference%20Guide)
 * [Frequently Asked Questions](org.jerkar.core/src/main/doc/FAQ.md)
+* [Javadoc](https://jeka.dev/docs/javadoc)
 * [Working examples](https://github.com/jerkar/working-examples)
 
+# Community
+
+You can ask question using regular using [this repository issues](https://github.com/jerkar/jerkar/issues).
+
+You can also use direct emailing for questions and support : djeangdev@yahoo.fr
+
+A twitter account also exist : https://twitter.com/djeang_dev
 
 # How to build Jerkar
 
