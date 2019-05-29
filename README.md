@@ -51,6 +51,13 @@ Visit following pages according your expectation :
 * [Javadoc](https://jeka.dev/docs/javadoc)
 * [Working examples](https://github.com/jerkar/working-examples)
 
+# Community
+
+You can ask question using regular using [this repository issues](https://github.com/jerkar/jerkar/issues).
+
+You can also use direct emailing for questions and support : djeangdev@yahoo.fr
+
+A twitter account also exist : https://twitter.com/djeang_dev
 
 # How to build Jerkar
 
