@@ -38,9 +38,9 @@
 		</java>
 	</target>
 
-	<target name="test-all" depends="create-bin">
+	<target name="run-all" depends="create-bin">
 		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
-			<arg line="-testSamples=true -LogMaxLength=100 -LogHeaders -LogVerbose" />
+			<arg line="java#pack -testSamples=true -LogMaxLength=120 -LogHeaders -LogVerbose" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
