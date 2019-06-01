@@ -3,14 +3,14 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jeka.dev/images/logo-whole-bg.jpg" width='420' height='420' align='middle'/>
 
-# What is Jerkar
+# What is Jerkar (Jeka)
 
-<strong>Jeka</strong> is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
+<strong>Jerkar</strong> is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
 
 Enjoy all the engineering power you are comfortable with (Java code, IDE, 3rd party libs,  Maven repository, ...) to define, 
 design, run, debug, reuse your automated tasks/builds. Exactly as you would do with regular code.
 
-Also, __Jeka conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of code/configuration. 
+Also, __Jerkar conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of code/configuration. 
 
 For example `jerkar java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
 performs a complete build running unit tests under Jacoco coverage tools and performs Sonar analysis on a Java project free 
