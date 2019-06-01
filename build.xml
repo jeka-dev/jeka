@@ -48,4 +48,6 @@
 		</java>
 	</target>
 
+	<target name="test" depends="run"/>
+
 </project>
