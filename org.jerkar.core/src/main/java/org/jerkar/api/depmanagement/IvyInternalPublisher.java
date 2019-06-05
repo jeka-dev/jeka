@@ -200,8 +200,7 @@ final class IvyInternalPublisher implements InternalPublisher {
     private int publishMavenArtifacts(JkMavenPublication publication,
                                       DefaultModuleDescriptor moduleDescriptor, UnaryOperator<Path> signer) {
         int count = 0;
-        for (final RepositoryResolver resolver : IvyTranslations.publishResolverOf(this.ivy
-                .getSettings())) {
+        for (final RepositoryResolver resolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
             final JkRepo publishRepo = this.publishRepos.getRepoConfigHavingUrl(IvyTranslations
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
@@ -211,7 +210,7 @@ final class IvyInternalPublisher implements InternalPublisher {
                 UnaryOperator<Path> effectiveSigner = publishRepo.getPublishConfig().isSignatureRequired() ? signer :
                         null;
                 final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
-                    signer, resolver, descriptorOutputDir,
+                    effectiveSigner, resolver, descriptorOutputDir,
                     publishRepo.getPublishConfig().isUniqueSnapshot(),
                     publishRepo.getPublishConfig().getChecksumAlgos());
                 ivyPublisherForMaven.publish(moduleDescriptor, publication);

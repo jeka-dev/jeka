@@ -83,7 +83,7 @@ public final class JkOptions {
      * found in props arguments.
      */
     static void populateFields(Object target, Map<String, String> props) {
-        OptionInjector.inject(target, props);
+        FieldInjector.inject(target, props);
     }
 
 

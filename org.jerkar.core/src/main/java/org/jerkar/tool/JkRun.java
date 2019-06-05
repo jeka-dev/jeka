@@ -79,10 +79,10 @@ public class JkRun {
         final T run = JkUtilsReflect.newInstance(runClass);
         final JkRun jkRun = run;
 
-        // Inject options
+        // Inject options & environment variables
         JkOptions.populateFields(run, JkOptions.readSystemAndUserOptions());
-        final Map<String, String> options = Environment.commandLine.getOptions();
-        JkOptions.populateFields(run, options);
+        FieldInjector.injectEnv(run);
+        JkOptions.populateFields(run,  Environment.commandLine.getOptions());
 
         // Load plugins declared in command line and inject options
         jkRun.plugins.loadCommandLinePlugins();

@@ -87,7 +87,7 @@ final class ProjectDef {
 
         private static List<NameAndField> options(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
             final List<NameAndField> result = new LinkedList<>();
-            for (final Field field : OptionInjector.getOptionFields(clazz)) {
+            for (final Field field : FieldInjector.getOptionFields(clazz)) {
                 final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
                 if (!hasSubOption(field)) {
                     result.add(new NameAndField(prefix + field.getName(), field, rootClass));

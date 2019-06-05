@@ -203,7 +203,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                         }
                         JkLog.warn(report.toString());
                     }
-                    return getDependencyResolver().resolve(getScopeDefaultedDependencies(), scopes).getFiles();
+                    return resolveResult.getFiles();
                 });
     }
 

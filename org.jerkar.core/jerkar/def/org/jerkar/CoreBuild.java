@@ -13,6 +13,7 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkEnv;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
@@ -40,9 +41,14 @@ public class CoreBuild extends JkRun {
 
     private Path distribFolder;
 
-    public String ossrhUser; // Must be injected by command line
+    @JkEnv("OSSRH_USER")
+    public String ossrhUser;
 
-    public String ossrhPwd;  // Must be injected by command line
+    @JkEnv("OSSRH_PWD")
+    public String ossrhPwd;
+
+    @JkEnv("GH_TOKEN")
+    public String githubToken;
 
     protected CoreBuild() {
         javaPlugin.tests.fork = false;
@@ -80,7 +86,6 @@ public class CoreBuild extends JkRun {
         Path javadocSourceDir = project.getMaker().getOutLayout().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         JkProcess git = JkProcess.of("git").withFailOnError(true);
-        String githubToken = System.getenv("GH_TOKEN");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
         git.andParams("clone", "--depth=1", "https://" + userPrefix + "github.com/jeka-dev/jeka-dev.github.io.git",
                 tempRepo.toString()).runSync();
@@ -140,8 +145,7 @@ public class CoreBuild extends JkRun {
     }
 
     private JkRepoSet publishRepos() {
-        return JkRepoSet.ofOssrhSnapshotAndRelease(JkUtilsObject.firstNonNull(ossrhUser, System.getenv("OSSRH_USER"))
-                , JkUtilsObject.firstNonNull(ossrhPwd, System.getenv("OSSRH_PWD")));
+        return JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd);
     }
 
     void testSamples()  {

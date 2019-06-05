@@ -39,8 +39,8 @@ The distribution is the file named core-x.x.x-distrib.zip.
 
 # How to use Jerkar
 
-Jerkar is designed to be easy to master for Java developers. In despite it offers rich functionalities, 
-developers should be able to figure out how it works by knowing few concepts and navigate in source code.
+Jerkar is designed to be easy to master for Java developers. It is easy to figure out how it works by knowing few 
+concepts and navigate in source code.
 
 That said, documentation is needed for a starting point.
 

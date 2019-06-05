@@ -113,7 +113,7 @@ class Environment {
                 if (map.containsKey(name)) {
                     String stringValue = map.get(name);
                     try {
-                        return (T) OptionInjector.parse(type, stringValue);
+                        return (T) FieldInjector.parse(type, stringValue);
                     } catch (IllegalArgumentException e) {
                         throw new JkException("Option " + name + " has been set with improper value '" + stringValue + "'");
                     }
