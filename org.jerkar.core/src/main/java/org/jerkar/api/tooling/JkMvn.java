@@ -110,7 +110,7 @@ public final class JkMvn implements Runnable {
         if (flag) {
             return new JkMvn(this.jkProcess.andParams("-U"));
         }
-        return new JkMvn(this.jkProcess.withoutParam("-U"));
+        return new JkMvn(this.jkProcess.minusParam("-U"));
     }
 
     /**
@@ -120,7 +120,7 @@ public final class JkMvn implements Runnable {
         if (flag) {
             return new JkMvn(this.jkProcess.andParams("-X"));
         }
-        return new JkMvn(this.jkProcess.withoutParam("-X"));
+        return new JkMvn(this.jkProcess.minusParam("-X"));
     }
 
     /**

@@ -78,9 +78,10 @@ public class CoreBuild extends JkRun {
         Path javadocSourceDir = project.getMaker().getOutLayout().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         JkProcess git = JkProcess.of("git").withFailOnError(true);
-        git.andParams("clone", "--depth=1", "https://github.com/jeka-dev/jeka-dev.github.io.git", tempRepo.toString())
-                .runSync();
-
+        String githubToken = System.getenv("GH_TOKEN");
+        String userPrefix = githubToken == null ? "" : githubToken + "@";
+        git.andParams("clone", "--depth=1", "https://" + userPrefix + "github.com/jeka-dev/jeka-dev.github.io.git",
+                tempRepo.toString()).runSync();
         project.getMaker().getTasksForJavadoc().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
@@ -90,7 +91,6 @@ public class CoreBuild extends JkRun {
         git.andParams("add", "*").runSync();
         git.andParams("commit", "-am", "Doc").withFailOnError(false).runSync();
         git.andParams("push").runSync();
-
     }
 
     private void doDistrib() {

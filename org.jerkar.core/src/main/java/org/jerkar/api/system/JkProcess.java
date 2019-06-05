@@ -113,7 +113,7 @@ public final class JkProcess implements Runnable {
      * Returns a <code>JkProcess</code> identical to this one but minus the
      * specified parameter.
      */
-    public JkProcess withoutParam(String parameter) {
+    public JkProcess minusParam(String parameter) {
         final List<String> list = new LinkedList<>(parameters);
         list.remove(parameter);
         return withParams(list.toArray(new String[0]));
