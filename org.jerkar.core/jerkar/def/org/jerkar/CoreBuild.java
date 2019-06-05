@@ -11,6 +11,7 @@ import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.system.JkPrompt;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
@@ -38,6 +39,8 @@ public class CoreBuild extends JkRun {
     final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
     private Path distribFolder;
+
+    public String ossrhUser = ""; // Must be injected by command line
 
     public String ossrhPwd = "";  // Must be injected by command line
 
@@ -137,7 +140,8 @@ public class CoreBuild extends JkRun {
     }
 
     private JkRepoSet publishRepos() {
-        return JkRepoSet.ofOssrhSnapshotAndRelease("djeang", ossrhPwd);
+        return JkRepoSet.ofOssrhSnapshotAndRelease(JkUtilsObject.firstNonNull(ossrhUser, System.getenv("OSSRH_USR"))
+                , JkUtilsObject.firstNonNull(ossrhPwd, System.getenv("OSSH_PWD")));
     }
 
     void testSamples()  {
