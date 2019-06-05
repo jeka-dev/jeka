@@ -73,7 +73,6 @@ public class CoreBuild extends JkRun {
     }
 
     public void publishDocsOnGithubPage() {
-        clean();
         JkJavaProject project = javaPlugin.getProject();
         Path javadocSourceDir = project.getMaker().getOutLayout().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");

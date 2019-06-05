@@ -180,8 +180,6 @@ public final class JkJavaProcess {
         return withClasspath(this.classpath.and(classpath));
     }
 
-
-
     private ProcessBuilder processBuilder(List<String> command, Map<String, String> env) {
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);
@@ -209,7 +207,8 @@ public final class JkJavaProcess {
 
     private void runClassOrJarSync(String mainClassName, Path jar, String... arguments) {
         JkUtilsAssert.isTrue(jar != null || mainClassName != null,
-                "main class name and jar can't be both null while launching a Java process, please set at least one of them.");
+                "main class name and jar can't be both null while launching a Java process, " +
+                        "please set at least one of them.");
         final List<String> command = new LinkedList<>();
         final OptionAndEnv optionAndEnv = optionsAndEnv();
         command.add(getRunningJavaCommand());
@@ -247,8 +246,7 @@ public final class JkJavaProcess {
                 throw new RuntimeException(e);
             }
             if (result != 0) {
-                throw new IllegalStateException("Process terminated in error : exit value = " + result
-                        + ".");
+                throw new IllegalStateException("Process terminated in error : exit value = " + result + ".");
             }
         };
         JkLog.execute("Starting java program : " + execPart, task);

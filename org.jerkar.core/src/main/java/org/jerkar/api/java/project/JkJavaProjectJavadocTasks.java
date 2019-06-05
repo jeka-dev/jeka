@@ -4,7 +4,9 @@ import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 
+import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class JkJavaProjectJavadocTasks {
     }
 
     public void runIfNecessary() {
-        if (done) {
+        if (done && !Files.exists(maker.getOutLayout().getJavadocDir())) {
             JkLog.info("Javadoc already generated. Won't perfom again");
         } else {
             run();
