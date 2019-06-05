@@ -1,7 +1,7 @@
 <project name="Jerkar" default="run" basedir=".">
 
 	<description>
-            This ANT file bootstraps Jerkar in order it builds itself from Travis.
+            This ANT file bootstraps Jeka in order it builds itself from Travis.
         </description>
 
 	<property name="bin" location="jerkar-bin" />
@@ -14,7 +14,7 @@
 		<mkdir dir="${bin}" />
 	</target>
 
-	<target name="create-bin" depends="init">
+	<target name="bootstrap" depends="init" description="Creates an executable instance of Jeka from this source">
 		<delete dir="${bin}" />
 		<mkdir dir="${bin}" />
 		<javac destdir="${bin}">
@@ -28,19 +28,9 @@
 		</copy>
 	</target>
 
-	<target name="run" depends="create-bin">
+	<target name="run" depends="bootstrap">
 		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
 			<arg line="java#pack publishDocsOnGithubPage java#publish -testSamples=false -LogMaxLength=120 -LogHeaders" />
-			<classpath>
-				<pathelement location="${bin}" />
-				<fileset refid="libs" />
-			</classpath>
-		</java>
-	</target>
-
-	<target name="run-all" depends="create-bin">
-		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
-			<arg line="java#pack -testSamples=true -LogMaxLength=120 -LogHeaders -LogVerbose" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

@@ -141,7 +141,7 @@ public class CoreBuild extends JkRun {
 
     private JkRepoSet publishRepos() {
         return JkRepoSet.ofOssrhSnapshotAndRelease(JkUtilsObject.firstNonNull(ossrhUser, System.getenv("OSSRH_USR"))
-                , JkUtilsObject.firstNonNull(ossrhPwd, System.getenv("OSSH_PWD")));
+                , JkUtilsObject.firstNonNull(ossrhPwd, System.getenv("OSSRH_PWD")));
     }
 
     void testSamples()  {
