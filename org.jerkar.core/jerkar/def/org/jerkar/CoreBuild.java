@@ -40,9 +40,9 @@ public class CoreBuild extends JkRun {
 
     private Path distribFolder;
 
-    public String ossrhUser = ""; // Must be injected by command line
+    public String ossrhUser; // Must be injected by command line
 
-    public String ossrhPwd = "";  // Must be injected by command line
+    public String ossrhPwd;  // Must be injected by command line
 
     protected CoreBuild() {
         javaPlugin.tests.fork = false;
