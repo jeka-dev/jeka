@@ -17,7 +17,7 @@ public class PgpUtilsTest {
     public void testSignAndVerify() throws Exception {
         final JkPathFile path = JkPathFile.of(Paths.get(JkConstants.OUTPUT_PATH +
                 "/test-out/signature.asm")).createIfNotExist();
-        PgpUtils.sign(sample(), PgpUtilsTest.class.getResourceAsStream("secring.gpg"),
+        PgpUtils.sign(sample(), PgpUtilsTest.class.getResourceAsStream("secring.gpg"), "",
                 JkUtilsIO.outputStream(path.get().toFile(), false), "jerkar".toCharArray(), true);
 
         final boolean result = PgpUtils.verify(sample(), JkUtilsIO.inputStream(path.get().toFile()),

@@ -20,6 +20,9 @@ public class JkPluginPgp extends JkPlugin {
     @JkDoc("Secret password for decoding secret key ring.")
     public String secretKeyPassword;
 
+    @JkDoc("Key name to sign and verify.")
+    public String keyName = "";
+
 
     protected JkPluginPgp(JkRun run) {
         super(run);
@@ -41,6 +44,7 @@ public class JkPluginPgp extends JkPlugin {
         JkPgp pgp = get();
         sb.append("PGP public ring path : " + pgp.getPublicRing());
         sb.append("\nPGP secret ring path : " + pgp.getSecretRing());
+        sb.append("\nPGP key name : " + keyName);
         JkLog.info(sb.toString());
     }
 }

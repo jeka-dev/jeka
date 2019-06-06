@@ -14,6 +14,7 @@ import org.jerkar.tool.JkEnv;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
+import org.jerkar.tool.builtins.repos.JkPluginPgp;
 
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -29,8 +30,6 @@ import static org.jerkar.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID
 public class CoreBuild extends JkRun {
 
     public static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
-
-    private static final String VERSION = "0.7.0-SNAPSHOT";
 
     final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
@@ -51,11 +50,14 @@ public class CoreBuild extends JkRun {
         javaPlugin.tests.fork = false;
         javaPlugin.pack.javadoc = true;
         git = JkGitWrapper.of(this.getBaseDir());
+        getPlugin(JkPluginPgp.class).keyName = "jerkar.org";
     }
 
     @Override
     protected void setup()  {
         JkJavaProject project = javaPlugin.getProject();
+
+        // Module version is driven by git repository info
         project.setVersionedModule(JkModuleId.of("org.jerkar:core").withVersion(git.getVersionWithTagOrSnapshot()));
         javaPlugin.publish.signArtifacts = project.getVersionedModule().getVersion().isSnapshot();
         project.setSourceVersion(JkJavaVersion.V8);

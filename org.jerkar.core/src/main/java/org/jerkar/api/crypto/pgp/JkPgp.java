@@ -21,7 +21,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
  *
  * @author Jerome Angibaud
  */
-public final class JkPgp implements UnaryOperator<Path>,  Serializable {
+public final class JkPgp implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -85,16 +85,16 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         return of(null, secRing, password);
     }
 
-    public Path sign(Path fileToSign) {
+    public Path sign(Path fileToSign, String keyname) {
         final Path signatureFile = getSignatureFile(fileToSign);
-        sign(fileToSign, signatureFile);
+        sign(fileToSign, keyname, signatureFile);
         return signatureFile;
     }
 
     /**
      * Signs the specified file and write the signature in the specified signature file.
      */
-    public void sign(Path fileToSign, Path signatureFile) {
+    public void sign(Path fileToSign, String keyName, Path signatureFile) {
         final char[] pass;
         if (password == null) {
             pass = new char[0];
@@ -106,10 +106,10 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         if (!Files.exists(getSecretRing())) {
             throw new IllegalStateException("Specified secret ring file " + secRing + " not found.");
         }
-        Method signMethod = JkUtilsReflect.getMethod(PGPUTILS_CLASS, "sign", Path.class, Path.class, Path.class,
+        Method signMethod = JkUtilsReflect.getMethod(PGPUTILS_CLASS, "sign", Path.class, Path.class, String.class, Path.class,
                 char[].class, boolean.class);
         JkUtilsReflect.invoke(null, signMethod, fileToSign,
-                secRing.toPath(), signatureFile, pass, true);
+                secRing.toPath(), keyName, signatureFile, pass, true);
     }
 
     /**
@@ -167,14 +167,27 @@ public final class JkPgp implements UnaryOperator<Path>,  Serializable {
         return pubRing.toPath();
     }
 
-    @Override
-    public Path apply(Path file) {
-        if (!Files.exists(file)) {
-            return null;
+    public UnaryOperator<Path> getSigner(String keyName) {
+        return new Signer(keyName);
+    }
+
+    private class Signer implements UnaryOperator<Path>, Serializable {
+
+        private final String keyName;
+
+        private Signer(String keyName) {
+            this.keyName = keyName;
         }
-        final Path signatureFile = file.getParent().resolve(file.getFileName().toString() + ".asc");
-        sign(file, signatureFile);
-        return signatureFile;
+
+        @Override
+        public Path apply(Path file) {
+            if (!Files.exists(file)) {
+                return null;
+            }
+            final Path signatureFile = file.getParent().resolve(file.getFileName().toString() + ".asc");
+            sign(file, keyName, signatureFile);
+            return signatureFile;
+        }
     }
 
 }

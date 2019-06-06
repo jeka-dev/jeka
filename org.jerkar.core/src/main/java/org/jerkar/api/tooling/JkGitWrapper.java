@@ -36,6 +36,10 @@ public final class JkGitWrapper {
         return git.andParams("tag", "-l", "--points-at", "HEAD").withLogOutput(false).runAndReturnOutputAsLines();
     }
 
+    public List<String> getLastCommitMessage() {
+        return git.andParams("log", "--oneline", "--format=%B", "-n 1", "HEAD").withLogOutput(false).runAndReturnOutputAsLines();
+    }
+
     public JkGitWrapper tagAndPush(String name) {
         git.andParams("tag", name).runSync();
         git.andParams("push", "origin", "--tags").runSync();
@@ -43,7 +47,7 @@ public final class JkGitWrapper {
     }
 
     /**
-     * If the current commit is tagged then the version is the tag name (last in alphabetical order. Otherwise
+     * If the current commit is tagged then the version is the tag name (last in alphabetical order). Otherwise
      * the version is [branch]-SNAPSHOT
      */
     public String getVersionWithTagOrSnapshot() {
@@ -52,7 +56,7 @@ public final class JkGitWrapper {
         if (tags.isEmpty()) {
             return branch + "-SNAPSHOT";
         } else {
-            return tags.get(0);
+            return tags.get(tags.size() -1);
         }
     }
 

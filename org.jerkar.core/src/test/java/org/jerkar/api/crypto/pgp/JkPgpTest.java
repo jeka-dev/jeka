@@ -22,7 +22,7 @@ public class JkPgpTest {
             Files.createFile(signatureFile);
         }
         final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
-        Path signature = pgp.sign(sampleFile);
+        Path signature = pgp.sign(sampleFile, "");
         System.out.println("Signature file : " + signature);
     }
 
@@ -37,7 +37,7 @@ public class JkPgpTest {
             Files.createFile(signatureFile);
         }
         final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
-        pgp.withSecretRingPassword("bad password").sign(sampleFile, signatureFile);
+        pgp.withSecretRingPassword("bad password").sign(sampleFile, "", signatureFile);
         Assert.assertTrue(pgp.verify(sampleFile, signatureFile));
     }
 

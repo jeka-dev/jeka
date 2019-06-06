@@ -24,7 +24,7 @@ public class JkPublisherRunner {
                 .and(Paths.get("org.myorg.mylib-sources.jar"), "sources")
                 .and(Paths.get("org.myorg.mylib-javadoc.jar"), "javadoc")
                 .withChecksums("sha-2", "md5")
-                .withSigner(JkPgp.of(Paths.get("myPubring"), Paths.get("mySecretRing"), "mypassword"))
+                .withSigner(JkPgp.of(Paths.get("myPubring"), Paths.get("mySecretRing"), "mypassword").getSigner("toto"))
                 .with(JkMavenPublicationInfo.of("My sample project",
                         "A project to demonstrate publishing on Jerkar",
                         "http://project.jerkar.org")

@@ -15,6 +15,7 @@ public class JkGitWrapperRunner {
         System.out.println(git.getCurrentCommit());
         System.out.println(git.getTagsOfCurrentCommit());
         System.out.println(git.getVersionWithTagOrSnapshot());
+        System.out.println(git.getLastCommitMessage());
         System.out.println("***");
     }
 }

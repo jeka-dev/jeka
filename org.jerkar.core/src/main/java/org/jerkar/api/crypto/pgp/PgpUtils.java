@@ -93,27 +93,26 @@ final class PgpUtils {
         return signature.verify();
     }
 
-    public static void sign(Path fileToSign, Path secringFile, Path signatureFile, char[] pass,
+    public static void sign(Path fileToSign, Path secringFile, String keyName, Path signatureFile, char[] pass,
                             boolean armor) {
-        //JkUtilsFile.assertAllExist(fileToSign, secringFile);
         JkUtilsAssert.isTrue(Files.exists(fileToSign), fileToSign + " not found.");
         JkUtilsAssert.isTrue(Files.exists(secringFile), secringFile + " not found.");
         JkPathFile.of(signatureFile).createIfNotExist();
         try (final InputStream toSign = Files.newInputStream(fileToSign);
              final InputStream keyRing = Files.newInputStream(secringFile);
              final OutputStream out = Files.newOutputStream(signatureFile)) {
-            sign(toSign, keyRing, out, pass, armor);
+            sign(toSign, keyRing, keyName, out, pass, armor);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    static void sign(InputStream toSign, InputStream keyRing, OutputStream out, char[] pass,
+    static void sign(InputStream toSign, InputStream keyRing, String keyName, OutputStream out, char[] pass,
             boolean armor) {
         if (armor) {
             out = new ArmoredOutputStream(out);
         }
-        final PGPSecretKey pgpSecretKey = readFirstSecretKey(keyRing);
+        final PGPSecretKey pgpSecretKey = readSecretKey(keyRing, keyName);
         try {
             final PGPDigestCalculatorProvider pgpDigestCalculatorProvider = new BcPGPDigestCalculatorProvider();
             final PBESecretKeyDecryptor secretKeyDecryptor = new BcPBESecretKeyDecryptorBuilder(
@@ -140,6 +139,21 @@ final class PgpUtils {
             }
             throw JkUtilsThrowable.unchecked(e);
         }
+    }
+
+    private static PGPSecretKey readSecretKey(InputStream keyRingIs, String prefix) {
+        for (final PGPSecretKeyRing keyRing : extractSecrectKeyRings(keyRingIs)) {
+            final Iterator<PGPSecretKey> keyIter = keyRing.getSecretKeys();
+            while (keyIter.hasNext()) {
+                final PGPSecretKey key = keyIter.next();
+                if (key.isSigningKey()) {
+                    if (key.getUserIDs().hasNext() && key.getUserIDs().next().toString().startsWith(prefix)) {
+                        return key;
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException("Can't find signing key in key ring having name starting with " + prefix);
     }
 
     private static PGPSecretKey readFirstSecretKey(InputStream keyRingIs) {

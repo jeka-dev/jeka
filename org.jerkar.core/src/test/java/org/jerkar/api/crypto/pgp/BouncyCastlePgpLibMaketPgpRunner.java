@@ -75,7 +75,7 @@ public class BouncyCastlePgpLibMaketPgpRunner {
         final Path signatureFile = Paths.get(
                 "jerkar/output/test-out/signature-fake.asm").toAbsolutePath();
         final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
-        pgp.sign(sampleFile, signatureFile);
+        pgp.sign(sampleFile, "", signatureFile);
     }
 
     private static void sign(Path fileToSign, Path output, String password, Path secRing,
