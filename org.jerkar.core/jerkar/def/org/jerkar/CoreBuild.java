@@ -9,6 +9,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.system.JkPrompt;
 import org.jerkar.api.tooling.JkGitWrapper;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkEnv;
 import org.jerkar.tool.JkInit;
@@ -158,12 +159,12 @@ public class CoreBuild extends JkRun {
 
     @JkDoc("Create a new git tag for release purpose.")
     public void tagGit() {
-        JkProcess git = JkProcess.of("git").withFailOnError(true);
+        JkGitWrapper git = JkGitWrapper.of(getBaseDir());
         System.out.println("Existing tags :");
-        git.andParams("tag").runSync();
+        git.exec("tag");
         String newTag = JkPrompt.ask("Enter new tag : ");
-        git.andParams("tag", "-a", newTag, "-m", "Release").runSync();
-        git.andParams("push").runSync();
+        JkUtilsAssert.isTrue(!git.isDirty(), "Git workspace is dirty. Cannot put tag");
+        git.tagAndPush(newTag);
     }
 
     public static void main(String[] args) {
