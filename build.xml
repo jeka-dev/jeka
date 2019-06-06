@@ -30,7 +30,7 @@
 
 	<target name="run" depends="bootstrap">
 		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
-			<arg line="java#pack publishDocsOnGithubPage java#publish -testSamples=false -LogMaxLength=120 -LogHeaders" />
+			<arg line="java#pack publishDocsOnGithubPage java#publish -testSamples=false -LogMaxLength=100 -LogHeaders" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
