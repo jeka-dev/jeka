@@ -56,12 +56,16 @@ public final class JkProcess implements Runnable {
 
     private final boolean logCommand;
 
-    private JkProcess(String command, List<String> parameters, Path workingDir, boolean failOnError, boolean logCommand) {
+    private final boolean logOutput;
+
+    private JkProcess(String command, List<String> parameters, Path workingDir, boolean failOnError, boolean logCommand
+            , boolean logOutput) {
         this.command = command;
         this.parameters = parameters;
         this.workingDir = workingDir;
         this.failOnError = failOnError;
         this.logCommand = logCommand;
+        this.logOutput = logOutput;
     }
 
     /**
@@ -69,7 +73,7 @@ public final class JkProcess implements Runnable {
      * parameters.
      */
     public static JkProcess of(String command, String... parameters) {
-        return new JkProcess(command, Arrays.asList(parameters), null, false, false);
+        return new JkProcess(command, Arrays.asList(parameters), null, false, false, true);
     }
 
     /**
@@ -79,7 +83,7 @@ public final class JkProcess implements Runnable {
     public static JkProcess ofWinOrUx(String windowsCommand, String unixCommand,
             String... parameters) {
         final String cmd = JkUtilsSystem.IS_WINDOWS ? windowsCommand : unixCommand;
-        return new JkProcess(cmd, Arrays.asList(parameters), null, false, false);
+        return new JkProcess(cmd, Arrays.asList(parameters), null, false, false, true);
     }
 
     /**
@@ -137,7 +141,7 @@ public final class JkProcess implements Runnable {
     public JkProcess andParams(Collection<String> parameters) {
         final List<String> list = new ArrayList<>(this.parameters);
         list.addAll(parameters);
-        return new JkProcess(command, list, workingDir, failOnError, logCommand);
+        return new JkProcess(command, list, workingDir, failOnError, logCommand, logOutput);
     }
 
     /**
@@ -147,7 +151,7 @@ public final class JkProcess implements Runnable {
      * by the specified ones (not adding).
      */
     public JkProcess withParams(String... parameters) {
-        return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError, logCommand);
+        return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError, logCommand, logOutput);
     }
 
     /**
@@ -166,7 +170,7 @@ public final class JkProcess implements Runnable {
      * specified directory as the working directory.
      */
     public JkProcess withWorkingDir(Path workingDir) {
-        return new JkProcess(command, parameters, workingDir, failOnError, logCommand);
+        return new JkProcess(command, parameters, workingDir, failOnError, logCommand, logOutput);
     }
 
     /**
@@ -186,16 +190,24 @@ public final class JkProcess implements Runnable {
      * throw a {@link IllegalStateException}.
      */
     public JkProcess withFailOnError(boolean fail) {
-        return new JkProcess(command, parameters, workingDir, fail, logCommand);
+        return new JkProcess(command, parameters, workingDir, fail, logCommand, logOutput);
     }
 
     /**
-     * Returns a <code>JkProcess</code> identical to this one but with the specified logging behavior.
+     * Returns a <code>JkProcess</code> identical to this one but with the specified logging command behavior.
      * If parameter is <code>true</code>, a process execution will be wrapped in a log showing start and end of
      * the execution showing details about the command to be executed and execution duration.
      */
     public  JkProcess withLogCommand(boolean logCommand) {
-        return new JkProcess(command, parameters, workingDir, failOnError, logCommand);
+        return new JkProcess(command, parameters, workingDir, failOnError, logCommand, logOutput);
+    }
+
+    /**
+     * Returns a <code>JkProcess</code> identical to this one but with the specified logging output behavior.
+     * If parameter is <code>true</code>, a process output will be redirected to JkLog.
+     */
+    public  JkProcess withLogOutput(boolean logOutput) {
+        return new JkProcess(command, parameters, workingDir, failOnError, logCommand, logOutput);
     }
 
     /**
@@ -242,11 +254,12 @@ public final class JkProcess implements Runnable {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-
+            OutputStream consoleOutputStream = logOutput ? JkLog.getOutputStream() : JkUtilsIO.nopOuputStream();
+            OutputStream consoleErrStream = logOutput ? JkLog.getErrorStream() : JkUtilsIO.nopOuputStream();
             final JkUtilsIO.StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getInputStream(), JkLog.getOutputStream(), collectOs);
+                        process.getInputStream(), consoleOutputStream, collectOs);
                 final JkUtilsIO.StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getErrorStream(), JkLog.getErrorStream(), collectOs);
+                        process.getErrorStream(), consoleErrStream, collectOs);
             try {
                 exitCode.set(process.waitFor());
             } catch (InterruptedException e) {

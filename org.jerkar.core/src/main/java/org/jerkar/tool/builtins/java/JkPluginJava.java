@@ -66,7 +66,7 @@ public class JkPluginJava extends JkPlugin {
         // Pre-configure JkJavaProject instance
         this.project = JkJavaProject.ofMavenLayout(this.getRun().getBaseDir());
         this.project.setDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
-        final Path path = run.getBaseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
+        final Path path = run.getBaseDir().resolve(JkConstants.JERKAR_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
             this.project.addDependencies(JkDependencySet.ofTextDescription(path));
         }

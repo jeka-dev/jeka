@@ -1,7 +1,6 @@
 package org.jerkar;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProject;
@@ -9,17 +8,13 @@ import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.system.JkPrompt;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.tooling.JkGitWrapper;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkEnv;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.builtins.java.JkPluginJava;
-import org.jerkar.tool.builtins.repos.JkPluginPgp;
 
-import java.nio.file.CopyOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -41,6 +36,8 @@ public class CoreBuild extends JkRun {
 
     private Path distribFolder;
 
+    private final JkGitWrapper git;
+
     @JkEnv("OSSRH_USER")
     public String ossrhUser;
 
@@ -53,12 +50,13 @@ public class CoreBuild extends JkRun {
     protected CoreBuild() {
         javaPlugin.tests.fork = false;
         javaPlugin.pack.javadoc = true;
+        git = JkGitWrapper.of(this.getBaseDir());
     }
 
     @Override
     protected void setup()  {
         JkJavaProject project = javaPlugin.getProject();
-        project.setVersionedModule(JkModuleId.of("org.jerkar:core").withVersion(VERSION));
+        project.setVersionedModule(JkModuleId.of("org.jerkar:core").withVersion(git.getVersionWithTagOrSnapshot()));
         javaPlugin.publish.signArtifacts = project.getVersionedModule().getVersion().isSnapshot();
         project.setSourceVersion(JkJavaVersion.V8);
         project.setMavenPublicationInfo(mavenPublication());
