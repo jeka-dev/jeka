@@ -34,6 +34,7 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.jerkar.api.file.JkPathFile;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
@@ -135,7 +136,7 @@ final class PgpUtils {
             throw JkUtilsThrowable.unchecked(e);
         } catch (final PGPException e) {
             if (e.getMessage().equals("checksum mismatch at 0 of 20")) {
-                throw new IllegalStateException("Secret key password is probably wrong.", e);
+                throw new JkException("Secret key password is probably wrong.");
             }
             throw JkUtilsThrowable.unchecked(e);
         }
@@ -153,24 +154,10 @@ final class PgpUtils {
                 }
             }
         }
-        throw new IllegalArgumentException("Can't find signing key in key ring having name starting with " + prefix);
-    }
-
-    private static PGPSecretKey readFirstSecretKey(InputStream keyRingIs) {
-        for (final PGPSecretKeyRing keyRing : extractSecrectKeyRings(keyRingIs)) {
-            final Iterator<PGPSecretKey> keyIter = keyRing.getSecretKeys();
-            while (keyIter.hasNext()) {
-                final PGPSecretKey key = keyIter.next();
-                if (key.isSigningKey()) {
-                    return key;
-                }
-            }
-        }
-        throw new IllegalArgumentException("Can't find signing key in key ring.");
+        throw new JkException("Can't find signing key in key ring having name starting with " + prefix);
     }
 
     private static List<PGPSecretKeyRing> extractSecrectKeyRings(InputStream inputStream) {
-
         InputStream decodedInput;
         try {
             decodedInput = PGPUtil.getDecoderStream(inputStream);
@@ -216,7 +203,7 @@ final class PgpUtils {
                     throw JkUtilsThrowable.unchecked(e);
                 }
             } else {
-                throw new IllegalArgumentException(
+                throw new JkException(
                         "Provided PGP file does not contain only secret key."
                                 + " Was expecting a file containing secret key only. ");
             }
