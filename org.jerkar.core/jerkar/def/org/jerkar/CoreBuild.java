@@ -5,6 +5,7 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.system.JkPrompt;
@@ -163,7 +164,9 @@ public class CoreBuild extends JkRun {
         System.out.println("Existing tags :");
         git.exec("tag");
         String newTag = JkPrompt.ask("Enter new tag : ");
-        JkUtilsAssert.isTrue(!git.isDirty(), "Git workspace is dirty. Cannot put tag");
+        if (git.isDirty()) {
+            throw new JkException("Git workspace is dirty. Cannot put tag.");
+        }
         git.tagAndPush(newTag);
     }
 
