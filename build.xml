@@ -2,7 +2,9 @@
 
 	<description>
             This ANT file bootstraps Jeka in order it builds itself from Travis.
-        </description>
+	</description>
+
+	<property environment="env"/>
 
 	<property name="bin" location="jerkar-bin" />
 
