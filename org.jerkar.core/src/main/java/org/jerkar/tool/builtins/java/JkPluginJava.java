@@ -231,9 +231,6 @@ public class JkPluginJava extends JkPlugin {
         @JkDoc("If true, publishing will occur only in the local repository.")
         public boolean localOnly = false;
 
-        @JkDoc("If true, all artifacts to be published will be signed with PGP.")
-        public boolean signArtifacts = false;
-
     }
 
     private JkJavaCompiler compiler() {
