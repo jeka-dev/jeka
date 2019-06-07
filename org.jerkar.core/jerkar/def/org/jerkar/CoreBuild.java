@@ -7,10 +7,8 @@ import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.system.JkPrompt;
 import org.jerkar.api.tooling.JkGitWrapper;
-import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkEnv;
 import org.jerkar.tool.JkInit;
@@ -52,7 +50,6 @@ public class CoreBuild extends JkRun {
         javaPlugin.tests.fork = false;
         javaPlugin.pack.javadoc = true;
         git = JkGitWrapper.of(this.getBaseDir());
-        getPlugin(JkPluginPgp.class).keyName = "jerkar.org";
     }
 
     @Override
@@ -61,7 +58,7 @@ public class CoreBuild extends JkRun {
 
         // Module version is driven by git repository info
         project.setVersionedModule(JkModuleId.of("org.jerkar:core").withVersion(git.getVersionWithTagOrSnapshot()));
-        javaPlugin.publish.signArtifacts = project.getVersionedModule().getVersion().isSnapshot();
+
         project.setSourceVersion(JkJavaVersion.V8);
         project.setMavenPublicationInfo(mavenPublication());
         JkJavaProjectMaker maker = project.getMaker();
@@ -71,10 +68,13 @@ public class CoreBuild extends JkRun {
         JkVersion version = javaPlugin.getProject().getVersionedModule().getVersion();
         if (!version.isSnapshot()) {
             javaPlugin.pack.javadoc = true;
-            javaPlugin.publish.signArtifacts = true;
             maker.getTasksForPublishing().getPostActions().chain(this::tagGit);
         }
         maker.getTasksForJavadoc().setJavadocOptions("-notimestamp");
+
+        // Use embedded secret ring protected by a passphrase to deploy releases on ossrh
+        JkPluginPgp pgpPlugin = getPlugins().get(JkPluginPgp.class);
+        pgpPlugin.secretRingPath = getBaseDir().resolve("jerkar/secring.gpg").toString();
     }
 
     @Override
@@ -87,19 +87,18 @@ public class CoreBuild extends JkRun {
         JkJavaProject project = javaPlugin.getProject();
         Path javadocSourceDir = project.getMaker().getOutLayout().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
-        JkProcess git = JkProcess.of("git").withFailOnError(true);
         String userPrefix = githubToken == null ? "" : githubToken + "@";
-        git.andParams("clone", "--depth=1", "https://" + userPrefix + "github.com/jeka-dev/jeka-dev.github.io.git",
-                tempRepo.toString()).runSync();
+        git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jeka-dev/jeka-dev.github.io.git",
+                tempRepo.toString());
         project.getMaker().getTasksForJavadoc().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
         makeDocs();
         JkPathTree.of(distribFolder.resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
-        git = git.withWorkingDir(tempRepo).withLogCommand(true);
-        git.andParams("add", "*").runSync();
-        git.andParams("commit", "-am", "Doc").withFailOnError(false).runSync();
-        git.andParams("push").runSync();
+        JkGitWrapper gitTemp = JkGitWrapper.of(tempRepo).withLogCommand(true);
+        gitTemp.exec("add", "*");
+        gitTemp.withFailOnError(false).exec("commit", "-am", "Doc");
+        gitTemp.exec("push");
     }
 
     private void doDistrib() {

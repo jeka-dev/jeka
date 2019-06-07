@@ -105,11 +105,10 @@ public class JkPluginJava extends JkPlugin {
         if (pack.checksums().length > 0) {
             maker.getTasksForPackaging().setChecksumAlgorithms(pack.checksums());
         }
-        if (publish.signArtifacts) {
-            JkPluginPgp pgpPlugin = this.getRun().getPlugins().get(JkPluginPgp.class);
-            JkPgp pgp = pgpPlugin.get();
-            maker.getTasksForPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
-        }
+        JkPluginPgp pgpPlugin = this.getRun().getPlugins().get(JkPluginPgp.class);
+        JkPgp pgp = pgpPlugin.get();
+        maker.getTasksForPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
+
         JkUnit tester = maker.getTasksForTesting().getRunner();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);

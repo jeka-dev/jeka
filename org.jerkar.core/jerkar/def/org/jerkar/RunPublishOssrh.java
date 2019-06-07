@@ -12,7 +12,7 @@ class RunPublishOssrh {
      */
     public static void main(String[] args) {
         CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args);
-        coreBuild.javaPlugin.clean().pack();
+        //coreBuild.javaPlugin.clean().pack();
         coreBuild.javaPlugin.publish();
     }
 }

@@ -17,7 +17,15 @@ public final class JkGitWrapper {
     }
 
     public static JkGitWrapper of(Path dir) {
-        return new JkGitWrapper(JkProcess.of("git").withWorkingDir(dir));
+        return new JkGitWrapper(JkProcess.of("git").withWorkingDir(dir).withFailOnError(true));
+    }
+
+    public JkGitWrapper withLogCommand(boolean log) {
+        return new JkGitWrapper(this.git.withLogCommand(log));
+    }
+
+    public JkGitWrapper withFailOnError(boolean fail) {
+        return new JkGitWrapper(this.git.withFailOnError(fail));
     }
 
     public String getCurrentBranch() {

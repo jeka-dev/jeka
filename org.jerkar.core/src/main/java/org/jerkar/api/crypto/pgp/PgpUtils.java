@@ -147,26 +147,14 @@ final class PgpUtils {
             while (keyIter.hasNext()) {
                 final PGPSecretKey key = keyIter.next();
                 if (key.isSigningKey()) {
-                    if (key.getUserIDs().hasNext() && key.getUserIDs().next().toString().startsWith(prefix)) {
+                    String keyname = key.getUserIDs().hasNext() ? key.getUserIDs().next().toString() : "";
+                    if (keyname.startsWith(prefix)) {
                         return key;
                     }
                 }
             }
         }
-        throw new IllegalArgumentException("Can't find signing key in key ring having name starting with " + prefix);
-    }
-
-    private static PGPSecretKey readFirstSecretKey(InputStream keyRingIs) {
-        for (final PGPSecretKeyRing keyRing : extractSecrectKeyRings(keyRingIs)) {
-            final Iterator<PGPSecretKey> keyIter = keyRing.getSecretKeys();
-            while (keyIter.hasNext()) {
-                final PGPSecretKey key = keyIter.next();
-                if (key.isSigningKey()) {
-                    return key;
-                }
-            }
-        }
-        throw new IllegalArgumentException("Can't find signing key in key ring.");
+        throw new IllegalArgumentException("Can't find a signing key in keyring having a name starting with " + prefix);
     }
 
     private static List<PGPSecretKeyRing> extractSecrectKeyRings(InputStream inputStream) {

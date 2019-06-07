@@ -317,9 +317,9 @@ final class IvyPublisherForMaven {
 
     private void putInRepo(Path source, String destination, boolean overwrite) {
         final Repository repository = this.resolver.getRepository();
+        final String dest = completePath(destination);
+        JkLog.info("Publish file " + dest);
         try {
-            final String dest = completePath(destination);
-            JkLog.info("Publish file " + dest);
             repository.put(null, source.toFile(), dest, overwrite);
             for (final String algo : checksumAlgos) {
                 final Path temp = Files.createTempFile("jk-checksum-", algo);
