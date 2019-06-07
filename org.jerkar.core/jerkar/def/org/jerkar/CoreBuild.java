@@ -68,7 +68,6 @@ public class CoreBuild extends JkRun {
         JkVersion version = javaPlugin.getProject().getVersionedModule().getVersion();
         if (!version.isSnapshot()) {
             javaPlugin.pack.javadoc = true;
-            maker.getTasksForPublishing().getPostActions().chain(this::tagGit);
         }
         maker.getTasksForJavadoc().setJavadocOptions("-notimestamp");
 
