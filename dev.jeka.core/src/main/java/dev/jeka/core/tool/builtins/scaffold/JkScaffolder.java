@@ -49,8 +49,8 @@ public final class JkScaffolder {
         JkUtilsPath.write(buildClass, buildClassCode.getBytes(Charset.forName("UTF-8")));
         if (embed) {
             JkLog.info("Create shell files.");
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.getRoot().resolve("jerkar.bat"));
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.getRoot().resolve("jerkar"));
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka.bat"), baseTree.getRoot().resolve("jerkar.bat"));
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka"), baseTree.getRoot().resolve("jerkar"));
             Path jerkarJar = JkLocator.getJerkarJarPath();
             Path bootFolder = baseTree.getRoot().resolve("build/boot");
             JkUtilsPath.createDirectories(bootFolder);

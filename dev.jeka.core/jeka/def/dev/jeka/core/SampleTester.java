@@ -37,7 +37,7 @@ class SampleTester {
         this.sampleBaseDir = buildDir.goTo("../dev.jeka.core.samples");
         this.sampleDependerBaseDir = buildDir.goTo("../dev.jeka.core.depender-samples");
         this.output = sampleBaseDir.goTo(JkConstants.OUTPUT_PATH);
-        String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
+        String scriptName = JkUtilsSystem.IS_WINDOWS ? "jeka.bat" : "jeka";
         launchScript = buildDir.goTo(JkConstants.OUTPUT_PATH).get("distrib/" + scriptName);
     }
 
