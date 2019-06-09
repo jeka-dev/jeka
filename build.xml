@@ -6,9 +6,9 @@
 
 	<property environment="env"/>
 
-	<property name="bin" location="jerkar-bin" />
+	<property name="bin" location="jeka-bin" />
 
-	<fileset id="libs" dir="org.jerkar.core/jerkar/libs/provided">
+	<fileset id="libs" dir="dev.jeka.core/jeka/libs/provided">
 		<include name='**/*.jar' />
 	</fileset>
 
