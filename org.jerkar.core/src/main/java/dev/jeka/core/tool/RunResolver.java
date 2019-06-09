@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jerkar.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTree;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsString;

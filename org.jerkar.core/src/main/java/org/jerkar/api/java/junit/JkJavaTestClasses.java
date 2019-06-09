@@ -1,8 +1,8 @@
 package org.jerkar.api.java.junit;
 
-import org.jerkar.api.file.JkPathMatcher;
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClasspath;
 
 /**

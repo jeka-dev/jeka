@@ -1,9 +1,9 @@
 package dev.jeka.core.tool;
 
-import org.jerkar.api.system.JkException;
-import org.jerkar.api.system.JkHierarchicalConsoleLogHandler;
-import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsObject;
 

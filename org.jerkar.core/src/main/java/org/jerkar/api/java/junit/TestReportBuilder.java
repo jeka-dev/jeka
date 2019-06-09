@@ -9,7 +9,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathFile;
 import org.jerkar.api.java.junit.JkTestSuiteResult.JkIgnoredCase;
 import org.jerkar.api.java.junit.JkTestSuiteResult.JkTestCaseFailure;
 import dev.jeka.core.api.utils.JkUtilsPath;

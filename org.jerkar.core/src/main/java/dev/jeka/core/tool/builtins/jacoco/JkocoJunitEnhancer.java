@@ -3,7 +3,7 @@ package dev.jeka.core.tool.builtins.jacoco;
 import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 
 import java.io.PrintStream;

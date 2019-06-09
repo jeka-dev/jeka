@@ -1,10 +1,10 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
 import dev.jeka.core.tool.JkConstants;
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.function.JkRunnables;
-import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;

@@ -7,8 +7,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.system.JkException;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**

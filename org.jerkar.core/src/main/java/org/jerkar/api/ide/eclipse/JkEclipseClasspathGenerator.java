@@ -18,12 +18,12 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.depmanagement.JkRepoSet;
-import org.jerkar.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkProjectSourceLayout;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectDefinition;
-import org.jerkar.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsThrowable;

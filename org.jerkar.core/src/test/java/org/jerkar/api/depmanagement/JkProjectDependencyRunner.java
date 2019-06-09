@@ -3,7 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jerkar.api.tooling.JkMvn;
+import dev.jeka.core.api.tooling.JkMvn;
 
 @SuppressWarnings("javadoc")
 public class JkProjectDependencyRunner {

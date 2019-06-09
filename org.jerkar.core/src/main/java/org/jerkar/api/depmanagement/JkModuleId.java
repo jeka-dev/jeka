@@ -3,7 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import org.jerkar.api.system.JkException;
+import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 /**

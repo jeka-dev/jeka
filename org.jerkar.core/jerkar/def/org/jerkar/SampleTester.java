@@ -1,8 +1,8 @@
 package org.jerkar;
 
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.system.JkProcess;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;

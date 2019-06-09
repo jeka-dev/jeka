@@ -2,16 +2,16 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.*;
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkPathMatcher;
-import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.system.JkException;
-import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 
 import java.lang.reflect.Method;
 import java.nio.file.Files;

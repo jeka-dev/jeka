@@ -3,8 +3,8 @@ package dev.jeka.core.tool.builtins.maven;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.JkRun;
-import org.jerkar.api.system.JkException;
-import org.jerkar.api.tooling.JkPom;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.tooling.JkPom;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

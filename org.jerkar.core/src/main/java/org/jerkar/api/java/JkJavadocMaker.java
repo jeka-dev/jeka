@@ -10,10 +10,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.file.JkPathTreeSet;
-import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;

@@ -1,14 +1,14 @@
 package org.jerkar;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
-import org.jerkar.api.system.JkException;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.system.JkPrompt;
-import org.jerkar.api.tooling.JkGitWrapper;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkPrompt;
+import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;

@@ -1,8 +1,8 @@
 package org.jerkar.api.java;
 
 import dev.jeka.core.api.utils.*;
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLog;
 
 import java.net.MalformedURLException;
 import java.net.URL;

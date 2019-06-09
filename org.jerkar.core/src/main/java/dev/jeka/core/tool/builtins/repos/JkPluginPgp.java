@@ -4,7 +4,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.JkRun;
 import dev.jeka.core.api.crypto.pgp.JkPgp;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Paths;
 

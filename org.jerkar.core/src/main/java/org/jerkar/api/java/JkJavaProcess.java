@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import dev.jeka.core.api.utils.*;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO.StreamGobbler;
 
 /**

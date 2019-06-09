@@ -5,7 +5,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathSequence;
 import org.jerkar.api.java.project.JkProjectSourceLayout;
 import org.jerkar.api.java.project.JkJavaProject;
 

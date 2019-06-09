@@ -2,8 +2,8 @@ package org.jerkar.api.java.junit;
 
 import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.api.system.JkException;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsTime;

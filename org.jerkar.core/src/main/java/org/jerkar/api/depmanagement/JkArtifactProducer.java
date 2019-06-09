@@ -4,8 +4,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkLog;
 
 
 /**

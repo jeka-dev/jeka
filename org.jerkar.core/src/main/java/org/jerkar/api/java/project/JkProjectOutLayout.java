@@ -1,6 +1,6 @@
 package org.jerkar.api.java.project;
 
-import org.jerkar.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTree;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

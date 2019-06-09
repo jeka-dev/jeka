@@ -11,8 +11,8 @@ import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLog;
 
 
 /**

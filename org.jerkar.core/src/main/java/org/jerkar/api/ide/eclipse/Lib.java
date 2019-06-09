@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLocator;
 
 
 class Lib {

@@ -13,8 +13,8 @@ import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkLocator;
 
 class JUnit4TestLauncher {
 

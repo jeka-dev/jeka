@@ -7,7 +7,7 @@ import dev.jeka.core.tool.JkRun;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathApplier;
 import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 @JkDoc("Use Eclipse .classpath file to setupAfterPluginActivations project structure and dependencies.")
 @JkDocPluginDeps(JkPluginJava.class)

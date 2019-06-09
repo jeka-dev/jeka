@@ -1,6 +1,6 @@
 package org.jerkar.samples;
 
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 class BuildUtility {
 

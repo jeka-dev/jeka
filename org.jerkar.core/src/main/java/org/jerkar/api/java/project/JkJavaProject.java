@@ -1,13 +1,13 @@
 package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkFileSystemLocalizable;
-import org.jerkar.api.file.JkPathMatcher;
-import org.jerkar.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkFileSystemLocalizable;
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.JkManifest;
-import org.jerkar.api.file.JkResourceProcessor;
+import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;

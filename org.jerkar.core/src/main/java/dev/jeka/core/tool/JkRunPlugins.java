@@ -1,6 +1,6 @@
 package dev.jeka.core.tool;
 
-import org.jerkar.api.system.JkException;
+import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.util.*;

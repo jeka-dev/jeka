@@ -15,7 +15,7 @@ import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.apache.ivy.util.ChecksumHelper;
 import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 import java.io.*;
 import java.nio.file.Files;

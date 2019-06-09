@@ -15,13 +15,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkProjectSourceLayout;
 import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;

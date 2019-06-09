@@ -2,7 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 import java.io.PrintStream;
 

@@ -1,7 +1,7 @@
 package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;

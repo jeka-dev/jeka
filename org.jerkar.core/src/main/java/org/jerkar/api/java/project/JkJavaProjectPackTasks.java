@@ -2,11 +2,11 @@ package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.JkArtifactId;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkPathFile;
-import org.jerkar.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathTree;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarPacker;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

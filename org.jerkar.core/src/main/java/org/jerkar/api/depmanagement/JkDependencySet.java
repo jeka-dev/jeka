@@ -2,7 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import dev.jeka.core.api.utils.*;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
-import org.jerkar.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTree;
 
 import java.io.*;
 import java.net.URL;

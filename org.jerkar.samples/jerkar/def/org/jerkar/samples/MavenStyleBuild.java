@@ -3,8 +3,8 @@ package org.jerkar.samples;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepoSet;
-import org.jerkar.api.file.JkPathMatcher;
-import org.jerkar.api.file.JkResourceProcessor;
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.tool.JkRun;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 

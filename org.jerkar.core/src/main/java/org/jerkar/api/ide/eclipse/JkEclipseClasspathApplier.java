@@ -6,10 +6,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import org.jerkar.api.java.project.JkProjectSourceLayout;
 import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.api.system.JkException;
+import dev.jeka.core.api.system.JkException;
 
 /**
  * Provides methods to modify a given {@link JkJavaProject} in order it reflects a given .classpath file.

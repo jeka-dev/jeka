@@ -1,9 +1,9 @@
 package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.function.JkRunnables;
-import org.jerkar.api.system.JkException;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
 import java.time.Instant;

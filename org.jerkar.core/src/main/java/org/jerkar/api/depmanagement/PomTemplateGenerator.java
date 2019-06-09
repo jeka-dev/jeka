@@ -13,7 +13,7 @@ import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkDeveloperInfo;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkLicenseInfo;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkProjectInfo;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkScmInfo;
-import org.jerkar.api.system.JkInfo;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;

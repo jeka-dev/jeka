@@ -3,8 +3,8 @@ package org.jerkar.api.depmanagement;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import org.jerkar.api.file.JkFileSystemLocalizable;
-import org.jerkar.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkFileSystemLocalizable;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 

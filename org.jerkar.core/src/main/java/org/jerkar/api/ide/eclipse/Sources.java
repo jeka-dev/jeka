@@ -1,6 +1,6 @@
 package org.jerkar.api.ide.eclipse;
 
-import org.jerkar.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkPathTreeSet;
 
 class Sources {
 

@@ -2,7 +2,7 @@ package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.java.JkJavadocMaker;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.nio.file.Files;

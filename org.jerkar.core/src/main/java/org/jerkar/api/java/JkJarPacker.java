@@ -1,7 +1,7 @@
 package org.jerkar.api.java;
 
-import org.jerkar.api.file.JkPathTreeSet;
-import org.jerkar.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;

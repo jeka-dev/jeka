@@ -1,7 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import dev.jeka.core.api.crypto.pgp.JkPgp;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Paths;
 import java.time.Instant;

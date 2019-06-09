@@ -1,6 +1,6 @@
 package org.jerkar.api.java.junit;
 
-import org.jerkar.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTree;
 import org.jerkar.api.java.JkClasspath;
 import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;

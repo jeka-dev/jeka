@@ -3,7 +3,7 @@ package dev.jeka.core.api.crypto.pgp;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
-import org.jerkar.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.JkConstants;
 import org.junit.Test;

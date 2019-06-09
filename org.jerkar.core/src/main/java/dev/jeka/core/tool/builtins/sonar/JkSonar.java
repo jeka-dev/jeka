@@ -3,10 +3,10 @@ package dev.jeka.core.tool.builtins.sonar;
 
 import dev.jeka.core.tool.JkConstants;
 import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathFile;
 import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;

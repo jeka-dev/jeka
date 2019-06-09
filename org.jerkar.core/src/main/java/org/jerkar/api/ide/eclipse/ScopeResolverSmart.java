@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 class ScopeResolverSmart implements ScopeResolver {

@@ -2,9 +2,9 @@ package org.jerkar.samples;
 
 import dev.jeka.core.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.file.JkPathTreeSet;
-import org.jerkar.api.file.JkResourceProcessor;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkResourceProcessor;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;

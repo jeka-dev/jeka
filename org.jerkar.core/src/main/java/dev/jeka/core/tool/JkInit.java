@@ -1,8 +1,8 @@
 package dev.jeka.core.tool;
 
-import org.jerkar.api.system.JkInfo;
-import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkInfo;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;

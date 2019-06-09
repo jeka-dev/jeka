@@ -1,17 +1,17 @@
 package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.file.JkPathMatcher;
-import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.file.JkPathTreeSet;
-import org.jerkar.api.function.JkRunnables;
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.function.JkRunnables;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.file.JkResourceProcessor;
+import dev.jeka.core.api.file.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;

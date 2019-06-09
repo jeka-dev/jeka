@@ -33,8 +33,8 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
-import org.jerkar.api.file.JkPathFile;
-import org.jerkar.api.system.JkException;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 

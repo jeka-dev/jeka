@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.system.JkException;
+import dev.jeka.core.api.system.JkException;
 
 /**
  * A class to publish artifacts on repositories. According the nature of the

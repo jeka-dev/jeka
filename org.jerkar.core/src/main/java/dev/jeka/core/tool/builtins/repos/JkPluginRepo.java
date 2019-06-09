@@ -6,7 +6,7 @@ import dev.jeka.core.tool.JkRepoConfigOptionLoader;
 import dev.jeka.core.tool.JkRun;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepoSet;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Map;

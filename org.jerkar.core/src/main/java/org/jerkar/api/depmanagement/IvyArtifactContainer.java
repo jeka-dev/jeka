@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
-import org.jerkar.api.system.JkLog;
+import dev.jeka.core.api.system.JkLog;
 
 /**
  * Created by angibaudj on 20-06-17.
