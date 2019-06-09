@@ -1,18 +1,18 @@
 package dev.jeka.core.api.depmanagement;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 @SuppressWarnings("javadoc")
 public class MavenMetadataTest {
 
     @Test
     public void testupdateSnapshot() throws UnsupportedEncodingException {
-        final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("org.jerkar", "core")
+        final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("dev.jeka", "core")
                 .withVersion("0.1-SNAPSHOT"), "11111111.222222");
         mavenMetadata.updateSnapshot("20151023145532");
         mavenMetadata.addSnapshotVersion("jar", "source");
@@ -31,7 +31,7 @@ public class MavenMetadataTest {
 
     @Test
     public void testAddRelease() throws UnsupportedEncodingException {
-        final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("org.jerkar", "core"));
+        final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("dev.jeka", "core"));
         mavenMetadata.addVersion("1.3.2", "20151023145532");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         mavenMetadata.output(outputStream);
@@ -47,7 +47,7 @@ public class MavenMetadataTest {
 
     @Test
     public void testAddSnapshot() throws UnsupportedEncodingException {
-        final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("org.jerkar", "core"));
+        final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("dev.jeka", "core"));
         mavenMetadata.addVersion("1.3.2-SNAPSHOT", "20151023145532");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         mavenMetadata.output(outputStream);

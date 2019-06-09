@@ -13,7 +13,7 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
  * A dependency along a scope information to specify for wich purpose it should be used.
  * A scoped dependency can be declared either with {@link JkScope}s nor {@link JkScopeMapping}.
  *
- * Jerkar uses Ivy under the hood for dependency resolution. Internally {@link JkScope} are turned to Ivy 'configuration'
+ * Jeka uses Ivy under the hood for dependency resolution. Internally {@link JkScope} are turned to Ivy 'configuration'
  * and {@link JkScopeMapping} are turned to Ivy 'configurationMapping'.
  *
  * To understand how scope and mapping scope influence resolution, you can visit <a href="http://ant.apache.org/ivy/history/latest-milestone/ivyfile/configurations.html">this page</a>.

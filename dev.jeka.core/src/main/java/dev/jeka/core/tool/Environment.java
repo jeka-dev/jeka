@@ -55,7 +55,7 @@ class Environment {
 
     private static Map<String, String> userSystemProperties() {
         final Map<String, String> result = new HashMap<>();
-        final Path userPropFile = JkLocator.getJerkarUserHomeDir().resolve("ofSystem.properties");
+        final Path userPropFile = JkLocator.getJekaUserHomeDir().resolve("ofSystem.properties");
         if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }
@@ -65,7 +65,7 @@ class Environment {
 
     private static Map<String, String> getSpecifiedSystemProps() {
         final Map<String, String> result = new TreeMap<>();
-        final Path propFile = JkLocator.getJerkarHomeDir().resolve("ofSystem.properties");
+        final Path propFile = JkLocator.getJekaHomeDir().resolve("ofSystem.properties");
         if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }

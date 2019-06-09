@@ -1,17 +1,20 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.utils.JkUtilsFile;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.*;
-
-import dev.jeka.core.api.utils.JkUtilsFile;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.system.JkLocator;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository
@@ -141,10 +144,10 @@ public final class JkRepo implements Serializable {
 
 
     /**
-     * Creates a Maven repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
+     * Creates a Maven repository for publishing locally under <code></code>[USER HOME]/.jeka/publish</code> folder.
      */
     public static JkRepo ofLocal() {
-        final Path file = JkLocator.getJerkarUserHomeDir().resolve("maven-publish-dir");
+        final Path file = JkLocator.getJekaUserHomeDir().resolve("maven-publish-dir");
         return JkRepo.ofMaven(file);
     }
 

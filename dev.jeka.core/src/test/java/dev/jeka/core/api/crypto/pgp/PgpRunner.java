@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 
 public class PgpRunner {
 
-    private static final String PGPUTILS_CLASS_NAME = "org.jerkar.api.crypto.pgp.PgpUtils";
+    private static final String PGPUTILS_CLASS_NAME = "dev.jeka.core.api.crypto.pgp.PgpUtils";
 
     public static void main(String[] args) throws Exception {
         System.out.println("ttt".startsWith(""));

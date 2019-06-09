@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @JkDocPluginDeps(JkPluginScaffold.class)
 public final class JkPluginIntellij extends JkPlugin {
 
-    @JkDoc("If true, dependency paths will be expressed relatively to $JERKAR_REPO$ and $JERKAR_HOME$ path variable instead of absolute paths.")
+    @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")
     public boolean useVarPath = true;
 
     @JkDoc("If true, the project taken in account is not the run project but the project configured in java plugin.")

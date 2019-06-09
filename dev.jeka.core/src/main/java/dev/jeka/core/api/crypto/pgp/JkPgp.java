@@ -1,5 +1,10 @@
 package dev.jeka.core.api.crypto.pgp;
 
+import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -7,11 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.UnaryOperator;
-
-import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 
 /**
  * Provides method for signing and verify signature with PGP.
@@ -42,7 +42,7 @@ public final class JkPgp implements Serializable {
         this.password = password;
     }
 
-    // We don't want to add Bouncycastle in the Jerkar classpath, so we create a
+    // We don't want to add Bouncycastle in the Jeka classpath, so we create a
     // specific classloader just for launching the Bouncy castle methods.
     private static final Class<?> PGPUTILS_CLASS = JkUrlClassLoader.ofCurrent()
             .getSiblingWithOptional(JkPgp.class.getResource("bouncycastle-pgp-152.jar"))

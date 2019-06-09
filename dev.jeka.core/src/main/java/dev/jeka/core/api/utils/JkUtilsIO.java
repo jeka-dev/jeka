@@ -193,7 +193,7 @@ public final class JkUtilsIO {
 
     /**
      * Copies the content of an url in a cache file. The cached file path will
-     * be [jerkar user dir]/cache/url-contents/[last segment of the url (after
+     * be [jeka user dir]/cache/url-contents/[last segment of the url (after
      * last '/')]. If the file already exist than the content of the url is not
      * copied and the file is directly returned.
      */

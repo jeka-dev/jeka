@@ -44,7 +44,7 @@ public class JkPluginWar extends JkPlugin {
         JkArtifactId warArtifactId = JkArtifactId.of(null, "war");
         maker.addArtifact(warArtifactId, () -> {
             staticResourceComputation.run();
-            Path temp = JkUtilsPath.createTempDirectory("jerkar-war");
+            Path temp = JkUtilsPath.createTempDirectory("jeka-war");
             generateWarDir(project, temp, staticResourceDir);
             JkPathTree.of(temp).zipTo(maker.getArtifactPath(warArtifactId));
             JkPathTree.of(temp).deleteRoot();

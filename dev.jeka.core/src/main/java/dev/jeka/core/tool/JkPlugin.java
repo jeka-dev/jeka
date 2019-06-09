@@ -6,7 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  * Plugin instances are owned by a JkRun instance. The relationship is bidirectional. JkRun instances may
  * invoke plugin methods or fields and plugin instances may invoke owner methods.
  *
- * Therefore plugins can interact with or load other plugins into the owner instance, which is quite common in Jerkar.
+ * Therefore plugins can interact with or load other plugins into the owner instance, which is quite common in Jeka.
  */
 public abstract class JkPlugin {
 

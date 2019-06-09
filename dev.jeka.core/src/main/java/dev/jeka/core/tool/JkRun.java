@@ -16,7 +16,7 @@ import dev.jeka.core.api.system.JkLog;
 
 
 /**
- * Base class for defining runs. All run classes must extend this class in order to be run with Jerkar.
+ * Base class for defining runs. All run classes must extend this class in order to be run with Jeka.
  *
  * @author Jerome Angibaud
  */

@@ -19,7 +19,7 @@ final class IvyClassloader {
         if (JkClassLoader.ofCurrent().isDefined(IVY_CLASS_NAME)) {
             return JkClassLoader.ofCurrent();
         }
-        // We can not just create a new url classloader on top of the current one cause Jerkar classes expect to
+        // We can not just create a new url classloader on top of the current one cause Jeka classes expect to
         // load Ivy classes.
         return JkUrlClassLoader.ofCurrent().getSibling(IvyClassloader.class.getResource(IVY_JAR_NAME)).toJkClassLoader();
     }

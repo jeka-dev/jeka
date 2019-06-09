@@ -1,27 +1,26 @@
 package dev.jeka.core;
 
+import dev.jeka.core.api.java.JkUrlClassLoader;
+import jdepend.framework.JDepend;
+import jdepend.framework.JavaClass;
+import jdepend.framework.JavaPackage;
+import jdepend.framework.PackageFilter;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import dev.jeka.core.api.java.JkUrlClassLoader;
-import org.junit.Assert;
-import org.junit.Test;
-
-import jdepend.framework.JDepend;
-import jdepend.framework.JavaClass;
-import jdepend.framework.JavaPackage;
-import jdepend.framework.PackageFilter;
-
 @SuppressWarnings("javadoc")
-public class PackageDependency {
+public class PackageDependencyTest {
 
     @Test
     public void testDependencies() throws IOException {
-        final String packagePrefix = "org.jerkar";
-        final File classDir = JkUrlClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("Main").toFile();
+        final String packagePrefix = "dev.jeka.core";
+        final File classDir = JkUrlClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("dev.jeka.core.tool.Main").toFile();
         final String cycle = PackageAnalyser.of(classDir, packagePrefix).cycle();
         Assert.assertTrue(cycle, cycle == null);
     }

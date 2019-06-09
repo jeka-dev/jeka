@@ -57,7 +57,7 @@ class JUnit4TestLauncher {
             args.add(clazz.getName());
         }
         final JkJavaProcess process;
-        process = javaProcess.andClasspath(JkClasspath.of(JkLocator.getJerkarJarPath()));
+        process = javaProcess.andClasspath(JkClasspath.of(JkLocator.getJekaJarPath()));
         process.runClassSync(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
         return (JkTestSuiteResult) JkUtilsIO.deserialize(file);
     }
@@ -70,7 +70,7 @@ class JUnit4TestLauncher {
                                                     JunitReportDetail reportDetail, File reportDir) {
         final JkUrlClassLoader classloader = JkUrlClassLoader.ofLoaderOf(classes.iterator().next());
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
-        classloader.addEntries(JkLocator.getJerkarJarPath());
+        classloader.addEntries(JkLocator.getJekaJarPath());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             JkLog.trace("Launching test using class loader : " + classloader);
         }

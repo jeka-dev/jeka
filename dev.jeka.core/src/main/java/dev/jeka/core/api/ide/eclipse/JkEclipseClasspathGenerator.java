@@ -55,7 +55,7 @@ public final class JkEclipseClasspathGenerator {
     private String jreContainer;
 
     /**
-     * Use JERKAR_REPO and JERKAR_HOME variable instead of absolute path
+     * Use JEKA_REPO and JEKA_HOME variable instead of absolute path
      */
     private boolean usePathVariables;
 
@@ -118,7 +118,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     /**
-     * If <code>true</code> dependencies path will use JERKAR_HOME and JERKAR_REPO classpath variable instead of absolute paths.
+     * If <code>true</code> dependencies path will use JEKA_HOME and JEKA_REPO classpath variable instead of absolute paths.
      */
     public JkEclipseClasspathGenerator setUsePathVariables(boolean usePathVariables) {
         this.usePathVariables = usePathVariables;
@@ -396,12 +396,12 @@ public final class JkEclipseClasspathGenerator {
         if (!paths.add(binPath)) {
             return;
         }
-        boolean useRepoVariable = usePathVariables && bin.startsWith(JkLocator.getJerkarRepositoryCache());
+        boolean useRepoVariable = usePathVariables && bin.startsWith(JkLocator.getJekaRepositoryCache());
         boolean isVar = true;
         if (useRepoVariable) {
-            binPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.getJerkarRepositoryCache().relativize(bin).toString();
-        } else if (usePathVariables && bin.startsWith(JkLocator.getJerkarHomeDir())) {
-            binPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.getJerkarHomeDir().relativize(bin).toString();
+            binPath = DotClasspathModel.JEKA_REPO + "/" + JkLocator.getJekaRepositoryCache().relativize(bin).toString();
+        } else if (usePathVariables && bin.startsWith(JkLocator.getJekaHomeDir())) {
+            binPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
         } else {
             isVar = false;
             binPath = sourceLayout.getBaseDir().relativize(bin).toString();
@@ -420,10 +420,10 @@ public final class JkEclipseClasspathGenerator {
         writer.writeAttribute("exported", "true");
         if (source != null && Files.exists(source)) {
             String srcPath;
-            if (usePathVariables && source.startsWith(JkLocator.getJerkarRepositoryCache())) {
-                srcPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.getJerkarRepositoryCache().relativize(source).toString();
-            } else if (usePathVariables && source.startsWith(JkLocator.getJerkarHomeDir())) {
-                srcPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.getJerkarHomeDir().relativize(source).toString();
+            if (usePathVariables && source.startsWith(JkLocator.getJekaRepositoryCache())) {
+                srcPath = DotClasspathModel.JEKA_REPO + "/" + JkLocator.getJekaRepositoryCache().relativize(source).toString();
+            } else if (usePathVariables && source.startsWith(JkLocator.getJekaHomeDir())) {
+                srcPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(source).toString();
             }else {
                 srcPath = sourceLayout.getBaseDir().relativize(source).toString();
             }

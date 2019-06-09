@@ -98,8 +98,6 @@ public final class JkPopularModules {
 
     public static final JkModuleId GLIB = JkModuleId.of("cglib", "cglib");
 
-    public static final JkModuleId JERKAR_CORE = JkModuleId.of("org.jerkar", "core");
-
     public static final JkModuleId JODA_TIME = JkModuleId.of("joda-time", "joda-time");
 
     public static final JkModuleId APACHE_HTTP_CLIENT = JkModuleId.of("org.apache.httpcomponents", "httpclient");

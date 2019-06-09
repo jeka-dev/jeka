@@ -12,7 +12,7 @@ public class JkJavaCompilerRunner {
         System.out.println(ToolProvider.getSystemJavaCompiler().getSourceVersions());
 
         JkJavaCompiler.ofJdk().compile(JkJavaCompileSpec.of()
-                .setOutputDir(Paths.get("jerkar/output/bin"))
+                .setOutputDir(Paths.get("jeka/output/bin"))
                 .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V6.get()));
     }
 

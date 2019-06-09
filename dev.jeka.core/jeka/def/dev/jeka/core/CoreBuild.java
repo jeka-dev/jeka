@@ -73,7 +73,7 @@ public class CoreBuild extends JkRun {
 
         // Use embedded secret ring protected by a passphrase to deploy releases on ossrh
         JkPluginPgp pgpPlugin = getPlugins().get(JkPluginPgp.class);
-        pgpPlugin.secretRingPath = getBaseDir().resolve("jerkar/secring.gpg").toString();
+        pgpPlugin.secretRingPath = getBaseDir().resolve("jeka/secring.gpg").toString();
     }
 
     @Override

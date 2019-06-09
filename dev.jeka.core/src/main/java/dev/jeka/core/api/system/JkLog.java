@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * Provides static methods for logging events. <p>
  *
  * Events are simply forwarded to an event consumer which has the responsibility to handle it. A basic handler may
- * simply displays event on the console. That is the case for the Jerkar tool.
+ * simply displays event on the console. That is the case for the Jeka tool.
  * By default, logging events turns in a no-op.<p>
  *
  * This class provides task concept for hierarchical log. A log event happening during a task will be assigned a nested

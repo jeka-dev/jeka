@@ -55,7 +55,7 @@ public class JkRepoConfigOptionLoader {
     }
 
     /**
-     * Returns the repositories where are downloaded dependencies needed to execute the Jerkar run.
+     * Returns the repositories where are downloaded dependencies needed to execute the Jeka run.
      */
     public static JkRepo runRepository() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.runName"), "run");
@@ -64,7 +64,7 @@ public class JkRepoConfigOptionLoader {
     }
 
     /**
-     * Creates {@link JkRepo} form Jerkar options. the specified repository name
+     * Creates {@link JkRepo} form Jeka options. the specified repository name
      * will be turned to <code>repo.[repoName].url</code>,
      * <code>repo.[repoName].username</code> and
      * <code>repo.[repoName].password</code> options for creating according

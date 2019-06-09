@@ -27,9 +27,9 @@ final class DotClasspathModel {
 
     static final String CLASSPATHENTRY = "classpathentry";
 
-    static final String JERKAR_HOME = "JERKAR_HOME";
+    static final String JEKA_HOME = "JEKA_HOME";
 
-    static final String JERKAR_REPO = "JERKAR_REPO";
+    static final String JEKA_REPO = "JEKA_REPO";
 
     private final List<ClasspathEntry> classpathentries = new LinkedList<>();
 
@@ -117,10 +117,10 @@ final class DotClasspathModel {
             } else if (classpathEntry.kind.equals(ClasspathEntry.Kind.VAR)) {
                 final String var = JkUtilsString.substringBeforeFirst(classpathEntry.path, "/");
                 final String varFile;
-                if (JERKAR_HOME.equals(var)) {
-                    varFile = JkLocator.getJerkarHomeDir().toAbsolutePath().normalize().toString();
-                } else if (JERKAR_REPO.equals(var)) {
-                    varFile = JkLocator.getJerkarRepositoryCache().normalize().toString();
+                if (JEKA_HOME.equals(var)) {
+                    varFile = JkLocator.getJekaHomeDir().toAbsolutePath().normalize().toString();
+                } else if (JEKA_REPO.equals(var)) {
+                    varFile = JkLocator.getJekaRepositoryCache().normalize().toString();
                 } else {
                     final String optionName = OPTION_VAR_PREFIX + var;
                     varFile = JkOptions.get(optionName);
@@ -131,7 +131,7 @@ final class DotClasspathModel {
                                         + ". It is needed in order to build this project as it is mentionned andAccept Eclipse .classpath."
                                         + " Please set this option either in command line as -"
                                         + optionName
-                                        + "=/absolute/path/for/this/var or in [jerkar_home]/options.properties");
+                                        + "=/absolute/path/for/this/var or in [jeka_home]/options.properties");
                     }
                 }
 

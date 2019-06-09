@@ -1,14 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.StringWriter;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-
 import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo.JkDeveloperInfo;
 import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo.JkLicenseInfo;
 import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo.JkProjectInfo;
@@ -18,11 +9,19 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.StringWriter;
+import java.nio.file.Path;
+import java.util.List;
+
 final class PomTemplateGenerator {
 
-    private static final String TOKEN = "____jerkar.maven.extraInfo____";
+    private static final String TOKEN = "____jeka.maven.extraInfo____";
 
-    private static final String VERSION_TOKEN = "____jerkarVersion____";
+    private static final String VERSION_TOKEN = "____jekaVersion____";
 
     public static Path generateTemplate(JkMavenPublicationInfo publicationInfo) {
         final String firstTemplate = JkUtilsIO.read(PomTemplateGenerator.class
@@ -34,9 +33,9 @@ final class PomTemplateGenerator {
             throw new RuntimeException(e);
         }
         String completeTemplate = firstTemplate.replace(TOKEN, extraXml);
-        final String jerkarVersion = JkUtilsObject.firstNonNull(JkInfo.getJerkarVersion(), "Development version");
-        completeTemplate = completeTemplate.replace(VERSION_TOKEN, jerkarVersion);
-        final Path result = JkUtilsPath.createTempFile("jerkar-pom", ".template");
+        final String JekaVersion = JkUtilsObject.firstNonNull(JkInfo.getJekaVersion(), "Development version");
+        completeTemplate = completeTemplate.replace(VERSION_TOKEN, JekaVersion);
+        final Path result = JkUtilsPath.createTempFile("jeka-pom", ".template");
         JkUtilsPath.write(result, completeTemplate.getBytes());
         return result;
     }

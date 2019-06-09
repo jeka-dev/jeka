@@ -201,7 +201,7 @@ final class ProjectDef {
     }
 
     /**
-     * Definition of method in a given class that can be called by Jerkar.
+     * Definition of method in a given class that can be called by Jeka.
      *
      * @author Jerome Angibaud
      */

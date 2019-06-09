@@ -1,12 +1,12 @@
 package dev.jeka.core.api.crypto.pgp;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import dev.jeka.core.tool.JkConstants;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @SuppressWarnings("javadoc")
 public class JkPgpTest {

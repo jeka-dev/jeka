@@ -1,10 +1,10 @@
-package org.jerkar;
+package dev.jeka.core;
 import org.apache.ivy.util.StringUtils;
-import org.jerkar.api.depmanagement.JkDependencies;
+import dev.jeka.core.api.depmanagement.JkDependencies;
 import JkScope;
 import JkVersion;
-import org.jerkar.api.publishing.JkIvyPublication;
-import org.jerkar.api.publishing.JkMavenPublication;
+import dev.jeka.core.api.publishing.JkIvyPublication;
+import dev.jeka.core.api.publishing.JkMavenPublication;
 import JkUtilsIterable;
 
 /**

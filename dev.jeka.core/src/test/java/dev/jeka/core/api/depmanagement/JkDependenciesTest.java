@@ -46,7 +46,7 @@ public class JkDependenciesTest {
 
     @Test
     public void onProject() throws IOException {
-        Path root = Files.createTempDirectory("jerkartestproject");
+        Path root = Files.createTempDirectory("jekatestproject");
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(root);
         JkDependencySet dependencies = JkDependencySet.of().and(javaProject);
         JkComputedDependency computedDependency = (JkComputedDependency) dependencies.toList().get(0).getDependency();

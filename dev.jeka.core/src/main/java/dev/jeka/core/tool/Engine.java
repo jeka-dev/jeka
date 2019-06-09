@@ -21,11 +21,11 @@ import java.util.*;
 
 /**
  * Engine having responsibility of compiling run classes, instantiate and run them.<br/>
- * Run class sources are expected to lie in [project base dir]/jerkar/def <br/>
+ * Run class sources are expected to lie in [project base dir]/jeka/def <br/>
  * Classes having simple name starting with '_' are ignored.
  *
  * Run classes can have dependencies on jars : <ul>
- *     <li>located in [base dir]/jerkar/boot directory</li>
+ *     <li>located in [base dir]/jeka/boot directory</li>
  *     <li>declared in {@link JkImport} annotation</li>
  * </ul>
  */
@@ -88,10 +88,10 @@ final class Engine {
         jkRun.getImportedRuns().setImportedRunRoots(this.rootOfImportedRuns);
         if (jkRun == null) {
             throw new JkException("Can't find or guess any run class for project hosted in " + this.projectBaseDir
-                    + " .\nAre you sure this directory is a Jerkar project ?");
+                    + " .\nAre you sure this directory is a Jeka project ?");
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        JkLog.info("Jerkar run is ready to start.");
+        JkLog.info("Jeka run is ready to start.");
         JkLog.setVerbosity(verbosityToRestore);
         try {
             this.launch(jkRun, commandLine);
@@ -165,12 +165,12 @@ final class Engine {
 
     private JkDependencySet computeRunDependencies() {
 
-        // If true, we assume Jerkar is provided by IDE (development mode)
-        final boolean devMode = Files.isDirectory(JkLocator.getJerkarJarPath());
+        // If true, we assume Jeka is provided by IDE (development mode)
+        final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
         return JkDependencySet.of(runDependencies
                 .andFiles(localRunPath())
                 .andFiles(JkClasspath.ofCurrentRuntime()).withoutLastIf(!devMode)
-                .andFiles(jerkarLibs()).withoutLastIf(devMode)
+                .andFiles(jekaLibs()).withoutLastIf(devMode)
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT));
     }
 
@@ -203,7 +203,7 @@ final class Engine {
             JkJavaCompiler.ofJdk().compile(compileSpec);
         } catch (JkException e) {
             JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
-            JkLog.info("Compilation of Jerkar files failed. You can run jerkar -RC=JkRun to use default Jerkar files" +
+            JkLog.info("Compilation of Jeka files failed. You can run jeka -RC=JkRun to use default Jeka files" +
                     " instead of the ones located in this project.");
             throw e;
         }
@@ -236,9 +236,9 @@ final class Engine {
         return JkDependencyResolver.of();
     }
 
-    private static JkPathSequence jerkarLibs() {
+    private static JkPathSequence jekaLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
-        extraLibs.add(JkLocator.getJerkarJarPath());
+        extraLibs.add(JkLocator.getJekaJarPath());
         return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 

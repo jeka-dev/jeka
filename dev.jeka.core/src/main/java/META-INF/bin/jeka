@@ -1,11 +1,11 @@
 #!/bin/sh
 
-if [ -z "$JERKAR_OPTS" ] ; then
-  export "JERKAR_OPTS= "
+if [ -z "$Jeka_OPTS" ] ; then
+  export "JEKA_OPTS= "
 fi
 
-if [ -n "$JERKAR_JDK" ] ; then
-  export JAVA_HOME=$JERKAR_JDK
+if [ -n "$JEKA_JDK" ] ; then
+  export JAVA_HOME=$JEKA_JDK
 fi
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -56,8 +56,8 @@ if [ -z "$JAVA_HOME" ] ; then
   fi
 fi
 
-if [ -z "$JERKAR_HOME" ] ; then
-  ## resolve links - $0 may be a link to jerkar's home
+if [ -z "$JEKA_HOME" ] ; then
+  ## resolve links - $0 may be a link to jeka's home
   PRG="$0"
 
   # need this for relative symlinks
@@ -73,18 +73,18 @@ if [ -z "$JERKAR_HOME" ] ; then
 
   saveddir=`pwd`
 
-  JERKAR_HOME=`dirname "$PRG"`
+  JEKA_HOME=`dirname "$PRG"`
 
   # make it fully qualified
-  JERKAR_HOME=`cd "$JERKAR_HOME" && pwd`
+  JEKA_HOME=`cd "$JEKA_HOME" && pwd`
 
   cd "$saveddir"
 fi
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
-  [ -n "$JERKAR_HOME" ] &&
-    JERKAR_HOME=`cygpath --unix "$JERKAR_HOME"`
+  [ -n "$JEKA_HOME" ] &&
+    JEKA_HOME=`cygpath --unix "$JEKA_HOME"`
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
   [ -n "$CLASSPATH" ] &&
@@ -93,8 +93,8 @@ fi
 
 # For Migwn, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
-  [ -n "$JERKAR_HOME" ] &&
-    JERKAR_HOME="`(cd "$JERKAR_HOME"; pwd)`"
+  [ -n "$JEKA_HOME" ] &&
+    JEKA_HOME="`(cd "$JEKA_HOME"; pwd)`"
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
   # TODO classpath?
@@ -131,7 +131,7 @@ fi
 if [ ! -x "$JAVACMD" ] ; then
   echo "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )." >&2
   echo "  We cannot execute $JAVACMD" >&2
-  echo "  You can specify which JDK to use by setting JERKAR_JDK environment variable." >&2
+  echo "  You can specify which JDK to use by setting JEKA_JDK environment variable." >&2
   exit 1
 fi
 
@@ -141,8 +141,8 @@ fi
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
-  [ -n "$JERKAR_HOME" ] &&
-    JERKAR_HOME=`cygpath --path --windows "$JERKAR_HOME"`
+  [ -n "$JEKA_HOME" ] &&
+    JEKA_HOME=`cygpath --path --windows "$JEKA_HOME"`
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
   [ -n "$CLASSPATH" ] &&
@@ -151,15 +151,15 @@ fi
 
 # Provide a "standardized" way to retrieve the CLI args that will 
 # work with both Windows and non-Windows executions.
-JERKAR_CMD_LINE_ARGS="$@"
-export JERKAR_CMD_LINE_ARGS
+JEKA_CMD_LINE_ARGS="$@"
+export JEKA_CMD_LINE_ARGS
 
-if [ -d "./jerkar/boot" ]; then
-   LOCAL_BUILD_DIR="./jerkar/boot/*:"
+if [ -d "./jeka/boot" ]; then
+   LOCAL_BUILD_DIR="./jeka/boot/*:"
 else
    LOCAL_BUILD_DIR=""
 fi
 
 exec "$JAVACMD" \
-  $JERKAR_OPTS \
-  -cp "$JERKAR_HOME/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"
+  $JEKA_OPTS \
+  -cp "$JEKA_HOME/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"

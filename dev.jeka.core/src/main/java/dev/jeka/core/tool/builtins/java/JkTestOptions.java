@@ -31,7 +31,7 @@ public final class JkTestOptions {
     @JkDoc("If true, tests System.out and System.err will be displayed on console.")
     public boolean output;
 
-    @JkDoc("If true, Jerkar runs also test classes suffixed with 'IT'. By default Jerkar runs only test classes " +
+    @JkDoc("If true, Jeka runs also test classes suffixed with 'IT'. By default Jeka runs only test classes " +
             " suffixed with 'Test'.")
     public boolean runIT;
 

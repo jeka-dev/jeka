@@ -91,7 +91,7 @@ public class SampleIvyRunner {
 
         }
 
-        final String filePattern = new File("jerkar/output/downloaded-libs").getAbsolutePath()
+        final String filePattern = new File("jeka/output/downloaded-libs").getAbsolutePath()
                 + "/[artifact](-[classifier]).[ext]";
         final RetrieveOptions retrieveOptions = new RetrieveOptions()
         .setConfs(new String[] { "default" });

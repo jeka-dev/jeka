@@ -1,10 +1,5 @@
 package dev.jeka.core.tool;
 
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
 import dev.jeka.core.api.system.JkLog;
@@ -12,15 +7,20 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
 /**
- * Main class for launching Jerkar from command line.
+ * Main class for launching Jeka from command line.
  *
  * @author Jerome Angibaud
  */
 public final class Main {
 
     /**
-     * Entry point for Jerkar application when launched from command-line
+     * Entry point for Jeka application when launched from command-line
      */
     public static void main(String[] args) throws Exception {
         final long start = System.nanoTime();
@@ -59,7 +59,7 @@ public final class Main {
     }
 
     /**
-     * Entry point to call Jerkar on a given folder
+     * Entry point to call Jeka on a given folder
      */
     public static void exec(Path projectDir, String... args) {
         final Engine engine = new Engine(projectDir);
@@ -89,7 +89,7 @@ public final class Main {
     }
 
     private static void displayIntro() {
-        final int length = printAscii(false, "jerkar.ascii");
+        final int length = printAscii(false, "jeka.ascii");
         JkLog.info(JkUtilsString.repeat(" ", length) + "The 100% Java build tool.\n");
     }
 

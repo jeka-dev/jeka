@@ -67,7 +67,7 @@ public final class JkImlGenerator {
 
     private boolean forceJdkVersion;
 
-    /* When true, path will be mentioned with $JERKAR_HOME$ and $JERKAR_REPO$ instead of explicit absolute path. */
+    /* When true, path will be mentioned with $JEKA_HOME$ and $JEKA_REPO$ instead of explicit absolute path. */
     private boolean useVarPath;
 
     private final Set<String> paths = new HashSet<>();
@@ -447,12 +447,12 @@ public final class JkImlGenerator {
         String type = jarFile ? "jar" : "file";
         Path basePath  = projectDir;
         String varName = "MODULE_DIR";
-        if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJerkarHomeDir())) {
-            basePath = JkLocator.getJerkarHomeDir();
-            varName = "JERKAR_HOME";
-        } else if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJerkarRepositoryCache())) {
-            basePath = JkLocator.getJerkarRepositoryCache();
-            varName = "JERKAR_REPO";
+        if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJekaHomeDir())) {
+            basePath = JkLocator.getJekaHomeDir();
+            varName = "JEKA_HOME";
+        } else if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJekaRepositoryCache())) {
+            basePath = JkLocator.getJekaRepositoryCache();
+            varName = "JEKA_REPO";
         }
         String result;
         if (file.startsWith(basePath)) {
@@ -533,13 +533,13 @@ public final class JkImlGenerator {
         if (!useVarPath) {
             return path;
         }
-        final String repo = JkLocator.getJerkarRepositoryCache().toAbsolutePath().normalize().toString().replace('\\', '/');
-        final String home = JkLocator.getJerkarHomeDir().toAbsolutePath().normalize().toString().replace('\\', '/');
-        final String result = path.replace(repo, "$JERKAR_REPO$");
+        final String repo = JkLocator.getJekaRepositoryCache().toAbsolutePath().normalize().toString().replace('\\', '/');
+        final String home = JkLocator.getJekaHomeDir().toAbsolutePath().normalize().toString().replace('\\', '/');
+        final String result = path.replace(repo, "$JEKA_REPO$");
         if (!result.equals(path)) {
             return result;
         }
-        return path.replace(home, "$JERKAR_HOME$");
+        return path.replace(home, "$JEKA_HOME$");
     }
 
     private static XMLStreamWriter createWriter(ByteArrayOutputStream fos) {

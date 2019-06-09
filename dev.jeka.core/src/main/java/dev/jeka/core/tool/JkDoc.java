@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Documents the annotated element so that Jerkar can display some information
+ * Documents the annotated element so that Jeka can display some information
  * when 'help' is invoked from command line.
  *
  * @author Jerome Angibaud

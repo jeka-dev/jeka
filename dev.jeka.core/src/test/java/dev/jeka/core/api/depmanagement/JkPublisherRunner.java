@@ -29,7 +29,7 @@ public class JkPublisherRunner {
                         "A project to demonstrate publishing on Jerkar",
                         "http://project.jerkar.org")
                         .andApache2License()
-                        .andDeveloper("djeang", "myemail@gmail.com", "jerkar.org", "http://project.jerkar.org/"));
+                        .andDeveloper("djeang", "myemail@gmail.com", "dev.jeka", "https://jeka.dev/"));
 
         JkRepo repo = JkRepo.ofMaven(Paths.get("mavenrepo"))
                 .withOptionalCredentials("myUserName", "myPassword")

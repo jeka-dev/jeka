@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Contains description for all concrete plugins in current classpath.
  * <p>
- * Jerkar offers a very simple, yet powerful, plugin mechanism.<br/>
+ * Jeka offers a very simple, yet powerful, plugin mechanism.<br/>
  * Basically it offers to discover every classes in the classpath that inherit
  * to a given class and that respect a certain naming convention.<br/>
  * <p>

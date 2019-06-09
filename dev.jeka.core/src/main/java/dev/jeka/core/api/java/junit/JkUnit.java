@@ -282,7 +282,7 @@ public final class JkUnit {
                         result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
             }
             if (JkLog.Verbosity.VERBOSE != JkLog.verbosity() && result.get().getFailureCount() > 0) {
-                JkLog.info("Launch Jerkar in verbose mode to display failure stack traces andAccept console.");
+                JkLog.info("Launch Jeka in verbose mode to display failure stack traces andAccept console.");
             }
             if (reportDetail.equals(JunitReportDetail.BASIC)) {
                 TestReportBuilder.of(result.get()).writeToFileSystem(reportDir);

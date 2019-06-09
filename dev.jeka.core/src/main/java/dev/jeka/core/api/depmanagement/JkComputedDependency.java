@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * generates these files in case one of them misses. <p>
  *
  * This is yet simple but quite powerful mechanism, cause the runnable can be anything as Maven or ANT build
- * of another project, a Jerkar build of another project, ... <p>
+ * of another project, a Jeka build of another project, ... <p>
  *
  * This is the way for creating multi-projet (and multi-techno if desired) builds.
  *

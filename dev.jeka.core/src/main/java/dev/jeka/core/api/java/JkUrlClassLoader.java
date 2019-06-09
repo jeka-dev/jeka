@@ -34,7 +34,7 @@ public final class JkUrlClassLoader {
 
     private static final int CLASS_SUFFIX_LENGTH = CLASS_SUFFIX.length();
 
-    private static Path urlCacheDir = JkLocator.getJerkarUserHomeDir().resolve("cache/url-content");
+    private static Path urlCacheDir = JkLocator.getJekaUserHomeDir().resolve("cache/url-content");
 
     static {
         JkUtilsPath.createDirectories(urlCacheDir);
@@ -91,7 +91,7 @@ public final class JkUrlClassLoader {
     }
 
     /**
-     * Get the directory where are cached urls. For its internal use, Jerkar may
+     * Get the directory where are cached urls. For its internal use, Jeka may
      * copy the the content of an URL to a file. This class manages the central
      * place where those URL are cached.
      */

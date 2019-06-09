@@ -1,5 +1,12 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.*;
+import dev.jeka.core.tool.PluginDictionary.PluginDescription;
+import dev.jeka.core.tool.ProjectDef.RunClassDef;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -7,13 +14,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import dev.jeka.core.api.utils.*;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.tool.PluginDictionary.PluginDescription;
-import dev.jeka.core.tool.ProjectDef.RunClassDef;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 final class HelpDisplayer {
 
@@ -23,9 +23,9 @@ final class HelpDisplayer {
             return;
         }
         StringBuilder sb = new StringBuilder()
-                .append("Usage: \njerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
+                .append("Usage: \njeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
                 .append("Execute the specified methods defined in run class or plugins using the specified options and system properties.\n")
-                .append("Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
+                .append("Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
                 .append("\nAvailable methods and options :\n")
                 .append(RunClassDef.of(jkRun).description("", true));
@@ -36,8 +36,8 @@ final class HelpDisplayer {
         sb.append("\nAvailable plugins in classpath : ").append(JkUtilsString.join(names, ", "))
                 .append(".\n");
 
-        sb.append("\nType 'jerkar [pluginName]#help' to get help on a particular plugin (ex : 'jerkar java#help'). ");
-        sb.append("\nType 'jerkar help -Plugins' to get help on all available plugins in the classpath.\n");
+        sb.append("\nType 'jeka [pluginName]#help' to get help on a particular plugin (ex : 'jeka java#help'). ");
+        sb.append("\nType 'jeka help -Plugins' to get help on all available plugins in the classpath.\n");
         JkLog.info(sb.toString());
     }
 

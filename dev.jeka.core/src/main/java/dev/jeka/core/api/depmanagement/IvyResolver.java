@@ -27,9 +27,9 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * Jerkar users : This class is not part of the public API !!! Please, Use
+ * Jeka users : This class is not part of the public API !!! Please, Use
  * {@link JkDependencyResolver} instead. Ivy wrapper providing high level methods. The
- * API is expressed using Jerkar classes only (mostly free of Ivy classes).
+ * API is expressed using Jeka classes only (mostly free of Ivy classes).
  *
  * @author Jerome Angibaud
  */
@@ -70,7 +70,7 @@ final class IvyResolver implements ModuleDepResolver {
     private static IvySettings ivySettingsOf(JkRepoSet resolveRepos) {
         final IvySettings ivySettings = new IvySettings();
         IvyTranslations.populateIvySettingsWithRepo(ivySettings, resolveRepos);
-        ivySettings.setDefaultCache(JkLocator.getJerkarRepositoryCache().toFile());
+        ivySettings.setDefaultCache(JkLocator.getJekaRepositoryCache().toFile());
         return ivySettings;
     }
 

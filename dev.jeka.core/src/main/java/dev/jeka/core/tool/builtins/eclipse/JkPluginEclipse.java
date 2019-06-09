@@ -85,7 +85,7 @@ public final class JkPluginEclipse extends JkPlugin {
         }
     }
 
-    @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jerkar/def directory are taken in account. See eclipse#generateFiles.")
+    @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jeka/def directory are taken in account. See eclipse#generateFiles.")
     public void generateAll() {
         final Iterable<Path> folders = getRun().getBaseTree()
                 .andMatching(true,"**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)

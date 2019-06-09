@@ -1,4 +1,4 @@
 /**
- * Contains classes for dealing with Jerkar ofSystem.
+ * Contains classes for dealing with Jeka ofSystem.
  */
 package dev.jeka.core.api.system;

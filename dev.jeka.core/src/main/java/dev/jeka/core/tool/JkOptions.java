@@ -17,7 +17,7 @@ import java.util.TreeMap;
  * {@link String}. Parameters are stored in a static field so they are available
  * to everywhere.<br/>
  * To define these values see <a
- * href="http://jerkar.github.io/documentation/latest/reference.html">Jerkar
+ * href="http://jeka.github.io/documentation/latest/reference.html">Jeka
  * Reference Guide section 3.3</a>
  */
 public final class JkOptions {
@@ -104,12 +104,12 @@ public final class JkOptions {
     }
 
     static Map<String, String> readSystemAndUserOptions() {
-        final Path propFile = JkLocator.getJerkarHomeDir().resolve("options.properties");
+        final Path propFile = JkLocator.getJekaHomeDir().resolve("options.properties");
         final Map<String, String> result = new HashMap<>();
         if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }
-        final Path userPropFile = JkLocator.getJerkarUserHomeDir().resolve("options.properties");
+        final Path userPropFile = JkLocator.getJekaUserHomeDir().resolve("options.properties");
         if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }

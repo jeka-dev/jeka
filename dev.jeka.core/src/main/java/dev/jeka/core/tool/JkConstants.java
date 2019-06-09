@@ -6,18 +6,18 @@ package dev.jeka.core.tool;
 public final class JkConstants {
 
     /**
-     * Relative path to the project where Jerkar elements lie.
+     * Relative path to the project where Jeka elements lie.
      */
-    public static final String JERKAR_DIR = "jeka";
+    public static final String JEKA_DIR = "jeka";
 
     /**
      * Relative path to the project base directory where output files are generated.
      */
-    public static final String OUTPUT_PATH = JERKAR_DIR + "/output";
+    public static final String OUTPUT_PATH = JEKA_DIR + "/output";
 
     static final String DEF_BIN_DIR_NAME = "def-classes";
 
-    static final String BOOT_DIR = JERKAR_DIR + "/boot";
+    static final String BOOT_DIR = JEKA_DIR + "/boot";
 
     static final Class<? extends JkRun> DEFAULT_RUN_CLASS = JkRun.class;
 
@@ -32,7 +32,7 @@ public final class JkConstants {
     /**
      * Relative path to the project where the def definition sources lie.
      */
-    public static final String DEF_DIR = JERKAR_DIR + "/def";
+    public static final String DEF_DIR = JEKA_DIR + "/def";
 
 
 

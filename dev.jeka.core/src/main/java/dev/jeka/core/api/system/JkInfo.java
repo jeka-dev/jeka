@@ -8,16 +8,16 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 /**
- * Provides information about Jerkar running instance.
+ * Provides information about Jeka running instance.
  */
 public final class JkInfo {
 
     private static String version;
 
     /**
-     * Returns the current Jerkar version.
+     * Returns the current Jeka version.
      */
-    public static String getJerkarVersion() {
+    public static String getJekaVersion() {
         if (JkUtilsString.isBlank(version)) {
             final Class<?> clazz = JkInfo.class;
             final String className = clazz.getSimpleName() + ".class";

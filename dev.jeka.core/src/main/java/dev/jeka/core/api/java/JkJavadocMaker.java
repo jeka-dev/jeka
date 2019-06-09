@@ -183,7 +183,7 @@ public final class JkJavadocMaker {
             mainClass = classLoader.toJkClassLoader().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
             if (mainClass == null) {
                 throw new RuntimeException(
-                        "It seems that you are running a JRE instead of a JDK, please run Jerkar using a JDK.");
+                        "It seems that you are running a JRE instead of a JDK, please run Jeka using a JDK.");
             }
         }
         return mainClass;

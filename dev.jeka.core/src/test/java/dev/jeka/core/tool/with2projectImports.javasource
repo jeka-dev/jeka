@@ -1,11 +1,11 @@
-package org.jerkar;
+package dev.jeka.core;
 import org.apache.ivy.util.StringUtils;
-import org.jerkar.api.depmanagement.jerkarDependencies;
-import org.jerkar.api.depmanagement.jerkarScope;
-import org.jerkar.api.depmanagement.jerkarVersion;
-import org.jerkar.api.publishing.jerkarIvyPublication;
-import org.jerkar.api.publishing.jerkarMavenPublication;
-import org.jerkar.api.utils.jerkarUtilsIterable;
+import dev.jeka.core.api.depmanagement.jekaDependencies;
+import dev.jeka.core.api.depmanagement.jekaScope;
+import dev.jeka.core.api.depmanagement.jekaVersion;
+import dev.jeka.core.api.publishing.jekaIvyPublication;
+import dev.jeka.core.api.publishing.jekaMavenPublication;
+import dev.jeka.core.api.utils.jekaUtilsIterable;
 
 /**
  * Blalalala

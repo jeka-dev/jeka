@@ -49,14 +49,14 @@ public final class JkScaffolder {
         JkUtilsPath.write(buildClass, buildClassCode.getBytes(Charset.forName("UTF-8")));
         if (embed) {
             JkLog.info("Create shell files.");
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka.bat"), baseTree.getRoot().resolve("jerkar.bat"));
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka"), baseTree.getRoot().resolve("jerkar"));
-            Path jerkarJar = JkLocator.getJerkarJarPath();
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka.bat"), baseTree.getRoot().resolve("jeka.bat"));
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka"), baseTree.getRoot().resolve("jeka"));
+            Path jekaJar = JkLocator.getJekaJarPath();
             Path bootFolder = baseTree.getRoot().resolve("build/boot");
             JkUtilsPath.createDirectories(bootFolder);
-            Path target = bootFolder.resolve(jerkarJar.getFileName());
-            JkLog.info("Copy jerkar jar to " + baseTree.getRoot().relativize(target));
-            JkUtilsPath.copy(jerkarJar, target, StandardCopyOption.REPLACE_EXISTING);
+            Path target = bootFolder.resolve(jekaJar.getFileName());
+            JkLog.info("Copy jeka jar to " + baseTree.getRoot().relativize(target));
+            JkUtilsPath.copy(jekaJar, target, StandardCopyOption.REPLACE_EXISTING);
         }
         extraActions.run();
     }

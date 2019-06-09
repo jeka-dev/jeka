@@ -201,7 +201,7 @@ public final class JkSonar {
 
     private Path jarRunner() {
         Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
-        final Path globalJar = tempDir.resolve("jerkar/" + RUNNER_JAR_NAME_24);
+        final Path globalJar = tempDir.resolve("jeka/" + RUNNER_JAR_NAME_24);
         if (!Files.exists(globalJar)) {
             try {
                 return createRunnerJar(tempDir);

@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies the libraries necessary to compile and run the annotated class as a
- * Jerkar run. It can specify library referenced in a repository (as
+ * Jeka run. It can specify library referenced in a repository (as
  * "com.google.guava:guava:18.0") or file pattern relative to the project
  * directory (as "../lib-folder/mylib.jar").
  *
