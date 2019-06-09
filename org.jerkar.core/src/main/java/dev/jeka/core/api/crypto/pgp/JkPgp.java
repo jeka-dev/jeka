@@ -1,4 +1,4 @@
-package org.jerkar.api.crypto.pgp;
+package dev.jeka.core.api.crypto.pgp;
 
 import java.io.File;
 import java.io.Serializable;
@@ -25,7 +25,7 @@ public final class JkPgp implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PGPUTILS_CLASS_NAME = "org.jerkar.api.crypto.pgp.PgpUtils";
+    private static final String PGPUTILS_CLASS_NAME = "dev.jeka.core.api.crypto.pgp.PgpUtils";
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 

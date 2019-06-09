@@ -1,12 +1,11 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.crypto.pgp.JkPgp;
+import dev.jeka.core.api.crypto.pgp.JkPgp;
 import org.jerkar.api.system.JkLog;
 
 import java.nio.file.Paths;
 import java.time.Instant;
 
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE_AND_RUNTIME;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 

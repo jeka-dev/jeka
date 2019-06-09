@@ -1,4 +1,4 @@
-package org.jerkar.api.crypto.pgp;
+package dev.jeka.core.api.crypto.pgp;
 
 import java.io.InputStream;
 import java.nio.file.Paths;

@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.tool.*;
-import org.jerkar.api.crypto.pgp.JkPgp;
+import dev.jeka.core.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompiler;
