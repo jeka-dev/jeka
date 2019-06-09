@@ -2,12 +2,12 @@ package org.jerkar.samples;
 
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.builtins.java.JkPluginJava;
-import org.jerkar.tool.builtins.sonar.JkPluginSonar;
-import org.jerkar.tool.builtins.sonar.JkSonar;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.sonar.JkPluginSonar;
+import dev.jeka.core.tool.builtins.sonar.JkSonar;
 
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;

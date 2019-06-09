@@ -4,7 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jerkar.tool.JkConstants;
+import dev.jeka.core.tool.JkConstants;
 import org.junit.Assert;
 import org.junit.Test;
 

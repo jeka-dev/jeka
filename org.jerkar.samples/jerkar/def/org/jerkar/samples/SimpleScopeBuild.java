@@ -3,8 +3,8 @@ package org.jerkar.samples;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;

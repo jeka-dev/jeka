@@ -162,4 +162,4 @@ fi
 
 exec "$JAVACMD" \
   $JERKAR_OPTS \
-  -cp "$JERKAR_HOME/dev.jeka.jeka-core.jar" org.jerkar.tool.Main "$@"
+  -cp "$JERKAR_HOME/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"

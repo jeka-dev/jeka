@@ -4,10 +4,10 @@ import com.google.common.base.MoreObjects;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkImport;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkImport;
+import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import java.io.IOException;
 

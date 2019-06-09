@@ -6,10 +6,10 @@ import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
-import org.jerkar.tool.JkImport;
-import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.JkImport;
+import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 

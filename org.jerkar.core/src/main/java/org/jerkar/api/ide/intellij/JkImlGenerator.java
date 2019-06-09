@@ -26,7 +26,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.tool.JkConstants;
+import dev.jeka.core.tool.JkConstants;
 
 /**
  * Provides method to generate and read Eclipse metadata files.

@@ -1,13 +1,11 @@
 package org.jerkar.api.crypto.pgp;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
 import org.jerkar.api.file.JkPathFile;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.tool.JkConstants;
+import dev.jeka.core.tool.JkConstants;
 import org.junit.Test;
 
 @SuppressWarnings("javadoc")

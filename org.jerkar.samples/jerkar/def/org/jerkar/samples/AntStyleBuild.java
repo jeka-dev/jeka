@@ -9,10 +9,10 @@ import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestClasses;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkImport;
-import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkRun;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkImport;
+import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkRun;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;

@@ -9,12 +9,12 @@ import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkPrompt;
 import org.jerkar.api.tooling.JkGitWrapper;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkEnv;
-import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.builtins.java.JkPluginJava;
-import org.jerkar.tool.builtins.repos.JkPluginPgp;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkEnv;
+import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.repos.JkPluginPgp;
 
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;

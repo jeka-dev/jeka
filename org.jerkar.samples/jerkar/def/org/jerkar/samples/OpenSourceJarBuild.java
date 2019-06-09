@@ -2,8 +2,8 @@ package org.jerkar.samples;
 
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;

@@ -1,6 +1,6 @@
 package org.jerkar;
 
-import org.jerkar.tool.JkInit;
+import dev.jeka.core.tool.JkInit;
 
 class RunPublishDocsOnGithubPages {
 

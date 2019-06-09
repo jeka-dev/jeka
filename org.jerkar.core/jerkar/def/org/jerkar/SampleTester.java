@@ -7,8 +7,8 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
-import org.jerkar.tool.JkConstants;
-import org.jerkar.tool.JkInit;
+import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkInit;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

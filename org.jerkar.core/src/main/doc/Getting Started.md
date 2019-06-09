@@ -50,12 +50,12 @@ Specified System Properties : none.
 Standard Options : RunClass=null, LogVerbose=false, LogHeaders=true, LogMaxLength=230
 Options :   LH=null  LML=230  jdk.9=C:/Program Files (x86)/Java/jdk9.0.1 jdk.10=C:/Program Files (x86)/Java/jdk10.0.2  repo.download.url=https://repo.maven.apache.org/maven2/
 Compile and initialise run classes ...
-│ Initializing class org.jerkar.tool.JkRun at C:\Users\djeang\IdeaProjects\jerkar ...
+│ Initializing class JkRun at C:\Users\djeang\IdeaProjects\jerkar ...
 │ │ Run instance initialized with options []
 │ └ Done in 57 milliseconds.
 └ Done in 336 milliseconds.
 Jerkar run is ready to start.
-Method : help on org.jerkar.tool.JkRun
+Method : help on JkRun
 Usage:
 jerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
 
@@ -122,8 +122,8 @@ sample1
 4. Import the project in your IDE. Eveything should be Ok, in particular *Build.java* should compile and execute within your IDE.
 
 ```java
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.JkInit;
+import JkRun;
+import JkInit;
 
 class Build extends JkRun {
 
@@ -141,8 +141,8 @@ Add the following method to the Build java source.
 
 ```java
 import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.JkInit;
+import JkRun;
+import JkInit;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -171,7 +171,7 @@ From class Build :
   Methods :
     displayGoogle : No description available.
 
-From class org.jerkar.tool.JkRun :
+From class JkRun :
   Methods :
     clean : Cleans the output directory except the compiled run classes.
     help : Displays all available methods and options defined for this run class.
@@ -383,9 +383,9 @@ any dependency you need.
 ```Java
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.builtins.java.JkPluginJava;
+import JkInit;
+import JkRun;
+import JkPluginJava;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 

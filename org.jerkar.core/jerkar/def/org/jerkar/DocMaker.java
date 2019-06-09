@@ -6,7 +6,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.JkConstants;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;

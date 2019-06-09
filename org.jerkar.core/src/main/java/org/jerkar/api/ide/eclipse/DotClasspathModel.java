@@ -20,7 +20,7 @@ import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsXml;
 import org.jerkar.api.system.JkException;
-import org.jerkar.tool.JkOptions;
+import dev.jeka.core.tool.JkOptions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

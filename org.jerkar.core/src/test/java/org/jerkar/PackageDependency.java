@@ -21,7 +21,7 @@ public class PackageDependency {
     @Test
     public void testDependencies() throws IOException {
         final String packagePrefix = "org.jerkar";
-        final File classDir = JkUrlClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("org.jerkar.tool.Main").toFile();
+        final File classDir = JkUrlClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("Main").toFile();
         final String cycle = PackageAnalyser.of(classDir, packagePrefix).cycle();
         Assert.assertTrue(cycle, cycle == null);
     }

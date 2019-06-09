@@ -5,8 +5,8 @@ import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkResourceProcessor;
-import org.jerkar.tool.JkRun;
-import org.jerkar.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import java.util.HashMap;
 import java.util.Map;
