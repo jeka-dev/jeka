@@ -1,9 +1,9 @@
 package org.jerkar.api.file;
 
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsThrowable;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsThrowable;
 
 import java.io.IOException;
 import java.io.InputStream;

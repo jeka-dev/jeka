@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
-import org.jerkar.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * Information about excluding artifacts or whole modules.

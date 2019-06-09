@@ -10,8 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsPathTest;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsPathTest;
 import org.junit.Test;
 
 @SuppressWarnings("javadoc")

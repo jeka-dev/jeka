@@ -1,10 +1,7 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
-
-import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Dependencies that can directly provide files without passing by an external medium.

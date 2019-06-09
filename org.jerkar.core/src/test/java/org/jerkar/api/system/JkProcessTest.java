@@ -1,12 +1,10 @@
 package org.jerkar.api.system;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;
 

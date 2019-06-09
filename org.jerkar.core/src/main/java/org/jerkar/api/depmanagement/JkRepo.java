@@ -7,8 +7,11 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 
+import dev.jeka.core.api.utils.JkUtilsFile;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.*;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository

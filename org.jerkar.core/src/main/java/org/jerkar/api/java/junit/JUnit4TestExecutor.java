@@ -4,9 +4,9 @@ import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsTime;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 

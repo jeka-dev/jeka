@@ -7,9 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.system.JkException;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * A dependency on an external module. External modules are supposed to be

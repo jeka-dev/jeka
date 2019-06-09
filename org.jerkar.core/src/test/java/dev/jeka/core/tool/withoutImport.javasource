@@ -5,7 +5,7 @@ import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.publishing.JkIvyPublication;
 import org.jerkar.api.publishing.JkMavenPublication;
-import org.jerkar.api.utils.JkUtilsIterable;
+import JkUtilsIterable;
 
 /**
  * Tututututtutt

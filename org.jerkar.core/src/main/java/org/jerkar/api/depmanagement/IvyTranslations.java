@@ -14,10 +14,10 @@ import org.apache.ivy.plugins.resolver.*;
 import org.apache.ivy.util.url.CredentialsStore;
 import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.lang.reflect.Field;

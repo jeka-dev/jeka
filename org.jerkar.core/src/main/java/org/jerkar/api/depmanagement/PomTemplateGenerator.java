@@ -14,9 +14,9 @@ import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkLicenseInfo;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkProjectInfo;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkScmInfo;
 import org.jerkar.api.system.JkInfo;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 final class PomTemplateGenerator {
 

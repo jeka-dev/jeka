@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.tool.JkDoc;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Standard options for packaging java projects.

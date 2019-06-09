@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jerkar.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * A mapping to scopes to scopes acting when declaring dependencies. The goal of a scope mapping is to determine :<ul>

@@ -1,9 +1,9 @@
 package org.jerkar.api.java;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

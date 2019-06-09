@@ -1,4 +1,4 @@
-package org.jerkar.api.utils;
+package dev.jeka.core.api.utils;
 
 import java.io.File;
 import java.io.IOException;

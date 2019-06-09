@@ -14,8 +14,7 @@ import org.jerkar.api.ide.eclipse.JkEclipseClasspathGenerator;
 import org.jerkar.api.ide.eclipse.JkEclipseProject;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 

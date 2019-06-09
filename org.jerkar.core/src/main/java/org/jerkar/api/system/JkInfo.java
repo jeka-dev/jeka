@@ -1,6 +1,6 @@
 package org.jerkar.api.system;
 
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.net.URL;

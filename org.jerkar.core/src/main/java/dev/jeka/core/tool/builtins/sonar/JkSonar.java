@@ -7,9 +7,9 @@ import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

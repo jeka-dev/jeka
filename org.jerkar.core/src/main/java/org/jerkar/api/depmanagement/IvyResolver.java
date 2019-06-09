@@ -28,9 +28,9 @@ import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.jerkar.api.depmanagement.JkDependencyNode.JkModuleNodeInfo;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsThrowable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsThrowable;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use

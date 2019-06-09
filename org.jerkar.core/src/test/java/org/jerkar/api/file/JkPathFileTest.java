@@ -1,6 +1,5 @@
 package org.jerkar.api.file;
 
-import org.jerkar.api.utils.JkUtilsPath;
 import org.junit.Assert;
 import org.junit.Test;
 

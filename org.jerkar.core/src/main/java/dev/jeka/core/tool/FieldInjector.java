@@ -9,8 +9,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.jerkar.api.system.JkException;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 final class FieldInjector {
 

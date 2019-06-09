@@ -8,7 +8,7 @@ import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.file.JkResourceProcessor;
-import org.jerkar.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;

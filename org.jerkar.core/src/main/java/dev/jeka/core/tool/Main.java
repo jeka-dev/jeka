@@ -8,9 +8,9 @@ import java.util.List;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkHierarchicalConsoleLogHandler;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 /**
  * Main class for launching Jerkar from command line.

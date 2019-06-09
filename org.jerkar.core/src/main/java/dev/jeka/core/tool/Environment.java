@@ -4,8 +4,8 @@ import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkHierarchicalConsoleLogHandler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsFile;
+import dev.jeka.core.api.utils.JkUtilsObject;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

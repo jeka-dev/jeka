@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
 

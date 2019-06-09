@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jerkar.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsReflect;
 
 /**
  * A run class can import one or several run classes. It is an important mechanism to reuse runs across projects.

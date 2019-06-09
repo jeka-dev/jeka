@@ -3,10 +3,7 @@ package org.jerkar.api.depmanagement;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.jerkar.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Test;
 
 @SuppressWarnings("javadoc")

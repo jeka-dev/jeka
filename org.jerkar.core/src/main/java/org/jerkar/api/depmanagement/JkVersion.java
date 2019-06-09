@@ -2,8 +2,8 @@ package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
 
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Used to specify a module version. Versions are comparable.

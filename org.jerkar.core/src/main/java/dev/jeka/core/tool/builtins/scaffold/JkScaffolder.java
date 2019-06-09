@@ -6,8 +6,8 @@ import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;

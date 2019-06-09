@@ -3,7 +3,7 @@ package dev.jeka.core.tool.builtins.scaffold;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.JkRun;
-import org.jerkar.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsIO;
 
 /**
  * Provides method to generate a project skeleton (folder structure, configuration files, ....)

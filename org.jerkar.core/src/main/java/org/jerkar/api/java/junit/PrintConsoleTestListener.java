@@ -3,7 +3,7 @@ package org.jerkar.api.java.junit;
 import java.io.PrintStream;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.JkUtilsTime;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;

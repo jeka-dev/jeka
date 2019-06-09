@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.jerkar.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * Association between getModuleIds and version.

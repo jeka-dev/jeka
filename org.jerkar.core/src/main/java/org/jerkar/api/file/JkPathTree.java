@@ -1,7 +1,7 @@
 package org.jerkar.api.file;
 
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

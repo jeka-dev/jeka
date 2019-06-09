@@ -5,7 +5,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import org.jerkar.api.ide.intellij.JkImlGenerator;
 import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.nio.charset.Charset;

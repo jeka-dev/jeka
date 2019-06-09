@@ -3,8 +3,8 @@ package dev.jeka.core.tool;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkUrlClassLoader;
 import org.jerkar.api.system.JkException;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

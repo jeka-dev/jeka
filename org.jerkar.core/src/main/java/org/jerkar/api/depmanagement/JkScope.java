@@ -9,9 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsJdk;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Defines a context where is defined dependencies of a given project. According

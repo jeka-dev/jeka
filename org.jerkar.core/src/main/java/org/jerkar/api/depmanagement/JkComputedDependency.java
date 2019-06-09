@@ -4,8 +4,8 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

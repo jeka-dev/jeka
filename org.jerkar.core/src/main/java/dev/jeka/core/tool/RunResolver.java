@@ -10,7 +10,7 @@ import java.util.List;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkUrlClassLoader;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * A resolver for the {@link JkRun} to use for a given project.

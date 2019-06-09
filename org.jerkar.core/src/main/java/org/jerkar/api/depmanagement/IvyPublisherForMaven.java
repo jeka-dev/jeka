@@ -1,5 +1,6 @@
 package org.jerkar.api.depmanagement;
 
+import dev.jeka.core.api.utils.*;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleId;
@@ -15,7 +16,6 @@ import org.apache.ivy.util.ChecksumHelper;
 import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.*;
 
 import java.io.*;
 import java.nio.file.Files;

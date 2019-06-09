@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 
 /*

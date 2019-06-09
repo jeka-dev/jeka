@@ -12,9 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import dev.jeka.core.api.utils.*;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.*;
-import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
+import dev.jeka.core.api.utils.JkUtilsIO.StreamGobbler;
 
 /**
  * Offers fluent interface for launching Java processes.

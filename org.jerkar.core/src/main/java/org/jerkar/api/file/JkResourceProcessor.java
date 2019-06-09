@@ -1,8 +1,8 @@
 package org.jerkar.api.file;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 //import java.io.File;
 import java.nio.charset.Charset;

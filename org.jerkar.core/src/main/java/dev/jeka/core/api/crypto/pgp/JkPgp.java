@@ -9,9 +9,9 @@ import java.nio.file.Paths;
 import java.util.function.UnaryOperator;
 
 import org.jerkar.api.java.JkUrlClassLoader;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 /**
  * Provides method for signing and verify signature with PGP.

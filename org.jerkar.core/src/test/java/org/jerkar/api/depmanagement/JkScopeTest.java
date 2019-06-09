@@ -4,7 +4,7 @@ import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.RUNTIME;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.TEST;
 
-import org.jerkar.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
 

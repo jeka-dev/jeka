@@ -4,9 +4,9 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;

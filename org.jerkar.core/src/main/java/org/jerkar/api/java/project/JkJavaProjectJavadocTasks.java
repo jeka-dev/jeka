@@ -3,8 +3,7 @@ package org.jerkar.api.java.project;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.nio.file.Files;
 import java.util.LinkedList;

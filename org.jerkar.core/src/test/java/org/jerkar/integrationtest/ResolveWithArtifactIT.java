@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.Test;
 
 /**

@@ -1,4 +1,4 @@
-package org.jerkar.api.utils;
+package dev.jeka.core.api.utils;
 
 import java.io.*;
 import java.net.URL;
@@ -8,9 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Utility class for dealing with Inputs/Outputs.

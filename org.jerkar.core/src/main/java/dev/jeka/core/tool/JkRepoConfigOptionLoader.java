@@ -2,8 +2,8 @@ package dev.jeka.core.tool;
 
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepoSet;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.HashMap;
 import java.util.Map;

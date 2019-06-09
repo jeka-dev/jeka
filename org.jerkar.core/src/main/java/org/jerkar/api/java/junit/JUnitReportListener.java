@@ -4,7 +4,7 @@ import org.jerkar.api.java.junit.JkTestSuiteResult.JkExceptionDescription;
 import org.jerkar.api.java.junit.JkTestSuiteResult.JkIgnoredCase;
 import org.jerkar.api.java.junit.JkTestSuiteResult.JkTestCaseFailure;
 import org.jerkar.api.java.junit.JkTestSuiteResult.JkTestCaseResult;
-import org.jerkar.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.JkUtilsTime;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;

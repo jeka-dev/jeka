@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Test;
 
 public class ResolverWithScopeMapperIT {

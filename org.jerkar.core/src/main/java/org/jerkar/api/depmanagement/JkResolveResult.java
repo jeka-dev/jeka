@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkException;
-import org.jerkar.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * Result of a module dependency resolution for a given scope.<br/>

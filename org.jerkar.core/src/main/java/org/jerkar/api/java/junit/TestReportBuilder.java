@@ -12,8 +12,8 @@ import javax.xml.stream.XMLStreamWriter;
 import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.java.junit.JkTestSuiteResult.JkIgnoredCase;
 import org.jerkar.api.java.junit.JkTestSuiteResult.JkTestCaseFailure;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 final class TestReportBuilder {
 

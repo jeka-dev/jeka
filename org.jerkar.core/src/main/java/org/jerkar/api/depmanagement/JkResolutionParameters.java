@@ -1,6 +1,6 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.io.Serializable;
 

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
-import org.jerkar.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsObject;
 import org.junit.Test;
 
 /**

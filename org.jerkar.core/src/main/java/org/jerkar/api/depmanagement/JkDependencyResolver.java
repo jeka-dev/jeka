@@ -1,15 +1,14 @@
 package org.jerkar.api.depmanagement;
 
-import static org.jerkar.api.utils.JkUtilsString.plurialize;
+import static dev.jeka.core.api.utils.JkUtilsString.plurialize;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 /**
  * Class to resolve dependencies to files or dependency tree. Resolution is made upon binary repositories.

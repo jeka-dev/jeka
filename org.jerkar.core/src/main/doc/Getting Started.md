@@ -140,7 +140,7 @@ class Build extends JkRun {
 Add the following method to the Build java source.
 
 ```java
-import org.jerkar.api.utils.JkUtilsIO;
+import JkUtilsIO;
 import JkRun;
 import JkInit;
 

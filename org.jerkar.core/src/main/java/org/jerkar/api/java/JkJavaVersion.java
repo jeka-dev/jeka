@@ -1,6 +1,6 @@
 package org.jerkar.api.java;
 
-import org.jerkar.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 /**
  * Java specification version

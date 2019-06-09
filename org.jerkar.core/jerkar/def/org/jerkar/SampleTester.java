@@ -3,10 +3,10 @@ package org.jerkar;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
 

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.jar.Attributes;
 
 import org.jerkar.api.java.JkManifest;
-import org.jerkar.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 /**
  * Identifies a given module in a given version
