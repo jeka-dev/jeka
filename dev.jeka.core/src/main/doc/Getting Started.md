@@ -44,7 +44,7 @@ Jeka Home : C:\Users\djeang\IdeaProjects\jeka\dev.jeka.core\jeka\output\distrib
 Jeka User Home : C:\Users\djeang\.jeka
 Jeka Run Repositories : [https://repo.maven.apache.org/maven2/, file:/C:/Users/djeang/.jeka/maven-publish-dir/]
 Jeka Repository Cache : C:\Users\djeang\.jeka\cache\repo
-Jeka Classpath : C:\Users\djeang\IdeaProjects\jeka\dev.jeka.core\jeka\output\distrib\dev.jeka.core.jar
+Jeka Classpath : C:\Users\djeang\IdeaProjects\jeka\dev.jeka.core\jeka\output\distrib\dev.jeka.jeka-core.jar
 Command Line : -LH help
 Specified System Properties : none.
 Standard Options : RunClass=null, LogVerbose=false, LogHeaders=true, LogMaxLength=230
