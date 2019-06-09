@@ -40,11 +40,11 @@ Working Directory : C:\Users\djeang\IdeaProjects\jeka
 Java Home : C:\Program Files (x86)\Java\jdk1.8.0_121\jre
 Java Version : 1.8.0_121, Oracle Corporation
 Jeka Version : null
-Jeka Home : C:\Users\djeang\IdeaProjects\jeka\org.jeka.core\jeka\output\distrib
+Jeka Home : C:\Users\djeang\IdeaProjects\jeka\dev.jeka.core\jeka\output\distrib
 Jeka User Home : C:\Users\djeang\.jeka
 Jeka Run Repositories : [https://repo.maven.apache.org/maven2/, file:/C:/Users/djeang/.jeka/maven-publish-dir/]
 Jeka Repository Cache : C:\Users\djeang\.jeka\cache\repo
-Jeka Classpath : C:\Users\djeang\IdeaProjects\jeka\org.jeka.core\jeka\output\distrib\org.jeka.core.jar
+Jeka Classpath : C:\Users\djeang\IdeaProjects\jeka\dev.jeka.core\jeka\output\distrib\dev.jeka.core.jar
 Command Line : -LH help
 Specified System Properties : none.
 Standard Options : RunClass=null, LogVerbose=false, LogHeaders=true, LogMaxLength=230
@@ -113,7 +113,7 @@ This will generate a project skeleton as follow :
 ```
 sample1
    + .idea
-       + sample1.iml    <----- Intellij metadata containing project dependencies (At least org.jeka.core)
+       + sample1.iml    <----- Intellij metadata containing project dependencies (At least dev.jeka.core)
    + jeka             
       + def             <-----  Java code that build your project goes here
          + Build.java   
@@ -387,7 +387,7 @@ import JkInit;
 import JkRun;
 import JkPluginJava;
 
-import static org.jeka.api.depmanagement.JkJavaDepScopes.*;
+import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
 
 class Build extends JkRun {
 
