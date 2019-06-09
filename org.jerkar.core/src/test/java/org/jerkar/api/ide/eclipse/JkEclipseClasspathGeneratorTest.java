@@ -15,9 +15,9 @@ import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkScopedDependency;
 import dev.jeka.core.api.file.JkPathTree;
-import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.java.project.JkProjectSourceLayout;
-import org.jerkar.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.java.project.JkJavaProject;
 import org.junit.Test;
 
 // Test on a project structure as Base -> Core -> Desktop

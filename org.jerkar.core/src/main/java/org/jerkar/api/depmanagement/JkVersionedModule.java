@@ -3,7 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.Serializable;
 import java.util.jar.Attributes;
 
-import org.jerkar.api.java.JkManifest;
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 /**

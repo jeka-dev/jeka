@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import org.jerkar.api.java.project.JkProjectSourceLayout;
-import org.jerkar.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkException;
 
 /**

@@ -1,7 +1,7 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 
 final class IvyClassloader {
 

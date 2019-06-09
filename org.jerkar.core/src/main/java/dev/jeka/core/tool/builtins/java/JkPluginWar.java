@@ -7,8 +7,8 @@ import dev.jeka.core.tool.JkRun;
 import org.jerkar.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
-import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.api.java.project.JkJavaProjectMaker;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Path;

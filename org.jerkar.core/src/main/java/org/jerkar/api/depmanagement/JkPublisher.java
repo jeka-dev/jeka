@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-import org.jerkar.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkException;
 
 /**

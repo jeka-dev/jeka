@@ -382,7 +382,7 @@ any dependency you need.
 
 ```Java
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.java.project.JkJavaProject;
+import JkJavaProject;
 import JkInit;
 import JkRun;
 import JkPluginJava;

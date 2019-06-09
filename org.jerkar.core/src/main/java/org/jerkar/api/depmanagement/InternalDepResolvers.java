@@ -1,6 +1,6 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkClassLoader;
 
 class InternalDepResolvers {
 

@@ -8,8 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import dev.jeka.core.api.file.JkPathTree;
-import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 /**

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jerkar.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import org.junit.Assert;
 import org.junit.Test;
 

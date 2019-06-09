@@ -2,9 +2,9 @@ package org.jerkar;
 
 import org.jerkar.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
-import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.api.java.project.JkJavaProjectMaker;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkPrompt;
@@ -20,8 +20,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static org.jerkar.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
-import static org.jerkar.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
+import static dev.jeka.core.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
+import static dev.jeka.core.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
 
 /**
  * Build class for Jerkar. Run main method to create full distrib.

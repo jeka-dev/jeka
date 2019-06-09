@@ -1,7 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import dev.jeka.core.api.file.JkPathTree;
-import org.jerkar.api.java.JkJavaProcess;
+import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIterable;

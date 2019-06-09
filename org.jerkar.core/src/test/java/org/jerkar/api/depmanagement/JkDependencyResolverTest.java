@@ -1,7 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import dev.jeka.core.api.file.JkPathTree;
-import org.jerkar.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Test;

@@ -1,6 +1,6 @@
 package dev.jeka.core.api.crypto.pgp;
 
-import org.jerkar.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.Test;

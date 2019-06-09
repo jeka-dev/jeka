@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.UnaryOperator;
 
-import org.jerkar.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsSystem;

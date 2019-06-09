@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.tool.JkDoc;
-import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
+import dev.jeka.core.api.java.junit.JkUnit.JunitReportDetail;
 
 /**
  * Options about tests

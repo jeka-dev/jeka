@@ -1,6 +1,6 @@
 package dev.jeka.core.tool.builtins.templates.javabuild;
 
-import org.jerkar.api.java.JkManifest;
+import dev.jeka.core.api.java.JkManifest;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,7 +1,7 @@
 package dev.jeka.core.tool;
 
-import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;

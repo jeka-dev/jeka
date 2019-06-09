@@ -1,6 +1,6 @@
 package dev.jeka.core.tool.builtins.jacoco;
 
-import org.jerkar.api.java.junit.JkUnit;
+import dev.jeka.core.api.java.junit.JkUnit;
 import org.junit.Test;
 
 import java.nio.file.Paths;

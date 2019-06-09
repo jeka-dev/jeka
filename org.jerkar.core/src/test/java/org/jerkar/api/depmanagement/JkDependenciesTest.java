@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.jerkar.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;

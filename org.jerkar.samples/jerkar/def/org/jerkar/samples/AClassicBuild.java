@@ -2,10 +2,10 @@ package org.jerkar.samples;
 
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.api.java.project.JkJavaProjectMaker;
+import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkRun;
