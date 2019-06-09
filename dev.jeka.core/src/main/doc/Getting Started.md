@@ -2,30 +2,30 @@
 
 These terms are used in this document, this short lexical disambiguates their meanings.
 
-__[JERKAR HOME]__ : refers to the folder where _Jerkar_ is intalled. You should find _jerkar.bat_ and _jerkar_ shell files directly under this folder.
+__[JEKA HOME]__ : refers to the folder where _Jeka_ is intalled. You should find _jeka.bat_ and _jeka_ shell files directly under this folder.
 
-__[JERKAR USER HOME]__ : refers to the folder where Jerkar stores caches, binary repository and global user configuration.
+__[JEKA USER HOME]__ : refers to the folder where Jeka stores caches, binary repository and global user configuration.
 
 __[USER HOME]__ : User Home within the meaning of Windows or Unix.
 
 
-# Install Jerkar
+# Install Jeka
 
-1. Download and unzip the lastest *core-x.x.x-distrib.zip* file found on [snapshot](https://oss.sonatype.org/content/repositories/snapshots/org/jerkar/core/) or [release](https://repo1.maven.org/maven2/org/jerkar/core/) repository to the directory you want to install Jerkar
+1. Download and unzip the lastest *core-x.x.x-distrib.zip* file found on [snapshot](https://oss.sonatype.org/content/repositories/snapshots/org/jeka/core/) or [release](https://repo1.maven.org/maven2/org/jeka/core/) repository to the directory you want to install Jeka
 2. Make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on.
-   For now, Jerkar only runs with JDK8 (though it can build Java project of any Java version). If your defaulf JDK version is not 8 or your _JAVA_HOME_ environment variable does not point to a JDK8 then add a _JERKAR_JDK_ environment variable pointing on a JDK8 (_JERKAR_JDK_/bin/java must point on a java execuable). 
-3. Add _[JERKAR HOME]_ to your _PATH_ environment variable
-5. execute `jerkar help` in the command line. You should get an output starting by : 
+   For now, Jeka only runs with JDK8 (though it can build Java project of any Java version). If your defaulf JDK version is not 8 or your _JAVA_HOME_ environment variable does not point to a JDK8 then add a _JEKA_JDK_ environment variable pointing on a JDK8 (_JEKA_JDK_/bin/java must point on a java execuable). 
+3. Add _[JEKA HOME]_ to your _PATH_ environment variable
+5. execute `jeka help` in the command line. You should get an output starting by : 
 
 ```
 Usage:
-jerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
+jeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
 
 Execute the specified methods defined in run class or plugins using the specified options and system properties.
-Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
+Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
 ...
 ```
-**Tips:** You can display Jerkar metadata information by adding `-LH` (or `-LogHeaders`) to the command line. You should get the following output.
+**Tips:** You can display Jeka metadata information by adding `-LH` (or `-LogHeaders`) to the command line. You should get the following output.
 ```
  _______           _
 (_______)         | |
@@ -36,31 +36,31 @@ Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyPr
                                      The 100% Java build tool.
 
 
-Working Directory : C:\Users\djeang\IdeaProjects\jerkar
+Working Directory : C:\Users\djeang\IdeaProjects\jeka
 Java Home : C:\Program Files (x86)\Java\jdk1.8.0_121\jre
 Java Version : 1.8.0_121, Oracle Corporation
-Jerkar Version : null
-Jerkar Home : C:\Users\djeang\IdeaProjects\jerkar\org.jerkar.core\jerkar\output\distrib
-Jerkar User Home : C:\Users\djeang\.jerkar
-Jerkar Run Repositories : [https://repo.maven.apache.org/maven2/, file:/C:/Users/djeang/.jerkar/maven-publish-dir/]
-Jerkar Repository Cache : C:\Users\djeang\.jerkar\cache\repo
-Jerkar Classpath : C:\Users\djeang\IdeaProjects\jerkar\org.jerkar.core\jerkar\output\distrib\org.jerkar.core.jar
+Jeka Version : null
+Jeka Home : C:\Users\djeang\IdeaProjects\jeka\org.jeka.core\jeka\output\distrib
+Jeka User Home : C:\Users\djeang\.jeka
+Jeka Run Repositories : [https://repo.maven.apache.org/maven2/, file:/C:/Users/djeang/.jeka/maven-publish-dir/]
+Jeka Repository Cache : C:\Users\djeang\.jeka\cache\repo
+Jeka Classpath : C:\Users\djeang\IdeaProjects\jeka\org.jeka.core\jeka\output\distrib\org.jeka.core.jar
 Command Line : -LH help
 Specified System Properties : none.
 Standard Options : RunClass=null, LogVerbose=false, LogHeaders=true, LogMaxLength=230
 Options :   LH=null  LML=230  jdk.9=C:/Program Files (x86)/Java/jdk9.0.1 jdk.10=C:/Program Files (x86)/Java/jdk10.0.2  repo.download.url=https://repo.maven.apache.org/maven2/
 Compile and initialise run classes ...
-│ Initializing class JkRun at C:\Users\djeang\IdeaProjects\jerkar ...
+│ Initializing class JkRun at C:\Users\djeang\IdeaProjects\jeka ...
 │ │ Run instance initialized with options []
 │ └ Done in 57 milliseconds.
 └ Done in 336 milliseconds.
-Jerkar run is ready to start.
+Jeka run is ready to start.
 Method : help on JkRun
 Usage:
-jerkar (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
+jeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
 
 Execute the specified methods defined in run class or plugins using the specified options and system properties.
-Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
+Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
 ...
 
 Method help succeeded in 660 milliseconds.
@@ -76,15 +76,15 @@ Method help succeeded in 660 milliseconds.
 ```
 # Configure your IDE
 
-For now, there is no valuable Jerkar Visual Plugin for your IDE but you can work pretty well without thanks to Intellij and Eclipse Jerkar plugin whose generating IDE metadata files (.iml and .classpath).
+For now, there is no valuable Jeka Visual Plugin for your IDE but you can work pretty well without thanks to Intellij and Eclipse Jeka plugin whose generating IDE metadata files (.iml and .classpath).
 
-But first you have to instruct your IDE where is located Jerkar distribution and repositories.
+But first you have to instruct your IDE where is located Jeka distribution and repositories.
 
 ## Intellij
 
 Declare the 2 path variables (go settings -> Apparence & behavior -> Path Variables)
- * `JERKAR_HOME` which point to _[Jerkar Home]_, 
- * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_
+ * `JEKA_HOME` which point to _[Jeka Home]_, 
+ * `JEKA_REPO` which point to _[Jeka User Home]/cache/repo_
 
 ## Eclipse 
 Declare the 2 classpath variables in Eclipse.
@@ -92,12 +92,12 @@ Declare the 2 classpath variables in Eclipse.
 1. Open the Eclipse preference window : _Window -> Preferences_
 2. Navigate to the classpath variable panel : _Java -> Build Path -> Classpath Variables_
 3. Add these 2 variables :
-    * `JERKAR_HOME` which point to _[Jerkar Home]_, 
-    * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_.
+    * `JEKA_HOME` which point to _[Jeka Home]_, 
+    * `JEKA_REPO` which point to _[Jeka User Home]/cache/repo_.
     
 ## Note 
-By default _[Jerkar User Home]_ point to _[User Home]/.jerkar_ but can be overridden by defining the environment 
-variable `JERKAR_USER_HOME`. 
+By default _[Jeka User Home]_ point to _[User Home]/.jeka_ but can be overridden by defining the environment 
+variable `JEKA_USER_HOME`. 
 
 
 # Basic automation project
@@ -107,14 +107,14 @@ First, let's create a simple automation project that read content from url and d
 ## Create a project
 
 1. Create the root directory of your project (here 'sample1').
-2. Open a terminal/console and cd to *sample1* directory. Jerkar should be always executed from the root of the project.
-3. Execute `jerkar scaffold#run intellij#` under this directory (replace `intellij#` by `eclipse#` if you're using Eclipse).  
+2. Open a terminal/console and cd to *sample1* directory. Jeka should be always executed from the root of the project.
+3. Execute `jeka scaffold#run intellij#` under this directory (replace `intellij#` by `eclipse#` if you're using Eclipse).  
 This will generate a project skeleton as follow :
 ```
 sample1
    + .idea
-       + sample1.iml    <----- Intellij metadata containing project dependencies (At least org.jerkar.core)
-   + jerkar             
+       + sample1.iml    <----- Intellij metadata containing project dependencies (At least org.jeka.core)
+   + jeka             
       + def             <-----  Java code that build your project goes here
          + Build.java   
       + output          <---- Genererated files are supposed to lie here  
@@ -161,9 +161,9 @@ class Build extends JkRun {
 }
 
 ```
-Open a  console/:terminal in _sample1_ directory and execute `jerkar displayGoogle`. You should see the Google source displayed.
+Open a  console/:terminal in _sample1_ directory and execute `jeka displayGoogle`. You should see the Google source displayed.
 
-Execute `jerkar help` and the output should mention your new method.
+Execute `jeka help` and the output should mention your new method.
 
 ```
 ...
@@ -194,7 +194,7 @@ public void displayGoogle() throws MalformedURLException {
 }
 ```
 
-Execute `jerkar help` and the output should mention doculentation.
+Execute `jeka help` and the output should mention doculentation.
 ```
 From class Build :
   Methods :
@@ -226,9 +226,9 @@ class Build extends JkRun {
 }
 ```
 
-Execute `jerkar displayContent -url=https://github.com/github` and you should see the Github page source displayed.
+Execute `jeka displayContent -url=https://github.com/github` and you should see the Github page source displayed.
 
-If you execute `jerkar help` you should see the url option mentioned.
+If you execute `jeka help` you should see the url option mentioned.
 
 ```
 ...
@@ -254,7 +254,7 @@ class Build extends JkRun {
 }
 ```
 
-2. Execute `jerkar intellij#generateIml` or `jerkar eclipse#generateFiles` to add properly the dependencies to your IDE (You may need to refresh it).
+2. Execute `jeka intellij#generateIml` or `jeka eclipse#generateFiles` to add properly the dependencies to your IDE (You may need to refresh it).
 
 3. You can add code depending on the imported libs
 
@@ -267,14 +267,14 @@ public void post() {
     ...
 }
 ```
-Execute *post* method as usual : `jerkar post`.
+Execute *post* method as usual : `jeka post`.
 
-## Import a Jerkar build from another project
+## Import a Jeka build from another project
 
-Imagine that you want to want to reuse *displayContent* method from project _sample1_ in another Jerkar project named _sample2_. Let's create a new _sample2_ project located in a sibling folder than _sample1_.
+Imagine that you want to want to reuse *displayContent* method from project _sample1_ in another Jeka project named _sample2_. Let's create a new _sample2_ project located in a sibling folder than _sample1_.
 
-1. Execute `mkdir sample2` then `cd sample2` followed by `jerkar scaffold#run intellij#` (or `jerkar scaffold#run eclipse#`)
-2. Rename sample2 _Build_ class 'Sample2Build` to avoid name collision. Be carefull, rename its filename as well unless Jerkar will fail.
+1. Execute `mkdir sample2` then `cd sample2` followed by `jeka scaffold#run intellij#` (or `jeka scaffold#run eclipse#`)
+2. Rename sample2 _Build_ class 'Sample2Build` to avoid name collision. Be carefull, rename its filename as well unless Jeka will fail.
 3. Add a field of type JkRun annotated with `JkImportProject` and the relative path of _sample1_ as value.
  
 ```java
@@ -289,7 +289,7 @@ class Sample2Build extends JkRun {
     
 }
 ```
-4. Execute `jerkar intellij#generateIml` (or `jerkar eclipse#generateFiles`) to add _sample1_ dependencies to your IDE. Now _Sampl2Build_ can refer to the _Build_ class of _sample1_.
+4. Execute `jeka intellij#generateIml` (or `jeka eclipse#generateFiles`) to add _sample1_ dependencies to your IDE. Now _Sampl2Build_ can refer to the _Build_ class of _sample1_.
 
 5. Replace _JkRun_ Type by the _Build_ type from _sample1_ and use it in method implementation.
 
@@ -306,7 +306,7 @@ class Sample2Build extends JkRun {
 
 }
 ```
-Executing `jerkar printUrlContent` displays :
+Executing `jeka printUrlContent` displays :
 
 ```
 Content of https://www.google.com/
@@ -317,7 +317,7 @@ Content of https://www.google.com/
 
 You can set directly the value of the url on the command line as option values are injected on all imported build recursively.
 
-`jerkar printUrlContent -url=https://github.com/github` displays :
+`jeka printUrlContent -url=https://github.com/github` displays :
 
 ```
 Content of https://fr.wikipedia.org
@@ -338,11 +338,11 @@ Except the following mentioned below, there is not known restriction about what 
 
 # Build a Java project
 Now let's start more complicated tasks as building a Java poject. It involves compilation, testing, packaging, dependency resolution, releasing, ...
-There's many option to handle it in Jerkar :
+There's many option to handle it in Jeka :
 
 * Use low level API (similar to ANT tasks)
 * Use high level _JkJavaProject_ API
-* Use Jerkar Java Plugin
+* Use Jeka Java Plugin
 
 The one you choose is a matter of taste, flexibility, verbosity, reusability and integration with existing tools.
 
@@ -354,15 +354,15 @@ _TODO_
 
 _TODO_
 
-## Build Java project using Jerkar Java plugin.
+## Build Java project using Jeka Java plugin.
 
 1. Create the root directory of your project (here 'mygroup.myproject').
-2. Execute `jerkar scaffold#run java#` under this directory. 
+2. Execute `jeka scaffold#run java#` under this directory. 
 This will generate a project skeleton with the following build class at _[PROJECT DIR]/build/def/Build.java_
 
 ```
 mygroup.myproject
-   + jerkar             
+   + jeka             
       + def             <-----  Java code that build your project goes here
          + Build.java   
       + output          <---- Build artifacts are generated here
@@ -387,7 +387,7 @@ import JkInit;
 import JkRun;
 import JkPluginJava;
 
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
+import static org.jeka.api.depmanagement.JkJavaDepScopes.*;
 
 class Build extends JkRun {
 
@@ -415,17 +415,17 @@ class Build extends JkRun {
     
 }
 ```
-Execute `jerkar java#info` to see an abstract of the project setup. 
+Execute `jeka java#info` to see an abstract of the project setup. 
 
 ## Build your project
 
 1. Edit the Build.java source file above. For example, you can add compile dependencies.
-2. Just execute `jerkar clean java#pack` under the project base directory. This will compile, run test and package your project in a jar file. You can also lauch the `main` method from your IDE.
+2. Just execute `jeka clean java#pack` under the project base directory. This will compile, run test and package your project in a jar file. You can also lauch the `main` method from your IDE.
 
 ## Extra function
 
 If you want to create javadoc, jar sources and  jar tests or checksums : 
-just execute `jerkar clean java#pack -java#pack.tests -java#pack.sources -java#pack.checksums=sha-256`.
+just execute `jeka clean java#pack -java#pack.tests -java#pack.sources -java#pack.checksums=sha-256`.
 
 Explanation  '-' prefix means that you want to set an option value. For example `-java#pack.sources` means that 
 `JkPluginJava.pack.sources` will be injected the 'true' value.
@@ -443,8 +443,8 @@ You can also set it by default in the build class constructor :
 
 ## Explore functions and options provided out-of-thebox
 
-Execute `jerkar help` to display all what you can do from the command line for the current project. As told on the help screen,
-you can execute `jerkar aGivenPluginName#help` to display help on a specific plugin. 
-The list of available plugins on the Jerkar classpath is displayed in help screen.
+Execute `jeka help` to display all what you can do from the command line for the current project. As told on the help screen,
+you can execute `jeka aGivenPluginName#help` to display help on a specific plugin. 
+The list of available plugins on the Jeka classpath is displayed in help screen.
 
 
