@@ -1,4 +1,4 @@
-package org.jerkar.api.ide.eclipse;
+package dev.jeka.core.api.ide.eclipse;
 
 import static org.junit.Assert.assertEquals;
 

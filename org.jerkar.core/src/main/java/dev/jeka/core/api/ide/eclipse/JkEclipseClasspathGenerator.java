@@ -1,4 +1,4 @@
-package org.jerkar.api.ide.eclipse;
+package dev.jeka.core.api.ide.eclipse;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

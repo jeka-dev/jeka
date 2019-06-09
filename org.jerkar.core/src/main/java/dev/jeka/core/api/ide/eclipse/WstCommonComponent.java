@@ -1,4 +1,4 @@
-package org.jerkar.api.ide.eclipse;
+package dev.jeka.core.api.ide.eclipse;
 
 
 import java.nio.file.Files;
@@ -10,8 +10,6 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
-import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import dev.jeka.core.api.system.JkLog;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -30,18 +28,18 @@ class WstCommonComponent {
         return new WstCommonComponent(parse(projectDir));
     }
 
-    private final List<ClasspathEntry> dependentModules;
+    private final List<DotClasspathModel.ClasspathEntry> dependentModules;
 
-    private WstCommonComponent(List<ClasspathEntry> files) {
+    private WstCommonComponent(List<DotClasspathModel.ClasspathEntry> files) {
         this.dependentModules = Collections.unmodifiableList(files);
     }
 
-    public List<ClasspathEntry> dependentModules() {
+    public List<DotClasspathModel.ClasspathEntry> dependentModules() {
         return this.dependentModules;
     }
 
-    public boolean contains(ClasspathEntry candidate) {
-        for (final ClasspathEntry entry : this.dependentModules) {
+    public boolean contains(DotClasspathModel.ClasspathEntry candidate) {
+        for (final DotClasspathModel.ClasspathEntry entry : this.dependentModules) {
             if (entry.sameTypeAndPath(candidate)) {
                 return true;
             }
@@ -57,7 +55,7 @@ class WstCommonComponent {
         return projectDir.resolve(FILE);
     }
 
-    private static List<ClasspathEntry> parse(Path projectDir) {
+    private static List<DotClasspathModel.ClasspathEntry> parse(Path projectDir) {
         final Path file = componentFile(projectDir);
         if (!Files.exists(file)) {
             throw new IllegalStateException("Can't find " + FILE);
@@ -79,14 +77,14 @@ class WstCommonComponent {
         }
     }
 
-    private static List<ClasspathEntry> from(Document document) {
+    private static List<DotClasspathModel.ClasspathEntry> from(Document document) {
         final NodeList nodeList = document.getElementsByTagName("dependent-module");
-        final List<ClasspathEntry> result = new LinkedList<>();
+        final List<DotClasspathModel.ClasspathEntry> result = new LinkedList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
             final Element element = (Element) node;
             final String handle = element.getAttribute("handle");
-            final ClasspathEntry entry = handleToFile(handle);
+            final DotClasspathModel.ClasspathEntry entry = handleToFile(handle);
             if (entry != null) {
                 result.add(entry);
             }
@@ -94,14 +92,14 @@ class WstCommonComponent {
         return result;
     }
 
-    private static ClasspathEntry handleToFile(String handle) {
-        final ClasspathEntry result;
+    private static DotClasspathModel.ClasspathEntry handleToFile(String handle) {
+        final DotClasspathModel.ClasspathEntry result;
         if (handle.startsWith(VAR_PREFIX)) {
             final String rest = handle.substring(VAR_PREFIX.length());
-            return ClasspathEntry.of(ClasspathEntry.Kind.VAR, rest);
+            return DotClasspathModel.ClasspathEntry.of(DotClasspathModel.ClasspathEntry.Kind.VAR, rest);
         } else if (handle.startsWith(LIB_PREFIX)) {
             final String rest = handle.substring(LIB_PREFIX.length());
-            return ClasspathEntry.of(Kind.LIB, rest);
+            return DotClasspathModel.ClasspathEntry.of(DotClasspathModel.ClasspathEntry.Kind.LIB, rest);
         } else {
             JkLog.warn("Ignoring handle " + handle);
             result = null;

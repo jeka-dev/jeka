@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import org.jerkar.api.ide.eclipse.JkEclipseClasspathGenerator;
-import org.jerkar.api.ide.eclipse.JkEclipseProject;
+import dev.jeka.core.api.ide.eclipse.JkEclipseClasspathGenerator;
+import dev.jeka.core.api.ide.eclipse.JkEclipseProject;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;

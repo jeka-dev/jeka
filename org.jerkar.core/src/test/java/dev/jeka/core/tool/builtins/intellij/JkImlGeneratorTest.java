@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.intellij;
 
 
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.ide.intellij.JkImlGenerator;
+import dev.jeka.core.api.ide.intellij.JkImlGenerator;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import org.junit.Test;
 

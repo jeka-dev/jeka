@@ -1,4 +1,4 @@
-package org.jerkar.api.ide.eclipse;
+package dev.jeka.core.api.ide.eclipse;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
@@ -9,8 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
-import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -24,10 +22,10 @@ class ScopeResolverSmart implements ScopeResolver {
     }
 
     @Override
-    public JkScope scopeOfLib(Kind kind, String path) {
+    public JkScope scopeOfLib(DotClasspathModel.ClasspathEntry.Kind kind, String path) {
         JkScope scope = scopeOfLibAccordingLocation(Paths.get(path));
         if (wstCommonComponent != null) {
-            final ClasspathEntry classpathEntry = ClasspathEntry.of(kind, path);
+            final DotClasspathModel.ClasspathEntry classpathEntry = DotClasspathModel.ClasspathEntry.of(kind, path);
             if (!wstCommonComponent.contains(classpathEntry)) {
                 if (scope.isInOrIsExtendingAnyOf(COMPILE)) {
                     JkLog.trace(path + " not found as module in " + WstCommonComponent.FILE

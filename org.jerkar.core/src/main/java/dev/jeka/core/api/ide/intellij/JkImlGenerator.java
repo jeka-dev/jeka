@@ -1,4 +1,4 @@
-package org.jerkar.api.ide.intellij;
+package dev.jeka.core.api.ide.intellij;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

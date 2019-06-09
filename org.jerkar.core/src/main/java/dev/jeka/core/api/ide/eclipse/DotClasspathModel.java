@@ -1,4 +1,4 @@
-package org.jerkar.api.ide.eclipse;
+package dev.jeka.core.api.ide.eclipse;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -14,7 +14,7 @@ import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
+import dev.jeka.core.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsString;
