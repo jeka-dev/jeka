@@ -90,7 +90,7 @@ class SampleTester {
 
     private void testScaffoldJava() {
         JkLog.info("Test scaffold Java");
-        Path root = JkUtilsPath.createTempDirectory("jerkar");
+        Path root = JkUtilsPath.createTempDirectory("jeka");
         process().withWorkingDir(root).andParams("scaffold#run", "java#", "intellij#").runSync();
         process().withWorkingDir(root).andParams("java#pack").runSync();
         JkPathTree.of(root).deleteRoot();

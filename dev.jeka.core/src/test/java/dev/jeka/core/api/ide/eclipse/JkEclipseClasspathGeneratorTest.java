@@ -1,6 +1,14 @@
 package dev.jeka.core.api.ide.eclipse;
 
-import static org.junit.Assert.assertEquals;
+import dev.jeka.core.api.depmanagement.JkComputedDependency;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.depmanagement.JkScopedDependency;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -10,15 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import dev.jeka.core.api.depmanagement.JkComputedDependency;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
-import dev.jeka.core.api.depmanagement.JkScopedDependency;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 // Test on a project structure as Base -> Core -> Desktop
 public class JkEclipseClasspathGeneratorTest {
@@ -89,7 +89,7 @@ public class JkEclipseClasspathGeneratorTest {
         final List<Path> resFiles = base2Layout.getResources().getFiles();
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
-        assertEquals(5, baseProject2.getDependencies().toList().size());
+        assertEquals(4, baseProject2.getDependencies().toList().size());
 
         final JkJavaProject coreProject2 = JkJavaProject.ofMavenLayout(core);
 

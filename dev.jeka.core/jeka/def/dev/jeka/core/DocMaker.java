@@ -33,7 +33,7 @@ class DocMaker {
     DocMaker(Path baseDir, Path distribPath, String version) {
         docSource = JkPathTree.of(baseDir.resolve("src/main/doc"));
         docDist = distribPath.resolve("doc");
-        htmlTemplates = baseDir.resolve("jerkar/doc-templates").toAbsolutePath().normalize();
+        htmlTemplates = baseDir.resolve("jeka/doc-templates").toAbsolutePath().normalize();
         this.version = version;
     }
 

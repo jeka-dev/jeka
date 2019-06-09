@@ -8,7 +8,7 @@ public final class JkConstants {
     /**
      * Relative path to the project where Jerkar elements lie.
      */
-    public static final String JERKAR_DIR = "jerkar";
+    public static final String JERKAR_DIR = "jeka";
 
     /**
      * Relative path to the project base directory where output files are generated.

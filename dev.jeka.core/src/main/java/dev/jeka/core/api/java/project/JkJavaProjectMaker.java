@@ -7,6 +7,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -55,8 +56,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     private final JkRunnables outputCleaner;
 
     JkJavaProjectMaker(JkJavaProject project) {
-        outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(project.getBaseDir().resolve("jerkar/output"));
-
+        outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(project.getBaseDir().resolve(
+                JkConstants.OUTPUT_PATH));
         outputCleaner = JkRunnables.of(
                 () -> JkPathTree.of(getOutLayout().getOutputPath()).deleteContent());
         final Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
