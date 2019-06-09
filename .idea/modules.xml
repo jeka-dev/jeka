@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.core/.idea/org.jerkar.core.iml" filepath="$PROJECT_DIR$/org.jerkar.core/.idea/org.jerkar.core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples/.idea/org.jerkar.samples.iml" filepath="$PROJECT_DIR$/org.jerkar.samples/.idea/org.jerkar.samples.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples-depender/.idea/org.jerkar.samples-depender.iml" filepath="$PROJECT_DIR$/org.jerkar.samples-depender/.idea/org.jerkar.samples-depender.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" filepath="$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev.jeka.core.depender-samples/.idea/dev.jeka.core.depender-samples.iml" filepath="$PROJECT_DIR$/dev.jeka.core.depender-samples/.idea/dev.jeka.core.depender-samples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev.jeka.core.samples/.idea/dev.jeka.core.samples.iml" filepath="$PROJECT_DIR$/dev.jeka.core.samples/.idea/dev.jeka.core.samples.iml" />
     </modules>
   </component>
 </project>
