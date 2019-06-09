@@ -57,7 +57,7 @@ public class CoreBuild extends JkRun {
         JkJavaProject project = javaPlugin.getProject();
 
         // Module version is driven by git repository info
-        project.setVersionedModule(JkModuleId.of("org.jerkar:core").withVersion(git.getVersionWithTagOrSnapshot()));
+        project.setVersionedModule(JkModuleId.of("dev.jeka:jeka-core").withVersion(git.getVersionWithTagOrSnapshot()));
 
         project.setSourceVersion(JkJavaVersion.V8);
         project.setMavenPublicationInfo(mavenPublication());
