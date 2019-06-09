@@ -1,13 +1,13 @@
 package dev.jeka.core.tool.builtins.sonar;
 
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionedModule;
-import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
-import dev.jeka.core.api.java.project.JkJavaProject;
 
 import java.nio.file.Path;
 import java.util.HashMap;

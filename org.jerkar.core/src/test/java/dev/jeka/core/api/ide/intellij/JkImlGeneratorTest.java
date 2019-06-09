@@ -7,8 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import dev.jeka.core.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.java.project.JkJavaProject;

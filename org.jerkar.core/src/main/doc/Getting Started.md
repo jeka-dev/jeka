@@ -381,7 +381,7 @@ Below is the content of the generated build class. Guava and Junit are pesent on
 any dependency you need.
 
 ```Java
-import org.jerkar.api.depmanagement.JkDependencySet;
+import JkDependencySet;
 import JkJavaProject;
 import JkInit;
 import JkRun;

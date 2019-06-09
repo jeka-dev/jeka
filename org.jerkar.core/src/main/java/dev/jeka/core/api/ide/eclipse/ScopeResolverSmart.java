@@ -1,16 +1,13 @@
 package dev.jeka.core.api.ide.eclipse;
 
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
+import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jerkar.api.depmanagement.JkScope;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsString;
+import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
 
 class ScopeResolverSmart implements ScopeResolver {
 

@@ -1,15 +1,15 @@
 package dev.jeka.core.api.ide.eclipse;
 
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.system.JkException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-
-import org.jerkar.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.system.JkException;
 
 /**
  * Provides methods to modify a given {@link JkJavaProject} in order it reflects a given .classpath file.

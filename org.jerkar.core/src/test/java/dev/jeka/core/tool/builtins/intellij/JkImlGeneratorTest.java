@@ -1,15 +1,15 @@
 package dev.jeka.core.tool.builtins.intellij;
 
 
-import org.jerkar.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.ide.intellij.JkImlGenerator;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import org.junit.Test;
 
 import java.nio.file.Paths;
 
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
-import static org.jerkar.api.depmanagement.JkPopularModules.*;
+import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.PROVIDED;
+import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 public class JkImlGeneratorTest {
 

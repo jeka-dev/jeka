@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import org.jerkar.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
 
 /**

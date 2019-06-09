@@ -1,8 +1,8 @@
 package org.jerkar;
 import org.apache.ivy.util.StringUtils;
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkVersion;
+import JkScope;
+import JkVersion;
 import org.jerkar.api.publishing.JkIvyPublication;
 import org.jerkar.api.publishing.JkMavenPublication;
 import JkUtilsIterable;

@@ -1,8 +1,8 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.java.JkClasspath;
-import org.jerkar.api.depmanagement.JkArtifactId;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJarPacker;

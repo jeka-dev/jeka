@@ -4,10 +4,10 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkScopedDependency;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkModuleDependency;
+import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.JkScopedDependency;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;

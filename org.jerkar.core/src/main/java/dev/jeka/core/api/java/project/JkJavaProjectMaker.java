@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import org.jerkar.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;

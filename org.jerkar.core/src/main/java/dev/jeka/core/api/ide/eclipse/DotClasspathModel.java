@@ -1,30 +1,25 @@
 package dev.jeka.core.api.ide.eclipse;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
-import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsXml;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.tool.JkOptions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 final class DotClasspathModel {
 
@@ -145,7 +140,7 @@ final class DotClasspathModel {
                 if (!Files.exists(file)) {
                     JkLog.warn("Can't find Eclipse classpath entry : " + file.toAbsolutePath());
                 }
-                final JkScope scope = scopeResolver.scopeOfLib(Kind.VAR, classpathEntry.path);
+                final JkScope scope = scopeResolver.scopeOfLib(ClasspathEntry.Kind.VAR, classpathEntry.path);
                 result.add(Lib.file(file, scope, classpathEntry.exported));
 
             } else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {

@@ -1,11 +1,11 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.java.JkJavaCompileSpec;
-import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.file.JkResourceProcessor;
+import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.java.JkJavaCompileSpec;
+import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.charset.Charset;

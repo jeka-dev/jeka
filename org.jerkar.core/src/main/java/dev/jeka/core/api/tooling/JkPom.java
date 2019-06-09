@@ -1,13 +1,6 @@
 package dev.jeka.core.api.tooling;
 
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsXml;
@@ -15,6 +8,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Wraps a POM file (Ideally an effective POM file) and provides convenient methods to extract

@@ -1,15 +1,17 @@
 package dev.jeka.core.tool.builtins.java;
 
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkDocPluginDeps;
-import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.JkRun;
-import org.jerkar.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkResolveResult;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocPluginDeps;
+import dev.jeka.core.tool.JkPlugin;
+import dev.jeka.core.tool.JkRun;
 
 import java.nio.file.Path;
 

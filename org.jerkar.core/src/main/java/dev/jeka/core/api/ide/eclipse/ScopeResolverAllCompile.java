@@ -1,7 +1,7 @@
 package dev.jeka.core.api.ide.eclipse;
 
-import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 
 
 class ScopeResolverAllCompile implements ScopeResolver {

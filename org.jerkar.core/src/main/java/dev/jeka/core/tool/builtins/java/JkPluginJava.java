@@ -1,8 +1,7 @@
 package dev.jeka.core.tool.builtins.java;
 
-import dev.jeka.core.tool.*;
 import dev.jeka.core.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
@@ -14,6 +13,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.repos.JkPluginPgp;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;

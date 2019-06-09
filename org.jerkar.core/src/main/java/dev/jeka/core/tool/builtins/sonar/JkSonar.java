@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.sonar;
 
 
 import dev.jeka.core.tool.JkConstants;
-import org.jerkar.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.java.JkJavaProcess;

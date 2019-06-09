@@ -1,9 +1,9 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.*;
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkModuleDependency;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.system.JkException;
 
 import java.io.IOException;

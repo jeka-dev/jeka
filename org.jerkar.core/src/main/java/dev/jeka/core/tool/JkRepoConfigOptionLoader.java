@@ -1,7 +1,7 @@
 package dev.jeka.core.tool;
 
-import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
 

@@ -1,6 +1,6 @@
 package dev.jeka.core.tool;
 
-import org.jerkar.api.depmanagement.JkModuleDependency;
+import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 

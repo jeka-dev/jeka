@@ -1,6 +1,6 @@
-import org.jerkar.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import org.jerkar.samples.MavenStyleBuild;
+import dev.jeka.core.samples.MavenStyleBuild;
 import dev.jeka.core.tool.JkImportProject;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkRun;

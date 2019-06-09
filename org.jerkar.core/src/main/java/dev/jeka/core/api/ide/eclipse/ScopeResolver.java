@@ -1,6 +1,6 @@
 package dev.jeka.core.api.ide.eclipse;
 
-import org.jerkar.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.JkScope;
 
 interface ScopeResolver {
 

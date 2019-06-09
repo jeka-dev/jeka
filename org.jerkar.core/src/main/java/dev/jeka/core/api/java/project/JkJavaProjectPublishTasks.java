@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import org.jerkar.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
