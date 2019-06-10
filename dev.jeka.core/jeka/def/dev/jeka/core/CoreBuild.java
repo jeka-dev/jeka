@@ -12,7 +12,7 @@ import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.repos.JkPluginPgp;
 
@@ -27,7 +27,7 @@ import static dev.jeka.core.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT
  * Build class for Jerkar. Run main method to create full distrib.
  * For publishing in OSSRH the following options must be set : -ossrhPwd=Xxxxxx -pgp#secretKeyPassword=Xxxxxxx
  */
-public class CoreBuild extends JkRun {
+public class CoreBuild extends JkCommands {
 
     public static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 

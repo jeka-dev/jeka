@@ -3,7 +3,7 @@ package dev.jeka.core.samples;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.depmanagement.JkScopeMapping;
-import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
@@ -12,7 +12,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 /**
  * This build illustrates how one can use other dependency scope mapping then the standard ones.
  */
-public class SimpleScopeBuild extends JkRun {
+public class SimpleScopeBuild extends JkCommands {
 
     private static final JkScope FOO = JkScope.of("foo");
 

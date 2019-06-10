@@ -13,7 +13,7 @@ import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
- * A resolver for the {@link JkRun} to use for a given project.
+ * A resolver for the {@link JkCommands} to use for a given project.
  *
  * @author Jerome Angibaud
  */
@@ -36,21 +36,21 @@ final class RunResolver {
      * Resolves run classes defined in this project
      */
     List<Class<?>> resolveRunClasses() {
-        return resolveRunClasses(JkRun.class);
+        return resolveRunClasses(JkCommands.class);
     }
 
     /**
-     * Resolves the {@link JkRun} instance to use on this project.
+     * Resolves the {@link JkCommands} instance to use on this project.
      */
-    JkRun resolve(String classNameHint) {
-        return resolve(classNameHint, JkRun.class);
+    JkCommands resolve(String classNameHint) {
+        return resolve(classNameHint, JkCommands.class);
     }
 
     /**
-     * Resolves the {@link JkRun} instance to use on this project.
+     * Resolves the {@link JkCommands} instance to use on this project.
      */
     @SuppressWarnings("unchecked")
-    <T extends JkRun> T resolve(Class<T> baseClass) {
+    <T extends JkCommands> T resolve(Class<T> baseClass) {
         return (T) resolve(null, baseClass);
     }
 
@@ -89,23 +89,23 @@ final class RunResolver {
         return false;
     }
 
-    private JkRun resolve(String classNameHint, Class<? extends JkRun> baseClass) {
+    private JkCommands resolve(String classNameHint, Class<? extends JkCommands> baseClass) {
 
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
 
         // If class name specified in options.
         if (!JkUtilsString.isBlank(classNameHint)) {
-            final Class<? extends JkRun> clazz = classLoader.loadFromNameOrSimpleName(
-                    classNameHint, JkRun.class);
+            final Class<? extends JkCommands> clazz = classLoader.loadFromNameOrSimpleName(
+                    classNameHint, JkCommands.class);
             if (clazz == null) {
                 return null;
             }
-            JkRun.baseDirContext(baseDir);
-            final JkRun run;
+            JkCommands.baseDirContext(baseDir);
+            final JkCommands run;
             try {
-                run = JkRun.of(clazz);
+                run = JkCommands.of(clazz);
             } finally {
-                JkRun.baseDirContext(null);
+                JkCommands.baseDirContext(null);
             }
             return run;
         }
@@ -118,12 +118,12 @@ final class RunResolver {
                     final Class<?> clazz = classLoader.toJkClassLoader().loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
-                        JkRun.baseDirContext(baseDir);
-                        final JkRun run;
+                        JkCommands.baseDirContext(baseDir);
+                        final JkCommands run;
                         try {
-                            run = JkRun.of((Class<? extends JkRun>) clazz);
+                            run = JkCommands.of((Class<? extends JkCommands>) clazz);
                         } finally {
-                            JkRun.baseDirContext(null);
+                            JkCommands.baseDirContext(null);
                         }
                         return run;
                     }
@@ -133,17 +133,17 @@ final class RunResolver {
         }
 
         // If nothing yet found use defaults
-        JkRun.baseDirContext(baseDir);
-        final JkRun result;
+        JkCommands.baseDirContext(baseDir);
+        final JkCommands result;
         try {
-            result = JkRun.of(JkConstants.DEFAULT_RUN_CLASS);
+            result = JkCommands.of(JkConstants.DEFAULT_RUN_CLASS);
         } finally {
-            JkRun.baseDirContext(null);
+            JkCommands.baseDirContext(null);
         }
         return result;
     }
 
-    private List<Class<?>> resolveRunClasses(Class<? extends JkRun> baseClass) {
+    private List<Class<?>> resolveRunClasses(Class<? extends JkCommands> baseClass) {
 
         final JkClassLoader classLoader = JkClassLoader.ofCurrent();
         final List<Class<?>> result = new LinkedList<>();

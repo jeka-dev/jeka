@@ -22,22 +22,22 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
  */
 public final class JkImportedRuns {
 
-    private static final ThreadLocal<Map<ImportedRunRef, JkRun>> IMPORTED_RUN_CONTEXT = new ThreadLocal<>();
+    private static final ThreadLocal<Map<ImportedRunRef, JkCommands>> IMPORTED_RUN_CONTEXT = new ThreadLocal<>();
 
-    static JkImportedRuns of(Path masterRootDir, JkRun masterRun) {
+    static JkImportedRuns of(Path masterRootDir, JkCommands masterRun) {
         return new JkImportedRuns(masterRootDir, getDirectImportedRuns(masterRun));
     }
 
-    private final List<JkRun> directImportedRuns;
+    private final List<JkCommands> directImportedRuns;
 
-    private List<JkRun> transitiveImportedRuns;
+    private List<JkCommands> transitiveImportedRuns;
 
     private final Path masterRunBaseDir;
 
     // The declared @JkImportProject values, read at pre-compile time
     private List<Path> importedRunRoots = Collections.emptyList();
 
-    private JkImportedRuns(Path masterDir, List<JkRun> runDeps) {
+    private JkImportedRuns(Path masterDir, List<JkCommands> runDeps) {
         super();
         this.masterRunBaseDir = masterDir;
         this.directImportedRuns = Collections.unmodifiableList(runDeps);
@@ -46,14 +46,14 @@ public final class JkImportedRuns {
     /**
      * Returns only the direct slave of this master run.
      */
-    public List<JkRun> getDirects() {
+    public List<JkCommands> getDirects() {
         return Collections.unmodifiableList(directImportedRuns);
     }
 
     /**
      * Returns direct and transitive importedRuns.
      */
-    public List<JkRun> getAll() {
+    public List<JkCommands> getAll() {
         if (transitiveImportedRuns == null) {
             transitiveImportedRuns = resolveTransitiveRuns(new HashSet<>());
         }
@@ -63,9 +63,9 @@ public final class JkImportedRuns {
     /**
      * Same as {@link #getAll()} but only returns run instance of the specified class or its subclasses.
      */
-    public <T extends JkRun> List<T> getAllOf(Class<T> ofClass) {
+    public <T extends JkCommands> List<T> getAllOf(Class<T> ofClass) {
         final List<T> result = new LinkedList<>();
-        for (final JkRun run : getAll()) {
+        for (final JkCommands run : getAll()) {
             if (ofClass.isAssignableFrom(run.getClass())) {
                 result.add((T) run);
             }
@@ -81,9 +81,9 @@ public final class JkImportedRuns {
         this.importedRunRoots = Collections.unmodifiableList(roots);
     }
 
-    private List<JkRun> resolveTransitiveRuns(Set<Path> files) {
-        final List<JkRun> result = new LinkedList<>();
-        for (final JkRun run : directImportedRuns) {
+    private List<JkCommands> resolveTransitiveRuns(Set<Path> files) {
+        final List<JkCommands> result = new LinkedList<>();
+        for (final JkCommands run : directImportedRuns) {
             final Path dir = run.getBaseDir();
             if (!files.contains(dir)) {
                 result.addAll(run.getImportedRuns().resolveTransitiveRuns(files));
@@ -95,14 +95,14 @@ public final class JkImportedRuns {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<JkRun> getDirectImportedRuns(JkRun masterRun) {
-        final List<JkRun> result = new LinkedList<>();
+    private static List<JkCommands> getDirectImportedRuns(JkCommands masterRun) {
+        final List<JkCommands> result = new LinkedList<>();
         final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterRun.getClass(), JkImportProject.class);
 
         for (final Field field : fields) {
             final JkImportProject jkProject = field.getAnnotation(JkImportProject.class);
-            final JkRun importedRun = createImportedRun(
-                    (Class<? extends JkRun>) field.getType(), jkProject.value(), masterRun.getBaseDir());
+            final JkCommands importedRun = createImportedRun(
+                    (Class<? extends JkCommands>) field.getType(), jkProject.value(), masterRun.getBaseDir());
             try {
                 JkUtilsReflect.setFieldValue(masterRun, field, importedRun);
             } catch (final RuntimeException e) {
@@ -129,15 +129,15 @@ public final class JkImportedRuns {
     }
 
     /*
-     * Creates an instance of <code>JkRun</code> for the given project and
+     * Creates an instance of <code>JkCommands</code> for the given project and
      * run class. The instance field annotated with <code>JkOption</code> are
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    private static <T extends JkRun> T createImportedRun(Class<T> importedRunClass, String relativePath, Path masterRunPath) {
+    private static <T extends JkCommands> T createImportedRun(Class<T> importedRunClass, String relativePath, Path masterRunPath) {
         final Path projectDir = masterRunPath.resolve(relativePath).normalize();
         final ImportedRunRef projectRef = new ImportedRunRef(projectDir, importedRunClass);
-        Map<ImportedRunRef, JkRun> map = IMPORTED_RUN_CONTEXT.get();
+        Map<ImportedRunRef, JkCommands> map = IMPORTED_RUN_CONTEXT.get();
         if (map == null) {
             map = new HashMap<>();
             IMPORTED_RUN_CONTEXT.set(map);

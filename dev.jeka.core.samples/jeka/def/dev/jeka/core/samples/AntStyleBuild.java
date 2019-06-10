@@ -9,10 +9,10 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.java.junit.JkJavaTestClasses;
 import dev.jeka.core.api.java.junit.JkUnit;
 import dev.jeka.core.api.java.junit.JkUnit.JunitReportDetail;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkRun;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Jerome Angibaud
  */
 @JkImport("org.apache.httpcomponents:httpclient:jar:4.5.6")
-public class AntStyleBuild extends JkRun {
+public class AntStyleBuild extends JkCommands {
 
     Path src = getBaseDir().resolve("src/main/javaPlugin");
     Path buildDir = getBaseDir().resolve("build/output");

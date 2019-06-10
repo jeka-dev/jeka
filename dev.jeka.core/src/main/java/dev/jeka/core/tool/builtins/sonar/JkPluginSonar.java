@@ -19,7 +19,7 @@ public class JkPluginSonar extends JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
 
-    public JkPluginSonar(JkRun run) {
+    public JkPluginSonar(JkCommands run) {
         super(run);
     }
 

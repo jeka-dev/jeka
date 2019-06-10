@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 
 final class HelpDisplayer {
 
-    static void help(JkRun jkRun) {
+    static void help(JkCommands jkCommands) {
         if (JkOptions.containsKey("Plugins")) {
-            helpPlugins(jkRun);
+            helpPlugins(jkCommands);
             return;
         }
         StringBuilder sb = new StringBuilder()
@@ -28,7 +28,7 @@ final class HelpDisplayer {
                 .append("Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
                 .append("\nAvailable methods and options :\n")
-                .append(RunClassDef.of(jkRun).description("", true));
+                .append(RunClassDef.of(jkCommands).description("", true));
 
         // List plugins
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
@@ -52,7 +52,7 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    static void help(JkRun run, Path xmlFile) {
+    static void help(JkCommands run, Path xmlFile) {
         final Document document = JkUtilsXml.createDocument();
         final Element runEl = RunClassDef.of(run).toElement(document);
         document.appendChild(runEl);
@@ -69,8 +69,8 @@ final class HelpDisplayer {
         }
     }
 
-    static void helpPlugins(JkRun jkRun) {
-        JkLog.info(helpPluginsDescription(jkRun));
+    static void helpPlugins(JkCommands jkCommands) {
+        JkLog.info(helpPluginsDescription(jkCommands));
     }
 
     static void helpPlugin(JkPlugin plugin) {
@@ -83,16 +83,16 @@ final class HelpDisplayer {
         }
     }
 
-    private static String helpPluginsDescription(JkRun jkRun) {
+    private static String helpPluginsDescription(JkCommands jkCommands) {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         StringBuilder sb = new StringBuilder();
         for (final PluginDescription description : pluginDescriptions) {
-            sb.append(helpPluginDescription(jkRun, description));
+            sb.append(helpPluginDescription(jkCommands, description));
         }
         return sb.toString();
     }
 
-    private static String helpPluginDescription(JkRun jkRun, PluginDescription description) {
+    private static String helpPluginDescription(JkCommands jkCommands, PluginDescription description) {
         StringBuilder sb = new StringBuilder();
         sb.append("\nPlugin Class : " + description.fullName());
         sb.append("\nPlugin Name : " + description.shortName());
@@ -116,7 +116,7 @@ final class HelpDisplayer {
         } else {
             sb.append("\nActivation Effect : Not documented.");
         }
-        final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkRun.class, jkRun);
+        final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkCommands.class, jkCommands);
         sb.append("\n");
         sb.append(RunClassDef.of(object).flatDescription(description.shortName() + "#", false));
         return sb.toString();

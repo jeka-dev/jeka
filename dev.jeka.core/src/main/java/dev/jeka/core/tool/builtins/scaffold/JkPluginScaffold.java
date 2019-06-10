@@ -1,8 +1,8 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.JkRun;
 import dev.jeka.core.api.utils.JkUtilsIO;
 
 /**
@@ -16,7 +16,7 @@ public class JkPluginScaffold extends JkPlugin {
 
     private final JkScaffolder scaffolder;
 
-    protected JkPluginScaffold(JkRun run) {
+    protected JkPluginScaffold(JkCommands run) {
         super(run);
         this.scaffolder = new JkScaffolder(run.getBaseDir(), false);
         this.scaffolder.setRunClassCode(JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));

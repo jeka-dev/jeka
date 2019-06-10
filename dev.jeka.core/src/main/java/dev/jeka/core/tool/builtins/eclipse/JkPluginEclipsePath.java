@@ -1,9 +1,9 @@
 package dev.jeka.core.tool.builtins.eclipse;
 
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.JkRun;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.api.ide.eclipse.JkEclipseClasspathApplier;
 import dev.jeka.core.api.java.project.JkJavaProject;
@@ -18,7 +18,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
             " will be considered as test code, so won't be packaged in main jar file.")
     public boolean smartScope = true;
 
-    protected JkPluginEclipsePath(JkRun run) {
+    protected JkPluginEclipsePath(JkCommands run) {
         super(run);
     }
 

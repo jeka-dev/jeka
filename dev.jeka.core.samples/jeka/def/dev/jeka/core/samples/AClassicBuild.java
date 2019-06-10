@@ -1,15 +1,15 @@
 package dev.jeka.core.samples;
 
-import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkRun;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
 
@@ -24,7 +24,7 @@ import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
  * @formatter:off
  */
 @JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
-public class AClassicBuild extends JkRun {
+public class AClassicBuild extends JkCommands {
 
     public final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 

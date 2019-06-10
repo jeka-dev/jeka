@@ -106,7 +106,7 @@ final class ProjectDef {
 
         String description(String prefix, boolean withHeader) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (Class<? extends JkRun> buildClass : this.runClassHierarchy()) {
+            for (Class<? extends JkCommands> buildClass : this.runClassHierarchy()) {
                 stringBuilder.append(description(buildClass, prefix, withHeader, false));
             }
             return stringBuilder.toString();
@@ -124,7 +124,7 @@ final class ProjectDef {
             if (methods.isEmpty() && options.isEmpty()) {
                 return "";
             }
-            String classWord = JkRun.class.isAssignableFrom(runClass) ? "class" : "plugin";
+            String classWord = JkCommands.class.isAssignableFrom(runClass) ? "class" : "plugin";
             StringBuilder stringBuilder = new StringBuilder();
             if (withHeader) {
                 stringBuilder.append("\nFrom " + classWord + " " + runClass.getName() + " :\n");
@@ -152,7 +152,7 @@ final class ProjectDef {
             return stringBuilder.toString();
         }
 
-        Map<String, String> optionValues(JkRun run) {
+        Map<String, String> optionValues(JkCommands run) {
             final Map<String, String> result = new LinkedHashMap<>();
             for (final RunOptionDef optionDef : this.optionDefs) {
                 final String name = optionDef.name;
@@ -179,11 +179,11 @@ final class ProjectDef {
             return runEl;
         }
 
-        private List<Class<? extends JkRun>> runClassHierarchy() {
-            List<Class<? extends JkRun>> result = new ArrayList<>();
+        private List<Class<? extends JkCommands>> runClassHierarchy() {
+            List<Class<? extends JkCommands>> result = new ArrayList<>();
             Class<?> current = this.runOrPlugin.getClass();
-            while (JkRun.class.isAssignableFrom(current) || JkPlugin.class.isAssignableFrom(current)) {
-                result.add((Class<? extends JkRun>) current);
+            while (JkCommands.class.isAssignableFrom(current) || JkPlugin.class.isAssignableFrom(current)) {
+                result.add((Class<? extends JkCommands>) current);
                 current = current.getSuperclass();
             }
             return result;

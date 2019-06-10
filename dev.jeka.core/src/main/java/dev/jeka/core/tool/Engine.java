@@ -56,7 +56,7 @@ final class Engine {
         this.resolver = new RunResolver(baseDir);
     }
 
-    <T extends JkRun> T getRun(Class<T> baseClass) {
+    <T extends JkCommands> T getRun(Class<T> baseClass) {
         if (resolver.needCompile()) {
             this.compile();
         }
@@ -70,7 +70,7 @@ final class Engine {
         runDependencies = runDependencies.andScopelessDependencies(commandLine.dependencies());
         long start = System.nanoTime();
         JkLog.startTask("Compile and initialise run classes");
-        JkRun jkRun = null;
+        JkCommands jkCommands = null;
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
@@ -79,14 +79,14 @@ final class Engine {
         }
         preCompile();  // Need to pre-compile to get the declared run dependencies
         if (!JkUtilsString.isBlank(runClassHint)) {  // First find a class in the existing classpath without compiling
-            jkRun = getRunInstance(runClassHint, path);
+            jkCommands = getRunInstance(runClassHint, path);
         }
-        if (jkRun == null) {
+        if (jkCommands == null) {
             path = compile().and(path);
-            jkRun = getRunInstance(runClassHint, path);
+            jkCommands = getRunInstance(runClassHint, path);
         }
-        jkRun.getImportedRuns().setImportedRunRoots(this.rootOfImportedRuns);
-        if (jkRun == null) {
+        jkCommands.getImportedRuns().setImportedRunRoots(this.rootOfImportedRuns);
+        if (jkCommands == null) {
             throw new JkException("Can't find or guess any run class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a Jeka project ?");
         }
@@ -94,7 +94,7 @@ final class Engine {
         JkLog.info("Jeka run is ready to start.");
         JkLog.setVerbosity(verbosityToRestore);
         try {
-            this.launch(jkRun, commandLine);
+            this.launch(jkCommands, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -146,11 +146,11 @@ final class Engine {
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
-    private JkRun getRunInstance(String runClassHint, JkPathSequence runtimePath) {
+    private JkCommands getRunInstance(String runClassHint, JkPathSequence runtimePath) {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting run execution classpath to : " + classLoader.getDirectClasspath());
-        final JkRun run = resolver.resolve(runClassHint);
+        final JkCommands run = resolver.resolve(runClassHint);
         if (run == null) {
             return null;
         }
@@ -203,7 +203,7 @@ final class Engine {
             JkJavaCompiler.ofJdk().compile(compileSpec);
         } catch (JkException e) {
             JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
-            JkLog.info("Compilation of Jeka files failed. You can run jeka -RC=JkRun to use default Jeka files" +
+            JkLog.info("Compilation of Jeka files failed. You can run jeka -RC=JkCommands to use default Jeka files" +
                     " instead of the ones located in this project.");
             throw e;
         }
@@ -212,14 +212,14 @@ final class Engine {
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void launch(JkRun jkRun, CommandLine commandLine) {
+    private void launch(JkCommands jkCommands, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkRun importedRun : jkRun.getImportedRuns().getAll()) {
+            for (final JkCommands importedRun : jkCommands.getImportedRuns().getAll()) {
                 runProject(importedRun, commandLine.getSubProjectMethods());
             }
-            runProject(jkRun, commandLine.getSubProjectMethods());
+            runProject(jkCommands, commandLine.getSubProjectMethods());
         }
-        runProject(jkRun, commandLine.getMasterMethods());
+        runProject(jkCommands, commandLine.getMasterMethods());
     }
 
     private JkJavaCompileSpec defCompileSpec() {
@@ -242,18 +242,18 @@ final class Engine {
         return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
-    private static void runProject(JkRun jkRun, List<CommandLine.MethodInvocation> invokes) {
+    private static void runProject(JkCommands jkCommands, List<CommandLine.MethodInvocation> invokes) {
         for (CommandLine.MethodInvocation methodInvocation : invokes) {
-            invokeMethodOnRunClassOrPlugin(jkRun, methodInvocation);
+            invokeMethodOnRunClassOrPlugin(jkCommands, methodInvocation);
         }
     }
 
-    private static void invokeMethodOnRunClassOrPlugin(JkRun jkRun, CommandLine.MethodInvocation methodInvocation) {
+    private static void invokeMethodOnRunClassOrPlugin(JkCommands jkCommands, CommandLine.MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
-            final JkPlugin plugin = jkRun.getPlugins().get(methodInvocation.pluginName);
+            final JkPlugin plugin = jkCommands.getPlugins().get(methodInvocation.pluginName);
             invokeMethodOnRunOrPlugin(plugin, methodInvocation.methodName);
         } else {
-            invokeMethodOnRunOrPlugin(jkRun, methodInvocation.methodName);
+            invokeMethodOnRunOrPlugin(jkCommands, methodInvocation.methodName);
         }
     }
 

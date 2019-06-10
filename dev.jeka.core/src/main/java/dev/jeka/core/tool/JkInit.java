@@ -21,7 +21,7 @@ public final class JkInit {
     /**
      * Creates an instance of the specified run class and displays information about this class andPrepending environment.
      */
-    public static <T extends JkRun> T instanceOf(Class<T> clazz, String... args) {
+    public static <T extends JkCommands> T instanceOf(Class<T> clazz, String... args) {
         JkLog.registerHierarchicalConsoleHandler();
         Environment.initialize(args);
         JkLog.Verbosity verbosity = JkLog.verbosity();
@@ -29,7 +29,7 @@ public final class JkInit {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
         displayInfo();
-        final T jkRun = JkRun.of(clazz);
+        final T jkRun = JkCommands.of(clazz);
         JkLog.info("Jeka run is ready to start.");
         JkLog.setVerbosity(verbosity);
         return jkRun;

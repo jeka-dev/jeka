@@ -35,7 +35,7 @@ public final class JkPluginEclipse extends JkPlugin {
 
     private final JkPluginScaffold scaffold;
 
-    protected JkPluginEclipse(JkRun run) {
+    protected JkPluginEclipse(JkCommands run) {
         super(run);
         this.scaffold = run.getPlugins().get(JkPluginScaffold.class);
     }
@@ -62,7 +62,7 @@ public final class JkPluginEclipse extends JkPlugin {
         if (getRun().getPlugins().hasLoaded(JkPluginJava.class)) {
             final JkJavaProject javaProject = getRun().getPlugins().get(JkPluginJava.class).getProject();
             final List<Path> importedRunProjects = new LinkedList<>();
-            for (final JkRun depRun : getRun().getImportedRuns().getDirects()) {
+            for (final JkCommands depRun : getRun().getImportedRuns().getDirects()) {
                 importedRunProjects.add(depRun.getBaseTree().getRoot());
             }
             final JkEclipseClasspathGenerator classpathGenerator = JkEclipseClasspathGenerator.of(javaProject);

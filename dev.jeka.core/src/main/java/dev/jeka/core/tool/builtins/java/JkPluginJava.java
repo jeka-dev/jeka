@@ -58,7 +58,7 @@ public class JkPluginJava extends JkPlugin {
 
     private JkJavaProject project;
 
-    protected JkPluginJava(JkRun run) {
+    protected JkPluginJava(JkCommands run) {
         super(run);
         this.scaffoldPlugin = run.getPlugins().get(JkPluginScaffold.class);
         this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);

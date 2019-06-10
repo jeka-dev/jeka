@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.maven;
 
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.tooling.JkPom;
 
@@ -12,7 +12,7 @@ import java.nio.file.Path;
 @JkDoc("Provides method to help migration from Maven.")
 public class JkPluginPom extends JkPlugin {
 
-    protected JkPluginPom(JkRun run) {
+    protected JkPluginPom(JkCommands run) {
         super(run);
     }
 

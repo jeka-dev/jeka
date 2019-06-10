@@ -3,7 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
- * Plugin instances are owned by a JkRun instance. The relationship is bidirectional. JkRun instances may
+ * Plugin instances are owned by a JkCommands instance. The relationship is bidirectional. JkCommands instances may
  * invoke plugin methods or fields and plugin instances may invoke owner methods.
  *
  * Therefore plugins can interact with or load other plugins into the owner instance, which is quite common in Jeka.
@@ -12,14 +12,14 @@ public abstract class JkPlugin {
 
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
-    private final JkRun run;
+    private final JkCommands run;
 
     /*
      * Right after to be instantiated, plugin instances are likely to be configured by the owning run.
      * Therefore, every plugin members that are likely to be configured by the owning run must be
      * initialized in the constructor.
      */
-    protected JkPlugin(JkRun run) {
+    protected JkPlugin(JkCommands run) {
         this.run = run;
     }
 
@@ -44,7 +44,7 @@ public abstract class JkPlugin {
         return JkUtilsString.uncapitalize(suffix);
     }
 
-    protected JkRun getRun() {
+    protected JkCommands getRun() {
         return run;
     }
 

@@ -11,7 +11,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.JkCommands;
 
 import java.nio.file.Path;
 
@@ -30,7 +30,7 @@ public class JkPluginWar extends JkPlugin {
 
     private final JkJavaProjectMaker maker;
 
-    public JkPluginWar(JkRun run) {
+    public JkPluginWar(JkCommands run) {
         super(run);
         this.staticResourceDir = run.getBaseDir().resolve("src/main/webapp/static");
         this.maker = run.getPlugin(JkPluginJava.class).getProject().getMaker();

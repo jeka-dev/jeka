@@ -1,9 +1,9 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.samples.MavenStyleBuild;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkImportProject;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkRun;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 /**
@@ -19,7 +19,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
  * 
  * @formatter:off
  */
-public class NormalJarBuild extends JkRun {
+public class NormalJarBuild extends JkCommands {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 

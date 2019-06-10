@@ -1,8 +1,8 @@
 package dev.jeka.core.tool.builtins.repos;
 
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.JkRun;
 import dev.jeka.core.api.crypto.pgp.JkPgp;
 import dev.jeka.core.api.system.JkLog;
 
@@ -24,7 +24,7 @@ public class JkPluginPgp extends JkPlugin {
     public String keyName = "";
 
 
-    protected JkPluginPgp(JkRun run) {
+    protected JkPluginPgp(JkCommands run) {
         super(run);
         JkPgp defaultPgp = JkPgp.ofDefaultGnuPg();
         publicRingPath = defaultPgp.getPublicRing().normalize().toString();

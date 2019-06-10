@@ -5,7 +5,7 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkResourceProcessor;
-import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
  * 
  * @author Jerome Angibaud
  */
-public class MavenStyleBuild extends JkRun {
+public class MavenStyleBuild extends JkCommands {
 
     public final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 

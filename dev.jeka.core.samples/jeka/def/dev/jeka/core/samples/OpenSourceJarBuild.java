@@ -2,7 +2,7 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo;
-import dev.jeka.core.tool.JkRun;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
@@ -15,7 +15,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
  * 
  * @author Jerome Angibaud
  */
-public class OpenSourceJarBuild extends JkRun {
+public class OpenSourceJarBuild extends JkCommands {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 

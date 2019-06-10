@@ -26,7 +26,7 @@ public final class JkPluginIntellij extends JkPlugin {
 
     private final JkPluginScaffold scaffold;
 
-    protected JkPluginIntellij(JkRun run) {
+    protected JkPluginIntellij(JkCommands run) {
         super(run);
         scaffold = run.getPlugins().get(JkPluginScaffold.class);
     }
@@ -87,9 +87,9 @@ public final class JkPluginIntellij extends JkPlugin {
             try {
                 Main.exec(projectFolder, "intellij#generateIml");
             } catch (Exception e) {
-                JkLog.warn("Generating Iml failed : Try to generate it using -RC=JkRun option.");
+                JkLog.warn("Generating Iml failed : Try to generate it using -RC=JkCommands option.");
                 try {
-                    Main.exec(projectFolder, "intellij#generateIml", "-RC=JkRun");
+                    Main.exec(projectFolder, "intellij#generateIml", "-RC=JkCommands");
                 } catch (Exception e1) {
                     JkLog.warn("Generatint Iml file failed;");
                 }
