@@ -30,7 +30,7 @@ public final class JkInit {
         }
         displayInfo();
         final T jkCommands = JkCommands.of(clazz);
-        JkLog.info("Jeka run is ready to start.");
+        JkLog.info("Jeka commands are ready to be executed.");
         JkLog.setVerbosity(verbosity);
         return jkCommands;
     }

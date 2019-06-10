@@ -76,7 +76,7 @@ Compile and initialise command classes ...
 │ │ Run instance initialized with options []
 │ └ Done in 57 milliseconds.
 └ Done in 336 milliseconds.
-Jeka run is ready to start.
+Jeka commands are ready to be executed.
 Method : help on JkCommands
 Usage:
 jeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]

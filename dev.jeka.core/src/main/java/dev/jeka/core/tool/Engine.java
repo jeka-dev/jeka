@@ -91,7 +91,7 @@ final class Engine {
                     + " .\nAre you sure this directory is a Jeka project ?");
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        JkLog.info("Jeka run is ready to start.");
+        JkLog.info("Jeka commands are ready to be executed.");
         JkLog.setVerbosity(verbosityToRestore);
         try {
             this.launch(jkCommands, commandLine);
