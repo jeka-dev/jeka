@@ -49,13 +49,14 @@ You can display Jeka metadata information by adding `-LH` (or `-LogHeaders`) to 
 </div>
 
 ```
- _______           _
-(_______)         | |
-     _ _____  ____| |  _ _____  ____
- _  | | ___ |/ ___) |_/ |____ |/ ___)
-| |_| | ____| |   |  _ (/ ___ | |
- \___/|_____)_|   |_| \_)_____|_|
-                                     The 100% Java build tool.
+ _______     _
+(_______)   | |
+     _ _____| |  _ _____
+ _  | | ___ | |_/ |____ |
+| |_| | ____|  _ (/ ___ |
+ \___/|_____)_| \_)_____|
+
+                           The pure Java build tool.
 
 
 Working Directory : C:\Users\djeang\IdeaProjects\jeka
