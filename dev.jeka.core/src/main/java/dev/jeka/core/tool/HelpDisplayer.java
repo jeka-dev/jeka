@@ -23,8 +23,8 @@ final class HelpDisplayer {
             return;
         }
         StringBuilder sb = new StringBuilder()
-                .append("Usage: \njeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
-                .append("Execute the specified methods defined in run class or plugins using the specified options and system properties.\n")
+                .append("Usage: \n\njeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
+                .append("Executes the specified methods defined in run class or plugins using the specified options and system properties.\n\n")
                 .append("Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
                 .append("\nAvailable methods and options :\n")

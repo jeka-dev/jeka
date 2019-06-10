@@ -19,13 +19,18 @@ __[USER HOME]__ : User Home within the meaning of Windows or Unix.
 
 ```
 Usage:
-jeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
 
-Execute the specified methods defined in run class or plugins using the specified options and system properties.
+jeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropertyName=value]
+
+Executes the specified methods defined in command class or plugins using the specified options and system properties.
+
 Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx
 ...
 ```
-**Tips:** You can display Jeka metadata information by adding `-LH` (or `-LogHeaders`) to the command line. You should get the following output.
+<div class="alert alert-primary" role="alert">
+You can display Jeka metadata information by adding `-LH` (or `-LogHeaders`) to the command line. You should get the following output.
+</div>
+
 ```
  _______           _
 (_______)         | |
