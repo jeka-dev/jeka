@@ -33,7 +33,7 @@ final class RunResolver {
     }
 
     /**
-     * Resolves run classes defined in this project
+     * Resolves command classes defined in this project
      */
     List<Class<?>> resolveRunClasses() {
         return resolveRunClasses(JkCommands.class);

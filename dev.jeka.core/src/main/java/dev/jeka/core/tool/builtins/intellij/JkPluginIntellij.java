@@ -87,9 +87,9 @@ public final class JkPluginIntellij extends JkPlugin {
             try {
                 Main.exec(projectFolder, "intellij#generateIml");
             } catch (Exception e) {
-                JkLog.warn("Generating Iml failed : Try to generate it using -RC=JkCommands option.");
+                JkLog.warn("Generating Iml failed : Try to generate it using -CC=JkCommands option.");
                 try {
-                    Main.exec(projectFolder, "intellij#generateIml", "-RC=JkCommands");
+                    Main.exec(projectFolder, "intellij#generateIml", "-CC=JkCommands");
                 } catch (Exception e1) {
                     JkLog.warn("Generatint Iml file failed;");
                 }

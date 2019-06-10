@@ -92,19 +92,19 @@ class Environment {
 
         int logMaxLength = -1;
 
-        String runClass;
+        String commandClass;
 
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "LogVerbose", "LV");
             this.logQuiteVerbose = valueOf(Boolean.class, map, false, "LogQuiteVerbose", "LQV");
             this.logHeaders = valueOf(Boolean.class, map, false,"LogHeaders", "LH");
             this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
-            this.runClass = valueOf(String.class, map, null, "RunClass", "RC");
+            this.commandClass = valueOf(String.class, map, null, "CommandClass", "CC");
         }
 
         @Override
         public String toString() {
-            return "RunClass=" + JkUtilsObject.toString(runClass) + ", LogVerbose=" + logVerbose
+            return "Commandlass=" + JkUtilsObject.toString(commandClass) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logHeaders + ", LogMaxLength=" + logMaxLength;
         }
 

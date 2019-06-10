@@ -19,7 +19,7 @@ import java.util.Map;
 public final class JkInit {
 
     /**
-     * Creates an instance of the specified run class and displays information about this class andPrepending environment.
+     * Creates an instance of the specified command class and displays information about this class andPrepending environment.
      */
     public static <T extends JkCommands> T instanceOf(Class<T> clazz, String... args) {
         JkLog.registerHierarchicalConsoleHandler();
@@ -29,10 +29,10 @@ public final class JkInit {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
         displayInfo();
-        final T jkRun = JkCommands.of(clazz);
+        final T jkCommands = JkCommands.of(clazz);
         JkLog.info("Jeka run is ready to start.");
         JkLog.setVerbosity(verbosity);
-        return jkRun;
+        return jkCommands;
     }
 
     static void displayInfo() {

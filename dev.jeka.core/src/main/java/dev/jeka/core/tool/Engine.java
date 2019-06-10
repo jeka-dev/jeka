@@ -20,11 +20,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
- * Engine having responsibility of compiling run classes, instantiate and run them.<br/>
- * Run class sources are expected to lie in [project base dir]/jeka/def <br/>
+ * Engine having responsibility of compiling command classes, instantiate and run them.<br/>
+ * Command class sources are expected to lie in [project base dir]/jeka/def <br/>
  * Classes having simple name starting with '_' are ignored.
  *
- * Run classes can have dependencies on jars : <ul>
+ * Command classes can have dependencies on jars : <ul>
  *     <li>located in [base dir]/jeka/boot directory</li>
  *     <li>declared in {@link JkImport} annotation</li>
  * </ul>
@@ -64,12 +64,12 @@ final class Engine {
     }
 
     /**
-     * Pre-compile and compile run classes (if needed) then execute methods mentioned in command line
+     * Pre-compile and compile command classes (if needed) then execute methods mentioned in command line
      */
     void execute(CommandLine commandLine, String runClassHint, JkLog.Verbosity verbosityToRestore) {
         runDependencies = runDependencies.andScopelessDependencies(commandLine.dependencies());
         long start = System.nanoTime();
-        JkLog.startTask("Compile and initialise run classes");
+        JkLog.startTask("Compile and initialise command classes");
         JkCommands jkCommands = null;
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
@@ -87,7 +87,7 @@ final class Engine {
         }
         jkCommands.getImportedRuns().setImportedRunRoots(this.rootOfImportedRuns);
         if (jkCommands == null) {
-            throw new JkException("Can't find or guess any run class for project hosted in " + this.projectBaseDir
+            throw new JkException("Can't find or guess any command class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a Jeka project ?");
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -130,7 +130,7 @@ final class Engine {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        String msg = "Compiling run classes for project " + this.projectBaseDir.getFileName().toString();
+        String msg = "Compiling command classes for project " + this.projectBaseDir.getFileName().toString();
         long start = System.nanoTime();
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
@@ -186,7 +186,7 @@ final class Engine {
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootOfImportedRuns.isEmpty()) {
-            JkLog.info("Compile run classes of dependent projects : "
+            JkLog.info("Compile command classes of dependent projects : "
                         + toRelativePaths(this.projectBaseDir, this.rootOfImportedRuns));
         }
         for (final Path file : this.rootOfImportedRuns) {
@@ -203,7 +203,7 @@ final class Engine {
             JkJavaCompiler.ofJdk().compile(compileSpec);
         } catch (JkException e) {
             JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
-            JkLog.info("Compilation of Jeka files failed. You can run jeka -RC=JkCommands to use default Jeka files" +
+            JkLog.info("Compilation of Jeka files failed. You can run jeka -CC=JkCommands to use default Jeka files" +
                     " instead of the ones located in this project.");
             throw e;
         }

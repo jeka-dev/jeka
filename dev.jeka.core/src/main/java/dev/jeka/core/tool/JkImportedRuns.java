@@ -1,22 +1,16 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.utils.JkUtilsReflect;
+
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import dev.jeka.core.api.utils.JkUtilsReflect;
+import java.util.*;
 
 /**
- * A run class can import one or several run classes. It is an important mechanism to reuse runs across projects.
- * This class holds imported runs within a run class.
+ * A command class can import one or several command classes. It is an important mechanism to reuse runs across projects.
+ * This class holds imported runs within a command class.
  *
  * @author Jerome Angibaud
  */
@@ -119,7 +113,7 @@ public final class JkImportedRuns {
                 throw new IllegalStateException("Can't inject imported run instance of type " + importedRun.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
                         + "#" + field.getName() + " from directory " + masterRun.getBaseDir()
-                        + "\nRun class is located in " + currentClassBaseDir
+                        + "\nCommand class is located in " + currentClassBaseDir
                         + " while working dir is " + Paths.get("").toAbsolutePath()
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);
             }
@@ -130,7 +124,7 @@ public final class JkImportedRuns {
 
     /*
      * Creates an instance of <code>JkCommands</code> for the given project and
-     * run class. The instance field annotated with <code>JkOption</code> are
+     * command class. The instance field annotated with <code>JkOption</code> are
      * populated as usual.
      */
     @SuppressWarnings("unchecked")

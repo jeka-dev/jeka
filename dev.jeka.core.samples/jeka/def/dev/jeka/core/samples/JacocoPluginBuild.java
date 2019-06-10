@@ -11,7 +11,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
 
 /**
- * This build deletes artifacts, compiles, tests and launches SonarQube analyse.
+ * This command class deletes artifacts, compiles, tests and launches SonarQube analyse.
  */
 public class JacocoPluginBuild extends JkCommands {
 

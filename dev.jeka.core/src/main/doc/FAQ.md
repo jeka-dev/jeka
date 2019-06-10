@@ -1,7 +1,7 @@
 # General
 
-### Can run classes and code to build be hosted in separate projects ?
-Of course yes. If you prefer that your Jeka run code lies in a distinct project, create a Jeka project in a sibling 
+### Can command classes and code to build be hosted in separate projects ?
+Of course yes. If you prefer that your Jeka code lies in a distinct project, create a Jeka project in a sibling 
 folder and mention where is located the project to build.
 
 ```java
@@ -13,10 +13,10 @@ protected void setup() {  // project to build lies in a sibling folder.
       ...
 ```
 
-### My run class does not compile so I can't invoke any Jeka method as 'help' or 'scaffold#run'. What can I do ?
+### My command class does not compile so I can't invoke any Jeka method as 'help' or 'scaffold#run'. What can I do ?
 
-You can specify a built-in run class to run. This way, compilation won't occur.
-For example `jeka -RunClass=JkRun help` or `jeka -RC=JkRun scaffold#run java#"`.
+You can specify a built-in command class to run. This way, compilation won't occur.
+For example `jeka -CommandClass=JkCommandshelp` or `jeka -CC=JkCommands scaffold#run java#"`.
 
 # Compilation
 
@@ -43,7 +43,7 @@ Jeka can use any JSR199 Java compiler to compile your Java code. Just set the co
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
-public class Build extends JkRun {
+public class Build extends JkCommands{
     ...
     maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
     ...

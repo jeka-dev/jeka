@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Defines run classes defined on a given project.
+ * Defines command classes defined on a given project.
  *
  * @author Jerome Angibaud
  */
@@ -257,7 +257,7 @@ final class ProjectDef {
 
     /**
      * Definition for run option. Run options are fields belonging to a
-     * run class.
+     * command class.
      *
      * @author Jerome Angibaud
      */

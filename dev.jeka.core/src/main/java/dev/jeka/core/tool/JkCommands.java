@@ -69,7 +69,7 @@ public class JkCommands {
     }
 
     /**
-     * Creates a instance of the specified run class (extending JkCommands), including option injection, plugin loading
+     * Creates a instance of the specified command class (extending JkCommands), including option injection, plugin loading
      * and plugin activation.
      */
     public static <T extends JkCommands> T of(Class<T> runClass) {
@@ -190,7 +190,7 @@ public class JkCommands {
     }
 
     /**
-     * Dependencies necessary to compile the this run class. It is not the dependencies for building the project.
+     * Dependencies necessary to compile the this command class. It is not the dependencies for building the project.
      */
     public final JkDependencySet getRunDependencies() {
         return runDependencies;
@@ -208,7 +208,7 @@ public class JkCommands {
     /**
      * Cleans the output directory.
      */
-    @JkDoc("Cleans the output directory except the compiled run classes.")
+    @JkDoc("Cleans the output directory except the compiled command classes.")
     public void clean() {
         JkLog.info("Clean output directory " + getOutputDir());
         if (Files.exists(getOutputDir())) {
@@ -220,7 +220,7 @@ public class JkCommands {
     /**
      * Displays all available methods defined in this run.
      */
-    @JkDoc("Displays all available methods and options defined for this run class.")
+    @JkDoc("Displays all available methods and options defined for this command class.")
     public void help() {
         if (help.xml || help.xmlFile != null) {
             HelpDisplayer.help(this, help.xmlFile);
