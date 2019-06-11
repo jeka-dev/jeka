@@ -138,7 +138,7 @@ public class CoreBuild extends JkCommands {
     // Necessary to publish on OSSRH
     private static JkMavenPublicationInfo mavenPublication() {
         return JkMavenPublicationInfo
-                .of("Jerkar", "Build simpler, stronger, faster", "http://jerkar.github.io")
+                .of("Jeka", "Automate with plain Java code and nothing else.", "https://jeka.dev")
                 .withScm("https://github.com/jerkar/jerkar.git")
                 .andApache2License()
                 .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
