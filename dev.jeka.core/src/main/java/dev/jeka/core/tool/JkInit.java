@@ -48,7 +48,7 @@ public final class JkInit {
             sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
-        sb.append("\nJeka Run Repositories : " + Engine.repos().toString());
+        sb.append("\nJeka Def Class Repositories : " + Engine.repos().toString());
         sb.append("\nJeka Repository Cache : " + JkLocator.getJekaRepositoryCache());
         sb.append("\nJeka Classpath : " + System.getProperty("java.class.path"));
         sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(Environment.commandLine.rawArgs()), " "));

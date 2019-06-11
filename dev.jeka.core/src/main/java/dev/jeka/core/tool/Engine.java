@@ -85,7 +85,7 @@ final class Engine {
             path = compile().and(path);
             jkCommands = getRunInstance(runClassHint, path);
         }
-        jkCommands.getImportedRuns().setImportedRunRoots(this.rootOfImportedRuns);
+        jkCommands.getImportedCommands().setImportedRunRoots(this.rootOfImportedRuns);
         if (jkCommands == null) {
             throw new JkException("Can't find or guess any command class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a Jeka project ?");
@@ -214,7 +214,7 @@ final class Engine {
 
     private void launch(JkCommands jkCommands, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkCommands importedRun : jkCommands.getImportedRuns().getAll()) {
+            for (final JkCommands importedRun : jkCommands.getImportedCommands().getAll()) {
                 runProject(importedRun, commandLine.getSubProjectMethods());
             }
             runProject(jkCommands, commandLine.getSubProjectMethods());

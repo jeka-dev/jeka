@@ -14,12 +14,12 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-public final class JkImportedRuns {
+public final class JkImportedCommands {
 
     private static final ThreadLocal<Map<ImportedRunRef, JkCommands>> IMPORTED_RUN_CONTEXT = new ThreadLocal<>();
 
-    static JkImportedRuns of(Path masterRootDir, JkCommands masterRun) {
-        return new JkImportedRuns(masterRootDir, getDirectImportedRuns(masterRun));
+    static JkImportedCommands of(Path masterRootDir, JkCommands masterRun) {
+        return new JkImportedCommands(masterRootDir, getDirectImportedRuns(masterRun));
     }
 
     private final List<JkCommands> directImportedRuns;
@@ -31,7 +31,7 @@ public final class JkImportedRuns {
     // The declared @JkImportProject values, read at pre-compile time
     private List<Path> importedRunRoots = Collections.emptyList();
 
-    private JkImportedRuns(Path masterDir, List<JkCommands> runDeps) {
+    private JkImportedCommands(Path masterDir, List<JkCommands> runDeps) {
         super();
         this.masterRunBaseDir = masterDir;
         this.directImportedRuns = Collections.unmodifiableList(runDeps);
@@ -80,7 +80,7 @@ public final class JkImportedRuns {
         for (final JkCommands run : directImportedRuns) {
             final Path dir = run.getBaseDir();
             if (!files.contains(dir)) {
-                result.addAll(run.getImportedRuns().resolveTransitiveRuns(files));
+                result.addAll(run.getImportedCommands().resolveTransitiveRuns(files));
                 result.add(run);
                 files.add(dir);
             }

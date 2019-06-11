@@ -40,10 +40,10 @@ public final class JkPluginIntellij extends JkPlugin {
         } else {
             generator = JkImlGenerator.of(getRun().getBaseDir());
         }
-        final List<Path> depProjects = getRun().getImportedRuns().getImportedRunRoots();
+        final List<Path> depProjects = getRun().getImportedCommands().getImportedRunRoots();
         generator.setUseVarPath(useVarPath);
         generator.setRunDependencies(externalDir ? null : getRun().getRunDependencyResolver(),
-                getRun().getRunDependencies());
+                getRun().getDefDependencies());
         generator.setImportedProjects(depProjects);
         Path basePath = getRun().getBaseDir();
         if (getRun().getPlugins().hasLoaded(JkPluginJava.class)) {

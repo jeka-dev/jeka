@@ -62,11 +62,11 @@ public final class JkPluginEclipse extends JkPlugin {
         if (getRun().getPlugins().hasLoaded(JkPluginJava.class)) {
             final JkJavaProject javaProject = getRun().getPlugins().get(JkPluginJava.class).getProject();
             final List<Path> importedRunProjects = new LinkedList<>();
-            for (final JkCommands depRun : getRun().getImportedRuns().getDirects()) {
+            for (final JkCommands depRun : getRun().getImportedCommands().getDirects()) {
                 importedRunProjects.add(depRun.getBaseTree().getRoot());
             }
             final JkEclipseClasspathGenerator classpathGenerator = JkEclipseClasspathGenerator.of(javaProject);
-            classpathGenerator.setRunDependencies(getRun().getRunDependencyResolver(), getRun().getRunDependencies());
+            classpathGenerator.setRunDependencies(getRun().getRunDependencyResolver(), getRun().getDefDependencies());
             classpathGenerator.setIncludeJavadoc(true);
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedProjects(importedRunProjects);

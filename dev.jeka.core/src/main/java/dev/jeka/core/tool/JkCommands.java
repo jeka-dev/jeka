@@ -38,11 +38,11 @@ public class JkCommands {
 
     private JkRunPlugins plugins;
 
-    private JkDependencyResolver runDefDependencyResolver;
+    private JkDependencyResolver defDependencyResolver;
 
-    private JkDependencySet runDependencies;
+    private JkDependencySet defDependencies;
 
-    private final JkImportedRuns importedRuns;
+    private final JkImportedCommands importedCommands;
 
     // ------------------ options --------------------------------------------------------
 
@@ -63,7 +63,7 @@ public class JkCommands {
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
         // Instantiating imported runs
-        this.importedRuns = JkImportedRuns.of(this.getBaseTree().getRoot(), this);
+        this.importedCommands = JkImportedCommands.of(this.getBaseTree().getRoot(), this);
 
         this.plugins = new JkRunPlugins(this, Environment.commandLine.getPluginOptions());
     }
@@ -178,29 +178,29 @@ public class JkCommands {
     // ------------------------------ run dependencies --------------------------------
 
     void setRunDependencyResolver(JkDependencySet runDependencies, JkDependencyResolver scriptDependencyResolver) {
-        this.runDependencies = runDependencies;
-        this.runDefDependencyResolver = scriptDependencyResolver;
+        this.defDependencies = runDependencies;
+        this.defDependencyResolver = scriptDependencyResolver;
     }
 
     /**
      * Returns the dependency resolver used to compile/run scripts of this project.
      */
     public final JkDependencyResolver getRunDependencyResolver() {
-        return this.runDefDependencyResolver;
+        return this.defDependencyResolver;
     }
 
     /**
      * Dependencies necessary to compile the this command class. It is not the dependencies for building the project.
      */
-    public final JkDependencySet getRunDependencies() {
-        return runDependencies;
+    public final JkDependencySet getDefDependencies() {
+        return defDependencies;
     }
 
     /**
      * Returns imported runs with plugins applied on.
      */
-    public final JkImportedRuns getImportedRuns() {
-        return importedRuns;
+    public final JkImportedCommands getImportedCommands() {
+        return importedCommands;
     }
 
     // ------------------------------ Command line methods ------------------------------
