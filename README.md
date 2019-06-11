@@ -16,6 +16,12 @@ For example `jeka java#pack jacoco# sonar#run -sonar#host.url=http://myserver/so
 performs a complete build running unit tests under Jacoco coverage tools and performs Sonar analysis on a Java project free 
 of any build-code / configuration / script. 
 
+# News 
+
+_Jerkar_ has been rebranded to _Jeka_. Maven groupId and artifactId has moved to `dev.jeka.jeka-core`.
+Next release version of Jeka will be `0.8.0.RELEASE`. It will basically contain the Jerkar `0.7.0.RELEASE` plus 
+everything related to name change (packages, classes, variables, documentation).
+
 # Get Jeka
 
 * Snapshots : https://oss.sonatype.org/content/repositories/snapshots/dev/jeka/jeka-core/
