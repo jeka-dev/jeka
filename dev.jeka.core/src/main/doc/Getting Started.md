@@ -1,6 +1,6 @@
 # Lexical
 
-The following concepts are used all over the tool section :
+The following concepts are used all over this document :
 
 __[PROJECT DIR]__ : Refers to the root folder of the project to build (or to run commands on). This is where you would put pom.xml or build.xml files.
 
@@ -10,20 +10,24 @@ __[JEKA USER HOME]__ : Refers to the folder where Jeka stores caches, binary rep
 
 __Def Classes :__ Java source files located under _[PROJECT DIR]/jeka/def_. They are compiled on the flight by Jeka when invoked from the command line.
 
-__Def Classpath :__ Classpath on which depends _def classes_ to get compiled and _command classes_ to be executed. 
+__Def Classpath :__ Classpath on which depend _def classes_ to get compiled and _command classes_ to be executed. 
 By default, it consists in _Jeka_ core classes. it can be augmented with any third party lib or def Classpath coming 
-from another project. 
-Once _def classes_ sources have been compiled, _def Classpath_ is augmented with their _.class_ counterpart.
+from imported project. 
+Once _def classes_ sources have been compiled, _def Classpath_ is augmented with compiled  _def classes_.
 
 __Command Classes :__ Classes extending `JkCommands`. Their _commands_ can be invoked from the command line and 
 their pubic fields set from the command line as well. Generally _def classes_ contains one _command class_ though there can be many or 
-none. Command class can be a _def class_ but can also be imported from a library or external project.
+none. Command classes can come from _def classes_ but can also be imported from a library or external project.
 
-__Commands :__ Java methods member of _command classes_ and invokable from Jeka command line. 
-They must be instance method (not static), public, zero-args and returning void. Every method verifying these constraints is considered as a _command_.
+__Commands :__ Java methods member of _command classes_ and invokable from command line. 
+They must be instance method (not static), public, zero-args and returning void. 
+Every method verifying these constraints within a _command class_ or a _plugin_  is considered as a _command_.
  
 __Options :__ This is a set of key-value used to inject parameters. Options can be mentioned 
 as command line arguments, stored in specific files or hard coded in _command classes_.
+
+__Plugins :__ Classes extending `JkPlugin` and named as _JkPluginXxxxx_ where_Xxxxx_ is the name of the plugin. In short, a plugin 
+add dynamically commands and options to the running _command class_.
 
 
 # Install Jeka
@@ -148,19 +152,19 @@ sample1
 import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkInit;
 
-class Build extends JkCommands {
+class Commands extends JkCommands {
 
-    public static void main(String[] args) throws Exception {
-        Build build = JkInit.instanceOf(Build.class, args);
-        build.clean();
+    public static void main(String[] args) {
+        Commands commands = JkInit.instanceOf(Commands.class, args);
+        commands.clean();
     }
 
 }
 ```
 
-## Add a run method (method invokable from command line)
+## Add a command
 
-Add the following method to the Build java source.
+Add the following method to the `Commands` class.
 
 ```java
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -170,7 +174,7 @@ import dev.jeka.core.tool.JkInit;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-class Build extends JkCommands {
+class Commands extends JkCommands {
 
     public void displayGoogle() throws MalformedURLException {
         String content = JkUtilsIO.read(new URL("https://www.google.com/"));
@@ -178,7 +182,7 @@ class Build extends JkCommands {
     }
 
     public static void main(String[] args) throws Exception {
-        JkInit.instanceOf(Build.class, args).displayGoogle();
+        JkInit.instanceOf(Commands.class, args).displayGoogle();
     }
 
 }
@@ -190,7 +194,7 @@ Execute `jeka help` and the output should mention your new method.
 
 ```
 ...
-From class Build :
+From class Commands :
   Methods :
     displayGoogle : No description available.
 
@@ -201,13 +205,14 @@ From class JkCommands :
 ...
 ```
 
-Any public instance method with no-args and returning `void` fits to be a run method. You can call several run methods in a single row.
+Any public instance method with no-args and returning `void` fits to be a _command_. You can call several _commands_ in a single row.
 
-You can also launch/debug the method directly from your IDE, using the *main* method.
+You can also launch/debug command directly from your IDE, using the *main* method. Note that for so, you must instantiate 
+your _command class_ using `JkInit.instanceOf`.
 
 ## Self document your method
 
-Add the following annotation to the newly created method.
+Add the following annotation to the _command_.
 
 ```java
 @JkDoc("Fetch Google page and display its source on the console.")
@@ -217,7 +222,7 @@ public void displayGoogle() throws MalformedURLException {
 }
 ```
 
-Execute `jeka help` and the output should mention doculentation.
+Execute `jeka help` and the output should mention documentation.
 ```
 From class Build :
   Methods :
@@ -228,10 +233,10 @@ From class Build :
 
 May you like to see Google page source but you probably want to apply this method to any other url.
 
-To make it parametrizable, just declare the url in a public field so its value can be injected from command line.
+To make it configurable, just declare the url in a public field so its value can be injected from command line.
 
 ```java
-class Build extends JkCommands {
+class Commands extends JkCommands {
 
     @JkDoc("The url to display content.")   // Optional self documentation
     public String url = "https://www.google.com/";
@@ -243,7 +248,7 @@ class Build extends JkCommands {
     }
 
     public static void main(String[] args) throws Exception {
-        JkInit.instanceOf(Build.class, args).displayContent();
+        JkInit.instanceOf(Commands.class, args).displayContent();
     }
 
 }
@@ -255,7 +260,7 @@ If you execute `jeka help` you should see the url option mentioned.
 
 ```
 ...
-From class Build :
+From class Commands :
   Methods :
     displayContent : Fetch Google page and display its source on the console.
   Options :
@@ -263,16 +268,16 @@ From class Build :
 ...
 ```
 
-## Use 3rd party libs in your build class
+## Use 3rd party libs in your command class
 
-You can mention inline the external library you need to compile and execute your build class. For exemple, you main need *Apache HttpClient* library to perform some non basic HTTP tasks.
+You can mention inline the external libraries you need to compile and execute your _command class_. For exemple, you main need *Apache HttpClient* library to perform some non basic HTTP tasks.
 
 1. Annotate your class with modules or jar files you want to use.
 
 ```java
 @JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")  // Can import files from Maven repos
 @JkImport("../local_libs/my-utility.jar")   // or simply located locally
-class Build extends JkCommands {
+class Commands extends JkCommands {
    ...
 }
 ```
@@ -292,16 +297,16 @@ public void post() {
 ```
 Execute *post* method as usual : `jeka post`.
 
-## Import a Jeka build from another project
+## Import a command class from another project
 
-Imagine that you want to want to reuse *displayContent* method from project _sample1_ in another Jeka project named _sample2_. Let's create a new _sample2_ project located in a sibling folder than _sample1_.
+Imagine that you want to want to reuse *displayContent* method from project _sample1_ in another project. Let's create a new _sample2_ project located in a sibling folder than _sample1_.
 
 1. Execute `mkdir sample2` then `cd sample2` followed by `jeka scaffold#run intellij#` (or `jeka scaffold#run eclipse#`)
-2. Rename sample2 _Build_ class 'Sample2Build` to avoid name collision. Be carefull, rename its filename as well unless Jeka will fail.
+2. Rename sample2 _command class_ 'Sample2Commands` to avoid name collision. Be careful to rename its filename as well unless Jeka will fail.
 3. Add a field of type JkCommands annotated with `JkImportProject` and the relative path of _sample1_ as value.
  
 ```java
-class Sample2Build extends JkCommands {
+class Sample2Commands extends JkCommands {
 
     @JkImportProject("../sample1")
     private JkCommands project1Run;
@@ -312,19 +317,19 @@ class Sample2Build extends JkCommands {
     
 }
 ```
-4. Execute `jeka intellij#generateIml` (or `jeka eclipse#generateFiles`) to add _sample1_ dependencies to your IDE. Now _Sampl2Build_ can refer to the _Build_ class of _sample1_.
+4. Execute `jeka intellij#generateIml` (or `jeka eclipse#generateFiles`) to add _sample1_ dependencies to your IDE. Now _Sampl2Commands_ can refer to the _command class_ of _sample1_.
 
-5. Replace _JkCommands_ Type by the _Build_ type from _sample1_ and use it in method implementation.
+5. Replace _JkCommands_ Type by the _Commands_ type from _sample1_ and use it in method implementation.
 
 ```java
-class Sample2Build extends JkCommands {
+class Sample2Commands extends JkCommands {
 
     @JkImportProject("../sample1")
-    private Build project1Run;  // This Build come from sample1
+    private Commands sample1Commands;  // This class comes from sample1
 
     public void printUrlContent() throws MalformedURLException {
-        System.out.println("Content of " + project1Run.url);
-        project1Run.displayContent();
+        System.out.println("Content of " + sample1Commands.url);
+        sample1Commands.displayContent();
     }
 
 }
@@ -338,28 +343,35 @@ Content of https://www.google.com/
 ...
 ```
 
-You can set directly the value of the url on the command line as option values are injected on all imported build recursively.
+You can set directly the value of the url on the command line as option values are injected on all imported commands recursively.
 
 `jeka printUrlContent -url=https://github.com/github` displays :
 
 ```
 Content of https://fr.wikipedia.org
 <!DOCTYPE html>
-<html class="client-nojs" lang="fr" dir="ltr">
+<html class="client-nojs" lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
-<title>Wikipédia, l'encyclopédie libre</title>
+<title>Wikipedia, the free encyclopedia</title>
 ...
 ```
 
 ## Restrictions
 
-Except the following mentioned below, there is not known restriction about what you can do with you build class. You can define as many classes as you want into def directoy. Organise them within Java packages or not. 
+Except that _command classes_ must have the same name than their filename, there is not known restriction about what you can do with _command classes_ or _def classes_. 
+You can define as many classes as you want into def directory. Organise them within Java packages or not. 
 
-* Classes invoked from command lines must have the same name than their file.
+# Work with plugins
+
+Each _command class_ instance acts as a registry for plugins. In turn, plugins can interact each other through this registry.
+
+Let's implements similar commands than previously but using plugins. TODO
+
 
 
 # Build a Java project
+
 Now let's start more complicated tasks as building a Java poject. It involves compilation, testing, packaging, dependency resolution, releasing, ...
 There's many option to handle it in Jeka :
 
