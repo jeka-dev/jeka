@@ -1,13 +1,11 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
-import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-
-import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -50,8 +48,10 @@ public final class JkScaffolder {
      */
     public void embed() {
         JkLog.info("Create shell files.");
-        JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka.bat"), baseTree.getRoot().resolve("jekaw.bat"));
-        JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka"), baseTree.getRoot().resolve("jekaw"));
+        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka.bat"), baseTree.getRoot().resolve("jekaw.bat"),
+                StandardCopyOption.REPLACE_EXISTING);
+        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), baseTree.getRoot().resolve("jekaw"),
+                StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         Path jekaJar = JkLocator.getJekaJarPath();
         Path bootFolder = baseTree.getRoot().resolve(JkConstants.JEKA_DIR + "/boot");
         JkUtilsPath.createDirectories(bootFolder);

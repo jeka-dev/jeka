@@ -162,4 +162,4 @@ fi
 
 exec "$JAVACMD" \
   $JEKA_OPTS \
-  -cp "$JEKA_HOME/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"
+  -cp "$LOCAL_BUILD_DIR$JEKA_HOME/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"
