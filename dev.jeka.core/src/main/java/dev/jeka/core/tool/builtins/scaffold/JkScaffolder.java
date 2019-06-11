@@ -53,7 +53,7 @@ public final class JkScaffolder {
         JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka.bat"), baseTree.getRoot().resolve("jekaw.bat"));
         JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jeka"), baseTree.getRoot().resolve("jekaw"));
         Path jekaJar = JkLocator.getJekaJarPath();
-        Path bootFolder = baseTree.getRoot().resolve("build/boot");
+        Path bootFolder = baseTree.getRoot().resolve(JkConstants.JEKA_DIR + "/boot");
         JkUtilsPath.createDirectories(bootFolder);
         Path target = bootFolder.resolve(jekaJar.getFileName());
         JkLog.info("Copy jeka jar to " + baseTree.getRoot().relativize(target));
