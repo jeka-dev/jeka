@@ -49,10 +49,11 @@ class SampleTester {
         testSamples("HttpClientTaskBuild");
         testSamples("SimpleScopeBuild");
         testDependee("FatJarBuild");
-        Path classpathFile = sampleBaseDir.get(".classpath");
-        Path classpathFile2 = sampleBaseDir.get(".classpath2");
 
         // Test eclipse
+        JkLog.startTask("Test Eclipse .classpath generation");
+        Path classpathFile = sampleBaseDir.get(".classpath");
+        Path classpathFile2 = sampleBaseDir.get(".classpath2");
         try {
             Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
             testSamples("", "eclipse#generateAll");
@@ -63,7 +64,10 @@ class SampleTester {
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            JkLog.endTask();
         }
+
         testDependee("NormalJarBuild");
         testFork();
         testScaffoldJava();

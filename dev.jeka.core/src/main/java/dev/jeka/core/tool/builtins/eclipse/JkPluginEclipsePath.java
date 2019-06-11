@@ -9,7 +9,7 @@ import dev.jeka.core.api.ide.eclipse.JkEclipseClasspathApplier;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 
-@JkDoc("Use Eclipse .classpath file to setupAfterPluginActivations project structure and dependencies.")
+@JkDoc("Use Eclipse .classpath file to setup project structure and dependencies.")
 @JkDocPluginDeps(JkPluginJava.class)
 public final class JkPluginEclipsePath extends JkPlugin {
 
