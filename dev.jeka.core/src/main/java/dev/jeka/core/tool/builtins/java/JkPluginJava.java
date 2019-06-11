@@ -136,7 +136,8 @@ public class JkPluginJava extends JkPlugin {
         project.getSourceLayout().getResources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
         project.getSourceLayout().getTests().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
         project.getSourceLayout().getTestResources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        scaffoldPlugin.setRunClassClode(code);
+        scaffoldPlugin.getScaffolder().setCommandClassCode(code);
+        scaffoldPlugin.getScaffolder().setClassFilename("Build.java");
     }
 
     //  ----------------------------- Shorthands ---------------------------------------

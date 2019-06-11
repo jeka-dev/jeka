@@ -107,6 +107,6 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Adds *.iml generation to scaffolding.")
     @Override
     protected void activate() {
-        scaffold.addExtraAction(this::generateIml);
+        scaffold.getScaffolder().getExtraActions().chain(this::generateIml);
     }
 }

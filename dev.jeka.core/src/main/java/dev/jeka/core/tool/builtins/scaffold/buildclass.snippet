@@ -4,11 +4,11 @@ import dev.jeka.core.tool.JkInit;
 /**
  * @formatter:off
  */
-class Build extends JkCommands {
+class Commands extends JkCommands {
 
     public static void main(String[] args) throws Exception {
-        Build build = JkInit.instanceOf(Build.class, args);
-        build.clean();
+        Commands commands = JkInit.instanceOf(Commands.class, args);
+        commands.clean();
     }
 
 }
