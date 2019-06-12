@@ -131,7 +131,7 @@ public class CoreBuild extends JkCommands {
     private static JkMavenPublicationInfo mavenPublication() {
         return JkMavenPublicationInfo
                 .of("Jeka", "Automate with plain Java code and nothing else.", "https://jeka.dev")
-                .withScm("https://github.com/jerkar/jerkar.git")
+                .withScm("https://github.com/jerkar/jeka.git")
                 .andApache2License()
                 .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
     }

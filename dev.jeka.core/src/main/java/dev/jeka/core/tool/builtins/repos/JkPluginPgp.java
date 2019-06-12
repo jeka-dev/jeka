@@ -31,13 +31,16 @@ public class JkPluginPgp extends JkPlugin {
     @JkDoc("Key name to sign and verify.")
     public String keyName = "";
 
-    private final JkPgp pgp;
+    private JkPgp pgp;
 
-    protected JkPluginPgp(JkCommands run) {
-        super(run);
-        Path localPub = run.getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
+    protected JkPluginPgp(JkCommands commands) {
+        super(commands);
+    }
+
+    protected void init() {
+        Path localPub = getCommands().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
         Path pub = JkUtilsPath.firstExisting(publicRingPath, localPub, JkPgp.getDefaultPubring());
-        Path localSec = run.getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
+        Path localSec = getCommands().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
         Path sec = JkUtilsPath.firstExisting(secretRingPath, localSec, JkPgp.getDefaultSecring());
         this.pgp = JkPgp.of(pub, sec, secretKeyPassword);
     }

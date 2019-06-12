@@ -34,6 +34,12 @@ public abstract class JkPlugin {
     protected void activate() {
     }
 
+    /**
+     * This method is invoked right after plugin options has been injected
+     */
+    protected void init() {
+    }
+
     public final String name() {
         final String className = this.getClass().getSimpleName();
         if (! className.startsWith(CLASS_PREFIX) || className.equals(CLASS_PREFIX)) {

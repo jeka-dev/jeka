@@ -74,11 +74,13 @@ public final class JkRunPlugins {
         }
         final T plugin = JkUtilsReflect.newInstance(pluginClass, JkCommands.class, this.holder);
         injectOptions(plugin);
+        plugin.init();
         loadedPlugins.add(plugin);
         return plugin;
     }
 
     void injectOptions(JkPlugin plugin) {
+        FieldInjector.injectEnv(plugin);
         JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(), this.pluginOptionsList));
     }
 
