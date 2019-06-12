@@ -63,6 +63,7 @@ public class CoreBuild extends JkCommands {
         if (!JkVersion.of(jekaVersion).isSnapshot()) {
             javaPlugin.pack.javadoc = true;
         }
+        project.getManifest().addMainClass("dev.jeka.core.tool.Main");
 
         JkJavaProjectMaker maker = project.getMaker();
         maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis

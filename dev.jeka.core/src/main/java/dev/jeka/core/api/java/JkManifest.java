@@ -46,6 +46,23 @@ public final class JkManifest {
      */
     private static final String BUILT_BY = "Built-By";
 
+    /**
+     * The title of the implementation.
+     */
+    public static final String IMPLEMENTATION_TITLE = "Implementation_Title";
+
+    /**
+     * The version of the implementation.
+     */
+    public static final String IMPLEMENTATION_VERSION = "Implementation-Version";
+
+    /**
+     * The version of the implementation.
+     */
+    public static final String IMPLEMENTATION_VENDOR = "Implementation-Vendor";
+
+
+
     private final Manifest manifest;
 
     /**

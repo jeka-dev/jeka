@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.junit.JkUnit;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
@@ -81,6 +82,13 @@ public class JkPluginJava extends JkPlugin {
     }
 
     private void applyOptionsToUnderlyingProject() {
+        if (project.getVersionedModule() != null) {
+            JkVersionedModule versionedModule = project.getVersionedModule();
+            project.getManifest()
+                    .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, versionedModule.getModuleId().getName())
+                    .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, versionedModule.getModuleId().getGroup())
+                    .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, versionedModule.getVersion().getValue());
+        }
         final JkJavaProjectMaker maker = project.getMaker();
         if (!pack.sources) {
             maker.removeArtifact(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
