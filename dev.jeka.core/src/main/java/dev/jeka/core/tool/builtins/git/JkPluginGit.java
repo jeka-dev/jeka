@@ -17,7 +17,7 @@ public class JkPluginGit extends JkPlugin {
     }
 
     @JkDoc("Perform a dirty check first then put a tag at the HEAD and push it to remote.")
-    public void remoteTag() {
+    public void tagRemote() {
         if (!git.withLogOutput(false).withLogCommand(true).isRemoteEqual()) {
             System.out.println("The current tracking branch is not aligned with the remote. Please update/push and retry.");
             return;
