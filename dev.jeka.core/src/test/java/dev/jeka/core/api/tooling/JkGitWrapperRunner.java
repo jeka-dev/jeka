@@ -11,7 +11,7 @@ public class JkGitWrapperRunner {
         JkGitWrapper git = JkGitWrapper.of(Paths.get(""));
         System.out.println(git.getCurrentBranch());
         //git.exec("rev-parse --abbrev-ref HEAD");
-        System.out.println(git.isDirty());
+        System.out.println(git.isWorkspaceDirty());
         System.out.println(git.getCurrentCommit());
         System.out.println(git.getTagsOfCurrentCommit());
         System.out.println(git.getVersionWithTagOrSnapshot());

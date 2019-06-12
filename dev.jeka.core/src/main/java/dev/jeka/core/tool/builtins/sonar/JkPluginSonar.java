@@ -55,7 +55,7 @@ public class JkPluginSonar extends JkPlugin {
             "Options prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
             "will be appended to these properties.")
     public void run() {
-        configureSonarFrom(getRun().getPlugins().get(JkPluginJava.class).getProject()).withProperties(properties).run();
+        configureSonarFrom(getCommands().getPlugins().get(JkPluginJava.class).getProject()).withProperties(properties).run();
     }
 
     /**

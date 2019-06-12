@@ -77,7 +77,7 @@ final class HelpDisplayer {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         for (PluginDescription pluginDescription : pluginDescriptions) {
             if (pluginDescription.shortName().equals(plugin.name())) {
-                JkLog.info(helpPluginDescription(plugin.getRun(), pluginDescription));
+                JkLog.info(helpPluginDescription(plugin.getCommands(), pluginDescription));
                 return;
             }
         }
@@ -122,7 +122,7 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    static List<String> optionValues(List<ProjectDef.RunOptionDef> optionDefs) {
+    static List<String> optionValues(List<ProjectDef.CommandOptionDef> optionDefs) {
         return optionDefs.stream().map(optionDef -> optionDef.shortDescription()).collect(Collectors.toList());
     }
 

@@ -33,7 +33,9 @@ public class OpenSourceJarBuild extends JkCommands {
         
         javaPlugin.getProject()
                 .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
-                .addDependencies(deps)
+                .addDependencies(deps);
+
+        javaPlugin.getProject().getMaker().getTasksForPublishing()
                 .setMavenPublicationInfo(info);
     }
    

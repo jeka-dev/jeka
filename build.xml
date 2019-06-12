@@ -32,7 +32,7 @@
 
 	<target name="run" depends="bootstrap">
 		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.core" fork="true" failonerror="true">
-			<arg line="java#pack publishDocsOnGithubPage java#publish -pgp#secretKeyPassword=${env.PGP_PASSPHRASE} -testSamples=false -LogMaxLength=100 -LogHeaders" />
+			<arg line="java#pack publishDocsOnGithubPage java#publish -testSamples=false -LogMaxLength=100 -LogHeaders" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

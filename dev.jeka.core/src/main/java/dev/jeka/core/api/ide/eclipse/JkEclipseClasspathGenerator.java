@@ -404,6 +404,7 @@ public final class JkEclipseClasspathGenerator {
             binPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
         } else {
             isVar = false;
+            System.out.println("*************************************" + bin);
             binPath = sourceLayout.getBaseDir().relativize(bin).toString();
         }
         binPath = binPath.replace(File.separator, "/");

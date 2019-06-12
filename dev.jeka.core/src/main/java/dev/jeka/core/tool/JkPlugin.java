@@ -12,15 +12,15 @@ public abstract class JkPlugin {
 
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
-    private final JkCommands run;
+    private final JkCommands commands;
 
     /*
-     * Right after to be instantiated, plugin instances are likely to be configured by the owning run.
-     * Therefore, every plugin members that are likely to be configured by the owning run must be
+     * Right after to be instantiated, plugin instances are likely to be configured by the owning commands.
+     * Therefore, every plugin members that are likely to be configured by the owning commands must be
      * initialized in the constructor.
      */
-    protected JkPlugin(JkCommands run) {
-        this.run = run;
+    protected JkPlugin(JkCommands commands) {
+        this.commands = commands;
     }
 
     @JkDoc("Displays help about this plugin.")
@@ -29,7 +29,7 @@ public abstract class JkPlugin {
     }
 
     /**
-     * Override this method to modify the run itself or its bound plugins.
+     * Override this method to modify the commands itself or its bound plugins.
      */
     protected void activate() {
     }
@@ -44,8 +44,8 @@ public abstract class JkPlugin {
         return JkUtilsString.uncapitalize(suffix);
     }
 
-    protected JkCommands getRun() {
-        return run;
+    protected JkCommands getCommands() {
+        return commands;
     }
 
     @Override

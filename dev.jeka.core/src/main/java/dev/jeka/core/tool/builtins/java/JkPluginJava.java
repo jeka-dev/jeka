@@ -64,7 +64,7 @@ public class JkPluginJava extends JkPlugin {
         this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);
 
         // Pre-configure JkJavaProject instance
-        this.project = JkJavaProject.ofMavenLayout(this.getRun().getBaseDir());
+        this.project = JkJavaProject.ofMavenLayout(this.getCommands().getBaseDir());
         this.project.setDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
         final Path path = run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
@@ -97,7 +97,10 @@ public class JkPluginJava extends JkPlugin {
         if (maker.getTasksForCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
             maker.getTasksForCompilation().setCompiler(compiler());
         }
-        maker.getTasksForPublishing().setPublishRepos(repoPlugin.publishRepositories());
+        if (maker.getTasksForPublishing().getPublishRepos() == null
+                || maker.getTasksForPublishing().getPublishRepos().getRepoList().isEmpty()) {
+            maker.getTasksForPublishing().setPublishRepos(repoPlugin.publishRepositories());
+        }
         final JkRepoSet downloadRepos = repoPlugin.downloadRepositories();
         JkDependencyResolver resolver = project.getMaker().getDependencyResolver();
         resolver = resolver.withRepos(downloadRepos); // always look in local repo
@@ -105,7 +108,7 @@ public class JkPluginJava extends JkPlugin {
         if (pack.checksums().length > 0) {
             maker.getTasksForPackaging().setChecksumAlgorithms(pack.checksums());
         }
-        JkPluginPgp pgpPlugin = this.getRun().getPlugins().get(JkPluginPgp.class);
+        JkPluginPgp pgpPlugin = this.getCommands().getPlugins().get(JkPluginPgp.class);
         JkPgp pgp = pgpPlugin.get();
         maker.getTasksForPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
 
@@ -129,7 +132,7 @@ public class JkPluginJava extends JkPlugin {
 
     private void setupScaffolder() {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
-        String baseDirName = getRun().getBaseDir().getFileName().toString();
+        String baseDirName = getCommands().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
         project.getSourceLayout().getSources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());

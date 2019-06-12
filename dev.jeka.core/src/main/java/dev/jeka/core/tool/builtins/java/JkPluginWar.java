@@ -39,7 +39,7 @@ public class JkPluginWar extends JkPlugin {
     @JkDoc("Add a war file to the generated artifacts.")
     @Override  
     protected void activate() {
-        JkPluginJava pluginJava = this.getRun().getPlugin(JkPluginJava.class);
+        JkPluginJava pluginJava = this.getCommands().getPlugin(JkPluginJava.class);
         JkJavaProject project = pluginJava.getProject();
         JkArtifactId warArtifactId = JkArtifactId.of(null, "war");
         maker.addArtifact(warArtifactId, () -> {

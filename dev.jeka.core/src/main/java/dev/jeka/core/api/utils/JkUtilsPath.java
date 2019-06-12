@@ -50,6 +50,18 @@ public final class JkUtilsPath {
         return result;
     }
 
+    /**
+     * Returns the first specified path that exist. Returns null if none.
+     */
+    public static Path firstExisting(Path... paths) {
+        for (int i=0; i < paths.length; i++) {
+            if (paths[i] != null && Files.exists(paths[i])) {
+                return paths[i];
+            }
+        }
+        return null;
+    }
+
     public static Path get(URL url) {
         try {
             return Paths.get(url.toURI());

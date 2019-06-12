@@ -60,8 +60,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 
-    private JkMavenPublicationInfo mavenPublicationInfo;
-
     private final JkJavaProjectMaker maker;
 
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
@@ -214,15 +212,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
      */
     public JkJavaProject setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
-        return this;
-    }
-
-    public JkMavenPublicationInfo getMavenPublicationInfo() {
-        return this.mavenPublicationInfo;
-    }
-
-    public JkJavaProject setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
-        this.mavenPublicationInfo = mavenPublicationInfo;
         return this;
     }
 

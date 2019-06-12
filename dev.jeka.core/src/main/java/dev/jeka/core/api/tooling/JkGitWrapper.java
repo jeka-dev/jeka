@@ -28,11 +28,21 @@ public final class JkGitWrapper {
         return new JkGitWrapper(this.git.withFailOnError(fail));
     }
 
+    public JkGitWrapper withLogOutput(boolean log) {
+        return new JkGitWrapper(this.git.withLogOutput(log));
+    }
+
     public String getCurrentBranch() {
         return git.andParams("rev-parse", "--abbrev-ref", "HEAD").withLogOutput(false).runAndReturnOutputAsLines().get(0);
     }
 
-    public boolean isDirty() {
+    public boolean isRemoteEqual() {
+        Object local = git.andParams("rev-parse", "@").runAndReturnOutputAsLines();
+        Object remote = git.andParams("rev-parse", "@{u}").runAndReturnOutputAsLines();
+        return  local.equals(remote);
+    }
+
+    public boolean isWorkspaceDirty() {
         return !git.andParams("diff", "HEAD", "--stat").withLogOutput(false).runAndReturnOutputAsLines().isEmpty();
     }
 

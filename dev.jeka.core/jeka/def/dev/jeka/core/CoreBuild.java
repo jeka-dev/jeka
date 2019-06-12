@@ -57,29 +57,21 @@ public class CoreBuild extends JkCommands {
         JkJavaProject project = javaPlugin.getProject();
 
         // Module version is driven by git repository info
-        project.setVersionedModule(JkModuleId.of("dev.jeka:jeka-core").withVersion(git.getVersionWithTagOrSnapshot()));
-
+        String jekaVersion = git.getVersionWithTagOrSnapshot();
+        project.setVersionedModule(JkModuleId.of("dev.jeka:jeka-core").withVersion(jekaVersion));
         project.setSourceVersion(JkJavaVersion.V8);
-        project.setMavenPublicationInfo(mavenPublication());
+        if (!JkVersion.of(jekaVersion).isSnapshot()) {
+            javaPlugin.pack.javadoc = true;
+        }
+
         JkJavaProjectMaker maker = project.getMaker();
         maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
         maker.addArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
-        JkVersion version = javaPlugin.getProject().getVersionedModule().getVersion();
-        if (!version.isSnapshot()) {
-            javaPlugin.pack.javadoc = true;
-        }
         maker.getTasksForJavadoc().setJavadocOptions("-notimestamp");
-
-        // Use embedded secret ring protected by a passphrase to deploy releases on ossrh
-        JkPluginPgp pgpPlugin = getPlugins().get(JkPluginPgp.class);
-        pgpPlugin.secretRingPath = getBaseDir().resolve("jeka/secring.gpg").toString();
-    }
-
-    @Override
-    protected void setupAfterPluginActivations() {
-        javaPlugin.getProject().getMaker().getTasksForPublishing().setPublishRepos(publishRepos());
-
+        maker.getTasksForPublishing()
+                .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
+                .setMavenPublicationInfo(mavenPublication());
     }
 
     public void publishDocsOnGithubPage() {
@@ -144,28 +136,12 @@ public class CoreBuild extends JkCommands {
                 .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
-    private JkRepoSet publishRepos() {
-        return JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd);
-    }
-
     void testSamples()  {
         JkLog.startTask("Launching integration tests on samples");
         SampleTester sampleTester = new SampleTester(this.getBaseTree());
         sampleTester.restoreEclipseClasspathFile = true;
         sampleTester.doTest();
         JkLog.endTask();
-    }
-
-    @JkDoc("Create a new git tag for release purpose.")
-    public void tagGit() {
-        JkGitWrapper git = JkGitWrapper.of(getBaseDir());
-        System.out.println("Existing tags :");
-        git.exec("tag");
-        String newTag = JkPrompt.ask("Enter new tag : ");
-        if (git.isDirty()) {
-            throw new JkException("Git workspace is dirty. Cannot put tag.");
-        }
-        git.tagAndPush(newTag);
     }
 
     public static void main(String[] args) {

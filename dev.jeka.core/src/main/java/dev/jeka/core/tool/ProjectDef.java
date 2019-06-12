@@ -35,12 +35,12 @@ final class ProjectDef {
 
         private final List<RunMethodDef> methodDefs;
 
-        private final List<RunOptionDef> optionDefs;
+        private final List<CommandOptionDef> optionDefs;
 
         private final Object runOrPlugin;
 
         private RunClassDef(Object runOrPlugin, List<RunMethodDef> methodDefs,
-                            List<RunOptionDef> optionDefs) {
+                            List<CommandOptionDef> optionDefs) {
             super();
             this.runOrPlugin = runOrPlugin;
             this.methodDefs = Collections.unmodifiableList(methodDefs);
@@ -51,7 +51,7 @@ final class ProjectDef {
             return methodDefs;
         }
 
-        List<RunOptionDef> optionDefs() {
+        List<CommandOptionDef> optionDefs() {
             return optionDefs;
         }
 
@@ -62,9 +62,9 @@ final class ProjectDef {
                 methods.add(RunMethodDef.of(method));
             }
             Collections.sort(methods);
-            final List<RunOptionDef> options = new LinkedList<>();
+            final List<CommandOptionDef> options = new LinkedList<>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
-                options.add(RunOptionDef.of(run, nameAndField.field,
+                options.add(CommandOptionDef.of(run, nameAndField.field,
                         nameAndField.name, nameAndField.rootClass));
             }
             Collections.sort(options);
@@ -120,7 +120,7 @@ final class ProjectDef {
 
         private String description(Class<?> runClass, String prefix, boolean withHeader, boolean includeHierarchy) {
             List<RunMethodDef> methods = includeHierarchy ? this.methodDefs : this.methodsOf(runClass);
-            List<RunOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(runClass);
+            List<CommandOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(runClass);
             if (methods.isEmpty() && options.isEmpty()) {
                 return "";
             }
@@ -145,7 +145,7 @@ final class ProjectDef {
             }
             if (!options.isEmpty()) {
                 stringBuilder.append(margin + "Options :\n");
-                for (RunOptionDef optionDef : options) {
+                for (CommandOptionDef optionDef : options) {
                     stringBuilder.append(optionDef.description(prefix, margin));
                 }
             }
@@ -154,9 +154,9 @@ final class ProjectDef {
 
         Map<String, String> optionValues(JkCommands run) {
             final Map<String, String> result = new LinkedHashMap<>();
-            for (final RunOptionDef optionDef : this.optionDefs) {
+            for (final CommandOptionDef optionDef : this.optionDefs) {
                 final String name = optionDef.name;
-                final Object value = RunOptionDef.value(run, name);
+                final Object value = CommandOptionDef.value(run, name);
                 result.put(name, JkUtilsObject.toString(value));
             }
             return result;
@@ -172,8 +172,8 @@ final class ProjectDef {
             }
             final Element optionsEl = document.createElement("options");
             runEl.appendChild(optionsEl);
-            for (final RunOptionDef runOptionDef : this.optionDefs) {
-                final Element optionEl = runOptionDef.toElement(document);
+            for (final CommandOptionDef commandOptionDef : this.optionDefs) {
+                final Element optionEl = commandOptionDef.toElement(document);
                 optionsEl.appendChild(optionEl);
             }
             return runEl;
@@ -194,8 +194,8 @@ final class ProjectDef {
                     .collect(Collectors.toList());
         }
 
-        private List<RunOptionDef> optionsOf(Class<?> runClass) {
-            return this.optionDefs.stream().filter(runOptionDef -> runClass.equals(runOptionDef.rootDeclaringClass))
+        private List<CommandOptionDef> optionsOf(Class<?> runClass) {
+            return this.optionDefs.stream().filter(commandOptionDef -> runClass.equals(commandOptionDef.rootDeclaringClass))
                     .collect(Collectors.toList());
         }
     }
@@ -261,7 +261,7 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-     static final class RunOptionDef implements Comparable<RunOptionDef> {
+     static final class CommandOptionDef implements Comparable<CommandOptionDef> {
 
         private final String name;
 
@@ -275,8 +275,10 @@ final class ProjectDef {
 
         private final Class<?> type;
 
-        private RunOptionDef(String name, String description, Object jkRun, Object defaultValue,
-                             Class<?> type, Class<?> declaringClass) {
+        private final String envVarName;
+
+        private CommandOptionDef(String name, String description, Object jkRun, Object defaultValue,
+                                 Class<?> type, Class<?> declaringClass, String envVarName) {
             super();
             this.name = name;
             this.description = description;
@@ -284,14 +286,17 @@ final class ProjectDef {
             this.defaultValue = defaultValue;
             this.type = type;
             this.rootDeclaringClass = declaringClass;
+            this.envVarName = envVarName;
         }
 
-        static RunOptionDef of(Object instance, Field field, String name, Class<?> rootDeclaringClass) {
+        static CommandOptionDef of(Object instance, Field field, String name, Class<?> rootDeclaringClass) {
             final JkDoc opt = field.getAnnotation(JkDoc.class);
             final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
             final Class<?> type = field.getType();
             final Object defaultValue = value(instance, name);
-            return new RunOptionDef(name, descr, instance, defaultValue, type, rootDeclaringClass);
+            final JkEnv env = field.getAnnotation(JkEnv.class);
+            final String envVarName = env != null ? env.value() : null;
+            return new CommandOptionDef(name, descr, instance, defaultValue, type, rootDeclaringClass, envVarName);
         }
 
         private static Object value(Object runInstance, String optName) {
@@ -309,7 +314,7 @@ final class ProjectDef {
         }
 
         @Override
-        public int compareTo(RunOptionDef other) {
+        public int compareTo(CommandOptionDef other) {
             if (this.run.getClass().equals(other.run.getClass())) {
                 return this.name.compareTo(other.name);
             }
@@ -323,13 +328,12 @@ final class ProjectDef {
             return name + " = " + defaultValue;
         }
 
-
         String description(String prefix, String margin) {
             String desc = description != null ? description : "No description available.";
-            StringBuilder builder = new StringBuilder();
-            builder.append(margin).append("  -").append(prefix).append(name).append(" (").append(type()).append( ", default : ").append(defaultValue)
-                    .append(") : ").append(desc.replace("\n", " ")).append("\n");
-            return builder.toString();
+            String oneLineDesc = desc.replace("\n", " ");
+            String envPart = envVarName == null ? "" : ", env : " + envVarName;
+            return String.format("%s -%s%s (%s, default : %s%s) : %s\n",
+                    margin, prefix, name, type(), defaultValue, envPart, oneLineDesc);
         }
 
         private String type() {

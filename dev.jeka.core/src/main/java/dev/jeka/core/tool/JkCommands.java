@@ -93,7 +93,7 @@ public class JkCommands {
         }
         run.setup();
         for (JkPlugin plugin : new LinkedList<>(plugins)) {
-            List<ProjectDef.RunOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
+            List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
             try {
                 plugin.activate();
             } catch (RuntimeException e) {
@@ -108,7 +108,7 @@ public class JkCommands {
 
         // Extra run configuration
         run.setupAfterPluginActivations();
-        List<ProjectDef.RunOptionDef> defs = ProjectDef.RunClassDef.of(run).optionDefs();
+        List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(run).optionDefs();
         JkLog.info("Run instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask();
         baseDirContext(null);

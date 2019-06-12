@@ -37,8 +37,8 @@ public final class JkPgp implements Serializable {
 
     private JkPgp(Path pubRing, Path secRing, String password) {
         super();
-        this.pubRing = pubRing.toFile();
-        this.secRing = secRing.toFile();
+        this.pubRing = pubRing == null ? null : pubRing.toFile();
+        this.secRing = secRing == null ? null : secRing.toFile();
         this.password = password;
     }
 
@@ -55,20 +55,25 @@ public final class JkPgp implements Serializable {
         return new JkPgp(pubRing, secRing, password);
     }
 
+    public static Path getDefaultPubring() {
+        if (JkUtilsSystem.IS_WINDOWS) {
+            return USER_HOME.resolve("AppData/Roaming/gnupg/pubring.gpg");
+        }
+        return USER_HOME.resolve(".gnupg/pubring.gpg");
+    }
+
+    public static Path getDefaultSecring() {
+        if (JkUtilsSystem.IS_WINDOWS) {
+            return USER_HOME.resolve("AppData/Roaming/gnupg/secring.gpg");
+        }
+        return USER_HOME.resolve(".gnupg/secring.gpg");
+    }
+
     /**
      * Creates a {@link JkPgp} with default GnuPgp file location.
      */
     public static JkPgp ofDefaultGnuPg() {
-        final Path pub;
-        final Path sec;
-        if (JkUtilsSystem.IS_WINDOWS) {
-            pub = USER_HOME.resolve("AppData/Roaming/gnupg/pubring.gpg");
-            sec = USER_HOME.resolve("AppData/Roaming/gnupg/secring.gpg");
-        } else {
-            pub = USER_HOME.resolve(".gnupg/pubring.gpg");
-            sec = USER_HOME.resolve(".gnupg/secring.gpg");
-        }
-        return new JkPgp(pub, sec, null);
+        return new JkPgp(getDefaultPubring(), getDefaultSecring(), null);
     }
 
     /**
