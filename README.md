@@ -5,10 +5,10 @@
 
 # What is Jeka
 
-<strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
+<strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using only Java code to automate builds or tasks.
 
-Enjoy all the engineering power you are comfortable with (Java code, IDE, 3rd party libs,  Maven repository, ...) to define, 
-design, run, debug, reuse your automated tasks/builds. Exactly as you would do with regular code.
+Enjoy all the engineering power you are comfortable with (Java code, IDE, 3rd party libs,  Maven repository, ...). Model, 
+refactor, run, debug, reuse automation assets accros task and projects. Exactly as you would do with regular Java code.
 
 Also, __Jeka conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of code/configuration. 
 
@@ -20,7 +20,7 @@ of any build-code / configuration / script.
 
 _Jerkar_ has been rebranded to _Jeka_. Maven groupId and artifactId has moved to `dev.jeka.jeka-core`.
 Next release version of Jeka will be `0.8.0.RELEASE`. It will basically contain the Jerkar `0.7.0.RELEASE` plus 
-everything related to name change (packages, classes, variables, documentation).
+everything related to name change (packages, classes, variables, documentation) and bugfixes.
 
 # Get Jeka
 
