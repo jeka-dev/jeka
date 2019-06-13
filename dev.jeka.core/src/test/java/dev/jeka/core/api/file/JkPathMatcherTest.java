@@ -34,11 +34,11 @@ public class JkPathMatcherTest {
     }
 
     @Test
-    public void testRefuse() {
+    public void testNegative() {
         assertTrue(JkPathMatcher.of(false, "org/**", "com/**").matches(Paths.get("foo/subfoo/bar.java")));
         assertFalse(JkPathMatcher.of(false,"org/**", "com/**").matches(Paths.get("com/subfoo/bar.java")));
+        assertFalse(JkPathMatcher.of(false,"org/**", "com/**/*").matches(Paths.get("com/subfoo/bar.java")));
         assertFalse(JkPathMatcher.of(false,"org/**", "com/**").matches(Paths.get("org/subfoo/bar.java")));
-
         assertFalse(JkPathMatcher.of(false,"**/_*").matches(Paths.get("foo/subfoo/_Bar.java")));
         assertFalse(JkPathMatcher.of(false,"**/_*", "_*").matches(Paths.get("_Bar.java")));
     }

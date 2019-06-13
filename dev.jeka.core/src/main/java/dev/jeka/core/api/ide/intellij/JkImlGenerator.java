@@ -101,8 +101,6 @@ public final class JkImlGenerator {
                 javaProject.getMaker().getDependencyResolver());
     }
 
-
-
     /** Generate the .classpath file */
     public String generate() {
         try {

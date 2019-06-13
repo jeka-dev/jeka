@@ -80,7 +80,7 @@ class ModulesXmlGenerator {
         writer.writeEndDocument();
         writer.flush();
         writer.close();
-        JkUtilsPath.deleteFile(outputFile);
+        JkUtilsPath.deleteIfExists(outputFile);
         Files.write(outputFile, baos.toByteArray());
     }
 

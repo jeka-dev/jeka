@@ -16,6 +16,8 @@ import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.repos.JkPluginPgp;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -141,7 +143,11 @@ public class CoreBuild extends JkCommands {
         JkLog.startTask("Launching integration tests on samples");
         SampleTester sampleTester = new SampleTester(this.getBaseTree());
         sampleTester.restoreEclipseClasspathFile = true;
-        sampleTester.doTest();
+        try {
+            sampleTester.doTest();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         JkLog.endTask();
     }
 

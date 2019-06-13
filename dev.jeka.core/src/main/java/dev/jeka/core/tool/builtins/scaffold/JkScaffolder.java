@@ -1,11 +1,9 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 
@@ -70,9 +68,12 @@ public final class JkScaffolder {
         Path target = bootFolder.resolve(jekaJar.getFileName());
         JkLog.info("Copy jeka jar to " + baseDir.relativize(target));
         JkUtilsPath.copy(jekaJar, target, StandardCopyOption.REPLACE_EXISTING);
+        String jarSourceName = "dev.jeka.jeka-core-sources.jar";
+        Path libSources = baseDir.resolve(JkConstants.JEKA_DIR + "/libs-sources");
+        JkUtilsPath.createDirectories(libSources);
+        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("libs-sources/" + jarSourceName),
+                libSources.resolve(jarSourceName), StandardCopyOption.REPLACE_EXISTING);
     }
-
-
 
     public void setCommandClassCode(String code) {
         this.commandClassCode = code;

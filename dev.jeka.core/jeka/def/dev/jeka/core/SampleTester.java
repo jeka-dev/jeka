@@ -10,6 +10,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -28,7 +29,7 @@ class SampleTester {
 
     private final JkPathTree output;
 
-    private Path launchScript;
+    private String jekaScript;
     
     boolean restoreEclipseClasspathFile;
 
@@ -38,54 +39,54 @@ class SampleTester {
         this.sampleDependerBaseDir = buildDir.goTo("../dev.jeka.core.depender-samples");
         this.output = sampleBaseDir.goTo(JkConstants.OUTPUT_PATH);
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jeka.bat" : "jeka";
-        launchScript = buildDir.goTo(JkConstants.OUTPUT_PATH).get("distrib/" + scriptName);
+        jekaScript = buildDir.goTo(JkConstants.OUTPUT_PATH).get("distrib/" + scriptName).toAbsolutePath().toString();
     }
 
-    void doTest()  {
+    void doTest() throws IOException {
         testSamples("AClassicBuild");
         testSamples("AntStyleBuild");
         testSamples("MavenStyleBuild");
         testSamples("OpenSourceJarBuild");
         testSamples("HttpClientTaskBuild");
         testSamples("SimpleScopeBuild");
-        testDependee("FatJarBuild");
+        testDepender("FatJarBuild");
 
         // Test eclipse
         JkLog.startTask("Test Eclipse .classpath generation");
         Path classpathFile = sampleBaseDir.get(".classpath");
         Path classpathFile2 = sampleBaseDir.get(".classpath2");
-        try {
-            Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
-            testSamples("", "eclipse#generateAll");
-            if (restoreEclipseClasspathFile) {
-                Files.move(classpathFile2, classpathFile, StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                Files.delete(classpathFile2);
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } finally {
-            JkLog.endTask();
+        Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
+        testSamples("", "eclipse#generateAll");
+        if (restoreEclipseClasspathFile) {
+            Files.move(classpathFile2, classpathFile, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            Files.delete(classpathFile2);
         }
 
-        testDependee("NormalJarBuild");
+        // Test intellij
+        JkLog.startTask("Test Intellij generate all");
+        Path project = JkUtilsPath.createTempDirectory("jeka-test-");
+        sampleBaseDir.andMatching(false, ".idea/**/*", "jeka/output/**/*").copyTo(project);
+        JkProcess.of(jekaScript).withFailOnError(true).withWorkingDir(project).andParams("intellij#generateAll").runSync();
+        JkLog.endTask();
+
+        testDepender("NormalJarBuild");
         testFork();
         testScaffoldJava();
     }
 
-
     private void testSamples(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
+        JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-LV=true -RC=" + className)
                 .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LH")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }
 
-    private void testDependee(String className, String... args) {
+    private void testDepender(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependerBaseDir.getRoot())
+        JkProcess.of(jekaScript).withWorkingDir(this.sampleDependerBaseDir.getRoot())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-RC=" + className)
                 .withParams("clean", "java#pack")
                 .andParams(args)
@@ -114,7 +115,7 @@ class SampleTester {
     }
 
     private JkProcess process() {
-        return JkProcess.of(launchScript.toAbsolutePath().toString()).withFailOnError(true);
+        return JkProcess.of(jekaScript).withFailOnError(true);
     }
 
     private void testFork() {

@@ -336,39 +336,38 @@ public final class JkUtilsPath {
 
     private static class CopyDirVisitor extends SimpleFileVisitor<Path> {
 
-        int count;
-
-        CopyDirVisitor(Path fromPath, Path toPath, PathMatcher pathMatcher, CopyOption ... options) {
-            this.fromPath = fromPath;
-            this.toPath = toPath;
+        CopyDirVisitor(Path fromDir, Path toDir, PathMatcher pathMatcher, CopyOption ... options) {
+            this.fromDir = fromDir;
+            this.toDir = toDir;
             this.options = options;
             this.pathMatcher = pathMatcher;
         }
 
-        private final Path fromPath;
-        private final Path toPath;
+        private final Path fromDir;
+        private final Path toDir;
         private final PathMatcher pathMatcher;
         private final CopyOption[] options;
+        int count;
 
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-            if (!pathMatcher.matches(dir)) {
+            final Path sourceRelativePath = fromDir.relativize(dir);
+            if (!pathMatcher.matches(sourceRelativePath)) {
                 return FileVisitResult.CONTINUE;
             }
-            final Path sourceRelativePath = fromPath.relativize(dir);
-            final Path relativePath = toPath.getFileSystem().getPath(toPath.toString(), sourceRelativePath.toString());
+            final Path relativePath = toDir.getFileSystem().getPath(toDir.toString(), sourceRelativePath.toString());
             Files.createDirectories(relativePath);
             return FileVisitResult.CONTINUE;
         }
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            if (!pathMatcher.matches(file)) {
+            Path relativePath = fromDir.relativize(file);
+            if (!pathMatcher.matches(relativePath)) {
                 return FileVisitResult.CONTINUE;
             }
-            final String relativePath = fromPath.relativize(file).toString();
-            final Path target = toPath.getFileSystem().getPath(toPath.toString(), relativePath); // necessary to deal with both regular file ofSystem and zip
+            final Path target = toDir.getFileSystem().getPath(toDir.toString(), relativePath.toString()); // necessary to deal with both regular file system and zip
             Files.copy(file, target , options);
             count ++;
             return FileVisitResult.CONTINUE;

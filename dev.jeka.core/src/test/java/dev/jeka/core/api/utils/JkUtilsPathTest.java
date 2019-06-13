@@ -1,14 +1,13 @@
 package dev.jeka.core.api.utils;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 
+import dev.jeka.core.api.file.JkPathMatcher;
 import org.junit.Test;
 
 
@@ -34,6 +33,16 @@ public class JkUtilsPathTest {
         System.out.println(target2);
         assertTrue(Files.exists(target2.resolve("sample.txt")));
 
+        // Test copy with matcher
+        final Path target3 = Files.createTempDirectory("copydirtest");
+        PathMatcher pathMatcher = JkPathMatcher.of(false, "subfolder/**");
+        JkUtilsPath.copyDirContent(source, target3, pathMatcher, StandardCopyOption.REPLACE_EXISTING);
+        assertFalse(Files.exists(target3.resolve("subfolder/sample.txt")));
+
+        final Path target4 = Files.createTempDirectory("copydirtest");
+        pathMatcher = JkPathMatcher.of(false, "subfolder/**", "subfolder");
+        JkUtilsPath.copyDirContent(source, target4, pathMatcher, StandardCopyOption.REPLACE_EXISTING);
+        assertFalse(Files.exists(target4.resolve("subfolder")));
     }
 
     @Test

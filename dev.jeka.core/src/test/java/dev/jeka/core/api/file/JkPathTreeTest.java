@@ -2,6 +2,7 @@ package dev.jeka.core.api.file;
 
 import static org.junit.Assert.*;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -9,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsPathTest;
@@ -179,6 +181,29 @@ public class JkPathTreeTest {
         Files.delete(zip);
         JkPathTree.of(folder).zipTo(zip);
         return zip;
+    }
+
+    @Test
+    public void testAndMatching() throws Exception {
+        final URL sampleFileUrl = JkUtilsPathTest.class
+                .getResource("samplefolder/subfolder/sample.txt");
+        final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        boolean samplePresent = JkPathTree.of(sampleFolder).andMatching(false, "subfolder/**").stream()
+                .anyMatch(path -> path.getFileName().toString().equals("sample.txt"));
+        assertFalse(samplePresent);
+    }
+
+    @Test
+    public void testCopyToWithFilter() throws Exception {
+        final URL sampleFileUrl = JkUtilsPathTest.class
+                .getResource("samplefolder/subfolder/sample.txt");
+        final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        Path tempDir = Files.createTempDirectory("jeka-test");
+        JkPathTree tree = JkPathTree.of(sampleFolder).andMatching(false, "subfolder/**");
+        JkPathMatcher matcher = tree.getMatcher();
+        assertFalse(matcher.matches(Paths.get("subfolder/sample.txt")));
+        tree.copyTo(tempDir);
+        assertFalse(Files.exists(tempDir.resolve("subfolder/sample.txt")));
     }
 
 }

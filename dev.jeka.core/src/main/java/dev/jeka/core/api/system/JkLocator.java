@@ -62,6 +62,10 @@ public final class JkLocator {
         throw new IllegalStateException("Main not found in classpath");
     }
 
+    public static boolean isEmbedded() {
+        return !getJekaHomeDir().equals(getJekaJarPath().getParent());
+    }
+
     /**
      * Returns the directory where is installed the running Jeka instance.
      */
