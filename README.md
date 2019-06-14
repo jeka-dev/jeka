@@ -43,6 +43,16 @@ Visit following pages according your expectation :
 * [Javadoc](https://jeka.dev/docs/javadoc)
 * [Working examples](https://github.com/jerkar/working-examples)
 
+# External plugins
+
+Jeka comes with plugins out of the box. These plugins covers the most common point a Java developer need to address 
+when building a project. This includes plugins for IDE metadata generation (IntelliJ, Eclipse), git, jacoco, java project building, 
+PGP signing, binary repositories, Maven interaction, scaffolding, sonarQube and web archives.
+
+Nevertheless, Jeka is extensible and other plugins exist outside the main distib among :
+* [Springboot Plugin](https://github.com/jerkar/springboot-plugin)
+* [Protobuf Plugin](https://github.com/jerkar/protobuf-plugin)
+
 # Community
 
 You can ask question using regular using [this repository issues](https://github.com/jerkar/jerkar/issues).
