@@ -19,8 +19,11 @@ of any build-code / configuration / script.
 # News 
 
 _Jerkar_ has been rebranded to _Jeka_. Maven groupId and artifactId has moved to `dev.jeka.jeka-core`.
-Next release version of Jeka will be `0.8.0.RELEASE`. It will basically contain the Jerkar `0.7.0.RELEASE` plus 
-everything related to name change (packages, classes, variables, documentation) and bugfixes.
+It has a completely re-designed API based on Java7 nio and Java8 lambdas providing a much cleaner/polished design 
+and leaner user code.
+
+Last addition was about deploying on Maven central though a modern release process (version numbering based on Git instead of being hardcoded).
+Jeka now uses these features to release itself.
 
 # Get Jeka
 
@@ -86,4 +89,15 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 * Make sure the project is configured with a JDK8.
 * Run `dev.jeka.core.CoreBuild` class main method. This class is located in *jeka/def* folder, inside *dev.jeka.core* project.
 * This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder
+
+## How to Release ?
+
+Release is done automatically by Travis at each git push. If their is no tag on the current commit then it goes to a 
+SNAPSHOT deploy on OSSRH. If there is a tag, it goes to a publish on Maven central.
+
+To realy deploy to Maven central, a manual action it still needed to [close/release repository](https://oss.sonatype.org).
+
+To create a tag conveniently, just execute `jeka git#tagRemote` from your console and answer to the prompt. 
+
+
 
