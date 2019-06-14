@@ -55,7 +55,6 @@ public class JkJavaProjectTestTasks {
     JkJavaProjectTestTasks(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
         resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().getTestResources())
-                .and(maker.getOutLayout().getGeneratedTestResourceDir())
                 .and(maker.project.getResourceInterpolators())
                 .generateTo(maker.getOutLayout().getTestClassDir(), charset));
         compileRunner = JkRunnables.of(() -> {

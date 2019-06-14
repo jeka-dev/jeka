@@ -3,7 +3,10 @@ package dev.jeka.core.api.java.project;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.tool.JkConstants;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
@@ -15,6 +18,10 @@ import java.util.List;
  * considered as source part since it is generated (so part of the output).
  */
 public class JkProjectSourceLayout {
+
+    public static final String GENERATED_SOURCE_PATH = "generated_sources/java";
+
+    public static final String GENERATED_RESOURCE_PATH = "generated_resources";
 
     /**
      * Filter to consider as resources everything but java source stuff.
@@ -28,12 +35,20 @@ public class JkProjectSourceLayout {
      */
     public static JkProjectSourceLayout ofMavenStyle() {
         final Path baseDir = Paths.get(".");
-        final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src/main/java").normalize());
-        final JkPathTreeSet resources = JkPathTreeSet.of(baseDir.resolve("src/main/resources").normalize())
+        JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src/main/java").normalize());
+        JkPathTreeSet resources = JkPathTreeSet.of(baseDir.resolve("src/main/resources").normalize())
                 .and(sources.andMatcher(JAVA_RESOURCE_MATCHER));
         final JkPathTreeSet tests = JkPathTreeSet.of(baseDir.resolve("src/test/java").normalize());
         final JkPathTreeSet testResources = JkPathTreeSet.of(baseDir.resolve("src/test/resources").normalize())
                 .and(tests.andMatcher(JAVA_RESOURCE_MATCHER));
+        Path generatedSources = baseDir.resolve(JkConstants.OUTPUT_PATH).resolve(GENERATED_SOURCE_PATH);
+        if (Files.exists(generatedSources)) {
+            sources = sources.and(generatedSources);
+        }
+        Path generatedResources = baseDir.resolve(JkConstants.OUTPUT_PATH).resolve(GENERATED_RESOURCE_PATH);
+        if (Files.exists(generatedResources)) {
+            resources = resources.and(generatedSources);
+        }
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
