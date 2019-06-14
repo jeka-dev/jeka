@@ -7,13 +7,16 @@
 
 <strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using only Java code to automate builds or tasks.
 
-Enjoy all the engineering power you are comfortable with (Java code, IDE, 3rd party libs,  Maven repository, ...). Model, 
-refactor, run, debug, reuse automation assets accros task and projects. Exactly as you would do with regular Java code.
+Forget about verbose Poms and rigid Maven structure. Get rid of Gradle scripting.  
+
+Enjoy all the engineering power you are comfortable with : Java code, IDE, 3rd party libs, binary repositories, .... 
+
+Model, refactor, run, debug, reuse automation assets across tasks and projects. Exactly as you do with your regular Java code. 
 
 Also, __Jeka conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of code/configuration. 
 
 For example `jeka java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
-performs a complete build running unit tests under Jacoco coverage tools and performs Sonar analysis on a Java project free 
+performs a complete build running unit tests under Jacoco coverage tools and performs SonarQube analysis on a Java project free 
 of any build-code / configuration / script. 
 
 # News 
