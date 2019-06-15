@@ -69,8 +69,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         tasksForJavadoc = new JkJavaProjectJavadocTasks(this);
 
         // define default artifacts
-        addArtifact(getMainArtifactId(), () -> makeMainJar());
-        addArtifact(SOURCES_ARTIFACT_ID, () -> makeSourceJar());
+        putArtifact(getMainArtifactId(), () -> makeMainJar());
+        putArtifact(SOURCES_ARTIFACT_ID, () -> makeSourceJar());
         this.project = project;
     }
 
@@ -111,7 +111,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * {@link JkJavaProjectMaker} declares predefined artifact ids as {@link JkJavaProjectMaker#SOURCES_ARTIFACT_ID}
      * or {@link JkJavaProjectMaker#JAVADOC_ARTIFACT_ID}.
      */
-    public JkJavaProjectMaker addArtifact(JkArtifactId artifactId, Runnable runnable) {
+    public JkJavaProjectMaker putArtifact(JkArtifactId artifactId, Runnable runnable) {
         artifactProducers.put(artifactId, runnable);
         return this;
     }
@@ -145,13 +145,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkJavaProjectMaker defineMainArtifactAsFatJar(boolean defineOriginal) {
         Path mainPath = getArtifactPath(getMainArtifactId());
         Runnable originalRun = artifactProducers.get(getMainArtifactId());
-        addArtifact(getMainArtifactId(), () -> {
+        putArtifact(getMainArtifactId(), () -> {
             tasksForCompilation.runIfNecessary();
             tasksForTesting.runIfNecessary();
             tasksForPackaging.createFatJar(mainPath);});
         if (defineOriginal) {
             JkArtifactId original = JkArtifactId.of("original", "jar");
-            addArtifact(original, originalRun);
+            putArtifact(original, originalRun);
         }
         return this;
     }
@@ -167,16 +167,16 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public void addTestArtifact() {
-        addArtifact(TEST_ARTIFACT_ID, () -> makeTestJar());
+        putArtifact(TEST_ARTIFACT_ID, () -> makeTestJar());
     }
 
     public void addTestSourceArtifact() {
-        addArtifact(TEST_SOURCE_ARTIFACT_ID,
+        putArtifact(TEST_SOURCE_ARTIFACT_ID,
                 () -> tasksForPackaging.createTestSourceJar(tasksForPackaging.getArtifactFile(TEST_SOURCE_ARTIFACT_ID)));
     }
 
     public void addJavadocArtifact() {
-        addArtifact(JAVADOC_ARTIFACT_ID, () -> makeJavadocJar());
+        putArtifact(JAVADOC_ARTIFACT_ID, () -> makeJavadocJar());
     }
 
     /**

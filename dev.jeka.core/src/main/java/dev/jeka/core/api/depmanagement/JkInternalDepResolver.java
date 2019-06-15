@@ -1,6 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.io.File;
@@ -25,14 +26,12 @@ public interface JkInternalDepResolver {
     File get(JkModuleDependency dependency);
 
     static JkInternalDepResolver of(JkRepoSet repos) {
-        final JkInternalDepResolver ivyPublisher;
         Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(FACTORY_CLASS_NAME);
         if (factoryClass != null) {
-            ivyPublisher = JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
-        } else {
-            throw new IllegalStateException("Use embedded class loader");
+            return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
         }
-        return ivyPublisher;
+        return JkInternalEmbeddedClassloader.createCrossClassloaderProxy(
+                JkInternalDepResolver.class, FACTORY_CLASS_NAME, "of", repos);
     }
 
 }

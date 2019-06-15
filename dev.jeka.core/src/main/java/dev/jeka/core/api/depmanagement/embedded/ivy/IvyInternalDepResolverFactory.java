@@ -1,8 +1,7 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkInternalDepResolver;
-import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 
 /*
  * This class is only used with Refection. Please do not remove.
@@ -17,11 +16,7 @@ final class IvyInternalDepResolverFactory {
      * This method is only invoked by reflection. Please do not remove.
      */
     static JkInternalDepResolver of(JkRepoSet repos) {
-        if (JkClassLoader.ofCurrent().isDefined(IvyClassloader.IVY_CLASS_NAME)) {
-            return IvyInternalDepResolver.of(repos);
-        }
-        return IvyClassloader.CLASSLOADER.createCrossClassloaderProxy(
-                JkInternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
+        return IvyInternalDepResolver.of(repos);
     }
 
 }

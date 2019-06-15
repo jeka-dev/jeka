@@ -167,10 +167,14 @@ public final class JkUtilsIO {
         final StringBuilder out = new StringBuilder();
         final String newLine = System.getProperty("line.separator");
         String line;
+        boolean firstTime = true;
         try {
             while ((line = reader.readLine()) != null) {
+                if (!firstTime) {
+                    out.append(newLine);
+                }
                 out.append(line);
-                out.append(newLine);
+                firstTime = false;
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

@@ -1,6 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;
@@ -25,11 +26,11 @@ public interface JkInternalPublisher {
         final JkInternalPublisher ivyPublisher;
         Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(FACTORY_CLASS_NAME);
         if (factoryClass != null) {
-            ivyPublisher = JkUtilsReflect.invokeStaticMethod(factoryClass, "of", publishRepos, artifactDir);
-        } else {
-            throw new IllegalStateException("Use embedded class loader");
+            return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", publishRepos, artifactDir);
         }
-        return ivyPublisher;
+        return JkInternalEmbeddedClassloader.createCrossClassloaderProxy(
+                JkInternalPublisher.class, FACTORY_CLASS_NAME, "of", publishRepos, artifactDir);
+
     }
 
 }

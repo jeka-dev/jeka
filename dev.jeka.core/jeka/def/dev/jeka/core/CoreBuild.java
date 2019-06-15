@@ -1,23 +1,24 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.tooling.JkGitWrapper;
-import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import dev.jeka.core.tool.builtins.repos.JkPluginPgp;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -69,12 +70,15 @@ public class CoreBuild extends JkCommands {
 
         JkJavaProjectMaker maker = project.getMaker();
         maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
-        maker.addArtifact(DISTRIB_FILE_ID, this::doDistrib);
+        maker.putArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
         maker.getTasksForJavadoc().setJavadocOptions("-notimestamp");
         maker.getTasksForPublishing()
                 .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
                 .setMavenPublicationInfo(mavenPublication());
+
+        // include embedded jar
+        maker.putArtifact(maker.getMainArtifactId(), this::doPack);
     }
 
     public void publishDocsOnGithubPage() {
@@ -150,6 +154,26 @@ public class CoreBuild extends JkCommands {
         }
         JkLog.endTask();
     }
+
+    private void doPack() {
+        JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
+        Path tempJar = maker.getOutLayout().getOutputPath().resolve("tempJar");
+        maker.getTasksForPackaging().createBinJar(tempJar);
+        Path tempClasses = maker.getOutLayout().getOutputPath().resolve("tempClasses");
+        JkPathTree.ofZip(tempJar).copyTo(tempClasses);
+        Path embededJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
+        Path classDir = maker.getOutLayout().getClassDir();
+        JkPathTree classTree = JkPathTree.of(classDir);
+        classTree.andMatching("**/embedded/**/*").zipTo(embededJar);
+        String checksum = JkPathFile.of(embededJar).getChecksum("MD5");
+        String embeddedFinalName = "jeka-embedded-" + checksum + ".jar";
+        JkUtilsPath.copy(embededJar, tempClasses.resolve("META-INF/"+ embeddedFinalName));
+        JkPathFile.of(tempClasses.resolve("META-INF/jeka-embedded-name")).write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
+        JkPathTreeSet.of(JkPathTree.of(tempClasses).andMatching(false, "**/embedded/**"))
+                .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/ivy-2.4.0.jar"))
+                .zipTo(maker.getMainArtifactPath());
+    }
+
 
     public static void main(String[] args) {
         JkInit.instanceOf(CoreBuild.class, args).javaPlugin.clean().pack();

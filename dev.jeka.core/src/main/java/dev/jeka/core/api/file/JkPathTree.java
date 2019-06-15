@@ -298,6 +298,7 @@ public final class JkPathTree {
             stream.filter(excludeRootFilter()).forEach(path -> {
                 Path zipEntry = zipRootEntry.resolve(getRoot().relativize(path).toString());
                 if (!Files.exists(zipEntry) || !Files.isDirectory(zipEntry)) {
+                    JkUtilsPath.createDirectories(zipEntry.getParent());
                     JkUtilsPath.copy(path, zipEntry, StandardCopyOption.REPLACE_EXISTING);
                 }
             });
@@ -368,6 +369,7 @@ public final class JkPathTree {
         if (!exists()) {
             return 0;
         }
+        // TODO don't count filtered entries
         return JkUtilsPath.childrenCount(getRoot(), max, includeDirectories);
     }
 

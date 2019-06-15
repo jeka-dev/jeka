@@ -34,10 +34,10 @@ public final class JkUrlClassLoader {
 
     private static final int CLASS_SUFFIX_LENGTH = CLASS_SUFFIX.length();
 
-    private static Path urlCacheDir = JkLocator.getJekaUserHomeDir().resolve("cache/url-content");
+    static final Path URL_CACHE_DIR = JkLocator.getJekaUserHomeDir().resolve("cache/url-content");
 
     static {
-        JkUtilsPath.createDirectories(urlCacheDir);
+        JkUtilsPath.createDirectories(URL_CACHE_DIR);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class JkUrlClassLoader {
      * place where those URL are cached.
      */
     public static Path getUrlCacheDir() {
-        return urlCacheDir;
+        return URL_CACHE_DIR;
     }
 
 
@@ -153,7 +153,7 @@ public final class JkUrlClassLoader {
                     || (!candidate.isFile() && !candidate.isDirectory())) {
                 PrintStream printStream =
                         JkLog.Verbosity.VERBOSE == JkLog.verbosity() ? new PrintStream(JkLog.getOutputStream()) : null;
-                final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, printStream, urlCacheDir);
+                final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, printStream, URL_CACHE_DIR);
                 files.add(file);
             } else {
                 files.add(candidate.toPath());
@@ -347,7 +347,7 @@ public final class JkUrlClassLoader {
         if (Files.isDirectory(dirOrJar)) {
             paths = JkPathTree.of(dirOrJar).andMatching(true, "**.class").getRelativeFiles();
         } else {
-            final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar.toFile()));
+            final List<ZipEntry> entries = JkUtilsZip.getZipEntries(JkUtilsZip.getZipFile(dirOrJar.toFile()));
             paths = new LinkedList<>();
             for (final ZipEntry entry : entries) {
                 if (entry.getName().endsWith(".class")) {
@@ -468,13 +468,13 @@ public final class JkUrlClassLoader {
         for (final Path file : this.getFullClasspath()) {
             if (Files.isRegularFile(file)) {
                 JkLog.trace("Scanning " + file + " for META-INF/services.");
-                final ZipFile zipFile = JkUtilsZip.zipFile(file.toFile());
+                final ZipFile zipFile = JkUtilsZip.getZipFile(file.toFile());
                 final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
                 if (serviceEntry == null) {
                     JkUtilsIO.closeOrFail(zipFile);
                     continue;
                 }
-                for (final ZipEntry entry : JkUtilsZip.zipEntries(zipFile)) {
+                for (final ZipEntry entry : JkUtilsZip.getZipEntries(zipFile)) {
                     if (entry.getName().startsWith("META-INF/services/")) {
                         final String serviceName = JkUtilsString.substringAfterLast(
                                 entry.getName(), "/");

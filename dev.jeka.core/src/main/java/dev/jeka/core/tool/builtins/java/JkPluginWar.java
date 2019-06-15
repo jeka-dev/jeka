@@ -42,7 +42,7 @@ public class JkPluginWar extends JkPlugin {
         JkPluginJava pluginJava = this.getCommands().getPlugin(JkPluginJava.class);
         JkJavaProject project = pluginJava.getProject();
         JkArtifactId warArtifactId = JkArtifactId.of(null, "war");
-        maker.addArtifact(warArtifactId, () -> {
+        maker.putArtifact(warArtifactId, () -> {
             staticResourceComputation.run();
             Path temp = JkUtilsPath.createTempDirectory("jeka-war");
             generateWarDir(project, temp, staticResourceDir);

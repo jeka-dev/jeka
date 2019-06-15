@@ -20,7 +20,7 @@ public final class JkUtilsZip {
      * Returns all zip entry of the specified zip file.
      */
     @SuppressWarnings("unchecked")
-    public static List<ZipEntry> zipEntries(ZipFile zipFile) {
+    public static List<ZipEntry> getZipEntries(ZipFile zipFile) {
         final List<ZipEntry> result = new LinkedList<>();
         final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
         while (en.hasMoreElements()) {
@@ -32,7 +32,7 @@ public final class JkUtilsZip {
     /**
      * Creates a {@link ZipFile} to file without checked exception.
      */
-    public static ZipFile zipFile(File file) {
+    public static ZipFile getZipFile(File file) {
         try {
             return new ZipFile(file);
         } catch (final Exception e) {

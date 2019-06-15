@@ -113,7 +113,7 @@ public final class JkClasspath implements Iterable<Path> {
                     return file;
                 }
             } else {
-                final ZipFile zipFile = JkUtilsZip.zipFile(file.toFile());
+                final ZipFile zipFile = JkUtilsZip.getZipFile(file.toFile());
                 if (zipFile.getEntry(path) != null) {
                     JkUtilsIO.closeQuietly(zipFile);
                     return file;
