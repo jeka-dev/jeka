@@ -1,5 +1,6 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.system.JkLog;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;

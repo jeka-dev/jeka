@@ -9,7 +9,7 @@ public class JkModuleDepProblem implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    static JkModuleDepProblem of(JkModuleId moduleId, String version, String text) {
+    public static JkModuleDepProblem of(JkModuleId moduleId, String version, String text) {
         return new JkModuleDepProblem(moduleId, JkVersion.of(version), text);
     }
 

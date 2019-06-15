@@ -1,17 +1,13 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.File;
-import java.io.Serializable;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.io.File;
+import java.io.Serializable;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * A representation of a node in a dependency tree.
@@ -310,9 +306,14 @@ public class JkDependencyNode implements Serializable {
                     new HashSet<>(), new HashSet<>(), JkVersion.UNSPECIFIED, new LinkedList<>());
         }
 
-        static JkModuleNodeInfo ofRoot(JkVersionedModule versionedModule) {
+        public static JkModuleNodeInfo ofRoot(JkVersionedModule versionedModule) {
             return new JkModuleNodeInfo(versionedModule.getModuleId(), versionedModule.getVersion(),
                     new HashSet<>(), new HashSet<>(), versionedModule.getVersion(), new LinkedList<>(), true);
+        }
+
+        public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
+                                       Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
+            return new JkModuleNodeInfo(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts);
         }
 
         private final JkModuleId moduleId;

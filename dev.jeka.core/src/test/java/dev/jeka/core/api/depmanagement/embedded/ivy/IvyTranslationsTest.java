@@ -1,6 +1,7 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
@@ -20,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class IvyTranslationsTest {
 
-    private static final  JkVersionedModule OWNER = JkVersionedModule.of("ownerGroup:ownerName:ownerVersion");
+    private static final JkVersionedModule OWNER = JkVersionedModule.of("ownerGroup:ownerName:ownerVersion");
 
     @Test
     public void toPublicationLessModule() throws Exception {

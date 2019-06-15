@@ -1,6 +1,7 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.MavenMetadata.Versioning.Snapshot;
+import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
@@ -14,7 +15,6 @@ import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.apache.ivy.util.ChecksumHelper;
-import dev.jeka.core.api.system.JkLog;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -60,16 +60,16 @@ final class IvyPublisherForMaven {
         // publish artifacts
         final JkVersionedModule versionedModule = IvyTranslations
                 .toJkVersionedModule(ivyModuleRevisionId);
-        final MavenMetadata returnedMetaData = publish(versionedModule, publication);
+        final JkMavenMetadata returnedMetaData = publish(versionedModule, publication);
 
         // publish pom
         final Path pomXml = makePom(moduleDescriptor, publication);
         final String version;
         if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
-            final MavenMetadata mavenMetadata = JkUtilsObject.firstNonNull(loadMavenMedatata(path),
+            final JkMavenMetadata mavenMetadata = JkUtilsObject.firstNonNull(loadMavenMedatata(path),
                     returnedMetaData);
-            final Snapshot snap = mavenMetadata.currentSnapshot();
+            final JkMavenMetadata.Versioning.JkSnapshot snap = mavenMetadata.currentSnapshot();
             version = versionForUniqueSnapshot(versionedModule.getVersion().getValue(), snap.timestamp,
                     snap.buildNumber);
             final String pomDest = destination(versionedModule, "pom", null, version);
@@ -94,8 +94,8 @@ final class IvyPublisherForMaven {
         commitPublication(resolver);
     }
 
-    private MavenMetadata publish(JkVersionedModule versionedModule,
-            JkMavenPublication mavenPublication) {
+    private JkMavenMetadata publish(JkVersionedModule versionedModule,
+                                    JkMavenPublication mavenPublication) {
         if (!versionedModule.getVersion().isSnapshot()) {
             final String existing = checkNotExist(versionedModule, mavenPublication);
             if (existing != null) {
@@ -105,10 +105,10 @@ final class IvyPublisherForMaven {
         }
         if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
-            MavenMetadata mavenMetadata = loadMavenMedatata(path);
+            JkMavenMetadata mavenMetadata = loadMavenMedatata(path);
             final String timestamp = JkUtilsTime.nowUtc("yyyyMMdd.HHmmss");
             if (mavenMetadata == null) {
-                mavenMetadata = MavenMetadata.of(versionedModule, timestamp);
+                mavenMetadata = JkMavenMetadata.of(versionedModule, timestamp);
             }
             mavenMetadata.updateSnapshot(timestamp);
             push(mavenMetadata, path);
@@ -153,7 +153,7 @@ final class IvyPublisherForMaven {
         pomWriterOptions.setArtifactPackaging(packaging);
         Path fileToDelete = null;
         if (publication.getExtraInfo() != null) {
-            final Path template = PomTemplateGenerator.generateTemplate(publication.getExtraInfo());
+            final Path template = JkPomTemplateGenerator.generateTemplate(publication.getExtraInfo());
             pomWriterOptions.setTemplate(template.toFile());
             fileToDelete = template;
         }
@@ -205,7 +205,7 @@ final class IvyPublisherForMaven {
     }
 
     private void publishUniqueSnapshot(JkVersionedModule versionedModule, String classifier,
-            Path source, String versionForUniqueSpshot, MavenMetadata mavenMetadata) {
+            Path source, String versionForUniqueSpshot, JkMavenMetadata mavenMetadata) {
 
         final String extension = JkUtilsString.substringAfterLast(source.getFileName().toString(), ".");
         final String dest = destination(versionedModule, extension, classifier,
@@ -251,16 +251,16 @@ final class IvyPublisherForMaven {
 
     private void updateMetadata(ModuleId moduleId, String version, String timestamp) {
         final String path = versionMetadataPath(of(moduleId, version));
-        MavenMetadata mavenMetadata = loadMavenMedatata(path);
+        JkMavenMetadata mavenMetadata = loadMavenMedatata(path);
         if (mavenMetadata == null) {
-            mavenMetadata = MavenMetadata.of(JkModuleId.of(moduleId.getOrganisation(),
+            mavenMetadata = JkMavenMetadata.of(JkModuleId.of(moduleId.getOrganisation(),
                     moduleId.getName()));
         }
         mavenMetadata.addVersion(version, timestamp);
         push(mavenMetadata, path);
     }
 
-    private void push(MavenMetadata metadata, String path) {
+    private void push(JkMavenMetadata metadata, String path) {
         final Path file = JkUtilsPath.createTempFile("metadata-", ".xml");
 
         try (OutputStream outputStream = Files.newOutputStream(file)) {
@@ -290,12 +290,12 @@ final class IvyPublisherForMaven {
                 + "/maven-metadata.xml";
     }
 
-    private MavenMetadata loadMavenMedatata(String path) {
+    private JkMavenMetadata loadMavenMedatata(String path) {
         try {
             final Resource resource = resolver.getRepository().getResource(completePath(path));
             if (resource.exists()) {
                 final InputStream inputStream = resource.openStream();
-                final MavenMetadata mavenMetadata = MavenMetadata.of(inputStream);
+                final JkMavenMetadata mavenMetadata = JkMavenMetadata.of(inputStream);
                 inputStream.close();
                 return mavenMetadata;
             }

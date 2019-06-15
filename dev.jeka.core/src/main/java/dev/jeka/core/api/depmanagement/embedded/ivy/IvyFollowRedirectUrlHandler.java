@@ -1,4 +1,10 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
+
+import org.apache.ivy.util.CopyProgressListener;
+import org.apache.ivy.util.FileUtil;
+import org.apache.ivy.util.Message;
+import org.apache.ivy.util.url.BasicURLHandler;
+import org.apache.ivy.util.url.IvyAuthenticator;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,12 +12,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.apache.ivy.util.CopyProgressListener;
-import org.apache.ivy.util.FileUtil;
-import org.apache.ivy.util.Message;
-import org.apache.ivy.util.url.BasicURLHandler;
-import org.apache.ivy.util.url.IvyAuthenticator;
 
 /**
  * BasicURLHandler does not handle http redirect. This class fixes this missing

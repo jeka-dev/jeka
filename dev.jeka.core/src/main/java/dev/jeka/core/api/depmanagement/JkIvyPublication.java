@@ -1,5 +1,8 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -9,24 +12,20 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import dev.jeka.core.api.depmanagement.JkIvyPublication.Artifact;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsString;
-
 /**
  * Information required to publish a module in an Ivy repository.
  *
  * @author Jerome Angibaud.
  */
-public final class JkIvyPublication implements Iterable<Artifact>, Serializable {
+public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPublicationArtifact>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final Set<Artifact> artifacts;
+    private final Set<JkPublicationArtifact> jkPublicationArtifacts;
 
-    private JkIvyPublication(Set<Artifact> artifacts) {
+    private JkIvyPublication(Set<JkPublicationArtifact> jkPublicationArtifacts) {
         super();
-        this.artifacts = artifacts;
+        this.jkPublicationArtifacts = jkPublicationArtifacts;
     }
 
 
@@ -94,9 +93,9 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
      * @see #ofType(Path, String, String...)
      */
     public JkIvyPublication and(String name, Path file, String type, String... scopes) {
-        final Set<Artifact> artifacts = new HashSet<>(this.artifacts);
-        artifacts.add(new Artifact(name, file, type, JkUtilsIterable.setOf(scopes).stream().map(JkScope::of).collect(Collectors.toSet())));
-        return new JkIvyPublication(artifacts);
+        final Set<JkPublicationArtifact> jkPublicationArtifacts = new HashSet<>(this.jkPublicationArtifacts);
+        jkPublicationArtifacts.add(new JkPublicationArtifact(name, file, type, JkUtilsIterable.setOf(scopes).stream().map(JkScope::of).collect(Collectors.toSet())));
+        return new JkIvyPublication(jkPublicationArtifacts);
     }
 
     /**
@@ -129,15 +128,15 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
     }
 
     @Override
-    public Iterator<Artifact> iterator() {
-        return this.artifacts.iterator();
+    public Iterator<JkPublicationArtifact> iterator() {
+        return this.jkPublicationArtifacts.iterator();
     }
 
-    static class Artifact implements Serializable {
+    public static class JkPublicationArtifact implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        private Artifact(String name, Path path, String type, Set<JkScope> jkScopes) {
+        private JkPublicationArtifact(String name, Path path, String type, Set<JkScope> jkScopes) {
             super();
             this.file = path.toFile();
             this.extension = path.getFileName().toString().contains(".") ? JkUtilsString.substringAfterLast(

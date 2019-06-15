@@ -1,5 +1,6 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.depmanagement.*;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
 import org.apache.ivy.core.module.descriptor.*;
@@ -26,7 +27,7 @@ import java.util.function.UnaryOperator;
  * {@link JkPublisher} instead. Ivy wrapper providing high level methods. The
  * API is expressed using Jeka classes only (mostly free of Ivy classes).
  */
-final class IvyInternalPublisher implements InternalPublisher {
+final class IvyInternalPublisher implements JkInternalPublisher {
 
     private final Ivy ivy;
 
@@ -52,7 +53,7 @@ final class IvyInternalPublisher implements InternalPublisher {
 
     private static IvyInternalPublisher of(IvySettings ivySettings, JkRepoSet publishRepos,
                                            File descriptorOutputDir) {
-        final Ivy ivy = IvyResolver.ivy(ivySettings);
+        final Ivy ivy = IvyInternalDepResolver.ivy(ivySettings);
         return new IvyInternalPublisher(ivy, publishRepos, descriptorOutputDir);
     }
 
@@ -172,7 +173,7 @@ final class IvyInternalPublisher implements InternalPublisher {
             throw new IllegalStateException(e);
         }
         try {
-            for (final JkIvyPublication.Artifact artifact : publication) {
+            for (final JkIvyPublication.JkPublicationArtifact artifact : publication) {
                 final Artifact ivyArtifact = IvyTranslations.toPublishedArtifact(artifact,
                         ivyModuleRevisionId, date);
                 try {
@@ -245,10 +246,10 @@ final class IvyInternalPublisher implements InternalPublisher {
             final ModuleRevisionId mrId = moduleDescriptor.getModuleRevisionId();
             final Path file;
             if (this.descriptorOutputDir != null) {
-                file = this.descriptorOutputDir.toPath().resolve("published-ivy-" + mrId.getOrganisation()
+                file = this.descriptorOutputDir.toPath().resolve("published-of-" + mrId.getOrganisation()
                 + "-" + mrId.getName() + "-" + mrId.getRevision() + ".xml");
             } else {
-                file = JkUtilsPath.createTempFile("published-ivy-", ".xml");
+                file = JkUtilsPath.createTempFile("published-of-", ".xml");
             }
             moduleDescriptor.toIvyFile(file.toFile());
             return file;

@@ -139,7 +139,9 @@ public final class JkUrlClassLoader {
     }
 
     /**
-     * @see #getSibling(Iterable)
+     * Creates a <code>JkClassLoader</code> loader having the same parent and
+     * the same entries as this one plus the specified entries. URL entries that
+     * are not file are transformed to file (created in temp folder).
      */
     public JkUrlClassLoader getSibling(Iterable<URL> fileOrUrls) {
         final List<Path> files = new LinkedList<>();

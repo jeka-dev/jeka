@@ -1,13 +1,13 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
+
 import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * A set of {@link JkRepo}
@@ -19,7 +19,7 @@ public final class JkRepoSet implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // Cached resolver
-    private transient ModuleDepResolver ivyResolver;
+    private transient JkInternalDepResolver ivyResolver;
 
     private final List<JkRepo> repos;
 
@@ -120,7 +120,7 @@ public final class JkRepoSet implements Serializable {
      * Retrieves directly the file embodying the specified the external dependency.
      */
     public Path get(JkModuleDependency moduleDependency) {
-        final ModuleDepResolver depResolver = getIvyResolver();
+        final JkInternalDepResolver depResolver = getIvyResolver();
         File file = depResolver.get(moduleDependency);
         if (file == null) {
             return null;
@@ -142,9 +142,9 @@ public final class JkRepoSet implements Serializable {
         return get(JkModuleDependency.of(moduleGroupVersion));
     }
 
-    private ModuleDepResolver getIvyResolver() {
+    private JkInternalDepResolver getIvyResolver() {
         if (ivyResolver == null) {
-            ivyResolver = InternalDepResolvers.ivy(this);
+            ivyResolver = JkInternalDepResolver.of(this);
         }
         return ivyResolver;
     }

@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.MavenMetadata.Versioning.Snapshot;
+import dev.jeka.core.api.depmanagement.JkMavenMetadata.Versioning.JkSnapshot;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.w3c.dom.Document;
@@ -26,28 +26,28 @@ import java.util.List;
  * 
  * @author Jerome Angibaud
  */
-final class MavenMetadata {
+public final class JkMavenMetadata {
 
-    static MavenMetadata of(JkVersionedModule versionedModule, String timestamp) {
-        final MavenMetadata metadata = new MavenMetadata();
+    public static JkMavenMetadata of(JkVersionedModule versionedModule, String timestamp) {
+        final JkMavenMetadata metadata = new JkMavenMetadata();
         metadata.groupId = versionedModule.getModuleId().getGroup();
         metadata.artifactId = versionedModule.getModuleId().getName();
         metadata.modelVersion = "1.1.0";
         metadata.version = versionedModule.getVersion().getValue();
         metadata.versioning = new Versioning();
-        metadata.versioning.snapshot = new Snapshot(timestamp, 0);
+        metadata.versioning.snapshot = new JkSnapshot(timestamp, 0);
         return metadata;
     }
 
-    static MavenMetadata of(JkModuleId moduleId) {
-        final MavenMetadata metadata = new MavenMetadata();
+    public static JkMavenMetadata of(JkModuleId moduleId) {
+        final JkMavenMetadata metadata = new JkMavenMetadata();
         metadata.groupId = moduleId.getGroup();
         metadata.artifactId = moduleId.getName();
         metadata.modelVersion = "1.1.0";
         return metadata;
     }
 
-    static MavenMetadata of(InputStream inputStream) {
+    public static JkMavenMetadata of(InputStream inputStream) {
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
             final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -57,7 +57,7 @@ final class MavenMetadata {
             final Element metadata = (org.w3c.dom.Element) doc.getElementsByTagName("metadata")
                     .item(0);
             final String modelVersion = metadata.getAttribute("modelVersion");
-            final MavenMetadata result = new MavenMetadata();
+            final JkMavenMetadata result = new JkMavenMetadata();
             result.modelVersion = modelVersion;
             result.groupId = subValue(metadata, "groupId");
             result.artifactId = subValue(metadata, "artifactId");
@@ -81,35 +81,35 @@ final class MavenMetadata {
 
     private Versioning versioning = new Versioning();
 
-    private MavenMetadata() {
+    private JkMavenMetadata() {
 
     }
 
-    void updateSnapshot(String timestamp) {
+    public void updateSnapshot(String timestamp) {
         if (versioning == null) {
             this.versioning = new Versioning();
         }
         final int buildNumber = this.versioning.currentBuildNumber() + 1;
-        this.versioning.snapshot = new Snapshot(timestamp, buildNumber);
+        this.versioning.snapshot = new JkSnapshot(timestamp, buildNumber);
         this.versioning.lastUpdate = timestamp.replace(".", "");
         this.versioning.snapshotVersions.clear();
     }
 
-    Snapshot currentSnapshot() {
+    public JkSnapshot currentSnapshot() {
         return this.versioning.snapshot;
     }
 
     void setFirstCurrentSnapshot(String timestamp) {
-        this.versioning.snapshot = new Snapshot(timestamp, 1);
+        this.versioning.snapshot = new Versioning.JkSnapshot(timestamp, 1);
     }
 
-    void addSnapshotVersion(String extension, String classifier) {
+    public void addSnapshotVersion(String extension, String classifier) {
         final Versioning.SnapshotVersion snapshotVersion = new Versioning.SnapshotVersion();
         snapshotVersion.classifier = classifier;
         snapshotVersion.extension = extension;
         snapshotVersion.updated = this.versioning.lastUpdate;
         final String version = this.version.replace("-SNAPSHOT", "");
-        final Snapshot snapshot = this.versioning.snapshot;
+        final JkSnapshot snapshot = this.versioning.snapshot;
         snapshotVersion.value = version + "-" + snapshot.timestamp + "-" + snapshot.buildNumber;
         this.versioning.snapshotVersions.add(snapshotVersion);
     }
@@ -136,7 +136,7 @@ final class MavenMetadata {
         this.versioning.lastUpdate = timestamp;
     }
 
-    void output(OutputStream outputStream) {
+    public void output(OutputStream outputStream) {
         try {
             final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(
                     outputStream, "UTF-8");
@@ -167,7 +167,7 @@ final class MavenMetadata {
         writer.writeEndElement();
     }
 
-    static class Versioning {
+    public static class Versioning {
 
         private Versioning() {
         }
@@ -175,7 +175,7 @@ final class MavenMetadata {
         private Versioning(Element element) {
             final NodeList snapNodeList = element.getElementsByTagName("snapshot");
             if (snapNodeList.getLength() > 0) {
-                this.snapshot = new Snapshot((Element) snapNodeList.item(0));
+                this.snapshot = new JkSnapshot((Element) snapNodeList.item(0));
             }
             this.snapshotVersions = new LinkedList<>();
 
@@ -205,7 +205,7 @@ final class MavenMetadata {
             this.lastUpdate = subValue(element, "lastUpdate");
         }
 
-        private Snapshot snapshot;
+        private JkSnapshot snapshot;
 
         private String latest;
 
@@ -274,16 +274,16 @@ final class MavenMetadata {
             writer.writeEndElement();
         }
 
-        static class Snapshot {
+        public static class JkSnapshot {
             public final String timestamp;
             public final int buildNumber;
 
-            Snapshot(String timestamp, int buildNumber) {
+            JkSnapshot(String timestamp, int buildNumber) {
                 this.buildNumber = buildNumber;
                 this.timestamp = timestamp;
             }
 
-            Snapshot(Element element) {
+            JkSnapshot(Element element) {
                 this.buildNumber = Integer.parseInt(subValue(element, "buildNumber"));
                 this.timestamp = subValue(element, "timestamp");
             }

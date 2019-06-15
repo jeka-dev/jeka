@@ -17,14 +17,14 @@ import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.List;
 
-final class PomTemplateGenerator {
+public final class JkPomTemplateGenerator {
 
     private static final String TOKEN = "____jeka.maven.extraInfo____";
 
     private static final String VERSION_TOKEN = "____jekaVersion____";
 
     public static Path generateTemplate(JkMavenPublicationInfo publicationInfo) {
-        final String firstTemplate = JkUtilsIO.read(PomTemplateGenerator.class
+        final String firstTemplate = JkUtilsIO.read(JkPomTemplateGenerator.class
                 .getResource("pom-full.template"));
         String extraXml;
         try {

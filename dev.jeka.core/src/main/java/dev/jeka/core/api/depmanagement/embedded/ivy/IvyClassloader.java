@@ -1,4 +1,4 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
@@ -7,7 +7,7 @@ final class IvyClassloader {
 
     private static final String IVY_JAR_NAME = "ivy-2.4.0.jar";
 
-    static final String IVY_CLASS_NAME = "org.apache.ivy.Ivy";
+    static final String IVY_CLASS_NAME = "org.apache.of.Ivy";
 
     static final JkClassLoader CLASSLOADER = classloader();
 

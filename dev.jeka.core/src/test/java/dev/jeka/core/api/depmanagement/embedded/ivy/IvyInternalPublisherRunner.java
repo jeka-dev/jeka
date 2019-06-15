@@ -1,5 +1,7 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+
+import dev.jeka.core.api.depmanagement.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -1,5 +1,6 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -33,7 +34,7 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-final class IvyResolver implements ModuleDepResolver {
+final class IvyInternalDepResolver implements JkInternalDepResolver {
 
     private static final Random RANDOM = new Random();
 
@@ -41,14 +42,14 @@ final class IvyResolver implements ModuleDepResolver {
 
     private final Ivy ivy;
 
-    private IvyResolver(Ivy ivy) {
+    private IvyInternalDepResolver(Ivy ivy) {
         super();
         this.ivy = ivy;
     }
 
-    private static IvyResolver of(IvySettings ivySettings) {
+    private static IvyInternalDepResolver of(IvySettings ivySettings) {
         final Ivy ivy = ivy(ivySettings);
-        return new IvyResolver(ivy);
+        return new IvyInternalDepResolver(ivy);
     }
 
     static Ivy ivy(IvySettings ivySettings) {
@@ -78,7 +79,7 @@ final class IvyResolver implements ModuleDepResolver {
      * Creates an instance using specified repository for publishing and the
      * specified repositories for resolving.
      */
-    public static IvyResolver of(JkRepoSet resolveRepos) {
+    public static IvyInternalDepResolver of(JkRepoSet resolveRepos) {
         IvySettings ivySettings = ivySettingsOf(resolveRepos);
         return of(ivySettings);
     }
@@ -86,7 +87,7 @@ final class IvyResolver implements ModuleDepResolver {
     @SuppressWarnings("unchecked")
     @Override
     public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencySet deps,
-            JkResolutionParameters parameters, JkScope ... resolvedScopes) {
+                                   JkResolutionParameters parameters, JkScope ... resolvedScopes) {
 
         final JkVersionedModule module;
         if (moduleArg == null) {
@@ -226,7 +227,7 @@ final class IvyResolver implements ModuleDepResolver {
                     final Set<JkScope> declaredScopes = IvyTranslations.toJkScopes(dependencyDescriptor.getModuleConfigurations());
                     final JkVersion version = JkVersion.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());
-                    final JkModuleNodeInfo moduleNodeInfo  = new JkModuleNodeInfo(moduleId, version, declaredScopes,
+                    final JkModuleNodeInfo moduleNodeInfo  = JkModuleNodeInfo.of(moduleId, version, declaredScopes,
                             rootScopes, resolvedVersion, artifacts);
                     if (!containSame(list, moduleId)) {
                         list.add(moduleNodeInfo);

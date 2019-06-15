@@ -1,5 +1,6 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.depmanagement.*;
 import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.descriptor.Configuration.Visibility;
 import org.apache.ivy.core.module.id.ArtifactId;
@@ -336,7 +337,7 @@ final class IvyTranslations {
 
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
             JkIvyPublication publication, Instant publishDate) {
-        for (final JkIvyPublication.Artifact artifact : publication) {
+        for (final JkIvyPublication.JkPublicationArtifact artifact : publication) {
             for (final JkScope jkScope : JkScope.getInvolvedScopes(artifact.jkScopes)) {
                 if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.getName())) {
                     descriptor.addConfiguration(toConfiguration(jkScope));
@@ -378,7 +379,7 @@ final class IvyTranslations {
         descriptor.addExtraAttributeNamespace(EXTRA_PREFIX, EXTRA_NAMESPACE);
     }
 
-    static Artifact toPublishedArtifact(JkIvyPublication.Artifact artifact,
+    static Artifact toPublishedArtifact(JkIvyPublication.JkPublicationArtifact artifact,
             ModuleRevisionId moduleId, Instant date) {
         final String artifactName = JkUtilsString.isBlank(artifact.name) ? moduleId.getName()
                 : artifact.name;

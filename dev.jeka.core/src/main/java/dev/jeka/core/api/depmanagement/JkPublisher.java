@@ -1,9 +1,8 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.java.JkClassLoader;
+
 import dev.jeka.core.api.system.JkException;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
@@ -18,13 +17,11 @@ import java.util.function.UnaryOperator;
  */
 public final class JkPublisher {
 
-    private static final String IVY_PUB_CLASS = "dev.jeka.core.api.depmanagement.IvyInternalPublisher";
-
-    private final InternalPublisher internalPublisher;
+    private final JkInternalPublisher internalPublisher;
 
     private final UnaryOperator<Path> signer;
 
-    private JkPublisher(InternalPublisher internalPublisher, UnaryOperator<Path> signer) {
+    private JkPublisher(JkInternalPublisher internalPublisher, UnaryOperator<Path> signer) {
         super();
         this.internalPublisher = internalPublisher;
         this.signer = signer;
@@ -43,16 +40,7 @@ public final class JkPublisher {
      * ivy.xml are generated.
      */
     public static JkPublisher of(JkRepoSet publishRepos, Path artifactDir) {
-        File arg = artifactDir == null ? null : artifactDir.toFile();
-        final InternalPublisher ivyPublisher;
-        if (JkClassLoader.ofCurrent().isDefined(IvyClassloader.IVY_CLASS_NAME)) {
-            ivyPublisher = IvyInternalPublisher.of(publishRepos, arg);
-        } else {
-            ivyPublisher =IvyClassloader.CLASSLOADER.createCrossClassloaderProxy(
-                    InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos,
-                    artifactDir == null ? null : artifactDir.toFile());
-        }
-        return new JkPublisher(ivyPublisher, null);
+        return new JkPublisher(JkInternalPublisher.of(publishRepos, artifactDir), null);
     }
 
     /**

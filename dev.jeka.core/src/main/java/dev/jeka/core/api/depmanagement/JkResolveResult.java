@@ -1,15 +1,15 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+
 import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
-
-import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * Result of a module dependency resolution for a given scope.<br/>
@@ -52,7 +52,7 @@ public final class JkResolveResult implements Serializable {
     /**
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
-    static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
+    public static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
         return new JkResolveResult(depTree, errorReport, Paths.get("").toFile());
     }
 
@@ -153,11 +153,11 @@ public final class JkResolveResult implements Serializable {
 
         private final boolean hasErrors;
 
-        static JkErrorReport allFine() {
+        public static JkErrorReport allFine() {
             return new JkErrorReport(JkUtilsIterable.listOf(), false);
         }
 
-        static JkErrorReport failure(List<JkModuleDepProblem> missingArtifacts) {
+        public static JkErrorReport failure(List<JkModuleDepProblem> missingArtifacts) {
             return new JkErrorReport(missingArtifacts, true);
         }
 
