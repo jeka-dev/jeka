@@ -17,7 +17,7 @@ import java.net.URLConnection;
  * BasicURLHandler does not handle http redirect. This class fixes this missing
  * feature.
  */
-class IvyFollowRedirectUrlHandler extends BasicURLHandler {
+final class IvyFollowRedirectUrlHandler extends BasicURLHandler {
 
     private static final int BUFFER_SIZE = 64 * 1024;
 

@@ -6,7 +6,7 @@ import dev.jeka.core.api.system.JkLog;
 
 import java.io.PrintStream;
 
-class IvyMessageLogger extends AbstractMessageLogger {
+final class IvyMessageLogger extends AbstractMessageLogger {
 
     @Override
     public void log(String message, int level) {

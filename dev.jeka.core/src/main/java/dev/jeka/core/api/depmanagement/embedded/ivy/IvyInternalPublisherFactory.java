@@ -7,8 +7,15 @@ import dev.jeka.core.api.java.JkClassLoader;
 import java.io.File;
 import java.nio.file.Path;
 
-class IvyInternalPublisherFactory {
+/*
+ * This class is only used with Refection. Please do not remove.
+ */
+final class IvyInternalPublisherFactory {
 
+
+    /*
+     * This method is only invoked by reflection. Please do not remove.
+     */
     static JkInternalPublisher of(JkRepoSet publishRepos, Path artifactDir) {
         File arg = artifactDir == null ? null : artifactDir.toFile();
         final JkInternalPublisher ivyPublisher;

@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Created by angibaudj on 20-06-17.
  */
-class IvyArtifactContainer {
+final class IvyArtifactContainer {
 
     private final Map<JkVersionedModule, List<Path>> map = new HashMap<>();
 
