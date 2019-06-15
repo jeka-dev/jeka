@@ -1,10 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.*;
 import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.utils.*;
 
-import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,7 +16,7 @@ import java.util.function.Supplier;
  *
  * @author Jerome Angibaud.
  */
-public class JkDependencySet implements Iterable<JkScopedDependency>, Serializable {
+public class JkDependencySet implements Iterable<JkScopedDependency> {
 
     private static final long serialVersionUID = 1L;
 

@@ -1,19 +1,16 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
-import java.util.jar.Attributes;
-
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+
+import java.util.jar.Attributes;
 
 /**
  * Identifies a given module in a given version
  *
  * @author Jerome Angibaud
  */
-public final class JkVersionedModule implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class JkVersionedModule {
 
     private final JkModuleId moduleId;
 

@@ -1,11 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
-
 /**
  * Information about problem when resolving dependencies
  */
-public class JkModuleDepProblem implements Serializable {
+public class JkModuleDepProblem {
 
     private static final long serialVersionUID = 1L;
 

@@ -14,7 +14,7 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-public class JkDependencyNode implements Serializable {
+public class JkDependencyNode {
 
     private static final String INDENT = "    ";
 

@@ -3,7 +3,6 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.io.File;
-import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -14,7 +13,7 @@ import java.util.List;
  *
  * @author Jerome Angibaud
  */
-public final class JkRepoSet implements Serializable {
+public final class JkRepoSet {
 
     private static final long serialVersionUID = 1L;
 

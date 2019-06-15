@@ -2,14 +2,10 @@ package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
-import java.io.Serializable;
-
 /**
  * Contains parameters likely to impact module resolution behavior.
  */
-public final class JkResolutionParameters implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class JkResolutionParameters {
 
     /**
      * Creates resolution parameters without default mapping and no dynamic

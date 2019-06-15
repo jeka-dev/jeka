@@ -1,13 +1,12 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * A dependency along a scope information to specify for wich purpose it should be used.
@@ -18,9 +17,7 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
  *
  * To understand how scope and mapping scope influence resolution, you can visit <a href="http://ant.apache.org/ivy/history/latest-milestone/ivyfile/configurations.html">this page</a>.
  */
-public final class JkScopedDependency implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class JkScopedDependency {
 
     /**
      * Type for the scope.<ul>

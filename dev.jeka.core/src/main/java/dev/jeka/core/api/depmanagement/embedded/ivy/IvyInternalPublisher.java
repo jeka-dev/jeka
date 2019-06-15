@@ -33,9 +33,9 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     private final JkRepoSet publishRepos;
 
-    private final File descriptorOutputDir;
+    private final Path descriptorOutputDir;
 
-    private IvyInternalPublisher(Ivy ivy, JkRepoSet publishRepo, File descriptorOutputDir) {
+    private IvyInternalPublisher(Ivy ivy, JkRepoSet publishRepo, Path descriptorOutputDir) {
         super();
         this.ivy = ivy;
         this.publishRepos = publishRepo;
@@ -52,7 +52,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     }
 
     private static IvyInternalPublisher of(IvySettings ivySettings, JkRepoSet publishRepos,
-                                           File descriptorOutputDir) {
+                                           Path descriptorOutputDir) {
         final Ivy ivy = IvyInternalDepResolver.ivy(ivySettings);
         return new IvyInternalPublisher(ivy, publishRepos, descriptorOutputDir);
     }
@@ -61,7 +61,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
      * Creates an instance using specified repository for publishing and the
      * specified repositories for resolving.
      */
-    public static IvyInternalPublisher of(JkRepoSet publishRepos, File descriptorOutputDir) {
+    public static IvyInternalPublisher of(JkRepoSet publishRepos, Path descriptorOutputDir) {
         return of(ivySettingsOf(publishRepos), publishRepos, descriptorOutputDir);
     }
 
@@ -246,7 +246,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             final ModuleRevisionId mrId = moduleDescriptor.getModuleRevisionId();
             final Path file;
             if (this.descriptorOutputDir != null) {
-                file = this.descriptorOutputDir.toPath().resolve("published-of-" + mrId.getOrganisation()
+                file = this.descriptorOutputDir.resolve("published-of-" + mrId.getOrganisation()
                 + "-" + mrId.getName() + "-" + mrId.getRevision() + ".xml");
             } else {
                 file = JkUtilsPath.createTempFile("published-of-", ".xml");

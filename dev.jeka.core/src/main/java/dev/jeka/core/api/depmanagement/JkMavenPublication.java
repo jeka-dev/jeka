@@ -1,7 +1,11 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.File;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -10,11 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-
 /**
  * Publication specific information to include in POM file in order to be published of a Maven repository.
  * These information contains : <ul>
@@ -22,7 +21,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  *   <li>Information about describing the project as some public repositories require</li>
  * </ul>
  */
-public final class JkMavenPublication implements Serializable {
+public final class JkMavenPublication {
 
     private static final long serialVersionUID = 1L;
 
@@ -175,8 +174,8 @@ public final class JkMavenPublication implements Serializable {
             }
         }
         for (JkClassifiedFileArtifact classifiedFileArtifact : this.classifiedArtifacts) {
-            if (!classifiedFileArtifact.file.exists()) {
-                result.add(classifiedFileArtifact.file.toPath());
+            if (!Files.exists(classifiedFileArtifact.file)) {
+                result.add(classifiedFileArtifact.file);
             }
         }
         return result;
@@ -185,17 +184,17 @@ public final class JkMavenPublication implements Serializable {
     /**
      * An artifact with a classifier for Maven repository.
      */
-    public static class JkClassifiedFileArtifact implements Serializable {
+    public static class JkClassifiedFileArtifact {
 
         private static final long serialVersionUID = 1L;
 
         private final String classifier;
-        private final File file;  // Path not serializable
+        private final Path file;
 
         JkClassifiedFileArtifact(String classifier, Path file) {
             super();
             this.classifier = classifier;
-            this.file = file.toFile();
+            this.file = file;
         }
 
         /** Classifier string for this classified artifact */
@@ -205,12 +204,12 @@ public final class JkMavenPublication implements Serializable {
 
         /** File for this classified artifact */
         public Path getFile() {
-            return file.toPath();
+            return file;
         }
 
         /** File getExtension */
         public String getExtension() {
-            return JkUtilsString.substringAfterLast(file.getName(), ".");
+            return JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
         }
 
     }

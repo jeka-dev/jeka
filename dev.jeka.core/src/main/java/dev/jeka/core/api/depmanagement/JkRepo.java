@@ -19,7 +19,7 @@ import java.util.Set;
 /**
  * Hold configuration necessary to instantiate download or upload repository
  */
-public final class JkRepo implements Serializable {
+public final class JkRepo {
 
     private static final long serialVersionUID = 1L;
 

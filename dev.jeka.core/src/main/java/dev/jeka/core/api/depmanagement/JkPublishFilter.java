@@ -1,14 +1,12 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
-
 /**
  * Defines filter to accept or not module to be published on a given {@link JkRepo}
  * 
  * @author Jerome Angibaud
  */
 @FunctionalInterface
-public interface JkPublishFilter extends Serializable {
+public interface JkPublishFilter {
 
     /**
      * Returns <code>true</code> if this filter should andAccept the specified versioned module.

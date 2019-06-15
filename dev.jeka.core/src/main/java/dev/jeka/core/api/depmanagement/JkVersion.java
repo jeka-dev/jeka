@@ -1,7 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
-
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -10,9 +8,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  *
  * @author Jerome Angibaud
  */
-public final class JkVersion implements Comparable<JkVersion>, Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class JkVersion implements Comparable<JkVersion> {
 
     /** Mention that the version is unspecified */
     public static final JkVersion UNSPECIFIED = new JkVersion("UNSPECIFIED-SNAPSHOT");

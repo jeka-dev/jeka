@@ -1,16 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.util.*;
 
 /**
  * Defines a context where is defined dependencies of a given project. According
@@ -23,7 +16,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  *
  * @author Jerome Angibaud
  */
-public final class JkScope implements Serializable {
+public final class JkScope {
 
     private static final long serialVersionUID = 1L;
 

@@ -10,9 +10,7 @@ import java.util.List;
  * 
  * @author Jerome Angibaud
  */
-public final  class JkMavenPublicationInfo implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final  class JkMavenPublicationInfo {
 
     /**
      * Creates a publication infoString specifying the name of the project, its description and its

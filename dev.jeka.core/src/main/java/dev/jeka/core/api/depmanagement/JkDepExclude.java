@@ -1,17 +1,16 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+
 import java.util.Collections;
 import java.util.Set;
-
-import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * Information about excluding artifacts or whole modules.
  *
  * @author Jerome Angibaud
  */
-public final class JkDepExclude implements Serializable {
+public final class JkDepExclude {
 
     private static final long serialVersionUID = 1L;
 

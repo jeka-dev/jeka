@@ -1,10 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
-import java.util.Comparator;
-
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.util.Comparator;
 
 /**
  * Identifier for project. The identifier will be used to name the generated
@@ -12,9 +11,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  *
  * @author Jerome Angibaud
  */
-public final class JkModuleId implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class JkModuleId {
 
     /**
      * Comparator sorting by module group first then module name.

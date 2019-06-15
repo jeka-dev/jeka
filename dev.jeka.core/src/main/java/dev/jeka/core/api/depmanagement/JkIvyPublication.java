@@ -4,7 +4,6 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud.
  */
-public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPublicationArtifact>, Serializable {
+public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPublicationArtifact> {
 
     private static final long serialVersionUID = 1L;
 
@@ -132,7 +131,7 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
         return this.jkPublicationArtifacts.iterator();
     }
 
-    public static class JkPublicationArtifact implements Serializable {
+    public static class JkPublicationArtifact {
 
         private static final long serialVersionUID = 1L;
 

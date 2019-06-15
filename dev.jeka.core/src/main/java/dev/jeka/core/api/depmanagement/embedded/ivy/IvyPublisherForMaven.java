@@ -33,14 +33,14 @@ final class IvyPublisherForMaven {
 
     private final UnaryOperator<Path> signer;
 
-    private final File descriptorOutputDir;
+    private final Path descriptorOutputDir;
 
     private final boolean uniqueSnapshot;
 
     private final Set<String> checksumAlgos;
 
     IvyPublisherForMaven(UnaryOperator<Path> signer, RepositoryResolver dependencyResolver,
-                         File descriptorOutputDir, boolean uniqueSnapshot, Set<String> checksumAlgos) {
+                         Path descriptorOutputDir, boolean uniqueSnapshot, Set<String> checksumAlgos) {
         super();
         this.resolver = dependencyResolver;
         this.descriptorOutputDir = descriptorOutputDir;
@@ -341,7 +341,7 @@ final class IvyPublisherForMaven {
     }
 
     private String targetDir() {
-        return this.descriptorOutputDir.getAbsolutePath();
+        return this.descriptorOutputDir.toAbsolutePath().toString();
     }
 
     private static void commitPublication(DependencyResolver resolver) {

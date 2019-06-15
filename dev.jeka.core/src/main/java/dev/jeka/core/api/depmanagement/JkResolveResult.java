@@ -22,7 +22,7 @@ import java.util.Set;
  *        (as 1.0.+)</li>
  * </ul>
  */
-public final class JkResolveResult implements Serializable {
+public final class JkResolveResult {
 
     private static final long serialVersionUID = 1L;
 

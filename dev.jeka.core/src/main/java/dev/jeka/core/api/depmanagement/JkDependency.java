@@ -1,7 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
-
 /**
  * Marker interface for a dependency. It can be a either :
  * <ul>
@@ -14,7 +12,7 @@ import java.io.Serializable;
  *
  * @author Jerome Angibaud
  */
-public interface JkDependency extends Serializable {
+public interface JkDependency {
 
 
 }

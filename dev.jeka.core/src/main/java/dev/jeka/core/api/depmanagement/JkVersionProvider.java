@@ -1,21 +1,18 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.Serializable;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * Association between getModuleIds and version.
  *
  * @author Jerome Angibaud
  */
-public final class JkVersionProvider implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class JkVersionProvider {
 
     /**
      * @see #of(JkModuleId, JkVersion)
