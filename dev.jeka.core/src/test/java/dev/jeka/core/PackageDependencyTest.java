@@ -1,6 +1,6 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.tool.Main;
 import jdepend.framework.JDepend;
 import jdepend.framework.JavaClass;
 import jdepend.framework.JavaPackage;
@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,9 +19,9 @@ import java.util.List;
 public class PackageDependencyTest {
 
     @Test
-    public void testDependencies() throws IOException {
+    public void testDependencies() throws Exception {
         final String packagePrefix = "dev.jeka.core";
-        final File classDir = JkUrlClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("dev.jeka.core.tool.Main").toFile();
+        final File classDir = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
         final String cycle = PackageAnalyser.of(classDir, packagePrefix).cycle();
         Assert.assertTrue(cycle, cycle == null);
     }

@@ -2,14 +2,9 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
-import dev.jeka.core.api.utils.JkUtilsThrowable;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,31 +30,14 @@ public final class JkLocator {
         if (JEKA_JAR_FILE != null) {
             return JEKA_JAR_FILE;
         }
-        if (JkLocator.class.getClassLoader() instanceof URLClassLoader) {
-            for (final Path file : JkUtilsSystem.classloaderEntries((URLClassLoader) JkLocator.class.getClassLoader())) {
-                final URL url = JkUtilsPath.toUrl(file);
-
-                try ( URLClassLoader classLoader =  new URLClassLoader(new URL[] { url }, ClassLoader.getSystemClassLoader().getParent())) {
-                    classLoader.loadClass(JkLocator.class.getName());
-                    JEKA_JAR_FILE = file;
-                    return file;
-                } catch (final ClassNotFoundException e) {
-                    // Class just not there
-                } catch (final IOException e) {
-                    throw JkUtilsThrowable.unchecked(e);
-                }
-            }
-        } else {
-            URI uri;
-            try {
-                uri = JkLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-            } catch (URISyntaxException e) {
-                throw new IllegalStateException("Cannot find location of "
-                        + JkLocator.class.getProtectionDomain().getCodeSource().getLocation());
-            }
-            return Paths.get(uri);
+        URI uri;
+        try {
+            uri = JkLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Cannot find location of "
+                    + JkLocator.class.getProtectionDomain().getCodeSource().getLocation());
         }
-        throw new IllegalStateException("Main not found in classpath");
+        return Paths.get(uri);
     }
 
     public static boolean isEmbedded() {

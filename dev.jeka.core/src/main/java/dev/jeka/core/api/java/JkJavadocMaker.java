@@ -1,23 +1,25 @@
 package dev.jeka.core.api.java;
 
 
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Offers fluent interface for producing Javadoc.
@@ -176,11 +178,12 @@ public final class JkJavadocMaker {
     }
 
     private static Class<?> getJavadocMainClass() {
-        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
-        Class<?> mainClass = classLoader.toJkClassLoader().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
+        Class<?> mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
         if (mainClass == null) {
-            classLoader.addEntries(JkUtilsJdk.toolsJar());
-            mainClass = classLoader.toJkClassLoader().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+            URL url = JkUtilsPath.toUrl(JkUtilsJdk.toolsJar());
+            URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {url});
+            mainClass = JkClassLoader.of(urlClassLoader).loadIfExist(JAVADOC_MAIN_CLASS_NAME);
             if (mainClass == null) {
                 throw new RuntimeException(
                         "It seems that you are running a JRE instead of a JDK, please run Jeka using a JDK.");

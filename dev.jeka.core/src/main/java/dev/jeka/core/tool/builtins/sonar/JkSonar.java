@@ -1,16 +1,17 @@
 package dev.jeka.core.tool.builtins.sonar;
 
 
-import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkConstants;
 
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -107,12 +108,9 @@ public final class JkSonar {
     }
 
     private JkJavaProcess javaProcess() {
-        final Path sonarRunnerJar = JkUtilsObject.firstNonNull(
-                JkUrlClassLoader.ofCurrent().getFullClasspath().getEntryContainingClass("org.sonar.runner.Main"),
-                jarRunner());
-
-        return JkJavaProcess.of().withClasspath(sonarRunnerJar)
-                .andOptions(toProperties());
+        URL embeddedUrl = JkSonar.class.getResource(RUNNER_JAR_NAME_24);
+        Path cachedUrl = JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkUrlClassLoader.getUrlCacheDir());
+        return JkJavaProcess.of().withClasspath(cachedUrl).andOptions(toProperties());
     }
 
     private List<String> toProperties() {

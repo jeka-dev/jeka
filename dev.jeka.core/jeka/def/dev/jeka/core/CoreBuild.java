@@ -78,7 +78,7 @@ public class CoreBuild extends JkCommands {
                 .setMavenPublicationInfo(mavenPublication());
 
         // include embedded jar
-        maker.putArtifact(maker.getMainArtifactId(), this::doPack);
+        maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded);
     }
 
     public void publishDocsOnGithubPage() {
@@ -155,7 +155,7 @@ public class CoreBuild extends JkCommands {
         JkLog.endTask();
     }
 
-    private void doPack() {
+    private void doPackWithEmbedded() {
         JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
         Path tempJar = maker.getOutLayout().getOutputPath().resolve("tempJar");
         maker.getTasksForPackaging().createBinJar(tempJar);

@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.junit;
 
-import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.junit.JkUnit.JunitReportDetail;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
@@ -96,7 +96,7 @@ class JUnit4TestExecutor {
                 classes.add(Class.forName(className));
             } catch (final ClassNotFoundException e) {
                 throw new IllegalArgumentException("Class " + className + " not found in classloader "
-                        + JkUrlClassLoader.ofCurrent());
+                        + JkClassLoader.ofCurrent());
             }
         }
         return classes.toArray(new Class[0]);
