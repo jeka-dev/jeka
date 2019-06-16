@@ -28,6 +28,8 @@ and leaner user code.
 Last addition was about deploying on Maven central though a modern release process (version numbering based on Git instead of being hardcoded).
 Jeka now uses these features to release itself.
 
+Please visit [relelease note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues]("issues") for roadmap.
+
 # Get Jeka
 
 * Snapshots : https://oss.sonatype.org/content/repositories/snapshots/dev/jeka/jeka-core/
