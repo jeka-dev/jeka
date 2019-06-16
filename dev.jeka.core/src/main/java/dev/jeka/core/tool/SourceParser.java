@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
@@ -108,8 +109,8 @@ final class SourceParser {
                     if (Files.exists(relativeFile)) {
                         depFile = relativeFile.normalize();
                     } else {
-                        throw new JkException("File " + dependency
-                                + " mentionned in @JkImport does not exist.");
+                        JkLog.warn("File '" + dependency
+                                + "' mentionned in @JkImport does not exist.");
                     }
                 }
 

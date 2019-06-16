@@ -1,10 +1,8 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -32,9 +30,6 @@ public final class JkFileSystemDependency implements JkFileDependency {
 
     @Override
     public final List<Path> getFiles() {
-        for (final Path file : files) {
-            JkUtilsAssert.isTrue(Files.exists(file), "File " + file + " does not exist.");
-        }
         return files;
     }
 
