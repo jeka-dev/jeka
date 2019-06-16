@@ -1,3 +1,15 @@
+## 0.8.1
+
+* Reworked mechanism to embed 3rd party jar within jeka-core.jar
+* Better general performance and lower resource consumption
+* Bug fixes
+
+## 0.8.0
+
+* Change from org.jerkar to dev.jeka namespace.
+* Package classes has all been renamed (no backward compatibility with 0.7.x)
+* Bug fixes
+
 ## 0.7.0
 
 * Move from jdk6 to jdk8

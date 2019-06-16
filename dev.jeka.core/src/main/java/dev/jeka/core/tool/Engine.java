@@ -147,7 +147,7 @@ final class Engine {
     }
 
     private JkCommands getRunInstance(String runClassHint, JkPathSequence runtimePath) {
-        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent(); // Should be always a UrlClassloader
+        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting run execution classpath to : " + classLoader.getDirectClasspath());
         final JkCommands run = resolver.resolve(runClassHint);
