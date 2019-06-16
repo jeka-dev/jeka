@@ -1,8 +1,13 @@
-## 0.8.1
+## 0.8.2
 
 * Reworked mechanism to embed 3rd party jar within jeka-core.jar
 * Better general performance and lower resource consumption
 * Bug fixes
+
+## 0.8.1
+
+* Minor adaptation for better plugin integration
+* Minor bug fixes
 
 ## 0.8.0
 
