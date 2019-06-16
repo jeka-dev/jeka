@@ -1,13 +1,8 @@
-package dev.jeka.core.api.crypto.pgp;
+package dev.jeka.core.api.crypto.gpg;
 
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
-import java.io.File;
-import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,43 +11,38 @@ import java.util.function.UnaryOperator;
 /**
  * Provides method for signing and verify signature with PGP.
  * <p>
- * When constructing JkPgp, you can provide a secret key ring, a public key ring
+ * When constructing JkGpg, you can provide a secret key ring, a public key ring
  * or both.
  *
  * @author Jerome Angibaud
  */
-public final class JkPgp implements Serializable {
+public final class JkGpg {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PGPUTILS_CLASS_NAME = "dev.jeka.core.api.crypto.pgp.PgpUtils";
-
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
-    private final File pubRing;
+    private static JkInternalGpgDoer internalGpgDoer = JkInternalGpgDoer.of();
 
-    private final File secRing;
+    private final Path pubRing;
 
-    private final String password;
+    private final Path secRing;
 
-    private JkPgp(Path pubRing, Path secRing, String password) {
+    private final String passphrase;
+
+
+    private JkGpg(Path pubRing, Path secRing, String password) {
         super();
-        this.pubRing = pubRing == null ? null : pubRing.toFile();
-        this.secRing = secRing == null ? null : secRing.toFile();
-        this.password = password;
+        this.pubRing = pubRing == null ? null : pubRing;
+        this.secRing = secRing == null ? null : secRing;
+        this.passphrase = password;
     }
 
-    // We don't want to add Bouncycastle in the Jeka classpath, so we create a
-    // specific classloader just for launching the Bouncy castle methods.
-    private static final Class<?> PGPUTILS_CLASS = JkUrlClassLoader.ofCurrent()
-            .getSiblingWithOptional(JkPgp.class.getResource("bouncycastle-pgp-152.jar"))
-            .toJkClassLoader().load(PGPUTILS_CLASS_NAME);
-
     /**
-     * Creates a {@link JkPgp} with the specified public and secret ring.
+     * Creates a {@link JkGpg} with the specified public and secret ring.
      */
-    public static JkPgp of(Path pubRing, Path secRing, String password) {
-        return new JkPgp(pubRing, secRing, password);
+    public static JkGpg of(Path pubRing, Path secRing, String password) {
+        return new JkGpg(pubRing, secRing, password);
     }
 
     public static Path getDefaultPubring() {
@@ -70,23 +60,23 @@ public final class JkPgp implements Serializable {
     }
 
     /**
-     * Creates a {@link JkPgp} with default GnuPgp file location.
+     * Creates a {@link JkGpg} with default GnuPgp file location.
      */
-    public static JkPgp ofDefaultGnuPg() {
-        return new JkPgp(getDefaultPubring(), getDefaultSecring(), null);
+    public static JkGpg ofDefaultGnuPg() {
+        return new JkGpg(getDefaultPubring(), getDefaultSecring(), null);
     }
 
     /**
-     * Creates a JkPgp with the specified public key ring.
+     * Creates a JkGpg with the specified public key ring.
      */
-    public static JkPgp ofPublicRing(Path pubRing) {
+    public static JkGpg ofPublicRing(Path pubRing) {
         return of(pubRing, null, null);
     }
 
     /**
-     * Creates a JkPgp with the specified secret key ring.
+     * Creates a JkGpg with the specified secret key ring.
      */
-    public static JkPgp ofSecretRing(Path secRing, String password) {
+    public static JkGpg ofSecretRing(Path secRing, String password) {
         return of(null, secRing, password);
     }
 
@@ -101,20 +91,17 @@ public final class JkPgp implements Serializable {
      */
     public void sign(Path fileToSign, String keyName, Path signatureFile) {
         final char[] pass;
-        if (password == null) {
+        if (passphrase == null) {
             pass = new char[0];
         } else {
-            pass = password.toCharArray();
+            pass = passphrase.toCharArray();
         }
         JkUtilsAssert.isTrue(secRing != null,
                 "You must supply a secret ring file (as secring.gpg) to sign files");
         if (!Files.exists(getSecretRing())) {
             throw new IllegalStateException("Specified secret ring file " + secRing + " not found.");
         }
-        Method signMethod = JkUtilsReflect.getMethod(PGPUTILS_CLASS, "sign", Path.class, Path.class, String.class, Path.class,
-                char[].class, boolean.class);
-        JkUtilsReflect.invoke(null, signMethod, fileToSign,
-                secRing.toPath(), keyName, signatureFile, pass, true);
+        internalGpgDoer.sign(fileToSign, this.secRing, keyName, signatureFile, pass, true);
     }
 
     /**
@@ -133,50 +120,49 @@ public final class JkPgp implements Serializable {
         if (!Files.exists(getPublicRing())) {
             throw new IllegalStateException("Specified public ring file " + getPublicRing() + " not found.");
         }
-        return JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify", fileToVerify,
-                pubRing.toPath(), signature);
+        return internalGpgDoer.verify(fileToVerify, pubRing, signature);
     }
 
     /**
-     * Creates a identical {@link JkPgp} but with the specified secret ring key file.
+     * Creates a identical {@link JkGpg} but with the specified secret ring key file.
      */
-    public JkPgp withSecretRing(Path file, String password) {
-        return new JkPgp(pubRing.toPath(), file, password);
+    public JkGpg withSecretRing(Path file, String password) {
+        return new JkGpg(pubRing, file, password);
     }
 
     /**
-     * Creates a identical {@link JkPgp} but with the specified public ring key file.
+     * Creates a identical {@link JkGpg} but with the specified public ring key file.
      */
-    public JkPgp withPublicRing(Path file) {
-        return new JkPgp(file, secRing.toPath(), password);
+    public JkGpg withPublicRing(Path file) {
+        return new JkGpg(file, secRing, passphrase);
     }
 
     /**
-     * Creates a identical {@link JkPgp} but with the specified password for secret ring.
+     * Creates a identical {@link JkGpg} but with the specified password for secret ring.
      */
-    public JkPgp withSecretRingPassword(String pwd) {
-        return new JkPgp(pubRing.toPath(), secRing.toPath(), pwd);
+    public JkGpg withSecretRingPassword(String pwd) {
+        return new JkGpg(pubRing, secRing, pwd);
     }
 
     /**
      * Returns the secret ring of this object.
      */
     public Path getSecretRing() {
-        return secRing.toPath();
+        return secRing;
     }
 
     /**
      * Returns the public ring of this object.
      */
     public Path getPublicRing() {
-        return pubRing.toPath();
+        return pubRing;
     }
 
     public UnaryOperator<Path> getSigner(String keyName) {
         return new Signer(keyName);
     }
 
-    private class Signer implements UnaryOperator<Path>, Serializable {
+    private class Signer implements UnaryOperator<Path> {
 
         private final String keyName;
 

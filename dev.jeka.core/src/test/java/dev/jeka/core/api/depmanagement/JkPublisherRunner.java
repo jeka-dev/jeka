@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.crypto.pgp.JkPgp;
+import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Paths;
@@ -24,7 +24,7 @@ public class JkPublisherRunner {
                 .and(Paths.get("org.myorg.mylib-sources.jar"), "sources")
                 .and(Paths.get("org.myorg.mylib-javadoc.jar"), "javadoc")
                 .withChecksums("sha-2", "md5")
-                .withSigner(JkPgp.of(Paths.get("myPubring"), Paths.get("mySecretRing"), "mypassword").getSigner("toto"))
+                .withSigner(JkGpg.of(Paths.get("myPubring"), Paths.get("mySecretRing"), "mypassword").getSigner("toto"))
                 .with(JkMavenPublicationInfo.of("My sample project",
                         "A project to demonstrate publishing on Jerkar",
                         "http://project.jerkar.org")

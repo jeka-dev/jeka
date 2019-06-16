@@ -1,4 +1,4 @@
-package dev.jeka.core.api.crypto.pgp;
+package dev.jeka.core.api.crypto.gpg;
 
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -31,10 +31,10 @@ import java.util.zip.ZipOutputStream;
 @SuppressWarnings("javadoc")
 public class BouncyCastlePgpLibMaketPgpRunner {
 
-    private static final String PGPUTILS_CLASS_NAME = "dev.jeka.core.api.crypto.pgp.PgpUtils";
+    private static final String PGPUTILS_CLASS_NAME = "dev.jeka.core.api.crypto.pgp.embedded.bc.PgpUtils";
 
     public static void main(String[] args) throws Exception {
-        final URL jar = JkPgp.class.getResource("bouncycastle-all-152.jar");
+        final URL jar = JkGpg.class.getResource("bouncycastle-all-152.jar");
         final Set<String> classNames = new HashSet<>();
         final Class<?> PGPUTILS_CLASS = JkUrlClassLoader.ofCurrent().getSibling(jar)
                 .getSiblingPrintingSearchedClasses(classNames).toJkClassLoader().load(PGPUTILS_CLASS_NAME);
@@ -47,14 +47,14 @@ public class BouncyCastlePgpLibMaketPgpRunner {
     }
 
     private static void testSignAndVerify(Class<?> pgpClass) throws Exception {
-        final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
-        final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
+        final Path pubFile = Paths.get(JkGpgTest.class.getResource("pubring.gpg").toURI());
+        final Path secringFile = Paths.get(JkGpgTest.class.getResource("secring.gpg").toURI());
         final Path signatureFile = Paths.get("jeka/output/test-out/signature-runner.asm");
         Files.createDirectories(signatureFile.getParent());
         if (!Files.exists(signatureFile)) {
             Files.createFile(signatureFile);
         }
-        final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
+        final Path sampleFile = Paths.get(JkGpgTest.class.getResource("sampleFileToSign.txt").toURI());
 
         sign(sampleFile, signatureFile, "jeka", secringFile, pgpClass);
         verify(sampleFile, signatureFile, pubFile, pgpClass);
@@ -67,12 +67,12 @@ public class BouncyCastlePgpLibMaketPgpRunner {
     }
 
     public void testSignWithBadSignature() throws Exception {
-        final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
-        final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
-        final JkPgp pgp = JkPgp.of(pubFile, secringFile, "badPassword");
+        final Path pubFile = Paths.get(JkGpgTest.class.getResource("pubring.gpg").toURI());
+        final Path secringFile = Paths.get(JkGpgTest.class.getResource("secring.gpg").toURI());
+        final JkGpg pgp = JkGpg.of(pubFile, secringFile, "badPassword");
         final Path signatureFile = Paths.get(
                 "jeka/output/test-out/signature-fake.asm").toAbsolutePath();
-        final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
+        final Path sampleFile = Paths.get(JkGpgTest.class.getResource("sampleFileToSign.txt").toURI());
         pgp.sign(sampleFile, "", signatureFile);
     }
 

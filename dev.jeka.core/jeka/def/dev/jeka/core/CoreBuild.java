@@ -171,6 +171,7 @@ public class CoreBuild extends JkCommands {
         JkPathFile.of(tempClasses.resolve("META-INF/jeka-embedded-name")).write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
         JkPathTreeSet.of(JkPathTree.of(tempClasses).andMatching(false, "**/embedded/**"))
                 .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/ivy-2.4.0.jar"))
+                .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/bouncycastle-pgp-152.jar"))
                 .zipTo(maker.getMainArtifactPath());
     }
 

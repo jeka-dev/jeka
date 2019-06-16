@@ -1,6 +1,6 @@
 package dev.jeka.core.tool.builtins.java;
 
-import dev.jeka.core.api.crypto.pgp.JkPgp;
+import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompiler;
@@ -117,7 +117,7 @@ public class JkPluginJava extends JkPlugin {
             maker.getTasksForPackaging().setChecksumAlgorithms(pack.checksums());
         }
         JkPluginPgp pgpPlugin = this.getCommands().getPlugins().get(JkPluginPgp.class);
-        JkPgp pgp = pgpPlugin.get();
+        JkGpg pgp = pgpPlugin.get();
         maker.getTasksForPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
 
         JkUnit tester = maker.getTasksForTesting().getRunner();

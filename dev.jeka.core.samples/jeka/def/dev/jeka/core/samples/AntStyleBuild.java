@@ -1,6 +1,6 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.crypto.pgp.JkPgp;
+import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
@@ -106,7 +106,7 @@ public class AntStyleBuild extends JkCommands {
     protected String pgpPassword = "mypPgpPassword";
 
     public void publish() {
-        JkPgp pgp = JkPgp.ofSecretRing(Paths.get(pgpPrivateRingFile), pgpPassword);
+        JkGpg pgp = JkGpg.ofSecretRing(Paths.get(pgpPrivateRingFile), pgpPassword);
         JkRepo repo = JkRepo.of(publishRepo)
                 .withOptionalCredentials("myRepoUserName", "myRepoPassword");
 

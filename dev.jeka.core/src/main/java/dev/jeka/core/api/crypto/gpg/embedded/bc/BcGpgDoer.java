@@ -1,4 +1,22 @@
-package dev.jeka.core.api.crypto.pgp;
+package dev.jeka.core.api.crypto.gpg.embedded.bc;
+
+import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsThrowable;
+import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.operator.*;
+import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
+import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -7,42 +25,15 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.PacketTags;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.PGPSignatureList;
-import org.bouncycastle.openpgp.PGPUtil;
-import org.bouncycastle.openpgp.operator.KeyFingerPrintCalculator;
-import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
-import org.bouncycastle.openpgp.operator.PGPContentSignerBuilder;
-import org.bouncycastle.openpgp.operator.PGPContentVerifierBuilderProvider;
-import org.bouncycastle.openpgp.operator.PGPDigestCalculatorProvider;
-import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
-import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
-import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
-import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsThrowable;
-
-final class PgpUtils {
+final class BcGpgDoer implements JkInternalGpgDoer {
 
     private static final int HASH_ALGO = PGPUtil.SHA1;
 
-    public static boolean verify(Path fileToVerify, Path pubringFile, Path signatureFile) {
+    static BcGpgDoer of() {
+        return new BcGpgDoer();
+    }
+
+    public boolean verify(Path fileToVerify, Path pubringFile, Path signatureFile) {
 
         try (final InputStream streamToVerify = Files.newInputStream(fileToVerify);
              final InputStream signatureStream = Files.newInputStream(signatureFile);
@@ -94,7 +85,7 @@ final class PgpUtils {
         return signature.verify();
     }
 
-    public static void sign(Path fileToSign, Path secringFile, String keyName, Path signatureFile, char[] pass,
+    public void sign(Path fileToSign, Path secringFile, String keyName, Path signatureFile, char[] pass,
                             boolean armor) {
         JkUtilsAssert.isTrue(Files.exists(fileToSign), fileToSign + " not found.");
         JkUtilsAssert.isTrue(Files.exists(secringFile), secringFile + " not found.");
@@ -212,7 +203,7 @@ final class PgpUtils {
 
     }
 
-    private PgpUtils() {
+    private BcGpgDoer() {
         // Do nothing
     }
 
