@@ -292,8 +292,7 @@ public final class JkPathTree {
             JkUtilsPath.createDirectories(destination.getParent());
         }
         final Path zipRootEntry = JkUtilsPath.zipRoot(destination);
-        try (FileSystem fileSystem = zipRootEntry.getFileSystem();  // zipRootEntry.getFileSystem() need to be called in
-             Stream<Path> stream = this.stream()) {                 // try-resources-catch otherwise it fails
+        try (Stream<Path> stream = this.stream()) {
 
             stream.filter(excludeRootFilter()).forEach(path -> {
                 Path zipEntry = zipRootEntry.resolve(getRoot().relativize(path).toString());
@@ -302,6 +301,7 @@ public final class JkPathTree {
                     JkUtilsPath.copy(path, zipEntry, StandardCopyOption.REPLACE_EXISTING);
                 }
             });
+            zipRootEntry.getFileSystem().close();
         } catch (IOException e) {
            throw new UncheckedIOException(e);
         }
