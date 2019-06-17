@@ -167,6 +167,7 @@ public class CoreBuild extends JkCommands {
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
                 .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/ivy-2.4.0.jar"))
                 .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/bouncycastle-pgp-152.jar"))
+                .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/classgraph-4.8.41.jar"))
                 .zipTo(embededJar);
         String checksum = JkPathFile.of(embededJar).getChecksum("MD5");
         String embeddedFinalName = "jeka-embedded-" + checksum + ".jar";
