@@ -2,6 +2,7 @@ package dev.jeka.core;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
@@ -164,10 +166,14 @@ public class CoreBuild extends JkCommands {
         Path embededJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
         Path classDir = maker.getOutLayout().getClassDir();
         JkPathTree classTree = JkPathTree.of(classDir);
+        Path embeddedFolder = maker.getOutLayout().getOutputPath().resolve("embeddedFolder");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
-                .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/ivy-2.4.0.jar"))
                 .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/bouncycastle-pgp-152.jar"))
                 .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/classgraph-4.8.41.jar"))
+                .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/ivy-2.4.0.jar"))
+                .copyTo(embeddedFolder, StandardCopyOption.REPLACE_EXISTING);
+        JkPathTree.of(embeddedFolder)
+                .andMatcher(JkPathMatcher.of(false, "META-INF/*.SF", "META-INF/*.RSA"))
                 .zipTo(embededJar);
         String checksum = JkPathFile.of(embededJar).getChecksum("MD5");
         String embeddedFinalName = "jeka-embedded-" + checksum + ".jar";

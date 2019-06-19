@@ -68,13 +68,14 @@ class JUnit4TestLauncher {
      */
     public static JkTestSuiteResult launchInProcess(Iterable<Class> classes, boolean logRunningTest,
                                                     JunitReportDetail reportDetail, File reportDir) {
-        final JkUrlClassLoader classloader = JkUrlClassLoader.ofLoaderOf(classes.iterator().next());
+        final JkUrlClassLoader testClassloader = JkUrlClassLoader.ofLoaderOf(classes.iterator().next());
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
-        classloader.addEntries(JkLocator.getJekaJarPath());
+        final JkUrlClassLoader launchtestClassLoader = JkUrlClassLoader.of(JkLocator.getJekaJarPath(),
+                testClassloader.getDelegate());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.trace("Launching test using class loader : " + classloader);
+            JkLog.trace("Launching test using class loader : " + testClassloader);
         }
-        return classloader.toJkClassLoader().invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
+        return launchtestClassLoader.toJkClassLoader().invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
                 "launchInProcess", classArray, logRunningTest, reportDetail, reportDir, true);
     }
 

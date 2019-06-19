@@ -1,12 +1,14 @@
 package dev.jeka.core.api.java.embedded.classgraph;
 
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
+import dev.jeka.core.api.system.JkLog;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
@@ -15,15 +17,21 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     }
 
     @Override
-    public Set<Class<?>> loadClassesMatching(ClassLoader classLoader, String... globPatterns) {
+    public Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate) {
+        JkLog.startTask("Scanning classpath");
         ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
-                .overrideClassLoaders(classLoader);
+                .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
+                        "org.commonmark", "io.github.classgraph");
         ScanResult scanResult = classGraph.scan();
+        JkLog.endTask();
+        Set<Class<?>> result = new HashSet<>();
         for (ClassInfo classInfo : scanResult.getAllClasses()) {
-            System.out.println(classGraph);
+            if (predicate.test(classInfo.getSimpleName())) {
+                result.add(classInfo.loadClass());
+            }
         }
-        return new HashSet<>(scanResult.getAllClasses().loadClasses());
+        return result;
     }
 
 }

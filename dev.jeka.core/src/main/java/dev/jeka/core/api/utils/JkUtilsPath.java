@@ -368,6 +368,9 @@ public final class JkUtilsPath {
                 return FileVisitResult.CONTINUE;
             }
             final Path target = toDir.getFileSystem().getPath(toDir.toString(), relativePath.toString()); // necessary to deal with both regular file system and zip
+            if (target.getParent() != null) {
+                Files.createDirectories(target.getParent());
+            }
             Files.copy(file, target , options);
             count ++;
             return FileVisitResult.CONTINUE;

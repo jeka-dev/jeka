@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -307,7 +308,7 @@ public final class JkUnit {
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestClasses testSpec) {
         final JkClasspath classpath = testSpec.getClasspath().andPrepending(testSpec.getClassesToTest().getRootDirsOrZipFiles());
-        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofSystem().getParent().getChild(classpath);
+        final JkUrlClassLoader classLoader = JkUrlClassLoader.of(classpath, ClassLoader.getSystemClassLoader().getParent());
         classLoader.loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.getClassesToTest());
         if (result.isEmpty()) {

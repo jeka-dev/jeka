@@ -56,6 +56,14 @@ public final class JkUrlClassLoader {
         return new JkUrlClassLoader(urlClassLoader);
     }
 
+    public static JkUrlClassLoader of(Iterable<Path> paths) {
+        return of(new URLClassLoader(toUrl(paths)));
+    }
+
+    public static JkUrlClassLoader of(Iterable<Path> paths, ClassLoader parent) {
+        return of(new URLClassLoader(toUrl(paths), parent));
+    }
+
     /**
      * Returns a {@link JkUrlClassLoader} wrapping the current thread context classloader.
      *
@@ -99,7 +107,6 @@ public final class JkUrlClassLoader {
         return URL_CACHE_DIR;
     }
 
-
     /**
      * Return the {@link URLClassLoader} wrapped by this object.
      */
@@ -110,15 +117,8 @@ public final class JkUrlClassLoader {
     /**
      * Returns the class loader parent of this one.
      */
-    public JkUrlClassLoader getParent() {
-        return new JkUrlClassLoader((URLClassLoader) this.delegate.getParent());
-    }
-
-    /**
-     * @see #getChild(Iterable)
-     */
-    private JkUrlClassLoader getChild(Path... entries) {
-        return new JkUrlClassLoader(new URLClassLoader(toUrl(Arrays.asList(entries)), this.delegate));
+    public JkClassLoader getParent() {
+        return JkClassLoader.of(this.delegate.getParent());
     }
 
     /**
@@ -159,29 +159,7 @@ public final class JkUrlClassLoader {
                 files.add(candidate.toPath());
             }
         }
-        return getParent().getChild(this.getDirectClasspath().and(files));
-    }
-
-    /**
-     * Same as {@link #getSibling(URL...)} but more tolerant about the input. If
-     * one of the specified entry is not valid, then it is simply ignored.
-     */
-    public JkUrlClassLoader getSiblingWithOptional(URL... fileOrUrls) {
-        final List<URL> objects = new LinkedList<>();
-        for (final URL entry : fileOrUrls) {
-            objects.add(entry);
-        }
-        return getSibling(objects);
-    }
-
-    /**
-     * Returns a getSibling of this class loader that outputs every searched class.
-     *
-     * @see #getSibling(Iterable)
-     */
-    public JkUrlClassLoader getSiblingPrintingSearchedClasses(Set<String> searchedClassContainer) {
-        return new JkUrlClassLoader(new TrackingClassLoader(searchedClassContainer, this
-                .getDirectClasspath().toArrayOfUrl(), this.getParent().delegate));
+        return JkUrlClassLoader.of(this.getDirectClasspath().and(files), this.delegate.getParent());
     }
 
     /**
@@ -197,8 +175,9 @@ public final class JkUrlClassLoader {
      */
     public JkClasspath getFullClasspath() {
         final JkClasspath classpath;
-        if (this.delegate.getParent() != null) {
-            classpath = this.getParent().getFullClasspath();
+        if (this.delegate.getParent() != null && this.getParent().getDelegate() instanceof  URLClassLoader) {
+            classpath = JkUrlClassLoader.of((URLClassLoader) this.getParent().getDelegate()).getFullClasspath();
+
         } else {
             classpath = JkClasspath.of();
         }
@@ -463,8 +442,9 @@ public final class JkUrlClassLoader {
      * Reloads all J2SE service providers. It can be necessary if adding
      * dynamically some service providers to the classpath.
      */
+    // TODO move to JkClassloader
     public void loadAllServices() {
-            final Set<Class<?>> serviceClasses = new HashSet<>();
+        final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final Path file : this.getFullClasspath()) {
             if (Files.isRegularFile(file)) {
                 JkLog.trace("Scanning " + file + " for META-INF/services.");

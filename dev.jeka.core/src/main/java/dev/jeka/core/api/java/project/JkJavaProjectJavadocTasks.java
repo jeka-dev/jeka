@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkJavadocMaker;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;

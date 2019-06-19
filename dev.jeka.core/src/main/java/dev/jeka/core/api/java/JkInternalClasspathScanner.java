@@ -3,6 +3,7 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Not part of public api
@@ -11,7 +12,7 @@ public interface JkInternalClasspathScanner {
 
     static final JkInternalClasspathScanner INSTANCE = of();
 
-    Set<Class<?>> loadClassesMatching(ClassLoader classLoader, String ... globPatterns);
+    Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate);
 
     static JkInternalClasspathScanner of() {
         String IMPL_CLASS = "dev.jeka.core.api.java.embedded.classgraph.ClassGraphClasspathScanner";
@@ -20,6 +21,10 @@ public interface JkInternalClasspathScanner {
             return JkUtilsReflect.invokeStaticMethod(clazz, "of");
         }
         return JkInternalEmbeddedClassloader.createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
+    }
+
+    default Set<Class<?>> loadClassesHavingSimpleName(String simpleName) {
+        return loadClassesHavingSimpleNameMatching( name -> name.equals(simpleName));
     }
 
 

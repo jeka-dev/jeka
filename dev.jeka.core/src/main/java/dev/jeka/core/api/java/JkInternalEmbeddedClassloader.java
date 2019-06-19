@@ -38,7 +38,7 @@ public class JkInternalEmbeddedClassloader {
     @SuppressWarnings("unchecked")
     public static <T> T createCrossClassloaderProxy(Class<T> interfaze, String className,
                                              String staticMethodFactory, Object... args) {
-        final Object target = invokeStaticMethod(false, className, staticMethodFactory, args);
+        final Object target = invokeStaticMethod(className, staticMethodFactory, args);
         ClassLoader from = Thread.currentThread().getContextClassLoader();
         return ((T) Proxy.newProxyInstance(from,
                 new Class[]{interfaze}, new CrossClassloaderInvokationHandler(target, from)));
@@ -56,7 +56,7 @@ public class JkInternalEmbeddedClassloader {
         private final ClassLoader fromClassLoader;
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) {
             final Method targetMethod = JkUtilsReflect.methodWithSameNameAndArgType(method,
                     targetObject.getClass());
             return invokeInstanceMethod(fromClassLoader, targetObject, targetMethod, args);
@@ -80,7 +80,7 @@ public class JkInternalEmbeddedClassloader {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T invokeStaticMethod(boolean serializeResult, String className, String methodName,
+    private static <T> T invokeStaticMethod(String className, String methodName,
                                     Object... args) {
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);

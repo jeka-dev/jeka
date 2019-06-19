@@ -1,5 +1,6 @@
 package dev.jeka.core.api.file;
 
+import java.nio.file.CopyOption;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
@@ -189,6 +190,15 @@ public final class JkPathTreeSet {
         this.pathTrees.forEach(tree -> tree.zipTo(dir));
         return this;
     }
+
+    /**
+     * Copies the content of all trees involved in this set.
+     */
+    public JkPathTreeSet copyTo(Path dir, CopyOption... copyOptions) {
+        this.pathTrees.forEach(tree -> tree.copyTo(dir, copyOptions));
+        return this;
+    }
+
 
     // -------------------------------------- iterates over trees ----------------------
 

@@ -1,7 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -46,16 +46,12 @@ final class PluginDictionary {
     }
 
     /**
-     * Returns the plugin having a full name equals to the specified value. If
-     * not found, returns the plugin having a short name equals to the specified
-     * name. Note that the short value is capitalized for you so using
-     * "myPluging" or "MyPlugin" is equal. If not found, returns
-     * <code>null</code>.
+     * Returns the plugin having the specified name.
+     * If the specified name can be a short name (like 'myPlugin') or a full class name
      */
     static PluginDescription loadByName(String name) {
-        if (!name.contains(".")) {
-            final PluginDescription result = loadPluginHavingShortName(
-                    JkUtilsString.capitalize(name));
+        if (isShortName(name)) {
+            final PluginDescription result = loadPluginHavingShortName(name);
             if (result != null) {
                 return result;
             }
@@ -65,6 +61,10 @@ final class PluginDictionary {
 
     private static String simpleClassName(String pluginName) {
         return JkPlugin.class.getSimpleName() + JkUtilsString.capitalize(pluginName);
+    }
+
+    private static boolean isShortName(String name) {
+        return !name.contains(".") && !name.startsWith(JkPlugin.class.getSimpleName());
     }
 
     @Override
@@ -77,8 +77,12 @@ final class PluginDictionary {
 
     private static <T> Set<PluginDescription> loadAllPlugins() {
         final String nameSuffix = JkPlugin.class.getSimpleName();
-        return loadPlugins( "**/" + nameSuffix + "*", nameSuffix, "**/*$" + nameSuffix + "*",
-                "*$" + nameSuffix + "*");
+        Set<PluginDescription> result = toPluginDescriptions(JkInternalClasspathScanner.INSTANCE
+                .loadClassesHavingSimpleNameMatching(name -> name.startsWith(nameSuffix)));
+        for(PluginDescription pluginDescription : result) {
+            SHORTNAME_CACHE.put(pluginDescription.shortName, pluginDescription);
+        }
+        return result;
     }
 
     private static PluginDescription loadPluginHavingShortName(String shortName) {
@@ -87,8 +91,8 @@ final class PluginDictionary {
             return result;
         }
         final String simpleName = simpleClassName(shortName);
-        final Set<PluginDescription> set = loadPlugins( "**/" + simpleName, simpleName, "**/*$" + simpleName,
-                "*$" + simpleName );
+        Set<Class<?>> classes = JkInternalClasspathScanner.INSTANCE.loadClassesHavingSimpleName(simpleName );
+        final Set<PluginDescription> set = toPluginDescriptions(classes);
         if (set.size() > 1) {
             throw new JkException("Several plugin have the same short name : '" + shortName
                     + "'. Please disambiguate with using plugin long name (full class value)."
@@ -110,8 +114,7 @@ final class PluginDictionary {
         return new PluginDescription(pluginClass);
     }
 
-    private static Set<PluginDescription> loadPlugins(String... patterns) {
-        final Set<Class<?>> matchingClasses = JkUrlClassLoader.ofCurrent().loadClasses(patterns);
+    private static Set<PluginDescription> toPluginDescriptions(Set<Class<?>> matchingClasses) {
         return toPluginSet(matchingClasses.stream()
                 .filter(clazz -> JkPlugin.class.isAssignableFrom(clazz))
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
