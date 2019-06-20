@@ -45,7 +45,7 @@ public class JkClassLoader {
     /**
      * Return the {@link URLClassLoader} wrapped by this object.
      */
-    public ClassLoader getDelegate() {
+    public ClassLoader get() {
         return delegate;
     }
 
@@ -282,7 +282,7 @@ public class JkClassLoader {
     }
 
     private void initLogInClassloader() {
-        JkLog.initializeInClassLoader(this.getDelegate());
+        JkLog.initializeInClassLoader(this.get());
     }
 
 

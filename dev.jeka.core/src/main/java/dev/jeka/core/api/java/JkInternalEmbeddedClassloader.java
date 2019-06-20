@@ -19,11 +19,11 @@ public class JkInternalEmbeddedClassloader {
     private static ClassLoader classLoader;
 
     static {
-        URL embeddedNameUrl = JkClassLoader.ofCurrent().getDelegate().getResource("META-INF/jeka-embedded-name");
+        URL embeddedNameUrl = JkClassLoader.ofCurrent().get().getResource("META-INF/jeka-embedded-name");
         String jarName = JkUtilsIO.read(embeddedNameUrl);
-        URL url = JkClassLoader.ofCurrent().getDelegate().getResource("META-INF/" + jarName);
+        URL url = JkClassLoader.ofCurrent().get().getResource("META-INF/" + jarName);
         Path file = JkUtilsIO.copyUrlContentToCacheFile(url, null, JkUrlClassLoader.URL_CACHE_DIR);
-        classLoader = new URLClassLoader(new URL[] {JkUtilsPath.toUrl(file)}, JkClassLoader.ofCurrent().getDelegate());
+        classLoader = new URLClassLoader(new URL[] {JkUtilsPath.toUrl(file)}, JkClassLoader.ofCurrent().get());
     }
 
     public static JkClassLoader get() {

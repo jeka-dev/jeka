@@ -71,7 +71,7 @@ class JUnit4TestLauncher {
         final JkUrlClassLoader testClassloader = JkUrlClassLoader.ofLoaderOf(classes.iterator().next());
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
         final JkUrlClassLoader launchtestClassLoader = JkUrlClassLoader.of(JkLocator.getJekaJarPath(),
-                testClassloader.getDelegate());
+                testClassloader.get());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             JkLog.trace("Launching test using class loader : " + testClassloader);
         }

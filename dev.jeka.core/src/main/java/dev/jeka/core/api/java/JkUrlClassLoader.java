@@ -7,7 +7,6 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
@@ -70,7 +69,7 @@ public final class JkUrlClassLoader {
      * @see Class#getClassLoader()
      */
     public static JkUrlClassLoader ofCurrent() {
-        return createUrlClassLoaderFrom(Thread.currentThread().getContextClassLoader());
+        return wrapUrlClassLoader(Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -79,10 +78,10 @@ public final class JkUrlClassLoader {
      * @see ClassLoader#getSystemClassLoader()
      */
     public static JkUrlClassLoader ofSystem() {
-        return createUrlClassLoaderFrom(ClassLoader.getSystemClassLoader());
+        return wrapUrlClassLoader(ClassLoader.getSystemClassLoader());
     }
 
-    private static JkUrlClassLoader createUrlClassLoaderFrom(ClassLoader classLoader) {
+    private static JkUrlClassLoader wrapUrlClassLoader(ClassLoader classLoader) {
         if (! (classLoader instanceof URLClassLoader)) {
             throw new IllegalStateException("The current or system classloader is not instance of URLClassLoader but "
                     + classLoader.getClass() + ". It is probably due that you are currently running on JDK9.");
@@ -110,7 +109,7 @@ public final class JkUrlClassLoader {
     /**
      * Return the {@link URLClassLoader} wrapped by this object.
      */
-    public ClassLoader getDelegate() {
+    public ClassLoader get() {
         return delegate;
     }
 
@@ -130,39 +129,6 @@ public final class JkUrlClassLoader {
     }
 
     /**
-     * Creates a <code>JkClassLoader</code> loader having the same parent and
-     * the same entries as this one plus the specified entries. URL entries that
-     * are not file are transformed to file (created in temp folder).
-     */
-    public JkUrlClassLoader getSibling(URL... fileOrUrls) {
-        return getSibling(Arrays.asList(fileOrUrls));
-    }
-
-    /**
-     * Creates a <code>JkClassLoader</code> loader having the same parent and
-     * the same entries as this one plus the specified entries. URL entries that
-     * are not file are transformed to file (created in temp folder).
-     */
-    public JkUrlClassLoader getSibling(Iterable<URL> fileOrUrls) {
-        final List<Path> files = new LinkedList<>();
-        for (final URL entry : fileOrUrls) {
-            final URL url = entry;
-            final String path = url.getFile();
-            final File candidate = new File(path);
-            if (JkUtilsString.isBlank(path)
-                    || (!candidate.isFile() && !candidate.isDirectory())) {
-                PrintStream printStream =
-                        JkLog.Verbosity.VERBOSE == JkLog.verbosity() ? new PrintStream(JkLog.getOutputStream()) : null;
-                final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, printStream, URL_CACHE_DIR);
-                files.add(file);
-            } else {
-                files.add(candidate.toPath());
-            }
-        }
-        return JkUrlClassLoader.of(this.getDirectClasspath().and(files), this.delegate.getParent());
-    }
-
-    /**
      * Returns the classpath of this classloader without mentioning classpath of
      * the parent classloaders.
      */
@@ -175,8 +141,8 @@ public final class JkUrlClassLoader {
      */
     public JkClasspath getFullClasspath() {
         final JkClasspath classpath;
-        if (this.delegate.getParent() != null && this.getParent().getDelegate() instanceof  URLClassLoader) {
-            classpath = JkUrlClassLoader.of((URLClassLoader) this.getParent().getDelegate()).getFullClasspath();
+        if (this.delegate.getParent() != null && this.getParent().get() instanceof  URLClassLoader) {
+            classpath = JkUrlClassLoader.of((URLClassLoader) this.getParent().get()).getFullClasspath();
 
         } else {
             classpath = JkClasspath.of();
@@ -184,47 +150,8 @@ public final class JkUrlClassLoader {
         return classpath.and(getDirectClasspath());
     }
 
-
-
     public JkClassLoader toJkClassLoader() {
         return JkClassLoader.of(delegate);
-    }
-
-
-
-    /**
-     * Returns all classes of this <code>classloader</code> that are defined in
-     * entries matching the specified fileFilter.</br> For example : if you want
-     * to load all classes that are defined in folder and not andAccept jar file, you
-     * have to provide a <code>FileFilter</code> which includes only
-     * directories.
-     *
-     * @param entryFilter The classpath entry filter. Can be <code>null</code>.
-     */
-    public Set<Class<?>> loadClassesInEntries(PathMatcher entryFilter) {
-        final List<Path> classfiles = new LinkedList<>();
-        final Map<Path, Path> file2Entry = new HashMap<>();
-        for (final Path file : getDirectClasspath()) {
-            if (entryFilter == null || entryFilter.matches(file) && Files.isDirectory(file)) {
-                final List<Path> files = JkPathTree.of(file).andMatcher(CLASS_FILE_FILTER).getFiles();
-                classfiles.addAll(files);
-                JkUtilsIterable.putMultiEntry(file2Entry, files, file);
-            }
-        }
-        final Set<Class<?>> result = new HashSet<>();
-        for (final Path file : classfiles) {
-            final Path entry = file2Entry.get(file);
-            final String relativeName = entry.relativize(file).toString();
-            final String className = getAsClassName(relativeName);
-            Class<?> clazz;
-            try {
-                clazz = delegate.loadClass(className);
-            } catch (final ClassNotFoundException e) {
-                throw new IllegalStateException("Can't find the class " + className, e);
-            }
-            result.add(clazz);
-        }
-        return result;
     }
 
     /**
@@ -264,11 +191,10 @@ public final class JkUrlClassLoader {
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the provided <code>JkPathTreeSet</code>.
      *
-     * @see JkUrlClassLoader#loadClassesInEntries(PathMatcher)
      */
     public Set<Class<?>> loadClassesIn(JkPathTreeSet jkPathTreeSet) {
         final Set<Class<?>> result = new HashSet<>();
-        JkClassLoader jkClassLoader = JkClassLoader.of(delegate);
+        JkClassLoader jkClassLoader = this.toJkClassLoader();
         for (final Path path : jkPathTreeSet.getRelativeFiles()) {
             if (path.toString().endsWith(".class")) {
                 final String className = getAsClassName(path.toString());
@@ -318,8 +244,6 @@ public final class JkUrlClassLoader {
     /**
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the specified directory.
-     *
-     * @see JkUrlClassLoader#loadClassesInEntries(PathMatcher)
      */
     private Iterator<Class<?>> iterateClassesIn(Path dirOrJar) {
         final List<Path> paths;
@@ -418,18 +342,11 @@ public final class JkUrlClassLoader {
     }
 
     /**
-     * Add a new entry to this class loader. WARN : This method has side effect
-     * on this class loader : use it with caution !
-     */
-    public void addEntries(Path path1, Path path2, Path... others) {
-        addEntries(JkUtilsIterable.listOf2orMore(path1, path2, others));
-    }
-
-    /**
-     * Same as {@link #addEntries(Path, Path, Path...)}.
+     *
      * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
+    @Deprecated
     public void addEntries(Iterable<Path> paths) {
         final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL",
                 URL.class);
@@ -483,23 +400,6 @@ public final class JkUrlClassLoader {
         for (final Class<?> serviceClass : serviceClasses) {
             JkLog.trace("Reload service providers for : " + serviceClass.getName());
             ServiceLoader.loadInstalled(serviceClass).reload();
-        }
-    }
-
-    // Class loader that keep all the found classes in a given set
-    private final class TrackingClassLoader extends URLClassLoader {
-
-        private final Set<String> searchedClasses;
-
-        public TrackingClassLoader(Set<String> searchedClasses, URL[] urls, ClassLoader parent) {
-            super(urls, parent);
-            this.searchedClasses = searchedClasses;
-        }
-
-        @Override
-        protected Class<?> findClass(String name) throws ClassNotFoundException {
-            searchedClasses.add(name);
-            return super.findClass(name);
         }
     }
 

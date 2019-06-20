@@ -5,7 +5,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -264,7 +263,7 @@ public final class JkUnit {
                 final long duration = (end - start) / 1000000;
                 result.set(fromJunit3Result(properties, name, testResult, duration));
             } else {
-                JkUtilsIO.closeifClosable(classLoader.getDelegate());
+                JkUtilsIO.closeifClosable(classLoader.get());
                 throw new JkException("No Junit found on test classpath.");
             }
 
@@ -272,7 +271,7 @@ public final class JkUnit {
                 if (breakOnFailure) {
                     JkLog.error(String.join("\n",
                             result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
-                    JkUtilsIO.closeifClosable(classLoader.getDelegate());
+                    JkUtilsIO.closeifClosable(classLoader.get());
                     throw new JkException("Test failed : " + result.toString());
                 } else {
                     JkLog.warn(String.join("\n",
@@ -293,7 +292,7 @@ public final class JkUnit {
             }
         };
         JkLog.execute("Executing JUnit tests", task);
-        JkUtilsIO.closeifClosable(classLoader.getDelegate());
+        JkUtilsIO.closeifClosable(classLoader.get());
         return result.get();
     }
 
@@ -312,7 +311,7 @@ public final class JkUnit {
         classLoader.loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.getClassesToTest());
         if (result.isEmpty()) {
-            JkUtilsIO.closeifClosable(classLoader.getDelegate());
+            JkUtilsIO.closeifClosable(classLoader.get());
         }
         return result;
     }

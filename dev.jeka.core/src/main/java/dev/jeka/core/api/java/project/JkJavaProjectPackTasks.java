@@ -12,6 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
+/**
+ * Tasks for packaging artifacts created by the holding project.
+ */
 public class JkJavaProjectPackTasks {
 
     private final JkJavaProjectMaker maker;
@@ -121,8 +124,6 @@ public class JkJavaProjectPackTasks {
         return this;
     }
 
-
-
     /**
      * Creates a checksum file of each specified digest algorithm for the specified file.
      * Checksum files will be created in same folder as their respecting artifact files with the same name suffixed
@@ -136,6 +137,5 @@ public class JkJavaProjectPackTasks {
         }
 
     }
-
 
 }

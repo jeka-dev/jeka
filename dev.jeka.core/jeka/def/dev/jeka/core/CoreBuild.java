@@ -161,6 +161,7 @@ public class CoreBuild extends JkCommands {
         JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
         Path tempJar = maker.getOutLayout().getOutputPath().resolve("tempJar");
         maker.getTasksForPackaging().createBinJar(tempJar);
+        JkLog.startTask("Creating jar");
         Path tempClasses = maker.getOutLayout().getOutputPath().resolve("tempClasses");
         JkPathTree.ofZip(tempJar).copyTo(tempClasses);
         Path embededJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
@@ -181,6 +182,7 @@ public class CoreBuild extends JkCommands {
         JkPathFile.of(tempClasses.resolve("META-INF/jeka-embedded-name")).write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
         JkPathTreeSet.of(JkPathTree.of(tempClasses).andMatching(false, "**/embedded/**"))
                 .zipTo(maker.getMainArtifactPath());
+        JkLog.endTask();
     }
 
 
