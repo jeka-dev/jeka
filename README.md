@@ -53,9 +53,8 @@ Visit following pages according your expectation :
 
 # External plugins
 
-Jeka comes with plugins out of the box. These plugins covers the most common point a Java developer need to address 
-when building a project. This includes plugins for IDE metadata generation (IntelliJ, Eclipse), git, jacoco, java project building, 
-PGP signing, binary repositories, Maven interaction, scaffolding, sonarQube and web archives.
+Jeka comes with plugins out of the box. These plugins covers the most common points a Java developer need to address 
+when building a project. This includes plugins for IDE metadata generation (IntelliJ, Eclipse), dependency management, git, , java project building, testing, PGP signing, binary repositories, Maven interaction, scaffolding, sonarQube and web archives.
 
 Nevertheless, Jeka is extensible and other plugins exist outside the main distib among :
 * [Springboot Plugin](https://github.com/jerkar/springboot-plugin)
