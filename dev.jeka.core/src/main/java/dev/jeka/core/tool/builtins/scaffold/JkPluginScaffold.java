@@ -33,4 +33,9 @@ public class JkPluginScaffold extends JkPlugin {
         scaffolder.embed();
     }
 
+    @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
+    public void wrap() {
+        scaffolder.wrap();
+    }
+
 }

@@ -2,15 +2,20 @@ package dev.jeka.core.tool.builtins.scaffold;
 
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Properties;
 
 /**
  * Object that process scaffolding.
@@ -23,7 +28,6 @@ public final class JkScaffolder {
 
     private String classFilename = "Commands.java";
 
-    private boolean embed;
 
     private final JkRunnables extraActions = JkRunnables.noOp();
 
@@ -31,11 +35,6 @@ public final class JkScaffolder {
         super();
         this.commandClassCode = "";
         this.baseDir= baseDir;
-        this.embed = embed;
-    }
-
-    public void setEmbbed(boolean embed) {
-        this.embed = embed;
     }
 
     /**
@@ -75,10 +74,37 @@ public final class JkScaffolder {
                 libSources.resolve(jarSourceName), StandardCopyOption.REPLACE_EXISTING);
     }
 
+    public void wrap() {
+        JkLog.info("Create shell files.");
+        Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
+        JkException.throwIf(!Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
+                "to shell scripts");
+        JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
+        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("wrapper/jekaw"), baseDir.resolve("jekaw"),
+                StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+        Path jekaWrapperJar = JkLocator.getJekaJarPath().getParent().resolve("dev.jeka.jeka-core-wrapper.jar");
+        Path bootFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/boot");
+        JkUtilsPath.createDirectories(bootFolder);
+        Path target = bootFolder.resolve(jekaWrapperJar.getFileName());
+        JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
+        JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
+        String jarSourceName = "dev.jeka.jeka-core-sources.jar";
+        Path libSources = baseDir.resolve(JkConstants.JEKA_DIR + "/libs-sources");
+        JkUtilsPath.createDirectories(libSources);
+        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("libs-sources/" + jarSourceName),
+                libSources.resolve(jarSourceName), StandardCopyOption.REPLACE_EXISTING);
+        Properties properties = new Properties();
+        properties.setProperty("jeka.version", JkInfo.getJekaVersion());
+        try {
+            properties.store(JkUtilsIO.outputStream(bootFolder.resolve("jeka.properties").toFile(), false), "");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public void setCommandClassCode(String code) {
         this.commandClassCode = code;
     }
-
     public void setClassFilename(String classFilename) {
         this.classFilename = classFilename;
     }

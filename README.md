@@ -7,7 +7,7 @@
 
 <strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using only Java code to automate builds or tasks.
 
-Forget about verbose Poms and rigid Maven structure. Get rid of Gradle scripting.  
+Forget about verbose Poms and rigid Maven structure. Get rid of Gradle scripting/DSL.  
 
 Enjoy all the engineering power you are comfortable with : Java code, IDE, 3rd party libs, binary repositories, .... 
 

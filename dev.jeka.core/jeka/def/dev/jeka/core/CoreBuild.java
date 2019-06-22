@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
@@ -34,7 +33,9 @@ import static dev.jeka.core.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT
  */
 public class CoreBuild extends JkCommands {
 
-    public static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
+    private static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
+
+    private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
     final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
@@ -81,6 +82,9 @@ public class CoreBuild extends JkCommands {
 
         // include embedded jar
         maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded);
+
+        // define wrapper
+        maker.putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
     }
 
     public void publishDocsOnGithubPage() {
@@ -103,7 +107,7 @@ public class CoreBuild extends JkCommands {
 
     private void doDistrib() {
         final JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
-        maker.makeMissingArtifacts(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID);
+        maker.makeMissingArtifacts(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
@@ -111,6 +115,7 @@ public class CoreBuild extends JkCommands {
         distrib.merge(getBaseDir().resolve("src/main/dist"));
         distrib.merge(getBaseDir().resolve("src/main/java/META-INF/bin"));
         distrib.bring(maker.getArtifactPath(maker.getMainArtifactId()));
+        distrib.bring(maker.getArtifactPath(WRAPPER_ARTIFACT_ID));
         final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources")
                 .andMatching(true, "apache-ivy*.jar").getFiles();
         distrib.goTo("libs-sources")
@@ -182,7 +187,17 @@ public class CoreBuild extends JkCommands {
         JkPathFile.of(tempClasses.resolve("META-INF/jeka-embedded-name")).write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
         JkPathTreeSet.of(JkPathTree.of(tempClasses).andMatching(false, "**/embedded/**"))
                 .zipTo(maker.getMainArtifactPath());
+        JkPathTree.of(tempClasses).deleteRoot();
+        JkPathTree.of(embeddedFolder).deleteRoot();
+        JkUtilsPath.deleteIfExists(tempJar);
+        JkUtilsPath.deleteIfExists(embededJar);
         JkLog.endTask();
+    }
+
+    private void doWrapper() {
+        JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
+        Path wrapperJar = maker.getArtifactPath(WRAPPER_ARTIFACT_ID);
+        JkPathTree.of(maker.getOutLayout().getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
 
