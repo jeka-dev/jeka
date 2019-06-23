@@ -1,7 +1,6 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Test;
 
 import java.util.Set;
@@ -72,11 +71,7 @@ public class ResolverWithoutScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
-        if (JkUtilsSystem.IS_WINDOWS) {
-            assertEquals("Wrong modules size " + moduleIds, 24, moduleIds.size());
-        } else {
-            assertEquals("Wrong modules size " + moduleIds, 25, moduleIds.size());
-        }
+        assertEquals("Wrong modules size " + moduleIds, 24, moduleIds.size());
 
     }
 
