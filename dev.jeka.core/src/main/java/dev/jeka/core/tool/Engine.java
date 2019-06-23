@@ -167,18 +167,19 @@ final class Engine {
 
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
-        return JkDependencySet.of(runDependencies
-                .andFiles(localRunPath())
+        JkDependencySet result = JkDependencySet.of(runDependencies
+                .andFiles(bootLibs())
                 .andFiles(JkClasspath.ofCurrentRuntime()).withoutLastIf(!devMode)
-                .andFiles(jekaLibs()).withoutLastIf(devMode)
+                .andFile(JkLocator.getJekaJarPath()).withoutLastIf(devMode)
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT));
+        return result;
     }
 
-    private JkPathSequence localRunPath() {
+    private JkPathSequence bootLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
-        final Path localDefLibDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
-        if (Files.exists(localDefLibDir)) {
-            extraLibs.addAll(JkPathTree.of(localDefLibDir).andMatching(true,"**.jar").getFiles());
+        final Path bootDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
+        if (Files.exists(bootDir)) {
+            extraLibs.addAll(JkPathTree.of(bootDir).andMatching(true,"**.jar").getFiles());
         }
         return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
@@ -234,12 +235,6 @@ final class Engine {
             return JkDependencyResolver.of(this.runRepos);
         }
         return JkDependencyResolver.of();
-    }
-
-    private static JkPathSequence jekaLibs() {
-        final List<Path>  extraLibs = new LinkedList<>();
-        extraLibs.add(JkLocator.getJekaJarPath());
-        return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
     private static void runProject(JkCommands jkCommands, List<CommandLine.MethodInvocation> invokes) {

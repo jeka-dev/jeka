@@ -10,9 +10,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
 
-import java.awt.*;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -79,7 +77,7 @@ class SampleTester {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-LV=true -RC=" + className)
-                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LH")
+                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LH", "-LV")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }

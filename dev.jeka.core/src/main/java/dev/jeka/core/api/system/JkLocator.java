@@ -34,14 +34,11 @@ public final class JkLocator {
         try {
             uri = JkLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         } catch (URISyntaxException e) {
-            throw new IllegalStateException("Cannot find location of "
-                    + JkLocator.class.getProtectionDomain().getCodeSource().getLocation());
+            throw new IllegalStateException("Cannot find location of " + JkLocator.class);
         }
-        return Paths.get(uri);
-    }
-
-    public static boolean isEmbedded() {
-        return !getJekaHomeDir().equals(getJekaJarPath().getParent());
+        Path result = Paths.get(uri);
+        JEKA_JAR_FILE = result;
+        return result;
     }
 
     /**

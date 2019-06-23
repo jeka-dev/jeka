@@ -244,7 +244,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      * Returns a clone of this dependencySet but removing the last element if the specified condition is met.
      */
     public JkDependencySet withoutLastIf(boolean condition) {
-        if (condition) {
+        if (!condition) {
             return this;
         }
         LinkedList<JkScopedDependency> deps = new LinkedList<>(dependencies);

@@ -8,6 +8,7 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -200,9 +201,17 @@ public class CoreBuild extends JkCommands {
         JkPathTree.of(maker.getOutLayout().getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
+    private void copyToWrapper() {
+        Path target = javaPlugin.getProject().getMaker().getMainArtifactPath();
+        Path wrapper =  JkLocator.getJekaRepositoryCache().getParent().resolve("wrapper/0.8.2.RELEASE").resolve(target.getFileName());
+        JkUtilsPath.copy(target, wrapper, StandardCopyOption.REPLACE_EXISTING);
+    }
+
 
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class, args).javaPlugin.clean().pack();
+        CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args);
+        coreBuild.javaPlugin.clean().pack();
+        //coreBuild.copyToWrapper();
     }
 
 }
