@@ -64,13 +64,6 @@ public final class JkUtilsSystem {
     }
 
     /**
-     * Adds an action to be executed when he JVM shuts down.
-     */
-    public static void addOnExitAction(Runnable runnable) {
-        Runtime.getRuntime().addShutdownHook(new Thread(runnable));
-    }
-
-    /**
      * On Jdk 9+, a warning is emitted while attempting to access private fields by reflection. This hack aims at
      * removing this warning.
      */

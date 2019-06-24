@@ -79,8 +79,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns occurrence count of the specified character into the specified
-     * string.
+     * Returns occurrence count of the specified character into the specified string.
      */
     public static int countOccurence(String matchedString, char occurrence) {
         int count = 0;
@@ -185,7 +184,7 @@ public final class JkUtilsString {
 
     /**
      * Returns a string containing the quantity and noun. The noun is the plural form if
-     * quantity > 1. The plurial form is singular form + 's';
+     * quantity greater than 1. The plurial form is singular form + 's';
      */
     public static String plurialize(int count, String singular) {
         return plurialize(count, singular, singular + 's');

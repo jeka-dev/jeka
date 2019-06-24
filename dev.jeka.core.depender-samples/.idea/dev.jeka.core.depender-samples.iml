@@ -14,17 +14,17 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/jerkar/output" />
     </content>
-    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="dev.jeka.core.samples" exported="" />
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../dev.jeka.core/jeka/output/distrib/dev.jeka.jeka-core.jar!/" />
+          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../dev.jeka.core/jeka/output/distrib/libs-sources/dev.jeka.jeka-core-sources.jar!/" />
+          <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

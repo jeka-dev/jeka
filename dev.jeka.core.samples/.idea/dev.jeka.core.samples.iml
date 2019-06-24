@@ -16,7 +16,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/output" />
       <excludeFolder url="file://$MODULE_DIR$/jerkar/output" />
     </content>
-    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="">
       <library>

@@ -5,6 +5,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -118,16 +119,20 @@ public final class JkJavadocMaker {
                 JkLog.warn("No sources found in " + this.srcDirs);
                 return;
             }
-            final String[] args = toArguments(outputDir);
-            OutputStream info = JkLog.getOutputStream();
-            OutputStream warn = JkUtilsIO.nopPrintStream();   // error and log produces very verbose logs in jdoclet
-            OutputStream error = JkUtilsIO.nopPrintStream();
-            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-                warn = JkLog.getOutputStream();
-                error = JkLog.getErrorStream();
+            if (JkUtilsJdk.runningMajorVersion() >= 11) {
+                executeCmdLine(toArguments(outputDir, false));
+            } else {
+                final List<String> args = toArguments(outputDir, true);
+                OutputStream info = JkLog.getOutputStream();
+                OutputStream warn = JkUtilsIO.nopPrintStream();   // error and log produces very verbose logs in jdoclet
+                OutputStream error = JkUtilsIO.nopPrintStream();
+                if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+                    warn = JkLog.getOutputStream();
+                    error = JkLog.getErrorStream();
+                }
+                JkUtilsPath.createDirectories(outputDir);
+                execute(doclet, info, warn, error, args);
             }
-            JkUtilsPath.createDirectories(outputDir);
-            execute(doclet, info, warn, error, args);
             if (Files.exists(outputDir) && zipFile != null) {
                 JkPathTree.of(outputDir).zipTo(zipFile);
             }
@@ -135,7 +140,7 @@ public final class JkJavadocMaker {
         JkLog.execute("Generating javadoc", task);
     }
 
-    private String[] toArguments(Path outputDir) {
+    private List<String> toArguments(Path outputDir, boolean withDocletPath) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
         list.add(JkPathSequence.of(this.srcDirs.getRootDirsOrZipFiles()).toString());
@@ -146,11 +151,13 @@ public final class JkJavadocMaker {
         } else {
             list.add("-quiet");
         }
-        list.add("-docletpath");
-        list.add(JkUtilsJdk.toolsJar().toString());
         if (classpath != null && classpath.iterator().hasNext()) {
             list.add("-classpath");
             list.add(JkPathSequence.of(this.classpath).toString());
+        }
+        if (withDocletPath) {
+            list.add("-docletpath");
+            list.add(JkUtilsJdk.toolsJar().toString());
         }
         list.addAll(extraArgs);
 
@@ -160,11 +167,11 @@ public final class JkJavadocMaker {
             }
 
         }
-        return list.toArray(new String[0]);
+        return list;
     }
 
     private static void execute(Class<?> doclet, OutputStream normalStream, OutputStream warnStream,
-                                OutputStream errorStream, String[] args) {
+                                OutputStream errorStream, List<String> args) {
 
         final String docletString = doclet != null ? doclet.getName()
                 : "com.sun.tools.doclets.standard.Standard";
@@ -174,7 +181,7 @@ public final class JkJavadocMaker {
                 PrintWriter.class, PrintWriter.class, PrintWriter.class, String.class,
                 String[].class);
         JkUtilsReflect.invoke(null, method, "Javadoc", new PrintWriter(errorStream),
-                new PrintWriter(warnStream), new PrintWriter(normalStream), docletString, args);
+                new PrintWriter(warnStream), new PrintWriter(normalStream), docletString, args.toArray(new String[0]));
     }
 
     private static Class<?> getJavadocMainClass() {
@@ -190,6 +197,11 @@ public final class JkJavadocMaker {
             }
         }
         return mainClass;
+    }
+
+    private static void executeCmdLine(List<String> args) {
+        JkProcess.of("javadoc", args.toArray(new String[0])).withWorkingDir(JkUtilsJdk.javaHome()
+                .resolve("bin")).runSync();
     }
 
 }
