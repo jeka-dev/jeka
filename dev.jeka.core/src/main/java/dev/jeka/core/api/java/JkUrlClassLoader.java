@@ -60,7 +60,8 @@ public final class JkUrlClassLoader {
     }
 
     public static JkUrlClassLoader of(Iterable<Path> paths, ClassLoader parent) {
-        return of(new URLClassLoader(toUrl(paths), parent));
+        List<Path> cleanedPath = JkUtilsPath.disambiguate(paths);
+        return of(new URLClassLoader(toUrl(cleanedPath), parent));
     }
 
     /**

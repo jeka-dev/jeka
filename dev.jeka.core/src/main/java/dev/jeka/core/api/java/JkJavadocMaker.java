@@ -4,15 +4,13 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsJdk;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.*;
 
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import javax.tools.*;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -21,6 +19,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Offers fluent interface for producing Javadoc.
@@ -119,8 +118,9 @@ public final class JkJavadocMaker {
                 JkLog.warn("No sources found in " + this.srcDirs);
                 return;
             }
-            if (JkUtilsJdk.runningMajorVersion() >= 11) {
+            if (JkUtilsJdk.runningMajorVersion() >= 8) {
                 executeCmdLine(toArguments(outputDir, false));
+                //executeTool(outputDir, srcDirs.getFiles());
             } else {
                 final List<String> args = toArguments(outputDir, true);
                 OutputStream info = JkLog.getOutputStream();
@@ -201,7 +201,35 @@ public final class JkJavadocMaker {
 
     private static void executeCmdLine(List<String> args) {
         JkProcess.of("javadoc", args.toArray(new String[0])).withWorkingDir(JkUtilsJdk.javaHome()
-                .resolve("bin")).runSync();
+                .resolve("bin")).withFailOnError(true).withLogCommand(true).runSync();
+    }
+
+    // https://www.programcreek.com/java-api-examples/index.php?api=javax.tools.DocumentationTool
+    private static void executeTool(Path outputDir, List<Path> files) {
+        DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
+        try (StandardJavaFileManager fm = tool.getStandardFileManager(null, null, null)) {
+            Files.createDirectories(outputDir);
+            Iterable<JavaSourceObject> fileObjects = files.stream()
+                    .filter(path -> path.getFileName().endsWith(".java"))
+                    .map(path -> new JavaSourceObject(path)).collect(Collectors.toList());
+            fm.setLocation(DocumentationTool.Location.DOCUMENTATION_OUTPUT, JkUtilsIterable.listOf(outputDir.toFile()));
+            Writer writer = new PrintWriter(new OutputStreamWriter(JkLog.getOutputStream(), "UTF-8"));
+            DocumentationTool.DocumentationTask task = tool.getTask(writer, fm, null, null,
+                    null, fileObjects);
+            boolean success = task.call();
+            if (!success) {
+                throw new JkException("Javadoc task failed");
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static class JavaSourceObject extends SimpleJavaFileObject {
+
+        protected JavaSourceObject(Path path) {
+            super(path.toUri(), Kind.SOURCE);
+        }
     }
 
 }
