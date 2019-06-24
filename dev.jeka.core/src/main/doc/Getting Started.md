@@ -13,10 +13,9 @@ __Def Classes :__ Java source files located under _[PROJECT DIR]/jeka/def_. They
 __Def Classpath :__ Classpath on which depend _def classes_ to get compiled and _command classes_ to be executed. 
 By default, it consists in _Jeka_ core classes. it can be augmented with any third party lib or def Classpath coming 
 from imported project. 
-Once _def classes_ sources have been compiled, _def Classpath_ is augmented with compiled  _def classes_.
 
-__Command Classes :__ Classes extending `JkCommands`. Their _commands_ can be invoked from the command line and 
-their pubic fields set from the command line as well. Generally _def classes_ contains one _command class_ though there can be many or 
+__Command Classes :__ Classes extending `JkCommands`. Their public no-arg methods can be invoked from the command line and 
+their pubic fields set from the command line. Generally _def classes_ contains one _command class_ though there can be many or 
 none. Command classes can come from _def classes_ but can also be imported from a library or external project.
 
 __Commands :__ Java methods member of _command classes_ and invokable from command line. 
@@ -139,12 +138,11 @@ First, let's create a simple automation project that read content from url and d
 This will generate a project skeleton as follow :
 ```
 sample1
-   + .idea
-       + sample1.iml    <----- Intellij metadata containing project dependencies (At least dev.jeka.core)
    + jeka             
       + def             <-----  Java code that build your project goes here
          + Build.java   
       + output          <---- Genererated files are supposed to lie here  
+   + sample1.iml    <----- Intellij metadata containing project dependencies (At least dev.jeka.core)
 ```
 4. Import the project in your IDE. Eveything should be Ok, in particular *Build.java* should compile and execute within your IDE.
 
