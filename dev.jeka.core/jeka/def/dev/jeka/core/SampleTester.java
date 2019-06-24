@@ -60,6 +60,7 @@ class SampleTester {
         } else {
             Files.delete(classpathFile2);
         }
+        JkLog.endTask();
 
         // Test intellij
         JkLog.startTask("Test Intellij generate all");

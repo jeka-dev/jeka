@@ -160,7 +160,7 @@ public class CoreBuild extends JkCommands {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        JkLog.endTask();
+        JkLog.endTask("It tests done");
     }
 
     private void doPackWithEmbedded() {

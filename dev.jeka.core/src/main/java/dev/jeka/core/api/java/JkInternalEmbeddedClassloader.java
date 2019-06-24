@@ -3,6 +3,7 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -19,6 +20,7 @@ public class JkInternalEmbeddedClassloader {
     private static ClassLoader classLoader;
 
     static {
+        JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.
         URL embeddedNameUrl = JkClassLoader.ofCurrent().get().getResource("META-INF/jeka-embedded-name");
         String jarName = JkUtilsIO.read(embeddedNameUrl);
         URL url = JkClassLoader.ofCurrent().get().getResource("META-INF/" + jarName);

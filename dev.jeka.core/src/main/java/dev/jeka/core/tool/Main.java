@@ -1,15 +1,14 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.*;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -30,11 +29,14 @@ public final class Main {
         if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
             URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {},
                     Thread.currentThread().getContextClassLoader());
-            Thread.currentThread().setContextClassLoader(urlClassLoader);
-            main(args);
+            //Thread.currentThread().setContextClassLoader(urlClassLoader);
+            //main(args);
+            Object[] argArray = new Object[] {args};
+            JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main", "main" , argArray);
             return;
         }
         final long start = System.nanoTime();
+        JkUtilsSystem.disableUnsafeWarning();
         try {
             Environment.initialize(args);
             JkLog.registerHierarchicalConsoleHandler();

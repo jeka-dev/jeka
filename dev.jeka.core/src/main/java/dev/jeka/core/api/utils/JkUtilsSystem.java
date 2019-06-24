@@ -1,6 +1,9 @@
 package dev.jeka.core.api.utils;
 
+import sun.misc.Unsafe;
+
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -65,6 +68,23 @@ public final class JkUtilsSystem {
      */
     public static void addOnExitAction(Runnable runnable) {
         Runtime.getRuntime().addShutdownHook(new Thread(runnable));
+    }
+
+    /**
+     * On Jdk 9+, a warning is emitted while attempting to access private fields by reflection. This hack aims at
+     * removing this warning.
+     */
+    public static void disableUnsafeWarning() {
+        try {
+            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            Unsafe unsafe = (Unsafe) theUnsafe.get(null);
+            Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
+            Field logger = cls.getDeclaredField("logger");
+            unsafe.putObjectVolatile(cls, unsafe.staticFieldOffset(logger), null);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
 }

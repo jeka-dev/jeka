@@ -1,15 +1,21 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
+
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
 
@@ -43,7 +49,9 @@ public class AClassicBuild extends JkCommands {
                         .and("com.sun.jersey:jersey-server:1.19")
                         .and("junit:junit:4.11", TEST));
         JkJavaProjectMaker maker = project.getMaker();
-        maker.getTasksForCompilation().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
+
+         // With JDK 9 you should provide jre classes in the buildPath (so in dependencies)
+        // maker.getTasksForCompilation().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
         maker.defineMainArtifactAsFatJar(false);  // project will produce a fat jar as well.
         maker.getTasksForTesting().setForkRun(true);
     }
