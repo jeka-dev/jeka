@@ -118,7 +118,7 @@ public final class JkJavadocMaker {
                 JkLog.warn("No sources found in " + this.srcDirs);
                 return;
             }
-            if (JkUtilsJdk.runningMajorVersion() >= 8) {
+            if (JkUtilsJdk.runningMajorVersion() >= 11) {
                 executeCmdLine(toArguments(outputDir, false));
                 //executeTool(outputDir, srcDirs.getFiles());
             } else {
