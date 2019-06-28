@@ -155,6 +155,20 @@ public final class JkPathSequence implements Iterable<Path> {
     // --------------- Canonical methods ------------------------------------------
 
     /**
+     * Returns the file names concatenated with ';' on Windows and ':' on unix.
+     */
+    public String toSystemAwareString() {
+        final StringBuilder builder = new StringBuilder();
+        for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
+            builder.append(it.next().toAbsolutePath().toString());
+            if (it.hasNext()) {
+                builder.append(File.pathSeparator);
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
      * Returns the file names concatenated with ';'.
      */
     @Override
