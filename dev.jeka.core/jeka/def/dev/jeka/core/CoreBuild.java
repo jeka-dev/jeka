@@ -163,13 +163,14 @@ public class CoreBuild extends JkCommands {
     }
 
     private void doPackWithEmbedded() {
+        JkLog.startTask("Creating main jar");
         JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
 
-        // Jar containing jeka classes
+        // Main jar
         Path targetJar = maker.getMainArtifactPath();
         maker.getTasksForPackaging().createBinJar(targetJar);
-        JkPathTree jarTre = JkPathTree.ofZip(targetJar);
-        JkLog.startTask("Creating jar embedding 3rd party libs");
+        JkPathTree jarTree = JkPathTree.ofZip(targetJar);
+
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
@@ -188,11 +189,11 @@ public class CoreBuild extends JkCommands {
         String embeddedFinalName = "jeka-embedded-" + checksum + ".jar";
 
         // Copy embbeded jar into temp folder and remove embedded part code from jeka classes
-        jarTre.goTo("META-INF").importFile(embeddedJar, embeddedFinalName);
-        JkPathFile.of(jarTre.get("META-INF/jeka-embedded-name"))
+        jarTree.goTo("META-INF").importFile(embeddedJar, embeddedFinalName);
+        JkPathFile.of(jarTree.get("META-INF/jeka-embedded-name"))
                 .write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
-        jarTre.andMatching( "**/embedded/**").deleteContent();
-        jarTre.close();
+        jarTree.andMatching( "**/embedded/**").deleteContent();
+        jarTree.close();
 
         // Cleanup
         JkUtilsPath.deleteIfExists(embeddedJar);
