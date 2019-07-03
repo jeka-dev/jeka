@@ -336,12 +336,11 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private void writeIncludingExcluding(XMLStreamWriter writer, JkPathTree fileTree) throws XMLStreamException {
-        // TODO
-        final String including = ""; //toPatternString(fileTree.matcher().getIncludePatterns());
+        final String including = "";
         if (!JkUtilsString.isBlank(including)) {
             writer.writeAttribute("including", including);
         }
-        final String excluding = ""; //toPatternString(fileTree.matcher().getExcludePatterns());
+        final String excluding = "";
         if (!JkUtilsString.isBlank(excluding)) {
             writer.writeAttribute("excluding", excluding);
         }

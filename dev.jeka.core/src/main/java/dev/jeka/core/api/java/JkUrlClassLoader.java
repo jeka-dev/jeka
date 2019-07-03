@@ -360,7 +360,6 @@ public final class JkUrlClassLoader {
      * Reloads all J2SE service providers. It can be necessary if adding
      * dynamically some service providers to the classpath.
      */
-    // TODO move to JkClassloader
     public void loadAllServices() {
         final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final Path file : this.getFullClasspath()) {

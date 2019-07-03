@@ -133,7 +133,6 @@ public final class JkUtilsIO {
     /**
      * Returns the content of the specified input getOutputStream, line by line.
      */
-    // TODO encoding ????
     public static List<String> readAsLines(InputStream in) {
         final List<String> result = new LinkedList<>();
         final BufferedReader reader = new BufferedReader(new InputStreamReader(in));

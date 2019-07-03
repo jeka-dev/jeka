@@ -157,8 +157,6 @@ public final class JkImlGenerator {
     }
 
     private void writeOutput() throws XMLStreamException {
-
-        // TODO should get location to #outputClassFolder and #outputTestClassFolder
         writer.writeCharacters(T2);
         writer.writeEmptyElement("output");
         writer.writeAttribute("url", "file://$MODULE_DIR$/.idea/output/production");
