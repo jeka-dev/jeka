@@ -81,7 +81,7 @@ public class CoreBuild extends JkCommands {
                 .setMavenPublicationInfo(mavenPublication());
 
         // include embedded jar
-        maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded2);
+        maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded);
 
         // define wrapper
         maker.putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
@@ -162,7 +162,7 @@ public class CoreBuild extends JkCommands {
         JkLog.endTask("It tests done");
     }
 
-    private void doPackWithEmbedded2() {
+    private void doPackWithEmbedded() {
         JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
 
         // Jar containing jeka classes
