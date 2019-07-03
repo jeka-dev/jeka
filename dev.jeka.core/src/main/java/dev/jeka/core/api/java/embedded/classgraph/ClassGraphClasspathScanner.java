@@ -18,13 +18,11 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
     @Override
     public Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate) {
-        JkLog.startTask("Scanning classpath");
         ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
                 .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
                         "org.commonmark", "io.github.classgraph");
         ScanResult scanResult = classGraph.scan();
-        JkLog.endTask();
         Set<Class<?>> result = new HashSet<>();
         for (ClassInfo classInfo : scanResult.getAllClasses()) {
             if (predicate.test(classInfo.getSimpleName())) {
