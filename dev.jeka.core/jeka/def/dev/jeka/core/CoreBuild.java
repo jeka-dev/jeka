@@ -112,19 +112,19 @@ public class CoreBuild extends JkCommands {
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
-        distrib.bring(getBaseDir().getParent().resolve("LICENSE"));
-        distrib.merge(getBaseDir().resolve("src/main/dist"));
-        distrib.merge(getBaseDir().resolve("src/main/java/META-INF/bin"));
-        distrib.bring(maker.getArtifactPath(maker.getMainArtifactId()));
-        distrib.bring(maker.getArtifactPath(WRAPPER_ARTIFACT_ID));
+        distrib.importFiles(getBaseDir().getParent().resolve("LICENSE"));
+        distrib.importDir(getBaseDir().resolve("src/main/dist"));
+        distrib.importDir(getBaseDir().resolve("src/main/java/META-INF/bin"));
+        distrib.importFiles(maker.getArtifactPath(maker.getMainArtifactId()));
+        distrib.importFiles(maker.getArtifactPath(WRAPPER_ARTIFACT_ID));
         final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources")
                 .andMatching(true, "apache-ivy*.jar").getFiles();
         distrib.goTo("libs-sources")
-            .bring(ivySourceLibs)
-            .bring(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
+            .importFiles(ivySourceLibs)
+            .importFiles(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
         if (javaPlugin.pack.javadoc) {
             maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
-            distrib.goTo("libs-javadoc").bring(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
+            distrib.goTo("libs-javadoc").importFiles(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         makeDocs();
         if (javaPlugin.tests.runIT) {
@@ -165,12 +165,18 @@ public class CoreBuild extends JkCommands {
 
     private void doPackWithEmbedded() {
         JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
+
+        // Jar containing jeka classes
         Path tempJar = maker.getOutLayout().getOutputPath().resolve("tempJar");
         maker.getTasksForPackaging().createBinJar(tempJar);
         JkLog.startTask("Creating jar");
+
+        // Use a temp folder to create the fat jar from
         Path tempClasses = maker.getOutLayout().getOutputPath().resolve("tempClasses");
         JkPathTree.ofZip(tempJar).copyTo(tempClasses);
-        Path embededJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
+
+        // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
+        Path embeddedJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
         Path classDir = maker.getOutLayout().getClassDir();
         JkPathTree classTree = JkPathTree.of(classDir);
         Path embeddedFolder = maker.getOutLayout().getOutputPath().resolve("embeddedFolder");
@@ -181,17 +187,24 @@ public class CoreBuild extends JkCommands {
                 .copyTo(embeddedFolder, StandardCopyOption.REPLACE_EXISTING);
         JkPathTree.of(embeddedFolder)
                 .andMatcher(JkPathMatcher.of(false, "META-INF/*.SF", "META-INF/*.RSA"))
-                .zipTo(embededJar);
-        String checksum = JkPathFile.of(embededJar).getChecksum("MD5");
+                .zipTo(embeddedJar);
+
+        // Name uniquely this embedded jar according its content
+        String checksum = JkPathFile.of(embeddedJar).getChecksum("MD5");
         String embeddedFinalName = "jeka-embedded-" + checksum + ".jar";
-        JkUtilsPath.copy(embededJar, tempClasses.resolve("META-INF/"+ embeddedFinalName));
-        JkPathFile.of(tempClasses.resolve("META-INF/jeka-embedded-name")).write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
+
+        // Copy embbeded jar into temp folder and remove embedded part code from jeka classes
+        JkUtilsPath.copy(embeddedJar, tempClasses.resolve("META-INF/"+ embeddedFinalName));
+        JkPathFile.of(tempClasses.resolve("META-INF/jeka-embedded-name"))
+                .write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
         JkPathTreeSet.of(JkPathTree.of(tempClasses).andMatching(false, "**/embedded/**"))
                 .zipTo(maker.getMainArtifactPath());
+
+        // Cleanup
         JkPathTree.of(tempClasses).deleteRoot();
         JkPathTree.of(embeddedFolder).deleteRoot();
         JkUtilsPath.deleteIfExists(tempJar);
-        JkUtilsPath.deleteIfExists(embededJar);
+        JkUtilsPath.deleteIfExists(embeddedJar);
         JkLog.endTask();
     }
 

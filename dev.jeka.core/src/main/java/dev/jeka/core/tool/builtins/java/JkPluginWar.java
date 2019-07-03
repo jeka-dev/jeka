@@ -60,7 +60,7 @@ public class JkPluginWar extends JkPlugin {
         JkResolveResult resolveResult = project.getMaker().getDependencyResolver().resolve(project.getDependencies(),
                 JkJavaDepScopes.RUNTIME);
         JkPathTree lib = root.goTo("lib");
-        resolveResult.getFiles().withoutDuplicates().getEntries().forEach(path ->  lib.bring(path));
+        resolveResult.getFiles().withoutDuplicates().getEntries().forEach(path ->  lib.importFiles(path));
     }
 
     public void setStaticResourceDir(Path staticResourceDir) {

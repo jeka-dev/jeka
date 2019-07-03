@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.regex.Matcher;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsPathTest;
@@ -77,7 +76,7 @@ public class JkPathTreeTest {
         Path zipFile = Files.createTempFile("jksample",".zip");
         Files.deleteIfExists(zipFile);
         JkPathTree zipTree = JkPathTree.ofZip(zipFile);
-        zipTree.merge(sampleDir());
+        zipTree.importDir(sampleDir());
         List<Path> paths = zipTree.getFiles();
         assertEquals(1, paths.size());
 
@@ -101,12 +100,12 @@ public class JkPathTreeTest {
     }
 
     @Test  // Ensure we can import  a zip from a zip
-    public void testZipMergeDir() throws Exception {
+    public void testZipImportTree() throws Exception {
         Path zip = createSampleZip();
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
         JkPathTree zip2Tree = JkPathTree.ofZip(zip2);
-        zip2Tree.merge(JkPathTree.ofZip(zip));
+        zip2Tree.importTree(JkPathTree.ofZip(zip));
         assertTrue(Files.isDirectory(zip2Tree.get("subfolder")));
         assertTrue(Files.isRegularFile(zip2Tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(zip2Tree.get("emptyfolder")));
@@ -119,7 +118,7 @@ public class JkPathTreeTest {
         Path zip = createSampleZip();
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
-        tree.merge(JkPathTree.ofZip(createSampleZip()));
+        tree.importTree(JkPathTree.ofZip(createSampleZip()));
         assertTrue(Files.isDirectory(tree.get("subfolder")));
         assertTrue(Files.isRegularFile(tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(tree.get("emptyfolder")));
@@ -131,7 +130,7 @@ public class JkPathTreeTest {
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
         Path tempFile = Files.createTempFile("example", ".txt");
-        tree.bring(tempFile);
+        tree.importFiles(tempFile);
         assertTrue(Files.exists(tree.get(tempFile.getFileName().toString())));
         Files.delete(tempFile);
     }
@@ -162,6 +161,14 @@ public class JkPathTreeTest {
         fooTree.deleteContent();
         assertTrue(Files.exists(txt));
         fooTree.deleteRoot();  // cleanup
+    }
+
+    @Test
+    public void testZipDeleteContent() throws Exception {
+        Path zip = createSampleZip();
+        Desktop.getDesktop().open(zip.toFile());
+        JkPathTree.ofZip(zip).goTo("subfolder").deleteRoot().close();
+        System.out.println(JkPathTree.ofZip(zip).getFiles());
     }
 
 

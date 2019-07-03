@@ -3,6 +3,7 @@ package dev.jeka.core.api.file;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
  *
  * @author Jerome Angibaud
  */
-public final class JkPathTree {
+public final class JkPathTree implements Closeable {
 
     private static final JkPathMatcher NO_FILTER = JkPathMatcher.of();
 
@@ -165,7 +166,8 @@ public final class JkPathTree {
      */
     public JkPathTree goTo(String relativePath) {
         final Path path = getRoot().resolve(relativePath).normalize();
-        return JkPathTree.of(path);
+        RootHolder rootHolder = new RootHolder(this.rootHolder.zipFile, path);
+        return new JkPathTree(rootHolder, this.matcher);
     }
 
     /**
@@ -179,10 +181,10 @@ public final class JkPathTree {
 
 
     /**
-     * Short hand for <code>#merge(JkPathTree.of(dirToCopy, copyOptions)</code>.
+     * Copies the specified directory and its content at the root of this tree.
      */
-    public JkPathTree merge(Path dirToCopy, CopyOption... copyOptions) {
-        return merge(JkPathTree.of(dirToCopy), copyOptions);
+    public JkPathTree importDir(Path dirToCopy, CopyOption... copyOptions) {
+        return importTree(JkPathTree.of(dirToCopy), copyOptions);
     }
 
     /**
@@ -191,7 +193,7 @@ public final class JkPathTree {
      * is preserved.
      * Note that the the root of the specified tree is not part of the copied content.
      */
-    public JkPathTree merge(JkPathTree tree, CopyOption... copyOptions) {
+    public JkPathTree importTree(JkPathTree tree, CopyOption... copyOptions) {
         createIfNotExist();
         if (tree.exists()) {
             tree.stream().filter(excludeRootFilter()).forEach(path -> {
@@ -207,11 +209,11 @@ public final class JkPathTree {
     }
 
     /**
-     * Copies the specified files at the root of this tree.
+     * Copies the specified files at the root of this tree. The copy is not recursive.
      */
-    public JkPathTree bring(Iterable<Path> files, StandardCopyOption ... copyOptions) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(files);
+    public JkPathTree importFiles(Iterable<Path> files, StandardCopyOption ... copyOptions) {
         createIfNotExist();
+        Iterable<Path> paths = JkUtilsPath.disambiguate(files);
         for (final Path file : paths) {
             JkUtilsPath.copy(file, getRoot().resolve(file.getFileName()), copyOptions);
         }
@@ -228,12 +230,12 @@ public final class JkPathTree {
         JkUtilsPath.walkFileTree(getRoot(), new SimpleFileVisitor<Path>() {
 
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                 return visitFile(file);
             }
 
             @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
                 return visitDir(dir);
             }
 
@@ -393,6 +395,17 @@ public final class JkPathTree {
     @Override
     public String toString() {
         return rootHolder + ":" + matcher;
+    }
+
+    /**
+     * This method close the underlying file system. It is only significant for zip trees.
+     * @throws IOException
+     */
+    @Override
+    public void close() throws IOException {
+        if (this.rootHolder.isZip()) {
+            rootHolder.get().getFileSystem().close();
+        }
     }
 
     private static class RootHolder {
