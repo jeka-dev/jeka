@@ -167,8 +167,11 @@ public class JkPathTreeTest {
     public void testZipDeleteContent() throws Exception {
         Path zip = createSampleZip();
         Desktop.getDesktop().open(zip.toFile());
+        boolean subfolderExist = Files.exists(JkPathTree.ofZip(zip).goTo("subfolder").getRoot());
+        assertTrue(subfolderExist);
         JkPathTree.ofZip(zip).goTo("subfolder").deleteRoot().close();
-        System.out.println(JkPathTree.ofZip(zip).getFiles());
+        subfolderExist = Files.exists(JkPathTree.ofZip(zip).goTo("subfolder").getRoot());
+        assertFalse(subfolderExist);
     }
 
 
