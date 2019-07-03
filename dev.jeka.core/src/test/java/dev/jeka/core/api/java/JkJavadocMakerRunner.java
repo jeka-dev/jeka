@@ -19,7 +19,7 @@ public class JkJavadocMakerRunner {
         Path out = Files.createTempDirectory("jekatest");
         JkLog.registerHierarchicalConsoleHandler();
         JkJavadocMaker.of(sources, out)
-               //.withClasspath(JkPathTree.of(srcDir.resolve("../../../jeka/libs/provided").normalize()).getFiles())
+                .withClasspath(JkPathTree.of(srcDir.resolve("../../../jeka/libs/provided").normalize()).getFiles())
                 .withDisplayOutput(true)
                 //.andOptions("-verbose")
                 .process();

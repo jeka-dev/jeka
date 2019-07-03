@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Offers fluent interface for producing Javadoc.
@@ -56,7 +57,8 @@ public final class JkJavadocMaker {
      * the specified directory then compacted in the specified zip file.
      */
     public static JkJavadocMaker of(JkPathTreeSet sources, Path outputDir, Path zipFile) {
-        return new JkJavadocMaker(sources, Collections.emptyList(),  new LinkedList<>(), outputDir, zipFile, JkLog.isVerbose());
+        return new JkJavadocMaker(sources, Collections.emptyList(),  new LinkedList<>(), outputDir, zipFile,
+                JkLog.isVerbose());
     }
 
     /**
@@ -64,7 +66,8 @@ public final class JkJavadocMaker {
      * the specified directory.
      */
     public static JkJavadocMaker of(JkPathTreeSet sources, Path outputDir) {
-        return new JkJavadocMaker(sources, Collections.emptyList(),  new LinkedList<>(), outputDir, null, JkLog.isVerbose());
+        return new JkJavadocMaker(sources, Collections.emptyList(),  new LinkedList<>(), outputDir, null,
+                JkLog.isVerbose());
     }
 
     /**
@@ -87,14 +90,16 @@ public final class JkJavadocMaker {
      * Returns a {@link JkJavadocMaker} identical to this one but using the specified classpath.
      */
     public JkJavadocMaker withClasspath(Iterable<Path> classpath) {
-        return new JkJavadocMaker(srcDirs, JkUtilsPath.disambiguate(classpath), extraArgs, outputDir, zipFile, displayOutput);
+        return new JkJavadocMaker(srcDirs, JkUtilsPath.disambiguate(classpath), extraArgs, outputDir, zipFile,
+                displayOutput);
     }
 
     /**
      * Returns a {@link JkJavadocMaker} identical to this one but using the specified classpath.
      */
     public JkJavadocMaker withDisplayOutput(boolean displayOutput) {
-        return new JkJavadocMaker(srcDirs, JkUtilsPath.disambiguate(classpath), extraArgs, outputDir, zipFile, displayOutput);
+        return new JkJavadocMaker(srcDirs, JkUtilsPath.disambiguate(classpath), extraArgs, outputDir, zipFile,
+                displayOutput);
     }
 
     /**
@@ -121,23 +126,7 @@ public final class JkJavadocMaker {
             Files.createDirectories(outputDir);
             fm.setLocation(DocumentationTool.Location.DOCUMENTATION_OUTPUT, JkUtilsIterable.listOf(outputDir.toFile()));
             Writer writer = new PrintWriter(new OutputStreamWriter(JkLog.getOutputStream(), "UTF-8"));
-            List<String> options = new LinkedList<>();
-            options.add("-sourcepath");
-            options.add(JkPathSequence.of(srcDirs.getRootDirsOrZipFiles()).toString());
-            options.add("-subpackages");
-            options.add(".");
-            options.add("-d");
-            options.add(outputDir.toString());
-            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-                options.add("-verbose");
-            } else {
-                options.add("-quiet");
-            }
-            if (classpath != null && classpath.iterator().hasNext()) {
-                options.add("-classpath");
-                options.add(JkPathSequence.of(classpath).toString());
-            }
-            options.addAll(this.extraArgs);
+            List<String> options = computeOptions();
             DocumentationTool.DocumentationTask task = tool.getTask(writer, fm, null, null,
                     options, null);
             task.call();
@@ -147,37 +136,84 @@ public final class JkJavadocMaker {
     }
 
     private void executeCommandLine() {
-        Path wd = Paths.get("").toAbsolutePath().normalize();
-        System.out.println("--------------------------" + wd);
         String exeName = JkUtilsSystem.IS_WINDOWS ? "javadoc.exe" : "javadoc";
         Path javadocExe = JkUtilsJdk.javaHome().resolve("bin/" + exeName);
         if (!Files.exists(javadocExe)) {
             javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
         }
-        System.out.println(javadocExe);
+        JkLog.trace(javadocExe.toString());
+        JkProcess.of(javadocExe.toString())
+                .andParams(computeOptions())
+                .withLogOutput(displayOutput)
+                .withFailOnError(true)
+                .runSync();
+    }
+
+    private List<String> computeOptions() {
         List<String> options = new LinkedList<>();
-        options.add("-sourcepath");
-        options.add(JkPathSequence.of(srcDirs.getRootDirsOrZipFiles()).toString());
-        options.add("-subpackages");
-        options.add(".");
-        options.add("-d");
-        options.add(outputDir.toString());
+        if (!containsLike("-Xdoclint")) {
+            options.add("-Xdoclint:none");
+        }
+        if (!contains("-sourcepath")) {
+            options.add("-sourcepath");
+            options.add(JkPathSequence.of(srcDirs.getRootDirsOrZipFiles()).toString());
+        }
+        if (!contains("-subpackages")) {
+            options.add("-subpackages");
+            options.add(computeSubpackages());
+        }
+        if (!contains("-d")) {
+            options.add("-d");
+            options.add(outputDir.toString());
+        }
+        if (!contains("-classpath") && classpath != null && classpath.iterator().hasNext()) {
+            options.add("-classpath");
+            options.add(JkPathSequence.of(classpath).toPath());
+        }
         if (JkLog.isVerbose()) {
             options.add("-verbose");
         } else {
             options.add("-quiet");
         }
-        if (classpath != null && classpath.iterator().hasNext()) {
-            options.add("-classpath");
-            options.add(JkPathSequence.of(classpath).toString());
-        }
+
         options.addAll(this.extraArgs);
-        System.out.println(options);
-        JkProcess.of(javadocExe.toString())
-                .andParams(options)
-                .withLogOutput(displayOutput)
-                //.withWorkingDir(wd)
-                .runSync();
+        JkLog.trace(options.toString());
+        return options;
+    }
+
+    private String computeSubpackages() {
+        List<String> dirs = new LinkedList<>();
+        for (Path root : this.srcDirs.getRootDirsOrZipFiles()) {
+            try (Stream<Path> pathStream = Files.list(root).filter(path ->Files.isDirectory(path))) {
+                pathStream.forEach(path -> {
+                    JkPathTree pathTree = JkPathTree.of(path).andMatching("*.java", "**/*.java");
+                    if (!pathTree.getFiles().isEmpty()) {
+                        dirs.add(path.getFileName().toString());
+                    }
+                });
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        return String.join(":", dirs);
+    }
+
+    private boolean containsLike(String hint) {
+        for (String option : extraArgs) {
+            if (option.contains(hint)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean contains(String hint) {
+        for (String option : extraArgs) {
+            if (option.equals(hint)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
