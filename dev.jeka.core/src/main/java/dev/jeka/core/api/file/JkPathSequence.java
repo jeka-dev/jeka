@@ -1,12 +1,12 @@
 package dev.jeka.core.api.file;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
 /**
  * A sequence of file path (folder or archive). Each file is called an <code>entry</code>.<br/>

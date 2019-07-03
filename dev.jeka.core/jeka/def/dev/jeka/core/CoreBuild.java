@@ -2,7 +2,6 @@ package dev.jeka.core;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -82,7 +81,7 @@ public class CoreBuild extends JkCommands {
                 .setMavenPublicationInfo(mavenPublication());
 
         // include embedded jar
-        maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded);
+        maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded2);
 
         // define wrapper
         maker.putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
@@ -163,59 +162,14 @@ public class CoreBuild extends JkCommands {
         JkLog.endTask("It tests done");
     }
 
-    private void doPackWithEmbedded() {
-        JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
-
-        // Jar containing jeka classes
-        Path tempJar = maker.getOutLayout().getOutputPath().resolve("tempJar");
-        maker.getTasksForPackaging().createBinJar(tempJar);
-        JkLog.startTask("Creating jar");
-
-        // Use a temp folder to create the fat jar from
-        Path tempClasses = maker.getOutLayout().getOutputPath().resolve("tempClasses");
-        JkPathTree.ofZip(tempJar).copyTo(tempClasses);
-
-        // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
-        Path embeddedJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
-        Path classDir = maker.getOutLayout().getClassDir();
-        JkPathTree classTree = JkPathTree.of(classDir);
-        Path embeddedFolder = maker.getOutLayout().getOutputPath().resolve("embeddedFolder");
-        JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
-                .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/bouncycastle-pgp-152.jar"))
-                .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/classgraph-4.8.41.jar"))
-                .andZip(getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided/ivy-2.4.0.jar"))
-                .copyTo(embeddedFolder, StandardCopyOption.REPLACE_EXISTING);
-        JkPathTree.of(embeddedFolder)
-                .andMatcher(JkPathMatcher.of(false, "META-INF/*.SF", "META-INF/*.RSA"))
-                .zipTo(embeddedJar);
-
-        // Name uniquely this embedded jar according its content
-        String checksum = JkPathFile.of(embeddedJar).getChecksum("MD5");
-        String embeddedFinalName = "jeka-embedded-" + checksum + ".jar";
-
-        // Copy embbeded jar into temp folder and remove embedded part code from jeka classes
-        JkUtilsPath.copy(embeddedJar, tempClasses.resolve("META-INF/"+ embeddedFinalName));
-        JkPathFile.of(tempClasses.resolve("META-INF/jeka-embedded-name"))
-                .write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
-        JkPathTreeSet.of(JkPathTree.of(tempClasses).andMatching(false, "**/embedded/**"))
-                .zipTo(maker.getMainArtifactPath());
-
-        // Cleanup
-        JkPathTree.of(tempClasses).deleteRoot();
-        JkPathTree.of(embeddedFolder).deleteRoot();
-        JkUtilsPath.deleteIfExists(tempJar);
-        JkUtilsPath.deleteIfExists(embeddedJar);
-        JkLog.endTask();
-    }
-
     private void doPackWithEmbedded2() {
         JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
 
         // Jar containing jeka classes
-        Path tempJar = maker.getMainArtifactPath();
-        maker.getTasksForPackaging().createBinJar(tempJar);
-        JkPathTree jarTre = JkPathTree.ofZip(tempJar);
-        JkLog.startTask("Creating jar");
+        Path targetJar = maker.getMainArtifactPath();
+        maker.getTasksForPackaging().createBinJar(targetJar);
+        JkPathTree jarTre = JkPathTree.ofZip(targetJar);
+        JkLog.startTask("Creating jar embedding 3rd party libs");
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
@@ -225,8 +179,9 @@ public class CoreBuild extends JkCommands {
                 .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
                 .andZip(providedLibs.resolve("classgraph-4.8.41.jar"))
                 .andZip(providedLibs.resolve("ivy-2.4.0.jar"))
-                .andMatcher(JkPathMatcher.of(false, "META-INF/*.SF", "META-INF/*.RSA"))
                 .zipTo(embeddedJar);
+        JkPathTree.ofZip(embeddedJar).andMatching( "META-INF/*.SF", "META-INF/*.RSA")
+                .deleteContent().close();
 
         // Name uniquely this embedded jar according its content
         String checksum = JkPathFile.of(embeddedJar).getChecksum("MD5");
