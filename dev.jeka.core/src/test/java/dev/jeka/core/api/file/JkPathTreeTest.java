@@ -115,14 +115,12 @@ public class JkPathTreeTest {
 
     @Test
     public void testImportTree() throws Exception {
-        Path zip = createSampleZip();
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
         tree.importTree(JkPathTree.ofZip(createSampleZip()));
         assertTrue(Files.isDirectory(tree.get("subfolder")));
         assertTrue(Files.isRegularFile(tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(tree.get("emptyfolder")));
-        Files.delete(zip);
     }
 
     @Test
@@ -172,6 +170,7 @@ public class JkPathTreeTest {
         JkPathTree.ofZip(zip).goTo("subfolder").deleteRoot().close();
         subfolderExist = Files.exists(JkPathTree.ofZip(zip).goTo("subfolder").getRoot());
         assertFalse(subfolderExist);
+        Files.delete(zip);
     }
 
 
