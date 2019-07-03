@@ -328,8 +328,8 @@ public final class JkUtilsPath {
      * If the effective count is greater than max count, returns <code>max + 1</code>.
      * This method is designed to stop file traversal as soon as count is greater than max.
      */
-    public static int childrenCount(Path dir, int max, boolean includeDirectories)  {
-        final CountFileVisitor visitor = new CountFileVisitor(dir, max, includeDirectories);
+    public static int childrenCount(Path dir, int max, boolean includeDirectories, PathMatcher pathMatcher)  {
+        final CountFileVisitor visitor = new CountFileVisitor(dir, max, includeDirectories, pathMatcher);
         walkFileTree(dir, visitor);
         return visitor.count;
     }
@@ -383,16 +383,22 @@ public final class JkUtilsPath {
         private final boolean includeDirectories;
         private final int countMax;
         private int count;
+        private final PathMatcher pathMatcher;
 
 
-        CountFileVisitor(Path fromPath, int countMax , boolean includeDirectories) {
+        CountFileVisitor(Path fromPath, int countMax , boolean includeDirectories, PathMatcher pathMatcher) {
             this.fromPath = fromPath;
             this.countMax = countMax;
             this.includeDirectories = includeDirectories;
+            this.pathMatcher = pathMatcher;
         }
 
         @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+            final Path sourceRelativePath = fromPath.relativize(dir);
+            if (!pathMatcher.matches(sourceRelativePath)) {
+                return FileVisitResult.CONTINUE;
+            }
             if (includeDirectories && !fromPath.equals(dir)) {
                 count ++;
             }
@@ -403,7 +409,11 @@ public final class JkUtilsPath {
         }
 
         @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+            Path relativePath = fromPath.relativize(file);
+            if (!pathMatcher.matches(relativePath)) {
+                return FileVisitResult.CONTINUE;
+            }
             count ++;
             if (count > countMax) {
                 return FileVisitResult.TERMINATE;

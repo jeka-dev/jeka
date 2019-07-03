@@ -362,15 +362,14 @@ public final class JkPathTree {
 
     /**
      * Returns the file count contained in this {@link JkPathTree} to concurrence to specified max count.
-     * If the effective count is greater than max count, returns <code>max + 1</code>.
+     * If the effective count is greater than max count, this method returns <code>max count + 1</code>.
      * This method is designed to stop file traversal as soon as count is greater than max.
      */
     public int count(int max, boolean includeDirectories) {
         if (!exists()) {
             return 0;
         }
-        // TODO don't count filtered entries
-        return JkUtilsPath.childrenCount(getRoot(), max, includeDirectories);
+        return JkUtilsPath.childrenCount(getRoot(), max, includeDirectories, this.matcher);
     }
 
     /**

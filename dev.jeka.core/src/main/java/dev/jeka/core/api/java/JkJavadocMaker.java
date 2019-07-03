@@ -185,7 +185,7 @@ public final class JkJavadocMaker {
             try (Stream<Path> pathStream = Files.list(root).filter(path ->Files.isDirectory(path))) {
                 pathStream.forEach(path -> {
                     JkPathTree pathTree = JkPathTree.of(path).andMatching("*.java", "**/*.java");
-                    if (!pathTree.getFiles().isEmpty()) {
+                    if (pathTree.count(0, false) > 0) {
                         dirs.add(path.getFileName().toString());
                     }
                 });
