@@ -14,14 +14,13 @@ public class JkJavadocMakerRunner {
     public static void main(String[] args) throws Exception {
         Path srcDir = Paths.get(JkJavadocMaker.class.getProtectionDomain().getCodeSource().getLocation().toURI())
                 .resolve("../../../src/main/java").normalize();
-        System.out.println(srcDir);
         JkPathTreeSet sources = JkPathTreeSet.of(srcDir);
         Path out = Files.createTempDirectory("jekatest");
         JkLog.registerHierarchicalConsoleHandler();
+        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkJavadocMaker.of(sources, out)
                 .withClasspath(JkPathTree.of(srcDir.resolve("../../../jeka/libs/provided").normalize()).getFiles())
                 .withDisplayOutput(true)
-                //.andOptions("-verbose")
                 .process();
         Desktop.getDesktop().open(out.toFile());
     }

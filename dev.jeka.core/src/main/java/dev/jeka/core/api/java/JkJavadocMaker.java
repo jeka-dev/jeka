@@ -1,12 +1,14 @@
 package dev.jeka.core.api.java;
 
-
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsJdk;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import javax.tools.DocumentationTool;
 import javax.tools.StandardJavaFileManager;
@@ -14,7 +16,6 @@ import javax.tools.ToolProvider;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -22,13 +23,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Offers fluent interface for producing Javadoc.
+ * Provides fluent interface for producing Javadoc.
  *
  * @author Jerome Angibaud
  */
 public final class JkJavadocMaker {
-
-    //private static final String JAVADOC_MAIN_CLASS_NAME = "com.sun.tools.javadoc.Main";
 
     private final JkPathTreeSet srcDirs;
 
@@ -175,7 +174,6 @@ public final class JkJavadocMaker {
         } else {
             options.add("-quiet");
         }
-
         options.addAll(this.extraArgs);
         JkLog.trace(options.toString());
         return options;
@@ -215,7 +213,5 @@ public final class JkJavadocMaker {
         }
         return false;
     }
-
-
 
 }
