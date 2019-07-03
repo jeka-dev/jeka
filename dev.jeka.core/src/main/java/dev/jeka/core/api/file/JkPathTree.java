@@ -1,6 +1,7 @@
 package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.Closeable;
@@ -221,6 +222,15 @@ public final class JkPathTree implements Closeable {
     }
 
     /**
+     * Copies the specified file at the root of this tree with the specified name. The copy is not recursive.
+     */
+    public JkPathTree importFile(Path src, String targetName, StandardCopyOption ... copyOptions) {
+        createIfNotExist();
+        JkUtilsPath.copy(src, getRoot().resolve(targetName), copyOptions);
+        return this;
+    }
+
+    /**
      * Deletes each and every files in this tree except the root and files not matching this tree filter.
      */
     public JkPathTree deleteContent() {
@@ -402,9 +412,9 @@ public final class JkPathTree implements Closeable {
      * @throws IOException
      */
     @Override
-    public void close() throws IOException {
+    public void close()  {
         if (this.rootHolder.isZip()) {
-            rootHolder.get().getFileSystem().close();
+            JkUtilsIO.closeQuietly(rootHolder.get().getFileSystem());
         }
     }
 

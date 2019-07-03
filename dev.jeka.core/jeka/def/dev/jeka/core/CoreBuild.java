@@ -208,6 +208,42 @@ public class CoreBuild extends JkCommands {
         JkLog.endTask();
     }
 
+    private void doPackWithEmbedded2() {
+        JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
+
+        // Jar containing jeka classes
+        Path tempJar = maker.getMainArtifactPath();
+        maker.getTasksForPackaging().createBinJar(tempJar);
+        JkPathTree jarTre = JkPathTree.ofZip(tempJar);
+        JkLog.startTask("Creating jar");
+
+        // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
+        Path embeddedJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
+        JkPathTree classTree = JkPathTree.of(maker.getOutLayout().getClassDir());
+        Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
+        JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
+                .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
+                .andZip(providedLibs.resolve("classgraph-4.8.41.jar"))
+                .andZip(providedLibs.resolve("ivy-2.4.0.jar"))
+                .andMatcher(JkPathMatcher.of(false, "META-INF/*.SF", "META-INF/*.RSA"))
+                .zipTo(embeddedJar);
+
+        // Name uniquely this embedded jar according its content
+        String checksum = JkPathFile.of(embeddedJar).getChecksum("MD5");
+        String embeddedFinalName = "jeka-embedded-" + checksum + ".jar";
+
+        // Copy embbeded jar into temp folder and remove embedded part code from jeka classes
+        jarTre.goTo("META-INF").importFile(embeddedJar, embeddedFinalName);
+        JkPathFile.of(jarTre.get("META-INF/jeka-embedded-name"))
+                .write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
+        jarTre.andMatching( "**/embedded/**").deleteContent();
+        jarTre.close();
+
+        // Cleanup
+        JkUtilsPath.deleteIfExists(embeddedJar);
+        JkLog.endTask();
+    }
+
     private void doWrapper() {
         JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
         Path wrapperJar = maker.getArtifactPath(WRAPPER_ARTIFACT_ID);
