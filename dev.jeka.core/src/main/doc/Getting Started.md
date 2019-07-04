@@ -110,7 +110,7 @@ But first you have to instruct your IDE where is located Jeka distribution and r
 
 Declare the 2 path variables (go settings -> Apparence & behavior -> Path Variables)
  * `JEKA_HOME` which point to _[Jeka Home]_, 
- * `JEKA_REPO` which point to _[Jeka User Home]/cache/repo_
+ * `JEKA_USER_HOME` which point to _[Jeka User Home]_
 
 ## Eclipse 
 Declare the 2 classpath variables in Eclipse.
@@ -119,7 +119,7 @@ Declare the 2 classpath variables in Eclipse.
 2. Navigate to the classpath variable panel : _Java -> Build Path -> Classpath Variables_
 3. Add these 2 variables :
     * `JEKA_HOME` which point to _[Jeka Home]_, 
-    * `JEKA_REPO` which point to _[Jeka User Home]/cache/repo_.
+    * `JEKA_USER_HOME` which point to _[Jeka User Home]_.
     
 ## Note 
 By default _[Jeka User Home]_ point to _[User Home]/.jeka_ but can be overridden by defining the environment 
