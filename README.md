@@ -96,10 +96,10 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 
 ## How to Release ?
 
-Release is done automatically by Travis at each git push. If their is no tag on the current commit then it goes to a 
+Release is done automatically by Travis at each git push. If there is no tag on the current commit then it goes to a 
 SNAPSHOT deploy on OSSRH. If there is a tag, it goes to a publish on Maven central.
 
-To realy deploy to Maven central, a manual action it still needed to [close/release repository](https://oss.sonatype.org).
+To really deploy to Maven central, a manual action it still needed to [close/release repository](https://oss.sonatype.org).
 
 To create a tag conveniently, just execute `jeka git#tagRemote` from your console and answer to the prompt. 
 
