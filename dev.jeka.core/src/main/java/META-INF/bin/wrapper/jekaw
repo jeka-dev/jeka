@@ -154,4 +154,4 @@ fi
 JEKA_CMD_LINE_ARGS="$@"
 export JEKA_CMD_LINE_ARGS
 
-exec "$JAVACMD" $JEKA_OPTS -cp "./jeka/boot/*" dev.jeka.core.wrapper.Booter "$@"
+exec "$JAVACMD" $JEKA_OPTS -cp "./jeka/wrapper/*" dev.jeka.core.wrapper.Booter "$@"

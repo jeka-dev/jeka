@@ -395,10 +395,10 @@ public final class JkEclipseClasspathGenerator {
         if (!paths.add(binPath)) {
             return;
         }
-        boolean useRepoVariable = usePathVariables && bin.startsWith(JkLocator.getJekaRepositoryCache());
+        boolean usePathVariable = usePathVariables && bin.startsWith(JkLocator.getJekaUserHomeDir());
         boolean isVar = true;
-        if (useRepoVariable) {
-            binPath = DotClasspathModel.JEKA_REPO + "/" + JkLocator.getJekaRepositoryCache().relativize(bin).toString();
+        if (usePathVariable) {
+            binPath = DotClasspathModel.JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(bin).toString();
         } else if (usePathVariables && bin.startsWith(JkLocator.getJekaHomeDir())) {
             binPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
         } else {
@@ -419,8 +419,8 @@ public final class JkEclipseClasspathGenerator {
         writer.writeAttribute("exported", "true");
         if (source != null && Files.exists(source)) {
             String srcPath;
-            if (usePathVariables && source.startsWith(JkLocator.getJekaRepositoryCache())) {
-                srcPath = DotClasspathModel.JEKA_REPO + "/" + JkLocator.getJekaRepositoryCache().relativize(source).toString();
+            if (usePathVariables && source.startsWith(JkLocator.getJekaUserHomeDir())) {
+                srcPath = DotClasspathModel.JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(source).toString();
             } else if (usePathVariables && source.startsWith(JkLocator.getJekaHomeDir())) {
                 srcPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(source).toString();
             }else {

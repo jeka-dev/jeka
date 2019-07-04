@@ -443,16 +443,16 @@ public final class JkImlGenerator {
         String type = jarFile ? "jar" : "file";
         Path basePath  = projectDir;
         String varName = "MODULE_DIR";
-        if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJekaHomeDir())) {
+        if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJekaUserHomeDir())) {
+            basePath = JkLocator.getJekaUserHomeDir();
+            varName = "JEKA_USER_HOME";
+        } else if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJekaHomeDir())) {
             basePath = JkLocator.getJekaHomeDir();
             varName = "JEKA_HOME";
-        } else if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.getJekaRepositoryCache())) {
-            basePath = JkLocator.getJekaRepositoryCache();
-            varName = "JEKA_REPO";
         }
         String result;
         if (file.startsWith(basePath)) {
-            final String relPath = basePath.relativize(file).toString();
+            final String relPath = basePath.relativize(file).normalize().toString();
             result = type + "://$" + varName + "$/" + replacePathWithVar(relPath).replace('\\', '/');
         } else {
             if (file.isAbsolute()) {
@@ -529,9 +529,9 @@ public final class JkImlGenerator {
         if (!useVarPath) {
             return path;
         }
-        final String repo = JkLocator.getJekaRepositoryCache().toAbsolutePath().normalize().toString().replace('\\', '/');
+        final String userHome = JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize().toString().replace('\\', '/');
         final String home = JkLocator.getJekaHomeDir().toAbsolutePath().normalize().toString().replace('\\', '/');
-        final String result = path.replace(repo, "$JEKA_REPO$");
+        final String result = path.replace(userHome, "$JEKA_USER_HOME$");
         if (!result.equals(path)) {
             return result;
         }

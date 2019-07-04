@@ -80,7 +80,7 @@ public final class JkLocator {
     }
 
     /**
-     * Returns the relative path from Jeka User Dir
+     * Returns the relative path from Jeka User Dir to to specified wrapped version
      */
     public static String getWrappedVersionRelativeDir(String version) {
         return "cache/wrapper/" + version;

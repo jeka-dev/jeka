@@ -29,7 +29,7 @@ final class DotClasspathModel {
 
     static final String JEKA_HOME = "JEKA_HOME";
 
-    static final String JEKA_REPO = "JEKA_REPO";
+    static final String JEKA_USER_HOME= "JEKA_USER_REPO";
 
     private final List<ClasspathEntry> classpathentries = new LinkedList<>();
 
@@ -119,8 +119,8 @@ final class DotClasspathModel {
                 final String varFile;
                 if (JEKA_HOME.equals(var)) {
                     varFile = JkLocator.getJekaHomeDir().toAbsolutePath().normalize().toString();
-                } else if (JEKA_REPO.equals(var)) {
-                    varFile = JkLocator.getJekaRepositoryCache().normalize().toString();
+                } else if (JEKA_USER_HOME.equals(var)) {
+                    varFile = JkLocator.getJekaUserHomeDir().normalize().toString();
                 } else {
                     final String optionName = OPTION_VAR_PREFIX + var;
                     varFile = JkOptions.get(optionName);

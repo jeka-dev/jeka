@@ -83,9 +83,9 @@ public final class JkScaffolder {
         JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("wrapper/jekaw"), baseDir.resolve("jekaw"),
                 StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         Path jekaWrapperJar = JkLocator.getJekaJarPath().getParent().resolve("dev.jeka.jeka-core-wrapper.jar");
-        Path bootFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/boot");
-        JkUtilsPath.createDirectories(bootFolder);
-        Path target = bootFolder.resolve(jekaWrapperJar.getFileName());
+        Path wrapperFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/wrapper");
+        JkUtilsPath.createDirectories(wrapperFolder);
+        Path target = wrapperFolder.resolve(jekaWrapperJar.getFileName());
         JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
         String jarSourceName = "dev.jeka.jeka-core-sources.jar";
@@ -96,7 +96,7 @@ public final class JkScaffolder {
         Properties properties = new Properties();
         properties.setProperty("jeka.version", JkInfo.getJekaVersion());
         try {
-            properties.store(JkUtilsIO.outputStream(bootFolder.resolve("jeka.properties").toFile(), false), "");
+            properties.store(JkUtilsIO.outputStream(wrapperFolder.resolve("jeka.properties").toFile(), false), "");
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

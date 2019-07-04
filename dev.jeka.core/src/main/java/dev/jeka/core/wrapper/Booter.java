@@ -31,7 +31,6 @@ class Booter {
             System.out.println("Unzip distribution to " + dir + " ...");
             Files.createDirectories(dir);
             unzip(zip, dir);
-            Files.delete(zip);
             Files.deleteIfExists(dir.resolve("options.properties"));
             Files.deleteIfExists(dir.resolve("system.properties"));
             Files.deleteIfExists(dir.resolve("jeka.bat"));
@@ -57,7 +56,7 @@ class Booter {
                 readableByteChannel = Channels.newChannel(url.openStream());
             } catch (FileNotFoundException e) {
                 System.out.println(urlString + " not found. Please check that version " + version + " exists in repo " + repo);
-                System.out.println("Jeka version to download is defined in ./jeka/boot/jeka.properties file.");
+                System.out.println("Jeka version to download is defined in ./jeka/wrapper/jeka.properties file.");
                 System.exit(1);
             }
             Path temp = Files.createTempFile("jeka-wrapper", ".zip");
@@ -141,7 +140,7 @@ class Booter {
     }
 
     private static Path getWrapperPropsFile() {
-        return Paths.get("jeka/boot/jeka.properties");
+        return Paths.get("jeka/wrapper/jeka.properties");
     }
 
     private static String version() {
@@ -155,7 +154,7 @@ class Booter {
             props.load(inputStream);
             String result = props.getProperty("jeka.version");
             if (result == null || result.trim().isEmpty()) {
-                System.out.println("Please, specify a jeka.version property in file ./jeka/boot/jeka.properties");
+                System.out.println("Please, specify a jeka.version property in file ./jeka/wrapper/jeka.properties");
                 System.exit(1);
             }
             return  result.trim();
