@@ -1,13 +1,20 @@
 package dev.jeka.core.api.system;
 
+import dev.jeka.core.api.utils.JkUtilsFile;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Provides location related to the running Jeka instance.
@@ -48,6 +55,36 @@ public final class JkLocator {
         return getJekaJarPath().getParent();
     }
 
+    /**
+     * Returns the Jeka wrapped version declared in the specified project. Returns <code>null</code> if no wrapped
+     * version is declared.
+     */
+    public static String getWrappedJekaVersion(Path projectRoot) {
+        Path jekaPropFile = projectRoot.resolve("jeka/boot/jeka.properties");
+        if (!Files.exists(jekaPropFile)) {
+            return null;
+        }
+        Properties properties = new Properties();
+        try (InputStream fis = Files.newInputStream(jekaPropFile)){
+            properties.load(new FileInputStream(jekaPropFile.toFile()));
+        } catch (IOException e) {
+            JkLog.warn("Impossible to read property file " + jekaPropFile + ". Jeka wrapped version will be ignored");
+            return null;
+        }
+        String result = properties.getProperty("jeka.version");
+        if (result == null || result.trim().isEmpty()) {
+            JkLog.warn("Property file " + jekaPropFile + " does not contain jeka.version property. Jeka wrapped version will be ignored");
+            return null;
+        }
+        return result;
+    }
+
+    /**
+     * Returns the relative path from Jeka User Dir
+     */
+    public static String getWrappedVersionRelativeDir(String version) {
+        return "cache/wrapper/" + version;
+    }
 
     /**
      * Returns the Jeka user directory.

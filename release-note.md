@@ -1,3 +1,8 @@
+## 0.8.3
+
+* Jeka can now run on JDK version greater or equal to 8 (tested until Jdk 12).
+* JkPathTree polish and bug fix related to zip archive.
+
 ## 0.8.2
 
 * Reworked mechanism for embedding 3rd party jar within jeka-core.jar

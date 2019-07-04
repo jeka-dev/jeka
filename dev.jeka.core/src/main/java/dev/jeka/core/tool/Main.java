@@ -29,8 +29,7 @@ public final class Main {
         if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
             URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {},
                     Thread.currentThread().getContextClassLoader());
-            //Thread.currentThread().setContextClassLoader(urlClassLoader);
-            //main(args);
+            Thread.currentThread().setContextClassLoader(urlClassLoader);
             Object[] argArray = new Object[] {args};
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main", "main" , argArray);
             return;

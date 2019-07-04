@@ -11,7 +11,7 @@ if "%JAVA_HOME%" == "" set "JAVA_CMD=java"
 if not "%JAVA_HOME%" == "" set "JAVA_CMD=%JAVA_HOME%\bin\java"
 
 if exist %cd%\jeka\boot set "LOCAL_BUILD_DIR=.\jeka\boot\*;"
-set "COMMAND="%JAVA_CMD%" %JEKA_OPTS% -cp ".\jeka\boot\*" dev.jeka.core.wrapper.Main %*"
+set "COMMAND="%JAVA_CMD%" %JEKA_OPTS% -cp ".\jeka\boot\*" dev.jeka.core.wrapper.Booter %*"
 if not "%JEKA_ECHO_CMD%" == "" (
 	@echo on
 	echo %COMMAND%
