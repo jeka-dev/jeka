@@ -92,7 +92,7 @@ public class CoreBuild extends JkCommands {
         Path javadocSourceDir = project.getMaker().getOutLayout().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
-        git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jeka-dev/jeka-dev.github.io.git",
+        git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
                 tempRepo.toString());
         project.getMaker().getTasksForJavadoc().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
