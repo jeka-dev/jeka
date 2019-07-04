@@ -29,7 +29,7 @@ final class DotClasspathModel {
 
     static final String JEKA_HOME = "JEKA_HOME";
 
-    static final String JEKA_USER_HOME= "JEKA_USER_REPO";
+    static final String JEKA_USER_HOME= "JEKA_USER_HOME";
 
     private final List<ClasspathEntry> classpathentries = new LinkedList<>();
 
