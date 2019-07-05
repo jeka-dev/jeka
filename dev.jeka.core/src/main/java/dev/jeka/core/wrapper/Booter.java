@@ -10,6 +10,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -23,6 +24,7 @@ class Booter {
     private final static String BIN_NAME = "dev.jeka.jeka-core.jar";
 
     public static void main(String[] args) throws Exception {
+        Path jekawDir = Paths.get(args[0]);
         String version = version();
         Path path = getJekaBinPath(version);
         if (!Files.exists(path)) {
@@ -41,7 +43,10 @@ class Booter {
         Thread.currentThread().setContextClassLoader(classLoader);
         Class<?> mainClass = classLoader.loadClass(MAIN_CLASS_NAME);
         Method method = mainClass.getMethod("main", String[].class);
-        method.invoke(null, (Object) args);
+        String[] actualArgs = args.length <= 1 ? args : Arrays.asList(args).subList(1, args.length).toArray(new String[0]);
+        System.out.println("*************************** arg0=" + jekawDir);
+        System.out.println("*************************** args=" + Arrays.asList(actualArgs));
+        method.invoke(null, (Object) actualArgs);
     }
 
     private static Path downloadDistribZip(String version) {
