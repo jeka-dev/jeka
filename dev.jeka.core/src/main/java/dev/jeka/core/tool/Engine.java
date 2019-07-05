@@ -130,7 +130,7 @@ final class Engine {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        String msg = "Compiling command classes for project " + this.projectBaseDir.getFileName().toString();
+        String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         long start = System.nanoTime();
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
