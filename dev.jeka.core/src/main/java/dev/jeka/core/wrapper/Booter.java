@@ -43,9 +43,8 @@ class Booter {
         Thread.currentThread().setContextClassLoader(classLoader);
         Class<?> mainClass = classLoader.loadClass(MAIN_CLASS_NAME);
         Method method = mainClass.getMethod("main", String[].class);
-        String[] actualArgs = args.length <= 1 ? args : Arrays.asList(args).subList(1, args.length).toArray(new String[0]);
-        System.out.println("*************************** arg0=" + jekawDir);
-        System.out.println("*************************** args=" + Arrays.asList(actualArgs));
+        final String[] actualArgs = args.length <= 1 ? new String[0]
+                : Arrays.asList(args).subList(1, args.length).toArray(new String[0]);
         method.invoke(null, (Object) actualArgs);
     }
 
