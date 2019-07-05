@@ -1,3 +1,7 @@
+### 0.8.4
+
+* Partial jekaw wrapper (working on single projects)
+
 ## 0.8.3
 
 * Jeka can now run on JDK version greater or equal to 8 (tested until Jdk 12).
