@@ -88,11 +88,6 @@ public final class JkScaffolder {
         Path target = wrapperFolder.resolve(jekaWrapperJar.getFileName());
         JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
-        String jarSourceName = "dev.jeka.jeka-core-sources.jar";
-        Path libSources = baseDir.resolve(JkConstants.JEKA_DIR + "/libs-sources");
-        JkUtilsPath.createDirectories(libSources);
-        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("libs-sources/" + jarSourceName),
-                libSources.resolve(jarSourceName), StandardCopyOption.REPLACE_EXISTING);
         Properties properties = new Properties();
         properties.setProperty("jeka.version", JkInfo.getJekaVersion());
         try {

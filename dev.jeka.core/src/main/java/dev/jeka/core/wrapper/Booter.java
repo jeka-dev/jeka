@@ -25,7 +25,7 @@ class Booter {
 
     public static void main(String[] args) throws Exception {
         Path jekawDir = Paths.get(args[0]);
-        String version = version();
+        String version = version(jekawDir);
         Path path = getJekaBinPath(version);
         if (!Files.exists(path)) {
             Path zip = downloadDistribZip(version);
@@ -143,12 +143,12 @@ class Booter {
         return getJekaVersionCacheDir(version).resolve(BIN_NAME);
     }
 
-    private static Path getWrapperPropsFile() {
-        return Paths.get("jeka/wrapper/jeka.properties");
+    private static Path getWrapperPropsFile(Path jekawDir) {
+        return jekawDir.resolve("jeka/wrapper/jeka.properties");
     }
 
-    private static String version() {
-        Path propFile = getWrapperPropsFile();
+    private static String version(Path jekawDir) {
+        Path propFile = getWrapperPropsFile(jekawDir);
         if (!Files.exists(propFile)) {
             System.out.println("No file found at " + propFile + ". Please rerun 'jeka scaffold#wrap");
             System.exit(1);
