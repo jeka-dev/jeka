@@ -1,8 +1,8 @@
 package dev.jeka.core.tool.builtins.eclipse;
 
 
-import dev.jeka.core.api.ide.eclipse.JkEclipseClasspathGenerator;
-import dev.jeka.core.api.ide.eclipse.JkEclipseProject;
+import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
+import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -75,11 +75,11 @@ public final class JkPluginEclipse extends JkPlugin {
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
 
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofJavaNature(getCommands().getBaseTree().getRoot().getFileName().toString()).writeTo(dotProject);
+                JkEclipseProjectGenerator.ofJavaNature(getCommands().getBaseTree().getRoot().getFileName().toString()).writeTo(dotProject);
             }
         } else {
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofSimpleNature(getCommands().getBaseTree().getRoot().getFileName().toString()).writeTo(dotProject);
+                JkEclipseProjectGenerator.ofSimpleNature(getCommands().getBaseTree().getRoot().getFileName().toString()).writeTo(dotProject);
             }
         }
     }

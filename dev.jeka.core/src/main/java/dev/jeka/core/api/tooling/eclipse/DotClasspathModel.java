@@ -1,4 +1,4 @@
-package dev.jeka.core.api.ide.eclipse;
+package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.depmanagement.JkScope;
@@ -96,7 +96,7 @@ final class DotClasspathModel {
 
     public List<Lib> libs(Path baseDir, ScopeResolver scopeResolver) {
         final List<Lib> result = new LinkedList<>();
-        final Map<String, Path> projects = JkEclipseProject.findProjectPath(baseDir.getParent());
+        final Map<String, Path> projects = JkEclipseProjectGenerator.findProjectPath(baseDir.getParent());
         for (final ClasspathEntry classpathEntry : classpathentries) {
 
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON)) {
@@ -159,7 +159,7 @@ final class DotClasspathModel {
 
         public final static String JRE_CONTAINER_PREFIX = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
-        public enum Kind {
+        enum Kind {
             SRC, CON, LIB, VAR, OUTPUT, UNKNOWN
         }
 

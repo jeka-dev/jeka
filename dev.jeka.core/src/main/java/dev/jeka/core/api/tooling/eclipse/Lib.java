@@ -1,4 +1,4 @@
-package dev.jeka.core.api.ide.eclipse;
+package dev.jeka.core.api.tooling.eclipse;
 
 import java.nio.file.Path;
 

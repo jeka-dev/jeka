@@ -1,4 +1,4 @@
-package dev.jeka.core.api.ide.eclipse;
+package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;

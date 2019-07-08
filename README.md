@@ -25,7 +25,10 @@ _Jerkar_ has been rebranded to _Jeka_. Maven groupId and artifactId has moved to
 It has a completely re-designed API based on Java7 nio and Java8 lambdas providing a much cleaner/polished design 
 and leaner user code.
 
-Last addition was about deploying on Maven central though a modern release process (version numbering based on Git instead of being hardcoded).
+Last addition was about :
+* Wrapper to run Jeka independently of the Jeka version installed on the host machine
+* Jdk9+ compatibility
+* deploying on Maven central though a modern release process (version numbering based on Git instead of being hardcoded).
 Jeka now uses these features to release itself.
 
 Please visit [relelease note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
@@ -82,15 +85,17 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 
 ## Build Jeka from Eclipse
 
-* Clone this repository in Eclipse. Project is already configured ( *.project* and *.classpath* are stored in git). 
-* Make sure the project is configured to compile using a JDK8 and not a JRE.
+* Clone this repository in Eclipse. Project is already configured ( *.project* and *.classpath* are stored in git).
+* Add the `JEKA_USER_HOME` classpath variable pointing on [USER_HOME]/.jeka 
+* Make sure the project is configured to compile using a JDK8 or higher and not a JRE.
 * Run `dev.jeka.core.CoreBuild` class main method. This class is located in *jeka/def* folder. 
 * This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder
 
 ## Build Jeka from IntelliJ
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
-* Make sure the project is configured with a JDK8.
+* Add the `JEKA_USER_HOME` variable pointing on [USER_HOME]/.jeka 
+* Make sure the project is configured with a JDK8 or higher.
 * Run `dev.jeka.core.CoreBuild` class main method. This class is located in *jeka/def* folder, inside *dev.jeka.core* project.
 * This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder
 

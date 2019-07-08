@@ -31,6 +31,10 @@ add dynamically commands and options to the running _command class_.
 
 # Install Jeka
 
+Thank to the wrapper feature, you don't need to install Jeka on your machine to run it... except if you are 
+creating projects from scratch. 
+As it's what we are going to do in this tutorial, you need to get it properly installed. 
+
 1. Download and unzip the lastest *core-x.x.x-distrib.zip* file found on [snapshot](https://oss.sonatype.org/content/repositories/snapshots/org/jeka/core/) or [release](https://repo1.maven.org/maven2/org/jeka/core/) repository to the directory you want to install Jeka. 
 2. Make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on (_JAVA_HOME_/bin/java must point on a java executable). 
    Note that you can choose a specific JDK instance to run Jeka without affecting _JAVA_HOME_ variable by setting _JEKA_JDK_ environment variable (_JEKA_JDK_/bin/java must point on a java executable). 

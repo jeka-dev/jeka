@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.intellij;
 
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import dev.jeka.core.api.ide.intellij.JkImlGenerator;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;

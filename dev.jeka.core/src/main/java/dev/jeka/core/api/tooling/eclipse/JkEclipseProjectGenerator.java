@@ -1,6 +1,5 @@
-package dev.jeka.core.api.ide.eclipse;
+package dev.jeka.core.api.tooling.eclipse;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -28,19 +27,19 @@ import org.w3c.dom.NodeList;
 /**
  * Memory model of Eclipse .project file.
  */
-public final class JkEclipseProject {
+public final class JkEclipseProjectGenerator {
 
-    private static JkEclipseProject of(Path dotProjectFile) {
+    private static JkEclipseProjectGenerator of(Path dotProjectFile) {
         final Document document = getDotProjectAsDom(dotProjectFile);
         return from(document);
     }
 
-    public static JkEclipseProject ofJavaNature(String name) {
-        return new JkEclipseProject(name, JkUtilsIterable.setOf("org.eclipse.jdt.core.javanature"));
+    public static JkEclipseProjectGenerator ofJavaNature(String name) {
+        return new JkEclipseProjectGenerator(name, JkUtilsIterable.setOf("org.eclipse.jdt.core.javanature"));
     }
 
-    public static JkEclipseProject ofSimpleNature(String name) {
-        return new JkEclipseProject(name, new HashSet<>());
+    public static JkEclipseProjectGenerator ofSimpleNature(String name) {
+        return new JkEclipseProjectGenerator(name, new HashSet<>());
     }
 
     static Map<String, Path> findProjectPath(Path parent) {
@@ -50,7 +49,7 @@ public final class JkEclipseProject {
             if (!Files.exists(dotProject)) {
                 continue;
             }
-            final JkEclipseProject project = JkEclipseProject.of(dotProject);
+            final JkEclipseProjectGenerator project = JkEclipseProjectGenerator.of(dotProject);
             map.put(project.name, file);
         }
         return map;
@@ -67,15 +66,13 @@ public final class JkEclipseProject {
     public void writeTo(Path dotProjectFile) {
         try {
             writeToFile(dotProjectFile);
-        } catch (final FileNotFoundException | FactoryConfigurationError | XMLStreamException e) {
+        } catch (FactoryConfigurationError | XMLStreamException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void writeToFile(Path dotProjectFile) throws XMLStreamException,
-    FactoryConfigurationError, FileNotFoundException {
+    private void writeToFile(Path dotProjectFile) throws XMLStreamException, FactoryConfigurationError {
         try(OutputStream fos = Files.newOutputStream(dotProjectFile)) {
-
             final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos,
                     "UTF-8");
             writer.writeStartDocument("UTF-8", "1.0");
@@ -121,15 +118,14 @@ public final class JkEclipseProject {
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
-
     }
 
-    private JkEclipseProject(String name, Set<String> natures) {
+    private JkEclipseProjectGenerator(String name, Set<String> natures) {
         this.name = name;
         this.natures = Collections.unmodifiableSet(natures);
     }
 
-    private static JkEclipseProject from(Document document) {
+    private static JkEclipseProjectGenerator from(Document document) {
         final NodeList nodeList = document.getElementsByTagName("name");
         final Node node = nodeList.item(0);
         final String name = node.getTextContent();
@@ -138,7 +134,7 @@ public final class JkEclipseProject {
         for (int i = 0; i < natureNodes.getLength(); i++) {
             natures.add(natureNodes.item(i).getTextContent());
         }
-        return new JkEclipseProject(name, natures);
+        return new JkEclipseProjectGenerator(name, natures);
     }
 
     private static Document getDotProjectAsDom(Path dotProjectFile) {

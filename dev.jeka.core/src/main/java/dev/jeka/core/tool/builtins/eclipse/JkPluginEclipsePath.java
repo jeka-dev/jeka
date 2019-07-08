@@ -5,7 +5,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import dev.jeka.core.api.ide.eclipse.JkEclipseClasspathApplier;
+import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathApplier;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 

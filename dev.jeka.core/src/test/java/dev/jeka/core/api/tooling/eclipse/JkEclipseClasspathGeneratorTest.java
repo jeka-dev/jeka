@@ -1,4 +1,4 @@
-package dev.jeka.core.api.ide.eclipse;
+package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkComputedDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
@@ -77,7 +77,7 @@ public class JkEclipseClasspathGeneratorTest {
         Files.deleteIfExists(base.resolve(".classpath"));
         Files.write(base.resolve(".classpath"), baseClasspath.getBytes(Charset.forName("UTF-8")));
         //JkUtilsFile.writeString(new File(base, ".classpath"), baseClasspath, false);
-        JkEclipseProject.ofJavaNature("base").writeTo(base.resolve(".project"));
+        JkEclipseProjectGenerator.ofJavaNature("base").writeTo(base.resolve(".project"));
         classpathApplier.apply(baseProject2);
         System.out.println(baseProject2.getDependencies().toList());
         final JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
@@ -95,7 +95,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         Files.write(core.resolve(".classpath"), coreClasspath.getBytes(Charset.forName("utf-8")));
         //JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
-        JkEclipseProject.ofJavaNature("core").writeTo(core.resolve(".project"));
+        JkEclipseProjectGenerator.ofJavaNature("core").writeTo(core.resolve(".project"));
         classpathApplier.apply(coreProject2);
         final List<JkScopedDependency> coreDeps2 = coreProject2.getDependencies().toList();
         assertEquals(1, coreDeps2.size());

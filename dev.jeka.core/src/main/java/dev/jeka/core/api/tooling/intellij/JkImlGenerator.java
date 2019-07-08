@@ -1,4 +1,4 @@
-package dev.jeka.core.api.ide.intellij;
+package dev.jeka.core.api.tooling.intellij;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
@@ -466,10 +466,6 @@ public final class JkImlGenerator {
         }
         return result;
     }
-
-
-
-
 
     private static String jdkVersion(JkJavaVersion javaVersion) {
         if (JkJavaVersion.V1_4.equals(javaVersion)) {

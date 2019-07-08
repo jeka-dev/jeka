@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  * <ul>
  *     <li>Contains Java source files to be compiled</li>
  *     <li>All Java sources file (prod + test) are wrote against the same Java version and encoding</li>
- *     <li>JkEclipseProject may contain unit tests</li>
+ *     <li>JkJavaProject may contain unit tests</li>
  *     <li>It can depends on any accepted dependencies (Maven module, other project, files on fs, ...)</li>
  *
  *     <li>It produces a bin jar, a source jar and a javadoc jar</li>
