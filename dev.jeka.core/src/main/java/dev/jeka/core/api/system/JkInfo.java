@@ -14,6 +14,8 @@ public final class JkInfo {
 
     private static String version;
 
+    public static final String JEKA_MODULE_ID = "dev.jeka:jeka-core";
+
     /**
      * Returns the current Jeka version.
      */

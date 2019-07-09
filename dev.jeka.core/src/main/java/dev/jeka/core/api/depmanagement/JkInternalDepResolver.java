@@ -5,15 +5,13 @@ import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.io.File;
+import java.util.List;
 
 
 /**
  * Not part of the public API.
  */
-
 public interface JkInternalDepResolver {
-
-    static final String FACTORY_CLASS_NAME = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalDepResolverFactory";
 
     /**
      * @param  module The resolved module. Only use for caching purpose. Can be <code>null</code>
@@ -25,13 +23,20 @@ public interface JkInternalDepResolver {
 
     File get(JkModuleDependency dependency);
 
+    List<String> searchGroups();
+
+    List<String> searchModules(String groupId);
+
+    List<String> searchVersions(JkModuleId moduleId);
+
     static JkInternalDepResolver of(JkRepoSet repos) {
-        Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(FACTORY_CLASS_NAME);
+        final String factoryClassName = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalDepResolverFactory";
+        Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(factoryClassName);
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
         }
         return JkInternalEmbeddedClassloader.createCrossClassloaderProxy(
-                JkInternalDepResolver.class, FACTORY_CLASS_NAME, "of", repos);
+                JkInternalDepResolver.class, factoryClassName, "of", repos);
     }
 
 }

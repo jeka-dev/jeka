@@ -1,5 +1,8 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
+import dev.jeka.core.api.depmanagement.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkInfo;
@@ -8,6 +11,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -15,7 +19,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Object that process scaffolding.
@@ -74,7 +80,7 @@ public final class JkScaffolder {
                 libSources.resolve(jarSourceName), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    public void wrap() {
+    public void wrap(JkDependencyResolver dependencyResolver) {
         JkLog.info("Create shell files.");
         Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
         JkException.throwIf(!Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
@@ -89,7 +95,8 @@ public final class JkScaffolder {
         JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
         Properties properties = new Properties();
-        properties.setProperty("jeka.version", JkInfo.getJekaVersion());
+        String version = jekaVersion(dependencyResolver);
+        properties.setProperty("jeka.version", version);
         try {
             properties.store(JkUtilsIO.outputStream(wrapperFolder.resolve("jeka.properties").toFile(), false), "");
         } catch (IOException e) {
@@ -100,11 +107,24 @@ public final class JkScaffolder {
     public void setCommandClassCode(String code) {
         this.commandClassCode = code;
     }
+
     public void setClassFilename(String classFilename) {
         this.classFilename = classFilename;
     }
 
     public JkRunnables getExtraActions() {
         return extraActions;
+    }
+
+    private String jekaVersion(JkDependencyResolver dependencyResolver) {
+        List<String> versions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID)).stream()
+                .filter(version -> version.endsWith(".RELEASE"))
+                .collect(Collectors.toList());
+        if (versions.isEmpty()) {
+            JkLog.warn("Didn't find any version of " + JkInfo.JEKA_MODULE_ID + " in " + dependencyResolver);
+            JkLog.warn("Will use current one : " + JkInfo.getJekaVersion());
+            return JkInfo.getJekaVersion();
+        }
+        return versions.get(versions.size() -1);
     }
 }

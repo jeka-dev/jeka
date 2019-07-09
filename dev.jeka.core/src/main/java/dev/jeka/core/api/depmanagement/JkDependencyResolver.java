@@ -7,6 +7,7 @@ import dev.jeka.core.api.utils.JkUtilsTime;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 
 import static dev.jeka.core.api.utils.JkUtilsString.plurialize;
 
@@ -157,6 +158,27 @@ public final class JkDependencyResolver {
      */
     public JkResolutionParameters getParams() {
         return this.parameters;
+    }
+
+    /**
+     * Returns an alphabetical sorted list of groupId present in these repositories
+     */
+    public List<String> searchGroups() {
+        return this.jkInternalModuleDepResolver.searchGroups();
+    }
+
+    /**
+     * Returns an alphabetical sorted list of module ids present in these repositories for the specified groupId.
+     */
+    public List<String> searchModules(String groupId) {
+        return this.jkInternalModuleDepResolver.searchModules(groupId);
+    }
+
+    /**
+     * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
+     */
+    public List<String> searchVersions(JkModuleId moduleId) {
+        return this.jkInternalModuleDepResolver.searchVersions(moduleId);
     }
 
     @Override

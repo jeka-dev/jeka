@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
       <excludeFolder url="file://$MODULE_DIR$/../org.jerkar.core/bin" />
@@ -23,7 +24,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/jeka/libs-sources/classgraph-4.8.41-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/jeka/libs-sources/ivy-2.4.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

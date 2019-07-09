@@ -20,12 +20,14 @@ import org.apache.ivy.core.resolve.DownloadOptions;
 import org.apache.ivy.core.resolve.IvyNode;
 import org.apache.ivy.core.resolve.IvyNodeCallers.Caller;
 import org.apache.ivy.core.resolve.ResolveOptions;
+import org.apache.ivy.core.search.SearchEngine;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.util.url.URLHandlerRegistry;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Jeka users : This class is not part of the public API !!! Please, Use
@@ -187,6 +189,30 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
         }
         final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());
         return report.getLocalFile();
+    }
+
+    @Override
+    public List<String> searchGroups() {
+        SearchEngine searchEngine = new SearchEngine(this.ivy.getSettings());
+        return Arrays.asList(searchEngine.listOrganisations()).stream()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> searchModules(String groupId) {
+        SearchEngine searchEngine = new SearchEngine(this.ivy.getSettings());
+        return Arrays.asList(searchEngine.listModules(groupId)).stream()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> searchVersions(JkModuleId moduleId) {
+        SearchEngine searchEngine = new SearchEngine(this.ivy.getSettings());
+        return Arrays.asList(searchEngine.listRevisions(moduleId.getGroup(), moduleId.getName())).stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     private static JkDependencyNode createTree(Iterable<IvyNode> nodes, JkVersionedModule rootVersionedModule,
