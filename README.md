@@ -25,7 +25,7 @@ _Jerkar_ has been rebranded to _Jeka_. Maven groupId and artifactId has moved to
 It has a completely re-designed API based on Java7 nio and Java8 lambdas providing a much cleaner/polished design 
 and leaner user code.
 
-Last addition was about :
+Last additions :
 * Wrapper to run Jeka independently of the Jeka version installed on the host machine
 * Jdk9+ compatibility
 * deploying on Maven central though a modern release process (version numbering based on Git instead of being hardcoded).
