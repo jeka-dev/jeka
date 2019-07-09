@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
+import sun.reflect.FieldAccessor;
 
 final class FieldInjector {
 
@@ -64,11 +65,19 @@ final class FieldInjector {
                 throw new IllegalArgumentException("Class " + target.getClass().getName()
                         + ", field " + name + ", can't handle type " + type);
             }
+            if (Modifier.isFinal(field.getModifiers())) {
+                throw new JkException("Can not set value on final " + field.getDeclaringClass().getName()
+                        + "#" + field.getName() + " field.");
+            }
             JkUtilsReflect.setFieldValue(target, field, value);
         } else if (hasKeyStartingWith(name + ".", props)) {
             Object value = JkUtilsReflect.getFieldValue(target, field);
             if (value == null) {
                 value = JkUtilsReflect.newInstance(field.getType());
+                if (Modifier.isFinal(field.getModifiers())) {
+                    throw new JkException("Can not set value on final " + field.getDeclaringClass().getName()
+                            + "#" + field.getName() + " field.");
+                }
                 JkUtilsReflect.setFieldValue(target, field, value);
             }
             final Map<String, String> subProps = extractKeyStartingWith(name + ".", props);

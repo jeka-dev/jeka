@@ -114,7 +114,6 @@ public final class JkUtilsReflect {
         }
     }
 
-
     /**
      * Gets the value of the field having the specified name on a given object.
      */
