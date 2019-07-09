@@ -284,7 +284,7 @@ class Commands extends JkCommands {
 }
 ```
 
-2. Execute `jeka intellij#generateIml` or `jeka eclipse#generateFiles` to add properly the dependencies to your IDE (You may need to refresh it).
+2. Execute `jeka intellij#iml` or `jeka eclipse#files` to add properly the dependencies to your IDE (You may need to refresh it).
 
 3. You can add code depending on the imported libs
 
@@ -319,7 +319,7 @@ class Sample2Commands extends JkCommands {
     
 }
 ```
-4. Execute `jeka intellij#generateIml` (or `jeka eclipse#generateFiles`) to add _sample1_ dependencies to your IDE. Now _Sampl2Commands_ can refer to the _command class_ of _sample1_.
+4. Execute `jeka intellij#iml` (or `jeka eclipse#files`) to add _sample1_ dependencies to your IDE. Now _Sampl2Commands_ can refer to the _command class_ of _sample1_.
 
 5. Replace _JkCommands_ Type by the _Commands_ type from _sample1_ and use it in method implementation.
 

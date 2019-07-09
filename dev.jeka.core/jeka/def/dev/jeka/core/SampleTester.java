@@ -54,7 +54,7 @@ class SampleTester {
         Path classpathFile = sampleBaseDir.get(".classpath");
         Path classpathFile2 = sampleBaseDir.get(".classpath2");
         Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
-        testSamples("", "eclipse#generateAll");
+        testSamples("", "eclipse#all");
         if (restoreEclipseClasspathFile) {
             Files.move(classpathFile2, classpathFile, StandardCopyOption.REPLACE_EXISTING);
         } else {
@@ -66,7 +66,7 @@ class SampleTester {
         JkLog.startTask("Test Intellij generate all");
         Path project = JkUtilsPath.createTempDirectory("jeka-test-");
         sampleBaseDir.andMatching(false, ".idea/**/*", "jeka/output/**/*").copyTo(project);
-        JkProcess.of(jekaScript).withFailOnError(true).withWorkingDir(project).andParams("intellij#generateAll").runSync();
+        JkProcess.of(jekaScript).withFailOnError(true).withWorkingDir(project).andParams("intellij#all").runSync();
         JkLog.endTask();
 
         testDepender("NormalJarBuild");
@@ -108,7 +108,7 @@ class SampleTester {
         // project
         scaffoldProcess.runSync(); // Build the scaffolded project
         JkLog.info("Test eclipse generation and compile            ");
-        scaffoldProcess.withParams("eclipse#generateAll").runSync();
+        scaffoldProcess.withParams("eclipse#all").runSync();
         scaffoldProcess.withParams("eclipse#").runSync(); // build using the .classpath for resolving classpath
         scaffoldProcess.withParams("idea#generateIml", "idea#generateModulesXml").runSync();
     }

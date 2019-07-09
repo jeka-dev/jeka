@@ -28,7 +28,7 @@ public final class JkPluginEclipse extends JkPlugin {
     @JkDoc({ "If not null, this value will be used as the JRE container path in .classpath." })
     public String jreContainer = null;
 
-    /** Flag to set whether 'generateAll' task should use absolute paths instead of classpath variables */
+    /** Flag to set whether 'all' task should use absolute paths instead of classpath variables */
     @JkDoc({ "If true, dependency paths will be expressed relatively to Eclipse path variables instead of absolute paths." })
     public boolean useVarPath = true;
 
@@ -51,12 +51,12 @@ public final class JkPluginEclipse extends JkPlugin {
     @Override
     @JkDoc("Adds .classpath and .project generation to scaffolding.")
     protected void activate() {
-        scaffold.getScaffolder().getExtraActions().chain(this::generateFiles);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
+        scaffold.getScaffolder().getExtraActions().chain(this::files);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 
     @JkDoc("Generates Eclipse files (.classpath and .project) in the current directory. The files reflect project " +
             "dependencies and source layout.")
-    public void generateFiles() {
+    public void files() {
         final Path dotProject = getCommands().getBaseDir().resolve(".project");
         if (getCommands().getPlugins().hasLoaded(JkPluginJava.class)) {
             final JkJavaProject javaProject = getCommands().getPlugins().get(JkPluginJava.class).getProject();
@@ -84,8 +84,8 @@ public final class JkPluginEclipse extends JkPlugin {
         }
     }
 
-    @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jeka/def directory are taken in account. See eclipse#generateFiles.")
-    public void generateAll() {
+    @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jeka/def directory are taken in account. See eclipse#files.")
+    public void all() {
         final Iterable<Path> folders = getCommands().getBaseTree()
                 .andMatching(true,"**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andMatching(false,"**/" + JkConstants.OUTPUT_PATH + "/**")
@@ -93,7 +93,7 @@ public final class JkPluginEclipse extends JkPlugin {
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.execute("Generating Eclipse files on " + projectFolder,
-                    () -> Main.exec(projectFolder, "eclipse#generateFiles"));
+                    () -> Main.exec(projectFolder, "eclipse#files"));
         }
     }
 
