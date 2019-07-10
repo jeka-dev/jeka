@@ -193,7 +193,7 @@ public class CoreBuild extends JkCommands {
         // Copy embbeded jar into temp folder and remove embedded part code from jeka classes
         jarTree.goTo("META-INF").importFile(embeddedJar, embeddedFinalName);
         JkPathFile.of(jarTree.get("META-INF/jeka-embedded-name"))
-                .write(embeddedFinalName.getBytes(Charset.forName("utf-8")), StandardOpenOption.TRUNCATE_EXISTING);
+                .write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
         jarTree.andMatching( "**/embedded/**").deleteContent();
         jarTree.close();
 

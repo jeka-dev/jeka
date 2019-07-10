@@ -73,13 +73,18 @@ public final class JkPluginEclipse extends JkPlugin {
             final String result = classpathGenerator.generate();
             final Path dotClasspath = getCommands().getBaseDir().resolve(".classpath");
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
+            JkLog.info("File " + dotClasspath + " generated.");
 
             if (!Files.exists(dotProject)) {
-                JkEclipseProjectGenerator.ofJavaNature(getCommands().getBaseTree().getRoot().getFileName().toString()).writeTo(dotProject);
+                JkEclipseProjectGenerator.ofJavaNature(getCommands().getBaseTree().getRoot().getFileName().toString())
+                        .writeTo(dotProject);
+                JkLog.info("File " + dotProject + " generated.");
             }
         } else {
             if (!Files.exists(dotProject)) {
-                JkEclipseProjectGenerator.ofSimpleNature(getCommands().getBaseTree().getRoot().getFileName().toString()).writeTo(dotProject);
+                JkEclipseProjectGenerator.ofSimpleNature(getCommands().getBaseTree().getRoot().getFileName().toString())
+                        .writeTo(dotProject);
+                JkLog.info("File " + dotProject + " generated.");
             }
         }
     }
