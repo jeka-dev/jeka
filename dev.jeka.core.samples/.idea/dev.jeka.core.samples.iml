@@ -7,9 +7,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
     </content>
@@ -143,18 +141,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_HOME$/libs-javadoc/dev.jeka.jeka-core-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
+    <orderEntry type="module" module-name="dev.jeka.core" />
   </component>
 </module>

@@ -22,9 +22,9 @@ public class FatJarBuild extends JkCommands {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().addDependencies(JkDependencySet.of()
-                .and(sampleBuild.javaPlugin.getProject()));
+        javaPlugin.getProject().addDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()));
         javaPlugin.getProject().setSourceVersion(JkJavaVersion.V7);
+        javaPlugin.getProject().getMaker().defineMainArtifactAsFatJar(true);
     } 
     
     public static void main(String[] args) {

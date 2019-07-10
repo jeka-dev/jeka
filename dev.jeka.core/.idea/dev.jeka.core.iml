@@ -7,16 +7,13 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
+      <excludeFolder url="file://$MODULE_DIR$/idea-output" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
-      <excludeFolder url="file://$MODULE_DIR$/../org.jerkar.core/bin" />
-      <excludeFolder url="file://$MODULE_DIR$/../org.jerkar.core/idea-output" />
-      <excludeFolder url="file://$MODULE_DIR$/../org.jerkar.core/output" />
     </content>
-    <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>

@@ -53,12 +53,16 @@ class SampleTester {
         JkLog.startTask("Test Eclipse .classpath generation");
         Path classpathFile = sampleBaseDir.get(".classpath");
         Path classpathFile2 = sampleBaseDir.get(".classpath2");
-        Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
+        boolean copyClasspath = false;
+        if (Files.exists(classpathFile)) {
+            Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
+            copyClasspath = true;
+        }
         testSamples("", "eclipse#all");
-        if (restoreEclipseClasspathFile) {
+        if (restoreEclipseClasspathFile && copyClasspath) {
             Files.move(classpathFile2, classpathFile, StandardCopyOption.REPLACE_EXISTING);
         } else {
-            Files.delete(classpathFile2);
+            Files.deleteIfExists(classpathFile2);
         }
         JkLog.endTask();
 

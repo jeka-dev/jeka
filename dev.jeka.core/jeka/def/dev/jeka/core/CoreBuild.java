@@ -22,6 +22,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import static dev.jeka.core.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
@@ -72,8 +73,9 @@ public class CoreBuild extends JkCommands {
         project.getManifest().addMainClass("dev.jeka.core.tool.Main");
 
         JkJavaProjectMaker maker = project.getMaker();
+        project.getCompileSpec().addOptions("-Xlint:none");
         maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
-        maker.putArtifact(DISTRIB_FILE_ID, this::doDistrib);
+                maker.putArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
         maker.getTasksForJavadoc().setJavadocOptions("-notimestamp");
         maker.getTasksForPublishing()
@@ -191,7 +193,7 @@ public class CoreBuild extends JkCommands {
         // Copy embbeded jar into temp folder and remove embedded part code from jeka classes
         jarTree.goTo("META-INF").importFile(embeddedJar, embeddedFinalName);
         JkPathFile.of(jarTree.get("META-INF/jeka-embedded-name"))
-                .write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
+                .write(embeddedFinalName.getBytes(Charset.forName("utf-8")), StandardOpenOption.TRUNCATE_EXISTING);
         jarTree.andMatching( "**/embedded/**").deleteContent();
         jarTree.close();
 
