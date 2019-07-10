@@ -1,9 +1,13 @@
 package dev.jeka.core.tool;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsReflect;
-
-import java.util.*;
 
 /**
  * Set of plugins configured or activated in a {@link JkCommands}.
@@ -36,11 +40,11 @@ public final class JkRunPlugins {
      * Caution : this method may be significantly slower than {@link #get(Class)} as it may involve classpath scanning.
      */
     public JkPlugin get(String pluginName) {
-        Optional<JkPlugin> optPlugin = loadedPlugins.stream().filter(plugin -> plugin.name().equals(pluginName)).findFirst();
+        final Optional<JkPlugin> optPlugin = loadedPlugins.stream().filter(plugin -> plugin.name().equals(pluginName)).findFirst();
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }
-        PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginName);
+        final PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginName);
         if (pluginDescription == null) {
             return null;
         }
@@ -51,7 +55,7 @@ public final class JkRunPlugins {
      * Returns <code>true</code> if the specified plugin class has been loaded in the holding JkCommands instance.
      */
     public boolean hasLoaded(Class<? extends JkPlugin> pluginClass) {
-        for (JkPlugin plugin : loadedPlugins) {
+        for (final JkPlugin plugin : loadedPlugins) {
             if (plugin.getClass().equals(pluginClass)) {
                 return true;
             }
@@ -66,6 +70,7 @@ public final class JkRunPlugins {
         return Collections.unmodifiableList(loadedPlugins);
     }
 
+    @SuppressWarnings("unchecked")
     private <T extends JkPlugin> T getOrCreate(Class<T> pluginClass) {
         final Optional<T> optPlugin = (Optional<T>) this.loadedPlugins.stream().filter(
                 (item) -> item.getClass().equals(pluginClass)).findFirst();
@@ -85,9 +90,9 @@ public final class JkRunPlugins {
     }
 
     void loadCommandLinePlugins() {
-        Iterable<PluginOptions> pluginOptionsList = Environment.commandLine.getPluginOptions();
-        for (PluginOptions pluginOptions : pluginOptionsList){
-            PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginOptions.pluginName);
+        final Iterable<PluginOptions> pluginOptionsList = Environment.commandLine.getPluginOptions();
+        for (final PluginOptions pluginOptions : pluginOptionsList){
+            final PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginOptions.pluginName);
             if (pluginDescription == null) {
                 throw new JkException("No plugin found with name '" + pluginOptions.pluginName + "'.");
             }

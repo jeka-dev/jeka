@@ -1,19 +1,20 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
-
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 /**
  * Main class for launching Jeka from command line.
@@ -27,10 +28,10 @@ public final class Main {
      */
     public static void main(String[] args) throws Exception {
         if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
-            URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {},
+            final URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {},
                     Thread.currentThread().getContextClassLoader());
             Thread.currentThread().setContextClassLoader(urlClassLoader);
-            Object[] argArray = new Object[] {args};
+            final Object[] argArray = new Object[] {args};
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main", "main" , argArray);
             return;
         }
@@ -39,7 +40,7 @@ public final class Main {
         try {
             Environment.initialize(args);
             JkLog.registerHierarchicalConsoleHandler();
-            JkLog.Verbosity verbosity = JkLog.verbosity();
+            final JkLog.Verbosity verbosity = JkLog.verbosity();
             if (!Environment.standardOptions.logHeaders) {
                 JkLog.setVerbosity(JkLog.Verbosity.MUTE);
             } else {
@@ -76,7 +77,7 @@ public final class Main {
     public static void exec(Path projectDir, String... args) {
         final Engine engine = new Engine(projectDir);
         Environment.initialize(args);
-        JkLog.Verbosity verbosity = JkLog.verbosity();
+        final JkLog.Verbosity verbosity = JkLog.verbosity();
         if (!Environment.standardOptions.logHeaders) {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }

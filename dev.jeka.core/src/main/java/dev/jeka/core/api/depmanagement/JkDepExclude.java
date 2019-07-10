@@ -1,9 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
-
 import java.util.Collections;
 import java.util.Set;
+
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * Information about excluding artifacts or whole modules.
@@ -11,8 +11,6 @@ import java.util.Set;
  * @author Jerome Angibaud
  */
 public final class JkDepExclude {
-
-    private static final long serialVersionUID = 1L;
 
     private final JkModuleId moduleId;
 

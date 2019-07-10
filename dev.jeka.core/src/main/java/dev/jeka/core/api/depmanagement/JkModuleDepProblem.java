@@ -5,8 +5,6 @@ package dev.jeka.core.api.depmanagement;
  */
 public class JkModuleDepProblem {
 
-    private static final long serialVersionUID = 1L;
-
     public static JkModuleDepProblem of(JkModuleId moduleId, String version, String text) {
         return new JkModuleDepProblem(moduleId, JkVersion.of(version), text);
     }

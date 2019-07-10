@@ -1,9 +1,16 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * A mapping to scopes to scopes acting when declaring dependencies. The goal of a scope mapping is to determine :<ul>
@@ -18,8 +25,6 @@ import java.util.stream.Collectors;
  * This concept matches strictly with the <i>configuration</i> concept found in Ivy : <a href="http://wrongnotes.blogspot.be/2014/02/simplest-explanation-of-ivy.html">see here.</a>.
  */
 public final class JkScopeMapping {
-
-    private static final long serialVersionUID = 1L;
 
     /**
      * A scope mapping active for any scope that map to the default scope of the dependencies.
@@ -96,7 +101,7 @@ public final class JkScopeMapping {
     }
 
     public JkScopeMapping minus(JkScope scope) {
-        Map<JkScope, Set<String>> newMap = new HashMap<>(this.map);
+        final Map<JkScope, Set<String>> newMap = new HashMap<>(this.map);
         newMap.remove(scope);
         return new JkScopeMapping(newMap);
     }

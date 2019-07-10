@@ -34,7 +34,7 @@ public class AClassicBuild extends JkCommands {
 
     public final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
-    protected void AClassicBuild() {
+    AClassicBuild() {
 	    javaPlugin.pack.checksums = "sha1";
 	    javaPlugin.pack.tests = true;
 	    javaPlugin.pack.javadoc = true;

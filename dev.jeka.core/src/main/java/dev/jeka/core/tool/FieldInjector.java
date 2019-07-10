@@ -5,13 +5,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
-import sun.reflect.FieldAccessor;
 
 final class FieldInjector {
 
@@ -25,15 +27,15 @@ final class FieldInjector {
 
     static void injectEnv(Object target) {
         for (final Field field : getOptionFields(target.getClass())) {
-            JkEnv env = field.getAnnotation(JkEnv.class);
+            final JkEnv env = field.getAnnotation(JkEnv.class);
             if (env != null) {
-                String stringValue = System.getenv(env.value());
+                final String stringValue = System.getenv(env.value());
                 if (stringValue != null) {
                     final Class<?> type = field.getType();
                     Object value;
                     try {
                         value = parse(type, stringValue);
-                    } catch (IllegalArgumentException e) {
+                    } catch (final IllegalArgumentException e) {
                         throw new JkException("Option " + env.value() + " has been set with improper value '"
                                 + stringValue + "'");
                     }
@@ -48,7 +50,6 @@ final class FieldInjector {
                 .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     private static void inject(Object target, Field field, Map<String, String> props) {
         final String name = field.getName();
         final Class<?> type = field.getType();
@@ -58,7 +59,7 @@ final class FieldInjector {
             Object value;
             try {
                 value = parse(type, stringValue);
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 throw new JkException("Option " + name + " has been set with improper value '" + stringValue + "'");
             }
             if (value == UNHANDLED_TYPE) {
@@ -158,18 +159,6 @@ final class FieldInjector {
         for (final String string : values.keySet()) {
             if (string.startsWith(prefix)) {
                 result.put(string.substring(prefix.length()), values.get(string));
-            }
-        }
-        return result;
-    }
-
-    private static Set<String> candidateFields(Map<String, String> props) {
-        final Set<String> result = new HashSet<>();
-        for (final String key : props.keySet()) {
-            if (key.contains(".")) {
-                result.add(JkUtilsString.substringBeforeFirst(key, "."));
-            } else {
-                result.add(key);
             }
         }
         return result;

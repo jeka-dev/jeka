@@ -1,17 +1,16 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.tool.JkConstants;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.tool.JkConstants;
 
 /**
  * Describes a project layout about the source parts. Generated sources/resources are not
@@ -41,11 +40,11 @@ public class JkProjectSourceLayout {
         final JkPathTreeSet tests = JkPathTreeSet.of(baseDir.resolve("src/test/java").normalize());
         final JkPathTreeSet testResources = JkPathTreeSet.of(baseDir.resolve("src/test/resources").normalize())
                 .and(tests.andMatcher(JAVA_RESOURCE_MATCHER));
-        Path generatedSources = baseDir.resolve(JkConstants.OUTPUT_PATH).resolve(GENERATED_SOURCE_PATH);
+        final Path generatedSources = baseDir.resolve(JkConstants.OUTPUT_PATH).resolve(GENERATED_SOURCE_PATH);
         if (Files.exists(generatedSources)) {
             sources = sources.and(generatedSources);
         }
-        Path generatedResources = baseDir.resolve(JkConstants.OUTPUT_PATH).resolve(GENERATED_RESOURCE_PATH);
+        final Path generatedResources = baseDir.resolve(JkConstants.OUTPUT_PATH).resolve(GENERATED_RESOURCE_PATH);
         if (Files.exists(generatedResources)) {
             resources = resources.and(generatedSources);
         }
@@ -91,7 +90,7 @@ public class JkProjectSourceLayout {
     private final JkPathTreeSet testResources;
 
     private JkProjectSourceLayout(Path baseDir, JkPathTreeSet sources, JkPathTreeSet resources,
-                                  JkPathTreeSet tests, JkPathTreeSet testResources) {
+            JkPathTreeSet tests, JkPathTreeSet testResources) {
         super();
         this.baseDir = baseDir.normalize().toAbsolutePath();
         this.sources = sources;
@@ -104,7 +103,7 @@ public class JkProjectSourceLayout {
      * Re-localise all locations defined under the base directory to the specified new of directory keeping the same relative path.
      */
     public JkProjectSourceLayout withBaseDir(Path newBaseDir) {
-        Path path = newBaseDir.toAbsolutePath().normalize();
+        final Path path = newBaseDir.toAbsolutePath().normalize();
         return new JkProjectSourceLayout(path,
                 relocalize(path,sources), relocalize(path, resources),
                 relocalize(path, tests), relocalize(path, testResources));
@@ -231,8 +230,8 @@ public class JkProjectSourceLayout {
     }
 
     private JkPathTreeSet toSet(String ... relativePaths) {
-        List<JkPathTree> trees = new LinkedList<>();
-        for (String relativePath : relativePaths) {
+        final List<JkPathTree> trees = new LinkedList<>();
+        for (final String relativePath : relativePaths) {
             trees.add(getBaseTree().goTo(relativePath));
         }
         return JkPathTreeSet.of(trees);
@@ -251,7 +250,7 @@ public class JkProjectSourceLayout {
 
     private JkPathTreeSet relocalize(Path newBase, JkPathTreeSet pathTreeSet) {
         JkPathTreeSet result = JkPathTreeSet.ofEmpty();
-        for (JkPathTree tree : pathTreeSet.getPathTrees()) {
+        for (final JkPathTree tree : pathTreeSet.getPathTrees()) {
             result = result.and(JkPathTree.of(relocalize(newBase, tree.getRoot())).withMatcher(tree.getMatcher()));
         }
         return result;

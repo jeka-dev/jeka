@@ -1,19 +1,26 @@
 package dev.jeka.core;
 
-import org.commonmark.node.*;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
-
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.commonmark.node.AbstractVisitor;
+import org.commonmark.node.HardLineBreak;
+import org.commonmark.node.Heading;
+import org.commonmark.node.HtmlInline;
+import org.commonmark.node.Link;
+import org.commonmark.node.Node;
+import org.commonmark.node.Text;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
+
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 
 /*
  * Utility class to build friendly HTML doc from markdown files.
@@ -45,40 +52,40 @@ class DocMaker {
 
 
     private void assembleHtmlDoc() {
-        Path targetFolder = docDist;
+        final Path targetFolder = docDist;
         JkUtilsPath.createDirectories(targetFolder);
         docSource.andMatching(true,"*.md").getFiles().forEach(path -> {
-            String content = new String(JkUtilsPath.readAllBytes(path), UTF8);
-            String html = mdToHtml(content, JkUtilsString.substringBeforeLast(path.getFileName().toString(), "."));
-            String name = path.getFileName().toString().replace(".md", ".html");
+            final String content = new String(JkUtilsPath.readAllBytes(path), UTF8);
+            final String html = mdToHtml(content, JkUtilsString.substringBeforeLast(path.getFileName().toString(), "."));
+            final String name = path.getFileName().toString().replace(".md", ".html");
             JkUtilsPath.write(targetFolder.resolve(name), html.getBytes(UTF8));
         });
-        String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
+        final String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
         JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
         JkPathTree.of(htmlTemplates).andMatching("**/*.css", "**/*.jpg", "**/*.svg", "**/*.js")
-                .copyTo(docDist.resolve("style"));
+        .copyTo(docDist.resolve("style"));
     }
 
     private String createSingleReferenceMdPage() {
         final StringBuilder sb = new StringBuilder();
-        List<Path> paths = docSource.goTo("Reference Guide").getFiles();
+        final List<Path> paths = docSource.goTo("Reference Guide").getFiles();
         paths.sort((path1, path2) -> path1.compareTo(path2));
-        for(Path path : paths) {
-            String content = new String(JkUtilsPath.readAllBytes(path), Charset.forName("UTF8"));
+        for(final Path path : paths) {
+            final String content = new String(JkUtilsPath.readAllBytes(path), Charset.forName("UTF8"));
             sb.append(content);
         }
         return sb.toString();
     }
 
     private String mdToHtml(String mdContent, String title) {
-        StringBuilder sb = new StringBuilder();
-        String rawHeader = new String(JkUtilsPath.readAllBytes(htmlTemplates.resolve("header.html")), UTF8);
+        final StringBuilder sb = new StringBuilder();
+        final String rawHeader = new String(JkUtilsPath.readAllBytes(htmlTemplates.resolve("header.html")), UTF8);
         sb.append( rawHeader.replace("${title}", title).replace("${version}", version) );
-        Parser parser = Parser.builder().build();
-        Node document = parser.parse(mdContent);
-        List<MenuItem> menuItems = addAnchorAndNumberingToHeaders(document);
+        final Parser parser = Parser.builder().build();
+        final Node document = parser.parse(mdContent);
+        final List<MenuItem> menuItems = addAnchorAndNumberingToHeaders(document);
         addMenu(document, menuItems);
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        final HtmlRenderer renderer = HtmlRenderer.builder().build();
         sb.append(renderer.render(document));
         sb.append( new String(JkUtilsPath.readAllBytes(htmlTemplates.resolve("footer.html")), UTF8) );
         return sb.toString();
@@ -86,41 +93,37 @@ class DocMaker {
 
     public static void main(String[] args) {
         new DocMaker(Paths.get("."), Paths.get(JkConstants.OUTPUT_PATH + "/distrib"), "unspecified")
-                .assembleAllDoc();
+        .assembleAllDoc();
     }
 
     private List<MenuItem> addAnchorAndNumberingToHeaders(Node node) {
-        List<MenuItem> menuItems = new LinkedList<>();
-        int[] counters = new int[10];
+        final List<MenuItem> menuItems = new LinkedList<>();
+        final int[] counters = new int[10];
         node.accept(new AbstractVisitor() {
 
             @Override
             public void visit(Heading heading) {
-                Text text = (Text) heading.getFirstChild();
-                String content = text.getLiteral();
-                boolean intro = "Introduction".equals(content);  // Do not number Introduction
+                final Text text = (Text) heading.getFirstChild();
+                final String content = text.getLiteral();
+                final boolean intro = "Introduction".equals(content);  // Do not number Introduction
                 if (!intro) {
                     counters[heading.getLevel()]++;
                     for (int i = heading.getLevel() + 1; i < 6; i++) {
                         counters[i] = 0;
                     }
                 }
-                StringBuilder sb = new StringBuilder();
+                final StringBuilder sb = new StringBuilder();
                 for (int i = 1; i <= heading.getLevel(); i++) {
                     sb.append(counters[i]).append(".");
                 }
                 if (sb.length() > 1 && heading.getLevel() > 1) {
-                   sb.delete(sb.length() - 1, sb.length() );
+                    sb.delete(sb.length() - 1, sb.length() );
                 }
-                String number = sb.toString();
-                String anchorId = content.replace(" ", "");
-                HtmlInline htmlInline = new HtmlInline();
+                final String anchorId = content.replace(" ", "");
+                final HtmlInline htmlInline = new HtmlInline();
                 htmlInline.setLiteral("<a name=\"" + anchorId + "\"></a>");
                 heading.insertBefore(htmlInline);
-                String numberedTitle = intro ? content : number + " " + content;
-                String bulleteditle = heading.getLevel() < 3 ? content : "&bull;&nbsp;" + content;
-                ////text.setLiteral(numberedTitle);
-                MenuItem menuItem = new MenuItem(content, anchorId, heading.getLevel());
+                final MenuItem menuItem = new MenuItem(content, anchorId, heading.getLevel());
                 menuItems.add(menuItem);
             }
         });
@@ -131,20 +134,20 @@ class DocMaker {
     }
 
     private void addMenu(Node document, List<MenuItem> menuItems) {
-        List<MenuItem> reversedItems = new LinkedList<>(menuItems);
+        final List<MenuItem> reversedItems = new LinkedList<>(menuItems);
         Collections.reverse(reversedItems);
-        for (MenuItem menuItem : reversedItems) {
+        for (final MenuItem menuItem : reversedItems) {
             if (menuItem.level > 5) {
                 continue;
             }
-            Link link = new Link();
+            final Link link = new Link();
             link.setTitle(menuItem.title);
-            Text text = new Text();
+            final Text text = new Text();
             text.setLiteral( menuItem.title);
             link.appendChild(text);
             link.setDestination("#" + menuItem.anchorId);
-            HtmlInline indent = new HtmlInline();
-            String cssClass = "menuItem" + menuItem.level;
+            final HtmlInline indent = new HtmlInline();
+            final String cssClass = "menuItem" + menuItem.level;
             indent.setLiteral("<a href=\"#" + menuItem.anchorId + "\" class=\"" + cssClass + "\">" + menuItem.title + "</a>");
             document.prependChild(indent);
             document.prependChild(new HardLineBreak());

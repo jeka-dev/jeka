@@ -1,10 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +8,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.UnaryOperator;
+
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Publication specific information to include in POM file in order to be published of a Maven repository.
@@ -23,8 +23,6 @@ import java.util.function.UnaryOperator;
  */
 public final class JkMavenPublication {
 
-    private static final long serialVersionUID = 1L;
-
     private final List<JkClassifiedFileArtifact> classifiedArtifacts;
 
     private final List<File> mainArtifacts; // can't have 2 artifacts with same getExtension
@@ -32,7 +30,7 @@ public final class JkMavenPublication {
     private final JkMavenPublicationInfo extraInfo;
 
     private JkMavenPublication(List<File> mainArtifacts, List<JkClassifiedFileArtifact> classified,
-                               JkMavenPublicationInfo extraInfo) {
+            JkMavenPublicationInfo extraInfo) {
         super();
         this.mainArtifacts = mainArtifacts;
         this.classifiedArtifacts = classified;
@@ -71,7 +69,7 @@ public final class JkMavenPublication {
         final String fileExt = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
         if (JkUtilsString.isBlank(fileExt)) {
             throw new IllegalArgumentException("File " + file
-            + " must have an getExtension (as .jar, .zip, ...");
+                    + " must have an getExtension (as .jar, .zip, ...");
         }
         if (contains(fileExt, classifier)) {
             throw new IllegalArgumentException(
@@ -167,13 +165,13 @@ public final class JkMavenPublication {
     }
 
     List<Path> missingFiles() {
-        List<Path> result = new LinkedList<>();
-        for (File file : this.mainArtifacts) {
+        final List<Path> result = new LinkedList<>();
+        for (final File file : this.mainArtifacts) {
             if (!file.exists()) {
                 result.add(file.toPath());
             }
         }
-        for (JkClassifiedFileArtifact classifiedFileArtifact : this.classifiedArtifacts) {
+        for (final JkClassifiedFileArtifact classifiedFileArtifact : this.classifiedArtifacts) {
             if (!Files.exists(classifiedFileArtifact.file)) {
                 result.add(classifiedFileArtifact.file);
             }
@@ -185,8 +183,6 @@ public final class JkMavenPublication {
      * An artifact with a classifier for Maven repository.
      */
     public static class JkClassifiedFileArtifact {
-
-        private static final long serialVersionUID = 1L;
 
         private final String classifier;
         private final Path file;

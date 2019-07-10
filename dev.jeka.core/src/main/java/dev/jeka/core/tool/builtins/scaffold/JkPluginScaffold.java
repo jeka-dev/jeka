@@ -1,11 +1,10 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
 import dev.jeka.core.api.depmanagement.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
 /**
@@ -28,7 +27,7 @@ public class JkPluginScaffold extends JkPlugin {
 
     @JkDoc("Generates project skeleton (folders and files necessary to work with the project).")
     public void run() {
-       scaffolder.run();
+        scaffolder.run();
     }
 
     @JkDoc("Copies Jeka executables inside the project in order to be run in embedded mode.")
@@ -38,8 +37,8 @@ public class JkPluginScaffold extends JkPlugin {
 
     @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
     public void wrap() {
-        JkPluginRepo repoPlugin = this.getCommands().getPlugin(JkPluginRepo.class);
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repoPlugin.downloadRepositories());
+        final JkPluginRepo repoPlugin = this.getCommands().getPlugin(JkPluginRepo.class);
+        final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repoPlugin.downloadRepositories());
         scaffolder.wrap(dependencyResolver);
     }
 

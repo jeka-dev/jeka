@@ -12,9 +12,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import dev.jeka.core.api.utils.*;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIO.StreamGobbler;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 /**
  * Offers fluent interface for launching Java processes.
@@ -151,7 +155,7 @@ public final class JkJavaProcess {
     /**
      * Returns a {@link JkJavaProcess} identical to this one but using the specified
      * classpath.
-     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      *
      */
@@ -208,7 +212,7 @@ public final class JkJavaProcess {
     private void runClassOrJarSync(String mainClassName, Path jar, String... arguments) {
         JkUtilsAssert.isTrue(jar != null || mainClassName != null,
                 "main class name and jar can't be both null while launching a Java process, " +
-                        "please set at least one of them.");
+                "please set at least one of them.");
         final List<String> command = new LinkedList<>();
         final OptionAndEnv optionAndEnv = optionsAndEnv();
         command.add(getRunningJavaCommand());
@@ -228,7 +232,7 @@ public final class JkJavaProcess {
         }
 
         command.addAll(Arrays.asList(arguments));
-        Runnable task = () -> {
+        final Runnable task = () -> {
             JkLog.info(String.join("\n", command));
             final int result;
             try {

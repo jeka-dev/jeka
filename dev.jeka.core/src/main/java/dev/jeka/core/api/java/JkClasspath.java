@@ -1,16 +1,26 @@
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.utils.*;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.system.JkLog;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipFile;
+
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsZip;
 
 
 /**
@@ -30,7 +40,7 @@ public final class JkClasspath implements Iterable<Path> {
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
 
     private final List<Path> entries;
-    
+
     // ------------------- constructor && factory methods
 
     private JkClasspath(Iterable<Path> entries) {
@@ -39,7 +49,7 @@ public final class JkClasspath implements Iterable<Path> {
 
     /**
      * Creates a <code>JkClasspath</code> form specified file entries.
-     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
     public static JkClasspath of(Iterable<Path> paths) {
@@ -70,7 +80,7 @@ public final class JkClasspath implements Iterable<Path> {
         }
         return JkClasspath.of(files);
     }
-    
+
     // --------------------------------- Iterate -----------------------------
 
     /**
@@ -94,7 +104,7 @@ public final class JkClasspath implements Iterable<Path> {
         for (final Path file : this.entries) {
             try {
                 result[i] = file.toUri().toURL();
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 throw new IllegalStateException(file + " can't be transformed to url", e);
             }
             i++;
@@ -120,7 +130,7 @@ public final class JkClasspath implements Iterable<Path> {
                 }
                 JkUtilsIO.closeQuietly(zipFile);
 
-               /* if (Files.exists(JkPathTree.ofZip(file).get(path))) {
+                /* if (Files.exists(JkPathTree.ofZip(file).get(path))) {
                     return file;
                 }*/
             }
@@ -131,23 +141,23 @@ public final class JkClasspath implements Iterable<Path> {
     Set<Path> getAllPathMatching(Iterable<String> globPatterns) {
         final Set<Path> result = new LinkedHashSet<>();
         for (final Path classpathEntry : this.entries) {
-            JkPathTree tree = Files.isDirectory(classpathEntry) ?
+            final JkPathTree tree = Files.isDirectory(classpathEntry) ?
                     JkPathTree.of(classpathEntry) : JkPathTree.ofZip(classpathEntry);
-            result.addAll(tree.andMatching(true, globPatterns).getRelativeFiles());
+                    result.addAll(tree.andMatching(true, globPatterns).getRelativeFiles());
         }
         return result;
     }
 
-   // ------------------------------ wither, adder --------------------------------------------
+    // ------------------------------ wither, adder --------------------------------------------
 
     /**
      * Returns a <code>JkClasspath</code> made of, in the order, the specified
      * entries plus the entries of this one.
-     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
     public JkClasspath andPrepending(Iterable<Path> paths) {
-        List<Path> result = JkUtilsPath.disambiguate(paths);
+        final List<Path> result = JkUtilsPath.disambiguate(paths);
         result.addAll(0, this.entries);
         return new JkClasspath(result);
     }
@@ -156,11 +166,11 @@ public final class JkClasspath implements Iterable<Path> {
      * Returns a <code>JkClasspath</code> made of, in the order, the entries of
      * this one plus the specified ones.
      *
-     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
     public JkClasspath and(Iterable<Path> paths) {
-        List<Path> result = JkUtilsPath.disambiguate(paths);
+        final List<Path> result = JkUtilsPath.disambiguate(paths);
         final List<Path> list = new LinkedList<>(this.entries);
         list.addAll(result);
         return new JkClasspath(list);
@@ -179,9 +189,9 @@ public final class JkClasspath implements Iterable<Path> {
     public JkClasspath andPrepending(Path path1, Path path2, Path... others) {
         return and(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
-    
+
     // ------------------------- canonical methods --------------------------------------
-    
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
@@ -196,10 +206,14 @@ public final class JkClasspath implements Iterable<Path> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        JkClasspath classpath = (JkClasspath) o;
+        final JkClasspath classpath = (JkClasspath) o;
 
         return entries.equals(classpath.entries);
     }
@@ -208,8 +222,8 @@ public final class JkClasspath implements Iterable<Path> {
     public int hashCode() {
         return entries.hashCode();
     }
-    
-    // ----------------- privates 
+
+    // ----------------- privates
 
     private static List<Path> resolveWildCard(Iterable<Path> files) {
         final LinkedHashSet<Path> result = new LinkedHashSet<>();
@@ -241,9 +255,9 @@ public final class JkClasspath implements Iterable<Path> {
     }
 
     private static List<Path> resolveWildCard(String candidatePath) {
-        List<Path> result = new LinkedList<>();
+        final List<Path> result = new LinkedList<>();
         if (candidatePath.endsWith(WILD_CARD)) {
-            String candidateFolder = JkUtilsString.substringBeforeFirst(candidatePath, WILD_CARD);
+            final String candidateFolder = JkUtilsString.substringBeforeFirst(candidatePath, WILD_CARD);
             final Path parent = Paths.get(candidateFolder);
             if (!Files.exists(parent)) {
                 JkLog.trace("File " + parent

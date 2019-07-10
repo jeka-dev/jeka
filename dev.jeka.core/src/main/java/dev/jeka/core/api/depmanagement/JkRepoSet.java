@@ -1,12 +1,12 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * A set of {@link JkRepo}
@@ -14,8 +14,6 @@ import java.util.List;
  * @author Jerome Angibaud
  */
 public final class JkRepoSet {
-
-    private static final long serialVersionUID = 1L;
 
     // Cached resolver
     private transient JkInternalDepResolver ivyResolver;
@@ -120,7 +118,7 @@ public final class JkRepoSet {
      */
     public Path get(JkModuleDependency moduleDependency) {
         final JkInternalDepResolver depResolver = getIvyResolver();
-        File file = depResolver.get(moduleDependency);
+        final File file = depResolver.get(moduleDependency);
         if (file == null) {
             return null;
         }

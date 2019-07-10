@@ -24,8 +24,6 @@ class ModulesXmlGenerator {
 
     private static final String T3 = T2 + T1;
 
-    private static final String T4 = T3 + T1;
-
     private final Iterable<Path> imlFiles;
 
     private final Path projectDir;
@@ -63,10 +61,10 @@ class ModulesXmlGenerator {
         writer.writeCharacters("\n" + T2);
         writer.writeStartElement("modules");
         writer.writeCharacters("\n");
-        for (Path iml : imlFiles) {
-            Path relPath = projectDir.relativize(iml);
+        for (final Path iml : imlFiles) {
+            final Path relPath = projectDir.relativize(iml);
             JkLog.info("Iml file detected : " + relPath);
-            String path = path(relPath);
+            final String path = path(relPath);
             writer.writeCharacters(T3);
             writer.writeEmptyElement("module");
             writer.writeAttribute("fileurl", "file://" + path);

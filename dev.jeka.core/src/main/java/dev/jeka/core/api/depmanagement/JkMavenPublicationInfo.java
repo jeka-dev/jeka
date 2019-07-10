@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * These are extra information required to publish on Maven central.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final  class JkMavenPublicationInfo {
@@ -194,12 +194,6 @@ public final  class JkMavenPublicationInfo {
             this.organisation = organisation;
             this.organisationUrl = organisationUrl;
         }
-
-        private static JkDeveloperInfo of(String name, String email, String organisation,
-                                String organisationUrl) {
-            return new JkDeveloperInfo(name, email, organisation, organisationUrl);
-        }
-
 
         public String getName() {
             return name;

@@ -1,14 +1,13 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkJavadocMaker;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-
 import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.List;
+
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.java.JkJavadocMaker;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 
 public class JkJavaProjectJavadocTasks {
 
@@ -26,10 +25,10 @@ public class JkJavaProjectJavadocTasks {
      * Generates javadoc files (files + zip)
      */
     public void run() {
-        JkJavaProject project = maker.project;
+        final JkJavaProject project = maker.project;
         JkJavadocMaker.of(project.getSourceLayout().getSources(), maker.getOutLayout().getJavadocDir())
-                .withClasspath(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
-                .andOptions(javadocOptions).process();
+        .withClasspath(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
+        .andOptions(javadocOptions).process();
     }
 
     public void runIfNecessary() {

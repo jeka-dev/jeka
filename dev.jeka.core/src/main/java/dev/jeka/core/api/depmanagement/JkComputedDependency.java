@@ -1,16 +1,20 @@
 package dev.jeka.core.api.depmanagement;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * Dependency on computed resource. More concretely, this is a file dependency on files that might not
@@ -81,8 +85,6 @@ public class JkComputedDependency implements JkFileDependency {
         return of(JkUtilsIterable.setOf(file), process, className, args);
     }
 
-    private static final long serialVersionUID = 1L;
-
     private final Runnable runnable;
 
     private final Iterable<Path> files;
@@ -96,7 +98,7 @@ public class JkComputedDependency implements JkFileDependency {
      * generating them.
      */
     protected JkComputedDependency(Runnable runnable, Path ideProjectBaseDir, Iterable<Path> files,
-                                   Supplier<Iterable<Path>> extraFileSupplier)  {
+            Supplier<Iterable<Path>> extraFileSupplier)  {
         super();
         this.runnable = runnable;
         this.files = files;
@@ -134,7 +136,7 @@ public class JkComputedDependency implements JkFileDependency {
         if (!missingFiles.isEmpty()) {
             throw new IllegalStateException(this + " didn't generate " + missingFiles);
         }
-        List<Path> result = new LinkedList<>();
+        final List<Path> result = new LinkedList<>();
         files.forEach(path -> result.add(path));
         extraFileSupplier.get().forEach(path -> result.add(path));
         return result;

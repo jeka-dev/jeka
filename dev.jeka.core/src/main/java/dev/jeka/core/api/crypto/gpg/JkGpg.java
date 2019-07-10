@@ -1,12 +1,12 @@
 package dev.jeka.core.api.crypto.gpg;
 
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsSystem;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.UnaryOperator;
+
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 /**
  * Provides method for signing and verify signature with PGP.
@@ -17,8 +17,6 @@ import java.util.function.UnaryOperator;
  * @author Jerome Angibaud
  */
 public final class JkGpg {
-
-    private static final long serialVersionUID = 1L;
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 

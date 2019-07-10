@@ -1,6 +1,11 @@
 package dev.jeka.core.wrapper;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -24,12 +29,12 @@ class Booter {
     private final static String BIN_NAME = "dev.jeka.jeka-core.jar";
 
     public static void main(String[] args) throws Exception {
-        Path jekawDir = Paths.get(args[0]);
-        String version = version(jekawDir);
-        Path path = getJekaBinPath(version);
+        final Path jekawDir = Paths.get(args[0]);
+        final String version = version(jekawDir);
+        final Path path = getJekaBinPath(version);
         if (!Files.exists(path)) {
-            Path zip = downloadDistribZip(version);
-            Path dir = getJekaVersionCacheDir(version);
+            final Path zip = downloadDistribZip(version);
+            final Path dir = getJekaVersionCacheDir(version);
             System.out.println("Unzip distribution to " + dir + " ...");
             Files.createDirectories(dir);
             unzip(zip, dir);
@@ -39,36 +44,37 @@ class Booter {
             Files.deleteIfExists(dir.resolve("jeka"));
             System.out.println("Jeka " + version + " installed in " + dir);
         }
-        ClassLoader classLoader = new URLClassLoader(new URL[] {path.toUri().toURL()});
+        final ClassLoader classLoader = new URLClassLoader(new URL[] {path.toUri().toURL()});
         Thread.currentThread().setContextClassLoader(classLoader);
-        Class<?> mainClass = classLoader.loadClass(MAIN_CLASS_NAME);
-        Method method = mainClass.getMethod("main", String[].class);
+        final Class<?> mainClass = classLoader.loadClass(MAIN_CLASS_NAME);
+        final Method method = mainClass.getMethod("main", String[].class);
         final String[] actualArgs = args.length <= 1 ? new String[0]
                 : Arrays.asList(args).subList(1, args.length).toArray(new String[0]);
         method.invoke(null, (Object) actualArgs);
     }
 
     private static Path downloadDistribZip(String version) {
-        String repo = "https://repo.maven.apache.org/maven2";
-        String urlString = repo + "/dev/jeka/jeka-core/"
+        final String repo = "https://repo.maven.apache.org/maven2";
+        final String urlString = repo + "/dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";
         System.out.println("Downloading " + urlString + " ...");
         try {
-            URL url = new URL(urlString);
+            final URL url = new URL(urlString);
             ReadableByteChannel readableByteChannel = null;
             try {
                 readableByteChannel = Channels.newChannel(url.openStream());
-            } catch (FileNotFoundException e) {
+            } catch (final FileNotFoundException e) {
                 System.out.println(urlString + " not found. Please check that version " + version + " exists in repo " + repo);
                 System.out.println("Jeka version to download is defined in ./jeka/wrapper/jeka.properties file.");
                 System.exit(1);
             }
-            Path temp = Files.createTempFile("jeka-wrapper", ".zip");
-            FileOutputStream fileOutputStream = new FileOutputStream(temp.toFile());
-            FileChannel fileChannel = fileOutputStream.getChannel();
-            fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+            final Path temp = Files.createTempFile("jeka-wrapper", ".zip");
+            try (FileOutputStream fileOutputStream = new FileOutputStream(temp.toFile())) {
+                final FileChannel fileChannel = fileOutputStream.getChannel();
+                fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+            }
             return temp;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -77,7 +83,7 @@ class Booter {
         try (InputStream fis = Files.newInputStream(zip); ZipInputStream zis = new ZipInputStream(fis)) {
             ZipEntry entry = zis.getNextEntry();
             while (entry != null) {
-                Path file = dir.resolve(entry.getName());
+                final Path file = dir.resolve(entry.getName());
                 if (entry.isDirectory()) {
                     if (Files.exists(file) && !Files.isDirectory(file)) {
                         Files.delete(file);
@@ -86,7 +92,7 @@ class Booter {
                         Files.createDirectories(file);
                     }
                 } else {
-                    Path parent = file.getParent();
+                    final Path parent = file.getParent();
                     if (!Files.exists(parent)) {
                         Files.createDirectories(parent);
                     }
@@ -94,7 +100,7 @@ class Booter {
                         Files.delete(file);
                     }
                     try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file.toFile()))) {
-                        byte[] buffer = new byte[Math.toIntExact(entry.getSize())];
+                        final byte[] buffer = new byte[Math.toIntExact(entry.getSize())];
                         int location;
                         while ((location = zis.read(buffer)) != -1) {
                             bos.write(buffer, 0, location);
@@ -117,13 +123,13 @@ class Booter {
         if (Files.exists(result) && Files.isRegularFile(result)) {
             try {
                 Files.delete(result);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
         try {
             Files.createDirectories(result);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
         return result;
@@ -133,7 +139,7 @@ class Booter {
         final Path result = getJekaUserHomeDir().resolve("cache/wrapper/" + verion);
         try {
             Files.createDirectories(result);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
         return result;
@@ -148,21 +154,21 @@ class Booter {
     }
 
     private static String version(Path jekawDir) {
-        Path propFile = getWrapperPropsFile(jekawDir);
+        final Path propFile = getWrapperPropsFile(jekawDir);
         if (!Files.exists(propFile)) {
             System.out.println("No file found at " + propFile + ". Please rerun 'jeka scaffold#wrap");
             System.exit(1);
         }
-        Properties props = new Properties();
+        final Properties props = new Properties();
         try (InputStream inputStream = Files.newInputStream(propFile)){
             props.load(inputStream);
-            String result = props.getProperty("jeka.version");
+            final String result = props.getProperty("jeka.version");
             if (result == null || result.trim().isEmpty()) {
                 System.out.println("Please, specify a jeka.version property in file ./jeka/wrapper/jeka.properties");
                 System.exit(1);
             }
             return  result.trim();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }

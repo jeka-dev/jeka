@@ -1,11 +1,5 @@
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.utils.*;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -16,10 +10,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsZip;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent
@@ -60,7 +71,7 @@ public final class JkUrlClassLoader {
     }
 
     public static JkUrlClassLoader of(Iterable<Path> paths, ClassLoader parent) {
-        List<Path> cleanedPath = JkUtilsPath.disambiguate(paths);
+        final List<Path> cleanedPath = JkUtilsPath.disambiguate(paths);
         return of(new URLClassLoader(toUrl(cleanedPath), parent));
     }
 
@@ -125,7 +136,7 @@ public final class JkUrlClassLoader {
      * Creates a <code>JkClassLoader</code>, child of this one and having the specified entries.
      */
     public JkUrlClassLoader getChild(Iterable<Path> extraEntries) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(extraEntries);
+        final Iterable<Path> paths = JkUtilsPath.disambiguate(extraEntries);
         return new JkUrlClassLoader(new URLClassLoader(toUrl(paths), this.delegate));
     }
 
@@ -134,7 +145,7 @@ public final class JkUrlClassLoader {
      * the parent classloaders.
      */
     public JkClasspath getDirectClasspath() {
-        return JkClasspath.of(JkUtilsSystem.classloaderEntries((URLClassLoader) this.delegate));
+        return JkClasspath.of(JkUtilsSystem.classloaderEntries(this.delegate));
     }
 
     /**
@@ -165,7 +176,7 @@ public final class JkUrlClassLoader {
      */
     private Set<Class<?>> loadClasses(Iterable<String> patterns) {
         final Set<Class<?>> result = new HashSet<>();
-        JkClassLoader jkClassLoader = JkClassLoader.of(delegate);
+        final JkClassLoader jkClassLoader = JkClassLoader.of(delegate);
         final Set<Path> classFiles = this.getFullClasspath().getAllPathMatching(patterns);
         for (final Path classFile : classFiles) {
             final String className = getAsClassName(classFile.toString());
@@ -195,7 +206,7 @@ public final class JkUrlClassLoader {
      */
     public Set<Class<?>> loadClassesIn(JkPathTreeSet jkPathTreeSet) {
         final Set<Class<?>> result = new HashSet<>();
-        JkClassLoader jkClassLoader = this.toJkClassLoader();
+        final JkClassLoader jkClassLoader = this.toJkClassLoader();
         for (final Path path : jkPathTreeSet.getRelativeFiles()) {
             if (path.toString().endsWith(".class")) {
                 final String className = getAsClassName(path.toString());
@@ -264,7 +275,7 @@ public final class JkUrlClassLoader {
 
     private Iterator<Class<?>> classIterator(final Iterable<String> fileNameIt) {
         final Iterator<String> it = fileNameIt.iterator();
-        JkClassLoader jkClassLoader = JkClassLoader.of(delegate);
+        final JkClassLoader jkClassLoader = JkClassLoader.of(delegate);
         return new Iterator<Class<?>>() {
 
             @Override
@@ -332,7 +343,7 @@ public final class JkUrlClassLoader {
         final StringBuilder builder = new StringBuilder();
         builder.append(delegate);
         if (delegate instanceof URLClassLoader) {
-            for (final URL url : ((URLClassLoader) delegate).getURLs()) {
+            for (final URL url : delegate.getURLs()) {
                 builder.append("\n  ").append(url);
             }
         }
@@ -344,7 +355,7 @@ public final class JkUrlClassLoader {
 
     /**
      *
-     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
     @Deprecated

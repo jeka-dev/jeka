@@ -1,10 +1,15 @@
 package dev.jeka.core.tool;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
-
-import java.util.*;
 
 /*
  * Holds information carried by the command line.
@@ -18,8 +23,6 @@ final class CommandLine {
     private static final char PLUGIN_SYMBOL_CHAR = '#';
 
     private static final String MODULE_SYMBOL_CHAR = "@";
-
-    private static CommandLine INSTANCE = null;
 
     static CommandLine parse(String[] words) {
         final CommandLine result = new CommandLine();
@@ -122,7 +125,7 @@ final class CommandLine {
 
     private static List<PluginOptions> extractPluginOptions(String words[]) {
         final Map<String, PluginOptions> setups = new LinkedHashMap<>();
-        for (String word : words) {
+        for (final String word : words) {
             if (MethodInvocation.isPluginMethodInvokation(word)) {
                 final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL);
                 if (!setups.containsKey(pluginName)) {
@@ -139,7 +142,7 @@ final class CommandLine {
             } else if (isPluginOption(word)) {
                 final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL)
                         .substring(1);
-                PluginOptions setup = setups.computeIfAbsent(pluginName, n -> PluginOptions.of(n));
+                final PluginOptions setup = setups.computeIfAbsent(pluginName, n -> PluginOptions.of(n));
                 final int equalIndex = word.indexOf("=");
                 if (equalIndex <= -1) {
                     final String key = JkUtilsString.substringAfterFirst(word, PLUGIN_SYMBOL);

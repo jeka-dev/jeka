@@ -1,10 +1,5 @@
 package dev.jeka.core.api.system;
 
-import dev.jeka.core.api.utils.JkUtilsFile;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,8 +8,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Properties;
+
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Provides location related to the running Jeka instance.
@@ -40,10 +37,10 @@ public final class JkLocator {
         URI uri;
         try {
             uri = JkLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new IllegalStateException("Cannot find location of " + JkLocator.class);
         }
-        Path result = Paths.get(uri);
+        final Path result = Paths.get(uri);
         JEKA_JAR_FILE = result;
         return result;
     }
@@ -60,18 +57,18 @@ public final class JkLocator {
      * version is declared.
      */
     public static String getWrappedJekaVersion(Path projectRoot) {
-        Path jekaPropFile = projectRoot.resolve("jeka/boot/jeka.properties");
+        final Path jekaPropFile = projectRoot.resolve("jeka/boot/jeka.properties");
         if (!Files.exists(jekaPropFile)) {
             return null;
         }
-        Properties properties = new Properties();
+        final Properties properties = new Properties();
         try (InputStream fis = Files.newInputStream(jekaPropFile)){
             properties.load(new FileInputStream(jekaPropFile.toFile()));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             JkLog.warn("Impossible to read property file " + jekaPropFile + ". Jeka wrapped version will be ignored");
             return null;
         }
-        String result = properties.getProperty("jeka.version");
+        final String result = properties.getProperty("jeka.version");
         if (result == null || result.trim().isEmpty()) {
             JkLog.warn("Property file " + jekaPropFile + " does not contain jeka.version property. Jeka wrapped version will be ignored");
             return null;

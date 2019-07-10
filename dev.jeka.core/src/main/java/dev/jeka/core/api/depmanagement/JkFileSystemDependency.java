@@ -1,24 +1,22 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 /**
  * A dependency on files located on file ofSystem.
  */
 public final class JkFileSystemDependency implements JkFileDependency {
 
-    private static final long serialVersionUID = 1079527121988214989L;
-
     /**
      * Creates a {@link JkFileSystemDependency} on the specified files.
      */
     public static JkFileSystemDependency of(Iterable<Path> files) {
-        Iterable<Path> trueFiles = JkUtilsPath.disambiguate(files);
+        final Iterable<Path> trueFiles = JkUtilsPath.disambiguate(files);
         return new JkFileSystemDependency(trueFiles);
     }
 

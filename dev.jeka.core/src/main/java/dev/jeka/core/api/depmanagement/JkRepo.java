@@ -1,11 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.utils.JkUtilsFile;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -16,12 +10,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.utils.JkUtilsFile;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 /**
  * Hold configuration necessary to instantiate download or upload repository
  */
 public final class JkRepo {
-
-    private static final long serialVersionUID = 1L;
 
     private static final String LOCAL_NAME = "local";
 
@@ -212,9 +210,13 @@ public final class JkRepo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JkRepo jkRepo = (JkRepo) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final JkRepo jkRepo = (JkRepo) o;
         return url.equals(jkRepo.url);
     }
 
@@ -242,7 +244,7 @@ public final class JkRepo {
     }
 
 
-    public static final class JkRepoCredential implements Serializable {
+    public static final class JkRepoCredential {
 
         private final String realm;
 
@@ -280,7 +282,7 @@ public final class JkRepo {
     /**
      * Configuration specific to Ivy.
      */
-    public static final class JkRepoIvyConfig implements Serializable {
+    public static final class JkRepoIvyConfig {
 
         public static final String DEFAULT_IVY_ARTIFACT_PATTERN = "[organisation]/[module]/[type]s/[artifact]-[revision](-[type]).[ext]";
 
@@ -330,7 +332,7 @@ public final class JkRepo {
         private final Set<String> checksumAlgos;
 
         private JkPublishConfig(JkPublishFilter filter, boolean signatureRequired, boolean uniqueSnapshot,
-                                Set<String> checksumAlgos) {
+                Set<String> checksumAlgos) {
             super();
             this.filter = filter;
             this.uniqueSnapshot = uniqueSnapshot;

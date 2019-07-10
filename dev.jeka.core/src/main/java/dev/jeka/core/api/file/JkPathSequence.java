@@ -1,17 +1,21 @@
 package dev.jeka.core.api.file;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 /**
  * A sequence of file path (folder or archive). Each file is called an <code>entry</code>.<br/>
  * Instances of this class are immutable.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkPathSequence implements Iterable<Path> {
@@ -27,7 +31,7 @@ public final class JkPathSequence implements Iterable<Path> {
 
     /**
      * Creates a <code>JkPathSequence</code> from an <code>Iterable</code> of paths or a single Path.
-     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
     public static JkPathSequence of(Iterable<Path> paths) {
@@ -59,7 +63,7 @@ public final class JkPathSequence implements Iterable<Path> {
      * Creates a <code>JkPathSequence</code> form specified entries
      */
     public static JkPathSequence of(Path path1, Path path2, Path... others) { ;
-        return JkPathSequence.of(JkUtilsIterable.listOf2orMore(path1, path2, others));
+    return JkPathSequence.of(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
 
 
@@ -106,12 +110,11 @@ public final class JkPathSequence implements Iterable<Path> {
     /**
      * Returns a <code>JkPathSequence</code> made of the specified entries followed by the sequence entries of this object.
      *
-     * @param paths As {@link Path} class implements {@link Iterable<Path>} the argument can be a single {@link Path}
+     * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
-    @SuppressWarnings("unchecked")
     public JkPathSequence andPrepending(Iterable<Path> paths) {
-        List<Path> result = JkUtilsPath.disambiguate(paths);
+        final List<Path> result = JkUtilsPath.disambiguate(paths);
         result.addAll(entries);
         return new JkPathSequence(result);
     }
@@ -127,9 +130,8 @@ public final class JkPathSequence implements Iterable<Path> {
      * Returns a <code>JkPathSequence</code> made of, in the order, the entries of this
      * one plus the specified ones.
      */
-    @SuppressWarnings("unchecked")
     public JkPathSequence and(Iterable<Path> otherEntries) {
-        List<Path> result = JkUtilsPath.disambiguate(otherEntries);
+        final List<Path> result = JkUtilsPath.disambiguate(otherEntries);
         result.addAll(0, entries);
         return new JkPathSequence(result);
     }
@@ -141,8 +143,8 @@ public final class JkPathSequence implements Iterable<Path> {
      * specified base directory.
      */
     public JkPathSequence resolveTo(Path baseDir) {
-        List<Path> result = new LinkedList<>();
-        for(Path entry : entries) {
+        final List<Path> result = new LinkedList<>();
+        for(final Path entry : entries) {
             if (entry.isAbsolute()) {
                 result.add(entry);
             } else {
@@ -185,10 +187,14 @@ public final class JkPathSequence implements Iterable<Path> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        JkPathSequence paths = (JkPathSequence) o;
+        final JkPathSequence paths = (JkPathSequence) o;
 
         return entries.equals(paths.entries);
     }

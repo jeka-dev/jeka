@@ -1,13 +1,17 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-
 import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * A representation of a node in a dependency tree.
@@ -17,8 +21,6 @@ import java.util.*;
 public class JkDependencyNode {
 
     private static final String INDENT = "    ";
-
-    private static final long serialVersionUID = 1L;
 
     private final JkNodeInfo nodeInfo;
 
@@ -192,7 +194,7 @@ public class JkDependencyNode {
     }
 
     private static void addFileDepsToTree(JkDependencySet dependencies, Set<JkScope> scopes, List<JkDependencyNode> result,
-                                          Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
+            Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
         for (final JkScopedDependency scopedDependency : depsUntilLast(dependencies, moduleId)) {
             if (scopes.isEmpty() || scopedDependency.isInvolvedInAnyOf(scopes)) {
                 final JkFileDependency fileDep = (JkFileDependency) scopedDependency.getDependency();
@@ -312,7 +314,7 @@ public class JkDependencyNode {
         }
 
         public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                                       Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
+                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
             return new JkModuleNodeInfo(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts);
         }
 
@@ -325,12 +327,12 @@ public class JkDependencyNode {
         private final boolean treeRoot;
 
         JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                         Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
+                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
             this(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts, false);
         }
 
         JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                         Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
+                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
             this.moduleId = moduleId;
             this.declaredVersion = declaredVersion;
             this.declaredScopes = declaredScopes;
@@ -439,7 +441,7 @@ public class JkDependencyNode {
         }
 
         // for serialization we need to use File class instead of Path
-        private List<File> files;
+        private final List<File> files;
 
         private final Set<JkScope> scopes;
 

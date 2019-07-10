@@ -1,6 +1,22 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.*;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import dev.jeka.core.api.depmanagement.JkDependency;
+import dev.jeka.core.api.depmanagement.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkResolveResult;
+import dev.jeka.core.api.depmanagement.JkScopeMapping;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
@@ -11,13 +27,11 @@ import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
-
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 /**
  * Engine having responsibility of compiling command classes, instantiate and run them.<br/>
@@ -68,7 +82,7 @@ final class Engine {
      */
     void execute(CommandLine commandLine, String runClassHint, JkLog.Verbosity verbosityToRestore) {
         runDependencies = runDependencies.andScopelessDependencies(commandLine.dependencies());
-        long start = System.nanoTime();
+        final long start = System.nanoTime();
         JkLog.startTask("Compile and initialise command classes");
         JkCommands jkCommands = null;
         JkPathSequence path = JkPathSequence.of();
@@ -84,12 +98,12 @@ final class Engine {
         if (jkCommands == null) {
             path = compile().and(path);
             jkCommands = getRunInstance(runClassHint, path);
+            if (jkCommands == null) {
+                throw new JkException("Can't find or guess any command class for project hosted in " + this.projectBaseDir
+                        + " .\nAre you sure this directory is a Jeka project ?");
+            }
         }
         jkCommands.getImportedCommands().setImportedRunRoots(this.rootOfImportedRuns);
-        if (jkCommands == null) {
-            throw new JkException("Can't find or guess any command class for project hosted in " + this.projectBaseDir
-                    + " .\nAre you sure this directory is a Jeka project ?");
-        }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         JkLog.info("Jeka commands are ready to be executed.");
         JkLog.setVerbosity(verbosityToRestore);
@@ -103,14 +117,14 @@ final class Engine {
 
     private JkPathSequence pathOf(List<? extends JkDependency> dependencies) {
         JkDependencySet deps = JkDependencySet.of();
-        for (JkDependency dependency : dependencies) {
+        for (final JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
         return JkDependencyResolver.of(this.runRepos).resolve(deps).getFiles();
     }
 
     private void preCompile() {
-        List<Path> sourceFiles = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER).getFiles();
+        final List<Path> sourceFiles = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER).getFiles();
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.runDependencies = this.runDependencies.and(parser.dependencies());
         this.runRepos = parser.importRepos().and(runRepos);
@@ -130,11 +144,11 @@ final class Engine {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
-        long start = System.nanoTime();
+        final String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
+        final long start = System.nanoTime();
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
-        JkResolveResult resolveResult = runDependencyResolver.resolve(this.computeRunDependencies());
+        final JkResolveResult resolveResult = runDependencyResolver.resolve(this.computeRunDependencies());
         if (resolveResult.getErrorReport().hasErrors()) {
             JkLog.warn(resolveResult.getErrorReport().toString());
         }
@@ -167,7 +181,7 @@ final class Engine {
 
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
-        JkDependencySet result = JkDependencySet.of(runDependencies
+        final JkDependencySet result = JkDependencySet.of(runDependencies
                 .andFiles(bootLibs())
                 .andFiles(JkClasspath.ofCurrentRuntime()).withoutLastIf(!devMode)
                 .andFile(JkLocator.getJekaJarPath()).withoutLastIf(devMode)
@@ -188,7 +202,7 @@ final class Engine {
         JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootOfImportedRuns.isEmpty()) {
             JkLog.info("Compile command classes of dependent projects : "
-                        + toRelativePaths(this.projectBaseDir, this.rootOfImportedRuns));
+                    + toRelativePaths(this.projectBaseDir, this.rootOfImportedRuns));
         }
         for (final Path file : this.rootOfImportedRuns) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
@@ -199,17 +213,17 @@ final class Engine {
     }
 
     private void compileDef(JkPathSequence runPath) {
-        JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath);
+        final JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath);
         try {
             JkJavaCompiler.ofJdk().compile(compileSpec);
-        } catch (JkException e) {
+        } catch (final JkException e) {
             JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
             JkLog.info("Compilation of Jeka files failed. You can run jeka -CC=JkCommands to use default Jeka files" +
                     " instead of the ones located in this project.");
             throw e;
         }
         JkPathTree.of(this.resolver.runSourceDir).andMatching(false, "**/*.java")
-                .copyTo(this.resolver.runClassDir,
+        .copyTo(this.resolver.runClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -238,7 +252,7 @@ final class Engine {
     }
 
     private static void runProject(JkCommands jkCommands, List<CommandLine.MethodInvocation> invokes) {
-        for (CommandLine.MethodInvocation methodInvocation : invokes) {
+        for (final CommandLine.MethodInvocation methodInvocation : invokes) {
             invokeMethodOnRunClassOrPlugin(jkCommands, methodInvocation);
         }
     }
@@ -274,7 +288,7 @@ final class Engine {
             }
         } catch (final RuntimeException e) {
             JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInMillis(time)
-                        + " milliseconds.");
+            + " milliseconds.");
             throw e;
         }
     }

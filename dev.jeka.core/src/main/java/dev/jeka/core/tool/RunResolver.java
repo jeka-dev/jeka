@@ -89,6 +89,7 @@ final class RunResolver {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private JkCommands resolve(String classNameHint, Class<? extends JkCommands> baseClass) {
 
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();

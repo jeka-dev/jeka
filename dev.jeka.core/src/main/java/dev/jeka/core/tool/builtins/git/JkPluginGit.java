@@ -1,5 +1,5 @@
 package dev.jeka.core.tool.builtins.git;
-;
+
 import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkCommands;
@@ -29,7 +29,7 @@ public class JkPluginGit extends JkPlugin {
         System.out.println("Existing tags :");
         git.exec("tag");
         System.out.println("You are about to tag commit : " + git.getCurrentCommit());
-        String newTag = JkPrompt.ask("Enter new tag : ");
+        final String newTag = JkPrompt.ask("Enter new tag : ");
         git.withLogCommand(true).tagAndPush(newTag);
     }
 }

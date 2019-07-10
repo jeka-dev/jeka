@@ -13,8 +13,6 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
  */
 class ArtifactProducerDependency extends JkComputedDependency  {
 
-    private static final long serialVersionUID = 1L;
-
     private final JkArtifactProducer artifactProducer;
 
     /*

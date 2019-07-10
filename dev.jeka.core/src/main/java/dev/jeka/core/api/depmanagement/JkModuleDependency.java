@@ -25,8 +25,6 @@ import dev.jeka.core.api.utils.JkUtilsString;
  */
 public final class JkModuleDependency implements JkDependency {
 
-    private static final long serialVersionUID = 1L;
-
     private final JkModuleId module;
     private final JkVersion version;
     private final String classifier;
@@ -35,11 +33,11 @@ public final class JkModuleDependency implements JkDependency {
     private final List<JkDepExclude> excludes;
 
     private JkModuleDependency(JkModuleId module, JkVersion version, String classifier,
-                               boolean transitive, String extension, List<JkDepExclude> excludes) {
+            boolean transitive, String extension, List<JkDepExclude> excludes) {
         JkUtilsAssert.notNull(module, " module dependency can't be instantiated without module");
         JkUtilsAssert.notNull(version, module + " module dependency can't instantiate without versionRange");
         JkUtilsAssert
-                .notNull(excludes, module + " module dependency can't be instantiated with null excludes, use empty list instead");
+        .notNull(excludes, module + " module dependency can't be instantiated with null excludes, use empty list instead");
         this.module = module;
         this.version = version;
         this.classifier = classifier;
@@ -103,11 +101,11 @@ public final class JkModuleDependency implements JkDependency {
     public static JkModuleDependency of(String description) {
         final String[] strings = description.split( ":");
         final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
-        ", group:name:version, 'group:value:type:version, group:of:type:artifact:version";
+                ", group:name:version, 'group:value:type:version, group:of:type:artifact:version";
         if (!isModuleDependencyDescription(description)) {
             throw new JkException(errorMessage);
         }
-        JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
+        final JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
         if (strings.length == 2) {
             return of(moduleId, JkVersion.UNSPECIFIED);
         }
@@ -204,7 +202,7 @@ public final class JkModuleDependency implements JkDependency {
      * artifact getExtension.
      */
     public JkModuleDependency withExt(String extension) {
-        String ext = JkUtilsString.isBlank(extension) ? null : extension;
+        final String ext = JkUtilsString.isBlank(extension) ? null : extension;
         return new JkModuleDependency(module, version, classifier, transitive, ext,
                 excludes);
     }

@@ -1,8 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsString;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,14 +8,15 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 /**
  * Information required to publish a module in an Ivy repository.
  *
  * @author Jerome Angibaud.
  */
 public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPublicationArtifact> {
-
-    private static final long serialVersionUID = 1L;
 
     private final Set<JkPublicationArtifact> jkPublicationArtifacts;
 
@@ -42,13 +40,13 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
      * Creates an Ivy publication from the specified artifact producer.
      */
     public static JkIvyPublication of(JkArtifactProducer artifactProducer) {
-       JkIvyPublication result =  of(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()),
-               JkJavaDepScopes.COMPILE.getName());
-       for (JkArtifactId extraFileId : artifactProducer.getArtifactIds()) {
-            Path file = artifactProducer.getArtifactPath(extraFileId);
+        JkIvyPublication result =  of(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()),
+                JkJavaDepScopes.COMPILE.getName());
+        for (final JkArtifactId extraFileId : artifactProducer.getArtifactIds()) {
+            final Path file = artifactProducer.getArtifactPath(extraFileId);
             result = result.andOptional(file, extraFileId.getClassifier(), scopeFor(extraFileId.getClassifier()));
-       }
-       return result;
+        }
+        return result;
     }
 
     private static String scopeFor(String classifier) {
@@ -132,8 +130,6 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
     }
 
     public static class JkPublicationArtifact {
-
-        private static final long serialVersionUID = 1L;
 
         private JkPublicationArtifact(String name, Path path, String type, Set<JkScope> jkScopes) {
             super();
