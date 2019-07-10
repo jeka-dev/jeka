@@ -21,7 +21,7 @@ public class PureApiBuild extends JkCommands {
 
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
 
-        javaProject.setDependencies(deps).setSourceVersion(JkJavaVersion.V6);
+        javaProject.setDependencies(deps);
 
         javaProject.getMaker().clean();
         javaProject.getMaker().makeAllArtifacts();

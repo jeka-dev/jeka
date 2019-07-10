@@ -43,7 +43,7 @@ public class AClassicBuild extends JkCommands {
     @Override
     protected void setup() {
         JkJavaProject project = javaPlugin.getProject();
-        project.setSourceVersion(JkJavaVersion.V7)
+        project.setSourceVersion(JkJavaVersion.V8)
                 .addDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
                         .and("com.sun.jersey:jersey-server:1.19")
