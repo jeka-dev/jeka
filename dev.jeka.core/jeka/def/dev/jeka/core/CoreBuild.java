@@ -20,6 +20,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
@@ -192,8 +193,9 @@ public class CoreBuild extends JkCommands {
 
         // Copy embbeded jar into temp folder and remove embedded part code from jeka classes
         jarTree.goTo("META-INF").importFile(embeddedJar, embeddedFinalName);
-        JkPathFile.of(jarTree.get("META-INF/jeka-embedded-name"))
-                .write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
+        Path embeddedNaneFile = jarTree.get("META-INF/jeka-embedded-name");
+        JkUtilsPath.deleteIfExists(embeddedNaneFile);
+        JkPathFile.of(embeddedNaneFile).write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
         jarTree.andMatching( "**/embedded/**").deleteContent();
         jarTree.close();
 
