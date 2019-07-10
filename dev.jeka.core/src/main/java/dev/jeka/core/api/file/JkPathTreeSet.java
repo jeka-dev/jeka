@@ -148,7 +148,7 @@ public final class JkPathTreeSet {
     public JkPathTreeSet withMatcher(PathMatcher matcher) {
         final List<JkPathTree> list = new LinkedList<>();
         for (final JkPathTree tree : this.pathTrees) {
-            list.add(JkPathTree.of(tree.getRoot()).andMatcher(matcher));
+            list.add(JkPathTree.of(tree.getRoot()).withMatcher(JkPathMatcher.of(matcher)));
         }
         return new JkPathTreeSet(list);
     }

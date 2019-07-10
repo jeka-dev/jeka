@@ -69,7 +69,8 @@ public final class JkJarPacker {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classtrees.getPathTrees().get(0).getRoot());
         }
-        classtrees.and(extraFiles).andZips(otherJars).andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(resultFile);
+        classtrees.and(extraFiles).andZips(otherJars)
+                .andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(resultFile);
     }
 
 }

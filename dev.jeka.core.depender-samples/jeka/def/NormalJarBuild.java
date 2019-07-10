@@ -33,6 +33,7 @@ public class NormalJarBuild extends JkCommands {
 
     @Override
     protected void setup() {
+        javaPlugin.getProject().getMaker().defineMainArtifactAsFatJar(true);
         javaPlugin.getProject()
                 .setDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()))
                 .setSourceVersion(JkJavaVersion.V7);

@@ -311,7 +311,7 @@ Imagine that you want to want to reuse *displayContent* method from project _sam
 class Sample2Commands extends JkCommands {
 
     @JkImportProject("../sample1")
-    private JkCommands project1Run;
+    private JkCommands sample1Commands;
 
     public void hello() throws MalformedURLException {
         System.out.println("Hello World");
