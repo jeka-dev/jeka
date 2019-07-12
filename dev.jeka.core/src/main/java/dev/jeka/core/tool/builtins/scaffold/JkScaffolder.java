@@ -12,12 +12,14 @@ import java.util.stream.Collectors;
 
 import dev.jeka.core.api.depmanagement.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 
@@ -94,12 +96,12 @@ public final class JkScaffolder {
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
         final Properties properties = new Properties();
         final String version = jekaVersion(dependencyResolver);
-        properties.setProperty("jeka.version", version);
-        try {
-            properties.store(JkUtilsIO.outputStream(wrapperFolder.resolve("jeka.properties").toFile(), false), "");
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        Path tempProps = JkUtilsPath.createTempFile("jeka-", ".properties");
+        JkPathFile.of(tempProps)
+                .replaceContentBy(JkScaffolder.class.getResource("jeka.properties"))
+                .copyReplacingTokens(wrapperFolder.resolve("jeka.properties"),
+                        JkUtilsIterable.mapOf("${version}", version), Charset.forName("utf-8"))
+                .deleteIfExist();
     }
 
     public void setCommandClassCode(String code) {

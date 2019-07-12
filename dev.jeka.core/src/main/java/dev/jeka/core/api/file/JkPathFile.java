@@ -8,6 +8,7 @@ import dev.jeka.core.api.utils.JkUtilsThrowable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.*;
@@ -40,6 +41,14 @@ public final class JkPathFile {
 
     public static JkPathFile of(String path) {
         return of(Paths.get(path));
+    }
+
+    public static JkPathFile of(URL url) {
+        try {
+            return of(Paths.get(url.toURI()));
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
