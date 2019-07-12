@@ -36,7 +36,7 @@ class Booter {
             final String version = version(props);
             jekaBinPath = getJekaBinPath(version);
             if (!Files.exists(jekaBinPath)) {
-                final Path zip = downloadDistribZip(version);
+                final Path zip = downloadDistribZip(props, version);
                 final Path dir = getJekaVersionCacheDir(version);
                 System.out.println("Unzip distribution to " + dir + " ...");
                 Files.createDirectories(dir);
@@ -57,9 +57,16 @@ class Booter {
         method.invoke(null, (Object) actualArgs);
     }
 
-    private static Path downloadDistribZip(String version) {
-        final String repo = "https://repo.maven.apache.org/maven2";
-        final String urlString = repo + "/dev/jeka/jeka-core/"
+    private static Path downloadDistribZip(Properties properties, String version) {
+        String repo = properties.getProperty("jeka.repo.url");
+        if (repo != null && !repo.trim().isEmpty()) {
+            if (!repo.trim().endsWith("/")) {
+                repo = repo.trim() + "/";
+            }
+        } else {
+            repo = "https://repo.maven.apache.org/maven2/";
+        }
+        final String urlString = repo + "dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";
         System.out.println("Downloading " + urlString + " ...");
         try {
