@@ -180,6 +180,9 @@ class Booter {
     public static String repoOptions() {
         Properties properties = new Properties();
         Path optionFile = getJekaUserHomeDir().resolve("options.properties");
+        if (!Files.exists(optionFile)) {
+            return null;
+        }
         try (InputStream inputStream = Files.newInputStream(optionFile)) {
             properties.load(inputStream);
         } catch (IOException e) {
