@@ -30,21 +30,25 @@ class Booter {
 
     public static void main(String[] args) throws Exception {
         final Path jekawDir = Paths.get(args[0]);
-        final String version = version(jekawDir);
-        final Path path = getJekaBinPath(version);
-        if (!Files.exists(path)) {
-            final Path zip = downloadDistribZip(version);
-            final Path dir = getJekaVersionCacheDir(version);
-            System.out.println("Unzip distribution to " + dir + " ...");
-            Files.createDirectories(dir);
-            unzip(zip, dir);
-            Files.deleteIfExists(dir.resolve("options.properties"));
-            Files.deleteIfExists(dir.resolve("system.properties"));
-            Files.deleteIfExists(dir.resolve("jeka.bat"));
-            Files.deleteIfExists(dir.resolve("jeka"));
-            System.out.println("Jeka " + version + " installed in " + dir);
+        Properties props = props(jekawDir);
+        Path jekaBinPath = location(props);  // First try to get it from explicit location
+        if (jekaBinPath == null) {
+            final String version = version(props);
+            jekaBinPath = getJekaBinPath(version);
+            if (!Files.exists(jekaBinPath)) {
+                final Path zip = downloadDistribZip(version);
+                final Path dir = getJekaVersionCacheDir(version);
+                System.out.println("Unzip distribution to " + dir + " ...");
+                Files.createDirectories(dir);
+                unzip(zip, dir);
+                Files.deleteIfExists(dir.resolve("options.properties"));
+                Files.deleteIfExists(dir.resolve("system.properties"));
+                Files.deleteIfExists(dir.resolve("jeka.bat"));
+                Files.deleteIfExists(dir.resolve("jeka"));
+                System.out.println("Jeka " + version + " installed in " + dir);
+            }
         }
-        final ClassLoader classLoader = new URLClassLoader(new URL[] {path.toUri().toURL()});
+        final ClassLoader classLoader = new URLClassLoader(new URL[] {jekaBinPath.toUri().toURL()});
         Thread.currentThread().setContextClassLoader(classLoader);
         final Class<?> mainClass = classLoader.loadClass(MAIN_CLASS_NAME);
         final Method method = mainClass.getMethod("main", String[].class);
@@ -153,7 +157,24 @@ class Booter {
         return jekawDir.resolve("jeka/wrapper/jeka.properties");
     }
 
-    private static String version(Path jekawDir) {
+    private static String version(Properties props) {
+        final String result = props.getProperty("jeka.version");
+        if (result == null || result.trim().isEmpty()) {
+            System.out.println("Please, specify a jeka.version property in file ./jeka/wrapper/jeka.properties");
+            System.exit(1);
+        }
+        return  result.trim();
+    }
+
+    private static Path location(Properties props) {
+        final String result = props.getProperty("jeka.distrib.location");
+        if (result == null || result.trim().isEmpty()) {
+            return null;
+        }
+        return  Paths.get(result.trim()).resolve(BIN_NAME);
+    }
+
+    private static Properties props(Path jekawDir) {
         final Path propFile = getWrapperPropsFile(jekawDir);
         if (!Files.exists(propFile)) {
             System.out.println("No file found at " + propFile + ". Please rerun 'jeka scaffold#wrap");
@@ -162,16 +183,12 @@ class Booter {
         final Properties props = new Properties();
         try (InputStream inputStream = Files.newInputStream(propFile)){
             props.load(inputStream);
-            final String result = props.getProperty("jeka.version");
-            if (result == null || result.trim().isEmpty()) {
-                System.out.println("Please, specify a jeka.version property in file ./jeka/wrapper/jeka.properties");
-                System.exit(1);
-            }
-            return  result.trim();
+            return props;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
+
 
 
 }

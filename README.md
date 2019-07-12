@@ -88,16 +88,19 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 * Clone this repository in Eclipse. Project is already configured ( *.project* and *.classpath* are stored in git).
 * Add the `JEKA_USER_HOME` classpath variable pointing on [USER_HOME]/.jeka 
 * Make sure the project is configured to compile using a JDK8 or higher and not a JRE.
-* Run `dev.jeka.core.CoreBuild` class main method. This class is located in *jeka/def* folder. 
-* This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder
+* Run `dev.jeka.core.CoreBuildAndIT` class main method. This class is located in *jeka/def* folder. 
+* This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder and run full Integration test suite.
 
 ## Build Jeka from IntelliJ
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
 * Add the `JEKA_USER_HOME` variable pointing on [USER_HOME]/.jeka 
 * Make sure the project is configured with a JDK8 or higher.
-* Run `dev.jeka.core.CoreBuild` class main method. This class is located in *jeka/def* folder, inside *dev.jeka.core* project.
-* This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder
+* Run `dev.jeka.core.CoreBuildAndIT` class main method. This class is located in *jeka/def* folder, inside *dev.jeka.core* module.
+  Make sure to run it using `$MODULE_WORKING_DIR$` as working directory.
+* This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder  and run full Integration test suite.
+
+To build the project without running whole integration test suite, run `dev.jeka.core.CoreBuild` class main method.
 
 ## How to Release ?
 
