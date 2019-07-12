@@ -1,7 +1,6 @@
 package dev.jeka.core.wrapper;
 
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsObject;
 
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
@@ -19,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -62,14 +60,7 @@ class Booter {
     }
 
     private static Path downloadDistribZip(Properties properties, String version) {
-        String repo = properties.getProperty("jeka.repo.url");
-        if (repo != null && !repo.trim().isEmpty()) {
-            if (!repo.trim().endsWith("/")) {
-                repo = repo.trim() + "/";
-            }
-        } else {
-            repo = "https://repo.maven.apache.org/maven2/";
-        }
+        String repo = JkUtilsObject.firstNonNull(repoOptions(), "https://repo.maven.apache.org/maven2/");
         final String urlString = repo + "dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";
         System.out.println("Downloading " + urlString + " ...");
@@ -182,10 +173,11 @@ class Booter {
         if (result == null || result.trim().isEmpty()) {
             return null;
         }
+
         return  Paths.get(result.trim()).resolve(BIN_NAME);
     }
 
-    public String repoOptions() {
+    public static String repoOptions() {
         Properties properties = new Properties();
         Path optionFile = getJekaUserHomeDir().resolve("options.properties");
         try (InputStream inputStream = Files.newInputStream(optionFile)) {
