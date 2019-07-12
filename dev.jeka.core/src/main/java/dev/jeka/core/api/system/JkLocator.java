@@ -53,37 +53,6 @@ public final class JkLocator {
     }
 
     /**
-     * Returns the Jeka wrapped version declared in the specified project. Returns <code>null</code> if no wrapped
-     * version is declared.
-     */
-    public static String getWrappedJekaVersion(Path projectRoot) {
-        final Path jekaPropFile = projectRoot.resolve("jeka/boot/jeka.properties");
-        if (!Files.exists(jekaPropFile)) {
-            return null;
-        }
-        final Properties properties = new Properties();
-        try (InputStream fis = Files.newInputStream(jekaPropFile)){
-            properties.load(new FileInputStream(jekaPropFile.toFile()));
-        } catch (final IOException e) {
-            JkLog.warn("Impossible to read property file " + jekaPropFile + ". Jeka wrapped version will be ignored");
-            return null;
-        }
-        final String result = properties.getProperty("jeka.version");
-        if (result == null || result.trim().isEmpty()) {
-            JkLog.warn("Property file " + jekaPropFile + " does not contain jeka.version property. Jeka wrapped version will be ignored");
-            return null;
-        }
-        return result;
-    }
-
-    /**
-     * Returns the relative path from Jeka User Dir to to specified wrapped version
-     */
-    public static String getWrappedVersionRelativeDir(String version) {
-        return "cache/wrapper/" + version;
-    }
-
-    /**
      * Returns the Jeka user directory.
      */
     public static Path getJekaUserHomeDir() {

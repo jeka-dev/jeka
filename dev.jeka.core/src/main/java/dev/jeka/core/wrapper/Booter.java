@@ -1,5 +1,8 @@
 package dev.jeka.core.wrapper;
 
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -16,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -181,6 +185,21 @@ class Booter {
         return  Paths.get(result.trim()).resolve(BIN_NAME);
     }
 
+    public String repoOptions() {
+        Properties properties = new Properties();
+        Path optionFile = getJekaUserHomeDir().resolve("options.properties");
+        try (InputStream inputStream = Files.newInputStream(optionFile)) {
+            properties.load(inputStream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        String url= properties.getProperty("repo.download.url");
+        if (url == null || url.trim().isEmpty()) {
+            return null;
+        }
+        return url.trim().endsWith("/") ? url.trim() : url.trim() + "/";
+    }
+
     private static Properties props(Path jekawDir) {
         final Path propFile = getWrapperPropsFile(jekawDir);
         if (!Files.exists(propFile)) {
@@ -195,7 +214,5 @@ class Booter {
             throw new UncheckedIOException(e);
         }
     }
-
-
 
 }
