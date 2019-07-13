@@ -1,25 +1,14 @@
 package dev.jeka.core.integrationtest;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.DEFAULT_SCOPE_MAPPING;
-import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.COMPILE;
-import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.RUNTIME;
-import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.TEST;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import dev.jeka.core.api.depmanagement.*;
+import org.junit.Test;
 
 import java.util.Set;
 
-import org.junit.Test;
-
-import dev.jeka.core.api.depmanagement.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
-import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkResolutionParameters;
-import dev.jeka.core.api.depmanagement.JkResolveResult;
-import dev.jeka.core.api.depmanagement.JkScopeMapping;
+import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.DEFAULT_SCOPE_MAPPING;
+import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ResolverWithoutScopeMapperIT {
 
@@ -80,7 +69,10 @@ public class ResolverWithoutScopeMapperIT {
         final JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
         final JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         final Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
-        assertEquals("Wrong modules size " + moduleIds, 24, moduleIds.size());
+
+        // According presence or absence of cache it could be 24 vor 25
+        assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() >= 24);
+        assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() <= 25);
 
     }
 
