@@ -166,4 +166,11 @@ public final class JkPathMatcher implements PathMatcher {
         }
     }
 
+    // ------------------------------------- Other
+
+    public JkPathMatcher reversed() {
+        PathMatcher matcher = path -> !this.matcher.matches(path);
+        return new JkPathMatcher(matcher, "Reverse of " + this.label);
+    }
+
 }

@@ -1,3 +1,9 @@
+## 0.9.0 (Ongoing)
+
+* Wrapper fully implemented(multi-project, configurable location)
+* Dependency resolver can find groups, modules and versions available on remote repositories
+* Getting started doc improved
+
 ## 0.8.4
 
 * Partial jekaw wrapper (working on single projects)

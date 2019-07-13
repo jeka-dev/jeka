@@ -1,8 +1,9 @@
 package dev.jeka.core.api.file;
 
-import static org.junit.Assert.*;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsPathTest;
+import org.junit.Test;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -11,9 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsPathTest;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("javadoc")
 public class JkPathTreeTest {
@@ -67,8 +66,12 @@ public class JkPathTreeTest {
         assertTrue(Files.exists(zipRoot.resolve("subfolder/sample.txt")));
         zipRoot.getFileSystem().close();
 
-        // Test overwrite
-        JkPathTree.of(sampleDir()).zipTo(zip);
+        // Test with match
+        Files.delete(zip);
+        JkPathTree.of(sampleDir()).andMatching(false, "**r/sample.txt").zipTo(zip);
+        zipRoot = JkUtilsPath.zipRoot(zip);
+        assertFalse(Files.exists(zipRoot.resolve("subfolder/sample.txt")));
+
     }
 
     @Test
