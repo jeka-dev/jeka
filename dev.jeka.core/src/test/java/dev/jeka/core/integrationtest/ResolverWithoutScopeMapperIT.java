@@ -70,7 +70,7 @@ public class ResolverWithoutScopeMapperIT {
         final JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         final Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
 
-        // According presence or absence of cache it could be 24 vor 25
+        // According presence or absence of cache it could be 24 or 25
         assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() >= 24);
         assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() <= 25);
 
