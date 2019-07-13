@@ -1,21 +1,13 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
-
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
 
@@ -46,7 +38,7 @@ public class AClassicBuild extends JkCommands {
         project.setSourceVersion(JkJavaVersion.V8)
                 .addDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
-                        .and("com.sun.jersey:jersey-server:1.19")
+                        .and("com.sun.jersey:jersey-server:1.19.4")
                         .and("junit:junit:4.11", TEST));
         JkJavaProjectMaker maker = project.getMaker();
 
