@@ -38,7 +38,7 @@ public class AClassicBuild extends JkCommands {
         project.setSourceVersion(JkJavaVersion.V8)
                 .addDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
-                      //  .and("com.sun.jersey:jersey-server:1.19.4")
+                        .and("com.sun.jersey:jersey-server:1.19.4")
                         .and("junit:junit:4.11", TEST));
         JkJavaProjectMaker maker = project.getMaker();
 
