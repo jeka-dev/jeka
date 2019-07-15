@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -27,27 +28,31 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     private final List<String> options;
 
-    private JkocoJunitEnhancer(Path agent, boolean enabled, Path destFile) {
+    private JkocoJunitEnhancer(Path agent, boolean enabled, Path destFile, List<String> options) {
         super();
         this.agent = agent;
         this.enabled = enabled;
         this.destFile = destFile;
-        this.options = new LinkedList<>();
+        this.options = options;
     }
 
     public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
         PrintStream outputStream = JkLog.verbosity() == JkLog.Verbosity.VERBOSE ? new PrintStream(JkLog.getOutputStream()) : null;
         final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, outputStream, JkUrlClassLoader.getUrlCacheDir());
-        return new JkocoJunitEnhancer(file, true, destFile);
+        return new JkocoJunitEnhancer(file, true, destFile, Collections.emptyList());
     }
 
     public JkocoJunitEnhancer withAgent(Path jacocoagent) {
-        return new JkocoJunitEnhancer(jacocoagent, enabled, destFile);
+        return new JkocoJunitEnhancer(jacocoagent, enabled, destFile, options);
+    }
+
+    public JkocoJunitEnhancer withOptions(List<String> options) {
+        return new JkocoJunitEnhancer(agent, enabled, destFile, new LinkedList<>(options));
     }
 
     public JkocoJunitEnhancer enabled(boolean enabled) {
-        return new JkocoJunitEnhancer(this.agent, enabled, destFile);
+        return new JkocoJunitEnhancer(this.agent, enabled, destFile, options);
     }
 
     @Override

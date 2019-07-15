@@ -391,7 +391,7 @@ public final class JkUtilsIO {
             @Override
             public void run() {
                 try (InputStreamReader isr = new InputStreamReader(in); BufferedReader br = new BufferedReader(isr)) {
-                    String line = null;
+                    String line;
                     while (!stop.get() && (line = br.readLine()) != null) {
                         final byte[] bytes = line.getBytes();
                         for (OutputStream out : outs) {

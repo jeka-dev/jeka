@@ -42,7 +42,7 @@ public final class JkInfo {
     }
 
     private static String readVersionFrom(String manifestPath) {
-        Manifest manifest = null;
+        Manifest manifest;
         try {
             manifest = new Manifest(new URL(manifestPath).openStream());
             final Attributes attrs = manifest.getMainAttributes();

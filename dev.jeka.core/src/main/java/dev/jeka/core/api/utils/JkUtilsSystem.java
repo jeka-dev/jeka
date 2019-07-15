@@ -43,7 +43,7 @@ public final class JkUtilsSystem {
     public static List<Path> classloaderEntries(URLClassLoader classLoader) {
         final List<Path> result = new ArrayList<>();
         for (final URL url : classLoader.getURLs()) {
-            String pathName = null;
+            String pathName;
             try {
                 pathName = url.toURI().getPath().replaceAll("%20", " ").trim();
             } catch (URISyntaxException e) {

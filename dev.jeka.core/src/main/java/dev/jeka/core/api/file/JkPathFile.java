@@ -136,7 +136,7 @@ public final class JkPathFile {
             final MessageDigest md = MessageDigest.getInstance(algorithm);
             md.reset();
             final byte[] buf = new byte[2048];
-            int len = 0;
+            int len;
             while ((len = is.read(buf)) != -1) {
                 md.update(buf, 0, len);
             }

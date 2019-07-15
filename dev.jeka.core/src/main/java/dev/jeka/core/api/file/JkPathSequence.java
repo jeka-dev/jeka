@@ -151,7 +151,7 @@ public final class JkPathSequence implements Iterable<Path> {
                 result.add(baseDir.toAbsolutePath().resolve(entry));
             }
         }
-        return new JkPathSequence(entries);
+        return new JkPathSequence(result);
     }
 
     // --------------- Canonical methods ------------------------------------------

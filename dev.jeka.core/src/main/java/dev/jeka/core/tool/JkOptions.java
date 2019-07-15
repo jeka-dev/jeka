@@ -30,7 +30,7 @@ public final class JkOptions {
     static synchronized void init(Map<String, String> options) {
         final Map<String, String> map = new HashMap<>();
         map.putAll(options);
-        INSTANCE.props.putAll(options);
+        INSTANCE.props.putAll(map);
     }
 
     private JkOptions(Map<String, String> options) {
