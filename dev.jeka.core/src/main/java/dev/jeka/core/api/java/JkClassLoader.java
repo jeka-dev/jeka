@@ -206,40 +206,6 @@ public class JkClassLoader {
         return JkUtilsIO.cloneBySerialization(object, to);
     }
 
-    private class CrossClassloaderInvokationHandler implements InvocationHandler {
-
-        CrossClassloaderInvokationHandler(Object target, ClassLoader fromClassLoader) {
-            this.targetObject = target;
-            this.fromClassLoader = fromClassLoader;
-        }
-
-        private final Object targetObject;
-
-        private final ClassLoader fromClassLoader;
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            final Method targetMethod = JkUtilsReflect.methodWithSameNameAndArgType(method,
-                    targetObject.getClass());
-            return invokeInstanceMethod(fromClassLoader, targetObject, targetMethod, args);
-        }
-
-    }
-
-    /**
-     * Creates an instance of the specified class in this classloader and
-     * callable from the current thread classloader. Arguments ans result are
-     * serialized (if needed) so we keep compatibility between classes.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T createCrossClassloaderProxy(Class<T> interfaze, String className,
-                                             String staticMethodFactory, Object... args) {
-        final Object target = this.invokeStaticMethod(false, className, staticMethodFactory, args);
-        ClassLoader from = Thread.currentThread().getContextClassLoader();
-        return ((T) Proxy.newProxyInstance(from,
-                new Class[]{interfaze}, new CrossClassloaderInvokationHandler(target, from)));
-    }
-
     /**
      * Invoke instance method on specified object using this classloader as the curent context class loader.
      *

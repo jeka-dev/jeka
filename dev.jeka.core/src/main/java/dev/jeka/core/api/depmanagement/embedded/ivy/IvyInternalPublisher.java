@@ -82,26 +82,6 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         throw new IllegalStateException(dependencyResolver.getClass().getName() + " not handled");
     }
 
-    private boolean hasMavenPublishRepo() {
-        for (final DependencyResolver dependencyResolver : IvyTranslations
-                .publishResolverOf(this.ivy.getSettings())) {
-            if (isMaven(dependencyResolver)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean hasIvyPublishRepo() {
-        for (final DependencyResolver dependencyResolver : IvyTranslations
-                .publishResolverOf(this.ivy.getSettings())) {
-            if (!isMaven(dependencyResolver)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Publish the specified module. Dependencies, default scopes and mapping
      * are necessary in order to generate the ivy.xml file.

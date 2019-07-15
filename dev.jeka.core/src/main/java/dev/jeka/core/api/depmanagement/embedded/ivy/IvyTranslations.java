@@ -188,14 +188,6 @@ final class IvyTranslations {
         return result;
     }
 
-    private static Set<String> ivyNameAlgos(Set<String> algos) {
-        final Set<String> result = new HashSet<>();
-        for (final String algo : algos) {
-            result.add(ALGOS.get(algo));
-        }
-        return result;
-    }
-
     private static boolean isFileSystem(URL url) {
         return url.getProtocol().equals("file");
     }
