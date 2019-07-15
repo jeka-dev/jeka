@@ -19,13 +19,6 @@ import org.w3c.dom.Element;
  */
 final class ProjectDef {
 
-    private final List<Class<?>> runClasses;
-
-    private ProjectDef(List<Class<?>> runClasses) {
-        super();
-        this.runClasses = Collections.unmodifiableList(runClasses);
-    }
-
     /**
      * Defines methods and options available on a given build class.
      *
@@ -104,16 +97,16 @@ final class ProjectDef {
             return !JkUtilsReflect.getAllDeclaredFields(field.getType(), JkDoc.class).isEmpty();
         }
 
-        String description(String prefix, boolean withHeader) {
+        String description() {
             StringBuilder stringBuilder = new StringBuilder();
             for (Class<? extends JkCommands> buildClass : this.runClassHierarchy()) {
-                stringBuilder.append(description(buildClass, prefix, withHeader, false));
+                stringBuilder.append(description(buildClass, "", true, false));
             }
             return stringBuilder.toString();
         }
 
-        String flatDescription(String prefix, boolean withHeader) {
-            return description(this.runOrPlugin.getClass(), prefix, withHeader, true);
+        String flatDescription(String prefix) {
+            return description(this.runOrPlugin.getClass(), prefix, false, true);
         }
 
 
@@ -381,9 +374,9 @@ final class ProjectDef {
     }
 
     private static class NameAndField {
-        String name;
-        Field field;
-        Class<?> rootClass; // for nested fields, we need the class declaring
+        final String name;
+        final Field field;
+        final Class<?> rootClass; // for nested fields, we need the class declaring
 
         // the asScopedDependency object
 

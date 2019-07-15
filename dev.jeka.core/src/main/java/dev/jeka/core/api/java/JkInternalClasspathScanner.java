@@ -10,7 +10,7 @@ import java.util.function.Predicate;
  */
 public interface JkInternalClasspathScanner {
 
-    static final JkInternalClasspathScanner INSTANCE = of();
+    JkInternalClasspathScanner INSTANCE = of();
 
     Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate);
 

@@ -25,7 +25,7 @@ public class BcGpgDoerTest {
 
     }
 
-    static InputStream sample() {
+    private static InputStream sample() {
         return JkGpgTest.class.getResourceAsStream("sampleFileToSign.txt");
     }
 

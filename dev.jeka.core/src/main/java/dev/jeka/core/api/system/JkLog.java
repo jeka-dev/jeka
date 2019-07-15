@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public final class JkLog implements Serializable {
 
     public enum Type {
-        INFO, WARN, ERROR, TRACE, PROGRESS, TASK, START_TASK, END_TASK;
+        INFO, WARN, ERROR, TRACE, PROGRESS, TASK, START_TASK, END_TASK
     }
 
     public enum Verbosity {
@@ -42,6 +42,7 @@ public final class JkLog implements Serializable {
 
     private static Verbosity verbosity = Verbosity.NORMAL;
 
+    // Field accessed though reflection
     private static AtomicInteger currentNestedTaskLevel = new AtomicInteger(0);
 
     private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();

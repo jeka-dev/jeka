@@ -10,7 +10,7 @@ import java.util.List;
  */
 public final class JkGitWrapper {
 
-    private JkProcess git;
+    private final JkProcess git;
 
     private JkGitWrapper(JkProcess process) {
         this.git = process;

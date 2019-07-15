@@ -38,7 +38,7 @@ public class JkComputedDependency implements JkFileDependency {
      * Creates a computed dependency to the specified files and {@link JkProcess} to run for
      * generating them.
      */
-    public static final JkComputedDependency of(final JkProcess process, Path... files) {
+    public static JkComputedDependency of(final JkProcess process, Path... files) {
         final List<Path> fileSet = JkUtilsIterable.listWithoutDuplicateOf(Arrays.asList(files));
         final Runnable runnable = new Runnable() {
 
@@ -60,7 +60,7 @@ public class JkComputedDependency implements JkFileDependency {
      * Creates a computed dependency to the specified files and the specified {@link Runnable} to run for
      * generating them.
      */
-    public static final JkComputedDependency of(Runnable runnable, Path... files) {
+    public static JkComputedDependency of(Runnable runnable, Path... files) {
         final List<Path> fileSet = JkUtilsIterable.listWithoutDuplicateOf(Arrays.asList(files));
         return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
     }
@@ -69,7 +69,7 @@ public class JkComputedDependency implements JkFileDependency {
      * Same as {@link #of(Path, JkJavaProcess, String, String...)} but you must specify a set of files
      * instead of a single one.
      */
-    public static final JkComputedDependency of(Iterable<Path> files, final JkJavaProcess process,
+    public static JkComputedDependency of(Iterable<Path> files, final JkJavaProcess process,
             final String className, final String... args) {
         final List<Path> fileSet = JkUtilsIterable.listWithoutDuplicateOf(JkUtilsPath.disambiguate(files));
         final Runnable runnable = () -> process.runClassSync(className, args);
@@ -80,7 +80,7 @@ public class JkComputedDependency implements JkFileDependency {
      * Creates a computed dependency to the specified file and the specified java program to run for
      * generating them.
      */
-    public static final JkComputedDependency of(Path file, final JkJavaProcess process,
+    public static JkComputedDependency of(Path file, final JkJavaProcess process,
             final String className, final String... args) {
         return of(JkUtilsIterable.setOf(file), process, className, args);
     }

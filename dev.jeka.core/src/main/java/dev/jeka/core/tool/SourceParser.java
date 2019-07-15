@@ -188,7 +188,7 @@ final class SourceParser {
     private static List<String> scanInsideAnnotation(Scanner scanner, URL url, String context) {
 
         final String betweenParenthesis = extractStringTo(scanner, ")", url, context);
-        final List<String> items = splitIgnoringQuotes(betweenParenthesis, ',');
+        final List<String> items = splitIgnoringQuotes(betweenParenthesis);
         for (final String item : items) {
             final String trimedItem = item.trim();
             if (trimedItem.startsWith("\"")) {
@@ -214,7 +214,7 @@ final class SourceParser {
         final Scanner innerScanner = new Scanner(input);
         innerScanner.useDelimiter("");
         final String braced = extractStringTo(innerScanner, "}", url, context);
-        final List<String> elements = splitIgnoringQuotes(braced, ',');
+        final List<String> elements = splitIgnoringQuotes(braced);
         final List<String> result = new LinkedList<>();
         for (final String element : elements) {
             result.add(withoutQuotes(element));
@@ -227,7 +227,7 @@ final class SourceParser {
                 "\"");
     }
 
-    private static List<String> splitIgnoringQuotes(String input, char delimiter) {
+    private static List<String> splitIgnoringQuotes(String input) {
         final List<String> result = new LinkedList<>();
         int start = 0;
         boolean inQuotes = false;
@@ -238,7 +238,7 @@ final class SourceParser {
             final boolean atLastChar = (current == input.length() - 1);
             if (atLastChar) {
                 result.add(input.substring(start));
-            } else if (input.charAt(current) == delimiter && !inQuotes) {
+            } else if (input.charAt(current) == ',' && !inQuotes) {
                 result.add(input.substring(start, current));
                 start = current + 1;
             }

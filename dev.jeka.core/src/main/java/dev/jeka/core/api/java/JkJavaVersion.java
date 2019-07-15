@@ -16,7 +16,7 @@ public final class JkJavaVersion {
     }
 
     /** Stands for Java version 1.3 */
-    public static JkJavaVersion V1_3 = JkJavaVersion.of("1.3");
+    public static final JkJavaVersion V1_3 = JkJavaVersion.of("1.3");
 
     /** Stands for Java version 1.4 */
     public  static final JkJavaVersion V1_4 = JkJavaVersion.of("1.4");

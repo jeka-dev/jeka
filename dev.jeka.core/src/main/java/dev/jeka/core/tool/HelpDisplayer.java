@@ -28,7 +28,7 @@ final class HelpDisplayer {
                 .append("Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
                 .append("\nAvailable methods and options :\n")
-                .append(RunClassDef.of(jkCommands).description("", true));
+                .append(RunClassDef.of(jkCommands).description());
 
         // List plugins
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
@@ -41,7 +41,7 @@ final class HelpDisplayer {
         JkLog.info(sb.toString());
     }
 
-    static String standardOptions() {
+    private static String standardOptions() {
         StringBuilder sb = new StringBuilder();
         sb.append("Built-in options (these options are not specific to a plugin or a command class) :\n");
         sb.append("  -LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.\n");
@@ -69,7 +69,7 @@ final class HelpDisplayer {
         }
     }
 
-    static void helpPlugins(JkCommands jkCommands) {
+    private static void helpPlugins(JkCommands jkCommands) {
         JkLog.info(helpPluginsDescription(jkCommands));
     }
 
@@ -118,7 +118,7 @@ final class HelpDisplayer {
         }
         final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkCommands.class, jkCommands);
         sb.append("\n");
-        sb.append(RunClassDef.of(object).flatDescription(description.shortName() + "#", false));
+        sb.append(RunClassDef.of(object).flatDescription(description.shortName() + "#"));
         return sb.toString();
     }
 

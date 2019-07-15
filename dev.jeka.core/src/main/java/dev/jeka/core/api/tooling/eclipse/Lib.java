@@ -24,13 +24,13 @@ class Lib {
         return new Lib(null, project, scope, exported);
     }
 
-    public final Path file;
+    private final Path file;
 
-    public final String projectRelativePath;
+    private final String projectRelativePath;
 
-    public final JkScope scope;
+    private final JkScope scope;
 
-    public final boolean exported;
+    private final boolean exported;
 
     private Lib(Path file, String projectRelativePath, JkScope scope, boolean exported) {
         super();

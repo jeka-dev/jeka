@@ -13,7 +13,7 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
  */
 public interface JkInternalPublisher {
 
-    static final String FACTORY_CLASS_NAME = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalPublisherFactory";
+    String FACTORY_CLASS_NAME = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalPublisherFactory";
 
     void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
             JkDependencySet dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,

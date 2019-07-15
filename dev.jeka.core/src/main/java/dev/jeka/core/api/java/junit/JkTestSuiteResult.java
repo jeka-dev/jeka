@@ -40,9 +40,9 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    static JkTestSuiteResult ofEmpty(Properties properties, String name, long durationInMillis) {
+    static JkTestSuiteResult ofEmpty(Properties properties, String name) {
         return new JkTestSuiteResult(properties, name, 0, 0, Collections.EMPTY_LIST,
-                durationInMillis);
+                0);
     }
 
     List<? extends JkTestCaseResult> testCaseResults() {

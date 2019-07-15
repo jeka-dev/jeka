@@ -29,6 +29,7 @@ final class BcGpgDoer implements JkInternalGpgDoer {
 
     private static final int HASH_ALGO = PGPUtil.SHA1;
 
+    // Accessed through reflection
     static BcGpgDoer of() {
         return new BcGpgDoer();
     }
@@ -172,12 +173,12 @@ final class BcGpgDoer implements JkInternalGpgDoer {
         private final BCPGInputStream in;
         private final KeyFingerPrintCalculator fingerPrintCalculator;
 
-        public InnerPGPObjectFactory(InputStream in, KeyFingerPrintCalculator fingerPrintCalculator) {
+        InnerPGPObjectFactory(InputStream in, KeyFingerPrintCalculator fingerPrintCalculator) {
             this.in = new BCPGInputStream(in);
             this.fingerPrintCalculator = fingerPrintCalculator;
         }
 
-        public PGPSecretKeyRing nextSecretKey() {
+        PGPSecretKeyRing nextSecretKey() {
             int tag;
             try {
                 tag = in.nextPacketTag();

@@ -26,15 +26,6 @@ class ArtifactProducerDependency extends JkComputedDependency  {
         this.artifactProducer = producer;
     }
 
-    /*
-     * Constructs a {@link ArtifactProducerDependency} from an artifact producer and the artifact file id
-     * one is interested on.
-     */
-    ArtifactProducerDependency(JkArtifactProducer artifactProducer,
-            JkArtifactId... artifactFileIds) {
-        this(artifactProducer, Arrays.asList(artifactFileIds));
-    }
-
     private static Iterable<JkArtifactId> artifacts(JkArtifactProducer artifactProducer, Iterable<JkArtifactId> artifactFileIds) {
         if (!artifactFileIds.iterator().hasNext()) {
             return JkUtilsIterable.listOf(artifactProducer.getMainArtifactId());

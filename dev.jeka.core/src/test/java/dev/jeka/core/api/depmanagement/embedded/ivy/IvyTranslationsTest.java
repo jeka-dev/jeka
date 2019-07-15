@@ -25,12 +25,12 @@ public class IvyTranslationsTest {
 
     @Test
     public void toPublicationLessModule() throws Exception {
-        final JkScopeMapping mapping = DEFAULT_SCOPE_MAPPING;
         final JkVersionProvider versionProvider = JkVersionProvider.of();
 
         // handle multiple artifacts properly
         JkDependencySet deps = deps();
-        final DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps, mapping, versionProvider);
+        final DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps, DEFAULT_SCOPE_MAPPING,
+                versionProvider);
         final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
         assertEquals(1, dependencyDescriptors.length);
         final DependencyDescriptor depDesc = dependencyDescriptors[0];

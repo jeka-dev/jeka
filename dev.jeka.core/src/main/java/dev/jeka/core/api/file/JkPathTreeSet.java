@@ -31,28 +31,28 @@ public final class JkPathTreeSet {
     /**
      * Creates a {@link JkPathTreeSet} from an iterable of {@link JkPathTree}.
      */
-    public static final JkPathTreeSet of(Iterable<JkPathTree> dirs) {
+    public static JkPathTreeSet of(Iterable<JkPathTree> dirs) {
         return new JkPathTreeSet(JkUtilsIterable.listOf(dirs));
     }
 
     /**
      * Creates an empty {@link JkPathTreeSet}.
      */
-    public static final JkPathTreeSet ofEmpty() {
+    public static JkPathTreeSet ofEmpty() {
         return new JkPathTreeSet(Collections.emptyList());
     }
 
     /**
      * Creates a {@link JkPathTreeSet} to an array of {@link JkPathTree}.
      */
-    public static final JkPathTreeSet of(JkPathTree... trees) {
+    public static JkPathTreeSet of(JkPathTree... trees) {
         return new JkPathTreeSet(Arrays.asList(trees));
     }
 
     /**
      * Creates a {@link JkPathTreeSet} from an array of folder.
      */
-    public static final JkPathTreeSet of(Path... folders) {
+    public static JkPathTreeSet of(Path... folders) {
         final List<JkPathTree> dirs = new ArrayList<>(folders.length);
         for (final Path folder : folders) {
             dirs.add(JkPathTree.of(folder));
@@ -117,15 +117,6 @@ public final class JkPathTreeSet {
     }
 
     // ------------------------ additional filters -------------------------------------------
-
-
-    public JkPathTreeSet andAccept(Iterable<String> globPatterns) {
-        final List<JkPathTree> list = new LinkedList<>();
-        for (final JkPathTree tree : this.pathTrees) {
-            list.add(tree.andMatching(true, globPatterns));
-        }
-        return new JkPathTreeSet(list);
-    }
 
     /**
      * Creates a {@link JkPathTree} which is a copy of this {@link JkPathTree}
@@ -281,13 +272,8 @@ public final class JkPathTreeSet {
         }
         final JkPathTreeSet other = (JkPathTreeSet) obj;
         if (pathTrees == null) {
-            if (other.pathTrees != null) {
-                return false;
-            }
-        } else if (!pathTrees.equals(other.pathTrees)) {
-            return false;
-        }
-        return true;
+            return other.pathTrees == null;
+        } else return pathTrees.equals(other.pathTrees);
     }
 
 }

@@ -46,7 +46,7 @@ public final class JkImlGenerator {
 
     private JkProjectSourceLayout sourceLayout;
 
-    private Path baseDir;
+    private final Path baseDir;
 
     /** Used to generate JRE container */
     private JkJavaVersion sourceJavaVersion;
@@ -482,15 +482,6 @@ public final class JkImlGenerator {
         }
         if (JkJavaVersion.V8.equals(javaVersion)) {
             return "1.8";
-        }
-        if (JkJavaVersion.V9.equals(javaVersion)) {
-            return "1.9";
-        }
-        if (JkJavaVersion.V9.equals(javaVersion)) {
-            return "1.9";
-        }
-        if (JkJavaVersion.V10.equals(javaVersion)) {
-            return "1.10";
         }
         return javaVersion.get();
     }

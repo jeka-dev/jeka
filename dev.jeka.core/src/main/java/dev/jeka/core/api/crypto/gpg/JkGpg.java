@@ -20,7 +20,7 @@ public final class JkGpg {
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
-    private static JkInternalGpgDoer internalGpgDoer = JkInternalGpgDoer.of();
+    private static final JkInternalGpgDoer INTERNAL_GPG_DOER = JkInternalGpgDoer.of();
 
     private final Path pubRing;
 
@@ -31,8 +31,8 @@ public final class JkGpg {
 
     private JkGpg(Path pubRing, Path secRing, String password) {
         super();
-        this.pubRing = pubRing == null ? null : pubRing;
-        this.secRing = secRing == null ? null : secRing;
+        this.pubRing = pubRing;
+        this.secRing = secRing;
         this.passphrase = password;
     }
 
@@ -99,7 +99,7 @@ public final class JkGpg {
         if (!Files.exists(getSecretRing())) {
             throw new IllegalStateException("Specified secret ring file " + secRing + " not found.");
         }
-        internalGpgDoer.sign(fileToSign, this.secRing, keyName, signatureFile, pass, true);
+        INTERNAL_GPG_DOER.sign(fileToSign, this.secRing, keyName, signatureFile, pass, true);
     }
 
     /**
@@ -118,7 +118,7 @@ public final class JkGpg {
         if (!Files.exists(getPublicRing())) {
             throw new IllegalStateException("Specified public ring file " + getPublicRing() + " not found.");
         }
-        return internalGpgDoer.verify(fileToVerify, pubRing, signature);
+        return INTERNAL_GPG_DOER.verify(fileToVerify, pubRing, signature);
     }
 
     /**

@@ -87,7 +87,7 @@ final class FieldInjector {
 
     }
 
-    static Object defaultValue(Class<?> type) {
+    private static Object defaultValue(Class<?> type) {
         if (type.equals(Boolean.class) || type.equals(boolean.class)) {
             return true;
         }
@@ -162,74 +162,6 @@ final class FieldInjector {
             }
         }
         return result;
-    }
-
-    // ----------------------------------
-    // Methods to inspect field values
-    // ----------------------------------
-
-    public static Map<String, String> injectedFields(Object inspected) {
-        return injectedFields("", inspected);
-    }
-
-    private static Map<String, String> injectedFields(String context, Object inspected) {
-        final List<Field> fields = getOptionFields(inspected.getClass());
-        final Map<String, String> result = new TreeMap<>();
-        for (final Field field : fields) {
-            final Object value = JkUtilsReflect.getFieldValue(inspected, field);
-            final String stringValue = stringValue(value);
-
-            // Composite value
-            if (stringValue == UNHANDLED_TYPE) {
-                final String subContext = context + field.getName() + ".";
-                result.putAll(injectedFields(subContext, value));
-            } else {
-                result.put(context + field.getName(), stringValue);
-            }
-        }
-        return result;
-    }
-
-    private static String stringValue(Object value) throws IllegalArgumentException {
-        if (value == null) {
-            return "null";
-        }
-        final Class<?> type = value.getClass();
-        if (type.equals(String.class)) {
-            return (String) value;
-        }
-        if (type.equals(Boolean.class) || type.equals(boolean.class)) {
-            return Boolean.toString((Boolean) value);
-        }
-        try {
-            if (type.equals(Integer.class) || type.equals(int.class)) {
-                return Integer.toString((Integer) value);
-            }
-            if (type.equals(Long.class) || type.equals(long.class)) {
-                return Long.toString((Long) value);
-            }
-            if (type.equals(Short.class) || type.equals(short.class)) {
-                return Short.toString((Short) value);
-            }
-            if (type.equals(Byte.class) || type.equals(byte.class)) {
-                return Byte.toString((Byte) value);
-            }
-            if (type.equals(Double.class) || type.equals(double.class)) {
-                return Double.toString((Double) value);
-            }
-            if (type.equals(Float.class) || type.equals(float.class)) {
-                return Float.toString((Float) value);
-            }
-            if (type.equals(File.class)) {
-                return ((File) value).getPath();
-            }
-        } catch (final NumberFormatException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
-        if (type.isEnum()) {
-            return value.toString();
-        }
-        return UNHANDLED_TYPE;
     }
 
 }

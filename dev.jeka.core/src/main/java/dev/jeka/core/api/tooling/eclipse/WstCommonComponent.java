@@ -24,7 +24,7 @@ class WstCommonComponent {
 
     private static final String LIB_PREFIX = "module:/classpath/lib/";
 
-    public static final WstCommonComponent of(Path projectDir) {
+    public static WstCommonComponent of(Path projectDir) {
         return new WstCommonComponent(parse(projectDir));
     }
 
@@ -47,7 +47,7 @@ class WstCommonComponent {
         return false;
     }
 
-    public static final boolean existIn(Path projectDir) {
+    public static boolean existIn(Path projectDir) {
         return Files.exists(componentFile(projectDir));
     }
 

@@ -54,7 +54,7 @@ public final class JkMvn implements Runnable {
      * white space to separate workds. Ex : JkMvn.of(myFile, "deleteArtifacts", "install",
      * "-U").
      */
-    public static final JkMvn of(Path workingDir, String... args) {
+    public static JkMvn of(Path workingDir, String... args) {
         if (MVN_CMD == null) {
             throw new IllegalStateException("Maven not installed on this machine");
         }

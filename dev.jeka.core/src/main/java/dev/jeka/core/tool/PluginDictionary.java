@@ -153,7 +153,7 @@ final class PluginDictionary {
 
         private final Class<? extends JkPlugin> clazz;
 
-        public PluginDescription(Class<? extends JkPlugin> clazz) {
+        PluginDescription(Class<? extends JkPlugin> clazz) {
             super();
             this.shortName = shortName(clazz);
             this.fullName = longName(clazz);

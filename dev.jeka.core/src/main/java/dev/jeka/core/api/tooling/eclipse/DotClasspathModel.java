@@ -53,20 +53,6 @@ final class DotClasspathModel {
         return new DotClasspathModel(classpathEntries);
     }
 
-    static DotClasspathModel from(String dotClasspathString) {
-        final Document document = JkUtilsXml.documentFrom(dotClasspathString);
-        return from(document);
-    }
-
-    String outputPath() {
-        for (final ClasspathEntry classpathEntry : classpathentries) {
-            if (classpathEntry.kind.equals(ClasspathEntry.Kind.OUTPUT)) {
-                return classpathEntry.path;
-            }
-        }
-        return null;
-    }
-
     public Sources sourceDirs(Path baseDir, Sources.TestSegregator segregator) {
         final List<JkPathTree> prods = new LinkedList<>();
         final List<JkPathTree> tests = new LinkedList<>();
@@ -80,18 +66,6 @@ final class DotClasspathModel {
             }
         }
         return new Sources(JkPathTreeSet.of(prods), JkPathTreeSet.of(tests));
-    }
-
-    public List<String> projectDependencies() {
-        final List<String> result = new LinkedList<>();
-        for (final ClasspathEntry classpathEntry : classpathentries) {
-            if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
-                if (classpathEntry.path.startsWith("/")) {
-                    result.add(classpathEntry.path);
-                }
-            }
-        }
-        return result;
     }
 
     public List<Lib> libs(Path baseDir, ScopeResolver scopeResolver) {
@@ -157,7 +131,7 @@ final class DotClasspathModel {
 
     static class ClasspathEntry {
 
-        public final static String JRE_CONTAINER_PREFIX = "org.eclipse.jdt.launching.JRE_CONTAINER";
+        final static String JRE_CONTAINER_PREFIX = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
         enum Kind {
             SRC, CON, LIB, VAR, OUTPUT, UNKNOWN
@@ -175,7 +149,7 @@ final class DotClasspathModel {
 
         private final Map<String, String> attributes = new HashMap<>();
 
-        public ClasspathEntry(Kind kind, String path, String excluding, String including,
+        ClasspathEntry(Kind kind, String path, String excluding, String including,
                 boolean exported) {
             super();
             this.kind = kind;
@@ -185,11 +159,11 @@ final class DotClasspathModel {
             this.exported = exported;
         }
 
-        public static ClasspathEntry of(Kind kind, String path) {
+        static ClasspathEntry of(Kind kind, String path) {
             return new ClasspathEntry(kind, path, null, null, false);
         }
 
-        public static ClasspathEntry from(Element classpathEntryEl) {
+        static ClasspathEntry from(Element classpathEntryEl) {
             final String kindString = classpathEntryEl.getAttribute("kind");
             final String path = classpathEntryEl.getAttribute("path");
             final String including = classpathEntryEl.getAttribute("including");
@@ -222,7 +196,7 @@ final class DotClasspathModel {
             return result;
         }
 
-        public JkPathTree srcAsJkDir(Path baseDir) {
+        JkPathTree srcAsJkDir(Path baseDir) {
             if (!this.kind.equals(Kind.SRC)) {
                 throw new IllegalStateException(
                         "Can only get source dir to classpath entry of kind 'src'.");
@@ -240,7 +214,7 @@ final class DotClasspathModel {
             return jkFileTree;
         }
 
-        public boolean isOptional() {
+        boolean isOptional() {
             return "true".equals(this.attributes.get("optional"));
         }
 
@@ -251,7 +225,7 @@ final class DotClasspathModel {
             return this.path.equals(other.path);
         }
 
-        public List<Path> conAsFiles() {
+        List<Path> conAsFiles() {
             if (!this.kind.equals(Kind.CON)) {
                 throw new IllegalStateException(
                         "Can only get files to classpath entry of kind 'con'.");
@@ -278,7 +252,7 @@ final class DotClasspathModel {
             return result;
         }
 
-        public Path libAsFile(Path baseDir, Map<String, Path> projectLocationMap) {
+        Path libAsFile(Path baseDir, Map<String, Path> projectLocationMap) {
             final String pathInProject;
             final Path pathAsFile = Paths.get(path);
             if (pathAsFile.isAbsolute() && Files.exists(pathAsFile)) {
@@ -294,11 +268,11 @@ final class DotClasspathModel {
             return baseDir.resolve(path);
         }
 
-        public boolean isProjectSrc() {
+        boolean isProjectSrc() {
             return path.startsWith("/");
         }
 
-        public String projectRelativePath(Path baseDir, Map<String, Path> projectLocationMap) {
+        String projectRelativePath(Path baseDir, Map<String, Path> projectLocationMap) {
             final Path projectDir = projectLocation(baseDir.getParent(), projectLocationMap);
             return baseDir.relativize(projectDir).toString();
         }

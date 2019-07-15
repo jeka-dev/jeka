@@ -17,7 +17,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  *
  * @author Jerome Angibaud
  */
-final class RunResolver {
+final class CommandResolver {
 
     private final Path baseDir;
 
@@ -25,18 +25,11 @@ final class RunResolver {
 
     final Path runClassDir;
 
-    RunResolver(Path baseDir) {
+    CommandResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
         this.runSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
         this.runClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
-    }
-
-    /**
-     * Resolves command classes defined in this project
-     */
-    List<Class<?>> resolveRunClasses() {
-        return resolveRunClasses(JkCommands.class);
     }
 
     /**
@@ -140,27 +133,6 @@ final class RunResolver {
             result = JkCommands.of(JkConstants.DEFAULT_RUN_CLASS);
         } finally {
             JkCommands.baseDirContext(null);
-        }
-        return result;
-    }
-
-    private List<Class<?>> resolveRunClasses(Class<? extends JkCommands> baseClass) {
-
-        final JkClassLoader classLoader = JkClassLoader.ofCurrent();
-        final List<Class<?>> result = new LinkedList<>();
-
-        // If there is a def sources
-        if (this.hasDefSource()) {
-            final JkPathTree dir = JkPathTree.of(runSourceDir);
-            for (final Path path : dir.getRelativeFiles()) {
-                if (path.toString().endsWith(".java")) {
-                    final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
-                    if (baseClass.isAssignableFrom(clazz)
-                            && !Modifier.isAbstract(clazz.getModifiers())) {
-                        result.add(clazz);
-                    }
-                }
-            }
         }
         return result;
     }

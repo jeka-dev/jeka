@@ -38,7 +38,7 @@ class Booter {
             final String version = version(props);
             jekaBinPath = getJekaBinPath(version);
             if (!Files.exists(jekaBinPath)) {
-                final Path zip = downloadDistribZip(props, version);
+                final Path zip = downloadDistribZip(version);
                 final Path dir = getJekaVersionCacheDir(version);
                 System.out.println("Unzip distribution to " + dir + " ...");
                 Files.createDirectories(dir);
@@ -55,11 +55,11 @@ class Booter {
         final Class<?> mainClass = classLoader.loadClass(MAIN_CLASS_NAME);
         final Method method = mainClass.getMethod("main", String[].class);
         final String[] actualArgs = args.length <= 1 ? new String[0]
-                : Arrays.asList(args).subList(1, args.length).toArray(new String[0]);
+                : Arrays.copyOfRange(args, 1, args.length);
         method.invoke(null, (Object) actualArgs);
     }
 
-    private static Path downloadDistribZip(Properties properties, String version) {
+    private static Path downloadDistribZip(String version) {
         String repo = JkUtilsObject.firstNonNull(repoOptions(), "https://repo.maven.apache.org/maven2/");
         final String urlString = repo + "dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";
@@ -177,7 +177,7 @@ class Booter {
         return  Paths.get(result.trim()).resolve(BIN_NAME);
     }
 
-    public static String repoOptions() {
+    private static String repoOptions() {
         Properties properties = new Properties();
         Path optionFile = getJekaUserHomeDir().resolve("options.properties");
         if (!Files.exists(optionFile)) {

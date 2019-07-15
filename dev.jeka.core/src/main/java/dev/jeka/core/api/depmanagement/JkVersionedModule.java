@@ -41,7 +41,7 @@ public final class JkVersionedModule {
      * Creates a <code>JkVersionedModule</code> from a string formatted as
      * <code>groupId:name:version</code>.
      */
-    public static final JkVersionedModule of(String description) {
+    public static JkVersionedModule of(String description) {
         final String[] items = description.split(":");
         if (items.length != 3) {
             throw new IllegalArgumentException(description
@@ -54,7 +54,7 @@ public final class JkVersionedModule {
      * Creates a <code>JkVersionedModule</code> from a string formatted as
      * <code>groupId:name:version</code>.
      */
-    public static final JkVersionedModule ofRootDirName(String rootDirName) {
+    public static JkVersionedModule ofRootDirName(String rootDirName) {
         return ofUnspecifiedVerion(JkModuleId.of(rootDirName));
     }
 

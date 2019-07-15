@@ -16,17 +16,17 @@ public interface JkPublishFilter {
     /**
      * A filter accepting everything.
      */
-    JkPublishFilter ACCEPT_ALL = (JkPublishFilter) versionedModule -> true;
+    JkPublishFilter ACCEPT_ALL = versionedModule -> true;
 
     /**
      * A filter accepting only snapshot versioned module.
      */
     JkPublishFilter ACCEPT_SNAPSHOT_ONLY =
-            (JkPublishFilter) versionedModule -> versionedModule.getVersion().isSnapshot();
+            versionedModule -> versionedModule.getVersion().isSnapshot();
 
     /**
      * A filter accepting only non-snapshot versioned module.
      */
     JkPublishFilter ACCEPT_RELEASE_ONLY =
-            (JkPublishFilter) versionedModule -> !versionedModule.getVersion().isSnapshot();
+            versionedModule -> !versionedModule.getVersion().isSnapshot();
 }

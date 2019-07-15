@@ -2,6 +2,7 @@ package dev.jeka.core.api.utils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -260,11 +261,7 @@ public final class JkUtilsString {
             hex[index++] = HEX_CHAR_TABLE[v >>> 4];
             hex[index++] = HEX_CHAR_TABLE[v & 0xF];
         }
-        try {
-            return new String(hex, "ASCII");
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Illegal Hex string", e);
-        }
+        return new String(hex, StandardCharsets.US_ASCII);
     }
 
     /**

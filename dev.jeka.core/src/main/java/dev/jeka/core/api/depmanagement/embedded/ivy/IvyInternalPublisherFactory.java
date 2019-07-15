@@ -14,8 +14,7 @@ final class IvyInternalPublisherFactory {
      * This method is only invoked by reflection. Please do not remove.
      */
     static JkInternalPublisher of(JkRepoSet publishRepos, Path artifactDir) {
-        Path arg = artifactDir == null ? null : artifactDir;
-        return IvyInternalPublisher.of(publishRepos, arg);
+        return IvyInternalPublisher.of(publishRepos, artifactDir);
     }
 
 }

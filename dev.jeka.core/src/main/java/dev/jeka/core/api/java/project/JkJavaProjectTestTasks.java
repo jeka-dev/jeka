@@ -103,7 +103,7 @@ public class JkJavaProjectTestTasks {
         this.runner = runner;
     }
 
-    private final JkUnit getDefaultTester() {
+    private JkUnit getDefaultTester() {
         final Path junitReport = maker.getOutLayout().getTestReportDir().resolve("junit");
         return JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC)
                 .withReportDir(junitReport);

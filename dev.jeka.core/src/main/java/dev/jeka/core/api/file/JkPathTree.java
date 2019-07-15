@@ -29,33 +29,33 @@ import java.util.stream.Stream;
  */
 public final class JkPathTree implements Closeable {
 
-    private static final JkPathMatcher NO_FILTER = JkPathMatcher.of();
+    private static final JkPathMatcher ACCEPT_ALL = JkPathMatcher.of();
 
     /**
      * Creates a {@link JkPathTree} having the specified root directory.
      */
     public static JkPathTree of(Path rootDir) {
-        return new JkPathTree(rootDir, false);
+        return JkPathTree.of(rootDir, false);
     }
 
     /**
      * Creates a {@link JkPathTree} having the specified root directory.
      */
     public static JkPathTree ofZip(Path zipFile) {
-        return new JkPathTree(zipFile.toAbsolutePath(), true);
+        return JkPathTree.of(zipFile.toAbsolutePath(), true);
     }
 
     private final RootHolder rootHolder;
 
     private final JkPathMatcher matcher;
 
-    private JkPathTree(Path rootDir, boolean zip) {
-        this(rootDir, NO_FILTER, zip);
+    private static JkPathTree of(Path rootDir, boolean zip) {
+        return of(rootDir, ACCEPT_ALL, zip);
     }
 
-    private JkPathTree(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
-        this.rootHolder = zipFile ? RootHolder.ofZip(rootDirOrArchive) : RootHolder.ofDir(rootDirOrArchive);
-        this.matcher = matcher;
+    private static JkPathTree of(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
+        final RootHolder rootHolder = zipFile ? RootHolder.ofZip(rootDirOrArchive) : RootHolder.ofDir(rootDirOrArchive);
+        return new JkPathTree(rootHolder, matcher);
     }
 
     private JkPathTree(RootHolder rootHolder, JkPathMatcher matcher) {
@@ -90,7 +90,7 @@ public final class JkPathTree implements Closeable {
      * Returns true if a matcher has explicitly been defined on this tree.
      */
     public boolean isDefineMatcher() {
-        return this.matcher == NO_FILTER;
+        return this.matcher == ACCEPT_ALL;
     }
 
     // ------------------------------- functional ---------------------------------

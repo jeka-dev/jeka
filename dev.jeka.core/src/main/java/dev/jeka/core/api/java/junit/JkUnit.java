@@ -234,7 +234,7 @@ public final class JkUnit {
 
         if (!classes.iterator().hasNext()) {
             JkLog.warn("No test class found on " + testSpec.getClassesToTest());
-            return JkTestSuiteResult.ofEmpty((Properties) System.getProperties().clone(), name, 0);
+            return JkTestSuiteResult.ofEmpty((Properties) System.getProperties().clone(), name);
         }
         final long start = System.nanoTime();
         final JkClassLoader classLoader = JkClassLoader.ofLoaderOf(classes.iterator().next());

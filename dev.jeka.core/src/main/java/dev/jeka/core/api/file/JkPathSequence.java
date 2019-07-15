@@ -62,8 +62,8 @@ public final class JkPathSequence implements Iterable<Path> {
     /**
      * Creates a <code>JkPathSequence</code> form specified entries
      */
-    public static JkPathSequence of(Path path1, Path path2, Path... others) { ;
-    return JkPathSequence.of(JkUtilsIterable.listOf2orMore(path1, path2, others));
+    public static JkPathSequence of(Path path1, Path path2, Path... others) {
+        return JkPathSequence.of(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
 
 

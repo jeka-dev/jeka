@@ -18,22 +18,19 @@ public final class JkImportedCommands {
 
     private static final ThreadLocal<Map<ImportedRunRef, JkCommands>> IMPORTED_RUN_CONTEXT = new ThreadLocal<>();
 
-    static JkImportedCommands of(Path masterRootDir, JkCommands masterRun) {
-        return new JkImportedCommands(masterRootDir, getDirectImportedRuns(masterRun));
+    static JkImportedCommands of(JkCommands masterRun) {
+        return new JkImportedCommands(getDirectImportedRuns(masterRun));
     }
 
     private final List<JkCommands> directImportedRuns;
 
     private List<JkCommands> transitiveImportedRuns;
 
-    private final Path masterRunBaseDir;
-
     // The declared @JkImportProject values, read at pre-compile time
     private List<Path> importedRunRoots = Collections.emptyList();
 
-    private JkImportedCommands(Path masterDir, List<JkCommands> runDeps) {
+    private JkImportedCommands( List<JkCommands> runDeps) {
         super();
-        this.masterRunBaseDir = masterDir;
         this.directImportedRuns = Collections.unmodifiableList(runDeps);
     }
 

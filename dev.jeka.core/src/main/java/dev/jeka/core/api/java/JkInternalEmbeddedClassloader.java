@@ -17,7 +17,7 @@ import java.nio.file.Path;
  */
 public class JkInternalEmbeddedClassloader {
 
-    private static ClassLoader classLoader;
+    private static final ClassLoader classLoader;
 
     static {
         JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.

@@ -153,40 +153,4 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
 
     }
 
-    static class Status {
-
-        public static final Status INTEGRATION = new Status("integration", true);
-
-        public static final Status MILESTONE = new Status("milestone", false);
-
-        public static final Status RELEASE = new Status("release", false);
-
-        public static final Status of(String name) {
-            return new Status(name, false);
-        }
-
-        public static final Status ofIntegration(String name) {
-            return new Status(name, true);
-        }
-
-        private final String name;
-
-        private final boolean integration;
-
-        private Status(String name, boolean integration) {
-            super();
-            this.name = name;
-            this.integration = integration;
-        }
-
-        public String name() {
-            return name;
-        }
-
-        public boolean integration() {
-            return integration;
-        }
-
-    }
-
 }

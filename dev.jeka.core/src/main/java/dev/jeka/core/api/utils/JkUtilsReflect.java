@@ -335,8 +335,7 @@ public final class JkUtilsReflect {
      */
     public static Method findMethodMethodDeclaration(Class<?> clazz, String name, Class<?>... argTypes) {
         try {
-            final Method method = clazz.getDeclaredMethod(name, argTypes);
-            return method;
+            return clazz.getDeclaredMethod(name, argTypes);
         } catch (final SecurityException e) {
             throw new RuntimeException(e);
         } catch (final NoSuchMethodException e) {
@@ -478,7 +477,7 @@ public final class JkUtilsReflect {
         final Set<Method> canditates = new HashSet<>(Arrays.asList(effectiveClass
                 .getMethods()));
         canditates.addAll(Arrays.asList(effectiveClass.getDeclaredMethods()));
-        final Class<?> types[] = new Class<?>[args.length];
+        final Class<?>[] types = new Class<?>[args.length];
         for (int i = 0; i < args.length; i++) {
             final Object arg = args[i];
             types[i] = arg == null ? null : arg.getClass();

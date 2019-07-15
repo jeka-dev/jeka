@@ -13,7 +13,7 @@ class PluginOptions {
 
     final String pluginName;
 
-    final Map<String, String> options;
+    private final Map<String, String> options;
 
     private PluginOptions(String pluginName, Map<String, String> options) {
         super();

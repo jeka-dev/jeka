@@ -123,7 +123,7 @@ final class CommandLine {
         return Collections.unmodifiableMap(result);
     }
 
-    private static List<PluginOptions> extractPluginOptions(String words[]) {
+    private static List<PluginOptions> extractPluginOptions(String[] words) {
         final Map<String, PluginOptions> setups = new LinkedHashMap<>();
         for (final String word : words) {
             if (MethodInvocation.isPluginMethodInvokation(word)) {
@@ -164,7 +164,7 @@ final class CommandLine {
 
     static final class MethodInvocation {
 
-        public static MethodInvocation parse(String word) {
+        static MethodInvocation parse(String word) {
             if (isPluginMethodInvokation(word)) {
                 return pluginMethod(JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL),
                         JkUtilsString.substringAfterLast(word, PLUGIN_SYMBOL));
@@ -172,11 +172,11 @@ final class CommandLine {
             return normal(word);
         }
 
-        public static MethodInvocation normal(String name) {
+        static MethodInvocation normal(String name) {
             return new MethodInvocation(name, null);
         }
 
-        public static MethodInvocation pluginMethod(String pluginName, String methodName) {
+        static MethodInvocation pluginMethod(String pluginName, String methodName) {
             JkUtilsAssert.isTrue(pluginName != null && !pluginName.isEmpty(),
                     "PluginName can't be null or empty");
             return new MethodInvocation(methodName, pluginName);

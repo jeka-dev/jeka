@@ -14,6 +14,7 @@ import javax.tools.DocumentationTool;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -124,7 +125,7 @@ public final class JkJavadocMaker {
         try (StandardJavaFileManager fm = tool.getStandardFileManager(null, null, null)) {
             Files.createDirectories(outputDir);
             fm.setLocation(DocumentationTool.Location.DOCUMENTATION_OUTPUT, JkUtilsIterable.listOf(outputDir.toFile()));
-            Writer writer = new PrintWriter(new OutputStreamWriter(JkLog.getOutputStream(), "UTF-8"));
+            Writer writer = new PrintWriter(new OutputStreamWriter(JkLog.getOutputStream(), StandardCharsets.UTF_8));
             List<String> options = computeOptions();
             DocumentationTool.DocumentationTask task = tool.getTask(writer, fm, null, null,
                     options, null);

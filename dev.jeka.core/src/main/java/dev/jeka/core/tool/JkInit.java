@@ -61,7 +61,7 @@ public final class JkInit {
         JkLog.info(sb.toString());
     }
 
-    private final static String propsAsString(String message, Map<String, String> props) {
+    private static String propsAsString(String message, Map<String, String> props) {
         StringBuilder sb = new StringBuilder();
         if (props.isEmpty()) {
             sb.append("\n" + message + " : none.");

@@ -162,7 +162,7 @@ class DocMaker {
 
         final int level;
 
-        public MenuItem(String title, String anchorId, int level) {
+        MenuItem(String title, String anchorId, int level) {
             super();
             this.title = title;
             this.anchorId = anchorId;

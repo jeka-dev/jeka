@@ -410,17 +410,17 @@ final class IvyTranslations {
 
     private static class DependencyDefinition {
 
-        Set<Conf> confs = new HashSet<>();
+        final Set<Conf> confs = new HashSet<>();
 
         JkVersion version;
 
-        List<ArtifactDef> artifacts = new LinkedList<>();
+        final List<ArtifactDef> artifacts = new LinkedList<>();
 
         boolean includeMainArtifact = false;
 
         boolean transitive = true;
 
-        List<JkDepExclude> excludes = new LinkedList<>();
+        final List<JkDepExclude> excludes = new LinkedList<>();
 
         @SuppressWarnings("rawtypes")
         DefaultDependencyDescriptor toDescriptor(JkModuleId moduleId) {
@@ -637,8 +637,10 @@ final class IvyTranslations {
     private static class ArtifactDef {
 
         final Set<String> confs;
-        String name;
-        String type;
+
+        final String name;
+
+        final String type;
 
         ArtifactDef(Set<String> masterConfs, String name, String type) {
             this.confs = masterConfs;

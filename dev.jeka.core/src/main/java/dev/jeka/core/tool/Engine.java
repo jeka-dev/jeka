@@ -55,7 +55,7 @@ final class Engine {
 
     private List<Path> rootOfImportedRuns = new LinkedList<>();
 
-    private final RunResolver resolver;
+    private final CommandResolver resolver;
 
     /**
      * Constructs an engine for the specified base directory.
@@ -67,7 +67,7 @@ final class Engine {
         this.projectBaseDir = baseDir.normalize();
         runRepos = repos();
         this.runDependencies = JkDependencySet.of();
-        this.resolver = new RunResolver(baseDir);
+        this.resolver = new CommandResolver(baseDir);
     }
 
     <T extends JkCommands> T getRun(Class<T> baseClass) {
@@ -181,12 +181,11 @@ final class Engine {
 
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
-        final JkDependencySet result = JkDependencySet.of(runDependencies
+        return JkDependencySet.of(runDependencies
                 .andFiles(bootLibs())
                 .andFiles(JkClasspath.ofCurrentRuntime()).withoutLastIf(!devMode)
                 .andFile(JkLocator.getJekaJarPath()).withoutLastIf(devMode)
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT));
-        return result;
     }
 
     private JkPathSequence bootLibs() {
