@@ -43,7 +43,8 @@ public class AntStyleBuild extends JkCommands {
     @Override
     protected void setup() {
        JkResolveResult depResolution = JkDependencyResolver.of(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
-                .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
+               .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
+               .and("junit:junit:4.11", JkJavaDepScopes.TEST)
        );
        classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles())
             .and(depResolution.getFiles());

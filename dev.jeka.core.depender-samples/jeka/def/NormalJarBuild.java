@@ -1,6 +1,6 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.samples.MavenStyleBuild;
+import dev.jeka.core.samples.AClassicBuild;
 import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkImportProject;
 import dev.jeka.core.tool.JkInit;
@@ -29,7 +29,7 @@ public class NormalJarBuild extends JkCommands {
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
     @JkImportProject("../dev.jeka.core.samples")
-    private MavenStyleBuild sampleBuild;  
+    private AClassicBuild sampleBuild;
 
     @Override
     protected void setup() {

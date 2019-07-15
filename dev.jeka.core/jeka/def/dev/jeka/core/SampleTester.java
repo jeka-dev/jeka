@@ -41,12 +41,11 @@ class SampleTester {
     }
 
     void doTest() throws IOException {
-        testSamples("AClassicBuild");
-        testSamples("AntStyleBuild");
-        testSamples("MavenStyleBuild");
-        testSamples("OpenSourceJarBuild");
-        testSamples("HttpClientTaskBuild");
-        testSamples("SimpleScopeBuild");
+        testSampleWithJavaPlugin("AClassicBuild");
+        //testSampleWithJavaPlugin("AntStyleBuild");
+        testSampleWithJavaPlugin("OpenSourceJarBuild");
+        testSampleWithJavaPlugin("HttpClientTaskBuild");
+        testSampleWithJavaPlugin("SimpleScopeBuild");
         testDepender("FatJarBuild");
 
         // Test eclipse
@@ -58,7 +57,7 @@ class SampleTester {
             Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
             copyClasspath = true;
         }
-        testSamples("", "eclipse#all");
+        testSampleWithJavaPlugin("", "eclipse#all");
         if (restoreEclipseClasspathFile && copyClasspath) {
             Files.move(classpathFile2, classpathFile, StandardCopyOption.REPLACE_EXISTING);
         } else {
@@ -81,7 +80,7 @@ class SampleTester {
         //testScaffoldJava();
     }
 
-    private void testSamples(String className, String... args) {
+    private void testSampleWithJavaPlugin(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
@@ -126,7 +125,7 @@ class SampleTester {
     }
 
     private void testFork() {
-        testSamples("", "-java#tests.fork");
+        testSampleWithJavaPlugin("", "-java#tests.fork");
         JkUtilsAssert.isTrue(output.goTo("test-reports/junit").exists(), "No test report generated in test fork mode.");
     }
 
