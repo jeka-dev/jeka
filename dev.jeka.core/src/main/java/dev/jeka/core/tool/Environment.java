@@ -16,6 +16,10 @@ import java.util.TreeMap;
 
 class Environment {
 
+    private Environment() {
+        // Can't be instantiated
+    }
+
     static Map<String, String> systemProps = new HashMap<>();
 
     static CommandLine commandLine = CommandLine.parse(new String[0]);
@@ -27,15 +31,15 @@ class Environment {
         // Parse command line
         final CommandLine commandLine = CommandLine.parse(commandLineArgs);
 
-        // Take all defined ofSystem properties (command line, ofSystem.properties files) and
-        // inject them in the ofSystem.
+        // Take all defined system properties (command line, ofSystem.properties files) and
+        // inject them in the system.
         final Map<String, String> sysProps = getSpecifiedSystemProps();
         sysProps.putAll(commandLine.getSystemProperties());
         setSystemProperties(sysProps);
 
         final Map<String, String> optionMap = new HashMap<>();
         optionMap.putAll(JkOptions.readSystemAndUserOptions());
-        optionMap.putAll(commandLine.getOptions());
+        optionMap.putAll(commandLine.getCommandOptions());
         JkOptions.init(optionMap);
 
         final StandardOptions standardOptions = new StandardOptions(optionMap);
@@ -104,7 +108,7 @@ class Environment {
 
         @Override
         public String toString() {
-            return "Commandlass=" + JkUtilsObject.toString(commandClass) + ", LogVerbose=" + logVerbose
+            return "CommandClass=" + JkUtilsObject.toString(commandClass) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logHeaders + ", LogMaxLength=" + logMaxLength;
         }
 

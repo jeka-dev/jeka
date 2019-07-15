@@ -28,8 +28,7 @@ public final class JkOptions {
     private final Map<String, String> props = new HashMap<>();
 
     static synchronized void init(Map<String, String> options) {
-        final Map<String, String> map = new HashMap<>();
-        map.putAll(options);
+        final Map<String, String> map = new HashMap<>(options);
         INSTANCE.props.putAll(map);
     }
 

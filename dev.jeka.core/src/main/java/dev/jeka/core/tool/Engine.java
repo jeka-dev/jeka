@@ -160,11 +160,11 @@ final class Engine {
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
-    private JkCommands getRunInstance(String runClassHint, JkPathSequence runtimePath) {
+    private JkCommands getRunInstance(String commandClassHint, JkPathSequence runtimePath) {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting run execution classpath to : " + classLoader.getDirectClasspath());
-        final JkCommands run = resolver.resolve(runClassHint);
+        final JkCommands run = resolver.resolve(commandClassHint);
         if (run == null) {
             return null;
         }

@@ -72,18 +72,18 @@ public class JkCommands {
      * Creates a instance of the specified command class (extending JkCommands), including option injection, plugin loading
      * and plugin activation.
      */
-    public static <T extends JkCommands> T of(Class<T> runClass) {
+    public static <T extends JkCommands> T of(Class<T> commandClass) {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
-        JkLog.startTask("Initializing class " + runClass.getName() + " at " + BASE_DIR_CONTEXT.get());
-        final T run = JkUtilsReflect.newInstance(runClass);
+        JkLog.startTask("Initializing class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        final T run = JkUtilsReflect.newInstance(commandClass);
         final JkCommands jkCommands = run;
 
         // Inject options & environment variables
         JkOptions.populateFields(run, JkOptions.readSystemAndUserOptions());
         FieldInjector.injectEnv(run);
-        JkOptions.populateFields(run,  Environment.commandLine.getOptions());
+        JkOptions.populateFields(run,  Environment.commandLine.getCommandOptions());
 
         // Load plugins declared in command line and inject options
         jkCommands.plugins.loadCommandLinePlugins();

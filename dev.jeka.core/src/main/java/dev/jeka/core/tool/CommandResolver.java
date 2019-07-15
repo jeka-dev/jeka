@@ -4,8 +4,6 @@ import java.io.File;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
 
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
@@ -84,7 +82,6 @@ final class CommandResolver {
 
     @SuppressWarnings("unchecked")
     private JkCommands resolve(String classNameHint, Class<? extends JkCommands> baseClass) {
-
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
 
         // If class name specified in options.
@@ -104,7 +101,7 @@ final class CommandResolver {
             return run;
         }
 
-        // If there is a run file
+        // If there is a command file
         if (this.hasDefSource()) {
             final JkPathTree dir = JkPathTree.of(runSourceDir);
             for (final Path path : dir.getRelativeFiles()) {
@@ -130,7 +127,7 @@ final class CommandResolver {
         JkCommands.baseDirContext(baseDir);
         final JkCommands result;
         try {
-            result = JkCommands.of(JkConstants.DEFAULT_RUN_CLASS);
+            result = JkCommands.of(JkConstants.DEFAULT_COMMAND_CLASS);
         } finally {
             JkCommands.baseDirContext(null);
         }

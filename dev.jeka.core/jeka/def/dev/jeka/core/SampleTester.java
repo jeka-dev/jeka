@@ -84,7 +84,7 @@ class SampleTester {
     private void testSamples(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-LV=true -CC=" + className)
+                .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
                 .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LH")
                 .andParams(args)
                 .withFailOnError(true).runSync();

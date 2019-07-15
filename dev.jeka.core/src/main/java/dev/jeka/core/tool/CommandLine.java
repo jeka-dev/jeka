@@ -26,7 +26,7 @@ final class CommandLine {
 
     static CommandLine parse(String[] words) {
         final CommandLine result = new CommandLine();
-        result.runOptions = extractOptions(words);
+        result.commandOptions = extractOptions(words);
         result.systemProperties = extractSystemProperties(words);
         result.masterMethods = extractMethods(words, true);
         result.subProjectMethods = extractMethods(words, false);
@@ -36,7 +36,7 @@ final class CommandLine {
         return result;
     }
 
-    private Map<String, String> runOptions;
+    private Map<String, String> commandOptions;
 
     private Map<String, String> systemProperties;
 
@@ -221,8 +221,8 @@ final class CommandLine {
 
     }
 
-    Map<String, String> getOptions() {
-        return runOptions;
+    Map<String, String> getCommandOptions() {
+        return commandOptions;
     }
 
     Map<String, String> getSystemProperties() {
