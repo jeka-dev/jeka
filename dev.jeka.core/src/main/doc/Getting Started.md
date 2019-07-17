@@ -366,10 +366,60 @@ You can define as many classes as you want into def directory. Organise them wit
 
 # Work with plugins
 
+## Write your first plugin
+
 Each _command class_ instance acts as a registry for plugins. In turn, plugins can interact each other through this registry.
 
-Let's implements similar commands than previously but using plugins. TODO
+Let's implements similar commands than previously but using plugins :
 
+* Create a new project 'sample-plugins' as we did for 'sample1". 
+* Remove the class `JkCommands` that has been created in 'jeka/def' : we don't need it for now.
+* Create a the following class inside 'jeka/def' : it could lie in a package or not.
+
+```
+@JkDoc("Provide command and option to display url content on the console")
+public class JkPluginWebReader extends JkPlugin {
+
+    @JkDoc("The url to display content.")
+    public String url = "https://www.google.com/";
+
+    protected JkPluginWebReader(JkCommands commands) {
+        super(commands);
+    }
+
+    @JkDoc("Display source cotent of the url option on the console.")
+    public void displayContent() throws MalformedURLException {
+        String content = JkUtilsIO.read(new URL(url));
+        System.out.println(content);
+    }
+
+}
+```
+
+* execute `jeka help` in the console at the root of the project. At the end of the output your plugin should be mentioned 
+`Available plugins in classpath : eclipse, eclipsePath, git, intellij, jacoco, java, pgp, pom, repo, scaffold, sonar, war, webReader.`
+
+Jeka has discovered automatically your plugin called 'webReader'. For this your plugin class must follow 3 requirements :
+* Be public.
+* Extend `JkPlugin`.
+* Having a name starting with 'JkPlugin' : plugin names are inferred from their class name.
+
+Now you can execute `jeka webReader#help` to display which options and commands are available on this plugin.
+
+To execute `displayContent` command : `jeka webReader#displayContent -webReader#url=https://twitter.com`.
+
+You don't need to have a _command class_ defined in _jeka/def_ by default Jeka will used `dev.jeka.core.tool.JkCommands`.
+
+## What did happened behind the scene ?
+
+Mentioning `webReader#` has led in instantiating _JkPluginWebReader_ class, attaching it to the current _command class instance.
+
+Mentioning `webReader#displayContent -webReader#url=https://twitter.com`  has led on injecting the url value and invoke 
+method `displayContent` on the instance plugin. This mechanism is similar to options/commands existing on command class.
+
+ 
+
+ 
 
 
 # Build a Java project

@@ -213,6 +213,7 @@ final class Engine {
 
     private void compileDef(JkPathSequence runPath) {
         final JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath);
+        JkPathTree.of(compileSpec.getOutputDir()).deleteContent();
         try {
             JkJavaCompiler.ofJdk().compile(compileSpec);
         } catch (final JkException e) {
