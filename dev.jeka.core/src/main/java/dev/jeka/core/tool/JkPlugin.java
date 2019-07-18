@@ -6,7 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  * Plugin instances are owned by a JkCommands instance. The relationship is bidirectional. JkCommands instances may
  * invoke plugin methods or fields and plugin instances may invoke owner methods.
  *
- * Therefore plugins can interact with or load other plugins into the owner instance, which is quite common in Jeka.
+ * Therefore plugins can interact with or load other plugins into the owner instance, which is quite common with Jeka.
  */
 public abstract class JkPlugin {
 

@@ -417,9 +417,81 @@ Mentioning `webReader#` has led in instantiating _JkPluginWebReader_ class, atta
 Mentioning `webReader#displayContent -webReader#url=https://twitter.com`  has led on injecting the url value and invoke 
 method `displayContent` on the instance plugin. This mechanism is similar to options/commands existing on command class.
 
+## Configure plugins within the command class
+
+You may need to configure default options on plugins and invoke them from the _command classes_ without specifying 
+everything from the command line. 
+
+For such create a _command class_ within the same project and declare the plugin as below. In the _command class_ constructor 
+you can redefine plugin state as its default field values. 
+
+```
+public class MyCommands extends JkCommands {
+
+    private final JkPluginWebReader webReaderPlugin = getPlugin(JkPluginWebReader.class);
+
+    MyCommands() {
+        webReaderPlugin.url = "https://twitter.com";  // define a new default url
+    }
+
+    public void show() throws MalformedURLException {
+        webReaderPlugin.displayContent();
+    }
+
+}
+```
+
+Now, if you execute `jeka webReader#help` you'll notice that the default `url` value is now the one defined above.
+
+You can also use `jeka show` as a shorthand for `jeka webReader#displayContent`.
+
+Note : You can also configure plugin by overriding `JkCommands@setup` methods. In this case 
+the values set here will override the ones provided by command line.
+
+## Configure/Enhance a Plugin From Another One
+
+Its quite common to have a plugin that act as an enhancer of another one. For example _Jacoco_ plugin enhance _Java_ 
+ plugin by adding test coverage measurement when tests are run. 
  
+ Of course this kind of mechanism is possible because _Java_ plugin test feature has been designed to be extendable 
+ but the idea is that a plugin can access or load any other plugins for its _command class_ owner. 
 
  
+## Reuse a plugin across project
+
+You can pack your plugin in a jar, publish it on a repository and reuse it any build. 
+
+### Develop
+
+For those just create a regular Java project and add Jeka as ***PROVIDED*** dependency. 
+```
+// Use same Jeka version both for building and compiling
+project.addDependencies(JkDependencySet.of()
+        .andFile(JkLocator.getJekaJarPath(), PROVIDED));
+```
+
+Code your plugin in _src/main/java_ as you will do for any regular Java project. Of course you an use 
+any third party lib as you want but keep in mind that the more deps you have the more dependency issues 
+you may face with other plugins.
+
+## Pack
+
+Execute `Java java#pack java#publish` to build your plugin project and deploy it to your default repository.
+
+
+## Reuse
+
+You have to import the jar containing the plugin you want to use.
+As for any other jar, you can declare it in a `@JkImport` annotation.
+
+```
+@JkImport("org.myorg:myjekaplugin:0.1")
+class MyBuid extends JkCommands {
+}
+```
+
+If you don't have declared it in a _command class_ `@JkImport` annotation you can still invoke it from 
+the command line : `jeka @org.myorg:myjekaplugin:0.1 myPlugin#doSomething`.
 
 
 # Build a Java project

@@ -116,9 +116,14 @@ final class HelpDisplayer {
         } else {
             sb.append("\nActivation Effect : Not documented.");
         }
-        final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkCommands.class, jkCommands);
+        final JkPlugin plugin;
+        if (jkCommands.getPlugins().hasLoaded(description.pluginClass())) {
+            plugin = jkCommands.getPlugin(description.pluginClass());
+        } else {
+            plugin = JkUtilsReflect.newInstance(description.pluginClass(), JkCommands.class, jkCommands);
+        }
         sb.append("\n");
-        sb.append(RunClassDef.of(object).flatDescription(description.shortName() + "#"));
+        sb.append(RunClassDef.of(plugin).flatDescription(description.shortName() + "#"));
         return sb.toString();
     }
 
