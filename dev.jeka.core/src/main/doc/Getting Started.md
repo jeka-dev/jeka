@@ -366,14 +366,14 @@ You can define as many classes as you want into def directory. Organise them wit
 
 # Work with plugins
 
-## Write your first plugin
-
 Each _command class_ instance acts as a registry for plugins. In turn, plugins can interact each other through this registry.
+
+## Write your first plugin
 
 Let's implements similar commands than previously but using plugins :
 
 * Create a new project 'sample-plugins' as we did for 'sample1". 
-* Remove the class `JkCommands` that has been created in 'jeka/def' : we don't need it for now.
+* Remove all classes that has been created in 'jeka/def' : we don't need it for now.
 * Create a the following class inside 'jeka/def' : it could lie in a package or not.
 
 ```
@@ -396,26 +396,30 @@ public class JkPluginWebReader extends JkPlugin {
 }
 ```
 
-* execute `jeka help` in the console at the root of the project. At the end of the output your plugin should be mentioned 
-`Available plugins in classpath : eclipse, eclipsePath, git, intellij, jacoco, java, pgp, pom, repo, scaffold, sonar, war, webReader.`
+* Execute `jeka help` in the console at the root of the project. At the end of the output your plugin should be
+ mentioned : 
+ ```
+ Available plugins in classpath : eclipse, eclipsePath, git, intellij, jacoco, java, pgp, pom, repo, scaffold, sonar, war, webReader.
+```
 
 Jeka has discovered automatically your plugin called 'webReader'. For this your plugin class must follow 3 requirements :
-* Be public.
-* Extend `JkPlugin`.
-* Having a name starting with 'JkPlugin' : plugin names are inferred from their class name.
+* be `public`
+* extend `JkPlugin`
+* having a name starting with 'JkPlugin' : plugin names are inferred from their class name
 
 Now you can execute `jeka webReader#help` to display which options and commands are available on this plugin.
 
 To execute `displayContent` command : `jeka webReader#displayContent -webReader#url=https://twitter.com`.
 
-You don't need to have a _command class_ defined in _jeka/def_ by default Jeka will used `dev.jeka.core.tool.JkCommands`.
+You don't need to have a _command class_ defined in _jeka/def_. By default Jeka uses `dev.jeka.core.tool.JkCommands`.
 
 ## What did happened behind the scene ?
 
-Mentioning `webReader#` has led in instantiating _JkPluginWebReader_ class, attaching it to the current _command class instance.
+Mentioning `webReader#` on the command line has instantiated _JkPluginWebReader_ class, attaching it to the current _command class_ instance.
 
-Mentioning `webReader#displayContent -webReader#url=https://twitter.com`  has led on injecting the url value and invoke 
-method `displayContent` on the instance plugin. This mechanism is similar to options/commands existing on command class.
+Mentioning `webReader#displayContent -webReader#url=https://twitter.com`  has injected the url value and invoke 
+`JkPluginWebReader#displayContent` method on the instance plugin. 
+This mechanism is similar to options/commands existing on command class.
 
 ## Configure plugins within the command class
 
@@ -450,16 +454,84 @@ the values set here will override the ones provided by command line.
 
 ## Configure/Enhance a Plugin From Another One
 
-Its quite common to have a plugin that act as an enhancer of another one. For example _Jacoco_ plugin enhance _Java_ 
- plugin by adding test coverage measurement when tests are run. 
+It's quite common to have a plugin that acts as an enhancer of another one. For example _Jacoco_ plugin enhance _Java_ 
+ plugin by adding test coverage when tests are run. 
  
- Of course this kind of mechanism is possible because _Java_ plugin test feature has been designed to be extendable 
+Of course this kind of mechanism is possible because _Java_ plugin test feature has been designed to be extendable 
  but the idea is that a plugin can access or load any other plugins for its _command class_ owner. 
-
  
-## Reuse a plugin across project
+Let's modify the webReader plugin in order it can allow the url be modified from the outside.
 
-You can pack your plugin in a jar, publish it on a repository and reuse it any build. 
+```
+public class JkPluginWebReader extends JkPlugin {
+
+    @JkDoc("The url to display content.")
+    public String url = "https://www.google.com/";
+
+    private UnaryOperator<URL> urlTransformer = url -> url;
+
+    protected JkPluginWebReader(JkCommands commands) {
+        super(commands);
+    }
+
+    @JkDoc("Fetch Google page and display its source on the console.")
+    public void displayContent() throws MalformedURLException {
+        URL effectiveUrl = urlTransformer.apply(new URL(url));
+        System.out.println("Reading content from " + effectiveUrl);
+        String content = JkUtilsIO.read(effectiveUrl);
+        System.out.println(content);
+    }
+
+    public void setUrlTransformer(UnaryOperator<URL> urlTransformer) {
+        this.urlTransformer = urlTransformer;
+    }
+
+}
+```
+
+Now let's create a plugin HttpsIzer in _jeka/def_ that forces the webReader plugin to use _https_ protocol.
+
+```
+public class JkPluginHttpsIzer extends JkPlugin {
+
+    protected JkPluginHttpsIzer(JkCommands commands) {
+        super(commands);
+    }
+
+    @Override
+    protected void activate() {
+        boolean webReaderPresent = this.getCommands().getPlugins().hasLoaded(JkPluginWebReader.class);
+        if (!webReaderPresent) {
+            return;
+        }
+        UnaryOperator<URL> urlTransformer = url -> {
+            try {
+                return new URL("https", url.getHost(), url.getPort(), url.getFile());
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException(e);
+            }
+        };
+        JkPluginWebReader webReader = this.getCommands().getPlugins().get(JkPluginWebReader.class);
+        webReader.setUrlTransformer(urlTransformer);
+    }
+}
+```
+
+Now, if you execute `jeka webReader#displayContent -webReader#url=http://jeka.dev httpsIzer#` console will display :
+```
+Reading content from https://jeka.dev
+...
+```
+
+**Explanation:** Adding `httpIzer#` instantiates and binds httpIzer plugin to the running _command class_ instance. 
+During this process, `JkPlugin#activate` method is invoked. By default this method does nothing but as we have 
+overrode it in `JkPluginHttpsIzer`, it modifies the `JkPluginWebReader` plugin bound to the running _command class_ instance.
+
+
+## Reuse a Plugin Across Project
+
+You can pack your plugin in a jar, publish it on a repository and reuse it any build. The prerequisite is to know 
+about building a Java project which is covered in the next section.
 
 ### Develop
 
