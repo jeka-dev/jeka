@@ -267,13 +267,13 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeClasspathEl(Path file, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
 
-        final String name = JkUtilsString.substringBeforeLast(file.getFileSystem().toString(), ".jar");
+        final String name = JkUtilsString.substringBeforeLast(file.toString(), ".jar");
         Path source = file.resolveSibling(name + "-sources.jar");
         if (!Files.exists(source)) {
-            source = file.resolveSibling("../../libs-sources/" + name + "-getSources.jar");
+            source = file.resolveSibling("../../libs-sources/" + name + "-sources.jar");
         }
         if (!Files.exists(source)) {
-            source = file.resolveSibling("libs-sources/" + name + "-getSources.jar");
+            source = file.resolveSibling("libs-sources/" + name + "-sources.jar");
         }
         Path javadoc = file.resolveSibling(name + "-javadoc.jar");
         if (!Files.exists(javadoc)) {
