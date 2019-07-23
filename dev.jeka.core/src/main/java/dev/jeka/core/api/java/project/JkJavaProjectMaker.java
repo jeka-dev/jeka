@@ -166,17 +166,20 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this.artifactProducers.keySet();
     }
 
-    public void addTestArtifact() {
+    public JkJavaProjectMaker addTestArtifact() {
         putArtifact(TEST_ARTIFACT_ID, () -> makeTestJar());
+        return this;
     }
 
-    public void addTestSourceArtifact() {
+    public JkJavaProjectMaker addTestSourceArtifact() {
         putArtifact(TEST_SOURCE_ARTIFACT_ID,
                 () -> tasksForPackaging.createTestSourceJar(tasksForPackaging.getArtifactFile(TEST_SOURCE_ARTIFACT_ID)));
+        return this;
     }
 
-    public void addJavadocArtifact() {
+    public JkJavaProjectMaker addJavadocArtifact() {
         putArtifact(JAVADOC_ARTIFACT_ID, () -> makeJavadocJar());
+        return this;
     }
 
     /**
@@ -248,8 +251,9 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         }
     }
 
-    void cleanDependencyCache() {
+    JkJavaProjectMaker cleanDependencyCache() {
         dependencyCache.clear();
+        return this;
     }
 
     // Clean -----------------------------------------------
@@ -299,27 +303,32 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     // Make -------------------------------------------------------
 
 
-    private void makeMainJar() {
+    private JkJavaProjectMaker makeMainJar() {
         Path target = tasksForPackaging.getArtifactFile(getMainArtifactId());
         tasksForPackaging.createBinJar(target);
+        return this;
     }
 
-    private void makeSourceJar() {
+    private JkJavaProjectMaker makeSourceJar() {
         Path target = tasksForPackaging.getArtifactFile(SOURCES_ARTIFACT_ID);
         tasksForPackaging.createSourceJar(target);
+        return this;
     }
 
-    private void makeJavadocJar() {
+    private JkJavaProjectMaker makeJavadocJar() {
         Path target = tasksForPackaging.getArtifactFile(JAVADOC_ARTIFACT_ID);
         tasksForPackaging.createJavadocJar(target);
+        return this;
     }
 
-    private void makeTestJar(Path target) {
+    private JkJavaProjectMaker makeTestJar(Path target) {
         tasksForPackaging.createTestJar(target);
+        return this;
     }
 
-    private void makeTestJar() {
+    private JkJavaProjectMaker makeTestJar() {
         makeTestJar(getArtifactPath(TEST_ARTIFACT_ID));
+        return this;
     }
 
     @Override
