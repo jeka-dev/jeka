@@ -117,6 +117,9 @@ public final class JkLog implements Serializable {
         consume(JkLogEvent.ofRegular(Type.ERROR, message));
     }
 
+    /**
+     * Executes the specified runnable within a startTask/endTask log declaration.
+     */
     public static void execute(String message, Runnable task) {
         consume(JkLogEvent.ofRegular(Type.START_TASK, message));
         currentNestedTaskLevel.incrementAndGet();
@@ -127,19 +130,21 @@ public final class JkLog implements Serializable {
         consume((JkLogEvent.ofEndTask(durationMs)));
     }
 
+    /**
+     * Logs the start of the current task. Subsequent logs will be nested in this task log until #endTask is invoked.
+     */
     public static void startTask(String message) {
         consume(JkLogEvent.ofRegular(Type.START_TASK, message));
         currentNestedTaskLevel.incrementAndGet();
-        START_TIMES.get().push(System.nanoTime());
+        START_TIMES.get().addLast(System.nanoTime());
     }
 
+    /**
+     * Logs a end the current task with a specific message. The specified message is formatted by String#format passing
+     * the duration time in milliseconds as argument. So if your message contains '%d', it will be replaced by
+     * the duration taken to complete the current task.
+     */
     public static void endTask(String message) {
-        currentNestedTaskLevel.decrementAndGet();
-        consume(JkLogEvent.ofRegular(Type.END_TASK, message));
-        START_TIMES.get().pollLast();
-    }
-
-    public static void endTask() {
         currentNestedTaskLevel.decrementAndGet();
         Long startTime = START_TIMES.get().pollLast();
         if (startTime == null) {
@@ -147,8 +152,15 @@ public final class JkLog implements Serializable {
                     "used an 'endTask' one too many in your code.");
         }
         Long durationMillis = JkUtilsTime.durationInMillis(startTime);
-        consume(JkLogEvent.ofRegular(Type.END_TASK, "Done in " + durationMillis + " milliseconds."));
+        consume(JkLogEvent.ofRegular(Type.END_TASK, String.format(message, durationMillis)));
 
+    }
+
+    /**
+     * Same as {@link #endTask(String)} but using the standard message.
+     */
+    public static void endTask() {
+        endTask("Done in %d milliseconds.");
     }
 
     public static boolean isVerbose() {
