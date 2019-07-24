@@ -1,8 +1,9 @@
-## 0.9.0 (Ongoing)
+## 0.8.5
 
 * Wrapper fully implemented(multi-project, configurable location)
 * Dependency resolver can find groups, modules and versions available on remote repositories
 * Getting started doc improved
+* Small bug fixes and improvements
 
 ## 0.8.4
 
