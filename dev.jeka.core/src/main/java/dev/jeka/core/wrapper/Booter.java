@@ -1,13 +1,7 @@
 package dev.jeka.core.wrapper;
 
-import dev.jeka.core.api.utils.JkUtilsObject;
 
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -60,7 +54,10 @@ class Booter {
     }
 
     private static Path downloadDistribZip(String version) {
-        String repo = JkUtilsObject.firstNonNull(repoOptions(), "https://repo.maven.apache.org/maven2/");
+        String repo = repoOptions();
+        if (repo == null) {
+            repo = "https://repo.maven.apache.org/maven2/";
+        }
         final String urlString = repo + "dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";
         System.out.println("Downloading " + urlString + " ...");
