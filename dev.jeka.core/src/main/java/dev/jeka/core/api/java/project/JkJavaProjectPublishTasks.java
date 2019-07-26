@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -16,7 +17,7 @@ public class JkJavaProjectPublishTasks {
 
     private final JkJavaProjectMaker maker;
 
-    private JkRepoSet publishRepos = null;
+    private JkRepoSet publishRepos = JkRepoSet.of();
 
     private UnaryOperator<Path> signer;
 
@@ -96,7 +97,13 @@ public class JkJavaProjectPublishTasks {
     }
 
     public JkJavaProjectPublishTasks setPublishRepos(JkRepoSet publishRepos) {
+        JkUtilsAssert.notNull(publishRepos, "publish repos cannot be null.");
         this.publishRepos = publishRepos;
+        return this;
+    }
+
+    public JkJavaProjectPublishTasks addPublishRepo(JkRepo publishRepo) {
+        this.publishRepos = this.publishRepos.and(publishRepo);
         return this;
     }
 

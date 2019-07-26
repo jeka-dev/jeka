@@ -233,6 +233,14 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
+    /**
+     * Shorthand to add a download repository to this project maker.
+     */
+    public JkJavaProjectMaker addDownloadRepo(JkRepo repo) {
+        this.dependencyResolver = this.getDependencyResolver().andRepos(repo.toSet());
+        return this;
+    }
+
     public JkJavaProjectMaker setDownloadRepos(JkRepoSet repos) {
         this.dependencyResolver = this.getDependencyResolver().withRepos(repos);
         return this;

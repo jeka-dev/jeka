@@ -137,7 +137,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this.setDependencies(this.dependencies.and(dependencies));
     }
 
-
     public JkJavaProject setSourceEncoding(String encoding) {
         this.compileSpec.setEncoding(encoding);
         return this;

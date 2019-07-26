@@ -1,3 +1,8 @@
+## 0.8.6 (ongoing)
+
+* Fix wrapper failure at downloading
+* More intuitive behavior for JkPluginRepo 
+ 
 ## 0.8.5
 
 * Wrapper fully implemented(multi-project, configurable location)

@@ -38,7 +38,7 @@ public class JkPluginScaffold extends JkPlugin {
     @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
     public void wrap() {
         final JkPluginRepo repoPlugin = this.getCommands().getPlugin(JkPluginRepo.class);
-        final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repoPlugin.downloadRepositories());
+        final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repoPlugin.downloadRepository().toSet());
         scaffolder.wrap(dependencyResolver);
     }
 

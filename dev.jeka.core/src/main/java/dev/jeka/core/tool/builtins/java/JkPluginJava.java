@@ -107,12 +107,10 @@ public class JkPluginJava extends JkPlugin {
         }
         if (maker.getTasksForPublishing().getPublishRepos() == null
                 || maker.getTasksForPublishing().getPublishRepos().getRepoList().isEmpty()) {
-            maker.getTasksForPublishing().setPublishRepos(repoPlugin.publishRepositories());
+            maker.getTasksForPublishing().addPublishRepo(repoPlugin.publishRepository());
         }
-        final JkRepoSet downloadRepos = repoPlugin.downloadRepositories();
-        JkDependencyResolver resolver = project.getMaker().getDependencyResolver();
-        resolver = resolver.withRepos(downloadRepos); // always look in local repo
-        maker.setDependencyResolver(resolver);
+        final JkRepo downloadRepo = repoPlugin.downloadRepository();
+        maker.addDownloadRepo(downloadRepo);
         if (pack.checksums().length > 0) {
             maker.getTasksForPackaging().setChecksumAlgorithms(pack.checksums());
         }
