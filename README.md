@@ -31,6 +31,8 @@ Last additions :
 * deploying on Maven central though a modern release process (version numbering based on Git instead of being hardcoded).
 Jeka now uses these features to release itself.
 
+Next step is to provide a IntelliJ visual plugin for greater IDE integration (see https://github.com/jerkar/ideaPlugin4Jeka)
+
 Please visit [relelease note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
 # Get Jeka
