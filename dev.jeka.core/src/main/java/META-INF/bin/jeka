@@ -160,4 +160,5 @@ else
    LOCAL_BUILD_DIR=""
 fi
 
-exec "$JAVACMD" $JEKA_OPTS -cp "$LOCAL_BUILD_DIR$JEKA_HOME/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+exec "$JAVACMD" $JEKA_OPTS -cp "$LOCAL_BUILD_DIR$SCRIPTPATH/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"

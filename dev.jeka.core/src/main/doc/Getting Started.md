@@ -36,10 +36,11 @@ creating projects from scratch.
 As it's what we are going to do in this tutorial, you need to get it properly installed. 
 
 1. Download and unzip the lastest *core-x.x.x-distrib.zip* file found on [snapshot](https://oss.sonatype.org/content/repositories/snapshots/org/jeka/core/) or [release](https://repo1.maven.org/maven2/org/jeka/core/) repository to the directory you want to install Jeka. 
-2. Make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on (_JAVA_HOME_/bin/java must point on a java executable). 
+2. Add _JEKA HOME_ (repositoty where you have unzipped the distribution) to your PATH environment. 
+3. Make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on (_JAVA_HOME_/bin/java must point on a java executable). 
    Note that you can choose a specific JDK instance to run Jeka without affecting _JAVA_HOME_ variable by setting _JEKA_JDK_ environment variable (_JEKA_JDK_/bin/java must point on a java executable). 
    Required Jdk version for running Jeka is 8 or more (tested until 12). Jdk 7 is no more supported. 
-3. execute `jeka help` in the command line. You should get an output starting by : 
+4. execute `jeka help` in the command line. You should get an output starting by : 
 
 ```
 Usage:
