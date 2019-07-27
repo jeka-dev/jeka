@@ -1,7 +1,9 @@
-## 0.8.6 (ongoing)
+## 0.8.6
 
 * Fix wrapper failure at downloading
 * More intuitive behavior for JkPluginRepo 
+* Improve Windows and Linux script : JEKA_HOME environment variable no more required to be set
+* Windows : fix problem with project paths containing spaces
  
 ## 0.8.5
 
