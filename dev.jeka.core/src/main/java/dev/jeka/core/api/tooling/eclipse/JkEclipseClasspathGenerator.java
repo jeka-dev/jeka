@@ -220,16 +220,25 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private static String eclipseJavaVersion(JkJavaVersion compilerVersion) {
-        if (JkJavaVersion.V6 == compilerVersion) {
-            return "1.6";
+        if (JkJavaVersion.V1_3.equals(compilerVersion)) {
+            return "J2SE-1.3";
         }
-        if (JkJavaVersion.V7 == compilerVersion) {
-            return "1.7";
+        if (JkJavaVersion.V1_4.equals(compilerVersion)) {
+            return "J2SE-1.4";
         }
-        if (JkJavaVersion.V8 == compilerVersion) {
-            return "1.8";
+        if (JkJavaVersion.V5.equals(compilerVersion)) {
+            return "J2SE-1.5";
         }
-        return compilerVersion.get();
+        if (JkJavaVersion.V6.equals(compilerVersion)) {
+            return "JavaSE-1.6";
+        }
+        if (JkJavaVersion.V7.equals(compilerVersion)) {
+            return "JavaSE-1.7";
+        }
+        if (JkJavaVersion.V8.equals(compilerVersion)) {
+            return "JavaSE-1.8";
+        }
+        return "JavaSE-" + compilerVersion.get();
     }
 
     private void writeProjectEntryIfNeeded(Path projectDir, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
@@ -255,7 +264,7 @@ public final class JkEclipseClasspathGenerator {
             container = jreContainer;
         } else {
             if (sourceVersion != null) {
-                container = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-"
+                container = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/"
                         + eclipseJavaVersion(sourceVersion);
             } else {
                 container = "org.eclipse.jdt.launching.JRE_CONTAINER";
