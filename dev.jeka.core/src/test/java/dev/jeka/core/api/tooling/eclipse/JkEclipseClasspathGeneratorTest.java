@@ -35,7 +35,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
         final JkEclipseClasspathGenerator baseGenerator =
-                JkEclipseClasspathGenerator.of(baseProject);
+                JkEclipseClasspathGenerator.of(baseProject.getJavaProjectIde());
         baseGenerator.setUsePathVariables(true);
         baseGenerator.setRunDependencies(baseProject.getMaker().getDependencyResolver(),
                 JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
@@ -50,7 +50,7 @@ public class JkEclipseClasspathGeneratorTest {
         coreProject.getMaker().getTasksForTesting().setRunner(
                 coreProject.getMaker().getTasksForTesting().getRunner().withForking(true));
         final JkEclipseClasspathGenerator coreGenerator =
-                JkEclipseClasspathGenerator.of(coreProject);
+                JkEclipseClasspathGenerator.of(coreProject.getJavaProjectIde());
         final String coreClasspath = coreGenerator.generate();
         System.out.println("\ncore .classpath");
         System.out.println(coreClasspath);

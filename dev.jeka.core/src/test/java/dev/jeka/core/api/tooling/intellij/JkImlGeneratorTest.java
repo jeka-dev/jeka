@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
@@ -28,7 +29,7 @@ public class JkImlGeneratorTest {
                 .withResources("res").withTestResources("res-test").withBaseDir(base);
         final JkJavaProject baseProject = JkJavaProject.of(sourceLayout);
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
-        final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject);
+        final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject.getJavaProjectIde());
         final String result0 = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(result0);
@@ -39,16 +40,17 @@ public class JkImlGeneratorTest {
         coreProject.setDependencies(coreDeps);
         coreProject.getMaker().getTasksForTesting().setRunner(
                 coreProject.getMaker().getTasksForTesting().getRunner().withForking(true));
-        final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject);
+        final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject.getJavaProjectIde());
         final String result1 = coreGenerator.generate();
         System.out.println("\ncore .classpath");
         System.out.println(result1);
 
         final Path desktop = top.resolve("desktop");
         final JkDependencySet deps = JkDependencySet.of().and(coreProject);
-        final JkImlGenerator desktopGenerator =
-                JkImlGenerator.of(sourceLayout.withBaseDir(desktop), deps,
-                        coreProject.getMaker().getDependencyResolver());
+        final JkImlGenerator desktopGenerator = JkImlGenerator.of(JkJavaProjectIde.ofDefault()
+                .withSourceLayout(sourceLayout.withBaseDir(desktop))
+                .withDependencies(deps)
+                .withDependencyResolver(coreProject.getMaker().getDependencyResolver()));
         final String result2 = desktopGenerator.generate();
 
         System.out.println("\ndesktop .classpath");

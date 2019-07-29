@@ -5,6 +5,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
@@ -83,22 +84,16 @@ public final class JkImlGenerator {
     /**
      * Constructs a {@link JkImlGenerator} to the project base directory
      */
-    public static JkImlGenerator of(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
-                          JkDependencyResolver resolver) {
-        JkImlGenerator result = new JkImlGenerator(sourceLayout.getBaseDir());
-        result.sourceLayout = sourceLayout;
-        result.projectDependencies = dependencies;
-        result.projectDependencyResolver = resolver;
+    public static JkImlGenerator of(JkJavaProjectIde projectIde) {
+        JkImlGenerator result = new JkImlGenerator(projectIde.getSourceLayout().getBaseDir());
+        result.sourceLayout = projectIde.getSourceLayout();
+        result.projectDependencies = projectIde.getDependencies();
+        result.projectDependencyResolver = projectIde.getDependencyResolver();
         return result;
     }
 
     public static JkImlGenerator of(Path baseDir) {
         return new JkImlGenerator(baseDir);
-    }
-
-    public static JkImlGenerator of (JkJavaProject javaProject) {
-        return of(javaProject.getSourceLayout(), javaProject.getDependencies(),
-                javaProject.getMaker().getDependencyResolver());
     }
 
     /** Generate the .classpath file */

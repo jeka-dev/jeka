@@ -43,7 +43,7 @@ import java.util.function.Supplier;
  *
  * @See JkJavaProjectMaker
  */
-public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
+public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
 
     private JkVersionedModule versionedModule;
 
@@ -103,19 +103,12 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this.getSourceLayout().getBaseDir();
     }
 
-    @Override
     public JkProjectSourceLayout getSourceLayout() {
         return sourceLayout;
     }
 
-    @Override
     public JkDependencySet getDependencies() {
         return this.dependencies;
-    }
-
-    @Override
-    public JkJavaVersion getSourceVersion() {
-        return compileSpec.getSourceVersion();
     }
 
     public JkJavaProjectMaker getMaker() {
@@ -223,7 +216,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + this.versionedModule + "\n")
                 .append(this.sourceLayout.getInfo()).append("\n")
-                .append("Java Source Version : " + this.getSourceVersion() + "\n")
+                .append("Java Source Version : " + this.getCompileSpec().getSourceVersion() + "\n")
                 .append("Source Encoding : " + this.compileSpec.getEncoding() + "\n")
                 .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + this.maker.getDependencyResolver().getRepos() + "\n")
@@ -231,5 +224,14 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
                 .append("Declared Dependencies : " + this.getDependencies().toList().size() + " elements.\n")
                 .append("Defined Artifacts : " + this.get().getArtifactIds())
                 .toString();
+    }
+
+    @Override
+    public JkJavaProjectIde getJavaProjectIde() {
+        return JkJavaProjectIde.ofDefault()
+                .withDependencies(this.dependencies)
+                .withDependencyResolver(this.maker.getDependencyResolver())
+                .withSourceLayout(this.sourceLayout)
+                .withSourceVersion(this.compileSpec.getSourceVersion());
     }
 }

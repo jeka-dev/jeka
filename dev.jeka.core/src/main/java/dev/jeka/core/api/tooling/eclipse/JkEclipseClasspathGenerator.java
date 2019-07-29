@@ -3,8 +3,7 @@ package dev.jeka.core.api.tooling.eclipse;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectDefinition;
+import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -82,15 +81,9 @@ public final class JkEclipseClasspathGenerator {
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    public static JkEclipseClasspathGenerator of(JkJavaProjectDefinition project, JkDependencyResolver resolver) {
-        return new JkEclipseClasspathGenerator(project.getSourceLayout(), project.getDependencies(), resolver, project.getSourceVersion());
-    }
-
-    /**
-     * Constructs a {@link JkEclipseClasspathGenerator}.
-     */
-    public static JkEclipseClasspathGenerator of(JkJavaProject javaProject) {
-        return of(javaProject, javaProject.getMaker().getDependencyResolver());
+    public static JkEclipseClasspathGenerator of(JkJavaProjectIde projectDef) {
+        return new JkEclipseClasspathGenerator(projectDef.getSourceLayout(), projectDef.getDependencies(),
+                projectDef.getDependencyResolver(), projectDef.getSourceVersion());
     }
 
     private boolean hasBuildDef() {
