@@ -1,6 +1,7 @@
 package dev.jeka.core.api.file;
 
 import java.nio.file.CopyOption;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
@@ -167,6 +168,20 @@ public final class JkPathTreeSet {
         for (final JkPathTree dir : this.pathTrees) {
             if (dir.exists()) {
                 result.addAll(dir.getRelativeFiles());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns a list of existing files having the specified relative path to its <code>JkPathTree</code> root.
+     */
+    public List<Path> getExistingFiles(String relativePath) {
+        List<Path> result = new LinkedList<>();
+        for (JkPathTree pathTree : this.pathTrees) {
+            Path candidate = pathTree.get(relativePath);
+            if (Files.exists(candidate)) {
+                result.add(candidate);
             }
         }
         return result;

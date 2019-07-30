@@ -9,11 +9,10 @@ import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsThrowable;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
@@ -129,17 +128,28 @@ public final class JkImlGenerator {
     }
 
     private void writeHead() throws XMLStreamException {
+        Path pluginXml = findPluginXml();
+        boolean pluginModule = pluginXml != null;
         writer.writeStartDocument(ENCODING, "1.0");
         writer.writeCharacters("\n");
         writer.writeStartElement("module");
-        writer.writeAttribute("type", "JAVA_MODULE");
+        writer.writeAttribute("type", pluginModule ? "PLUGIN_MODULE" : "JAVA_MODULE");
         writer.writeAttribute("version", "4");
         writer.writeCharacters("\n" + T1);
+        if (pluginModule) {
+            writer.writeEmptyElement("component");
+            writer.writeAttribute("name", "DevKit.ModuleBuildProperties");
+            writer.writeAttribute("url", "file://$MODULE_DIR$/" + this.baseDir.relativize(pluginXml)
+                    .toString().replace("\\", "/"));
+            writer.writeCharacters("\n"  + T1);
+        }
         writer.writeStartElement("component");
         writer.writeAttribute("name", "NewModuleRootManager");
         writer.writeAttribute("inherit-compileRunner-output", "false");
         writer.writeCharacters("\n");
     }
+
+
 
     private void writeFoot() throws XMLStreamException {
         writer.writeCharacters(T1);
@@ -611,5 +621,23 @@ public final class JkImlGenerator {
     public JkImlGenerator setWriter(XMLStreamWriter writer) {
         this.writer = writer;
         return this;
+    }
+
+    private Path findPluginXml() {
+        List<Path> candidates = this.sourceLayout.getResources().getExistingFiles("META-INF/plugin.xml");
+        if (candidates.isEmpty()) {
+            return null;
+        }
+        return candidates.stream().filter(JkImlGenerator::isPlateformPlugin).findFirst().orElse(null);
+    }
+
+    private static boolean isPlateformPlugin(Path pluginXmlFile) {
+        try {
+            Document doc = JkUtilsXml.documentFrom(pluginXmlFile);
+            Element root = JkUtilsXml.directChild(doc, "idea-plugin");
+            return  root != null;
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 }

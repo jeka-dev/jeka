@@ -102,7 +102,7 @@ public final class JkUtilsXml {
      * Returns the direct getChild node of the specified element having specified
      * name.
      */
-    public static Element directChild(Element parent, String childName) {
+    public static Element directChild(Node parent, String childName) {
         final NodeList nodeList = parent.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);

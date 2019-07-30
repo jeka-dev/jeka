@@ -73,7 +73,7 @@ public class JkPluginRepo extends JkPlugin {
             return JkRepoConfigOptionLoader.repoFromOptions(downloadRepoName);
         }
         if (!JkUtilsString.isBlank(downloadUrl)) {
-            return JkRepo.of(publishUrl).withOptionalCredentials(downloadUsername, downloadPassword);
+            return JkRepo.of(downloadUrl).withOptionalCredentials(downloadUsername, downloadPassword);
         }
         return JkRepoConfigOptionLoader.downloadRepository();
     }
