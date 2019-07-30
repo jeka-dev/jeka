@@ -624,6 +624,9 @@ public final class JkImlGenerator {
     }
 
     private Path findPluginXml() {
+        if (sourceLayout == null) {
+            return null;
+        }
         List<Path> candidates = this.sourceLayout.getResources().getExistingFiles("META-INF/plugin.xml");
         if (candidates.isEmpty()) {
             return null;

@@ -24,6 +24,10 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("If true, the project taken in account is not the run project but the project configured in java plugin.")
     public boolean externalDir = false;
 
+    @JkDoc("By default, generated iml files specify a JDK inherited from the project setup. " +
+            "Set this option to 'true' for  forcing the JDK version to the one defined in JkJavaProject.")
+    public boolean forceJdkVersion = false;
+
     private final JkPluginScaffold scaffold;
 
     protected JkPluginIntellij(JkCommands run) {
@@ -50,7 +54,7 @@ public final class JkPluginIntellij extends JkPlugin {
         if (getCommands().getPlugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = getCommands().getPlugins().get(JkPluginJava.class).getProject();
             generator.setSourceJavaVersion(project.getCompileSpec().getSourceVersion());
-            generator.setForceJdkVersion(true);
+            generator.setForceJdkVersion(forceJdkVersion);
             if (externalDir) {
                 basePath = project.getBaseDir();
             }
