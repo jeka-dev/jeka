@@ -1,3 +1,9 @@
+## 0.8.7
+
+* Fix download repo NPE introduced in 0.8.6
+* Fix Java version naming in Eclipse .classpath generation
+* Handle Intellij Platform Plugin in iml generation  
+
 ## 0.8.6
 
 * Fix wrapper failure at downloading
