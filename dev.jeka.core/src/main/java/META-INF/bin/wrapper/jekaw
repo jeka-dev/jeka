@@ -154,11 +154,5 @@ fi
 JEKA_CMD_LINE_ARGS="$@"
 export JEKA_CMD_LINE_ARGS
 
-if [ -d "./jeka/boot" ]; then
-   LOCAL_BUILD_DIR="./jeka/boot/*:"
-else
-   LOCAL_BUILD_DIR=""
-fi
-
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-exec "$JAVACMD" $JEKA_OPTS -cp "$LOCAL_BUILD_DIR$SCRIPTPATH/jeka/wrapper/*" dev.jeka.core.wrapper.Booter $SCRIPTPATH "$@"
+exec "$JAVACMD" $JEKA_OPTS -cp "$SCRIPTPATH/jeka/wrapper/*" dev.jeka.core.wrapper.Booter $SCRIPTPATH "$@"

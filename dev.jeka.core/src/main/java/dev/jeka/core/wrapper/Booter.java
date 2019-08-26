@@ -1,8 +1,8 @@
 package dev.jeka.core.wrapper;
 
-
 import java.io.*;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.Channels;
@@ -11,8 +11,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -44,13 +44,38 @@ class Booter {
                 System.out.println("Jeka " + version + " installed in " + dir);
             }
         }
-        final ClassLoader classLoader = new URLClassLoader(new URL[] {jekaBinPath.toUri().toURL()});
+        List<URL> classpath = new LinkedList<>();
+        classpath.addAll(getBootLibs());
+        classpath.add(jekaBinPath.toUri().toURL());
+        final ClassLoader classLoader = new URLClassLoader(classpath.toArray(new URL[0]));
         Thread.currentThread().setContextClassLoader(classLoader);
         final Class<?> mainClass = classLoader.loadClass(MAIN_CLASS_NAME);
         final Method method = mainClass.getMethod("main", String[].class);
         final String[] actualArgs = args.length <= 1 ? new String[0]
                 : Arrays.copyOfRange(args, 1, args.length);
         method.invoke(null, (Object) actualArgs);
+    }
+
+    private static List<URL> getBootLibs() {
+        Path bootDir = Paths.get("jeka/boot");
+        if (!Files.exists(bootDir)) {
+            return Collections.emptyList();
+        }
+        try {
+            return Files.list(bootDir)
+                    .filter(path -> Files.isRegularFile(path))
+                    .filter(path -> path.getFileName().toString().toLowerCase().endsWith(".jar"))
+                    .map(path -> {
+                        try {
+                            return path.toUri().toURL();
+                        } catch (MalformedURLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private static Path downloadDistribZip(String version) {
