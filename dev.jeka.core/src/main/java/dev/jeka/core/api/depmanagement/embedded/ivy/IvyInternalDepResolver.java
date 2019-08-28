@@ -10,9 +10,7 @@ import dev.jeka.core.api.depmanagement.JkDependencyNode.JkModuleNodeInfo;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
-import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
-import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
+import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
@@ -90,7 +88,6 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
     @Override
     public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencySet deps,
                                    JkResolutionParameters parameters, JkScope ... resolvedScopes) {
-
         final JkVersionedModule module;
         if (moduleArg == null) {
             module = anonymousVersionedModule();
@@ -100,7 +97,7 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
                 parameters.getScopeMapping(), deps.getVersionProvider());
 
-        final String[] confs = toConfs(deps.getDeclaredScopes(), resolvedScopes);
+        final String[] confs = toConfs(moduleDescriptor.getConfigurations(), resolvedScopes);
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);
@@ -308,15 +305,16 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
         return result;
     }
 
-    private String[] toConfs(Set<JkScope> declaredScopes, JkScope ... resolvedScopes) {
+    private String[] toConfs(Configuration[] declaredConfigurations, JkScope ... resolvedScopes) {
         final Set<String> result = new HashSet<>();
-        for (final JkScope resolvedScope : resolvedScopes) {
-            final List<JkScope> scopes = resolvedScope.getCommonScopes(declaredScopes);
-            for (final JkScope scope : scopes) {
-                result.add(scope.getName());
+        for (Configuration declaredConf : declaredConfigurations) {
+            for (JkScope scope : resolvedScopes) {
+                if (declaredConf.getName().equals(scope.getName())) {
+                    result.add(scope.getName());
+                }
             }
         }
-        if (result.isEmpty()) {
+        if (result.isEmpty() && resolvedScopes.length == 0) {
             return IVY_24_ALL_CONF;
         }
         return JkUtilsIterable.arrayOf(result, String.class);

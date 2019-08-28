@@ -29,9 +29,6 @@ import java.util.*;
 
 final class IvyTranslations {
 
-    private static final Map<String, String> ALGOS = JkUtilsIterable.mapOf("MD5", "md5", "SHA-1",
-            "sha1", "SHA-2", "sha2", "SHA-256", "sha256");
-
     private static final String MAIN_RESOLVER_NAME = "MAIN";
 
     private static final String EXTRA_NAMESPACE = "http://ant.apache.org/ivy/extra";
@@ -60,8 +57,6 @@ final class IvyTranslations {
         populateModuleDescriptor(result, dependencies, defaultMapping, resolvedVersions);
         return result;
     }
-
-
 
     private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude, Iterable<String> allRootConfs) {
         final String type = depExclude.getType() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
@@ -93,7 +88,6 @@ final class IvyTranslations {
         return new Configuration(jkScope.getName(), visibility, jkScope.getDescription(),
                 extendedScopes.toArray(new String[0]), jkScope.isTransitive(), null);
     }
-
 
     static ModuleRevisionId toModuleRevisionId(JkModuleId moduleId, JkVersion version) {
         final String originalVersion = version.getValue();
@@ -487,7 +481,6 @@ final class IvyTranslations {
         }
 
         void populate(JkScopedDependency scopedDependency) {
-
             final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.getDependency();
             final JkModuleId moduleId = moduleDep.getModuleId();
             final boolean mainArtifact = moduleDep.getClassifier() == null && moduleDep.getExt() == null;

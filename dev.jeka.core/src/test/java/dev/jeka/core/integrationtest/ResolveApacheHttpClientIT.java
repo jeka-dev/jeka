@@ -8,7 +8,6 @@ import org.junit.Test;
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.COMPILE;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.TEST;
 
-
 public class ResolveApacheHttpClientIT {
 
     private static final String HTTP_CLIENT = "org.apache.httpcomponents:httpclient:4.5.3";
@@ -23,7 +22,7 @@ public class ResolveApacheHttpClientIT {
     }
 
     @Test
-    public void apacheHttpClientWithoutDeclaredAndResolvedScope() {
+    public void resolveWithoutDeclaredAndResolvedScope() {
         JkResolveResult result = resolver().resolve(JkDependencySet.of(HTTP_CLIENT));
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
@@ -31,7 +30,7 @@ public class ResolveApacheHttpClientIT {
     }
 
     @Test
-    public void apacheHttpClientWithoutDeclaredScopeButResolvedScope() {
+    public void resolveWithoutDeclaredScopeButResolvedScope() {
         JkLog.registerHierarchicalConsoleHandler();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkResolveResult result = resolver().resolve(JkDependencySet.of(HTTP_CLIENT), COMPILE);
@@ -41,7 +40,7 @@ public class ResolveApacheHttpClientIT {
     }
 
     @Test
-    public void apacheHttpClientWithDeclaredAndResolvedScope() {
+    public void resolveWithDeclaredAndResolvedScope() {
         JkResolveResult result = resolver().resolve(JkDependencySet.of().and(HTTP_CLIENT, COMPILE), COMPILE);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
@@ -49,7 +48,7 @@ public class ResolveApacheHttpClientIT {
     }
 
     @Test
-    public void apacheHttpClientWithTestScope() {
+    public void resolveWithTestScope() {
         JkResolveResult result = resolver().resolve(
                 JkDependencySet.of().and(HTTP_CLIENT).withDefaultScopes(TEST));
         System.out.println(result.getDependencyTree().toStringTree());
@@ -58,7 +57,7 @@ public class ResolveApacheHttpClientIT {
     }
 
     @Test
-    public void apacheHttpClientWithTestToTestScopeMapping() {
+    public void resolveWithTestToTestScopeMapping() {
         JkLog.registerHierarchicalConsoleHandler();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkDependencySet deps =  JkDependencySet.of().and(HTTP_CLIENT,  TEST.mapTo( "test"));
@@ -73,15 +72,23 @@ public class ResolveApacheHttpClientIT {
     }
 
     @Test
-    public void apacheHttpClientMultiScopeMapping() {
-        JkDependencySet deps =  JkDependencySet.of().and(HTTP_CLIENT,  JkJavaDepScopes.DEFAULT_SCOPE_MAPPING);
+    public void resolveWithMultiScopeMapping() {
+        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT,  JkJavaDepScopes.DEFAULT_SCOPE_MAPPING);
         JkResolveResult result = resolver().resolve(deps, TEST);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
         Assert.assertEquals(3, result.getDependencyTree().getChildren().get(0).getChildren().size());
     }
 
+    @Test
+    public void resolveWithNoOccupiedScope() {
+        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT, JkJavaDepScopes.RUNTIME);
+        JkResolveResult result = resolver().resolve(deps, COMPILE);
+        Assert.assertEquals(0, result.getFiles().getEntries().size());
+    }
+
     private JkDependencyResolver resolver() {
         return JkDependencyResolver.of(JkRepo.ofMavenCentral());
     }
+
 }
