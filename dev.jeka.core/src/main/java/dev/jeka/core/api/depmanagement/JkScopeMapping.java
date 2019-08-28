@@ -26,11 +26,6 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
  */
 public final class JkScopeMapping {
 
-    /**
-     * A scope mapping active for any scope that map to the default scope of the dependencies.
-     */
-    public static final JkScopeMapping ALL_TO_DEFAULT = JkScope.of("*").mapTo("default(*)");
-
     private final Map<JkScope, Set<String>> map;
 
     // -------- Factory methods ----------------------------

@@ -10,13 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.depmanagement.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkResolveResult;
-import dev.jeka.core.api.depmanagement.JkScopeMapping;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
@@ -181,11 +175,12 @@ final class Engine {
 
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
+        JkScopeMapping scope = JkScope.of("*").mapTo("default(*)");
         return JkDependencySet.of(runDependencies
                 .andFiles(bootLibs())
                 .andFiles(JkClasspath.ofCurrentRuntime()).withoutLastIf(!devMode)
                 .andFile(JkLocator.getJekaJarPath()).withoutLastIf(devMode)
-                .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT));
+                .withDefaultScope(scope));
     }
 
     private JkPathSequence bootLibs() {
