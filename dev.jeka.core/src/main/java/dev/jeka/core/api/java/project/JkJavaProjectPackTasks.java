@@ -132,7 +132,7 @@ public class JkJavaProjectPackTasks {
     void checksum(Path fileToChecksum) {
         for (String algo : checksumAlgorithms) {
             JkLog.startTask("Creating checksum " + algo + " for file " + fileToChecksum);
-            JkPathFile.of(fileToChecksum).checksum(checksumAlgorithms);
+            JkPathFile.of(fileToChecksum).checksum(algo);
             JkLog.endTask();
         }
 
