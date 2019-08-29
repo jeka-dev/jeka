@@ -6,6 +6,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import dev.jeka.core.api.java.JkClassLoader;
@@ -76,6 +77,18 @@ public final class Main {
      * Entry point to call Jeka on a given folder
      */
     public static void exec(Path projectDir, String... args) {
+        if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
+            final URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {},
+                    Thread.currentThread().getContextClassLoader());
+            Thread.currentThread().setContextClassLoader(urlClassLoader);
+            List<Object> argList = new LinkedList<>();
+            argList.add(projectDir);
+            argList.addAll(Arrays.asList(args));
+            final Object[] argArray = argList.toArray();
+            JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main",
+                    "exec" , argArray);
+            return;
+        }
         final Engine engine = new Engine(projectDir);
         Environment.initialize(args);
         final JkLog.Verbosity verbosity = JkLog.verbosity();
