@@ -1,4 +1,9 @@
-## 0.8.7
+# 0.8.8
+* Fix classloading error with wrapper
+* Fix classloading error on when using jdk9+
+* Fix dependency scope issue taking too large scopes
+
+# 0.8.7
 
 * Fix download repo NPE introduced in 0.8.6
 * Fix Java version naming in Eclipse .classpath generation
