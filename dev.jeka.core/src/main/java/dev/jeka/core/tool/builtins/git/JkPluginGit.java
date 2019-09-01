@@ -6,7 +6,7 @@ import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 
-@JkDoc("Plugin providing commons Git scripts/commands out of the box.")
+@JkDoc("Plugin providing common Git scripts/commands out of the box.")
 public class JkPluginGit extends JkPlugin {
 
     private final JkGitWrapper git;
