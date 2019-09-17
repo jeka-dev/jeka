@@ -3,13 +3,7 @@ package dev.jeka.core.api.depmanagement;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
@@ -512,6 +506,47 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
             }
         }
         return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
+    }
+
+    /**
+     * Returns a JkDependencySet similar to this one but removing duplicates on module dependencies. Such duplicates
+     * occurres when two module dependencies have been declared with the same JkModuleId. The removed dependency is
+     * the one with the lower or unspecified version.
+     * It has been introduced to satisfy https://github.com/jerkar/jeka/issues/135
+     */
+    public JkDependencySet withoutDuplicate() {
+        Map<JkModuleId, JkVersion> moduleIdVersionMap = new HashMap<>();
+        for (JkScopedDependency scopedDependency : this.dependencies) {
+            JkDependency dependency = scopedDependency.getDependency();
+            if (dependency instanceof JkModuleDependency) {
+                JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
+                JkModuleId moduleId = moduleDependency.getModuleId();
+                JkVersion version = moduleDependency.getVersion();
+                JkVersion mapVersion = moduleIdVersionMap.get(moduleId);
+                if (mapVersion == null || mapVersion.isUnspecified() || (version != null && version.isGreaterThan(mapVersion))) {
+                    moduleIdVersionMap.put(moduleId, version);
+                }
+            }
+        }
+        List<JkScopedDependency> result = new LinkedList<>();
+        Set<JkModuleId> moduleIds = new HashSet<>();
+        for (JkScopedDependency scopedDependency : this.dependencies) {
+            JkDependency dependency = scopedDependency.getDependency();
+            if (dependency instanceof JkModuleDependency) {
+                JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
+                JkModuleId moduleId = moduleDependency.getModuleId();
+                if (moduleIds.contains(moduleId)) {
+                    continue;
+                }
+                moduleIds.add(moduleId);
+                JkModuleDependency replacingModuleDep = moduleDependency.withVersion(moduleIdVersionMap.get(moduleId));
+                JkScopedDependency replacingScopedDep = scopedDependency.withDependency(replacingModuleDep);
+                result.add(replacingScopedDep);
+            } else {
+                result.add(scopedDependency);
+            }
+        }
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
     }
 
     /**

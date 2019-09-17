@@ -49,6 +49,14 @@ public final class JkVersion implements Comparable<JkVersion> {
 
     @Override
     public int compareTo(JkVersion other) {
+        if (this.isUnspecified()) {
+            if (other.isUnspecified()) {
+                return 0;
+            }
+            return -1;
+        } else if (other.isUnspecified()) {
+            return 1;
+        }
         return value.compareTo(other.value);
     }
 
