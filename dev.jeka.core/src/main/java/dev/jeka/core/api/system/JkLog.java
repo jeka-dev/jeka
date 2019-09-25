@@ -47,8 +47,13 @@ public final class JkLog implements Serializable {
 
     private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();
 
-    static {
-        START_TIMES.set(new LinkedList<>());
+    private static LinkedList<Long> getStartTimes() {
+        LinkedList<Long> result = START_TIMES.get();
+        if (result == null) {
+            result = new LinkedList<>();
+            START_TIMES.set(result);
+        }
+        return result;
     }
 
     public static void register(EventLogHandler eventLogHandler) {
@@ -136,7 +141,7 @@ public final class JkLog implements Serializable {
     public static void startTask(String message) {
         consume(JkLogEvent.ofRegular(Type.START_TASK, message));
         currentNestedTaskLevel.incrementAndGet();
-        START_TIMES.get().addLast(System.nanoTime());
+        getStartTimes().addLast(System.nanoTime());
     }
 
     /**
@@ -146,7 +151,7 @@ public final class JkLog implements Serializable {
      */
     public static void endTask(String message) {
         currentNestedTaskLevel.decrementAndGet();
-        Long startTime = START_TIMES.get().pollLast();
+        Long startTime = getStartTimes().pollLast();
         if (startTime == null) {
             throw new JkException("No start task found matching with this endTask. Check that you don't have " +
                     "used an 'endTask' one too many in your code.");
