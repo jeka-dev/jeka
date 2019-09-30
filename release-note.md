@@ -1,6 +1,7 @@
 # 0.8.9
 * Fix NPE when invoking `JkLog.startTask` on a new Thread.
-* Handle duplicate dependency declaration on a `JkDependencySet` 
+* Handle duplicate dependency declaration on a `JkDependencySet`
+* Fix issue when generating fat jar along original jar 
 
 # 0.8.8
 * Fix classloading error with wrapper
