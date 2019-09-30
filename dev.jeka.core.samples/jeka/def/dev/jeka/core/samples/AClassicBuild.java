@@ -44,7 +44,7 @@ public class AClassicBuild extends JkCommands {
 
          // With JDK 9 you should provide jre classes in the buildPath (so in dependencies)
         // maker.getTasksForCompilation().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
-        maker.defineMainArtifactAsFatJar(false);  // project will produce a fat jar as well.
+        maker.defineMainArtifactAsFatJar(true);  // project will produce a fat jar as well.
         maker.getTasksForTesting().setForkRun(true);
     }
     

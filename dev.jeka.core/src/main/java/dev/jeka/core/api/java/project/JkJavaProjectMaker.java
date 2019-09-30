@@ -33,7 +33,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     final JkJavaProject project;
 
-    private final Map<JkArtifactId, Runnable> artifactProducers = new LinkedHashMap<>();
+    private final Map<JkArtifactId, Runnable> artifactRunnables = new LinkedHashMap<>();
 
     private final Map<Set<JkScope>, JkPathSequence> dependencyCache = new HashMap<>();
 
@@ -112,7 +112,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * or {@link JkJavaProjectMaker#JAVADOC_ARTIFACT_ID}.
      */
     public JkJavaProjectMaker putArtifact(JkArtifactId artifactId, Runnable runnable) {
-        artifactProducers.put(artifactId, runnable);
+        artifactRunnables.put(artifactId, runnable);
         return this;
     }
 
@@ -121,16 +121,16 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * will raise an exception.
      */
     public JkJavaProjectMaker removeArtifact(JkArtifactId artifactId) {
-        artifactProducers.remove(artifactId);
+        artifactRunnables.remove(artifactId);
         return this;
     }
 
     @Override
     public void makeArtifact(JkArtifactId artifactId) {
-        if (artifactProducers.containsKey(artifactId)) {
+        if (artifactRunnables.containsKey(artifactId)) {
             Path resultFile =  project.getBaseDir().relativize(tasksForPackaging.getArtifactFile(artifactId));
             JkLog.startTask("Producing artifact file " + resultFile);
-            this.artifactProducers.get(artifactId).run();
+            this.artifactRunnables.get(artifactId).run();
             JkLog.endTask();
             this.getTasksForPackaging().checksum(resultFile);
         } else {
@@ -143,15 +143,15 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * @param defineOriginal If true, a "original" artifact will be created standing for the original jar.
      */
     public JkJavaProjectMaker defineMainArtifactAsFatJar(boolean defineOriginal) {
-        Path mainPath = getArtifactPath(getMainArtifactId());
-        Runnable originalRun = artifactProducers.get(getMainArtifactId());
-        putArtifact(getMainArtifactId(), () -> {
+        JkArtifactId mainArtifactId = getMainArtifactId();
+        Path mainPath = getArtifactPath(mainArtifactId);
+        putArtifact(mainArtifactId, () -> {
             tasksForCompilation.runIfNecessary();
             tasksForTesting.runIfNecessary();
             tasksForPackaging.createFatJar(mainPath);});
         if (defineOriginal) {
-            JkArtifactId original = JkArtifactId.of("original", "jar");
-            putArtifact(original, originalRun);
+            JkArtifactId originalArtifactId = JkArtifactId.of("original", "jar");
+            putArtifact(originalArtifactId, () -> tasksForPackaging.createBinJar(getArtifactPath(originalArtifactId)));
         }
         return this;
     }
@@ -163,7 +163,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     @Override
     public final Iterable<JkArtifactId> getArtifactIds() {
-        return this.artifactProducers.keySet();
+        return this.artifactRunnables.keySet();
     }
 
     public JkJavaProjectMaker addTestArtifact() {
@@ -186,7 +186,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Returns the runnable responsible for creating the specified artifactId.
      */
     public Runnable getRunnable(JkArtifactId artifactId) {
-        return this.artifactProducers.get(artifactId);
+        return this.artifactRunnables.get(artifactId);
     }
 
     // Dependency management -----------------------------------------------------------
