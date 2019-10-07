@@ -1,3 +1,8 @@
+# 0.8.10
+* Display JkException stacktrace when faing in verbose mode
+* Display Exception stacktrace when JkPluginIntellij#allIml fails
+
+
 # 0.8.9
 * Fix NPE when invoking `JkLog.startTask` on a new Thread.
 * Handle duplicate dependency declaration on a `JkDependencySet`

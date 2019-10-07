@@ -49,6 +49,8 @@ final class Engine {
 
     private List<Path> rootOfImportedRuns = new LinkedList<>();
 
+    private List<String> compileOptions = new LinkedList<>();
+
     private final CommandResolver resolver;
 
     /**
@@ -123,6 +125,7 @@ final class Engine {
         this.runDependencies = this.runDependencies.and(parser.dependencies());
         this.runRepos = parser.importRepos().and(runRepos);
         this.rootOfImportedRuns = parser.projects();
+        this.compileOptions = parser.compileOptions();
     }
 
     // Compiles and returns the runtime classpath
@@ -207,7 +210,7 @@ final class Engine {
     }
 
     private void compileDef(JkPathSequence runPath) {
-        final JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath);
+        final JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath).addOptions(this.compileOptions);
         JkPathTree.of(compileSpec.getOutputDir()).deleteContent();
         try {
             JkJavaCompiler.ofJdk().compile(compileSpec);

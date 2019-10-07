@@ -32,7 +32,7 @@ final class SourceParser {
 
     public static SourceParser of(Path baseDir, Iterable<Path>  files) {
         SourceParser result = new SourceParser(JkDependencySet.of(), JkRepoSet.of(),
-                new LinkedList<>());
+                new LinkedList<>(), new LinkedList<>());
         for (final Path code : files) {
             result = result.and(of(baseDir, code));
         }
@@ -44,7 +44,8 @@ final class SourceParser {
             final String uncomentedCode = removeComments(inputStream);
             final JkDependencySet deps = dependencies(uncomentedCode, baseDir, codeUrl);
             final List<Path>  projects = projects(uncomentedCode, baseDir, codeUrl);
-            return new SourceParser(deps, repos(uncomentedCode, codeUrl), projects);
+            final List<String> compileOptions = compileOptions(uncomentedCode, codeUrl);
+            return new SourceParser(deps, repos(uncomentedCode, codeUrl), projects, compileOptions);
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
@@ -56,30 +57,39 @@ final class SourceParser {
 
     private final List<Path> dependencyProjects;
 
-    private SourceParser(JkDependencySet deps, JkRepoSet repos, List<Path>  dependencyProjects) {
+    private final List<String> compileOptions;
+
+    private SourceParser(JkDependencySet deps, JkRepoSet repos, List<Path>  dependencyProjects,
+                         List<String> compileOptions) {
         super();
         this.dependencies = deps;
         this.importRepos = repos;
         this.dependencyProjects = Collections.unmodifiableList(dependencyProjects);
+        this.compileOptions = compileOptions;
     }
 
     @SuppressWarnings("unchecked")
     private SourceParser and(SourceParser other) {
         return new SourceParser(this.dependencies.and(other.dependencies),
-                this.importRepos.and(other.importRepos), JkUtilsIterable.concatLists(
-                this.dependencyProjects, other.dependencyProjects));
+                this.importRepos.and(other.importRepos),
+                JkUtilsIterable.concatLists(this.dependencyProjects, other.dependencyProjects),
+                JkUtilsIterable.concatLists(this.compileOptions, other.compileOptions));
     }
 
-    public JkDependencySet dependencies() {
+    JkDependencySet dependencies() {
         return this.dependencies;
     }
 
-    public JkRepoSet importRepos() {
+    JkRepoSet importRepos() {
         return this.importRepos;
     }
 
-    public List<Path>  projects() {
+    List<Path>  projects() {
         return this.dependencyProjects;
+    }
+
+    List<String> compileOptions() {
+        return this.compileOptions;
     }
 
     private static JkDependencySet dependencies(String code, Path baseDir, URL url) {
@@ -95,6 +105,10 @@ final class SourceParser {
     private static List<Path>  projects(String code, Path baseDir, URL url) {
         final List<String> deps = jkImportRun(code, url);
         return projectDependencies(baseDir, deps);
+    }
+
+    private static List<String>  compileOptions(String code, URL url) {
+        return stringsInAnnotation(code, JkCompileOption.class, url);
     }
 
     private static JkDependencySet dependenciesFromImports(Path baseDir, List<String> deps) {
