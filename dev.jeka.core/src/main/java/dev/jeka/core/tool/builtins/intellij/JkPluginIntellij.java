@@ -8,6 +8,9 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,11 +95,15 @@ public final class JkPluginIntellij extends JkPlugin {
             try {
                 Main.exec(projectFolder, "intellij#iml");
             } catch (Exception e) {
-                JkLog.warn("Generating Iml failed : Try to generate it using -CC=JkCommands option.");
+                JkLog.warn("Generating Iml failed : Try to generate it using -CC=JkCommands option. Failure cause : ");
+                JkLog.warn(e.getMessage());
+                PrintWriter printWriter = new PrintWriter(JkLog.getErrorStream());
+                e.printStackTrace(printWriter);
+                printWriter.flush();
                 try {
                     Main.exec(projectFolder, "intellij#iml", "-CC=JkCommands");
                 } catch (Exception e1) {
-                    JkLog.warn("Generatint Iml file failed;");
+                    JkLog.warn("Generating Iml file failed;");
                 }
             }
             JkLog.endTask();
