@@ -79,6 +79,7 @@ class ModulesXmlGenerator {
         writer.flush();
         writer.close();
         JkUtilsPath.deleteIfExists(outputFile);
+        JkUtilsPath.createDirectories(outputFile.getParent());
         Files.write(outputFile, baos.toByteArray());
     }
 

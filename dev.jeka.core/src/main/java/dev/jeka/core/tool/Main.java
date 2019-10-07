@@ -13,10 +13,7 @@ import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
-import dev.jeka.core.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.*;
 
 /**
  * Main class for launching Jeka from command line.
@@ -59,6 +56,9 @@ public final class Main {
             JkHierarchicalConsoleLogHandler.restore();
             if (e instanceof JkException) {
                 System.err.println(e.getMessage());
+                if (JkLog.isVerbose()) {
+                    e.printStackTrace(System.err);
+                }
             } else {
                 e.printStackTrace(System.err);
             }
