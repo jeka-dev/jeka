@@ -1,7 +1,7 @@
 # 0.8.10
-* Display JkException stacktrace when faing in verbose mode
-* Display Exception stacktrace when JkPluginIntellij#allIml fails
-
+* Display JkException stacktrace when failing in verbose mode
+* Display Exception stacktrace when `JkPluginIntellij#allIml` fails
+* Add `@JkCompileOption` to inject compile options to def class compiler.
 
 # 0.8.9
 * Fix NPE when invoking `JkLog.startTask` on a new Thread.
