@@ -1,10 +1,11 @@
-# 0.8.10
+# 0.8.10 
 * Display JkException stacktrace when failing in verbose mode
 * Display Exception stacktrace when `JkPluginIntellij#allIml` fails
-* Add `@JkCompileOption` to inject compile options to def class compiler.
+* Add `@JkCompileOption` to inject compile options to def class compiler
+* Add wildcard usage in `@JkImport`
 
 # 0.8.9
-* Fix NPE when invoking `JkLog.startTask` on a new Thread.
+* Fix NPE when invoking `JkLog.startTask` on a new Thread
 * Handle duplicate dependency declaration on a `JkDependencySet`
 * Fix issue when generating fat jar along original jar 
 

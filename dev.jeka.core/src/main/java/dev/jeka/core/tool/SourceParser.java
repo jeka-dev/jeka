@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
@@ -116,6 +117,12 @@ final class SourceParser {
         for (final String dependency : deps) {
             if (isModuleDependencyDescription(dependency)) {
                 result = result.and(JkModuleDependency.of(dependency));
+            } else  if (dependency.contains("*")) {
+                if (dependency.contains("*")) {
+                    for (Path path : JkPathTree.of(baseDir).andMatching(true, dependency).getFiles()) {
+                        result = result.andFile(path);
+                    }
+                }
             } else {
                 Path depFile = Paths.get(dependency);
                 if (!Files.exists(depFile)) {
@@ -127,13 +134,12 @@ final class SourceParser {
                                 + "' mentionned in @JkImport does not exist.");
                     }
                 }
-
                 result = result.andFile(depFile);
             }
-
         }
         return result;
     }
+
 
     /**
      * Returns <code>true</code> if the candidate string is a valid module dependency description.

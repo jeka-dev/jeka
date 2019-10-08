@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * Specifies the libraries necessary to compile and run the annotated class as a
  * Jeka run. It can specify library referenced in a repository (as
  * "com.google.guava:guava:18.0") or file pattern relative to the project
- * directory (as "../lib-folder/mylib.jar").
+ * directory (as "../lib-folder/mylib.jar" or "libs/*.jar")
  *
  * @author Jerome Angibaud
  */
@@ -24,7 +24,6 @@ public @interface JkImport {
      * or a file dependency (as "../lib-folder.mylib.jar").
      */
     String value();
-
 
     /**
      * Repeatable container.
