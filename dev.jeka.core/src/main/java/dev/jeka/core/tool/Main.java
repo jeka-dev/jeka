@@ -81,12 +81,8 @@ public final class Main {
             final URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {},
                     Thread.currentThread().getContextClassLoader());
             Thread.currentThread().setContextClassLoader(urlClassLoader);
-            List<Object> argList = new LinkedList<>();
-            argList.add(projectDir);
-            argList.addAll(Arrays.asList(args));
-            final Object[] argArray = argList.toArray();
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main",
-                    "exec" , argArray);
+                    "exec" , projectDir, args);
             return;
         }
         final Engine engine = new Engine(projectDir);
