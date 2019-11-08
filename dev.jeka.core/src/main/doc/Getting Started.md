@@ -576,11 +576,105 @@ There's many option to handle it in Jeka :
 * Use high level _JkJavaProject_ API
 * Use Jeka Java Plugin
 
-The one you choose is a matter of taste, flexibility, verbosity, reusability and integration with existing tools.
+The one you choose is a matter of taste, flexibility, verbosity, re-usability and integration with existing tools.
 
 ## Build Java project using low-level API
 
-_TODO_
+This approach is similar to what developers do when they use ANT. They just define explicitly where are 
+stored the materials and define specific tasks for their needs. Just define public methods for tasks.
+
+Jeka provides a library providing what is needed for building and deploy Java projects of any structure.
+
+```Java
+import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.file.JkResourceProcessor;
+import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.java.junit.JkJavaTestClasses;
+import dev.jeka.core.api.java.junit.JkUnit;
+import dev.jeka.core.api.java.junit.JkUnit.JunitReportDetail;
+import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkImport;
+import dev.jeka.core.tool.JkInit;
+
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
+@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.6")
+public class AntStyleBuild extends JkCommands {
+
+    Path src = getBaseDir().resolve("src/main/javaPlugin");
+    Path buildDir = getBaseDir().resolve("build/output");
+    Path classDir = getOutputDir().resolve("classes");
+    Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
+    JkClasspath classpath;
+    Path reportDir = buildDir.resolve("junitRreport");
+
+    public void doDefault() {
+        clean();
+        run();
+    }
+
+    @Override
+    protected void setup() {
+       JkResolveResult depResolution = JkDependencyResolver.of(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
+               .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
+               .and("junit:junit:4.11", JkJavaDepScopes.TEST)
+       );
+       classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles())
+            .and(depResolution.getFiles());
+    }
+
+    public void compile() {
+        JkJavaCompiler.ofJdk().compile(JkJavaCompileSpec.of()
+                .setOutputDir(classDir)
+                .setClasspath(classpath)
+                .setSourceAndTargetVersion(JkJavaVersion.V8)
+                .addSources(src));
+        Map<String, String> varReplacement = new HashMap<>();
+        varReplacement.put("${server.ip}", "123.211.11.0");
+        JkResourceProcessor.of(JkPathTreeSet.of(src)).andInterpolate("**/*.properties", varReplacement)
+                .generateTo(classDir, Charset.forName("UTF-8"));
+        JkPathTree.of(src).andMatching(false, "**/*.javaPlugin").copyTo(classDir);
+    }
+
+    public void jar() {
+        compile();
+        JkManifest.ofEmpty().addMainClass("RunClass").writeToStandardLocation(classDir);
+        JkPathTree.of(classDir).zipTo(jarFile);
+    }
+
+    public void javadoc() {
+        JkJavadocMaker.of(JkPathTreeSet.of(src), buildDir.resolve("javadoc")).process();
+    }
+
+    public void run() {
+        jar();
+        JkJavaProcess.of().withWorkingDir(jarFile.getParent())
+            .andClasspath(classpath)
+            .runJarSync(jarFile);
+    }
+
+    public void cleanBuild() {
+        clean();
+        jar();
+    }
+
+    public void junit() {
+        jar();
+        JkUnit.of().withForking()
+        .withReportDir(reportDir)
+        .withReport(JunitReportDetail.FULL)
+        .run(JkJavaTestClasses.of(
+                classpath.andPrepending(jarFile),
+                JkPathTree.of(classDir).andMatching(true, "**/*Test.class", "*Test.class") ));
+    }
+
+}
+```
 
 ## Build Java project using high level API
 

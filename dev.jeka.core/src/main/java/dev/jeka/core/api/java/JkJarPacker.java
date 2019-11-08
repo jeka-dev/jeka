@@ -47,7 +47,7 @@ public final class JkJarPacker {
     }
 
     /**
-     * Creates a jar file according specified parameters.
+     * Creates a jar file including extra files and manifest.
      * @param resultFile Result file
      */
     public void makeJar(Path resultFile) {
