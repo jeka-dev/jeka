@@ -678,7 +678,37 @@ public class AntStyleBuild extends JkCommands {
 
 ## Build Java project using high level API
 
-_TODO_
+Defining all tasks needed to build a project can be verbose and tedious. Therefore Jeka provides a higher level API
+to build Java project. This API mainly consist in a `JkJavaProject` class defining the project structure, dependencies, 
+artifacts it produces and how they are produced.
+
+
+
+```Java
+        // Bar project depends on Foo one.
+
+        JkVersionProvider versionProvider = JkVersionProvider.of()
+                .and("com.google.guava:guava", "21.0")
+                .and("junit:junit", "4.12");
+
+        JkJavaProject fooProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("foo"));
+        fooProject.setDependencies(JkDependencySet.of()
+                .and("junit:junit", JkJavaDepScopes.TEST)
+                .and("com.google.guava:guava")
+                .and("com.sun.jersey:jersey-server:1.19.4")
+                .withVersionProvider(versionProvider)
+        );
+        fooProject.getMaker().addJavadocArtifact();  // Generate Javadoc by default
+
+        JkJavaProject barProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("bar"));
+        fooProject.setDependencies(JkDependencySet.of()
+                .and("junit:junit", JkJavaDepScopes.TEST)
+                .and("com.sun.jersey:jersey-server:1.19.4")
+                .and(fooProject)
+        );
+        barProject.getMaker().defineMainArtifactAsFatJar(true); // Produced jar will embed dependencies
+        barProject.getMaker().clean().makeAllArtifacts();  // Creates Bar jar along Foo jar (if not already built)
+```
 
 ## Build Java project using Jeka Java plugin.
 
