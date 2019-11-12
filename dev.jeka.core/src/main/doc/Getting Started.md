@@ -682,6 +682,15 @@ Defining all tasks needed to build a project can be verbose and tedious. Therefo
 to build Java project. This API mainly consist in a `JkJavaProject` class defining the project structure, dependencies, 
 artifacts it produces and how they are produced.
 
+Basically, A Java build definition can stand in one single instance of `JkJavaProject`. 
+This class implements `JkArtifactProducer` which defines methods to produce artifacts as jar files, javadoc and any 
+other files you want to produces from the project build.
+
+To avoid to get to much bloated `JkJavaProject` class, methods are splitted between `JkJavaProject` itself and 
+`JkJavaProjectMaker` classes. The first host methods relative to the project 'statical' structure 
+(Name, version, layout, dependencies, Java version, default compilation options, manifest) and the second host methods 
+and lambdas to produces artifacts and publish them.  
+
 
 
 ```Java
@@ -733,7 +742,7 @@ Explanation : `scaffold#run` invokes 'run' method on the 'scaffold' plugin.  `ja
 
 By default the project mimics Maven layout convention so sources are supposed to lie in _src/main/java_.
 
-Below is the content of the generated build class. Guava and Junit are pesent only fo demo purpose. You can remove it safely and add 
+Below is the content of the generated build class. Guava and Junit are present only fo demo purpose. You can remove it safely and add 
 any dependency you need.
 
 ```Java

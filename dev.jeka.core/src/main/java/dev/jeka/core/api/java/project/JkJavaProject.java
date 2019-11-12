@@ -43,7 +43,7 @@ import java.util.function.Supplier;
  *
  * @See JkJavaProjectMaker
  */
-public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
+public abstract class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer>, JkArtifactProducer {
 
     private JkVersionedModule versionedModule;
 
