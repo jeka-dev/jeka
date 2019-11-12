@@ -196,8 +196,8 @@ public final class JkManifest {
     }
 
     private static void merge(Attributes attributes, Attributes others) {
-        for (final Object key : others.entrySet()) {
-            attributes.putValue(key.toString(), others.getValue(key.toString()));
+        for (final Map.Entry<?, ?> entry : others.entrySet()) {
+            attributes.putValue(entry.getKey().toString(), entry.getValue().toString());
         }
     }
 
