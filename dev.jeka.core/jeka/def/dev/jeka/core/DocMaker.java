@@ -50,7 +50,6 @@ class DocMaker {
         assembleHtmlDoc();
     }
 
-
     private void assembleHtmlDoc() {
         final Path targetFolder = docDist;
         JkUtilsPath.createDirectories(targetFolder);
@@ -63,7 +62,7 @@ class DocMaker {
         final String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
         JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
         JkPathTree.of(htmlTemplates).andMatching("**/*.css", "**/*.jpg", "**/*.svg", "**/*.js")
-        .copyTo(docDist.resolve("style"));
+            .copyTo(docDist.resolve("style"));
     }
 
     private String createSingleReferenceMdPage() {
@@ -127,9 +126,6 @@ class DocMaker {
                 menuItems.add(menuItem);
             }
         });
-
-
-
         return menuItems;
     }
 

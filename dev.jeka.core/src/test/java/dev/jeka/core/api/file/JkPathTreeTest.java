@@ -4,7 +4,9 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsPathTest;
 import org.junit.Test;
 
+import java.awt.*;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -127,13 +129,36 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testImportFile() throws Exception {
+    public void testImportFiles() throws Exception {
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
         Path tempFile = Files.createTempFile("example", ".txt");
         tree.importFiles(tempFile);
         assertTrue(Files.exists(tree.get(tempFile.getFileName().toString())));
         Files.delete(tempFile);
+    }
+
+    @Test
+    public void testImportFile() throws Exception {
+        Path dirSample = Files.createTempDirectory("sample");
+        JkPathTree treeSample = JkPathTree.of(dirSample);
+        testImportFile(treeSample);
+        Path zipFile = createSampleZip();
+        try (JkPathTree zipTree = JkPathTree.ofZip(zipFile)) {
+            testImportFile(zipTree);
+        }
+    }
+
+    private void testImportFile(JkPathTree treeSample) throws URISyntaxException {
+        Path sampleTxt = Paths.get(JkUtilsPathTest.class
+                .getResource("samplefolder/subfolder/sample.txt").toURI());
+
+        treeSample.importFile(sampleTxt, "newDir/sample.txt");
+        treeSample.importFile(sampleTxt, "sample.txt");
+
+        assertTrue(Files.exists(treeSample.getRoot().resolve("sample.txt")));
+        assertTrue(Files.exists(treeSample.getRoot().resolve("newDir/sample.txt")));
+
     }
 
     @Test

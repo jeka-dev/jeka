@@ -226,6 +226,10 @@ public final class JkPathTree implements Closeable {
      */
     public JkPathTree importFile(Path src, String targetName, StandardCopyOption ... copyOptions) {
         createIfNotExist();
+        Path parentTarget = getRoot().resolve(targetName).getParent();
+        if (parentTarget != null && !Files.exists(parentTarget)) {
+            JkUtilsPath.createDirectories(parentTarget);
+        }
         JkUtilsPath.copy(src, getRoot().resolve(targetName), copyOptions);
         return this;
     }
