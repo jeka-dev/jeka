@@ -167,6 +167,9 @@ public final class JkPathTree implements Closeable {
      */
     public JkPathTree goTo(String relativePath) {
         final Path path = getRoot().resolve(relativePath).normalize();
+        if (Files.exists(path) && !Files.isDirectory(path)) {
+            throw new IllegalArgumentException(getRoot() + "/" + relativePath + " is not a directory");
+        }
         RootHolder rootHolder = new RootHolder(this.rootHolder.zipFile, path);
         return new JkPathTree(rootHolder, this.matcher);
     }
