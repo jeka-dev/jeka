@@ -49,7 +49,7 @@ public final class JkManifest {
     /**
      * The title of the implementation.
      */
-    public static final String IMPLEMENTATION_TITLE = "Implementation_Title";
+    public static final String IMPLEMENTATION_TITLE = "Implementation-Title";
 
     /**
      * The version of the implementation.
