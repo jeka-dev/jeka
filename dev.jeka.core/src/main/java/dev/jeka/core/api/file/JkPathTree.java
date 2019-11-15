@@ -337,7 +337,18 @@ public final class JkPathTree implements Closeable {
         return JkUtilsPath.copyDirContent(getRoot(), destinationDir, matcher, copyOptions);
     }
 
-
+    /**
+     * Copies a single file contained in this {@link JkPathTree} to the specified directory. File name remains the same.
+     * @param sourcePath The relative path of the source file from this tree root.
+     */
+    public void copyFile(String sourcePath, Path destinationDir, CopyOption ... copyOptions) {
+        if (!Files.exists(destinationDir)) {
+            JkUtilsPath.createDirectories(destinationDir);
+        }
+        Path source = get(sourcePath);
+        Path dest = destinationDir.getFileSystem().getPath(destinationDir.toString() + "/" + source.getFileName());
+        JkUtilsPath.copy(source, dest, copyOptions);
+    }
 
     // ------------------------- Filter ----------------------------------------------
 

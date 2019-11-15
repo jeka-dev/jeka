@@ -4,13 +4,11 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsPathTest;
 import org.junit.Test;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.*;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -248,6 +246,16 @@ public class JkPathTreeTest {
         Path tempDir = Files.createTempDirectory("jeka-test");
         try (JkPathTree pathTree = JkPathTree.ofZip(zipFile)) {
             pathTree.goTo("subfolder").andMatching("sample.txt").copyTo(tempDir);
+        }
+        assertTrue(Files.exists(tempDir.resolve("sample.txt")));
+    }
+
+    @Test
+    public void testCopyToSingle() throws Exception {
+        Path zipFile = createSampleZip();
+        Path tempDir = Files.createTempDirectory("jeka-test");
+        try (JkPathTree pathTree = JkPathTree.ofZip(zipFile)) {
+            pathTree.copyFile("subfolder/sample.txt", tempDir);
         }
         assertTrue(Files.exists(tempDir.resolve("sample.txt")));
     }
