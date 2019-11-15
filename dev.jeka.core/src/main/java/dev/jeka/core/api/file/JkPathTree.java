@@ -312,7 +312,6 @@ public final class JkPathTree implements Closeable {
         }
         final Path zipRootEntry = JkUtilsPath.zipRoot(destination);
         try (Stream<Path> stream = this.stream()) {
-
             stream.filter(excludeRootFilter()).forEach(path -> {
                 Path zipEntry = zipRootEntry.resolve(getRoot().relativize(path).toString());
                 if (!Files.exists(zipEntry) || !Files.isDirectory(zipEntry)) {

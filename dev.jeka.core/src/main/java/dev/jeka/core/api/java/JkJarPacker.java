@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -69,8 +70,8 @@ public final class JkJarPacker {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classtrees.getPathTrees().get(0).getRoot());
         }
-        classtrees.and(extraFiles).andZips(otherJars)
-                .andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(resultFile);
+        JkPathTreeSet.ofEmpty().andZips(otherJars).and(classtrees).andMatcher(EXCLUDE_SIGNATURE_MATCHER)
+                .zipTo(resultFile);  // main jar files must take precedence over files coming form dependencies
     }
 
 }
