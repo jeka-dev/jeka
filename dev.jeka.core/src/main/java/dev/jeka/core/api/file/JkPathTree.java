@@ -225,7 +225,7 @@ public final class JkPathTree implements Closeable {
     }
 
     /**
-     * Copies the specified file at the root of this tree with the specified name. The copy is not recursive.
+     * Copies the specified file at the specified path within this tree.
      */
     public JkPathTree importFile(Path src, String targetName, StandardCopyOption ... copyOptions) {
         createIfNotExist();

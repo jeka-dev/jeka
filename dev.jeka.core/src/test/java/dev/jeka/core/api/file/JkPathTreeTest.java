@@ -9,10 +9,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
@@ -250,6 +250,14 @@ public class JkPathTreeTest {
             pathTree.goTo("subfolder").andMatching("sample.txt").copyTo(tempDir);
         }
         assertTrue(Files.exists(tempDir.resolve("sample.txt")));
+    }
+
+    @Test
+    public void testZipStreamWithNoDirectoryMatcher() throws Exception {
+        JkPathTree zipTree = JkPathTree.ofZip(createSampleZip());
+        try (Stream<Path> stream = zipTree.withMatcher(JkPathMatcher.ofNoDirectory()).stream()) {
+            stream.forEach(System.out::println);
+        }
     }
 
 }

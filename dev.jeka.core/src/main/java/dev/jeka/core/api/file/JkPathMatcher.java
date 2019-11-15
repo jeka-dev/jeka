@@ -30,7 +30,12 @@ public final class JkPathMatcher implements PathMatcher {
      * A matcher filtering out directories.
      */
     public static JkPathMatcher ofNoDirectory(LinkOption...linkOptions) {
-        return new JkPathMatcher(path -> !Files.isDirectory(path, linkOptions), "No directories");
+        return new JkPathMatcher(path -> {
+            if (path.toString().equals("")) {
+                return false;
+            }
+            return !Files.isDirectory(path, linkOptions);
+            }, "No directories");
     }
 
     /**
