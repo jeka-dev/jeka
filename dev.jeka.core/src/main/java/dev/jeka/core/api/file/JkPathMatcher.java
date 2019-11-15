@@ -31,7 +31,7 @@ public final class JkPathMatcher implements PathMatcher {
      */
     public static JkPathMatcher ofNoDirectory(LinkOption...linkOptions) {
         return new JkPathMatcher(path -> {
-            if (path.toString().equals("")) {
+            if (path.toString().equals("")) {  // In zip, Files.isDirectory(Paths.get("")) throws an Exception.
                 return false;
             }
             return !Files.isDirectory(path, linkOptions);
