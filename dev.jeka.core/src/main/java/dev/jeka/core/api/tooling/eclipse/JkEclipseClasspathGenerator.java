@@ -170,10 +170,9 @@ public final class JkEclipseClasspathGenerator {
 
         // write entries for project importedRuns
         for (final Path projectFile : this.importedProjects) {
-            if (paths.contains(projectFile)) {
+            if (!paths.add(projectFile.toAbsolutePath().toString())) {
                 continue;
             }
-            paths.add(projectFile.toAbsolutePath().toString());
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "combineaccessrules", "false", "kind", "src", "exported", "true",
                     "path", "/" + projectFile.getFileName().toString());
