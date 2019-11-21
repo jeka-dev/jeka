@@ -314,7 +314,7 @@ public final class JkEclipseClasspathGenerator {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.getBaseDir(), fileTree.getRoot());
+            final String path = relativePathIfPossible(sourceLayout.getBaseDir(), fileTree.getRoot()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -329,11 +329,11 @@ public final class JkEclipseClasspathGenerator {
 
     }
 
-    private static String relativePathIfPossible(Path base, Path candidate) {
+    private static Path relativePathIfPossible(Path base, Path candidate) {
         if (!candidate.startsWith(base)) {
-            return candidate.toAbsolutePath().normalize().toString().replace(File.separator, "/");
+            return candidate.toAbsolutePath().normalize();
         }
-        return base.relativize(candidate).toString().replace(File.separator, "/");
+        return base.relativize(candidate);
     }
 
     private void writeIncludingExcluding(XMLStreamWriter writer, JkPathTree fileTree) throws XMLStreamException {
@@ -404,7 +404,7 @@ public final class JkEclipseClasspathGenerator {
             binPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
         } else {
             isVar = false;
-            binPath = sourceLayout.getBaseDir().relativize(bin).toString();
+            binPath = relativePathIfPossible(sourceLayout.getBaseDir(), bin).toString();
         }
         binPath = binPath.replace(File.separator, "/");
         writer.writeCharacters("\t");
@@ -424,8 +424,8 @@ public final class JkEclipseClasspathGenerator {
                 srcPath = DotClasspathModel.JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(source).toString();
             } else if (usePathVariables && source.startsWith(JkLocator.getJekaHomeDir())) {
                 srcPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(source).toString();
-            }else {
-                srcPath = sourceLayout.getBaseDir().relativize(source).toString();
+            } else {
+                srcPath = relativePathIfPossible(sourceLayout.getBaseDir(), source).toString();
             }
             srcPath = srcPath.replace(File.separator, "/");
             writer.writeAttribute("sourcepath", srcPath);
@@ -446,10 +446,4 @@ public final class JkEclipseClasspathGenerator {
         }
         writer.writeCharacters("\n");
     }
-
-
-    private static String toPatternString(List<String> pattern) {
-        return JkUtilsString.join(pattern, "|");
-    }
-
 }
