@@ -113,4 +113,6 @@ To really deploy to Maven central, a manual action it still needed to [close/rel
 
 To create a tag conveniently, just execute `jeka git#tagRemote` from your console and answer to the prompt. 
 
-<img src="http://jeka.dev/images/logo-whole-bg.jpg" width='420' height='420' align='middle'/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="http://jeka.dev/images/logo-whole-bg.jpg" width='420' height='420' align='center'/>
+
