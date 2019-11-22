@@ -1,7 +1,11 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.tool.JkCommands;
@@ -9,6 +13,9 @@ import dev.jeka.core.tool.JkCompileOption;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
 
@@ -52,6 +59,19 @@ public class AClassicBuild extends JkCommands {
     
     public static void main(String[] args) {
 	    JkInit.instanceOf(AClassicBuild.class, args).javaPlugin.clean().pack();
+    }
+
+    private void makeManifest(Path classDir, Path distribDir, JkClasspath classpath) {
+
+        // copy all deps in libs dir
+        classpath.forEach(path -> JkPathFile.of(path).copyToDir(distribDir.resolve("libs")));
+
+        // create Class-Path value
+        StringBuilder cp = new StringBuilder();
+        JkPathTree.of(distribDir).andMatching("libs/*.jar").getFiles().forEach(path -> cp.append(path + " "));
+
+        // Create a Manifest and add it to the class dir at the proper location
+        JkManifest.ofEmpty().addMainAttribute("class-path", cp.toString()).writeToStandardLocation(classDir);
     }
 
 }
