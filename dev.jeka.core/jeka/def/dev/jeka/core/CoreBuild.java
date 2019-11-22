@@ -182,7 +182,7 @@ public class CoreBuild extends JkCommands {
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
                 .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
                 .andZip(providedLibs.resolve("classgraph-4.8.41.jar"))
-                .andZip(providedLibs.resolve("ivy-2.4.0.jar"))
+                .andZip(providedLibs.resolve("ivy-2.5.0.jar"))
                 .zipTo(embeddedJar);
         JkPathTree.ofZip(embeddedJar).andMatching( "META-INF/*.SF", "META-INF/*.RSA")
                 .deleteContent().close();

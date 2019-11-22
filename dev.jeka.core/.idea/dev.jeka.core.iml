@@ -17,17 +17,6 @@
     <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/jeka/libs/provided/ivy-2.4.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/jeka/libs-sources/ivy-2.4.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" scope="PROVIDED">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/provided/bouncycastle-pgp-152.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -74,6 +63,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/test/jdepend-2.9.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/jeka/libs/provided/ivy-2.5.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
