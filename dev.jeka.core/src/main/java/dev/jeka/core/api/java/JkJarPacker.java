@@ -1,11 +1,11 @@
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 
 /**
  * Utilities class to produce Jar files.
@@ -65,13 +65,17 @@ public final class JkJarPacker {
      * of original jar.
      * @param resultFile Result file
      * @param otherJars content of other jar to merge with the original jar
+     * @param filter Only files matching this filter will be included in the resulting fat jar, either it comes from
+     *               dependencies or not.
      */
-    public void makeFatJar(Path resultFile, Iterable<Path> otherJars) {
+    public void makeFatJar(Path resultFile, Iterable<Path> otherJars, PathMatcher filter) {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classtrees.getPathTrees().get(0).getRoot());
         }
         JkPathTreeSet.ofEmpty().andZips(otherJars).and(classtrees).andMatcher(EXCLUDE_SIGNATURE_MATCHER)
+                .andMatcher(filter)
                 .zipTo(resultFile);  // main jar files must take precedence over files coming form dependencies
     }
+
 
 }

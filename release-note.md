@@ -1,3 +1,8 @@
+# 0.8.11 (Ongoing)
+* Fix `JkPathTree` bugs related to zip files.
+* Preserve manifest of the main jar when creating fat jars.
+* Fix small bugs in `JkManifest` 
+
 # 0.8.10 
 * Display JkException stacktrace when failing in verbose mode
 * Display Exception stacktrace when `JkPluginIntellij#allIml` fails

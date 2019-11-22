@@ -1,15 +1,18 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.depmanagement.JkArtifactId;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.function.Supplier;
 
 /**
@@ -23,7 +26,10 @@ public class JkJavaProjectPackTasks {
 
     private String[] checksumAlgorithms = new String[0];
 
-    JkJavaProjectPackTasks(JkJavaProjectMaker maker) {
+    private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
+
+    JkJavaProjectPackTasks(
+            JkJavaProjectMaker maker) {
         this.maker = maker;
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
     }
@@ -76,7 +82,7 @@ public class JkJavaProjectPackTasks {
         JkJarPacker.of( maker.getOutLayout().getClassDir())
                 .withManifest(maker.project.getManifest())
                 .withExtraFiles(maker.project.getExtraFilesToIncludeInJar())
-                .makeFatJar(target, classpath);
+                .makeFatJar(target, classpath, this.fatJarFilter);
     }
 
     public void createSourceJar(Path target) {
@@ -121,6 +127,16 @@ public class JkJavaProjectPackTasks {
      */
     public JkJavaProjectPackTasks setChecksumAlgorithms(String ... algorithms) {
         this.checksumAlgorithms = algorithms;
+        return this;
+    }
+
+    /**
+     * Defines witch files from main jar and dependency jars will be included in the fat jar.
+     * By default, it is valued to "all".
+     */
+    public JkJavaProjectPackTasks setFatJarFilter(PathMatcher fatJarFilter) {
+        JkUtilsAssert.notNull(fatJarFilter, "Fat jar filter can not be null.");
+        this.fatJarFilter = fatJarFilter;
         return this;
     }
 

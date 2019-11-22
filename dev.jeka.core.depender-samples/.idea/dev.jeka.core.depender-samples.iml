@@ -17,5 +17,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="dev.jeka.core.samples" exported="" />
+    <orderEntry type="module" module-name="dev.jeka.core" />
   </component>
 </module>
