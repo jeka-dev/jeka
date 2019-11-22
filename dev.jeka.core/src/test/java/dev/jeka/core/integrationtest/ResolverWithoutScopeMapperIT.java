@@ -62,7 +62,7 @@ public class ResolverWithoutScopeMapperIT {
 
         // According presence or absence of cache it could be 37 or 38
         assertTrue(resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size() <= 38);
-        assertTrue(resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size() <= 37);
+        assertTrue(resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size() >= 37);
     }
 
     @Test
