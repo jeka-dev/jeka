@@ -3,7 +3,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jeka.dev/images/large-social-logo.png" align='middle'/>
 
-# What is Jeka
+# What is Jeka ?
 
 <strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using only Java code to automate builds or tasks.
 
@@ -42,7 +42,7 @@ Please visit [relelease note](https://github.com/jerkar/jeka/blob/master/release
 
 The distribution is the file named jeka-core-x.x.x-distrib.zip. 
 
-# How to use Jeka
+# How to use Jeka ?
 
 Jeka is designed to be easy to master for Java developers. It is easy to figure out how it works by knowing few 
 concepts and navigate in source code.
@@ -73,7 +73,7 @@ You can also use direct emailing for questions and support : djeangdev@yahoo.fr
 
 A twitter account also exist : https://twitter.com/djeang_dev
 
-# How to build Jeka
+# How to build Jeka ?
 
 Jeka is made of following projects :
 * dev.jeka.core : complete Jeka project
