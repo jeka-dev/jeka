@@ -17,7 +17,7 @@ public class FatJarBuild extends JkCommands {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
     
-    @JkImportProject("../dev.jeka.core.samples")
+    @JkImportProject("../dev.jeka.core-samples")
     private AClassicBuild sampleBuild;
 
     @Override

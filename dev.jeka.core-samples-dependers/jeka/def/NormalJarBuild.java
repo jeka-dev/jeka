@@ -28,7 +28,7 @@ public class NormalJarBuild extends JkCommands {
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
-    @JkImportProject("../dev.jeka.core.samples")
+    @JkImportProject("../dev.jeka.core-samples")
     private AClassicBuild sampleBuild;
 
     @Override

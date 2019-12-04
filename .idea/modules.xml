@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" filepath="$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/dev.jeka.core.depender-samples/.idea/dev.jeka.core.depender-samples.iml" filepath="$PROJECT_DIR$/dev.jeka.core.depender-samples/.idea/dev.jeka.core.depender-samples.iml" />
-      <module fileurl="file://$PROJECT_DIR$/dev.jeka.core.samples/.idea/dev.jeka.core.samples.iml" filepath="$PROJECT_DIR$/dev.jeka.core.samples/.idea/dev.jeka.core.samples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev.jeka.core-samples/.idea/dev.jeka.core-samples.iml" filepath="$PROJECT_DIR$/dev.jeka.core-samples/.idea/dev.jeka.core-samples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev.jeka.core-samples-dependers/.idea/dev.jeka.core-samples-dependers.iml" filepath="$PROJECT_DIR$/dev.jeka.core-samples-dependers/.idea/dev.jeka.core-samples-dependers.iml" />
     </modules>
   </component>
 </project>

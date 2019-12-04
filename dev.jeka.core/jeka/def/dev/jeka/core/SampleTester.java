@@ -33,8 +33,8 @@ class SampleTester {
 
     SampleTester(JkPathTree buildDir) {
         super();
-        this.sampleBaseDir = buildDir.goTo("../dev.jeka.core.samples");
-        this.sampleDependerBaseDir = buildDir.goTo("../dev.jeka.core.depender-samples");
+        this.sampleBaseDir = buildDir.goTo("../dev.jeka.core-samples");
+        this.sampleDependerBaseDir = buildDir.goTo("../dev.jeka.core-samples-dependers");
         this.output = sampleBaseDir.goTo(JkConstants.OUTPUT_PATH);
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jekaw";
         jekaScript = sampleBaseDir.get(scriptName).toString();
