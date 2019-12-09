@@ -35,10 +35,9 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     public List<String> findClassesHavingMainMethod(ClassLoader classloader) {
         final ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
+                .enableMethodInfo()
                 .addClassLoader(classloader)
-                .ignoreParentClassLoaders()
-                .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
-                        "org.commonmark", "io.github.classgraph");
+                .ignoreParentClassLoaders();
         final ScanResult scanResult = classGraph.scan();
         final List<String> result = new LinkedList<>();
         for (final ClassInfo classInfo : scanResult.getAllClasses()) {
@@ -47,10 +46,8 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
                 if (methodInfo.isPublic() && methodInfo.isStatic() && methodInfo.getParameterInfo().length == 1) {
                     MethodParameterInfo methodParameterInfo = methodInfo.getParameterInfo()[0];
                     if (methodParameterInfo.getTypeDescriptor() instanceof ArrayTypeSignature) {
-                        ArrayTypeSignature arrayTypeSignature = (ArrayTypeSignature) methodParameterInfo.getTypeSignature();
-                        if (arrayTypeSignature.getNumDimensions() == 1
-                                && arrayTypeSignature.getArrayClassInfo()
-                                .getElementClassInfo().getName().equals("java.lang.String")) {
+                        ArrayTypeSignature arrayTypeSignature = (ArrayTypeSignature) methodParameterInfo.getTypeDescriptor();
+                        if ("java.lang.String[]".equals(arrayTypeSignature.toString())) {
                             result.add(classInfo.getName());
                         }
                     }

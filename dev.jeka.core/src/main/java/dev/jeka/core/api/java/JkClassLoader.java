@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class JkClassLoader {
@@ -245,6 +246,13 @@ public class JkClassLoader {
         final String className = classSourcePath.replace('/', '.').replace('\\', '.')
                 .substring(0, classSourcePath.length() - JAVA_SUFFIX_LENGTH);
         return loadIfExist(className);
+    }
+
+    /**
+     * Returns all class names having a <code>main</code> method.
+     */
+    public List<String> findClassesHavingMainMethod() {
+        return JkInternalClasspathScanner.INSTANCE.findClassesHavingMainMethod(this.delegate);
     }
 
     private void initLogInClassloader() {
