@@ -2,6 +2,7 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -13,6 +14,8 @@ public interface JkInternalClasspathScanner {
     JkInternalClasspathScanner INSTANCE = of();
 
     Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate);
+
+    List<String> findClassesHavingMainMethod(ClassLoader extraCclassLoader);
 
     static JkInternalClasspathScanner of() {
         String IMPL_CLASS = "dev.jeka.core.api.java.embedded.classgraph.ClassGraphClasspathScanner";

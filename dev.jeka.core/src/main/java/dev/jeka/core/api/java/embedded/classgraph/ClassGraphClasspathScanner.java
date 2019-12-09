@@ -1,13 +1,13 @@
 package dev.jeka.core.api.java.embedded.classgraph;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ScanResult;
+import io.github.classgraph.*;
 
 class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
@@ -26,6 +26,35 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         for (final ClassInfo classInfo : scanResult.getAllClasses()) {
             if (predicate.test(classInfo.getSimpleName())) {
                 result.add(classInfo.loadClass());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> findClassesHavingMainMethod(ClassLoader classloader) {
+        final ClassGraph classGraph = new ClassGraph()
+                .enableClassInfo()
+                .addClassLoader(classloader)
+                .ignoreParentClassLoaders()
+                .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
+                        "org.commonmark", "io.github.classgraph");
+        final ScanResult scanResult = classGraph.scan();
+        final List<String> result = new LinkedList<>();
+        for (final ClassInfo classInfo : scanResult.getAllClasses()) {
+            MethodInfoList methodInfoList = classInfo.getMethodInfo("main");
+            for (MethodInfo methodInfo : methodInfoList) {
+                if (methodInfo.isPublic() && methodInfo.isStatic() && methodInfo.getParameterInfo().length == 1) {
+                    MethodParameterInfo methodParameterInfo = methodInfo.getParameterInfo()[0];
+                    if (methodParameterInfo.getTypeDescriptor() instanceof ArrayTypeSignature) {
+                        ArrayTypeSignature arrayTypeSignature = (ArrayTypeSignature) methodParameterInfo.getTypeSignature();
+                        if (arrayTypeSignature.getNumDimensions() == 1
+                                && arrayTypeSignature.getArrayClassInfo()
+                                .getElementClassInfo().getName().equals("java.lang.String")) {
+                            result.add(classInfo.getName());
+                        }
+                    }
+                }
             }
         }
         return result;

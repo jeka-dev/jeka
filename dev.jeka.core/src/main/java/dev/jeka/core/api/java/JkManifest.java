@@ -4,14 +4,19 @@ package dev.jeka.core.api.java;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 
@@ -131,9 +136,10 @@ public final class JkManifest {
      * Adds the main class entry by auto-detecting the class holding the main method.
      */
     public JkManifest addAutodetectMain(Path classDir) {
-        final String mainClassName = JkUrlClassLoader.findMainClass(classDir);
-        if (mainClassName != null) {
-            this.addMainClass(mainClassName);
+        ClassLoader classLoader = JkUrlClassLoader.of(classDir).get();
+        List<String> classes = JkInternalClasspathScanner.INSTANCE.findClassesHavingMainMethod(classLoader);
+        if (!classes.isEmpty()) {
+            this.addMainClass(classes.get(0));
         } else {
             throw new IllegalStateException("No class with main method found.");
         }

@@ -121,7 +121,7 @@ public final class JkUrlClassLoader {
     /**
      * Return the {@link URLClassLoader} wrapped by this object.
      */
-    public ClassLoader get() {
+    public URLClassLoader get() {
         return delegate;
     }
 
@@ -297,9 +297,10 @@ public final class JkUrlClassLoader {
         };
     }
 
-    private static URL[] toUrl(Iterable<Path> files) {
+    private static URL[] toUrl(Iterable<Path> paths) {
+        List<Path> pathList = JkUtilsPath.disambiguate(paths);
         final List<URL> urls = new ArrayList<>();
-        for (final Path file : files) {
+        for (final Path file : pathList) {
             try {
                 urls.add(file.toUri().toURL());
             } catch (final MalformedURLException e) {
@@ -318,25 +319,6 @@ public final class JkUrlClassLoader {
                 .substring(0, resourceName.length() - CLASS_SUFFIX_LENGTH);
     }
 
-    /**
-     * Returns the first class having a main method from the specified class
-     * directory or Jar. Returns <code>null</code> if no such class found.
-     */
-    public static String findMainClass(Path classDirOrJar) {
-        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofSystem().getChild(classDirOrJar);
-        final Iterator<Class<?>> it = classLoader.iterateClassesIn(classDirOrJar);
-        while (it.hasNext()) {
-            final Class<?> clazz = it.next();
-            final Method mainMethod = JkUtilsReflect.getMethodOrNull(clazz, "main", String[].class);
-            if (mainMethod != null) {
-                final int modifiers = mainMethod.getModifiers();
-                if (Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)) {
-                    return clazz.getName();
-                }
-            }
-        }
-        return null;
-    }
 
     @Override
     public String toString() {
