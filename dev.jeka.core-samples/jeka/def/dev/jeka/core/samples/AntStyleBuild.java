@@ -56,11 +56,6 @@ public class AntStyleBuild extends JkCommands {
                 .setClasspath(classpath)
                 .setSourceAndTargetVersion(JkJavaVersion.V8)
                 .addSources(src));
-        Map<String, String> varReplacement = new HashMap<>();
-        varReplacement.put("${server.ip}", "123.211.11.0");
-        JkResourceProcessor.of(JkPathTreeSet.of(src))
-                .andInterpolate("**/*.properties", varReplacement)
-                .generateTo(classDir, Charset.forName("UTF-8"));
         JkPathTree.of(src).andMatching(false, "**/*.java")
                 .copyTo(classDir);
     }
