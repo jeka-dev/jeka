@@ -1,6 +1,6 @@
-# Lexical
+# Install Jeka
 
-The following concepts are used all over this document :
+Jeka deals with 3 directories :
 
 __[PROJECT DIR]__ : Refers to the root folder of the project to build (or to run commands on). This is where you would put pom.xml or build.xml files.
 
@@ -8,28 +8,7 @@ __[JEKA HOME]__ : Refers to the folder where Jeka is installed. You should find 
 
 __[JEKA USER HOME]__ : Refers to the folder where Jeka stores caches, binary repository and global user configuration. By default it is located at [USER DIR]/.jeka.
 
-__Def Classes :__ Java source files located under _[PROJECT DIR]/jeka/def_. They are compiled on the flight by Jeka when invoked from the command line.
 
-__Def Classpath :__ Classpath on which depend _def classes_ to get compiled and _command classes_ to be executed. 
-By default, it consists in _Jeka_ core classes. it can be augmented with any third party lib or def Classpath coming 
-from imported project. 
-
-__Command Classes :__ Classes extending `JkCommands`. Their public no-arg methods can be invoked from the command line and 
-their pubic fields set from the command line. Generally _def classes_ contains one _command class_ though there can be many or 
-none. Command classes can come from _def classes_ but can also be imported from a library or external project.
-
-__Commands :__ Java methods member of _command classes_ and invokable from command line. 
-They must be instance method (not static), public, zero-args and returning void. 
-Every method verifying these constraints within a _command class_ or a _plugin_  is considered as a _command_.
- 
-__Options :__ This is a set of key-value used to inject parameters. Options can be mentioned 
-as command line arguments, stored in specific files or hard coded in _command classes_.
-
-__Plugins :__ Classes extending `JkPlugin` and named as _JkPluginXxxxx_ where_Xxxxx_ is the name of the plugin. In short, a plugin 
-add dynamically commands and options to the running _command class_.
-
-
-# Install Jeka
 
 Thank to the wrapper feature, you don't need to install Jeka on your machine to run it... except if you are 
 creating projects from scratch. 
@@ -133,7 +112,30 @@ variable `JEKA_USER_HOME`.
 
 # Basic automation project
 
-First, let's create a simple automation project that read content from url and display it on the console. 
+First, let introduce common Jeka concepts :
+
+__Def Classes :__ Java source files located under _[PROJECT DIR]/jeka/def_. They are compiled on the flight by Jeka when invoked from the command line.
+
+__Def Classpath :__ Classpath on which depend _def classes_ to get compiled and run. 
+By default, it consists in _Jeka_ core classes but it can be augmented with any third party lib or _def classpath_ coming 
+from other projects. 
+
+__Command Classes :__ Classes extending `JkCommands`. Their public no-arg methods can be invoked from the command line 
+ if they belong to _def classpath_. Their public fields can be set from the command line as well. Typically, _def classes_ 
+ include one _command class_.
+
+__Commands :__ Java methods member of _command classes_ invokable from command line. 
+They must be instance method (not static), public, zero-args and returning void. 
+Every method verifying these constraints within a _command class_ or a _plugin_  is considered as a _command_.
+ 
+__Options :__ This is a set of key-value used to inject parameters. Options can be mentioned 
+as command line arguments, stored in specific files or hard coded in _command classes_. Options can be injected 
+in _command class_ or _plugin_ instance fields.
+
+__Plugins :__ Classes extending `JkPlugin` and named as _JkPluginXxxxx_ where_Xxxxx_ is the name of the plugin. In short, a plugin 
+add dynamically commands and options to the running _command class_.
+
+Now, let's create a simple automation project that read content from url and display it on the console. 
 
 ## Create a project
 
