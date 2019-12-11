@@ -109,10 +109,7 @@ Declare the 2 classpath variables in Eclipse.
 By default _[Jeka User Home]_ point to _[User Home]/.jeka_ but can be overridden by defining the environment 
 variable `JEKA_USER_HOME`. 
 
-
-# Basic automation project
-
-First, let introduce common Jeka concepts :
+# Jeka's concepts
 
 __Def Classes :__ Java source files located under _[PROJECT DIR]/jeka/def_. They are compiled on the flight by Jeka when invoked from the command line.
 
@@ -135,7 +132,9 @@ in _command class_ or _plugin_ instance fields.
 __Plugins :__ Classes extending `JkPlugin` and named as _JkPluginXxxxx_ where_Xxxxx_ is the name of the plugin. In short, a plugin 
 add dynamically commands and options to the running _command class_.
 
-Now, let's create a simple automation project that read content from url and display it on the console. 
+# Basic automation project
+
+First, let's create a simple automation project that read content from url and display it on the console. 
 
 ## Create a project
 
