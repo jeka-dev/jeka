@@ -45,6 +45,10 @@ public final class JkEclipseClasspathGenerator {
     // content for build class only
     private List<Path> importedProjects = new LinkedList<>();
 
+    private Map<JkDependency, Properties> attributes = new HashMap<>();
+
+    private Map<JkDependency, Properties> accessRules = new HashMap<>();
+
     // --------------------- options --------------------------------
 
     private boolean includeJavadoc = true;
@@ -446,4 +450,40 @@ public final class JkEclipseClasspathGenerator {
         }
         writer.writeCharacters("\n");
     }
+
+    private void writeClasspathentryChildAttributes(XMLStreamWriter writer, Properties props) throws XMLStreamException {
+        if (props == null || props.isEmpty()) {
+            return;
+        }
+        writer.writeCharacters("\n\t\t");
+        writer.writeStartElement("attributes");
+        for (String key : props.stringPropertyNames()) {
+            writer.writeCharacters("\n\t\t\t");
+            String value = props.getProperty(key);
+            writer.writeStartElement("attribute");
+            writer.writeAttribute("name", key);
+            writer.writeAttribute("value", value);
+            writer.writeEndElement();
+        }
+        writer.writeCharacters("\n\t\t");
+        writer.writeEndElement();
+    }
+
+    private boolean depsMatchForExtraAttributes(JkDependency dep1, JkDependency dep2) {
+        if (dep1 instanceof JkModuleDependency) {
+            if (dep2 instanceof JkModuleDependency) {
+                JkModuleDependency modDep1 = (JkModuleDependency) dep1;
+                JkModuleDependency modDep2 = (JkModuleDependency) dep2;
+                return modDep1.getModuleId().equals(modDep2.getModuleId());
+            }
+            return false;
+        }
+        if (dep1 instanceof JkFileSystemDependency) {
+            if (dep2 instanceof JkFileSystemDependency) {
+                return dep1.equals(dep2);
+            }
+        }
+        return false;
+    }
+
 }
