@@ -140,6 +140,11 @@ public final class JkEclipseClasspathGenerator {
 
     /**
      * For the specified dependency, specify a child attribute tag to add to the mapping classpathentry tag.
+     * @param dependency The dependency paired to the classpathentry we want generate `<attributes></attributes>` children
+     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkModuleDependency} or a
+     *                   {@link dev.jeka.core.api.depmanagement.JkFileSystemDependency}.
+     *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
+     *                   is relevant.
      */
     public JkEclipseClasspathGenerator addAttribute(JkDependency dependency, String name, String value) {
         this.attributes.putIfAbsent(dependency, new Properties());
@@ -148,11 +153,34 @@ public final class JkEclipseClasspathGenerator {
     }
 
     /**
+     * @See #addAttribute.
+     */
+    public JkEclipseClasspathGenerator addAttributes(JkDependency dependency, Properties attributes) {
+        this.attributes.putIfAbsent(dependency, new Properties());
+        this.attributes.get(dependency).putAll(attributes);
+        return this;
+    }
+
+    /**
      * For the specified dependency, specify a child accessrule tag to add to the mapping classpathentry tag.
+     * @param dependency The dependency paired to the classpathentry we want generate `<attributes></attributes>` children
+     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkModuleDependency} or a
+     *                   {@link dev.jeka.core.api.depmanagement.JkFileSystemDependency}.
+     *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
+     *                   is relevant.
      */
     public JkEclipseClasspathGenerator addAccessRule(JkDependency dependency, String kind, String pattern) {
         this.accessRules.putIfAbsent(dependency, new Properties());
         this.accessRules.get(dependency).put(kind, pattern);
+        return this;
+    }
+
+    /**
+     * @see  #addAccessRule(JkDependency, String, String)
+     */
+    public JkEclipseClasspathGenerator addAccessRules(JkDependency dependency, Properties rules) {
+        this.accessRules.putIfAbsent(dependency, new Properties());
+        this.accessRules.get(dependency).putAll(rules);
         return this;
     }
 
