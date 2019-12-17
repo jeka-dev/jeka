@@ -94,9 +94,7 @@ public final class JkEclipseClasspathGenerator {
         return new File(this.sourceLayout.getBaseDir().toFile(), JkConstants.DEF_DIR).exists();
     }
 
-
     // -------------------------- setters ----------------------------
-
 
     /**
      * Set whether or not generated .classpath file should contains javadoc link for libraries.
@@ -137,6 +135,24 @@ public final class JkEclipseClasspathGenerator {
                                                           JkDependencySet buildDependencies) {
         this.runDependencyResolver = buildDependencyResolver;
         this.runDependencies = buildDependencies;
+        return this;
+    }
+
+    /**
+     * For the specified dependency, specify a child attribute tag to add to the mapping classpathentry tag.
+     */
+    public JkEclipseClasspathGenerator addAttribute(JkDependency dependency, String name, String value) {
+        this.attributes.putIfAbsent(dependency, new Properties());
+        this.attributes.get(dependency).put(name, value);
+        return this;
+    }
+
+    /**
+     * For the specified dependency, specify a child accessrule tag to add to the mapping classpathentry tag.
+     */
+    public JkEclipseClasspathGenerator addAccessRule(JkDependency dependency, String kind, String pattern) {
+        this.accessRules.putIfAbsent(dependency, new Properties());
+        this.accessRules.get(dependency).put(kind, pattern);
         return this;
     }
 
@@ -190,7 +206,7 @@ public final class JkEclipseClasspathGenerator {
         // add build dependencies
         if (hasBuildDef() && runDependencyResolver != null) {
             final Iterable<Path> files = runDependencyResolver.resolve(runDependencies).getFiles();
-            writeFileDepsEntries(writer, files, paths);
+            writeFileDepsEntries(writer, files, paths, new Properties(), new Properties());
         }
 
         // Write output
@@ -201,7 +217,6 @@ public final class JkEclipseClasspathGenerator {
         writer.writeEndDocument();
         writer.flush();
         writer.close();
-
         return fos.toString(ENCODING);
     }
 
@@ -245,9 +260,10 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeFileDepsEntries(XMLStreamWriter writer, Iterable<Path> fileDeps, Set<String> paths) throws XMLStreamException {
+    private void writeFileDepsEntries(XMLStreamWriter writer, Iterable<Path> fileDeps, Set<String> paths,
+                                      Properties attributeProps, Properties accessRuleProps) throws XMLStreamException {
         for (final Path file : fileDeps) {
-            writeClasspathEl(file, writer, paths);
+            writeFileEntry(file, writer, paths, attributeProps, accessRuleProps);
         }
     }
 
@@ -270,8 +286,9 @@ public final class JkEclipseClasspathGenerator {
         writer.writeCharacters("\n");
     }
 
-    private void writeClasspathEl(Path file, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
-
+    private void writeFileEntry(Path file, XMLStreamWriter writer, Set<String> paths, Properties attributeProps,
+                                Properties accessRuleProps)
+            throws XMLStreamException {
         final String name = JkUtilsString.substringBeforeLast(file.getFileName().toString(), ".jar");
         Path source = file.resolveSibling(name + "-sources.jar");
         if (!Files.exists(source)) {
@@ -286,9 +303,12 @@ public final class JkEclipseClasspathGenerator {
         }
         if (!Files.exists(javadoc)) {
             javadoc = file.resolveSibling("libs-javadoc/" + name + "-javadoc.jar");
-        }
-        writeClasspathEl(writer, file, source, javadoc, paths);
 
+        }
+        if (Files.exists(javadoc) && includeJavadoc) {
+            attributeProps.put("javadoc_location", javadocAttributeValue(javadoc));
+        }
+        writeClasspathEl(writer, file, source, attributeProps, accessRuleProps, paths);
     }
 
     private void generateSrcAndTestSrc(XMLStreamWriter writer) throws XMLStreamException {
@@ -351,16 +371,20 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
+    private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies,
+                                          JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         final JkRepoSet repos = resolver.getRepos();
         for (final JkDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency
             if (node.isModuleNode()) {
                 final JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
+                JkDependency dependency = JkModuleDependency.of(moduleNodeInfo.getModuleId().getGroupAndName());
+                Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
+                Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);
                 writeModuleEntry(writer,
                         moduleNodeInfo.getResolvedVersionedModule(),
-                        moduleNodeInfo.getFiles(), repos, allPaths);
+                        moduleNodeInfo.getFiles(), repos, allPaths, attributeProps, accessruleProps);
 
                 // File dependencies (file system + computed)
             } else {
@@ -373,28 +397,36 @@ public final class JkEclipseClasspathGenerator {
                             writeProjectEntryIfNeeded(ideProjectBaseDir, writer, allPaths);
                         }
                     } else {
-                        writeFileDepsEntries(writer, node.getResolvedFiles(), allPaths);
+                        writeFileDepsEntries(writer, node.getResolvedFiles(), allPaths, new Properties(), new Properties());
                     }
                 } else {
-                    writeFileDepsEntries(writer, node.getResolvedFiles(), allPaths);
+                    JkDependency fileDep = JkFileSystemDependency.of(fileNodeInfo.getFiles());
+                    Properties attributeProps = copyOfPropsOf(fileDep, this.attributes);
+                    Properties accessRuleProps = copyOfPropsOf(fileDep, this.accessRules);
+                    writeFileDepsEntries(writer, node.getResolvedFiles(), allPaths, attributeProps, accessRuleProps);
                 }
             }
         }
     }
 
     private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<Path> files,
-                                  JkRepoSet repos, Set<String> paths) throws XMLStreamException {
+                                  JkRepoSet repos, Set<String> paths, Properties attributeProps,
+                                  Properties accessRuleProps) throws XMLStreamException {
         final Path source = repos.get(JkModuleDependency.of(versionedModule).withClassifier("sources"));
         Path javadoc = null;
-        if (source == null || !Files.exists(source)) {
+        if (source == null || !Files.exists(source) || this.includeJavadoc) {
             javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifier("javadoc"));
         }
+        if (javadoc != null) {
+            attributeProps.put("javadoc_location", javadocAttributeValue(javadoc));
+        }
         for (final Path file : files) {
-            writeClasspathEl(writer, file, source, javadoc, paths);
+            writeClasspathEl(writer, file, source, attributeProps, accessRuleProps, paths);
         }
     }
 
-    private void writeClasspathEl(XMLStreamWriter writer, Path bin, Path source, Path javadoc, Set<String> paths)
+    private void writeClasspathEl(XMLStreamWriter writer, Path bin, Path source, Properties attributeProps,
+                                  Properties accesRuleProps, Set<String> paths)
             throws XMLStreamException {
         String binPath = bin.toAbsolutePath().toString();
         if (!paths.add(binPath)) {
@@ -412,9 +444,8 @@ public final class JkEclipseClasspathGenerator {
         }
         binPath = binPath.replace(File.separator, "/");
         writer.writeCharacters("\t");
-        final boolean mustWriteJavadoc = includeJavadoc && javadoc != null
-                && Files.exists(javadoc) && (source == null || !Files.exists(source));
-        if (!mustWriteJavadoc) {
+        boolean emptyTag = attributeProps.isEmpty() && accesRuleProps.isEmpty();
+        if (emptyTag) {
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
         } else {
             writer.writeStartElement(DotClasspathModel.CLASSPATHENTRY);
@@ -434,21 +465,18 @@ public final class JkEclipseClasspathGenerator {
             srcPath = srcPath.replace(File.separator, "/");
             writer.writeAttribute("sourcepath", srcPath);
         }
-        if (mustWriteJavadoc) {
-            writer.writeCharacters("\n\t\t");
-            writer.writeStartElement("attributes");
-            writer.writeCharacters("\n\t\t\t");
-            writer.writeEmptyElement("attribute");
-            writer.writeAttribute("name", "javadoc_location");
-            writer.writeAttribute("value",   // Eclipse does not andAccept variable for javadoc path
-                    "jar:file:/" + javadoc.toAbsolutePath().normalize().toString()
-                            .replace(File.separator, "/") + "!/");
-            writer.writeCharacters("\n\t\t");
-            writer.writeEndElement();
+        writeClasspathentryChildAttributes(writer, attributeProps);
+        writeClasspathentryChildAccessRules(writer, accesRuleProps);
+        if (!emptyTag) {
             writer.writeCharacters("\n\t");
             writer.writeEndElement();
         }
         writer.writeCharacters("\n");
+    }
+
+    private static String javadocAttributeValue(Path javadocPath) {
+        return "jar:file:/" + javadocPath.toAbsolutePath().normalize().toString()
+                .replace(File.separator, "/") + "!/";
     }
 
     private void writeClasspathentryChildAttributes(XMLStreamWriter writer, Properties props) throws XMLStreamException {
@@ -460,16 +488,47 @@ public final class JkEclipseClasspathGenerator {
         for (String key : props.stringPropertyNames()) {
             writer.writeCharacters("\n\t\t\t");
             String value = props.getProperty(key);
-            writer.writeStartElement("attribute");
+            writer.writeEmptyElement("attribute");
             writer.writeAttribute("name", key);
             writer.writeAttribute("value", value);
-            writer.writeEndElement();
         }
         writer.writeCharacters("\n\t\t");
         writer.writeEndElement();
     }
 
-    private boolean depsMatchForExtraAttributes(JkDependency dep1, JkDependency dep2) {
+    private void writeClasspathentryChildAccessRules(XMLStreamWriter writer, Properties props) throws XMLStreamException {
+        if (props == null || props.isEmpty()) {
+            return;
+        }
+        writer.writeCharacters("\n\t\t");
+        writer.writeStartElement("accessrules");
+        for (String key : props.stringPropertyNames()) {
+            writer.writeCharacters("\n\t\t\t");
+            String value = props.getProperty(key);
+            writer.writeEmptyElement("accessrule");
+            writer.writeAttribute("kind", key);
+            writer.writeAttribute("pattern", value);
+        }
+        writer.writeCharacters("\n\t\t");
+        writer.writeEndElement();
+    }
+
+    private static Properties copyOfPropsOf(JkDependency dependency, Map<JkDependency, Properties> propMap) {
+        JkDependency key = findMatchingKey(dependency, propMap.keySet());
+        if (key == null) {
+            return new Properties();
+        }
+        Properties props = propMap.get(key);
+        Properties result = new Properties();
+        result.putAll(props);
+        return result;
+    }
+
+    private static JkDependency findMatchingKey(JkDependency dep1, Collection<JkDependency> deps) {
+        return deps.stream().filter(dep -> depsMatchForExtraAttributes(dep1, dep)).findFirst().orElse(null);
+    }
+
+    private static boolean depsMatchForExtraAttributes(JkDependency dep1, JkDependency dep2) {
         if (dep1 instanceof JkModuleDependency) {
             if (dep2 instanceof JkModuleDependency) {
                 JkModuleDependency modDep1 = (JkModuleDependency) dep1;
@@ -478,7 +537,7 @@ public final class JkEclipseClasspathGenerator {
             }
             return false;
         }
-        if (dep1 instanceof JkFileSystemDependency) {
+        if (dep1 instanceof JkFileDependency) {
             if (dep2 instanceof JkFileSystemDependency) {
                 return dep1.equals(dep2);
             }

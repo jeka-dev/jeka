@@ -23,9 +23,11 @@ import static org.junit.Assert.assertEquals;
 // Test on a project structure as Base -> Core -> Desktop
 public class JkEclipseClasspathGeneratorTest {
 
+    static final String ZIP_NAME = "sample-multi-scriptless.zip";
+
     @Test
     public void generate() throws Exception {
-        final Path top = unzipToDir("sample-multi-scriptless.zip");
+        final Path top = unzipToDir(ZIP_NAME);
         // JkLog.silent(true);
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.ofSimpleStyle()
