@@ -8,7 +8,6 @@ import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.intellij.JkPluginIntellij;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
