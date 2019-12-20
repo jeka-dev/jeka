@@ -1,18 +1,14 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.utils.*;
+
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Supplier;
-
-import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * A set of {@link JkScopedDependency} generally standing for the entire
@@ -112,7 +108,15 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
             return this;
         }
         final List<JkScopedDependency> deps = JkUtilsIterable.concatLists(this.dependencies, others);
-        return new JkDependencySet(deps, this.globalExclusions, this.versionProvider);
+        Set<JkDepExclude> globalExcludes = this.globalExclusions;
+        JkVersionProvider versionProvider = this.versionProvider;
+        if (others instanceof JkDependencySet) {
+            JkDependencySet other = (JkDependencySet) others;
+            globalExcludes = new HashSet<>(this.globalExclusions);
+            globalExcludes.addAll(other.globalExclusions);
+            versionProvider = versionProvider.and(other.versionProvider);
+        }
+        return new JkDependencySet(deps, globalExcludes, versionProvider);
     }
 
     /**
