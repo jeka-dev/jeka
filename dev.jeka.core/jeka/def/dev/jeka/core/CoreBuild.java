@@ -20,10 +20,8 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import static dev.jeka.core.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
@@ -65,7 +63,7 @@ public class CoreBuild extends JkCommands {
         JkJavaProject project = javaPlugin.getProject();
 
         // Module version is driven by git repository info
-        String jekaVersion = git.getVersionWithTagOrSnapshot();
+        String jekaVersion = git.getVersionFromTags();
         project.setVersionedModule(JkModuleId.of("dev.jeka:jeka-core").withVersion(jekaVersion));
         project.setSourceVersion(JkJavaVersion.V8);
         if (!JkVersion.of(jekaVersion).isSnapshot()) {

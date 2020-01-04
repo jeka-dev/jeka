@@ -68,7 +68,7 @@ public final class JkGitWrapper {
      * If the current commit is tagged then the version is the tag name (last in alphabetical order). Otherwise
      * the version is [branch]-SNAPSHOT
      */
-    public String getVersionWithTagOrSnapshot() {
+    public String getVersionFromTags() {
         List<String> tags = getTagsOfCurrentCommit();
         String branch = getCurrentBranch();
         if (tags.isEmpty()) {
