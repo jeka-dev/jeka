@@ -28,7 +28,7 @@ import static dev.jeka.core.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT
 import static dev.jeka.core.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
 
 /**
- * Build class for Jerkar. Run main method to create full distrib.
+ * Build class for Jeka. Run main method to create full distrib.
  * For publishing in OSSRH the following options must be set : -ossrhPwd=Xxxxxx -pgp#secretKeyPassword=Xxxxxxx
  */
 public class CoreBuild extends JkCommands {
@@ -64,8 +64,10 @@ public class CoreBuild extends JkCommands {
 
         // Module version is driven by git repository info
         String jekaVersion = git.getVersionFromTags();
-        project.setVersionedModule(JkModuleId.of("dev.jeka:jeka-core").withVersion(jekaVersion));
+        project.setVersionedModule("dev.jeka:jeka-core", jekaVersion);
         project.setSourceVersion(JkJavaVersion.V8);
+        project.setDependencies(JkDependencySet.of()
+            .and(""));
         if (!JkVersion.of(jekaVersion).isSnapshot()) {
             javaPlugin.pack.javadoc = true;
         }

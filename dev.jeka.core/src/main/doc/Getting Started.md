@@ -581,10 +581,8 @@ The one you choose is a matter of taste, flexibility, verbosity, re-usability an
 
 ## Build Java project using low-level API
 
-This approach is similar to what developers do when they use ANT. They just define explicitly where are 
-stored the materials and define specific tasks for their needs. Just define public methods for tasks.
-
-Jeka provides a library providing what is needed for building and deploy Java projects of any structure.
+This approach is quite similar to what developers do when they use ANT. It consists in writing explicit tasks to compile, make resources,
+tests and produce jars using Jeka low-level API.
 
 ```Java
 import dev.jeka.core.api.depmanagement.*;
@@ -683,19 +681,26 @@ Defining all tasks needed to build a project can be verbose and tedious. Therefo
 to build Java project. This API mainly consist in a `JkJavaProject` class defining the project structure, dependencies, 
 artifacts it produces and how they are produced.
 
-Basically, A Java build definition can stand in one single instance of `JkJavaProject`. 
+Basically, A Java project build definition can stand in one single instance of `JkJavaProject`. 
 This class implements `JkArtifactProducer` which defines methods to produce artifacts as jar files, javadoc and any 
 other files you want to produces from the project build.
 
-To avoid to get to much bloated `JkJavaProject` class, methods are splitted between `JkJavaProject` itself and 
-`JkJavaProjectMaker` classes. The first host methods relative to the project 'statical' structure 
-(Name, version, layout, dependencies, Java version, default compilation options, manifest) and the second host methods 
-and lambdas to produces artifacts and publish them.  
+To avoid bloating `JkJavaProject` class, methods are splitted between `JkJavaProject` itself and 
+`JkJavaProjectMaker` classes. The first host methods relative to the project 'static' structure 
+(Name, version, layout, dependencies, Java version, default compilation options, manifest) and *maker* hosts methods 
+to produced/published artifacts (jar, source-jars, javadoc, ...).
+
+The outstanding philosophy is that the *raison d'être* of a project is to produce and publish artifacts (for Jeka, an artifact is a file produced by a project). 
+The *maker* holds the artifacts to produce and how to produce them.
+By default, the production of the main artifact implies unit testing.
+
+The following example shows how to build 2 projects, one depending on the other. If you are only interested of building 
+a standalone project, you can concentrate on the Foo project.
 
 
 
 ```Java
-        // Bar project depends on Foo one.
+        // --------------- Foo Project build -------------------------------------------------
 
         JkVersionProvider versionProvider = JkVersionProvider.of()
                 .and("com.google.guava:guava", "21.0")
@@ -705,22 +710,30 @@ and lambdas to produces artifacts and publish them.
         fooProject.setDependencies(JkDependencySet.of()
                 .and("junit:junit", JkJavaDepScopes.TEST)
                 .and("com.google.guava:guava")
-                .and("com.sun.jersey:jersey-server:1.19.4")
                 .withVersionProvider(versionProvider)
         );
         fooProject.getMaker().addJavadocArtifact();  // Generate Javadoc by default
+
+        // --------------- Bar Project build -------------------------------------------------
 
         JkJavaProject barProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("bar"));
         fooProject.setDependencies(JkDependencySet.of()
                 .and("junit:junit", JkJavaDepScopes.TEST)
                 .and("com.sun.jersey:jersey-server:1.19.4")
-                .and(fooProject)
+                .and("com.google.guava:guava")
+                .and(fooProject)  // Bar project depends of Foo
+                .withVersionProvider(versionProvider)
         );
         barProject.getMaker().defineMainArtifactAsFatJar(true); // Produced jar will embed dependencies
         barProject.getMaker().clean().makeAllArtifacts();  // Creates Bar jar along Foo jar (if not already built)
 ```
 
 ## Build Java project using Jeka Java plugin.
+
+The java plugin consists in holding a `JkJavaProject` instance with predefined methods that you can directly call from the command line.
+It can also alter other loaded plugin instances in order they take in account of Java nature of the project.
+
+Let's create a new project from scratch to illustrate it :
 
 1. Create the root directory of your project (here 'mygroup.myproject').
 2. Execute `jeka scaffold#run java#` under this directory. 
