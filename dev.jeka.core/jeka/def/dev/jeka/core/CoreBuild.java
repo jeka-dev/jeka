@@ -66,8 +66,6 @@ public class CoreBuild extends JkCommands {
         String jekaVersion = git.getVersionFromTags();
         project.setVersionedModule("dev.jeka:jeka-core", jekaVersion);
         project.setSourceVersion(JkJavaVersion.V8);
-        project.setDependencies(JkDependencySet.of()
-            .and(""));
         if (!JkVersion.of(jekaVersion).isSnapshot()) {
             javaPlugin.pack.javadoc = true;
         }
