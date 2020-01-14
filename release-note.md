@@ -1,4 +1,4 @@
-# 0.8.12 (ongoing)
+# 0.8.12
 *  Eclipse plugin : Generate specific 'attributes' and 'accessrules' to each dependency.
 *  Fix JkDependencySet#and(Jcd .kDependencySet) 
 *  Make build failure on deps resolution failure by default
