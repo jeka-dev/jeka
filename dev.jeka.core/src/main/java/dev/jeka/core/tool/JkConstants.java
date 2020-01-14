@@ -15,6 +15,11 @@ public final class JkConstants {
      */
     public static final String OUTPUT_PATH = JEKA_DIR + "/output";
 
+    /**
+     * Relative path to the project base directory where jeka work files are generated.
+     */
+    public static final String WORK_PATH = JEKA_DIR + "/.work";
+
     static final String DEF_BIN_DIR_NAME = "def-classes";
 
     static final String BOOT_DIR = JEKA_DIR + "/boot";
@@ -25,7 +30,7 @@ public final class JkConstants {
      * Relative path to the project where the def classes will be
      * compiled.
      */
-    public static final String DEF_BIN_DIR = OUTPUT_PATH + "/" + DEF_BIN_DIR_NAME;
+    public static final String DEF_BIN_DIR = WORK_PATH + "/" + DEF_BIN_DIR_NAME;
 
 
 

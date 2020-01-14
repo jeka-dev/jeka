@@ -1,7 +1,8 @@
 # 0.8.12 (ongoing)
 *  Eclipse plugin : Generate specific 'attributes' and 'accessrules' to each dependency.
 *  Fix JkDependencySet#and(JkDependencySet) 
-*  Make build failure when deps resolution failure as default
+*  Make build failure on deps resolution failure by default
+*  Move def compiled classes to _jeka/.work_ 
 
 # 0.8.11
 * Move to Ivy 2.5.0

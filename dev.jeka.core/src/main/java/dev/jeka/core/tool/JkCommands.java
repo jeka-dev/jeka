@@ -212,8 +212,7 @@ public class JkCommands {
     public void clean() {
         JkLog.info("Clean output directory " + getOutputDir());
         if (Files.exists(getOutputDir())) {
-            JkPathTree.of(getOutputDir()).andMatching(false, JkConstants.DEF_BIN_DIR_NAME + "/**")
-                    .deleteContent();
+            JkPathTree.of(getOutputDir()).deleteContent();
         }
     }
 
