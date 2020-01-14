@@ -1,6 +1,6 @@
 # 0.8.12 (ongoing)
 *  Eclipse plugin : Generate specific 'attributes' and 'accessrules' to each dependency.
-*  Fix JkDependencySet#and(JkDependencySet) 
+*  Fix JkDependencySet#and(Jcd .kDependencySet) 
 *  Make build failure on deps resolution failure by default
 *  Move def compiled classes to _jeka/.work_ 
 
