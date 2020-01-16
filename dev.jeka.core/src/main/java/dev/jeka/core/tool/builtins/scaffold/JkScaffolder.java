@@ -1,11 +1,16 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import dev.jeka.core.api.depmanagement.JkDependencyResolver;
@@ -83,8 +88,21 @@ public final class JkScaffolder {
         JkException.throwIf(!Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
                 "to shell scripts");
         JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
-        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("wrapper/jekaw"), baseDir.resolve("jekaw"),
+        Path jekawPath = baseDir.resolve("jekaw");
+        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("wrapper/jekaw"), jekawPath,
                 StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+        Set<PosixFilePermission> perms = null;
+        try {
+            perms = Files.getPosixFilePermissions(jekawPath);
+            perms.add(PosixFilePermission.OWNER_EXECUTE);
+            perms.add(PosixFilePermission.GROUP_EXECUTE);
+            perms.add(PosixFilePermission.OWNER_EXECUTE);
+        } catch (UnsupportedOperationException e) {
+            // Windows system
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
         final Path jekaWrapperJar = JkLocator.getJekaJarPath().getParent().resolve("dev.jeka.jeka-core-wrapper.jar");
         final Path wrapperFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/wrapper");
         JkUtilsPath.createDirectories(wrapperFolder);
