@@ -37,8 +37,13 @@ public final class JkLocator {
         URI uri;
         try {
             uri = JkLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-        } catch (final URISyntaxException e) {
-            throw new IllegalStateException("Cannot find location of " + JkLocator.class);
+        } catch (final Exception e) {
+            try {
+                uri = JkLocator.class.getResource('/' + JkLocator.class.getName()
+                        .replace('.', '/') + ".class").toURI();
+            } catch (URISyntaxException ex) {
+                throw new IllegalStateException("Cannot find location of jeka jar", ex);
+            }
         }
         final Path result = Paths.get(uri);
         JEKA_JAR_FILE = result;
