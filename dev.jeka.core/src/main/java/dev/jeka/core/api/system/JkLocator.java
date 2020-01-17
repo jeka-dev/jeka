@@ -40,7 +40,7 @@ public final class JkLocator {
                         .replace('.', '/') + ".class").toURI();
                 String uriString = JkUtilsString.substringAfterFirst(uri.toString(), "jar:");
                 uriString = JkUtilsString.substringBeforeFirst(uriString, "!");
-                result = Paths.get(URI.create(uriString)).getParent().getParent().getParent().getParent().getParent();
+                result = Paths.get(URI.create(uriString));
             } catch (URISyntaxException ex) {
                 throw new IllegalStateException("Cannot find location of jeka jar", ex);
             }

@@ -5,7 +5,9 @@ import dev.jeka.core.api.utils.*;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -60,6 +62,17 @@ public final class JkLog implements Serializable {
         consumer = eventLogHandler;
         stream = eventLogHandler.getOutStream();
         errorStream = eventLogHandler.getErrorStream();
+    }
+
+    public static void register(Consumer<Map> mapConsumer) {
+        Consumer<JkLogEvent> eventConsumer = event -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("type", event.type.name());
+            map.put("message", event.message);
+            map.put("duration", event.duration);
+            mapConsumer.accept(map);
+        };
+        consumer = eventConsumer;
     }
 
     public static void registerHierarchicalConsoleHandler() {
@@ -199,6 +212,12 @@ public final class JkLog implements Serializable {
 
     public static class JkLogEvent implements Serializable {
 
+        private final Type type;
+
+        private final String message;
+
+        private final long duration;
+
         private JkLogEvent(Type type, String message, long duration) {
             this.type = type;
             this.message = message;
@@ -213,11 +232,6 @@ public final class JkLog implements Serializable {
             return new JkLogEvent(Type.END_TASK, "",  duration);
         }
 
-        private final Type type;
-
-        private final String message;
-
-        private final long duration;
 
         public Type getType() {
             return type;
