@@ -1,13 +1,9 @@
 package dev.jeka.core.tool;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+
+import java.util.*;
 
 /**
  * Set of plugins configured or activated in a {@link JkCommands}.

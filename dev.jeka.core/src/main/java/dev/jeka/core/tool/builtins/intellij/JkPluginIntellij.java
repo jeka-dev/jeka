@@ -1,16 +1,14 @@
 package dev.jeka.core.tool.builtins.intellij;
 
-import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;

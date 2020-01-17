@@ -1,10 +1,10 @@
 package dev.jeka.core.tool.builtins.maven;
 
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.tooling.JkPom;
+import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkPlugin;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

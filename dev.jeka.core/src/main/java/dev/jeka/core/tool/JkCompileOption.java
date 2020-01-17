@@ -1,7 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.tool.JkCommands;
-
 import java.lang.annotation.*;
 
 /**

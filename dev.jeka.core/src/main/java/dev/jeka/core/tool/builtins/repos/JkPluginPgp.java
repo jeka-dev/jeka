@@ -1,9 +1,9 @@
 package dev.jeka.core.tool.builtins.repos;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
 

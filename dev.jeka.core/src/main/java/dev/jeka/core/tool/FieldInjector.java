@@ -1,5 +1,8 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -9,11 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
-
-import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.utils.JkUtilsReflect;
 
 final class FieldInjector {
 

@@ -1,6 +1,12 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
+import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.descriptor.Configuration.Visibility;
 import org.apache.ivy.core.module.id.ArtifactId;
@@ -13,12 +19,6 @@ import org.apache.ivy.plugins.matcher.PatternMatcher;
 import org.apache.ivy.plugins.repository.file.FileRepository;
 import org.apache.ivy.plugins.resolver.*;
 import org.apache.ivy.util.url.CredentialsStore;
-import dev.jeka.core.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
-import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsObject;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.lang.reflect.Field;

@@ -1,15 +1,15 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+
 import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
-
-import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * Result of a module dependency resolution for a given scope.<br/>

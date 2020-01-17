@@ -1,8 +1,13 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.*;
+
 import java.io.File;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -10,27 +15,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
-import dev.jeka.core.api.utils.JkUtilsZip;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent

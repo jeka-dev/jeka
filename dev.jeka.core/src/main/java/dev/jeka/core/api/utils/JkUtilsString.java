@@ -1,7 +1,6 @@
 package dev.jeka.core.api.utils;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 

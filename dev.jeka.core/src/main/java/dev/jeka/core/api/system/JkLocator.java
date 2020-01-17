@@ -1,17 +1,13 @@
 package dev.jeka.core.api.system;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
-
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Provides location related to the running Jeka instance.
@@ -20,7 +16,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  */
 public final class JkLocator {
 
-    private final static String JK_USER_HOM_ENV_NAME = "JEKA_USER_HOME";
+    private final static String JK_USER_HOME_ENV_NAME = "JEKA_USER_HOME";
 
     private final static String JK_REPOSITORY_CACHE_ENV_NAME = "JEKA_REPO";
 
@@ -34,18 +30,21 @@ public final class JkLocator {
         if (JEKA_JAR_FILE != null) {
             return JEKA_JAR_FILE;
         }
-        URI uri;
+        Path result;
         try {
-            uri = JkLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            URI uri = JkLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            result = Paths.get(uri);
         } catch (final Exception e) {
             try {
-                uri = JkLocator.class.getResource('/' + JkLocator.class.getName()
+                URI uri = JkLocator.class.getResource('/' + JkLocator.class.getName()
                         .replace('.', '/') + ".class").toURI();
+                String uriString = JkUtilsString.substringAfterFirst(uri.toString(), "jar:");
+                uriString = JkUtilsString.substringBeforeFirst(uriString, "!");
+                result = Paths.get(URI.create(uriString)).getParent().getParent().getParent().getParent().getParent();
             } catch (URISyntaxException ex) {
                 throw new IllegalStateException("Cannot find location of jeka jar", ex);
             }
         }
-        final Path result = Paths.get(uri);
         JEKA_JAR_FILE = result;
         return result;
     }
@@ -62,7 +61,7 @@ public final class JkLocator {
      */
     public static Path getJekaUserHomeDir() {
         final Path result;
-        final String env = System.getenv(JK_USER_HOM_ENV_NAME);
+        final String env = System.getenv(JK_USER_HOME_ENV_NAME);
         if (!JkUtilsString.isBlank(env)) {
             result = Paths.get(env);
         } else {

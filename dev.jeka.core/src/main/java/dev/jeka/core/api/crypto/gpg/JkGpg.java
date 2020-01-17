@@ -1,12 +1,12 @@
 package dev.jeka.core.api.crypto.gpg;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.UnaryOperator;
-
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 
 /**
  * Provides method for signing and verify signature with PGP.

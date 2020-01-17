@@ -1,20 +1,20 @@
 package dev.jeka.core.api.java.junit;
 
+import dev.jeka.core.api.java.JkClasspath;
+import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.junit.JkUnit.JunitReportDetail;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+
 import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
-
-import dev.jeka.core.api.java.JkClasspath;
-import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.java.junit.JkUnit.JunitReportDetail;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkLocator;
 
 class JUnit4TestLauncher {
 

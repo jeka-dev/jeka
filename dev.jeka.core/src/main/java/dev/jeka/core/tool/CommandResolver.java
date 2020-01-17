@@ -1,14 +1,14 @@
 package dev.jeka.core.tool;
 
-import java.io.File;
-import java.lang.reflect.Modifier;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.io.File;
+import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * A resolver for the {@link JkCommands} to use for a given project.

@@ -1,19 +1,20 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsTime;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-
-import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
 
 /**
  * Main class for launching Jeka from command line.

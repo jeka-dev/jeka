@@ -1,5 +1,8 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,9 +10,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Information required to publish a module in an Ivy repository.

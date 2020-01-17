@@ -1,15 +1,10 @@
 package dev.jeka.core.tool;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.util.*;
 
 /*
  * Holds information carried by the command line.

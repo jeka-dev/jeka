@@ -2,10 +2,10 @@ package dev.jeka.core.tool.builtins.eclipse;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
-import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
+import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;

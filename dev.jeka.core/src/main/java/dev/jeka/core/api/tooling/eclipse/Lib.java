@@ -1,11 +1,11 @@
 package dev.jeka.core.api.tooling.eclipse;
 
-import java.nio.file.Path;
-
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLocator;
+
+import java.nio.file.Path;
 
 
 class Lib {

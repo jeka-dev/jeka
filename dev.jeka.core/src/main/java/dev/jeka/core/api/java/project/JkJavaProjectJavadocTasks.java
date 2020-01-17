@@ -1,13 +1,13 @@
 package dev.jeka.core.api.java.project;
 
-import java.nio.file.Files;
-import java.util.LinkedList;
-import java.util.List;
-
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.java.JkJavadocMaker;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+
+import java.nio.file.Files;
+import java.util.LinkedList;
+import java.util.List;
 
 public class JkJavaProjectJavadocTasks {
 
