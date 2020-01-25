@@ -1,20 +1,16 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
-
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Dependency on computed resource. More concretely, this is a file dependency on files that might not
@@ -130,7 +126,9 @@ public class JkComputedDependency implements JkFileDependency {
     @Override
     public List<Path> getFiles() {
         if (this.hasMissingFilesOrEmptyDirs()) {
-            JkLog.execute("Building dependency : " + this, runnable);
+            JkLog.startTask("Building dependency : " + this);
+            runnable.run();
+            JkLog.endTask();
         }
         final Set<Path> missingFiles = this.getMissingFilesOrEmptyDirs();
         if (!missingFiles.isEmpty()) {

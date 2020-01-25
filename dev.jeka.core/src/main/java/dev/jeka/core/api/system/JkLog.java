@@ -4,7 +4,6 @@ import dev.jeka.core.api.utils.*;
 
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -26,7 +25,7 @@ public final class JkLog implements Serializable {
     }
 
     public enum Verbosity {
-        MUTE, NORMAL, VERBOSE, QUITE_VERBOSE;
+        MUTE, WARN_AND_ERRORS, NORMAL, VERBOSE, QUITE_VERBOSE;
 
         public boolean isVerbose() {
             return this == VERBOSE || this == QUITE_VERBOSE;
@@ -122,17 +121,15 @@ public final class JkLog implements Serializable {
         consume(JkLogEvent.ofRegular(Type.ERROR, message));
     }
 
-    /**
-     * Executes the specified runnable within a startTask/endTask log declaration.
-     */
-    public static void execute(String message, Runnable task) {
-        consume(JkLogEvent.ofRegular(Type.START_TASK, message));
-        currentNestedTaskLevel.incrementAndGet();
-        final long startTs = System.nanoTime();
-        task.run();
-        long durationMs = (System.nanoTime() - startTs) / 1000000;
-        currentNestedTaskLevel.decrementAndGet();
-        consume((JkLogEvent.ofEndTask(durationMs)));
+
+    private static boolean shouldPrint(Type type) {
+        if (Verbosity.MUTE == verbosity()) {
+            return false;
+        }
+        if (Verbosity.WARN_AND_ERRORS == verbosity() && (type != Type.ERROR && type != Type.WARN)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -140,8 +137,10 @@ public final class JkLog implements Serializable {
      */
     public static void startTask(String message) {
         consume(JkLogEvent.ofRegular(Type.START_TASK, message));
-        currentNestedTaskLevel.incrementAndGet();
-        getStartTimes().addLast(System.nanoTime());
+        if (shouldPrint(Type.START_TASK)) {
+            currentNestedTaskLevel.incrementAndGet();
+            getStartTimes().addLast(System.nanoTime());
+        }
     }
 
     /**
@@ -150,15 +149,16 @@ public final class JkLog implements Serializable {
      * the duration taken to complete the current task.
      */
     public static void endTask(String message) {
-        currentNestedTaskLevel.decrementAndGet();
-        Long startTime = getStartTimes().pollLast();
-        if (startTime == null) {
-            throw new JkException("No start task found matching with this endTask. Check that you don't have " +
-                    "used an 'endTask' one too many in your code.");
+        if (shouldPrint(Type.END_TASK)) {
+            currentNestedTaskLevel.decrementAndGet();
+            Long startTime = getStartTimes().pollLast();
+            if (startTime == null) {
+                throw new JkException("No start task found matching with this endTask. Check that you don't have " +
+                        "used an 'endTask' one too many in your code.");
+            }
+            Long durationMillis = JkUtilsTime.durationInMillis(startTime);
+            consume(JkLogEvent.ofRegular(Type.END_TASK, String.format(message, durationMillis)));
         }
-        Long durationMillis = JkUtilsTime.durationInMillis(startTime);
-        consume(JkLogEvent.ofRegular(Type.END_TASK, String.format(message, durationMillis)));
-
     }
 
     /**
@@ -172,25 +172,14 @@ public final class JkLog implements Serializable {
         return verbosity == Verbosity.VERBOSE;
     }
 
-    private static void consume(Object event) {
-        if (Verbosity.MUTE == verbosity()) {
-            return;
-        }
+    private static void consume(JkLogEvent event) {
         if (consumer == null) {
             return;
         }
-        if (event.getClass().getClassLoader() != consumer.getClass().getClassLoader()) {  // survive to classloader change
-            final Object evt = JkUtilsIO.cloneBySerialization(event, consumer.getClass().getClassLoader());
-            try {
-                Method accept = consumer.getClass().getMethod("accept", evt.getClass());
-                accept.setAccessible(true);
-                accept.invoke(consumer, evt);
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            consumer.accept((JkLogEvent) event);
+        if (!shouldPrint(event.getType()) ){
+            return;
         }
+        consumer.accept(event);
     }
 
     public static Consumer<JkLogEvent> getLogConsumer() {
@@ -207,10 +196,6 @@ public final class JkLog implements Serializable {
 
         static JkLogEvent ofRegular(Type type, String message) {
             return new JkLogEvent(type, message,  -1);
-        }
-
-        static JkLogEvent ofEndTask(long duration) {
-            return new JkLogEvent(Type.END_TASK, "",  duration);
         }
 
         private final Type type;

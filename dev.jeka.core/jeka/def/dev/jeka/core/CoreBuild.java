@@ -138,8 +138,10 @@ public class CoreBuild extends JkCommands {
     }
 
     private void makeDocs() {
-        JkLog.execute("Making documentation", () -> new DocMaker(getBaseDir(), distribFolder,
-                javaPlugin.getProject().getVersionedModule().getVersion().getValue()).assembleAllDoc());
+        JkLog.startTask("Making documentation");
+        new DocMaker(getBaseDir(), distribFolder,
+                javaPlugin.getProject().getVersionedModule().getVersion().getValue()).assembleAllDoc();
+        JkLog.endTask();
     }
 
     // Necessary to publish on OSSRH

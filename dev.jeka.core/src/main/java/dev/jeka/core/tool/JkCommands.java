@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -83,7 +84,8 @@ public class JkCommands {
         // Inject options & environment variables
         JkOptions.populateFields(run, JkOptions.readSystemAndUserOptions());
         FieldInjector.injectEnv(run);
-        JkOptions.populateFields(run,  Environment.commandLine.getCommandOptions());
+        Set<String> unusedCmdOptions = JkOptions.populateFields(run,  Environment.commandLine.getCommandOptions());
+        unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key + "' from command line does not match with any field"));
 
         // Load plugins declared in command line and inject options
         jkCommands.plugins.loadCommandLinePlugins();
@@ -97,7 +99,6 @@ public class JkCommands {
             try {
                 plugin.activate();
             } catch (RuntimeException e) {
-                JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
                 JkLog.error("Plugin " + plugin.name() + " has caused build instantiation failure.");
                 throw e;
             }

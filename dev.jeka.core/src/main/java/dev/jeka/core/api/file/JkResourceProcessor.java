@@ -57,29 +57,27 @@ public final class JkResourceProcessor {
      * specified output directory along replacing specified tokens.
      */
     public void generateTo(Path outputDir, Charset charset) {
-        JkLog.execute("Coping resource files to " + outputDir, () -> {
-            final AtomicInteger count = new AtomicInteger(0);
-            for (final JkPathTree resourceTree : this.resourceTrees.getPathTrees()) {
-                if (!resourceTree.exists()) {
-                    continue;
-                }
-                resourceTree.stream().forEach(path -> {
-                    final Path relativePath = resourceTree.getRoot().relativize(path);
-                    final Path out = outputDir.resolve(relativePath);
-                    final Map<String, String> data = JkInterpolator.of(relativePath.toString(),
-                            interpolators);
-                    if (Files.isDirectory(path)) {
-                        JkUtilsPath.createDirectories(out);
-                    } else {
-                        JkPathFile.of(path).copyReplacingTokens(out, data, charset);
-                        count.incrementAndGet();
-                    }
-                });
+        JkLog.startTask("Coping resource files to " + outputDir);
+        final AtomicInteger count = new AtomicInteger(0);
+        for (final JkPathTree resourceTree : this.resourceTrees.getPathTrees()) {
+            if (!resourceTree.exists()) {
+                continue;
             }
-            JkLog.info(count.intValue() + " file(s) copied.");
-        });
-
-
+            resourceTree.stream().forEach(path -> {
+                final Path relativePath = resourceTree.getRoot().relativize(path);
+                final Path out = outputDir.resolve(relativePath);
+                final Map<String, String> data = JkInterpolator.of(relativePath.toString(),
+                        interpolators);
+                if (Files.isDirectory(path)) {
+                    JkUtilsPath.createDirectories(out);
+                } else {
+                    JkPathFile.of(path).copyReplacingTokens(out, data, charset);
+                    count.incrementAndGet();
+                }
+            });
+        }
+        JkLog.info(count.intValue() + " file(s) copied.");
+        JkLog.endTask();
     }
 
     /**

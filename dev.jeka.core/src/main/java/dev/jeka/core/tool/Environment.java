@@ -54,7 +54,6 @@ class Environment {
         Environment.systemProps = sysProps;
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;
-
     }
 
     private static Map<String, String> userSystemProperties() {

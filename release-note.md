@@ -1,3 +1,7 @@
+# 0.8.13 (ongoing)
+* Generate jekaw unix script with execution permissions
+* Remove JkLog#execute method
+
 # 0.8.12
 *  Eclipse plugin : Generate specific 'attributes' and 'accessrules' to each dependency.
 *  Fix JkDependencySet#and(Jcd .kDependencySet) 

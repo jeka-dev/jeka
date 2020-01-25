@@ -64,6 +64,11 @@ public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHand
         final PrintStream stream = (event.getType() == JkLog.Type.ERROR) ? System.err : System.out;
         marginStream.handlingStart = event.getType() == JkLog.Type.START_TASK;
         try {
+            if (event.getType() == JkLog.Type.WARN) {
+                stream.write("Warn: ".getBytes(UTF8));
+            } else if (event.getType() == JkLog.Type.ERROR) {
+                stream.write("Error: ".getBytes(UTF8));
+            }
             stream.write(message.getBytes(UTF8));
             stream.write(LINE_SEPARATOR);
             stream.flush();

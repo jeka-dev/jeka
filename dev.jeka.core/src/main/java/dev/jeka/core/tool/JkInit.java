@@ -27,7 +27,7 @@ public final class JkInit {
         Environment.initialize(args);
         JkLog.Verbosity verbosity = JkLog.verbosity();
         if (!Environment.standardOptions.logHeaders) {
-            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
+            JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
         }
         displayInfo();
         final T jkCommands = JkCommands.of(clazz);

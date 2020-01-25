@@ -7,10 +7,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Key/value string storage for run parameters. Both keys and values are java
@@ -81,8 +78,11 @@ public final class JkOptions {
      * Set the field values according to the target object according the string
      * found in props arguments.
      */
-    static void populateFields(Object target, Map<String, String> props) {
-        FieldInjector.inject(target, props);
+    static Set<String> populateFields(Object target, Map<String, String> props) {
+        Set<String> usedProps = FieldInjector.inject(target, props);
+        Set<String> unusedProps = new HashSet<>(props.keySet());
+        unusedProps.removeAll(usedProps);
+        return unusedProps;
     }
 
 

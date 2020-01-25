@@ -136,8 +136,9 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (!isMaven(resolver) && publishRepo.getPublishConfig().getFilter().accept(versionedModule)) {
-                JkLog.execute("Publishing for repository " + resolver, () ->
-                    this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor));
+                JkLog.startTask("Publishing for repository " + resolver);
+                this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
+                JkLog.endTask();
                 count++;
             }
         }

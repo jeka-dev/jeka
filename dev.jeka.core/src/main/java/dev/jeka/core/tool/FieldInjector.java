@@ -1,28 +1,31 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.utils.JkUtilsReflect;
 
 final class FieldInjector {
 
     private static final String UNHANDLED_TYPE = "";
 
-    public static void inject(Object target, Map<String, String> props) {
+    static Set<String> inject(Object target, Map<String, String> props) {
+        return inject(target, props, "");
+    }
+
+    private static Set<String> inject(Object target, Map<String, String> props, String fieldPrefix) {
+        Set<String> usedProperties = new HashSet<>();
         for (final Field field : getOptionFields(target.getClass())) {
-            inject(target, field, props);
+            Set<String> matchedKeys = inject(target, field, props, fieldPrefix);
+            usedProperties.addAll(matchedKeys);
         }
+        return usedProperties;
     }
 
     static void injectEnv(Object target) {
@@ -50,7 +53,7 @@ final class FieldInjector {
                 .collect(Collectors.toList());
     }
 
-    private static void inject(Object target, Field field, Map<String, String> props) {
+    private static Set<String> inject(Object target, Field field, Map<String, String> props, String prefix) {
         final String name = field.getName();
         final Class<?> type = field.getType();
         final boolean present = props.containsKey(name);
@@ -71,7 +74,9 @@ final class FieldInjector {
                         + "#" + field.getName() + " field.");
             }
             JkUtilsReflect.setFieldValue(target, field, value);
+            return Collections.singleton(prefix + name);
         } else if (hasKeyStartingWith(name + ".", props)) {
+            String fieldPrefix = name + ".";
             Object value = JkUtilsReflect.getFieldValue(target, field);
             if (value == null) {
                 value = JkUtilsReflect.newInstance(field.getType());
@@ -81,10 +86,11 @@ final class FieldInjector {
                 }
                 JkUtilsReflect.setFieldValue(target, field, value);
             }
-            final Map<String, String> subProps = extractKeyStartingWith(name + ".", props);
-            inject(value, subProps);
+            final Map<String, String> subProps = extractKeyStartingWith(fieldPrefix, props);
+            return inject(value, subProps, prefix + fieldPrefix);
+        } else {
+            return Collections.emptySet();
         }
-
     }
 
     private static Object defaultValue(Class<?> type) {
