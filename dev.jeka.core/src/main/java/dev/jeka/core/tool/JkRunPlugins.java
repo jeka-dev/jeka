@@ -83,8 +83,10 @@ public final class JkRunPlugins {
 
     void injectOptions(JkPlugin plugin) {
         FieldInjector.injectEnv(plugin);
-        Set<String> unusedKeys = JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(), this.pluginOptionsList));
-        unusedKeys.forEach(key -> JkLog.warn("Option '" + plugin.name() + "#" + key + "' from command line does not match any field"));
+        Set<String> unusedKeys = JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(),
+                this.pluginOptionsList));
+        unusedKeys.forEach(key -> JkLog.warn("Option '" + plugin.name() + "#" + key
+                + "' from command line does not match any field of class " + plugin.getClass().getName()));
     }
 
     void loadCommandLinePlugins() {

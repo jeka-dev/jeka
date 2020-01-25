@@ -1,6 +1,7 @@
 # 0.8.13 (ongoing)
-* Generate jekaw unix script with execution permissions
+* Generate jekaw *nix script with execution permissions
 * Remove JkLog#execute method
+* Log warning when an command line option does not match any field
 
 # 0.8.12
 *  Eclipse plugin : Generate specific 'attributes' and 'accessrules' to each dependency.

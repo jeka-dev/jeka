@@ -85,13 +85,16 @@ public class JkCommands {
         JkOptions.populateFields(run, JkOptions.readSystemAndUserOptions());
         FieldInjector.injectEnv(run);
         Set<String> unusedCmdOptions = JkOptions.populateFields(run,  Environment.commandLine.getCommandOptions());
-        unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key + "' from command line does not match with any field"));
+        unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key
+                + "' from command line does not match with any field of class " + run.getClass().getName()));
 
         // Load plugins declared in command line and inject options
         jkCommands.plugins.loadCommandLinePlugins();
         List<JkPlugin> plugins = jkCommands.getPlugins().getAll();
         for (JkPlugin plugin : plugins) {
-           jkCommands.plugins.injectOptions(plugin);
+            if (!jkCommands.plugins.getAll().contains(plugin)) {
+                jkCommands.plugins.injectOptions(plugin);
+            }
         }
         run.setup();
         for (JkPlugin plugin : new LinkedList<>(plugins)) {
