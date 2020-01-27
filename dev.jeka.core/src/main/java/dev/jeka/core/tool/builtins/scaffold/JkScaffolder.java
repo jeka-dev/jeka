@@ -95,7 +95,7 @@ public final class JkScaffolder {
             perms = Files.getPosixFilePermissions(jekawPath);
             perms.add(PosixFilePermission.OWNER_EXECUTE);
             perms.add(PosixFilePermission.GROUP_EXECUTE);
-            perms.add(PosixFilePermission.OWNER_EXECUTE);
+            perms.add(PosixFilePermission.OTHERS_EXECUTE);
             Files.setPosixFilePermissions(jekawPath, perms);
         } catch (UnsupportedOperationException e) {
             // Windows system
