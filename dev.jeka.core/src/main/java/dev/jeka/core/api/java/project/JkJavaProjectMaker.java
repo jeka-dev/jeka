@@ -41,7 +41,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkDependencyResolver dependencyResolver;
 
-    private boolean failOnDependencyResolutionError;
+    private boolean failOnDependencyResolutionError = true;
 
     private final JkJavaProjectCompileTasks tasksForCompilation;
 

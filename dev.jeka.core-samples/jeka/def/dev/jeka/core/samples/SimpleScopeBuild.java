@@ -8,7 +8,6 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
-import static dev.jeka.core.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 
 /**
  * This build illustrates how one can use other dependency scope mapping then the standard ones.
@@ -24,9 +23,8 @@ public class SimpleScopeBuild extends JkCommands {
         javaPlugin.getProject().addDependencies(JkDependencySet.of()
                 .andFile(getBaseDir().resolve("libs/foo.jar"))
                 .and("junit:junit:4.11", TEST)
-                .and(JERSEY_SERVER, "1.19", JkScopeMapping
-                        .of(COMPILE).to(RUNTIME.getName())
-                    .and(FOO, PROVIDED).to("bar", PROVIDED.getName())));
+                .and("com.sun.jersey:jersey-server:1.19", JkScopeMapping
+                        .of(COMPILE).to(RUNTIME.getName())));
 
         BuildUtility.printHello();
     }

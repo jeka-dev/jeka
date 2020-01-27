@@ -2,6 +2,7 @@
 * Generate jekaw *nix script with execution permissions
 * Remove JkLog#execute method
 * Log warning when an command line option does not match any field
+* Fix make build failure on deps resolution failure by default
 
 # 0.8.12
 *  Eclipse plugin : Generate specific 'attributes' and 'accessrules' to each dependency.
