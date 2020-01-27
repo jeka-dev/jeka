@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/* This class should not depends with any other package in dev.jeka.core project as it
+   will be turned in its own jar.
+ */
 class Booter {
 
     private static final String MAIN_CLASS_NAME = "dev.jeka.core.tool.Main";

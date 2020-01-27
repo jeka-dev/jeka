@@ -117,14 +117,13 @@ public class CoreBuild extends JkCommands {
         distrib.importDir(getBaseDir().resolve("src/main/java/META-INF/bin"));
         distrib.importFiles(maker.getArtifactPath(maker.getMainArtifactId()));
         distrib.importFiles(maker.getArtifactPath(WRAPPER_ARTIFACT_ID));
-        final List<Path> ivySourceLibs = getBaseTree().goTo("build/libs-sources")
-                .andMatching(true, "apache-ivy*.jar").getFiles();
-        distrib.goTo("libs-sources")
-            .importFiles(ivySourceLibs)
-            .importFiles(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
+        final List<Path> ivySourceLibs = getBaseTree().goTo("jeka/libs-sources")
+                .andMatching(true, "ivy-*.jar").getFiles();
+        distrib.goTo("libs-sources").importFiles(ivySourceLibs);
+        distrib.importFiles(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
         if (javaPlugin.pack.javadoc) {
             maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
-            distrib.goTo("libs-javadoc").importFiles(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
+            distrib.importFiles(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         makeDocs();
         if (javaPlugin.tests.runIT) {
