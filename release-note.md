@@ -1,4 +1,4 @@
-# 0.8.13 (ongoing)
+# 0.8.13
 * Generate jekaw *nix script with execution permissions
 * Remove JkLog#execute method
 * Log warning when an command line option does not match any field
