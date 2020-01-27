@@ -8,10 +8,10 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.JkCommands;
 
 import java.nio.file.Path;
 

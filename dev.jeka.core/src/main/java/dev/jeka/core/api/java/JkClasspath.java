@@ -1,26 +1,16 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.*;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipFile;
-
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsZip;
 
 
 /**

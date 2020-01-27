@@ -1,16 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import dev.jeka.core.api.utils.JkUtilsIterable;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A mapping to scopes to scopes acting when declaring dependencies. The goal of a scope mapping is to determine :<ul>

@@ -1,12 +1,12 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import dev.jeka.core.api.utils.JkUtilsIterable;
 
 /**
  * A set of {@link JkRepo}

@@ -1,15 +1,11 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.util.*;
 
 /**
  * A dependency on an external module. External modules are supposed to be

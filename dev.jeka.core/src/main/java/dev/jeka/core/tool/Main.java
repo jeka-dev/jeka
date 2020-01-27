@@ -78,9 +78,9 @@ public final class Main {
      * Entry point to call Jeka on a given folder
      */
     public static void exec(Path projectDir, String... args) {
-        if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
-            final URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {},
-                    Thread.currentThread().getContextClassLoader());
+        ClassLoader originalClassloader = Thread.currentThread().getContextClassLoader();
+        if (!(originalClassloader instanceof URLClassLoader)) {
+            final URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {}, originalClassloader);
             Thread.currentThread().setContextClassLoader(urlClassLoader);
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main",
                     "exec" , projectDir, args);

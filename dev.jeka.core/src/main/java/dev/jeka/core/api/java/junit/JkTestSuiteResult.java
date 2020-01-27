@@ -1,14 +1,10 @@
 package dev.jeka.core.api.java.junit;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * A result of a test suite execution. It contains both overall information about suite execution

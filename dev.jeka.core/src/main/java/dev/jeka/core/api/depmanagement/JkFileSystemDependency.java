@@ -1,11 +1,11 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
 /**
  * A dependency on files located on file ofSystem.

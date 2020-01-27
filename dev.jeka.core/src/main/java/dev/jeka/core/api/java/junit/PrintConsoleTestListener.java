@@ -1,12 +1,12 @@
 package dev.jeka.core.api.java.junit;
 
-import java.io.PrintStream;
-
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+
+import java.io.PrintStream;
 
 class PrintConsoleTestListener extends RunListener {
 

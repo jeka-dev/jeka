@@ -1,16 +1,16 @@
 package dev.jeka.core.api.java.project;
 
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.tool.JkConstants;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-
-import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.tool.JkConstants;
 
 /**
  * Describes a project layout about the source parts. Generated sources/resources are not

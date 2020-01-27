@@ -1,12 +1,12 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.function.UnaryOperator;
-
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.function.UnaryOperator;
 
 /**
  * Not part of the public API

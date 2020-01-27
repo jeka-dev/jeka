@@ -1,5 +1,11 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.utils.JkUtilsFile;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -9,12 +15,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.utils.JkUtilsFile;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository

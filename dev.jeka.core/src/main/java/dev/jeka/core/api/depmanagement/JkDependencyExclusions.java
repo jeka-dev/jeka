@@ -1,13 +1,8 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import dev.jeka.core.api.utils.JkUtilsIterable;
+
+import java.util.*;
 
 /**
  * Holds information about transitive dependencies to exclude.

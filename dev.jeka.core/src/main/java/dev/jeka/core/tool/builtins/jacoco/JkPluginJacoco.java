@@ -1,12 +1,11 @@
 package dev.jeka.core.tool.builtins.jacoco;
 
+import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import dev.jeka.core.api.java.junit.JkUnit;
-import dev.jeka.core.api.java.project.JkJavaProject;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
 @JkDocPluginDeps(JkPluginJava.class)

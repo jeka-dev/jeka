@@ -1,8 +1,8 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.system.JkLog;
 import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
-import dev.jeka.core.api.system.JkLog;
 
 import java.io.PrintStream;
 

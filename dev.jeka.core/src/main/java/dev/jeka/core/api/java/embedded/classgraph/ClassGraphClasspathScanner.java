@@ -1,13 +1,13 @@
 package dev.jeka.core.api.java.embedded.classgraph;
 
+import dev.jeka.core.api.java.JkInternalClasspathScanner;
+import io.github.classgraph.*;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-
-import dev.jeka.core.api.java.JkInternalClasspathScanner;
-import io.github.classgraph.*;
 
 class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 

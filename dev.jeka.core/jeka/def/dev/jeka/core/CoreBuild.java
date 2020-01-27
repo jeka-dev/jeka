@@ -72,9 +72,9 @@ public class CoreBuild extends JkCommands {
         project.getManifest().addMainClass("dev.jeka.core.tool.Main");
 
         JkJavaProjectMaker maker = project.getMaker();
-        project.getCompileSpec().addOptions("-Xlint:none");
+        project.getCompileSpec().addOptions("-Xlint:none","-g");
         maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
-                maker.putArtifact(DISTRIB_FILE_ID, this::doDistrib);
+        maker.putArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
         maker.getTasksForJavadoc().setJavadocOptions("-notimestamp");
         maker.getTasksForPublishing()
