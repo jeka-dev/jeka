@@ -35,7 +35,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
-        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
+        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
         final JkEclipseClasspathGenerator baseGenerator =
                 JkEclipseClasspathGenerator.of(baseProject.getJavaProjectIde());
         baseGenerator.setUsePathVariables(true);

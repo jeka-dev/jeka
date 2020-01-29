@@ -1,19 +1,19 @@
 package dev.jeka.core.api.tooling.intellij;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectIde;
+import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
-import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import org.junit.Test;
 
 /**
  * Created by angibaudj on 21-09-17.
@@ -28,7 +28,7 @@ public class JkImlGeneratorTest {
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.ofSimpleStyle()
                 .withResources("res").withTestResources("res-test").withBaseDir(base);
         final JkJavaProject baseProject = JkJavaProject.of(sourceLayout);
-        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
+        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
         final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject.getJavaProjectIde());
         final String result0 = baseGenerator.generate();
         System.out.println("\nbase .classpath");

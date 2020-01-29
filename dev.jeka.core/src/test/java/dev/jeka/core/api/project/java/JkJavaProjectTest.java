@@ -1,18 +1,18 @@
 package dev.jeka.core.api.project.java;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
-import org.junit.Test;
 
 
 public class JkJavaProjectTest {
@@ -27,7 +27,7 @@ public class JkJavaProjectTest {
 
 
         JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
-        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
+        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
