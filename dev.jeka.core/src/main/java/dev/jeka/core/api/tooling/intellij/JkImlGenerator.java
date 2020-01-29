@@ -50,11 +50,10 @@ public final class JkImlGenerator {
     /** Used to generate JRE container */
     private JkJavaVersion sourceJavaVersion;
 
-
     /** Dependency resolver to fetch module dependencies */
     private JkDependencyResolver projectDependencyResolver;
 
-    public JkDependencySet projectDependencies;
+    private JkDependencySet projectDependencies;
 
     /** Dependency resolver to fetch module dependencies for build classes */
     private JkDependencyResolver runDependencyResolver;

@@ -61,14 +61,41 @@ public final class JkPluginIntellij extends JkPlugin {
             }
         }
         final String xml = generator.generate();
-        String filename = basePath.getFileName().toString() + ".iml";
-        Path candidateImlFile = basePath.resolve(".idea").resolve(filename);
-        final Path imlFile = Files.exists(candidateImlFile) ? candidateImlFile :
-                basePath.resolve(filename);
+        final Path imlFile = findIml(basePath);
         JkUtilsPath.deleteIfExists(imlFile);
         JkUtilsPath.createDirectories(imlFile.getParent());
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));
         JkLog.info("Iml file generated at " + imlFile);
+    }
+
+    private static Path findIml(Path dir) {
+        String dirNameCandidate = dir.getFileName().toString() + ".iml";
+        Path dirNameCandidatePath = dir.resolve(dirNameCandidate);
+        if (Files.exists(dirNameCandidatePath)) {
+            return dirNameCandidatePath;
+        }
+        Path ideaDir = dir.resolve(".idea");
+        Path ideaDirNameCandidatePath = ideaDir.resolve(dirNameCandidate);
+        if (Files.exists(ideaDirNameCandidatePath)) {
+            return ideaDirNameCandidatePath;
+        }
+        Path firstInDir = JkUtilsPath.listDirectChildren(dir).stream()
+                .filter(Files::isRegularFile)
+                .filter(path -> path.getFileName().toString().endsWith(".iml"))
+                .findFirst().orElse(null);
+        if (firstInDir != null) {
+            return firstInDir;
+        }
+        if (Files.exists(ideaDir) && Files.isDirectory(ideaDir)) {
+            Path firstInIdea = JkUtilsPath.listDirectChildren(dir.resolve(".idea")).stream()
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".iml"))
+                    .findFirst().orElse(null);
+            if (firstInIdea != null) {
+                return firstInIdea;
+            }
+        }
+        return dirNameCandidatePath;
     }
 
     /** Generate modules.xml files */
