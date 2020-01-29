@@ -86,7 +86,8 @@ Method help succeeded in 660 milliseconds.
 ```
 # Configure your IDE
 
-For now, there is no valuable Jeka Visual Plugin for your IDE but you can work pretty well without thanks to Intellij and Eclipse Jeka plugin whose generating IDE metadata files (.iml and .classpath).
+While a visual Jeka plugin for Intellij exists (a plugin to be installed on Intellij), we will ignore it in this tutorial. 
+You can still work pretty well thanks to Intellij and Eclipse Jeka plugin whose generating IDE metadata files (.iml and .classpath).
 
 But first you have to instruct your IDE where is located Jeka distribution and repositories.
 
