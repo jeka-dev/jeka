@@ -217,7 +217,7 @@ public final class JkJavaCompiler {
 
     static String currentJdkSourceVersion() {
         final String fullVersion = System.getProperty("java.version");
-        return currentJdkSourceVersion();
+        return currentJdkSourceVersion(fullVersion);
     }
 
     static String currentJdkSourceVersion(String fullVersion) {
