@@ -217,28 +217,18 @@ public final class JkJavaCompiler {
 
     static String currentJdkSourceVersion() {
         final String fullVersion = System.getProperty("java.version");
-        final int firstDot = fullVersion.indexOf(".");
-        final String version;
-        if (firstDot == -1 ) {
-            version = fullVersion;
-        } else {
-            final int secondDot = fullVersion.indexOf(".", firstDot+1);
-            if (secondDot == -1) {
-                version = fullVersion;
-            } else {
-                version = fullVersion.substring(0, secondDot);
-            }
+        return currentJdkSourceVersion();
+    }
+
+    static String currentJdkSourceVersion(String fullVersion) {
+        String[] items = fullVersion.split("\\.");
+        if (items.length == 1 ) {
+            return fullVersion;
         }
-        if (version.equals(JkJavaVersion.V1_3.get()) || version.equals(JkJavaVersion.V1_4.get())) {
-            return version;
+        if ("1".equals(items[0])) {
+            return items[1];
         }
-        String shortVersion;
-        if (firstDot != -1) {
-            shortVersion = version.substring(firstDot+1);
-        } else {
-            shortVersion = version;
-        }
-        return shortVersion;
+        return items[0];
     }
 
     /**

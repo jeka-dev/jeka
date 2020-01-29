@@ -1,3 +1,7 @@
+# 0.8.14 (Ongoing)
+* Fix JDK version recognition for version 9 and greater
+
+
 # 0.8.13
 * Generate jekaw *nix script with execution permissions
 * Remove JkLog#execute method
