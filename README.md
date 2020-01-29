@@ -29,6 +29,7 @@ It has a completely re-designed API based on Java7 nio and Java8 lambdas providi
 and leaner user code.
 
 Last major additions :
+* Release of a [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
 * Upgraded to Ivy 2.5.0
 * Wrapper to run Jeka independently of the Jeka version installed on the host machine
 * Jdk9+ compatibility
