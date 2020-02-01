@@ -42,8 +42,14 @@ public final class JkJavaVersion {
     /** Stands for Java Version  11 */
     public static final JkJavaVersion V11 = JkJavaVersion.of("11");
 
-    /** Stands for Java Version  11 */
+    /** Stands for Java Version  12 */
     public static final JkJavaVersion V12 = JkJavaVersion.of("12");
+
+    /** Stands for Java Version  13 */
+    public static final JkJavaVersion V13 = JkJavaVersion.of("13");
+
+    /** Stands for Java Version  14 */
+    public static final JkJavaVersion V14 = JkJavaVersion.of("14");
 
     private final String value;
 
