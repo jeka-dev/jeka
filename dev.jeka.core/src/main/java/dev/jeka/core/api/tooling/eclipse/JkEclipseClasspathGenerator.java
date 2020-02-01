@@ -233,8 +233,7 @@ public final class JkEclipseClasspathGenerator {
 
         // add build dependencies
         if (hasBuildDef() && runDependencyResolver != null) {
-            final Iterable<Path> files = runDependencyResolver.resolve(runDependencies).getFiles();
-            writeFileDepsEntries(writer, files, paths, new Properties(), new Properties());
+            writeDependenciesEntries(writer, runDependencies, runDependencyResolver, paths);
         }
 
         // Write output
