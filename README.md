@@ -24,6 +24,8 @@ of any build-code / configuration / script.
 
 # News 
 
+Jeka has joined OW2 organisation on javuary 2020 : https://projects.ow2.org/view/jeka/
+
 _Jerkar_ has been rebranded to _Jeka_. Maven groupId and artifactId has moved to `dev.jeka.jeka-core`.
 It has a completely re-designed API based on Java7 nio and Java8 lambdas providing a much cleaner/polished design 
 and leaner user code.
