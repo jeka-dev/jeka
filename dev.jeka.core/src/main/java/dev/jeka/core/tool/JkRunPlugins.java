@@ -5,6 +5,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Set of plugins configured or activated in a {@link JkCommands}.
@@ -65,6 +66,16 @@ public final class JkRunPlugins {
      */
     public List<JkPlugin> getAll() {
         return Collections.unmodifiableList(loadedPlugins);
+    }
+
+    /**
+     * Returns the list of loaded plugin instance of the specified class/interface.
+     */
+    public <T> List<T> getLoadedPluginInstanceOf(Class<T> clazz) {
+        return loadedPlugins.stream()
+                .filter(clazz::isInstance)
+                .map(plugin -> (T) plugin)
+                .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")

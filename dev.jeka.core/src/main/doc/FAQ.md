@@ -50,6 +50,12 @@ public class Build extends JkCommands{
 }
 ```
 
+### How can I generate Eclipse/Intellij without using Java plugin (JkPluginJava) ?
+
+Just make your command class implements `dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier`.
+
+
+
 
 
 

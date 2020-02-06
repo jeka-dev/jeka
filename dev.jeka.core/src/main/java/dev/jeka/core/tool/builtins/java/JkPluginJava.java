@@ -7,9 +7,7 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.junit.JkUnit;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectMaker;
-import dev.jeka.core.api.java.project.JkJavaProjectTestTasks;
+import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -29,7 +27,7 @@ import java.util.Map;
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
 @JkDocPluginDeps({JkPluginRepo.class, JkPluginScaffold.class})
-public class JkPluginJava extends JkPlugin {
+public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
 
     // ------------  Options injectable by command line --------------------------------
 
@@ -234,6 +232,11 @@ public class JkPluginJava extends JkPlugin {
     @JkDoc("Fetches project dependencies in cache.")
     public void refreshDeps() {
         project.getMaker().getDependencyResolver().resolve(project.getMaker().getScopeDefaultedDependencies());
+    }
+
+    @Override
+    public JkJavaProjectIde getJavaProjectIde() {
+        return project.getJavaProjectIde();
     }
 
     public static class JkPublishOptions {

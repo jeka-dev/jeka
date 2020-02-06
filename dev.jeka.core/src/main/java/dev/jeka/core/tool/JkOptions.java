@@ -82,6 +82,7 @@ public final class JkOptions {
         Set<String> usedProps = FieldInjector.inject(target, props);
         Set<String> unusedProps = new HashSet<>(props.keySet());
         unusedProps.removeAll(usedProps);
+        unusedProps.removeAll(Environment.standardOptions.names());
         return unusedProps;
     }
 

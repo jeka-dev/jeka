@@ -9,10 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsObject;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 class Environment {
 
@@ -97,6 +94,8 @@ class Environment {
 
         String commandClass;
 
+        private final Set<String> names = new HashSet<>();
+
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "LogVerbose", "LV");
             this.logQuiteVerbose = valueOf(Boolean.class, map, false, "LogQuiteVerbose", "LQV");
@@ -105,14 +104,19 @@ class Environment {
             this.commandClass = valueOf(String.class, map, null, "CommandClass", "CC");
         }
 
+        Set<String> names() {
+            return names;
+        }
+
         @Override
         public String toString() {
             return "CommandClass=" + JkUtilsObject.toString(commandClass) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logHeaders + ", LogMaxLength=" + logMaxLength;
         }
 
-        private static <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... names) {
-            for (String name : names) {
+        private <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... optionNames) {
+            for (String name : optionNames) {
+                this.names.add(name);
                 if (map.containsKey(name)) {
                     String stringValue = map.get(name);
                     try {

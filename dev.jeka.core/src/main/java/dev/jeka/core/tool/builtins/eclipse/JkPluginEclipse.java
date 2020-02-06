@@ -2,7 +2,8 @@ package dev.jeka.core.tool.builtins.eclipse;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectIde;
+import dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
@@ -62,14 +63,14 @@ public final class JkPluginEclipse extends JkPlugin {
             "dependencies and source layout.")
     public void files() {
         final Path dotProject = getCommands().getBaseDir().resolve(".project");
-        if (getCommands().getPlugins().hasLoaded(JkPluginJava.class)) {
-            final JkJavaProject javaProject = getCommands().getPlugins().get(JkPluginJava.class).getProject();
+        JkJavaProjectIde projectIde = getProjectIde(getCommands());
+        if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
             for (final JkCommands depRun : getCommands().getImportedCommands().getDirects()) {
                 importedRunProjects.add(depRun.getBaseTree().getRoot());
             }
             final JkEclipseClasspathGenerator classpathGenerator =
-                    JkEclipseClasspathGenerator.of(javaProject.getJavaProjectIde());
+                    JkEclipseClasspathGenerator.of(projectIde);
             classpathGenerator.setRunDependencies(getCommands().getRunDependencyResolver(),
                     getCommands().getDefDependencies());
             classpathGenerator.setIncludeJavadoc(this.javadoc);
@@ -146,6 +147,18 @@ public final class JkPluginEclipse extends JkPlugin {
         return this;
     }
 
-
+    public static JkJavaProjectIde getProjectIde(JkCommands commands) {
+        if (commands instanceof JkJavaProjectIdeSupplier) {
+            JkJavaProjectIdeSupplier supplier = (JkJavaProjectIdeSupplier) commands;
+            return supplier.getJavaProjectIde();
+        }
+        List<JkJavaProjectIdeSupplier> suppliers = commands.getPlugins().getLoadedPluginInstanceOf(
+                JkJavaProjectIdeSupplier.class);
+        return suppliers.stream()
+                .filter(supplier -> supplier != null)
+                .map(supplier -> supplier.getJavaProjectIde())
+                .filter(projectIde -> projectIde != null)
+                .findFirst().orElse(null);
+    }
 
 }

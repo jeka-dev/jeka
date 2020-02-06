@@ -1,10 +1,12 @@
 package dev.jeka.core.tool.builtins.intellij;
 
 import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.builtins.eclipse.JkPluginEclipse;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
@@ -40,9 +42,9 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates Idea [my-module].iml file.")
     public void iml() {
         final JkImlGenerator generator;
-        if (getCommands().getPlugins().hasLoaded(JkPluginJava.class)) {
-            generator = JkImlGenerator.of(getCommands().getPlugins().get(JkPluginJava.class).getProject()
-                    .getJavaProjectIde());
+        JkJavaProjectIde projectIde = JkPluginEclipse.getProjectIde(getCommands());
+        if (projectIde != null) {
+            generator = JkImlGenerator.of(projectIde);
         } else {
             generator = JkImlGenerator.of(getCommands().getBaseDir());
         }

@@ -1,6 +1,7 @@
 # 0.8.14 (Ongoing)
 * Fix JDK version recognition for version 9 and greater
-
+* Let generate Eclipse/Intellij metadata without using JkPluginJava
+* Fix warning on standard option usage
 
 # 0.8.13
 * Generate jekaw *nix script with execution permissions

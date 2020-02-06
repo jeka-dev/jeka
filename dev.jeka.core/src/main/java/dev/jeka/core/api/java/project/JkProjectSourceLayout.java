@@ -141,7 +141,6 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, toSet(relativePath));
     }
 
-
     // --------------------------- Views ---------------------------------
 
     /**
@@ -255,7 +254,5 @@ public class JkProjectSourceLayout {
         }
         return result;
     }
-
-
 
 }

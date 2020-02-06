@@ -15,13 +15,12 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
 
 
 /**
- * This build is equivalent to {@link MavenStyleBuild} but removing the needless
+ * This build is equivalent to {@link AClassicBuild} but removing the needless
  * part cause we respect the convention project folder name =
  * groupName.projectName and the version number is taken from build.properties
  * (default behavior)
