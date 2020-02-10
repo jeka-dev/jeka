@@ -24,7 +24,7 @@ of any build-code / configuration / script.
 
 # News 
 
-Jeka has joined OW2 organisation on javuary 2020 : https://projects.ow2.org/view/jeka/
+Jeka has joined OW2 organisation on january 2020 : https://projects.ow2.org/view/jeka/
 
 Last major additions :
 * Release of a [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
@@ -34,7 +34,13 @@ Last major additions :
 * Deploying on Maven central though a modern release process (version numbering based on Git instead of being hardcoded).
 Jeka now uses these features to release itself.
 
-Next step is to provide a IntelliJ visual plugin for greater IDE integration (see https://github.com/jerkar/ideaPlugin4Jeka)
+# Roadmap/Ideas
+
+* Stabilise api from user feedback. API is quite workable but may be improved.
+* Provides a graphical plugin for better integration with Eclipse
+* Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
+* Provide a plugin for Android
+* Integrate Kotlin as a first citizen language for both building Kotlin projects and write Jeka command classes.
 
 Please visit [relelease note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
@@ -97,6 +103,8 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 * This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder and run full Integration test suite.
 
 ## Build Jeka from IntelliJ
+
+Note that it exists a now an IntelliJ plugin to integrate Jeka to get rid of the following setup.
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
 * Add the `JEKA_USER_HOME` variable pointing on [USER_HOME]/.jeka 

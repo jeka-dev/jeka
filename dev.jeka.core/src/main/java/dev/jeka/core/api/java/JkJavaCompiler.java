@@ -22,7 +22,6 @@ import java.util.*;
  */
 public final class JkJavaCompiler {
 
-
     private final boolean failOnError;
 
     private final JkProcess fork;
