@@ -2,6 +2,7 @@
 * Fix JDK version recognition for version 9 and greater
 * Let generate Eclipse/Intellij metadata without using JkPluginJava
 * Fix warning on standard option usage
+* Use private field with public setter to inject options in command classes
 
 # 0.8.13
 * Generate jekaw *nix script with execution permissions

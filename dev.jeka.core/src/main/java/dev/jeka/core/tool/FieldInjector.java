@@ -2,9 +2,11 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,8 +51,22 @@ final class FieldInjector {
     }
 
     static List<Field> getOptionFields(Class<?> clazz) {
-        return Arrays.asList(clazz.getFields()).stream().filter(field -> !Modifier.isStatic(field.getModifiers()))
+        return JkUtilsReflect.getAllDeclaredFields(clazz,true).stream()
+                .filter(FieldInjector::isOptionField)
                 .collect(Collectors.toList());
+    }
+
+    private static boolean isOptionField(Field field) {
+        if (Modifier.isStatic(field.getModifiers())) {
+            return false;
+        }
+        if (Modifier.isPublic(field.getModifiers())) {
+            return true;
+        }
+        String setterName = "set" + JkUtilsString.capitalize(field.getName());
+        return Arrays.asList(field.getDeclaringClass().getMethods()).stream()
+                .map(Method::getName)
+                .anyMatch(name -> name.equals(setterName));
     }
 
     private static Set<String> inject(Object target, Field field, Map<String, String> props, String prefix) {
