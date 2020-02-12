@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.utils.JkUtilsString.plurialize;
 
@@ -178,7 +179,8 @@ public final class JkDependencyResolver {
      * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
      */
     public List<String> searchVersions(JkModuleId moduleId) {
-        return this.jkInternalModuleDepResolver.searchVersions(moduleId);
+        return this.jkInternalModuleDepResolver.searchVersions(moduleId).stream()
+                .sorted(JkVersion.semanticVersionComparator()).collect(Collectors.toList());
     }
 
     @Override

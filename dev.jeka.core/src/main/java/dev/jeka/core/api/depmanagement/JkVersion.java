@@ -3,6 +3,8 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.util.Comparator;
+
 /**
  * Used to specify a module version. Versions are comparable.
  *
@@ -58,6 +60,42 @@ public final class JkVersion implements Comparable<JkVersion> {
             return 1;
         }
         return value.compareTo(other.value);
+    }
+
+    public static Comparator<String> semanticVersionComparator() {
+        return new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                if (o1 == null) {
+                    return o2 == null ? 0 : -1;
+                }
+                if (o2 == null) {
+                    return 1;
+                }
+                String[] o1Parts = o1.split("\\.");
+                String[] o2Parts = o2.split("\\.");
+                int length = Math.max(o1Parts.length, o2Parts.length);
+                for(int i = 0; i < length; i++) {
+                    String item1 = o1Parts[i];
+                    String item2 = o2Parts[i];
+                    if (Integer.getInteger(item1) == null || Integer.getInteger(item2) == null) {
+                        if (item1.equals(item2)) {
+                            continue;
+                        }
+                        return item1.compareTo(item2);
+                    }
+                    int thisPart = i < o1Parts.length ?
+                            Integer.parseInt(o1Parts[i]) : 0;
+                    int thatPart = i < o2Parts.length ?
+                            Integer.parseInt(o2Parts[i]) : 0;
+                    if(thisPart < thatPart)
+                        return -1;
+                    if(thisPart > thatPart)
+                        return 1;
+                }
+                return 0;
+            }
+        };
     }
 
     /**

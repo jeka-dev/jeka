@@ -1,3 +1,6 @@
+# 0.8.15 (ongoing)
+* Compare JkVersion according semantic version when available
+
 # 0.8.14
 * Fix JDK version recognition for version 9 and greater
 * Let generate Eclipse/Intellij metadata without using JkPluginJava
