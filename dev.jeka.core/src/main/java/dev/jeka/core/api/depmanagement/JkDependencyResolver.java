@@ -180,7 +180,7 @@ public final class JkDependencyResolver {
      */
     public List<String> searchVersions(JkModuleId moduleId) {
         return this.jkInternalModuleDepResolver.searchVersions(moduleId).stream()
-                .sorted(JkVersion.semanticVersionComparator()).collect(Collectors.toList());
+                .sorted(JkVersion.SEMANTIC_COMARATOR).collect(Collectors.toList());
     }
 
     @Override

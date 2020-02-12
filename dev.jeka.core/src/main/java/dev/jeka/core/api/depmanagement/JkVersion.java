@@ -15,6 +15,42 @@ public final class JkVersion implements Comparable<JkVersion> {
     /** Mention that the version is unspecified */
     public static final JkVersion UNSPECIFIED = new JkVersion("UNSPECIFIED-SNAPSHOT");
 
+    public static final Comparator<String> SEMANTIC_COMARATOR = new Comparator<String>() {
+
+            @Override
+            public int compare(String o1, String o2) {
+                if (o1 == null) {
+                    return o2 == null ? 0 : -1;
+                }
+                if (o2 == null) {
+                    return 1;
+                }
+                String[] o1Parts = o1.split("\\.");
+                String[] o2Parts = o2.split("\\.");
+                int length = Math.max(o1Parts.length, o2Parts.length);
+                for(int i = 0; i < length; i++) {
+                    String item1 = o1Parts[i];
+                    String item2 = o2Parts[i];
+                    if (Integer.getInteger(item1) == null || Integer.getInteger(item2) == null) {
+                        if (item1.equals(item2)) {
+                            continue;
+                        }
+                        return item1.compareTo(item2);
+                    }
+                    int thisPart = i < o1Parts.length ?
+                            Integer.parseInt(o1Parts[i]) : 0;
+                    int thatPart = i < o2Parts.length ?
+                            Integer.parseInt(o2Parts[i]) : 0;
+                    if(thisPart < thatPart)
+                        return -1;
+                    if(thisPart > thatPart)
+                        return 1;
+                }
+                return 0;
+            }
+    };
+
+
     /**
      * Creates a {@link JkVersion} with the specified value. If specified name is null, then it creates
      * an {@link #UNSPECIFIED} version.
@@ -59,43 +95,7 @@ public final class JkVersion implements Comparable<JkVersion> {
         } else if (other.isUnspecified()) {
             return 1;
         }
-        return value.compareTo(other.value);
-    }
-
-    public static Comparator<String> semanticVersionComparator() {
-        return new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                if (o1 == null) {
-                    return o2 == null ? 0 : -1;
-                }
-                if (o2 == null) {
-                    return 1;
-                }
-                String[] o1Parts = o1.split("\\.");
-                String[] o2Parts = o2.split("\\.");
-                int length = Math.max(o1Parts.length, o2Parts.length);
-                for(int i = 0; i < length; i++) {
-                    String item1 = o1Parts[i];
-                    String item2 = o2Parts[i];
-                    if (Integer.getInteger(item1) == null || Integer.getInteger(item2) == null) {
-                        if (item1.equals(item2)) {
-                            continue;
-                        }
-                        return item1.compareTo(item2);
-                    }
-                    int thisPart = i < o1Parts.length ?
-                            Integer.parseInt(o1Parts[i]) : 0;
-                    int thatPart = i < o2Parts.length ?
-                            Integer.parseInt(o2Parts[i]) : 0;
-                    if(thisPart < thatPart)
-                        return -1;
-                    if(thisPart > thatPart)
-                        return 1;
-                }
-                return 0;
-            }
-        };
+        return SEMANTIC_COMARATOR.compare(value, other.value);
     }
 
     /**
