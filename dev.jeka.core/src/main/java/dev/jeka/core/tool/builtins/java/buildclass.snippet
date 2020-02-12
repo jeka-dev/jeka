@@ -26,8 +26,12 @@ class Build extends JkCommands {
                 .and("junit:junit:4.11", TEST);
     }
 
+    public void cleanPack() {
+        clean(); javaPlugin.pack();
+    }
+
     public static void main(String[] args) {
-        JkInit.instanceOf(Build.class, args).javaPlugin.clean().pack();
+        JkInit.instanceOf(Build.class, args).cleanPack();
     }
 
 }
