@@ -36,7 +36,7 @@ Jeka now uses these features to release itself.
 
 # Roadmap/Ideas
 
-* Stabilise api from user feedback. API is quite workable but may be improved.
+* Stabilise api from user feedback. API is quite workable now but may be improved.
 * Provides a graphical plugin for better integration with Eclipse
 * Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
 * Provide a plugin for Android

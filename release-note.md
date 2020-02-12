@@ -3,6 +3,9 @@
 * Let generate Eclipse/Intellij metadata without using JkPluginJava
 * Fix warning on standard option usage
 * Use private field with public setter to inject options in command classes
+* Fix JkPathMatcher#or
+* Fix JkLog.Event ClassCastException when run in external classloader
+* Let write def classes in Kotlin (experimental)
 
 # 0.8.13
 * Generate jekaw *nix script with execution permissions

@@ -71,13 +71,6 @@ public final class JkKotlinCompileSpec {
 
     // ------- Java version & encoding ----------------
 
-    public JkJavaVersion getSourceVersion() {
-        final String rawResult = getNextValue(SOURCE_OPTS);
-        if (rawResult == null) {
-            return null;
-        }
-        return JkJavaVersion.of(rawResult);
-    }
 
     public JkJavaVersion getTargetVersion() {
         final String rawResult = getNextValue(TARGET_OPTS);
@@ -85,16 +78,6 @@ public final class JkKotlinCompileSpec {
             return null;
         }
         return JkJavaVersion.of(rawResult);
-    }
-
-    /**
-     * Sets the version of source code accepted.
-     */
-    public JkKotlinCompileSpec setSourceVersion(JkJavaVersion version) {
-        if (version == null) {
-            return this;
-        }
-        return setOption(SOURCE_OPTS, version.get());
     }
 
     /**
@@ -108,13 +91,6 @@ public final class JkKotlinCompileSpec {
             return this;
         }
         return setOption(TARGET_OPTS, version.get());
-    }
-
-    /**
-     * Shorthand for #setSourceVersion chained to #setTargetVersion
-     */
-    public JkKotlinCompileSpec setSourceAndTargetVersion(JkJavaVersion version) {
-        return this.setSourceVersion(version).setTargetVersion(version);
     }
 
     public String getEncoding() {
@@ -144,7 +120,7 @@ public final class JkKotlinCompileSpec {
         for (final Path file : files) {
             if (Files.isDirectory(file)) {
                 this.sourceFiles.add(file);
-            } else if (file.getFileName().toString().toLowerCase().endsWith(".java")) {
+            } else if (file.getFileName().toString().toLowerCase().endsWith(".kt")) {
                 this.sourceFiles.add(file);
             }
         }
@@ -152,7 +128,7 @@ public final class JkKotlinCompileSpec {
     }
 
     public JkKotlinCompileSpec addSources(JkPathTree tree) {
-        if (tree.isDefineMatcher()) {
+        if (!tree.isDefineMatcher()) {
             return addSources(tree.getRoot());
         }
         return addSources(tree.getFiles());

@@ -19,15 +19,15 @@ final class CommandResolver {
 
     private final Path baseDir;
 
-    final Path runSourceDir;
+    final Path defSourceDir;
 
-    final Path runClassDir;
+    final Path defClassDir;
 
     CommandResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
-        this.runSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
-        this.runClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
+        this.defSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
+        this.defClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
     }
 
     /**
@@ -46,10 +46,10 @@ final class CommandResolver {
     }
 
     boolean hasDefSource() {
-        if (!Files.exists(runSourceDir)) {
+        if (!Files.exists(defSourceDir)) {
             return false;
         }
-        return JkPathTree.of(runSourceDir).andMatching(true,
+        return JkPathTree.of(defSourceDir).andMatching(true,
                 "**.java", "*.java").count(0, false) > 0;
     }
 
@@ -57,7 +57,7 @@ final class CommandResolver {
         if (!this.hasDefSource()) {
             return false;
         }
-        final JkPathTree dir = JkPathTree.of(runSourceDir);
+        final JkPathTree dir = JkPathTree.of(defSourceDir);
         for (final Path path : dir.getRelativeFiles()) {
             final String pathName = path.toString();
             if (pathName.endsWith(".java")) {
@@ -103,9 +103,9 @@ final class CommandResolver {
 
         // If there is a command file
         if (this.hasDefSource()) {
-            final JkPathTree dir = JkPathTree.of(runSourceDir);
+            final JkPathTree dir = JkPathTree.of(defSourceDir);
             for (final Path path : dir.getRelativeFiles()) {
-                if (path.toString().endsWith(".java")) {
+                if (path.toString().endsWith(".java") || path.toString().endsWith(".kt")) {
                     final Class<?> clazz = classLoader.toJkClassLoader().loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {

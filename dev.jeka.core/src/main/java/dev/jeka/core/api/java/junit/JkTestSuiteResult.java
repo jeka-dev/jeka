@@ -143,6 +143,9 @@ public class JkTestSuiteResult implements Serializable {
      */
     @SuppressWarnings("serial")
     public static class JkTestCaseResult implements Serializable {
+
+        private static final long serialVersionUID = 7089021299003181605L;
+
         private final String className;
         private final String testName;
         private final float durationInSecond;

@@ -126,7 +126,7 @@ public final class JkPathMatcher implements PathMatcher {
     }
 
     public JkPathMatcher and(boolean positive, FileSystem fileSystem, String ...patterns) {
-        return this.or(JkPathMatcher.of(positive, fileSystem, patterns));
+        return this.and(JkPathMatcher.of(positive, fileSystem, patterns));
     }
 
     public JkPathMatcher and(boolean positive, String ...patterns) {

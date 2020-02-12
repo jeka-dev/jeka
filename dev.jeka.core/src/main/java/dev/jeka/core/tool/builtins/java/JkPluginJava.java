@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
@@ -123,7 +124,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
         }
         if (tests.runIT) {
             maker.getTasksForTesting().setTestClassMatcher(maker.getTasksForTesting().getTestClassMatcher()
-                    .and(true, JkJavaProjectTestTasks.IT_CLASS_PATTERN));
+                    .or(JkPathMatcher.of(true, JkJavaProjectTestTasks.IT_CLASS_PATTERN)));
         }
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);

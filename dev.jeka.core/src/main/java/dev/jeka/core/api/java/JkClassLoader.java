@@ -4,6 +4,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
@@ -94,10 +95,24 @@ public class JkClassLoader {
      * will load the class <code>mypack1.subpack.MyClass</code>.
      */
     public <T> Class<T> loadGivenClassSourcePath(String classSourcePath) {
-        final String className = classSourcePath.replace('/', '.').replace('\\', '.')
-                .substring(0, classSourcePath.length() - JAVA_SUFFIX_LENGTH);
-        return load(className);
+        return load(classNameFromSourceFilePath(classSourcePath));
     }
+
+    /**
+     * Loads a class given its source relative path if exists. For example
+     * <code>loadGivenSourcePath("mypack1/subpack/MyClass.java")
+     * will load the class <code>mypack1.subpack.MyClass</code>. Returns
+     * <code>null</code> if no such class exists.
+     */
+    public <T> Class<T> loadGivenClassSourcePathIfExist(String classSourcePath) {
+        return loadIfExist(classNameFromSourceFilePath(classSourcePath));
+    }
+
+    private static String classNameFromSourceFilePath(String sourcePath) {
+        final String dotName = sourcePath.replace('/', '.').replace('\\', '.');
+        return JkUtilsString.substringBeforeLast(dotName, ".");
+    }
+
 
     /**
      * Returns <code>true</code> if this classloader is descendant or same as the specified classloader.
@@ -234,17 +249,6 @@ public class JkClassLoader {
         }
     }
 
-    /**
-     * Loads a class given its source relative path if exists. For example
-     * <code>loadGivenSourcePath("mypack1/subpack/MyClass.java")
-     * will load the class <code>mypack1.subpack.MyClass</code>. Returns
-     * <code>null</code> if no such class exists.
-     */
-    public <T> Class<T> loadGivenClassSourcePathIfExist(String classSourcePath) {
-        final String className = classSourcePath.replace('/', '.').replace('\\', '.')
-                .substring(0, classSourcePath.length() - JAVA_SUFFIX_LENGTH);
-        return loadIfExist(className);
-    }
 
     /**
      * Returns all class names having a <code>main</code> method.

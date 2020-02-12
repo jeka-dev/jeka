@@ -40,7 +40,7 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a {@link JkJavaCompiler} producing its output in the given directory.
+     * Creates a {@link JkJavaCompiler} besed on {@link JavaCompiler} provided with the JDK.
      */
     public static JkJavaCompiler ofJdk() {
         return new JkJavaCompiler(true, null, null, new HashMap<>());

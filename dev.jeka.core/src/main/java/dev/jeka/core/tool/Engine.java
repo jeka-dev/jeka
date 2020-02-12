@@ -8,6 +8,8 @@ import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.kotlin.JkKotlinCompileSpec;
+import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
@@ -31,13 +33,17 @@ import java.util.*;
  */
 final class Engine {
 
-    private final JkPathMatcher RUN_SOURCE_MATCHER = JkPathMatcher.of(true,"**.java").and(false, "**/_*", "_*");
+    private final JkPathMatcher JAVA_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.java")
+            .and(false, "**/_*", "_*");
+
+    private final JkPathMatcher KOTLIN_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.kt")
+           .and(false, "**/_*", "_*");
 
     private final Path projectBaseDir;
 
-    private JkDependencySet runDependencies;
+    private JkDependencySet defDependencies;
 
-    private JkRepoSet runRepos;
+    private JkRepoSet defRepos;
 
     private List<Path> rootOfImportedRuns = new LinkedList<>();
 
@@ -53,8 +59,8 @@ final class Engine {
         JkUtilsAssert.isTrue(baseDir.isAbsolute(), baseDir + " is not absolute.");
         JkUtilsAssert.isTrue(Files.isDirectory(baseDir), baseDir + " is not directory.");
         this.projectBaseDir = baseDir.normalize();
-        runRepos = repos();
-        this.runDependencies = JkDependencySet.of();
+        defRepos = repos();
+        this.defDependencies = JkDependencySet.of();
         this.resolver = new CommandResolver(baseDir);
     }
 
@@ -69,9 +75,9 @@ final class Engine {
      * Pre-compile and compile command classes (if needed) then execute methods mentioned in command line
      */
     void execute(CommandLine commandLine, String runClassHint, JkLog.Verbosity verbosityToRestore) {
-        runDependencies = runDependencies.andScopelessDependencies(commandLine.dependencies());
+        defDependencies = defDependencies.andScopelessDependencies(commandLine.dependencies());
         final long start = System.nanoTime();
-        JkLog.startTask("Compile and initialise command classes");
+        JkLog.startTask("Compile def classes and initialise command classes");
         JkCommands jkCommands = null;
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
@@ -81,11 +87,11 @@ final class Engine {
         }
         preCompile();  // Need to pre-compile to get the declared run dependencies
         if (!JkUtilsString.isBlank(runClassHint)) {  // First find a class in the existing classpath without compiling
-            jkCommands = getRunInstance(runClassHint, path);
+            jkCommands = getCommandsInstance(runClassHint, path);
         }
         if (jkCommands == null) {
             path = compile().and(path);
-            jkCommands = getRunInstance(runClassHint, path);
+            jkCommands = getCommandsInstance(runClassHint, path);
             if (jkCommands == null) {
                 throw new JkException("Can't find or guess any command class for project hosted in " + this.projectBaseDir
                         + " .\nAre you sure this directory is a Jeka project ?");
@@ -108,14 +114,15 @@ final class Engine {
         for (final JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
-        return JkDependencyResolver.of(this.runRepos).resolve(deps).getFiles();
+        return JkDependencyResolver.of(this.defRepos).resolve(deps).getFiles();
     }
 
     private void preCompile() {
-        final List<Path> sourceFiles = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER).getFiles();
+        final List<Path> sourceFiles = JkPathTree.of(resolver.defSourceDir)
+                .andMatcher(JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER)).getFiles();
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
-        this.runDependencies = this.runDependencies.and(parser.dependencies());
-        this.runRepos = parser.importRepos().and(runRepos);
+        this.defDependencies = this.defDependencies.and(parser.dependencies());
+        this.defRepos = parser.importRepos().and(defRepos);
         this.rootOfImportedRuns = parser.projects();
         this.compileOptions = parser.compileOptions();
     }
@@ -145,21 +152,21 @@ final class Engine {
         path.addAll(runPath.getEntries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
         compileDef(JkPathSequence.of(path));
-        path.add(this.resolver.runClassDir);
+        path.add(this.resolver.defClassDir);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
-    private JkCommands getRunInstance(String commandClassHint, JkPathSequence runtimePath) {
+    private JkCommands getCommandsInstance(String commandClassHint, JkPathSequence runtimePath) {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting run execution classpath to : " + classLoader.getDirectClasspath());
-        final JkCommands run = resolver.resolve(commandClassHint);
-        if (run == null) {
+        final JkCommands commands = resolver.resolve(commandClassHint);
+        if (commands == null) {
             return null;
         }
         try {
-            run.setRunDependencyResolver(this.computeRunDependencies(), getRunDependencyResolver());
-            return run;
+            commands.setRunDependencyResolver(this.computeRunDependencies(), getRunDependencyResolver());
+            return commands;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -171,7 +178,7 @@ final class Engine {
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
         JkScopeMapping scope = JkScope.of("*").mapTo("default(*)");
-        return JkDependencySet.of(runDependencies
+        return JkDependencySet.of(defDependencies
                 .andFiles(bootLibs())
                 .andFiles(JkClasspath.ofCurrentRuntime()).withoutLastIf(!devMode)
                 .andFile(JkLocator.getJekaJarPath()).withoutLastIf(devMode)
@@ -201,20 +208,31 @@ final class Engine {
         return pathSequence;
     }
 
-    private void compileDef(JkPathSequence runPath) {
-        final JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath).addOptions(this.compileOptions);
-        JkPathTree.of(compileSpec.getOutputDir()).deleteContent();
+    private void compileDef(JkPathSequence defClasspath) {
+        JkPathTree.of(resolver.defClassDir).deleteContent();
+        if (hasKotlin()) {
+            final JkKotlinCompileSpec kotlinCompileSpec = defKotlinCompileSpec(defClasspath);
+            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofKotlinHome();
+            wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec));
+            JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
+            classLoader.addEntries(kotlinCompiler.getStdLib());
+        }
+        final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath);
+        wrapCompile(() -> JkJavaCompiler.ofJdk().compile(javaCompileSpec));
+        JkPathTree.of(this.resolver.defSourceDir).andMatching(false, "**/*.java", "**/*.kt")
+        .copyTo(this.resolver.defClassDir,
+                StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private void wrapCompile(Runnable runnable) {
         try {
-            JkJavaCompiler.ofJdk().compile(compileSpec);
+            runnable.run();
         } catch (final JkException e) {
             JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
-            JkLog.info("Compilation of Jeka files failed. You can run jeka -CC=JkCommands to use default Jeka files" +
-                    " instead of the ones located in this project.");
+            JkLog.info("Compilation of Jeka files failed. You can run jeka -CC=JkCommands to use default commands " +
+                    " instead of the ones defined in 'def'.");
             throw e;
         }
-        JkPathTree.of(this.resolver.runSourceDir).andMatching(false, "**/*.java")
-        .copyTo(this.resolver.runClassDir,
-                StandardCopyOption.REPLACE_EXISTING);
     }
 
     private void launch(JkCommands jkCommands, CommandLine commandLine) {
@@ -227,39 +245,55 @@ final class Engine {
         runProject(jkCommands, commandLine.getMasterMethods());
     }
 
-    private JkJavaCompileSpec defCompileSpec() {
-        final JkPathTree defSource = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER);
-        JkUtilsPath.createDirectories(resolver.runClassDir);
-        return JkJavaCompileSpec.of().setOutputDir(resolver.runClassDir)
-                .addSources(defSource.getFiles());
+    private boolean hasKotlin() {
+        return JkPathTree.of(resolver.defSourceDir).andMatcher(KOTLIN_DEF_SOURCE_MATCHER)
+                .count(1, false) > 0;
+    }
+
+    private JkJavaCompileSpec defJavaCompileSpec(JkPathSequence classpath) {
+        final JkPathTree defSource = JkPathTree.of(resolver.defSourceDir).andMatcher(JAVA_DEF_SOURCE_MATCHER);
+        JkUtilsPath.createDirectories(resolver.defClassDir);
+        return JkJavaCompileSpec.of()
+                .setClasspath(classpath.and(resolver.defClassDir))
+                .setOutputDir(resolver.defClassDir)
+                .addSources(defSource.getFiles())
+                .addOptions(this.compileOptions);
+    }
+
+    private JkKotlinCompileSpec defKotlinCompileSpec(JkPathSequence defClasspath) {
+        JkUtilsPath.createDirectories(resolver.defClassDir);
+        return JkKotlinCompileSpec.of()
+                .setClasspath(defClasspath)
+                .addSources(resolver.defSourceDir)
+                .setOutputDir(resolver.defClassDir);
     }
 
     private JkDependencyResolver getRunDependencyResolver() {
         if (this.computeRunDependencies().hasModules()) {
-            return JkDependencyResolver.of(this.runRepos);
+            return JkDependencyResolver.of(this.defRepos);
         }
         return JkDependencyResolver.of();
     }
 
     private static void runProject(JkCommands jkCommands, List<CommandLine.MethodInvocation> invokes) {
         for (final CommandLine.MethodInvocation methodInvocation : invokes) {
-            invokeMethodOnRunClassOrPlugin(jkCommands, methodInvocation);
+            invokeMethodCommandsOrPlugin(jkCommands, methodInvocation);
         }
     }
 
-    private static void invokeMethodOnRunClassOrPlugin(JkCommands jkCommands, CommandLine.MethodInvocation methodInvocation) {
+    private static void invokeMethodCommandsOrPlugin(JkCommands jkCommands, CommandLine.MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
             final JkPlugin plugin = jkCommands.getPlugins().get(methodInvocation.pluginName);
-            invokeMethodOnRunOrPlugin(plugin, methodInvocation.methodName);
+            invokeMethodOnCommandsOrPlugin(plugin, methodInvocation.methodName);
         } else {
-            invokeMethodOnRunOrPlugin(jkCommands, methodInvocation.methodName);
+            invokeMethodOnCommandsOrPlugin(jkCommands, methodInvocation.methodName);
         }
     }
 
     /**
      * Invokes the specified method in this run.
      */
-    private static void invokeMethodOnRunOrPlugin(Object run, String methodName) {
+    private static void invokeMethodOnCommandsOrPlugin(Object run, String methodName) {
         final Method method;
         try {
             method = run.getClass().getMethod(methodName);

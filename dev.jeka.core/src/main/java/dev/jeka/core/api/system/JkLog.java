@@ -4,6 +4,7 @@ import dev.jeka.core.api.utils.*;
 
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -179,7 +180,20 @@ public final class JkLog implements Serializable {
         if (!shouldPrint(event.getType()) ){
             return;
         }
-        consumer.accept(event);
+
+        // This is necessary for avoing class cast exception when run in other classloader (unit tests)
+        if (event.getClass().getClassLoader() != consumer.getClass().getClassLoader()) {  // survive to classloader change
+            final Object evt = JkUtilsIO.cloneBySerialization(event, consumer.getClass().getClassLoader());
+            try {
+                Method accept = consumer.getClass().getMethod("accept", evt.getClass());
+                accept.setAccessible(true);
+                accept.invoke(consumer, evt);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            consumer.accept((JkLogEvent) event);
+        }
     }
 
     public static Consumer<JkLogEvent> getLogConsumer() {
