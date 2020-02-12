@@ -1,4 +1,4 @@
-# 0.8.14 (Ongoing)
+# 0.8.14
 * Fix JDK version recognition for version 9 and greater
 * Let generate Eclipse/Intellij metadata without using JkPluginJava
 * Fix warning on standard option usage
