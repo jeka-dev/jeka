@@ -1,5 +1,6 @@
 # 0.8.15 (ongoing)
-* Compare JkVersion according semantic version when available
+* Compare JkVersion according semantic version
+
 
 # 0.8.14
 * Fix JDK version recognition for version 9 and greater
@@ -52,47 +53,47 @@
 * Fix Java version naming in Eclipse .classpath generation
 * Handle Intellij Platform Plugin in iml generation  
 
-## 0.8.6
+# 0.8.6
 
 * Fix wrapper failure at downloading
 * More intuitive behavior for JkPluginRepo 
 * Improve Windows and Linux script : JEKA_HOME environment variable no more required to be set
 * Windows : fix problem with project paths containing spaces
  
-## 0.8.5
+# 0.8.5
 
 * Wrapper fully implemented(multi-project, configurable location)
 * Dependency resolver can find groups, modules and versions available on remote repositories
 * Getting started doc improved
 * Small bug fixes and improvements
 
-## 0.8.4
+# 0.8.4
 
 * Partial jekaw wrapper (working on single projects)
 
-## 0.8.3
+# 0.8.3
 
 * Jeka can now run on JDK version greater or equal to 8 (tested until Jdk 12).
 * JkPathTree polish and bug fix related to zip archive.
 
-## 0.8.2
+# 0.8.2
 
 * Reworked mechanism for embedding 3rd party jar within jeka-core.jar
 * Improved general performances and lower resource consumption
 * Bug fixes
 
-## 0.8.1
+# 0.8.1
 
 * Minor adaptation for better plugin integration
 * Minor bug fixes
 
-## 0.8.0
+# 0.8.0
 
 * Change from org.jerkar to dev.jeka namespace.
 * Package classes has all been renamed (no backward compatibility with 0.7.x)
 * Bug fixes
 
-## 0.7.0
+# 0.7.0
 
 * Move from jdk6 to jdk8
 * Documentation hosted in Jerkar repository for better sync.
@@ -101,7 +102,7 @@
 * Completely new file API based on Java7 nio
 * Removed legacy API (no backward compatibility with Jerkar 0.6.x)
 
-## 0.6.0
+# 0.6.0
 
 * Deep dependency resolution reworking : entirely based on tree leading in a greater accuracy/control.
 * Fix issue #60 related to artifacts with classifier.
@@ -110,7 +111,7 @@
 * Take scope into account when generating Intellij iml files
 * Many bug fixes
 
-## 0.5.0
+# 0.5.0
 
 * Add `showDependencies` on `JkBuildDependencySupport` that display project dependency tree.
 * Add `JkDependencyNode` to explore and reason about dependency trees.
@@ -122,7 +123,7 @@
 * Minor bug fixes
  
 
-## 0.4.6
+# 0.4.6
 
 * Resolved classpath follows dependency declaration order
 * Fat jars now exclude signature files by default
@@ -130,7 +131,7 @@
 * Add method on JkJavaBuildPlugin to alter source code generation 
 * Bug fixes
 
-## 0.4.5
+# 0.4.5
 
 * Easier repository/credential management
 * Enhanced scaffolding
@@ -138,27 +139,27 @@
 * API polish
 * Minor bug fixes
 
-## 0.4.0
+# 0.4.0
 
 * Add IntelliJ IDEA plugin for generating iml files (module descriptor).
 * "Wrapper" mode (embedding Jerkar jar in the project itself) is achieved by placing jar files in build/boot and not in /build/libs/build anymore.
 * Display running Jerkar version in console. 
 * Cross-compile. The JDK to compile is chosen according declared source version.
  
-## 0.3.2
+# 0.3.2
 
 * Add JkPom class to reason about Maven POM files (retrieving dependencies, dependency management, version, ...)
 * Add method on InternalResolver for fetching directly artifacts, regardless dependency management.
 * Polish on Repository API
 
-## 0.3.1
+# 0.3.1
 
 * Fix Eclipse .classpath generation (doublon entries for local jar dependencies, exported project dependencies)
 * Improve dependency handling between java sub-projects
 * Fix auto found main class.
 * Add methods on JkDependencies.Builder
  
-## 0.3.0
+# 0.3.0
 
 * Add "@" import syntax to import build dependencies from the command line (Usefull for scaffolding projects).
 * Improve handling of version definition in JkBuildDependencySupport template (add final effectiveVersion() method).
@@ -172,6 +173,6 @@
 * The Jerkar java process now launches Jerkar fat jar and not the normak jerkar jar + ext libs  
 * Improved Javadoc
  
-## 0.2.7
+# 0.2.7
 
 First official release.

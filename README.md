@@ -76,6 +76,13 @@ Nevertheless, Jeka is extensible and other plugins exist outside the main distib
 
 # Community
 
+<a class="btn btn-link btn-neutral" href="https://projects.ow2.org/view/jeka">
+              <img src="https://jeka.dev/images/ow2.svg" alt="Image" height="60" width="60"></a>
+              
+This project is supported by OW2 consortium.
+              
+              
+
 You can ask question using regular using [this repository issues](https://github.com/jerkar/jerkar/issues).
 
 You can also use direct emailing for questions and support : djeangdev@yahoo.fr

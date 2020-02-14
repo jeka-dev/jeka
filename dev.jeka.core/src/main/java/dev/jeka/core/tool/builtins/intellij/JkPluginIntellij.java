@@ -31,6 +31,10 @@ public final class JkPluginIntellij extends JkPlugin {
             "Set this option to 'true' for  forcing the JDK version to the one defined in JkJavaProject.")
     public boolean forceJdkVersion = false;
 
+    @JkDoc("If true, the iml generation fails when a dependency can not be resolved. If false, it will be ignored " +
+            "(only a warning will be notified).")
+    public boolean failOnDepsResolutionError = true;
+
     private final JkPluginScaffold scaffold;
 
     protected JkPluginIntellij(JkCommands run) {
@@ -48,6 +52,7 @@ public final class JkPluginIntellij extends JkPlugin {
         } else {
             generator = JkImlGenerator.of(getCommands().getBaseDir());
         }
+        generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
         final List<Path> depProjects = getCommands().getImportedCommands().getImportedRunRoots();
         generator.setUseVarPath(useVarPath);
         generator.setRunDependencies(externalDir ? null : getCommands().getRunDependencyResolver(),

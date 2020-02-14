@@ -39,16 +39,6 @@ public class AntStyleBuild extends JkCommands implements JkJavaProjectIdeSupplie
                 .and("junit:junit:4.11", JkJavaDepScopes.TEST);
     }
 
-    @Override
-    public JkJavaProjectIde getJavaProjectIde() {
-        return JkJavaProjectIde.ofDefault()
-                .withSourceLayout(JkProjectSourceLayout.ofSimpleStyle()
-                        .withSources(JkPathTreeSet.of(src))
-                        .withBaseDir(getBaseDir()))
-                .withDependencyResolver(resolver)
-                .withDependencies(dependencies());
-    }
-
     public void doDefault() {
         clean();
         run();
@@ -138,6 +128,17 @@ public class AntStyleBuild extends JkCommands implements JkJavaProjectIdeSupplie
         JkPublisher.of(repo).publishMaven(versionedModule, publication,
                 JkDependencySet.of());
     }
+
+    @Override
+    public JkJavaProjectIde getJavaProjectIde() {
+        return JkJavaProjectIde.ofDefault()
+                .withSourceLayout(JkProjectSourceLayout.ofSimpleStyle()
+                        .withSources(JkPathTreeSet.of(src))
+                        .withBaseDir(getBaseDir()))
+                .withDependencyResolver(resolver)
+                .withDependencies(dependencies());
+    }
+
 
     public static void main(String[] args) {
         JkInit.instanceOf(AntStyleBuild.class, args).doDefault();

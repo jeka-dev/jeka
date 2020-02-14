@@ -6,6 +6,7 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
@@ -56,14 +57,16 @@ public final class JkImlGenerator {
     private JkDependencySet projectDependencies;
 
     /** Dependency resolver to fetch module dependencies for build classes */
-    private JkDependencyResolver runDependencyResolver;
+    private JkDependencyResolver defDependencyResolver;
 
-    private JkDependencySet runDependencies;
+    private JkDependencySet defDependencies;
 
     /** Can be empty but not null */
     private Iterable<Path> importedProjects = JkUtilsIterable.listOf();
 
     private boolean forceJdkVersion;
+
+    private boolean failOnDepsResolutionError;
 
     /* When true, path will be mentioned with $JEKA_HOME$ and $JEKA_REPO$ instead of explicit absolute path. */
     private boolean useVarPath;
@@ -115,8 +118,8 @@ public final class JkImlGenerator {
         if (this.projectDependencyResolver != null) {
             writeDependencies(projectDependencies, this.projectDependencyResolver, allPaths, allModules, false);
         }
-        if (this.runDependencyResolver != null) {
-            writeDependencies(this.runDependencies, this.runDependencyResolver, allPaths, allModules, true);
+        if (this.defDependencyResolver != null) {
+            writeDependencies(this.defDependencies, this.defDependencyResolver, allPaths, allModules, true);
         }
         writeProjectImportDependencies(allModules);
 
@@ -284,8 +287,12 @@ public final class JkImlGenerator {
                                    boolean forceTest) throws XMLStreamException {
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         if (resolveResult.getErrorReport().hasErrors()) {
-            JkLog.warn(resolveResult.getErrorReport().toString());
-            JkLog.warn("The generated iml file won't take in account missing files.");
+            if (failOnDepsResolutionError) {
+                throw new JkException("Fail at resolvig dependencies : " + resolveResult.getErrorReport());
+            } else {
+                JkLog.warn(resolveResult.getErrorReport().toString());
+                JkLog.warn("The generated iml file won't take in account missing files.");
+            }
         }
         final JkDependencyNode tree = resolveResult.getDependencyTree();
         for (final JkDependencyNode node : tree.toFlattenList()) {
@@ -601,8 +608,8 @@ public final class JkImlGenerator {
     }
 
     public JkImlGenerator setRunDependencies(JkDependencyResolver buildDependencyResolver, JkDependencySet dependencies) {
-        this.runDependencyResolver = buildDependencyResolver;
-        this.runDependencies = dependencies;
+        this.defDependencyResolver = buildDependencyResolver;
+        this.defDependencies = dependencies;
         return this;
     }
 
@@ -618,6 +625,11 @@ public final class JkImlGenerator {
 
     public JkImlGenerator setUseVarPath(boolean useVarPath) {
         this.useVarPath = useVarPath;
+        return this;
+    }
+
+    public JkImlGenerator setFailOnDepsResolutionError(boolean fail) {
+        this.failOnDepsResolutionError = fail;
         return this;
     }
 
