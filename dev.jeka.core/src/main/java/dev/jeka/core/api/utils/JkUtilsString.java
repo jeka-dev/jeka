@@ -416,6 +416,14 @@ public final class JkUtilsString {
         return result.toArray(new String[result.size()]);
     }
 
+    public static Integer parseInteger(String number) {
+        try {
+            return Integer.parseInt(number);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     /**
      * Converts the supplied String to a string suitable to be used as a package name.
      */

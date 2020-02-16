@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.scaffold;
 
 import dev.jeka.core.api.depmanagement.JkDependencyResolver;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkCommands;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
@@ -14,6 +15,9 @@ import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 public class JkPluginScaffold extends JkPlugin {
 
     private final JkScaffolder scaffolder;
+
+    @JkDoc("If set then the wrapper shell script will delegate 'jekaw' call to jekaw script located in the specified folder")
+    public String wrapDelegatePath;
 
     protected JkPluginScaffold(JkCommands run) {
         super(run);
@@ -37,9 +41,13 @@ public class JkPluginScaffold extends JkPlugin {
 
     @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
     public void wrap() {
-        final JkPluginRepo repoPlugin = this.getCommands().getPlugin(JkPluginRepo.class);
-        final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repoPlugin.downloadRepository().toSet());
-        scaffolder.wrap(dependencyResolver);
+        if (JkUtilsString.isBlank(this.wrapDelegatePath)) {
+            final JkPluginRepo repoPlugin = this.getCommands().getPlugin(JkPluginRepo.class);
+            final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repoPlugin.downloadRepository().toSet());
+            scaffolder.wrap(dependencyResolver);
+        } else {
+            scaffolder.wrapDelegate(this.wrapDelegatePath);
+        }
     }
 
 }

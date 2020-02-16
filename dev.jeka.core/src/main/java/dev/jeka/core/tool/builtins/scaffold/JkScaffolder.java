@@ -10,18 +10,14 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkConstants;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -90,26 +86,13 @@ public final class JkScaffolder {
         Path jekawPath = baseDir.resolve("jekaw");
         JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("wrapper/jekaw"), jekawPath,
                 StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-        Set<PosixFilePermission> perms = null;
-        try {
-            perms = Files.getPosixFilePermissions(jekawPath);
-            perms.add(PosixFilePermission.OWNER_EXECUTE);
-            perms.add(PosixFilePermission.GROUP_EXECUTE);
-            perms.add(PosixFilePermission.OTHERS_EXECUTE);
-            Files.setPosixFilePermissions(jekawPath, perms);
-        } catch (UnsupportedOperationException e) {
-            // Windows system
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
+        JkPathFile.of(jekawPath).addExecPerm(true, true, true);
         final Path jekaWrapperJar = JkLocator.getJekaJarPath().getParent().resolve("dev.jeka.jeka-core-wrapper.jar");
         final Path wrapperFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/wrapper");
         JkUtilsPath.createDirectories(wrapperFolder);
         final Path target = wrapperFolder.resolve(jekaWrapperJar.getFileName());
         JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
-        final Properties properties = new Properties();
         final String version = jekaVersion(dependencyResolver);
         Path tempProps = JkUtilsPath.createTempFile("jeka-", ".properties");
         JkPathFile.of(tempProps)
@@ -117,6 +100,27 @@ public final class JkScaffolder {
                 .copyReplacingTokens(wrapperFolder.resolve("jeka.properties"),
                         JkUtilsIterable.mapOf("${version}", version), Charset.forName("utf-8"))
                 .deleteIfExist();
+    }
+
+    public void wrapDelegate(String delegateFolder) {
+        JkPathFile newBatFile = JkPathFile.of(baseDir.resolve("jekaw.bat"));
+        JkPathFile newShellFile = JkPathFile.of(baseDir.resolve("jekaw"));
+        Path batDelegate = baseDir.resolve(delegateFolder).resolve("jekaw.bat");
+        if (!Files.exists(batDelegate) && JkUtilsSystem.IS_WINDOWS) {
+            throw new JkException("Cannot find file " + batDelegate);
+        } else {
+            String content = delegateFolder + "\\jekaw %*";
+            content = content.replace('/', '\\');
+            newBatFile.deleteIfExist().createIfNotExist().write(content.getBytes(Charset.forName("utf8")));
+        }
+        Path shellDelegate = baseDir.resolve(delegateFolder).resolve("jekaw");
+        if (!Files.exists(shellDelegate) && !JkUtilsSystem.IS_WINDOWS) {
+            throw new JkException("Cannot find file " + batDelegate);
+        } else {
+            String content ="#!/bin/sh\n\n" + delegateFolder.replace('\\', '/') + "/jekaw $@";
+            newShellFile.deleteIfExist().createIfNotExist().write(content.getBytes(Charset.forName("utf8")))
+                    .addExecPerm(true, true, true);
+        }
     }
 
     public void setCommandClassCode(String code) {

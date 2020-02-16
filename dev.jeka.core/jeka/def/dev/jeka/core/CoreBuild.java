@@ -52,6 +52,9 @@ public class CoreBuild extends JkCommands {
     @JkEnv("GH_TOKEN")
     public String githubToken;
 
+    @JkEnv("TRAVIS_BRANCH")
+    public String travisBranch;
+
     protected CoreBuild() {
         javaPlugin.tests.fork = false;
         javaPlugin.pack.javadoc = true;
@@ -86,6 +89,21 @@ public class CoreBuild extends JkCommands {
 
         // define wrapper
         maker.putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
+
+        // create Github release note
+        maker.getTasksForPublishing().getPostActions().chain(() -> createGithubRelease(jekaVersion));
+    }
+
+    private void createGithubRelease(String version) {
+        if (version.endsWith(".RELEASE")) {
+            GithubReleaseContentEditor githubReleaseContentEditor =
+                    new GithubReleaseContentEditor("jerkar/jeka", travisBranch, githubToken);
+            String releaseNote = githubReleaseContentEditor.getReleaseNoteForTag(
+                    this.getBaseDir().resolve("../release-note.md"), version);
+            if (releaseNote!= null) {
+                githubReleaseContentEditor.createRelease(version, releaseNote);
+            }
+        }
     }
 
     public void publishDocsOnGithubPage() {

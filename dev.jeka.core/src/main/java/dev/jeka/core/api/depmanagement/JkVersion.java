@@ -31,16 +31,16 @@ public final class JkVersion implements Comparable<JkVersion> {
                 for(int i = 0; i < length; i++) {
                     String item1 = o1Parts[i];
                     String item2 = o2Parts[i];
-                    if (Integer.getInteger(item1) == null || Integer.getInteger(item2) == null) {
+                    Integer int1 = JkUtilsString.parseInteger(item1);
+                    Integer int2 = JkUtilsString.parseInteger(item2);
+                    if (int1 == null || int1 == null) {
                         if (item1.equals(item2)) {
                             continue;
                         }
                         return item1.compareTo(item2);
                     }
-                    int thisPart = i < o1Parts.length ?
-                            Integer.parseInt(o1Parts[i]) : 0;
-                    int thatPart = i < o2Parts.length ?
-                            Integer.parseInt(o2Parts[i]) : 0;
+                    int thisPart = i < o1Parts.length ? int1: 0;
+                    int thatPart = i < o2Parts.length ? int2 : 0;
                     if(thisPart < thatPart)
                         return -1;
                     if(thisPart > thatPart)

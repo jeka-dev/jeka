@@ -1,6 +1,6 @@
 # 0.8.15 (ongoing)
 * Compare JkVersion according semantic version
-
+* generate wrapper pointing on another location (for multi-projects)
 
 # 0.8.14
 * Fix JDK version recognition for version 9 and greater

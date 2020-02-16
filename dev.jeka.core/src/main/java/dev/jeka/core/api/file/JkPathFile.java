@@ -12,9 +12,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermission;
 import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -163,6 +165,25 @@ public final class JkPathFile {
             final String fileName = this.path.getFileName().toString() + "." + algorithm.toLowerCase();
             JkPathFile.of(path.resolveSibling(fileName)).deleteIfExist().write(
                     this.getChecksum(algorithm).getBytes(Charset.forName("ASCII")));
+        }
+        return this;
+    }
+
+    /**
+     * Adds execute permition on this files. No effect on windows system.
+     */
+    public JkPathFile addExecPerm(boolean owner, boolean group, boolean other) {
+        Set<PosixFilePermission> perms = null;
+        try {
+            perms = Files.getPosixFilePermissions(this.path);
+            if (owner) perms.add(PosixFilePermission.OWNER_EXECUTE);
+            if (group) perms.add(PosixFilePermission.GROUP_EXECUTE);
+            if (other) perms.add(PosixFilePermission.OTHERS_EXECUTE);
+            Files.setPosixFilePermissions(this.path, perms);
+        } catch (UnsupportedOperationException e) {
+            // Windows system
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
         return this;
     }
