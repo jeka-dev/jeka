@@ -181,7 +181,7 @@ public class JkCommands {
 
     // ------------------------------ run dependencies --------------------------------
 
-    void setRunDependencyResolver(JkDependencySet runDependencies, JkDependencyResolver scriptDependencyResolver) {
+    void setDefDependencyResolver(JkDependencySet runDependencies, JkDependencyResolver scriptDependencyResolver) {
         this.defDependencies = runDependencies;
         this.defDependencyResolver = scriptDependencyResolver;
     }
@@ -189,7 +189,7 @@ public class JkCommands {
     /**
      * Returns the dependency resolver used to compile/run scripts of this project.
      */
-    public final JkDependencyResolver getRunDependencyResolver() {
+    public final JkDependencyResolver getDefDependencyResolver() {
         return this.defDependencyResolver;
     }
 

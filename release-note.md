@@ -1,6 +1,8 @@
-# 0.8.15 (ongoing)
+# 0.8.15
 * Compare JkVersion according semantic version
 * generate wrapper pointing on another location (for multi-projects)
+* API polish on JkCommands
+* Fix JkPluginWar when no static resource directory is present
 
 # 0.8.14
 * Fix JDK version recognition for version 9 and greater

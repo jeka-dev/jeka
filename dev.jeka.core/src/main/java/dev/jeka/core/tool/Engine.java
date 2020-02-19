@@ -165,7 +165,7 @@ final class Engine {
             return null;
         }
         try {
-            commands.setRunDependencyResolver(this.computeRunDependencies(), getRunDependencyResolver());
+            commands.setDefDependencyResolver(this.computeRunDependencies(), getRunDependencyResolver());
             return commands;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
@@ -237,8 +237,8 @@ final class Engine {
 
     private void launch(JkCommands jkCommands, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkCommands importedRun : jkCommands.getImportedCommands().getAll()) {
-                runProject(importedRun, commandLine.getSubProjectMethods());
+            for (final JkCommands importedCommands : jkCommands.getImportedCommands().getAll()) {
+                runProject(importedCommands, commandLine.getSubProjectMethods());
             }
             runProject(jkCommands, commandLine.getSubProjectMethods());
         }

@@ -13,6 +13,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -55,7 +56,9 @@ public class JkPluginWar extends JkPlugin {
         project.getMaker().getTasksForCompilation().runIfNecessary();
         JkPathTree root = JkPathTree.of(dest);
         JkPathTree.of(project.getBaseDir().resolve("src/main/webapp/WEB-INF")).copyTo(root.get("WEB-INF"));
-        JkPathTree.of(staticResouceDir).copyTo(root.getRoot());
+        if (Files.exists(staticResouceDir)) {
+            JkPathTree.of(staticResouceDir).copyTo(root.getRoot());
+        }
         JkPathTree.of(project.getMaker().getOutLayout().getClassDir()).copyTo(root.get("classes"));
         JkResolveResult resolveResult = project.getMaker().getDependencyResolver().resolve(project.getDependencies(),
                 JkJavaDepScopes.RUNTIME);
