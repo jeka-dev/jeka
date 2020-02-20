@@ -2,7 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
@@ -34,15 +34,15 @@ final class CommandResolver {
      * Resolves the {@link JkCommands} instance to use on this project.
      */
     JkCommands resolve(String classNameHint) {
-        return resolve(classNameHint, JkCommands.class);
+        return resolve(classNameHint, JkCommands.class, true);
     }
 
     /**
      * Resolves the {@link JkCommands} instance to use on this project.
      */
     @SuppressWarnings("unchecked")
-    <T extends JkCommands> T resolve(Class<T> baseClass) {
-        return (T) resolve(null, baseClass);
+    <T extends JkCommands> T resolve(Class<T> baseClass, boolean initialised) {
+        return (T) resolve(null, baseClass, initialised);
     }
 
     boolean hasDefSource() {
@@ -81,20 +81,20 @@ final class CommandResolver {
     }
 
     @SuppressWarnings("unchecked")
-    private JkCommands resolve(String classNameHint, Class<? extends JkCommands> baseClass) {
-        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
+    private JkCommands resolve(String classNameHint, Class<? extends JkCommands> baseClass, boolean initialised) {
+
 
         // If class name specified in options.
         if (!JkUtilsString.isBlank(classNameHint)) {
-            final Class<? extends JkCommands> clazz = classLoader.loadFromNameOrSimpleName(
-                    classNameHint, JkCommands.class);
+            final Class<? extends JkCommands> clazz = JkInternalClasspathScanner.INSTANCE
+                    .loadClassesHavingNameOrSimpleName(classNameHint, JkCommands.class);
             if (clazz == null) {
                 return null;
             }
             JkCommands.baseDirContext(baseDir);
             final JkCommands run;
             try {
-                run = JkCommands.of(clazz);
+                run = initialised ? JkCommands.of(clazz) : JkCommands.ofUninitialised(clazz);
             } finally {
                 JkCommands.baseDirContext(null);
             }
@@ -106,7 +106,7 @@ final class CommandResolver {
             final JkPathTree dir = JkPathTree.of(defSourceDir);
             for (final Path path : dir.getRelativeFiles()) {
                 if (path.toString().endsWith(".java") || path.toString().endsWith(".kt")) {
-                    final Class<?> clazz = classLoader.toJkClassLoader().loadGivenClassSourcePath(path.toString());
+                    final Class<?> clazz = JkClassLoader.ofCurrent().loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
                         JkCommands.baseDirContext(baseDir);

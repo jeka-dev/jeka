@@ -64,11 +64,11 @@ final class Engine {
         this.resolver = new CommandResolver(baseDir);
     }
 
-    <T extends JkCommands> T getRun(Class<T> baseClass) {
+    <T extends JkCommands> T getCommands(Class<T> baseClass, boolean initialised) {
         if (resolver.needCompile()) {
             this.compile();
         }
-        return resolver.resolve(baseClass);
+        return resolver.resolve(baseClass, initialised);
     }
 
     /**

@@ -3,8 +3,7 @@ package dev.jeka.core.tool;
 import java.lang.annotation.*;
 
 /**
- * Specifies the libraries necessary to compile and run the annotated class as a
- * Jeka run. It can specify library referenced in a repository (as
+ * Adds an element to def classpath. It can specify a library referenced in a repository (as
  * "com.google.guava:guava:18.0") or file pattern relative to the project
  * directory (as "../lib-folder/mylib.jar" or "libs/*.jar")
  *

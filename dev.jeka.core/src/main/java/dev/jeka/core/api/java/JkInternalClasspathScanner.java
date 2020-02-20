@@ -17,6 +17,8 @@ public interface JkInternalClasspathScanner {
 
     List<String> findClassesHavingMainMethod(ClassLoader extraCclassLoader);
 
+    <T> Class<T> loadClassesHavingNameOrSimpleName(String name, Class<T> superClass);
+
     static JkInternalClasspathScanner of() {
         String IMPL_CLASS = "dev.jeka.core.api.java.embedded.classgraph.ClassGraphClasspathScanner";
         Class<JkInternalClasspathScanner> clazz = JkClassLoader.ofCurrent().loadIfExist(IMPL_CLASS);

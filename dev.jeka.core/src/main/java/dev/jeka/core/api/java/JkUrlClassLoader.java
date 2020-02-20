@@ -204,42 +204,6 @@ public final class JkUrlClassLoader {
         return result;
     }
 
-    /**
-     * Loads the class having the specified full name or the specified simple
-     * name. Returns <code>null</code> if no class matches. </br> For example :
-     * loadFromNameOrSimpleName("MyClass", null) may returns
-     * my.packAllArtifacts.MyClass class.
-     *
-     * @param name          The full name or the simple value of the class to load
-     * @param superClassArg If not null, the search is narrowed to classes/interfaces
-     *                      children of this class/interface.
-     * @return The loaded class or <code>null</code>.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> Class<? extends T> loadFromNameOrSimpleName(final String name, Class<T> superClassArg) {
-        final Class<T> superClass = this.toJkClassLoader().load(superClassArg.getName());
-        try {
-            if (superClass == null) {
-                return (Class<? extends T>) delegate.loadClass(name);
-            }
-            final Class<?> type = delegate.loadClass(name);
-            if (superClass.isAssignableFrom(type)) {
-                return (Class<? extends T>) type;
-            }
-            return null;
-
-        } catch (final ClassNotFoundException e) { // NOSONAR
-            final Set<Class<?>> classes = loadClasses("**/" + name, name);
-            for (final Class<?> clazz : classes) {
-                if (clazz.getSimpleName().equals(name) && superClass == null
-                        || superClass != null && superClass.isAssignableFrom(clazz)) {
-                    return (Class<? extends T>) clazz;
-
-                }
-            }
-        }
-        return null;
-    }
 
     /**
      * Returns all classes of this <code>classloader</code> that are defined

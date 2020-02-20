@@ -576,7 +576,7 @@ public final class JkImlGenerator {
     private Path lookFileHere(Iterable<Path> folders, Iterable<String> names) {
         for (final Path folder : folders) {
             for (final String name : names) {
-                final Path candidate = folder.resolve(name);
+                final Path candidate = folder.resolve(name).normalize();
                 if (Files.exists(candidate)) {
                     return candidate;
                 }
@@ -604,7 +604,7 @@ public final class JkImlGenerator {
         return this;
     }
 
-    public JkImlGenerator setRunDependencies(JkDependencyResolver buildDependencyResolver, JkDependencySet dependencies) {
+    public JkImlGenerator setDefDependencies(JkDependencyResolver buildDependencyResolver, JkDependencySet dependencies) {
         this.defDependencyResolver = buildDependencyResolver;
         this.defDependencies = dependencies;
         return this;

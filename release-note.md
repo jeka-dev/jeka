@@ -1,3 +1,8 @@
+# 0.8.16 (ongoing)
+* Fix source attachment in iml generation
+* API polish
+* Fix classloader issues on Java 9+
+
 # 0.8.15
 * Compare JkVersion according semantic version
 * generate wrapper pointing on another location (for multi-projects)

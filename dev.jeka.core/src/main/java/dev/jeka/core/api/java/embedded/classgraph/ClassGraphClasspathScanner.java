@@ -17,6 +17,30 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
     @Override
     public Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate) {
+        return loadClassesMatching(hasSimpleName(predicate));
+    }
+
+    @Override
+    public <T> Class<T> loadClassesHavingNameOrSimpleName(String name, Class<T> superClass) {
+        for (Class<?> clazz : loadClassesMatching(classInfo -> classInfo.getName().equals(name))) {
+            if (superClass.isAssignableFrom(clazz)) {
+                return (Class<T>) clazz;
+            }
+        }
+        for (Class<?> clazz : loadClassesMatching(classInfo -> classInfo.getSimpleName().equals(name))) {
+            if (superClass.isAssignableFrom(clazz)) {
+                return (Class<T>) clazz;
+            }
+        }
+        return null;
+    }
+
+    private static Predicate<ClassInfo> hasSimpleName(Predicate<String> namePredicate) {
+        return classInfo ->  namePredicate.test(classInfo.getSimpleName());
+
+    }
+
+    public Set<Class<?>> loadClassesMatching(Predicate<ClassInfo> predicate) {
         final ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
                 .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
@@ -24,7 +48,7 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         final ScanResult scanResult = classGraph.scan();
         final Set<Class<?>> result = new HashSet<>();
         for (final ClassInfo classInfo : scanResult.getAllClasses()) {
-            if (predicate.test(classInfo.getSimpleName())) {
+            if (predicate.test(classInfo)) {
                 result.add(classInfo.loadClass());
             }
         }

@@ -16,10 +16,10 @@ import java.util.*;
  */
 public final class JkImportedCommands {
 
-    private static final ThreadLocal<Map<ImportedRunRef, JkCommands>> IMPORTED_RUN_CONTEXT = new ThreadLocal<>();
+    private static final ThreadLocal<Map<ImportedCommandsRef, JkCommands>> IMPORTED_RUN_CONTEXT = new ThreadLocal<>();
 
-    static JkImportedCommands of(JkCommands masterRun) {
-        return new JkImportedCommands(getDirectImportedRuns(masterRun));
+    static JkImportedCommands of(JkCommands masterCommands) {
+        return new JkImportedCommands(getDirectImportedCommands(masterCommands));
     }
 
     private final List<JkCommands> directImportedRuns;
@@ -86,30 +86,29 @@ public final class JkImportedCommands {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<JkCommands> getDirectImportedRuns(JkCommands masterRun) {
+    private static List<JkCommands> getDirectImportedCommands(JkCommands masterCommands) {
         final List<JkCommands> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterRun.getClass(), JkImportProject.class);
-
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterCommands.getClass(), JkImportProject.class);
         for (final Field field : fields) {
             final JkImportProject jkProject = field.getAnnotation(JkImportProject.class);
-            final JkCommands importedRun = createImportedRun(
-                    (Class<? extends JkCommands>) field.getType(), jkProject.value(), masterRun.getBaseDir());
+            final JkCommands importedRun = createImportedCommands(
+                    (Class<? extends JkCommands>) field.getType(), jkProject.value(), masterCommands.getBaseDir());
             try {
-                JkUtilsReflect.setFieldValue(masterRun, field, importedRun);
+                JkUtilsReflect.setFieldValue(masterCommands, field, importedRun);
             } catch (final RuntimeException e) {
-                Path currentClassBaseDir = Paths.get(masterRun.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+                Path currentClassBaseDir = Paths.get(masterCommands.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
                 while (!Files.exists(currentClassBaseDir.resolve(JkConstants.DEF_DIR)) && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParent();
                 }
                 if (currentClassBaseDir == null) {
                     throw new IllegalStateException("Can't inject imported run instance of type " + importedRun.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
-                            + "#" + field.getName() + " from directory " + masterRun.getBaseDir()
+                            + "#" + field.getName() + " from directory " + masterCommands.getBaseDir()
                             + " while working dir is " + Paths.get("").toAbsolutePath());
                 }
                 throw new IllegalStateException("Can't inject imported run instance of type " + importedRun.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
-                        + "#" + field.getName() + " from directory " + masterRun.getBaseDir()
+                        + "#" + field.getName() + " from directory " + masterCommands.getBaseDir()
                         + "\nCommand class is located in " + currentClassBaseDir
                         + " while working dir is " + Paths.get("").toAbsolutePath()
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);
@@ -125,31 +124,31 @@ public final class JkImportedCommands {
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    private static <T extends JkCommands> T createImportedRun(Class<T> importedRunClass, String relativePath, Path masterRunPath) {
+    private static <T extends JkCommands> T createImportedCommands(Class<T> importedCommandsClass, String relativePath, Path masterRunPath) {
         final Path projectDir = masterRunPath.resolve(relativePath).normalize();
-        final ImportedRunRef projectRef = new ImportedRunRef(projectDir, importedRunClass);
-        Map<ImportedRunRef, JkCommands> map = IMPORTED_RUN_CONTEXT.get();
+        final ImportedCommandsRef commandsRef = new ImportedCommandsRef(projectDir, importedCommandsClass);
+        Map<ImportedCommandsRef, JkCommands> map = IMPORTED_RUN_CONTEXT.get();
         if (map == null) {
             map = new HashMap<>();
             IMPORTED_RUN_CONTEXT.set(map);
         }
-        final T cachedResult = (T) IMPORTED_RUN_CONTEXT.get().get(projectRef);
+        final T cachedResult = (T) IMPORTED_RUN_CONTEXT.get().get(commandsRef);
         if (cachedResult != null) {
             return cachedResult;
         }
         final Engine engine = new Engine(projectDir);
-        final T result = engine.getRun(importedRunClass);
-        IMPORTED_RUN_CONTEXT.get().put(projectRef, result);
+        final T result = engine.getCommands(importedCommandsClass, false);
+        IMPORTED_RUN_CONTEXT.get().put(commandsRef, result);
         return result;
     }
 
-    private static class ImportedRunRef {
+    private static class ImportedCommandsRef {
 
         final String canonicalFileName;
 
         final Class<?> clazz;
 
-        ImportedRunRef(Path projectDir, Class<?> clazz) {
+        ImportedCommandsRef(Path projectDir, Class<?> clazz) {
             super();
             this.canonicalFileName = projectDir.normalize().toAbsolutePath().toString();
             this.clazz = clazz;
@@ -164,7 +163,7 @@ public final class JkImportedCommands {
                 return false;
             }
 
-            final ImportedRunRef that = (ImportedRunRef) o;
+            final ImportedCommandsRef that = (ImportedCommandsRef) o;
 
             if (!canonicalFileName.equals(that.canonicalFileName)) {
                 return false;

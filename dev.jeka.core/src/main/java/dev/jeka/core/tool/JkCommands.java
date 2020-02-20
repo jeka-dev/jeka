@@ -66,6 +66,7 @@ public class JkCommands {
         // Instantiating imported runs
         this.importedCommands = JkImportedCommands.of(this);
 
+        // Instantiate plugins
         this.plugins = new JkRunPlugins(this, Environment.commandLine.getPluginOptions());
     }
 
@@ -74,30 +75,19 @@ public class JkCommands {
      * and plugin activation.
      */
     public static <T extends JkCommands> T of(Class<T> commandClass) {
-        if (BASE_DIR_CONTEXT.get() == null) {
-            baseDirContext(Paths.get("").toAbsolutePath());
-        }
-        JkLog.startTask("Initializing class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
-        final T run = JkUtilsReflect.newInstance(commandClass);
-        final JkCommands jkCommands = run;
+        final T commands = ofUninitialised(commandClass);
+        commands.initialise();
+        return commands;
+    }
 
-        // Inject options & environment variables
-        JkOptions.populateFields(run, JkOptions.readSystemAndUserOptions());
-        FieldInjector.injectEnv(run);
-        Set<String> unusedCmdOptions = JkOptions.populateFields(run,  Environment.commandLine.getCommandOptions());
-        unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key
-                + "' from command line does not match with any field of class " + run.getClass().getName()));
+    void initialise() {
+        setup();
 
-        // Load plugins declared in command line and inject options
-        jkCommands.plugins.loadCommandLinePlugins();
-        List<JkPlugin> plugins = jkCommands.getPlugins().getAll();
-        for (JkPlugin plugin : plugins) {
-            if (!jkCommands.plugins.getAll().contains(plugin)) {
-                jkCommands.plugins.injectOptions(plugin);
-            }
-        }
-        run.setup();
-        for (JkPlugin plugin : new LinkedList<>(plugins)) {
+        // initialise imported project after setup to let a chance master commands to modify imported commands
+        // in the setup method.
+        importedCommands.getDirects().forEach(JkCommands::initialise);
+
+        for (JkPlugin plugin : new LinkedList<>(plugins.getAll())) {
             List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
             try {
                 plugin.activate();
@@ -111,14 +101,39 @@ public class JkCommands {
         }
 
         // Extra run configuration
-        run.setupAfterPluginActivations();
-        List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(run).optionDefs();
+        setupAfterPluginActivations();
+        List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(this).optionDefs();
         JkLog.info("Run instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask();
         baseDirContext(null);
-
-        return run;
     }
+
+    static <T extends JkCommands> T ofUninitialised(Class<T> commandClass) {
+        if (BASE_DIR_CONTEXT.get() == null) {
+            baseDirContext(Paths.get("").toAbsolutePath());
+        }
+        JkLog.startTask("Initializing class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        final T commands = JkUtilsReflect.newInstance(commandClass);
+        final JkCommands jkCommands = commands;
+
+        // Inject options & environment variables
+        JkOptions.populateFields(commands, JkOptions.readSystemAndUserOptions());
+        FieldInjector.injectEnv(commands);
+        Set<String> unusedCmdOptions = JkOptions.populateFields(commands,  Environment.commandLine.getCommandOptions());
+        unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key
+                + "' from command line does not match with any field of class " + commands.getClass().getName()));
+
+        // Load plugins declared in command line and inject options
+        jkCommands.plugins.loadCommandLinePlugins();
+        List<JkPlugin> plugins = jkCommands.getPlugins().getAll();
+        for (JkPlugin plugin : plugins) {
+            if (!jkCommands.plugins.getAll().contains(plugin)) {
+                jkCommands.plugins.injectOptions(plugin);
+            }
+        }
+        return commands;
+    }
+
 
     /**
      * This method is invoked right after options has been injected into this instance. Here, You will typically
@@ -181,8 +196,8 @@ public class JkCommands {
 
     // ------------------------------ run dependencies --------------------------------
 
-    void setDefDependencyResolver(JkDependencySet runDependencies, JkDependencyResolver scriptDependencyResolver) {
-        this.defDependencies = runDependencies;
+    void setDefDependencyResolver(JkDependencySet defDependencies, JkDependencyResolver scriptDependencyResolver) {
+        this.defDependencies = defDependencies;
         this.defDependencyResolver = scriptDependencyResolver;
     }
 

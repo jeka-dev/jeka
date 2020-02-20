@@ -55,7 +55,7 @@ public final class JkPluginIntellij extends JkPlugin {
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
         final List<Path> depProjects = getCommands().getImportedCommands().getImportedRunRoots();
         generator.setUseVarPath(useVarPath);
-        generator.setRunDependencies(externalDir ? null : getCommands().getDefDependencyResolver(),
+        generator.setDefDependencies(externalDir ? null : getCommands().getDefDependencyResolver(),
                 getCommands().getDefDependencies());
         generator.setImportedProjects(depProjects);
         Path basePath = getCommands().getBaseDir();
