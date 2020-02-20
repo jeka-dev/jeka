@@ -3,6 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
@@ -83,12 +84,12 @@ final class CommandResolver {
     @SuppressWarnings("unchecked")
     private JkCommands resolve(String classNameHint, Class<? extends JkCommands> baseClass, boolean initialised) {
 
-
         // If class name specified in options.
         if (!JkUtilsString.isBlank(classNameHint)) {
             final Class<? extends JkCommands> clazz = JkInternalClasspathScanner.INSTANCE
                     .loadClassesHavingNameOrSimpleName(classNameHint, JkCommands.class);
             if (clazz == null) {
+                JkLog.warn("No commands class found with name " + classNameHint);
                 return null;
             }
             JkCommands.baseDirContext(baseDir);

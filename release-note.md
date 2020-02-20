@@ -1,7 +1,8 @@
-# 0.8.16 (ongoing)
-* Fix source attachment in iml generation
-* API polish
+# 0.8.16
+* Fix source attachment in .iml generation
 * Fix classloader issues on Java 9+
+* Setup slave commands from a master commands class.
+* API polish
 
 # 0.8.15
 * Compare JkVersion according semantic version

@@ -81,6 +81,7 @@ public class JkCommands {
     }
 
     void initialise() {
+        JkLog.startTask("Initialising instance of " + this.getClass().getName());
         setup();
 
         // initialise imported project after setup to let a chance master commands to modify imported commands
@@ -112,7 +113,7 @@ public class JkCommands {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
-        JkLog.startTask("Initializing class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        JkLog.startTask("Instantiating class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T commands = JkUtilsReflect.newInstance(commandClass);
         final JkCommands jkCommands = commands;
 
@@ -131,6 +132,7 @@ public class JkCommands {
                 jkCommands.plugins.injectOptions(plugin);
             }
         }
+        JkLog.endTask();
         return commands;
     }
 

@@ -17,17 +17,17 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
     @Override
     public Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate) {
-        return loadClassesMatching(hasSimpleName(predicate));
+        return loadClassesMatching(hasSimpleName(predicate), false);
     }
 
     @Override
     public <T> Class<T> loadClassesHavingNameOrSimpleName(String name, Class<T> superClass) {
-        for (Class<?> clazz : loadClassesMatching(classInfo -> classInfo.getName().equals(name))) {
+        for (Class<?> clazz : loadClassesMatching(classInfo -> classInfo.getName().equals(name), true)) {
             if (superClass.isAssignableFrom(clazz)) {
                 return (Class<T>) clazz;
             }
         }
-        for (Class<?> clazz : loadClassesMatching(classInfo -> classInfo.getSimpleName().equals(name))) {
+        for (Class<?> clazz : loadClassesMatching(classInfo -> classInfo.getSimpleName().equals(name), true)) {
             if (superClass.isAssignableFrom(clazz)) {
                 return (Class<T>) clazz;
             }
@@ -40,11 +40,15 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
     }
 
-    public Set<Class<?>> loadClassesMatching(Predicate<ClassInfo> predicate) {
-        final ClassGraph classGraph = new ClassGraph()
+    private Set<Class<?>> loadClassesMatching(Predicate<ClassInfo> predicate, boolean ignoreClassVisibility) {
+        ClassGraph classGraph = new ClassGraph()
+                .ignoreClassVisibility()
                 .enableClassInfo()
                 .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
                         "org.commonmark", "io.github.classgraph");
+        if (ignoreClassVisibility) {
+            classGraph = classGraph.ignoreClassVisibility();
+        }
         final ScanResult scanResult = classGraph.scan();
         final Set<Class<?>> result = new HashSet<>();
         for (final ClassInfo classInfo : scanResult.getAllClasses()) {
