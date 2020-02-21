@@ -1,3 +1,7 @@
+# 0.8.17
+* Better console output for Commands initialization
+* Fix JkInterpolator#and
+
 # 0.8.16
 * Fix source attachment in .iml generation
 * Fix classloader issues on Java 9+

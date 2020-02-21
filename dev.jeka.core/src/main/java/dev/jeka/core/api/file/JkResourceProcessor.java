@@ -9,10 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 //import java.io.File;
@@ -112,9 +109,7 @@ public final class JkResourceProcessor {
      * adding the specified interpolator.
      */
     public JkResourceProcessor and(JkInterpolator interpolator) {
-        final List<JkInterpolator> list = JkUtilsIterable.listOf(this.interpolators);
-        list.add(interpolator);
-        return new JkResourceProcessor(this.resourceTrees, list);
+        return and(JkUtilsIterable.listOf(interpolator));
     }
 
     public JkResourceProcessor andInterpolate(PathMatcher pathMatcher, Map<String, String> keyValues) {
@@ -125,12 +120,16 @@ public final class JkResourceProcessor {
         return andInterpolate(JkPathMatcher.of(true, acceptPattern), keyValues);
     }
 
+    public JkResourceProcessor andInterpolate(String acceptPattern, String... keyValues) {
+        return andInterpolate(acceptPattern, JkUtilsIterable.mapOfAny(keyValues));
+    }
+
     /**
      * Creates a <code>JkResourceProcessor</code> identical at this one but
      * adding the specified interpolator.
      */
     public JkResourceProcessor and(Iterable<JkInterpolator> interpolators) {
-        final List<JkInterpolator> list = JkUtilsIterable.listOf(this.interpolators);
+        final List<JkInterpolator> list = new LinkedList<>(JkUtilsIterable.listOf(this.interpolators));
         JkUtilsIterable.addAllWithoutDuplicate(list, interpolators);
         return new JkResourceProcessor(this.resourceTrees, list);
     }

@@ -90,21 +90,20 @@ public class JkCommands {
 
         for (JkPlugin plugin : new LinkedList<>(plugins.getAll())) {
             List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
+            JkLog.startTask("Activating plugin " + plugin.name() + " with options " + HelpDisplayer.optionValues(defs));
             try {
                 plugin.activate();
             } catch (RuntimeException e) {
                 JkLog.error("Plugin " + plugin.name() + " has caused build instantiation failure.");
                 throw e;
             }
-            String pluginInfo = "Instance decorated with plugin " + plugin.getClass()
-                    + HelpDisplayer.optionValues(defs);
-            JkLog.info(pluginInfo);
+            JkLog.endTask();
         }
 
         // Extra run configuration
         setupAfterPluginActivations();
         List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(this).optionDefs();
-        JkLog.info("Run instance initialized with options " + HelpDisplayer.optionValues(defs));
+        JkLog.info(this.getClass().getSimpleName() + " instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask();
         baseDirContext(null);
     }
