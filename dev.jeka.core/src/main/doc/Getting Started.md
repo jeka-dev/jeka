@@ -110,7 +110,7 @@ Declare the 2 classpath variables in Eclipse.
 By default _[Jeka User Home]_ point to _[User Home]/.jeka_ but can be overridden by defining the environment 
 variable `JEKA_USER_HOME`. 
 
-# Jeka's concepts
+# Jeka concepts
 
 __Def Classes :__ Java source files located under _[PROJECT DIR]/jeka/def_. They are compiled on the flight by Jeka when invoked from the command line.
 
@@ -119,10 +119,10 @@ By default, it consists in _Jeka_ core classes but it can be augmented with any 
 from other projects. 
 
 __Command Classes :__ Classes extending `JkCommands`. Their public no-arg methods can be invoked from the command line 
- if they belong to _def classpath_. Their public fields can be set from the command line as well. Typically, _def classes_ 
+ if they belong to _def classpath_. Their public properties can be set from the command line as well. Typically, _def classes_ 
  include one _command class_.
 
-__Commands :__ Java methods member of _command classes_ invokable from command line. 
+__Command :__ Java method member of _command class_ invokable from command line. 
 They must be instance method (not static), public, zero-args and returning void. 
 Every method verifying these constraints within a _command class_ or a _plugin_  is considered as a _command_.
  

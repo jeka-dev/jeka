@@ -75,15 +75,15 @@ public class JkCommands {
      * and plugin activation.
      */
     public static <T extends JkCommands> T of(Class<T> commandClass) {
+        JkLog.startTask("Instantiating command class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T commands = ofUninitialised(commandClass);
         commands.initialise();
+        JkLog.endTask();
         return commands;
     }
 
     void initialise() {
-        JkLog.startTask("Initialising instance of " + this.getClass().getName());
         setup();
-
         // initialise imported project after setup to let a chance master commands to modify imported commands
         // in the setup method.
         importedCommands.getDirects().forEach(JkCommands::initialise);
@@ -104,7 +104,6 @@ public class JkCommands {
         setupAfterPluginActivations();
         List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(this).optionDefs();
         JkLog.info(this.getClass().getSimpleName() + " instance initialized with options " + HelpDisplayer.optionValues(defs));
-        JkLog.endTask();
         baseDirContext(null);
     }
 
@@ -112,14 +111,13 @@ public class JkCommands {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
-        JkLog.startTask("Instantiating class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T commands = JkUtilsReflect.newInstance(commandClass);
         final JkCommands jkCommands = commands;
 
         // Inject options & environment variables
         JkOptions.populateFields(commands, JkOptions.readSystemAndUserOptions());
         FieldInjector.injectEnv(commands);
-        Set<String> unusedCmdOptions = JkOptions.populateFields(commands,  Environment.commandLine.getCommandOptions());
+        Set<String> unusedCmdOptions = JkOptions.populateFields(commands, Environment.commandLine.getCommandOptions());
         unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key
                 + "' from command line does not match with any field of class " + commands.getClass().getName()));
 
@@ -131,7 +129,6 @@ public class JkCommands {
                 jkCommands.plugins.injectOptions(plugin);
             }
         }
-        JkLog.endTask();
         return commands;
     }
 

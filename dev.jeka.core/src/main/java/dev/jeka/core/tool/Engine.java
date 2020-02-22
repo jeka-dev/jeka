@@ -300,19 +300,19 @@ final class Engine {
         } catch (final NoSuchMethodException e) {
             throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + run.getClass());
         }
+        String fullMethodName = run.getClass().getName() + "#" + methodName;
         if (Environment.standardOptions.logHeaders) {
-            JkLog.info("Method : " + methodName + " on " + run.getClass().getName());
+            JkLog.startTask("\nExecuting method : " + fullMethodName);
         }
-        final long time = System.nanoTime();
         try {
             JkUtilsReflect.invoke(run, method);
             if (Environment.standardOptions.logHeaders) {
-                JkLog.info("Method " + methodName + " succeeded in "
-                        + JkUtilsTime.durationInMillis(time) + " milliseconds.");
+                JkLog.endTask("Method " + fullMethodName + " succeeded in %d milliseconds.");
             }
         } catch (final RuntimeException e) {
-            JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInMillis(time)
-            + " milliseconds.");
+            if (Environment.standardOptions.logHeaders) {
+                JkLog.endTask("Method " + fullMethodName + " failed in %d milliseconds.");
+            }
             throw e;
         }
     }

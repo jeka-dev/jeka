@@ -96,8 +96,8 @@ public final class JkDependencyResolver {
                     + resolveResult.getInvolvedModules());
             JkLog.info(plurialize(resolveResult.getFiles().getEntries().size(), "artifact") + ".");
         } else {
-            JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " leading to " +
-                    plurialize(resolveResult.getFiles().getEntries().size(), "artifact") + ".");
+            JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " resolved to " +
+                    plurialize(resolveResult.getFiles().getEntries().size(), "artifact files") + ".");
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         return resolveResult;
