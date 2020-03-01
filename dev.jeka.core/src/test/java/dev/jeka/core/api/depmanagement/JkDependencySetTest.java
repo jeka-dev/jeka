@@ -26,7 +26,7 @@ public class JkDependencySetTest {
                 .and("my.group:module")
                 .and("other:other")
                 .withDefaultScopes(scope)
-                .withoutDuplicate();
+                .minusDuplicates();
         assertEquals(3, dependencySet.getDependenciesDeclaredWith(scope).size());
         assertEquals("2.8", dependencySet.getVersion(JkModuleId.of("my.group:module")).getValue());
 

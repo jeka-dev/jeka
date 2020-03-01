@@ -1,12 +1,16 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.system.JkInfo;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
- * Plugin instances are owned by a JkCommands instance. The relationship is bidirectional. JkCommands instances may
- * invoke plugin methods or fields and plugin instances may invoke owner methods.
+ * Plugin instances are owned by a <code>JkCommands</code> instance. The relationship is bidirectional :
+ * <code>JkCommands</code> instances can invoke plugin methods and vice-versa.<p>
  *
- * Therefore plugins can interact with or load other plugins into the owner instance, which is quite common with Jeka.
+ * Therefore plugins can interact with (or load) other plugins from the owning <code>JkCommands</code> instance
+ * (which is a quite common pattern).
  */
 public abstract class JkPlugin {
 
@@ -15,12 +19,24 @@ public abstract class JkPlugin {
     private final JkCommands commands;
 
     /*
-     * Right after to be instantiated, plugin instances are likely to be configured by the owning commands.
-     * Therefore, every plugin members that are likely to be configured by the owning commands must be
-     * initialized in the constructor.
+     * Plugin instances are likely to be configured by the owning <code>JkCommands</code> instance, before options
+     * are injected.
+     * If a plugin needs to initialize state before options are injected, you have to do it in the
+     * constructor.
      */
     protected JkPlugin(JkCommands commands) {
         this.commands = commands;
+        if (getLowestJekaCompatibleVersion() != null && JkInfo.getJekaVersion() != null) {
+            JkVersion runningJekaVersion = JkVersion.of(JkInfo.getJekaVersion());
+            JkVersion minVersion = JkVersion.of(getLowestJekaCompatibleVersion());
+            if (runningJekaVersion.isSnapshot()) {
+                JkLog.warn("You are not running a release Jeka version. Plugin " + this +
+                        " which is compatible with Jeka version " + minVersion + " or greater may not work properly.");
+            } else if (runningJekaVersion.compareTo(minVersion) < 0) {
+                JkLog.warn("You are running Jeka version " + runningJekaVersion + " but " + this
+                        + " plugin is supposed to work with " + minVersion + " or higher. It may not work properly." );
+            }
+        }
     }
 
     @JkDoc("Displays help about this plugin.")
@@ -32,6 +48,14 @@ public abstract class JkPlugin {
      * Override this method to modify the commands itself or its bound plugins.
      */
     protected void activate() {
+    }
+
+    /**
+     * Returns a the lowest Jeka version which is compatible with this plugin. If not <code>null</code>  and
+     * running Jeka version is lower then a warning log will be emitted.
+     */
+    protected String getLowestJekaCompatibleVersion() {
+        return null;
     }
 
     /**

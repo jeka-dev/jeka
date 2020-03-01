@@ -12,7 +12,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
+/*
  * Defines command classes defined on a given project.
  *
  * @author Jerome Angibaud

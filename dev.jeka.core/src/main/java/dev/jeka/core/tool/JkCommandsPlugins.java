@@ -8,9 +8,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Set of plugins configured or activated in a {@link JkCommands}.
+ * Set of plugin instances loaded in a {@link JkCommands}.
  */
-public final class JkRunPlugins {
+public final class JkCommandsPlugins {
 
     private final JkCommands holder;
 
@@ -18,7 +18,7 @@ public final class JkRunPlugins {
 
     private final List<PluginOptions> pluginOptionsList;
 
-    JkRunPlugins(JkCommands holder, List<PluginOptions> pluginOptionsList) {
+    JkCommandsPlugins(JkCommands holder, List<PluginOptions> pluginOptionsList) {
         super();
         this.holder = holder;
         this.pluginOptionsList = Collections.unmodifiableList(new ArrayList<>(pluginOptionsList));
@@ -38,7 +38,9 @@ public final class JkRunPlugins {
      * Caution : this method may be significantly slower than {@link #get(Class)} as it may involve classpath scanning.
      */
     public JkPlugin get(String pluginName) {
-        final Optional<JkPlugin> optPlugin = loadedPlugins.stream().filter(plugin -> plugin.name().equals(pluginName)).findFirst();
+        final Optional<JkPlugin> optPlugin = loadedPlugins.stream()
+                .filter(plugin -> plugin.name().equals(pluginName))
+                .findFirst();
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }
@@ -53,18 +55,14 @@ public final class JkRunPlugins {
      * Returns <code>true</code> if the specified plugin class has been loaded in the holding JkCommands instance.
      */
     public boolean hasLoaded(Class<? extends JkPlugin> pluginClass) {
-        for (final JkPlugin plugin : loadedPlugins) {
-            if (plugin.getClass().equals(pluginClass)) {
-                return true;
-            }
-        }
-        return false;
+        return loadedPlugins.stream()
+                .anyMatch(plugin -> plugin.getClass().equals(pluginClass));
     }
 
     /**
      * Returns a list of all loaded plugins in the holding JkCommands instance.
      */
-    public List<JkPlugin> getAll() {
+    public List<JkPlugin> getLoadedPlugins() {
         return Collections.unmodifiableList(loadedPlugins);
     }
 
@@ -80,8 +78,9 @@ public final class JkRunPlugins {
 
     @SuppressWarnings("unchecked")
     private <T extends JkPlugin> T getOrCreate(Class<T> pluginClass) {
-        final Optional<T> optPlugin = (Optional<T>) this.loadedPlugins.stream().filter(
-                (item) -> item.getClass().equals(pluginClass)).findFirst();
+        final Optional<T> optPlugin = (Optional<T>) this.loadedPlugins.stream()
+                .filter(item -> item.getClass().equals(pluginClass))
+                .findFirst();
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }

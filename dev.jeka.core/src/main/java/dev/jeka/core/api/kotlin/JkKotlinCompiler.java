@@ -74,7 +74,7 @@ public final class JkKotlinCompiler {
      * @throws IllegalStateException if a compilation error occurred and the 'withFailOnError' flag is <code>true</code>.
      */
     @SuppressWarnings("unchecked")
-    public boolean compile(JkKotlinCompileSpec compileSpec) {
+    public boolean compile(JkKotlinJvmCompileSpec compileSpec) {
         final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
@@ -105,7 +105,7 @@ public final class JkKotlinCompiler {
         return true;
     }
 
-    private boolean run(JkKotlinCompileSpec compileSpec) {
+    private boolean run(JkKotlinJvmCompileSpec compileSpec) {
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSourceFiles()) {
             if (Files.isDirectory(file)) {

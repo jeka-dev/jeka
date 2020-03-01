@@ -8,7 +8,7 @@ import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.kotlin.JkKotlinCompileSpec;
+import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
@@ -144,7 +144,7 @@ final class Engine {
         final long start = System.nanoTime();
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
-        final JkResolveResult resolveResult = runDependencyResolver.resolve(this.computeRunDependencies());
+        final JkResolveResult resolveResult = runDependencyResolver.resolve(this.computeDefDependencies());
         if (resolveResult.getErrorReport().hasErrors()) {
             JkLog.warn(resolveResult.getErrorReport().toString());
         }
@@ -165,7 +165,7 @@ final class Engine {
             return null;
         }
         try {
-            commands.setDefDependencyResolver(this.computeRunDependencies(), getRunDependencyResolver());
+            commands.setDefDependencyResolver(this.computeDefDependencies(), getRunDependencyResolver());
             return commands;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
@@ -173,15 +173,15 @@ final class Engine {
         }
     }
 
-    private JkDependencySet computeRunDependencies() {
+    private JkDependencySet computeDefDependencies() {
 
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
         JkScopeMapping scope = JkScope.of("*").mapTo("default(*)");
         return JkDependencySet.of(defDependencies
                 .andFiles(bootLibs())
-                .andFiles(JkClasspath.ofCurrentRuntime()).withoutLastIf(!devMode)
-                .andFile(JkLocator.getJekaJarPath()).withoutLastIf(devMode)
+                .andFiles(JkClasspath.ofCurrentRuntime()).minusLastIf(!devMode)
+                .andFile(JkLocator.getJekaJarPath()).minusLastIf(devMode)
                 .withDefaultScope(scope));
     }
 
@@ -211,7 +211,7 @@ final class Engine {
     private void compileDef(JkPathSequence defClasspath) {
         JkPathTree.of(resolver.defClassDir).deleteContent();
         if (hasKotlin()) {
-            final JkKotlinCompileSpec kotlinCompileSpec = defKotlinCompileSpec(defClasspath);
+            final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(defClasspath);
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofKotlinHome();
             wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec));
             JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
@@ -260,16 +260,16 @@ final class Engine {
                 .addOptions(this.compileOptions);
     }
 
-    private JkKotlinCompileSpec defKotlinCompileSpec(JkPathSequence defClasspath) {
+    private JkKotlinJvmCompileSpec defKotlinCompileSpec(JkPathSequence defClasspath) {
         JkUtilsPath.createDirectories(resolver.defClassDir);
-        return JkKotlinCompileSpec.of()
+        return JkKotlinJvmCompileSpec.of()
                 .setClasspath(defClasspath)
                 .addSources(resolver.defSourceDir)
                 .setOutputDir(resolver.defClassDir);
     }
 
     private JkDependencyResolver getRunDependencyResolver() {
-        if (this.computeRunDependencies().hasModules()) {
+        if (this.computeDefDependencies().hasModules()) {
             return JkDependencyResolver.of(this.defRepos);
         }
         return JkDependencyResolver.of();

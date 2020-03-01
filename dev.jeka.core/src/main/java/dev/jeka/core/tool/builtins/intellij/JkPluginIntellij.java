@@ -1,5 +1,6 @@
 package dev.jeka.core.tool.builtins.intellij;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.system.JkLog;
@@ -18,14 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @JkDoc("Generation of Idea Intellij metadata files (*.iml and modules.xml).")
-@JkDocPluginDeps(JkPluginScaffold.class)
+@JkDocPluginDeps(JkPluginJava.class) // To read jevaSourceVarsion from
 public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")
     public boolean useVarPath = true;
-
-    @JkDoc("If true, the project taken in account is not the run project but the project configured in java plugin.")
-    public boolean externalDir = false;
 
     @JkDoc("By default, generated iml files specify a JDK inherited from the project setup. " +
             "Set this option to 'true' for  forcing the JDK version to the one defined in JkJavaProject.")
@@ -34,6 +32,9 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("If true, the iml generation fails when a dependency can not be resolved. If false, it will be ignored " +
             "(only a warning will be notified).")
     public boolean failOnDepsResolutionError = true;
+
+    @JkDoc("If true, dependency to Jeka jar will be excluded (assuming it will be got from a module dependencies")
+    public boolean imlSkipJeka;
 
     private final JkPluginScaffold scaffold;
 
@@ -46,26 +47,24 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates Idea [my-module].iml file.")
     public void iml() {
         final JkImlGenerator generator;
-        JkJavaProjectIde projectIde = JkPluginEclipse.getProjectIde(getCommands());
+        JkCommands commands = getCommands();
+        JkJavaProjectIde projectIde = JkPluginEclipse.getProjectIde(commands);
         if (projectIde != null) {
             generator = JkImlGenerator.of(projectIde);
         } else {
-            generator = JkImlGenerator.of(getCommands().getBaseDir());
+            generator = JkImlGenerator.of(commands.getBaseDir());
         }
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
-        final List<Path> depProjects = getCommands().getImportedCommands().getImportedRunRoots();
+        final List<Path> depProjects = commands.getImportedCommands().getImportedCommandRoots();
         generator.setUseVarPath(useVarPath);
-        generator.setDefDependencies(externalDir ? null : getCommands().getDefDependencyResolver(),
-                getCommands().getDefDependencies());
+        JkDependencySet defDependencies = commands.getDefDependencies();
+        generator.setDefDependencies(commands.getDefDependencyResolver(), defDependencies);
         generator.setImportedProjects(depProjects);
-        Path basePath = getCommands().getBaseDir();
-        if (getCommands().getPlugins().hasLoaded(JkPluginJava.class)) {
-            JkJavaProject project = getCommands().getPlugins().get(JkPluginJava.class).getProject();
+        Path basePath = commands.getBaseDir();
+        if (commands.getPlugins().hasLoaded(JkPluginJava.class)) {
+            JkJavaProject project = commands.getPlugins().get(JkPluginJava.class).getProject();
             generator.setSourceJavaVersion(project.getCompileSpec().getSourceVersion());
             generator.setForceJdkVersion(forceJdkVersion);
-            if (externalDir) {
-                basePath = project.getBaseDir();
-            }
         }
         final String xml = generator.generate();
         final Path imlFile = findIml(basePath);

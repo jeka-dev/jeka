@@ -11,7 +11,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
+/*
  * Contains description for all concrete plugins in current classpath.
  * <p>
  * Jeka offers a very simple, yet powerful, plugin mechanism.<br/>

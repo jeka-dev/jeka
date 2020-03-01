@@ -64,7 +64,7 @@ public final class JkImportedCommands {
         return result;
     }
 
-    public List<Path> getImportedRunRoots() {
+    public List<Path> getImportedCommandRoots() {
         return importedRunRoots;
     }
 

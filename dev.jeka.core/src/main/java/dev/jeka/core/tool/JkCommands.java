@@ -37,7 +37,7 @@ public class JkCommands {
 
     private final Path baseDir;
 
-    private JkRunPlugins plugins;
+    private JkCommandsPlugins plugins;
 
     private JkDependencyResolver defDependencyResolver;
 
@@ -67,7 +67,7 @@ public class JkCommands {
         this.importedCommands = JkImportedCommands.of(this);
 
         // Instantiate plugins
-        this.plugins = new JkRunPlugins(this, Environment.commandLine.getPluginOptions());
+        this.plugins = new JkCommandsPlugins(this, Environment.commandLine.getPluginOptions());
     }
 
     /**
@@ -84,11 +84,12 @@ public class JkCommands {
 
     void initialise() {
         setup();
+
         // initialise imported project after setup to let a chance master commands to modify imported commands
         // in the setup method.
         importedCommands.getDirects().forEach(JkCommands::initialise);
 
-        for (JkPlugin plugin : new LinkedList<>(plugins.getAll())) {
+        for (JkPlugin plugin : new LinkedList<>(plugins.getLoadedPlugins())) {
             List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
             JkLog.startTask("Activating plugin " + plugin.name() + " with options " + HelpDisplayer.optionValues(defs));
             try {
@@ -123,9 +124,9 @@ public class JkCommands {
 
         // Load plugins declared in command line and inject options
         jkCommands.plugins.loadCommandLinePlugins();
-        List<JkPlugin> plugins = jkCommands.getPlugins().getAll();
+        List<JkPlugin> plugins = jkCommands.getPlugins().getLoadedPlugins();
         for (JkPlugin plugin : plugins) {
-            if (!jkCommands.plugins.getAll().contains(plugin)) {
+            if (!jkCommands.plugins.getLoadedPlugins().contains(plugin)) {
                 jkCommands.plugins.injectOptions(plugin);
             }
         }
@@ -178,7 +179,7 @@ public class JkCommands {
     /**
      * Returns the container of loaded plugins for this instance.
      */
-    public JkRunPlugins getPlugins() {
+    public JkCommandsPlugins getPlugins() {
         return this.plugins;
     }
 

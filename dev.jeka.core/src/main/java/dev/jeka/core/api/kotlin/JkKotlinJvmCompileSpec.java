@@ -18,7 +18,7 @@ import java.util.*;
  * Stands for a compilation settings as source and target version, encoding, annotation processing
  * or any option supported by the compileRunner.
  */
-public final class JkKotlinCompileSpec {
+public final class JkKotlinJvmCompileSpec {
 
     public static final String SOURCE_OPTS = "-source";
 
@@ -36,15 +36,15 @@ public final class JkKotlinCompileSpec {
 
     private final List<Path> sourceFiles = new LinkedList<>();
 
-    private JkKotlinCompileSpec() {
+    private JkKotlinJvmCompileSpec() {
     }
 
-    public static JkKotlinCompileSpec of() {
-        return new JkKotlinCompileSpec();
+    public static JkKotlinJvmCompileSpec of() {
+        return new JkKotlinJvmCompileSpec();
     }
 
-    public JkKotlinCompileSpec copy() {
-        JkKotlinCompileSpec result = new JkKotlinCompileSpec();
+    public JkKotlinJvmCompileSpec copy() {
+        JkKotlinJvmCompileSpec result = new JkKotlinJvmCompileSpec();
         result.options.addAll(options);
         result.sourceFiles.addAll(sourceFiles);
         return result;
@@ -65,7 +65,7 @@ public final class JkKotlinCompileSpec {
         return path == null ? null : Paths.get(path);
     }
 
-    public JkKotlinCompileSpec setOutputDir(Path outputDir) {
+    public JkKotlinJvmCompileSpec setOutputDir(Path outputDir) {
         return addOptions(OUTPUT_DIR_OPTS, outputDir.toString());
     }
 
@@ -86,7 +86,7 @@ public final class JkKotlinCompileSpec {
      * {@link JkJavaCompiler} can choose to use the appropriate compileRunner to compile to the
      * specified target.
      */
-    public JkKotlinCompileSpec setTargetVersion(JkJavaVersion version) {
+    public JkKotlinJvmCompileSpec setTargetVersion(JkJavaVersion version) {
         if (version == null) {
             return this;
         }
@@ -98,11 +98,11 @@ public final class JkKotlinCompileSpec {
     }
 
     /**
-     * Creates a copy of this {@link JkKotlinCompileSpec} but using the
+     * Creates a copy of this {@link JkKotlinJvmCompileSpec} but using the
      * specified source encoding (e.g. UTF-8). If <code>null</code> is specified,
      * then default plateform encoding will be used.
      */
-    public JkKotlinCompileSpec setEncoding(String encoding) {
+    public JkKotlinJvmCompileSpec setEncoding(String encoding) {
         if (encoding == null) {
             return this;
         }
@@ -115,7 +115,7 @@ public final class JkKotlinCompileSpec {
      * Adds specified source files to the set of java sources to compile.
      *
      **/
-    public JkKotlinCompileSpec addSources(Iterable<Path> paths) {
+    public JkKotlinJvmCompileSpec addSources(Iterable<Path> paths) {
         List<Path> files = JkUtilsPath.disambiguate(paths);
         for (final Path file : files) {
             if (Files.isDirectory(file)) {
@@ -127,14 +127,14 @@ public final class JkKotlinCompileSpec {
         return this;
     }
 
-    public JkKotlinCompileSpec addSources(JkPathTree tree) {
+    public JkKotlinJvmCompileSpec addSources(JkPathTree tree) {
         if (!tree.isDefineMatcher()) {
             return addSources(tree.getRoot());
         }
         return addSources(tree.getFiles());
     }
 
-    public JkKotlinCompileSpec addSources(JkPathTreeSet treeSet) {
+    public JkKotlinJvmCompileSpec addSources(JkPathTreeSet treeSet) {
         treeSet.getPathTrees().forEach(this::addSources);
         return this;
     }
@@ -142,7 +142,7 @@ public final class JkKotlinCompileSpec {
     /**
      * @see #addSources(Iterable)
      */
-    public JkKotlinCompileSpec addSources(Path path1, Path path2, Path... files) {
+    public JkKotlinJvmCompileSpec addSources(Path path1, Path path2, Path... files) {
         return addSources(JkUtilsIterable.listOf2orMore(path1, path2, files));
     }
 
@@ -159,7 +159,7 @@ public final class JkKotlinCompileSpec {
      * Creates a copy of this {@link JkJavaCompiler} but with the specified
      * classpath.
      */
-    public JkKotlinCompileSpec setClasspath(Iterable<Path> files) {
+    public JkKotlinJvmCompileSpec setClasspath(Iterable<Path> files) {
         final String classpath = JkClasspath.of(files).toString();
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
@@ -174,14 +174,14 @@ public final class JkKotlinCompileSpec {
      * to <code>javac -deprecation -cp path1 path2</code>, you should pass "-deprecation",
      * "-cp", "path1", "path2" parameters.
      */
-    public JkKotlinCompileSpec addOptions(String... options) {
+    public JkKotlinJvmCompileSpec addOptions(String... options) {
         return this.addOptions(Arrays.asList(options));
     }
 
     /**
      * See {@link #addOptions(String...)}
      */
-    public JkKotlinCompileSpec addOptions(Iterable<String> options) {
+    public JkKotlinJvmCompileSpec addOptions(Iterable<String> options) {
         options.forEach(option -> this.options.add(option));
         return this;
     }
@@ -191,7 +191,7 @@ public final class JkKotlinCompileSpec {
      * So if you want to explicitly set such an option it is desirable to remove current value
      * instead of adding it at the queue of options. This method does this for you.
      */
-    public JkKotlinCompileSpec setOption(String optionName, String optionValue) {
+    public JkKotlinJvmCompileSpec setOption(String optionName, String optionValue) {
         addOrReplace(optionName, optionValue);
         return this;
     }
@@ -201,21 +201,21 @@ public final class JkKotlinCompileSpec {
     /**
      * Sets specified annotation classes instead of using the ones discovered by default Java 6 mechanism.
      */
-    public JkKotlinCompileSpec setAnnotationProcessors(String... annotationProcessorClassNames) {
+    public JkKotlinJvmCompileSpec setAnnotationProcessors(String... annotationProcessorClassNames) {
         return setOption(PROCESSOR_OPTS, JkUtilsString.join(annotationProcessorClassNames, ","));
     }
 
     /**
      * Disable annotation processing.
      */
-    public JkKotlinCompileSpec disableAnnotationProcessing() {
+    public JkKotlinJvmCompileSpec disableAnnotationProcessing() {
         return addOptions("-proc:none");
     }
 
     /**
      * Only process annotation.
      */
-    public JkKotlinCompileSpec setAnnotationProcessingOnly() {
+    public JkKotlinJvmCompileSpec setAnnotationProcessingOnly() {
         return addOptions("-proc:only");
     }
 

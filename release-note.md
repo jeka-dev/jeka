@@ -1,5 +1,7 @@
 # 0.8.17
-* Better console output for Commands initialization
+* Api Polish : `JkCommands` renamed to `JkCommandSet`
+* Plugins can declare compatibility constrains on Jeka version
+* Better console output for `JkCommandSet` initialization
 * Fix JkInterpolator#and
 
 # 0.8.16

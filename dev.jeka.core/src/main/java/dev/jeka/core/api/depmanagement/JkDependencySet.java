@@ -249,7 +249,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     /**
      * Returns a clone of this dependencySet but removing the last element if the specified condition is met.
      */
-    public JkDependencySet withoutLastIf(boolean condition) {
+    public JkDependencySet minusLastIf(boolean condition) {
         if (!condition) {
             return this;
         }
@@ -518,7 +518,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      * the one with the lower or unspecified version.
      * It has been introduced to satisfy https://github.com/jerkar/jeka/issues/135
      */
-    public JkDependencySet withoutDuplicate() {
+    public JkDependencySet minusDuplicates() {
         Map<JkModuleId, JkVersion> moduleIdVersionMap = new HashMap<>();
         for (JkScopedDependency scopedDependency : this.dependencies) {
             JkDependency dependency = scopedDependency.getDependency();
