@@ -1,4 +1,4 @@
-# 0.8.18 (ongoing)
+# 0.8.18
 * Api Polish : `JkCommands` renamed to `JkCommandSet`
 * Api Polish : `JkImportProject` renamed to `JkDefImport`
 * Api Polish : `JkImport` renamed to `JkDefClasspath`
