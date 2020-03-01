@@ -196,14 +196,18 @@ final class Engine {
 
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
-        if (!this.rootsOfImportedCommandSets.isEmpty()) {
-            JkLog.info("Compile command classes of dependent projects : "
+        boolean compileImports = !this.rootsOfImportedCommandSets.isEmpty();
+        if (compileImports) {
+            JkLog.startTask("Compile command classes of dependent projects : "
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedCommandSets));
         }
         for (final Path file : this.rootsOfImportedCommandSets) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries);
             pathSequence = pathSequence.and(file);
+        }
+        if (compileImports) {
+            JkLog.endTask();
         }
         return pathSequence;
     }
