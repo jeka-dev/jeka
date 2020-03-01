@@ -24,7 +24,7 @@ of any build-code / configuration / script.
 
 # News 
 
-* Jeka 0.8.18.RELEASE introduces major API Breaks see [relelease note](https://github.com/jerkar/jeka/blob/master/release-note.md)
+* Jeka 0.8.18.RELEASE introduces major API Breaks see [relelease note](https://github.com/jerkar/jeka/releases/tag/0.8.18.RELEASE)
 
 * Jeka has joined OW2 organisation on january 2020 : https://projects.ow2.org/view/jeka/
 
