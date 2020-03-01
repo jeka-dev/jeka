@@ -6,26 +6,26 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
- * Plugin instances are owned by a <code>JkCommands</code> instance. The relationship is bidirectional :
- * <code>JkCommands</code> instances can invoke plugin methods and vice-versa.<p>
+ * Plugin instances are owned by a <code>JkCommandSet</code> instance. The relationship is bidirectional :
+ * <code>JkCommandSet</code> instances can invoke plugin methods and vice-versa.<p>
  *
- * Therefore plugins can interact with (or load) other plugins from the owning <code>JkCommands</code> instance
+ * Therefore plugins can interact with (or load) other plugins from the owning <code>JkCommandSet</code> instance
  * (which is a quite common pattern).
  */
 public abstract class JkPlugin {
 
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
-    private final JkCommands commands;
+    private final JkCommandSet commandSet;
 
     /*
-     * Plugin instances are likely to be configured by the owning <code>JkCommands</code> instance, before options
+     * Plugin instances are likely to be configured by the owning <code>JkCommandSet</code> instance, before options
      * are injected.
      * If a plugin needs to initialize state before options are injected, you have to do it in the
      * constructor.
      */
-    protected JkPlugin(JkCommands commands) {
-        this.commands = commands;
+    protected JkPlugin(JkCommandSet commandSet) {
+        this.commandSet = commandSet;
         if (getLowestJekaCompatibleVersion() != null && JkInfo.getJekaVersion() != null) {
             JkVersion runningJekaVersion = JkVersion.of(JkInfo.getJekaVersion());
             JkVersion minVersion = JkVersion.of(getLowestJekaCompatibleVersion());
@@ -74,8 +74,8 @@ public abstract class JkPlugin {
         return JkUtilsString.uncapitalize(suffix);
     }
 
-    protected JkCommands getCommands() {
-        return commands;
+    protected JkCommandSet getCommandSet() {
+        return commandSet;
     }
 
     @Override

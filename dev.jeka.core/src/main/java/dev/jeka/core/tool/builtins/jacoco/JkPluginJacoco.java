@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.jacoco;
 
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
@@ -16,7 +16,7 @@ public class JkPluginJacoco extends JkPlugin {
      */
     public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
 
-    protected JkPluginJacoco(JkCommands run) {
+    protected JkPluginJacoco(JkCommandSet run) {
         super(run);
     }
 
@@ -24,7 +24,7 @@ public class JkPluginJacoco extends JkPlugin {
             + OUTPUT_RELATIVE_PATH + " file.")
     @Override
     protected void activate() {
-        JkPluginJava pluginJava = getCommands().getPlugins().get(JkPluginJava.class);
+        JkPluginJava pluginJava = getCommandSet().getPlugins().get(JkPluginJava.class);
         final JkJavaProject project = pluginJava.getProject();
         final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getMaker().getOutLayout()
               .getOutputPath(OUTPUT_RELATIVE_PATH));

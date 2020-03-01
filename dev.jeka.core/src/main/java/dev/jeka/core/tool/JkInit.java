@@ -22,7 +22,7 @@ public final class JkInit {
     /**
      * Creates an instance of the specified command class and displays information about this class andPrepending environment.
      */
-    public static <T extends JkCommands> T instanceOf(Class<T> clazz, String... args) {
+    public static <T extends JkCommandSet> T instanceOf(Class<T> clazz, String... args) {
         JkLog.registerHierarchicalConsoleHandler();
         Environment.initialize(args);
         JkLog.Verbosity verbosity = JkLog.verbosity();
@@ -30,7 +30,7 @@ public final class JkInit {
             JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
         }
         displayInfo();
-        final T jkCommands = JkCommands.of(clazz);
+        final T jkCommands = JkCommandSet.of(clazz);
         JkLog.info("Jeka commands are ready to be executed.");
         JkLog.setVerbosity(verbosity);
         return jkCommands;

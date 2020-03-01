@@ -4,16 +4,14 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.depmanagement.JkVersionProvider;
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectMaker;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
 
 /**
  * This should be run with org.jerkar.samples as working dir.
  */
-public class PureApiBuild extends JkCommands {
+public class PureApiBuild extends JkCommandSet {
 
     public void doDefault() {
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.getBaseDir());

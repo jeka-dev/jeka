@@ -7,12 +7,12 @@ import java.lang.annotation.Target;
 
 /**
  * Adds a Jeka project def classpath to the Jeka project where this annotation is declared.
- * Typically, the annotated element is a a class from 'jeka/def' source directory.
- * When used on a public field of type  <code>JkCommands</code> the annotated field is
- * injected with the instance of the imported project.
+ * Typically, the annotated element is a <code>JkCommandSet</code> class from 'jeka/def' source directory.
+ * But when used on a public field of type  <code>JkCommandSet</code> within a <code>JkCommandSet</code> class,
+ * the annotated field is injected with an initialised <code>JkCommandSet</code> instance of the imported project.
  *
  * Examples : <code>@JkImportProject("../importedProject")</code>
- * a {@link JkCommands} field with value <code>../FooB</code>.
+ * a {@link JkCommandSet} field with value <code>../FooB</code>.
  * 
  * @author Jerome Angibaud
  */

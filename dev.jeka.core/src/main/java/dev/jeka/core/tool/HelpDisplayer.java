@@ -17,18 +17,18 @@ import java.util.stream.Collectors;
 
 final class HelpDisplayer {
 
-    static void help(JkCommands jkCommands) {
+    static void help(JkCommandSet jkCommandSet) {
         if (JkOptions.containsKey("Plugins")) {
-            helpPlugins(jkCommands);
+            helpPlugins(jkCommandSet);
             return;
         }
         StringBuilder sb = new StringBuilder()
                 .append("Usage: \n\njeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
-                .append("Executes the specified methods defined in command class or plugins using the specified options and system properties.\n\n")
+                .append("Executes the specified methods defined in commandSet class or plugins using the specified options and system properties.\n\n")
                 .append("Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
                 .append("\nAvailable methods and options :\n")
-                .append(RunClassDef.of(jkCommands).description());
+                .append(RunClassDef.of(jkCommandSet).description());
 
         // List plugins
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
@@ -52,7 +52,7 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    static void help(JkCommands run, Path xmlFile) {
+    static void help(JkCommandSet run, Path xmlFile) {
         final Document document = JkUtilsXml.createDocument();
         final Element runEl = RunClassDef.of(run).toElement(document);
         document.appendChild(runEl);
@@ -69,30 +69,30 @@ final class HelpDisplayer {
         }
     }
 
-    private static void helpPlugins(JkCommands jkCommands) {
-        JkLog.info(helpPluginsDescription(jkCommands));
+    private static void helpPlugins(JkCommandSet jkCommandSet) {
+        JkLog.info(helpPluginsDescription(jkCommandSet));
     }
 
     static void helpPlugin(JkPlugin plugin) {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         for (PluginDescription pluginDescription : pluginDescriptions) {
             if (pluginDescription.shortName().equals(plugin.name())) {
-                JkLog.info(helpPluginDescription(plugin.getCommands(), pluginDescription));
+                JkLog.info(helpPluginDescription(plugin.getCommandSet(), pluginDescription));
                 return;
             }
         }
     }
 
-    private static String helpPluginsDescription(JkCommands jkCommands) {
+    private static String helpPluginsDescription(JkCommandSet jkCommandSet) {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         StringBuilder sb = new StringBuilder();
         for (final PluginDescription description : pluginDescriptions) {
-            sb.append(helpPluginDescription(jkCommands, description));
+            sb.append(helpPluginDescription(jkCommandSet, description));
         }
         return sb.toString();
     }
 
-    private static String helpPluginDescription(JkCommands jkCommands, PluginDescription description) {
+    private static String helpPluginDescription(JkCommandSet jkCommandSet, PluginDescription description) {
         StringBuilder sb = new StringBuilder();
         sb.append("\nPlugin Class : " + description.fullName());
         sb.append("\nPlugin Name : " + description.shortName());
@@ -117,10 +117,10 @@ final class HelpDisplayer {
             sb.append("\nActivation Effect : Not documented.");
         }
         final JkPlugin plugin;
-        if (jkCommands.getPlugins().hasLoaded(description.pluginClass())) {
-            plugin = jkCommands.getPlugin(description.pluginClass());
+        if (jkCommandSet.getPlugins().hasLoaded(description.pluginClass())) {
+            plugin = jkCommandSet.getPlugin(description.pluginClass());
         } else {
-            plugin = JkUtilsReflect.newInstance(description.pluginClass(), JkCommands.class, jkCommands);
+            plugin = JkUtilsReflect.newInstance(description.pluginClass(), JkCommandSet.class, jkCommandSet);
         }
         sb.append("\n");
         sb.append(RunClassDef.of(plugin).flatDescription(description.shortName() + "#"));

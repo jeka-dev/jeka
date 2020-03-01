@@ -45,7 +45,7 @@ final class Engine {
 
     private JkRepoSet defRepos;
 
-    private List<Path> rootOfImportedRuns = new LinkedList<>();
+    private List<Path> rootsOfImportedCommandSets = new LinkedList<>();
 
     private List<String> compileOptions = new LinkedList<>();
 
@@ -64,7 +64,7 @@ final class Engine {
         this.resolver = new CommandResolver(baseDir);
     }
 
-    <T extends JkCommands> T getCommands(Class<T> baseClass, boolean initialised) {
+    <T extends JkCommandSet> T getCommands(Class<T> baseClass, boolean initialised) {
         if (resolver.needCompile()) {
             this.compile();
         }
@@ -74,35 +74,35 @@ final class Engine {
     /**
      * Pre-compile and compile command classes (if needed) then execute methods mentioned in command line
      */
-    void execute(CommandLine commandLine, String runClassHint, JkLog.Verbosity verbosityToRestore) {
+    void execute(CommandLine commandLine, String commandSetClassHint, JkLog.Verbosity verbosityToRestore) {
         defDependencies = defDependencies.andScopelessDependencies(commandLine.dependencies());
         final long start = System.nanoTime();
-        JkLog.startTask("Compile def classes and initialise command classes");
-        JkCommands jkCommands = null;
+        JkLog.startTask("Compile def classes and initialise commandSet classes");
+        JkCommandSet jkCommandSet = null;
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
             path = path.andPrepending(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
-        preCompile();  // Need to pre-compile to get the declared run dependencies
-        if (!JkUtilsString.isBlank(runClassHint)) {  // First find a class in the existing classpath without compiling
-            jkCommands = getCommandsInstance(runClassHint, path);
+        preCompile();  // Need to pre-compile to get the declared def dependencies
+        if (!JkUtilsString.isBlank(commandSetClassHint)) {  // First find a class in the existing classpath without compiling
+            jkCommandSet = getCommandsInstance(commandSetClassHint, path);
         }
-        if (jkCommands == null) {
+        if (jkCommandSet == null) {
             path = compile().and(path);
-            jkCommands = getCommandsInstance(runClassHint, path);
-            if (jkCommands == null) {
+            jkCommandSet = getCommandsInstance(commandSetClassHint, path);
+            if (jkCommandSet == null) {
                 throw new JkException("Can't find or guess any command class for project hosted in " + this.projectBaseDir
                         + " .\nAre you sure this directory is a Jeka project ?");
             }
         }
-        jkCommands.getImportedCommands().setImportedRunRoots(this.rootOfImportedRuns);
+        jkCommandSet.getImportedCommandSets().setImportedRunRoots(this.rootsOfImportedCommandSets);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         JkLog.info("Jeka commands are ready to be executed.");
         JkLog.setVerbosity(verbosityToRestore);
         try {
-            this.launch(jkCommands, commandLine);
+            this.launch(jkCommandSet, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -123,7 +123,7 @@ final class Engine {
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.defDependencies = this.defDependencies.and(parser.dependencies());
         this.defRepos = parser.importRepos().and(defRepos);
-        this.rootOfImportedRuns = parser.projects();
+        this.rootsOfImportedCommandSets = parser.projects();
         this.compileOptions = parser.compileOptions();
     }
 
@@ -156,11 +156,11 @@ final class Engine {
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
-    private JkCommands getCommandsInstance(String commandClassHint, JkPathSequence runtimePath) {
+    private JkCommandSet getCommandsInstance(String commandClassHint, JkPathSequence runtimePath) {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
-        JkLog.trace("Setting run execution classpath to : " + classLoader.getDirectClasspath());
-        final JkCommands commands = resolver.resolve(commandClassHint);
+        JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
+        final JkCommandSet commands = resolver.resolve(commandClassHint);
         if (commands == null) {
             return null;
         }
@@ -196,11 +196,11 @@ final class Engine {
 
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
-        if (!this.rootOfImportedRuns.isEmpty()) {
+        if (!this.rootsOfImportedCommandSets.isEmpty()) {
             JkLog.info("Compile command classes of dependent projects : "
-                    + toRelativePaths(this.projectBaseDir, this.rootOfImportedRuns));
+                    + toRelativePaths(this.projectBaseDir, this.rootsOfImportedCommandSets));
         }
-        for (final Path file : this.rootOfImportedRuns) {
+        for (final Path file : this.rootsOfImportedCommandSets) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries);
             pathSequence = pathSequence.and(file);
@@ -229,20 +229,20 @@ final class Engine {
             runnable.run();
         } catch (final JkException e) {
             JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
-            JkLog.info("Compilation of Jeka files failed. You can run jeka -CC=JkCommands to use default commands " +
+            JkLog.info("Compilation of Jeka files failed. You can run jeka -CC=JkCommandSet to use default commands " +
                     " instead of the ones defined in 'def'.");
             throw e;
         }
     }
 
-    private void launch(JkCommands jkCommands, CommandLine commandLine) {
+    private void launch(JkCommandSet jkCommandSet, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkCommands importedCommands : jkCommands.getImportedCommands().getAll()) {
+            for (final JkCommandSet importedCommands : jkCommandSet.getImportedCommandSets().getAll()) {
                 runProject(importedCommands, commandLine.getSubProjectMethods());
             }
-            runProject(jkCommands, commandLine.getSubProjectMethods());
+            runProject(jkCommandSet, commandLine.getSubProjectMethods());
         }
-        runProject(jkCommands, commandLine.getMasterMethods());
+        runProject(jkCommandSet, commandLine.getMasterMethods());
     }
 
     private boolean hasKotlin() {
@@ -275,18 +275,19 @@ final class Engine {
         return JkDependencyResolver.of();
     }
 
-    private static void runProject(JkCommands jkCommands, List<CommandLine.MethodInvocation> invokes) {
+    private static void runProject(JkCommandSet jkCommandSet, List<CommandLine.MethodInvocation> invokes) {
         for (final CommandLine.MethodInvocation methodInvocation : invokes) {
-            invokeMethodCommandsOrPlugin(jkCommands, methodInvocation);
+            invokeMethodOnCommandSetOrPlugin(jkCommandSet, methodInvocation);
         }
     }
 
-    private static void invokeMethodCommandsOrPlugin(JkCommands jkCommands, CommandLine.MethodInvocation methodInvocation) {
+    private static void invokeMethodOnCommandSetOrPlugin(JkCommandSet commandSet,
+                                                         CommandLine.MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
-            final JkPlugin plugin = jkCommands.getPlugins().get(methodInvocation.pluginName);
+            final JkPlugin plugin = commandSet.getPlugins().get(methodInvocation.pluginName);
             invokeMethodOnCommandsOrPlugin(plugin, methodInvocation.methodName);
         } else {
-            invokeMethodOnCommandsOrPlugin(jkCommands, methodInvocation.methodName);
+            invokeMethodOnCommandsOrPlugin(commandSet, methodInvocation.methodName);
         }
     }
 

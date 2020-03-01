@@ -3,7 +3,7 @@ package dev.jeka.core.samples;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.depmanagement.JkScopeMapping;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
@@ -12,7 +12,7 @@ import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
 /**
  * This build illustrates how one can use other dependency scope mapping then the standard ones.
  */
-public class SimpleScopeBuild extends JkCommands {
+public class SimpleScopeBuild extends JkCommandSet {
 
     private static final JkScope FOO = JkScope.of("foo");
 

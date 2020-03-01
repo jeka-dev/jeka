@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * A resolver for the {@link JkCommands} to use for a given project.
+ * A resolver for the {@link JkCommandSet} to use for a given project.
  *
  * @author Jerome Angibaud
  */
@@ -32,17 +32,17 @@ final class CommandResolver {
     }
 
     /**
-     * Resolves the {@link JkCommands} instance to use on this project.
+     * Resolves the {@link JkCommandSet} instance to use on this project.
      */
-    JkCommands resolve(String classNameHint) {
-        return resolve(classNameHint, JkCommands.class, true);
+    JkCommandSet resolve(String classNameHint) {
+        return resolve(classNameHint, JkCommandSet.class, true);
     }
 
     /**
-     * Resolves the {@link JkCommands} instance to use on this project.
+     * Resolves the {@link JkCommandSet} instance to use on this project.
      */
     @SuppressWarnings("unchecked")
-    <T extends JkCommands> T resolve(Class<T> baseClass, boolean initialised) {
+    <T extends JkCommandSet> T resolve(Class<T> baseClass, boolean initialised) {
         return (T) resolve(null, baseClass, initialised);
     }
 
@@ -82,22 +82,22 @@ final class CommandResolver {
     }
 
     @SuppressWarnings("unchecked")
-    private JkCommands resolve(String classNameHint, Class<? extends JkCommands> baseClass, boolean initialised) {
+    private JkCommandSet resolve(String classNameHint, Class<? extends JkCommandSet> baseClass, boolean initialised) {
 
         // If class name specified in options.
         if (!JkUtilsString.isBlank(classNameHint)) {
-            final Class<? extends JkCommands> clazz = JkInternalClasspathScanner.INSTANCE
-                    .loadClassesHavingNameOrSimpleName(classNameHint, JkCommands.class);
+            final Class<? extends JkCommandSet> clazz = JkInternalClasspathScanner.INSTANCE
+                    .loadClassesHavingNameOrSimpleName(classNameHint, JkCommandSet.class);
             if (clazz == null) {
                 JkLog.warn("No commands class found with name " + classNameHint);
                 return null;
             }
-            JkCommands.baseDirContext(baseDir);
-            final JkCommands run;
+            JkCommandSet.baseDirContext(baseDir);
+            final JkCommandSet run;
             try {
-                run = initialised ? JkCommands.of(clazz) : JkCommands.ofUninitialised(clazz);
+                run = initialised ? JkCommandSet.of(clazz) : JkCommandSet.ofUninitialised(clazz);
             } finally {
-                JkCommands.baseDirContext(null);
+                JkCommandSet.baseDirContext(null);
             }
             return run;
         }
@@ -110,12 +110,12 @@ final class CommandResolver {
                     final Class<?> clazz = JkClassLoader.ofCurrent().loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
-                        JkCommands.baseDirContext(baseDir);
-                        final JkCommands run;
+                        JkCommandSet.baseDirContext(baseDir);
+                        final JkCommandSet run;
                         try {
-                            run = JkCommands.of((Class<? extends JkCommands>) clazz);
+                            run = JkCommandSet.of((Class<? extends JkCommandSet>) clazz);
                         } finally {
-                            JkCommands.baseDirContext(null);
+                            JkCommandSet.baseDirContext(null);
                         }
                         return run;
                     }
@@ -125,12 +125,12 @@ final class CommandResolver {
         }
 
         // If nothing yet found use defaults
-        JkCommands.baseDirContext(baseDir);
-        final JkCommands result;
+        JkCommandSet.baseDirContext(baseDir);
+        final JkCommandSet result;
         try {
-            result = JkCommands.of(JkConstants.DEFAULT_COMMAND_CLASS);
+            result = JkCommandSet.of(JkConstants.DEFAULT_COMMAND_CLASS);
         } finally {
-            JkCommands.baseDirContext(null);
+            JkCommandSet.baseDirContext(null);
         }
         return result;
     }

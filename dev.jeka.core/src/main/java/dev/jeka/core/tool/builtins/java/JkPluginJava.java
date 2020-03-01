@@ -58,13 +58,13 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
 
     private JkJavaProject project;
 
-    protected JkPluginJava(JkCommands run) {
+    protected JkPluginJava(JkCommandSet run) {
         super(run);
         this.scaffoldPlugin = run.getPlugins().get(JkPluginScaffold.class);
         this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);
 
         // Pre-configure JkJavaProject instance
-        this.project = JkJavaProject.ofMavenLayout(this.getCommands().getBaseDir());
+        this.project = JkJavaProject.ofMavenLayout(this.getCommandSet().getBaseDir());
         this.project.setDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
         final Path path = run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
@@ -113,7 +113,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
         if (pack.checksums().length > 0) {
             maker.getTasksForPackaging().setChecksumAlgorithms(pack.checksums());
         }
-        JkPluginPgp pgpPlugin = this.getCommands().getPlugins().get(JkPluginPgp.class);
+        JkPluginPgp pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginPgp.class);
         JkGpg pgp = pgpPlugin.get();
         maker.getTasksForPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
 
@@ -137,7 +137,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
 
     private void setupScaffolder() {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
-        String baseDirName = getCommands().getBaseDir().getFileName().toString();
+        String baseDirName = getCommandSet().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
         project.getSourceLayout().getSources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());

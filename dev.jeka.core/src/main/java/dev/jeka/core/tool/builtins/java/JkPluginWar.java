@@ -8,7 +8,7 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
@@ -31,7 +31,7 @@ public class JkPluginWar extends JkPlugin {
 
     private final JkJavaProjectMaker maker;
 
-    public JkPluginWar(JkCommands run) {
+    public JkPluginWar(JkCommandSet run) {
         super(run);
         this.staticResourceDir = run.getBaseDir().resolve("src/main/webapp/static");
         this.maker = run.getPlugin(JkPluginJava.class).getProject().getMaker();
@@ -40,7 +40,7 @@ public class JkPluginWar extends JkPlugin {
     @JkDoc("Add a war file to the generated artifacts.")
     @Override  
     protected void activate() {
-        JkPluginJava pluginJava = this.getCommands().getPlugin(JkPluginJava.class);
+        JkPluginJava pluginJava = this.getCommandSet().getPlugin(JkPluginJava.class);
         JkJavaProject project = pluginJava.getProject();
         JkArtifactId warArtifactId = JkArtifactId.of(null, "war");
         maker.putArtifact(warArtifactId, () -> {

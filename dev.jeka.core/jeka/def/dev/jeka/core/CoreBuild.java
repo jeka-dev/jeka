@@ -11,7 +11,7 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
@@ -31,7 +31,7 @@ import static dev.jeka.core.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT
  * Build class for Jeka. Run main method to create full distrib.
  * For publishing in OSSRH the following options must be set : -ossrhPwd=Xxxxxx -pgp#secretKeyPassword=Xxxxxxx
  */
-public class CoreBuild extends JkCommands {
+public class CoreBuild extends JkCommandSet {
 
     private static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 

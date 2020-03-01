@@ -38,7 +38,7 @@ public final class JkPluginIntellij extends JkPlugin {
 
     private final JkPluginScaffold scaffold;
 
-    protected JkPluginIntellij(JkCommands run) {
+    protected JkPluginIntellij(JkCommandSet run) {
         super(run);
         scaffold = run.getPlugins().get(JkPluginScaffold.class);
     }
@@ -47,7 +47,7 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates Idea [my-module].iml file.")
     public void iml() {
         final JkImlGenerator generator;
-        JkCommands commands = getCommands();
+        JkCommandSet commands = getCommandSet();
         JkJavaProjectIde projectIde = JkPluginEclipse.getProjectIde(commands);
         if (projectIde != null) {
             generator = JkImlGenerator.of(projectIde);
@@ -55,7 +55,7 @@ public final class JkPluginIntellij extends JkPlugin {
             generator = JkImlGenerator.of(commands.getBaseDir());
         }
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
-        final List<Path> depProjects = commands.getImportedCommands().getImportedCommandRoots();
+        final List<Path> depProjects = commands.getImportedCommandSets().getImportedCommandRoots();
         generator.setUseVarPath(useVarPath);
         JkDependencySet defDependencies = commands.getDefDependencies();
         generator.setDefDependencies(commands.getDefDependencyResolver(), defDependencies);
@@ -107,8 +107,8 @@ public final class JkPluginIntellij extends JkPlugin {
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file.")
     public void modulesXml() {
-        final Path current = getCommands().getBaseTree().getRoot();
-        final Iterable<Path> imls = getCommands().getBaseTree().andMatching(true,"**.iml").getFiles();
+        final Path current = getCommandSet().getBaseTree().getRoot();
+        final Iterable<Path> imls = getCommandSet().getBaseTree().andMatching(true,"**.iml").getFiles();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
         JkLog.info("File generated at : " + modulesXmlGenerator.outputFile());
@@ -116,7 +116,7 @@ public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void allIml() {
-        final Iterable<Path> folders = getCommands().getBaseTree()
+        final Iterable<Path> folders = getCommandSet().getBaseTree()
                 .andMatching(true, "**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andMatching(false, "**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());
@@ -126,13 +126,13 @@ public final class JkPluginIntellij extends JkPlugin {
             try {
                 Main.exec(projectFolder, "intellij#iml");
             } catch (Exception e) {
-                JkLog.warn("Generating Iml failed : Try to generate it using -CC=JkCommands option. Failure cause : ");
+                JkLog.warn("Generating Iml failed : Try to generate it using -CC=JkCommandSet option. Failure cause : ");
                 JkLog.warn(e.getMessage());
                 PrintWriter printWriter = new PrintWriter(JkLog.getErrorStream());
                 e.printStackTrace(printWriter);
                 printWriter.flush();
                 try {
-                    Main.exec(projectFolder, "intellij#iml", "-CC=JkCommands");
+                    Main.exec(projectFolder, "intellij#iml", "-CC=JkCommandSet");
                 } catch (Exception e1) {
                     JkLog.warn("Generating Iml file failed;");
                 }

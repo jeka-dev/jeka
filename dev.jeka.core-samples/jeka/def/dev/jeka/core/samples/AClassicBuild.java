@@ -8,7 +8,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkCompileOption;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
@@ -30,7 +30,7 @@ import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
  */
 @JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 @JkCompileOption("-deprecation")
-public class AClassicBuild extends JkCommands {
+public class AClassicBuild extends JkCommandSet {
 
     public final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 

@@ -3,7 +3,7 @@ package dev.jeka.core.tool.builtins.repos;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.JkRepoConfigOptionLoader;
@@ -52,7 +52,7 @@ public class JkPluginRepo extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    protected JkPluginRepo(JkCommands run) {
+    protected JkPluginRepo(JkCommandSet run) {
         super(run);
     }
 

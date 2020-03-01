@@ -2,7 +2,7 @@ package dev.jeka.core.samples;
 
 import com.google.common.base.MoreObjects;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
@@ -23,7 +23,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
  */
 @JkImport("commons-httpclient:commons-httpclient:3.1")
 @JkImport("com.google.guava:guava:21.0")
-public class HttpClientTaskBuild extends JkCommands {
+public class HttpClientTaskBuild extends JkCommandSet {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
     

@@ -2,7 +2,7 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.tool.JkCommands;
+import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
@@ -13,7 +13,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
 /**
  * This command class deletes artifacts, compiles, tests and launches SonarQube analyse.
  */
-public class JacocoPluginBuild extends JkCommands {
+public class JacocoPluginBuild extends JkCommandSet {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 

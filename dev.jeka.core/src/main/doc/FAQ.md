@@ -1,6 +1,6 @@
 # General
 
-### Can command classes and code to build be hosted in separate projects ?
+### Can def classes be hosted in separate project than the code to build ?
 Of course yes. If you prefer that your Jeka code lies in a distinct project, create a Jeka project in a sibling 
 folder and mention where is located the project to build.
 
@@ -13,10 +13,10 @@ protected void setup() {  // project to build lies in a sibling folder.
       ...
 ```
 
-### My command class does not compile so I can't invoke any Jeka method as 'help' or 'scaffold#run'. What can I do ?
+### My commandSet class does not compile so I can't invoke any Jeka method as 'help' or 'scaffold#run'. What can I do ?
 
-You can specify a built-in command class to run. This way, compilation won't occur.
-For example `jeka -CommandClass=JkCommandshelp` or `jeka -CC=JkCommands scaffold#run java#"`.
+You can specify a built-in commandSet class to run. This way, compilation won't occur.
+For example `jeka -CommandClass=JkCommandSet` or `jeka -CC=JkCommandSet scaffold#run java#"`.
 
 # Compilation
 
@@ -43,7 +43,7 @@ Jeka can use any JSR199 Java compiler to compile your Java code. Just set the co
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
-public class Build extends JkCommands{
+public class Build extends JkCommandSet{
     ...
     maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
     ...
@@ -52,7 +52,7 @@ public class Build extends JkCommands{
 
 ### How can I generate Eclipse/Intellij without using Java plugin (JkPluginJava) ?
 
-Just make your command class implements `dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier`.
+Just make your commandSet class implements `dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier`.
 
 
 

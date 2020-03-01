@@ -8,24 +8,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Set of plugin instances loaded in a {@link JkCommands}.
+ * Set of plugin instances loaded in a {@link JkCommandSet}.
  */
-public final class JkCommandsPlugins {
+public final class JkCommandSetPlugins {
 
-    private final JkCommands holder;
+    private final JkCommandSet holder;
 
     private final List<JkPlugin> loadedPlugins = new LinkedList<>();
 
     private final List<PluginOptions> pluginOptionsList;
 
-    JkCommandsPlugins(JkCommands holder, List<PluginOptions> pluginOptionsList) {
+    JkCommandSetPlugins(JkCommandSet holder, List<PluginOptions> pluginOptionsList) {
         super();
         this.holder = holder;
         this.pluginOptionsList = Collections.unmodifiableList(new ArrayList<>(pluginOptionsList));
     }
 
     /**
-     * Returns the plugin instance of the specified class loaded in the holding JkCommands instance. If it does not hold
+     * Returns the plugin instance of the specified class loaded in the holding JkCommandSet instance. If it does not hold
      * a plugin of the specified class at call time, the plugin is loaded then returned.
      */
     public <T extends JkPlugin> T get(Class<T> pluginClass) {
@@ -33,7 +33,7 @@ public final class JkCommandsPlugins {
     }
 
     /**
-     * Returns the plugin instance of the specified name loaded in the holding JkCommands instance. If it does not hold
+     * Returns the plugin instance of the specified name loaded in the holding JkCommandSet instance. If it does not hold
      * a plugin of the specified name at call time, the plugin is loaded then returned.<br/>
      * Caution : this method may be significantly slower than {@link #get(Class)} as it may involve classpath scanning.
      */
@@ -52,7 +52,7 @@ public final class JkCommandsPlugins {
     }
 
     /**
-     * Returns <code>true</code> if the specified plugin class has been loaded in the holding JkCommands instance.
+     * Returns <code>true</code> if the specified plugin class has been loaded in the holding JkCommandSet instance.
      */
     public boolean hasLoaded(Class<? extends JkPlugin> pluginClass) {
         return loadedPlugins.stream()
@@ -60,7 +60,7 @@ public final class JkCommandsPlugins {
     }
 
     /**
-     * Returns a list of all loaded plugins in the holding JkCommands instance.
+     * Returns a list of all loaded plugins in the holding JkCommandSet instance.
      */
     public List<JkPlugin> getLoadedPlugins() {
         return Collections.unmodifiableList(loadedPlugins);
@@ -84,7 +84,7 @@ public final class JkCommandsPlugins {
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }
-        final T plugin = JkUtilsReflect.newInstance(pluginClass, JkCommands.class, this.holder);
+        final T plugin = JkUtilsReflect.newInstance(pluginClass, JkCommandSet.class, this.holder);
         injectOptions(plugin);
         plugin.init();
         loadedPlugins.add(plugin);

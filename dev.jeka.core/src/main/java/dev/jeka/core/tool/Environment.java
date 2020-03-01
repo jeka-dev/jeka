@@ -110,7 +110,7 @@ class Environment {
 
         @Override
         public String toString() {
-            return "CommandClass=" + JkUtilsObject.toString(commandClass) + ", LogVerbose=" + logVerbose
+            return "CommandSetClass=" + JkUtilsObject.toString(commandClass) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logHeaders + ", LogMaxLength=" + logMaxLength;
         }
 
