@@ -24,7 +24,7 @@ of any build-code / configuration / script.
 
 # News 
 
-* Jeka 0.8.18.RELEASE introduces major API Breaks see [relelease note](https://github.com/jerkar/jeka/releases/tag/0.8.18.RELEASE)
+* Jeka 0.8.18.RELEASE introduces major API Breaks see [release note](https://github.com/jerkar/jeka/releases/tag/0.8.18.RELEASE)
 
 * Jeka has joined OW2 organisation on january 2020 : https://projects.ow2.org/view/jeka/
 
@@ -44,7 +44,7 @@ Jeka now uses these features to release itself.
 * Provide a plugin for Android
 * Integrate Kotlin as a first citizen language for both building Kotlin projects and write Jeka command classes.
 
-Please visit [relelease note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
+Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
 # Get Jeka
 
