@@ -57,8 +57,8 @@ public class JkRepoConfigOptionLoader {
     /**
      * Returns the repositories where are downloaded dependencies needed to execute the Jeka run.
      */
-    public static JkRepo runRepository() {
-        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.runName"), "run");
+    public static JkRepo defRepository() {
+        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.defName"), "def");
         JkRepo namedRepo = repoFromOptions(repoName);
         return JkUtilsObject.firstNonNull(namedRepo, downloadRepository());
     }

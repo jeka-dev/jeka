@@ -26,7 +26,7 @@ public final class JkImportedCommandSets {
 
     private List<JkCommandSet> transitiveImportedCommandSets;
 
-    // The declared @JkImportProject values, read at pre-compile time
+    // The declared @JkDefImport values, read at pre-compile time
     private List<Path> importedRunRoots = Collections.emptyList();
 
     private JkImportedCommandSets(List<JkCommandSet> runDeps) {
@@ -88,9 +88,9 @@ public final class JkImportedCommandSets {
     @SuppressWarnings("unchecked")
     private static List<JkCommandSet> getDirectImportedCommands(JkCommandSet masterCommands) {
         final List<JkCommandSet> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterCommands.getClass(), JkImportProject.class);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterCommands.getClass(), JkDefImport.class);
         for (final Field field : fields) {
-            final JkImportProject jkProject = field.getAnnotation(JkImportProject.class);
+            final JkDefImport jkProject = field.getAnnotation(JkDefImport.class);
             final JkCommandSet importedRun = createImportedCommands(
                     (Class<? extends JkCommandSet>) field.getType(), jkProject.value(), masterCommands.getBaseDir());
             try {

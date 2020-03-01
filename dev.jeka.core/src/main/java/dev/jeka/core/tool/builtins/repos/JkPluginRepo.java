@@ -52,8 +52,8 @@ public class JkPluginRepo extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    protected JkPluginRepo(JkCommandSet run) {
-        super(run);
+    protected JkPluginRepo(JkCommandSet commandSet) {
+        super(commandSet);
     }
 
     public JkRepo publishRepository() {

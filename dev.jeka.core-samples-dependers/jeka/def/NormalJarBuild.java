@@ -2,7 +2,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.samples.AClassicBuild;
 import dev.jeka.core.tool.JkCommandSet;
-import dev.jeka.core.tool.JkImportProject;
+import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
@@ -28,7 +28,7 @@ public class NormalJarBuild extends JkCommandSet {
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
-    @JkImportProject("../dev.jeka.core-samples")
+    @JkDefImport("../dev.jeka.core-samples")
     private AClassicBuild sampleBuild;
 
     @Override

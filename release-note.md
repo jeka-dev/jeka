@@ -1,6 +1,12 @@
-# 0.8.17
+# 0.8.18 (ongoing)
 * Api Polish : `JkCommands` renamed to `JkCommandSet`
+* Api Polish : `JkImportProject` renamed to `JkDefImport`
+* Api Polish : `JkImport` renamed to `JkDefClasspath`
+* Api Polish : `JkImportRepo` renamed to `JkDefRepo`
+* Api Polish : In configuration files, `repo.run.url` renamed to `repo.def.url`
 * Plugins can declare compatibility constrains on Jeka version
+
+# 0.8.17 
 * Better console output for `JkCommandSet` initialization
 * Fix JkInterpolator#and
 

@@ -319,7 +319,7 @@ final class Engine {
     }
 
     static JkRepoSet repos() {
-        return JkRepoSet.of(JkRepoConfigOptionLoader.runRepository(), JkRepo.ofLocal());
+        return JkRepoSet.of(JkRepoConfigOptionLoader.defRepository(), JkRepo.ofLocal());
     }
 
     private static List<String> toRelativePaths(Path from, List<Path>  files) {
