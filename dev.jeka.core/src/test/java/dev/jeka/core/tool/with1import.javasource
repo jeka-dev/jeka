@@ -10,8 +10,8 @@ import dev.jeka.core.api.utils.jekaUtilsIterable;
 /**
  * Blallaaa
  */
-@JkImportRepo("http://maven.central.repo")
-@JkImport
+@JkDefRepo("http://maven.central.repo")
+@JkDefClasspath
 ({
 	"commons-lang:commons-lang:2.6"
 })

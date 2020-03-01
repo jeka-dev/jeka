@@ -10,7 +10,7 @@ import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkCompileOption;
-import dev.jeka.core.tool.JkImport;
+import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
@@ -28,7 +28,7 @@ import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
  * @author Jerome Angibaud
  * @formatter:off
  */
-@JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
+@JkDefClasspath("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 @JkCompileOption("-deprecation")
 public class AClassicBuild extends JkCommandSet {
 

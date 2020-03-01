@@ -3,8 +3,8 @@ package dev.jeka.core.samples;
 import com.google.common.base.MoreObjects;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -21,8 +21,8 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
  * @author Jerome Angibaud
  * @formatter:off
  */
-@JkImport("commons-httpclient:commons-httpclient:3.1")
-@JkImport("com.google.guava:guava:21.0")
+@JkDefClasspath("commons-httpclient:commons-httpclient:3.1")
+@JkDefClasspath("com.google.guava:guava:21.0")
 public class HttpClientTaskBuild extends JkCommandSet {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);

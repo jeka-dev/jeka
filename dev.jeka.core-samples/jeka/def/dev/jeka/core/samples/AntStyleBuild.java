@@ -12,7 +12,7 @@ import dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkImport;
+import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
 
 import java.nio.file.Path;
@@ -23,7 +23,7 @@ import java.nio.file.Paths;
  * 
  * @author Jerome Angibaud
  */
-@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.6")
+@JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.6")
 public class AntStyleBuild extends JkCommandSet implements JkJavaProjectIdeSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");

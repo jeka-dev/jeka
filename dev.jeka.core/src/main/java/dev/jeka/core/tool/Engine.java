@@ -28,7 +28,7 @@ import java.util.*;
  *
  * Command classes can have dependencies on jars : <ul>
  *     <li>located in [base dir]/jeka/boot directory</li>
- *     <li>declared in {@link JkImport} annotation</li>
+ *     <li>declared in {@link JkDefClasspath} annotation</li>
  * </ul>
  */
 final class Engine {
@@ -77,7 +77,7 @@ final class Engine {
     void execute(CommandLine commandLine, String commandSetClassHint, JkLog.Verbosity verbosityToRestore) {
         defDependencies = defDependencies.andScopelessDependencies(commandLine.dependencies());
         final long start = System.nanoTime();
-        JkLog.startTask("Compile def classes and initialise commandSet classes");
+        JkLog.startTask("Compile def and initialise commandSet classes");
         JkCommandSet jkCommandSet = null;
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {

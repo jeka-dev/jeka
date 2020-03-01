@@ -280,8 +280,8 @@ You can mention inline the external libraries you need to compile and execute yo
 1. Annotate your class with modules or jar files you want to use.
 
 ```java
-@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.8")  // Can import files from Maven repos
-@JkImport("../local_libs/my-utility.jar")   // or simply located locally
+@JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.8")  // Can import files from Maven repos
+@JkDefClasspath("../local_libs/my-utility.jar")   // or simply located locally
 class Commands extends JkCommandSet {
    ...
 }
@@ -313,7 +313,7 @@ Imagine that you want to want to reuse *displayContent* method from project _sam
 ```java
 class Sample2Commands extends JkCommandSet {
 
-    @JkImportProject("../sample1")
+    @JkDefClasspathProject("../sample1")
     private JkCommandSet sample1Commands;
 
     public void hello() throws MalformedURLException {
@@ -329,7 +329,7 @@ class Sample2Commands extends JkCommandSet {
 ```java
 class Sample2Commands extends JkCommandSet {
 
-    @JkImportProject("../sample1")
+    @JkDefClasspathProject("../sample1")
     private Commands sample1Commands;  // This class comes from sample1
 
     public void printUrlContent() throws MalformedURLException {
@@ -557,15 +557,15 @@ Execute `Java java#pack java#publish` to build your plugin project and deploy it
 ## Reuse
 
 You have to import the jar containing the plugin you want to use.
-As for any other jar, you can declare it in a `@JkImport` annotation.
+As for any other jar, you can declare it in a `@JkDefClasspath` annotation.
 
 ```
-@JkImport("org.myorg:myjekaplugin:0.1")
+@JkDefClasspath("org.myorg:myjekaplugin:0.1")
 class MyBuid extends JkCommandSet {
 }
 ```
 
-If you don't have declared it in a _commandSet class_ `@JkImport` annotation you can still invoke it from 
+If you don't have declared it in a _commandSet class_ `@JkDefClasspath` annotation you can still invoke it from 
 the command line : `jeka @org.myorg:myjekaplugin:0.1 myPlugin#doSomething`.
 
 
@@ -595,14 +595,14 @@ import dev.jeka.core.api.java.junit.JkJavaTestClasses;
 import dev.jeka.core.api.java.junit.JkUnit;
 import dev.jeka.core.api.java.junit.JkUnit.JunitReportDetail;
 import dev.jeka.core.tool.JkCommandSet;
-import dev.jeka.core.tool.JkImport;
+import dev.jeka.core.tool.JkDefClasspath;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-@JkImport("org.apache.httpcomponents:httpclient:jar:4.5.6")
+@JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.6")
 public class AntStyleBuild extends JkCommandSet {
 
     Path src = getBaseDir().resolve("src/main/javaPlugin");

@@ -99,7 +99,7 @@ final class SourceParser {
     }
 
     private static JkRepoSet repos(String code, URL url) {
-        final List<String> repoUrls = stringsInAnnotation(code, JkImportRepo.class, url);
+        final List<String> repoUrls = stringsInAnnotation(code, JkDefRepo.class, url);
         return JkRepoSet.of(repoUrls.toArray(new String[0]));
     }
 
@@ -131,7 +131,7 @@ final class SourceParser {
                         depFile = relativeFile.normalize();
                     } else {
                         JkLog.warn("File '" + dependency
-                                + "' mentionned in @JkImport does not exist.");
+                                + "' mentionned in @JkDefClasspath does not exist.");
                     }
                 }
                 result = result.andFile(depFile);
@@ -162,7 +162,7 @@ final class SourceParser {
     }
 
     private static List<String> stringsInJkImport(String code, URL url) {
-        return stringsInAnnotation(code, JkImport.class, url);
+        return stringsInAnnotation(code, JkDefClasspath.class, url);
     }
 
     @SuppressWarnings("unchecked")
