@@ -12,15 +12,13 @@ import dev.jeka.core.api.utils.jekaUtilsIterable;
  */
 @JkDefRepo("http://maven.central.repo")
 @JkDefClasspath
-({
-	"commons-lang:commons-lang:2.6"
-})
+("commons-lang:commons-lang:2.6")
 public class DepManagedBuild extends Build {
 
 	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");
 	
-	@JkImportProject("../dev.jeka.core")
+	@JkDefImport("../dev.jeka.core")
 	public CoreBuild foo;
 	
-	@JkImportProject("../dev.jeka.core/src")
+	@JkDefImport("../dev.jeka.core/src")
 	public CoreBuild bar;
