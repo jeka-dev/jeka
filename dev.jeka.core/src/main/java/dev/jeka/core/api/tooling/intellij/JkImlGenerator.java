@@ -62,7 +62,7 @@ public final class JkImlGenerator {
     private JkDependencySet defDependencies;
 
     /** Can be empty but not null */
-    private Iterable<Path> importedProjects = JkUtilsIterable.listOf();
+    private Iterable<String> importedTestModules = JkUtilsIterable.listOf();
 
     private boolean forceJdkVersion;
 
@@ -121,7 +121,7 @@ public final class JkImlGenerator {
         if (this.defDependencyResolver != null) {
             writeDependencies(this.defDependencies, this.defDependencyResolver, allPaths, allModules, true);
         }
-        writeProjectImportDependencies(allModules);
+        writeIntellijModuleImportDependencies(this.importedTestModules, "TEST");
 
         writeFoot();
         writer.close();
@@ -271,12 +271,10 @@ public final class JkImlGenerator {
         return false;
     }
 
-    private void writeProjectImportDependencies(Set<Path> allModules) throws XMLStreamException {
-        for (final Path rootFolder : this.importedProjects) {
-            if (!allModules.contains(rootFolder)) {
-                writeOrderEntryForModule(rootFolder.getFileName().toString(), "COMPILE");
-                allModules.add(rootFolder);
-            }
+    private void writeIntellijModuleImportDependencies(Iterable<String> moduleNames, String scope)
+            throws XMLStreamException {
+        for (final String rootFolder : moduleNames) {
+            writeOrderEntryForModule(rootFolder, scope);
         }
     }
 
@@ -610,8 +608,8 @@ public final class JkImlGenerator {
         return this;
     }
 
-    public JkImlGenerator setImportedProjects(Iterable<Path> importedProjects) {
-        this.importedProjects = importedProjects;
+    public JkImlGenerator setImportedTestModules(Iterable<String> importedTestModules) {
+        this.importedTestModules = importedTestModules;
         return this;
     }
 

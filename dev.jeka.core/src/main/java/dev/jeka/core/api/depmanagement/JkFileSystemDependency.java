@@ -5,6 +5,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -29,6 +30,12 @@ public final class JkFileSystemDependency implements JkFileDependency {
     @Override
     public final List<Path> getFiles() {
         return files;
+    }
+
+    public JkFileSystemDependency minusFile(Path file) {
+        List<Path> result = new LinkedList<>(files);
+        result.remove(file);
+        return new JkFileSystemDependency(result);
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -241,6 +242,30 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
                 if (externalModule.getModuleId().equals(jkModuleId)) {
                     it.remove();
                 }
+            }
+        }
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
+    }
+
+    /**
+     * Returns a dependency set identical to this one minus the dependencies on the given
+     * {@link JkModuleId}. This is used to exclude a given module to all scope.
+     */
+    public JkDependencySet minusFiles(Predicate<Path> pathPredicate) {
+        final List<JkScopedDependency> result = new LinkedList<>();
+        for (JkScopedDependency scopedDependency : this.dependencies) {
+            final JkDependency dependency = scopedDependency.getDependency();
+            if (dependency instanceof JkFileSystemDependency) {
+                JkFileSystemDependency fileDependency = (JkFileSystemDependency) dependency;
+                JkFileSystemDependency resultDependency = fileDependency;
+                for (Path path : fileDependency.getFiles()) {
+                    resultDependency = resultDependency.minusFile(path);
+                }
+                if (!resultDependency.getFiles().isEmpty()) {
+                    result.add(scopedDependency.withDependency(resultDependency));
+                }
+            } else {
+                result.add(scopedDependency);
             }
         }
         return new JkDependencySet(result, this.globalExclusions, this.versionProvider);

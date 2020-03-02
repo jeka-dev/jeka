@@ -1,3 +1,7 @@
+# 0.8.19
+* IntelliJ plugin : possible to add extra module dependencies in generated iml
+* IntelliJ plugin : possible to skip jeka.jar dependency in generated iml
+
 # 0.8.18
 * Api Polish : `JkCommands` renamed to `JkCommandSet`
 * Api Polish : `JkImportProject` renamed to `JkDefImport`

@@ -3,13 +3,14 @@ package dev.jeka.core.tool.builtins.intellij;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectIde;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.eclipse.JkPluginEclipse;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @JkDoc("Generation of Idea Intellij metadata files (*.iml and modules.xml).")
-@JkDocPluginDeps(JkPluginJava.class) // To read jevaSourceVarsion from
 public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")
@@ -36,11 +36,11 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("If true, dependency to Jeka jar will be excluded (assuming it will be got from a module dependencies")
     public boolean imlSkipJeka;
 
-    private final JkPluginScaffold scaffold;
+    @JkDoc("Comma separated modules to be added as dependencies with 'test' scope")
+    public String imlTestExtraModules;
 
     protected JkPluginIntellij(JkCommandSet run) {
         super(run);
-        scaffold = run.getPlugins().get(JkPluginScaffold.class);
     }
 
     /** Generates Idea [my-module].iml file */
@@ -55,11 +55,22 @@ public final class JkPluginIntellij extends JkPlugin {
             generator = JkImlGenerator.of(commands.getBaseDir());
         }
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
-        final List<Path> depProjects = commands.getImportedCommandSets().getImportedCommandRoots();
         generator.setUseVarPath(useVarPath);
         JkDependencySet defDependencies = commands.getDefDependencies();
+        if (imlSkipJeka) {
+            defDependencies = defDependencies.minusFiles(
+                    path -> path.getFileName().equals(JkLocator.getJekaJarPath().getFileName()));
+        }
         generator.setDefDependencies(commands.getDefDependencyResolver(), defDependencies);
-        generator.setImportedProjects(depProjects);
+        final List<String> testModuleDeps = commands.getImportedCommandSets().getImportedCommandRoots().stream()
+                .map(path -> path.getFileName().toString())
+                .collect(Collectors.toList());
+        if (!JkUtilsString.isBlank(this.imlTestExtraModules)) {
+            for (String module : JkUtilsString.splitTrimed(this.imlTestExtraModules, ",")) {
+                testModuleDeps.add(module);
+            }
+        }
+        generator.setImportedTestModules(testModuleDeps);
         Path basePath = commands.getBaseDir();
         if (commands.getPlugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = commands.getPlugins().get(JkPluginJava.class).getProject();
@@ -147,9 +158,4 @@ public final class JkPluginIntellij extends JkPlugin {
         modulesXml();
     }
 
-    @JkDoc("Adds *.iml generation to scaffolding.")
-    @Override
-    protected void activate() {
-        scaffold.getScaffolder().getExtraActions().chain(this::iml);
-    }
 }
