@@ -71,7 +71,11 @@ public final class JkImlGenerator {
     /* When true, path will be mentioned with $JEKA_HOME$ and $JEKA_REPO$ instead of explicit absolute path. */
     private boolean useVarPath;
 
-    private final Set<String> paths = new HashSet<>();
+    // Keep trace of already processed module-library entries to avoid duplicates
+    private final Set<String> processedLibEntries = new HashSet<>();
+
+    // Keep trace of already processed module entries to avoid duplicates
+    private final Set<String> processedModueEntries = new HashSet<>();
 
     private XMLStreamWriter writer;
 
@@ -273,8 +277,11 @@ public final class JkImlGenerator {
 
     private void writeIntellijModuleImportDependencies(Iterable<String> moduleNames, String scope)
             throws XMLStreamException {
-        for (final String rootFolder : moduleNames) {
-            writeOrderEntryForModule(rootFolder, scope);
+        for (final String moduleName : moduleNames) {
+            if (!processedModueEntries.contains(moduleName)) {
+                writeOrderEntryForModule(moduleName, scope);
+                processedModueEntries.add(moduleName);
+            }
         }
     }
 
@@ -314,7 +321,7 @@ public final class JkImlGenerator {
                         allModules.add(projectDir);
                     }
                 } else {
-                    writeFileEntries(fileNodeInfo.getFiles(), paths, ideScope);
+                    writeFileEntries(fileNodeInfo.getFiles(), processedLibEntries, ideScope);
                 }
             }
         }
@@ -422,6 +429,10 @@ public final class JkImlGenerator {
     }
 
     private void writeOrderEntryForModule(String ideaModuleName, String scope) throws XMLStreamException {
+        if (processedModueEntries.contains(ideaModuleName)) {
+            return;
+        }
+        processedModueEntries.add(ideaModuleName);
         writer.writeCharacters(T2);
         writer.writeEmptyElement("orderEntry");
         writer.writeAttribute("type", "module");
