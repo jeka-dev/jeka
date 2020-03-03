@@ -152,7 +152,7 @@ final class SourceParser {
     private static List<Path>  projectDependencies(Path baseDir, List<String> deps) {
         final List<Path>  projects = new LinkedList<>();
         for (final String projectReltivePath : deps) {
-            final Path file = baseDir.resolve(projectReltivePath);
+            final Path file = baseDir.resolve(projectReltivePath).normalize();
             if (!Files.exists(file)) {
                 throw new JkException("Folder " + file + " defined as project does not exists.");
             }
