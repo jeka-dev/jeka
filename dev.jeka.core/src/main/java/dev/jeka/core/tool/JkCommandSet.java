@@ -226,7 +226,7 @@ public class JkCommandSet {
     /**
      * Cleans the output directory.
      */
-    @JkDoc("Cleans the output directory except the compiled command classes.")
+    @JkDoc("Cleans the output directory.")
     public void clean() {
         JkLog.info("Clean output directory " + getOutputDir());
         if (Files.exists(getOutputDir())) {

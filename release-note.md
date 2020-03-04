@@ -1,6 +1,7 @@
 # 0.8.20 (ongoing)
 * .iml generation : avoid module entry duplicates
 
+
 # 0.8.19
 * IntelliJ plugin : possible to add extra module dependencies in generated iml
 * IntelliJ plugin : possible to skip jeka.jar dependency in generated iml

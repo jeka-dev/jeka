@@ -259,7 +259,9 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
                 JkFileSystemDependency fileDependency = (JkFileSystemDependency) dependency;
                 JkFileSystemDependency resultDependency = fileDependency;
                 for (Path path : fileDependency.getFiles()) {
-                    resultDependency = resultDependency.minusFile(path);
+                    if (pathPredicate.test(path)) {
+                        resultDependency = resultDependency.minusFile(path);
+                    }
                 }
                 if (!resultDependency.getFiles().isEmpty()) {
                     result.add(scopedDependency.withDependency(resultDependency));

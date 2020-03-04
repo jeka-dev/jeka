@@ -64,7 +64,7 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         final ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
                 .enableMethodInfo()
-                .addClassLoader(classloader)
+                .overrideClassLoaders(classloader)
                 .ignoreParentClassLoaders();
         final ScanResult scanResult = classGraph.scan();
         final List<String> result = new LinkedList<>();

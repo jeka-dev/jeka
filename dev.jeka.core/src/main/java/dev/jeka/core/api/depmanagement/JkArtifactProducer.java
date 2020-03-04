@@ -68,7 +68,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
             if (!Files.exists(path)) {
                 makeArtifact(artifactFileId);
             } else {
-                JkLog.info("Artifact " + path + " already exist ... won't process.");
+                JkLog.info("Artifact " + path + " already exist ... No need to make it again.");
             }
         }
     }

@@ -158,7 +158,7 @@ public final class JkPathFile {
     }
 
     /**
-     * Produces a files, in the same directory, that contains the checksum og this file.
+     * Produces a files, in the same directory, that contains the checksum of this file.
      */
     public JkPathFile checksum(String ... algorithms) {
         for (String algorithm : algorithms) {
