@@ -1,6 +1,6 @@
-# 0.8.20 (ongoing)
+# 0.8.20
 * .iml generation : avoid module entry duplicates
-
+* Add JkClassloader#findClassesMatchingAnnotations
 
 # 0.8.19
 * IntelliJ plugin : possible to add extra module dependencies in generated iml
