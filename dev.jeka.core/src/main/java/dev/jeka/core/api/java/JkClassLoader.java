@@ -11,6 +11,7 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class JkClassLoader {
 
@@ -255,6 +256,10 @@ public class JkClassLoader {
      */
     public List<String> findClassesHavingMainMethod() {
         return JkInternalClasspathScanner.INSTANCE.findClassesHavingMainMethod(this.delegate);
+    }
+
+    public List<String> findClassesMatchingAnnotations(Predicate<List<String>> annotationNamePredicate) {
+        return JkInternalClasspathScanner.INSTANCE.findClassesMatchingAnnotations(this.delegate, annotationNamePredicate);
     }
 
     private void initLogInClassloader() {

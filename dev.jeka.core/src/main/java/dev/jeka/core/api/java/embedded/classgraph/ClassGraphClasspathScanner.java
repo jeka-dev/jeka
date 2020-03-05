@@ -85,4 +85,24 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         return result;
     }
 
+    @Override
+    public List<String> findClassesMatchingAnnotations(ClassLoader classloader,
+                                                       Predicate<List<String>> annotationPredicate) {
+        final ClassGraph classGraph = new ClassGraph()
+                .enableClassInfo()
+                .overrideClassLoaders(classloader)
+                .enableAnnotationInfo()
+                .ignoreParentClassLoaders();
+        final ScanResult scanResult = classGraph.scan();
+        final List<String> result = new LinkedList<>();
+        for (final ClassInfo classInfo : scanResult.getAllClasses()) {
+            AnnotationInfoList annotationInfoList = classInfo.getAnnotationInfo();
+            List<String> annotationNames = annotationInfoList.getNames();
+            if (annotationPredicate.test(annotationNames)) {
+                result.add(classInfo.getName());
+            }
+        }
+        return result;
+    }
+
 }

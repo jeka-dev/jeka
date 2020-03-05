@@ -33,4 +33,6 @@ public interface JkInternalClasspathScanner {
     }
 
 
+    List<String> findClassesMatchingAnnotations(ClassLoader classloader,
+                                                Predicate<List<String>> annotationPredicate);
 }
