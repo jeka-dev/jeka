@@ -1,7 +1,7 @@
 package dev.jeka.core.api.crypto.gpg;
 
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
+import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;
@@ -18,7 +18,7 @@ public interface JkInternalGpgDoer {
         if (clazz != null) {
             return JkUtilsReflect.invokeStaticMethod(clazz, "of");
         }
-        return JkInternalEmbeddedClassloader.createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
+        return JkInternalClassloader.ofEmbeddedLibs().createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
     }
 
 }

@@ -15,20 +15,29 @@ import java.nio.file.Path;
 /**
  * Not part of the public API
  */
-public class JkInternalEmbeddedClassloader {
+public class JkInternalClassloader {
 
-    private static final ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
-    static {
+    private JkInternalClassloader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    public static JkInternalClassloader of(ClassLoader classLoader) {
+        return new JkInternalClassloader(classLoader);
+    }
+
+    public static JkInternalClassloader ofEmbeddedLibs() {
         JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.
         URL embeddedNameUrl = JkClassLoader.ofCurrent().get().getResource("META-INF/jeka-embedded-name");
         String jarName = JkUtilsIO.read(embeddedNameUrl);
         URL url = JkClassLoader.ofCurrent().get().getResource("META-INF/" + jarName);
         Path file = JkUtilsIO.copyUrlContentToCacheFile(url, null, JkUrlClassLoader.URL_CACHE_DIR);
-        classLoader = new URLClassLoader(new URL[] {JkUtilsPath.toUrl(file)}, JkClassLoader.ofCurrent().get());
+        ClassLoader classLoader = new URLClassLoader(new URL[] {JkUtilsPath.toUrl(file)}, JkClassLoader.ofCurrent().get());
+        return of(classLoader);
     }
 
-    public static JkClassLoader get() {
+    public JkClassLoader get() {
         return JkClassLoader.of(classLoader);
     }
 
@@ -38,7 +47,7 @@ public class JkInternalEmbeddedClassloader {
      * serialized (if needed) so we keep compatibility between classes.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createCrossClassloaderProxy(Class<T> interfaze, String className,
+    public <T> T createCrossClassloaderProxy(Class<T> interfaze, String className,
                                              String staticMethodFactory, Object... args) {
         final Object target = invokeStaticMethod(className, staticMethodFactory, args);
         ClassLoader from = Thread.currentThread().getContextClassLoader();
@@ -46,7 +55,7 @@ public class JkInternalEmbeddedClassloader {
                 new Class[]{interfaze}, new CrossClassloaderInvokationHandler(target, from)));
     }
 
-    private static class CrossClassloaderInvokationHandler implements InvocationHandler {
+    private class CrossClassloaderInvokationHandler implements InvocationHandler {
 
         CrossClassloaderInvokationHandler(Object target, ClassLoader fromClassLoader) {
             this.targetObject = target;
@@ -67,7 +76,7 @@ public class JkInternalEmbeddedClassloader {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T invokeInstanceMethod(ClassLoader from, Object object, Method method,
+    private <T> T invokeInstanceMethod(ClassLoader from, Object object, Method method,
                                       Object... args) {
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
@@ -82,7 +91,7 @@ public class JkInternalEmbeddedClassloader {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T invokeStaticMethod(String className, String methodName,
+    private <T> T invokeStaticMethod(String className, String methodName,
                                     Object... args) {
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);

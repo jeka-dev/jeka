@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
+import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.io.File;
@@ -35,7 +35,7 @@ public interface JkInternalDepResolver {
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
         }
-        return JkInternalEmbeddedClassloader.createCrossClassloaderProxy(
+        return JkInternalClassloader.ofEmbeddedLibs().createCrossClassloaderProxy(
                 JkInternalDepResolver.class, factoryClassName, "of", repos);
     }
 

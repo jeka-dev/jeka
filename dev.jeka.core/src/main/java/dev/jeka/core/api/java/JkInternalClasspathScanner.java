@@ -25,7 +25,7 @@ public interface JkInternalClasspathScanner {
         if (clazz != null) {
             return JkUtilsReflect.invokeStaticMethod(clazz, "of");
         }
-        return JkInternalEmbeddedClassloader.createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
+        return JkInternalClassloader.ofEmbeddedLibs().createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
     }
 
     default Set<Class<?>> loadClassesHavingSimpleName(String simpleName) {
