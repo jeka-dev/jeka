@@ -258,9 +258,21 @@ public class JkClassLoader {
         return JkInternalClasspathScanner.INSTANCE.findClassesHavingMainMethod(this.delegate);
     }
 
+    /**
+     * Returns all classes matching the specified annotation predicate.
+     */
     public List<String> findClassesMatchingAnnotations(Predicate<List<String>> annotationNamePredicate) {
         return JkInternalClasspathScanner.INSTANCE.findClassesMatchingAnnotations(this.delegate, annotationNamePredicate);
     }
+
+    /**
+     * Returns the classpath for this classloader excluding elements on the platform/system classloader.
+     */
+    public JkClasspath getClasspath() {
+        return JkInternalClasspathScanner.INSTANCE.getClasspath(this.delegate);
+    }
+
+
 
     private void initLogInClassloader() {
         JkLog.initializeInClassLoader(this.get());

@@ -258,7 +258,6 @@ public final class JkUnit {
                 JkUtilsIO.closeifClosable(classLoader.get());
                 throw new JkException("No Junit found on test classpath.");
             }
-
             if (result.get().getFailureCount() > 0) {
                 if (breakOnFailure) {
                     JkLog.error(String.join("\n",

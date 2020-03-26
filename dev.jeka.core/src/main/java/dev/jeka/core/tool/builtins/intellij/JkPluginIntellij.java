@@ -66,7 +66,7 @@ public final class JkPluginIntellij extends JkPlugin {
                 .map(path -> path.getFileName().toString())
                 .collect(Collectors.toList());
         if (!JkUtilsString.isBlank(this.imlTestExtraModules)) {
-            for (String module : JkUtilsString.splitTrimed(this.imlTestExtraModules, ",")) {
+            for (String module : JkUtilsString.splitTrimmed(this.imlTestExtraModules, ",")) {
                 testModuleDeps.add(module);
             }
         }

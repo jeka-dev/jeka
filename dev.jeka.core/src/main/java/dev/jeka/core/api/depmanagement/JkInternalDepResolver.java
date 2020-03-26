@@ -35,7 +35,7 @@ public interface JkInternalDepResolver {
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
         }
-        return JkInternalClassloader.ofEmbeddedLibs().createCrossClassloaderProxy(
+        return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(
                 JkInternalDepResolver.class, factoryClassName, "of", repos);
     }
 

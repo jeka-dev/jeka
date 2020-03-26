@@ -3,8 +3,8 @@ package dev.jeka.core.tool.builtins.sonar;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -109,7 +109,7 @@ public final class JkSonar {
 
     private JkJavaProcess javaProcess() {
         URL embeddedUrl = JkSonar.class.getResource(RUNNER_JAR_NAME_24);
-        Path cachedUrl = JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkUrlClassLoader.getUrlCacheDir());
+        Path cachedUrl = JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalClassloader.URL_CACHE_DIR);
         return JkJavaProcess.of().withClasspath(cachedUrl).andOptions(toProperties());
     }
 

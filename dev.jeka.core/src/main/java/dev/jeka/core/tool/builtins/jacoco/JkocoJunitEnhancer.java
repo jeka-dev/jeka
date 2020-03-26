@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.jacoco;
 
+import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.java.junit.JkUnit;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -39,7 +39,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
     public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
         PrintStream outputStream = JkLog.verbosity() == JkLog.Verbosity.VERBOSE ? new PrintStream(JkLog.getOutputStream()) : null;
-        final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, outputStream, JkUrlClassLoader.getUrlCacheDir());
+        final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, outputStream, JkInternalClassloader.URL_CACHE_DIR);
         return new JkocoJunitEnhancer(file, true, destFile, Collections.emptyList());
     }
 

@@ -2,7 +2,6 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 
@@ -31,12 +30,6 @@ public final class JkUrlClassLoader {
     private static final String CLASS_SUFFIX = ".class";
 
     private static final int CLASS_SUFFIX_LENGTH = CLASS_SUFFIX.length();
-
-    static final Path URL_CACHE_DIR = JkLocator.getJekaUserHomeDir().resolve("cache/url-content");
-
-    static {
-        JkUtilsPath.createDirectories(URL_CACHE_DIR);
-    }
 
     /**
      * A {@link PathMatcher} accepting only .class files.
@@ -95,15 +88,6 @@ public final class JkUrlClassLoader {
      */
     public static JkUrlClassLoader ofLoaderOf(Class<?> clazz) {
         return new JkUrlClassLoader((URLClassLoader) clazz.getClassLoader());
-    }
-
-    /**
-     * Get the directory where are cached urls. For its internal use, Jeka may
-     * copy the the content of an URL to a file. This class manages the central
-     * place where those URL are cached.
-     */
-    public static Path getUrlCacheDir() {
-        return URL_CACHE_DIR;
     }
 
     /**

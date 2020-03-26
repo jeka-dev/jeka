@@ -21,7 +21,7 @@ public class JkTestSuiteResult implements Serializable {
     private final long durationInMilis;
     private final Properties systemProperties;
 
-    /**
+    /*
      * Constructs a test suite execution result according specified information.
      */
     JkTestSuiteResult(Properties properties, String suiteName, int totaltestCount,
@@ -358,9 +358,7 @@ public class JkTestSuiteResult implements Serializable {
         for (final Object junitFailure : junitFailures) {
             failures.add(fromJunit4Failure(junitFailure));
         }
-        return new JkTestSuiteResult(properties, suiteName, runCount, ignoreCount, failures,
-                durationInMillis);
-
+        return new JkTestSuiteResult(properties, suiteName, runCount, ignoreCount, failures, durationInMillis);
     }
 
     private static JkTestCaseFailure fromJunit4Failure(Object junit4failure) {

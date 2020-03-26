@@ -99,7 +99,7 @@ class GithubReleaseContentEditor {
         if (line.toLowerCase().contains("ongoing")) {
             return null;
         }
-        String[] tokens = JkUtilsString.splitTrimed(line, " ");
+        String[] tokens = JkUtilsString.splitTrimmed(line, " ");
         if (tokens.length < 2) {
             return null;
         }

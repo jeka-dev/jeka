@@ -2,8 +2,10 @@ package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsReflect;
 
-import java.io.File;
+import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -14,7 +16,9 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-public final class JkPathSequence implements Iterable<Path> {
+public final class JkPathSequence implements Iterable<Path>, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final List<Path> entries;
 
@@ -166,6 +170,10 @@ public final class JkPathSequence implements Iterable<Path> {
         return builder.toString();
     }
 
+    public Set<Path> toSet() {
+        return new LinkedHashSet<>(this.entries);
+    }
+
     /**
      * Returns the file names concatenated with ';'.
      */
@@ -198,5 +206,18 @@ public final class JkPathSequence implements Iterable<Path> {
     @Override
     public int hashCode() {
         return entries.hashCode();
+    }
+
+    private  void writeObject(ObjectOutputStream oos) throws IOException {
+        List<File> files = JkUtilsPath.toFiles(this.entries);
+        oos.writeObject(files);
+    }
+
+
+    private  void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        List<File> files = (List<File>) ois.readObject();
+        List<Path> paths = JkUtilsPath.toPaths(files);
+        Field field = JkUtilsReflect.getField(JkPathSequence.class, "entries");
+        JkUtilsReflect.setFieldValue(this, field, paths);
     }
 }

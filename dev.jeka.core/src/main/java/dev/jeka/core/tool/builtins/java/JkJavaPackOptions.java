@@ -31,7 +31,7 @@ public class JkJavaPackOptions {
      * Returns the checksums algorithms to checksum artifact files.
      */
     public String[] checksums() {
-        return JkUtilsString.splitTrimed(checksums, ",");
+        return JkUtilsString.splitTrimmed(checksums, ",");
     }
 
 

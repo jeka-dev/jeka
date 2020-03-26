@@ -96,7 +96,7 @@ public final class JkUtilsString {
      * delimiter. Items are trimmed to eliminate blank spaces. If <code>str</code> is <code>null</code> then it returns an
      * empty array.
      */
-    public static String[] splitTrimed(String str, String delimiters) {
+    public static String[] splitTrimmed(String str, String delimiters) {
         if (str == null) {
             return new String[0];
         }

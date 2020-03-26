@@ -18,7 +18,7 @@ public interface JkInternalGpgDoer {
         if (clazz != null) {
             return JkUtilsReflect.invokeStaticMethod(clazz, "of");
         }
-        return JkInternalClassloader.ofEmbeddedLibs().createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
+        return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
     }
 
 }

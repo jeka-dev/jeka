@@ -275,9 +275,9 @@ public final class JkUtilsIO {
     /**
      * Deserializes the content of the specified file to a Java object.
      */
-    public static Object deserialize(Path file) {
+    public static <T> T deserialize(Path file) {
         try {
-            return deserialize(Files.newInputStream(file));
+            return (T) deserialize(Files.newInputStream(file));
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -286,7 +286,7 @@ public final class JkUtilsIO {
     /**
      * Deserializes the content of the specified input getOutputStream to a Java object.
      */
-    public static Object deserialize(InputStream inputStream) {
+    public static <T> T deserialize(InputStream inputStream) {
         return deserialize(inputStream, JkUtilsIO.class.getClassLoader());
     }
 
@@ -294,7 +294,7 @@ public final class JkUtilsIO {
      * Deserialises the content of a given input file to a Java object loaded in
      * the specified classloader.
      */
-    public static Object deserialize(InputStream inputStream, final ClassLoader classLoader) {
+    public static <T> T deserialize(InputStream inputStream, final ClassLoader classLoader) {
         try (final InputStream buffer = new BufferedInputStream(inputStream)) {
             final ObjectInput input = new ObjectInputStream(buffer) {
 
@@ -316,7 +316,7 @@ public final class JkUtilsIO {
                 }
 
             };
-            return input.readObject();
+            return (T) input.readObject();
         } catch (final IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

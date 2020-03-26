@@ -27,7 +27,7 @@ public interface JkInternalPublisher {
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", publishRepos, artifactDir);
         }
-        return JkInternalClassloader.ofEmbeddedLibs().createCrossClassloaderProxy(
+        return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(
                 JkInternalPublisher.class, FACTORY_CLASS_NAME, "of", publishRepos, artifactDir);
 
     }

@@ -18,7 +18,7 @@ public final class JkJavaProcess {
 
     private static final Path CURRENT_JAVA_DIR = Paths.get(System.getProperty("java.home")).resolve("bin");
 
-    private final Map<String, String> sytemProperties;
+    private final Map<String, String> systemProperties;
 
     private final Path javaDir;
 
@@ -30,19 +30,22 @@ public final class JkJavaProcess {
 
     private final Path workingDir;
 
+    private final boolean printCommand;
+
     private final Map<String, String> environment;
 
-    private JkJavaProcess(Path javaDir, Map<String, String> sytemProperties, JkClasspath classpath,
+    private JkJavaProcess(Path javaDir, Map<String, String> systemProperties, JkClasspath classpath,
             List<AgentLibAndOption> agents, Collection<String> options, Path workingDir,
-            Map<String, String> environment) {
+            Map<String, String> environment, boolean printCommand) {
         super();
         this.javaDir = javaDir;
-        this.sytemProperties = sytemProperties;
+        this.systemProperties = systemProperties;
         this.classpath = classpath;
         this.agents = agents;
         this.options = options;
         this.workingDir = workingDir;
         this.environment = environment;
+        this.printCommand = printCommand;
     }
 
     /**
@@ -60,7 +63,7 @@ public final class JkJavaProcess {
     @SuppressWarnings("unchecked")
     public static JkJavaProcess ofJavaHome(Path javaDir) {
         return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkClasspath.of(),
-                Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP);
+                Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP, true);
     }
 
     /**
@@ -80,8 +83,8 @@ public final class JkJavaProcess {
         final List<AgentLibAndOption> list = new ArrayList<>(
                 this.agents);
         list.add(new AgentLibAndOption(agentLib.toAbsolutePath().toString(), agentOption));
-        return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, list,
-                this.options, this.workingDir, this.environment);
+        return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, list,
+                this.options, this.workingDir, this.environment, this.printCommand);
     }
 
     /**
@@ -99,8 +102,8 @@ public final class JkJavaProcess {
     public JkJavaProcess andOptions(Collection<String> options) {
         final List<String> list = new ArrayList<>(this.options);
         list.addAll(options);
-        return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, this.agents,
-                list, this.workingDir, this.environment);
+        return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, this.agents,
+                list, this.workingDir, this.environment, this.printCommand);
     }
 
     /**
@@ -137,8 +140,8 @@ public final class JkJavaProcess {
      * working dir.
      */
     public JkJavaProcess withWorkingDir(Path workingDir) {
-        return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, this.agents,
-                this.options, workingDir, this.environment);
+        return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, this.agents,
+                this.options, workingDir, this.environment, this.printCommand);
     }
 
     /**
@@ -153,8 +156,17 @@ public final class JkJavaProcess {
             throw new IllegalArgumentException("Classpath can't be null.");
         }
         final JkClasspath jkClasspath = JkClasspath.of(JkUtilsPath.disambiguate(paths));
-        return new JkJavaProcess(this.javaDir, this.sytemProperties, jkClasspath, this.agents,
-                this.options, this.workingDir, this.environment);
+        return new JkJavaProcess(this.javaDir, this.systemProperties, jkClasspath, this.agents,
+                this.options, this.workingDir, this.environment, this.printCommand);
+    }
+
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one specifying if the launch command should be printed
+     * in the console
+     */
+    public JkJavaProcess withPrintCommand(boolean printCommand) {
+        return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, this.agents,
+                this.options, this.workingDir, this.environment, printCommand);
     }
 
     /**
@@ -219,32 +231,31 @@ public final class JkJavaProcess {
             command.add(mainClassName);
             execPart = execPart + " " + mainClassName;
         }
-
         command.addAll(Arrays.asList(arguments));
-        final Runnable task = () -> {
+        if (printCommand) {
+            JkLog.startTask("Starting java program : " + execPart);
             JkLog.info(String.join("\n", command));
-            final int result;
-            try {
-                final Process process = processBuilder(command, optionAndEnv.env).start();
-
-                final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getInputStream(), JkLog.getOutputStream());
-                final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getErrorStream(), JkLog.getErrorStream());
-                process.waitFor();
-                outputStreamGobbler.join();
-                errorStreamGobbler.join();
-                result = process.exitValue();
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-            if (result != 0) {
-                throw new IllegalStateException("Process terminated in error : exit value = " + result + ".");
-            }
-        };
-        JkLog.startTask("Starting java program : " + execPart);
-        task.run();
-        JkLog.endTask();
+        }
+        final int result;
+        try {
+            final Process process = processBuilder(command, optionAndEnv.env).start();
+            final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+                    process.getInputStream(), JkLog.getOutputStream());
+            final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
+                    process.getErrorStream(), JkLog.getErrorStream());
+            process.waitFor();
+            outputStreamGobbler.join();
+            errorStreamGobbler.join();
+            result = process.exitValue();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (result != 0) {
+            throw new IllegalStateException("Process terminated in error : exit value = " + result + ".");
+        }
+        if (printCommand) {
+            JkLog.endTask();
+        }
     }
 
     private OptionAndEnv optionsAndEnv() {
@@ -268,8 +279,8 @@ public final class JkJavaProcess {
             }
             options.add(builder.toString());
         }
-        for (final String key : this.sytemProperties.keySet()) {
-            final String value = this.sytemProperties.get(key);
+        for (final String key : this.systemProperties.keySet()) {
+            final String value = this.systemProperties.get(key);
             options.add("-D" + key + "=" + value);
         }
         options.addAll(this.options);

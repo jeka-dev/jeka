@@ -223,9 +223,9 @@ final class Engine {
         }
         final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath);
         wrapCompile(() -> JkJavaCompiler.ofJdk().compile(javaCompileSpec));
-        JkPathTree.of(this.resolver.defSourceDir).andMatching(false, "**/*.java", "**/*.kt")
-        .copyTo(this.resolver.defClassDir,
-                StandardCopyOption.REPLACE_EXISTING);
+        JkPathTree.of(this.resolver.defSourceDir)
+                .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")
+                .copyTo(this.resolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
     }
 
     private void wrapCompile(Runnable runnable) {

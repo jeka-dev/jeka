@@ -1,16 +1,19 @@
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.utils.*;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Not part of the public API
@@ -23,18 +26,45 @@ public class JkInternalClassloader {
         this.classLoader = classLoader;
     }
 
+    public static final Path URL_CACHE_DIR = JkLocator.getJekaUserHomeDir().resolve("cache/url-content");
+
+    static {
+        JkUtilsPath.createDirectories(URL_CACHE_DIR);
+    }
+
     public static JkInternalClassloader of(ClassLoader classLoader) {
         return new JkInternalClassloader(classLoader);
     }
 
-    public static JkInternalClassloader ofEmbeddedLibs() {
+    public static JkInternalClassloader ofMainEmbeddedLibs() {
+        return ofMainEmbeddedLibs(Collections.emptyList());
+    }
+
+    public static JkInternalClassloader ofMainEmbeddedLibs(List<Path> extraEntries) {
         JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.
         URL embeddedNameUrl = JkClassLoader.ofCurrent().get().getResource("META-INF/jeka-embedded-name");
         String jarName = JkUtilsIO.read(embeddedNameUrl);
-        URL url = JkClassLoader.ofCurrent().get().getResource("META-INF/" + jarName);
-        Path file = JkUtilsIO.copyUrlContentToCacheFile(url, null, JkUrlClassLoader.URL_CACHE_DIR);
-        ClassLoader classLoader = new URLClassLoader(new URL[] {JkUtilsPath.toUrl(file)}, JkClassLoader.ofCurrent().get());
+        Path file = getEmbeddedLibAsPath("META-INF/" + jarName);
+        List<Path> pathList = new LinkedList<>();
+        pathList.add(file);
+        pathList.addAll(extraEntries);
+        List<URL> urlList = pathList.stream()
+                .map(JkUtilsPath::toUrl)
+                .collect(Collectors.toList());
+        URL[] urls = urlList.toArray(new URL[0]);
+        ClassLoader classLoader = new URLClassLoader(urls, JkClassLoader.ofCurrent().get());
         return of(classLoader);
+    }
+
+    public static Path getEmbeddedLibAsPath(String resourcePath) {
+        URL url = JkClassLoader.ofCurrent().get().getResource(resourcePath);
+        final String name = resourcePath.contains("/") ? JkUtilsString.substringBeforeLast(resourcePath, "/")
+                : resourcePath;
+        Path result = URL_CACHE_DIR.resolve(name);
+        if (Files.exists(result)) {
+            return result;
+        }
+        return JkUtilsIO.copyUrlContentToCacheFile(url, null, URL_CACHE_DIR);
     }
 
     public JkClassLoader get() {
