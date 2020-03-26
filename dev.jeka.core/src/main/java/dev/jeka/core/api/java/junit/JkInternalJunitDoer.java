@@ -23,8 +23,8 @@ public interface JkInternalJunitDoer {
                 .createCrossClassloaderProxy(JkInternalJunitDoer.class, IMPL_CLASS, "of");
     }
 
-    // testRequest is either a dev.jeka.core.api.java.junit.JkUnit5TestSelection, either a
+    // testRequest is either a dev.jeka.core.api.java.junit.JkTestSelection, either a
     // dev.jeka.core.api.function.JkUnaryOperator<LauncherDiscoveryRequestBuilder>
-    JkUnit5TestResult launch(JkUnit5.JkEngineBehavior engineBehavior, Serializable testRequest);
+    JkTestResult launch(JkTestProcessor.JkEngineBehavior engineBehavior, Serializable testRequest);
 
 }

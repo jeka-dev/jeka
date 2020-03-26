@@ -1,11 +1,13 @@
 package dev.jeka.core.api.java.junit;
 
-import java.io.Serializable;
+import dev.jeka.core.api.system.JkException;
+
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public class JkUnit5TestResult implements Serializable {
+public final class JkTestResult implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,7 +21,7 @@ public class JkUnit5TestResult implements Serializable {
 
     private final List<JkFailure> failures;
 
-    private JkUnit5TestResult(long timeStarted, long timeFinished, JkCount containerCount, JkCount testCount, List<JkFailure> failures) {
+    private JkTestResult(long timeStarted, long timeFinished, JkCount containerCount, JkCount testCount, List<JkFailure> failures) {
         this.timeStarted = timeStarted;
         this.timeFinished = timeFinished;
         this.containerCount = containerCount;
@@ -27,8 +29,8 @@ public class JkUnit5TestResult implements Serializable {
         this.failures = failures;
     }
 
-    public static JkUnit5TestResult of(long timeStarted, long timeFinished, JkCount containerCount, JkCount testCount, List<JkFailure> failures) {
-        return new JkUnit5TestResult(timeStarted, timeFinished, containerCount, testCount, failures);
+    public static JkTestResult of(long timeStarted, long timeFinished, JkCount containerCount, JkCount testCount, List<JkFailure> failures) {
+        return new JkTestResult(timeStarted, timeFinished, containerCount, testCount, failures);
     }
 
     public long getTimeStarted() {
@@ -128,6 +130,30 @@ public class JkUnit5TestResult implements Serializable {
         }
     }
 
+    public void printFailures(PrintStream printStream) {
+        for (JkFailure failure : failures) {
+            failure.print(printStream);
+            printStream.println();
+        }
+    }
+
+    public void assertNoFailure() {
+        if (failures.isEmpty()) {
+            return;
+        }
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            PrintStream printStream = new PrintStream(os);
+            printStream.println("" + failures.size() + " test failures : ");
+            printStream.println();
+            printFailures(printStream);
+            String message = os.toString("UTF8");
+            throw new JkException(message);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+    }
+
     public static final class JkFailure implements Serializable {
 
         private static final long serialVersionUID = 1L;
@@ -162,11 +188,20 @@ public class JkUnit5TestResult implements Serializable {
 
         @Override
         public String toString() {
+            System.out.println();
             return "{" +
                     "testId=" + testId +
                     ", throwableMessage='" + throwableMessage + '\'' +
                     ", tacktraces=" + Arrays.toString(tacktraces) +
                     '}';
+        }
+
+        void print(PrintStream printStream) {
+            printStream.print(testId.displayName + " : ");
+            printStream.println(throwableMessage);
+            for (final StackTraceElement element : getTacktraces()) {
+                printStream.println("  at " + element);
+            }
         }
     }
 

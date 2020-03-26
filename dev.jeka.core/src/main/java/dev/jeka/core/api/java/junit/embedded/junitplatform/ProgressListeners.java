@@ -1,6 +1,6 @@
-package dev.jeka.core.api.java.junit.embedded.junit;
+package dev.jeka.core.api.java.junit.embedded.junitplatform;
 
-import dev.jeka.core.api.java.junit.JkUnit5;
+import dev.jeka.core.api.java.junit.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.platform.engine.TestExecutionResult;
@@ -12,7 +12,7 @@ import java.io.PrintStream;
 
 class ProgressListeners {
 
-    static TestExecutionListener get(JkUnit5.JkProgressOutputStyle progressDisplayer) {
+    static TestExecutionListener get(JkTestProcessor.JkProgressOutputStyle progressDisplayer) {
         if (progressDisplayer == null) {
             return null;
         }

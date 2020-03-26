@@ -21,6 +21,6 @@ public class JkUnit5HandlerRunner {
         JkPathSequence pathSquence = resolveResult.getFiles();
         Path path = Paths.get(".idea/output/test") ;
         JkClasspath classpath = JkClasspath.of(path).and(pathSquence);
-        JkUnit5.of().launch(classpath, JkUnit5TestSelection.ofStandard(path));
+        JkTestProcessor.of().launch(classpath, JkTestSelection.ofStandard(path));
     }
 }

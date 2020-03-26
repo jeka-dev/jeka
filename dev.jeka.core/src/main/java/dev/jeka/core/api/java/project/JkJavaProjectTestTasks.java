@@ -9,8 +9,7 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.junit.JkJavaTestClasses;
-import dev.jeka.core.api.java.junit.JkUnit;
+import dev.jeka.core.api.java.junit.*;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.charset.Charset;
@@ -42,7 +41,9 @@ public class JkJavaProjectTestTasks {
 
     private JkUnit runner;
 
-    public final JkRunnables testExecutor = JkRunnables.of(() -> runner.run(getTestClasses()));
+    private JkTestProcessor testProcessor;
+
+    public final JkRunnables testExecutor = JkRunnables.of(this::execute4or5);
 
     private JkJavaCompiler compiler = JkJavaCompiler.ofJdk();
 
@@ -51,6 +52,16 @@ public class JkJavaProjectTestTasks {
     private boolean done;
 
     private boolean skipTests;
+
+    // ----- Junit5
+
+    private boolean breakOnFailures = true;
+
+    private final JkTestSelection testSelection;
+
+    private boolean useJunit5;
+
+    // ------
 
     JkJavaProjectTestTasks(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
@@ -62,6 +73,10 @@ public class JkJavaProjectTestTasks {
             compiler.compile(testCompileSpec);
         });
         runner = getDefaultTester();
+
+        // ----- Junit5
+        testProcessor = defaultTestProcessor();
+        testSelection = defaultTestSelection();
     }
 
     public JkRunnables getPreTest() {
@@ -94,7 +109,6 @@ public class JkJavaProjectTestTasks {
         return this;
     }
 
-
     public JkUnit getRunner() {
         return runner;
     }
@@ -116,6 +130,7 @@ public class JkJavaProjectTestTasks {
 
     public JkJavaProjectTestTasks setForkRun(boolean fork) {
         this.runner = runner.withForking(fork);
+        this.testProcessor.setForkingProcess(fork);
         return this;
     }
 
@@ -131,6 +146,18 @@ public class JkJavaProjectTestTasks {
     public JkJavaProjectTestTasks setTestClassMatcher(JkPathMatcher testClassMatcher) {
         this.testClassMatcher = testClassMatcher;
         return this;
+    }
+
+    private void execute4or5() {
+        if (useJunit5) {
+            executeWithTestProcessor();
+        } else {
+            executeWithJuni4();
+        }
+    }
+
+    private void executeWithJuni4() {
+        runner.run(getTestClasses());
     }
 
     private JkJavaCompileSpec getTestCompileSpec() {
@@ -155,7 +182,6 @@ public class JkJavaProjectTestTasks {
     public void setSkipTests(boolean skipTests) {
         this.skipTests = skipTests;
     }
-
 
     /**
      * Performs entire test phase, including : <ul>
@@ -200,6 +226,43 @@ public class JkJavaProjectTestTasks {
 
     void reset() {
         done = false;
+    }
+
+    // ------ JUnit5
+
+    public boolean isBreakOnFailures() {
+        return breakOnFailures;
+    }
+
+    public JkJavaProjectTestTasks setBreakOnFailures(boolean breakOnFailures) {
+        this.breakOnFailures = breakOnFailures;
+        return this;
+    }
+
+    public JkTestSelection getTestSelection() {
+        return testSelection;
+    }
+
+    public void setUseJunit5(boolean useJunit5) {
+        this.useJunit5 = useJunit5;
+    }
+
+    private void executeWithTestProcessor() {
+        JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
+        if (breakOnFailures) {
+            result.assertNoFailure();
+        }
+    }
+
+    private JkTestProcessor defaultTestProcessor() {
+        JkTestProcessor result = JkTestProcessor.of();
+        final Path reportDir = maker.getOutLayout().getTestReportDir().resolve("junit");
+        result.getEngineBehavior().setLegacyReportDir(reportDir);
+        return result;
+    }
+
+    private JkTestSelection defaultTestSelection() {
+        return JkTestSelection.ofStandard(maker.getOutLayout().getTestClassDir());
     }
 
 }

@@ -1,7 +1,9 @@
 package dev.jeka.core.api.java.junit;
 
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.function.JkUnaryOperator;
 import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import org.junit.platform.launcher.core.LauncherConfig;
@@ -13,7 +15,18 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.ServiceLoader;
 
-public class JkUnit5 {
+/**
+ * Processor executing a given bunch of tests existing in compiled Java classes. <p/>
+ * This relies on Junit-platform (junit5), but having Junit-platform libraries on the classpath is optional.
+ * For most of cases, processors can be used without coding against junit-platform API but it is possible to use
+ * directly Junit-platform API for fine tuning.<p/>
+ * Users can configure <ul>
+ *     <li>Runtime support : classpath, forked process</li>
+ *     <li>Engine behavior : listeners, reports, progress display </li>
+ *     <li>The tests to run: discovery, selectors, filters, ...</li>
+ * </ul>
+ */
+public final class JkTestProcessor {
 
     /**
      * Style of progress mark to display on console while the tests are running.
@@ -49,17 +62,19 @@ public class JkUnit5 {
 
     private static final String OPENTEST4J_JAR_NAME = "opentest4j-1.2.0.jar";
 
-    private JkUnit5(JkEngineBehavior engineBehavior) {
+    private JkTestProcessor(JkEngineBehavior engineBehavior) {
         this.engineBehavior = engineBehavior;
-    }
-
-    public static JkUnit5 of() {
-        return new JkUnit5(new JkEngineBehavior().setProgressDisplayer(JkProgressOutputStyle.ONE_LINE));
     }
 
     private JkJavaProcess forkingProcess;
 
     private final JkEngineBehavior engineBehavior;
+
+    private final JkRunnables postActions = JkRunnables.noOp();
+
+    public static JkTestProcessor of() {
+        return new JkTestProcessor(new JkEngineBehavior());
+    }
 
     public JkJavaProcess getForkingProcess() {
         return forkingProcess;
@@ -69,12 +84,16 @@ public class JkUnit5 {
         return engineBehavior;
     }
 
-    public JkUnit5 setForkingProcess(JkJavaProcess process) {
+    public JkRunnables getPostActions() {
+        return postActions;
+    }
+
+    public JkTestProcessor setForkingProcess(JkJavaProcess process) {
         this.forkingProcess = process;
         return this;
     }
 
-    public JkUnit5 setForkingProcess(boolean fork) {
+    public JkTestProcessor setForkingProcess(boolean fork) {
         if (fork) {
             if (forkingProcess != null) {
                 return this;
@@ -114,7 +133,7 @@ public class JkUnit5 {
     }
 
     /**
-     * Same as {@link #launch(JkClasspath, JkUnit5TestSelection)} but relying on the native Junit-platform API.
+     * Same as {@link #launch(JkClasspath, JkTestSelection)} but relying on the native Junit-platform API.
      * The enhancer is a function that takes the default {@code LauncherDiscoveryRequestBuilder} as argument and
      * returns the one that will be use to build the {@code TestPlan}
      * <pre>
@@ -129,31 +148,36 @@ public class JkUnit5 {
      *     </code>
      * </pre>
      */
-    public JkUnit5TestResult launch(JkClasspath testClasspath, JkUnaryOperator<LauncherDiscoveryRequestBuilder> enhancer) {
-        return launchInternal(testClasspath, enhancer);
+    public JkTestResult launch(JkClasspath extraTestClasspath,
+                               JkUnaryOperator<LauncherDiscoveryRequestBuilder> enhancer) {
+        return launchInternal(extraTestClasspath, enhancer);
     }
 
     /**
      * Launches the specified test set with the underlying junit-platform. The classloader running the tests includes
      * the classpath of the current classloader plus the specified one.
      */
-    public JkUnit5TestResult launch(JkClasspath testClasspath, JkUnit5TestSelection testRequest) {
-        return launchInternal(testClasspath, testRequest);
+    public JkTestResult launch(JkClasspath extraTestClasspath, JkTestSelection testRequest) {
+        return launchInternal(extraTestClasspath, testRequest);
     }
 
-    private JkUnit5TestResult launchInternal(JkClasspath testClasspath, Serializable testRequest) {
+    private JkTestResult launchInternal(JkClasspath extraTestClasspath, Serializable testRequest) {
+        JkLog.startTask("Executing tests");
         if (forkingProcess == null) {
-            return launchInClassloader(testClasspath, testRequest);
+            return launchInClassloader(extraTestClasspath, testRequest);
         }
-        return launchInForkedProcess(testClasspath, testRequest);
+        JkTestResult result = launchInForkedProcess(extraTestClasspath, testRequest);
+        postActions.run();
+        JkLog.endTask();
+        return result;
     }
 
-    private JkUnit5TestResult launchInClassloader(JkClasspath testClasspath, Serializable testRequest) {
+    private JkTestResult launchInClassloader(JkClasspath testClasspath, Serializable testRequest) {
         JkClasspath classpath = computeClasspath(testClasspath);
         return JkInternalJunitDoer.instance(classpath.entries()).launch(engineBehavior, testRequest);
     }
 
-    private JkUnit5TestResult launchInForkedProcess(JkClasspath testClasspath, Serializable testRequest) {
+    private JkTestResult launchInForkedProcess(JkClasspath testClasspath, Serializable testRequest) {
         Path serializedResultPath = JkUtilsPath.createTempFile("testResult-", ".ser");
         Args args = new Args();
         args.resultFile = serializedResultPath.toAbsolutePath().toString();
@@ -166,9 +190,9 @@ public class JkUnit5 {
                 .withPrintCommand(false)
                 .andClasspath(JkClassLoader.ofCurrent().getClasspath().
                         and(computeClasspath(testClasspath)).withoutDuplicates());
-        process.runClassSync(JkUnit5.class.getName(), new String[] {arg});
+        process.runClassSync(JkTestProcessor.class.getName(), new String[] {arg});
         JkUtilsPath.deleteFile(serializedArgPath);
-        JkUnit5TestResult result = JkUtilsIO.deserialize(serializedResultPath);
+        JkTestResult result = JkUtilsIO.deserialize(serializedResultPath);
         JkUtilsPath.deleteFile(serializedResultPath);
         return result;
     }
@@ -179,7 +203,7 @@ public class JkUnit5 {
     public static void main(String[] args) {
         Path argFile = Paths.get(args[0]);
         Args data = JkUtilsIO.deserialize(argFile);
-        JkUnit5TestResult result =
+        JkTestResult result =
                 JkInternalJunitDoer.instance(Collections.emptyList()).launch(data.engineBehavior, data.testRequest);
         JkUtilsIO.serialize(result, Paths.get(data.resultFile));
     }

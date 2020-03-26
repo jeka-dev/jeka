@@ -2,9 +2,11 @@ package dev.jeka.core.tool.builtins.jacoco;
 
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.java.junit.JkTestProcessor;
 import dev.jeka.core.api.java.junit.JkUnit;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsObject;
 
 import java.io.PrintStream;
 import java.net.URL;
@@ -67,6 +69,16 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         }
         final JkJavaProcess process = JkJavaProcess.of().andAgent(agent, options());
         return jkUnit.withForking(process).withPostAction(new Reporter());
+    }
+
+    public void apply(JkTestProcessor testProcessor) {
+        if (!enabled) {
+            return;
+        }
+        JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(), JkJavaProcess.of());
+        process = process.andAgent(destFile, options());
+        testProcessor.setForkingProcess(process);
+        testProcessor.getPostActions().chain(new Reporter());
     }
 
     private String options() {

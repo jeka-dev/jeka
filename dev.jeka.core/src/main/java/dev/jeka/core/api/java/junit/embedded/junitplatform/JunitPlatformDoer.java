@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.junit.embedded.junit;
+package dev.jeka.core.api.java.junit.embedded.junitplatform;
 
 import dev.jeka.core.api.function.JkUnaryOperator;
 import dev.jeka.core.api.java.junit.*;
@@ -29,8 +29,7 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         return new JunitPlatformDoer();
     }
 
-    public JkUnit5TestResult launch(JkUnit5.JkEngineBehavior engineBehavior, Serializable testRequest) {
-        //System.out.println("-----------" + JkClassLoader.ofCurrent());
+    public JkTestResult launch(JkTestProcessor.JkEngineBehavior engineBehavior, Serializable testRequest) {
 
         // creating launcher
         LauncherConfig.Builder launcherBuilder = LauncherConfig.builder();
@@ -41,8 +40,8 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
 
         // Creating test plan
         LauncherDiscoveryRequestBuilder requestBuilder = LauncherDiscoveryRequestBuilder.request();
-        if (testRequest instanceof JkUnit5TestSelection) {
-            JkUnit5TestSelection testSet = (JkUnit5TestSelection) testRequest;
+        if (testRequest instanceof JkTestSelection) {
+            JkTestSelection testSet = (JkTestSelection) testRequest;
                 requestBuilder
                     .filters(getFilters(testSet))
                     .selectors(
@@ -76,7 +75,7 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         return toTestResult(summary);
     }
 
-    private static Filter[] getFilters(JkUnit5TestSelection testSelection) {
+    private static Filter[] getFilters(JkTestSelection testSelection) {
         List<Filter> result = new LinkedList<>();
         if (!testSelection.getIncludePatterns().isEmpty()) {
             result.add(ClassNameFilter.includeClassNamePatterns(toArray(testSelection.getIncludePatterns())));
@@ -93,24 +92,24 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         return result.toArray(new Filter[0]);
     }
 
-    private static JkUnit5TestResult toTestResult(TestExecutionSummary summary) {
-        JkUnit5TestResult.JkCount containerCount = JkUnit5TestResult.JkCount.of(
+    private static JkTestResult toTestResult(TestExecutionSummary summary) {
+        JkTestResult.JkCount containerCount = JkTestResult.JkCount.of(
                 summary.getContainersFoundCount(),
                 summary.getContainersStartedCount(),
                 summary.getContainersSkippedCount(),
                 summary.getContainersAbortedCount(),
                 summary.getContainersSucceededCount(),
                 summary.getContainersFailedCount());
-        JkUnit5TestResult.JkCount testCount = JkUnit5TestResult.JkCount.of(
+        JkTestResult.JkCount testCount = JkTestResult.JkCount.of(
                 summary.getTestsFoundCount(),
                 summary.getTestsStartedCount(),
                 summary.getTestsSkippedCount(),
                 summary.getTestsAbortedCount(),
                 summary.getTestsSucceededCount(),
                 summary.getTestsFailedCount());
-        List<JkUnit5TestResult.JkFailure> failures = summary.getFailures().stream()
+        List<JkTestResult.JkFailure> failures = summary.getFailures().stream()
                 .map(JunitPlatformDoer::toFailure).collect(Collectors.toList());
-        return JkUnit5TestResult.of(summary.getTimeStarted(), summary.getTimeFinished(),
+        return JkTestResult.of(summary.getTimeStarted(), summary.getTimeFinished(),
                 containerCount, testCount, failures);
     }
 
@@ -118,25 +117,25 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         return new ArrayList<String>(strings).toArray(new String[0]);
     }
 
-    private static JkUnit5TestResult.JkFailure toFailure(TestExecutionSummary.Failure failure) {
-        JkUnit5TestResult.JkTestIdentifier.JkType type;
+    private static JkTestResult.JkFailure toFailure(TestExecutionSummary.Failure failure) {
+        JkTestResult.JkTestIdentifier.JkType type;
         switch (failure.getTestIdentifier().getType()) {
             case CONTAINER:
-                type = JkUnit5TestResult.JkTestIdentifier.JkType.CONTAINER;
+                type = JkTestResult.JkTestIdentifier.JkType.CONTAINER;
                 break;
             case CONTAINER_AND_TEST:
-                type = JkUnit5TestResult.JkTestIdentifier.JkType.CONTAINER_AND_TEST;
+                type = JkTestResult.JkTestIdentifier.JkType.CONTAINER_AND_TEST;
                 break;
             default:
-                type = JkUnit5TestResult.JkTestIdentifier.JkType.TEST;
+                type = JkTestResult.JkTestIdentifier.JkType.TEST;
                 break;
         }
         String testId = failure.getTestIdentifier().getUniqueId();
         String displayName = failure.getTestIdentifier().getDisplayName();
         Set<String> tags = failure.getTestIdentifier().getTags().stream().map(TestTag::toString)
                 .collect(Collectors.toSet());
-        JkUnit5TestResult.JkTestIdentifier id = JkUnit5TestResult.JkTestIdentifier.of(type, testId, displayName, tags);
-        return JkUnit5TestResult.JkFailure.of(id, failure.getException().getMessage(),
+        JkTestResult.JkTestIdentifier id = JkTestResult.JkTestIdentifier.of(type, testId, displayName, tags);
+        return JkTestResult.JkFailure.of(id, failure.getException().getMessage(),
                 failure.getException().getStackTrace());
     }
 
