@@ -1,13 +1,20 @@
 package dev.jeka.core.api.java.junit.embedded.junitplatform;
 
 import dev.jeka.core.api.function.JkUnaryOperator;
-import dev.jeka.core.api.java.junit.*;
+import dev.jeka.core.api.java.junit.JkInternalJunitDoer;
+import dev.jeka.core.api.java.junit.JkTestProcessor;
+import dev.jeka.core.api.java.junit.JkTestResult;
+import dev.jeka.core.api.java.junit.JkTestSelection;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import org.junit.platform.engine.Filter;
 import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.discovery.ClassNameFilter;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
-import org.junit.platform.launcher.*;
+import org.junit.platform.launcher.Launcher;
+import org.junit.platform.launcher.TagFilter;
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherConfig;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
@@ -16,7 +23,6 @@ import org.junit.platform.launcher.listeners.TestExecutionSummary;
 import org.junit.platform.reporting.legacy.xml.LegacyXmlReportGeneratingListener;
 
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +35,7 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         return new JunitPlatformDoer();
     }
 
-    public JkTestResult launch(JkTestProcessor.JkEngineBehavior engineBehavior, Serializable testRequest) {
+    public JkTestResult launch(JkTestProcessor.JkEngineBehavior engineBehavior, JkTestSelection testSelection) {
 
         // creating launcher
         LauncherConfig.Builder launcherBuilder = LauncherConfig.builder();
@@ -39,18 +45,13 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         Launcher launcher = LauncherFactory.create(launcherConfig);
 
         // Creating test plan
-        LauncherDiscoveryRequestBuilder requestBuilder = LauncherDiscoveryRequestBuilder.request();
-        if (testRequest instanceof JkTestSelection) {
-            JkTestSelection testSet = (JkTestSelection) testRequest;
-                requestBuilder
-                    .filters(getFilters(testSet))
-                    .selectors(
-                            DiscoverySelectors.selectClasspathRoots(testSet.getTestClassRoots().toSet())
-                    );
-        } else if (testRequest instanceof JkUnaryOperator) {
-            JkUnaryOperator<LauncherDiscoveryRequestBuilder> enhancer =
-                    (JkUnaryOperator<LauncherDiscoveryRequestBuilder>) testRequest;
-            requestBuilder = enhancer.apply(requestBuilder);
+        LauncherDiscoveryRequestBuilder requestBuilder = LauncherDiscoveryRequestBuilder.request()
+            .filters(getFilters(testSelection))
+            .selectors(
+                    DiscoverySelectors.selectClasspathRoots(testSelection.getTestClassRoots().toSet())
+            );
+        if (testSelection.getDiscoveryConfigurer() != null) {
+            requestBuilder = testSelection.getDiscoveryConfigurer().apply(requestBuilder);
         }
         TestPlan testPlan = launcher.discover(requestBuilder.build());
 
@@ -68,6 +69,7 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
                     new PrintWriter(JkUtilsIO.nopOuputStream()));
             listeners.add(reportGeneratingListener);
         }
+        listeners.add(new RestoreJkLogListener());
 
         // Execution
         launcher.execute(testPlan, listeners.toArray(new TestExecutionListener[0]));
@@ -137,6 +139,19 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         JkTestResult.JkTestIdentifier id = JkTestResult.JkTestIdentifier.of(type, testId, displayName, tags);
         return JkTestResult.JkFailure.of(id, failure.getException().getMessage(),
                 failure.getException().getStackTrace());
+    }
+
+    private static class RestoreJkLogListener implements TestExecutionListener {
+
+        @Override
+        public void testPlanExecutionStarted(TestPlan testPlan) {
+            JkLog.JkState.save();
+        }
+
+        @Override
+        public void testPlanExecutionFinished(TestPlan testPlan) {
+            JkLog.JkState.restore();
+        }
     }
 
 }

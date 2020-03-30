@@ -7,7 +7,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import org.junit.platform.launcher.core.LauncherConfig;
-import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 
 import java.io.Serializable;
 import java.nio.file.Path;
@@ -133,56 +132,34 @@ public final class JkTestProcessor {
     }
 
     /**
-     * Same as {@link #launch(JkClasspath, JkTestSelection)} but relying on the native Junit-platform API.
-     * The enhancer is a function that takes the default {@code LauncherDiscoveryRequestBuilder} as argument and
-     * returns the one that will be use to build the {@code TestPlan}
-     * <pre>
-     *     <code>
-     *         launcher.launch(classpath, builder -> builder
-     *                 .filters(
-     *                         ClassNameFilter.includeClassNamePatterns(ClassNameFilter.STANDARD_INCLUDE_PATTERN)
-     *                 )
-     *                 .selectors(DiscoverySelectors.selectMethod("mytest.MyTest#toto"))
-     *                 .configurationParameter("run.it", "false")
-     *         );
-     *     </code>
-     * </pre>
-     */
-    public JkTestResult launch(JkClasspath extraTestClasspath,
-                               JkUnaryOperator<LauncherDiscoveryRequestBuilder> enhancer) {
-        return launchInternal(extraTestClasspath, enhancer);
-    }
-
-    /**
      * Launches the specified test set with the underlying junit-platform. The classloader running the tests includes
      * the classpath of the current classloader plus the specified one.
      */
-    public JkTestResult launch(JkClasspath extraTestClasspath, JkTestSelection testRequest) {
-        return launchInternal(extraTestClasspath, testRequest);
-    }
-
-    private JkTestResult launchInternal(JkClasspath extraTestClasspath, Serializable testRequest) {
+    public JkTestResult launch(JkClasspath extraTestClasspath, JkTestSelection testSelection) {
         JkLog.startTask("Executing tests");
+        final JkTestResult result;
         if (forkingProcess == null) {
-            return launchInClassloader(extraTestClasspath, testRequest);
+            result = launchInClassloader(extraTestClasspath, testSelection);
+        } else {
+            result = launchInForkedProcess(extraTestClasspath, testSelection);
         }
-        JkTestResult result = launchInForkedProcess(extraTestClasspath, testRequest);
         postActions.run();
+        JkLog.info("Result : " + result.getTestCount());
         JkLog.endTask();
         return result;
     }
 
-    private JkTestResult launchInClassloader(JkClasspath testClasspath, Serializable testRequest) {
+    private JkTestResult launchInClassloader(JkClasspath testClasspath, JkTestSelection testSelection) {
         JkClasspath classpath = computeClasspath(testClasspath);
-        return JkInternalJunitDoer.instance(classpath.entries()).launch(engineBehavior, testRequest);
+        return JkInternalJunitDoer.instance(classpath.entries()).launch(engineBehavior, testSelection);
     }
 
-    private JkTestResult launchInForkedProcess(JkClasspath testClasspath, Serializable testRequest) {
+    private JkTestResult launchInForkedProcess(JkClasspath testClasspath, JkTestSelection testSelection) {
         Path serializedResultPath = JkUtilsPath.createTempFile("testResult-", ".ser");
         Args args = new Args();
         args.resultFile = serializedResultPath.toAbsolutePath().toString();
         args.engineBehavior = this.engineBehavior;
-        args.testRequest = testRequest;
+        args.testSelection = testSelection;
         Path serializedArgPath = JkUtilsPath.createTempFile("testArgs-", ".ser");
         JkUtilsIO.serialize(args, serializedArgPath);
         String arg = serializedArgPath.toAbsolutePath().toString();
@@ -204,14 +181,14 @@ public final class JkTestProcessor {
         Path argFile = Paths.get(args[0]);
         Args data = JkUtilsIO.deserialize(argFile);
         JkTestResult result =
-                JkInternalJunitDoer.instance(Collections.emptyList()).launch(data.engineBehavior, data.testRequest);
+                JkInternalJunitDoer.instance(Collections.emptyList()).launch(data.engineBehavior, data.testSelection);
         JkUtilsIO.serialize(result, Paths.get(data.resultFile));
     }
 
     private static class Args implements Serializable {
         JkEngineBehavior engineBehavior;
         String resultFile;
-        Serializable testRequest;
+        JkTestSelection testSelection;
     }
 
     public static class JkEngineBehavior implements Serializable {

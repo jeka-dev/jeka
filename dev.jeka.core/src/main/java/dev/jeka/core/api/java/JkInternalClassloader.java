@@ -82,12 +82,12 @@ public class JkInternalClassloader {
         final Object target = invokeStaticMethod(className, staticMethodFactory, args);
         ClassLoader from = Thread.currentThread().getContextClassLoader();
         return ((T) Proxy.newProxyInstance(from,
-                new Class[]{interfaze}, new CrossClassloaderInvokationHandler(target, from)));
+                new Class[]{interfaze}, new CrossClassloaderInvocationHandler(target, from)));
     }
 
-    private class CrossClassloaderInvokationHandler implements InvocationHandler {
+    private class CrossClassloaderInvocationHandler implements InvocationHandler {
 
-        CrossClassloaderInvokationHandler(Object target, ClassLoader fromClassLoader) {
+        CrossClassloaderInvocationHandler(Object target, ClassLoader fromClassLoader) {
             this.targetObject = target;
             this.fromClassLoader = fromClassLoader;
         }

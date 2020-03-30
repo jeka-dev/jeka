@@ -3,7 +3,6 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.samples.AClassicBuild;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefImport;
-import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 /**
@@ -23,13 +22,8 @@ public class FatJarBuild extends JkCommandSet {
     @Override
     protected void setup() {
         javaPlugin.getProject().addDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()));
-        javaPlugin.getProject().setSourceVersion(JkJavaVersion.V7);
+        javaPlugin.getProject().setSourceVersion(JkJavaVersion.V8);
         javaPlugin.getProject().getMaker().defineMainArtifactAsFatJar(true);
-    } 
-    
-    public static void main(String[] args) {
-		JkInit.instanceOf(FatJarBuild.class, "-javaPlugin#tests.fork").javaPlugin.clean().pack();
-	}
-
+    }
    
 }

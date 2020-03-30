@@ -1,14 +1,15 @@
 package dev.jeka.core.api.system;
 
-import org.junit.Test;
-
 public class JkLogTest {
 
-    @Test
+    //@Test
     public void testMultithread() throws Exception {
-        JkLog.registerHierarchicalConsoleHandler();
+        JkLog.setHierarchicalConsoleConsumer();
         JkLog.info("toto");
-        Runnable runnable = () -> {JkLog.startTask("new thread");};
+        Runnable runnable = () -> {
+            JkLog.startTask("new thread");
+            JkLog.endTask();
+        };
         Thread thread = new Thread(runnable);
         thread.start();
         thread.join();

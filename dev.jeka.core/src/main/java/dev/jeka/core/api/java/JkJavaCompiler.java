@@ -147,7 +147,7 @@ public final class JkJavaCompiler {
         JkLog.startTask(message);
         if (compileSpec.getSourceFiles().isEmpty()) {
             JkLog.warn("No source to compile");
-            JkLog.endTask("");
+            JkLog.endTask();
             return true;
         }
         final boolean result;

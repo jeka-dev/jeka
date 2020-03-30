@@ -43,7 +43,7 @@ class SampleTester {
     void doTest() throws IOException {
         testSampleWithJavaPlugin("AClassicBuild");
         //testSampleWithJavaPlugin("AntStyleBuild");
-        testSampleWithJavaPlugin("OpenSourceJarBuild");
+        testSampleWithJavaPlugin("MavenCentralJarBuild");
         testSampleWithJavaPlugin("HttpClientTaskBuild");
         testSampleWithJavaPlugin("SimpleScopeBuild");
         testDepender("FatJarBuild");
@@ -92,8 +92,8 @@ class SampleTester {
     private void testDepender(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(this.sampleDependerBaseDir.getRoot())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-RC=" + className)
-                .withParams("clean", "java#pack")
+                .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
+                .withParams("clean", "java#pack", "-LH")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }

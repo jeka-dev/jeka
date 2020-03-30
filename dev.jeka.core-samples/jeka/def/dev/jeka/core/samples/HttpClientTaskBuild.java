@@ -37,7 +37,7 @@ public class HttpClientTaskBuild extends JkCommandSet {
         return JkDependencySet.of()
                 .and(GUAVA, "21.0")
                 .and(JAVAX_SERVLET_API, "3.1.0", PROVIDED)
-                .and(JUNIT, "4.11", TEST)
+                .and(JUNIT, "4.13", TEST)
                 .and(MOCKITO_ALL, "1.10.19", TEST);
     }
 

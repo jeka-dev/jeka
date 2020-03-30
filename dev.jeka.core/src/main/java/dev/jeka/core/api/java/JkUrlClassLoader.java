@@ -258,17 +258,7 @@ public final class JkUrlClassLoader {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append(delegate);
-        if (delegate instanceof URLClassLoader) {
-            for (final URL url : delegate.getURLs()) {
-                builder.append("\n  ").append(url);
-            }
-        }
-        if (delegate.getParent() != null) {
-            builder.append("\n").append(this.getParent());
-        }
-        return builder.toString();
+        return toJkClassLoader().toString();
     }
 
     /**

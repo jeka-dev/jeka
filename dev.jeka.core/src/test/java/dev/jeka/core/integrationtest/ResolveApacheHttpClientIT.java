@@ -31,8 +31,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithoutDeclaredScopeButResolvedScope() {
-        JkLog.registerHierarchicalConsoleHandler();
-        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
+        JkLog.setHierarchicalConsoleConsumer();
         JkResolveResult result = resolver().resolve(JkDependencySet.of(HTTP_CLIENT), COMPILE);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
@@ -58,8 +57,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithTestToTestScopeMapping() {
-        JkLog.registerHierarchicalConsoleHandler();
-        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
+        JkLog.setHierarchicalConsoleConsumer();
         JkDependencySet deps =  JkDependencySet.of().and(HTTP_CLIENT,  TEST.mapTo( "test"));
         JkResolveResult result = resolver().resolve(deps);
         System.out.println(result.getDependencyTree().toStringTree());

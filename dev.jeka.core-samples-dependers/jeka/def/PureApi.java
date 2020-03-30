@@ -6,12 +6,12 @@ import dev.jeka.core.api.system.JkLog;
 public class PureApi {
 
     public static void main(String[] args) {
-        JkLog.registerHierarchicalConsoleHandler();  // activate console logging
+        JkLog.setHierarchicalConsoleConsumer();  // activate console logging
 
         // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
         JkJavaProject coreProject = JkJavaProject.ofMavenLayout("../dev.jeka.core-samples");
         coreProject.addDependencies(
-                JkDependencySet.of().and("junit:junit:4.11", JkJavaDepScopes.TEST));
+                JkDependencySet.of().and("junit:junit:4.13", JkJavaDepScopes.TEST));
 
         // A project depending on the first project + Guava
         JkJavaProject dependerProject = JkJavaProject.ofMavenLayout(".");

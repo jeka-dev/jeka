@@ -45,7 +45,7 @@ public class JkPublisherRunner {
     }
 
     public static void main2(String[] args) {
-        JkLog.registerHierarchicalConsoleHandler();
+        JkLog.setHierarchicalConsoleConsumer();
         JkVersionedModule versionedModule = JkVersionedModule.of("org.myorg:mylib:1.2.6-SNAPSHOT");
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.slf4j:slf4j-simple", COMPILE_AND_RUNTIME)

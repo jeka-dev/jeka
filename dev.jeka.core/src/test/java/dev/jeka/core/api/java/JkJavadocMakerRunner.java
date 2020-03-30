@@ -16,7 +16,7 @@ public class JkJavadocMakerRunner {
                 .resolve("../../../src/main/java").normalize();
         JkPathTreeSet sources = JkPathTreeSet.of(srcDir);
         Path out = Files.createTempDirectory("jekatest");
-        JkLog.registerHierarchicalConsoleHandler();
+        JkLog.setHierarchicalConsoleConsumer();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkJavadocMaker.of(sources, out)
                 .withClasspath(JkPathTree.of(srcDir.resolve("../../../jeka/libs/provided").normalize()).getFiles())

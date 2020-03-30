@@ -54,13 +54,9 @@ public class JkRunnables implements Runnable {
         return this;
     }
 
-
     @Override
     public void run() {
         runnable.run();
     }
-
-
-
 
 }

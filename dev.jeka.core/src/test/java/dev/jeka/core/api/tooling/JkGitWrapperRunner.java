@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 public class JkGitWrapperRunner {
 
     public static void main(String[] args) {
-        JkLog.registerHierarchicalConsoleHandler();
+        JkLog.setHierarchicalConsoleConsumer();
         JkGitWrapper git = JkGitWrapper.of(Paths.get(""));
         System.out.println(git.getCurrentBranch());
         //git.exec("rev-parse --abbrev-ref HEAD");

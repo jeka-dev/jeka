@@ -39,9 +39,9 @@ class JUnit4TestLauncher {
         }
 
         // Serialize log handler
-        if (JkLog.getLogConsumer() != null && (JkLog.getLogConsumer() instanceof Serializable)) {
+        if (JkLog.getConsumer() != null && (JkLog.getConsumer() instanceof Serializable)) {
             Path path = JkUtilsPath.createTempFile("jk-logHandler", ".ser");
-            JkUtilsIO.serialize(JkLog.getLogConsumer(), path);
+            JkUtilsIO.serialize(JkLog.getConsumer(), path);
             String pathString = path.normalize().toAbsolutePath().toString();
             if (pathString.contains(" ")) {
                 args.add("\"" + pathString+ "\"");

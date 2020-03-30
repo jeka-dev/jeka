@@ -3,11 +3,7 @@ package dev.jeka.core.api.system;
 import java.io.*;
 import java.nio.charset.Charset;
 
-public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHandler, Serializable {
-
-    private static final PrintStream FORMER_OUT = System.out;
-
-    private static final PrintStream FORMER_ERR = System.err;
+public final class JkHierarchicalConsoleLogConsumer implements JkLog.JkEventLogConsumer, Serializable {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -23,27 +19,45 @@ public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHand
 
     private static int maxLength = -1;
 
-    private transient MarginStream out = new MarginStream(System.out);
+    private transient MarginStream marginOut;
 
-    private transient MarginStream err = new MarginStream(System.err);
+    private transient MarginStream marginErr;
 
-    {
-        System.setOut(new PrintStream(out));
-        System.setErr(new PrintStream(err));
+    private transient PrintStream formerOut;
+
+    private transient PrintStream formerErr;
+
+    private transient PrintStream out;
+
+    private transient PrintStream err;
+
+    public void init() {
+        formerOut = System.out;
+        formerErr = System.err;
+        marginOut = new MarginStream(formerOut);
+        marginErr = new MarginStream(formerErr);
+        out = new PrintStream(marginOut);
+        err = new PrintStream(marginErr);
+        System.setOut(out);
+        System.setErr(err);
     }
 
-    public static void restore() {
-        System.setOut(FORMER_OUT);
-        System.setErr(FORMER_ERR);
+    public void restore() {
+        if (formerOut != null && (out == System.out)) {
+            System.setOut(formerOut);
+        }
+        if (formerErr != null && (err == System.err)) {
+            System.setErr(formerErr);
+        }
     }
 
     private void readObject(ObjectInputStream objectInputStream) {
-        out = new MarginStream(System.out);
-        err = new MarginStream(System.err);
+        marginOut = new MarginStream(System.out);
+        marginErr = new MarginStream(System.err);
     }
 
     public static void setMaxLength(int maxLength) {
-        JkHierarchicalConsoleLogHandler.maxLength = maxLength;
+        JkHierarchicalConsoleLogConsumer.maxLength = maxLength;
     }
 
     @Override
@@ -60,7 +74,7 @@ public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHand
         } else if (event.getType() == JkLog.Type.START_TASK) {
                 message = message +  " ... ";
         }
-        final MarginStream marginStream = (event.getType() == JkLog.Type.ERROR) ? err : out;
+        final MarginStream marginStream = (event.getType() == JkLog.Type.ERROR) ? marginErr : marginOut;
         final PrintStream stream = (event.getType() == JkLog.Type.ERROR) ? System.err : System.out;
         marginStream.handlingStart = event.getType() == JkLog.Type.START_TASK;
         try {
@@ -69,9 +83,7 @@ public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHand
             } else if (event.getType() == JkLog.Type.ERROR) {
                 stream.write("Error: ".getBytes(UTF8));
             }
-            stream.write(message.getBytes(UTF8));
-            stream.write(LINE_SEPARATOR);
-            stream.flush();
+            System.out.println(message);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -80,12 +92,12 @@ public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHand
 
     @Override
     public OutputStream getOutStream() {
-        return out;
+        return System.out;
     }
 
     @Override
     public OutputStream getErrorStream() {
-        return err;
+        return System.err;
     }
 
     private static class MarginStream extends OutputStream {
@@ -115,7 +127,7 @@ public final class JkHierarchicalConsoleLogHandler implements JkLog.EventLogHand
             delegate.write(b);
             lastByte = b;
             lineLength ++;  // approximate 1 byte = 1 char (untrue for special characters).
-            if (JkHierarchicalConsoleLogHandler.maxLength > -1 && lineLength > JkHierarchicalConsoleLogHandler.maxLength) {
+            if (JkHierarchicalConsoleLogConsumer.maxLength > -1 && lineLength > JkHierarchicalConsoleLogConsumer.maxLength) {
                 lineLength = 0;
                 if (handlingStart) {
                     this.write(("\n" + new String(MARGIN_UNIT, UTF8) + "  ").getBytes(UTF8));

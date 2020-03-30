@@ -2,7 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -39,7 +38,7 @@ public final class Main {
         JkUtilsSystem.disableUnsafeWarning();
         try {
             Environment.initialize(args);
-            JkLog.registerHierarchicalConsoleHandler();
+            JkLog.setHierarchicalConsoleConsumer();
             final JkLog.Verbosity verbosity = JkLog.verbosity();
             if (!Environment.standardOptions.logHeaders) {
                 JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
@@ -54,7 +53,10 @@ public final class Main {
                 displayOutro(start);
             }
         } catch (final RuntimeException e) {
-            JkHierarchicalConsoleLogHandler.restore();
+            JkLog.JkEventLogConsumer consumer = JkLog.getConsumer();
+            if (consumer != null) {
+                consumer.restore();
+            }
             if (e instanceof JkException) {
                 System.err.println(e.getMessage());
                 if (JkLog.isVerbose()) {

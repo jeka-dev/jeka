@@ -36,7 +36,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaProjectIdeSuppl
     public JkDependencySet dependencies() {
         return JkDependencySet.of()
                 .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
-                .and("junit:junit:4.11", JkJavaDepScopes.TEST);
+                .and("junit:junit:4.13", JkJavaDepScopes.TEST);
     }
 
     public void doDefault() {

@@ -17,14 +17,15 @@ public class JkDependencyResolverTest {
 
     @Test
     public void resolveModuleDependencies() throws Exception {
+        JkLog.Verbosity verbosity = JkLog.verbosity();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
-        JkLog.registerHierarchicalConsoleHandler();
         JkDependencySet dependencies = JkDependencySet.of()
                 .and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
         resolveResult.assertNoError();
         Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
+        JkLog.setVerbosity(verbosity);
     }
 
     @Test

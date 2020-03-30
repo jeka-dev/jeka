@@ -33,7 +33,7 @@ public class SonarPluginBuild extends JkCommandSet {
                 .setVersionedModule("org.jerkar:samples", "0.1")
                 .addDependencies(JkDependencySet.of()
                     .and(GUAVA, "18.0")
-                    .and(JUNIT, "4.11", JkJavaDepScopes.TEST));
+                    .and(JUNIT, "4.13", JkJavaDepScopes.TEST));
     }
 
     public void runSonar() {

@@ -1,13 +1,17 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.junit.JkTestProcessor;
+import dev.jeka.core.api.java.junit.JkTestSelection;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -42,6 +46,8 @@ public class CoreBuild extends JkCommandSet {
     private Path distribFolder;
 
     private final JkGitWrapper git;
+
+    public boolean useJunit5 = true;
 
     @JkEnv("OSSRH_USER")
     public String ossrhUser;
@@ -83,6 +89,16 @@ public class CoreBuild extends JkCommandSet {
         maker.getTasksForPublishing()
                 .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
                 .setMavenPublicationInfo(mavenPublication());
+
+        maker.getTasksForTesting()
+                .setUseJunit5(useJunit5)
+                .setBreakOnFailures(false)
+                .getTestProcessor()
+                    .setForkingProcess(false)
+                    .getEngineBehavior()
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
+        maker.getTasksForTesting().getTestSelection()
+                .addIncludePatternsIf(javaPlugin.tests.runIT, JkTestSelection.IT_INCLUDE_PATTERN);
 
         // include embedded jar
         maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded);
@@ -179,7 +195,7 @@ public class CoreBuild extends JkCommandSet {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        JkLog.endTask("It tests done");
+        JkLog.endTask();
     }
 
     private void doPackWithEmbedded() {
@@ -226,13 +242,6 @@ public class CoreBuild extends JkCommandSet {
         Path wrapperJar = maker.getArtifactPath(WRAPPER_ARTIFACT_ID);
         JkPathTree.of(maker.getOutLayout().getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
-
-    private void copyToWrapper() {
-        Path target = javaPlugin.getProject().getMaker().getMainArtifactPath();
-        Path wrapper =  JkLocator.getJekaRepositoryCache().getParent().resolve("wrapper/0.8.2.RELEASE").resolve(target.getFileName());
-        JkUtilsPath.copy(target, wrapper, StandardCopyOption.REPLACE_EXISTING);
-    }
-
 
     public static void main(String[] args) {
         CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args);

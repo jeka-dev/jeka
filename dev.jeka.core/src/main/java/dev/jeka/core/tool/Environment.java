@@ -1,7 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.system.JkHierarchicalConsoleLogHandler;
+import dev.jeka.core.api.system.JkHierarchicalConsoleLogConsumer;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsFile;
@@ -46,7 +46,7 @@ class Environment {
         if (standardOptions.logQuiteVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
-        JkHierarchicalConsoleLogHandler.setMaxLength(standardOptions.logMaxLength);
+        JkHierarchicalConsoleLogConsumer.setMaxLength(standardOptions.logMaxLength);
 
         Environment.systemProps = sysProps;
         Environment.commandLine = commandLine;

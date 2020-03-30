@@ -1,12 +1,12 @@
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.List;
@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public class JkClassLoader {
-
-    private static final int JAVA_SUFFIX_LENGTH = ".java".length();
 
     private final ClassLoader delegate;
 
@@ -146,7 +144,6 @@ public class JkClassLoader {
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
         try {
-            initLogInClassloader();
             final Class<?> clazz = this.load(className);
             final Object returned = JkUtilsReflect.invokeStaticMethod(clazz, methodName,
                     effectiveArgs);
@@ -186,10 +183,32 @@ public class JkClassLoader {
 
     @Override
     public String toString() {
-        if (delegate instanceof URLClassLoader) {
-            return JkUrlClassLoader.of((URLClassLoader) delegate).toString();
+        return toString(delegate);
+    }
+
+    private static String toString(ClassLoader classLoader) {
+        if (classLoader instanceof URLClassLoader) {
+            return ucltoString((URLClassLoader) classLoader);
+        } else {
+            StringBuilder result = new StringBuilder();
+            result.append(classLoader).append("\n");
+            JkInternalClasspathScanner.INSTANCE.getClasspath(classLoader)
+                    .forEach(path -> result.append("  ").append(path).append("  \n"));
+            return result.toString();
         }
-        else return delegate.toString();
+    }
+
+    private static String ucltoString(URLClassLoader urlClassLoader) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(urlClassLoader);
+        for (final URL url : urlClassLoader.getURLs()) {
+            builder.append("\n  ").append(url);
+        }
+        if (urlClassLoader.getParent() != null) {
+            builder.append("\n").append(toString(urlClassLoader.getParent()));
+        }
+        return builder.toString();
+
     }
 
     private static Object crossClassLoader(Object object, ClassLoader to) {
@@ -206,7 +225,6 @@ public class JkClassLoader {
         } else {
             className = object.getClass().getName();
         }
-
         final JkClassLoader from = JkClassLoader.ofLoaderOf(object.getClass());
         final Class<?> toClass = JkClassLoader.of(to).load(className);
         final boolean container = Collection.class.isAssignableFrom(clazz)
@@ -233,7 +251,6 @@ public class JkClassLoader {
         final Object[] effectiveArgs = crossClassloaderArgs(args);
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
-        initLogInClassloader();
         try {
             final Object returned = JkUtilsReflect.invoke(object, method, effectiveArgs);
             final T result;
@@ -273,10 +290,6 @@ public class JkClassLoader {
     }
 
 
-
-    private void initLogInClassloader() {
-        JkLog.initializeInClassLoader(this.get());
-    }
 
 
 }

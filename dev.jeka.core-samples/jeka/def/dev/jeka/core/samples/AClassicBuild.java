@@ -47,7 +47,7 @@ public class AClassicBuild extends JkCommandSet {
                 .addDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
                         .and("com.sun.jersey:jersey-server:1.19.4")
-                        .and("junit:junit:4.11", TEST));
+                        .and("junit:junit:4.13", TEST));
         JkJavaProjectMaker maker = project.getMaker();
 
          // With JDK 9 you should provide jre classes in the buildPath (so in dependencies)

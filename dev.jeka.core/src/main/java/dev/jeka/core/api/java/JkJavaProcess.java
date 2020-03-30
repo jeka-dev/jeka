@@ -2,7 +2,7 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
-import dev.jeka.core.api.utils.JkUtilsIO.StreamGobbler;
+import dev.jeka.core.api.utils.JkUtilsIO.JkStreamGobbler;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -239,9 +239,9 @@ public final class JkJavaProcess {
         final int result;
         try {
             final Process process = processBuilder(command, optionAndEnv.env).start();
-            final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+            final JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
                     process.getInputStream(), JkLog.getOutputStream());
-            final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
+            final JkStreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
                     process.getErrorStream(), JkLog.getErrorStream());
             process.waitFor();
             outputStreamGobbler.join();

@@ -48,11 +48,6 @@ class ProgressListeners {
         private int nestedLevel;
 
         @Override
-        public void testPlanExecutionStarted(TestPlan testPlan) {
-            long testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isTest());
-        }
-
-        @Override
         public void testPlanExecutionFinished(TestPlan testPlan) {
             System.out.println();
         }
@@ -109,11 +104,12 @@ class ProgressListeners {
         public void testPlanExecutionStarted(TestPlan testPlan) {
             long testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isTest());
             System.out.print("Launching " + testCount + " tests ");
+            System.out.flush();
         }
 
         @Override
         public void testPlanExecutionFinished(TestPlan testPlan) {
-            System.out.println("");
+            System.out.println();
         }
 
         @Override
@@ -136,9 +132,9 @@ class ProgressListeners {
 
     static class Silencer {
 
-        private final PrintStream standardOutputStream = System.out;
+        private static final PrintStream standardOutputStream = System.out;
 
-        private final PrintStream standardErrStream = System.err;
+        private static final PrintStream standardErrStream = System.err;
 
         public void silent(boolean silent) {
             if (silent) {

@@ -8,7 +8,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
 
-import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,8 +39,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
-        PrintStream outputStream = JkLog.verbosity() == JkLog.Verbosity.VERBOSE ? new PrintStream(JkLog.getOutputStream()) : null;
-        final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, outputStream, JkInternalClassloader.URL_CACHE_DIR);
+        final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, System.out, JkInternalClassloader.URL_CACHE_DIR);
         return new JkocoJunitEnhancer(file, true, destFile, Collections.emptyList());
     }
 

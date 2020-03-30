@@ -256,9 +256,9 @@ public final class JkProcess implements Runnable {
             }
             OutputStream consoleOutputStream = logOutput ? JkLog.getOutputStream() : JkUtilsIO.nopOuputStream();
             OutputStream consoleErrStream = logOutput ? JkLog.getErrorStream() : JkUtilsIO.nopOuputStream();
-            final JkUtilsIO.StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+            final JkUtilsIO.JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
                         process.getInputStream(), consoleOutputStream, collectOs);
-                final JkUtilsIO.StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
+                final JkUtilsIO.JkStreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
                         process.getErrorStream(), consoleErrStream, collectOs);
             try {
                 exitCode.set(process.waitFor());

@@ -15,7 +15,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
  * 
  * @author Jerome Angibaud
  */
-public class OpenSourceJarBuild extends JkCommandSet {
+public class MavenCentralJarBuild extends JkCommandSet {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
@@ -23,7 +23,7 @@ public class OpenSourceJarBuild extends JkCommandSet {
     protected void setup() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(GUAVA, "18.0")
-                .and(JUNIT, "4.11", TEST);
+                .and(JUNIT, "4.13", TEST);
         
         JkMavenPublicationInfo info = JkMavenPublicationInfo
                 .of("my project", "my description", "https://github.com/jerkar/samples")

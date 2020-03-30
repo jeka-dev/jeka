@@ -33,8 +33,7 @@ public final class JkLog implements Serializable {
         }
     }
 
-    // Must not be replaced by EventLogHandler cause serialisation/classloader issues.
-    private static Consumer<JkLogEvent> consumer;
+    private static JkEventLogConsumer consumer;
 
     private static OutputStream stream = JkUtilsIO.nopPrintStream();
 
@@ -42,7 +41,6 @@ public final class JkLog implements Serializable {
 
     private static Verbosity verbosity = Verbosity.NORMAL;
 
-    // Field accessed though reflection
     private static AtomicInteger currentNestedTaskLevel = new AtomicInteger(0);
 
     private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();
@@ -56,14 +54,27 @@ public final class JkLog implements Serializable {
         return result;
     }
 
-    public static void register(EventLogHandler eventLogHandler) {
-        consumer = eventLogHandler;
-        stream = eventLogHandler.getOutStream();
-        errorStream = eventLogHandler.getErrorStream();
+    /**
+     * By default events are not consumed, meaning nothing appends when {@link #info(String)},
+     * {@link #error(String)}, {@link #warn(String)} or {@link #trace(String)} are invoked.
+     * Thus users have to set explicitly a consumer using this method or {@link #setHierarchicalConsoleConsumer()}.
+     */
+    public static void setConsumer(JkEventLogConsumer consumerArg) {
+        if (consumer != null) {
+            consumer.restore();
+        }
+        consumerArg.init();
+        consumer = consumerArg;
+        stream = consumerArg.getOutStream();
+        errorStream = consumerArg.getErrorStream();
+
     }
 
-    public static void registerHierarchicalConsoleHandler() {
-        register(new JkHierarchicalConsoleLogHandler());
+    /**
+     * This set the default consumer. This consumer displays logs in the console in a hierarchical style.
+     */
+    public static void setHierarchicalConsoleConsumer() {
+        setConsumer(new JkHierarchicalConsoleLogConsumer());
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
@@ -75,33 +86,18 @@ public final class JkLog implements Serializable {
         return currentNestedTaskLevel.get();
     }
 
-    public static void initializeInClassLoader(ClassLoader classLoader) {
-        try {
-            Class<?> targetClass = classLoader.loadClass(JkLog.class.getName());
-            JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("consumer"), consumer);
-            JkUtilsReflect.setFieldValue(null,targetClass.getDeclaredField("stream"), stream);
-            JkUtilsReflect.setFieldValue(null,targetClass.getDeclaredField("errorStream"), errorStream);
-            JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("currentNestedTaskLevel"),
-                    currentNestedTaskLevel);
-            JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("verbosity"),
-                    JkUtilsIO.cloneBySerialization(verbosity, classLoader));
-        } catch (ReflectiveOperationException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-    }
-
     public static OutputStream getOutputStream() {
         if (Verbosity.MUTE == verbosity()) {
             return JkUtilsIO.nopPrintStream();
         }
-        return stream;
+        return JkUtilsObject.firstNonNull(stream, JkUtilsIO.nopOuputStream());
     }
 
     public static OutputStream getErrorStream() {
         if (Verbosity.MUTE == verbosity()) {
             return JkUtilsIO.nopPrintStream();
         }
-        return errorStream;
+        return JkUtilsObject.firstNonNull(errorStream, JkUtilsIO.nopOuputStream());
     }
 
     public static void info(String message) {
@@ -121,7 +117,6 @@ public final class JkLog implements Serializable {
     public static void error(String message) {
         consume(JkLogEvent.ofRegular(Type.ERROR, message));
     }
-
 
     private static boolean shouldPrint(Type type) {
         if (Verbosity.MUTE == verbosity()) {
@@ -200,7 +195,7 @@ public final class JkLog implements Serializable {
         }
     }
 
-    public static Consumer<JkLogEvent> getLogConsumer() {
+    public static JkEventLogConsumer getConsumer() {
         return consumer;
     }
 
@@ -239,11 +234,49 @@ public final class JkLog implements Serializable {
         return verbosity;
     }
 
-    public interface EventLogHandler extends Consumer<JkLogEvent> {
+    public interface JkEventLogConsumer extends Consumer<JkLogEvent>, Serializable {
+
+        void init();
+
+        void restore();
 
         OutputStream getOutStream();
 
         OutputStream getErrorStream();
+
+    }
+
+    public static class JkState {
+
+        private static JkEventLogConsumer consumer;
+
+        private static OutputStream stream;
+
+        private static OutputStream errorStream;
+
+        private static Verbosity verbosity;
+
+        private static AtomicInteger currentNestedTaskLevel;
+
+        public static void save() {
+            consumer = JkLog.consumer;
+            stream = JkLog.stream;
+            errorStream = JkLog.errorStream;
+            verbosity = JkLog.verbosity;
+            currentNestedTaskLevel = JkLog.currentNestedTaskLevel;
+        }
+
+        public static void restore() {
+            if (currentNestedTaskLevel == null) {  // state has never been saved
+                return;
+            }
+            JkLog.consumer = consumer;
+            JkLog.stream = stream;
+            JkLog.errorStream = errorStream;
+            JkLog.verbosity = verbosity;
+            JkLog.currentNestedTaskLevel = currentNestedTaskLevel;
+        }
+
 
     }
 

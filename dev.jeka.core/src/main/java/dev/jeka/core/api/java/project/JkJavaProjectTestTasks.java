@@ -59,7 +59,7 @@ public class JkJavaProjectTestTasks {
 
     private final JkTestSelection testSelection;
 
-    private boolean useJunit5;
+    private boolean useJunit5 = false;
 
     // ------
 
@@ -197,7 +197,6 @@ public class JkJavaProjectTestTasks {
         JkLog.startTask("Running unit tests");
         if (maker.project.getSourceLayout().getTests().count(0, false) == 0) {
             JkLog.info("No unit test found in : " + maker.project.getSourceLayout().getTests());
-            JkLog.endTask();
         } else {
             this.maker.getTasksForCompilation().runIfNecessary();
             preTest.run();
@@ -206,8 +205,8 @@ public class JkJavaProjectTestTasks {
             resourceProcessor.run();
             testExecutor.run();
             postTest.run();
-            JkLog.endTask();
         }
+        JkLog.endTask();
     }
 
     /**
@@ -236,6 +235,7 @@ public class JkJavaProjectTestTasks {
 
     public JkJavaProjectTestTasks setBreakOnFailures(boolean breakOnFailures) {
         this.breakOnFailures = breakOnFailures;
+        this.runner = runner.withBreakOnFailure(breakOnFailures);
         return this;
     }
 
@@ -243,8 +243,13 @@ public class JkJavaProjectTestTasks {
         return testSelection;
     }
 
-    public void setUseJunit5(boolean useJunit5) {
+    public JkTestProcessor getTestProcessor() {
+        return testProcessor;
+    }
+
+    public JkJavaProjectTestTasks setUseJunit5(boolean useJunit5) {
         this.useJunit5 = useJunit5;
+        return this;
     }
 
     private void executeWithTestProcessor() {
@@ -257,7 +262,9 @@ public class JkJavaProjectTestTasks {
     private JkTestProcessor defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.of();
         final Path reportDir = maker.getOutLayout().getTestReportDir().resolve("junit");
-        result.getEngineBehavior().setLegacyReportDir(reportDir);
+        result.getEngineBehavior()
+                .setLegacyReportDir(reportDir)
+                .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
         return result;
     }
 

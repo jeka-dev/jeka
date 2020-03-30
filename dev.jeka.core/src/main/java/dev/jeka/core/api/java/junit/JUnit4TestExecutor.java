@@ -39,9 +39,9 @@ class JUnit4TestExecutor {
         final String logHandlerSerPath = args[4];
         if (!logHandlerSerPath.isEmpty()) {
             Path serFile = Paths.get(logHandlerSerPath);
-            JkLog.EventLogHandler eventLogHandler = (JkLog.EventLogHandler) JkUtilsIO.deserialize(serFile);
+            JkLog.JkEventLogConsumer jkEventLogConsumer = (JkLog.JkEventLogConsumer) JkUtilsIO.deserialize(serFile);
             JkUtilsPath.deleteFile(serFile);
-            JkLog.register(eventLogHandler);
+            JkLog.setConsumer(jkEventLogConsumer);
         }
         final File reportDirFile = reportDir == null ? null : reportDir.toFile();
         final Class<?>[] classes = toClassArray(Arrays.copyOfRange(args, 5, args.length));

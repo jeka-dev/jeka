@@ -23,7 +23,7 @@ public final class JkInit {
      * Creates an instance of the specified command class and displays information about this class andPrepending environment.
      */
     public static <T extends JkCommandSet> T instanceOf(Class<T> clazz, String... args) {
-        JkLog.registerHierarchicalConsoleHandler();
+        JkLog.setHierarchicalConsoleConsumer();
         Environment.initialize(args);
         JkLog.Verbosity verbosity = JkLog.verbosity();
         if (!Environment.standardOptions.logHeaders) {
@@ -43,8 +43,8 @@ public final class JkInit {
                 .append("\nJava Version : " + System.getProperty("java.version") + ", "
                         + System.getProperty("java.vendor"))
                 .append("\nJeka Version : " + JkInfo.getJekaVersion());
-        if ( embedded(JkLocator.getJekaHomeDir())) {
-            sb.append("\nJeka Home : " + bootDir() + " ( embedded !!! )");
+        if ( embedded(JkLocator.getJekaHomeDir().normalize())) {
+            sb.append("\nJeka Home : " + bootDir().normalize() + " ( embedded !!! )");
         } else {
             sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
         }

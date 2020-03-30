@@ -1,21 +1,14 @@
 package dev.jeka.core.integrationtest;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.COMPILE;
+import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.system.JkLog;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import dev.jeka.core.api.depmanagement.JkDependencyNode;
-import dev.jeka.core.api.depmanagement.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkResolveResult;
-import dev.jeka.core.api.depmanagement.JkScopeMapping;
-import dev.jeka.core.api.system.JkLog;
+import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.COMPILE;
 
 public class ResolveSpringBootStarterIT {
 
@@ -25,8 +18,7 @@ public class ResolveSpringBootStarterIT {
 
     @Test
     public void resolveCompile() {
-        JkLog.registerHierarchicalConsoleHandler();
-        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
+        JkLog.setHierarchicalConsoleConsumer();
         final JkResolveResult result = resolver().resolve(
                 JkDependencySet.of(SPRINGBOOT_STARTER, COMPILE)
                 );

@@ -116,7 +116,7 @@ class GithubReleaseContentEditor {
     }
 
     public static void main(String[] args) {
-        JkLog.registerHierarchicalConsoleHandler();
+        JkLog.setHierarchicalConsoleConsumer();
 
         ///Map<String, String> rc = parseReleaseContents(Paths.get("../release-note.md"));
         //System.out.println(rc);

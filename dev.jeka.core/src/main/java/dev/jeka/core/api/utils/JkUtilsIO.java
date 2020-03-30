@@ -339,8 +339,8 @@ public final class JkUtilsIO {
      * Returns a thread that write each data read to the specified input
      * getOutputStream to the specified output getOutputStream.
      */
-    public static StreamGobbler newStreamGobbler(InputStream is, OutputStream ... outputStreams) {
-        return new StreamGobbler(is, outputStreams);
+    public static JkStreamGobbler newStreamGobbler(InputStream is, OutputStream ... outputStreams) {
+        return new JkStreamGobbler(is, outputStreams);
     }
 
     /**
@@ -348,13 +348,13 @@ public final class JkUtilsIO {
      * thread is started when the instance is created. You have to call
      * {@link #stop()} to stop the thread.
      */
-    public static final class StreamGobbler {
+    public static final class JkStreamGobbler {
 
         private final InnerRunnable innerRunnable;
 
         private final Thread thread;
 
-        private StreamGobbler(InputStream is, OutputStream... outputStreams) {
+        private JkStreamGobbler(InputStream is, OutputStream... outputStreams) {
             this.innerRunnable = new InnerRunnable(is, outputStreams);
             thread = new Thread(innerRunnable);
             thread.start();
@@ -404,9 +404,7 @@ public final class JkUtilsIO {
                     throw new UncheckedIOException(e);
                 }
             }
-
         }
-
     }
 
     /* table mapping primitive type names to corresponding class objects */

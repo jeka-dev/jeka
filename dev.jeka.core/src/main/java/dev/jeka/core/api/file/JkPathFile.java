@@ -134,6 +134,7 @@ public final class JkPathFile {
      * @param algorithm Hashing algorithm as MD5, SHA-2, ...
      */
     public String getChecksum(String algorithm) {
+        assertExist();
         try (final InputStream is = Files.newInputStream(path)) {
             final MessageDigest md = MessageDigest.getInstance(algorithm);
             md.reset();
@@ -161,6 +162,7 @@ public final class JkPathFile {
      * Produces a files, in the same directory, that contains the checksum of this file.
      */
     public JkPathFile checksum(String ... algorithms) {
+        assertExist();
         for (String algorithm : algorithms) {
             final String fileName = this.path.getFileName().toString() + "." + algorithm.toLowerCase();
             JkPathFile.of(path.resolveSibling(fileName)).deleteIfExist().write(
@@ -173,6 +175,7 @@ public final class JkPathFile {
      * Adds execute permition on this files. No effect on windows system.
      */
     public JkPathFile addExecPerm(boolean owner, boolean group, boolean other) {
+        assertExist();
         Set<PosixFilePermission> perms = null;
         try {
             perms = Files.getPosixFilePermissions(this.path);
@@ -202,6 +205,12 @@ public final class JkPathFile {
             return interpolated(result, tokenValues);
         }
         return result;
+    }
+
+    public void assertExist() {
+        if (!this.exists()) {
+            throw new IllegalStateException("File " + this.path.toAbsolutePath().normalize() + " does not exist.");
+        }
     }
 
 }
