@@ -2,13 +2,15 @@ package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
-import dev.jeka.core.api.java.junit.JkUnit;
-import dev.jeka.core.api.java.project.*;
+import dev.jeka.core.api.java.junit.JkTestProcessor;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectIde;
+import dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier;
+import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -117,18 +119,11 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
         JkGpg pgp = pgpPlugin.get();
         maker.getTasksForPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
 
-        JkUnit tester = maker.getTasksForTesting().getRunner();
+        JkTestProcessor testProcessor = maker.getTasksForTesting().getTestProcessor();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
-            tester = tester.withForking(javaProcess);
+            testProcessor.setForkingProcess(javaProcess);
         }
-        if (tests.runIT) {
-            maker.getTasksForTesting().setTestClassMatcher(maker.getTasksForTesting().getTestClassMatcher()
-                    .or(JkPathMatcher.of(true, JkJavaProjectTestTasks.IT_CLASS_PATTERN)));
-        }
-        tester = tester.withOutputOnConsole(tests.output);
-        tester = tester.withReport(tests.report);
-        maker.getTasksForTesting().setRunner(tester);
         maker.getTasksForTesting().setSkipTests(tests.skip);
         if (this.compilerExtraArgs != null) {
             project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));

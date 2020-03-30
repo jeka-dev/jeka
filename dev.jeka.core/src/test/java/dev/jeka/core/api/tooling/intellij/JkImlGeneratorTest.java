@@ -38,8 +38,7 @@ public class JkImlGeneratorTest {
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
         coreProject.setDependencies(coreDeps);
-        coreProject.getMaker().getTasksForTesting().setRunner(
-                coreProject.getMaker().getTasksForTesting().getRunner().withForking(true));
+        coreProject.getMaker().getTasksForTesting().getTestProcessor().setForkingProcess(true);
         final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject.getJavaProjectIde());
         final String result1 = coreGenerator.generate();
         System.out.println("\ncore .classpath");

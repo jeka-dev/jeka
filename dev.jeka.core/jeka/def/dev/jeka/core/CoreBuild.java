@@ -47,7 +47,7 @@ public class CoreBuild extends JkCommandSet {
 
     private final JkGitWrapper git;
 
-    public boolean useJunit5 = true;
+    public boolean runIT;
 
     @JkEnv("OSSRH_USER")
     public String ossrhUser;
@@ -91,14 +91,13 @@ public class CoreBuild extends JkCommandSet {
                 .setMavenPublicationInfo(mavenPublication());
 
         maker.getTasksForTesting()
-                .setUseJunit5(useJunit5)
                 .setBreakOnFailures(false)
                 .getTestProcessor()
                     .setForkingProcess(false)
                     .getEngineBehavior()
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
         maker.getTasksForTesting().getTestSelection()
-                .addIncludePatternsIf(javaPlugin.tests.runIT, JkTestSelection.IT_INCLUDE_PATTERN);
+                .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN);
 
         // include embedded jar
         maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded);
@@ -160,7 +159,7 @@ public class CoreBuild extends JkCommandSet {
             distrib.importFiles(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         makeDocs();
-        if (javaPlugin.tests.runIT) {
+        if (runIT) {
             testSamples();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());

@@ -3,7 +3,6 @@ package dev.jeka.core.tool.builtins.jacoco;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.junit.JkTestProcessor;
-import dev.jeka.core.api.java.junit.JkUnit;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -14,12 +13,11 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
 /**
  * Enhancer to beforeOptionsInjected JkUnit such it performs Jacoco code coverage while it runs unit tests.
  */
-public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
+public final class JkocoJunitEnhancer {
 
     private final Path agent;
 
@@ -53,20 +51,6 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     public JkocoJunitEnhancer enabled(boolean enabled) {
         return new JkocoJunitEnhancer(this.agent, enabled, destFile, options);
-    }
-
-    @Override
-    public JkUnit apply(JkUnit jkUnit) {
-        if (!enabled) {
-            return jkUnit;
-        }
-        if (jkUnit.isForked()) {
-            JkJavaProcess process = jkUnit.getForkedProcess();
-            process = process.andAgent(destFile, options());
-            return jkUnit.withForking(process);
-        }
-        final JkJavaProcess process = JkJavaProcess.of().andAgent(agent, options());
-        return jkUnit.withForking(process).withPostAction(new Reporter());
     }
 
     public void apply(JkTestProcessor testProcessor) {

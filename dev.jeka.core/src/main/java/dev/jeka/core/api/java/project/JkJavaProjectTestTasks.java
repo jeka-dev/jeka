@@ -1,31 +1,21 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.junit.*;
+import dev.jeka.core.api.java.junit.JkTestProcessor;
+import dev.jeka.core.api.java.junit.JkTestResult;
+import dev.jeka.core.api.java.junit.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 public class JkJavaProjectTestTasks {
-
-    /**
-     * File pattern for selecting Test classes.
-     */
-    public static final String[] TEST_CLASS_PATTERN = new String[] {"*Test.class", "**/*Test.class"};
-
-    /**
-     * File pattern for selecting Integration Test classes.
-     */
-    public static final String[] IT_CLASS_PATTERN = new String[] {"*IT.class", "**/*IT.class"};
 
     private final JkJavaProjectMaker maker;
 
@@ -39,15 +29,11 @@ public class JkJavaProjectTestTasks {
 
     private final JkRunnables compileRunner;
 
-    private JkUnit runner;
-
     private JkTestProcessor testProcessor;
 
-    public final JkRunnables testExecutor = JkRunnables.of(this::execute4or5);
+    public final JkRunnables testExecutor = JkRunnables.of(this::executeWithTestProcessor);
 
     private JkJavaCompiler compiler = JkJavaCompiler.ofJdk();
-
-    private JkPathMatcher testClassMatcher = JkPathMatcher.of(true, TEST_CLASS_PATTERN);
 
     private boolean done;
 
@@ -59,9 +45,6 @@ public class JkJavaProjectTestTasks {
 
     private final JkTestSelection testSelection;
 
-    private boolean useJunit5 = false;
-
-    // ------
 
     JkJavaProjectTestTasks(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
@@ -72,9 +55,6 @@ public class JkJavaProjectTestTasks {
             final JkJavaCompileSpec testCompileSpec = getTestCompileSpec();
             compiler.compile(testCompileSpec);
         });
-        runner = getDefaultTester();
-
-        // ----- Junit5
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
     }
@@ -104,60 +84,9 @@ public class JkJavaProjectTestTasks {
         return this;
     }
 
-    public JkJavaProjectTestTasks setFork(boolean fork, String ... params) {
-        this.compiler = this.compiler.withForking(fork, params);
-        return this;
-    }
-
-    public JkUnit getRunner() {
-        return runner;
-    }
-
-    public void setRunner(JkUnit runner) {
-        this.runner = runner;
-    }
-
-    private JkUnit getDefaultTester() {
-        final Path junitReport = maker.getOutLayout().getTestReportDir().resolve("junit");
-        return JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC)
-                .withReportDir(junitReport);
-    }
-
-    public JkJavaTestClasses getTestClasses() {
-        return JkJavaTestClasses.of(getTestClasspath(),
-                JkPathTreeSet.of(maker.getOutLayout().getTestClassDir()).andMatcher(testClassMatcher));
-    }
-
-    public JkJavaProjectTestTasks setForkRun(boolean fork) {
-        this.runner = runner.withForking(fork);
-        this.testProcessor.setForkingProcess(fork);
-        return this;
-    }
-
     public JkJavaProjectTestTasks setForkCompile(boolean fork, String ... params) {
         compiler = compiler.withForking(fork, params);
         return this;
-    }
-
-    public JkPathMatcher getTestClassMatcher() {
-        return testClassMatcher;
-    }
-
-    public JkJavaProjectTestTasks setTestClassMatcher(JkPathMatcher testClassMatcher) {
-        this.testClassMatcher = testClassMatcher;
-        return this;
-    }
-
-    private void execute4or5() {
-        if (useJunit5) {
-            executeWithTestProcessor();
-        } else {
-            executeWithJuni4();
-        }
-    }
-
-    private void executeWithJuni4() {
-        runner.run(getTestClasses());
     }
 
     private JkJavaCompileSpec getTestCompileSpec() {
@@ -227,7 +156,6 @@ public class JkJavaProjectTestTasks {
         done = false;
     }
 
-    // ------ JUnit5
 
     public boolean isBreakOnFailures() {
         return breakOnFailures;
@@ -235,7 +163,6 @@ public class JkJavaProjectTestTasks {
 
     public JkJavaProjectTestTasks setBreakOnFailures(boolean breakOnFailures) {
         this.breakOnFailures = breakOnFailures;
-        this.runner = runner.withBreakOnFailure(breakOnFailures);
         return this;
     }
 
@@ -245,11 +172,6 @@ public class JkJavaProjectTestTasks {
 
     public JkTestProcessor getTestProcessor() {
         return testProcessor;
-    }
-
-    public JkJavaProjectTestTasks setUseJunit5(boolean useJunit5) {
-        this.useJunit5 = useJunit5;
-        return this;
     }
 
     private void executeWithTestProcessor() {

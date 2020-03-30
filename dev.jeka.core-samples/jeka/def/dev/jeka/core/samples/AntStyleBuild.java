@@ -5,14 +5,12 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.java.junit.JkJavaTestClasses;
-import dev.jeka.core.api.java.junit.JkUnit;
 import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.tool.JkCommandSet;
-import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDefClasspath;
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 
 import java.nio.file.Path;
@@ -81,16 +79,6 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaProjectIdeSuppl
     public void cleanBuild() {
         clean();
         jar();
-    }
-
-    public void junit() {
-        jar();
-        JkUnit.of().withForking()
-        .withReportDir(reportDir)
-        .withReport(JkUnit.JunitReportDetail.FULL)
-        .run(JkJavaTestClasses.of(
-                classpath.andPrepending(jarFile),
-                JkPathTree.of(classDir).andMatching(true, "**/*Test.class", "*Test.class") ));
     }
 
     /*
