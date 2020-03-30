@@ -19,6 +19,10 @@
 		<include name='**/*.jar' />
 	</fileset>
 
+	<fileset id="junit5-libs" dir="dev.jeka.core/jeka/libs/test">
+		<include name='**/*.jar' />
+	</fileset>
+
 	<target name="init">
 		<mkdir dir="${bin}" />
 	</target>
@@ -30,6 +34,7 @@
 			<src path="dev.jeka.core/src/main/java" />
 			<classpath>
 				<fileset refid="libs" />
+				<fileset refid="junit5-libs"/>
 			</classpath>
 		</javac>
 		<copy todir="${bin}">
