@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 /**
  * Tasks for packaging artifacts created by the holding project.
  */
-public class JkJavaProjectPackTasks {
+public class JkJavaProjectMakerPackagingStep {
 
     private final JkJavaProjectMaker maker;
 
@@ -28,7 +28,7 @@ public class JkJavaProjectPackTasks {
 
     private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
-    JkJavaProjectPackTasks(
+    JkJavaProjectMakerPackagingStep(
             JkJavaProjectMaker maker) {
         this.maker = maker;
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
@@ -65,8 +65,8 @@ public class JkJavaProjectPackTasks {
     }
 
     public void createBinJar(Path target) {
-        maker.getTasksForCompilation().runIfNecessary();
-        maker.getTasksForTesting().runIfNecessary();
+        maker.getSteps().getCompilation().runIfNecessary();
+        maker.getSteps().getTesting().runIfNecessary();
         JkJavaProject project = maker.project;
         JkJarPacker.of(maker.getOutLayout().getClassDir())
                 .withManifest(project.getManifest())
@@ -76,8 +76,8 @@ public class JkJavaProjectPackTasks {
 
 
     public void createFatJar(Path target) {
-        maker.getTasksForCompilation().runIfNecessary();
-        maker.getTasksForTesting().runIfNecessary();
+        maker.getSteps().getCompilation().runIfNecessary();
+        maker.getSteps().getTesting().runIfNecessary();
         JkClasspath classpath = JkClasspath.of(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
         JkJarPacker.of( maker.getOutLayout().getClassDir())
                 .withManifest(maker.project.getManifest())
@@ -90,7 +90,7 @@ public class JkJavaProjectPackTasks {
     }
 
     void createJavadocJar(Path target) {
-        maker.getTasksForJavadoc().runIfNecessary();
+        maker.getSteps().getDocumentation().runIfNecessary();
         Path javadocDir = maker.getOutLayout().getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
@@ -100,8 +100,8 @@ public class JkJavaProjectPackTasks {
     }
 
     public void createTestJar(Path target) {
-        maker.getTasksForCompilation().runIfNecessary();
-        maker.getTasksForTesting().runIfNecessary();
+        maker.getSteps().getCompilation().runIfNecessary();
+        maker.getSteps().getTesting().runIfNecessary();
         JkJarPacker.of(maker.getOutLayout().getTestClassDir())
                 .withManifest(maker.project.getManifest())
                 .makeJar(target);
@@ -116,7 +116,7 @@ public class JkJavaProjectPackTasks {
      * Given artifact file name are always structured as XXXXX-classifier.ext,
      * this method acts on the XXXXX part.
      */
-    public JkJavaProjectPackTasks setArtifactFileNameSupplier(Supplier<String> artifactFileNameSupplier) {
+    public JkJavaProjectMakerPackagingStep setArtifactFileNameSupplier(Supplier<String> artifactFileNameSupplier) {
         this.artifactFileNameSupplier = artifactFileNameSupplier;
         return this;
     }
@@ -125,7 +125,7 @@ public class JkJavaProjectPackTasks {
      * Defines the algorithms to sign the produced artifacts.
      * @param algorithms Digest algorithm working on JDK8 platform including <code>md5, sha-1, sha-2 and sha-256</code>
      */
-    public JkJavaProjectPackTasks setChecksumAlgorithms(String ... algorithms) {
+    public JkJavaProjectMakerPackagingStep setChecksumAlgorithms(String ... algorithms) {
         this.checksumAlgorithms = algorithms;
         return this;
     }
@@ -134,7 +134,7 @@ public class JkJavaProjectPackTasks {
      * Defines witch files from main jar and dependency jars will be included in the fat jar.
      * By default, it is valued to "all".
      */
-    public JkJavaProjectPackTasks setFatJarFilter(PathMatcher fatJarFilter) {
+    public JkJavaProjectMakerPackagingStep setFatJarFilter(PathMatcher fatJarFilter) {
         JkUtilsAssert.notNull(fatJarFilter, "Fat jar filter can not be null.");
         this.fatJarFilter = fatJarFilter;
         return this;

@@ -223,7 +223,7 @@ public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLoca
                 .append("Source Encoding : " + this.compileSpec.getEncoding() + "\n")
                 .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + this.maker.getDependencyResolver().getRepos() + "\n")
-                .append("Publish repositories : " + this.maker.getTasksForPublishing().getPublishRepos()  + "\n")
+                .append("Publish repositories : " + this.maker.getSteps().getPublishing().getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + this.getDependencies().toList().size() + " elements.\n")
                 .append("Defined Artifacts : " + this.get().getArtifactIds())
                 .toString();

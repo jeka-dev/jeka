@@ -43,15 +43,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private boolean failOnDependencyResolutionError = true;
 
-    private final JkJavaProjectCompileTasks tasksForCompilation;
-
-    private final JkJavaProjectTestTasks tasksForTesting;
-
-    private final JkJavaProjectPackTasks tasksForPackaging;
-
-    private final JkJavaProjectPublishTasks tasksForPublishing;
-
-    private final JkJavaProjectJavadocTasks tasksForJavadoc;
+    private final JkSteps steps;
 
     private final JkRunnables outputCleaner;
 
@@ -62,11 +54,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                 () -> JkPathTree.of(getOutLayout().getOutputPath()).deleteContent());
         final Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
                 Charset.forName(project.getCompileSpec().getEncoding());
-        tasksForCompilation = new JkJavaProjectCompileTasks(this, charset);
-        tasksForTesting = new JkJavaProjectTestTasks(this, charset);
-        tasksForPackaging = new JkJavaProjectPackTasks(this);
-        tasksForPublishing = new JkJavaProjectPublishTasks(this);
-        tasksForJavadoc = new JkJavaProjectJavadocTasks(this);
+        this.steps = new JkSteps(this, charset);
 
         // define default artifacts
         putArtifact(getMainArtifactId(), () -> makeMainJar());
@@ -128,11 +116,11 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     @Override
     public void makeArtifact(JkArtifactId artifactId) {
         if (artifactRunnables.containsKey(artifactId)) {
-            Path resultFile =  project.getBaseDir().relativize(tasksForPackaging.getArtifactFile(artifactId));
+            Path resultFile =  project.getBaseDir().relativize(steps.packaging.getArtifactFile(artifactId));
             JkLog.startTask("Making artifact file " + resultFile);
             this.artifactRunnables.get(artifactId).run();
             JkLog.endTask();
-            this.getTasksForPackaging().checksum(tasksForPackaging.getArtifactFile(artifactId));
+            steps.packaging.checksum(steps.packaging.getArtifactFile(artifactId));
         } else {
             throw new IllegalArgumentException("No artifact " + artifactId + " is defined on project " + this.project);
         }
@@ -146,19 +134,19 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         JkArtifactId mainArtifactId = getMainArtifactId();
         Path mainPath = getArtifactPath(mainArtifactId);
         putArtifact(mainArtifactId, () -> {
-            tasksForCompilation.runIfNecessary();
-            tasksForTesting.runIfNecessary();
-            tasksForPackaging.createFatJar(mainPath);});
+            steps.compilation.runIfNecessary();
+            steps.testing.runIfNecessary();
+            steps.packaging.createFatJar(mainPath);});
         if (defineOriginal) {
             JkArtifactId originalArtifactId = JkArtifactId.of("original", "jar");
-            putArtifact(originalArtifactId, () -> tasksForPackaging.createBinJar(getArtifactPath(originalArtifactId)));
+            putArtifact(originalArtifactId, () -> steps.packaging.createBinJar(getArtifactPath(originalArtifactId)));
         }
         return this;
     }
 
     @Override
     public Path getArtifactPath(JkArtifactId artifactId) {
-        return tasksForPackaging.getArtifactFile(artifactId);
+        return steps.packaging.getArtifactFile(artifactId);
     }
 
     @Override
@@ -173,7 +161,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public JkJavaProjectMaker addTestSourceArtifact() {
         putArtifact(TEST_SOURCE_ARTIFACT_ID,
-                () -> tasksForPackaging.createTestSourceJar(tasksForPackaging.getArtifactFile(TEST_SOURCE_ARTIFACT_ID)));
+                () -> steps.packaging.createTestSourceJar(steps.packaging.getArtifactFile(TEST_SOURCE_ARTIFACT_ID)));
         return this;
     }
 
@@ -278,59 +266,42 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Deletes project build outputs.
      */
     public JkJavaProjectMaker clean() {
-        tasksForCompilation.reset();
-        tasksForTesting.reset();
-        tasksForJavadoc.reset();
+        steps.compilation.reset();
+        steps.testing.reset();
+        steps.documentation.reset();
         outputCleaner.run();
         return this;
     }
 
     // Phase tasks -----------------------------
-    public JkJavaProjectJavadocTasks getTasksForJavadoc() {
-        return tasksForJavadoc;
+
+    public JkJavaProjectMaker.JkSteps getSteps() {
+        return steps;
     }
-
-
-
-    public JkJavaProjectCompileTasks getTasksForCompilation() {
-        return tasksForCompilation;
-    }
-    public JkJavaProjectTestTasks getTasksForTesting() {
-        return tasksForTesting;
-    }
-
-    public JkJavaProjectPackTasks getTasksForPackaging() {
-        return tasksForPackaging;
-    }
-
-    public JkJavaProjectPublishTasks getTasksForPublishing() {
-        return tasksForPublishing;
-    }
-
 
     // Make -------------------------------------------------------
 
 
     private JkJavaProjectMaker makeMainJar() {
-        Path target = tasksForPackaging.getArtifactFile(getMainArtifactId());
-        tasksForPackaging.createBinJar(target);
+        Path target = steps.packaging.getArtifactFile(getMainArtifactId());
+        steps.packaging.createBinJar(target);
         return this;
     }
 
     private JkJavaProjectMaker makeSourceJar() {
-        Path target = tasksForPackaging.getArtifactFile(SOURCES_ARTIFACT_ID);
-        tasksForPackaging.createSourceJar(target);
+        Path target = steps.packaging.getArtifactFile(SOURCES_ARTIFACT_ID);
+        steps.packaging.createSourceJar(target);
         return this;
     }
 
     private JkJavaProjectMaker makeJavadocJar() {
-        Path target = tasksForPackaging.getArtifactFile(JAVADOC_ARTIFACT_ID);
-        tasksForPackaging.createJavadocJar(target);
+        Path target = steps.packaging.getArtifactFile(JAVADOC_ARTIFACT_ID);
+        steps.packaging.createJavadocJar(target);
         return this;
     }
 
     private JkJavaProjectMaker makeTestJar(Path target) {
-        tasksForPackaging.createTestJar(target);
+        steps.packaging.createTestJar(target);
         return this;
     }
 
@@ -342,6 +313,47 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     @Override
     public String toString() {
         return this.project.toString();
+    }
+
+    public static class JkSteps {
+
+        private final JkJavaProjectMakerCompilationStep compilation;
+
+        private final JkJavaProjectMakerTestingStep testing;
+
+        private final JkJavaProjectMakerPackagingStep packaging;
+
+        private final JkJavaProjectMakerPublishingStep publishing;
+
+        private final JkJavaProjectMakerDocumentationStep documentation;
+
+        private JkSteps(JkJavaProjectMaker maker, Charset charset) {
+            compilation = new JkJavaProjectMakerCompilationStep(maker, charset);
+            testing = new JkJavaProjectMakerTestingStep(maker, charset);
+            packaging = new JkJavaProjectMakerPackagingStep(maker);
+            publishing = new JkJavaProjectMakerPublishingStep(maker);
+            documentation = new JkJavaProjectMakerDocumentationStep(maker);
+        }
+
+        public JkJavaProjectMakerCompilationStep getCompilation() {
+            return compilation;
+        }
+
+        public JkJavaProjectMakerTestingStep getTesting() {
+            return testing;
+        }
+
+        public JkJavaProjectMakerPackagingStep getPackaging() {
+            return packaging;
+        }
+
+        public JkJavaProjectMakerPublishingStep getPublishing() {
+            return publishing;
+        }
+
+        public JkJavaProjectMakerDocumentationStep getDocumentation() {
+            return documentation;
+        }
     }
 
 

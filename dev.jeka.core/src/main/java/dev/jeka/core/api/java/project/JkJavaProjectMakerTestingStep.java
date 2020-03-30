@@ -7,15 +7,15 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.junit.JkTestProcessor;
-import dev.jeka.core.api.java.junit.JkTestResult;
-import dev.jeka.core.api.java.junit.JkTestSelection;
+import dev.jeka.core.api.java.testplatform.JkTestProcessor;
+import dev.jeka.core.api.java.testplatform.JkTestResult;
+import dev.jeka.core.api.java.testplatform.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 
-public class JkJavaProjectTestTasks {
+public class JkJavaProjectMakerTestingStep {
 
     private final JkJavaProjectMaker maker;
 
@@ -46,7 +46,7 @@ public class JkJavaProjectTestTasks {
     private final JkTestSelection testSelection;
 
 
-    JkJavaProjectTestTasks(JkJavaProjectMaker maker, Charset charset) {
+    JkJavaProjectMakerTestingStep(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
         resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().getTestResources())
                 .and(maker.project.getResourceInterpolators())
@@ -79,12 +79,12 @@ public class JkJavaProjectTestTasks {
         return compiler;
     }
 
-    public JkJavaProjectTestTasks setCompiler(JkJavaCompiler compiler) {
+    public JkJavaProjectMakerTestingStep setCompiler(JkJavaCompiler compiler) {
         this.compiler = compiler;
         return this;
     }
 
-    public JkJavaProjectTestTasks setForkCompile(boolean fork, String ... params) {
+    public JkJavaProjectMakerTestingStep setForkCompile(boolean fork, String ... params) {
         compiler = compiler.withForking(fork, params);
         return this;
     }
@@ -122,12 +122,12 @@ public class JkJavaProjectTestTasks {
      * </ul>
      */
     public void run() {
-        maker.getTasksForCompilation().runIfNecessary();
+        maker.getSteps().getCompilation().runIfNecessary();
         JkLog.startTask("Running unit tests");
         if (maker.project.getSourceLayout().getTests().count(0, false) == 0) {
             JkLog.info("No unit test found in : " + maker.project.getSourceLayout().getTests());
         } else {
-            this.maker.getTasksForCompilation().runIfNecessary();
+            this.maker.getSteps().getCompilation().runIfNecessary();
             preTest.run();
             compileRunner.run();
             resourceGenerator.run();
@@ -161,7 +161,7 @@ public class JkJavaProjectTestTasks {
         return breakOnFailures;
     }
 
-    public JkJavaProjectTestTasks setBreakOnFailures(boolean breakOnFailures) {
+    public JkJavaProjectMakerTestingStep setBreakOnFailures(boolean breakOnFailures) {
         this.breakOnFailures = breakOnFailures;
         return this;
     }

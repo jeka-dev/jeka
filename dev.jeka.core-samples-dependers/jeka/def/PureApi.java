@@ -22,6 +22,6 @@ public class PureApi {
 
         coreProject.getMaker().clean();
         dependerProject.getMaker().clean().makeAllArtifacts();
-        dependerProject.getMaker().getTasksForPublishing().publish();
+        dependerProject.getMaker().getSteps().getPublishing().publish();
     }
 }

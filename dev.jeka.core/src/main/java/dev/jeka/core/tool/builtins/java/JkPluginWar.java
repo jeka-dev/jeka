@@ -53,7 +53,7 @@ public class JkPluginWar extends JkPlugin {
     }
 
     public static void generateWarDir(JkJavaProject project, Path dest, Path staticResouceDir) {
-        project.getMaker().getTasksForCompilation().runIfNecessary();
+        project.getMaker().getSteps().getCompilation().runIfNecessary();
         JkPathTree root = JkPathTree.of(dest);
         JkPathTree.of(project.getBaseDir().resolve("src/main/webapp/WEB-INF")).copyTo(root.get("WEB-INF"));
         if (Files.exists(staticResouceDir)) {

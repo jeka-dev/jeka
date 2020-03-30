@@ -6,11 +6,8 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
-import dev.jeka.core.api.java.junit.JkTestProcessor;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
-import dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier;
-import dev.jeka.core.api.java.project.JkJavaProjectMaker;
+import dev.jeka.core.api.java.testplatform.JkTestProcessor;
+import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -103,28 +100,29 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
         if (pack.testSources) {
             maker.addTestSourceArtifact();
         }
-        if (maker.getTasksForCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
-            maker.getTasksForCompilation().setCompiler(compiler());
+        JkJavaProjectMaker.JkSteps steps = maker.getSteps();
+        if (steps.getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
+            steps.getCompilation().setCompiler(compiler());
         }
-        if (maker.getTasksForPublishing().getPublishRepos() == null
-                || maker.getTasksForPublishing().getPublishRepos().getRepoList().isEmpty()) {
-            maker.getTasksForPublishing().addPublishRepo(repoPlugin.publishRepository());
+        if (steps.getPublishing().getPublishRepos() == null
+                || steps.getPublishing().getPublishRepos().getRepoList().isEmpty()) {
+            steps.getPublishing().addPublishRepo(repoPlugin.publishRepository());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         maker.addDownloadRepo(downloadRepo);
         if (pack.checksums().length > 0) {
-            maker.getTasksForPackaging().setChecksumAlgorithms(pack.checksums());
+            steps.getPackaging().setChecksumAlgorithms(pack.checksums());
         }
         JkPluginPgp pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginPgp.class);
         JkGpg pgp = pgpPlugin.get();
-        maker.getTasksForPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
+        steps.getPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
 
-        JkTestProcessor testProcessor = maker.getTasksForTesting().getTestProcessor();
+        JkTestProcessor testProcessor = steps.getTesting().getTestProcessor();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             testProcessor.setForkingProcess(javaProcess);
         }
-        maker.getTasksForTesting().setSkipTests(tests.skip);
+        steps.getTesting().setSkipTests(tests.skip);
         if (this.compilerExtraArgs != null) {
             project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
@@ -179,12 +177,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
 
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
-        project.getMaker().getTasksForCompilation().run();
+        project.getMaker().getSteps().getCompilation().run();
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
     public void test() {
-        project.getMaker().getTasksForTesting().run();
+        project.getMaker().getSteps().getTesting().run();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
@@ -217,12 +215,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
 
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
-        project.getMaker().getTasksForPublishing().publish();
+        project.getMaker().getSteps().getPublishing().publish();
     }
 
     @JkDoc("Publishes produced artifacts to local repository.")
     public void publishLocal() {
-        project.getMaker().getTasksForPublishing().publishLocal();
+        project.getMaker().getSteps().getPublishing().publishLocal();
     }
 
     @JkDoc("Fetches project dependencies in cache.")
@@ -246,10 +244,11 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
         final JkProcess process =  JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
                 getProject().getCompileSpec().getSourceVersion().get());
+        JkJavaProjectMakerCompilationStep compilation = project.getMaker().getSteps().getCompilation();
         if (process != null) {
-            return getProject().getMaker().getTasksForCompilation().getCompiler().withForking(process);
+            return compilation.getCompiler().withForking(process);
         }
-        return project.getMaker().getTasksForCompilation().getCompiler();
+        return compilation.getCompiler();
     }
 
 }

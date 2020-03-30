@@ -1,6 +1,6 @@
-package dev.jeka.core.api.java.junit.embedded.junitplatform;
+package dev.jeka.core.api.java.testplatform.embedded.junitplatform;
 
-import dev.jeka.core.api.java.junit.JkTestProcessor;
+import dev.jeka.core.api.java.testplatform.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.platform.engine.TestExecutionResult;

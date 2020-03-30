@@ -13,7 +13,7 @@ import java.util.function.UnaryOperator;
 
 import static dev.jeka.core.api.java.project.JkJavaProjectMaker.*;
 
-public class JkJavaProjectPublishTasks {
+public class JkJavaProjectMakerPublishingStep {
 
     private final JkJavaProjectMaker maker;
 
@@ -25,7 +25,7 @@ public class JkJavaProjectPublishTasks {
 
     private JkMavenPublicationInfo mavenPublicationInfo;
 
-    JkJavaProjectPublishTasks(JkJavaProjectMaker maker) {
+    JkJavaProjectMakerPublishingStep(JkJavaProjectMaker maker) {
         this.maker = maker;
     }
 
@@ -56,7 +56,7 @@ public class JkJavaProjectPublishTasks {
         return this.mavenPublicationInfo;
     }
 
-    public JkJavaProjectPublishTasks setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
+    public JkJavaProjectMakerPublishingStep setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
         this.mavenPublicationInfo = mavenPublicationInfo;
         return this;
     }
@@ -96,13 +96,13 @@ public class JkJavaProjectPublishTasks {
         return this.publishRepos;
     }
 
-    public JkJavaProjectPublishTasks setPublishRepos(JkRepoSet publishRepos) {
+    public JkJavaProjectMakerPublishingStep setPublishRepos(JkRepoSet publishRepos) {
         JkUtilsAssert.notNull(publishRepos, "publish repos cannot be null.");
         this.publishRepos = publishRepos;
         return this;
     }
 
-    public JkJavaProjectPublishTasks addPublishRepo(JkRepo publishRepo) {
+    public JkJavaProjectMakerPublishingStep addPublishRepo(JkRepo publishRepo) {
         this.publishRepos = this.publishRepos.and(publishRepo);
         return this;
     }

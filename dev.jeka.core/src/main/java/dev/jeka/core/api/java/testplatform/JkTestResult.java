@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.junit;
+package dev.jeka.core.api.java.testplatform;
 
 import dev.jeka.core.api.system.JkException;
 

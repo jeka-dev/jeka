@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.List;
 
-public class JkJavaProjectJavadocTasks {
+public class JkJavaProjectMakerDocumentationStep {
 
     private final JkJavaProjectMaker maker;
 
@@ -17,7 +17,7 @@ public class JkJavaProjectJavadocTasks {
 
     private boolean done;
 
-    JkJavaProjectJavadocTasks(JkJavaProjectMaker maker) {
+    JkJavaProjectMakerDocumentationStep(JkJavaProjectMaker maker) {
         this.maker = maker;
     }
 
@@ -44,12 +44,12 @@ public class JkJavaProjectJavadocTasks {
         return this.javadocOptions;
     }
 
-    public JkJavaProjectJavadocTasks setJavadocOptions(List<String> options) {
+    public JkJavaProjectMakerDocumentationStep setJavadocOptions(List<String> options) {
         this.javadocOptions = options;
         return this;
     }
 
-    public JkJavaProjectJavadocTasks setJavadocOptions(String ... options) {
+    public JkJavaProjectMakerDocumentationStep setJavadocOptions(String ... options) {
         return this.setJavadocOptions(JkUtilsIterable.listOf(options));
     }
 

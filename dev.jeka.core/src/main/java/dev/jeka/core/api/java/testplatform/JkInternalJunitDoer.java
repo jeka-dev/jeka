@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.junit;
+package dev.jeka.core.api.java.testplatform;
 
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClassloader;

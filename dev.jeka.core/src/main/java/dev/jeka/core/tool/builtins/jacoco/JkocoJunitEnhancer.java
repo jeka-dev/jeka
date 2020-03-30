@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.jacoco;
 
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.junit.JkTestProcessor;
+import dev.jeka.core.api.java.testplatform.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;

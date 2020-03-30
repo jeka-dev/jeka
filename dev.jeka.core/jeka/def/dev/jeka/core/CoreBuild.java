@@ -8,8 +8,8 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.junit.JkTestProcessor;
-import dev.jeka.core.api.java.junit.JkTestSelection;
+import dev.jeka.core.api.java.testplatform.JkTestProcessor;
+import dev.jeka.core.api.java.testplatform.JkTestSelection;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.system.JkLog;
@@ -82,21 +82,21 @@ public class CoreBuild extends JkCommandSet {
 
         JkJavaProjectMaker maker = project.getMaker();
         project.getCompileSpec().addOptions("-Xlint:none","-g");
-        maker.getTasksForCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
+        maker.getSteps().getCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
         maker.putArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
-        maker.getTasksForJavadoc().setJavadocOptions("-notimestamp");
-        maker.getTasksForPublishing()
+        maker.getSteps().getDocumentation().setJavadocOptions("-notimestamp");
+        maker.getSteps().getPublishing()
                 .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
                 .setMavenPublicationInfo(mavenPublication());
 
-        maker.getTasksForTesting()
+        maker.getSteps().getTesting()
                 .setBreakOnFailures(false)
                 .getTestProcessor()
                     .setForkingProcess(false)
                     .getEngineBehavior()
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
-        maker.getTasksForTesting().getTestSelection()
+        maker.getSteps().getTesting().getTestSelection()
                 .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN);
 
         // include embedded jar
@@ -106,7 +106,7 @@ public class CoreBuild extends JkCommandSet {
         maker.putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
 
         // create Github release note
-        maker.getTasksForPublishing().getPostActions().chain(() -> createGithubRelease(jekaVersion));
+        maker.getSteps().getPublishing().getPostActions().chain(() -> createGithubRelease(jekaVersion));
     }
 
     private void createGithubRelease(String version) {
@@ -128,7 +128,7 @@ public class CoreBuild extends JkCommandSet {
         String userPrefix = githubToken == null ? "" : githubToken + "@";
         git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
                 tempRepo.toString());
-        project.getMaker().getTasksForJavadoc().runIfNecessary();
+        project.getMaker().getSteps().getDocumentation().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
         makeDocs();
@@ -203,7 +203,7 @@ public class CoreBuild extends JkCommandSet {
 
         // Main jar
         Path targetJar = maker.getMainArtifactPath();
-        maker.getTasksForPackaging().createBinJar(targetJar);
+        maker.getSteps().getPackaging().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
 

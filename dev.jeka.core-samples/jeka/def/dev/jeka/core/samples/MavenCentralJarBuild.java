@@ -35,7 +35,7 @@ public class MavenCentralJarBuild extends JkCommandSet {
                 .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
                 .addDependencies(deps);
 
-        javaPlugin.getProject().getMaker().getTasksForPublishing()
+        javaPlugin.getProject().getMaker().getSteps().getPublishing()
                 .setMavenPublicationInfo(info);
     }
    

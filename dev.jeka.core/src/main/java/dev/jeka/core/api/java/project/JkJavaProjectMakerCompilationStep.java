@@ -10,7 +10,7 @@ import dev.jeka.core.api.system.JkLog;
 
 import java.nio.charset.Charset;
 
-public class JkJavaProjectCompileTasks {
+public class JkJavaProjectMakerCompilationStep {
 
     private final JkJavaProjectMaker maker;
 
@@ -30,7 +30,7 @@ public class JkJavaProjectCompileTasks {
 
     private boolean done;
 
-    JkJavaProjectCompileTasks(JkJavaProjectMaker maker, Charset charset) {
+    JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker, Charset charset) {
         this.maker = maker;
         resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().getResources())
                 .and(maker.getOutLayout().getGeneratedResourceDir())
@@ -105,12 +105,12 @@ public class JkJavaProjectCompileTasks {
         return compiler;
     }
 
-    public JkJavaProjectCompileTasks setCompiler(JkJavaCompiler compiler) {
+    public JkJavaProjectMakerCompilationStep setCompiler(JkJavaCompiler compiler) {
         this.compiler = compiler;
         return this;
     }
 
-    public JkJavaProjectCompileTasks setFork(boolean fork, String ... params) {
+    public JkJavaProjectMakerCompilationStep setFork(boolean fork, String ... params) {
         this.compiler = this.compiler.withForking(fork, params);
         return this;
     }
@@ -124,4 +124,5 @@ public class JkJavaProjectCompileTasks {
                 .addSources(maker.getOutLayout().getGeneratedSourceDir())
                 .setOutputDir(maker.getOutLayout().getClassDir());
     }
+
 }
