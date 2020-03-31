@@ -1,7 +1,7 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.java.JkJavadocMaker;
+import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Files;
@@ -11,7 +11,7 @@ public class JkJavaProjectMakerDocumentationStep {
 
     private final JkJavaProjectMaker maker;
 
-    private JkJavadocMaker<JkJavaProjectMakerDocumentationStep> javadocMaker;
+    private JkJavadocProcessor<JkJavaProjectMakerDocumentationStep> javadocMaker;
 
     private boolean done;
 
@@ -27,11 +27,11 @@ public class JkJavaProjectMakerDocumentationStep {
 
     static JkJavaProjectMakerDocumentationStep of(JkJavaProjectMaker maker) {
         JkJavaProjectMakerDocumentationStep result = new JkJavaProjectMakerDocumentationStep(maker);
-        result.javadocMaker = JkJavadocMaker.of(result);
+        result.javadocMaker = JkJavadocProcessor.of(result);
         return result;
     }
 
-    public JkJavadocMaker<JkJavaProjectMakerDocumentationStep> getJavadocMaker() {
+    public JkJavadocProcessor<JkJavaProjectMakerDocumentationStep> getJavadocProcessor() {
         return javadocMaker;
     }
 
@@ -42,7 +42,7 @@ public class JkJavaProjectMakerDocumentationStep {
         final JkJavaProject project = maker.project;
         Iterable<Path> classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         Path dir = maker.getOutLayout().getJavadocDir();
-        javadocMaker.process(classpath, project.getSourceLayout().getSources(), dir);
+        javadocMaker.make(classpath, project.getSourceLayout().getSources(), dir);
     }
 
     public void runIfNecessary() {

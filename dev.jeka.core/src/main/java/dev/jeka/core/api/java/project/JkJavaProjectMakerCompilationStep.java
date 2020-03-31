@@ -26,17 +26,18 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
 
     private final JkRunnables afterCompile = JkRunnables.noOp();
 
-    private final JkJavaCompiler compiler = JkJavaCompiler.of();
-
     private boolean done;
+
+    private JkJavaCompiler<T> compiler;
 
     private final JkJavaProjectMaker maker;
 
-    public final JkJavaProjectMaker.JkSteps _;
-
-    JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker) {
+    protected JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker) {
         this.maker = maker;
-        this._ = maker.getSteps();
+    }
+
+    protected void init() {
+        this.compiler = (JkJavaCompiler<T>) JkJavaCompiler.of(this);
     }
 
     void reset() {
@@ -108,6 +109,14 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
     }
 
     /**
+     * Returns the compiler compiling Java sources of this project. The returned instance is mutable
+     * so users can modify it from this method return.
+     */
+    public JkJavaCompiler<T> getCompiler() {
+        return this.compiler;
+    }
+
+    /**
      * Returns the runnables to be run after compilation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
@@ -115,17 +124,10 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
         return afterCompile;
     }
 
-    /**
-     * Returns the compiler compiling Java sources of this project. The returned instance is mutable
-     * so users can modify it from this method return.
-     */
-    public JkJavaCompiler<T> getCompiler() {
-        return compiler;
-    }
+    protected abstract JkJavaCompileSpec<T> getCompileSpec();
 
-    protected abstract JkJavaCompileSpec getCompileSpec();
+    protected abstract JkResourceProcessor<T> getResourceProcessor();
 
-    protected abstract JkResourceProcessor getResourceProcessor();
 
     protected abstract String getScope();
 
@@ -134,7 +136,7 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
     }
 
     private void runCompile() {
-        boolean success = compiler.compile(getCompileSpec());
+        boolean success = getCompiler().compile(getCompileSpec());
         if (!success) {
             throw new JkException("Compilation of Java sources failed.");
         }
@@ -142,15 +144,33 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
 
     public static class JkProduction extends JkJavaProjectMakerCompilationStep<JkProduction> {
 
-        private final JkJavaCompileSpec<JkProduction> compileSpec;
+        private JkJavaCompileSpec<JkProduction> compileSpec;
 
-        private final JkResourceProcessor resourceProcessor;
+        private JkResourceProcessor<JkProduction> resourceProcessor;
 
-        JkProduction(JkJavaProjectMaker maker) {
+        /**
+         * For parent chaining
+         */
+        public final JkJavaProjectMaker.JkSteps _;
+
+        private JkProduction(JkJavaProjectMaker maker) {
             super(maker);
-            resourceProcessor = JkResourceProcessor.of(maker.project.getSourceLayout().getResources())
-                    .addResources(maker.getOutLayout().getGeneratedResourceDir());
-            compileSpec = defaultCompileSourceSpec(maker);
+            _ = maker.getSteps();
+        }
+
+        @Override
+        protected void init() {
+            super.init();
+            resourceProcessor = JkResourceProcessor.of(this)
+                    .setResources(super.maker.project.getSourceLayout().getResources())
+                    .addResources(super.maker.getOutLayout().getGeneratedResourceDir());
+            compileSpec = defaultCompileSourceSpec(this, super.maker);
+        }
+
+        static JkProduction of(JkJavaProjectMaker maker) {
+            JkProduction result = new JkProduction(maker);
+            result.init();
+            return result;
         }
 
         /**
@@ -174,9 +194,10 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
             return "production code";
         }
 
-        private static JkJavaCompileSpec defaultCompileSourceSpec(JkJavaProjectMaker maker) {
+        private static JkJavaCompileSpec defaultCompileSourceSpec(JkProduction productionCompileStep,
+                                                                  JkJavaProjectMaker maker) {
             final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
-            return JkJavaCompileSpec.of()
+            return JkJavaCompileSpec.of(productionCompileStep)
                     .setSourceAndTargetVersion(JkJavaVersion.V8)
                     .setEncoding("UTF-8")
                     .setClasspath(classpath)

@@ -52,7 +52,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                 JkConstants.OUTPUT_PATH));
         outputCleaner = JkRunnables.of(
                 () -> JkPathTree.of(getOutLayout().getOutputPath()).deleteContent());
-        this.steps = new JkSteps(this);
+        this.steps = new JkSteps();
+        this.steps.init(this);
 
         // define default artifacts
         putArtifact(getMainArtifactId(), () -> makeMainJar());
@@ -314,18 +315,21 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public static class JkSteps {
 
-        private final JkJavaProjectMakerCompilationStep.JkProduction compilation;
+        private JkJavaProjectMakerCompilationStep.JkProduction compilation;
 
-        private final JkJavaProjectMakerTestingStep testing;
+        private JkJavaProjectMakerTestingStep testing;
 
-        private final JkJavaProjectMakerPackagingStep packaging;
+        private JkJavaProjectMakerPackagingStep packaging;
 
-        private final JkJavaProjectMakerPublishingStep publishing;
+        private JkJavaProjectMakerPublishingStep publishing;
 
-        private final JkJavaProjectMakerDocumentationStep documentation;
+        private JkJavaProjectMakerDocumentationStep documentation;
 
-        private JkSteps(JkJavaProjectMaker maker) {
-            compilation = new JkJavaProjectMakerCompilationStep.JkProduction(maker);
+        private JkSteps() {
+        }
+
+        private void init(JkJavaProjectMaker maker) {
+            compilation = JkJavaProjectMakerCompilationStep.JkProduction.of(maker);
             testing = JkJavaProjectMakerTestingStep.of(maker);
             packaging = JkJavaProjectMakerPackagingStep.of(maker);
             publishing = new JkJavaProjectMakerPublishingStep(maker);

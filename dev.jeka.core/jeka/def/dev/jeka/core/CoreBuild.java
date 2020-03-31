@@ -92,17 +92,21 @@ public class CoreBuild extends JkCommandSet {
                 .getCompiler()
                     .setForkingWithJavac()._._
             .getTesting()
+                .getTestCompileStep()
+                    .getCompiler()
+                        .setDefault()._._
                 .getTestProcessor()
                     .setForkingProcess(true)
                     .getEngineBehavior()
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.FULL)._._
                 .getTestSelection()
                     .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)._._
-            .getDocumentation()
-                .setJavadocOptions("-notimestamp")._
             .getPackaging()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main")._._
+            .getDocumentation()
+                .getJavadocProcessor()
+                    .addOptions("-notimestamp")._._
             .getPublishing()
                 .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
                 .setMavenPublicationInfo(mavenPublication())

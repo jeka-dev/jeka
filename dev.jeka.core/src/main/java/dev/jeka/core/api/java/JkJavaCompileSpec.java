@@ -45,6 +45,7 @@ public final class JkJavaCompileSpec<T> {
     public static JkJavaCompileSpec of() {
         return new JkJavaCompileSpec<Void>(null);
     }
+
     public static <T> JkJavaCompileSpec<T> of(T o) {
         return new JkJavaCompileSpec<T>(o);
     }

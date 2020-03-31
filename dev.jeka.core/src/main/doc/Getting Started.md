@@ -647,7 +647,7 @@ public class AntStyleBuild extends JkCommandSet {
     }
 
     public void javadoc() {
-        JkJavadocMaker.of(JkPathTreeSet.of(src), buildDir.resolve("javadoc")).process();
+        JkJavadocProcessor.of(JkPathTreeSet.of(src), buildDir.resolve("javadoc")).process();
     }
 
     public void run() {

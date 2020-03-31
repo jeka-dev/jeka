@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  *
  * @author Jerome Angibaud
  */
-public final class JkJavadocMaker<T> {
+public final class JkJavadocProcessor<T> {
 
     //private final JkPathTreeSet srcDirs;
 
@@ -45,23 +45,23 @@ public final class JkJavadocMaker<T> {
     public final T _;
 
 
-    private JkJavadocMaker(T parent) {
+    private JkJavadocProcessor(T parent) {
         this._ = parent;
         displayOutput = JkLog.isVerbose();
     }
 
     /**
-     * Creates a default {@link JkJavadocMaker} .
+     * Creates a default {@link JkJavadocProcessor} .
      */
-    public static JkJavadocMaker<Void> of() {
-        return new JkJavadocMaker(null);
+    public static JkJavadocProcessor<Void> of() {
+        return new JkJavadocProcessor(null);
     }
 
     /**
      * Sale as {@link #of()} but providing a parent chaining
      */
-    public static <T> JkJavadocMaker<T> of(T parent) {
-        return new JkJavadocMaker(parent);
+    public static <T> JkJavadocProcessor<T> of(T parent) {
+        return new JkJavadocProcessor(parent);
     }
 
     /**
@@ -74,14 +74,14 @@ public final class JkJavadocMaker<T> {
     /**
      * Adds the specified parameters to Javadoc tool.
      */
-    public JkJavadocMaker<T> addOptions(String ... options) {
+    public JkJavadocProcessor<T> addOptions(String ... options) {
         return addOptions(Arrays.asList(options));
     }
 
     /**
      * @see #addOptions(String...)
      */
-    public JkJavadocMaker<T> addOptions(Iterable<String> options) {
+    public JkJavadocProcessor<T> addOptions(Iterable<String> options) {
         JkUtilsIterable.addAllWithoutDuplicate(this.options, options);
         return this;
     }
@@ -90,7 +90,7 @@ public final class JkJavadocMaker<T> {
         return displayOutput;
     }
 
-    public JkJavadocMaker<T> setDisplayOutput(Boolean displayOutput) {
+    public JkJavadocProcessor<T> setDisplayOutput(Boolean displayOutput) {
         this.displayOutput = displayOutput;
         return this;
     }
@@ -98,7 +98,7 @@ public final class JkJavadocMaker<T> {
     /**
      * Actually processes and creates the javadoc files.
      */
-    public void process(Iterable<Path> classpath, JkPathTreeSet srcDirs, Path outputDir) {
+    public void make(Iterable<Path> classpath, JkPathTreeSet srcDirs, Path outputDir) {
         JkLog.startTask("Generating javadoc");
         if (srcDirs.hasNoExistingRoot()) {
             JkLog.warn("No sources found in " + srcDirs);

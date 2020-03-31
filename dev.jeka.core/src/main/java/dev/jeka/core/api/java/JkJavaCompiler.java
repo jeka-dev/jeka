@@ -74,6 +74,15 @@ public final class JkJavaCompiler<T> {
     }
 
     /**
+     * Sets to default underlying compiler, meaning the compiler tool embedded in the running JDK
+     */
+    public JkJavaCompiler<T> setDefault() {
+        this.forkingProcess = null;
+        this.compilerTool = null;
+        return this;
+    }
+
+    /**
      * Set the underlying compiler as an external process of the 'javac' tool provided with the running JDK.
      * @see #setForkingProcess(JkProcess)
      */

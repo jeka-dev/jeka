@@ -51,12 +51,11 @@ public class JkJavaProjectMakerTestingStep {
 
     static JkJavaProjectMakerTestingStep of(JkJavaProjectMaker maker) {
         JkJavaProjectMakerTestingStep result = new JkJavaProjectMakerTestingStep(maker);
-        result.testCompileStep = new JkTestCompile(result);
+        result.testCompileStep = JkTestCompile.of(result);
         result.testProcessor = result.defaultTestProcessor();
         result.testSelection = result.defaultTestSelection();
         return result;
     }
-
 
     /**
      * Returns tests to be run. The returned instance is mutable so users can modify it
@@ -72,6 +71,13 @@ public class JkJavaProjectMakerTestingStep {
      */
     public JkTestProcessor<JkJavaProjectMakerTestingStep> getTestProcessor() {
         return testProcessor;
+    }
+
+    /**
+     * Returns the compilation step for the test part.
+     */
+    public JkTestCompile getTestCompileStep() {
+        return testCompileStep;
     }
 
     /**
@@ -167,17 +173,44 @@ public class JkJavaProjectMakerTestingStep {
         return JkTestSelection.of(this).addTestClassRoots(maker.getOutLayout().getTestClassDir());
     }
 
-    public static class JkTestCompile extends JkJavaProjectMakerCompilationStep {
+    public static class JkTestCompile extends JkJavaProjectMakerCompilationStep<JkTestCompile> {
 
         private Consumer<JkJavaCompileSpec> compileSpecConfigurer = spec -> {};
 
         private Consumer<JkResourceProcessor> resourceProcessorConfigurer = processor -> {};
 
-        private final JkJavaProjectMakerTestingStep _;
+        /**
+         * For parent chaining
+         */
+        public final JkJavaProjectMakerTestingStep _;
 
         private JkTestCompile(JkJavaProjectMakerTestingStep parent) {
             super(parent.maker);
             _ = parent;
+        }
+
+        static JkTestCompile of(JkJavaProjectMakerTestingStep parent) {
+            JkTestCompile result = new JkTestCompile(parent);
+            result.init();
+            return result;
+        }
+
+        /**
+         * Sets a configurer for the compile spec. This configurer will apply on a copy of
+         * the compile spec of the compile step.
+         */
+        public JkTestCompile setCompileSpecConfigurer(Consumer<JkJavaCompileSpec> compileSpecConfigurer) {
+            this.compileSpecConfigurer = compileSpecConfigurer;
+            return this;
+        }
+
+        /**
+         * Sets a configurer for the resource processor. This configurer will apply on a copy of
+         * the resource processor of compile step.
+         */
+        public JkTestCompile setResourceProcessorConfigurer(Consumer<JkResourceProcessor> resourceProcessorConfigurer) {
+            this.resourceProcessorConfigurer = resourceProcessorConfigurer;
+            return this;
         }
 
         @Override
@@ -186,7 +219,7 @@ public class JkJavaProjectMakerTestingStep {
             final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST)
                     .andPrepending(maker.getOutLayout().getClassDir());
             JkJavaCompileSpec compileStepSpec = maker.getSteps().getCompilation().getCompileSpec();
-            JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
+            JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of(this)
                     .setEncoding(compileStepSpec.getEncoding())
                     .setSourceVersion(compileStepSpec.getSourceVersion())
                     .setTargetVersion(compileStepSpec.getTargetVersion())
@@ -200,8 +233,8 @@ public class JkJavaProjectMakerTestingStep {
         @Override
         protected JkResourceProcessor getResourceProcessor() {
             JkJavaProjectMaker maker = _.maker;
-            JkResourceProcessor resourceProcessor = JkResourceProcessor.of(
-                    maker.project.getSourceLayout().getTestResources())
+            JkResourceProcessor resourceProcessor = JkResourceProcessor.of(this)
+                    .setResources(maker.project.getSourceLayout().getTestResources())
                     .setInterpolationCharset(maker.getSteps().getCompilation()
                             .getResourceProcessor().getInterpolationCharset());
             resourceProcessorConfigurer.accept(resourceProcessor);

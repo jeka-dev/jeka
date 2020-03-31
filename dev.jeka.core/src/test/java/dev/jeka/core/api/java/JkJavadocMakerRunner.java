@@ -12,16 +12,16 @@ import java.nio.file.Paths;
 public class JkJavadocMakerRunner {
 
     public static void main(String[] args) throws Exception {
-        Path srcDir = Paths.get(JkJavadocMaker.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+        Path srcDir = Paths.get(JkJavadocProcessor.class.getProtectionDomain().getCodeSource().getLocation().toURI())
                 .resolve("../../../src/main/java").normalize();
         JkPathTreeSet sources = JkPathTreeSet.of(srcDir);
         Path out = Files.createTempDirectory("jekatest");
         JkLog.setHierarchicalConsoleConsumer();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         Iterable<Path> classpath = JkPathTree.of(srcDir.resolve("../../../jeka/libs/provided").normalize()).getFiles();
-        JkJavadocMaker.of()
+        JkJavadocProcessor.of()
                 .setDisplayOutput(true)
-                .process(classpath, sources, out);
+                .make(classpath, sources, out);
         Desktop.getDesktop().open(out.toFile());
     }
 }

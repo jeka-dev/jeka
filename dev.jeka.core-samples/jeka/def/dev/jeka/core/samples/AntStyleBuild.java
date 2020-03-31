@@ -61,12 +61,13 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupportSuppl
 
     public void jar() {
         compile();
-        JkManifest.ofEmpty().addMainClass("RunClass").writeToStandardLocation(classDir);
+        JkManifest.of().addMainClass("RunClass").writeToStandardLocation(classDir);
         JkPathTree.of(classDir).zipTo(jarFile);
     }
 
     public void javadoc() {
-        JkJavadocMaker.of(JkPathTreeSet.of(src), getOutputDir().resolve("javadoc")).process();
+        JkJavadocProcessor.of()
+                .make(JkClasspath.of(), JkPathTreeSet.of(src), getOutputDir().resolve("javadoc"));
     }
 
     public void run() {
