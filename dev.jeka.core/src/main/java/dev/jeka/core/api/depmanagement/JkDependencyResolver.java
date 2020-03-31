@@ -104,7 +104,7 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * The underlying dependency manager can cache the resolution on file ofSystem
+     * The underlying dependency manager can cache the resolution on file system
      * for faster result. To make this caching possible, you must set the
      * module+version for which the resolution is made. This is only relevant
      * for of dependencies and have no effect for of dependencies.

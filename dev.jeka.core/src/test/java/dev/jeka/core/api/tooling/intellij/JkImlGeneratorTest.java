@@ -3,8 +3,8 @@ package dev.jeka.core.api.tooling.intellij;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
 import org.junit.Test;
@@ -28,8 +28,8 @@ public class JkImlGeneratorTest {
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.ofSimpleStyle()
                 .withResources("res").withTestResources("res-test").withBaseDir(base);
         final JkJavaProject baseProject = JkJavaProject.of(sourceLayout);
-        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
-        final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject.getJavaProjectIde());
+        baseProject.addDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
+        final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(result0);
@@ -37,16 +37,16 @@ public class JkImlGeneratorTest {
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
-        coreProject.setDependencies(coreDeps);
+        coreProject.addDependencies(coreDeps);
         coreProject.getMaker().getSteps().getTesting().getTestProcessor().setForkingProcess(true);
-        final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject.getJavaProjectIde());
+        final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject.getJavaIdeSupport());
         final String result1 = coreGenerator.generate();
         System.out.println("\ncore .classpath");
         System.out.println(result1);
 
         final Path desktop = top.resolve("desktop");
         final JkDependencySet deps = JkDependencySet.of().and(coreProject);
-        final JkImlGenerator desktopGenerator = JkImlGenerator.of(JkJavaProjectIde.ofDefault()
+        final JkImlGenerator desktopGenerator = JkImlGenerator.of(JkJavaIdeSupport.ofDefault()
                 .withSourceLayout(sourceLayout.withBaseDir(desktop))
                 .withDependencies(deps)
                 .withDependencyResolver(coreProject.getMaker().getDependencyResolver()));
@@ -56,7 +56,7 @@ public class JkImlGeneratorTest {
         System.out.println(result2);
 
         final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
-        desktopProject.setDependencies(deps);
+        desktopProject.addDependencies(deps);
         desktopProject.getMaker().makeAllArtifacts();
 
         JkPathTree.of(top).deleteContent();

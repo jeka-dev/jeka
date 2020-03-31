@@ -7,6 +7,7 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJarPacker;
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -28,10 +29,27 @@ public class JkJavaProjectMakerPackagingStep {
 
     private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
-    JkJavaProjectMakerPackagingStep(
-            JkJavaProjectMaker maker) {
+    private JkManifest manifest;
+
+    /**
+     * For Parent chaining
+     */
+    public JkJavaProjectMaker.JkSteps _;
+
+    private JkJavaProjectMakerPackagingStep(JkJavaProjectMaker maker) {
         this.maker = maker;
+        this._ = maker.getSteps();
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
+    }
+
+    static JkJavaProjectMakerPackagingStep of(JkJavaProjectMaker maker) {
+        JkJavaProjectMakerPackagingStep result = new JkJavaProjectMakerPackagingStep(maker);
+        result.manifest = JkManifest.of(result);
+        return result;
+    }
+
+    public JkManifest<JkJavaProjectMakerPackagingStep> getManifest() {
+        return manifest;
     }
 
     /**
@@ -69,7 +87,7 @@ public class JkJavaProjectMakerPackagingStep {
         maker.getSteps().getTesting().runIfNecessary();
         JkJavaProject project = maker.project;
         JkJarPacker.of(maker.getOutLayout().getClassDir())
-                .withManifest(project.getManifest())
+                .withManifest(manifest)
                 .withExtraFiles(project.getExtraFilesToIncludeInJar())
                 .makeJar(target);
     }
@@ -80,7 +98,7 @@ public class JkJavaProjectMakerPackagingStep {
         maker.getSteps().getTesting().runIfNecessary();
         JkClasspath classpath = JkClasspath.of(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
         JkJarPacker.of( maker.getOutLayout().getClassDir())
-                .withManifest(maker.project.getManifest())
+                .withManifest(manifest)
                 .withExtraFiles(maker.project.getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath, this.fatJarFilter);
     }
@@ -103,7 +121,7 @@ public class JkJavaProjectMakerPackagingStep {
         maker.getSteps().getCompilation().runIfNecessary();
         maker.getSteps().getTesting().runIfNecessary();
         JkJarPacker.of(maker.getOutLayout().getTestClassDir())
-                .withManifest(maker.project.getManifest())
+                .withManifest(manifest)
                 .makeJar(target);
     }
 

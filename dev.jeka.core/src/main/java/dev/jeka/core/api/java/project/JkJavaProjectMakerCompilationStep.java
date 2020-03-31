@@ -6,40 +6,37 @@ import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 
-import java.nio.charset.Charset;
+/**
+ * Handles project compilation step. Users can configure inner phases by chaining runnables.
+ * They also can modify {@link JkJavaCompiler} and {@link JkJavaCompileSpec} to use.
+ */
+public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectMakerCompilationStep> {
 
-public class JkJavaProjectMakerCompilationStep {
+    private final JkRunnables beforeGenerate = JkRunnables.noOp();
 
-    private final JkJavaProjectMaker maker;
-
-    private final JkRunnables preCompile = JkRunnables.noOp();
+    private final JkRunnables afterGenerate = JkRunnables.noOp();
 
     private final JkRunnables sourceGenerator = JkRunnables.noOp();
 
     private final JkRunnables resourceGenerator = JkRunnables.noOp();
 
-    private final JkRunnables postActions = JkRunnables.noOp();
+    private final JkRunnables afterCompile = JkRunnables.noOp();
 
-    private final JkRunnables resourceProcessor;
-
-    private final JkRunnables compileRunner;
-
-    private JkJavaCompiler compiler = JkJavaCompiler.ofJdk();
+    private final JkJavaCompiler compiler = JkJavaCompiler.of();
 
     private boolean done;
 
-    JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker, Charset charset) {
+    private final JkJavaProjectMaker maker;
+
+    public final JkJavaProjectMaker.JkSteps _;
+
+    JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker) {
         this.maker = maker;
-        resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().getResources())
-                .and(maker.getOutLayout().getGeneratedResourceDir())
-                .and(maker.project.getResourceInterpolators())
-                .generateTo(maker.getOutLayout().getClassDir(), charset));
-        compileRunner = JkRunnables.of(() -> {
-            final JkJavaCompileSpec compileSpec = compileSourceSpec();
-            compiler.compile(compileSpec);
-        });
+        this._ = maker.getSteps();
     }
 
     void reset() {
@@ -55,13 +52,14 @@ public class JkJavaProjectMakerCompilationStep {
      * </ul>
      */
     public void run() {
-        JkLog.startTask("Compilation and resource processing");
-        preCompile.run();
+        JkLog.startTask("Compilation and resource processing of " + getScope());
+        afterGenerate.run();
         sourceGenerator.run();
         resourceGenerator.run();
-        compileRunner.run();
-        resourceProcessor.run();
-        postActions.run();
+        afterGenerate.run();
+        processResources();
+        runCompile();
+        afterCompile.run();
         JkLog.endTask();
     }
 
@@ -77,52 +75,117 @@ public class JkJavaProjectMakerCompilationStep {
         }
     }
 
-    public JkRunnables getPreCompile() {
-        return preCompile;
+    /**
+     * Returns the runnables to run prior source and resource generation. User can chain its own runnable
+     * to customise the process. Empty by default.
+     */
+    public JkRunnables getBeforeGenerate() {
+        return beforeGenerate;
     }
 
+    /**
+     * Returns the runnables to run after source and resource generation. User can chain its own runnable
+     * to customise the process. Empty by default.
+     */
+    public JkRunnables getAfterGenerate() {
+        return afterGenerate;
+    }
+
+    /**
+     * Returns the runnables generating sources. User can chain its own runnable
+     * to customise the process. Empty by default.
+     */
     public JkRunnables getSourceGenerator() {
         return sourceGenerator;
     }
 
+    /**
+     * Returns the runnables generating resources. User can chain its own runnable
+     * to customise the process. Empty by default.
+     */
     public JkRunnables getResourceGenerator() {
         return resourceGenerator;
     }
 
-    public JkRunnables getPostActions() {
-        return postActions;
+    /**
+     * Returns the runnables to be run after compilation. User can chain its own runnable
+     * to customise the process. Empty by default.
+     */
+    public JkRunnables getAfterCompile() {
+        return afterCompile;
     }
 
-    public JkRunnables getResourceProcessor() {
-        return resourceProcessor;
-    }
-
-    public JkRunnables getCompileRunner() {
-        return compileRunner;
-    }
-
-    public JkJavaCompiler getCompiler() {
+    /**
+     * Returns the compiler compiling Java sources of this project. The returned instance is mutable
+     * so users can modify it from this method return.
+     */
+    public JkJavaCompiler<T> getCompiler() {
         return compiler;
     }
 
-    public JkJavaProjectMakerCompilationStep setCompiler(JkJavaCompiler compiler) {
-        this.compiler = compiler;
-        return this;
+    protected abstract JkJavaCompileSpec getCompileSpec();
+
+    protected abstract JkResourceProcessor getResourceProcessor();
+
+    protected abstract String getScope();
+
+    private void processResources() {
+        this.getResourceProcessor().generateTo(maker.getOutLayout().getClassDir());
     }
 
-    public JkJavaProjectMakerCompilationStep setFork(boolean fork, String ... params) {
-        this.compiler = this.compiler.withForking(fork, params);
-        return this;
+    private void runCompile() {
+        boolean success = compiler.compile(getCompileSpec());
+        if (!success) {
+            throw new JkException("Compilation of Java sources failed.");
+        }
     }
 
-    private JkJavaCompileSpec compileSourceSpec() {
-        JkJavaCompileSpec result = maker.project.getCompileSpec().copy();
-        final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
-        return result
-                .setClasspath(classpath)
-                .addSources(maker.project.getSourceLayout().getSources())
-                .addSources(maker.getOutLayout().getGeneratedSourceDir())
-                .setOutputDir(maker.getOutLayout().getClassDir());
+    public static class JkProduction extends JkJavaProjectMakerCompilationStep<JkProduction> {
+
+        private final JkJavaCompileSpec<JkProduction> compileSpec;
+
+        private final JkResourceProcessor resourceProcessor;
+
+        JkProduction(JkJavaProjectMaker maker) {
+            super(maker);
+            resourceProcessor = JkResourceProcessor.of(maker.project.getSourceLayout().getResources())
+                    .addResources(maker.getOutLayout().getGeneratedResourceDir());
+            compileSpec = defaultCompileSourceSpec(maker);
+        }
+
+        /**
+         * Returns classes to compile. The returned instance is mutable
+         * so users can modify it from this method return.
+         */
+        public JkJavaCompileSpec<JkProduction> getCompileSpec() {
+            return compileSpec;
+        }
+
+        /**
+         * Returns the object that will process the resources (copying, interpolating).
+         * The returned instance is mutable so users can modify it from this method return.
+         */
+        public JkResourceProcessor getResourceProcessor() {
+            return resourceProcessor;
+        }
+
+        @Override
+        protected String getScope() {
+            return "production code";
+        }
+
+        private static JkJavaCompileSpec defaultCompileSourceSpec(JkJavaProjectMaker maker) {
+            final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
+            return JkJavaCompileSpec.of()
+                    .setSourceAndTargetVersion(JkJavaVersion.V8)
+                    .setEncoding("UTF-8")
+                    .setClasspath(classpath)
+                    .addSources(maker.project.getSourceLayout().getSources())
+                    .addSources(maker.getOutLayout().getGeneratedSourceDir())
+                    .setOutputDir(maker.getOutLayout().getClassDir());
+        }
+
+
     }
 
 }

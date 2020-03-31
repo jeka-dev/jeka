@@ -16,7 +16,7 @@ public class JkManifestTest {
     public void testWriteMainClass() throws IOException {
         final Path file = Files.createTempFile("manifest", ".mf");
         final String mainClassName = "dev.jeka.core.tool.Main";
-        final JkManifest manifest = JkManifest.ofEmpty().addMainAttribute(Name.MAIN_CLASS,
+        final JkManifest manifest = JkManifest.of().addMainAttribute(Name.MAIN_CLASS,
                 mainClassName);
         manifest.writeTo(file);
         final String readMainClass = JkManifest.of(file).getManifest().getMainAttributes()

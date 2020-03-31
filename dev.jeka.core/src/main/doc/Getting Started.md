@@ -635,7 +635,7 @@ public class AntStyleBuild extends JkCommandSet {
                 .addSources(src));
         Map<String, String> varReplacement = new HashMap<>();
         varReplacement.put("${server.ip}", "123.211.11.0");
-        JkResourceProcessor.of(JkPathTreeSet.of(src)).andInterpolate("**/*.properties", varReplacement)
+        JkResourceProcessor.of(JkPathTreeSet.of(src)).addInterpolator("**/*.properties", varReplacement)
                 .generateTo(classDir, Charset.forName("UTF-8"));
         JkPathTree.of(src).andMatching(false, "**/*.javaPlugin").copyTo(classDir);
     }

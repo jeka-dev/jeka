@@ -27,7 +27,6 @@ public final class JkKotlinCompiler {
 
     private final JkProcess process;
 
-
     private JkKotlinCompiler(boolean failOnError,
                              JkProcess process) {
         super();

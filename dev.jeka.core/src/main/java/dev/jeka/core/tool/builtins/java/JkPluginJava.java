@@ -3,9 +3,7 @@ package dev.jeka.core.tool.builtins.java;
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.java.testplatform.JkTestProcessor;
 import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.system.JkLog;
@@ -27,7 +25,7 @@ import java.util.Map;
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
 @JkDocPluginDeps({JkPluginRepo.class, JkPluginScaffold.class})
-public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
+public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
 
     // ------------  Options injectable by command line --------------------------------
 
@@ -64,7 +62,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
 
         // Pre-configure JkJavaProject instance
         this.project = JkJavaProject.ofMavenLayout(this.getCommandSet().getBaseDir());
-        this.project.setDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
+        this.project.addDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
         final Path path = run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
             this.project.addDependencies(JkDependencySet.ofTextDescription(path));
@@ -82,7 +80,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
     private void applyOptionsToUnderlyingProject() {
         if (project.getVersionedModule() != null) {
             JkVersionedModule versionedModule = project.getVersionedModule();
-            project.getManifest()
+            project.getMaker().getSteps().getPackaging().getManifest()
                     .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, versionedModule.getModuleId().getName())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, versionedModule.getModuleId().getGroup())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, versionedModule.getVersion().getValue());
@@ -102,7 +100,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
         }
         JkJavaProjectMaker.JkSteps steps = maker.getSteps();
         if (steps.getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
-            steps.getCompilation().setCompiler(compiler());
+            steps.getCompilation().getCompiler().setForkingProcess(compilerProcess());
         }
         if (steps.getPublishing().getPublishRepos() == null
                 || steps.getPublishing().getPublishRepos().getRepoList().isEmpty()) {
@@ -122,9 +120,9 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             testProcessor.setForkingProcess(javaProcess);
         }
-        steps.getTesting().setSkipTests(tests.skip);
+        steps.getTesting().setSkipped(tests.skip);
         if (this.compilerExtraArgs != null) {
-            project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+            steps.getCompilation().getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
     }
 
@@ -229,8 +227,8 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
     }
 
     @Override
-    public JkJavaProjectIde getJavaProjectIde() {
-        return project.getJavaProjectIde();
+    public JkJavaIdeSupport getJavaIdeSupport() {
+        return project.getJavaIdeSupport();
     }
 
     public static class JkPublishOptions {
@@ -240,15 +238,11 @@ public class JkPluginJava extends JkPlugin implements JkJavaProjectIdeSupplier {
 
     }
 
-    private JkJavaCompiler compiler() {
+    private JkProcess compilerProcess() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
-        final JkProcess process =  JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
-                getProject().getCompileSpec().getSourceVersion().get());
-        JkJavaProjectMakerCompilationStep compilation = project.getMaker().getSteps().getCompilation();
-        if (process != null) {
-            return compilation.getCompiler().withForking(process);
-        }
-        return compilation.getCompiler();
+        JkJavaProjectMakerCompilationStep.JkProduction compilation = project.getMaker().getSteps().getCompilation();
+        return JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
+                compilation.getCompileSpec().getSourceVersion().get());
     }
 
 }

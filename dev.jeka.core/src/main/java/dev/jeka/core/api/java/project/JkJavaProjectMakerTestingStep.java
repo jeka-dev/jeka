@@ -12,104 +12,103 @@ import dev.jeka.core.api.java.testplatform.JkTestResult;
 import dev.jeka.core.api.java.testplatform.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 
-import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
+/**
+ * Handles project testing step. This involve both test compilation and run.
+ * Users can configure inner phases by chaining runnables.
+ * They also can modify {@link JkJavaCompiler}, {@link JkJavaCompileSpec} for test compilation and
+ * {@link JkTestProcessor}, {@link JkTestSelection} for test run.
+ */
 public class JkJavaProjectMakerTestingStep {
 
     private final JkJavaProjectMaker maker;
 
-    private final JkRunnables preTest = JkRunnables.of(() -> {});
+    private JkTestCompile testCompileStep;
 
-    private final JkRunnables resourceGenerator = JkRunnables.of(() -> {});
-
-    public final JkRunnables postTest = JkRunnables.of(() -> {});
-
-    private final JkRunnables resourceProcessor;
-
-    private final JkRunnables compileRunner;
+    public final JkRunnables afterTest = JkRunnables.of(() -> {});
 
     private JkTestProcessor testProcessor;
 
-    public final JkRunnables testExecutor = JkRunnables.of(this::executeWithTestProcessor);
-
-    private JkJavaCompiler compiler = JkJavaCompiler.ofJdk();
+    private JkTestSelection testSelection;
 
     private boolean done;
 
-    private boolean skipTests;
-
-    // ----- Junit5
+    private boolean skipped;
 
     private boolean breakOnFailures = true;
 
-    private final JkTestSelection testSelection;
+    /**
+     * For parent chaining
+     */
+    public final JkJavaProjectMaker.JkSteps _;
 
-
-    JkJavaProjectMakerTestingStep(JkJavaProjectMaker maker, Charset charset) {
+    private JkJavaProjectMakerTestingStep(JkJavaProjectMaker maker) {
         this.maker = maker;
-        resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(maker.project.getSourceLayout().getTestResources())
-                .and(maker.project.getResourceInterpolators())
-                .generateTo(maker.getOutLayout().getTestClassDir(), charset));
-        compileRunner = JkRunnables.of(() -> {
-            final JkJavaCompileSpec testCompileSpec = getTestCompileSpec();
-            compiler.compile(testCompileSpec);
-        });
-        testProcessor = defaultTestProcessor();
-        testSelection = defaultTestSelection();
+        this._ = maker.getSteps();
     }
 
-    public JkRunnables getPreTest() {
-        return preTest;
+    static JkJavaProjectMakerTestingStep of(JkJavaProjectMaker maker) {
+        JkJavaProjectMakerTestingStep result = new JkJavaProjectMakerTestingStep(maker);
+        result.testCompileStep = new JkTestCompile(result);
+        result.testProcessor = result.defaultTestProcessor();
+        result.testSelection = result.defaultTestSelection();
+        return result;
     }
 
-    public JkRunnables getResourceGenerator() {
-        return resourceGenerator;
+
+    /**
+     * Returns tests to be run. The returned instance is mutable so users can modify it
+     * from this method return.
+     */
+    public JkTestSelection<JkJavaProjectMakerTestingStep> getTestSelection() {
+        return testSelection;
     }
 
-    public JkRunnables getResourceProcessor() {
-        return resourceProcessor;
+    /**
+     * Returns processor running the tests. The returned instance is mutable so users can modify it
+     * from this method return.
+     */
+    public JkTestProcessor<JkJavaProjectMakerTestingStep> getTestProcessor() {
+        return testProcessor;
     }
 
-    public JkRunnables getCompileRunner() {
-        return compileRunner;
-    }
-
-    public JkJavaCompiler getCompiler() {
-        return compiler;
-    }
-
-    public JkJavaProjectMakerTestingStep setCompiler(JkJavaCompiler compiler) {
-        this.compiler = compiler;
-        return this;
-    }
-
-    public JkJavaProjectMakerTestingStep setForkCompile(boolean fork, String ... params) {
-        compiler = compiler.withForking(fork, params);
-        return this;
-    }
-
-    private JkJavaCompileSpec getTestCompileSpec() {
-        JkJavaCompileSpec result = maker.project.getCompileSpec().copy();
-        final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST).andPrepending(maker.getOutLayout().getClassDir());
-        return result
-                .setClasspath(classpath)
-                .addSources(maker.project.getSourceLayout().getTests())
-                .setOutputDir(maker.getOutLayout().getTestClassDir());
-    }
-
+    /**
+     * Returns the classpath to run the test. It consists in test classes + prod classes +
+     * dependencies involved in TEST scope.
+     */
     public JkClasspath getTestClasspath() {
         return JkClasspath.of(maker.getOutLayout().getTestClassDir())
                 .and(maker.getOutLayout().getClassDir())
                 .and(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST));
     }
 
-    public boolean isTestSkipped() {
-        return skipTests;
+    /**
+     * Returns if the tests should be skipped.
+     */
+    public boolean isSkipped() {
+        return skipped;
     }
 
-    public void setSkipTests(boolean skipTests) {
-        this.skipTests = skipTests;
+    /**
+     * Specifies if the tests should be skipped.
+     */
+    public void setSkipped(boolean skipped) {
+        this.skipped = skipped;
+    }
+
+    /**
+     * Returns if #run should fail (throwing a {@link dev.jeka.core.api.system.JkException}) if
+     * test result has failures.
+     */
+    public boolean isBreakOnFailures() {
+        return breakOnFailures;
+    }
+
+    public JkJavaProjectMakerTestingStep setBreakOnFailures(boolean breakOnFailures) {
+        this.breakOnFailures = breakOnFailures;
+        return this;
     }
 
     /**
@@ -122,19 +121,11 @@ public class JkJavaProjectMakerTestingStep {
      * </ul>
      */
     public void run() {
-        maker.getSteps().getCompilation().runIfNecessary();
-        JkLog.startTask("Running unit tests");
-        if (maker.project.getSourceLayout().getTests().count(0, false) == 0) {
-            JkLog.info("No unit test found in : " + maker.project.getSourceLayout().getTests());
-        } else {
-            this.maker.getSteps().getCompilation().runIfNecessary();
-            preTest.run();
-            compileRunner.run();
-            resourceGenerator.run();
-            resourceProcessor.run();
-            testExecutor.run();
-            postTest.run();
-        }
+        JkLog.startTask("Processing tests");
+        this.maker.getSteps().getCompilation().runIfNecessary();
+        this.testCompileStep.run();
+        executeWithTestProcessor();
+        afterTest.run();
         JkLog.endTask();
     }
 
@@ -144,7 +135,7 @@ public class JkJavaProjectMakerTestingStep {
     public void runIfNecessary() {
         if (done) {
             JkLog.trace("Test task already done. Won't perfom again.");
-        } else if (skipTests) {
+        } else if (skipped) {
             JkLog.info("Tests are skipped. Won't perfom.");
         } else {
             run();
@@ -156,24 +147,6 @@ public class JkJavaProjectMakerTestingStep {
         done = false;
     }
 
-
-    public boolean isBreakOnFailures() {
-        return breakOnFailures;
-    }
-
-    public JkJavaProjectMakerTestingStep setBreakOnFailures(boolean breakOnFailures) {
-        this.breakOnFailures = breakOnFailures;
-        return this;
-    }
-
-    public JkTestSelection getTestSelection() {
-        return testSelection;
-    }
-
-    public JkTestProcessor getTestProcessor() {
-        return testProcessor;
-    }
-
     private void executeWithTestProcessor() {
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
         if (breakOnFailures) {
@@ -182,7 +155,7 @@ public class JkJavaProjectMakerTestingStep {
     }
 
     private JkTestProcessor defaultTestProcessor() {
-        JkTestProcessor result = JkTestProcessor.of();
+        JkTestProcessor result = JkTestProcessor.of(this);
         final Path reportDir = maker.getOutLayout().getTestReportDir().resolve("junit");
         result.getEngineBehavior()
                 .setLegacyReportDir(reportDir)
@@ -191,7 +164,56 @@ public class JkJavaProjectMakerTestingStep {
     }
 
     private JkTestSelection defaultTestSelection() {
-        return JkTestSelection.ofStandard(maker.getOutLayout().getTestClassDir());
+        return JkTestSelection.of(this).addTestClassRoots(maker.getOutLayout().getTestClassDir());
     }
+
+    public static class JkTestCompile extends JkJavaProjectMakerCompilationStep {
+
+        private Consumer<JkJavaCompileSpec> compileSpecConfigurer = spec -> {};
+
+        private Consumer<JkResourceProcessor> resourceProcessorConfigurer = processor -> {};
+
+        private final JkJavaProjectMakerTestingStep _;
+
+        private JkTestCompile(JkJavaProjectMakerTestingStep parent) {
+            super(parent.maker);
+            _ = parent;
+        }
+
+        @Override
+        protected JkJavaCompileSpec getCompileSpec() {
+            JkJavaProjectMaker maker = _.maker;
+            final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST)
+                    .andPrepending(maker.getOutLayout().getClassDir());
+            JkJavaCompileSpec compileStepSpec = maker.getSteps().getCompilation().getCompileSpec();
+            JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
+                    .setEncoding(compileStepSpec.getEncoding())
+                    .setSourceVersion(compileStepSpec.getSourceVersion())
+                    .setTargetVersion(compileStepSpec.getTargetVersion())
+                    .setClasspath(classpath)
+                    .addSources(maker.project.getSourceLayout().getTests())
+                    .setOutputDir(maker.getOutLayout().getTestClassDir());
+            compileSpecConfigurer.accept(compileSpec);
+            return compileSpec;
+        }
+
+        @Override
+        protected JkResourceProcessor getResourceProcessor() {
+            JkJavaProjectMaker maker = _.maker;
+            JkResourceProcessor resourceProcessor = JkResourceProcessor.of(
+                    maker.project.getSourceLayout().getTestResources())
+                    .setInterpolationCharset(maker.getSteps().getCompilation()
+                            .getResourceProcessor().getInterpolationCharset());
+            resourceProcessorConfigurer.accept(resourceProcessor);
+            return resourceProcessor;
+        }
+
+        @Override
+        protected String getScope() {
+            return "test code";
+        }
+
+    }
+
 
 }

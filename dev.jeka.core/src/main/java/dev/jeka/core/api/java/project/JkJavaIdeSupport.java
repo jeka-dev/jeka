@@ -8,7 +8,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 /**
  * Minimal information necessary to generate metadata project file for IDE.
  */
-public class JkJavaProjectIde {
+public class JkJavaIdeSupport {
 
     private final JkProjectSourceLayout sourceLayout;
 
@@ -18,7 +18,7 @@ public class JkJavaProjectIde {
 
     private final JkDependencyResolver dependencyResolver;
 
-    private JkJavaProjectIde(JkProjectSourceLayout sourceLayout, JkDependencySet dependencySet,
+    private JkJavaIdeSupport(JkProjectSourceLayout sourceLayout, JkDependencySet dependencySet,
                              JkJavaVersion sourceVersion, JkDependencyResolver dependencyResolver) {
         this.sourceLayout = sourceLayout;
         this.dependencies = dependencySet;
@@ -26,28 +26,28 @@ public class JkJavaProjectIde {
         this.dependencyResolver = dependencyResolver;
     }
 
-    public static JkJavaProjectIde ofDefault() {
-        return new JkJavaProjectIde(JkProjectSourceLayout.ofMavenStyle(), JkDependencySet.of(), JkJavaVersion.V8,
+    public static JkJavaIdeSupport ofDefault() {
+        return new JkJavaIdeSupport(JkProjectSourceLayout.ofMavenStyle(), JkDependencySet.of(), JkJavaVersion.V8,
                 JkDependencyResolver.of(JkRepo.ofLocal(), JkRepo.ofMavenCentral()));
     }
 
-    public JkJavaProjectIde withSourceLayout(JkProjectSourceLayout sourceLayout) {
-        return new JkJavaProjectIde(sourceLayout, this.dependencies, this.sourceVersion,
+    public JkJavaIdeSupport withSourceLayout(JkProjectSourceLayout sourceLayout) {
+        return new JkJavaIdeSupport(sourceLayout, this.dependencies, this.sourceVersion,
                 this.dependencyResolver);
     }
 
-    public JkJavaProjectIde withDependencies(JkDependencySet dependencies) {
-        return new JkJavaProjectIde(this.sourceLayout, dependencies, this.sourceVersion,
+    public JkJavaIdeSupport withDependencies(JkDependencySet dependencies) {
+        return new JkJavaIdeSupport(this.sourceLayout, dependencies, this.sourceVersion,
                 this.dependencyResolver);
     }
 
-    public JkJavaProjectIde withSourceVersion(JkJavaVersion sourceVersion) {
-        return new JkJavaProjectIde(this.sourceLayout, this.dependencies, sourceVersion,
+    public JkJavaIdeSupport withSourceVersion(JkJavaVersion sourceVersion) {
+        return new JkJavaIdeSupport(this.sourceLayout, this.dependencies, sourceVersion,
                 this.dependencyResolver);
     }
 
-    public JkJavaProjectIde withDependencyResolver(JkDependencyResolver dependencyResolver) {
-        return new JkJavaProjectIde(this.sourceLayout, this.dependencies, this.sourceVersion,
+    public JkJavaIdeSupport withDependencyResolver(JkDependencyResolver dependencyResolver) {
+        return new JkJavaIdeSupport(this.sourceLayout, this.dependencies, this.sourceVersion,
                 dependencyResolver);
     }
 

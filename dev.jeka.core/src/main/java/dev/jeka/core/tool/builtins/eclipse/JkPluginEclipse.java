@@ -2,8 +2,8 @@ package dev.jeka.core.tool.builtins.eclipse;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
-import dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.java.project.JkJavaIdeSupportSupplier;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
@@ -63,7 +63,7 @@ public final class JkPluginEclipse extends JkPlugin {
             "dependencies and source layout.")
     public void files() {
         final Path dotProject = getCommandSet().getBaseDir().resolve(".project");
-        JkJavaProjectIde projectIde = getProjectIde(getCommandSet());
+        JkJavaIdeSupport projectIde = getProjectIde(getCommandSet());
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
             for (final JkCommandSet depRun : getCommandSet().getImportedCommandSets().getDirects()) {
@@ -147,16 +147,16 @@ public final class JkPluginEclipse extends JkPlugin {
         return this;
     }
 
-    public static JkJavaProjectIde getProjectIde(JkCommandSet commands) {
-        if (commands instanceof JkJavaProjectIdeSupplier) {
-            JkJavaProjectIdeSupplier supplier = (JkJavaProjectIdeSupplier) commands;
-            return supplier.getJavaProjectIde();
+    public static JkJavaIdeSupport getProjectIde(JkCommandSet commands) {
+        if (commands instanceof JkJavaIdeSupportSupplier) {
+            JkJavaIdeSupportSupplier supplier = (JkJavaIdeSupportSupplier) commands;
+            return supplier.getJavaIdeSupport();
         }
-        List<JkJavaProjectIdeSupplier> suppliers = commands.getPlugins().getLoadedPluginInstanceOf(
-                JkJavaProjectIdeSupplier.class);
+        List<JkJavaIdeSupportSupplier> suppliers = commands.getPlugins().getLoadedPluginInstanceOf(
+                JkJavaIdeSupportSupplier.class);
         return suppliers.stream()
                 .filter(supplier -> supplier != null)
-                .map(supplier -> supplier.getJavaProjectIde())
+                .map(supplier -> supplier.getJavaIdeSupport())
                 .filter(projectIde -> projectIde != null)
                 .findFirst().orElse(null);
     }

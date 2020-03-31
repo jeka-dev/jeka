@@ -18,10 +18,10 @@ public class JkJavadocMakerRunner {
         Path out = Files.createTempDirectory("jekatest");
         JkLog.setHierarchicalConsoleConsumer();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
-        JkJavadocMaker.of(sources, out)
-                .withClasspath(JkPathTree.of(srcDir.resolve("../../../jeka/libs/provided").normalize()).getFiles())
-                .withDisplayOutput(true)
-                .process();
+        Iterable<Path> classpath = JkPathTree.of(srcDir.resolve("../../../jeka/libs/provided").normalize()).getFiles();
+        JkJavadocMaker.of()
+                .setDisplayOutput(true)
+                .process(classpath, sources, out);
         Desktop.getDesktop().open(out.toFile());
     }
 }

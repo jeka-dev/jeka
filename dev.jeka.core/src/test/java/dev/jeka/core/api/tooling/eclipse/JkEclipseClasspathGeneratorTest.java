@@ -35,9 +35,9 @@ public class JkEclipseClasspathGeneratorTest {
 
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
-        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
+        baseProject.addDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
         final JkEclipseClasspathGenerator baseGenerator =
-                JkEclipseClasspathGenerator.of(baseProject.getJavaProjectIde());
+                JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport());
         baseGenerator.setUsePathVariables(true);
         baseGenerator.setRunDependencies(baseProject.getMaker().getDependencyResolver(),
                 JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
@@ -48,10 +48,10 @@ public class JkEclipseClasspathGeneratorTest {
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
-        coreProject.setDependencies(coreDeps);
+        coreProject.addDependencies(coreDeps);
         coreProject.getMaker().getSteps().getTesting().getTestProcessor().setForkingProcess(true);
         final JkEclipseClasspathGenerator coreGenerator =
-                JkEclipseClasspathGenerator.of(coreProject.getJavaProjectIde());
+                JkEclipseClasspathGenerator.of(coreProject.getJavaIdeSupport());
         final String coreClasspath = coreGenerator.generate();
         System.out.println("\ncore .classpath");
         System.out.println(coreClasspath);
@@ -67,7 +67,7 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println(result2);
 
         final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
-        desktopProject.setDependencies(deps);
+        desktopProject.addDependencies(deps);
         desktopProject.getMaker().makeAllArtifacts();
 
         // ----------------- Now, try to apply generated .classpath to projects and compare if it matches

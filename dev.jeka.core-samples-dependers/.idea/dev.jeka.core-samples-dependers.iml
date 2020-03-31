@@ -11,6 +11,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
       <excludeFolder url="file://$MODULE_DIR$/../dev.jeka.core.depender-samples/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/../dev.jeka.core.depender-samples/jerkar/output" />
     </content>

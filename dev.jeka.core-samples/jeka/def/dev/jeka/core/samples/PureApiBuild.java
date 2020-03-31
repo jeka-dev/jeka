@@ -17,7 +17,7 @@ public class PureApiBuild extends JkCommandSet {
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.getBaseDir());
         javaProject.getMaker().setOutLayout(javaProject.getMaker().getOutLayout().withOutputDir("build/output/alt-output"));
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
-        javaProject.setDependencies(deps);
+        javaProject.addDependencies(deps);
         javaProject.getMaker().clean();
         javaProject.getMaker().makeAllArtifacts();
     }
@@ -30,7 +30,7 @@ public class PureApiBuild extends JkCommandSet {
                 .and("junit:junit", "4.12");
 
         JkJavaProject fooProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("foo"));
-        fooProject.setDependencies(JkDependencySet.of()
+        fooProject.addDependencies(JkDependencySet.of()
                 .and("junit:junit", JkJavaDepScopes.TEST)
                 .and("com.google.guava:guava")
                 .and("com.sun.jersey:jersey-server:1.19.4")
@@ -39,7 +39,7 @@ public class PureApiBuild extends JkCommandSet {
         fooProject.getMaker().addJavadocArtifact();  // Generate Javadoc by default
 
         JkJavaProject barProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("bar"));
-        fooProject.setDependencies(JkDependencySet.of()
+        fooProject.addDependencies(JkDependencySet.of()
                 .and("junit:junit", JkJavaDepScopes.TEST)
                 .and("com.sun.jersey:jersey-server:1.19.4")
                 .and(fooProject)

@@ -9,7 +9,6 @@ import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkConstants;
 
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -48,18 +47,16 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     private final JkRunnables outputCleaner;
 
     JkJavaProjectMaker(JkJavaProject project) {
+        this.project = project;
         outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(project.getBaseDir().resolve(
                 JkConstants.OUTPUT_PATH));
         outputCleaner = JkRunnables.of(
                 () -> JkPathTree.of(getOutLayout().getOutputPath()).deleteContent());
-        final Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
-                Charset.forName(project.getCompileSpec().getEncoding());
-        this.steps = new JkSteps(this, charset);
+        this.steps = new JkSteps(this);
 
         // define default artifacts
         putArtifact(getMainArtifactId(), () -> makeMainJar());
         putArtifact(SOURCES_ARTIFACT_ID, () -> makeSourceJar());
-        this.project = project;
     }
 
     @Override
@@ -317,7 +314,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public static class JkSteps {
 
-        private final JkJavaProjectMakerCompilationStep compilation;
+        private final JkJavaProjectMakerCompilationStep.JkProduction compilation;
 
         private final JkJavaProjectMakerTestingStep testing;
 
@@ -327,15 +324,15 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
         private final JkJavaProjectMakerDocumentationStep documentation;
 
-        private JkSteps(JkJavaProjectMaker maker, Charset charset) {
-            compilation = new JkJavaProjectMakerCompilationStep(maker, charset);
-            testing = new JkJavaProjectMakerTestingStep(maker, charset);
-            packaging = new JkJavaProjectMakerPackagingStep(maker);
+        private JkSteps(JkJavaProjectMaker maker) {
+            compilation = new JkJavaProjectMakerCompilationStep.JkProduction(maker);
+            testing = JkJavaProjectMakerTestingStep.of(maker);
+            packaging = JkJavaProjectMakerPackagingStep.of(maker);
             publishing = new JkJavaProjectMakerPublishingStep(maker);
-            documentation = new JkJavaProjectMakerDocumentationStep(maker);
+            documentation = JkJavaProjectMakerDocumentationStep.of(maker);
         }
 
-        public JkJavaProjectMakerCompilationStep getCompilation() {
+        public JkJavaProjectMakerCompilationStep.JkProduction getCompilation() {
             return compilation;
         }
 

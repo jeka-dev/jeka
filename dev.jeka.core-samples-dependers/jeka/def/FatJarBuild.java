@@ -1,5 +1,4 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.samples.AClassicBuild;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefImport;
@@ -22,7 +21,6 @@ public class FatJarBuild extends JkCommandSet {
     @Override
     protected void setup() {
         javaPlugin.getProject().addDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()));
-        javaPlugin.getProject().setSourceVersion(JkJavaVersion.V8);
         javaPlugin.getProject().getMaker().defineMainArtifactAsFatJar(true);
     }
    

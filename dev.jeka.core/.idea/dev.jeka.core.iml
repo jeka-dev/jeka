@@ -10,6 +10,7 @@
       <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/idea-output" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
     </content>
     <orderEntry type="inheritedJdk" />

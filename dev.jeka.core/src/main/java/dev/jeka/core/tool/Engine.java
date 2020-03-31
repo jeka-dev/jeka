@@ -222,7 +222,7 @@ final class Engine {
             classLoader.addEntries(kotlinCompiler.getStdLib());
         }
         final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath);
-        wrapCompile(() -> JkJavaCompiler.ofJdk().compile(javaCompileSpec));
+        wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec));
         JkPathTree.of(this.resolver.defSourceDir)
                 .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")
                 .copyTo(this.resolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);

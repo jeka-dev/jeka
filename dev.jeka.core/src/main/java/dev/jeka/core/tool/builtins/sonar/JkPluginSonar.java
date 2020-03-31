@@ -45,7 +45,7 @@ public class JkPluginSonar extends JkPlugin {
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,
                         baseDir.relativize(testReportDir.resolve("junit")).toString())
-                .withProperty(JkSonar.SOURCE_ENCODING, project.getCompileSpec().getEncoding())
+                .withProperty(JkSonar.SOURCE_ENCODING, project.getMaker().getSteps().getCompilation().getCompileSpec().getEncoding())
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
                         baseDir.relativize(project.getMaker().getOutLayout().getOutputPath("jacoco/jacoco.exec")).toString());
 

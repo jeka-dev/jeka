@@ -261,7 +261,7 @@ public final class JkJavaProcess {
     private OptionAndEnv optionsAndEnv() {
         final List<String> options = new LinkedList<>();
         final Map<String, String> env = new HashMap<>();
-        if (classpath != null && !classpath.entries().isEmpty()) {
+        if (classpath != null && !classpath.getEntries().isEmpty()) {
             final String classpathString = classpath.toString();
             if (JkUtilsSystem.IS_WINDOWS && classpathString.length() > 7500) {
                 JkLog.warn("Classpath too long, classpath will be passed using CLASSPATH env variable.");

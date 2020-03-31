@@ -5,8 +5,8 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
-import dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.java.project.JkJavaIdeSupportSupplier;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefClasspath;
@@ -22,7 +22,7 @@ import java.nio.file.Paths;
  * @author Jerome Angibaud
  */
 @JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.6")
-public class AntStyleBuild extends JkCommandSet implements JkJavaProjectIdeSupplier {
+public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupportSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
     Path classDir = getOutputDir().resolve("classes");
@@ -50,7 +50,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaProjectIdeSuppl
     }
 
     public void compile() {
-        JkJavaCompiler.ofJdk().compile(JkJavaCompileSpec.of()
+        JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(classDir)
                 .setClasspath(classpath)
                 .setSourceAndTargetVersion(JkJavaVersion.V8)
@@ -118,8 +118,8 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaProjectIdeSuppl
     }
 
     @Override
-    public JkJavaProjectIde getJavaProjectIde() {
-        return JkJavaProjectIde.ofDefault()
+    public JkJavaIdeSupport getJavaIdeSupport() {
+        return JkJavaIdeSupport.ofDefault()
                 .withSourceLayout(JkProjectSourceLayout.ofSimpleStyle()
                         .withSources(JkPathTreeSet.of(src))
                         .withBaseDir(getBaseDir()))

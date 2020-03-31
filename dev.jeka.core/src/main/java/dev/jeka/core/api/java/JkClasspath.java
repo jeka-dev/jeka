@@ -80,7 +80,7 @@ public final class JkClasspath implements Iterable<Path>, Serializable {
     /**
      * Returns each entries making this <code>classpath</code>.
      */
-    public List<Path> entries() {
+    public List<Path> getEntries() {
         return entries;
     }
 

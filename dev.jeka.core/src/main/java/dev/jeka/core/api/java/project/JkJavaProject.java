@@ -5,20 +5,11 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
-import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.file.JkResourceProcessor;
-import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -46,20 +37,13 @@ import java.util.function.Supplier;
  *
  * @See JkJavaProjectMaker
  */
-public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
+public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
 
     private JkVersionedModule versionedModule;
 
     private JkProjectSourceLayout sourceLayout;
 
     private JkDependencySet dependencies;
-
-    private JkJavaCompileSpec compileSpec =
-            JkJavaCompileSpec.of().setSourceAndTargetVersion(JkJavaVersion.V8).setEncoding("UTF-8");
-
-    private final List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<>();
-
-    private JkManifest manifest = JkManifest.ofEmpty();
 
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 
@@ -123,36 +107,16 @@ public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLoca
         return this;
     }
 
-    public JkJavaProject setDependencies(JkDependencySet dependencies) {
+    public JkJavaProject removeDependencies() {
         this.maker.cleanDependencyCache();
-        this.dependencies = dependencies;
+        this.dependencies = JkDependencySet.of();
         return this;
     }
 
     public JkJavaProject addDependencies(JkDependencySet dependencies) {
-        return this.setDependencies(this.dependencies.and(dependencies));
-    }
-
-    public JkJavaProject setSourceEncoding(String encoding) {
-        this.compileSpec.setEncoding(encoding);
+        this.maker.cleanDependencyCache();
+        this.dependencies = this.dependencies.and(dependencies);
         return this;
-    }
-
-    public JkJavaProject setSourceVersion(JkJavaVersion version ) {
-        this.compileSpec.setSourceAndTargetVersion(version);
-        return this;
-    }
-
-    public List<JkResourceProcessor.JkInterpolator> getResourceInterpolators() {
-        return resourceInterpolators;
-    }
-
-    public void addResourceInterpolator(PathMatcher pathMatcher, Map<String, String> valueReplacements) {
-        resourceInterpolators.add(JkResourceProcessor.JkInterpolator.of(pathMatcher, valueReplacements));
-    }
-
-    public void addResourceInterpolator(String acceptPattern, Map<String, String> valueReplacements) {
-        addResourceInterpolator(JkPathMatcher.of(acceptPattern), valueReplacements);
     }
 
     /**
@@ -180,23 +144,7 @@ public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLoca
         return setVersionedModule(JkModuleId.of(groupAndName).withVersion(version));
     }
 
-    public JkJavaCompileSpec getCompileSpec() {
-        return compileSpec;
-    }
 
-    public JkJavaProject setCompileSpec(JkJavaCompileSpec compileSpec) {
-        this.compileSpec = compileSpec;
-        return this;
-    }
-
-    public JkManifest getManifest() {
-        return manifest;
-    }
-
-    public JkJavaProject setManifest(JkManifest manifest) {
-        this.manifest = manifest;
-        return this;
-    }
 
     public JkPathTreeSet getExtraFilesToIncludeInJar() {
         return this.extraFilesToIncludeInFatJar;
@@ -219,8 +167,8 @@ public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLoca
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + this.versionedModule + "\n")
                 .append(this.sourceLayout.getInfo()).append("\n")
-                .append("Java Source Version : " + this.getCompileSpec().getSourceVersion() + "\n")
-                .append("Source Encoding : " + this.compileSpec.getEncoding() + "\n")
+                .append("Java Source Version : " + this.maker.getSteps().getCompilation().getCompileSpec().getSourceVersion() + "\n")
+                .append("Source Encoding : " + this.maker.getSteps().getCompilation().getCompileSpec().getEncoding() + "\n")
                 .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + this.maker.getDependencyResolver().getRepos() + "\n")
                 .append("Publish repositories : " + this.maker.getSteps().getPublishing().getPublishRepos()  + "\n")
@@ -230,11 +178,11 @@ public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLoca
     }
 
     @Override
-    public JkJavaProjectIde getJavaProjectIde() {
-        return JkJavaProjectIde.ofDefault()
+    public JkJavaIdeSupport getJavaIdeSupport() {
+        return JkJavaIdeSupport.ofDefault()
                 .withDependencies(this.dependencies)
                 .withDependencyResolver(this.maker.getDependencyResolver())
                 .withSourceLayout(this.sourceLayout)
-                .withSourceVersion(this.compileSpec.getSourceVersion());
+                .withSourceVersion(this.maker.getSteps().getCompilation().getCompileSpec().getSourceVersion());
     }
 }

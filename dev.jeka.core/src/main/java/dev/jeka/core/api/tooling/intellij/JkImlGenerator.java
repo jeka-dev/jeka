@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
@@ -88,7 +88,7 @@ public final class JkImlGenerator {
     /**
      * Constructs a {@link JkImlGenerator} to the project base directory
      */
-    public static JkImlGenerator of(JkJavaProjectIde projectIde) {
+    public static JkImlGenerator of(JkJavaIdeSupport projectIde) {
         JkImlGenerator result = new JkImlGenerator(projectIde.getSourceLayout().getBaseDir());
         result.sourceLayout = projectIde.getSourceLayout();
         result.projectDependencies = projectIde.getDependencies();

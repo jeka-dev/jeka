@@ -8,10 +8,10 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.testplatform.JkTestProcessor;
-import dev.jeka.core.api.java.testplatform.JkTestSelection;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
+import dev.jeka.core.api.java.testplatform.JkTestProcessor;
+import dev.jeka.core.api.java.testplatform.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -69,44 +69,45 @@ public class CoreBuild extends JkCommandSet {
 
     @Override
     protected void setup()  {
-        JkJavaProject project = javaPlugin.getProject();
 
         // Module version is driven by git repository info
         String jekaVersion = git.getVersionFromTags();
-        project.setVersionedModule("dev.jeka:jeka-core", jekaVersion);
-        project.setSourceVersion(JkJavaVersion.V8);
         if (!JkVersion.of(jekaVersion).isSnapshot()) {
             javaPlugin.pack.javadoc = true;
         }
-        project.getManifest().addMainClass("dev.jeka.core.tool.Main");
+        JkJavaProject project = javaPlugin.getProject();
+        project.setVersionedModule("dev.jeka:jeka-core", jekaVersion);
 
         JkJavaProjectMaker maker = project.getMaker();
-        project.getCompileSpec().addOptions("-Xlint:none","-g");
-        maker.getSteps().getCompilation().setFork(true);  // Fork to avoid compile failure bug on github/travis
-        maker.putArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
-        maker.getSteps().getDocumentation().setJavadocOptions("-notimestamp");
-        maker.getSteps().getPublishing()
-                .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
-                .setMavenPublicationInfo(mavenPublication());
-
-        maker.getSteps().getTesting()
-                .setBreakOnFailures(false)
+        maker
+            .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
+            .putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded)
+            .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper); // define wrapper
+        maker.getSteps()
+            .getCompilation()
+                .getCompileSpec()
+                    .addOptions("-Xlint:none","-g")
+                    .setSourceAndTargetVersion(JkJavaVersion.V8)._
+                .getCompiler()
+                    .setForkingWithJavac()._._
+            .getTesting()
                 .getTestProcessor()
-                    .setForkingProcess(false)
+                    .setForkingProcess(true)
                     .getEngineBehavior()
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
-        maker.getSteps().getTesting().getTestSelection()
-                .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN);
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.FULL)._._
+                .getTestSelection()
+                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)._._
+            .getDocumentation()
+                .setJavadocOptions("-notimestamp")._
+            .getPackaging()
+                .getManifest()
+                    .addMainClass("dev.jeka.core.tool.Main")._._
+            .getPublishing()
+                .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
+                .setMavenPublicationInfo(mavenPublication())
+                .getPostActions().chain(() -> createGithubRelease(jekaVersion));
 
-        // include embedded jar
-        maker.putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded);
-
-        // define wrapper
-        maker.putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
-
-        // create Github release note
-        maker.getSteps().getPublishing().getPostActions().chain(() -> createGithubRelease(jekaVersion));
     }
 
     private void createGithubRelease(String version) {
@@ -145,15 +146,17 @@ public class CoreBuild extends JkCommandSet {
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
-        distrib.importFiles(getBaseDir().getParent().resolve("LICENSE"));
-        distrib.importDir(getBaseDir().resolve("src/main/dist"));
-        distrib.importDir(getBaseDir().resolve("src/main/java/META-INF/bin"));
-        distrib.importFiles(maker.getArtifactPath(maker.getMainArtifactId()));
-        distrib.importFiles(maker.getArtifactPath(WRAPPER_ARTIFACT_ID));
         final List<Path> ivySourceLibs = getBaseTree().goTo("jeka/libs-sources")
                 .andMatching(true, "ivy-*.jar").getFiles();
-        distrib.goTo("libs-sources").importFiles(ivySourceLibs);
-        distrib.importFiles(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
+        distrib
+                .importFiles(getBaseDir().getParent().resolve("LICENSE"))
+                .importDir(getBaseDir().resolve("src/main/dist"))
+                .importDir(getBaseDir().resolve("src/main/java/META-INF/bin"))
+                .importFiles(maker.getArtifactPath(maker.getMainArtifactId()))
+                .importFiles(maker.getArtifactPath(WRAPPER_ARTIFACT_ID))
+                .goTo("libs-sources")
+                    .importFiles(ivySourceLibs)
+                    .importFiles(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
         if (javaPlugin.pack.javadoc) {
             maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.importFiles(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));

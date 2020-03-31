@@ -1,5 +1,4 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.samples.AClassicBuild;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefImport;
@@ -35,8 +34,7 @@ public class NormalJarBuild extends JkCommandSet {
     protected void setup() {
         javaPlugin.getProject().getMaker().defineMainArtifactAsFatJar(true);
         javaPlugin.getProject()
-                .setDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()))
-                .setSourceVersion(JkJavaVersion.V8);
+                .addDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()));
     }
 
     public void cleanPack() {
