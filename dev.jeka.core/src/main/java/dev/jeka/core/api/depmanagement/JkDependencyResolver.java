@@ -102,6 +102,9 @@ public final class JkDependencyResolver<T> {
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
     public JkResolveResult resolve(JkDependencySet dependencies, JkScope ... scopes) {
+        if (repos.getRepoList().isEmpty()) {
+            JkLog.warn("You are trying to resolve dependencies on no repositories. This will fail.");
+        }
         JkInternalDepResolver internalDepResolver = JkInternalDepResolver.of(this.repos);
         JkLog.trace("Preparing to resolve dependencies for module " + moduleHolder);
         long start = System.nanoTime();

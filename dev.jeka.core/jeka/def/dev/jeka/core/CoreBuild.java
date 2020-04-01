@@ -249,10 +249,12 @@ public class CoreBuild extends JkCommandSet {
         JkPathTree.of(maker.getOutLayout().getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
+    public void cleanPack() {
+        clean(); javaPlugin.pack();
+    }
+
     public static void main(String[] args) {
-        CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args);
-        coreBuild.javaPlugin.clean().pack();
-        //coreBuild.copyToWrapper();
+        JkInit.instanceOf(CoreBuild.class, args).cleanPack();;
     }
 
 }

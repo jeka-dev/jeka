@@ -18,10 +18,12 @@ public class JkDependencyResolverTest {
     @Test
     public void resolveModuleDependencies() throws Exception {
         JkLog.Verbosity verbosity = JkLog.verbosity();
-        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
+        JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
+        //JkLog.setHierarchicalConsoleConsumer();
         JkDependencySet dependencies = JkDependencySet.of()
                 .and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION);
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
         resolveResult.assertNoError();
         Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
@@ -55,7 +57,7 @@ public class JkDependencyResolverTest {
         JkDependencySet dependencies = JkDependencySet.of()
                 .and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION)
                 .andFiles(jarFile);
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
         Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size());
         resolveResult.assertNoError();
@@ -67,7 +69,8 @@ public class JkDependencyResolverTest {
         Path jarFile = Paths.get(sampleJarUrl.toURI());
         JkDependencySet dependencies = JkDependencySet.of()
                 .andFiles(jarFile);
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
         Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
     }
