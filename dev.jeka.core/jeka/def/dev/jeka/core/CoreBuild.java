@@ -76,42 +76,41 @@ public class CoreBuild extends JkCommandSet {
             javaPlugin.pack.javadoc = true;
         }
         JkJavaProject project = javaPlugin.getProject();
-        project.setVersionedModule("dev.jeka:jeka-core", jekaVersion);
-
         JkJavaProjectMaker maker = project.getMaker();
         this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
         maker
             .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
             .putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded)
-            .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper); // define wrapper
-        maker.getSteps()
-            .getCompilation()
-                .addOptions("-Xlint:none","-g")
-                .setJavaVersion(JkJavaVersion.V8)
-                .getCompiler()
-                    .setForkingWithJavac().__.__
-            .getTesting()
+            .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper) // define wrapper
+            .getSteps()
                 .getCompilation()
+                    .addOptions("-Xlint:none","-g")
+                    .setJavaVersion(JkJavaVersion.V8)
                     .getCompiler()
-                        .setDefault().__.__
-                .getTestProcessor()
-                    .setForkingProcess(true)
-                    .getEngineBehavior()
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
-                .getTestSelection()
-                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
-            .getPackaging()
-                .getManifest()
-                    .addMainClass("dev.jeka.core.tool.Main").__.__
-            .getDocumentation()
-                .getJavadocProcessor()
-                    .setDisplayOutput(true)
-                    .addOptions("-notimestamp").__.__
-            .getPublishing()
-                .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
-                .setMavenPublicationInfo(mavenPublication())
-                .getPostActions()
-                    .append(() -> createGithubRelease(jekaVersion));
+                        .setForkingWithJavac().__.__
+                .getTesting()
+                    .getCompilation()
+                        .getCompiler()
+                            .setDefault().__.__
+                    .getTestProcessor()
+                        .setForkingProcess(true)
+                        .getEngineBehavior()
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
+                    .getTestSelection()
+                        .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
+                .getPackaging()
+                    .getManifest()
+                        .addMainClass("dev.jeka.core.tool.Main").__.__
+                .getDocumentation()
+                    .getJavadocProcessor()
+                        .setDisplayOutput(true)
+                        .addOptions("-notimestamp").__.__
+                .getPublishing()
+                    .setVersionedModule("dev.jeka:jeka-core", jekaVersion)
+                    .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
+                    .setMavenPublicationInfo(mavenPublication())
+                    .getPostActions()
+                        .append(() -> createGithubRelease(jekaVersion));
     }
 
     private void createGithubRelease(String version) {
@@ -178,8 +177,9 @@ public class CoreBuild extends JkCommandSet {
 
     private void makeDocs() {
         JkLog.startTask("Making documentation");
-        new DocMaker(getBaseDir(), distribFolder,
-                javaPlugin.getProject().getVersionedModule().getVersion().getValue()).assembleAllDoc();
+        String version = javaPlugin.getProject().getMaker().getSteps().getPublishing().getVersionedModule()
+                .getVersion().getValue();
+        new DocMaker(getBaseDir(), distribFolder, version).assembleAllDoc();
         JkLog.endTask();
     }
 

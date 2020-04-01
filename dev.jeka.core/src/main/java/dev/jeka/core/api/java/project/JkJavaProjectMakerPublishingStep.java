@@ -25,8 +25,41 @@ public class JkJavaProjectMakerPublishingStep {
 
     private JkMavenPublicationInfo mavenPublicationInfo;
 
+    private JkVersionedModule versionedModule;
+
+    /**
+     * For parent chaining
+     */
+    public final JkSteps __;
+
     JkJavaProjectMakerPublishingStep(JkJavaProjectMaker maker) {
         this.maker = maker;
+        this.__ = maker.getSteps();
+    }
+
+    /**
+     * Returns the module name and version of this project. This information is used for naming produced artifact files,
+     * publishing. It is also consumed by tools as SonarQube.
+     */
+    public JkVersionedModule getVersionedModule() {
+        return versionedModule;
+    }
+
+    /**
+     * Sets the specified module name and version for this project.
+     * @see #getVersionedModule()
+     */
+    public JkJavaProjectMakerPublishingStep setVersionedModule(JkVersionedModule versionedModule) {
+        JkUtilsAssert.notNull(versionedModule, "Can't set null value for versioned module.");
+        this.versionedModule = versionedModule;
+        return this;
+    }
+
+    /**
+     * @see #setVersionedModule(JkVersionedModule)
+     */
+    public JkJavaProjectMakerPublishingStep setVersionedModule(String groupAndName, String version) {
+        return setVersionedModule(JkModuleId.of(groupAndName).withVersion(version));
     }
 
     /**
@@ -63,19 +96,19 @@ public class JkJavaProjectMakerPublishingStep {
 
     private void publishMaven(JkRepoSet repos) {
         JkJavaProject project = maker.project;
-        JkException.throwIf(project.getVersionedModule() == null, "No versioned module has been set on "
+        JkException.throwIf(versionedModule == null, "No versioned module has been set on "
                 + project + ". Can't publish.");
         JkMavenPublication publication = JkMavenPublication.of(maker, Collections.emptySet())
                 .with(mavenPublicationInfo).withSigner(signer);
         JkPublisher.of(repos, maker.getOutLayout().getOutputPath()).withSigner(this.signer)
-                .publishMaven(project.getVersionedModule(), publication, maker.getScopeDefaultedDependencies());
+                .publishMaven(versionedModule, publication, maker.getScopeDefaultedDependencies());
     }
 
     private void publishIvy(JkRepoSet repos) {
         if (!repos.hasIvyRepo()) {
             return;
         }
-        JkException.throwIf(maker.project.getVersionedModule() == null, "No versionedModule has been set on "
+        JkException.throwIf(versionedModule == null, "No versionedModule has been set on "
                 + maker.project + ". Can't publish.");
         JkLog.startTask("Preparing Ivy publication");
         final JkDependencySet dependencies = maker.getScopeDefaultedDependencies();
@@ -88,7 +121,7 @@ public class JkJavaProjectMakerPublishingStep {
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
         JkLog.endTask();
         JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
-                .publishIvy(maker.project.getVersionedModule(), publication, dependencies,
+                .publishIvy(versionedModule, publication, dependencies,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }
 

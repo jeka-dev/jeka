@@ -78,8 +78,8 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
     }
 
     private void applyOptionsToUnderlyingProject() {
-        if (project.getVersionedModule() != null) {
-            JkVersionedModule versionedModule = project.getVersionedModule();
+        JkVersionedModule versionedModule = project.getMaker().getSteps().getPublishing().getVersionedModule();
+        if (versionedModule != null) {
             project.getMaker().getSteps().getPackaging().getManifest()
                     .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, versionedModule.getModuleId().getName())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, versionedModule.getModuleId().getGroup())

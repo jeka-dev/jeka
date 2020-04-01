@@ -2,11 +2,8 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,8 +36,6 @@ import java.util.function.Supplier;
  */
 public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
 
-    private JkVersionedModule versionedModule;
-
     private JkProjectSourceLayout sourceLayout;
 
     private JkDependencySet dependencies;
@@ -52,7 +47,6 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
         this.dependencies = JkDependencySet.of();
-        this.versionedModule = JkVersionedModule.ofRootDirName(sourceLayout.getBaseDir().getFileName().toString());
         this.maker = new JkJavaProjectMaker(this);
     }
 
@@ -119,33 +113,6 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return this;
     }
 
-    /**
-     * Returns the module name and version of this project. This information is used for naming produced artifact files,
-     * publishing. It is also consumed by tools as SonarQube.
-     */
-    public JkVersionedModule getVersionedModule() {
-        return versionedModule;
-    }
-
-    /**
-     * Sets the specified module name and version for this project.
-     * @see #getVersionedModule()
-     */
-    public JkJavaProject setVersionedModule(JkVersionedModule versionedModule) {
-        JkUtilsAssert.notNull(versionedModule, "Can't set null value for versioned module.");
-        this.versionedModule = versionedModule;
-        return this;
-    }
-
-    /**
-     * @see #setVersionedModule(JkVersionedModule)
-     */
-    public JkJavaProject setVersionedModule(String groupAndName, String version) {
-        return setVersionedModule(JkModuleId.of(groupAndName).withVersion(version));
-    }
-
-
-
     public JkPathTreeSet getExtraFilesToIncludeInJar() {
         return this.extraFilesToIncludeInFatJar;
     }
@@ -165,7 +132,7 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
-                .append("Published Module & version : " + this.versionedModule + "\n")
+                .append("Published Module & version : " + this.maker.getSteps().getPublishing().getVersionedModule() + "\n")
                 .append(this.sourceLayout.getInfo()).append("\n")
                 .append("Java Source Version : " + this.maker.getSteps().getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
                 .append("Source Encoding : " + this.maker.getSteps().getCompilation().getComputedCompileSpec().getEncoding() + "\n")

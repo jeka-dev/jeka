@@ -29,7 +29,7 @@ public class JkPluginSonar extends JkPlugin {
         final JkPathSequence libs = project.getMaker().getDependencyResolver().resolve(project.getDependencies(),
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED).getFiles();
         final Path testReportDir = project.getMaker().getOutLayout().getTestReportDir();
-        final JkVersionedModule module = project.getVersionedModule();
+        final JkVersionedModule module = project.getMaker().getSteps().getPublishing().getVersionedModule();
         final String fullName = module != null ? module.getModuleId().getDotedName() : project.getBaseDir().getFileName().toString();
         final String name = module != null ? module.getModuleId().getName() : project.getBaseDir().getFileName().toString();
         final JkVersion version = module != null ? module.getVersion() : JkVersion.of("");

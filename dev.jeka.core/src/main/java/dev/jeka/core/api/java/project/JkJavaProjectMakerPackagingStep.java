@@ -56,7 +56,7 @@ public class JkJavaProjectMakerPackagingStep {
      * Returns an artifact file name supplier for including version in artifact file names.
      */
     public Supplier<String> getIncludingVersionFileNameSupplier() {
-        JkVersionedModule module = maker.project.getVersionedModule();
+        JkVersionedModule module = defaultVersionedModule();
         return () -> {
             String version = module.getVersion().isUnspecified() ? "" : "-"
                     + module.getVersion().getValue();
@@ -68,7 +68,15 @@ public class JkJavaProjectMakerPackagingStep {
      * Returns an artifact file name supplier for NOT including version in artifact file names.
      */
     public Supplier<String> getModuleNameFileNameSupplier() {
-        return () -> maker.project.getVersionedModule().getModuleId().getDotedName();
+        return () -> defaultVersionedModule().getModuleId().getDotedName();
+    }
+
+    private JkVersionedModule defaultVersionedModule() {
+        JkVersionedModule versionedModule = maker.getSteps().getPublishing().getVersionedModule();
+        if (versionedModule == null) {
+            return JkVersionedModule.ofRootDirName(maker.project.getSourceLayout().getBaseDir().getFileName().toString());
+        }
+        return versionedModule;
     }
 
     Path getArtifactFile(JkArtifactId artifactId) {
