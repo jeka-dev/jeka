@@ -3,7 +3,6 @@ package dev.jeka.core.api.java.project;
 import dev.jeka.core.api.depmanagement.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
-import dev.jeka.core.api.file.JkPathTreeSet;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,8 +39,6 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     private JkDependencySet dependencies;
 
-    private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
-
     private final JkJavaProjectMaker maker;
 
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
@@ -70,12 +67,6 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return ofSimpleLayout(Paths.get(baseDir));
     }
 
-    // -------------------------- Other -------------------------
-
-    @Override
-    public String toString() {
-        return "project " + this.sourceLayout.getBaseDir().getFileName();
-    }
 
     // ---------------------------- Getters / setters --------------------------------------------
 
@@ -113,16 +104,11 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return this;
     }
 
-    public JkPathTreeSet getExtraFilesToIncludeInJar() {
-        return this.extraFilesToIncludeInFatJar;
-    }
+    // -------------------------- Other -------------------------
 
-    /**
-     * File trees specified here will be added to the fat jar.
-     */
-    public JkJavaProject setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
-        this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
-        return this;
+    @Override
+    public String toString() {
+        return "project " + this.sourceLayout.getBaseDir().getFileName();
     }
 
     @Override

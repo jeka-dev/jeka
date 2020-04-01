@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.java.JkManifest;
@@ -30,6 +31,8 @@ public class JkJavaProjectMakerPackagingStep {
     private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
     private JkManifest manifest;
+
+    private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 
     /**
      * For Parent chaining
@@ -93,10 +96,9 @@ public class JkJavaProjectMakerPackagingStep {
     public void createBinJar(Path target) {
         maker.getSteps().getCompilation().runIfNecessary();
         maker.getSteps().getTesting().runIfNecessary();
-        JkJavaProject project = maker.project;
         JkJarPacker.of(maker.getOutLayout().getClassDir())
                 .withManifest(manifest)
-                .withExtraFiles(project.getExtraFilesToIncludeInJar())
+                .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeJar(target);
     }
 
@@ -107,7 +109,7 @@ public class JkJavaProjectMakerPackagingStep {
         JkClasspath classpath = JkClasspath.of(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
         JkJarPacker.of( maker.getOutLayout().getClassDir())
                 .withManifest(manifest)
-                .withExtraFiles(maker.project.getExtraFilesToIncludeInJar())
+                .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath, this.fatJarFilter);
     }
 
@@ -163,6 +165,18 @@ public class JkJavaProjectMakerPackagingStep {
     public JkJavaProjectMakerPackagingStep setFatJarFilter(PathMatcher fatJarFilter) {
         JkUtilsAssert.notNull(fatJarFilter, "Fat jar filter can not be null.");
         this.fatJarFilter = fatJarFilter;
+        return this;
+    }
+
+    public JkPathTreeSet getExtraFilesToIncludeInJar() {
+        return this.extraFilesToIncludeInFatJar;
+    }
+
+    /**
+     * File trees specified here will be added to the fat jar.
+     */
+    public JkJavaProjectMakerPackagingStep setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
+        this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;
     }
 
