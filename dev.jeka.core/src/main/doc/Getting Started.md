@@ -591,9 +591,9 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.java.testplatform.JkJavaTestClasses;
-import dev.jeka.core.api.java.testplatform.JkUnit;
-import dev.jeka.core.api.java.testplatform.JkUnit.JunitReportDetail;
+import dev.jeka.core.api.java.testing.JkJavaTestClasses;
+import dev.jeka.core.api.java.testing.JkUnit;
+import dev.jeka.core.api.java.testing.JkUnit.JunitReportDetail;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefClasspath;
 

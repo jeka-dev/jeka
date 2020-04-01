@@ -101,10 +101,10 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
     // ------------------------------ withers and adders ------------------------------------
 
     /**
-     * @see #andPrepending(Iterable)
+     * @see #andPrepend(Iterable)
      */
-    public JkPathSequence andPrepending(Path path1, Path path2, Path... entries) {
-        return andPrepending(JkUtilsIterable.listOf2orMore(path1, path2, entries));
+    public JkPathSequence andPrepend(Path path1, Path path2, Path... entries) {
+        return andPrepend(JkUtilsIterable.listOf2orMore(path1, path2, entries));
     }
 
     /**
@@ -113,7 +113,7 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
      * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
-    public JkPathSequence andPrepending(Iterable<Path> paths) {
+    public JkPathSequence andPrepend(Iterable<Path> paths) {
         final List<Path> result = JkUtilsPath.disambiguate(paths);
         result.addAll(entries);
         return new JkPathSequence(result);

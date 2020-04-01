@@ -82,7 +82,7 @@ final class Engine {
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
-            path = path.andPrepending(cmdPath);
+            path = path.andPrepend(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
         preCompile();  // Need to pre-compile to get the declared def dependencies

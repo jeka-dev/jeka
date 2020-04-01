@@ -10,8 +10,8 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectMaker;
-import dev.jeka.core.api.java.testplatform.JkTestProcessor;
-import dev.jeka.core.api.java.testplatform.JkTestSelection;
+import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -86,13 +86,12 @@ public class CoreBuild extends JkCommandSet {
             .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper); // define wrapper
         maker.getSteps()
             .getCompilation()
-                .getCompileSpec()
-                    .addOptions("-Xlint:none","-g")
-                    .setSourceAndTargetVersion(JkJavaVersion.V8)._
+                .addOptions("-Xlint:none","-g")
+                .setJavaVersion(JkJavaVersion.V8)
                 .getCompiler()
                     .setForkingWithJavac()._._
             .getTesting()
-                .getTestCompileStep()
+                .getCompilation()
                     .getCompiler()
                         .setDefault()._._
                 .getTestProcessor()
@@ -110,8 +109,8 @@ public class CoreBuild extends JkCommandSet {
             .getPublishing()
                 .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
                 .setMavenPublicationInfo(mavenPublication())
-                .getPostActions().chain(() -> createGithubRelease(jekaVersion));
-
+                .getPostActions()
+                    .append(() -> createGithubRelease(jekaVersion));
     }
 
     private void createGithubRelease(String version) {

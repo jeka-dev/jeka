@@ -1,6 +1,6 @@
 package dev.jeka.core.tool.builtins.jacoco;
 
-import dev.jeka.core.api.java.testplatform.JkTestProcessor;
+import dev.jeka.core.api.java.testing.JkTestProcessor;
 import org.junit.Test;
 
 import java.nio.file.Paths;

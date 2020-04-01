@@ -4,7 +4,7 @@ import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.java.testplatform.JkTestProcessor;
+import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -122,7 +122,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
         }
         steps.getTesting().setSkipped(tests.skip);
         if (this.compilerExtraArgs != null) {
-            steps.getCompilation().getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+            steps.getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
     }
 
@@ -240,9 +240,9 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
 
     private JkProcess compilerProcess() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
-        JkJavaProjectMakerCompilationStep.JkProduction compilation = project.getMaker().getSteps().getCompilation();
+        JkJavaProjectMakerCompilationStep compilation = project.getMaker().getSteps().getCompilation();
         return JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
-                compilation.getCompileSpec().getSourceVersion().get());
+                compilation.getJavaVersion().get());
     }
 
 }

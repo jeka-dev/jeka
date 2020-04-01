@@ -1,19 +1,16 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.testplatform.JkTestProcessor;
-import dev.jeka.core.api.java.testplatform.JkTestResult;
-import dev.jeka.core.api.java.testplatform.JkTestSelection;
+import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.java.testing.JkTestResult;
+import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
 /**
  * Handles project testing step. This involve both test compilation and run.
@@ -25,9 +22,9 @@ public class JkJavaProjectMakerTestingStep {
 
     private final JkJavaProjectMaker maker;
 
-    private JkTestCompile testCompileStep;
+    private final JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> compilation;
 
-    public final JkRunnables afterTest = JkRunnables.of(() -> {});
+    public final JkRunnables afterTest;
 
     private JkTestProcessor testProcessor;
 
@@ -44,18 +41,15 @@ public class JkJavaProjectMakerTestingStep {
      */
     public final JkJavaProjectMaker.JkSteps _;
 
-    private JkJavaProjectMakerTestingStep(JkJavaProjectMaker maker) {
+    JkJavaProjectMakerTestingStep(JkJavaProjectMaker maker) {
         this.maker = maker;
         this._ = maker.getSteps();
+        compilation = JkJavaProjectMakerCompilationStep.ofTest(maker, this);
+        afterTest = JkRunnables.noOp(this);
+        testProcessor = defaultTestProcessor();
+        testSelection = defaultTestSelection();
     }
 
-    static JkJavaProjectMakerTestingStep of(JkJavaProjectMaker maker) {
-        JkJavaProjectMakerTestingStep result = new JkJavaProjectMakerTestingStep(maker);
-        result.testCompileStep = JkTestCompile.of(result);
-        result.testProcessor = result.defaultTestProcessor();
-        result.testSelection = result.defaultTestSelection();
-        return result;
-    }
 
     /**
      * Returns tests to be run. The returned instance is mutable so users can modify it
@@ -76,8 +70,8 @@ public class JkJavaProjectMakerTestingStep {
     /**
      * Returns the compilation step for the test part.
      */
-    public JkTestCompile getTestCompileStep() {
-        return testCompileStep;
+    public JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> getCompilation() {
+        return compilation;
     }
 
     /**
@@ -129,7 +123,7 @@ public class JkJavaProjectMakerTestingStep {
     public void run() {
         JkLog.startTask("Processing tests");
         this.maker.getSteps().getCompilation().runIfNecessary();
-        this.testCompileStep.run();
+        this.compilation.run();
         executeWithTestProcessor();
         afterTest.run();
         JkLog.endTask();
@@ -160,7 +154,7 @@ public class JkJavaProjectMakerTestingStep {
         }
     }
 
-    private JkTestProcessor defaultTestProcessor() {
+    private JkTestProcessor<JkJavaProjectMakerTestingStep> defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.of(this);
         final Path reportDir = maker.getOutLayout().getTestReportDir().resolve("junit");
         result.getEngineBehavior()
@@ -169,84 +163,10 @@ public class JkJavaProjectMakerTestingStep {
         return result;
     }
 
-    private JkTestSelection defaultTestSelection() {
+    private JkTestSelection<JkJavaProjectMakerTestingStep> defaultTestSelection() {
         return JkTestSelection.of(this).addTestClassRoots(maker.getOutLayout().getTestClassDir());
     }
 
-    public static class JkTestCompile extends JkJavaProjectMakerCompilationStep<JkTestCompile> {
-
-        private Consumer<JkJavaCompileSpec> compileSpecConfigurer = spec -> {};
-
-        private Consumer<JkResourceProcessor> resourceProcessorConfigurer = processor -> {};
-
-        /**
-         * For parent chaining
-         */
-        public final JkJavaProjectMakerTestingStep _;
-
-        private JkTestCompile(JkJavaProjectMakerTestingStep parent) {
-            super(parent.maker);
-            _ = parent;
-        }
-
-        static JkTestCompile of(JkJavaProjectMakerTestingStep parent) {
-            JkTestCompile result = new JkTestCompile(parent);
-            result.init();
-            return result;
-        }
-
-        /**
-         * Sets a configurer for the compile spec. This configurer will apply on a copy of
-         * the compile spec of the compile step.
-         */
-        public JkTestCompile setCompileSpecConfigurer(Consumer<JkJavaCompileSpec> compileSpecConfigurer) {
-            this.compileSpecConfigurer = compileSpecConfigurer;
-            return this;
-        }
-
-        /**
-         * Sets a configurer for the resource processor. This configurer will apply on a copy of
-         * the resource processor of compile step.
-         */
-        public JkTestCompile setResourceProcessorConfigurer(Consumer<JkResourceProcessor> resourceProcessorConfigurer) {
-            this.resourceProcessorConfigurer = resourceProcessorConfigurer;
-            return this;
-        }
-
-        @Override
-        protected JkJavaCompileSpec getCompileSpec() {
-            JkJavaProjectMaker maker = _.maker;
-            final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST)
-                    .andPrepending(maker.getOutLayout().getClassDir());
-            JkJavaCompileSpec compileStepSpec = maker.getSteps().getCompilation().getCompileSpec();
-            JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of(this)
-                    .setEncoding(compileStepSpec.getEncoding())
-                    .setSourceVersion(compileStepSpec.getSourceVersion())
-                    .setTargetVersion(compileStepSpec.getTargetVersion())
-                    .setClasspath(classpath)
-                    .addSources(maker.project.getSourceLayout().getTests())
-                    .setOutputDir(maker.getOutLayout().getTestClassDir());
-            compileSpecConfigurer.accept(compileSpec);
-            return compileSpec;
-        }
-
-        @Override
-        protected JkResourceProcessor getResourceProcessor() {
-            JkJavaProjectMaker maker = _.maker;
-            JkResourceProcessor resourceProcessor = JkResourceProcessor.of(this)
-                    .setResources(maker.project.getSourceLayout().getTestResources())
-                    .setInterpolationCharset(maker.getSteps().getCompilation()
-                            .getResourceProcessor().getInterpolationCharset());
-            resourceProcessorConfigurer.accept(resourceProcessor);
-            return resourceProcessor;
-        }
-
-        @Override
-        protected String getScope() {
-            return "test code";
-        }
-
-    }
 
 
 }

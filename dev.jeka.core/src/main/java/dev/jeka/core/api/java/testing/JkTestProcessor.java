@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.testplatform;
+package dev.jeka.core.api.java.testing;
 
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.function.JkUnaryOperator;
@@ -70,7 +70,7 @@ public final class JkTestProcessor<T> {
     /**
      * For parent chaining
      */
-    public final T _;
+    public final transient T _;
 
     private JkTestProcessor(T _) {
         this._ = _;
@@ -212,7 +212,7 @@ public final class JkTestProcessor<T> {
 
         private JkUnaryOperator<LauncherConfig.Builder> launcherEnhancer;
 
-        public final JkTestProcessor<T> _;
+        public final transient JkTestProcessor<T> _;
 
         private JkEngineBehavior(JkTestProcessor<T> _) {
             this._ = _;

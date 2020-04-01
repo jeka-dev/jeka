@@ -1,7 +1,7 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
@@ -9,35 +9,95 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsObject;
+
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Handles project compilation step. Users can configure inner phases by chaining runnables.
  * They also can modify {@link JkJavaCompiler} and {@link JkJavaCompileSpec} to use.
  */
-public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectMakerCompilationStep> {
+public class JkJavaProjectMakerCompilationStep<T> {
 
-    private final JkRunnables beforeGenerate = JkRunnables.noOp();
+    private static final String DEFAULT_ENCODING = "UTF-8";
 
-    private final JkRunnables afterGenerate = JkRunnables.noOp();
+    private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V8;
 
-    private final JkRunnables sourceGenerator = JkRunnables.noOp();
-
-    private final JkRunnables resourceGenerator = JkRunnables.noOp();
-
-    private final JkRunnables afterCompile = JkRunnables.noOp();
-
-    private boolean done;
-
-    private JkJavaCompiler<T> compiler;
+    /**
+     * For parent chaining
+     */
+    public final T _;
 
     private final JkJavaProjectMaker maker;
 
-    protected JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker) {
+    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> beforeGenerate;
+
+    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> afterGenerate;
+
+    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> sourceGenerator;
+
+    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> resourceGenerator;
+
+    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> afterCompile;
+
+    private final JkJavaCompiler<JkJavaProjectMakerCompilationStep<T>> compiler;
+
+    private final JkResourceProcessor<JkJavaProjectMakerCompilationStep<T>> resourceProcessor;
+
+    private final String scope;
+
+    private final LinkedList<String> compileOptions = new LinkedList<>();
+
+    private boolean done;
+
+    private Supplier<JkJavaCompileSpec> compileSpecSupplier;
+
+    private Supplier<JkPathTreeSet> resourceSupplier;
+
+    private JkJavaVersion javaVersion;
+
+    private String sourceEncoding;
+
+    private JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker, String scope, T parent) {
         this.maker = maker;
+        _ = parent;
+        this.scope = scope;
+        beforeGenerate = JkRunnables.noOp(this);
+        afterGenerate = JkRunnables.noOp(this);
+        sourceGenerator = JkRunnables.noOp(this);
+        resourceGenerator = JkRunnables.noOp(this);
+        afterCompile = JkRunnables.noOp(this);
+        compiler = JkJavaCompiler.of(this);
+        resourceProcessor = JkResourceProcessor.of(this);
     }
 
-    protected void init() {
-        this.compiler = (JkJavaCompiler<T>) JkJavaCompiler.of(this);
+
+    static JkJavaProjectMakerCompilationStep<JkJavaProjectMaker> ofProd(JkJavaProjectMaker maker) {
+        JkJavaProjectMakerCompilationStep result =
+                new JkJavaProjectMakerCompilationStep(maker, "production code", maker.getSteps());
+        result.compileSpecSupplier = () -> result.computeProdCompileSpec();
+        result.resourceSupplier = () -> maker.project.getSourceLayout().getResources();
+        return result;
+    }
+
+    static JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> ofTest(JkJavaProjectMaker maker,
+                                                                        JkJavaProjectMakerTestingStep parent) {
+        JkJavaProjectMakerCompilationStep result =
+                new JkJavaProjectMakerCompilationStep(maker, "test code", parent);
+        result.compileSpecSupplier = () -> result.computeTestCompileSpec(maker.getSteps().getCompilation());
+        result.resourceSupplier = () -> maker.project.getSourceLayout().getTestResources();
+        return result;
+    }
+
+    public JkJavaProjectMakerCompilationStep apply(Consumer<JkJavaProjectMakerCompilationStep> consumer) {
+        consumer.accept(this);
+        return this;
     }
 
     void reset() {
@@ -53,7 +113,7 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
      * </ul>
      */
     public void run() {
-        JkLog.startTask("Compilation and resource processing of " + getScope());
+        JkLog.startTask("Compilation and resource processing of " + scope);
         afterGenerate.run();
         sourceGenerator.run();
         resourceGenerator.run();
@@ -112,7 +172,7 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
      * Returns the compiler compiling Java sources of this project. The returned instance is mutable
      * so users can modify it from this method return.
      */
-    public JkJavaCompiler<T> getCompiler() {
+    public JkJavaCompiler<JkJavaProjectMakerCompilationStep<T>> getCompiler() {
         return this.compiler;
     }
 
@@ -124,89 +184,99 @@ public abstract class JkJavaProjectMakerCompilationStep<T extends JkJavaProjectM
         return afterCompile;
     }
 
-    protected abstract JkJavaCompileSpec<T> getCompileSpec();
+    /**
+     * Returns encoding to use to read Java source files
+     */
+    public String getSourceEncoding() {
+        return getComputedCompileSpec().getEncoding();
+    }
 
-    protected abstract JkResourceProcessor<T> getResourceProcessor();
+    /**
+     * Set the encoding to use to read Java source files
+     */
+    public JkJavaProjectMakerCompilationStep<T> setSourceEncoding(String sourceEncoding) {
+        this.sourceEncoding = sourceEncoding;
+        return this;
+    }
 
+    /**
+     * Returns extra compile options passed to the compiler
+     */
+    public List<String> getCompileOptions() {
+        return Collections.unmodifiableList(compileOptions);
+    }
 
-    protected abstract String getScope();
+    /**
+     * Adds options to be passed to Java compiler
+     */
+    public JkJavaProjectMakerCompilationStep<T> addOptions(String ... options) {
+        this.compileOptions.addAll(Arrays.asList(options));
+        return this;
+    }
+
+    /**
+     * Returns the resource processor.
+     */
+    public JkResourceProcessor<JkJavaProjectMakerCompilationStep<T>> getResourceProcessor() {
+        return resourceProcessor;
+    }
+
+    /**
+     * Gets the Java version used as source and target version
+     */
+    public JkJavaVersion getJavaVersion() {
+        return getComputedCompileSpec().getSourceVersion();
+    }
+
+    /**
+     * Sets the Java version used for both source and target.
+     */
+    public JkJavaProjectMakerCompilationStep<T> setJavaVersion(JkJavaVersion javaVersion) {
+        this.javaVersion = javaVersion;
+        return this;
+    }
+
+    /**
+     * Computes and returns the compile specification to pass to Java computer. The returned result is created
+     * at each invokation and modify it has no side effect.
+     */
+    public JkJavaCompileSpec getComputedCompileSpec() {
+        return compileSpecSupplier.get();
+    }
 
     private void processResources() {
-        this.getResourceProcessor().generateTo(maker.getOutLayout().getClassDir());
+        Path dir = getComputedCompileSpec().getOutputDir();
+        this.getResourceProcessor().generate(resourceSupplier.get(), dir);
     }
 
     private void runCompile() {
-        boolean success = getCompiler().compile(getCompileSpec());
+        boolean success = getCompiler().compile(compileSpecSupplier.get());
         if (!success) {
             throw new JkException("Compilation of Java sources failed.");
         }
     }
 
-    public static class JkProduction extends JkJavaProjectMakerCompilationStep<JkProduction> {
+    private JkJavaCompileSpec computeProdCompileSpec() {
+        return JkJavaCompileSpec.of()
+                .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
+                .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
+                .setClasspath(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
+                .addSources(maker.project.getSourceLayout().getSources()
+                        .and(maker.getOutLayout().getGeneratedSourceDir()))
+                .addOptions(compileOptions)
+                .setOutputDir(maker.getOutLayout().getClassDir());
+    }
 
-        private JkJavaCompileSpec<JkProduction> compileSpec;
-
-        private JkResourceProcessor<JkProduction> resourceProcessor;
-
-        /**
-         * For parent chaining
-         */
-        public final JkJavaProjectMaker.JkSteps _;
-
-        private JkProduction(JkJavaProjectMaker maker) {
-            super(maker);
-            _ = maker.getSteps();
-        }
-
-        @Override
-        protected void init() {
-            super.init();
-            resourceProcessor = JkResourceProcessor.of(this)
-                    .setResources(super.maker.project.getSourceLayout().getResources())
-                    .addResources(super.maker.getOutLayout().getGeneratedResourceDir());
-            compileSpec = defaultCompileSourceSpec(this, super.maker);
-        }
-
-        static JkProduction of(JkJavaProjectMaker maker) {
-            JkProduction result = new JkProduction(maker);
-            result.init();
-            return result;
-        }
-
-        /**
-         * Returns classes to compile. The returned instance is mutable
-         * so users can modify it from this method return.
-         */
-        public JkJavaCompileSpec<JkProduction> getCompileSpec() {
-            return compileSpec;
-        }
-
-        /**
-         * Returns the object that will process the resources (copying, interpolating).
-         * The returned instance is mutable so users can modify it from this method return.
-         */
-        public JkResourceProcessor getResourceProcessor() {
-            return resourceProcessor;
-        }
-
-        @Override
-        protected String getScope() {
-            return "production code";
-        }
-
-        private static JkJavaCompileSpec defaultCompileSourceSpec(JkProduction productionCompileStep,
-                                                                  JkJavaProjectMaker maker) {
-            final JkPathSequence classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
-            return JkJavaCompileSpec.of(productionCompileStep)
-                    .setSourceAndTargetVersion(JkJavaVersion.V8)
-                    .setEncoding("UTF-8")
-                    .setClasspath(classpath)
-                    .addSources(maker.project.getSourceLayout().getSources())
-                    .addSources(maker.getOutLayout().getGeneratedSourceDir())
-                    .setOutputDir(maker.getOutLayout().getClassDir());
-        }
-
-
+    private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectMakerCompilationStep prodStep) {
+        JkJavaCompileSpec prodSpec = prodStep.getComputedCompileSpec();
+        return JkJavaCompileSpec.of()
+                .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
+                .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
+                .setClasspath(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST)
+                        .andPrepend(maker.getOutLayout().getClassDir()))
+                .addSources(maker.project.getSourceLayout().getTests())
+                .addOptions(compileOptions)
+                .setOutputDir(maker.getOutLayout().getTestClassDir());
     }
 
 }

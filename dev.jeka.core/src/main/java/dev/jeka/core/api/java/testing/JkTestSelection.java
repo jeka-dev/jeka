@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.testplatform;
+package dev.jeka.core.api.java.testing;
 
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkUnaryOperator;
@@ -36,7 +36,7 @@ public final class JkTestSelection<T> implements Serializable {
     /**
      * For parent chaining
      */
-    public final T _;
+    public final transient T _;
 
     private JkTestSelection(T _) {
         this._ = _;

@@ -15,7 +15,7 @@ import java.util.*;
  * Stands for a compilation settings as source and target version, encoding, annotation processing
  * or any option supported by the compileRunner.
  */
-public final class JkJavaCompileSpec<T> {
+public final class JkJavaCompileSpec<T> implements Cloneable {
 
     public static final String SOURCE_OPTS = "-source";
 
@@ -29,9 +29,9 @@ public final class JkJavaCompileSpec<T> {
 
     private static final String OUTPUT_DIR_OPTS = "-d";
 
-    private final List<String> options = new LinkedList<>();
+    private List<String> options = new LinkedList<>();
 
-    private final List<Path> sourceFiles = new LinkedList<>();
+    private List<Path> sourceFiles = new LinkedList<>();
 
     /**
      * Owner for parent chaining
@@ -48,6 +48,17 @@ public final class JkJavaCompileSpec<T> {
 
     public static <T> JkJavaCompileSpec<T> of(T o) {
         return new JkJavaCompileSpec<T>(o);
+    }
+
+    public JkJavaCompileSpec<T> clone() {
+        try {
+            JkJavaCompileSpec<T> clone = (JkJavaCompileSpec<T>) super.clone();
+            clone.options = new LinkedList(options);
+            clone.sourceFiles = new LinkedList(sourceFiles);
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

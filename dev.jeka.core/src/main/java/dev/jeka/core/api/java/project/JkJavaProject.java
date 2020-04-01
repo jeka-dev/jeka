@@ -167,8 +167,8 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + this.versionedModule + "\n")
                 .append(this.sourceLayout.getInfo()).append("\n")
-                .append("Java Source Version : " + this.maker.getSteps().getCompilation().getCompileSpec().getSourceVersion() + "\n")
-                .append("Source Encoding : " + this.maker.getSteps().getCompilation().getCompileSpec().getEncoding() + "\n")
+                .append("Java Source Version : " + this.maker.getSteps().getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
+                .append("Source Encoding : " + this.maker.getSteps().getCompilation().getComputedCompileSpec().getEncoding() + "\n")
                 .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + this.maker.getDependencyResolver().getRepos() + "\n")
                 .append("Publish repositories : " + this.maker.getSteps().getPublishing().getPublishRepos()  + "\n")
@@ -183,6 +183,6 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
                 .withDependencies(this.dependencies)
                 .withDependencyResolver(this.maker.getDependencyResolver())
                 .withSourceLayout(this.sourceLayout)
-                .withSourceVersion(this.maker.getSteps().getCompilation().getCompileSpec().getSourceVersion());
+                .withSourceVersion(this.maker.getSteps().getCompilation().getComputedCompileSpec().getSourceVersion());
     }
 }

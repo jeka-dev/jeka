@@ -315,7 +315,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public static class JkSteps {
 
-        private JkJavaProjectMakerCompilationStep.JkProduction compilation;
+        private JkJavaProjectMakerCompilationStep compilation;
 
         private JkJavaProjectMakerTestingStep testing;
 
@@ -328,15 +328,16 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         private JkSteps() {
         }
 
+        // Members should not be instantiated in constructor to avoid maker = null
         private void init(JkJavaProjectMaker maker) {
-            compilation = JkJavaProjectMakerCompilationStep.JkProduction.of(maker);
-            testing = JkJavaProjectMakerTestingStep.of(maker);
+            compilation = JkJavaProjectMakerCompilationStep.ofProd(maker);
+            testing = new JkJavaProjectMakerTestingStep(maker);
             packaging = JkJavaProjectMakerPackagingStep.of(maker);
             publishing = new JkJavaProjectMakerPublishingStep(maker);
             documentation = JkJavaProjectMakerDocumentationStep.of(maker);
         }
 
-        public JkJavaProjectMakerCompilationStep.JkProduction getCompilation() {
+        public JkJavaProjectMakerCompilationStep<JkSteps> getCompilation() {
             return compilation;
         }
 

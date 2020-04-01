@@ -26,8 +26,6 @@ import java.util.function.Consumer;
  */
 public final class JkResourceProcessor<T> {
 
-    private JkPathTreeSet resourceTrees = JkPathTreeSet.ofEmpty();
-
     private final List<JkInterpolator> interpolators = new LinkedList<>();
 
     // Charset for interpolation
@@ -62,44 +60,6 @@ public final class JkResourceProcessor<T> {
      */
     public static <T> JkResourceProcessor<T> of(T parent) {
         return new JkResourceProcessor<>(parent);
-    }
-
-    /**
-     * Sets the specified resources to process
-     */
-    public JkResourceProcessor<T> setResources(JkPathTreeSet trees) {
-        JkUtilsAssert.notNull(trees, "resource tree set cannot be null.");
-        this.resourceTrees = trees;
-        return this;
-    }
-
-    /**
-     * Sets the specified resources to this resource processor.
-     */
-    public JkResourceProcessor<T> setResources(JkPathTree tree) {
-        return setResources(tree.toSet());
-    }
-
-    /**
-     * Adds the specified resources to this resource processor.
-     */
-    public JkResourceProcessor<T> addResources(JkPathTreeSet trees) {
-        this.resourceTrees = this.resourceTrees.and(trees);
-        return this;
-    }
-
-    /**
-     * @see JkResourceProcessor#addResources(JkPathTreeSet)
-     */
-    public JkResourceProcessor<T> addResources(JkPathTree tree) {
-        return addResources(tree.toSet());
-    }
-
-    /**
-     * @see JkResourceProcessor#addResources(JkPathTree)
-     */
-    public JkResourceProcessor<T> addResources(Path dir) {
-        return addResources(JkPathTree.of(dir));
     }
 
     /**
@@ -158,10 +118,10 @@ public final class JkResourceProcessor<T> {
      * Actually processes the resources, meaning copies the getResources to the
      * specified output directory along replacing specified tokens.
      */
-    public void generateTo(Path outputDir) {
+    public void generate(JkPathTreeSet resourceTrees, Path outputDir) {
         JkLog.startTask("Coping resource files to " + outputDir);
         final AtomicInteger count = new AtomicInteger(0);
-        for (final JkPathTree resourceTree : this.resourceTrees.getPathTrees()) {
+        for (final JkPathTree resourceTree : resourceTrees.getPathTrees()) {
             if (!resourceTree.exists()) {
                 continue;
             }
@@ -187,7 +147,7 @@ public final class JkResourceProcessor<T> {
      * value), and the file filter to apply it. Keys are generally formatted as <code>${keyName}</code>
      * but can be of any form.
      */
-    public static class JkInterpolator {
+    private static class JkInterpolator {
 
         private final Map<String, String> keyValues;
 

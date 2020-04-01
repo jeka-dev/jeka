@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.testplatform;
+package dev.jeka.core.api.java.testing;
 
 import dev.jeka.core.api.depmanagement.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkDependencySet;

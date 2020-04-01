@@ -74,8 +74,7 @@ public final class JkPluginIntellij extends JkPlugin {
         Path basePath = commands.getBaseDir();
         if (commands.getPlugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = commands.getPlugins().get(JkPluginJava.class).getProject();
-            generator.setSourceJavaVersion(project.getMaker().getSteps().getCompilation().getCompileSpec()
-                    .getSourceVersion());
+            generator.setSourceJavaVersion(project.getMaker().getSteps().getCompilation().getJavaVersion());
             generator.setForceJdkVersion(forceJdkVersion);
         }
         final String xml = generator.generate();
