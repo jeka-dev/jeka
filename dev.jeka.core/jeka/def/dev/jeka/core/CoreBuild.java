@@ -43,8 +43,6 @@ public class CoreBuild extends JkCommandSet {
 
     final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 
-    private Path distribFolder;
-
     private final JkGitWrapper git;
 
     public boolean runIT;
@@ -75,12 +73,9 @@ public class CoreBuild extends JkCommandSet {
         if (!JkVersion.of(jekaVersion).isSnapshot()) {
             javaPlugin.pack.javadoc = true;
         }
-        JkJavaProject project = javaPlugin.getProject();
-        JkJavaProjectMaker maker = project.getMaker();
-        this.distribFolder = maker.getOutLayout().getOutputPath().resolve("distrib");
-        maker
+        javaPlugin.getProject().getMaker()
             .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
-            .putArtifact(maker.getMainArtifactId(), this::doPackWithEmbedded)
+            .setMainArtifact(this::doPackWithEmbedded)
             .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper) // define wrapper
             .getSteps()
                 .getCompilation()
@@ -97,13 +92,14 @@ public class CoreBuild extends JkCommandSet {
                         .getEngineBehavior()
                             .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
                     .getTestSelection()
+                        .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
                         .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
                 .getPackaging()
                     .getManifest()
                         .addMainClass("dev.jeka.core.tool.Main").__.__
                 .getDocumentation()
                     .getJavadocProcessor()
-                        .setDisplayOutput(true)
+                        .setDisplayOutput(false)
                         .addOptions("-notimestamp").__.__
                 .getPublishing()
                     .setVersionedModule("dev.jeka:jeka-core", jekaVersion)
@@ -125,6 +121,10 @@ public class CoreBuild extends JkCommandSet {
         }
     }
 
+    private Path distribFolder() {
+        return javaPlugin.getProject().getMaker().getOutLayout().getOutputPath().resolve("distrib");
+    }
+
     public void publishDocsOnGithubPage() {
         JkJavaProject project = javaPlugin.getProject();
         Path javadocSourceDir = project.getMaker().getOutLayout().getJavadocDir();
@@ -136,7 +136,7 @@ public class CoreBuild extends JkCommandSet {
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
         makeDocs();
-        JkPathTree.of(distribFolder.resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
+        JkPathTree.of(distribFolder().resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
         JkGitWrapper gitTemp = JkGitWrapper.of(tempRepo).withLogCommand(true);
         gitTemp.exec("add", "*");
         gitTemp.withFailOnError(false).exec("commit", "-am", "Doc");
@@ -146,7 +146,7 @@ public class CoreBuild extends JkCommandSet {
     private void doDistrib() {
         final JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
         maker.makeMissingArtifacts(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
-        final JkPathTree distrib = JkPathTree.of(distribFolder);
+        final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
         final List<Path> ivySourceLibs = getBaseTree().goTo("jeka/libs-sources")
@@ -179,7 +179,7 @@ public class CoreBuild extends JkCommandSet {
         JkLog.startTask("Making documentation");
         String version = javaPlugin.getProject().getMaker().getSteps().getPublishing().getVersionedModule()
                 .getVersion().getValue();
-        new DocMaker(getBaseDir(), distribFolder, version).assembleAllDoc();
+        new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }
 

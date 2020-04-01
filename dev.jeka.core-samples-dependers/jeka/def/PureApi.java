@@ -9,16 +9,20 @@ public class PureApi {
         JkLog.setHierarchicalConsoleConsumer();  // activate console logging
 
         // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
-        JkJavaProject coreProject = JkJavaProject.ofMavenLayout("../dev.jeka.core-samples");
-        coreProject.addDependencies(
-                JkDependencySet.of().and("junit:junit:4.13", JkJavaDepScopes.TEST));
+        JkJavaProject coreProject = JkJavaProject.ofMavenLayout("../dev.jeka.core-samples")
+             .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                        .and("junit:junit:4.13", JkJavaDepScopes.TEST)).__;
 
         // A project depending on the first project + Guava
-        JkJavaProject dependerProject = JkJavaProject.ofMavenLayout(".");
-        dependerProject.setVersionedModule("mygroup:depender", "1.0-SNAPSHOT");
-        dependerProject.addDependencies(JkDependencySet.of()
+        JkJavaProject dependerProject = JkJavaProject.ofMavenLayout(".")
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
                 .and("com.google.guava:guava:22.0")
-                .and(coreProject));
+                .and(coreProject)).__;
+        dependerProject.getMaker().getSteps()
+                .getPublishing()
+                    .setVersionedModule("mygroup:depender", "1.0-SNAPSHOT");
 
         coreProject.getMaker().clean();
         dependerProject.getMaker().clean().makeAllArtifacts();

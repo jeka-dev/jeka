@@ -1,11 +1,10 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,46 +16,37 @@ import static dev.jeka.core.api.utils.JkUtilsString.plurialize;
  *
  * @author Jerome Angibaud
  */
-public final class JkDependencyResolver {
+public final class JkDependencyResolver<T> {
 
-    private final JkInternalDepResolver jkInternalModuleDepResolver;
-
-    private final JkResolutionParameters parameters;
+    private final JkResolutionParameters<JkDependencyResolver<T> > parameters;
 
     // Not necessary but helps Ivy to hide data efficiently.
-    private final JkVersionedModule module;
+    private JkVersionedModule moduleHolder;
 
-    private final JkRepoSet repos;
+    private JkRepoSet repos = JkRepoSet.of();
 
-    private final Path baseDir;
+    /**
+     * For parent chaining
+     */
+    public final T __;
 
-    private JkDependencyResolver(JkInternalDepResolver jkInternalModuleDepResolver,
-                                 JkVersionedModule module, JkResolutionParameters resolutionParameters, JkRepoSet repos, Path baseDir) {
-        this.jkInternalModuleDepResolver = jkInternalModuleDepResolver;
-        this.module = module;
-        this.parameters = resolutionParameters;
-        this.repos = repos;
-        this.baseDir = baseDir;
+    private JkDependencyResolver(T parent) {
+        __ = parent;
+        parameters = JkResolutionParameters.of(this);
     }
 
     /**
-     * Creates a dependency resolver fetching module dependencies in the specified repos. If
-     * the specified JkRepo contains no {@link JkRepo} then the created.
+     * Creates a empty (without repo) dependency resolver fetching module dependencies.
      */
-    public static JkDependencyResolver of(JkRepoSet repos) {
-        final JkInternalDepResolver ivyResolver = JkInternalDepResolver.of(repos);
-        return new JkDependencyResolver(ivyResolver,  null, JkResolutionParameters.of(), repos, Paths.get(""));
+    public static JkDependencyResolver<Void> of() {
+        return JkDependencyResolver.of(null);
     }
 
     /**
-     * @See {@link #of(JkRepoSet)}
+     * Same as {@link #of()} but providing parent chaining.
      */
-    public static JkDependencyResolver of(JkRepo repo1, JkRepo... repos) {
-        return of(JkRepoSet.of(repo1, repos));
-    }
-
-    public static JkDependencyResolver of() {
-        return of(JkRepoSet.of());
+    public static <T> JkDependencyResolver<T> of(T parent) {
+        return new JkDependencyResolver(parent);
     }
 
     /**
@@ -64,6 +54,38 @@ public final class JkDependencyResolver {
      */
     public JkRepoSet getRepos() {
         return this.repos;
+    }
+
+    public JkDependencyResolver<T> setRepos(JkRepoSet repos) {
+        JkUtilsAssert.notNull(repos, "repos cannot be null");
+        this.repos = repos;
+        return this;
+    }
+
+    public JkDependencyResolver<T> addRepos(JkRepoSet repos) {
+        return setRepos(this.repos.and(repos));
+    }
+
+    public JkDependencyResolver<T> addRepos(JkRepo ... repos) {
+        return addRepos(JkRepoSet.of(Arrays.asList(repos)));
+    }
+
+    /**
+     * Returns the parameters of this dependency resolver.
+     */
+    public JkResolutionParameters<JkDependencyResolver<T> > getParams() {
+        return this.parameters;
+    }
+
+    /**
+     * The underlying dependency manager can cache the resolution on file system
+     * for faster result. To make this caching possible, you must set the
+     * module+version for which the resolution is made. This is only relevant
+     * for of dependencies and have no effect for of dependencies.
+     */
+    public JkDependencyResolver<T> setModuleHolder(JkVersionedModule versionedModule) {
+        this.moduleHolder = versionedModule;
+        return this;
     }
 
     /**
@@ -80,17 +102,18 @@ public final class JkDependencyResolver {
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
     public JkResolveResult resolve(JkDependencySet dependencies, JkScope ... scopes) {
-        JkLog.trace("Preparing to resolve dependencies for module " + module);
+        JkInternalDepResolver internalDepResolver = JkInternalDepResolver.of(this.repos);
+        JkLog.trace("Preparing to resolve dependencies for module " + moduleHolder);
         long start = System.nanoTime();
         final String msg = scopes.length == 0 ? "Resolving dependencies " :
                 "Resolving dependencies with specified scopes " + Arrays.asList(scopes);
         JkLog.startTask(msg);
-        JkResolveResult resolveResult = (jkInternalModuleDepResolver == null || !dependencies.hasModules()) ? JkResolveResult.ofRoot(module) :
-                jkInternalModuleDepResolver.resolve(module, dependencies.withModulesOnly(),
+        JkResolveResult resolveResult = (internalDepResolver == null || !dependencies.hasModules()) ? JkResolveResult.ofRoot(moduleHolder) :
+                internalDepResolver.resolve(moduleHolder, dependencies.withModulesOnly(),
                     parameters, scopes);
         final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies,
                     JkUtilsIterable.setOf(scopes));
-        resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport()).withBaseDir(baseDir);
+        resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module")
                     + resolveResult.getInvolvedModules());
@@ -104,82 +127,24 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * The underlying dependency manager can cache the resolution on file system
-     * for faster result. To make this caching possible, you must set the
-     * module+version for which the resolution is made. This is only relevant
-     * for of dependencies and have no effect for of dependencies.
-     */
-    public JkDependencyResolver withModuleHolder(JkVersionedModule versionedModule) {
-        return new JkDependencyResolver(this.jkInternalModuleDepResolver, versionedModule,
-                this.parameters, this.repos, this.baseDir);
-    }
-
-    /**
-     * Returns an dependency resolver identical to this one but with the specified repositories.
-     */
-    public JkDependencyResolver withRepos(JkRepoSet otherRepos) {
-        return new JkDependencyResolver(JkInternalDepResolver.of(otherRepos), this.module,
-                this.parameters, otherRepos, this.baseDir);
-    }
-
-    /**
-     * @see #withRepos(JkRepoSet)
-     */
-    public JkDependencyResolver withRepos(JkRepo repo, JkRepo... otherRepos) {
-        return withRepos(JkRepoSet.of(repo, otherRepos));
-    }
-
-    /**
-     * @see #withRepos(JkRepoSet)
-     */
-    public JkDependencyResolver andRepos(JkRepoSet repoSet) {
-        return withRepos(this.repos.and(repoSet));
-    }
-
-    /**
-     * Returns an dependency resolver identical to this one but with the specified repositories.
-     */
-    public JkDependencyResolver withParams(JkResolutionParameters params) {
-        return new JkDependencyResolver(this.jkInternalModuleDepResolver, this.module,
-                params, this.repos, this.baseDir);
-    }
-
-    /**
-     * Returns an dependency resolver identical to this one but with specified the base directory. The base directory is used
-     * to resolve relative files to absolute files for {@link JkFileSystemDependency}. This directory is used by
-     * {@link #resolve(JkDependencySet, JkScope...)} method as it returns only absolute files.
-     */
-    public JkDependencyResolver withBasedir(Path baseDir) {
-        return new JkDependencyResolver(this.jkInternalModuleDepResolver, this.module,
-                this.parameters, this.repos, baseDir);
-    }
-
-    /**
-     * Returns the parameters of this dependency resolver.
-     */
-    public JkResolutionParameters getParams() {
-        return this.parameters;
-    }
-
-    /**
      * Returns an alphabetical sorted list of groupId present in these repositories
      */
     public List<String> searchGroups() {
-        return this.jkInternalModuleDepResolver.searchGroups();
+        return JkInternalDepResolver.of(this.repos).searchGroups();
     }
 
     /**
      * Returns an alphabetical sorted list of module ids present in these repositories for the specified groupId.
      */
     public List<String> searchModules(String groupId) {
-        return this.jkInternalModuleDepResolver.searchModules(groupId);
+        return JkInternalDepResolver.of(this.repos).searchModules(groupId);
     }
 
     /**
      * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
      */
     public List<String> searchVersions(JkModuleId moduleId) {
-        return this.jkInternalModuleDepResolver.searchVersions(moduleId).stream()
+        return JkInternalDepResolver.of(this.repos).searchVersions(moduleId).stream()
                 .sorted(JkVersion.SEMANTIC_COMARATOR).collect(Collectors.toList());
     }
 

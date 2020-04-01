@@ -2,7 +2,6 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkCompileOption;
 import dev.jeka.core.tool.JkDefClasspath;
@@ -36,16 +35,18 @@ public class AClassicBuild extends JkCommandSet {
     @Override
     protected void setup() {
         JkJavaProject project = javaPlugin.getProject();
-        project.addDependencies(JkDependencySet.of()
+        project
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
                         .and("com.sun.jersey:jersey-server:1.19.4")
-                        .and("junit:junit:4.13", TEST));
-        JkJavaProjectMaker maker = project.getMaker();
-        maker.defineMainArtifactAsFatJar(true);  // project will produce a fat jar as well.
-        maker.getSteps()
-                .getTesting()
-                    .getTestProcessor()
-                        .setForkingProcess(true);
+                        .and("junit:junit:4.13", TEST)).__
+            .getMaker()
+                .defineMainArtifactAsFatJar(true)   // project will produce a fat jar as well.
+                .getSteps()
+                    .getTesting()
+                        .getTestProcessor()
+                            .setForkingProcess(true);
     }
     
     public static void main(String[] args) {

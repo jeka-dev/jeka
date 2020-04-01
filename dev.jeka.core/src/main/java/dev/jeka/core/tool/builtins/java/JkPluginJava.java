@@ -62,10 +62,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
 
         // Pre-configure JkJavaProject instance
         this.project = JkJavaProject.ofMavenLayout(this.getCommandSet().getBaseDir());
-        this.project.addDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
+        this.project.getDependencyManagement().addDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
         final Path path = run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
-            this.project.addDependencies(JkDependencySet.ofTextDescription(path));
+            this.project.getDependencyManagement().addDependencies(JkDependencySet.ofTextDescription(path));
         }
         this.project.getMaker().getOutputCleaner().set(() -> run.clean());
     }
@@ -107,7 +107,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
             steps.getPublishing().addPublishRepo(repoPlugin.publishRepository());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
-        maker.addDownloadRepo(downloadRepo);
+        project.getDependencyManagement().getResolver().addRepos(downloadRepo);
         if (pack.checksums().length > 0) {
             steps.getPackaging().setChecksumAlgorithms(pack.checksums());
         }
@@ -196,10 +196,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
         JkLog.info("Declared dependencies : ");
-        project.getDependencies().toResolvedModuleVersions().toList().forEach(dep -> JkLog.info(dep.toString()));
+        project.getDependencyManagement().getDependencies().toResolvedModuleVersions().toList()
+                .forEach(dep -> JkLog.info(dep.toString()));
         JkLog.info("Resolved to : ");
-        final JkResolveResult resolveResult = this.getProject().getMaker().getDependencyResolver()
-                .resolve(this.project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME));
+        final JkResolveResult resolveResult = this.getProject().getDependencyManagement().fetchDependencies();
         final JkDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
     }
@@ -223,7 +223,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
 
     @JkDoc("Fetches project dependencies in cache.")
     public void refreshDeps() {
-        project.getMaker().getDependencyResolver().resolve(project.getMaker().getScopeDefaultedDependencies());
+        project.getDependencyManagement().fetchDependencies();
     }
 
     @Override

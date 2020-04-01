@@ -20,7 +20,7 @@ public class SimpleScopeBuild extends JkCommandSet {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().addDependencies(JkDependencySet.of()
+        javaPlugin.getProject().getDependencyManagement().addDependencies(JkDependencySet.of()
                 .andFile(getBaseDir().resolve("libs/foo.jar"))
                 .and("junit:junit:4.13", TEST)
                 .and("com.sun.jersey:jersey-server:1.19", JkScopeMapping

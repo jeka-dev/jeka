@@ -1,11 +1,13 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkArtifactProducer;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
+import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -37,14 +39,14 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     private JkProjectSourceLayout sourceLayout;
 
-    private JkDependencySet dependencies;
-
     private final JkJavaProjectMaker maker;
+
+    private final JkDependencyManagement<JkJavaProject> dependencyManagement;
 
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
-        this.dependencies = JkDependencySet.of();
         this.maker = new JkJavaProjectMaker(this);
+        this.dependencyManagement = JkDependencyManagement.of(this);
     }
 
     public static JkJavaProject of(JkProjectSourceLayout layout) {
@@ -79,10 +81,6 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return sourceLayout;
     }
 
-    public JkDependencySet getDependencies() {
-        return this.dependencies;
-    }
-
     public JkJavaProjectMaker getMaker() {
         return maker;
     }
@@ -92,16 +90,8 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return this;
     }
 
-    public JkJavaProject removeDependencies() {
-        this.maker.cleanDependencyCache();
-        this.dependencies = JkDependencySet.of();
-        return this;
-    }
-
-    public JkJavaProject addDependencies(JkDependencySet dependencies) {
-        this.maker.cleanDependencyCache();
-        this.dependencies = this.dependencies.and(dependencies);
-        return this;
+    public JkDependencyManagement<JkJavaProject> getDependencyManagement() {
+        return dependencyManagement;
     }
 
     // -------------------------- Other -------------------------
@@ -123,9 +113,9 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
                 .append("Java Source Version : " + this.maker.getSteps().getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
                 .append("Source Encoding : " + this.maker.getSteps().getCompilation().getComputedCompileSpec().getEncoding() + "\n")
                 .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
-                .append("Download Repositories : " + this.maker.getDependencyResolver().getRepos() + "\n")
+                .append("Download Repositories : " + this.dependencyManagement.getResolver().getRepos() + "\n")
                 .append("Publish repositories : " + this.maker.getSteps().getPublishing().getPublishRepos()  + "\n")
-                .append("Declared Dependencies : " + this.getDependencies().toList().size() + " elements.\n")
+                .append("Declared Dependencies : " + this.dependencyManagement.getDependencies().toList().size() + " elements.\n")
                 .append("Defined Artifacts : " + this.get().getArtifactIds())
                 .toString();
     }
@@ -133,9 +123,100 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
         return JkJavaIdeSupport.ofDefault()
-                .withDependencies(this.dependencies)
-                .withDependencyResolver(this.maker.getDependencyResolver())
+                .withDependencies(this.dependencyManagement.getDependencies())
+                .withDependencyResolver(this.dependencyManagement.resolver)
                 .withSourceLayout(this.sourceLayout)
                 .withSourceVersion(this.maker.getSteps().getCompilation().getComputedCompileSpec().getSourceVersion());
+    }
+
+    public static class JkDependencyManagement<T> {
+
+        private final Map<Set<JkScope>, JkResolveResult> dependencyCache = new HashMap<>();
+
+        private final JkDependencyResolver<JkDependencyManagement> resolver;
+
+        private boolean failOnDependencyResolutionError = true;
+
+        /**
+         * For parent chaining
+         */
+        public final T __;
+
+        private JkDependencySet dependencies = JkDependencySet.of();
+
+        private JkDependencyManagement(T __) {
+            this.__ = __;
+            resolver = JkDependencyResolver.of(this);
+            resolver.addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
+        }
+
+        private static <T> JkDependencyManagement<T> of(T parent) {
+           return new JkDependencyManagement(parent);
+        }
+
+        public JkDependencySet getDependencies() {
+            return this.dependencies;
+        }
+
+        public JkDependencyManagement<T> removeDependencies() {
+            dependencyCache.clear();
+            this.dependencies = JkDependencySet.of();
+            return this;
+        }
+
+        public JkDependencyManagement<T> addDependencies(JkDependencySet dependencies) {
+            dependencyCache.clear();;
+            this.dependencies = this.dependencies.and(dependencies);
+            return this;
+        }
+
+        public JkDependencyResolver<JkDependencyManagement> getResolver() {
+            return resolver;
+        }
+
+        /**
+         * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise
+         * just log a warn message. <code>false</code> by default.
+         */
+        public JkDependencyManagement<T> setFailOnDependencyResolutionError(boolean fail) {
+            this.failOnDependencyResolutionError = fail;
+            return this;
+        }
+
+        // ------------
+
+        public JkDependencyManagement<T> cleanCache() {
+            dependencyCache.clear();
+            return this;
+        }
+
+        /**
+         * Returns dependencies declared for this project. Dependencies declared without specifying
+         * scope are defaulted to scope {@link JkJavaDepScopes#COMPILE_AND_RUNTIME}
+         */
+        public JkDependencySet getScopeDefaultedDependencies() {
+            return dependencies.withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME);
+        }
+
+        /**
+         * Returns lib paths standing for the resolution of this project dependencies for the specified dependency scopes.
+         */
+        public JkResolveResult fetchDependencies(JkScope... scopes) {
+            final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
+            return dependencyCache.computeIfAbsent(scopeSet,
+                    scopes1 -> {
+                        JkResolveResult resolveResult =
+                                resolver.resolve(getScopeDefaultedDependencies(), scopes);
+                        JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
+                        if (report.hasErrors()) {
+                            if (failOnDependencyResolutionError) {
+                                throw new JkException(report.toString());
+                            }
+                            JkLog.warn(report.toString());
+                        }
+                        return resolveResult;
+                    });
+        }
+
     }
 }

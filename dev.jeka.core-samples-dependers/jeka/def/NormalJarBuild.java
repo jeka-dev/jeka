@@ -33,8 +33,9 @@ public class NormalJarBuild extends JkCommandSet {
     @Override
     protected void setup() {
         javaPlugin.getProject().getMaker().defineMainArtifactAsFatJar(true);
-        javaPlugin.getProject()
-                .addDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()));
+        javaPlugin.getProject().getDependencyManagement()
+            .addDependencies(JkDependencySet.of()
+                .and(sampleBuild.javaPlugin.getProject()));
     }
 
     public void cleanPack() {

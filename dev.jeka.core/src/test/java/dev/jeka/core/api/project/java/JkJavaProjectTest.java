@@ -27,18 +27,18 @@ public class JkJavaProjectTest {
 
 
         JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
-        baseProject.addDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
+        baseProject.getDependencyManagement().addDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
-        coreProject.addDependencies(coreDeps);
+        coreProject.getDependencyManagement().addDependencies(coreDeps);
         coreProject.getMaker().getSteps().getTesting().getTestProcessor().setForkingProcess(true);
 
         final Path desktop = top.resolve("desktop");
         final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
         final JkDependencySet deps = JkDependencySet.of().and(coreProject);
-        desktopProject.addDependencies(deps);
+        desktopProject.getDependencyManagement().addDependencies(deps);
         desktopProject.getMaker().defineMainArtifactAsFatJar(false);
         desktopProject.getMaker().makeAllArtifacts();
 

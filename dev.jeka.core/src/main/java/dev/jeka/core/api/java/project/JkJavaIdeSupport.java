@@ -28,7 +28,7 @@ public class JkJavaIdeSupport {
 
     public static JkJavaIdeSupport ofDefault() {
         return new JkJavaIdeSupport(JkProjectSourceLayout.ofMavenStyle(), JkDependencySet.of(), JkJavaVersion.V8,
-                JkDependencyResolver.of(JkRepo.ofLocal(), JkRepo.ofMavenCentral()));
+                JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral()));
     }
 
     public JkJavaIdeSupport withSourceLayout(JkProjectSourceLayout sourceLayout) {

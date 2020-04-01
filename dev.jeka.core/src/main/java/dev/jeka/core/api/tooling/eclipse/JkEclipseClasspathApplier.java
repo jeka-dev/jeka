@@ -55,7 +55,9 @@ public class JkEclipseClasspathApplier {
 
         javaProject.setSourceLayout(javaProject.getSourceLayout().withSources(sources).withResources(resources)
                 .withTests(testSources).withTestResources(testResources));
-        javaProject.removeDependencies().addDependencies(dependencies);
+        javaProject.getDependencyManagement()
+                .removeDependencies()
+                .addDependencies(dependencies);
     }
 
     private ScopeResolver scopeResolver(Path baseDir) {

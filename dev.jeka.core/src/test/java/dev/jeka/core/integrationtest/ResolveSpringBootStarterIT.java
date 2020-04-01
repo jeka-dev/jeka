@@ -40,9 +40,10 @@ public class ResolveSpringBootStarterIT {
     }
 
     private JkDependencyResolver resolver() {
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
         final JkScopeMapping mapping = JkScopeMapping.of("compile").to("compile");
-        resolver = resolver.withParams(resolver.getParams().withScopeMapping(mapping));
-        return resolver;
+        return JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral())
+                .getParams()
+                    .setScopeMapping(mapping).__;
     }
 }

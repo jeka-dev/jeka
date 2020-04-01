@@ -32,11 +32,12 @@ public class MavenCentralJarBuild extends JkCommandSet {
                 .andGitHubDeveloper("John Doe", "johndoe6591@gmail.com");
         
         javaPlugin.getProject()
-                .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
-                .addDependencies(deps);
-
-        javaPlugin.getProject().getMaker().getSteps().getPublishing()
-                .setMavenPublicationInfo(info);
+            .getDependencyManagement()
+                .addDependencies(deps).__
+            .getMaker().getSteps()
+                .getPublishing()
+                    .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
+                    .setMavenPublicationInfo(info);
     }
    
 }

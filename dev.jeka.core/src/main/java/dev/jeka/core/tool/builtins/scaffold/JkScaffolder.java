@@ -136,7 +136,8 @@ public final class JkScaffolder {
     }
 
     private String jekaVersion(JkDependencyResolver dependencyResolver) {
-        final List<String> versions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID)).stream()
+        List<String> allVersions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID));
+        final List<String> versions = allVersions.stream()
                 .filter(version -> version.endsWith(".RELEASE"))
                 .collect(Collectors.toList());
         if (versions.isEmpty()) {

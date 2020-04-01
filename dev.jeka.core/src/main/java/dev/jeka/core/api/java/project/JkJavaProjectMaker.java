@@ -1,16 +1,21 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkArtifactProducer;
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Mainly an artifact producer for a Java project. It embeds also methods for publishing produced artifacts. <p>
@@ -37,10 +42,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     private final Map<Set<JkScope>, JkPathSequence> dependencyCache = new HashMap<>();
 
     private JkProjectOutLayout outLayout;
-
-    private JkDependencyResolver dependencyResolver;
-
-    private boolean failOnDependencyResolutionError = true;
 
     private final JkSteps steps;
 
@@ -78,15 +79,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
-    /**
-     * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise
-     * just log a warn message. <code>false</code> by default.
-     */
-    public JkJavaProjectMaker setFailOnDependencyResolutionError(boolean fail) {
-        this.failOnDependencyResolutionError = fail;
-        return this;
-    }
-
     // artifact definition -----------------------------------------------------------
 
     /**
@@ -99,6 +91,14 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      */
     public JkJavaProjectMaker putArtifact(JkArtifactId artifactId, Runnable runnable) {
         artifactRunnables.put(artifactId, runnable);
+        return this;
+    }
+
+    /**
+     * Shorthand for <code>putArtifact(this.getMainArtifact, runnable)</code>.
+     */
+    public JkJavaProjectMaker setMainArtifact(Runnable runnable) {
+        artifactRunnables.put(getMainArtifactId(), runnable);
         return this;
     }
 
@@ -177,77 +177,17 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     // Dependency management -----------------------------------------------------------
 
-    /**
-     * Returns lib paths standing for the resolution of this project dependencies for the specified dependency scopes.
-     */
-    public JkPathSequence fetchDependenciesFor(JkScope... scopes) {
-        final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
-        return dependencyCache.computeIfAbsent(scopeSet,
-                scopes1 -> {
-                    JkResolveResult resolveResult =
-                            getDependencyResolver().resolve(getScopeDefaultedDependencies(), scopes);
-                    JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
-                    if (report.hasErrors()) {
-                        if (failOnDependencyResolutionError) {
-                            throw new JkException(report.toString());
-                        }
-                        JkLog.warn(report.toString());
-                    }
-                    return resolveResult.getFiles();
-                });
-    }
-
-    /**
-     * Returns dependencies declared for this project. Dependencies declared without specifying
-     * scope are defaulted to scope {@link JkJavaDepScopes#COMPILE_AND_RUNTIME}
-     */
-    public JkDependencySet getScopeDefaultedDependencies() {
-        return project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME);
-    }
-
-    public JkDependencyResolver getDependencyResolver() {
-        if (dependencyResolver == null) {
-            dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral())
-                    .withParams(JkResolutionParameters.of(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING))
-                    .withBasedir(getBaseDir());
-        }
-        return dependencyResolver;
-    }
-
-    public JkJavaProjectMaker setDependencyResolver(JkDependencyResolver dependencyResolver) {
-        this.dependencyResolver = dependencyResolver.withBasedir(project.getBaseDir());
-        return this;
-    }
-
-    /**
-     * Shorthand to add a download repository to this project maker.
-     */
-    public JkJavaProjectMaker addDownloadRepo(JkRepo repo) {
-        this.dependencyResolver = this.getDependencyResolver().andRepos(repo.toSet());
-        return this;
-    }
-
-    public JkJavaProjectMaker setDownloadRepos(JkRepoSet repos) {
-        this.dependencyResolver = this.getDependencyResolver().withRepos(repos);
-        return this;
-    }
 
     @Override
     public JkPathSequence fetchRuntimeDependencies(JkArtifactId artifactFileId) {
+        JkJavaProject.JkDependencyManagement dm = project.getDependencyManagement();
         if (artifactFileId.equals(getMainArtifactId())) {
-            return this.getDependencyResolver().resolve(
-                    this.project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME).getFiles();
+            return dm.fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles();
         } else if (artifactFileId.isClassifier("test") && artifactFileId.isExtension("jar")) {
-            return this.getDependencyResolver().resolve(
-                    this.project.getDependencies().withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST).getFiles();
+            return dm.fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles();
         } else {
             return JkPathSequence.of();
         }
-    }
-
-    JkJavaProjectMaker cleanDependencyCache() {
-        dependencyCache.clear();
-        return this;
     }
 
     // Clean -----------------------------------------------

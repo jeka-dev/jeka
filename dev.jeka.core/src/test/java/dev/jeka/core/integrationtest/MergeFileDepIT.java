@@ -31,9 +31,11 @@ public class MergeFileDepIT {
                 .andFile(dep1File, TEST)
                 .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE)
                 .andFile(dep2File, COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
-                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
-                .withModuleHolder(holder);
+        JkDependencyResolver resolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral())
+                .setModuleHolder(holder)
+                .getParams()
+                    .setScopeMapping(DEFAULT_SCOPE_MAPPING).__;
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
         System.out.println(tree.toStringTree());

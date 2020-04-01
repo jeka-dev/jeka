@@ -81,7 +81,7 @@ public class JkJavaProjectMakerTestingStep {
     public JkClasspath getTestClasspath() {
         return JkClasspath.of(maker.getOutLayout().getTestClassDir())
                 .and(maker.getOutLayout().getClassDir())
-                .and(maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST));
+                .and(maker.project.getDependencyManagement().fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
     }
 
     /**

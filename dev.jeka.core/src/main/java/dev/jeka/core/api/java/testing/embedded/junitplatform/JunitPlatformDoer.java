@@ -39,7 +39,7 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
 
         // creating launcher
         LauncherConfig.Builder launcherBuilder = LauncherConfig.builder();
-        JkUnaryOperator<LauncherConfig.Builder> launcherEnhancer = engineBehavior.getLauncherEnhancer();
+        JkUnaryOperator<LauncherConfig.Builder> launcherEnhancer = engineBehavior.getLauncherConfigurer();
         launcherBuilder = launcherEnhancer == null ? launcherBuilder : launcherEnhancer.apply(launcherBuilder);
         LauncherConfig launcherConfig = launcherBuilder.build();
         Launcher launcher = LauncherFactory.create(launcherConfig);

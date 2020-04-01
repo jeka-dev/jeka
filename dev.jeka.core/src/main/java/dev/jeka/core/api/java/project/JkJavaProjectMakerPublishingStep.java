@@ -101,7 +101,7 @@ public class JkJavaProjectMakerPublishingStep {
         JkMavenPublication publication = JkMavenPublication.of(maker, Collections.emptySet())
                 .with(mavenPublicationInfo).withSigner(signer);
         JkPublisher.of(repos, maker.getOutLayout().getOutputPath()).withSigner(this.signer)
-                .publishMaven(versionedModule, publication, maker.getScopeDefaultedDependencies());
+                .publishMaven(versionedModule, publication, maker.project.getDependencyManagement().getScopeDefaultedDependencies());
     }
 
     private void publishIvy(JkRepoSet repos) {
@@ -111,13 +111,13 @@ public class JkJavaProjectMakerPublishingStep {
         JkException.throwIf(versionedModule == null, "No versionedModule has been set on "
                 + maker.project + ". Can't publish.");
         JkLog.startTask("Preparing Ivy publication");
-        final JkDependencySet dependencies = maker.getScopeDefaultedDependencies();
+        final JkDependencySet dependencies = maker.project.getDependencyManagement().getScopeDefaultedDependencies();
         final JkIvyPublication publication = JkIvyPublication.of(maker.getMainArtifactPath(), JkJavaDepScopes.COMPILE.getName())
                 .andOptional(maker.getArtifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES.getName())
                 .andOptional(maker.getArtifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC.getName())
                 .andOptional(maker.getArtifactPath(TEST_ARTIFACT_ID), JkJavaDepScopes.TEST.getName())
                 .andOptional(maker.getArtifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES.getName());
-        final JkVersionProvider resolvedVersions = maker.getDependencyResolver()
+        final JkVersionProvider resolvedVersions = maker.project.getDependencyManagement().getResolver()
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
         JkLog.endTask();
         JkPublisher.of(repos, maker.getOutLayout().getOutputPath())

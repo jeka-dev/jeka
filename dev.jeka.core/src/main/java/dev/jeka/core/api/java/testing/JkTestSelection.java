@@ -11,7 +11,10 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * Mutable object to specify a set of test to run according class root dirs, file patterns and tags.
+ * Mutable object to specify a set of test to run according class root dirs, file patterns and tags.<p>
+ *
+ * By default, when no include/exclude pattern/tag are specified, the selector get all classes
+ * under defined class root dirs.
  */
 public final class JkTestSelection<T> implements Serializable {
 
@@ -44,7 +47,7 @@ public final class JkTestSelection<T> implements Serializable {
 
     /**
      * Creates an empty <i>testSet</t>
-     * The created instance does not include any include filter nor class rot dirs
+     * The created instance does not include any include filter nor class root dirs
      * so no test will be included out of the box.
      */
     public static JkTestSelection<Void> of() {

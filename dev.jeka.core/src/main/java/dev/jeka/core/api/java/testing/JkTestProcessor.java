@@ -210,7 +210,7 @@ public final class JkTestProcessor<T> {
 
         private JkProgressOutputStyle progressDisplayer;
 
-        private JkUnaryOperator<LauncherConfig.Builder> launcherEnhancer;
+        private JkUnaryOperator<LauncherConfig.Builder> launcherConfigurer;
 
         public final transient JkTestProcessor<T> __;
 
@@ -226,8 +226,8 @@ public final class JkTestProcessor<T> {
             return progressDisplayer;
         }
 
-        public JkUnaryOperator<LauncherConfig.Builder> getLauncherEnhancer() {
-            return launcherEnhancer;
+        public JkUnaryOperator<LauncherConfig.Builder> getLauncherConfigurer() {
+            return launcherConfigurer;
         }
 
         /**
@@ -251,11 +251,11 @@ public final class JkTestProcessor<T> {
         /**
          * Lets to setup the Junit-platform native {@link LauncherConfig} used to build
          * the {@link org.junit.platform.launcher.Launcher}.
-         * @param launcherEnhancer a function that takes the default {@link LauncherConfig} as argument
+         * @param launcherConfigurer a function that takes the default {@link LauncherConfig} as argument
          *                          and returns the config to use.
          */
-        public JkEngineBehavior<T> setLauncherEnhancer(JkUnaryOperator<LauncherConfig.Builder> launcherEnhancer) {
-            this.launcherEnhancer = launcherEnhancer;
+        public JkEngineBehavior<T> setLauncherConfigurer(JkUnaryOperator<LauncherConfig.Builder> launcherConfigurer) {
+            this.launcherConfigurer = launcherConfigurer;
             return this;
         }
 

@@ -40,7 +40,8 @@ public class JkJavaProjectMakerDocumentationStep {
      */
     public void run() {
         final JkJavaProject project = maker.project;
-        Iterable<Path> classpath = maker.fetchDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
+        Iterable<Path> classpath = project.getDependencyManagement()
+                .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = maker.getOutLayout().getJavadocDir();
         javadocMaker.make(classpath, project.getSourceLayout().getSources(), dir);
     }

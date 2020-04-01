@@ -29,7 +29,7 @@ public class HttpClientTaskBuild extends JkCommandSet {
     
     @Override
     protected void setup() {
-        javaPlugin.getProject().addDependencies(dependencies());
+        javaPlugin.getProject().getDependencyManagement().addDependencies(dependencies());
     }
 
 
