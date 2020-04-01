@@ -263,9 +263,9 @@ public class JkJavaProjectMakerCompilationStep<T> {
                 .setClasspath(maker.project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles())
                 .addSources(maker.project.getSourceLayout().getSources()
-                        .and(maker.getOutLayout().getGeneratedSourceDir()))
+                        .and(maker.project.getOutLayout().getGeneratedSourceDir()))
                 .addOptions(compileOptions)
-                .setOutputDir(maker.getOutLayout().getClassDir());
+                .setOutputDir(maker.project.getOutLayout().getClassDir());
     }
 
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectMakerCompilationStep prodStep) {
@@ -275,10 +275,10 @@ public class JkJavaProjectMakerCompilationStep<T> {
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
                 .setClasspath(maker.project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles()
-                            .andPrepend(maker.getOutLayout().getClassDir()))
+                            .andPrepend(maker.project.getOutLayout().getClassDir()))
                 .addSources(maker.project.getSourceLayout().getTests())
                 .addOptions(compileOptions)
-                .setOutputDir(maker.getOutLayout().getTestClassDir());
+                .setOutputDir(maker.project.getOutLayout().getTestClassDir());
     }
 
 }

@@ -2,20 +2,16 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkArtifactId;
 import dev.jeka.core.api.depmanagement.JkArtifactProducer;
+import dev.jeka.core.api.depmanagement.JkDependencyManagement;
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Mainly an artifact producer for a Java project. It embeds also methods for publishing produced artifacts. <p>
@@ -39,20 +35,11 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private final Map<JkArtifactId, Runnable> artifactRunnables = new LinkedHashMap<>();
 
-    private final Map<Set<JkScope>, JkPathSequence> dependencyCache = new HashMap<>();
-
-    private JkProjectOutLayout outLayout;
-
     private final JkSteps steps;
-
-    private final JkRunnables outputCleaner;
 
     JkJavaProjectMaker(JkJavaProject project) {
         this.project = project;
-        outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(project.getBaseDir().resolve(
-                JkConstants.OUTPUT_PATH));
-        outputCleaner = JkRunnables.of(
-                () -> JkPathTree.of(getOutLayout().getOutputPath()).deleteContent());
+
         this.steps = new JkSteps();
         this.steps.init(this);
 
@@ -66,18 +53,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this.project.getBaseDir();
     }
 
-    public JkProjectOutLayout getOutLayout() {
-        return outLayout;
-    }
-
-    public JkJavaProjectMaker setOutLayout(JkProjectOutLayout outLayout) {
-        if (outLayout.getOutputPath().isAbsolute()) {
-            this.outLayout = outLayout;
-        } else {
-            this.outLayout = outLayout.withOutputDir(getBaseDir().resolve(outLayout.getOutputPath()));
-        }
-        return this;
-    }
 
     // artifact definition -----------------------------------------------------------
 
@@ -180,7 +155,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     @Override
     public JkPathSequence fetchRuntimeDependencies(JkArtifactId artifactFileId) {
-        JkJavaProject.JkDependencyManagement dm = project.getDependencyManagement();
+        JkDependencyManagement dm = project.getDependencyManagement();
         if (artifactFileId.equals(getMainArtifactId())) {
             return dm.fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles();
         } else if (artifactFileId.isClassifier("test") && artifactFileId.isExtension("jar")) {
@@ -193,21 +168,12 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     // Clean -----------------------------------------------
 
     /**
-     * Holds runnables executed while {@link #clean()} method is invoked. Add your own runnable if you want to
-     * improve the <code>clean</code> method.
-     */
-    public JkRunnables getOutputCleaner() {
-        return outputCleaner;
-    }
-
-    /**
      * Deletes project build outputs.
      */
-    public JkJavaProjectMaker clean() {
+    public JkJavaProjectMaker reset() {
         steps.compilation.reset();
         steps.testing.reset();
         steps.documentation.reset();
-        outputCleaner.run();
         return this;
     }
 

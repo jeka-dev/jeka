@@ -67,7 +67,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
         if (Files.exists(path)) {
             this.project.getDependencyManagement().addDependencies(JkDependencySet.ofTextDescription(path));
         }
-        this.project.getMaker().getOutputCleaner().set(() -> run.clean());
     }
 
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
@@ -145,7 +144,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
      * Cleans the output directory for the project
      */
     public JkPluginJava clean() {
-        this.project.getMaker().clean();
+        this.project.getMaker().reset();
         return this;
     }
 
@@ -160,7 +159,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
     }
 
     public JkPathTree ouputTree() {
-        return JkPathTree.of(this.getProject().getMaker().getOutLayout().getOutputPath());
+        return JkPathTree.of(this.getProject().getOutLayout().getOutputPath());
     }
 
     public JkPluginRepo getRepoPlugin() {

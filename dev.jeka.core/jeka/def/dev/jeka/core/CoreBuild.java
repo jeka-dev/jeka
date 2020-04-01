@@ -122,12 +122,12 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private Path distribFolder() {
-        return javaPlugin.getProject().getMaker().getOutLayout().getOutputPath().resolve("distrib");
+        return javaPlugin.getProject().getOutLayout().getOutputPath().resolve("distrib");
     }
 
     public void publishDocsOnGithubPage() {
         JkJavaProject project = javaPlugin.getProject();
-        Path javadocSourceDir = project.getMaker().getOutLayout().getJavadocDir();
+        Path javadocSourceDir = project.getOutLayout().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
         git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
@@ -215,8 +215,8 @@ public class CoreBuild extends JkCommandSet {
 
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
-        Path embeddedJar = maker.getOutLayout().getOutputPath().resolve("embedded.jar");
-        JkPathTree classTree = JkPathTree.of(maker.getOutLayout().getClassDir());
+        Path embeddedJar = javaPlugin.getProject().getOutLayout().getOutputPath().resolve("embedded.jar");
+        JkPathTree classTree = JkPathTree.of(javaPlugin.getProject().getOutLayout().getClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
                 .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
@@ -246,7 +246,7 @@ public class CoreBuild extends JkCommandSet {
     private void doWrapper() {
         JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
         Path wrapperJar = maker.getArtifactPath(WRAPPER_ARTIFACT_ID);
-        JkPathTree.of(maker.getOutLayout().getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
+        JkPathTree.of(javaPlugin.getProject().getOutLayout().getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void cleanPack() {

@@ -100,7 +100,7 @@ public class JkJavaProjectMakerPublishingStep {
                 + project + ". Can't publish.");
         JkMavenPublication publication = JkMavenPublication.of(maker, Collections.emptySet())
                 .with(mavenPublicationInfo).withSigner(signer);
-        JkPublisher.of(repos, maker.getOutLayout().getOutputPath()).withSigner(this.signer)
+        JkPublisher.of(repos, maker.project.getOutLayout().getOutputPath()).withSigner(this.signer)
                 .publishMaven(versionedModule, publication, maker.project.getDependencyManagement().getScopeDefaultedDependencies());
     }
 
@@ -120,7 +120,7 @@ public class JkJavaProjectMakerPublishingStep {
         final JkVersionProvider resolvedVersions = maker.project.getDependencyManagement().getResolver()
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
         JkLog.endTask();
-        JkPublisher.of(repos, maker.getOutLayout().getOutputPath())
+        JkPublisher.of(repos, maker.project.getOutLayout().getOutputPath())
                 .publishIvy(versionedModule, publication, dependencies,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }

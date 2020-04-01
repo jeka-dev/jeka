@@ -86,7 +86,7 @@ public class JkJavaProjectMakerPackagingStep {
         final String namePart = artifactFileNameSupplier.get();
         final String classifier = artifactId.getClassifier() == null ? "" : "-" + artifactId.getClassifier();
         final String extension = artifactId.getExtension() == null ? "" : "." + artifactId.getExtension();
-        return maker.getOutLayout().getOutputPath().resolve(namePart + classifier + extension);
+        return maker.project.getOutLayout().getOutputPath().resolve(namePart + classifier + extension);
     }
 
     public Supplier<String> getArtifactFileNameSupplier() {
@@ -96,7 +96,7 @@ public class JkJavaProjectMakerPackagingStep {
     public void createBinJar(Path target) {
         maker.getSteps().getCompilation().runIfNecessary();
         maker.getSteps().getTesting().runIfNecessary();
-        JkJarPacker.of(maker.getOutLayout().getClassDir())
+        JkJarPacker.of(maker.project.getOutLayout().getClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeJar(target);
@@ -107,19 +107,19 @@ public class JkJavaProjectMakerPackagingStep {
         maker.getSteps().getCompilation().runIfNecessary();
         maker.getSteps().getTesting().runIfNecessary();
         JkClasspath classpath = JkClasspath.of(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
-        JkJarPacker.of( maker.getOutLayout().getClassDir())
+        JkJarPacker.of( maker.project.getOutLayout().getClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath, this.fatJarFilter);
     }
 
     public void createSourceJar(Path target) {
-        maker.project.getSourceLayout().getSources().and(maker.getOutLayout().getGeneratedSourceDir()).zipTo(target);
+        maker.project.getSourceLayout().getSources().and(maker.project.getOutLayout().getGeneratedSourceDir()).zipTo(target);
     }
 
     void createJavadocJar(Path target) {
         maker.getSteps().getDocumentation().runIfNecessary();
-        Path javadocDir = maker.getOutLayout().getJavadocDir();
+        Path javadocDir = maker.project.getOutLayout().getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
                     + ". Can't create a javadoc jar until javadoc files has been generated.");
@@ -130,7 +130,7 @@ public class JkJavaProjectMakerPackagingStep {
     public void createTestJar(Path target) {
         maker.getSteps().getCompilation().runIfNecessary();
         maker.getSteps().getTesting().runIfNecessary();
-        JkJarPacker.of(maker.getOutLayout().getTestClassDir())
+        JkJarPacker.of(maker.project.getOutLayout().getTestClassDir())
                 .withManifest(manifest)
                 .makeJar(target);
     }

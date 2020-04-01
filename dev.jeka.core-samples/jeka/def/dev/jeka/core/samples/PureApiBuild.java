@@ -18,7 +18,7 @@ public class PureApiBuild extends JkCommandSet {
         javaProject.getMaker().setOutLayout(javaProject.getMaker().getOutLayout().withOutputDir("build/output/alt-output"));
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
         javaProject.getDependencyManagement().addDependencies(deps);
-        javaProject.getMaker().clean();
+        javaProject.getMaker().reset();
         javaProject.getMaker().makeAllArtifacts();
     }
 
@@ -45,7 +45,7 @@ public class PureApiBuild extends JkCommandSet {
                 .and(fooProject)
         );
         barProject.getMaker().defineMainArtifactAsFatJar(true); // Produced jar will embed dependencies
-        barProject.getMaker().clean().makeAllArtifacts();  // Creates Bar jar along Foo jar (if not already built)
+        barProject.getMaker().reset().makeAllArtifacts();  // Creates Bar jar along Foo jar (if not already built)
     }
 
     public static void main(String[] args) {

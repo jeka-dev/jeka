@@ -59,7 +59,7 @@ public class JkPluginWar extends JkPlugin {
         if (Files.exists(staticResouceDir)) {
             JkPathTree.of(staticResouceDir).copyTo(root.getRoot());
         }
-        JkPathTree.of(project.getMaker().getOutLayout().getClassDir()).copyTo(root.get("classes"));
+        JkPathTree.of(project.getOutLayout().getClassDir()).copyTo(root.get("classes"));
         JkResolveResult resolveResult = project.getDependencyManagement().fetchDependencies(JkJavaDepScopes.RUNTIME);
         JkPathTree lib = root.goTo("lib");
         resolveResult.getFiles().withoutDuplicates().getEntries().forEach(path ->  lib.importFiles(path));

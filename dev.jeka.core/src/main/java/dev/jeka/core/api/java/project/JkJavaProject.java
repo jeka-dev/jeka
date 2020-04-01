@@ -1,13 +1,12 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkArtifactProducer;
+import dev.jeka.core.api.depmanagement.JkDependencyManagement;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
-import dev.jeka.core.api.system.JkException;
-import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -39,14 +38,17 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     private JkProjectSourceLayout sourceLayout;
 
+    private JkProjectOutLayout outLayout;
+
     private final JkJavaProjectMaker maker;
 
     private final JkDependencyManagement<JkJavaProject> dependencyManagement;
 
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
-        this.maker = new JkJavaProjectMaker(this);
-        this.dependencyManagement = JkDependencyManagement.of(this);
+        outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(getBaseDir().resolve(JkConstants.OUTPUT_PATH));
+        maker = new JkJavaProjectMaker(this);
+        dependencyManagement = JkDependencyManagement.of(this);
     }
 
     public static JkJavaProject of(JkProjectSourceLayout layout) {
@@ -81,12 +83,25 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return sourceLayout;
     }
 
+    public JkProjectOutLayout getOutLayout() {
+        return outLayout;
+    }
+
     public JkJavaProjectMaker getMaker() {
         return maker;
     }
 
     public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
+        return this;
+    }
+
+    public JkJavaProject setOutLayout(JkProjectOutLayout outLayout) {
+        if (outLayout.getOutputPath().isAbsolute()) {
+            this.outLayout = outLayout;
+        } else {
+            this.outLayout = outLayout.withOutputDir(getBaseDir().resolve(outLayout.getOutputPath()));
+        }
         return this;
     }
 
@@ -124,99 +139,9 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
     public JkJavaIdeSupport getJavaIdeSupport() {
         return JkJavaIdeSupport.ofDefault()
                 .withDependencies(this.dependencyManagement.getDependencies())
-                .withDependencyResolver(this.dependencyManagement.resolver)
+                .withDependencyResolver(this.dependencyManagement.getResolver())
                 .withSourceLayout(this.sourceLayout)
                 .withSourceVersion(this.maker.getSteps().getCompilation().getComputedCompileSpec().getSourceVersion());
     }
 
-    public static class JkDependencyManagement<T> {
-
-        private final Map<Set<JkScope>, JkResolveResult> dependencyCache = new HashMap<>();
-
-        private final JkDependencyResolver<JkDependencyManagement> resolver;
-
-        private boolean failOnDependencyResolutionError = true;
-
-        /**
-         * For parent chaining
-         */
-        public final T __;
-
-        private JkDependencySet dependencies = JkDependencySet.of();
-
-        private JkDependencyManagement(T __) {
-            this.__ = __;
-            resolver = JkDependencyResolver.of(this);
-            resolver.addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
-        }
-
-        private static <T> JkDependencyManagement<T> of(T parent) {
-           return new JkDependencyManagement(parent);
-        }
-
-        public JkDependencySet getDependencies() {
-            return this.dependencies;
-        }
-
-        public JkDependencyManagement<T> removeDependencies() {
-            dependencyCache.clear();
-            this.dependencies = JkDependencySet.of();
-            return this;
-        }
-
-        public JkDependencyManagement<T> addDependencies(JkDependencySet dependencies) {
-            dependencyCache.clear();;
-            this.dependencies = this.dependencies.and(dependencies);
-            return this;
-        }
-
-        public JkDependencyResolver<JkDependencyManagement> getResolver() {
-            return resolver;
-        }
-
-        /**
-         * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise
-         * just log a warn message. <code>false</code> by default.
-         */
-        public JkDependencyManagement<T> setFailOnDependencyResolutionError(boolean fail) {
-            this.failOnDependencyResolutionError = fail;
-            return this;
-        }
-
-        // ------------
-
-        public JkDependencyManagement<T> cleanCache() {
-            dependencyCache.clear();
-            return this;
-        }
-
-        /**
-         * Returns dependencies declared for this project. Dependencies declared without specifying
-         * scope are defaulted to scope {@link JkJavaDepScopes#COMPILE_AND_RUNTIME}
-         */
-        public JkDependencySet getScopeDefaultedDependencies() {
-            return dependencies.withDefaultScopes(JkJavaDepScopes.COMPILE_AND_RUNTIME);
-        }
-
-        /**
-         * Returns lib paths standing for the resolution of this project dependencies for the specified dependency scopes.
-         */
-        public JkResolveResult fetchDependencies(JkScope... scopes) {
-            final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
-            return dependencyCache.computeIfAbsent(scopeSet,
-                    scopes1 -> {
-                        JkResolveResult resolveResult =
-                                resolver.resolve(getScopeDefaultedDependencies(), scopes);
-                        JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
-                        if (report.hasErrors()) {
-                            if (failOnDependencyResolutionError) {
-                                throw new JkException(report.toString());
-                            }
-                            JkLog.warn(report.toString());
-                        }
-                        return resolveResult;
-                    });
-        }
-
-    }
 }

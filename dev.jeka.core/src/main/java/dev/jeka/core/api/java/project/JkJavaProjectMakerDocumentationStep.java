@@ -42,12 +42,12 @@ public class JkJavaProjectMakerDocumentationStep {
         final JkJavaProject project = maker.project;
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles();
-        Path dir = maker.getOutLayout().getJavadocDir();
+        Path dir = project.getOutLayout().getJavadocDir();
         javadocMaker.make(classpath, project.getSourceLayout().getSources(), dir);
     }
 
     public void runIfNecessary() {
-        if (done && !Files.exists(maker.getOutLayout().getJavadocDir())) {
+        if (done && !Files.exists(maker.project.getOutLayout().getJavadocDir())) {
             JkLog.info("Javadoc already generated. Won't perfom again");
         } else {
             run();

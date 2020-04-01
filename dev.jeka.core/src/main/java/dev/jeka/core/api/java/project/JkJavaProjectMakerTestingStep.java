@@ -79,8 +79,8 @@ public class JkJavaProjectMakerTestingStep {
      * dependencies involved in TEST scope.
      */
     public JkClasspath getTestClasspath() {
-        return JkClasspath.of(maker.getOutLayout().getTestClassDir())
-                .and(maker.getOutLayout().getClassDir())
+        return JkClasspath.of(maker.project.getOutLayout().getTestClassDir())
+                .and(maker.project.getOutLayout().getClassDir())
                 .and(maker.project.getDependencyManagement().fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
     }
 
@@ -156,7 +156,7 @@ public class JkJavaProjectMakerTestingStep {
 
     private JkTestProcessor<JkJavaProjectMakerTestingStep> defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.of(this);
-        final Path reportDir = maker.getOutLayout().getTestReportDir().resolve("junit");
+        final Path reportDir = maker.project.getOutLayout().getTestReportDir().resolve("junit");
         result.getEngineBehavior()
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
@@ -164,7 +164,7 @@ public class JkJavaProjectMakerTestingStep {
     }
 
     private JkTestSelection<JkJavaProjectMakerTestingStep> defaultTestSelection() {
-        return JkTestSelection.of(this).addTestClassRoots(maker.getOutLayout().getTestClassDir());
+        return JkTestSelection.of(this).addTestClassRoots(maker.project.getOutLayout().getTestClassDir());
     }
 
 

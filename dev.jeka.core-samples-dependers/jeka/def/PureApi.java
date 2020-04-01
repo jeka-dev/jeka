@@ -24,8 +24,8 @@ public class PureApi {
                 .getPublishing()
                     .setVersionedModule("mygroup:depender", "1.0-SNAPSHOT");
 
-        coreProject.getMaker().clean();
-        dependerProject.getMaker().clean().makeAllArtifacts();
+        coreProject.getMaker().reset();
+        dependerProject.getMaker().reset().makeAllArtifacts();
         dependerProject.getMaker().getSteps().getPublishing().publish();
     }
 }
