@@ -42,11 +42,11 @@ public final class JkJavadocProcessor<T> {
     /**
      * For parent chaining
      */
-    public final T _;
+    public final T __;
 
 
     private JkJavadocProcessor(T parent) {
-        this._ = parent;
+        this.__ = parent;
         displayOutput = JkLog.isVerbose();
     }
 

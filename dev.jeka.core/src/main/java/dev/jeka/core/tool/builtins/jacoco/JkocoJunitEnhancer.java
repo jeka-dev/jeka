@@ -58,7 +58,7 @@ public final class JkocoJunitEnhancer {
             return;
         }
         JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(), JkJavaProcess.of());
-        process = process.andAgent(destFile, options());
+        process = process.andAgent(agent, options());
         testProcessor.setForkingProcess(process);
         testProcessor.getPostActions().append(new Reporter());
     }

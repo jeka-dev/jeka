@@ -32,7 +32,7 @@ public class JkJavaProjectMakerCompilationStep<T> {
     /**
      * For parent chaining
      */
-    public final T _;
+    public final T __;
 
     private final JkJavaProjectMaker maker;
 
@@ -66,7 +66,7 @@ public class JkJavaProjectMakerCompilationStep<T> {
 
     private JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker, String scope, T parent) {
         this.maker = maker;
-        _ = parent;
+        __ = parent;
         this.scope = scope;
         beforeGenerate = JkRunnables.noOp(this);
         afterGenerate = JkRunnables.noOp(this);

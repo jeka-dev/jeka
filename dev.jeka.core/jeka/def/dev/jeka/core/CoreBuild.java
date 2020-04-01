@@ -89,23 +89,24 @@ public class CoreBuild extends JkCommandSet {
                 .addOptions("-Xlint:none","-g")
                 .setJavaVersion(JkJavaVersion.V8)
                 .getCompiler()
-                    .setForkingWithJavac()._._
+                    .setForkingWithJavac().__.__
             .getTesting()
                 .getCompilation()
                     .getCompiler()
-                        .setDefault()._._
+                        .setDefault().__.__
                 .getTestProcessor()
                     .setForkingProcess(true)
                     .getEngineBehavior()
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.FULL)._._
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
                 .getTestSelection()
-                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)._._
+                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
             .getPackaging()
                 .getManifest()
-                    .addMainClass("dev.jeka.core.tool.Main")._._
+                    .addMainClass("dev.jeka.core.tool.Main").__.__
             .getDocumentation()
                 .getJavadocProcessor()
-                    .addOptions("-notimestamp")._._
+                    .setDisplayOutput(true)
+                    .addOptions("-notimestamp").__.__
             .getPublishing()
                 .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
                 .setMavenPublicationInfo(mavenPublication())

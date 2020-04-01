@@ -39,11 +39,11 @@ public class JkJavaProjectMakerTestingStep {
     /**
      * For parent chaining
      */
-    public final JkJavaProjectMaker.JkSteps _;
+    public final JkJavaProjectMaker.JkSteps __;
 
     JkJavaProjectMakerTestingStep(JkJavaProjectMaker maker) {
         this.maker = maker;
-        this._ = maker.getSteps();
+        this.__ = maker.getSteps();
         compilation = JkJavaProjectMakerCompilationStep.ofTest(maker, this);
         afterTest = JkRunnables.noOp(this);
         testProcessor = defaultTestProcessor();

@@ -34,10 +34,10 @@ public final class JkResourceProcessor<T> {
     /**
      * For parent chaining
      */
-    public final T _;
+    public final T __;
 
     private JkResourceProcessor(T parent) {
-        this._ = parent;
+        this.__ = parent;
     }
 
     /**

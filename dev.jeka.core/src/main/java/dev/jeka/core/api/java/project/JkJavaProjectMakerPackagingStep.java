@@ -34,11 +34,11 @@ public class JkJavaProjectMakerPackagingStep {
     /**
      * For Parent chaining
      */
-    public JkJavaProjectMaker.JkSteps _;
+    public JkJavaProjectMaker.JkSteps __;
 
     private JkJavaProjectMakerPackagingStep(JkJavaProjectMaker maker) {
         this.maker = maker;
-        this._ = maker.getSteps();
+        this.__ = maker.getSteps();
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
     }
 

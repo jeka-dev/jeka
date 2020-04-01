@@ -18,11 +18,11 @@ public class JkJavaProjectMakerDocumentationStep {
     /**
      * For parent chaining
      */
-    public final JkJavaProjectMaker.JkSteps _;
+    public final JkJavaProjectMaker.JkSteps __;
 
     private JkJavaProjectMakerDocumentationStep(JkJavaProjectMaker maker) {
         this.maker = maker;
-        this._ = maker.getSteps();
+        this.__ = maker.getSteps();
     }
 
     static JkJavaProjectMakerDocumentationStep of(JkJavaProjectMaker maker) {

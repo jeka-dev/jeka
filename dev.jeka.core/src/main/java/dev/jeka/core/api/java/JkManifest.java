@@ -66,10 +66,10 @@ public final class JkManifest<T> {
     /**
      *  For parent chaining
      */
-    public final T _;
+    public final T __;
 
-    private JkManifest(T _) {
-        this._ = _;
+    private JkManifest(T __) {
+        this.__ = __;
         this.manifest = new Manifest();
         this.manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
     }

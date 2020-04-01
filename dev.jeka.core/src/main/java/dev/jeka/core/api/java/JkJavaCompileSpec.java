@@ -36,10 +36,10 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
     /**
      * Owner for parent chaining
      */
-    public final T _;
+    public final T __;
 
-    private JkJavaCompileSpec(T _) {
-        this._ = _;
+    private JkJavaCompileSpec(T __) {
+        this.__ = __;
     }
 
     public static JkJavaCompileSpec of() {

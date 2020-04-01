@@ -36,10 +36,10 @@ public final class JkTestSelection<T> implements Serializable {
     /**
      * For parent chaining
      */
-    public final transient T _;
+    public final transient T __;
 
-    private JkTestSelection(T _) {
-        this._ = _;
+    private JkTestSelection(T __) {
+        this.__ = __;
     }
 
     /**

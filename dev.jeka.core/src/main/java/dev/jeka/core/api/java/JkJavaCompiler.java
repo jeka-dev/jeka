@@ -31,11 +31,11 @@ public final class JkJavaCompiler<T> {
     /**
      * Owner for parent chaining
      */
-    public final T _;
+    public final T __;
 
 
-    private JkJavaCompiler(T _) {
-        this._ = _;
+    private JkJavaCompiler(T __) {
+        this.__ = __;
     }
 
     /**

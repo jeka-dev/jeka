@@ -11,7 +11,7 @@ public class JkRunnables<T> implements Runnable {
     /**
      * For parent chaining
      */
-    public final T _;
+    public final T __;
 
     /**
      * Creates a {@link JkRunnables} delegating to the single specified {@link Runnable}.
@@ -43,7 +43,7 @@ public class JkRunnables<T> implements Runnable {
 
     private JkRunnables(T parent, Runnable runnable) {
         this.runnable = runnable;
-        this._ = parent;
+        this.__ = parent;
     }
 
     /**

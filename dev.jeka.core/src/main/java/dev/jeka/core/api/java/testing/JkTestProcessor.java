@@ -70,10 +70,10 @@ public final class JkTestProcessor<T> {
     /**
      * For parent chaining
      */
-    public final transient T _;
+    public final transient T __;
 
-    private JkTestProcessor(T _) {
-        this._ = _;
+    private JkTestProcessor(T __) {
+        this.__ = __;
     }
 
     public static JkTestProcessor<Void> of() {
@@ -212,10 +212,10 @@ public final class JkTestProcessor<T> {
 
         private JkUnaryOperator<LauncherConfig.Builder> launcherEnhancer;
 
-        public final transient JkTestProcessor<T> _;
+        public final transient JkTestProcessor<T> __;
 
-        private JkEngineBehavior(JkTestProcessor<T> _) {
-            this._ = _;
+        private JkEngineBehavior(JkTestProcessor<T> __) {
+            this.__ = __;
         }
 
         public Path getLegacyReportDir() {
