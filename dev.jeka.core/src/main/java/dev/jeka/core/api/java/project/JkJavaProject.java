@@ -135,11 +135,11 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
                 .append(this.sourceLayout.getInfo()).append("\n")
                 .append("Java Source Version : " + steps.getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
                 .append("Source Encoding : " + steps.getCompilation().getComputedCompileSpec().getEncoding() + "\n")
-                .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
-                .append("Download Repositories : " + this.dependencyManagement.getResolver().getRepos() + "\n")
+                .append("Source file count : " + sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
+                .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
                 .append("Publish repositories : " + steps.getPublishing().getPublishRepos()  + "\n")
-                .append("Declared Dependencies : " + this.dependencyManagement.getDependencies().toList().size() + " elements.\n")
-                .append("Defined Artifacts : " + this.get().getArtifactIds())
+                .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
+                .append("Defined Artifacts : " + get().getArtifactIds())
                 .toString();
     }
 
