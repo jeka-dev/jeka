@@ -15,14 +15,12 @@ import java.util.function.Supplier;
  *     <li>All Java sources file (prod + test) are wrote against the same Java version and encoding</li>
  *     <li>JkJavaProject may contain unit tests</li>
  *     <li>It can depends on any accepted dependencies (Maven module, other project, files on fs, ...)</li>
- *
  *     <li>It produces a bin jar, a source jar and a javadoc jar</li>
  *     <li>It can produce any other artifact files (fat-jar, test jar, doc, ...)</li>
- *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, version) in order to be published/reused</li>
+ *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, version) in order to be published/consumed</li>
  *     <li>It can be published on any Maven/Ivy repository, including Maven central</li>
- *
  *     <li>Part of the sources/resources may be generated</li>
- *     <li>By default, passing test suite is required to produce artifact.</li>
+ *     <li>By default, passing test suite is required to produce bin artifacts.</li>
  * </ul>
  *
  * It provides cache mechanism in order compile or unit test phases are executed once when generating
