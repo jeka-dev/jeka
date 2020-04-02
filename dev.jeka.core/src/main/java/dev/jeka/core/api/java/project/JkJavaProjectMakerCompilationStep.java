@@ -34,7 +34,7 @@ public class JkJavaProjectMakerCompilationStep<T> {
      */
     public final T __;
 
-    private final JkJavaProjectMaker maker;
+    private final JkJavaProject project;
 
     private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> beforeGenerate;
 
@@ -64,9 +64,9 @@ public class JkJavaProjectMakerCompilationStep<T> {
 
     private String sourceEncoding;
 
-    private JkJavaProjectMakerCompilationStep(JkJavaProjectMaker maker, String scope, T parent) {
-        this.maker = maker;
+    private JkJavaProjectMakerCompilationStep(JkJavaProject project, String scope, T parent) {
         __ = parent;
+        this.project = project;
         this.scope = scope;
         beforeGenerate = JkRunnables.noOp(this);
         afterGenerate = JkRunnables.noOp(this);
@@ -78,20 +78,20 @@ public class JkJavaProjectMakerCompilationStep<T> {
     }
 
 
-    static JkJavaProjectMakerCompilationStep<JkJavaProjectMaker> ofProd(JkJavaProjectMaker maker) {
+    static JkJavaProjectMakerCompilationStep<JkJavaProjectMaker> ofProd(JkJavaProject project) {
         JkJavaProjectMakerCompilationStep result =
-                new JkJavaProjectMakerCompilationStep(maker, "production code", maker.getSteps());
+                new JkJavaProjectMakerCompilationStep(project, "production code", project.getSteps());
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
-        result.resourceSupplier = () -> maker.project.getSourceLayout().getResources();
+        result.resourceSupplier = () -> project.getSourceLayout().getResources();
         return result;
     }
 
-    static JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> ofTest(JkJavaProjectMaker maker,
+    static JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> ofTest(JkJavaProject project,
                                                                         JkJavaProjectMakerTestingStep parent) {
         JkJavaProjectMakerCompilationStep result =
-                new JkJavaProjectMakerCompilationStep(maker, "test code", parent);
-        result.compileSpecSupplier = () -> result.computeTestCompileSpec(maker.getSteps().getCompilation());
-        result.resourceSupplier = () -> maker.project.getSourceLayout().getTestResources();
+                new JkJavaProjectMakerCompilationStep(project, "test code", parent);
+        result.compileSpecSupplier = () -> result.computeTestCompileSpec(project.getSteps().getCompilation());
+        result.resourceSupplier = () -> project.getSourceLayout().getTestResources();
         return result;
     }
 
@@ -260,12 +260,12 @@ public class JkJavaProjectMakerCompilationStep<T> {
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
                 .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
-                .setClasspath(maker.project.getDependencyManagement()
+                .setClasspath(project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles())
-                .addSources(maker.project.getSourceLayout().getSources()
-                        .and(maker.project.getOutLayout().getGeneratedSourceDir()))
+                .addSources(project.getSourceLayout().getSources()
+                        .and(project.getOutLayout().getGeneratedSourceDir()))
                 .addOptions(compileOptions)
-                .setOutputDir(maker.project.getOutLayout().getClassDir());
+                .setOutputDir(project.getOutLayout().getClassDir());
     }
 
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectMakerCompilationStep prodStep) {
@@ -273,12 +273,12 @@ public class JkJavaProjectMakerCompilationStep<T> {
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
-                .setClasspath(maker.project.getDependencyManagement()
+                .setClasspath(project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles()
-                            .andPrepend(maker.project.getOutLayout().getClassDir()))
-                .addSources(maker.project.getSourceLayout().getTests())
+                            .andPrepend(project.getOutLayout().getClassDir()))
+                .addSources(project.getSourceLayout().getTests())
                 .addOptions(compileOptions)
-                .setOutputDir(maker.project.getOutLayout().getTestClassDir());
+                .setOutputDir(project.getOutLayout().getTestClassDir());
     }
 
 }

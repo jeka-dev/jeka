@@ -21,23 +21,20 @@ public class MavenCentralJarBuild extends JkCommandSet {
 
     @Override
     protected void setup() {
-        JkDependencySet deps = JkDependencySet.of()
-                .and(GUAVA, "18.0")
-                .and(JUNIT, "4.13", TEST);
-        
-        JkMavenPublicationInfo info = JkMavenPublicationInfo
-                .of("my project", "my description", "https://github.com/jerkar/samples")
-                .withScm("https://github.com/jerkar/sample.git")
-                .andApache2License()
-                .andGitHubDeveloper("John Doe", "johndoe6591@gmail.com");
-        
         javaPlugin.getProject()
             .getDependencyManagement()
-                .addDependencies(deps).__
-            .getMaker().getSteps()
+                .addDependencies(JkDependencySet.of()
+                    .and(GUAVA, "18.0")
+                    .and(JUNIT, "4.13", TEST)).__
+            .getSteps()
                 .getPublishing()
                     .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
-                    .setMavenPublicationInfo(info);
+                    .setMavenPublicationInfo(JkMavenPublicationInfo
+                        .of("my project", "my description", "https://github.com/jerkar/jeka/samples")
+                        .withScm("https://github.com/jerkar/sample.git")
+                        .andApache2License()
+                        .andGitHubDeveloper("John Doe", "johndoe6591@gmail.com")
+                    );
     }
    
 }

@@ -20,12 +20,10 @@ public class PureApi {
                 .addDependencies(JkDependencySet.of()
                 .and("com.google.guava:guava:22.0")
                 .and(coreProject)).__;
-        dependerProject.getMaker().getSteps()
+        dependerProject.getSteps()
                 .getPublishing()
                     .setVersionedModule("mygroup:depender", "1.0-SNAPSHOT");
-
-        coreProject.getMaker().reset();
-        dependerProject.getMaker().reset().makeAllArtifacts();
-        dependerProject.getMaker().getSteps().getPublishing().publish();
+        dependerProject.getArtifactProducer().makeAllArtifacts();
+        dependerProject.getSteps().getPublishing().publish();
     }
 }

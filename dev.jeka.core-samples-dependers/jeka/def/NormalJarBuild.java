@@ -32,10 +32,12 @@ public class NormalJarBuild extends JkCommandSet {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().getMaker().defineMainArtifactAsFatJar(true);
-        javaPlugin.getProject().getDependencyManagement()
-            .addDependencies(JkDependencySet.of()
-                .and(sampleBuild.javaPlugin.getProject()));
+        javaPlugin.getProject()
+            .getArtifactProducer()
+                .putMainArtifact(javaPlugin.getProject().getSteps().getPackaging()::createFatJar).__
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and(sampleBuild.javaPlugin.getProject()));
     }
 
     public void cleanPack() {
@@ -44,7 +46,7 @@ public class NormalJarBuild extends JkCommandSet {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(NormalJarBuild.class).javaPlugin.clean().pack();
+        JkInit.instanceOf(NormalJarBuild.class).cleanPack();
     }
 
 }

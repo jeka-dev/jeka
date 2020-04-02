@@ -55,7 +55,7 @@ class Lib {
                 final Path projectDir = parentDir.resolve(lib.projectRelativePath);
                 final JkJavaProject project = JkJavaProject.ofMavenLayout(projectDir);
                 applier.apply(project);
-                result = result.and(project.getMaker(), lib.scope);
+                result = result.and(project.getArtifactProducer(), lib.scope);
             }
         }
         return result;

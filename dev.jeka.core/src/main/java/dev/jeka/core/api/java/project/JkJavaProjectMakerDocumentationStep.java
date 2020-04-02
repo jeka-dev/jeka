@@ -9,7 +9,7 @@ import java.nio.file.Path;
 
 public class JkJavaProjectMakerDocumentationStep {
 
-    private final JkJavaProjectMaker maker;
+    private final JkJavaProject project;
 
     private JkJavadocProcessor<JkJavaProjectMakerDocumentationStep> javadocMaker;
 
@@ -18,15 +18,15 @@ public class JkJavaProjectMakerDocumentationStep {
     /**
      * For parent chaining
      */
-    public final JkJavaProjectMaker.JkSteps __;
+    public final JkJavaProject.JkSteps __;
 
-    private JkJavaProjectMakerDocumentationStep(JkJavaProjectMaker maker) {
-        this.maker = maker;
-        this.__ = maker.getSteps();
+    private JkJavaProjectMakerDocumentationStep(JkJavaProject project) {
+        this.project = project;
+        this.__ = project.getSteps();
     }
 
-    static JkJavaProjectMakerDocumentationStep of(JkJavaProjectMaker maker) {
-        JkJavaProjectMakerDocumentationStep result = new JkJavaProjectMakerDocumentationStep(maker);
+    static JkJavaProjectMakerDocumentationStep of(JkJavaProject project) {
+        JkJavaProjectMakerDocumentationStep result = new JkJavaProjectMakerDocumentationStep(project);
         result.javadocMaker = JkJavadocProcessor.of(result);
         return result;
     }
@@ -39,7 +39,6 @@ public class JkJavaProjectMakerDocumentationStep {
      * Generates javadoc files (files + zip)
      */
     public void run() {
-        final JkJavaProject project = maker.project;
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = project.getOutLayout().getJavadocDir();
@@ -47,7 +46,7 @@ public class JkJavaProjectMakerDocumentationStep {
     }
 
     public void runIfNecessary() {
-        if (done && !Files.exists(maker.project.getOutLayout().getJavadocDir())) {
+        if (done && !Files.exists(project.getOutLayout().getJavadocDir())) {
             JkLog.info("Javadoc already generated. Won't perfom again");
         } else {
             run();

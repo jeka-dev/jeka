@@ -34,7 +34,7 @@ public class SonarPluginBuild extends JkCommandSet {
                 .addDependencies(JkDependencySet.of()
                     .and(GUAVA, "18.0")
                     .and(JUNIT, "4.13", JkJavaDepScopes.TEST)).__
-            .getMaker().getSteps()
+            .getSteps()
                 .getPublishing()
                     .setVersionedModule("org.jerkar:samples", "0.1");
     }

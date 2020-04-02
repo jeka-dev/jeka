@@ -1,15 +1,11 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.depmanagement.JkArtifactId;
-import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
@@ -28,8 +24,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static dev.jeka.core.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
-import static dev.jeka.core.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
+import static dev.jeka.core.api.java.project.JkJavaProject.JAVADOC_ARTIFACT_ID;
+import static dev.jeka.core.api.java.project.JkJavaProject.SOURCES_ARTIFACT_ID;
 
 /**
  * Build class for Jeka. Run main method to create full distrib.
@@ -73,10 +69,11 @@ public class CoreBuild extends JkCommandSet {
         if (!JkVersion.of(jekaVersion).isSnapshot()) {
             javaPlugin.pack.javadoc = true;
         }
-        javaPlugin.getProject().getMaker()
-            .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
-            .setMainArtifact(this::doPackWithEmbedded)
-            .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper) // define wrapper
+        javaPlugin.getProject()
+            .getArtifactProducer()
+                .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
+                .putMainArtifact(this::doPackWithEmbedded)
+                .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__ // define wrapper
             .getSteps()
                 .getCompilation()
                     .addOptions("-Xlint:none","-g")
@@ -132,7 +129,7 @@ public class CoreBuild extends JkCommandSet {
         String userPrefix = githubToken == null ? "" : githubToken + "@";
         git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
                 tempRepo.toString());
-        project.getMaker().getSteps().getDocumentation().runIfNecessary();
+        project.getSteps().getDocumentation().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
         makeDocs();
@@ -143,8 +140,8 @@ public class CoreBuild extends JkCommandSet {
         gitTemp.exec("push");
     }
 
-    private void doDistrib() {
-        final JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
+    private void doDistrib(Path distribFile) {
+        final JkArtifactProducer maker = javaPlugin.getProject().getArtifactProducer();
         maker.makeMissingArtifacts(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
@@ -152,14 +149,14 @@ public class CoreBuild extends JkCommandSet {
         final List<Path> ivySourceLibs = getBaseTree().goTo("jeka/libs-sources")
                 .andMatching(true, "ivy-*.jar").getFiles();
         distrib
-                .importFiles(getBaseDir().getParent().resolve("LICENSE"))
-                .importDir(getBaseDir().resolve("src/main/dist"))
-                .importDir(getBaseDir().resolve("src/main/java/META-INF/bin"))
-                .importFiles(maker.getArtifactPath(maker.getMainArtifactId()))
-                .importFiles(maker.getArtifactPath(WRAPPER_ARTIFACT_ID))
-                .goTo("libs-sources")
-                    .importFiles(ivySourceLibs)
-                    .importFiles(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
+            .importFiles(getBaseDir().getParent().resolve("LICENSE"))
+            .importDir(getBaseDir().resolve("src/main/dist"))
+            .importDir(getBaseDir().resolve("src/main/java/META-INF/bin"))
+            .importFiles(maker.getArtifactPath(maker.getMainArtifactId()))
+            .importFiles(maker.getArtifactPath(WRAPPER_ARTIFACT_ID))
+            .goTo("libs-sources")
+                .importFiles(ivySourceLibs)
+                .importFiles(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
         if (javaPlugin.pack.javadoc) {
             maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.importFiles(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
@@ -169,15 +166,14 @@ public class CoreBuild extends JkCommandSet {
             testSamples();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
-        final Path distripZipFile = maker.getArtifactPath(DISTRIB_FILE_ID);
-        distrib.zipTo(distripZipFile);
-        JkLog.info("Distribution zipped in " + distripZipFile);
+        distrib.zipTo(distribFile);
+        JkLog.info("Distribution zipped in " + distribFile);
         JkLog.endTask();
     }
 
     private void makeDocs() {
         JkLog.startTask("Making documentation");
-        String version = javaPlugin.getProject().getMaker().getSteps().getPublishing().getVersionedModule()
+        String version = javaPlugin.getProject().getSteps().getPublishing().getVersionedModule()
                 .getVersion().getValue();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
@@ -186,10 +182,10 @@ public class CoreBuild extends JkCommandSet {
     // Necessary to publish on OSSRH
     private static JkMavenPublicationInfo mavenPublication() {
         return JkMavenPublicationInfo
-                .of("Jeka", "Automate with plain Java code and nothing else.", "https://jeka.dev")
-                .withScm("https://github.com/jerkar/jeka.git")
-                .andApache2License()
-                .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
+            .of("Jeka", "Automate with plain Java code and nothing else.", "https://jeka.dev")
+            .withScm("https://github.com/jerkar/jeka.git")
+            .andApache2License()
+            .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
     void testSamples()  {
@@ -204,25 +200,22 @@ public class CoreBuild extends JkCommandSet {
         JkLog.endTask();
     }
 
-    private void doPackWithEmbedded() {
+    private void doPackWithEmbedded(Path targetJar) {
         JkLog.startTask("Creating main jar");
-        JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
 
         // Main jar
-        Path targetJar = maker.getMainArtifactPath();
-        maker.getSteps().getPackaging().createBinJar(targetJar);
+        javaPlugin.getProject().getSteps().getPackaging().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
-
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = javaPlugin.getProject().getOutLayout().getOutputPath().resolve("embedded.jar");
         JkPathTree classTree = JkPathTree.of(javaPlugin.getProject().getOutLayout().getClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
-                .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
-                .andZip(providedLibs.resolve("classgraph-4.8.41.jar"))
-                .andZip(providedLibs.resolve("ivy-2.5.0.jar"))
-                .zipTo(embeddedJar);
+            .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
+            .andZip(providedLibs.resolve("classgraph-4.8.41.jar"))
+            .andZip(providedLibs.resolve("ivy-2.5.0.jar"))
+            .zipTo(embeddedJar);
         JkPathTree.ofZip(embeddedJar).andMatching( "META-INF/*.SF", "META-INF/*.RSA")
                 .deleteContent().close();
 
@@ -243,9 +236,7 @@ public class CoreBuild extends JkCommandSet {
         JkLog.endTask();
     }
 
-    private void doWrapper() {
-        JkJavaProjectMaker maker = javaPlugin.getProject().getMaker();
-        Path wrapperJar = maker.getArtifactPath(WRAPPER_ARTIFACT_ID);
+    private void doWrapper(Path wrapperJar) {
         JkPathTree.of(javaPlugin.getProject().getOutLayout().getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 

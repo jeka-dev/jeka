@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * All defined tasks are extensible using {@link JkRunnables} mechanism.
  */
-public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocalizable {
+final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocalizable {
 
     public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
 
@@ -235,12 +235,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         }
 
         // Members should not be instantiated in constructor to avoid maker = null
-        private void init(JkJavaProjectMaker maker) {
+        private void init(JkJavaProjectMaker maker) {/*
             compilation = JkJavaProjectMakerCompilationStep.ofProd(maker);
             testing = new JkJavaProjectMakerTestingStep(maker);
             packaging = JkJavaProjectMakerPackagingStep.of(maker);
             publishing = new JkJavaProjectMakerPublishingStep(maker);
             documentation = JkJavaProjectMakerDocumentationStep.of(maker);
+            */
         }
 
         public JkJavaProjectMakerCompilationStep<JkSteps> getCompilation() {

@@ -1,7 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkArtifactProducer;
-import dev.jeka.core.api.depmanagement.JkDependencyManagement;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import dev.jeka.core.tool.JkConstants;
 
@@ -26,29 +25,34 @@ import java.util.function.Supplier;
  *     <li>By default, passing test suite is required to produce artifact.</li>
  * </ul>
  *
- * Beside, java projects are highly extensible so you can add build tasks or alter existing ones. This
- * is done using {@link #getMaker()} object. For example you can easily add test cover or SonarQube analysis.
- *
  * It provides cache mechanism in order compile or unit test phases are executed once when generating
  * several artifact files so be aware of clean it if you want to replay some tasks with different settings.
  *
- * @See JkJavaProjectMaker
  */
 public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
+
+    public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
+
+    public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
 
     private JkProjectSourceLayout sourceLayout;
 
     private JkProjectOutLayout outLayout;
 
-    private final JkJavaProjectMaker maker;
+    private final JkJavaProject.JkSteps steps;
 
     private final JkDependencyManagement<JkJavaProject> dependencyManagement;
+
+    private final JkArtifactBasicProducer<JkJavaProject> artifactProducer;
 
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
         outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(getBaseDir().resolve(JkConstants.OUTPUT_PATH));
-        maker = new JkJavaProjectMaker(this);
         dependencyManagement = JkDependencyManagement.of(this);
+        steps = new JkSteps(this);
+        artifactProducer = JkArtifactBasicProducer.of(this)
+                .setArtifactFileFunction(() -> outLayout.getOutputPath(), this::artifactFileNamePart);
+        registerArtifacts();
     }
 
     public static JkJavaProject of(JkProjectSourceLayout layout) {
@@ -87,10 +91,6 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return outLayout;
     }
 
-    public JkJavaProjectMaker getMaker() {
-        return maker;
-    }
-
     public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
         return this;
@@ -109,6 +109,14 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
         return dependencyManagement;
     }
 
+    public JkArtifactBasicProducer<JkJavaProject> getArtifactProducer() {
+        return artifactProducer;
+    }
+
+    public JkSteps getSteps() {
+        return steps;
+    }
+
     // -------------------------- Other -------------------------
 
     @Override
@@ -118,18 +126,18 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     @Override
     public JkArtifactProducer get() {
-        return getMaker();
+        return artifactProducer;
     }
 
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
-                .append("Published Module & version : " + this.maker.getSteps().getPublishing().getVersionedModule() + "\n")
+                .append("Published Module & version : " + steps.getPublishing().getVersionedModule() + "\n")
                 .append(this.sourceLayout.getInfo()).append("\n")
-                .append("Java Source Version : " + this.maker.getSteps().getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
-                .append("Source Encoding : " + this.maker.getSteps().getCompilation().getComputedCompileSpec().getEncoding() + "\n")
+                .append("Java Source Version : " + steps.getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
+                .append("Source Encoding : " + steps.getCompilation().getComputedCompileSpec().getEncoding() + "\n")
                 .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + this.dependencyManagement.getResolver().getRepos() + "\n")
-                .append("Publish repositories : " + this.maker.getSteps().getPublishing().getPublishRepos()  + "\n")
+                .append("Publish repositories : " + steps.getPublishing().getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + this.dependencyManagement.getDependencies().toList().size() + " elements.\n")
                 .append("Defined Artifacts : " + this.get().getArtifactIds())
                 .toString();
@@ -141,7 +149,66 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
                 .withDependencies(this.dependencyManagement.getDependencies())
                 .withDependencyResolver(this.dependencyManagement.getResolver())
                 .withSourceLayout(this.sourceLayout)
-                .withSourceVersion(this.maker.getSteps().getCompilation().getComputedCompileSpec().getSourceVersion());
+                .withSourceVersion(steps.getCompilation().getComputedCompileSpec().getSourceVersion());
     }
+
+    private String artifactFileNamePart() {
+        JkVersionedModule versionedModule = steps.getPublishing().getVersionedModule();
+        if (versionedModule == null) {
+            getSourceLayout().getBaseDir().getFileName().toString();
+        }
+        return versionedModule.toString();
+    }
+
+    private void registerArtifacts() {
+        artifactProducer.putMainArtifact(steps.getPackaging()::createBinJar);
+        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, steps.getPackaging()::createSourceJar);
+        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, steps.getPackaging()::createJavadocJar);
+    }
+
+    public static class JkSteps {
+
+        public final JkJavaProject __;
+
+        private final JkJavaProjectMakerCompilationStep compilation;
+
+        private final JkJavaProjectMakerTestingStep testing;
+
+        private final JkJavaProjectMakerPackagingStep packaging;
+
+        private final JkJavaProjectMakerPublishingStep publishing;
+
+        private final JkJavaProjectMakerDocumentationStep documentation;
+
+        private JkSteps(JkJavaProject __) {
+            this.__ = __;
+            compilation = JkJavaProjectMakerCompilationStep.ofProd(__);
+            testing = new JkJavaProjectMakerTestingStep(__);
+            packaging = JkJavaProjectMakerPackagingStep.of(__);
+            publishing = new JkJavaProjectMakerPublishingStep(__);
+            documentation = JkJavaProjectMakerDocumentationStep.of(__);
+        }
+
+        public JkJavaProjectMakerCompilationStep<JkJavaProject.JkSteps> getCompilation() {
+            return compilation;
+        }
+
+        public JkJavaProjectMakerTestingStep getTesting() {
+            return testing;
+        }
+
+        public JkJavaProjectMakerPackagingStep getPackaging() {
+            return packaging;
+        }
+
+        public JkJavaProjectMakerPublishingStep getPublishing() {
+            return publishing;
+        }
+
+        public JkJavaProjectMakerDocumentationStep getDocumentation() {
+            return documentation;
+        }
+    }
+
 
 }

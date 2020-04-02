@@ -15,11 +15,10 @@ public class PureApiBuild extends JkCommandSet {
 
     public void doDefault() {
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.getBaseDir());
-        javaProject.getMaker().setOutLayout(javaProject.getMaker().getOutLayout().withOutputDir("build/output/alt-output"));
+        javaProject.setOutLayout(javaProject.getOutLayout().withOutputDir("build/output/alt-output"));
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
         javaProject.getDependencyManagement().addDependencies(deps);
-        javaProject.getMaker().reset();
-        javaProject.getMaker().makeAllArtifacts();
+        javaProject.getArtifactProducer().makeAllArtifacts();
     }
 
     // Bar project depends on Foo
@@ -36,7 +35,6 @@ public class PureApiBuild extends JkCommandSet {
                 .and("com.sun.jersey:jersey-server:1.19.4")
                 .withVersionProvider(versionProvider)
         );
-        fooProject.getMaker().addJavadocArtifact();  // Generate Javadoc by default
 
         JkJavaProject barProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("bar"));
         fooProject.getDependencyManagement().addDependencies(JkDependencySet.of()
@@ -44,8 +42,9 @@ public class PureApiBuild extends JkCommandSet {
                 .and("com.sun.jersey:jersey-server:1.19.4")
                 .and(fooProject)
         );
-        barProject.getMaker().defineMainArtifactAsFatJar(true); // Produced jar will embed dependencies
-        barProject.getMaker().reset().makeAllArtifacts();  // Creates Bar jar along Foo jar (if not already built)
+        barProject.getArtifactProducer()
+            .putMainArtifact(barProject.getSteps().getPackaging()::createFatJar) // Produced jar will embed dependencies
+            .makeAllArtifacts();
     }
 
     public static void main(String[] args) {

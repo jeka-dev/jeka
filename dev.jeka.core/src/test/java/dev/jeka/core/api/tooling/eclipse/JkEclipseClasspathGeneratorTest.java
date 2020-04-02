@@ -46,7 +46,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
         coreProject.getDependencyManagement().addDependencies(coreDeps);
-        coreProject.getMaker().getSteps().getTesting().getTestProcessor().setForkingProcess(true);
+        coreProject.getSteps().getTesting().getTestProcessor().setForkingProcess(true);
         final JkEclipseClasspathGenerator coreGenerator =
                 JkEclipseClasspathGenerator.of(coreProject.getJavaIdeSupport());
         final String coreClasspath = coreGenerator.generate();
@@ -65,7 +65,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
         desktopProject.getDependencyManagement().addDependencies(deps);
-        desktopProject.getMaker().makeAllArtifacts();
+        desktopProject.getArtifactProducer().makeAllArtifacts();
 
         // ----------------- Now, try to apply generated .classpath to projects and compare if it matches
 

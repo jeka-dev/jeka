@@ -1,12 +1,12 @@
 package dev.jeka.core.tool.builtins.java;
 
+import dev.jeka.core.api.depmanagement.JkArtifactBasicProducer;
 import dev.jeka.core.api.depmanagement.JkArtifactId;
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.depmanagement.JkResolveResult;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectMaker;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDoc;
@@ -15,6 +15,7 @@ import dev.jeka.core.tool.JkPlugin;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 /**
  * Plugin for building WAR file (Jee Web Archive).
@@ -29,31 +30,34 @@ public class JkPluginWar extends JkPlugin {
 
     private JkRunnables staticResourceComputation = JkRunnables.noOp();
 
-    private final JkJavaProjectMaker maker;
+    private final JkArtifactBasicProducer artifactProducer;
 
     public JkPluginWar(JkCommandSet run) {
         super(run);
         this.staticResourceDir = run.getBaseDir().resolve("src/main/webapp/static");
-        this.maker = run.getPlugin(JkPluginJava.class).getProject().getMaker();
+        this.artifactProducer = run.getPlugin(JkPluginJava.class).getProject().getArtifactProducer();
     }
 
     @JkDoc("Add a war file to the generated artifacts.")
     @Override  
     protected void activate() {
+        JkArtifactId warArtifactId = JkArtifactId.of(null, "war");
+        Consumer<Path> consumer = path -> doWarFile(path);
+        artifactProducer.putArtifact(warArtifactId, consumer);
+    }
+
+    private void doWarFile(Path file) {
         JkPluginJava pluginJava = this.getCommandSet().getPlugin(JkPluginJava.class);
         JkJavaProject project = pluginJava.getProject();
-        JkArtifactId warArtifactId = JkArtifactId.of(null, "war");
-        maker.putArtifact(warArtifactId, () -> {
-            staticResourceComputation.run();
-            Path temp = JkUtilsPath.createTempDirectory("jeka-war");
-            generateWarDir(project, temp, staticResourceDir);
-            JkPathTree.of(temp).zipTo(maker.getArtifactPath(warArtifactId));
-            JkPathTree.of(temp).deleteRoot();
-        });
+        staticResourceComputation.run();
+        Path temp = JkUtilsPath.createTempDirectory("jeka-war");
+        generateWarDir(project, temp, staticResourceDir);
+        JkPathTree.of(temp).zipTo(file);
+        JkPathTree.of(temp).deleteRoot();
     }
 
     public static void generateWarDir(JkJavaProject project, Path dest, Path staticResouceDir) {
-        project.getMaker().getSteps().getCompilation().runIfNecessary();
+        project.getSteps().getCompilation().runIfNecessary();
         JkPathTree root = JkPathTree.of(dest);
         JkPathTree.of(project.getBaseDir().resolve("src/main/webapp/WEB-INF")).copyTo(root.get("WEB-INF"));
         if (Files.exists(staticResouceDir)) {
@@ -74,6 +78,6 @@ public class JkPluginWar extends JkPlugin {
     }
 
     public Path getWarFile() {
-        return maker.getArtifactPath(WAR_ARTIFACT_ID);
+        return artifactProducer.getArtifactPath(WAR_ARTIFACT_ID);
     }
 }

@@ -28,7 +28,7 @@ public class JkPluginJacoco extends JkPlugin {
         final JkJavaProject project = pluginJava.getProject();
         final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutLayout()
               .getOutputPath(OUTPUT_RELATIVE_PATH));
-        junitEnhancer.apply(project.getMaker().getSteps().getTesting().getTestProcessor());
+        junitEnhancer.apply(project.getSteps().getTesting().getTestProcessor());
     }
     
 }

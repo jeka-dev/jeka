@@ -64,6 +64,12 @@ public final class JkArtifactId {
         return false;
     }
 
+    public String toFileName(String namePart) {
+        String classifier = getClassifier() == null ? "" : "-" + getClassifier();
+        String extension = getExtension() == null ? "" : "." + getExtension();
+        return namePart + classifier + extension;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

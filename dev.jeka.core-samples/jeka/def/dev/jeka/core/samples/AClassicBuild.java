@@ -41,16 +41,20 @@ public class AClassicBuild extends JkCommandSet {
                         .and("com.google.guava:guava:21.0")
                         .and("com.sun.jersey:jersey-server:1.19.4")
                         .and("junit:junit:4.13", TEST)).__
-            .getMaker()
-                .defineMainArtifactAsFatJar(true)   // project will produce a fat jar as well.
-                .getSteps()
-                    .getTesting()
-                        .getTestProcessor()
-                            .setForkingProcess(true);
+            .getArtifactProducer()
+                .putMainArtifact(project.getSteps().getPackaging()::createFatJar).__  // use a fat jar
+            .getSteps()
+                .getTesting()
+                    .getTestProcessor()
+                        .setForkingProcess(true);
+    }
+
+    public void cleanPack() {
+        clean();javaPlugin.pack();
     }
     
     public static void main(String[] args) {
-	    JkInit.instanceOf(AClassicBuild.class, args).javaPlugin.clean().pack();
+	    JkInit.instanceOf(AClassicBuild.class, args).cleanPack();
     }
 
 

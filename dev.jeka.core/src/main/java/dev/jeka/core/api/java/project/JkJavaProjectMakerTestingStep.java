@@ -20,7 +20,7 @@ import java.nio.file.Path;
  */
 public class JkJavaProjectMakerTestingStep {
 
-    private final JkJavaProjectMaker maker;
+    private final JkJavaProject project;
 
     private final JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> compilation;
 
@@ -39,12 +39,12 @@ public class JkJavaProjectMakerTestingStep {
     /**
      * For parent chaining
      */
-    public final JkJavaProjectMaker.JkSteps __;
+    public final JkJavaProject.JkSteps __;
 
-    JkJavaProjectMakerTestingStep(JkJavaProjectMaker maker) {
-        this.maker = maker;
-        this.__ = maker.getSteps();
-        compilation = JkJavaProjectMakerCompilationStep.ofTest(maker, this);
+    JkJavaProjectMakerTestingStep(JkJavaProject project) {
+        this.project = project;
+        this.__ = project.getSteps();
+        compilation = JkJavaProjectMakerCompilationStep.ofTest(project, this);
         afterTest = JkRunnables.noOp(this);
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
@@ -79,9 +79,9 @@ public class JkJavaProjectMakerTestingStep {
      * dependencies involved in TEST scope.
      */
     public JkClasspath getTestClasspath() {
-        return JkClasspath.of(maker.project.getOutLayout().getTestClassDir())
-                .and(maker.project.getOutLayout().getClassDir())
-                .and(maker.project.getDependencyManagement().fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
+        return JkClasspath.of(project.getOutLayout().getTestClassDir())
+                .and(project.getOutLayout().getClassDir())
+                .and(project.getDependencyManagement().fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
     }
 
     /**
@@ -122,7 +122,7 @@ public class JkJavaProjectMakerTestingStep {
      */
     public void run() {
         JkLog.startTask("Processing tests");
-        this.maker.getSteps().getCompilation().runIfNecessary();
+        this.project.getSteps().getCompilation().runIfNecessary();
         this.compilation.run();
         executeWithTestProcessor();
         afterTest.run();
@@ -156,7 +156,7 @@ public class JkJavaProjectMakerTestingStep {
 
     private JkTestProcessor<JkJavaProjectMakerTestingStep> defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.of(this);
-        final Path reportDir = maker.project.getOutLayout().getTestReportDir().resolve("junit");
+        final Path reportDir = project.getOutLayout().getTestReportDir().resolve("junit");
         result.getEngineBehavior()
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
@@ -164,7 +164,7 @@ public class JkJavaProjectMakerTestingStep {
     }
 
     private JkTestSelection<JkJavaProjectMakerTestingStep> defaultTestSelection() {
-        return JkTestSelection.of(this).addTestClassRoots(maker.project.getOutLayout().getTestClassDir());
+        return JkTestSelection.of(this).addTestClassRoots(project.getOutLayout().getTestClassDir());
     }
 
 

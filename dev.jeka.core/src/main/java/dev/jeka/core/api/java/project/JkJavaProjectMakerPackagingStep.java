@@ -1,12 +1,12 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  */
 public class JkJavaProjectMakerPackagingStep {
 
-    private final JkJavaProjectMaker maker;
+    private final JkJavaProject project;
 
     private Supplier<String> artifactFileNameSupplier;
 
@@ -37,16 +37,16 @@ public class JkJavaProjectMakerPackagingStep {
     /**
      * For Parent chaining
      */
-    public JkJavaProjectMaker.JkSteps __;
+    public JkJavaProject.JkSteps __;
 
-    private JkJavaProjectMakerPackagingStep(JkJavaProjectMaker maker) {
-        this.maker = maker;
-        this.__ = maker.getSteps();
+    private JkJavaProjectMakerPackagingStep(JkJavaProject project) {
+        this.project = project;
+        this.__ = project.getSteps();
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
     }
 
-    static JkJavaProjectMakerPackagingStep of(JkJavaProjectMaker maker) {
-        JkJavaProjectMakerPackagingStep result = new JkJavaProjectMakerPackagingStep(maker);
+    static JkJavaProjectMakerPackagingStep of(JkJavaProject project) {
+        JkJavaProjectMakerPackagingStep result = new JkJavaProjectMakerPackagingStep(project);
         result.manifest = JkManifest.of(result);
         return result;
     }
@@ -75,9 +75,9 @@ public class JkJavaProjectMakerPackagingStep {
     }
 
     private JkVersionedModule defaultVersionedModule() {
-        JkVersionedModule versionedModule = maker.getSteps().getPublishing().getVersionedModule();
+        JkVersionedModule versionedModule = project.getSteps().getPublishing().getVersionedModule();
         if (versionedModule == null) {
-            return JkVersionedModule.ofRootDirName(maker.project.getSourceLayout().getBaseDir().getFileName().toString());
+            return JkVersionedModule.ofRootDirName(project.getSourceLayout().getBaseDir().getFileName().toString());
         }
         return versionedModule;
     }
@@ -86,7 +86,7 @@ public class JkJavaProjectMakerPackagingStep {
         final String namePart = artifactFileNameSupplier.get();
         final String classifier = artifactId.getClassifier() == null ? "" : "-" + artifactId.getClassifier();
         final String extension = artifactId.getExtension() == null ? "" : "." + artifactId.getExtension();
-        return maker.project.getOutLayout().getOutputPath().resolve(namePart + classifier + extension);
+        return project.getOutLayout().getOutputPath().resolve(namePart + classifier + extension);
     }
 
     public Supplier<String> getArtifactFileNameSupplier() {
@@ -94,32 +94,32 @@ public class JkJavaProjectMakerPackagingStep {
     }
 
     public void createBinJar(Path target) {
-        maker.getSteps().getCompilation().runIfNecessary();
-        maker.getSteps().getTesting().runIfNecessary();
-        JkJarPacker.of(maker.project.getOutLayout().getClassDir())
+        project.getSteps().getCompilation().runIfNecessary();
+        project.getSteps().getTesting().runIfNecessary();
+        JkJarPacker.of(project.getOutLayout().getClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeJar(target);
     }
 
-
     public void createFatJar(Path target) {
-        maker.getSteps().getCompilation().runIfNecessary();
-        maker.getSteps().getTesting().runIfNecessary();
-        JkClasspath classpath = JkClasspath.of(maker.fetchRuntimeDependencies(maker.getMainArtifactId()));
-        JkJarPacker.of( maker.project.getOutLayout().getClassDir())
+        project.getSteps().getCompilation().runIfNecessary();
+        project.getSteps().getTesting().runIfNecessary();
+        Iterable<Path> classpath = project.getDependencyManagement()
+                .fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles();
+        JkJarPacker.of(project.getOutLayout().getClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath, this.fatJarFilter);
     }
 
     public void createSourceJar(Path target) {
-        maker.project.getSourceLayout().getSources().and(maker.project.getOutLayout().getGeneratedSourceDir()).zipTo(target);
+        project.getSourceLayout().getSources().and(project.getOutLayout().getGeneratedSourceDir()).zipTo(target);
     }
 
     void createJavadocJar(Path target) {
-        maker.getSteps().getDocumentation().runIfNecessary();
-        Path javadocDir = maker.project.getOutLayout().getJavadocDir();
+        project.getSteps().getDocumentation().runIfNecessary();
+        Path javadocDir = project.getOutLayout().getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
                     + ". Can't create a javadoc jar until javadoc files has been generated.");
@@ -128,15 +128,15 @@ public class JkJavaProjectMakerPackagingStep {
     }
 
     public void createTestJar(Path target) {
-        maker.getSteps().getCompilation().runIfNecessary();
-        maker.getSteps().getTesting().runIfNecessary();
-        JkJarPacker.of(maker.project.getOutLayout().getTestClassDir())
+        project.getSteps().getCompilation().runIfNecessary();
+        project.getSteps().getTesting().runIfNecessary();
+        JkJarPacker.of(project.getOutLayout().getTestClassDir())
                 .withManifest(manifest)
                 .makeJar(target);
     }
 
     void createTestSourceJar(Path target) {
-        maker.project.getSourceLayout().getTests().zipTo(target);
+        project.getSourceLayout().getTests().zipTo(target);
     }
 
     /**
