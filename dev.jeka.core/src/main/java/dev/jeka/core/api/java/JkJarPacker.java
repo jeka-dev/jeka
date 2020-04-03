@@ -31,7 +31,7 @@ public final class JkJarPacker {
     }
 
     public static JkJarPacker of(JkPathTreeSet classTrees) {
-        JkUtilsAssert.isTrue(!classTrees.getPathTrees().isEmpty(), "Nothing to create jar from : " + classTrees);
+        JkUtilsAssert.isTrue(!classTrees.toList().isEmpty(), "Nothing to create jar from : " + classTrees);
         return new JkJarPacker(classTrees, null, null);
     }
 
@@ -53,7 +53,7 @@ public final class JkJarPacker {
      */
     public void makeJar(Path resultFile) {
         if (manifest != null && !manifest.isEmpty()) {
-            manifest.writeToStandardLocation(classtrees.getPathTrees().get(0).getRoot());
+            manifest.writeToStandardLocation(classtrees.toList().get(0).getRoot());
         }
         JkPathTreeSet treeSet = extraFiles == null ? JkPathTreeSet.ofEmpty() : extraFiles;
         classtrees.and(treeSet).zipTo(resultFile);
@@ -70,7 +70,7 @@ public final class JkJarPacker {
      */
     public void makeFatJar(Path resultFile, Iterable<Path> otherJars, PathMatcher filter) {
         if (manifest != null && !manifest.isEmpty()) {
-            manifest.writeToStandardLocation(classtrees.getPathTrees().get(0).getRoot());
+            manifest.writeToStandardLocation(classtrees.toList().get(0).getRoot());
         }
         JkPathTreeSet.ofEmpty().andZips(otherJars).and(classtrees).andMatcher(EXCLUDE_SIGNATURE_MATCHER)
                 .andMatcher(filter)

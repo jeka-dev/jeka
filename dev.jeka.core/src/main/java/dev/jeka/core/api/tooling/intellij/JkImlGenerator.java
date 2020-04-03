@@ -4,8 +4,8 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.project.JkCompileLayout;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
@@ -44,9 +44,9 @@ public final class JkImlGenerator {
 
     private static final String T5 = T4 + T1;
 
-    private JkProjectSourceLayout sourceLayout;
+    private JkCompileLayout prodLayout;
 
-    private final Path baseDir;
+    private JkCompileLayout testLayout;
 
     /** Used to generate JRE container */
     private JkJavaVersion sourceJavaVersion;
@@ -79,25 +79,18 @@ public final class JkImlGenerator {
 
     private XMLStreamWriter writer;
 
-    private JkImlGenerator(Path baseDir) {
-        this.baseDir = baseDir;
-        this.projectDependencies = JkDependencySet.of();
-        this.projectDependencyResolver = JkDependencyResolver.of();
+    private JkImlGenerator(JkJavaIdeSupport ideSupport) {
+        this.prodLayout = ideSupport.getProdLayout();
+        this.testLayout = ideSupport.getTestLayout();
+        this.projectDependencies = ideSupport.getDependencies();
+        this.projectDependencyResolver = ideSupport.getDependencyResolver();
     }
 
     /**
      * Constructs a {@link JkImlGenerator} to the project base directory
      */
-    public static JkImlGenerator of(JkJavaIdeSupport projectIde) {
-        JkImlGenerator result = new JkImlGenerator(projectIde.getSourceLayout().getBaseDir());
-        result.sourceLayout = projectIde.getSourceLayout();
-        result.projectDependencies = projectIde.getDependencies();
-        result.projectDependencyResolver = projectIde.getDependencyResolver();
-        return result;
-    }
-
-    public static JkImlGenerator of(Path baseDir) {
-        return new JkImlGenerator(baseDir);
+    public static JkImlGenerator of(JkJavaIdeSupport ideSupport) {
+        return new JkImlGenerator(ideSupport);
     }
 
     /** Generate the .classpath file */
@@ -144,7 +137,7 @@ public final class JkImlGenerator {
         if (pluginModule) {
             writer.writeEmptyElement("component");
             writer.writeAttribute("name", "DevKit.ModuleBuildProperties");
-            writer.writeAttribute("url", "file://$MODULE_DIR$/" + this.baseDir.relativize(pluginXml)
+            writer.writeAttribute("url", "file://$MODULE_DIR$/" + this.prodLayout.getBaseDir().relativize(pluginXml)
                     .toString().replace("\\", "/"));
             writer.writeCharacters("\n"  + T1);
         }
@@ -194,11 +187,11 @@ public final class JkImlGenerator {
         writer.writeCharacters("\n");
         writer.writeCharacters(T2);
 
-        if (sourceLayout != null) {
+        if (prodLayout != null) {
 
             // Write test sources
-            final Path projectDir = this.sourceLayout.getBaseDir();
-            for (final JkPathTree fileTree : this.sourceLayout.getTests().getPathTrees()) {
+            final Path projectDir = this.prodLayout.getBaseDir();
+            for (final JkPathTree fileTree : this.testLayout.getSources().toList()) {
                 if (fileTree.exists()) {
                     writer.writeCharacters(T1);
                     writer.writeEmptyElement("sourceFolder");
@@ -211,8 +204,8 @@ public final class JkImlGenerator {
             }
 
             // write test resources
-            for (final JkPathTree fileTree : this.sourceLayout.getTestResources().getPathTrees()) {
-                if (fileTree.exists() && !contains(this.sourceLayout.getTests(), fileTree.getRootDirOrZipFile())) {
+            for (final JkPathTree fileTree : testLayout.getResources().toList()) {
+                if (fileTree.exists() && !contains(testLayout.getSources(), fileTree.getRootDirOrZipFile())) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
                     final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
@@ -224,7 +217,7 @@ public final class JkImlGenerator {
 
             // Write production sources
 
-            for (final JkPathTree fileTree : this.sourceLayout.getSources().getPathTrees()) {
+            for (final JkPathTree fileTree : this.prodLayout.getSources().toList()) {
                 if (fileTree.exists()) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
@@ -236,8 +229,8 @@ public final class JkImlGenerator {
             }
 
             // Write production test resources
-            for (final JkPathTree fileTree : this.sourceLayout.getResources().getPathTrees()) {
-                if (fileTree.exists() && !contains(this.sourceLayout.getSources(), fileTree.getRootDirOrZipFile())) {
+            for (final JkPathTree fileTree : this.prodLayout.getResources().toList()) {
+                if (fileTree.exists() && !contains(this.prodLayout.getSources(), fileTree.getRootDirOrZipFile())) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
                     final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
@@ -267,7 +260,7 @@ public final class JkImlGenerator {
     }
 
     private static boolean contains(JkPathTreeSet treeSet, Path path) {
-        for (JkPathTree tree : treeSet.getPathTrees()) {
+        for (JkPathTree tree : treeSet.toList()) {
             if (JkUtilsPath.isSameFile(tree.getRoot(), path)) {
                 return true;
             }
@@ -451,7 +444,7 @@ public final class JkImlGenerator {
             writer.writeCharacters("\n");
             writer.writeCharacters(T5);
             writer.writeEmptyElement("root");
-            writer.writeAttribute("url", ideaPath(baseDir, file));
+            writer.writeAttribute("url", ideaPath(prodLayout.getBaseDir(), file));
             writer.writeCharacters("\n" + T4);
             writer.writeEndElement();
         } else {
@@ -597,28 +590,6 @@ public final class JkImlGenerator {
     // --------------------------- setters ------------------------------------------------
 
 
-    public JkImlGenerator setSourceLayout(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout;
-        return this;
-    }
-
-    public JkImlGenerator setSourceJavaVersion(JkJavaVersion sourceJavaVersion) {
-        this.sourceJavaVersion = sourceJavaVersion;
-        return this;
-    }
-
-    public JkImlGenerator setDependencies(JkDependencyResolver dependencyResolver, JkDependencySet dependencies) {
-        this.projectDependencyResolver = dependencyResolver;
-        this.projectDependencies = dependencies;
-        return this;
-    }
-
-    public JkImlGenerator setDefDependencies(JkDependencyResolver buildDependencyResolver, JkDependencySet dependencies) {
-        this.defDependencyResolver = buildDependencyResolver;
-        this.defDependencies = dependencies;
-        return this;
-    }
-
     public JkImlGenerator setImportedTestModules(Iterable<String> importedTestModules) {
         this.importedTestModules = importedTestModules;
         return this;
@@ -645,10 +616,10 @@ public final class JkImlGenerator {
     }
 
     private Path findPluginXml() {
-        if (sourceLayout == null) {
+        if (prodLayout == null) {
             return null;
         }
-        List<Path> candidates = this.sourceLayout.getResources().getExistingFiles("META-INF/plugin.xml");
+        List<Path> candidates = this.prodLayout.getResources().getExistingFiles("META-INF/plugin.xml");
         if (candidates.isEmpty()) {
             return null;
         }

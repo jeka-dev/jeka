@@ -53,7 +53,7 @@ class Lib {
 
             } else { // This is a dependency on an eclipse project
                 final Path projectDir = parentDir.resolve(lib.projectRelativePath);
-                final JkJavaProject project = JkJavaProject.ofMavenLayout(projectDir);
+                final JkJavaProject project = JkJavaProject.of().setBaseDir(projectDir);
                 applier.apply(project);
                 result = result.and(project.getArtifactProducer(), lib.scope);
             }

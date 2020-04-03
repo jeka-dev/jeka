@@ -171,7 +171,7 @@ public class JkJavaProjectMakerTestingStep {
 
     private JkTestProcessor<JkJavaProjectMakerTestingStep> defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.ofParent(this);
-        final Path reportDir = testCompilation.getLayout().getOutputPath(this.reportDir);
+        final Path reportDir = testCompilation.getLayout().getOutputDir().resolve(this.reportDir);
         result.getEngineBehavior()
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);

@@ -197,12 +197,12 @@ public class JkCompileLayout<T> {
 
     // --------------------------- Views ---------------------------------
 
-    public final Path getOutputPath() {
-        return outputDirSupplier.get();
+    public Path getBaseDir() {
+        return baseDirSupplier.get();
     }
 
-    public Path getOutputPath(String relativePath) {
-        return outputDirSupplier.get().resolve(relativePath);
+    public Path getOutputDir() {
+        return outputDirSupplier.get();
     }
 
     public Path getClassDir() {

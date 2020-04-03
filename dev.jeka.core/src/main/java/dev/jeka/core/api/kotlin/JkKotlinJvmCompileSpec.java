@@ -135,7 +135,7 @@ public final class JkKotlinJvmCompileSpec {
     }
 
     public JkKotlinJvmCompileSpec addSources(JkPathTreeSet treeSet) {
-        treeSet.getPathTrees().forEach(this::addSources);
+        treeSet.toList().forEach(this::addSources);
         return this;
     }
 

@@ -170,7 +170,7 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
     }
 
     public JkJavaCompileSpec<T> addSources(JkPathTreeSet treeSet) {
-        treeSet.getPathTrees().forEach(this::addSources);
+        treeSet.toList().forEach(this::addSources);
         return this;
     }
 

@@ -4,8 +4,8 @@ import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.java.project.JkCompileLayout;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
@@ -24,8 +24,9 @@ public class JkPluginSonar extends JkPlugin {
     }
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
-        final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
-        final Path baseDir = sourceLayout.getBaseDir();
+        final JkCompileLayout prodLayout = project.getSteps().getCompilation().getLayout();
+        final JkCompileLayout testLayout = project.getSteps().getTesting().getTestCompilation().getLayout();
+        final Path baseDir = project.getBaseDir();
         final JkPathSequence libs = project.getDependencyManagement().fetchDependencies(
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED).getFiles();
         final Path testReportDir = project.getSteps().getTesting().getReportDir();
@@ -38,9 +39,9 @@ public class JkPluginSonar extends JkPlugin {
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
                 .withBinaries(project.getSteps().getCompilation().getLayout().getClassDir())
                 .withLibraries(libs)
-                .withSourcesPath(sourceLayout.getSources().getRootDirsOrZipFiles())
-                .withTestPath(sourceLayout.getTests().getRootDirsOrZipFiles())
-                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.getBaseDir().resolve(JkConstants.JEKA_DIR + "/.sonar").toString())
+                .withSourcesPath(prodLayout.getSources().getRootDirsOrZipFiles())
+                .withTestPath(testLayout.getSources().getRootDirsOrZipFiles())
+                .withProperty(JkSonar.WORKING_DIRECTORY, baseDir.resolve(JkConstants.JEKA_DIR + "/.sonar").toString())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH,
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,

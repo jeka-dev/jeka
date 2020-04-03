@@ -12,9 +12,9 @@ import java.nio.file.Path;
  */
 public class JkJavaIdeSupport {
 
-    private JkCompileLayout sourceLayout;
+    private JkCompileLayout prodLayout;
 
-    private JkCompileLayout testSourceLayout;
+    private JkCompileLayout testLayout;
 
     private JkDependencySet dependencies;
 
@@ -23,9 +23,9 @@ public class JkJavaIdeSupport {
     private JkDependencyResolver dependencyResolver;
 
     private JkJavaIdeSupport(Path baseDir) {
-        this.sourceLayout = JkCompileLayout.of().setBaseDir(baseDir)
+        this.prodLayout = JkCompileLayout.of().setBaseDir(baseDir)
                 .setStandardSource(JkCompileLayout.Concern.PROD, JkCompileLayout.Style.MAVEN);
-        this.testSourceLayout = JkCompileLayout.of().setBaseDir(baseDir)
+        this.testLayout = JkCompileLayout.of().setBaseDir(baseDir)
                 .setStandardSource(JkCompileLayout.Concern.TEST, JkCompileLayout.Style.MAVEN);
         this.dependencies = JkDependencySet.of();
         this.sourceVersion = JkJavaVersion.V8;
@@ -36,12 +36,12 @@ public class JkJavaIdeSupport {
         return new JkJavaIdeSupport(baseDir);
     }
 
-    public JkCompileLayout getSourceLayout() {
-        return sourceLayout;
+    public JkCompileLayout getProdLayout() {
+        return prodLayout;
     }
 
-    public JkCompileLayout getTestSourceLayout() {
-        return sourceLayout;
+    public JkCompileLayout getTestLayout() {
+        return testLayout;
     }
 
     public JkDependencySet getDependencies() {
@@ -56,13 +56,13 @@ public class JkJavaIdeSupport {
         return dependencyResolver;
     }
 
-    public JkJavaIdeSupport setSourceLayout(JkCompileLayout sourceLayout) {
-        this.sourceLayout = sourceLayout;
+    public JkJavaIdeSupport setProdLayout(JkCompileLayout prodLayout) {
+        this.prodLayout = prodLayout;
         return this;
     }
 
-    public JkJavaIdeSupport setTestSourceLayout(JkCompileLayout testSourceLayout) {
-        this.testSourceLayout = testSourceLayout;
+    public JkJavaIdeSupport setTestLayout(JkCompileLayout testLayout) {
+        this.testLayout = testLayout;
         return this;
     }
 

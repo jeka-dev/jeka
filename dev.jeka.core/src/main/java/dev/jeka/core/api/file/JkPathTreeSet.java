@@ -207,7 +207,7 @@ public final class JkPathTreeSet {
     /**
      * Returns {@link JkPathTree} instances constituting this {@link JkPathTreeSet}.
      */
-    public List<JkPathTree> getPathTrees() {
+    public List<JkPathTree> toList() {
         return pathTrees;
     }
 
@@ -242,7 +242,7 @@ public final class JkPathTreeSet {
      */
     public JkPathTreeSet resolvedTo(Path newRoot) {
         List<JkPathTree> trees = new LinkedList<>();
-        this.getPathTrees().forEach(tree -> trees.add(tree.resolvedTo(newRoot)));
+        this.toList().forEach(tree -> trees.add(tree.resolvedTo(newRoot)));
         return JkPathTreeSet.of(trees);
     }
 

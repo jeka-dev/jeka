@@ -3,8 +3,8 @@ package dev.jeka.core.api.tooling.eclipse;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.project.JkCompileLayout;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -31,16 +31,12 @@ public final class JkEclipseClasspathGenerator {
 
     // --------------------- content --------------------------------
 
-    private final JkProjectSourceLayout sourceLayout;
-
-    private final JkDependencyResolver dependencyResolver;
-
-    private final JkDependencySet dependencies;
+    private final JkJavaIdeSupport ideSupport;
 
     // content for build class only
-    private JkDependencyResolver runDependencyResolver;
+    private JkDependencyResolver defDependencyResolver;
 
-    private JkDependencySet runDependencies;
+    private JkDependencySet defDependencies;
 
     // content for build class only
     private List<Path> importedProjects = new LinkedList<>();
@@ -53,8 +49,6 @@ public final class JkEclipseClasspathGenerator {
 
     private boolean includeJavadoc = true;
 
-    private final JkJavaVersion sourceVersion;
-
     private String jreContainer;
 
     /**
@@ -65,33 +59,20 @@ public final class JkEclipseClasspathGenerator {
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    private JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
-                                        JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
-        this.sourceLayout = sourceLayout;
-        this.dependencies = dependencies;
-        this.dependencyResolver = resolver;
-        this.sourceVersion = sourceVersion;
+    private JkEclipseClasspathGenerator(JkJavaIdeSupport ideSupport) {
+        this.ideSupport = ideSupport;
     }
 
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    public static JkEclipseClasspathGenerator of(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
-                                        JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
-        return new JkEclipseClasspathGenerator(sourceLayout, dependencies, resolver, sourceVersion);
+    public static JkEclipseClasspathGenerator of(JkJavaIdeSupport ideSupport) {
+        return new JkEclipseClasspathGenerator(ideSupport);
 
-    }
-
-    /**
-     * Constructs a {@link JkEclipseClasspathGenerator}.
-     */
-    public static JkEclipseClasspathGenerator of(JkJavaIdeSupport projectDef) {
-        return new JkEclipseClasspathGenerator(projectDef.getSourceLayout(), projectDef.getDependencies(),
-                projectDef.getDependencyResolver(), projectDef.getSourceVersion());
     }
 
     private boolean hasBuildDef() {
-        return new File(this.sourceLayout.getBaseDir().toFile(), JkConstants.DEF_DIR).exists();
+        return new File(ideSupport.getProdLayout().getBaseDir().toFile(), JkConstants.DEF_DIR).exists();
     }
 
     // -------------------------- setters ----------------------------
@@ -133,8 +114,8 @@ public final class JkEclipseClasspathGenerator {
      */
     public JkEclipseClasspathGenerator setRunDependencies(JkDependencyResolver buildDependencyResolver,
                                                           JkDependencySet buildDependencies) {
-        this.runDependencyResolver = buildDependencyResolver;
-        this.runDependencies = buildDependencies;
+        this.defDependencyResolver = buildDependencyResolver;
+        this.defDependencies = buildDependencies;
         return this;
     }
 
@@ -208,7 +189,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> paths = new HashSet<>();
 
         // Write sources for build classes
-        if (hasBuildDef() && new File(sourceLayout.getBaseDir().toFile(), JkConstants.DEF_DIR).exists()) {
+        if (hasBuildDef() && new File(ideSupport.getProdLayout().getBaseDir().toFile(), JkConstants.DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
@@ -226,14 +207,14 @@ public final class JkEclipseClasspathGenerator {
                     "path", "/" + projectFile.getFileName().toString());
         }
 
-        if (this.dependencyResolver != null) {
-            writeDependenciesEntries(writer, this.dependencies, this.dependencyResolver, paths);
+        if (ideSupport.getDependencyResolver() != null) {
+            writeDependenciesEntries(writer, ideSupport.getDependencies(), ideSupport.getDependencyResolver(), paths);
         }
         writeJre(writer);
 
         // add build dependencies
-        if (hasBuildDef() && runDependencyResolver != null) {
-            writeDependenciesEntries(writer, runDependencies, runDependencyResolver, paths);
+        if (hasBuildDef() && defDependencyResolver != null) {
+            writeDependenciesEntries(writer, defDependencies, defDependencyResolver, paths);
         }
 
         // Write output
@@ -302,9 +283,9 @@ public final class JkEclipseClasspathGenerator {
         if (jreContainer != null) {
             container = jreContainer;
         } else {
-            if (sourceVersion != null) {
+            if (ideSupport.getSourceVersion() != null) {
                 container = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/"
-                        + eclipseJavaVersion(sourceVersion);
+                        + eclipseJavaVersion(ideSupport.getSourceVersion());
             } else {
                 container = "org.eclipse.jdt.launching.JRE_CONTAINER";
             }
@@ -343,11 +324,12 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
-        for (final JkPathTree fileTree : sourceLayout.getTests().and(sourceLayout.getTestResources()).getPathTrees()) {
+        JkCompileLayout testLayout = ideSupport.getTestLayout();
+        for (final JkPathTree fileTree : testLayout.getSources().and(testLayout.getResources()).toList()) {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = sourceLayout.getBaseDir().relativize(fileTree.getRoot()).toString().replace(File.separator, "/");
+            final String path = testLayout.getBaseDir().relativize(fileTree.getRoot()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -361,11 +343,12 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        for (final JkPathTree fileTree : sourceLayout.getSources().and(sourceLayout.getResources()).getPathTrees()) {
+        JkCompileLayout prodLayout = ideSupport.getTestLayout();
+        for (final JkPathTree fileTree : prodLayout.getSources().and(prodLayout.getResources()).toList()) {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.getBaseDir(), fileTree.getRoot()).toString().replace(File.separator, "/");
+            final String path = relativePathIfPossible(prodLayout.getBaseDir(), fileTree.getRoot()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -467,7 +450,7 @@ public final class JkEclipseClasspathGenerator {
             binPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
         } else {
             isVar = false;
-            binPath = relativePathIfPossible(sourceLayout.getBaseDir(), bin).toString();
+            binPath = relativePathIfPossible(ideSupport.getProdLayout().getBaseDir(), bin).toString();
         }
         binPath = binPath.replace(File.separator, "/");
         writer.writeCharacters("\t");
@@ -487,7 +470,7 @@ public final class JkEclipseClasspathGenerator {
             } else if (usePathVariables && source.startsWith(JkLocator.getJekaHomeDir())) {
                 srcPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(source).toString();
             } else {
-                srcPath = relativePathIfPossible(sourceLayout.getBaseDir(), source).toString();
+                srcPath = relativePathIfPossible(ideSupport.getProdLayout().getBaseDir(), source).toString();
             }
             srcPath = srcPath.replace(File.separator, "/");
             writer.writeAttribute("sourcepath", srcPath);

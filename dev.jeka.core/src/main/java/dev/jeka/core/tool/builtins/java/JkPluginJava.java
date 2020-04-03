@@ -5,10 +5,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkJavaIdeSupportSupplier;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectMakerCompilationStep;
+import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -128,10 +125,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
         String baseDirName = getCommandSet().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
-        project.getSourceLayout().getSources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().getResources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().getTests().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().getTestResources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        JkCompileLayout prodLayout = project.getSteps().getCompilation().getLayout();
+        prodLayout.getSources().toList().stream().forEach(tree -> tree.createIfNotExist());
+        prodLayout.getResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+        JkCompileLayout testLayout = project.getSteps().getTesting().getTestCompilation().getLayout();
+        testLayout.getSources().toList().stream().forEach(tree -> tree.createIfNotExist());
+        testLayout.getResources().toList().stream().forEach(tree -> tree.createIfNotExist());
         scaffoldPlugin.getScaffolder().setCommandClassCode(code);
         scaffoldPlugin.getScaffolder().setClassFilename("Build.java");
     }

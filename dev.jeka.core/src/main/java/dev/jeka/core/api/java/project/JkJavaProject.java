@@ -126,8 +126,8 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
     public JkJavaIdeSupport getJavaIdeSupport() {
         return JkJavaIdeSupport.of(baseDir)
                 .setSourceVersion(steps.compilation.getJavaVersion())
-                .setSourceLayout(steps.compilation.getLayout())
-                .setTestSourceLayout(steps.testing.getTestCompilation().getLayout())
+                .setProdLayout(steps.compilation.getLayout())
+                .setTestLayout(steps.testing.getTestCompilation().getLayout())
                 .setDependencies(this.dependencyManagement.getDependencies())
                 .setDependencyResolver(this.dependencyManagement.getResolver());
     }

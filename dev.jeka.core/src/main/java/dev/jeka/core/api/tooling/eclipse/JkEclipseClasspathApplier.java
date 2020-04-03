@@ -3,8 +3,8 @@ package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.java.project.JkCompileLayout;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.system.JkException;
 
 import java.nio.file.Files;
@@ -31,9 +31,9 @@ public class JkEclipseClasspathApplier {
      * Modifies the specified javaProject in a way it reflects its eclipse .classpath file.
      */
     public void apply(JkJavaProject javaProject) {
-        final Path dotClasspathFile = javaProject.getSourceLayout().getBaseDir().resolve(".classpath");
+        final Path dotClasspathFile = javaProject.getBaseDir().resolve(".classpath");
         if (!Files.exists(dotClasspathFile)) {
-            throw new JkException(".classpath file not found in " + javaProject.getSourceLayout().getBaseDir());
+            throw new JkException(".classpath file not found in " + javaProject.getBaseDir());
         }
         apply(javaProject, DotClasspathModel.from(dotClasspathFile));
     }
@@ -44,17 +44,18 @@ public class JkEclipseClasspathApplier {
         final JkPathTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
         final JkPathTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
         final JkPathTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
-                .andMatcher(JkProjectSourceLayout.JAVA_RESOURCE_MATCHER);
+                .andMatcher(JkCompileLayout.JAVA_RESOURCE_MATCHER);
         final JkPathTreeSet testResources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources
-                .andMatcher(JkProjectSourceLayout.JAVA_RESOURCE_MATCHER);
-
+                .andMatcher(JkCompileLayout.JAVA_RESOURCE_MATCHER);
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);
-        final JkDependencySet dependencies = Lib.toDependencies(/*build*/
-                javaProject.getSourceLayout().getBaseDir(), libs, this);
-
-        javaProject.setSourceLayout(javaProject.getSourceLayout().withSources(sources).withResources(resources)
-                .withTests(testSources).withTestResources(testResources));
+        final JkDependencySet dependencies = Lib.toDependencies(javaProject.getBaseDir(), libs, this);
+        javaProject.getSteps().getCompilation().getLayout()
+                .setSources(sources)
+                .setResources(resources);
+        javaProject.getSteps().getTesting().getTestCompilation().getLayout()
+                .setSources(testSources)
+                .setResources(testResources);
         javaProject.getDependencyManagement()
                 .removeDependencies()
                 .addDependencies(dependencies);
