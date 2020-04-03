@@ -619,7 +619,7 @@ public class AntStyleBuild extends JkCommandSet {
 
     @Override
     protected void setup() {
-       JkResolveResult depResolution = JkDependencyResolver.of(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
+       JkResolveResult depResolution = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
                .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
                .and("junit:junit:4.11", JkJavaDepScopes.TEST)
        );
@@ -635,7 +635,7 @@ public class AntStyleBuild extends JkCommandSet {
                 .addSources(src));
         Map<String, String> varReplacement = new HashMap<>();
         varReplacement.put("${server.ip}", "123.211.11.0");
-        JkResourceProcessor.of(JkPathTreeSet.of(src)).addInterpolator("**/*.properties", varReplacement)
+        JkResourceProcessor.ofParent(JkPathTreeSet.of(src)).addInterpolator("**/*.properties", varReplacement)
                 .generateTo(classDir, Charset.forName("UTF-8"));
         JkPathTree.of(src).andMatching(false, "**/*.javaPlugin").copyTo(classDir);
     }

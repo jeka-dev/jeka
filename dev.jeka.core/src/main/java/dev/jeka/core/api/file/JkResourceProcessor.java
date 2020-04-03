@@ -52,13 +52,13 @@ public final class JkResourceProcessor<T> {
      * Creates an empty resource processor
      */
     public static JkResourceProcessor<Void> of() {
-        return new JkResourceProcessor<Void>(null);
+        return ofParent(null);
     }
 
     /**
      * Same as {@link #of()} with providing a parent chaining
      */
-    public static <T> JkResourceProcessor<T> of(T parent) {
+    public static <T> JkResourceProcessor<T> ofParent(T parent) {
         return new JkResourceProcessor<>(parent);
     }
 

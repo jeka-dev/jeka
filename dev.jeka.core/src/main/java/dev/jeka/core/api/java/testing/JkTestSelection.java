@@ -51,13 +51,13 @@ public final class JkTestSelection<T> implements Serializable {
      * so no test will be included out of the box.
      */
     public static JkTestSelection<Void> of() {
-        return new JkTestSelection(null);
+        return ofParent(null);
     }
 
     /**
      * Same as {@link #of()} but mentioning a parent for chaining
      */
-    public static <T> JkTestSelection<T> of(T parent) {
+    public static <T> JkTestSelection<T> ofParent(T parent) {
         return new JkTestSelection(parent);
     }
 

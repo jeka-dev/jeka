@@ -2,7 +2,6 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
-import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,9 +32,9 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
 
-    private JkProjectSourceLayout sourceLayout;
+    private Path baseDir = Paths.get(".");
 
-    private JkProjectOutLayout outLayout;
+    private String outputDir = "jeka/output";
 
     private final JkJavaProject.JkSteps steps;
 
@@ -43,34 +42,16 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     private final JkArtifactBasicProducer<JkJavaProject> artifactProducer;
 
-    private JkJavaProject(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout;
-        outLayout = JkProjectOutLayout.ofClassicJava().withOutputDir(getBaseDir().resolve(JkConstants.OUTPUT_PATH));
-        dependencyManagement = JkDependencyManagement.of(this);
+    private JkJavaProject() {
+        dependencyManagement = JkDependencyManagement.ofParent(this);
         steps = new JkSteps(this);
-        artifactProducer = JkArtifactBasicProducer.of(this)
-                .setArtifactFileFunction(() -> outLayout.getOutputPath(), this::artifactFileNamePart);
+        artifactProducer = JkArtifactBasicProducer.ofParent(this)
+                .setArtifactFileFunction(this::getOutputDir, this::artifactFileNamePart);
         registerArtifacts();
     }
 
-    public static JkJavaProject of(JkProjectSourceLayout layout) {
-        return new JkJavaProject(layout);
-    }
-
-    public static JkJavaProject ofMavenLayout(Path baseDir) {
-        return JkJavaProject.of(JkProjectSourceLayout.ofMavenStyle().withBaseDir(baseDir));
-    }
-
-    public static JkJavaProject ofMavenLayout(String baseDir) {
-        return ofMavenLayout(Paths.get(baseDir));
-    }
-
-    public static JkJavaProject ofSimpleLayout(Path baseDir) {
-        return JkJavaProject.of(JkProjectSourceLayout.ofSimpleStyle().withBaseDir(baseDir));
-    }
-
-    public static JkJavaProject ofSimpleLayout(String baseDir) {
-        return ofSimpleLayout(Paths.get(baseDir));
+    public static JkJavaProject of() {
+        return new JkJavaProject();
     }
 
 
@@ -78,28 +59,26 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     @Override
     public Path getBaseDir() {
-        return this.getSourceLayout().getBaseDir();
+        return this.baseDir;
     }
 
-    public JkProjectSourceLayout getSourceLayout() {
-        return sourceLayout;
-    }
-
-    public JkProjectOutLayout getOutLayout() {
-        return outLayout;
-    }
-
-    public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout;
+    public JkJavaProject setBaseDir(Path baseDir) {
+        this.baseDir = baseDir;
         return this;
     }
 
-    public JkJavaProject setOutLayout(JkProjectOutLayout outLayout) {
-        if (outLayout.getOutputPath().isAbsolute()) {
-            this.outLayout = outLayout;
-        } else {
-            this.outLayout = outLayout.withOutputDir(getBaseDir().resolve(outLayout.getOutputPath()));
-        }
+    /**
+     * Returns path of the directory under which are produced build files
+     */
+    public Path getOutputDir() {
+        return baseDir.resolve(outputDir);
+    }
+
+    /**
+     * Sets the output path dir relative to base dir.
+     */
+    public JkJavaProject setOutputDir(String relativePath) {
+        this.outputDir = relativePath;
         return this;
     }
 
@@ -119,7 +98,7 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     @Override
     public String toString() {
-        return "project " + this.sourceLayout.getBaseDir().getFileName();
+        return "project " + getBaseDir().getFileName();
     }
 
     @Override
@@ -128,12 +107,14 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
     }
 
     public String getInfo() {
+        JkJavaProjectMakerCompilationStep compilation = getSteps().compilation;
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + steps.getPublishing().getVersionedModule() + "\n")
-                .append(this.sourceLayout.getInfo()).append("\n")
+                .append("Production sources : " + steps.compilation.getLayout().getInfo()).append("\n")
+                .append("Test sources : " + steps.testing.getTestCompilation().getLayout().getInfo()).append("\n")
                 .append("Java Source Version : " + steps.getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
                 .append("Source Encoding : " + steps.getCompilation().getComputedCompileSpec().getEncoding() + "\n")
-                .append("Source file count : " + sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
+                .append("Source file count : " + compilation.getLayout().getSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
                 .append("Publish repositories : " + steps.getPublishing().getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
@@ -143,23 +124,25 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
-        return JkJavaIdeSupport.ofDefault()
-                .withDependencies(this.dependencyManagement.getDependencies())
-                .withDependencyResolver(this.dependencyManagement.getResolver())
-                .withSourceLayout(this.sourceLayout)
-                .withSourceVersion(steps.getCompilation().getComputedCompileSpec().getSourceVersion());
+        return JkJavaIdeSupport.of(baseDir)
+                .setSourceVersion(steps.compilation.getJavaVersion())
+                .setSourceLayout(steps.compilation.getLayout())
+                .setTestSourceLayout(steps.testing.getTestCompilation().getLayout())
+                .setDependencies(this.dependencyManagement.getDependencies())
+                .setDependencyResolver(this.dependencyManagement.getResolver());
     }
 
     private String artifactFileNamePart() {
         JkVersionedModule versionedModule = steps.getPublishing().getVersionedModule();
-        if (versionedModule == null) {
-            getSourceLayout().getBaseDir().getFileName().toString();
+        if (versionedModule != null) {
+            return versionedModule.toString();
         }
-        return versionedModule.toString();
+        return baseDir.getFileName().toString();
     }
 
     private void registerArtifacts() {
-        artifactProducer.putMainArtifact(steps.getPackaging()::createBinJar);
+        artifactProducer.putMainArtifact(steps.getPackaging()::createBinJar,
+                () -> dependencyManagement.fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles());
         artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, steps.getPackaging()::createSourceJar);
         artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, steps.getPackaging()::createJavadocJar);
     }
@@ -180,11 +163,11 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
         private JkSteps(JkJavaProject __) {
             this.__ = __;
-            compilation = JkJavaProjectMakerCompilationStep.ofProd(__);
-            testing = new JkJavaProjectMakerTestingStep(__);
-            packaging = JkJavaProjectMakerPackagingStep.of(__);
-            publishing = new JkJavaProjectMakerPublishingStep(__);
-            documentation = JkJavaProjectMakerDocumentationStep.of(__);
+            compilation = JkJavaProjectMakerCompilationStep.ofProd(__, this);
+            testing = new JkJavaProjectMakerTestingStep(__, this);
+            packaging = new JkJavaProjectMakerPackagingStep(__, this);
+            publishing = new JkJavaProjectMakerPublishingStep(__, this);
+            documentation = new JkJavaProjectMakerDocumentationStep(__, this);
         }
 
         public JkJavaProjectMakerCompilationStep<JkJavaProject.JkSteps> getCompilation() {

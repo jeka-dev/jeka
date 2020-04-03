@@ -30,25 +30,26 @@ public class JkJavaProjectMakerPackagingStep {
 
     private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
-    private JkManifest manifest;
+    private final JkManifest manifest;
 
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
+
+    private final JkJavaProjectMakerCompilationStep compilationStep;
+
+    private final JkJavaProjectMakerDocumentationStep documentationStep;
 
     /**
      * For Parent chaining
      */
     public JkJavaProject.JkSteps __;
 
-    private JkJavaProjectMakerPackagingStep(JkJavaProject project) {
+    JkJavaProjectMakerPackagingStep(JkJavaProject project, JkJavaProject.JkSteps steps) {
         this.project = project;
-        this.__ = project.getSteps();
+        this.__ = steps;
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
-    }
-
-    static JkJavaProjectMakerPackagingStep of(JkJavaProject project) {
-        JkJavaProjectMakerPackagingStep result = new JkJavaProjectMakerPackagingStep(project);
-        result.manifest = JkManifest.of(result);
-        return result;
+        manifest = JkManifest.ofParent(this);
+        compilationStep = steps.getCompilation();
+        documentationStep = steps.getDocumentation();
     }
 
     public JkManifest<JkJavaProjectMakerPackagingStep> getManifest() {
@@ -77,7 +78,7 @@ public class JkJavaProjectMakerPackagingStep {
     private JkVersionedModule defaultVersionedModule() {
         JkVersionedModule versionedModule = project.getSteps().getPublishing().getVersionedModule();
         if (versionedModule == null) {
-            return JkVersionedModule.ofRootDirName(project.getSourceLayout().getBaseDir().getFileName().toString());
+            return JkVersionedModule.ofRootDirName(project.getBaseDir().getFileName().toString());
         }
         return versionedModule;
     }
@@ -86,7 +87,7 @@ public class JkJavaProjectMakerPackagingStep {
         final String namePart = artifactFileNameSupplier.get();
         final String classifier = artifactId.getClassifier() == null ? "" : "-" + artifactId.getClassifier();
         final String extension = artifactId.getExtension() == null ? "" : "." + artifactId.getExtension();
-        return project.getOutLayout().getOutputPath().resolve(namePart + classifier + extension);
+        return project.getOutputDir().resolve(namePart + classifier + extension);
     }
 
     public Supplier<String> getArtifactFileNameSupplier() {
@@ -96,7 +97,7 @@ public class JkJavaProjectMakerPackagingStep {
     public void createBinJar(Path target) {
         project.getSteps().getCompilation().runIfNecessary();
         project.getSteps().getTesting().runIfNecessary();
-        JkJarPacker.of(project.getOutLayout().getClassDir())
+        JkJarPacker.of(compilationStep.getLayout().getClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeJar(target);
@@ -107,46 +108,25 @@ public class JkJavaProjectMakerPackagingStep {
         project.getSteps().getTesting().runIfNecessary();
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles();
-        JkJarPacker.of(project.getOutLayout().getClassDir())
+        JkJarPacker.of(compilationStep.getLayout().getClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath, this.fatJarFilter);
     }
 
     public void createSourceJar(Path target) {
-        project.getSourceLayout().getSources().and(project.getOutLayout().getGeneratedSourceDir()).zipTo(target);
+        compilationStep.getLayout().getSources().and(compilationStep
+                .getLayout().getGeneratedSourceDir()).zipTo(target);
     }
 
     void createJavadocJar(Path target) {
         project.getSteps().getDocumentation().runIfNecessary();
-        Path javadocDir = project.getOutLayout().getJavadocDir();
+        Path javadocDir = documentationStep.getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
                     + ". Can't create a javadoc jar until javadoc files has been generated.");
         }
         JkPathTree.of(javadocDir).zipTo(target);
-    }
-
-    public void createTestJar(Path target) {
-        project.getSteps().getCompilation().runIfNecessary();
-        project.getSteps().getTesting().runIfNecessary();
-        JkJarPacker.of(project.getOutLayout().getTestClassDir())
-                .withManifest(manifest)
-                .makeJar(target);
-    }
-
-    void createTestSourceJar(Path target) {
-        project.getSourceLayout().getTests().zipTo(target);
-    }
-
-    /**
-     * Specifies how the name of the artifact files will be constructed.
-     * Given artifact file name are always structured as XXXXX-classifier.ext,
-     * this method acts on the XXXXX part.
-     */
-    public JkJavaProjectMakerPackagingStep setArtifactFileNameSupplier(Supplier<String> artifactFileNameSupplier) {
-        this.artifactFileNameSupplier = artifactFileNameSupplier;
-        return this;
     }
 
     /**

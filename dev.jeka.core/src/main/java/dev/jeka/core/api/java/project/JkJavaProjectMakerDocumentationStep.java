@@ -11,24 +11,26 @@ public class JkJavaProjectMakerDocumentationStep {
 
     private final JkJavaProject project;
 
-    private JkJavadocProcessor<JkJavaProjectMakerDocumentationStep> javadocMaker;
+    private final JkJavadocProcessor<JkJavaProjectMakerDocumentationStep> javadocMaker;
+
+    private final JkJavaProjectMakerCompilationStep compilationStep;
 
     private boolean done;
+
+    // relative to output path
+    private String javadocDir;
 
     /**
      * For parent chaining
      */
     public final JkJavaProject.JkSteps __;
 
-    private JkJavaProjectMakerDocumentationStep(JkJavaProject project) {
+     JkJavaProjectMakerDocumentationStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
         this.project = project;
-        this.__ = project.getSteps();
-    }
+        this.__ = parent;
+        javadocMaker = JkJavadocProcessor.ofParent(this);
+        compilationStep = parent.getCompilation();
 
-    static JkJavaProjectMakerDocumentationStep of(JkJavaProject project) {
-        JkJavaProjectMakerDocumentationStep result = new JkJavaProjectMakerDocumentationStep(project);
-        result.javadocMaker = JkJavadocProcessor.of(result);
-        return result;
     }
 
     public JkJavadocProcessor<JkJavaProjectMakerDocumentationStep> getJavadocProcessor() {
@@ -41,17 +43,26 @@ public class JkJavaProjectMakerDocumentationStep {
     public void run() {
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles();
-        Path dir = project.getOutLayout().getJavadocDir();
-        javadocMaker.make(classpath, project.getSourceLayout().getSources(), dir);
+        Path dir = project.getOutputDir().resolve(javadocDir);
+        javadocMaker.make(classpath, compilationStep.getLayout().getSources(), dir);
     }
 
     public void runIfNecessary() {
-        if (done && !Files.exists(project.getOutLayout().getJavadocDir())) {
+        if (done && !Files.exists(project.getOutputDir().resolve(javadocDir))) {
             JkLog.info("Javadoc already generated. Won't perfom again");
         } else {
             run();
             done = true;
         }
+    }
+
+    public Path getJavadocDir() {
+        return project.getOutputDir().resolve(javadocDir);
+    }
+
+    public JkJavaProjectMakerDocumentationStep setJavadocDir(String javadocDir) {
+        this.javadocDir = javadocDir;
+        return this;
     }
 
     void reset() {

@@ -1,8 +1,8 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkResourceProcessor;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
@@ -38,17 +38,19 @@ public class JkJavaProjectMakerCompilationStep<T> {
 
     private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> beforeGenerate;
 
-    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> afterGenerate;
+    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> beforeCompile;
 
-    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> sourceGenerator;
+    private final JkConsumers<Path, JkJavaProjectMakerCompilationStep<T>> sourceGenerator;
 
-    private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> resourceGenerator;
+    private final JkConsumers<Path, JkJavaProjectMakerCompilationStep<T>> resourceGenerator;
 
     private final JkRunnables<JkJavaProjectMakerCompilationStep<T>> afterCompile;
 
     private final JkJavaCompiler<JkJavaProjectMakerCompilationStep<T>> compiler;
 
     private final JkResourceProcessor<JkJavaProjectMakerCompilationStep<T>> resourceProcessor;
+
+    private final JkCompileLayout<JkJavaProjectMakerCompilationStep<T>> layout;
 
     private final String scope;
 
@@ -57,8 +59,6 @@ public class JkJavaProjectMakerCompilationStep<T> {
     private boolean done;
 
     private Supplier<JkJavaCompileSpec> compileSpecSupplier;
-
-    private Supplier<JkPathTreeSet> resourceSupplier;
 
     private JkJavaVersion javaVersion;
 
@@ -69,20 +69,22 @@ public class JkJavaProjectMakerCompilationStep<T> {
         this.project = project;
         this.scope = scope;
         beforeGenerate = JkRunnables.noOp(this);
-        afterGenerate = JkRunnables.noOp(this);
-        sourceGenerator = JkRunnables.noOp(this);
-        resourceGenerator = JkRunnables.noOp(this);
+        sourceGenerator = JkConsumers.ofParent(this);
+        resourceGenerator = JkConsumers.ofParent(this);
+        beforeCompile = JkRunnables.noOp(this);
+        compiler = JkJavaCompiler.ofParent(this);
         afterCompile = JkRunnables.noOp(this);
-        compiler = JkJavaCompiler.of(this);
-        resourceProcessor = JkResourceProcessor.of(this);
+        resourceProcessor = JkResourceProcessor.ofParent(this);
+        layout = JkCompileLayout.ofParent(this)
+                .setBaseDirSupplier(project::getBaseDir)
+                .setOutputDirSupplier(project::getOutputDir);
     }
 
-
-    static JkJavaProjectMakerCompilationStep<JkJavaProjectMaker> ofProd(JkJavaProject project) {
+    static JkJavaProjectMakerCompilationStep<JkJavaProject.JkSteps> ofProd(JkJavaProject project, JkJavaProject.JkSteps parent) {
         JkJavaProjectMakerCompilationStep result =
-                new JkJavaProjectMakerCompilationStep(project, "production code", project.getSteps());
+                new JkJavaProjectMakerCompilationStep(project, "production code", parent);
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
-        result.resourceSupplier = () -> project.getSourceLayout().getResources();
+        result.layout.setStandardSource(JkCompileLayout.Concern.PROD, JkCompileLayout.Style.MAVEN);
         return result;
     }
 
@@ -91,7 +93,7 @@ public class JkJavaProjectMakerCompilationStep<T> {
         JkJavaProjectMakerCompilationStep result =
                 new JkJavaProjectMakerCompilationStep(project, "test code", parent);
         result.compileSpecSupplier = () -> result.computeTestCompileSpec(project.getSteps().getCompilation());
-        result.resourceSupplier = () -> project.getSourceLayout().getTestResources();
+        result.layout.setStandardSource(JkCompileLayout.Concern.TEST, JkCompileLayout.Style.MAVEN);
         return result;
     }
 
@@ -104,6 +106,10 @@ public class JkJavaProjectMakerCompilationStep<T> {
         done = false;
     }
 
+    public JkCompileLayout<JkJavaProjectMakerCompilationStep<T>> getLayout() {
+        return layout;
+    }
+
     /**
      * Performs entire compilation phase, including : <ul>
      * <li>Generating resources</li>
@@ -114,11 +120,11 @@ public class JkJavaProjectMakerCompilationStep<T> {
      */
     public void run() {
         JkLog.startTask("Compilation and resource processing of " + scope);
-        afterGenerate.run();
-        sourceGenerator.run();
-        resourceGenerator.run();
-        afterGenerate.run();
+        beforeGenerate.run();
+        sourceGenerator.accept(this.layout.getGeneratedSourceDir());
+        resourceGenerator.accept(this.layout.getGeneratedResourceDir());
         processResources();
+        beforeCompile.run();
         runCompile();
         afterCompile.run();
         JkLog.endTask();
@@ -140,7 +146,7 @@ public class JkJavaProjectMakerCompilationStep<T> {
      * Returns the runnables to run prior source and resource generation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables getBeforeGenerate() {
+    public JkRunnables<JkJavaProjectMakerCompilationStep<T>> getBeforeGenerate() {
         return beforeGenerate;
     }
 
@@ -148,23 +154,25 @@ public class JkJavaProjectMakerCompilationStep<T> {
      * Returns the runnables to run after source and resource generation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables getAfterGenerate() {
-        return afterGenerate;
+    public JkRunnables<JkJavaProjectMakerCompilationStep<T>> getBeforeCompile() {
+        return beforeCompile;
     }
 
     /**
-     * Returns the runnables generating sources. User can chain its own runnable
-     * to customise the process. Empty by default.
+     * Returns the consumers generating sources. User can chain its own consumer
+     * to customise the process. Empty by default. The object passed as parameter of the consumers
+     * is the base directory where sources must be generated.
      */
-    public JkRunnables getSourceGenerator() {
+    public JkConsumers<Path, JkJavaProjectMakerCompilationStep<T>> getSourceGenerator() {
         return sourceGenerator;
     }
 
     /**
-     * Returns the runnables generating resources. User can chain its own runnable
-     * to customise the process. Empty by default.
+     * Returns the consumers generating resources. User can chain its own consumer
+     * to customise the process. Empty by default. The object passed as parameter of the consumers
+     * is the base directory where resources must be generated.
      */
-    public JkRunnables getResourceGenerator() {
+    public JkConsumers<Path, JkJavaProjectMakerCompilationStep<T>> getResourceGenerator() {
         return resourceGenerator;
     }
 
@@ -245,8 +253,7 @@ public class JkJavaProjectMakerCompilationStep<T> {
     }
 
     private void processResources() {
-        Path dir = getComputedCompileSpec().getOutputDir();
-        this.getResourceProcessor().generate(resourceSupplier.get(), dir);
+        this.getResourceProcessor().generate(layout.getResources(), layout.getClassDir());
     }
 
     private void runCompile() {
@@ -262,10 +269,9 @@ public class JkJavaProjectMakerCompilationStep<T> {
                 .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
                 .setClasspath(project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles())
-                .addSources(project.getSourceLayout().getSources()
-                        .and(project.getOutLayout().getGeneratedSourceDir()))
+                .addSources(layout.getSources().and(layout.getGeneratedSourceDir()))
                 .addOptions(compileOptions)
-                .setOutputDir(project.getOutLayout().getClassDir());
+                .setOutputDir(layout.getClassDir());
     }
 
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectMakerCompilationStep prodStep) {
@@ -275,10 +281,10 @@ public class JkJavaProjectMakerCompilationStep<T> {
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
                 .setClasspath(project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles()
-                            .andPrepend(project.getOutLayout().getClassDir()))
-                .addSources(project.getSourceLayout().getTests())
+                            .andPrepend(prodStep.layout.getClassDir()))
+                .addSources(layout.getSources().and(layout.getGeneratedSourceDir()))
                 .addOptions(compileOptions)
-                .setOutputDir(project.getOutLayout().getTestClassDir());
+                .setOutputDir(layout.getClassDir());
     }
 
 }

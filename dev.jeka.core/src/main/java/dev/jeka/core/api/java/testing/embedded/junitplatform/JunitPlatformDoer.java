@@ -116,7 +116,7 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
     }
 
     private static String[] toArray(Set<String> strings) {
-        return new ArrayList<String>(strings).toArray(new String[0]);
+        return new ArrayList<>(strings).toArray(new String[0]);
     }
 
     private static JkTestResult.JkFailure toFailure(TestExecutionSummary.Failure failure) {

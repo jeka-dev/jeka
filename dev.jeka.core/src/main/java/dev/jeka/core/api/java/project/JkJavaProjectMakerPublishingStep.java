@@ -11,8 +11,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.function.UnaryOperator;
 
-import static dev.jeka.core.api.java.project.JkJavaProjectMaker.*;
-
 public class JkJavaProjectMakerPublishingStep {
 
     private final JkJavaProject project;
@@ -32,9 +30,9 @@ public class JkJavaProjectMakerPublishingStep {
      */
     public final JkJavaProject.JkSteps __;
 
-    JkJavaProjectMakerPublishingStep(JkJavaProject project) {
+    JkJavaProjectMakerPublishingStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
         this.project = project;
-        this.__ = project.getSteps();
+        this.__ = parent;
     }
 
     /**
@@ -99,7 +97,7 @@ public class JkJavaProjectMakerPublishingStep {
                 + project + ". Can't publish.");
         JkMavenPublication publication = JkMavenPublication.of(project.getArtifactProducer(), Collections.emptySet())
                 .with(mavenPublicationInfo).withSigner(signer);
-        JkPublisher.of(repos, project.getOutLayout().getOutputPath()).withSigner(this.signer)
+        JkPublisher.of(repos, project.getOutputDir()).withSigner(this.signer)
                 .publishMaven(versionedModule, publication, project.getDependencyManagement().getScopeDefaultedDependencies());
     }
 
@@ -113,14 +111,12 @@ public class JkJavaProjectMakerPublishingStep {
         final JkDependencySet dependencies = project.getDependencyManagement().getScopeDefaultedDependencies();
         JkArtifactProducer artifactProducer = project.getArtifactProducer();
         final JkIvyPublication publication = JkIvyPublication.of(artifactProducer.getMainArtifactPath(), JkJavaDepScopes.COMPILE.getName())
-                .andOptional(artifactProducer.getArtifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES.getName())
-                .andOptional(artifactProducer.getArtifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC.getName())
-                .andOptional(artifactProducer.getArtifactPath(TEST_ARTIFACT_ID), JkJavaDepScopes.TEST.getName())
-                .andOptional(artifactProducer.getArtifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES.getName());
+                .andOptional(artifactProducer.getArtifactPath(JkJavaProject.SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES.getName())
+                .andOptional(artifactProducer.getArtifactPath(JkJavaProject.JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC.getName());
         final JkVersionProvider resolvedVersions = project.getDependencyManagement().getResolver()
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
         JkLog.endTask();
-        JkPublisher.of(repos, project.getOutLayout().getOutputPath())
+        JkPublisher.of(repos, project.getOutputDir())
                 .publishIvy(versionedModule, publication, dependencies,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }

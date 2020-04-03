@@ -18,7 +18,7 @@ public final class JkResolutionParameters<T> {
         __ = parent;
     }
 
-    static <T> JkResolutionParameters of(T parent) {
+    static <T> JkResolutionParameters ofParent(T parent) {
         return new JkResolutionParameters(parent);
     }
 

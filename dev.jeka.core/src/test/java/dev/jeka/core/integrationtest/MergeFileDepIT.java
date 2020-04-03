@@ -89,7 +89,7 @@ public class MergeFileDepIT {
         JkDependencyResolver resolver = JkDependencyResolver.of();
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
         assertEquals(2, tree.toFlattenList().size());
-        resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
+        resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet());
         assertEquals(2, resolver.resolve(deps).getDependencyTree().toFlattenList().size());
 
     }

@@ -27,7 +27,8 @@ public class JkJavaProjectTest {
 
 
         JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
-        baseProject.getDependencyManagement().addDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
+        baseProject.getDependencyManagement().addDependencies(JkDependencySet.of()
+                .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));

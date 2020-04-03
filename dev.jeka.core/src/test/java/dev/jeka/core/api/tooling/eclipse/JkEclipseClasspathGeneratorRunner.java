@@ -19,7 +19,7 @@ public class JkEclipseClasspathGeneratorRunner {
                 .and(moduleDependency);
         JkEclipseClasspathGenerator generator = JkEclipseClasspathGenerator.of(JkProjectSourceLayout.ofMavenStyle(),
                 dependencies,
-                JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet()),
+                JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet()),
                 JkJavaVersion.V8);
         generator.addAttribute(fileDep, "myValue", "myKey");
         generator.addAttribute(fileDep, "myValue2", "myKey2");

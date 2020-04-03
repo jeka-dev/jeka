@@ -28,7 +28,7 @@ public class JkPluginSonar extends JkPlugin {
         final Path baseDir = sourceLayout.getBaseDir();
         final JkPathSequence libs = project.getDependencyManagement().fetchDependencies(
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED).getFiles();
-        final Path testReportDir = project.getOutLayout().getTestReportDir();
+        final Path testReportDir = project.getSteps().getTesting().getReportDir();
         final JkVersionedModule module = project.getSteps().getPublishing().getVersionedModule();
         final String fullName = module != null ? module.getModuleId().getDotedName() : project.getBaseDir().getFileName().toString();
         final String name = module != null ? module.getModuleId().getName() : project.getBaseDir().getFileName().toString();
@@ -36,7 +36,7 @@ public class JkPluginSonar extends JkPlugin {
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
-                .withBinaries(project.getOutLayout().getClassDir())
+                .withBinaries(project.getSteps().getCompilation().getLayout().getClassDir())
                 .withLibraries(libs)
                 .withSourcesPath(sourceLayout.getSources().getRootDirsOrZipFiles())
                 .withTestPath(sourceLayout.getTests().getRootDirsOrZipFiles())
@@ -47,7 +47,7 @@ public class JkPluginSonar extends JkPlugin {
                         baseDir.relativize(testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SOURCE_ENCODING, project.getSteps().getCompilation().getSourceEncoding())
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
-                        baseDir.relativize(project.getOutLayout().getOutputPath("jacoco/jacoco.exec")).toString());
+                        baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.exec")).toString());
 
     }
 

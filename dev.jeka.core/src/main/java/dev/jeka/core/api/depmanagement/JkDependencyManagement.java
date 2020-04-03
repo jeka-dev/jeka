@@ -29,12 +29,16 @@ public class JkDependencyManagement<T> {
 
     private JkDependencyManagement(T __) {
         this.__ = __;
-        resolver = JkDependencyResolver.of(this);
+        resolver = JkDependencyResolver.ofParent(this);
         resolver.addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
     }
 
-    public static <T> JkDependencyManagement<T> of(T parent) {
+    public static <T> JkDependencyManagement<T> ofParent(T parent) {
        return new JkDependencyManagement(parent);
+    }
+
+    public static JkDependencyManagement<Void> of() {
+        return ofParent(null);
     }
 
     public JkDependencySet getDependencies() {
@@ -94,19 +98,20 @@ public class JkDependencyManagement<T> {
      */
     public JkResolveResult fetchDependencies(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
-        return dependencyCache.computeIfAbsent(scopeSet,
-                scopes1 -> {
-                    JkResolveResult resolveResult =
-                            resolver.resolve(getScopeDefaultedDependencies(), scopes);
-                    JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
-                    if (report.hasErrors()) {
-                        if (failOnDependencyResolutionError) {
-                            throw new JkException(report.toString());
-                        }
-                        JkLog.warn(report.toString());
-                    }
-                    return resolveResult;
-                });
+        return dependencyCache.computeIfAbsent(scopeSet, this::resolveDependencies);
+    }
+
+    private JkResolveResult resolveDependencies(Set<JkScope>  scopes)  {
+        JkResolveResult resolveResult =
+                resolver.resolve(getScopeDefaultedDependencies(), scopes);
+        JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
+        if (report.hasErrors()) {
+            if (failOnDependencyResolutionError) {
+                throw new JkException(report.toString());
+            }
+            JkLog.warn(report.toString());
+        }
+        return resolveResult;
     }
 
 }

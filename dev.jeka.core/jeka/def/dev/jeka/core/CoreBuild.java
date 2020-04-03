@@ -71,8 +71,8 @@ public class CoreBuild extends JkCommandSet {
         }
         javaPlugin.getProject()
             .getArtifactProducer()
-                .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
                 .putMainArtifact(this::doPackWithEmbedded)
+                .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
                 .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__ // define wrapper
             .getSteps()
                 .getCompilation()
@@ -81,11 +81,11 @@ public class CoreBuild extends JkCommandSet {
                     .getCompiler()
                         .setForkingWithJavac().__.__
                 .getTesting()
-                    .getCompilation()
+                    .getTestCompilation()
                         .getCompiler()
                             .setDefault().__.__
                     .getTestProcessor()
-                        .setForkingProcess(true)
+                        .setForkingProcess(false)
                         .getEngineBehavior()
                             .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
                     .getTestSelection()
@@ -119,25 +119,7 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private Path distribFolder() {
-        return javaPlugin.getProject().getOutLayout().getOutputPath().resolve("distrib");
-    }
-
-    public void publishDocsOnGithubPage() {
-        JkJavaProject project = javaPlugin.getProject();
-        Path javadocSourceDir = project.getOutLayout().getJavadocDir();
-        Path tempRepo = getOutputDir().resolve("pagesGitRepo");
-        String userPrefix = githubToken == null ? "" : githubToken + "@";
-        git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
-                tempRepo.toString());
-        project.getSteps().getDocumentation().runIfNecessary();
-        Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
-        JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
-        makeDocs();
-        JkPathTree.of(distribFolder().resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
-        JkGitWrapper gitTemp = JkGitWrapper.of(tempRepo).withLogCommand(true);
-        gitTemp.exec("add", "*");
-        gitTemp.withFailOnError(false).exec("commit", "-am", "Doc");
-        gitTemp.exec("push");
+        return javaPlugin.getProject().getOutputDir().resolve("distrib");
     }
 
     private void doDistrib(Path distribFile) {
@@ -204,12 +186,13 @@ public class CoreBuild extends JkCommandSet {
         JkLog.startTask("Creating main jar");
 
         // Main jar
-        javaPlugin.getProject().getSteps().getPackaging().createBinJar(targetJar);
+        JkJavaProject project = javaPlugin.getProject();
+        project.getSteps().getPackaging().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
-        Path embeddedJar = javaPlugin.getProject().getOutLayout().getOutputPath().resolve("embedded.jar");
-        JkPathTree classTree = JkPathTree.of(javaPlugin.getProject().getOutLayout().getClassDir());
+        Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
+        JkPathTree classTree = JkPathTree.of(project.getSteps().getCompilation().getLayout().getClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
             .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
@@ -237,7 +220,26 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doWrapper(Path wrapperJar) {
-        JkPathTree.of(javaPlugin.getProject().getOutLayout().getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
+        JkPathTree.of(javaPlugin.getProject().getSteps().getCompilation().getLayout()
+                .getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
+    }
+
+    public void publishDocsOnGithubPage() {
+        JkJavaProject project = javaPlugin.getProject();
+        Path javadocSourceDir = project.getSteps().getDocumentation().getJavadocDir();
+        Path tempRepo = getOutputDir().resolve("pagesGitRepo");
+        String userPrefix = githubToken == null ? "" : githubToken + "@";
+        git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
+                tempRepo.toString());
+        project.getSteps().getDocumentation().runIfNecessary();
+        Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
+        JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
+        makeDocs();
+        JkPathTree.of(distribFolder().resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
+        JkGitWrapper gitTemp = JkGitWrapper.of(tempRepo).withLogCommand(true);
+        gitTemp.exec("add", "*");
+        gitTemp.withFailOnError(false).exec("commit", "-am", "Doc");
+        gitTemp.exec("push");
     }
 
     public void cleanPack() {
@@ -245,7 +247,7 @@ public class CoreBuild extends JkCommandSet {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class, args).cleanPack();;
+        JkInit.instanceOf(CoreBuild.class, args).cleanPack();
     }
 
 }

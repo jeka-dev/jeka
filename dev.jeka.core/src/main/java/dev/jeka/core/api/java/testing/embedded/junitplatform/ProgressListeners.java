@@ -138,6 +138,8 @@ class ProgressListeners {
 
         public void silent(boolean silent) {
             if (silent) {
+                System.out.flush();
+                System.err.flush();
                 System.setOut(JkUtilsIO.nopPrintStream());
                 System.setErr(JkUtilsIO.nopPrintStream());
             } else {

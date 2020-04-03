@@ -29,7 +29,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupportSuppl
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
     JkClasspath classpath;
     Path reportDir = getOutputDir().resolve("junitRreport");
-    JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+    JkDependencyResolver resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral());
 
     public JkDependencySet dependencies() {
         return JkDependencySet.of()

@@ -54,13 +54,13 @@ public final class JkJavadocProcessor<T> {
      * Creates a default {@link JkJavadocProcessor} .
      */
     public static JkJavadocProcessor<Void> of() {
-        return new JkJavadocProcessor(null);
+        return ofParent(null);
     }
 
     /**
      * Sale as {@link #of()} but providing a parent chaining
      */
-    public static <T> JkJavadocProcessor<T> of(T parent) {
+    public static <T> JkJavadocProcessor<T> ofParent(T parent) {
         return new JkJavadocProcessor(parent);
     }
 

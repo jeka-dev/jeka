@@ -33,15 +33,20 @@ public class JkDependencyResolverTest {
     @Test
     public void resolveDependenciesOfTypeProject() throws Exception {
         Path root = unzipToDir("sample-multiproject.zip");
-        Path base = root.resolve("base");
-        Path core = root.resolve("core");
-        JkJavaProject baseProject = JkJavaProject.ofMavenLayout(base);
-        JkJavaProject coreProject = JkJavaProject.ofMavenLayout(core);
-        baseProject.getDependencyManagement().addDependencies(JkDependencySet.of().and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION));
-        coreProject.getDependencyManagement().addDependencies(JkDependencySet.of().and(baseProject));
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
 
-        JkResolveResult resolveResult = dependencyResolver.resolve(coreProject.getDependencyManagement().getDependencies());
+        JkJavaProject baseProject = JkJavaProject.ofMavenLayout(root.resolve("base"))
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION)).__;;
+
+        JkJavaProject coreProject = JkJavaProject.ofMavenLayout(root.resolve("core"))
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and(baseProject)).__;
+
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = dependencyResolver.resolve(
+                coreProject.getDependencyManagement().getDependencies());
 
         Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
         JkDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);

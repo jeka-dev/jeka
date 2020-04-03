@@ -114,7 +114,7 @@ final class Engine {
         for (final JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
-        return JkDependencyResolver.of(this.defRepos).resolve(deps).getFiles();
+        return JkDependencyResolver.ofParent(this.defRepos).resolve(deps).getFiles();
     }
 
     private void preCompile() {
@@ -274,7 +274,7 @@ final class Engine {
 
     private JkDependencyResolver getRunDependencyResolver() {
         if (this.computeDefDependencies().hasModules()) {
-            return JkDependencyResolver.of(this.defRepos);
+            return JkDependencyResolver.ofParent(this.defRepos);
         }
         return JkDependencyResolver.of();
     }

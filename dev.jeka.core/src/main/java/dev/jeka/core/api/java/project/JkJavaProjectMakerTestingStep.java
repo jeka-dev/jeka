@@ -22,13 +22,18 @@ public class JkJavaProjectMakerTestingStep {
 
     private final JkJavaProject project;
 
-    private final JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> compilation;
+    private final JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> testCompilation;
+
+    private final JkJavaProjectMakerCompilationStep prodCompilation;
 
     public final JkRunnables afterTest;
 
     private JkTestProcessor testProcessor;
 
     private JkTestSelection testSelection;
+
+    // replative path from output dir
+    private String reportDir = "test-report";
 
     private boolean done;
 
@@ -41,15 +46,15 @@ public class JkJavaProjectMakerTestingStep {
      */
     public final JkJavaProject.JkSteps __;
 
-    JkJavaProjectMakerTestingStep(JkJavaProject project) {
+    JkJavaProjectMakerTestingStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
         this.project = project;
-        this.__ = project.getSteps();
-        compilation = JkJavaProjectMakerCompilationStep.ofTest(project, this);
+        this.__ = parent;
+        testCompilation = JkJavaProjectMakerCompilationStep.ofTest(project, this);
+        prodCompilation = parent.getCompilation();
         afterTest = JkRunnables.noOp(this);
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
     }
-
 
     /**
      * Returns tests to be run. The returned instance is mutable so users can modify it
@@ -70,8 +75,8 @@ public class JkJavaProjectMakerTestingStep {
     /**
      * Returns the compilation step for the test part.
      */
-    public JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> getCompilation() {
-        return compilation;
+    public JkJavaProjectMakerCompilationStep<JkJavaProjectMakerTestingStep> getTestCompilation() {
+        return testCompilation;
     }
 
     /**
@@ -79,9 +84,10 @@ public class JkJavaProjectMakerTestingStep {
      * dependencies involved in TEST scope.
      */
     public JkClasspath getTestClasspath() {
-        return JkClasspath.of(project.getOutLayout().getTestClassDir())
-                .and(project.getOutLayout().getClassDir())
-                .and(project.getDependencyManagement().fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
+        return JkClasspath.of(testCompilation.getLayout().getClassDir())
+                .and(prodCompilation.getLayout().getClassDir())
+                .and(project.getDependencyManagement()
+                        .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
     }
 
     /**
@@ -111,6 +117,15 @@ public class JkJavaProjectMakerTestingStep {
         return this;
     }
 
+    public Path getReportDir() {
+        return project.getOutputDir().resolve(reportDir);
+    }
+
+    public JkJavaProjectMakerTestingStep setReportDir(String reportDir) {
+        this.reportDir = reportDir;
+        return this;
+    }
+
     /**
      * Performs entire test phase, including : <ul>
      *     <li>compile regular code if needed</li>
@@ -123,7 +138,7 @@ public class JkJavaProjectMakerTestingStep {
     public void run() {
         JkLog.startTask("Processing tests");
         this.project.getSteps().getCompilation().runIfNecessary();
-        this.compilation.run();
+        this.testCompilation.run();
         executeWithTestProcessor();
         afterTest.run();
         JkLog.endTask();
@@ -155,8 +170,8 @@ public class JkJavaProjectMakerTestingStep {
     }
 
     private JkTestProcessor<JkJavaProjectMakerTestingStep> defaultTestProcessor() {
-        JkTestProcessor result = JkTestProcessor.of(this);
-        final Path reportDir = project.getOutLayout().getTestReportDir().resolve("junit");
+        JkTestProcessor result = JkTestProcessor.ofParent(this);
+        final Path reportDir = testCompilation.getLayout().getOutputPath(this.reportDir);
         result.getEngineBehavior()
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
@@ -164,9 +179,7 @@ public class JkJavaProjectMakerTestingStep {
     }
 
     private JkTestSelection<JkJavaProjectMakerTestingStep> defaultTestSelection() {
-        return JkTestSelection.of(this).addTestClassRoots(project.getOutLayout().getTestClassDir());
+        return JkTestSelection.ofParent(this).addTestClassRoots(testCompilation.getLayout().getClassDir());
     }
-
-
 
 }

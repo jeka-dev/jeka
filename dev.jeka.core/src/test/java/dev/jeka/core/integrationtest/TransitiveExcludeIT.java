@@ -35,7 +35,7 @@ public class TransitiveExcludeIT {
                 .and(JkModuleDependency.of(BOOT_TEST_AND_VERSION)
                         .andExclude(BOOT_TEST)
                         .andExclude("org.springframework.boot:spring-boot-test-autoconfigure"));
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkDependencyResolver resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
         assertFalse(resolveResult.contains(JkModuleId.of(BOOT_TEST)));
     }
@@ -47,7 +47,7 @@ public class TransitiveExcludeIT {
         JkDependencySet deps = JkDependencySet.of()
                 .and(BOOT_TEST_AND_VERSION, COMPILE)
                 .withGlobalExclusion(exclude);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        JkDependencyResolver resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);  // works with non empty scopes resolution
         assertFalse(resolveResult.contains(JkModuleId.of(BOOT_TEST)));
 

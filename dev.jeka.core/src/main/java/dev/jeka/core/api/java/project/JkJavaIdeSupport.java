@@ -5,53 +5,42 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.java.JkJavaVersion;
 
+import java.nio.file.Path;
+
 /**
  * Minimal information necessary to generate metadata project file for IDE.
  */
 public class JkJavaIdeSupport {
 
-    private final JkProjectSourceLayout sourceLayout;
+    private JkCompileLayout sourceLayout;
 
-    private final JkDependencySet dependencies;
+    private JkCompileLayout testSourceLayout;
 
-    private final JkJavaVersion sourceVersion;
+    private JkDependencySet dependencies;
 
-    private final JkDependencyResolver dependencyResolver;
+    private JkJavaVersion sourceVersion;
 
-    private JkJavaIdeSupport(JkProjectSourceLayout sourceLayout, JkDependencySet dependencySet,
-                             JkJavaVersion sourceVersion, JkDependencyResolver dependencyResolver) {
-        this.sourceLayout = sourceLayout;
-        this.dependencies = dependencySet;
-        this.sourceVersion = sourceVersion;
-        this.dependencyResolver = dependencyResolver;
+    private JkDependencyResolver dependencyResolver;
+
+    private JkJavaIdeSupport(Path baseDir) {
+        this.sourceLayout = JkCompileLayout.of().setBaseDir(baseDir)
+                .setStandardSource(JkCompileLayout.Concern.PROD, JkCompileLayout.Style.MAVEN);
+        this.testSourceLayout = JkCompileLayout.of().setBaseDir(baseDir)
+                .setStandardSource(JkCompileLayout.Concern.TEST, JkCompileLayout.Style.MAVEN);
+        this.dependencies = JkDependencySet.of();
+        this.sourceVersion = JkJavaVersion.V8;
+        this.dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());;
     }
 
-    public static JkJavaIdeSupport ofDefault() {
-        return new JkJavaIdeSupport(JkProjectSourceLayout.ofMavenStyle(), JkDependencySet.of(), JkJavaVersion.V8,
-                JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral()));
+    public static JkJavaIdeSupport of(Path baseDir) {
+        return new JkJavaIdeSupport(baseDir);
     }
 
-    public JkJavaIdeSupport withSourceLayout(JkProjectSourceLayout sourceLayout) {
-        return new JkJavaIdeSupport(sourceLayout, this.dependencies, this.sourceVersion,
-                this.dependencyResolver);
+    public JkCompileLayout getSourceLayout() {
+        return sourceLayout;
     }
 
-    public JkJavaIdeSupport withDependencies(JkDependencySet dependencies) {
-        return new JkJavaIdeSupport(this.sourceLayout, dependencies, this.sourceVersion,
-                this.dependencyResolver);
-    }
-
-    public JkJavaIdeSupport withSourceVersion(JkJavaVersion sourceVersion) {
-        return new JkJavaIdeSupport(this.sourceLayout, this.dependencies, sourceVersion,
-                this.dependencyResolver);
-    }
-
-    public JkJavaIdeSupport withDependencyResolver(JkDependencyResolver dependencyResolver) {
-        return new JkJavaIdeSupport(this.sourceLayout, this.dependencies, this.sourceVersion,
-                dependencyResolver);
-    }
-
-    public JkProjectSourceLayout getSourceLayout() {
+    public JkCompileLayout getTestSourceLayout() {
         return sourceLayout;
     }
 
@@ -65,5 +54,30 @@ public class JkJavaIdeSupport {
 
     public JkDependencyResolver getDependencyResolver() {
         return dependencyResolver;
+    }
+
+    public JkJavaIdeSupport setSourceLayout(JkCompileLayout sourceLayout) {
+        this.sourceLayout = sourceLayout;
+        return this;
+    }
+
+    public JkJavaIdeSupport setTestSourceLayout(JkCompileLayout testSourceLayout) {
+        this.testSourceLayout = testSourceLayout;
+        return this;
+    }
+
+    public JkJavaIdeSupport setDependencies(JkDependencySet dependencies) {
+        this.dependencies = dependencies;
+        return this;
+    }
+
+    public JkJavaIdeSupport setSourceVersion(JkJavaVersion sourceVersion) {
+        this.sourceVersion = sourceVersion;
+        return this;
+    }
+
+    public JkJavaIdeSupport setDependencyResolver(JkDependencyResolver dependencyResolver) {
+        this.dependencyResolver = dependencyResolver;
+        return this;
     }
 }

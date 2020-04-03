@@ -32,20 +32,20 @@ public final class JkDependencyResolver<T> {
 
     private JkDependencyResolver(T parent) {
         __ = parent;
-        parameters = JkResolutionParameters.of(this);
+        parameters = JkResolutionParameters.ofParent(this);
     }
 
     /**
      * Creates a empty (without repo) dependency resolver fetching module dependencies.
      */
     public static JkDependencyResolver<Void> of() {
-        return JkDependencyResolver.of(null);
+        return ofParent(null);
     }
 
     /**
      * Same as {@link #of()} but providing parent chaining.
      */
-    public static <T> JkDependencyResolver<T> of(T parent) {
+    public static <T> JkDependencyResolver<T> ofParent(T parent) {
         return new JkDependencyResolver(parent);
     }
 

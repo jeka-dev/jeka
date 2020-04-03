@@ -15,7 +15,7 @@ public class PureApiBuild extends JkCommandSet {
 
     public void doDefault() {
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.getBaseDir());
-        javaProject.setOutLayout(javaProject.getOutLayout().withOutputDir("build/output/alt-output"));
+        javaProject.setOutLayout(javaProject.getOutLayout().setOutputDirSupplier("build/output/alt-output"));
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
         javaProject.getDependencyManagement().addDependencies(deps);
         javaProject.getArtifactProducer().makeAllArtifacts();

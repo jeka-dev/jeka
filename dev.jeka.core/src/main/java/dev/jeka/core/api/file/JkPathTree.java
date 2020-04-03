@@ -175,6 +175,16 @@ public final class JkPathTree implements Closeable {
     }
 
     /**
+     * Assuming the root folder is relative, this creates an identical {@link JkPathTree}
+     * but having the root as :  [specified new root]/[former root]
+     */
+    public JkPathTree resolvedTo(Path newRoot) {
+        final Path path = newRoot.resolve(getRoot()).normalize();
+        RootHolder rootHolder = new RootHolder(this.rootHolder.zipFile, path);
+        return new JkPathTree(rootHolder, this.matcher);
+    }
+
+    /**
      * Returns path relative to this root of the specified relative path.
      */
     public Path get(String relativePath) {

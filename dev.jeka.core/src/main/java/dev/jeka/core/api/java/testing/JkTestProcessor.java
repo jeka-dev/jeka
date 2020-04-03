@@ -77,12 +77,10 @@ public final class JkTestProcessor<T> {
     }
 
     public static JkTestProcessor<Void> of() {
-        JkTestProcessor<Void> result = new JkTestProcessor<>(null);
-        result.engineBehavior = new JkEngineBehavior(result);
-        return result;
+        return ofParent(null);
     }
 
-    public static <T> JkTestProcessor<T> of(T parent) {
+    public static <T> JkTestProcessor<T> ofParent(T parent) {
         JkTestProcessor<T> result = new JkTestProcessor<T>(parent);
         result.engineBehavior = new JkEngineBehavior(result);
         return result;
@@ -206,13 +204,16 @@ public final class JkTestProcessor<T> {
 
     public static class JkEngineBehavior<T> implements Serializable {
 
+        /**
+         * Parent chaining.
+         */
+        public final transient JkTestProcessor<T> __;
+
         private String legacyReportDir; // Use String instead of Path for serialisation
 
         private JkProgressOutputStyle progressDisplayer;
 
         private JkUnaryOperator<LauncherConfig.Builder> launcherConfigurer;
-
-        public final transient JkTestProcessor<T> __;
 
         private JkEngineBehavior(JkTestProcessor<T> __) {
             this.__ = __;

@@ -197,7 +197,7 @@ public final class JkTestResult implements Serializable {
         }
 
         void print(PrintStream printStream) {
-            printStream.print(testId.displayName + " : ");
+            printStream.print(testId + System.lineSeparator() + "-> ");
             printStream.println(throwableMessage);
             for (final StackTraceElement element : getTacktraces()) {
                 printStream.println("  at " + element);

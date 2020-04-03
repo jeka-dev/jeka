@@ -12,6 +12,8 @@ import java.util.function.Supplier;
 
 public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
 
+    private final static Supplier<JkPathSequence> EMPTY_SUPPLIER = () -> JkPathSequence.of();
+
     /**
      * For parent chaining
      */
@@ -19,20 +21,21 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
 
     private final Map<JkArtifactId, Consumer<Path>> consumers = new HashMap<>();
 
-    private Function<JkArtifactId, JkPathSequence> artifactRunDepsFunction;
+    private final Map<JkArtifactId, Supplier> runtimeClasspathSuppliers = new HashMap<>();
 
     private Function<JkArtifactId, Path> artifactFileFunction;
 
     private JkArtifactBasicProducer(T __) {
         this.__ = __;
+
     }
 
-    public static <T> JkArtifactBasicProducer<T> of(T __) {
+    public static <T> JkArtifactBasicProducer<T> ofParent(T __) {
         return new JkArtifactBasicProducer<>( __);
     }
 
     public static JkArtifactBasicProducer<Void> of() {
-        return of(null);
+        return ofParent(null);
     }
 
     @Override
@@ -50,7 +53,9 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
 
     @Override
     public JkPathSequence fetchRuntimeDependencies(JkArtifactId artifactId) {
-        return artifactRunDepsFunction.apply(artifactId);
+        Supplier<JkPathSequence> supplier = runtimeClasspathSuppliers.get(artifactId);
+        supplier = supplier != null ? supplier : EMPTY_SUPPLIER;
+        return supplier.get();
     }
 
     @Override
@@ -63,12 +68,6 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
         return consumers.keySet();
     }
 
-
-    public JkArtifactBasicProducer<T> setArtifactRunDepsFunction(Function<JkArtifactId, JkPathSequence> artifactRunDepsFunction) {
-        this.artifactRunDepsFunction = artifactRunDepsFunction;
-        return this;
-    }
-
     public JkArtifactBasicProducer<T> setArtifactFileFunction(Function<JkArtifactId, Path> artifactFileFunction) {
         this.artifactFileFunction = artifactFileFunction;
         return this;
@@ -78,18 +77,31 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
         return setArtifactFileFunction(artifactId -> targetDir.get().resolve(artifactId.toFileName(partName.get())));
     }
 
-    public JkArtifactBasicProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> path) {
-        consumers.put(artifactId, path);
+    public JkArtifactBasicProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker,
+                                                  Supplier<JkPathSequence> artifactRuntimeClasspathSupplier) {
+        consumers.put(artifactId, artifactFileMaker);
+        runtimeClasspathSuppliers.put(artifactId, artifactRuntimeClasspathSupplier);
         return this;
     }
 
-    public JkArtifactBasicProducer<T> putMainArtifact(Consumer<Path> path) {
-        consumers.put(getMainArtifactId(), path);
+    public JkArtifactBasicProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
+        return putArtifact(artifactId, artifactFileMaker, EMPTY_SUPPLIER);
+    }
+
+    public JkArtifactBasicProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker,
+                                                      Supplier<JkPathSequence> artifactRuntimeClasspathSupplier) {
+        consumers.put(getMainArtifactId(), artifactFileMaker);
+        runtimeClasspathSuppliers.put(getMainArtifactId(), artifactRuntimeClasspathSupplier);
         return this;
+    }
+
+    public JkArtifactBasicProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker) { ;
+        return putMainArtifact(artifactFileMaker, EMPTY_SUPPLIER);
     }
 
     public JkArtifactBasicProducer<T> removeArtifact(JkArtifactId artifactId) {
         consumers.remove(artifactId);
+        runtimeClasspathSuppliers.remove(artifactId);
         return this;
     }
 

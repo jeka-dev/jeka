@@ -2,10 +2,14 @@ package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.java.project.JkJavaIdeSupportSupplier;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectMakerCompilationStep;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
-import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -61,7 +65,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
         this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);
 
         // Pre-configure JkJavaProject instance
-        this.project = JkJavaProject.ofMavenLayout(this.getCommandSet().getBaseDir());
+        this.project = JkJavaProject.of().setBaseDir(this.getCommandSet().getBaseDir());
         this.project.getDependencyManagement().addDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
         final Path path = run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
@@ -140,10 +144,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
 
     public void setProject(JkJavaProject javaProject) {
         this.project = javaProject;
-    }
-
-    public JkPathTree ouputTree() {
-        return JkPathTree.of(this.getProject().getOutLayout().getOutputPath());
     }
 
     public JkPluginRepo getRepoPlugin() {

@@ -30,47 +30,55 @@ public class JkEclipseClasspathGeneratorTest {
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.ofSimpleStyle()
                 .withResources("res").withTestResources("res-test");
 
-        final Path base = top.resolve("base");
-        final JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
-        baseProject.getDependencyManagement().addDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
-        final JkEclipseClasspathGenerator baseGenerator =
-                JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport());
-        baseGenerator.setUsePathVariables(true);
-        baseGenerator.setRunDependencies(baseProject.getDependencyManagement().getResolver(),
-                JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
+        final JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(top.resolve("base")))
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;
+
+        final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
+            .setUsePathVariables(true)
+            .setRunDependencies(baseProject.getDependencyManagement().getResolver(),
+                    JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);
 
-        final Path core = top.resolve("core");
-        final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
-        final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
-        coreProject.getDependencyManagement().addDependencies(coreDeps);
-        coreProject.getSteps().getTesting().getTestProcessor().setForkingProcess(true);
+        final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(top.resolve("core")))
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of().and(baseProject)).__
+            .getSteps()
+                .getTesting()
+                    .getTestProcessor()
+                        .setForkingProcess(true).__.__.__;
+
         final JkEclipseClasspathGenerator coreGenerator =
                 JkEclipseClasspathGenerator.of(coreProject.getJavaIdeSupport());
         final String coreClasspath = coreGenerator.generate();
         System.out.println("\ncore .classpath");
         System.out.println(coreClasspath);
 
-        final Path desktop = top.resolve("desktop");
-        final JkDependencySet deps = JkDependencySet.of().and(coreProject);
+        final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(top.resolve("desktop")))
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of().and(coreProject)).__;
+        desktopProject.getArtifactProducer().makeAllArtifacts();
+
         final JkEclipseClasspathGenerator desktopGenerator =
-                JkEclipseClasspathGenerator.of(sourceLayout.withBaseDir(desktop), deps,
-                        coreProject.getDependencyManagement().getResolver(), JkJavaVersion.V8);
+                JkEclipseClasspathGenerator.of(
+                        desktopProject.getSourceLayout(),
+                        desktopProject.getDependencyManagement().getDependencies(),
+                        coreProject.getDependencyManagement().getResolver(),
+                        JkJavaVersion.V8);
         final String result2 = desktopGenerator.generate();
 
         System.out.println("\ndesktop .classpath");
         System.out.println(result2);
 
-        final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
-        desktopProject.getDependencyManagement().addDependencies(deps);
-        desktopProject.getArtifactProducer().makeAllArtifacts();
 
         // ----------------- Now, try to apply generated .classpath to projects and compare if it matches
 
         final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(false);
 
+        Path base = baseProject.getBaseDir();
         final JkJavaProject baseProject2 = JkJavaProject.of(sourceLayout.withBaseDir(base));
         Files.write(base.resolve(".classpath"), baseClasspath.getBytes(Charset.forName("UTF-8")));
         //JkUtilsFile.writeString(new File(base, ".classpath"), baseClasspath, false);
@@ -88,8 +96,8 @@ public class JkEclipseClasspathGeneratorTest {
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
         assertEquals(4, baseProject2.getDependencyManagement().getDependencies().toList().size());
 
+        Path core = baseProject.getBaseDir();
         final JkJavaProject coreProject2 = JkJavaProject.ofMavenLayout(core);
-
         Files.write(core.resolve(".classpath"), coreClasspath.getBytes(Charset.forName("utf-8")));
         //JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
         JkEclipseProjectGenerator.ofJavaNature("core").writeTo(core.resolve(".project"));

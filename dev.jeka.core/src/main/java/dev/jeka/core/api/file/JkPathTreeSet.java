@@ -130,7 +130,7 @@ public final class JkPathTreeSet {
     // ------------------------- Replacing filter ----------------------------------
 
     /**
-     * Creates a {@link JkPathTree} which is a copy of this {@link JkPathTree}
+     * Creates a {@link JkPathTree} which is a copy of this {@link JkPathTreeSet}
      * replacing matcher by the specified one.
      */
     public JkPathTreeSet withMatcher(PathMatcher matcher) {
@@ -235,6 +235,15 @@ public final class JkPathTreeSet {
             }
         }
         return true;
+    }
+
+    /**
+     * @see JkPathTree#resolvedTo(Path)
+     */
+    public JkPathTreeSet resolvedTo(Path newRoot) {
+        List<JkPathTree> trees = new LinkedList<>();
+        this.getPathTrees().forEach(tree -> trees.add(tree.resolvedTo(newRoot)));
+        return JkPathTreeSet.of(trees);
     }
 
     /**

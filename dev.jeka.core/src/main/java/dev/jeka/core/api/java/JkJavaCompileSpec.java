@@ -42,11 +42,11 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
         this.__ = __;
     }
 
-    public static JkJavaCompileSpec of() {
-        return new JkJavaCompileSpec<Void>(null);
+    public static JkJavaCompileSpec<Void> of() {
+        return ofParent(null);
     }
 
-    public static <T> JkJavaCompileSpec<T> of(T o) {
+    public static <T> JkJavaCompileSpec<T> ofParent(T o) {
         return new JkJavaCompileSpec<T>(o);
     }
 

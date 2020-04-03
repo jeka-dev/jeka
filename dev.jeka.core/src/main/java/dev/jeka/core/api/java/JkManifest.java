@@ -78,13 +78,13 @@ public final class JkManifest<T> {
      * Creates an empty JkManifest
      */
     public static JkManifest<Void> of() {
-        return new JkManifest(null);
+        return ofParent(null);
     }
 
     /**
      * Same as {@link #of()} but providing a parent for method chaining
      */
-    public static <T> JkManifest<T> of(T parent) {
+    public static <T> JkManifest<T> ofParent(T parent) {
          return new JkManifest(parent);
     }
 

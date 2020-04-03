@@ -44,13 +44,13 @@ public final class JkJavaCompiler<T> {
      * by the running JDK.
      */
     public static JkJavaCompiler<Void> of() {
-        return new JkJavaCompiler(null);
+        return ofParent(null);
     }
 
     /**
      * Same as {@link #of()} but mentioning a owner for parent chaining.
      */
-    public static <T> JkJavaCompiler<T> of(T parent) {
+    public static <T> JkJavaCompiler<T> ofParent(T parent) {
         return new JkJavaCompiler(parent);
     }
 
