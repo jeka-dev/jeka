@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
 import org.junit.Test;
 
@@ -20,26 +19,40 @@ public class JkJavaProjectTest {
     @Test
     public void generate() throws Exception {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
+
         Path base = top.resolve("base");
-
-        JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.ofSimpleStyle()
-                .withResources("res").withTestResources("res-test");
-
-
-        JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
-        baseProject.getDependencyManagement().addDependencies(JkDependencySet.of()
-                .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6"));
+        JkJavaProject baseProject = JkJavaProject.of()
+            .setBaseDir(base)
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__
+            .getSteps()
+                .getCompilation()
+                    .getLayout()
+                        .removeSources().addSource("src")
+                        .removeResources().addResource("res").includeSourceDirsInResources().__.__
+                .getTesting()
+                    .getTestCompilation()
+                        .getLayout()
+                            .removeSources().addSource("test")
+                            .removeResources().addResource("res-test").__.__.__.__;
 
         final Path core = top.resolve("core");
-        final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
-        JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
-        coreProject.getDependencyManagement().addDependencies(coreDeps);
-        coreProject.getSteps().getTesting().getTestProcessor().setForkingProcess(true);
+        final JkJavaProject coreProject = JkJavaProject.of()
+            .setBaseDir(core)
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of().and(baseProject)).__
+            .getSteps()
+                .getTesting()
+                    .getTestProcessor()
+                        .setForkingProcess(true).__.__.__;
 
         final Path desktop = top.resolve("desktop");
-        final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
-        final JkDependencySet deps = JkDependencySet.of().and(coreProject);
-        desktopProject.getDependencyManagement().addDependencies(deps);
+        final JkJavaProject desktopProject = JkJavaProject.of()
+            .setBaseDir(desktop)
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                        .and(coreProject)).__;
         desktopProject.getArtifactProducer().makeAllArtifacts();
 
 
@@ -53,10 +66,6 @@ public class JkJavaProjectTest {
         JkPathTree.ofZip(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;
-    }
-
-    private void sourceLayoutConfigurer(JkProjectSourceLayout projectSourceLayout) {
-
     }
 
 }

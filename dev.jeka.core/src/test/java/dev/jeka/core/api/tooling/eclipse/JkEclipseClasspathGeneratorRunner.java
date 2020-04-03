@@ -1,8 +1,9 @@
 package dev.jeka.core.api.tooling.eclipse;
 
-import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
+import dev.jeka.core.api.depmanagement.JkModuleDependency;
+import dev.jeka.core.api.java.project.JkJavaProject;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -12,15 +13,14 @@ public class JkEclipseClasspathGeneratorRunner {
 
     public static void main(String[] args) throws URISyntaxException {
         final Path zip = Paths.get(JkEclipseClasspathGeneratorTest.class.getResource(JkEclipseClasspathGeneratorTest.ZIP_NAME).toURI());
-        JkDependency fileDep = JkFileSystemDependency.of(zip);
         JkModuleDependency moduleDependency = JkModuleDependency.of("junit:junit:4.11");
-        JkDependencySet dependencies = JkDependencySet.of()
-                .and(fileDep)
-                .and(moduleDependency);
-        JkEclipseClasspathGenerator generator = JkEclipseClasspathGenerator.of(JkProjectSourceLayout.ofMavenStyle(),
-                dependencies,
-                JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet()),
-                JkJavaVersion.V8);
+        JkFileSystemDependency fileDep = JkFileSystemDependency.of(zip);
+        JkJavaProject project = JkJavaProject.of()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of()
+                            .and(fileDep)
+                            .and(moduleDependency)).__;
+        JkEclipseClasspathGenerator generator = JkEclipseClasspathGenerator.of(project.getJavaIdeSupport());
         generator.addAttribute(fileDep, "myValue", "myKey");
         generator.addAttribute(fileDep, "myValue2", "myKey2");
         generator.addAttribute(moduleDependency, "myKey1", "myValue1");

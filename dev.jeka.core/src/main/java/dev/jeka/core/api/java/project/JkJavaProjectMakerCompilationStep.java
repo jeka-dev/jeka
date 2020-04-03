@@ -84,7 +84,6 @@ public class JkJavaProjectMakerCompilationStep<T> {
         JkJavaProjectMakerCompilationStep result =
                 new JkJavaProjectMakerCompilationStep(project, "production code", parent);
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
-        result.layout.setStandardSource(JkCompileLayout.Concern.PROD, JkCompileLayout.Style.MAVEN);
         return result;
     }
 
@@ -93,7 +92,7 @@ public class JkJavaProjectMakerCompilationStep<T> {
         JkJavaProjectMakerCompilationStep result =
                 new JkJavaProjectMakerCompilationStep(project, "test code", parent);
         result.compileSpecSupplier = () -> result.computeTestCompileSpec(project.getSteps().getCompilation());
-        result.layout.setStandardSource(JkCompileLayout.Concern.TEST, JkCompileLayout.Style.MAVEN);
+        result.layout.setSourceMavenStyle(JkCompileLayout.Concern.TEST);
         return result;
     }
 

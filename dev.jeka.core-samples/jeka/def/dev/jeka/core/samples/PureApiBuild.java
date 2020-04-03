@@ -14,8 +14,8 @@ import dev.jeka.core.tool.JkInit;
 public class PureApiBuild extends JkCommandSet {
 
     public void doDefault() {
-        JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.getBaseDir());
-        javaProject.setOutLayout(javaProject.getOutLayout().setOutputDirSupplier("build/output/alt-output"));
+        JkJavaProject javaProject = JkJavaProject.of().setBaseDir(this.getBaseDir());
+        javaProject.setOutputDir("jeka/output/alt-output");
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
         javaProject.getDependencyManagement().addDependencies(deps);
         javaProject.getArtifactProducer().makeAllArtifacts();
@@ -28,20 +28,22 @@ public class PureApiBuild extends JkCommandSet {
                 .and("com.google.guava:guava", "21.0")
                 .and("junit:junit", "4.12");
 
-        JkJavaProject fooProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("foo"));
-        fooProject.getDependencyManagement().addDependencies(JkDependencySet.of()
-                .and("junit:junit", JkJavaDepScopes.TEST)
-                .and("com.google.guava:guava")
-                .and("com.sun.jersey:jersey-server:1.19.4")
-                .withVersionProvider(versionProvider)
-        );
+        JkJavaProject fooProject = JkJavaProject.of()
+            .setBaseDir(this.getBaseDir().resolve("foo"))
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and("junit:junit", JkJavaDepScopes.TEST)
+                    .and("com.google.guava:guava")
+                    .and("com.sun.jersey:jersey-server:1.19.4")
+                    .withVersionProvider(versionProvider)).__;
 
-        JkJavaProject barProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("bar"));
-        fooProject.getDependencyManagement().addDependencies(JkDependencySet.of()
+        JkJavaProject barProject = JkJavaProject.of()
+            .setBaseDir(this.getBaseDir().resolve("bar"))
+            .getDependencyManagement().addDependencies(JkDependencySet.of()
                 .and("junit:junit", JkJavaDepScopes.TEST)
                 .and("com.sun.jersey:jersey-server:1.19.4")
-                .and(fooProject)
-        );
+                .and(fooProject)).__;
+
         barProject.getArtifactProducer()
             .putMainArtifact(barProject.getSteps().getPackaging()::createFatJar) // Produced jar will embed dependencies
             .makeAllArtifacts();

@@ -7,7 +7,6 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.java.project.JkJavaIdeSupportSupplier;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
@@ -120,12 +119,12 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupportSuppl
 
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
-        return JkJavaIdeSupport.ofDefault()
-                .withSourceLayout(JkProjectSourceLayout.ofSimpleStyle()
-                        .withSources(JkPathTreeSet.of(src))
-                        .withBaseDir(getBaseDir()))
-                .withDependencyResolver(resolver)
-                .withDependencies(dependencies());
+        return JkJavaIdeSupport.of(getBaseDir())
+            .getProdLayout()
+                .removeSources()
+                .addSource(src).__
+            .setDependencies(dependencies())
+            .setDependencyResolver(resolver);
     }
 
 

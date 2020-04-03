@@ -12,9 +12,9 @@ import java.nio.file.Path;
  */
 public class JkJavaIdeSupport {
 
-    private JkCompileLayout prodLayout;
+    private JkCompileLayout<JkJavaIdeSupport> prodLayout;
 
-    private JkCompileLayout testLayout;
+    private JkCompileLayout<JkJavaIdeSupport>  testLayout;
 
     private JkDependencySet dependencies;
 
@@ -23,10 +23,7 @@ public class JkJavaIdeSupport {
     private JkDependencyResolver dependencyResolver;
 
     private JkJavaIdeSupport(Path baseDir) {
-        this.prodLayout = JkCompileLayout.of().setBaseDir(baseDir)
-                .setStandardSource(JkCompileLayout.Concern.PROD, JkCompileLayout.Style.MAVEN);
-        this.testLayout = JkCompileLayout.of().setBaseDir(baseDir)
-                .setStandardSource(JkCompileLayout.Concern.TEST, JkCompileLayout.Style.MAVEN);
+        this.prodLayout = JkCompileLayout.ofParent(this).setBaseDir(baseDir);
         this.dependencies = JkDependencySet.of();
         this.sourceVersion = JkJavaVersion.V8;
         this.dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());;
@@ -36,11 +33,11 @@ public class JkJavaIdeSupport {
         return new JkJavaIdeSupport(baseDir);
     }
 
-    public JkCompileLayout getProdLayout() {
+    public JkCompileLayout<JkJavaIdeSupport> getProdLayout() {
         return prodLayout;
     }
 
-    public JkCompileLayout getTestLayout() {
+    public JkCompileLayout<JkJavaIdeSupport> getTestLayout() {
         return testLayout;
     }
 

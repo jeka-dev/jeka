@@ -34,12 +34,14 @@ public class JkDependencyResolverTest {
     public void resolveDependenciesOfTypeProject() throws Exception {
         Path root = unzipToDir("sample-multiproject.zip");
 
-        JkJavaProject baseProject = JkJavaProject.ofMavenLayout(root.resolve("base"))
+        JkJavaProject baseProject = JkJavaProject.of()
+            .setBaseDir(root.resolve("base"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION)).__;;
 
-        JkJavaProject coreProject = JkJavaProject.ofMavenLayout(root.resolve("core"))
+        JkJavaProject coreProject = JkJavaProject.of()
+            .setBaseDir(root.resolve("core"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(baseProject)).__;

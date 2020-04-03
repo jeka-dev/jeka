@@ -5,6 +5,7 @@ import dev.jeka.core.api.file.JkFileSystemLocalizable;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -52,6 +53,11 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
     public static JkJavaProject of() {
         return new JkJavaProject();
+    }
+
+    public JkJavaProject apply(Consumer<JkJavaProject> projectConsumer) {
+        projectConsumer.accept(this);
+        return this;
     }
 
 

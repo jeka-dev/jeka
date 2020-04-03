@@ -14,10 +14,6 @@ import java.util.function.Supplier;
  */
 public class JkCompileLayout<T> {
 
-    public enum Style {
-        MAVEN, SIMPLE;
-    }
-
     public enum Concern {
         PROD, TEST
     }
@@ -74,44 +70,61 @@ public class JkCompileLayout<T> {
         this.__ = parent;
         baseDirSupplier = () -> Paths.get(".");
         outputDirSupplier = () -> baseDirSupplier.get().resolve("jeka/output");
-        setStandardSource(Concern.PROD, Style.MAVEN);
+        setSourceMavenStyle(Concern.PROD);
     }
 
+    /**
+     * Same as {@link #of()} but proving parent chaining
+     * @see #of()
+     */
     public static <T> JkCompileLayout<T> ofParent(T parent) {
         return new JkCompileLayout<>(parent);
     }
 
+    /**
+     * Creates a default layout respecting Maven standard for sources. <p>
+     * This means sources in <i>[baseDir]/src/main/java</i> and resources in  <i>[baseDir]/src/main/resources</i></li>
+     * and using "." directory as base dir.
+     */
     public static <T> JkCompileLayout<T> of() {
         return ofParent(null);
     }
 
-    public JkCompileLayout<T> setStandardSource(Concern concern, Style style) {
-        if (style == Style.MAVEN) {
-            setSourceMavenStyle(concern);
+
+    /**
+     * Creates a default layout respecting Maven standard for sources. This means :
+     * <ul>
+     *     <li>For production : sources in <i>[baseDir]/src/main/java</i> and resources in  <i>[baseDir]/src/main/resources</i></li>
+     *     <li>For test : sources in <i>[baseDir]/src/test/java</i> and resources in  <i>[baseDir]/src/test/resources</i></li>
+     * </ul>
+     */
+    public JkCompileLayout<T> setSourceMavenStyle(Concern concern) {
+        if (concern == Concern.PROD) {
+            sources = JkPathTreeSet.of(Paths.get("src/main/java")).andMatcher(JAVA_SOURCE_MATCHER);
+            resources = JkPathTreeSet.of(Paths.get("src/main/resources"));
         } else {
-            setSourceSimpleStyle(concern);
+            sources = JkPathTreeSet.of(Paths.get("src/test/java")).andMatcher(JAVA_SOURCE_MATCHER);
+            resources = JkPathTreeSet.of(Paths.get("src/test/resources"));
         }
         return this;
     }
 
-    private void setSourceMavenStyle(Concern concern) {
+    /**
+     * Sets the <i>simple</i> standard layout on this {@link JkCompileLayout}. This means :
+     * <ul>
+     *     <li>For production code : sources and resources are located in the same directory [baseDir]/src</li>
+     *     <li>For test code : sources and resources are located in the same directory [baseDir]/test</li>
+     * </ul>
+     */
+    public JkCompileLayout<T> setSourceSimpleStyle(Concern concern) {
         if (concern == Concern.PROD) {
-            sources = JkPathTreeSet.of(Paths.get("src/main/java")).andMatcher(JAVA_SOURCE_MATCHER);
-            resources = JkPathTreeSet.of(Paths.get("src/main/resources")).andMatcher(JAVA_RESOURCE_MATCHER);
-        } else {
-            sources = JkPathTreeSet.of(Paths.get("src/test/java")).andMatcher(JAVA_SOURCE_MATCHER);
-            resources = JkPathTreeSet.of(Paths.get("src/test/resources")).andMatcher(JAVA_RESOURCE_MATCHER);
-        }
-    }
-
-    private void setSourceSimpleStyle(Concern concern) {
-        if (concern == Concern.TEST) {
             sources = JkPathTreeSet.of(Paths.get("src")).andMatcher(JAVA_SOURCE_MATCHER);
             resources = JkPathTreeSet.of(Paths.get("src")).andMatcher(JAVA_RESOURCE_MATCHER);
         } else {
             this.sources = JkPathTreeSet.of(Paths.get("test")).andMatcher(JAVA_SOURCE_MATCHER);
             this.resources = JkPathTreeSet.of(Paths.get("test")).andMatcher(JAVA_RESOURCE_MATCHER);
         }
+        return this;
     }
 
     public JkCompileLayout<T> setSources(JkPathTreeSet sources) {
@@ -123,8 +136,12 @@ public class JkCompileLayout<T> {
         return setSources(sources.and(source));
     }
 
-    public JkCompileLayout<T> addSource(String relativeDir) {
-        return addSource(JkPathTree.of(Paths.get(relativeDir)).andMatcher(JAVA_SOURCE_MATCHER));
+    public JkCompileLayout<T> addSource(Path dir) {
+        return addSource(JkPathTree.of(dir).andMatcher(JAVA_SOURCE_MATCHER));
+    }
+
+    public JkCompileLayout<T> addSource(String path) {
+        return addSource(Paths.get(path));
     }
 
     public JkCompileLayout<T> removeSources() {
@@ -140,8 +157,12 @@ public class JkCompileLayout<T> {
         return setResources(resources.and(resource));
     }
 
+    public JkCompileLayout<T> addResource(Path path) {
+        return addResource(JkPathTree.of(path).andMatcher(JAVA_RESOURCE_MATCHER));
+    }
+
     public JkCompileLayout<T> addResource(String relativeDir) {
-        return addResource(JkPathTree.of(Paths.get(relativeDir)).andMatcher(JAVA_RESOURCE_MATCHER));
+        return addResource(Paths.get(relativeDir));
     }
 
     public JkCompileLayout<T> removeResources() {
