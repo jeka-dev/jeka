@@ -113,7 +113,7 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
     }
 
     public String getInfo() {
-        JkJavaProjectMakerCompilationStep compilation = getSteps().compilation;
+        JkJavaProjectCompilationStep compilation = getSteps().compilation;
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + steps.getPublishing().getVersionedModule() + "\n")
                 .append("Production sources : " + steps.compilation.getLayout().getInfo()).append("\n")
@@ -157,42 +157,42 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
         public final JkJavaProject __;
 
-        private final JkJavaProjectMakerCompilationStep compilation;
+        private final JkJavaProjectCompilationStep compilation;
 
-        private final JkJavaProjectMakerTestingStep testing;
+        private final JkJavaProjectTestingStep testing;
 
-        private final JkJavaProjectMakerPackagingStep packaging;
+        private final JkJavaProjectPackagingStep packaging;
 
-        private final JkJavaProjectMakerPublishingStep publishing;
+        private final JkJavaProjecPublishingStep publishing;
 
-        private final JkJavaProjectMakerDocumentationStep documentation;
+        private final JkJavaProjectDocumentationStep documentation;
 
         private JkSteps(JkJavaProject __) {
             this.__ = __;
-            compilation = JkJavaProjectMakerCompilationStep.ofProd(__, this);
-            testing = new JkJavaProjectMakerTestingStep(__, this);
-            packaging = new JkJavaProjectMakerPackagingStep(__, this);
-            publishing = new JkJavaProjectMakerPublishingStep(__, this);
-            documentation = new JkJavaProjectMakerDocumentationStep(__, this);
+            compilation = JkJavaProjectCompilationStep.ofProd(__, this);
+            testing = new JkJavaProjectTestingStep(__, this);
+            packaging = new JkJavaProjectPackagingStep(__, this);
+            publishing = new JkJavaProjecPublishingStep(__, this);
+            documentation = new JkJavaProjectDocumentationStep(__, this);
         }
 
-        public JkJavaProjectMakerCompilationStep<JkJavaProject.JkSteps> getCompilation() {
+        public JkJavaProjectCompilationStep<JkSteps> getCompilation() {
             return compilation;
         }
 
-        public JkJavaProjectMakerTestingStep getTesting() {
+        public JkJavaProjectTestingStep getTesting() {
             return testing;
         }
 
-        public JkJavaProjectMakerPackagingStep getPackaging() {
+        public JkJavaProjectPackagingStep getPackaging() {
             return packaging;
         }
 
-        public JkJavaProjectMakerPublishingStep getPublishing() {
+        public JkJavaProjecPublishingStep getPublishing() {
             return publishing;
         }
 
-        public JkJavaProjectMakerDocumentationStep getDocumentation() {
+        public JkJavaProjectDocumentationStep getDocumentation() {
             return documentation;
         }
     }

@@ -121,7 +121,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupportSuppl
     public JkJavaIdeSupport getJavaIdeSupport() {
         return JkJavaIdeSupport.of(getBaseDir())
             .getProdLayout()
-                .removeSources()
+                .emptySources()
                 .addSource(src).__
             .setDependencies(dependencies())
             .setDependencyResolver(resolver);

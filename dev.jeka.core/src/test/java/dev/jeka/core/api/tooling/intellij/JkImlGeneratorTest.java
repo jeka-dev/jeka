@@ -28,11 +28,11 @@ public class JkImlGeneratorTest {
             .getSteps()
                 .getCompilation()
                     .getLayout()
-                        .removeSources().addSource("res").__.__
+                        .emptySources().addSource("res").__.__
                 .getTesting()
                     .getTestCompilation()
                         .getLayout()
-                            .removeResources().addResource("res-test").__.__.__.__
+                            .emptyResources().addResource("res-test").__.__.__.__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;

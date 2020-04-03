@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 /**
  * Tasks for packaging artifacts created by the holding project.
  */
-public class JkJavaProjectMakerPackagingStep {
+public class JkJavaProjectPackagingStep {
 
     private final JkJavaProject project;
 
@@ -34,16 +34,16 @@ public class JkJavaProjectMakerPackagingStep {
 
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 
-    private final JkJavaProjectMakerCompilationStep compilationStep;
+    private final JkJavaProjectCompilationStep compilationStep;
 
-    private final JkJavaProjectMakerDocumentationStep documentationStep;
+    private final JkJavaProjectDocumentationStep documentationStep;
 
     /**
      * For Parent chaining
      */
     public JkJavaProject.JkSteps __;
 
-    JkJavaProjectMakerPackagingStep(JkJavaProject project, JkJavaProject.JkSteps steps) {
+    JkJavaProjectPackagingStep(JkJavaProject project, JkJavaProject.JkSteps steps) {
         this.project = project;
         this.__ = steps;
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
@@ -52,7 +52,7 @@ public class JkJavaProjectMakerPackagingStep {
         documentationStep = steps.getDocumentation();
     }
 
-    public JkManifest<JkJavaProjectMakerPackagingStep> getManifest() {
+    public JkManifest<JkJavaProjectPackagingStep> getManifest() {
         return manifest;
     }
 
@@ -133,7 +133,7 @@ public class JkJavaProjectMakerPackagingStep {
      * Defines the algorithms to sign the produced artifacts.
      * @param algorithms Digest algorithm working on JDK8 platform including <code>md5, sha-1, sha-2 and sha-256</code>
      */
-    public JkJavaProjectMakerPackagingStep setChecksumAlgorithms(String ... algorithms) {
+    public JkJavaProjectPackagingStep setChecksumAlgorithms(String ... algorithms) {
         this.checksumAlgorithms = algorithms;
         return this;
     }
@@ -142,7 +142,7 @@ public class JkJavaProjectMakerPackagingStep {
      * Defines witch files from main jar and dependency jars will be included in the fat jar.
      * By default, it is valued to "all".
      */
-    public JkJavaProjectMakerPackagingStep setFatJarFilter(PathMatcher fatJarFilter) {
+    public JkJavaProjectPackagingStep setFatJarFilter(PathMatcher fatJarFilter) {
         JkUtilsAssert.notNull(fatJarFilter, "Fat jar filter can not be null.");
         this.fatJarFilter = fatJarFilter;
         return this;
@@ -155,7 +155,7 @@ public class JkJavaProjectMakerPackagingStep {
     /**
      * File trees specified here will be added to the fat jar.
      */
-    public JkJavaProjectMakerPackagingStep setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
+    public JkJavaProjectPackagingStep setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;
     }

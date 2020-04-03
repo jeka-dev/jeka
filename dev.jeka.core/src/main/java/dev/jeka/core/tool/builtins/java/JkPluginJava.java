@@ -222,7 +222,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
 
     private JkProcess compilerProcess() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
-        JkJavaProjectMakerCompilationStep compilation = project.getSteps().getCompilation();
+        JkJavaProjectCompilationStep compilation = project.getSteps().getCompilation();
         return JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
                 compilation.getJavaVersion().get());
     }

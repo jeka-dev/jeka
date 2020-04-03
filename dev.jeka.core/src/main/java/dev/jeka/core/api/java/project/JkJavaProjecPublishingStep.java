@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.function.UnaryOperator;
 
-public class JkJavaProjectMakerPublishingStep {
+public class JkJavaProjecPublishingStep {
 
     private final JkJavaProject project;
 
@@ -30,7 +30,7 @@ public class JkJavaProjectMakerPublishingStep {
      */
     public final JkJavaProject.JkSteps __;
 
-    JkJavaProjectMakerPublishingStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
+    JkJavaProjecPublishingStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
         this.project = project;
         this.__ = parent;
     }
@@ -47,7 +47,7 @@ public class JkJavaProjectMakerPublishingStep {
      * Sets the specified module name and version for this project.
      * @see #getVersionedModule()
      */
-    public JkJavaProjectMakerPublishingStep setVersionedModule(JkVersionedModule versionedModule) {
+    public JkJavaProjecPublishingStep setVersionedModule(JkVersionedModule versionedModule) {
         JkUtilsAssert.notNull(versionedModule, "Can't set null value for versioned module.");
         this.versionedModule = versionedModule;
         return this;
@@ -56,7 +56,7 @@ public class JkJavaProjectMakerPublishingStep {
     /**
      * @see #setVersionedModule(JkVersionedModule)
      */
-    public JkJavaProjectMakerPublishingStep setVersionedModule(String groupAndName, String version) {
+    public JkJavaProjecPublishingStep setVersionedModule(String groupAndName, String version) {
         return setVersionedModule(JkModuleId.of(groupAndName).withVersion(version));
     }
 
@@ -87,7 +87,7 @@ public class JkJavaProjectMakerPublishingStep {
         return this.mavenPublicationInfo;
     }
 
-    public JkJavaProjectMakerPublishingStep setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
+    public JkJavaProjecPublishingStep setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
         this.mavenPublicationInfo = mavenPublicationInfo;
         return this;
     }
@@ -125,13 +125,13 @@ public class JkJavaProjectMakerPublishingStep {
         return this.publishRepos;
     }
 
-    public JkJavaProjectMakerPublishingStep setPublishRepos(JkRepoSet publishRepos) {
+    public JkJavaProjecPublishingStep setPublishRepos(JkRepoSet publishRepos) {
         JkUtilsAssert.notNull(publishRepos, "publish repos cannot be null.");
         this.publishRepos = publishRepos;
         return this;
     }
 
-    public JkJavaProjectMakerPublishingStep addPublishRepo(JkRepo publishRepo) {
+    public JkJavaProjecPublishingStep addPublishRepo(JkRepo publishRepo) {
         this.publishRepos = this.publishRepos.and(publishRepo);
         return this;
     }

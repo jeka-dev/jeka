@@ -34,13 +34,13 @@ public class JkEclipseClasspathGeneratorTest {
             .getSteps()
                 .getCompilation()
                     .getLayout()
-                        .removeSources().addSource("src")
-                        .removeResources().addResource("res").__.__
+                        .emptySources().addSource("src")
+                        .emptyResources().addResource("res").__.__
                 .getTesting()
                     .getTestCompilation()
                         .getLayout()
-                            .removeSources().addSource("test")
-                            .removeResources().addSource("res-test").__.__.__.__
+                            .emptySources().addSource("test")
+                            .emptyResources().addSource("res-test").__.__.__.__
                 .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;

@@ -65,12 +65,12 @@ public class JkCompileLayout<T> {
     // Relative path from output dir
     private String classDir;
 
-
     private JkCompileLayout(T parent) {
         this.__ = parent;
         baseDirSupplier = () -> Paths.get(".");
         outputDirSupplier = () -> baseDirSupplier.get().resolve("jeka/output");
         setSourceMavenStyle(Concern.PROD);
+        setStandardOuputDirs(Concern.PROD);
     }
 
     /**
@@ -89,7 +89,6 @@ public class JkCompileLayout<T> {
     public static <T> JkCompileLayout<T> of() {
         return ofParent(null);
     }
-
 
     /**
      * Creates a default layout respecting Maven standard for sources. This means :
@@ -127,6 +126,19 @@ public class JkCompileLayout<T> {
         return this;
     }
 
+    public JkCompileLayout<T> setStandardOuputDirs(Concern concern) {
+        if (concern == Concern.PROD) {
+            this.classDir = "classes";
+            this.generatedSourceDir = GENERATED_SOURCE_PATH;
+            this.generatedResourceDir = GENERATED_RESOURCE_PATH;
+        } else {
+            this.classDir = "test-classes";
+            this.generatedSourceDir = GENERATED_TEST_SOURCE_PATH;
+            this.generatedResourceDir = GENERATED_TEST_RESOURCE_PATH;
+        }
+        return this;
+    }
+
     public JkCompileLayout<T> setSources(JkPathTreeSet sources) {
         this.sources = sources;
         return this;
@@ -144,7 +156,7 @@ public class JkCompileLayout<T> {
         return addSource(Paths.get(path));
     }
 
-    public JkCompileLayout<T> removeSources() {
+    public JkCompileLayout<T> emptySources() {
         return setSources(JkPathTreeSet.ofEmpty());
     }
 
@@ -165,7 +177,7 @@ public class JkCompileLayout<T> {
         return addResource(Paths.get(relativeDir));
     }
 
-    public JkCompileLayout<T> removeResources() {
+    public JkCompileLayout<T> emptyResources() {
         return setResources(JkPathTreeSet.ofEmpty());
     }
 

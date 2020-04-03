@@ -7,13 +7,13 @@ import dev.jeka.core.api.system.JkLog;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JkJavaProjectMakerDocumentationStep {
+public class JkJavaProjectDocumentationStep {
 
     private final JkJavaProject project;
 
-    private final JkJavadocProcessor<JkJavaProjectMakerDocumentationStep> javadocMaker;
+    private final JkJavadocProcessor<JkJavaProjectDocumentationStep> javadocMaker;
 
-    private final JkJavaProjectMakerCompilationStep compilationStep;
+    private final JkJavaProjectCompilationStep compilationStep;
 
     private boolean done;
 
@@ -25,7 +25,7 @@ public class JkJavaProjectMakerDocumentationStep {
      */
     public final JkJavaProject.JkSteps __;
 
-     JkJavaProjectMakerDocumentationStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
+     JkJavaProjectDocumentationStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
         this.project = project;
         this.__ = parent;
         javadocMaker = JkJavadocProcessor.ofParent(this);
@@ -33,7 +33,7 @@ public class JkJavaProjectMakerDocumentationStep {
 
     }
 
-    public JkJavadocProcessor<JkJavaProjectMakerDocumentationStep> getJavadocProcessor() {
+    public JkJavadocProcessor<JkJavaProjectDocumentationStep> getJavadocProcessor() {
         return javadocMaker;
     }
 
@@ -60,7 +60,7 @@ public class JkJavaProjectMakerDocumentationStep {
         return project.getOutputDir().resolve(javadocDir);
     }
 
-    public JkJavaProjectMakerDocumentationStep setJavadocDir(String javadocDir) {
+    public JkJavaProjectDocumentationStep setJavadocDir(String javadocDir) {
         this.javadocDir = javadocDir;
         return this;
     }

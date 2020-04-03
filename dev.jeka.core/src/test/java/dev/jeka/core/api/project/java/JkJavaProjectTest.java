@@ -29,13 +29,13 @@ public class JkJavaProjectTest {
             .getSteps()
                 .getCompilation()
                     .getLayout()
-                        .removeSources().addSource("src")
-                        .removeResources().addResource("res").includeSourceDirsInResources().__.__
+                        .emptySources().addSource("src")
+                        .emptyResources().addResource("res").includeSourceDirsInResources().__.__
                 .getTesting()
                     .getTestCompilation()
                         .getLayout()
-                            .removeSources().addSource("test")
-                            .removeResources().addResource("res-test").__.__.__.__;
+                            .emptySources().addSource("test")
+                            .emptyResources().addResource("res-test").__.__.__.__;
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of()
