@@ -3,7 +3,6 @@ package dev.jeka.core.tool.builtins.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkJavaIdeSupportSupplier;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
@@ -148,12 +147,12 @@ public final class JkPluginEclipse extends JkPlugin {
     }
 
     public static JkJavaIdeSupport getProjectIde(JkCommandSet commands) {
-        if (commands instanceof JkJavaIdeSupportSupplier) {
-            JkJavaIdeSupportSupplier supplier = (JkJavaIdeSupportSupplier) commands;
+        if (commands instanceof JkJavaIdeSupport.JkSupplier) {
+            JkJavaIdeSupport.JkSupplier supplier = (JkJavaIdeSupport.JkSupplier) commands;
             return supplier.getJavaIdeSupport();
         }
-        List<JkJavaIdeSupportSupplier> suppliers = commands.getPlugins().getLoadedPluginInstanceOf(
-                JkJavaIdeSupportSupplier.class);
+        List<JkJavaIdeSupport.JkSupplier> suppliers = commands.getPlugins().getLoadedPluginInstanceOf(
+                JkJavaIdeSupport.JkSupplier.class);
         return suppliers.stream()
                 .filter(supplier -> supplier != null)
                 .map(supplier -> supplier.getJavaIdeSupport())

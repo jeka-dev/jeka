@@ -76,18 +76,22 @@ public class CoreBuild extends JkCommandSet {
                 .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__ // define wrapper
             .getSteps()
                 .getCompilation()
+                    .getLayout()
+                        .includeSourceDirsInResources().__
                     .addOptions("-Xlint:none","-g")
                     .setJavaVersion(JkJavaVersion.V8)
                     .getCompiler()
                         .setForkingWithJavac().__.__
                 .getTesting()
                     .getTestCompilation()
+                        .getLayout()
+                            .includeSourceDirsInResources().__
                         .getCompiler()
                             .setDefault().__.__
                     .getTestProcessor()
                         .setForkingProcess(false)
                         .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__
                     .getTestSelection()
                         .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
                         .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
@@ -123,8 +127,9 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer maker = javaPlugin.getProject().getArtifactProducer();
-        maker.makeMissingArtifacts(maker.getMainArtifactId(), SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
+        final JkArtifactProducer artifactProducer = javaPlugin.getProject().getArtifactProducer();
+        artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
+                SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
@@ -134,14 +139,14 @@ public class CoreBuild extends JkCommandSet {
             .importFiles(getBaseDir().getParent().resolve("LICENSE"))
             .importDir(getBaseDir().resolve("src/main/dist"))
             .importDir(getBaseDir().resolve("src/main/java/META-INF/bin"))
-            .importFiles(maker.getArtifactPath(maker.getMainArtifactId()))
-            .importFiles(maker.getArtifactPath(WRAPPER_ARTIFACT_ID))
+            .importFiles(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()))
+            .importFiles(artifactProducer.getArtifactPath(WRAPPER_ARTIFACT_ID))
             .goTo("libs-sources")
                 .importFiles(ivySourceLibs)
-                .importFiles(maker.getArtifactPath(SOURCES_ARTIFACT_ID));
+                .importFiles(artifactProducer.getArtifactPath(SOURCES_ARTIFACT_ID));
         if (javaPlugin.pack.javadoc) {
-            maker.makeMissingArtifacts(maker.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
-            distrib.importFiles(maker.getArtifactPath(JAVADOC_ARTIFACT_ID));
+            artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
+            distrib.importFiles(artifactProducer.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         makeDocs();
         if (runIT) {
@@ -192,7 +197,7 @@ public class CoreBuild extends JkCommandSet {
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
-        JkPathTree classTree = JkPathTree.of(project.getSteps().getCompilation().getLayout().getClassDir());
+        JkPathTree classTree = JkPathTree.of(project.getSteps().getCompilation().getLayout().resolveClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
             .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
@@ -221,7 +226,7 @@ public class CoreBuild extends JkCommandSet {
 
     private void doWrapper(Path wrapperJar) {
         JkPathTree.of(javaPlugin.getProject().getSteps().getCompilation().getLayout()
-                .getClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
+                .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void publishDocsOnGithubPage() {

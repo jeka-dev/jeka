@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
@@ -11,6 +12,8 @@ import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.function.UnaryOperator;
 
 /**
  * Handles project testing step. This involve both test compilation and run.
@@ -18,13 +21,13 @@ import java.nio.file.Path;
  * They also can modify {@link JkJavaCompiler}, {@link JkJavaCompileSpec} for test compilation and
  * {@link JkTestProcessor}, {@link JkTestSelection} for test run.
  */
-public class JkJavaProjectTestingStep {
+public class JkJavaProjectTesting {
 
     private final JkJavaProject project;
 
-    private final JkJavaProjectCompilationStep<JkJavaProjectTestingStep> testCompilation;
+    private final JkJavaProjectCompilation<JkJavaProjectTesting> testCompilation;
 
-    private final JkJavaProjectCompilationStep prodCompilation;
+    private final JkJavaProjectCompilation prodCompilation;
 
     public final JkRunnables afterTest;
 
@@ -46,10 +49,10 @@ public class JkJavaProjectTestingStep {
      */
     public final JkJavaProject.JkSteps __;
 
-    JkJavaProjectTestingStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
+    JkJavaProjectTesting(JkJavaProject project, JkJavaProject.JkSteps parent) {
         this.project = project;
         this.__ = parent;
-        testCompilation = JkJavaProjectCompilationStep.ofTest(project, this);
+        testCompilation = JkJavaProjectCompilation.ofTest(project, this);
         prodCompilation = parent.getCompilation();
         afterTest = JkRunnables.noOp(this);
         testProcessor = defaultTestProcessor();
@@ -60,7 +63,7 @@ public class JkJavaProjectTestingStep {
      * Returns tests to be run. The returned instance is mutable so users can modify it
      * from this method return.
      */
-    public JkTestSelection<JkJavaProjectTestingStep> getTestSelection() {
+    public JkTestSelection<JkJavaProjectTesting> getTestSelection() {
         return testSelection;
     }
 
@@ -68,14 +71,14 @@ public class JkJavaProjectTestingStep {
      * Returns processor running the tests. The returned instance is mutable so users can modify it
      * from this method return.
      */
-    public JkTestProcessor<JkJavaProjectTestingStep> getTestProcessor() {
+    public JkTestProcessor<JkJavaProjectTesting> getTestProcessor() {
         return testProcessor;
     }
 
     /**
      * Returns the compilation step for the test part.
      */
-    public JkJavaProjectCompilationStep<JkJavaProjectTestingStep> getTestCompilation() {
+    public JkJavaProjectCompilation<JkJavaProjectTesting> getTestCompilation() {
         return testCompilation;
     }
 
@@ -84,8 +87,8 @@ public class JkJavaProjectTestingStep {
      * dependencies involved in TEST scope.
      */
     public JkClasspath getTestClasspath() {
-        return JkClasspath.of(testCompilation.getLayout().getClassDir())
-                .and(prodCompilation.getLayout().getClassDir())
+        return JkClasspath.of(testCompilation.getLayout().resolveClassDir())
+                .and(prodCompilation.getLayout().resolveClassDir())
                 .and(project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
     }
@@ -112,7 +115,7 @@ public class JkJavaProjectTestingStep {
         return breakOnFailures;
     }
 
-    public JkJavaProjectTestingStep setBreakOnFailures(boolean breakOnFailures) {
+    public JkJavaProjectTesting setBreakOnFailures(boolean breakOnFailures) {
         this.breakOnFailures = breakOnFailures;
         return this;
     }
@@ -121,7 +124,7 @@ public class JkJavaProjectTestingStep {
         return project.getOutputDir().resolve(reportDir);
     }
 
-    public JkJavaProjectTestingStep setReportDir(String reportDir) {
+    public JkJavaProjectTesting setReportDir(String reportDir) {
         this.reportDir = reportDir;
         return this;
     }
@@ -163,13 +166,15 @@ public class JkJavaProjectTestingStep {
     }
 
     private void executeWithTestProcessor() {
+        UnaryOperator<JkPathSequence> op = paths -> paths.resolveTo(project.getBaseDir());
+        testSelection.setTestClassRoots(op);
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
         if (breakOnFailures) {
             result.assertNoFailure();
         }
     }
 
-    private JkTestProcessor<JkJavaProjectTestingStep> defaultTestProcessor() {
+    private JkTestProcessor<JkJavaProjectTesting> defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.ofParent(this);
         final Path reportDir = testCompilation.getLayout().getOutputDir().resolve(this.reportDir);
         result.getEngineBehavior()
@@ -178,8 +183,9 @@ public class JkJavaProjectTestingStep {
         return result;
     }
 
-    private JkTestSelection<JkJavaProjectTestingStep> defaultTestSelection() {
-        return JkTestSelection.ofParent(this).addTestClassRoots(testCompilation.getLayout().getClassDir());
+    private JkTestSelection<JkJavaProjectTesting> defaultTestSelection() {
+        return JkTestSelection.ofParent(this).addTestClassRoots(
+                Paths.get(testCompilation.getLayout().getClassDir()));
     }
 
 }

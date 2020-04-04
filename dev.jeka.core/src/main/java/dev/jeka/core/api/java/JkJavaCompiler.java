@@ -3,9 +3,9 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsTime;
 
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +33,6 @@ public final class JkJavaCompiler<T> {
      * Owner for parent chaining
      */
     public final T __;
-
 
     private JkJavaCompiler(T __) {
         this.__ = __;
@@ -120,48 +120,56 @@ public final class JkJavaCompiler<T> {
         final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
-            throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
+            throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
         }
         JkUtilsPath.createDirectories(outputDir);
         final JavaCompiler compiler = this.compilerTool != null ? this.compilerTool : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
-        String message = "Compiling " + compileSpec.getSourceFiles() + " source files";
+        String message = "Compiling " + compileWhatMessage(compileSpec.getSourceFiles())
+                + " to "
+                + Paths.get("").toAbsolutePath().relativize((outputDir));
         if (JkLog.verbosity().isVerbose()) {
-            message = message + " to " + outputDir + " using options : " + JkUtilsString
-                    .join(options, " ");
+            message = message + " using options : " + JkUtilsString.join(options, " ");
         }
-        long start = System.nanoTime();
         JkLog.startTask(message);
-        if (compileSpec.getSourceFiles().isEmpty()) {
-            JkLog.warn("No source to compile");
-            JkLog.endTask();
-            return true;
-        }
         final boolean result;
         if (this.forkingProcess == null) {
             List<File> files = toFiles(compileSpec.getSourceFiles());
             final Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
             final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutputStream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);
-            if (files.size() > 0) {
-                JkLog.info("" + files.size() + " files to compile with " + compiler.getClass().getSimpleName());
-
-                result = task.call();
-            } else {
-                JkLog.warn("No file to compile.");
-                JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-                return true;
-            }
+            result = task.call();
         } else {
             JkLog.info("Use a forking process to perform compilation : " + forkingProcess.getCommand());
             result = runOnFork(compileSpec);
         }
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        JkLog.endTask();
         if (!result) {
             return false;
         }
         return true;
+    }
+
+    private static String compileWhatMessage(List<Path> paths) {
+        List<String> folders = new LinkedList<>();
+        List<String> files = new LinkedList<>();
+        for (Path path : paths) {
+            String relPath = Paths.get("").toAbsolutePath().relativize(path).toString();
+            if (Files.isDirectory(path)) {
+                folders.add(relPath);
+            } else {
+                files.add(relPath);
+            }
+        }
+        if (paths.size() < 4) {
+            List<String> all = JkUtilsIterable.concatLists(folders, files);
+            return String.join(", ", all);
+        }
+        else {
+            return JkUtilsString.plurialize(folders.size(), "folder") + " and " +
+                    JkUtilsString.plurialize(files.size(), "file");
+        }
     }
 
     private List<File> toFiles(Collection<Path> paths) {
@@ -191,6 +199,8 @@ public final class JkJavaCompiler<T> {
         final int result = jkProcess.runSync();
         return (result == 0);
     }
+
+
 
     private static JavaCompiler getDefaultOrFail() {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

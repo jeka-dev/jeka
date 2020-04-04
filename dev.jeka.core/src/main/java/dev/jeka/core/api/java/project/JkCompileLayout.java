@@ -29,8 +29,8 @@ public class JkCompileLayout<T> {
     /**
      * Filter to consider as resources everything but java source stuff.
      */
-    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.of(false, "**/*.java", "*.java",
-            "**/package.html", "package.html", "**/doc-files", "doc-files");
+    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.of(false,
+            "**/*.java", "*.java", "**/package.html", "package.html", "**/doc-files", "doc-files");
 
     /**
      * Filter to consider only Java source
@@ -223,9 +223,9 @@ public class JkCompileLayout<T> {
      * but not the outputDir.
      */
     public void deleteOutputDirs() {
-        JkPathTree.of(getClassDir()).deleteContent();
-        JkPathTree.of(getGeneratedSourceDir()).deleteContent();
-        JkPathTree.of(getGeneratedResourceDir()).deleteContent();
+        JkPathTree.of(resolveClassDir()).deleteContent();
+        JkPathTree.of(resolveGeneratedSourceDir()).deleteContent();
+        JkPathTree.of(resolveGeneratedResourceDir()).deleteContent();
     }
 
     // --------------------------- Views ---------------------------------
@@ -238,30 +238,54 @@ public class JkCompileLayout<T> {
         return outputDirSupplier.get();
     }
 
-    public Path getClassDir() {
+    public JkPathTreeSet getSources() {
+        return sources;
+    }
+
+    public JkPathTreeSet getResources() {
+        return resources;
+    }
+
+    public String getGeneratedSourceDir() {
+        return generatedSourceDir;
+    }
+
+    public String getGeneratedResourceDir() {
+        return generatedResourceDir;
+    }
+
+    public String getClassDir() {
+        return classDir;
+    }
+
+    /**
+     * Returns the class dir directory resolved against the current base dir
+     * @return
+     */
+    public Path resolveClassDir() {
         return outputDirSupplier.get().resolve(classDir);
     }
 
     /**
      * Returns location of generated sources.
      */
-    public Path getGeneratedSourceDir() {
+    public Path resolveGeneratedSourceDir() {
         return outputDirSupplier.get().resolve(generatedSourceDir);
     }
 
     /**
      * Returns location of generated resources.
      */
-    public Path getGeneratedResourceDir() {
+    public Path resolveGeneratedResourceDir() {
         return outputDirSupplier.get().resolve(generatedResourceDir);
     }
 
-    public JkPathTreeSet getSources() {
+    public JkPathTreeSet resolveSources() {
         return sources.resolvedTo(baseDirSupplier.get());
     }
 
-    public JkPathTreeSet getResources() {
-        return resources.resolvedTo(outputDirSupplier.get());
+    public JkPathTreeSet resolveResources() {
+        return resources.resolvedTo(baseDirSupplier.get());
     }
 
     public String getInfo() {

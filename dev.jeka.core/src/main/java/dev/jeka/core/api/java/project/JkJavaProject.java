@@ -27,7 +27,7 @@ import java.util.function.Supplier;
  * several artifact files so be aware of clean it if you want to replay some tasks with different settings.
  *
  */
-public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
+public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
 
     public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
 
@@ -113,14 +113,14 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
     }
 
     public String getInfo() {
-        JkJavaProjectCompilationStep compilation = getSteps().compilation;
+        JkJavaProjectCompilation compilation = getSteps().compilation;
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + steps.getPublishing().getVersionedModule() + "\n")
                 .append("Production sources : " + steps.compilation.getLayout().getInfo()).append("\n")
                 .append("Test sources : " + steps.testing.getTestCompilation().getLayout().getInfo()).append("\n")
                 .append("Java Source Version : " + steps.getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
                 .append("Source Encoding : " + steps.getCompilation().getComputedCompileSpec().getEncoding() + "\n")
-                .append("Source file count : " + compilation.getLayout().getSources().count(Integer.MAX_VALUE, false) + "\n")
+                .append("Source file count : " + compilation.getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
                 .append("Publish repositories : " + steps.getPublishing().getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
@@ -157,42 +157,42 @@ public class JkJavaProject implements JkJavaIdeSupportSupplier, JkFileSystemLoca
 
         public final JkJavaProject __;
 
-        private final JkJavaProjectCompilationStep compilation;
+        private final JkJavaProjectCompilation compilation;
 
-        private final JkJavaProjectTestingStep testing;
+        private final JkJavaProjectTesting testing;
 
-        private final JkJavaProjectPackagingStep packaging;
+        private final JkJavaProjectPackaging packaging;
 
-        private final JkJavaProjecPublishingStep publishing;
+        private final JkJavaProjectPublication publishing;
 
-        private final JkJavaProjectDocumentationStep documentation;
+        private final JkJavaProjectDocumentation documentation;
 
         private JkSteps(JkJavaProject __) {
             this.__ = __;
-            compilation = JkJavaProjectCompilationStep.ofProd(__, this);
-            testing = new JkJavaProjectTestingStep(__, this);
-            packaging = new JkJavaProjectPackagingStep(__, this);
-            publishing = new JkJavaProjecPublishingStep(__, this);
-            documentation = new JkJavaProjectDocumentationStep(__, this);
+            compilation = JkJavaProjectCompilation.ofProd(__, this);
+            testing = new JkJavaProjectTesting(__, this);
+            packaging = new JkJavaProjectPackaging(__, this);
+            publishing = new JkJavaProjectPublication(__, this);
+            documentation = new JkJavaProjectDocumentation(__, this);
         }
 
-        public JkJavaProjectCompilationStep<JkSteps> getCompilation() {
+        public JkJavaProjectCompilation<JkSteps> getCompilation() {
             return compilation;
         }
 
-        public JkJavaProjectTestingStep getTesting() {
+        public JkJavaProjectTesting getTesting() {
             return testing;
         }
 
-        public JkJavaProjectPackagingStep getPackaging() {
+        public JkJavaProjectPackaging getPackaging() {
             return packaging;
         }
 
-        public JkJavaProjecPublishingStep getPublishing() {
+        public JkJavaProjectPublication getPublishing() {
             return publishing;
         }
 
-        public JkJavaProjectDocumentationStep getDocumentation() {
+        public JkJavaProjectDocumentation getDocumentation() {
             return documentation;
         }
     }

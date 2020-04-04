@@ -7,13 +7,13 @@ import dev.jeka.core.api.system.JkLog;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JkJavaProjectDocumentationStep {
+public class JkJavaProjectDocumentation {
 
     private final JkJavaProject project;
 
-    private final JkJavadocProcessor<JkJavaProjectDocumentationStep> javadocMaker;
+    private final JkJavadocProcessor<JkJavaProjectDocumentation> javadocMaker;
 
-    private final JkJavaProjectCompilationStep compilationStep;
+    private final JkJavaProjectCompilation compilationStep;
 
     private boolean done;
 
@@ -25,7 +25,7 @@ public class JkJavaProjectDocumentationStep {
      */
     public final JkJavaProject.JkSteps __;
 
-     JkJavaProjectDocumentationStep(JkJavaProject project, JkJavaProject.JkSteps parent) {
+     JkJavaProjectDocumentation(JkJavaProject project, JkJavaProject.JkSteps parent) {
         this.project = project;
         this.__ = parent;
         javadocMaker = JkJavadocProcessor.ofParent(this);
@@ -33,7 +33,7 @@ public class JkJavaProjectDocumentationStep {
 
     }
 
-    public JkJavadocProcessor<JkJavaProjectDocumentationStep> getJavadocProcessor() {
+    public JkJavadocProcessor<JkJavaProjectDocumentation> getJavadocProcessor() {
         return javadocMaker;
     }
 
@@ -44,7 +44,7 @@ public class JkJavaProjectDocumentationStep {
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
-        javadocMaker.make(classpath, compilationStep.getLayout().getSources(), dir);
+        javadocMaker.make(classpath, compilationStep.getLayout().resolveSources(), dir);
     }
 
     public void runIfNecessary() {
@@ -60,7 +60,7 @@ public class JkJavaProjectDocumentationStep {
         return project.getOutputDir().resolve(javadocDir);
     }
 
-    public JkJavaProjectDocumentationStep setJavadocDir(String javadocDir) {
+    public JkJavaProjectDocumentation setJavadocDir(String javadocDir) {
         this.javadocDir = javadocDir;
         return this;
     }

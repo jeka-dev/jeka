@@ -100,8 +100,8 @@ public final class JkLog implements Serializable {
         return JkUtilsObject.firstNonNull(errorStream, JkUtilsIO.nopOuputStream());
     }
 
-    public static void info(String message) {
-        consume(JkLogEvent.ofRegular(Type.INFO, message));
+    public static void info(String message, Object... params) {
+        consume(JkLogEvent.ofRegular(Type.INFO, String.format(message, params)));
     }
 
     public static void warn(String message) {
@@ -131,8 +131,8 @@ public final class JkLog implements Serializable {
     /**
      * Logs the start of the current task. Subsequent logs will be nested in this task log until #endTask is invoked.
      */
-    public static void startTask(String message) {
-        consume(JkLogEvent.ofRegular(Type.START_TASK, message));
+    public static void startTask(String message, Object ... params) {
+        consume(JkLogEvent.ofRegular(Type.START_TASK, String.format(message, params)));
         if (shouldPrint(Type.START_TASK)) {
             currentNestedTaskLevel.incrementAndGet();
             getStartTimes().addLast(System.nanoTime());

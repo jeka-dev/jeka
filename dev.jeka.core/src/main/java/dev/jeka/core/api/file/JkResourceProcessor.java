@@ -4,6 +4,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -119,7 +120,7 @@ public final class JkResourceProcessor<T> {
      * specified output directory along replacing specified tokens.
      */
     public void generate(JkPathTreeSet resourceTrees, Path outputDir) {
-        JkLog.startTask("Coping resource files to " + outputDir);
+        JkLog.startTask("Copying resource files to %s", outputDir);
         final AtomicInteger count = new AtomicInteger(0);
         for (final JkPathTree resourceTree : resourceTrees.toList()) {
             if (!resourceTree.exists()) {
@@ -137,8 +138,9 @@ public final class JkResourceProcessor<T> {
                     count.incrementAndGet();
                 }
             });
+            JkLog.info("%s processed from %s.", JkUtilsString.plurialize(count.get(), "file"),
+                    Paths.get("").toAbsolutePath().relativize(resourceTree.getRoot()));
         }
-        JkLog.info(count.intValue() + " file(s) copied.");
         JkLog.endTask();
     }
 

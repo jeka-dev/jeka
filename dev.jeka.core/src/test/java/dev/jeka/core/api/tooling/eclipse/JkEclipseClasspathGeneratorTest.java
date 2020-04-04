@@ -93,10 +93,10 @@ public class JkEclipseClasspathGeneratorTest {
         final JkCompileLayout base2Layout = baseProject2.getSteps().getCompilation().getLayout();
         final JkCompileLayout baseLayout = baseProject.getSteps().getCompilation().getLayout();
         assertEquals(baseLayout.getBaseDir(), base2Layout.getBaseDir());
-        final List<Path> srcFiles = base2Layout.getSources().getFiles();
+        final List<Path> srcFiles = base2Layout.resolveSources().getFiles();
         assertEquals(2, srcFiles.size());
         assertEquals("Base.java", srcFiles.get(0).getFileName().toString());
-        final List<Path> resFiles = base2Layout.getResources().getFiles();
+        final List<Path> resFiles = base2Layout.resolveResources().getFiles();
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
         assertEquals(4, baseProject2.getDependencyManagement().getDependencies().toList().size());

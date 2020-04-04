@@ -12,6 +12,12 @@ import java.nio.file.Path;
  */
 public class JkJavaIdeSupport {
 
+    public interface JkSupplier {
+
+        JkJavaIdeSupport getJavaIdeSupport();
+
+    }
+
     private JkCompileLayout<JkJavaIdeSupport> prodLayout;
 
     private JkCompileLayout<JkJavaIdeSupport>  testLayout;
@@ -77,4 +83,6 @@ public class JkJavaIdeSupport {
         this.dependencyResolver = dependencyResolver;
         return this;
     }
+
+
 }

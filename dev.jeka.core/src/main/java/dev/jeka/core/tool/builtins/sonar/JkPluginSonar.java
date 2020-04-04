@@ -37,10 +37,10 @@ public class JkPluginSonar extends JkPlugin {
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
-                .withBinaries(project.getSteps().getCompilation().getLayout().getClassDir())
+                .withBinaries(project.getSteps().getCompilation().getLayout().resolveClassDir())
                 .withLibraries(libs)
-                .withSourcesPath(prodLayout.getSources().getRootDirsOrZipFiles())
-                .withTestPath(testLayout.getSources().getRootDirsOrZipFiles())
+                .withSourcesPath(prodLayout.resolveSources().getRootDirsOrZipFiles())
+                .withTestPath(testLayout.resolveSources().getRootDirsOrZipFiles())
                 .withProperty(JkSonar.WORKING_DIRECTORY, baseDir.resolve(JkConstants.JEKA_DIR + "/.sonar").toString())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH,
                         baseDir.relativize( testReportDir.resolve("junit")).toString())

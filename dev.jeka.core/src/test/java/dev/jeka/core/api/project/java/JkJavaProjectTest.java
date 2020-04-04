@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
 import org.junit.Test;
 
@@ -19,6 +20,7 @@ public class JkJavaProjectTest {
     @Test
     public void generate() throws Exception {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
+        JkLog.setHierarchicalConsoleConsumer();
 
         Path base = top.resolve("base");
         JkJavaProject baseProject = JkJavaProject.of()

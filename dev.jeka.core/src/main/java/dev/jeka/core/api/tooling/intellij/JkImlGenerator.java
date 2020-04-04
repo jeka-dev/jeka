@@ -178,7 +178,7 @@ public final class JkImlGenerator {
 
         // Write test sources
         final Path projectDir = ideSupport.getProdLayout().getBaseDir();
-        for (final JkPathTree fileTree : ideSupport.getTestLayout().getSources().toList()) {
+        for (final JkPathTree fileTree : ideSupport.getTestLayout().resolveSources().toList()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T1);
                 writer.writeEmptyElement("sourceFolder");
@@ -191,8 +191,8 @@ public final class JkImlGenerator {
         }
 
         // write test resources
-        for (final JkPathTree fileTree : ideSupport.getTestLayout().getResources().toList()) {
-            if (fileTree.exists() && !contains(ideSupport.getTestLayout().getSources(), fileTree.getRootDirOrZipFile())) {
+        for (final JkPathTree fileTree : ideSupport.getTestLayout().resolveResources().toList()) {
+            if (fileTree.exists() && !contains(ideSupport.getTestLayout().resolveSources(), fileTree.getRootDirOrZipFile())) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
                 final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
@@ -204,7 +204,7 @@ public final class JkImlGenerator {
 
         // Write production sources
 
-        for (final JkPathTree fileTree : ideSupport.getProdLayout().getSources().toList()) {
+        for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveSources().toList()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
@@ -216,8 +216,8 @@ public final class JkImlGenerator {
         }
 
         // Write production test resources
-        for (final JkPathTree fileTree : ideSupport.getProdLayout().getResources().toList()) {
-            if (fileTree.exists() && !contains(ideSupport.getProdLayout().getSources(), fileTree.getRootDirOrZipFile())) {
+        for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveResources().toList()) {
+            if (fileTree.exists() && !contains(ideSupport.getProdLayout().resolveSources(), fileTree.getRootDirOrZipFile())) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
                 final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
@@ -613,7 +613,7 @@ public final class JkImlGenerator {
     }
 
     private Path findPluginXml() {
-        List<Path> candidates = ideSupport.getProdLayout().getResources().getExistingFiles("META-INF/plugin.xml");
+        List<Path> candidates = ideSupport.getProdLayout().resolveResources().getExistingFiles("META-INF/plugin.xml");
         if (candidates.isEmpty()) {
             return null;
         }

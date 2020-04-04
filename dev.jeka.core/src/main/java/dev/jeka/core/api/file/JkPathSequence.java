@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A sequence of file path (folder or archive). Each file is called an <code>entry</code>.<br/>
@@ -143,15 +144,9 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
      * specified base directory.
      */
     public JkPathSequence resolveTo(Path baseDir) {
-        final List<Path> result = new LinkedList<>();
-        for(final Path entry : entries) {
-            if (entry.isAbsolute()) {
-                result.add(entry);
-            } else {
-                result.add(baseDir.toAbsolutePath().resolve(entry));
-            }
-        }
-        return new JkPathSequence(result);
+        return JkPathSequence.of(entries.stream()
+                .map(path -> baseDir.resolve(path))
+                .collect(Collectors.toList()));
     }
 
     // --------------- Canonical methods ------------------------------------------
@@ -181,7 +176,7 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
-            builder.append(it.next().toAbsolutePath().toString());
+            builder.append(it.next().toString());
             if (it.hasNext()) {
                 builder.append(";");
             }

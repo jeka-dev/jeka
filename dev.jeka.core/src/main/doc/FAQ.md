@@ -52,7 +52,7 @@ public class Build extends JkCommandSet{
 
 ### How can I generate Eclipse/Intellij without using Java plugin (JkPluginJava) ?
 
-Just make your commandSet class implements `dev.jeka.core.api.java.project.JkJavaIdeSupportSupplier`.
+Just make your commandSet class implements `dev.jeka.core.api.java.project.JkJavaIdeSupport.JkSupplier`.
 
 
 

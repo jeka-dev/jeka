@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
 @JkDocPluginDeps({JkPluginRepo.class, JkPluginScaffold.class})
-public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
+public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplier {
 
     // ------------  Options injectable by command line --------------------------------
 
@@ -126,11 +126,11 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
         JkCompileLayout prodLayout = project.getSteps().getCompilation().getLayout();
-        prodLayout.getSources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        prodLayout.getResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+        prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
+        prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
         JkCompileLayout testLayout = project.getSteps().getTesting().getTestCompilation().getLayout();
-        testLayout.getSources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        testLayout.getResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+        testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
+        testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
         scaffoldPlugin.getScaffolder().setCommandClassCode(code);
         scaffoldPlugin.getScaffolder().setClassFilename("Build.java");
     }
@@ -222,7 +222,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupportSupplier {
 
     private JkProcess compilerProcess() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
-        JkJavaProjectCompilationStep compilation = project.getSteps().getCompilation();
+        JkJavaProjectCompilation compilation = project.getSteps().getCompilation();
         return JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
                 compilation.getJavaVersion().get());
     }

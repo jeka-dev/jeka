@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 /**
  * Tasks for packaging artifacts created by the holding project.
  */
-public class JkJavaProjectPackagingStep {
+public class JkJavaProjectPackaging {
 
     private final JkJavaProject project;
 
@@ -34,16 +34,16 @@ public class JkJavaProjectPackagingStep {
 
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 
-    private final JkJavaProjectCompilationStep compilationStep;
+    private final JkJavaProjectCompilation compilationStep;
 
-    private final JkJavaProjectDocumentationStep documentationStep;
+    private final JkJavaProjectDocumentation documentationStep;
 
     /**
      * For Parent chaining
      */
     public JkJavaProject.JkSteps __;
 
-    JkJavaProjectPackagingStep(JkJavaProject project, JkJavaProject.JkSteps steps) {
+    JkJavaProjectPackaging(JkJavaProject project, JkJavaProject.JkSteps steps) {
         this.project = project;
         this.__ = steps;
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
@@ -52,7 +52,7 @@ public class JkJavaProjectPackagingStep {
         documentationStep = steps.getDocumentation();
     }
 
-    public JkManifest<JkJavaProjectPackagingStep> getManifest() {
+    public JkManifest<JkJavaProjectPackaging> getManifest() {
         return manifest;
     }
 
@@ -97,7 +97,7 @@ public class JkJavaProjectPackagingStep {
     public void createBinJar(Path target) {
         project.getSteps().getCompilation().runIfNecessary();
         project.getSteps().getTesting().runIfNecessary();
-        JkJarPacker.of(compilationStep.getLayout().getClassDir())
+        JkJarPacker.of(compilationStep.getLayout().resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeJar(target);
@@ -108,15 +108,15 @@ public class JkJavaProjectPackagingStep {
         project.getSteps().getTesting().runIfNecessary();
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles();
-        JkJarPacker.of(compilationStep.getLayout().getClassDir())
+        JkJarPacker.of(compilationStep.getLayout().resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath, this.fatJarFilter);
     }
 
     public void createSourceJar(Path target) {
-        compilationStep.getLayout().getSources().and(compilationStep
-                .getLayout().getGeneratedSourceDir()).zipTo(target);
+        compilationStep.getLayout().resolveSources().and(compilationStep
+                .getLayout().resolveGeneratedSourceDir()).zipTo(target);
     }
 
     void createJavadocJar(Path target) {
@@ -133,7 +133,7 @@ public class JkJavaProjectPackagingStep {
      * Defines the algorithms to sign the produced artifacts.
      * @param algorithms Digest algorithm working on JDK8 platform including <code>md5, sha-1, sha-2 and sha-256</code>
      */
-    public JkJavaProjectPackagingStep setChecksumAlgorithms(String ... algorithms) {
+    public JkJavaProjectPackaging setChecksumAlgorithms(String ... algorithms) {
         this.checksumAlgorithms = algorithms;
         return this;
     }
@@ -142,7 +142,7 @@ public class JkJavaProjectPackagingStep {
      * Defines witch files from main jar and dependency jars will be included in the fat jar.
      * By default, it is valued to "all".
      */
-    public JkJavaProjectPackagingStep setFatJarFilter(PathMatcher fatJarFilter) {
+    public JkJavaProjectPackaging setFatJarFilter(PathMatcher fatJarFilter) {
         JkUtilsAssert.notNull(fatJarFilter, "Fat jar filter can not be null.");
         this.fatJarFilter = fatJarFilter;
         return this;
@@ -155,7 +155,7 @@ public class JkJavaProjectPackagingStep {
     /**
      * File trees specified here will be added to the fat jar.
      */
-    public JkJavaProjectPackagingStep setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
+    public JkJavaProjectPackaging setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;
     }

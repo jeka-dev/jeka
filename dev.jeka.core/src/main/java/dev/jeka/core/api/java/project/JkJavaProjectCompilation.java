@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  * Handles project compilation step. Users can configure inner phases by chaining runnables.
  * They also can modify {@link JkJavaCompiler} and {@link JkJavaCompileSpec} to use.
  */
-public class JkJavaProjectCompilationStep<T> {
+public class JkJavaProjectCompilation<T> {
 
     private static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -36,21 +36,21 @@ public class JkJavaProjectCompilationStep<T> {
 
     private final JkJavaProject project;
 
-    private final JkRunnables<JkJavaProjectCompilationStep<T>> beforeGenerate;
+    private final JkRunnables<JkJavaProjectCompilation<T>> beforeGenerate;
 
-    private final JkRunnables<JkJavaProjectCompilationStep<T>> beforeCompile;
+    private final JkRunnables<JkJavaProjectCompilation<T>> beforeCompile;
 
-    private final JkConsumers<Path, JkJavaProjectCompilationStep<T>> sourceGenerator;
+    private final JkConsumers<Path, JkJavaProjectCompilation<T>> sourceGenerator;
 
-    private final JkConsumers<Path, JkJavaProjectCompilationStep<T>> resourceGenerator;
+    private final JkConsumers<Path, JkJavaProjectCompilation<T>> resourceGenerator;
 
-    private final JkRunnables<JkJavaProjectCompilationStep<T>> afterCompile;
+    private final JkRunnables<JkJavaProjectCompilation<T>> afterCompile;
 
-    private final JkJavaCompiler<JkJavaProjectCompilationStep<T>> compiler;
+    private final JkJavaCompiler<JkJavaProjectCompilation<T>> compiler;
 
-    private final JkResourceProcessor<JkJavaProjectCompilationStep<T>> resourceProcessor;
+    private final JkResourceProcessor<JkJavaProjectCompilation<T>> resourceProcessor;
 
-    private final JkCompileLayout<JkJavaProjectCompilationStep<T>> layout;
+    private final JkCompileLayout<JkJavaProjectCompilation<T>> layout;
 
     private final String scope;
 
@@ -64,7 +64,7 @@ public class JkJavaProjectCompilationStep<T> {
 
     private String sourceEncoding;
 
-    private JkJavaProjectCompilationStep(JkJavaProject project, String scope, T parent) {
+    private JkJavaProjectCompilation(JkJavaProject project, String scope, T parent) {
         __ = parent;
         this.project = project;
         this.scope = scope;
@@ -80,23 +80,25 @@ public class JkJavaProjectCompilationStep<T> {
                 .setOutputDirSupplier(project::getOutputDir);
     }
 
-    static JkJavaProjectCompilationStep<JkJavaProject.JkSteps> ofProd(JkJavaProject project, JkJavaProject.JkSteps parent) {
-        JkJavaProjectCompilationStep result =
-                new JkJavaProjectCompilationStep(project, "production code", parent);
+    static JkJavaProjectCompilation<JkJavaProject.JkSteps> ofProd(JkJavaProject project, JkJavaProject.JkSteps parent) {
+        JkJavaProjectCompilation result =
+                new JkJavaProjectCompilation(project, "production code", parent);
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
         return result;
     }
 
-    static JkJavaProjectCompilationStep<JkJavaProjectTestingStep> ofTest(JkJavaProject project,
-                                                                         JkJavaProjectTestingStep parent) {
-        JkJavaProjectCompilationStep result =
-                new JkJavaProjectCompilationStep(project, "test code", parent);
+    static JkJavaProjectCompilation<JkJavaProjectTesting> ofTest(JkJavaProject project,
+                                                                 JkJavaProjectTesting parent) {
+        JkJavaProjectCompilation result =
+                new JkJavaProjectCompilation(project, "test code", parent);
         result.compileSpecSupplier = () -> result.computeTestCompileSpec(project.getSteps().getCompilation());
-        result.layout.setSourceMavenStyle(JkCompileLayout.Concern.TEST);
+        result.layout
+                .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
+                .setStandardOuputDirs(JkCompileLayout.Concern.TEST);
         return result;
     }
 
-    public JkJavaProjectCompilationStep apply(Consumer<JkJavaProjectCompilationStep> consumer) {
+    public JkJavaProjectCompilation apply(Consumer<JkJavaProjectCompilation> consumer) {
         consumer.accept(this);
         return this;
     }
@@ -105,7 +107,7 @@ public class JkJavaProjectCompilationStep<T> {
         done = false;
     }
 
-    public JkCompileLayout<JkJavaProjectCompilationStep<T>> getLayout() {
+    public JkCompileLayout<JkJavaProjectCompilation<T>> getLayout() {
         return layout;
     }
 
@@ -120,8 +122,8 @@ public class JkJavaProjectCompilationStep<T> {
     public void run() {
         JkLog.startTask("Compilation and resource processing of " + scope);
         beforeGenerate.run();
-        sourceGenerator.accept(this.layout.getGeneratedSourceDir());
-        resourceGenerator.accept(this.layout.getGeneratedResourceDir());
+        sourceGenerator.accept(this.layout.resolveGeneratedSourceDir());
+        resourceGenerator.accept(this.layout.resolveGeneratedResourceDir());
         processResources();
         beforeCompile.run();
         runCompile();
@@ -145,7 +147,7 @@ public class JkJavaProjectCompilationStep<T> {
      * Returns the runnables to run prior source and resource generation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables<JkJavaProjectCompilationStep<T>> getBeforeGenerate() {
+    public JkRunnables<JkJavaProjectCompilation<T>> getBeforeGenerate() {
         return beforeGenerate;
     }
 
@@ -153,7 +155,7 @@ public class JkJavaProjectCompilationStep<T> {
      * Returns the runnables to run after source and resource generation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables<JkJavaProjectCompilationStep<T>> getBeforeCompile() {
+    public JkRunnables<JkJavaProjectCompilation<T>> getBeforeCompile() {
         return beforeCompile;
     }
 
@@ -162,7 +164,7 @@ public class JkJavaProjectCompilationStep<T> {
      * to customise the process. Empty by default. The object passed as parameter of the consumers
      * is the base directory where sources must be generated.
      */
-    public JkConsumers<Path, JkJavaProjectCompilationStep<T>> getSourceGenerator() {
+    public JkConsumers<Path, JkJavaProjectCompilation<T>> getSourceGenerator() {
         return sourceGenerator;
     }
 
@@ -171,7 +173,7 @@ public class JkJavaProjectCompilationStep<T> {
      * to customise the process. Empty by default. The object passed as parameter of the consumers
      * is the base directory where resources must be generated.
      */
-    public JkConsumers<Path, JkJavaProjectCompilationStep<T>> getResourceGenerator() {
+    public JkConsumers<Path, JkJavaProjectCompilation<T>> getResourceGenerator() {
         return resourceGenerator;
     }
 
@@ -179,7 +181,7 @@ public class JkJavaProjectCompilationStep<T> {
      * Returns the compiler compiling Java sources of this project. The returned instance is mutable
      * so users can modify it from this method return.
      */
-    public JkJavaCompiler<JkJavaProjectCompilationStep<T>> getCompiler() {
+    public JkJavaCompiler<JkJavaProjectCompilation<T>> getCompiler() {
         return this.compiler;
     }
 
@@ -201,7 +203,7 @@ public class JkJavaProjectCompilationStep<T> {
     /**
      * Set the encoding to use to read Java source files
      */
-    public JkJavaProjectCompilationStep<T> setSourceEncoding(String sourceEncoding) {
+    public JkJavaProjectCompilation<T> setSourceEncoding(String sourceEncoding) {
         this.sourceEncoding = sourceEncoding;
         return this;
     }
@@ -216,7 +218,7 @@ public class JkJavaProjectCompilationStep<T> {
     /**
      * Adds options to be passed to Java compiler
      */
-    public JkJavaProjectCompilationStep<T> addOptions(String ... options) {
+    public JkJavaProjectCompilation<T> addOptions(String ... options) {
         this.compileOptions.addAll(Arrays.asList(options));
         return this;
     }
@@ -224,7 +226,7 @@ public class JkJavaProjectCompilationStep<T> {
     /**
      * Returns the resource processor.
      */
-    public JkResourceProcessor<JkJavaProjectCompilationStep<T>> getResourceProcessor() {
+    public JkResourceProcessor<JkJavaProjectCompilation<T>> getResourceProcessor() {
         return resourceProcessor;
     }
 
@@ -238,7 +240,7 @@ public class JkJavaProjectCompilationStep<T> {
     /**
      * Sets the Java version used for both source and target.
      */
-    public JkJavaProjectCompilationStep<T> setJavaVersion(JkJavaVersion javaVersion) {
+    public JkJavaProjectCompilation<T> setJavaVersion(JkJavaVersion javaVersion) {
         this.javaVersion = javaVersion;
         return this;
     }
@@ -252,7 +254,7 @@ public class JkJavaProjectCompilationStep<T> {
     }
 
     private void processResources() {
-        this.getResourceProcessor().generate(layout.getResources(), layout.getClassDir());
+        this.getResourceProcessor().generate(layout.resolveResources(), layout.resolveClassDir());
     }
 
     private void runCompile() {
@@ -264,26 +266,26 @@ public class JkJavaProjectCompilationStep<T> {
 
     private JkJavaCompileSpec computeProdCompileSpec() {
         return JkJavaCompileSpec.of()
-                .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
-                .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
-                .setClasspath(project.getDependencyManagement()
-                        .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles())
-                .addSources(layout.getSources().and(layout.getGeneratedSourceDir()))
-                .addOptions(compileOptions)
-                .setOutputDir(layout.getClassDir());
+            .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
+            .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
+            .setClasspath(project.getDependencyManagement()
+                    .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles())
+            .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
+            .addOptions(compileOptions)
+            .setOutputDir(layout.resolveClassDir());
     }
 
-    private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilationStep prodStep) {
+    private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
         JkJavaCompileSpec prodSpec = prodStep.getComputedCompileSpec();
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
                 .setClasspath(project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles()
-                            .andPrepend(prodStep.layout.getClassDir()))
-                .addSources(layout.getSources().and(layout.getGeneratedSourceDir()))
+                            .andPrepend(prodStep.layout.resolveClassDir()))
+                .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
                 .addOptions(compileOptions)
-                .setOutputDir(layout.getClassDir());
+                .setOutputDir(layout.resolveClassDir());
     }
 
 }

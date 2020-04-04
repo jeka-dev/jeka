@@ -9,6 +9,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 /**
  * Mutable object to specify a set of test to run according class root dirs, file patterns and tags.<p>
@@ -16,7 +17,7 @@ import java.util.*;
  * By default, when no include/exclude pattern/tag are specified, the selector get all classes
  * under defined class root dirs.
  */
-public final class JkTestSelection<T> implements Serializable {
+public final class JkTestSelection<T> implements Cloneable, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -69,7 +70,8 @@ public final class JkTestSelection<T> implements Serializable {
     }
 
     /**
-     * Adds specified dir to the test class root directories.
+     * Adds specified dir to the test class root directories. It can be an- collection of path or
+     * a single path (as Path implements Iterable<Path>
      */
     public JkTestSelection<T> addTestClassRoots(Iterable<Path> paths) {
         List<Path> pathList = JkUtilsPath.disambiguate(paths);
@@ -150,6 +152,11 @@ public final class JkTestSelection<T> implements Serializable {
         return discoveryConfigurer;
     }
 
+    public JkTestSelection<T> setTestClassRoots(UnaryOperator<JkPathSequence> pathSequencer) {
+        testClassRoots = pathSequencer.apply(testClassRoots);
+        return this;
+    }
+
     /**
      * Set a native Junit-platform configurer to build the {@link org.junit.platform.launcher.LauncherDiscoveryRequest}
      * passed to Junit-platform. The configurer will apply on a builder instance created from
@@ -169,5 +176,19 @@ public final class JkTestSelection<T> implements Serializable {
     public JkTestSelection<T> setDiscoveryConfigurer(JkUnaryOperator<LauncherDiscoveryRequestBuilder> discoveryConfigurer) {
         this.discoveryConfigurer = discoveryConfigurer;
         return this;
+    }
+
+    @Override
+    public JkTestSelection clone() {
+        try {
+            JkTestSelection<T> result = (JkTestSelection<T>) super.clone();
+            result.excludePatterns = new HashSet<>(excludePatterns);
+            result.excludeTags = new HashSet<>(excludeTags);
+            result.includePatterns = new HashSet<>(includePatterns);
+            result.includeTags = new HashSet<>(includeTags);
+            return result;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

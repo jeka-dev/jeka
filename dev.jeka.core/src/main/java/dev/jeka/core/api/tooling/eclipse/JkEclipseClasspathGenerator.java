@@ -325,7 +325,7 @@ public final class JkEclipseClasspathGenerator {
 
         // Test Sources
         JkCompileLayout testLayout = ideSupport.getTestLayout();
-        for (final JkPathTree fileTree : testLayout.getSources().and(testLayout.getResources()).toList()) {
+        for (final JkPathTree fileTree : testLayout.resolveSources().and(testLayout.resolveResources()).toList()) {
             if (!fileTree.exists()) {
                 continue;
             }
@@ -344,7 +344,7 @@ public final class JkEclipseClasspathGenerator {
 
         // Sources
         JkCompileLayout prodLayout = ideSupport.getTestLayout();
-        for (final JkPathTree fileTree : prodLayout.getSources().and(prodLayout.getResources()).toList()) {
+        for (final JkPathTree fileTree : prodLayout.resolveSources().and(prodLayout.resolveResources()).toList()) {
             if (!fileTree.exists()) {
                 continue;
             }
