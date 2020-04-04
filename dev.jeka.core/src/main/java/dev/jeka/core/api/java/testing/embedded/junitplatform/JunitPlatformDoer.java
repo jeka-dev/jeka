@@ -53,7 +53,7 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         if (testSelection.getDiscoveryConfigurer() != null) {
             requestBuilder = (LauncherDiscoveryRequestBuilder) testSelection.getDiscoveryConfigurer().apply(requestBuilder);
         }
-        JkLog.info(requestBuilder.toString());
+        JkLog.info(testSelection.toString());
         TestPlan testPlan = launcher.discover(requestBuilder.build());
 
 

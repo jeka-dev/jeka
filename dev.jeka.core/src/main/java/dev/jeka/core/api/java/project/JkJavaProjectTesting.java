@@ -166,7 +166,7 @@ public class JkJavaProjectTesting {
     }
 
     private void executeWithTestProcessor() {
-        UnaryOperator<JkPathSequence> op = paths -> paths.resolveTo(project.getBaseDir());
+        UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(project.getOutputDir());
         testSelection.setTestClassRoots(op);
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
         if (breakOnFailures) {

@@ -8,6 +8,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 
 import java.io.Serializable;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
@@ -190,5 +191,15 @@ public final class JkTestSelection<T> implements Cloneable, Serializable {
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "testClassRoots=" + testClassRoots.relativizedTo(Paths.get("").toAbsolutePath()) +
+                ", includePatterns=" + includePatterns +
+                ", excludePatterns=" + excludePatterns +
+                ", includeTags=" + includeTags +
+                ", excludeTags=" + excludeTags +
+                ", discoveryConfigurer=" + discoveryConfigurer;
     }
 }

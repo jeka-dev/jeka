@@ -57,7 +57,7 @@ public final class JkResolveResult {
      * Shorthand for {@link JkDependencyNode#getResolvedFiles()} on the tree root.
      */
     public JkPathSequence getFiles() {
-        return JkPathSequence.of(this.depTree.getResolvedFiles()).withoutDuplicates().resolveTo(Paths.get(""));
+        return JkPathSequence.of(this.depTree.getResolvedFiles()).withoutDuplicates().resolvedTo(Paths.get(""));
     }
 
     /**

@@ -259,8 +259,7 @@ public class JkCompileLayout<T> {
     }
 
     /**
-     * Returns the class dir directory resolved against the current base dir
-     * @return
+     * Returns the class dir directory resolved against the current base dir.
      */
     public Path resolveClassDir() {
         return outputDirSupplier.get().resolve(classDir);
