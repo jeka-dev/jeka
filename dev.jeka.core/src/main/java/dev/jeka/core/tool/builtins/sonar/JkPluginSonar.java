@@ -24,20 +24,20 @@ public class JkPluginSonar extends JkPlugin {
     }
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
-        final JkCompileLayout prodLayout = project.getSteps().getCompilation().getLayout();
-        final JkCompileLayout testLayout = project.getSteps().getTesting().getTestCompilation().getLayout();
+        final JkCompileLayout prodLayout = project.getCompilation().getLayout();
+        final JkCompileLayout testLayout = project.getTesting().getTestCompilation().getLayout();
         final Path baseDir = project.getBaseDir();
         final JkPathSequence libs = project.getDependencyManagement().fetchDependencies(
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED).getFiles();
-        final Path testReportDir = project.getSteps().getTesting().getReportDir();
-        final JkVersionedModule module = project.getSteps().getPublishing().getVersionedModule();
+        final Path testReportDir = project.getTesting().getReportDir();
+        final JkVersionedModule module = project.getPublication().getVersionedModule();
         final String fullName = module != null ? module.getModuleId().getDotedName() : project.getBaseDir().getFileName().toString();
         final String name = module != null ? module.getModuleId().getName() : project.getBaseDir().getFileName().toString();
         final JkVersion version = module != null ? module.getVersion() : JkVersion.of("");
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
-                .withBinaries(project.getSteps().getCompilation().getLayout().resolveClassDir())
+                .withBinaries(project.getCompilation().getLayout().resolveClassDir())
                 .withLibraries(libs)
                 .withSourcesPath(prodLayout.resolveSources().getRootDirsOrZipFiles())
                 .withTestPath(testLayout.resolveSources().getRootDirsOrZipFiles())
@@ -46,7 +46,7 @@ public class JkPluginSonar extends JkPlugin {
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,
                         baseDir.relativize(testReportDir.resolve("junit")).toString())
-                .withProperty(JkSonar.SOURCE_ENCODING, project.getSteps().getCompilation().getSourceEncoding())
+                .withProperty(JkSonar.SOURCE_ENCODING, project.getCompilation().getSourceEncoding())
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
                         baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.exec")).toString());
 

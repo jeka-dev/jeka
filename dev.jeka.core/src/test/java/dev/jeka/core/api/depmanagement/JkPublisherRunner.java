@@ -26,8 +26,8 @@ public class JkPublisherRunner {
                 .withChecksums("sha-2", "md5")
                 .withSigner(JkGpg.of(Paths.get("myPubring"), Paths.get("mySecretRing"), "mypassword").getSigner("toto"))
                 .with(JkMavenPublicationInfo.of("My sample project",
-                        "A project to demonstrate publishing on Jerkar",
-                        "http://project.jerkar.org")
+                        "A project to demonstrate publishing on Jeka",
+                        "http://jeka.dev")
                         .andApache2License()
                         .andDeveloper("djeang", "myemail@gmail.com", "dev.jeka", "https://jeka.dev/"));
 

@@ -27,8 +27,6 @@ public class JkJavaProjectTesting {
 
     private final JkJavaProjectCompilation<JkJavaProjectTesting> testCompilation;
 
-    private final JkJavaProjectCompilation prodCompilation;
-
     public final JkRunnables afterTest;
 
     private JkTestProcessor testProcessor;
@@ -47,13 +45,12 @@ public class JkJavaProjectTesting {
     /**
      * For parent chaining
      */
-    public final JkJavaProject.JkSteps __;
+    public final JkJavaProject __;
 
-    JkJavaProjectTesting(JkJavaProject project, JkJavaProject.JkSteps parent) {
+    JkJavaProjectTesting(JkJavaProject project) {
         this.project = project;
-        this.__ = parent;
+        this.__ = project;
         testCompilation = JkJavaProjectCompilation.ofTest(project, this);
-        prodCompilation = parent.getCompilation();
         afterTest = JkRunnables.noOp(this);
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
@@ -88,7 +85,7 @@ public class JkJavaProjectTesting {
      */
     public JkClasspath getTestClasspath() {
         return JkClasspath.of(testCompilation.getLayout().resolveClassDir())
-                .and(prodCompilation.getLayout().resolveClassDir())
+                .and(project.getCompilation().getLayout().resolveClassDir())
                 .and(project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
     }
@@ -140,7 +137,7 @@ public class JkJavaProjectTesting {
      */
     public void run() {
         JkLog.startTask("Processing tests");
-        this.project.getSteps().getCompilation().runIfNecessary();
+        this.project.getCompilation().runIfNecessary();
         this.testCompilation.run();
         executeWithTestProcessor();
         afterTest.run();

@@ -74,40 +74,39 @@ public class CoreBuild extends JkCommandSet {
                 .putMainArtifact(this::doPackWithEmbedded)
                 .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
                 .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__ // define wrapper
-            .getSteps()
-                .getCompilation()
+            .getCompilation()
+                .getLayout()
+                    .includeSourceDirsInResources().__
+                .addOptions("-Xlint:none","-g")
+                .setJavaVersion(JkJavaVersion.V8)
+                .getCompiler()
+                    .setForkingWithJavac().__.__
+            .getTesting()
+                .getTestCompilation()
                     .getLayout()
                         .includeSourceDirsInResources().__
-                    .addOptions("-Xlint:none","-g")
-                    .setJavaVersion(JkJavaVersion.V8)
                     .getCompiler()
-                        .setForkingWithJavac().__.__
-                .getTesting()
-                    .getTestCompilation()
-                        .getLayout()
-                            .includeSourceDirsInResources().__
-                        .getCompiler()
-                            .setDefault().__.__
-                    .getTestProcessor()
-                        .setForkingProcess(false)
-                        .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__
-                    .getTestSelection()
-                        .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
-                        .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
-                .getPackaging()
-                    .getManifest()
-                        .addMainClass("dev.jeka.core.tool.Main").__.__
-                .getDocumentation()
-                    .getJavadocProcessor()
-                        .setDisplayOutput(false)
-                        .addOptions("-notimestamp").__.__
-                .getPublishing()
-                    .setVersionedModule("dev.jeka:jeka-core", jekaVersion)
-                    .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
-                    .setMavenPublicationInfo(mavenPublication())
-                    .getPostActions()
-                        .append(() -> createGithubRelease(jekaVersion));
+                        .setDefault().__.__
+                .getTestProcessor()
+                    .setForkingProcess(true)
+                    .getEngineBehavior()
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__
+                .getTestSelection()
+                    .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
+                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
+            .getPackaging()
+                .getManifest()
+                    .addMainClass("dev.jeka.core.tool.Main").__.__
+            .getDocumentation()
+                .getJavadocProcessor()
+                    .setDisplayOutput(false)
+                    .addOptions("-notimestamp").__.__
+            .getPublication()
+                .setVersionedModule("dev.jeka:jeka-core", jekaVersion)
+                .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
+                .setMavenPublicationInfo(mavenPublication())
+                .getPostActions()
+                    .append(() -> createGithubRelease(jekaVersion));
     }
 
     private void createGithubRelease(String version) {
@@ -160,7 +159,7 @@ public class CoreBuild extends JkCommandSet {
 
     private void makeDocs() {
         JkLog.startTask("Making documentation");
-        String version = javaPlugin.getProject().getSteps().getPublishing().getVersionedModule()
+        String version = javaPlugin.getProject().getPublication().getVersionedModule()
                 .getVersion().getValue();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
@@ -192,12 +191,12 @@ public class CoreBuild extends JkCommandSet {
 
         // Main jar
         JkJavaProject project = javaPlugin.getProject();
-        project.getSteps().getPackaging().createBinJar(targetJar);
+        project.getPackaging().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
-        JkPathTree classTree = JkPathTree.of(project.getSteps().getCompilation().getLayout().resolveClassDir());
+        JkPathTree classTree = JkPathTree.of(project.getCompilation().getLayout().resolveClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
             .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
@@ -225,18 +224,18 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doWrapper(Path wrapperJar) {
-        JkPathTree.of(javaPlugin.getProject().getSteps().getCompilation().getLayout()
+        JkPathTree.of(javaPlugin.getProject().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void publishDocsOnGithubPage() {
         JkJavaProject project = javaPlugin.getProject();
-        Path javadocSourceDir = project.getSteps().getDocumentation().getJavadocDir();
+        Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
         git.exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
                 tempRepo.toString());
-        project.getSteps().getDocumentation().runIfNecessary();
+        project.getDocumentation().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
         makeDocs();

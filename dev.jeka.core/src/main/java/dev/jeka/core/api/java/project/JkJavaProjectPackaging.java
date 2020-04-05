@@ -34,22 +34,17 @@ public class JkJavaProjectPackaging {
 
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 
-    private final JkJavaProjectCompilation compilationStep;
-
-    private final JkJavaProjectDocumentation documentationStep;
 
     /**
      * For Parent chaining
      */
-    public JkJavaProject.JkSteps __;
+    public JkJavaProject __;
 
-    JkJavaProjectPackaging(JkJavaProject project, JkJavaProject.JkSteps steps) {
+    JkJavaProjectPackaging(JkJavaProject project) {
         this.project = project;
-        this.__ = steps;
+        this.__ = project;
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
         manifest = JkManifest.ofParent(this);
-        compilationStep = steps.getCompilation();
-        documentationStep = steps.getDocumentation();
     }
 
     public JkManifest<JkJavaProjectPackaging> getManifest() {
@@ -76,7 +71,7 @@ public class JkJavaProjectPackaging {
     }
 
     private JkVersionedModule defaultVersionedModule() {
-        JkVersionedModule versionedModule = project.getSteps().getPublishing().getVersionedModule();
+        JkVersionedModule versionedModule = project.getPublication().getVersionedModule();
         if (versionedModule == null) {
             return JkVersionedModule.ofRootDirName(project.getBaseDir().getFileName().toString());
         }
@@ -95,33 +90,33 @@ public class JkJavaProjectPackaging {
     }
 
     public void createBinJar(Path target) {
-        project.getSteps().getCompilation().runIfNecessary();
-        project.getSteps().getTesting().runIfNecessary();
-        JkJarPacker.of(compilationStep.getLayout().resolveClassDir())
+        project.getCompilation().runIfNecessary();
+        project.getTesting().runIfNecessary();
+        JkJarPacker.of(project.getCompilation().getLayout().resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeJar(target);
     }
 
     public void createFatJar(Path target) {
-        project.getSteps().getCompilation().runIfNecessary();
-        project.getSteps().getTesting().runIfNecessary();
+        project.getCompilation().runIfNecessary();
+        project.getTesting().runIfNecessary();
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles();
-        JkJarPacker.of(compilationStep.getLayout().resolveClassDir())
+        JkJarPacker.of(project.getCompilation().getLayout().resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath, this.fatJarFilter);
     }
 
     public void createSourceJar(Path target) {
-        compilationStep.getLayout().resolveSources().and(compilationStep
+        project.getCompilation().getLayout().resolveSources().and(project.getCompilation()
                 .getLayout().resolveGeneratedSourceDir()).zipTo(target);
     }
 
     void createJavadocJar(Path target) {
-        project.getSteps().getDocumentation().runIfNecessary();
-        Path javadocDir = documentationStep.getJavadocDir();
+        project.getDocumentation().runIfNecessary();
+        Path javadocDir = project.getDocumentation().getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
                     + ". Can't create a javadoc jar until javadoc files has been generated.");

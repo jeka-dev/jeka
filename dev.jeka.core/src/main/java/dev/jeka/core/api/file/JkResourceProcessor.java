@@ -121,8 +121,8 @@ public final class JkResourceProcessor<T> {
      */
     public void generate(JkPathTreeSet resourceTrees, Path outputDir) {
         JkLog.startTask("Copying resource files to %s", outputDir);
-        final AtomicInteger count = new AtomicInteger(0);
         for (final JkPathTree resourceTree : resourceTrees.toList()) {
+            final AtomicInteger count = new AtomicInteger(0);
             if (!resourceTree.exists()) {
                 continue;
             }

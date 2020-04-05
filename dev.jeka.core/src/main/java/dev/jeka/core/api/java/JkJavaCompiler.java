@@ -133,6 +133,11 @@ public final class JkJavaCompiler<T> {
             message = message + " using options : " + JkUtilsString.join(options, " ");
         }
         JkLog.startTask(message);
+        if (compileSpec.getSourceFiles().isEmpty()) {
+            JkLog.info("No sources file or directory specified.");
+            JkLog.endTask();
+            return true;
+        }
         final boolean result;
         if (this.forkingProcess == null) {
             List<File> files = toFiles(compileSpec.getSourceFiles());

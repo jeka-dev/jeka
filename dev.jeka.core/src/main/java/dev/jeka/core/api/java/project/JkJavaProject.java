@@ -37,15 +37,28 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
 
     private String outputDir = "jeka/output";
 
-    private final JkJavaProject.JkSteps steps;
-
     private final JkDependencyManagement<JkJavaProject> dependencyManagement;
 
     private final JkArtifactBasicProducer<JkJavaProject> artifactProducer;
 
+    private final JkJavaProjectCompilation compilation;
+
+    private final JkJavaProjectTesting testing;
+
+    private final JkJavaProjectDocumentation documentation;
+
+    private final JkJavaProjectPackaging packaging;
+
+    private final JkJavaProjectPublication publication;
+
+
     private JkJavaProject() {
         dependencyManagement = JkDependencyManagement.ofParent(this);
-        steps = new JkSteps(this);
+        compilation = JkJavaProjectCompilation.ofProd(this);
+        testing = new JkJavaProjectTesting(this);
+        documentation = new JkJavaProjectDocumentation( this);
+        packaging = new JkJavaProjectPackaging(this);
+        publication = new JkJavaProjectPublication(this);
         artifactProducer = JkArtifactBasicProducer.ofParent(this)
                 .setArtifactFileFunction(this::getOutputDir, this::artifactFileNamePart);
         registerArtifacts();
@@ -96,8 +109,24 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         return artifactProducer;
     }
 
-    public JkSteps getSteps() {
-        return steps;
+    public JkJavaProjectCompilation<JkJavaProject> getCompilation() {
+        return compilation;
+    }
+
+    public JkJavaProjectTesting getTesting() {
+        return testing;
+    }
+
+    public JkJavaProjectPackaging getPackaging() {
+        return packaging;
+    }
+
+    public JkJavaProjectPublication getPublication() {
+        return publication;
+    }
+
+    public JkJavaProjectDocumentation getDocumentation() {
+        return documentation;
     }
 
     // -------------------------- Other -------------------------
@@ -113,16 +142,15 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     }
 
     public String getInfo() {
-        JkJavaProjectCompilation compilation = getSteps().compilation;
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
-                .append("Published Module & version : " + steps.getPublishing().getVersionedModule() + "\n")
-                .append("Production sources : " + steps.compilation.getLayout().getInfo()).append("\n")
-                .append("Test sources : " + steps.testing.getTestCompilation().getLayout().getInfo()).append("\n")
-                .append("Java Source Version : " + steps.getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
-                .append("Source Encoding : " + steps.getCompilation().getComputedCompileSpec().getEncoding() + "\n")
+                .append("Published Module & version : " + publication.getVersionedModule() + "\n")
+                .append("Production sources : " + compilation.getLayout().getInfo()).append("\n")
+                .append("Test sources : " + testing.getTestCompilation().getLayout().getInfo()).append("\n")
+                .append("Java Source Version : " + compilation.getComputedCompileSpec().getSourceVersion() + "\n")
+                .append("Source Encoding : " + compilation.getComputedCompileSpec().getEncoding() + "\n")
                 .append("Source file count : " + compilation.getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
-                .append("Publish repositories : " + steps.getPublishing().getPublishRepos()  + "\n")
+                .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
                 .append("Defined Artifacts : " + get().getArtifactIds())
                 .toString();
@@ -131,15 +159,15 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
         return JkJavaIdeSupport.of(baseDir)
-                .setSourceVersion(steps.compilation.getJavaVersion())
-                .setProdLayout(steps.compilation.getLayout())
-                .setTestLayout(steps.testing.getTestCompilation().getLayout())
+                .setSourceVersion(compilation.getJavaVersion())
+                .setProdLayout(compilation.getLayout())
+                .setTestLayout(testing.getTestCompilation().getLayout())
                 .setDependencies(this.dependencyManagement.getDependencies())
                 .setDependencyResolver(this.dependencyManagement.getResolver());
     }
 
     private String artifactFileNamePart() {
-        JkVersionedModule versionedModule = steps.getPublishing().getVersionedModule();
+        JkVersionedModule versionedModule = publication.getVersionedModule();
         if (versionedModule != null) {
             return versionedModule.toString();
         }
@@ -147,55 +175,10 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     }
 
     private void registerArtifacts() {
-        artifactProducer.putMainArtifact(steps.getPackaging()::createBinJar,
+        artifactProducer.putMainArtifact(packaging::createBinJar,
                 () -> dependencyManagement.fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles());
-        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, steps.getPackaging()::createSourceJar);
-        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, steps.getPackaging()::createJavadocJar);
+        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, packaging::createSourceJar);
+        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
     }
-
-    public static class JkSteps {
-
-        public final JkJavaProject __;
-
-        private final JkJavaProjectCompilation compilation;
-
-        private final JkJavaProjectTesting testing;
-
-        private final JkJavaProjectPackaging packaging;
-
-        private final JkJavaProjectPublication publishing;
-
-        private final JkJavaProjectDocumentation documentation;
-
-        private JkSteps(JkJavaProject __) {
-            this.__ = __;
-            compilation = JkJavaProjectCompilation.ofProd(__, this);
-            testing = new JkJavaProjectTesting(__, this);
-            packaging = new JkJavaProjectPackaging(__, this);
-            publishing = new JkJavaProjectPublication(__, this);
-            documentation = new JkJavaProjectDocumentation(__, this);
-        }
-
-        public JkJavaProjectCompilation<JkSteps> getCompilation() {
-            return compilation;
-        }
-
-        public JkJavaProjectTesting getTesting() {
-            return testing;
-        }
-
-        public JkJavaProjectPackaging getPackaging() {
-            return packaging;
-        }
-
-        public JkJavaProjectPublication getPublishing() {
-            return publishing;
-        }
-
-        public JkJavaProjectDocumentation getDocumentation() {
-            return documentation;
-        }
-    }
-
 
 }

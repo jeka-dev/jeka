@@ -31,19 +31,18 @@ public class JkEclipseClasspathGeneratorTest {
 
         final JkJavaProject baseProject = JkJavaProject.of()
             .setBaseDir(top.resolve("base"))
-            .getSteps()
-                .getCompilation()
+            .getCompilation()
+                .getLayout()
+                    .emptySources().addSource("src")
+                    .emptyResources().addResource("res").__.__
+            .getTesting()
+                .getTestCompilation()
                     .getLayout()
-                        .emptySources().addSource("src")
-                        .emptyResources().addResource("res").__.__
-                .getTesting()
-                    .getTestCompilation()
-                        .getLayout()
-                            .emptySources().addSource("test")
-                            .emptyResources().addSource("res-test").__.__.__.__
-                .getDependencyManagement()
+                        .emptySources().addSource("test")
+                        .emptyResources().addSource("res-test").__.__.__
+            .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                    .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;
+                .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
             .setRunDependencies(baseProject.getDependencyManagement().getResolver(),
@@ -56,10 +55,9 @@ public class JkEclipseClasspathGeneratorTest {
             .setBaseDir(top.resolve("core"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of().and(baseProject)).__
-            .getSteps()
-                .getTesting()
-                    .getTestProcessor()
-                        .setForkingProcess(true).__.__.__;
+            .getTesting()
+                .getTestProcessor()
+                    .setForkingProcess(true).__.__;
         final JkEclipseClasspathGenerator coreGenerator =
                 JkEclipseClasspathGenerator.of(coreProject.getJavaIdeSupport());
         final String coreClasspath = coreGenerator.generate();
@@ -90,8 +88,8 @@ public class JkEclipseClasspathGeneratorTest {
         JkEclipseProjectGenerator.ofJavaNature("base").writeTo(base.resolve(".project"));
         classpathApplier.apply(baseProject2);
         System.out.println(baseProject2.getDependencyManagement().getDependencies().toList());
-        final JkCompileLayout base2Layout = baseProject2.getSteps().getCompilation().getLayout();
-        final JkCompileLayout baseLayout = baseProject.getSteps().getCompilation().getLayout();
+        final JkCompileLayout base2Layout = baseProject2.getCompilation().getLayout();
+        final JkCompileLayout baseLayout = baseProject.getCompilation().getLayout();
         assertEquals(baseLayout.getBaseDir(), base2Layout.getBaseDir());
         final List<Path> srcFiles = base2Layout.resolveSources().getFiles();
         assertEquals(2, srcFiles.size());

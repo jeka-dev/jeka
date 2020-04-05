@@ -57,13 +57,13 @@ public class JkPluginWar extends JkPlugin {
     }
 
     public static void generateWarDir(JkJavaProject project, Path dest, Path staticResouceDir) {
-        project.getSteps().getCompilation().runIfNecessary();
+        project.getCompilation().runIfNecessary();
         JkPathTree root = JkPathTree.of(dest);
         JkPathTree.of(project.getBaseDir().resolve("src/main/webapp/WEB-INF")).copyTo(root.get("WEB-INF"));
         if (Files.exists(staticResouceDir)) {
             JkPathTree.of(staticResouceDir).copyTo(root.getRoot());
         }
-        JkPathTree.of(project.getSteps().getCompilation().getLayout().resolveClassDir()).copyTo(root.get("classes"));
+        JkPathTree.of(project.getCompilation().getLayout().resolveClassDir()).copyTo(root.get("classes"));
         JkResolveResult resolveResult = project.getDependencyManagement().fetchDependencies(JkJavaDepScopes.RUNTIME);
         JkPathTree lib = root.goTo("lib");
         resolveResult.getFiles().withoutDuplicates().getEntries().forEach(path ->  lib.importFiles(path));

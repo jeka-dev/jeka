@@ -25,14 +25,13 @@ public class JkImlGeneratorTest {
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = JkJavaProject.of()
             .setBaseDir(base)
-            .getSteps()
-                .getCompilation()
+            .getCompilation()
+                .getLayout()
+                    .emptySources().addSource("res").__.__
+            .getTesting()
+                .getTestCompilation()
                     .getLayout()
-                        .emptySources().addSource("res").__.__
-                .getTesting()
-                    .getTestCompilation()
-                        .getLayout()
-                            .emptyResources().addResource("res-test").__.__.__.__
+                        .emptyResources().addResource("res-test").__.__.__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;
@@ -46,10 +45,9 @@ public class JkImlGeneratorTest {
                 .setBaseDir(core)
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of().and(baseProject)).__
-                .getSteps()
-                    .getTesting()
-                        .getTestProcessor()
-                            .setForkingProcess(true).__.__.__;
+                .getTesting()
+                    .getTestProcessor()
+                        .setForkingProcess(true).__.__;
         final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject.getJavaIdeSupport());
         final String result1 = coreGenerator.generate();
         System.out.println("\ncore .classpath");

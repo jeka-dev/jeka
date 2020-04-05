@@ -17,7 +17,7 @@ public class BcGpgDoerTest {
         final JkPathFile path = JkPathFile.of(Paths.get(JkConstants.OUTPUT_PATH +
                 "/test-out/signature.asm")).createIfNotExist();
         BcGpgDoer.sign(sample(), JkGpgTest.class.getResourceAsStream("secring.gpg"), "",
-                JkUtilsIO.outputStream(path.get().toFile(), false), "jerkar".toCharArray(), true);
+                JkUtilsIO.outputStream(path.get().toFile(), false), "jeka".toCharArray(), true);
 
         final boolean result = BcGpgDoer.verify(sample(), JkUtilsIO.inputStream(path.get().toFile()),
                 JkGpgTest.class.getResourceAsStream("pubring.gpg"));

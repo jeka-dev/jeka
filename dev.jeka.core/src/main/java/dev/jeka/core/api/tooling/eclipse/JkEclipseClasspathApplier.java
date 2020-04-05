@@ -50,10 +50,10 @@ public class JkEclipseClasspathApplier {
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);
         final JkDependencySet dependencies = Lib.toDependencies(javaProject.getBaseDir(), libs, this);
-        javaProject.getSteps().getCompilation().getLayout()
+        javaProject.getCompilation().getLayout()
                 .setSources(sources)
                 .setResources(resources);
-        javaProject.getSteps().getTesting().getTestCompilation().getLayout()
+        javaProject.getTesting().getTestCompilation().getLayout()
                 .setSources(testSources)
                 .setResources(testResources);
         javaProject.getDependencyManagement()

@@ -80,9 +80,9 @@ public class JkJavaProjectCompilation<T> {
                 .setOutputDirSupplier(project::getOutputDir);
     }
 
-    static JkJavaProjectCompilation<JkJavaProject.JkSteps> ofProd(JkJavaProject project, JkJavaProject.JkSteps parent) {
+    static JkJavaProjectCompilation<JkJavaProject> ofProd(JkJavaProject project) {
         JkJavaProjectCompilation result =
-                new JkJavaProjectCompilation(project, "production code", parent);
+                new JkJavaProjectCompilation(project, "production code", project);
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
         return result;
     }
@@ -91,7 +91,7 @@ public class JkJavaProjectCompilation<T> {
                                                                  JkJavaProjectTesting parent) {
         JkJavaProjectCompilation result =
                 new JkJavaProjectCompilation(project, "test code", parent);
-        result.compileSpecSupplier = () -> result.computeTestCompileSpec(project.getSteps().getCompilation());
+        result.compileSpecSupplier = () -> result.computeTestCompileSpec(project.getCompilation());
         result.layout
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
                 .setStandardOuputDirs(JkCompileLayout.Concern.TEST);

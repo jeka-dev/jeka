@@ -288,8 +288,6 @@ public class JkCompileLayout<T> {
     }
 
     public String getInfo() {
-        return new StringBuffer("Sources : " + this.sources + "\n")
-                .append("Resources : " + this.resources + "\n")
-                .toString();
+        return "Sources =" + this.sources + ", Resources = " + this.resources;
     }
 }

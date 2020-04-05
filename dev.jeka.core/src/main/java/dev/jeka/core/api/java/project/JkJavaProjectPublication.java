@@ -28,11 +28,11 @@ public class JkJavaProjectPublication {
     /**
      * For parent chaining
      */
-    public final JkJavaProject.JkSteps __;
+    public final JkJavaProject __;
 
-    JkJavaProjectPublication(JkJavaProject project, JkJavaProject.JkSteps parent) {
+    JkJavaProjectPublication(JkJavaProject project) {
         this.project = project;
-        this.__ = parent;
+        this.__ = project;
     }
 
     /**

@@ -78,9 +78,9 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void applyOptionsToUnderlyingProject() {
-        JkVersionedModule versionedModule = project.getSteps().getPublishing().getVersionedModule();
+        JkVersionedModule versionedModule = project.getPublication().getVersionedModule();
         if (versionedModule != null) {
-            project.getSteps().getPackaging().getManifest()
+            project.getPackaging().getManifest()
                     .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, versionedModule.getModuleId().getName())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, versionedModule.getModuleId().getGroup())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, versionedModule.getVersion().getValue());
@@ -92,31 +92,30 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         if (!pack.javadoc) {
             artifactProducer.removeArtifact(JkJavaProject.JAVADOC_ARTIFACT_ID);
         }
-        JkJavaProject.JkSteps steps = project.getSteps();
-        if (steps.getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
-            steps.getCompilation().getCompiler().setForkingProcess(compilerProcess());
+        if (project.getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
+            project.getCompilation().getCompiler().setForkingProcess(compilerProcess());
         }
-        if (steps.getPublishing().getPublishRepos() == null
-                || steps.getPublishing().getPublishRepos().getRepoList().isEmpty()) {
-            steps.getPublishing().addPublishRepo(repoPlugin.publishRepository());
+        if (project.getPublication().getPublishRepos() == null
+                || project.getPublication().getPublishRepos().getRepoList().isEmpty()) {
+            project.getPublication().addPublishRepo(repoPlugin.publishRepository());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         project.getDependencyManagement().getResolver().addRepos(downloadRepo);
         if (pack.checksums().length > 0) {
-            steps.getPackaging().setChecksumAlgorithms(pack.checksums());
+            project.getPackaging().setChecksumAlgorithms(pack.checksums());
         }
         JkPluginPgp pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginPgp.class);
         JkGpg pgp = pgpPlugin.get();
-        steps.getPublishing().setSigner(pgp.getSigner(pgpPlugin.keyName));
+        project.getPublication().setSigner(pgp.getSigner(pgpPlugin.keyName));
 
-        JkTestProcessor testProcessor = steps.getTesting().getTestProcessor();
+        JkTestProcessor testProcessor = project.getTesting().getTestProcessor();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             testProcessor.setForkingProcess(javaProcess);
         }
-        steps.getTesting().setSkipped(tests.skip);
+        project.getTesting().setSkipped(tests.skip);
         if (this.compilerExtraArgs != null) {
-            steps.getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+            project.getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
     }
 
@@ -125,10 +124,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         String baseDirName = getCommandSet().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
-        JkCompileLayout prodLayout = project.getSteps().getCompilation().getLayout();
+        JkCompileLayout prodLayout = project.getCompilation().getLayout();
         prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        JkCompileLayout testLayout = project.getSteps().getTesting().getTestCompilation().getLayout();
+        JkCompileLayout testLayout = project.getTesting().getTestCompilation().getLayout();
         testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
         scaffoldPlugin.getScaffolder().setCommandClassCode(code);
@@ -157,12 +156,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
-        project.getSteps().getCompilation().run();
+        project.getCompilation().run();
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
     public void test() {
-        project.getSteps().getTesting().run();
+        project.getTesting().run();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
@@ -195,12 +194,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
-        project.getSteps().getPublishing().publish();
+        project.getPublication().publish();
     }
 
     @JkDoc("Publishes produced artifacts to local repository.")
     public void publishLocal() {
-        project.getSteps().getPublishing().publishLocal();
+        project.getPublication().publishLocal();
     }
 
     @JkDoc("Fetches project dependencies in cache.")
@@ -222,7 +221,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     private JkProcess compilerProcess() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
-        JkJavaProjectCompilation compilation = project.getSteps().getCompilation();
+        JkJavaProjectCompilation compilation = project.getCompilation();
         return JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
                 compilation.getJavaVersion().get());
     }

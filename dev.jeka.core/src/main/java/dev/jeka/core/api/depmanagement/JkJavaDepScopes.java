@@ -19,7 +19,7 @@ public final class JkJavaDepScopes {
      *
      * <b>CAUTION :</b> When resolving {@link #RUNTIME} dependencies, transitive 'runtime' dependencies won't be fetched if
      * it's coming to a 'compile' one. <b/>
-     * In such it differs from Maven 'compile' scope (resolving 'runtime' in Maven will fetch transitive 'runtime' dependencies coming from 'compile' ones).<b/>
+     * In such, it differs from Maven 'compile' scope : resolving 'runtime' in Maven will fetch transitive 'runtime' dependencies coming from 'compile' ones.<b/>
      * If you want to have a dependency scope equivalent to Maven 'compile', you need to declare dependencies with
      * two scopes : {@link #COMPILE} and {@link #RUNTIME} or their shorthand {@link #COMPILE_AND_RUNTIME}.
      */
