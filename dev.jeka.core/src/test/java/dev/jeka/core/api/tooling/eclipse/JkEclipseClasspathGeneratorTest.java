@@ -36,7 +36,7 @@ public class JkEclipseClasspathGeneratorTest {
                     .emptySources().addSource("src")
                     .emptyResources().addResource("res").__.__
             .getTesting()
-                .getTestCompilation()
+                .getCompilation()
                     .getLayout()
                         .emptySources().addSource("test")
                         .emptyResources().addSource("res-test").__.__.__

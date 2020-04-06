@@ -127,7 +127,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         JkCompileLayout prodLayout = project.getCompilation().getLayout();
         prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        JkCompileLayout testLayout = project.getTesting().getTestCompilation().getLayout();
+        JkCompileLayout testLayout = project.getTesting().getCompilation().getLayout();
         testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
         scaffoldPlugin.getScaffolder().setCommandClassCode(code);

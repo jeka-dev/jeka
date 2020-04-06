@@ -42,11 +42,10 @@ public class AClassicBuild extends JkCommandSet {
                         .and("com.sun.jersey:jersey-server:1.19.4")
                         .and("junit:junit:4.13", TEST)).__
             .getArtifactProducer()
-                .putMainArtifact(project.getSteps().getPackaging()::createFatJar).__  // use a fat jar
-            .getSteps()
-                .getTesting()
-                    .getTestProcessor()
-                        .setForkingProcess(true);
+                .putMainArtifact(project.getPackaging()::createFatJar).__  // use a fat jar
+            .getTesting()
+                .getTestProcessor()
+                    .setForkingProcess(true);
     }
 
     public void cleanPack() {

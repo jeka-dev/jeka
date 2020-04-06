@@ -7,6 +7,7 @@ import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public class JkJavaProjectDocumentation {
 
@@ -28,6 +29,11 @@ public class JkJavaProjectDocumentation {
         this.project = project;
         this.__ = project;
         javadocMaker = JkJavadocProcessor.ofParent(this);
+    }
+
+    public JkJavaProjectDocumentation apply(Consumer<JkJavaProjectDocumentation> consumer) {
+         consumer.accept(this);
+         return this;
     }
 
     public JkJavadocProcessor<JkJavaProjectDocumentation> getJavadocProcessor() {

@@ -28,7 +28,7 @@ public class JkPluginWar extends JkPlugin {
 
     private Path staticResourceDir;
 
-    private JkRunnables staticResourceComputation = JkRunnables.noOp();
+    private JkRunnables staticResourceComputation = JkRunnables.of();
 
     private final JkArtifactBasicProducer artifactProducer;
 

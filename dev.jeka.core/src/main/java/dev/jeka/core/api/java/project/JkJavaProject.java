@@ -6,7 +6,6 @@ import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Container for a Java project with classic characteristic :
@@ -27,7 +26,7 @@ import java.util.function.Supplier;
  * several artifact files so be aware of clean it if you want to replay some tasks with different settings.
  *
  */
-public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
+public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemLocalizable, JkArtifactProducer.JkSupplier {
 
     public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
 
@@ -136,23 +135,19 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         return "project " + getBaseDir().getFileName();
     }
 
-    @Override
-    public JkArtifactProducer get() {
-        return artifactProducer;
-    }
 
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + publication.getVersionedModule() + "\n")
                 .append("Production sources : " + compilation.getLayout().getInfo()).append("\n")
-                .append("Test sources : " + testing.getTestCompilation().getLayout().getInfo()).append("\n")
+                .append("Test sources : " + testing.getCompilation().getLayout().getInfo()).append("\n")
                 .append("Java Source Version : " + compilation.getComputedCompileSpec().getSourceVersion() + "\n")
                 .append("Source Encoding : " + compilation.getComputedCompileSpec().getEncoding() + "\n")
                 .append("Source file count : " + compilation.getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
                 .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
-                .append("Defined Artifacts : " + get().getArtifactIds())
+                .append("Defined Artifacts : " + getArtifactProducer().getArtifactIds())
                 .toString();
     }
 
@@ -161,7 +156,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         return JkJavaIdeSupport.of(baseDir)
                 .setSourceVersion(compilation.getJavaVersion())
                 .setProdLayout(compilation.getLayout())
-                .setTestLayout(testing.getTestCompilation().getLayout())
+                .setTestLayout(testing.getCompilation().getLayout())
                 .setDependencies(this.dependencyManagement.getDependencies())
                 .setDependencyResolver(this.dependencyManagement.getResolver());
     }

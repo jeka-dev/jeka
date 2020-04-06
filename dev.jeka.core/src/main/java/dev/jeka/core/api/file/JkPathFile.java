@@ -103,6 +103,15 @@ public final class JkPathFile {
         return this;
     }
 
+    public JkPathFile move(Path to, CopyOption ... options) {
+        try {
+            Files.move(path, to, options);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return this;
+    }
+
     /**
      * Copies the content of the specified url into this files, replacing the previous content.
      */

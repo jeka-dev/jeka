@@ -53,7 +53,7 @@ public class JkEclipseClasspathApplier {
         javaProject.getCompilation().getLayout()
                 .setSources(sources)
                 .setResources(resources);
-        javaProject.getTesting().getTestCompilation().getLayout()
+        javaProject.getTesting().getCompilation().getLayout()
                 .setSources(testSources)
                 .setResources(testResources);
         javaProject.getDependencyManagement()

@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -339,18 +338,20 @@ final class IvyTranslations {
 
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
             JkMavenPublication publication, Instant publishDate) {
-
+        JkArtifactLocator artifactLocator = publication.getArtifactLocator();
         final ModuleRevisionId moduleRevisionId = descriptor.getModuleRevisionId();
-        final String artifactName = moduleRevisionId.getName();
-        final Artifact mavenMainArtifact = toPublishedMavenArtifact(publication.getMainArtifactFiles()
-                .get(0), artifactName, null, moduleRevisionId, publishDate);
+        final String ivyArtifactName = moduleRevisionId.getName();
+        final Artifact mavenMainArtifact = toPublishedMavenArtifact(artifactLocator.getMainArtifactPath(),
+                ivyArtifactName, null, moduleRevisionId, publishDate);
         final String mainConf = "default";
         populateDescriptorWithMavenArtifact(descriptor, mainConf, mavenMainArtifact);
-
-        for (final JkClassifiedFileArtifact artifactEntry : publication.getClassifiedArtifacts()) {
-            final Path file = artifactEntry.getFile();
-            final String classifier = artifactEntry.getClassifier();
-            final Artifact mavenArtifact = toPublishedMavenArtifact(file, artifactName, classifier,
+        for (final JkArtifactId artifactId  : artifactLocator.getArtifactIds()) {
+            if (artifactId.equals(artifactLocator.getMainArtifactId())) {
+                continue;
+            }
+            final Path file = artifactLocator.getArtifactPath(artifactId);
+            final String classifier = artifactId.getName();
+            final Artifact mavenArtifact = toPublishedMavenArtifact(file, ivyArtifactName, classifier,
                     descriptor.getModuleRevisionId(), publishDate);
             populateDescriptorWithMavenArtifact(descriptor, classifier, mavenArtifact);
         }
@@ -374,9 +375,9 @@ final class IvyTranslations {
         return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), artifactName, type, extension);
     }
 
-    private static Artifact toPublishedMavenArtifact(Path artifact, String artifactName,
+    private static Artifact toPublishedMavenArtifact(Path artifactFile, String artifactName,
                                                      String classifier, ModuleRevisionId moduleId, Instant date) {
-        final String extension = JkUtilsString.substringAfterLast(artifact.getFileName().toString(), ".");
+        final String extension = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
         final Map<String, String> extraMap;
         if (classifier == null) {
             extraMap = new HashMap<>();

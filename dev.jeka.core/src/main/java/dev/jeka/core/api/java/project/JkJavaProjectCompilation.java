@@ -68,12 +68,12 @@ public class JkJavaProjectCompilation<T> {
         __ = parent;
         this.project = project;
         this.scope = scope;
-        beforeGenerate = JkRunnables.noOp(this);
+        beforeGenerate = JkRunnables.ofParent(this);
         sourceGenerator = JkConsumers.ofParent(this);
         resourceGenerator = JkConsumers.ofParent(this);
-        beforeCompile = JkRunnables.noOp(this);
+        beforeCompile = JkRunnables.ofParent(this);
         compiler = JkJavaCompiler.ofParent(this);
-        afterCompile = JkRunnables.noOp(this);
+        afterCompile = JkRunnables.ofParent(this);
         resourceProcessor = JkResourceProcessor.ofParent(this);
         layout = JkCompileLayout.ofParent(this)
                 .setBaseDirSupplier(project::getBaseDir)

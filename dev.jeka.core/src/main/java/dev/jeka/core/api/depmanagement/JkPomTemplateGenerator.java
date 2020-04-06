@@ -1,9 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo.JkDeveloperInfo;
-import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo.JkLicenseInfo;
-import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo.JkProjectInfo;
-import dev.jeka.core.api.depmanagement.JkMavenPublicationInfo.JkScmInfo;
+import dev.jeka.core.api.depmanagement.JkMavenPomMetadata.JkDeveloperInfo;
+import dev.jeka.core.api.depmanagement.JkMavenPomMetadata.JkLicenseInfo;
+import dev.jeka.core.api.depmanagement.JkMavenPomMetadata.JkProjectInfo;
+import dev.jeka.core.api.depmanagement.JkMavenPomMetadata.JkScmInfo;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -23,7 +23,7 @@ public final class JkPomTemplateGenerator {
 
     private static final String VERSION_TOKEN = "____jekaVersion____";
 
-    public static Path generateTemplate(JkMavenPublicationInfo publicationInfo) {
+    public static Path generateTemplate(JkMavenPomMetadata publicationInfo) {
         final String firstTemplate = JkUtilsIO.read(JkPomTemplateGenerator.class
                 .getResource("pom-full.template"));
         String extraXml;
@@ -40,18 +40,18 @@ public final class JkPomTemplateGenerator {
         return result;
     }
 
-    private static String extraXml(JkMavenPublicationInfo publicationInfo)
+    private static String extraXml(JkMavenPomMetadata publicationInfo)
             throws XMLStreamException, FactoryConfigurationError {
         final StringWriter stringWriter = new StringWriter();
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(
                 stringWriter);
-        final JkProjectInfo projectInfo = publicationInfo.project;
+        final JkProjectInfo projectInfo = publicationInfo.getProjectInfo();
         if (projectInfo != null) {
             writeElement("  ", writer, "name", projectInfo.getName());
             writeElement("  ", writer, "description", projectInfo.getDescription());
             writeElement("  ", writer, "url", projectInfo.getUrl());
         }
-        final List<JkLicenseInfo> licenses = publicationInfo.licenses;
+        final List<JkLicenseInfo> licenses = publicationInfo.getLicenses();
         if (!licenses.isEmpty()) {
             writer.writeCharacters("\n");
             writer.writeCharacters("  ");
@@ -68,7 +68,7 @@ public final class JkPomTemplateGenerator {
             writer.writeCharacters("\n  ");
             writer.writeEndElement();
         }
-        final List<JkDeveloperInfo> developers = publicationInfo.devs;
+        final List<JkDeveloperInfo> developers = publicationInfo.getDevelopers();
         if (!developers.isEmpty()) {
             writer.writeCharacters("\n\n");
             writer.writeCharacters("  ");
@@ -87,7 +87,7 @@ public final class JkPomTemplateGenerator {
             writer.writeCharacters("\n  ");
             writer.writeEndElement();
         }
-        final JkScmInfo scm = publicationInfo.scm;
+        final JkScmInfo scm = publicationInfo.getScm();
         if (scm != null) {
             writer.writeCharacters("\n\n  ");
             writer.writeStartElement("scm");

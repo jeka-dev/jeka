@@ -8,7 +8,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Collections;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 public class JkJavaProjectPublication {
@@ -19,9 +19,9 @@ public class JkJavaProjectPublication {
 
     private UnaryOperator<Path> signer;
 
-    private final JkRunnables postActions = JkRunnables.noOp();
+    private final JkRunnables<JkJavaProjectPublication> postActions;
 
-    private JkMavenPublicationInfo mavenPublicationInfo;
+    private final JkMavenPomMetadata<JkJavaProjectPublication> mavenPublicationInfo;
 
     private JkVersionedModule versionedModule;
 
@@ -33,6 +33,13 @@ public class JkJavaProjectPublication {
     JkJavaProjectPublication(JkJavaProject project) {
         this.project = project;
         this.__ = project;
+        this.mavenPublicationInfo = JkMavenPomMetadata.ofParent(this);
+        this.postActions = JkRunnables.ofParent(this);
+    }
+
+    public JkJavaProjectPublication apply(Consumer<JkJavaProjectPublication> consumer) {
+        consumer.accept(this);
+        return this;
     }
 
     /**
@@ -83,22 +90,17 @@ public class JkJavaProjectPublication {
         return postActions;
     }
 
-    public JkMavenPublicationInfo getMavenPublicationInfo() {
+    public JkMavenPomMetadata<JkJavaProjectPublication> getMavenPublicationInfo() {
         return this.mavenPublicationInfo;
-    }
-
-    public JkJavaProjectPublication setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
-        this.mavenPublicationInfo = mavenPublicationInfo;
-        return this;
     }
 
     private void publishMaven(JkRepoSet repos) {
         JkException.throwIf(versionedModule == null, "No versioned module has been set on "
                 + project + ". Can't publish.");
-        JkMavenPublication publication = JkMavenPublication.of(project.getArtifactProducer(), Collections.emptySet())
-                .with(mavenPublicationInfo).withSigner(signer);
+        JkMavenPublication publication = JkMavenPublication.of(project.getArtifactProducer(), mavenPublicationInfo);
         JkPublisher.of(repos, project.getOutputDir()).withSigner(this.signer)
-                .publishMaven(versionedModule, publication, project.getDependencyManagement().getScopeDefaultedDependencies());
+                .publishMaven(versionedModule, publication,
+                        project.getDependencyManagement().getScopeDefaultedDependencies());
     }
 
     private void publishIvy(JkRepoSet repos) {

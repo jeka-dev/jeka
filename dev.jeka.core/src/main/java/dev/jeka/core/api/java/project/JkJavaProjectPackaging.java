@@ -15,6 +15,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -45,6 +46,11 @@ public class JkJavaProjectPackaging {
         this.__ = project;
         artifactFileNameSupplier = getModuleNameFileNameSupplier();
         manifest = JkManifest.ofParent(this);
+    }
+
+    public JkJavaProjectPackaging apply(Consumer<JkJavaProjectPackaging> consumer) {
+        consumer.accept(this);
+        return this;
     }
 
     public JkManifest<JkJavaProjectPackaging> getManifest() {
@@ -80,7 +86,7 @@ public class JkJavaProjectPackaging {
 
     Path getArtifactFile(JkArtifactId artifactId) {
         final String namePart = artifactFileNameSupplier.get();
-        final String classifier = artifactId.getClassifier() == null ? "" : "-" + artifactId.getClassifier();
+        final String classifier = artifactId.getName() == null ? "" : "-" + artifactId.getName();
         final String extension = artifactId.getExtension() == null ? "" : "." + artifactId.getExtension();
         return project.getOutputDir().resolve(namePart + classifier + extension);
     }

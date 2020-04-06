@@ -4,8 +4,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -21,7 +20,7 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
 
     private final Map<JkArtifactId, Consumer<Path>> consumers = new HashMap<>();
 
-    private final Map<JkArtifactId, Supplier> runtimeClasspathSuppliers = new HashMap<>();
+    private final Map<JkArtifactId, Supplier> runtimeClasspathSuppliers = new LinkedHashMap<>();
 
     private Function<JkArtifactId, Path> artifactFileFunction;
 
@@ -64,8 +63,8 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
     }
 
     @Override
-    public Iterable<JkArtifactId> getArtifactIds() {
-        return consumers.keySet();
+    public List<JkArtifactId> getArtifactIds() {
+        return new LinkedList<>(consumers.keySet());
     }
 
     public JkArtifactBasicProducer<T> setArtifactFileFunction(Function<JkArtifactId, Path> artifactFileFunction) {

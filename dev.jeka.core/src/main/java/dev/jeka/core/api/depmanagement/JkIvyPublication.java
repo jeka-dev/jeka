@@ -44,7 +44,7 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
                 JkJavaDepScopes.COMPILE.getName());
         for (final JkArtifactId extraFileId : artifactProducer.getArtifactIds()) {
             final Path file = artifactProducer.getArtifactPath(extraFileId);
-            result = result.andOptional(file, extraFileId.getClassifier(), scopeFor(extraFileId.getClassifier()));
+            result = result.andOptional(file, extraFileId.getName(), scopeFor(extraFileId.getName()));
         }
         return result;
     }

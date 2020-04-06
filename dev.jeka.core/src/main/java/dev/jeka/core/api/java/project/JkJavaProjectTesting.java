@@ -13,6 +13,7 @@ import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
@@ -25,7 +26,7 @@ public class JkJavaProjectTesting {
 
     private final JkJavaProject project;
 
-    private final JkJavaProjectCompilation<JkJavaProjectTesting> testCompilation;
+    private final JkJavaProjectCompilation<JkJavaProjectTesting> compilation;
 
     public final JkRunnables afterTest;
 
@@ -50,10 +51,15 @@ public class JkJavaProjectTesting {
     JkJavaProjectTesting(JkJavaProject project) {
         this.project = project;
         this.__ = project;
-        testCompilation = JkJavaProjectCompilation.ofTest(project, this);
-        afterTest = JkRunnables.noOp(this);
+        compilation = JkJavaProjectCompilation.ofTest(project, this);
+        afterTest = JkRunnables.ofParent(this);
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
+    }
+
+    public JkJavaProjectTesting apply(Consumer<JkJavaProjectTesting> consumer) {
+        consumer.accept(this);
+        return this;
     }
 
     /**
@@ -75,8 +81,8 @@ public class JkJavaProjectTesting {
     /**
      * Returns the compilation step for the test part.
      */
-    public JkJavaProjectCompilation<JkJavaProjectTesting> getTestCompilation() {
-        return testCompilation;
+    public JkJavaProjectCompilation<JkJavaProjectTesting> getCompilation() {
+        return compilation;
     }
 
     /**
@@ -84,7 +90,7 @@ public class JkJavaProjectTesting {
      * dependencies involved in TEST scope.
      */
     public JkClasspath getTestClasspath() {
-        return JkClasspath.of(testCompilation.getLayout().resolveClassDir())
+        return JkClasspath.of(compilation.getLayout().resolveClassDir())
                 .and(project.getCompilation().getLayout().resolveClassDir())
                 .and(project.getDependencyManagement()
                         .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
@@ -138,7 +144,7 @@ public class JkJavaProjectTesting {
     public void run() {
         JkLog.startTask("Processing tests");
         this.project.getCompilation().runIfNecessary();
-        this.testCompilation.run();
+        this.compilation.run();
         executeWithTestProcessor();
         afterTest.run();
         JkLog.endTask();
@@ -173,7 +179,7 @@ public class JkJavaProjectTesting {
 
     private JkTestProcessor<JkJavaProjectTesting> defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.ofParent(this);
-        final Path reportDir = testCompilation.getLayout().getOutputDir().resolve(this.reportDir);
+        final Path reportDir = compilation.getLayout().getOutputDir().resolve(this.reportDir);
         result.getEngineBehavior()
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
@@ -182,7 +188,7 @@ public class JkJavaProjectTesting {
 
     private JkTestSelection<JkJavaProjectTesting> defaultTestSelection() {
         return JkTestSelection.ofParent(this).addTestClassRoots(
-                Paths.get(testCompilation.getLayout().getClassDir()));
+                Paths.get(compilation.getLayout().getClassDir()));
     }
 
 }

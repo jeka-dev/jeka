@@ -106,6 +106,7 @@ final class IvyPublisherForMaven {
                         + " already exists on repo.");
             }
         }
+        JkArtifactLocator artifactFileLocator = mavenPublication.getArtifactLocator();
         if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
             JkMavenMetadata mavenMetadata = loadMavenMedatata(path);
@@ -116,25 +117,17 @@ final class IvyPublisherForMaven {
             mavenMetadata.updateSnapshot(timestamp);
             push(mavenMetadata, path);
             final int buildNumber = mavenMetadata.currentBuildNumber();
-
             final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.getVersion()
                     .getValue(), timestamp, buildNumber);
-
-            for (final Path file : mavenPublication.getMainArtifactFiles()) {
-                publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot,
-                        mavenMetadata);
-            }
-            for (final JkMavenPublication.JkClassifiedFileArtifact classifiedArtifact : mavenPublication.getClassifiedArtifacts()) {
-                publishUniqueSnapshot(versionedModule, classifiedArtifact.getClassifier(),
-                        classifiedArtifact.getFile(), versionUniqueSnapshot, mavenMetadata);
+            for (final JkArtifactId artifactId : artifactFileLocator.getArtifactIds()) {
+                publishUniqueSnapshot(versionedModule, artifactId.getName(),
+                    artifactFileLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
             }
             return mavenMetadata;
         } else {
-            for (final Path file : mavenPublication.getMainArtifactFiles()) {
-                publishNormal(versionedModule, null, file);
-            }
-            for (final JkMavenPublication.JkClassifiedFileArtifact classifiedArtifact : mavenPublication.getClassifiedArtifacts()) {
-                publishNormal(versionedModule, classifiedArtifact.getClassifier(), classifiedArtifact.getFile());
+            for (final JkArtifactId artifactId : artifactFileLocator.getArtifactIds()) {
+                publishNormal(versionedModule, artifactId.getName(),
+                        artifactFileLocator.getArtifactPath(artifactId));
             }
             return null;
         }
@@ -150,8 +143,8 @@ final class IvyPublisherForMaven {
         } else {
             pomXml = JkUtilsPath.createTempFile("published-pom-", ".xml");
         }
-        final String packaging = JkUtilsString.substringAfterLast(publication.getMainArtifactFiles()
-                .get(0).getFileName().toString(), ".");
+        final String packaging = JkUtilsString.substringAfterLast(publication.getArtifactLocator()
+                .getMainArtifactPath().getFileName().toString(), ".");
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
         pomWriterOptions.setArtifactPackaging(packaging);
         Path fileToDelete = null;
@@ -171,25 +164,16 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private String checkNotExist(JkVersionedModule versionedModule,
-            JkMavenPublication mavenPublication) {
-        if (!mavenPublication.getMainArtifactFiles().isEmpty()) {
-            final String pomDest = destination(versionedModule, "pom", null);
-            if (existOnRepo(pomDest)) {
-                throw new IllegalArgumentException("The main artifact already exist for " + versionedModule);
-            }
-            for (final Path file : mavenPublication.getMainArtifactFiles()) {
-                final String ext = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
-                final String dest = destination(versionedModule, ext, null);
-                if (existOnRepo(dest)) {
-                    return dest;
-                }
-            }
+    private String checkNotExist(JkVersionedModule versionedModule, JkMavenPublication mavenPublication) {
+        JkArtifactLocator artifactLocator = mavenPublication.getArtifactLocator();
+        final String pomDest = destination(versionedModule, "pom", null);
+        if (existOnRepo(pomDest)) {
+            throw new IllegalArgumentException("The main artifact already exist for " + versionedModule);
         }
-        for (final JkMavenPublication.JkClassifiedFileArtifact classifiedArtifact : mavenPublication.getClassifiedArtifacts()) {
-            final String ext = JkUtilsString.substringAfterLast(
-                    classifiedArtifact.getFile().getFileName().toString(), ".");
-            final String dest = destination(versionedModule, ext, classifiedArtifact.getClassifier());
+        for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
+            Path artifactFile = artifactLocator.getArtifactPath(artifactId);
+            final String ext = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
+            final String dest = destination(versionedModule, ext, null);
             if (existOnRepo(dest)) {
                 return dest;
             }

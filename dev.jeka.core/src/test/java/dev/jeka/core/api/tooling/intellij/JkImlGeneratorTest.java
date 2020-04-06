@@ -29,7 +29,7 @@ public class JkImlGeneratorTest {
                 .getLayout()
                     .emptySources().addSource("res").__.__
             .getTesting()
-                .getTestCompilation()
+                .getCompilation()
                     .getLayout()
                         .emptyResources().addResource("res-test").__.__.__
             .getDependencyManagement()

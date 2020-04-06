@@ -2,10 +2,12 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
@@ -100,19 +102,22 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
                 "myGroup:myName:0.2.1");
 
         // Optinal : if you need to add metadata in the generated pom
-        JkMavenPublicationInfo info = JkMavenPublicationInfo
-                .of("my project", "my description", "http://myproject.github")
-                .withScm("http://scm/url/connection")
-                .andApache2License()
-                .andGitHubDeveloper("myName", "myName@provider.com");
+        JkMavenPomMetadata info = JkMavenPomMetadata.of()
+            .getProjectInfo()
+                .setName("my project")
+                .setDescription("My description")
+                .setUrl("https://github.com/jerkar/jeka/samples").__
+            .getScm()
+                .setConnection("https://github.com/jerkar/sample.git").__
+            .addApache2License()
+            .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
 
-        // Optional : if you want publish sources
-        Path srcZip = getOutputDir().resolve("src.zip");
-        JkPathTree.of(srcZip).zipTo(srcZip);
+        JkArtifactLocator artifactLocator = JkArtifactBasicProducer.of()
+                .putMainArtifact(path -> JkPathFile.of(jarFile).move(path))
+                .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, path -> JkPathTree.of(this.src).zipTo(path));
 
-        JkMavenPublication publication = JkMavenPublication.of(jarFile)
-                .with(info).and(srcZip, "sources");
-        JkPublisher.of(repo).publishMaven(versionedModule, publication,
+
+        JkPublisher.of(repo).publishMaven(versionedModule, JkMavenPublication.of(artifactLocator, info),
                 JkDependencySet.of());
     }
 

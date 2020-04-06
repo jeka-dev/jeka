@@ -24,20 +24,20 @@ public class JkRunnables<T> implements Runnable {
      * Same as {@link #of(Runnable)} but providing a parent chaining.
      */
     public static <T> JkRunnables<T> of(T parent, Runnable runnable) {
-        return new JkRunnables(null, runnable);
+        return new JkRunnables(parent, runnable);
     }
 
     /**
      * Creates a {@link JkRunnables} delegating to a no-op runnable.
      */
-    public static JkRunnables<Void> noOp() {
+    public static JkRunnables<Void> of() {
         return of(() -> {});
     }
 
     /**
-     * Same as {@link #noOp()} but providing parent chaining
+     * Same as {@link #of()} but providing parent chaining
      */
-    public static <T> JkRunnables<T> noOp(T parent) {
+    public static <T> JkRunnables<T> ofParent(T parent) {
         return of(parent, () -> {});
     }
 

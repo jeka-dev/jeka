@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * A set of {@link JkScopedDependency} generally standing for the entire
@@ -160,25 +159,25 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     /**
      * Creates a {@link JkDependencySet} to the specified artifact producer supplier
      */
-    public JkDependencySet and(Supplier<JkArtifactProducer> artifactProducerSupplier, List<JkArtifactId> artifactFileIds,
+    public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier, List<JkArtifactId> artifactFileIds,
             JkScope... scopes) {
-        return and(artifactProducerSupplier.get(), artifactFileIds, scopes);
+        return and(artifactProducerSupplier.getArtifactProducer(), artifactFileIds, scopes);
     }
 
     /**
      * Creates a {@link JkDependencySet} to the specified artifact producer supplier
      */
-    public JkDependencySet and(Supplier<JkArtifactProducer> artifactProducerSupplier, JkArtifactId artifactFileIds,
+    public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier, JkArtifactId artifactFileIds,
             JkScope... scopes) {
-        return and(artifactProducerSupplier.get(), Arrays.asList(artifactFileIds), scopes);
+        return and(artifactProducerSupplier.getArtifactProducer(), Arrays.asList(artifactFileIds), scopes);
     }
 
     /**
      * Creates a {@link JkDependencySet} to the specified artifact producer supplier
      */
-    public JkDependencySet and(Supplier<JkArtifactProducer> artifactProducerSupplier,
+    public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier,
             JkScope... scopes) {
-        return and(artifactProducerSupplier.get(), Collections.emptyList(), scopes);
+        return and(artifactProducerSupplier.getArtifactProducer(), Collections.emptyList(), scopes);
     }
 
     public JkDependencySet and(String moduleDescription, JkScope ... scopes) {

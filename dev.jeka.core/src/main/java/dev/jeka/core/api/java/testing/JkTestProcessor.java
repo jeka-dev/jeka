@@ -65,7 +65,7 @@ public final class JkTestProcessor<T> {
 
     private JkEngineBehavior<T> engineBehavior;
 
-    private final JkRunnables postActions = JkRunnables.noOp();
+    private final JkRunnables postActions = JkRunnables.of();
 
     /**
      * For parent chaining

@@ -82,7 +82,7 @@ public class CoreBuild extends JkCommandSet {
                 .getCompiler()
                     .setForkingWithJavac().__.__
             .getTesting()
-                .getTestCompilation()
+                .getCompilation()
                     .getLayout()
                         .includeSourceDirsInResources().__
                     .getCompiler()
@@ -104,7 +104,15 @@ public class CoreBuild extends JkCommandSet {
             .getPublication()
                 .setVersionedModule("dev.jeka:jeka-core", jekaVersion)
                 .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
-                .setMavenPublicationInfo(mavenPublication())
+                .getMavenPublicationInfo()
+                    .getProjectInfo()
+                        .setName("jeka")
+                        .setUrl("https://jeka.dev")
+                        .setDescription("Automate with plain Java code and nothing else.").__
+                    .getScm()
+                        .setUrl("https://github.com/jerkar/jeka.git").__
+                    .addApache2License()
+                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr").__
                 .getPostActions()
                     .append(() -> createGithubRelease(jekaVersion));
     }
@@ -163,15 +171,6 @@ public class CoreBuild extends JkCommandSet {
                 .getVersion().getValue();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
-    }
-
-    // Necessary to publish on OSSRH
-    private static JkMavenPublicationInfo mavenPublication() {
-        return JkMavenPublicationInfo
-            .of("Jeka", "Automate with plain Java code and nothing else.", "https://jeka.dev")
-            .withScm("https://github.com/jerkar/jeka.git")
-            .andApache2License()
-            .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
     void testSamples()  {

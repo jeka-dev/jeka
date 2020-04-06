@@ -98,7 +98,7 @@ public final class JkPublisher {
     }
 
     private void assertFilesToPublishExist(JkMavenPublication publication) {
-        List<Path> missingFiles = publication.missingFiles();
+        List<Path> missingFiles = publication.getArtifactLocator().getMissingFiles();
         if (!missingFiles.isEmpty()) {
             throw new JkException("One or several files to publish do not exist : " + missingFiles);
         }

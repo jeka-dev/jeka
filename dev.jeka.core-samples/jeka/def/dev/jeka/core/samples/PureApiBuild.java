@@ -45,7 +45,7 @@ public class PureApiBuild extends JkCommandSet {
                 .and(fooProject)).__;
 
         barProject.getArtifactProducer()
-            .putMainArtifact(barProject.getSteps().getPackaging()::createFatJar) // Produced jar will embed dependencies
+            .putMainArtifact(barProject.getPackaging()::createFatJar) // Produced jar will embed dependencies
             .makeAllArtifacts();
     }
 
