@@ -55,6 +55,10 @@ public class JkEclipseClasspathGeneratorTest {
             .setBaseDir(top.resolve("core"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of().and(baseProject)).__
+            .getCompilation()
+                .getLayout()
+                    .emptySources().addSource("src")
+                    .emptyResources().addResource("res").__.__
             .getTesting()
                 .getTestProcessor()
                     .setForkingProcess(true).__.__;
@@ -67,7 +71,11 @@ public class JkEclipseClasspathGeneratorTest {
         final JkJavaProject desktopProject = JkJavaProject.of()
             .setBaseDir(top.resolve("desktop"))
             .getDependencyManagement()
-                .addDependencies(JkDependencySet.of().and(coreProject)).__;
+                .addDependencies(JkDependencySet.of().and(coreProject)).__
+            .getCompilation()
+                .getLayout()
+                    .emptySources().addSource("src")
+                    .emptyResources().addResource("res").__.__;
         desktopProject.getArtifactProducer().makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());

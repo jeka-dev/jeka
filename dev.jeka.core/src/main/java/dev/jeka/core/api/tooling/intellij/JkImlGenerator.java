@@ -178,56 +178,57 @@ public final class JkImlGenerator {
 
         // Write test sources
         final Path projectDir = ideSupport.getProdLayout().getBaseDir();
-        for (final JkPathTree fileTree : ideSupport.getTestLayout().resolveSources().toList()) {
-            if (fileTree.exists()) {
-                writer.writeCharacters(T1);
-                writer.writeEmptyElement("sourceFolder");
+        if (ideSupport.getTestLayout() != null) {
+            for (final JkPathTree fileTree : ideSupport.getTestLayout().resolveSources().toList()) {
+                if (fileTree.exists()) {
+                    writer.writeCharacters(T1);
+                    writer.writeEmptyElement("sourceFolder");
 
-                final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
-                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                writer.writeAttribute("isTestSource", "true");
-                writer.writeCharacters("\n");
+                    final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
+                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                    writer.writeAttribute("isTestSource", "true");
+                    writer.writeCharacters("\n");
+                }
             }
-        }
 
-        // write test resources
-        for (final JkPathTree fileTree : ideSupport.getTestLayout().resolveResources().toList()) {
-            if (fileTree.exists() && !contains(ideSupport.getTestLayout().resolveSources(), fileTree.getRootDirOrZipFile())) {
-                writer.writeCharacters(T3);
-                writer.writeEmptyElement("sourceFolder");
-                final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
-                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                writer.writeAttribute("type", "java-test-resource");
-                writer.writeCharacters("\n");
+            for (final JkPathTree fileTree : ideSupport.getTestLayout().resolveResources().toList()) {
+                if (fileTree.exists() && !contains(ideSupport.getTestLayout().resolveSources(), fileTree.getRootDirOrZipFile())) {
+                    writer.writeCharacters(T3);
+                    writer.writeEmptyElement("sourceFolder");
+                    final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
+                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                    writer.writeAttribute("type", "java-test-resource");
+                    writer.writeCharacters("\n");
+                }
             }
         }
 
         // Write production sources
 
-        for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveSources().toList()) {
-            if (fileTree.exists()) {
-                writer.writeCharacters(T3);
-                writer.writeEmptyElement("sourceFolder");
-                final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
-                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                writer.writeAttribute("isTestSource", "false");
-                writer.writeCharacters("\n");
+        if (ideSupport.getProdLayout() != null) {
+            for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveSources().toList()) {
+                if (fileTree.exists()) {
+                    writer.writeCharacters(T3);
+                    writer.writeEmptyElement("sourceFolder");
+                    final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
+                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                    writer.writeAttribute("isTestSource", "false");
+                    writer.writeCharacters("\n");
+                }
+            }
+
+            // Write production test resources
+            for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveResources().toList()) {
+                if (fileTree.exists() && !contains(ideSupport.getProdLayout().resolveSources(), fileTree.getRootDirOrZipFile())) {
+                    writer.writeCharacters(T3);
+                    writer.writeEmptyElement("sourceFolder");
+                    final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
+                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                    writer.writeAttribute("type", "java-resource");
+                    writer.writeCharacters("\n");
+                }
             }
         }
-
-        // Write production test resources
-        for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveResources().toList()) {
-            if (fileTree.exists() && !contains(ideSupport.getProdLayout().resolveSources(), fileTree.getRootDirOrZipFile())) {
-                writer.writeCharacters(T3);
-                writer.writeEmptyElement("sourceFolder");
-                final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
-                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                writer.writeAttribute("type", "java-resource");
-                writer.writeCharacters("\n");
-            }
-        }
-
-
 
         writer.writeCharacters(T3);
         writer.writeEmptyElement("excludeFolder");
