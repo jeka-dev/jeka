@@ -25,15 +25,13 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
         this.jkPublicationArtifacts = jkPublicationArtifacts;
     }
 
-
     /**
      * Creates a publication for a single artifact embodied by the specified file and
      * to published as the specified type and scopes. Here, scopes maps directly to
      * Ivy configurations (scope = configuration).
      */
     public static JkIvyPublication ofType(Path file, String type, String... scopes) {
-        return new JkIvyPublication(new HashSet<>()).and(file,
-                type, scopes);
+        return new JkIvyPublication(new HashSet<>()).and(file, type, scopes);
     }
 
     /**

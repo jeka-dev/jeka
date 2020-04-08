@@ -102,7 +102,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
                 "myGroup:myName:0.2.1");
 
         // Optinal : if you need to add metadata in the generated pom
-        JkMavenPomMetadata info = JkMavenPomMetadata.of()
+        JkPublishedPomMetadata info = JkPublishedPomMetadata.of()
             .getProjectInfo()
                 .setName("my project")
                 .setDescription("My description")

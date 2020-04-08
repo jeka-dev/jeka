@@ -11,19 +11,19 @@ public final class JkMavenPublication {
 
     private final JkArtifactLocator artifactLocator;
 
-    private final JkMavenPomMetadata<JkMavenPublication> extraInfo;
+    private final JkPublishedPomMetadata<JkMavenPublication> extraInfo;
 
-    private JkMavenPublication(JkArtifactLocator artifactLocator, JkMavenPomMetadata extraInfo) {
+    private JkMavenPublication(JkArtifactLocator artifactLocator, JkPublishedPomMetadata extraInfo) {
         this.artifactLocator = artifactLocator;
         this.extraInfo = extraInfo;
     }
 
-    public static JkMavenPublication of(JkArtifactLocator artifactFileLocator, JkMavenPomMetadata extraInfo) {
+    public static JkMavenPublication of(JkArtifactLocator artifactFileLocator, JkPublishedPomMetadata extraInfo) {
         return new JkMavenPublication(artifactFileLocator, extraInfo);
     }
 
 
-    public JkMavenPomMetadata<JkMavenPublication> getExtraInfo() {
+    public JkPublishedPomMetadata<JkMavenPublication> getExtraInfo() {
         return this.extraInfo;
     }
 

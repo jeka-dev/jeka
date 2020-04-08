@@ -1,9 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.JkMavenPomMetadata.JkDeveloperInfo;
-import dev.jeka.core.api.depmanagement.JkMavenPomMetadata.JkLicenseInfo;
-import dev.jeka.core.api.depmanagement.JkMavenPomMetadata.JkProjectInfo;
-import dev.jeka.core.api.depmanagement.JkMavenPomMetadata.JkScmInfo;
+import dev.jeka.core.api.depmanagement.JkPublishedPomMetadata.JkDeveloperInfo;
+import dev.jeka.core.api.depmanagement.JkPublishedPomMetadata.JkLicenseInfo;
+import dev.jeka.core.api.depmanagement.JkPublishedPomMetadata.JkProjectInfo;
+import dev.jeka.core.api.depmanagement.JkPublishedPomMetadata.JkScmInfo;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -23,7 +23,7 @@ public final class JkPomTemplateGenerator {
 
     private static final String VERSION_TOKEN = "____jekaVersion____";
 
-    public static Path generateTemplate(JkMavenPomMetadata publicationInfo) {
+    public static Path generateTemplate(JkPublishedPomMetadata publicationInfo) {
         final String firstTemplate = JkUtilsIO.read(JkPomTemplateGenerator.class
                 .getResource("pom-full.template"));
         String extraXml;
@@ -40,7 +40,7 @@ public final class JkPomTemplateGenerator {
         return result;
     }
 
-    private static String extraXml(JkMavenPomMetadata publicationInfo)
+    private static String extraXml(JkPublishedPomMetadata publicationInfo)
             throws XMLStreamException, FactoryConfigurationError {
         final StringWriter stringWriter = new StringWriter();
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(

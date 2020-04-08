@@ -22,7 +22,7 @@ public class JkPublisherRunner {
                 .and("junit:junit:4.11", TEST);
        // JkMavenPublication mavenPublication = JkMavenPublication.of()Paths.get("org.myorg.mylib.jar"))
 
-        JkMavenPomMetadata mavenPublicationInfo = JkMavenPomMetadata.of()
+        JkPublishedPomMetadata mavenPublicationInfo = JkPublishedPomMetadata.of()
                 .getProjectInfo()
                     .setName("My sample Project")
                     .setDescription("A project to demonstrate publishing on Jeka")
@@ -47,7 +47,7 @@ public class JkPublisherRunner {
                             ));
 
         JkPublisher publisher = JkPublisher.of(repo);
-        publisher.publishMaven(versionedModule, JkMavenPublication.of(artifactProducer, JkMavenPomMetadata.of()), deps);
+        publisher.publishMaven(versionedModule, JkMavenPublication.of(artifactProducer, JkPublishedPomMetadata.of()), deps);
     }
 
     public static void main2(String[] args) {

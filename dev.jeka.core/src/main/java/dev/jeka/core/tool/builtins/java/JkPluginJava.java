@@ -97,7 +97,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         }
         if (project.getPublication().getPublishRepos() == null
                 || project.getPublication().getPublishRepos().getRepoList().isEmpty()) {
-            project.getPublication().addPublishRepo(repoPlugin.publishRepository());
+            project.getPublication().addRepo(repoPlugin.publishRepository());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         project.getDependencyManagement().getResolver().addRepos(downloadRepo);

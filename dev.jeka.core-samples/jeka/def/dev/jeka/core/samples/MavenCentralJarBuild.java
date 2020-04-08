@@ -27,7 +27,7 @@ public class MavenCentralJarBuild extends JkCommandSet {
                     .and(JUNIT, "4.13", TEST)).__
             .getPublication()
                 .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
-                .getMavenPublicationInfo()
+                .getPublishedPomMetadata()
                     .getProjectInfo()
                         .setName("my project")
                         .setDescription("My description")

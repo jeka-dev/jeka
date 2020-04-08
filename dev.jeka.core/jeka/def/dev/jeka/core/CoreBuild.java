@@ -103,8 +103,8 @@ public class CoreBuild extends JkCommandSet {
                     .addOptions("-notimestamp").__.__
             .getPublication()
                 .setVersionedModule("dev.jeka:jeka-core", jekaVersion)
-                .setPublishRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
-                .getMavenPublicationInfo()
+                .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
+                .getPublishedPomMetadata()
                     .getProjectInfo()
                         .setName("jeka")
                         .setUrl("https://jeka.dev")

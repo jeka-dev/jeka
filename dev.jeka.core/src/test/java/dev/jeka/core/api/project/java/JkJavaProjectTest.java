@@ -41,9 +41,12 @@ public class JkJavaProjectTest {
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of()
             .setBaseDir(core)
+            .getCompilation()
+                .getLayout()
+                    .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of().and(baseProject)).__;
-        Desktop.getDesktop().open(core.toFile());
+        //Desktop.getDesktop().open(core.toFile());
         coreProject.getArtifactProducer().makeAllArtifacts();
 
         final Path desktop = top.resolve("desktop");
@@ -55,7 +58,7 @@ public class JkJavaProjectTest {
             .getCompilation()
                 .getLayout()
                     .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__;
-        Desktop.getDesktop().open(desktop.toFile());
+        //Desktop.getDesktop().open(desktop.toFile());
         //desktopProject.getArtifactProducer().makeAllArtifacts();
 
         // Desktop.getDesktop().open(desktop);

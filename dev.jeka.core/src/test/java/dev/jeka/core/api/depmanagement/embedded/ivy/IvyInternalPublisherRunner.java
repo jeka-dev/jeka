@@ -47,7 +47,7 @@ public class IvyInternalPublisherRunner {
                 .putArtifact(JkArtifactId.of("other", "jar"), file -> JkUtilsPath.copy(sampleJarSourcefile(), file));
 
 
-        final JkMavenPublication publication = JkMavenPublication.of(artifactProducer, JkMavenPomMetadata.of());
+        final JkMavenPublication publication = JkMavenPublication.of(artifactProducer, JkPublishedPomMetadata.of());
 
         final JkModuleId spring = JkModuleId.of("org.springframework:spring-jdbc");
         final JkDependencySet deps = JkDependencySet.of().and(spring, "2.0.+", JkScopedDependencyTest.COMPILE);
