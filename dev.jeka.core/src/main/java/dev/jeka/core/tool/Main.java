@@ -116,7 +116,7 @@ public final class Main {
 
     private static void displayIntro() {
         final int length = printAscii(false, "jeka.ascii");
-        JkLog.info(JkUtilsString.repeat(" ", length) + "The 100% Java Build Tool.\n");
+        JkLog.info(JkUtilsString.repeat(" ", length) + "The 100%% Java Build Tool.\n");
     }
 
     private static void displayOutro(long startTs) {

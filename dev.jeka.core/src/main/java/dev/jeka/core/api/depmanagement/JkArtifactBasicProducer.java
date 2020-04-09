@@ -67,13 +67,18 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
         return new LinkedList<>(consumers.keySet());
     }
 
-    public JkArtifactBasicProducer<T> setArtifactFileFunction(Function<JkArtifactId, Path> artifactFileFunction) {
+    public JkArtifactBasicProducer<T> setArtifactFilenameComputation(Function<JkArtifactId, Path> artifactFileFunction) {
         this.artifactFileFunction = artifactFileFunction;
         return this;
     }
 
-    public JkArtifactBasicProducer<T> setArtifactFileFunction(Supplier<Path> targetDir, Supplier<String> partName) {
-        return setArtifactFileFunction(artifactId -> targetDir.get().resolve(artifactId.toFileName(partName.get())));
+    /**
+     * Specifies how the location and names or artifact files will be computed.
+     * Artifact files are generated on a given directory provided by the specified supplier. The name of the
+     * artifact files will be composed as [partName](-[artifactId.name]).[artifactId.ext].
+     */
+    public JkArtifactBasicProducer<T> setArtifactFilenameComputation(Supplier<Path> targetDir, Supplier<String> partName) {
+        return setArtifactFilenameComputation(artifactId -> targetDir.get().resolve(artifactId.toFileName(partName.get())));
     }
 
     public JkArtifactBasicProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker,

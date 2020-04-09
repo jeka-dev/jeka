@@ -59,7 +59,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         packaging = new JkJavaProjectPackaging(this);
         publication = new JkJavaProjectPublication(this);
         artifactProducer = JkArtifactBasicProducer.ofParent(this)
-                .setArtifactFileFunction(this::getOutputDir, this::artifactFileNamePart);
+                .setArtifactFilenameComputation(this::getOutputDir, this::artifactFileNamePart);
         registerArtifacts();
     }
 
@@ -135,7 +135,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         return "project " + getBaseDir().getFileName();
     }
 
-
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + publication.getVersionedModule() + "\n")
@@ -164,7 +163,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     private String artifactFileNamePart() {
         JkVersionedModule versionedModule = publication.getVersionedModule();
         if (versionedModule != null) {
-            return versionedModule.toString();
+            return versionedModule.getModuleId().getDotedName();
         }
         return baseDir.getFileName().toString();
     }
