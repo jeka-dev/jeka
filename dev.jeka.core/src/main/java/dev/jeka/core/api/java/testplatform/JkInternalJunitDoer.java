@@ -13,7 +13,7 @@ import java.util.List;
 public interface JkInternalJunitDoer {
 
     static JkInternalJunitDoer instance(List<Path> extraPaths) {
-        String IMPL_CLASS = "dev.jeka.core.api.java.junit.embedded.junitplatform.JunitPlatformDoer";
+        String IMPL_CLASS = "dev.jeka.core.api.java.testplatform.embedded.junitplatform.JunitPlatformDoer";
         Class<JkInternalJunitDoer> clazz = JkClassLoader.ofCurrent().loadIfExist(IMPL_CLASS);
         if (clazz != null) {
             return JkUtilsReflect.invokeStaticMethod(clazz, "of");
