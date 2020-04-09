@@ -4,7 +4,6 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.system.JkLog;
 
-import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,6 +21,5 @@ public class JkJavadocMakerRunner {
         JkJavadocProcessor.of()
                 .setDisplayOutput(true)
                 .make(classpath, sources, out);
-        Desktop.getDesktop().open(out.toFile());
     }
 }

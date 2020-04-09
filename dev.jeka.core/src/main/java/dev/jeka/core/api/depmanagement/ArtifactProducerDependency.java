@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
@@ -18,9 +17,9 @@ class ArtifactProducerDependency extends JkComputedDependency  {
      * Constructs a {@link ArtifactProducerDependency} from an artifact producer and the artifact file id
      * one is interested on.
      */
-    ArtifactProducerDependency(JkArtifactProducer producer, Iterable<JkArtifactId> fileIds) {
+    ArtifactProducerDependency(JkArtifactProducer producer, Path basedir, Iterable<JkArtifactId> fileIds) {
         super(() -> producer.makeMissingArtifacts(artifacts(producer, fileIds)),
-                baseDir(producer),
+                basedir,
                 jars(producer, artifacts(producer, fileIds)), () -> runtimeDeps(producer, artifacts(producer, fileIds)));
         this.artifactProducer = producer;
     }
@@ -46,13 +45,6 @@ class ArtifactProducerDependency extends JkComputedDependency  {
             result = result.and( producer.fetchRuntimeDependencies(artifactFileId));
         }
         return result.withoutDuplicates();
-    }
-
-    private static Path baseDir(JkArtifactProducer artifactProducer) {
-        if (artifactProducer instanceof JkFileSystemLocalizable) {
-            return ((JkFileSystemLocalizable) artifactProducer).getBaseDir();
-        }
-        return null;
     }
 
     @Override

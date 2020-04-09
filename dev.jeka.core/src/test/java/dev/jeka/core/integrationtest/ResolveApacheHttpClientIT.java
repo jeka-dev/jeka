@@ -1,6 +1,6 @@
 package dev.jeka.core.integrationtest;
 
-import dev.jeka.core.api.depmanagement.*;import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithoutDeclaredScopeButResolvedScope() {
-        JkLog.setHierarchicalConsoleConsumer();
+        //JkLog.setHierarchicalConsoleConsumer();
         JkResolveResult result = resolver().resolve(JkDependencySet.of(HTTP_CLIENT), COMPILE);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
@@ -57,7 +57,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithTestToTestScopeMapping() {
-        JkLog.setHierarchicalConsoleConsumer();
+        //JkLog.setHierarchicalConsoleConsumer();
         JkDependencySet deps =  JkDependencySet.of().and(HTTP_CLIENT,  TEST.mapTo( "test"));
         JkResolveResult result = resolver().resolve(deps);
         System.out.println(result.getDependencyTree().toStringTree());

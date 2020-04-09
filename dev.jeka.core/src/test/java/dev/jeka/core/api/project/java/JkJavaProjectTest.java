@@ -5,10 +5,8 @@ import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkCompileLayout;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.system.JkLog;
 import org.junit.Test;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -21,8 +19,6 @@ public class JkJavaProjectTest {
     @Test
     public void makeAllArtifacts() throws Exception {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
-        JkLog.setHierarchicalConsoleConsumer();
-        Desktop.getDesktop().open(top.toFile());
 
         Path base = top.resolve("base");
         JkJavaProject baseProject = JkJavaProject.of()

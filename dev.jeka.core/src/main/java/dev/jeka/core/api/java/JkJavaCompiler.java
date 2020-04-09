@@ -138,9 +138,14 @@ public final class JkJavaCompiler<T> {
             JkLog.endTask();
             return true;
         }
+        List<File> files = toFiles(compileSpec.getSourceFiles());
+        if (files.isEmpty()) {
+            JkLog.info("No Java source files found.");
+            JkLog.endTask();
+            return true;
+        }
         final boolean result;
         if (this.forkingProcess == null) {
-            List<File> files = toFiles(compileSpec.getSourceFiles());
             final Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
             final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutputStream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);

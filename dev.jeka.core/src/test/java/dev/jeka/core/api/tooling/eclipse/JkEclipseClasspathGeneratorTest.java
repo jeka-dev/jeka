@@ -27,39 +27,32 @@ public class JkEclipseClasspathGeneratorTest {
     @Test
     public void generate() throws Exception {
         final Path top = unzipToDir(ZIP_NAME);
-        // JkLog.silent(true);
 
         final JkJavaProject baseProject = JkJavaProject.of()
+            .apply(this::configureCompileLayout)
+            .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("base"))
-            .getCompilation()
-                .getLayout()
-                    .emptySources().addSource("src")
-                    .emptyResources().addResource("res").__.__
-            .getTesting()
-                .getCompilation()
-                    .getLayout()
-                        .emptySources().addSource("test")
-                        .emptyResources().addSource("res-test").__.__.__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                 .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
-            .setRunDependencies(baseProject.getDependencyManagement().getResolver(),
+            .setDefDependencies(baseProject.getDependencyManagement().getResolver(),
                     JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);
 
         final JkJavaProject coreProject = JkJavaProject.of()
+            .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of().and(baseProject)).__
-            .getCompilation()
-                .getLayout()
-                    .emptySources().addSource("src")
-                    .emptyResources().addResource("res").__.__
             .getTesting()
+                .getCompilation()
+                    .getLayout()
+                        .emptySources().addSource("test")
+                        .emptyResources().addResource("res-test").__.__
                 .getTestProcessor()
                     .setForkingProcess(true).__.__;
         final JkEclipseClasspathGenerator coreGenerator =
@@ -69,13 +62,11 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println(coreClasspath);
 
         final JkJavaProject desktopProject = JkJavaProject.of()
+            .apply(this::configureCompileLayout)
+            .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
             .getDependencyManagement()
-                .addDependencies(JkDependencySet.of().and(coreProject)).__
-            .getCompilation()
-                .getLayout()
-                    .emptySources().addSource("src")
-                    .emptyResources().addResource("res").__.__;
+                .addDependencies(JkDependencySet.of().and(coreProject)).__;
         desktopProject.getArtifactProducer().makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());
@@ -83,17 +74,12 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println("\ndesktop .classpath");
         System.out.println(result2);
 
-
         // ----------------- Now, try to apply generated .classpath to projects and compare if it matches
 
         final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(false);
-
-        Path base = baseProject.getBaseDir();
-        final JkJavaProject baseProject2 = JkJavaProject.of().setBaseDir(base);
-
-        Files.write(base.resolve(".classpath"), baseClasspath.getBytes(Charset.forName("UTF-8")));
-
-        JkEclipseProjectGenerator.ofJavaNature("base").writeTo(base.resolve(".project"));
+        final JkJavaProject baseProject2 = JkJavaProject.of().setBaseDir(baseProject.getBaseDir());
+        Files.write(baseProject.getBaseDir().resolve(".classpath"), baseClasspath.getBytes(Charset.forName("UTF-8")));
+        JkEclipseProjectGenerator.ofJavaNature("base").writeTo(baseProject.getBaseDir().resolve(".project"));
         classpathApplier.apply(baseProject2);
         System.out.println(baseProject2.getDependencyManagement().getDependencies().toList());
         final JkCompileLayout base2Layout = baseProject2.getCompilation().getLayout();
@@ -107,7 +93,7 @@ public class JkEclipseClasspathGeneratorTest {
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
         assertEquals(4, baseProject2.getDependencyManagement().getDependencies().toList().size());
 
-        Path core = baseProject.getBaseDir();
+        Path core = coreProject.getBaseDir();
         final JkJavaProject coreProject2 = JkJavaProject.of().setBaseDir(core);
         Files.write(core.resolve(".classpath"), coreClasspath.getBytes(Charset.forName("utf-8")));
         //JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
@@ -116,9 +102,23 @@ public class JkEclipseClasspathGeneratorTest {
         final List<JkScopedDependency> coreDeps2 = coreProject2.getDependencyManagement().getDependencies().toList();
         assertEquals(1, coreDeps2.size());
         final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).getDependency();
-        assertEquals(base, baseProjectDep.getIdeProjectBaseDir());
+    }
 
-        //JkPathTree.of(top).deleteContent();
+    private void configureCompileLayout(JkJavaProject javaProject) {
+        javaProject
+                .getCompilation()
+                    .getLayout()
+                        .emptySources().addSource("src")
+                        .emptyResources().addResource("res");
+    }
+
+    private void configureTestCompileLayout(JkJavaProject javaProject) {
+        javaProject
+                .getTesting()
+                    .getCompilation()
+                        .getLayout()
+                        .emptySources()
+                        .emptyResources();
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {

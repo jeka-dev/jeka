@@ -71,8 +71,8 @@ public final class JkEclipseClasspathGenerator {
 
     }
 
-    private boolean hasBuildDef() {
-        return new File(ideSupport.getProdLayout().getBaseDir().toFile(), JkConstants.DEF_DIR).exists();
+    private boolean hasJekaDefDir() {
+        return Files.exists(ideSupport.getProdLayout().getBaseDir().resolve(JkConstants.DEF_DIR));
     }
 
     // -------------------------- setters ----------------------------
@@ -112,7 +112,7 @@ public final class JkEclipseClasspathGenerator {
     /**
      * If the build script depends on external libraries, you must set the resolver of this dependencies here.
      */
-    public JkEclipseClasspathGenerator setRunDependencies(JkDependencyResolver buildDependencyResolver,
+    public JkEclipseClasspathGenerator setDefDependencies(JkDependencyResolver buildDependencyResolver,
                                                           JkDependencySet buildDependencies) {
         this.defDependencyResolver = buildDependencyResolver;
         this.defDependencies = buildDependencies;
@@ -188,8 +188,8 @@ public final class JkEclipseClasspathGenerator {
 
         final Set<String> paths = new HashSet<>();
 
-        // Write sources for build classes
-        if (hasBuildDef() && new File(ideSupport.getProdLayout().getBaseDir().toFile(), JkConstants.DEF_DIR).exists()) {
+        // Write sources for def classes
+        if (hasJekaDefDir()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
@@ -213,7 +213,7 @@ public final class JkEclipseClasspathGenerator {
         writeJre(writer);
 
         // add build dependencies
-        if (hasBuildDef() && defDependencyResolver != null) {
+        if (hasJekaDefDir() && defDependencyResolver != null) {
             writeDependenciesEntries(writer, defDependencies, defDependencyResolver, paths);
         }
 
@@ -343,7 +343,7 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        JkCompileLayout prodLayout = ideSupport.getTestLayout();
+        JkCompileLayout prodLayout = ideSupport.getProdLayout();
         for (final JkPathTree fileTree : prodLayout.resolveSources().and(prodLayout.resolveResources()).toList()) {
             if (!fileTree.exists()) {
                 continue;

@@ -1,6 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
+import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.*;
 
@@ -141,19 +142,29 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     }
 
     /**
-     * Creates a {@link JkDependencySet} to the specified artifact producer
+     * Creates a {@link JkDependencySet} to the specified artifact producer.
+     * @param baseDir optional argument for indicating if the artifact procducer can be materialised by a
+     *                project/module in a ide. Can be null.
      */
-    public JkDependencySet and(JkArtifactProducer artifactProducer, List<JkArtifactId> artifactFileIds, JkScope ... scopes) {
-        final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer, artifactFileIds);
+    public JkDependencySet and(JkArtifactProducer artifactProducer, Path baseDir, List<JkArtifactId> artifactFileIds, JkScope ... scopes) {
+        final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer, baseDir
+                ,artifactFileIds);
         final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scopes);
         return and(scopedDependency);
+    }
+
+    private static Path baseDir(Object object) {
+        if (object instanceof JkFileSystemLocalizable) {
+            return ((JkFileSystemLocalizable) object).getBaseDir();
+        }
+        return null;
     }
 
     /**
      * Creates a {@link JkDependencySet} to the specified artifact producer
      */
     public JkDependencySet and(JkArtifactProducer artifactProducer, JkScope... scopes) {
-        return and(artifactProducer, Collections.emptyList(), scopes);
+        return and(artifactProducer, baseDir(artifactProducer), Collections.emptyList(), scopes);
     }
 
     /**
@@ -161,7 +172,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      */
     public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier, List<JkArtifactId> artifactFileIds,
             JkScope... scopes) {
-        return and(artifactProducerSupplier.getArtifactProducer(), artifactFileIds, scopes);
+        return and(artifactProducerSupplier.getArtifactProducer(), baseDir(artifactProducerSupplier),
+                artifactFileIds, scopes);
     }
 
     /**
@@ -169,7 +181,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      */
     public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier, JkArtifactId artifactFileIds,
             JkScope... scopes) {
-        return and(artifactProducerSupplier.getArtifactProducer(), Arrays.asList(artifactFileIds), scopes);
+        return and(artifactProducerSupplier.getArtifactProducer(), baseDir(artifactProducerSupplier),
+                Arrays.asList(artifactFileIds), scopes);
     }
 
     /**
@@ -177,7 +190,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      */
     public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier,
             JkScope... scopes) {
-        return and(artifactProducerSupplier.getArtifactProducer(), Collections.emptyList(), scopes);
+        return and(artifactProducerSupplier.getArtifactProducer(), baseDir(artifactProducerSupplier),
+                Collections.emptyList(), scopes);
     }
 
     public JkDependencySet and(String moduleDescription, JkScope ... scopes) {

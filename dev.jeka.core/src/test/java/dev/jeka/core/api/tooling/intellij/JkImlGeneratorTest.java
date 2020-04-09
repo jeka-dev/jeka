@@ -7,6 +7,7 @@ import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
 import org.junit.Test;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -24,14 +25,9 @@ public class JkImlGeneratorTest {
 
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = JkJavaProject.of()
+            .apply(this::configureCompileLayout)
+            .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
-            .getCompilation()
-                .getLayout()
-                    .emptySources().addSource("res").__.__
-            .getTesting()
-                .getCompilation()
-                    .getLayout()
-                        .emptyResources().addResource("res-test").__.__.__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;
@@ -42,10 +38,15 @@ public class JkImlGeneratorTest {
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of()
+                .apply(this::configureCompileLayout)
                 .setBaseDir(core)
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of().and(baseProject)).__
                 .getTesting()
+                    .getCompilation()
+                        .getLayout()
+                            .emptySources().addSource("test")
+                            .emptyResources().addResource("res-test").__.__
                     .getTestProcessor()
                         .setForkingProcess(true).__.__;
         final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject.getJavaIdeSupport());
@@ -55,9 +56,12 @@ public class JkImlGeneratorTest {
 
         final Path desktop = top.resolve("desktop");
         final JkJavaProject desktopProject = JkJavaProject.of()
+            .apply(this::configureCompileLayout)
+            .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
             .getDependencyManagement()
-                .addDependencies(JkDependencySet.of().and(coreProject)).__;
+                .addDependencies(JkDependencySet.of()
+                    .and(coreProject)).__;
         final JkImlGenerator desktopGenerator = JkImlGenerator.of(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.generate();
         System.out.println("\ndesktop .classpath");
@@ -65,6 +69,23 @@ public class JkImlGeneratorTest {
 
         desktopProject.getArtifactProducer().makeAllArtifacts();
         JkPathTree.of(top).deleteContent();
+    }
+
+    private void configureCompileLayout(JkJavaProject javaProject) {
+        javaProject
+                .getCompilation()
+                    .getLayout()
+                        .emptySources().addSource("src")
+                        .emptyResources().addResource("res");
+    }
+
+    private void configureEmptyTestCompileLayout(JkJavaProject javaProject) {
+        javaProject
+                .getTesting()
+                    .getCompilation()
+                        .getLayout()
+                            .emptySources()
+                            .emptyResources();
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
