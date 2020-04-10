@@ -210,8 +210,6 @@ public final class JkJavaCompiler<T> {
         return (result == 0);
     }
 
-
-
     private static JavaCompiler getDefaultOrFail() {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {

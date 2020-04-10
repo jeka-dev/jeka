@@ -8,8 +8,8 @@ import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
+import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Engine having responsibility of compiling command classes, instantiate and run them.<br/>
@@ -143,8 +144,8 @@ final class Engine {
         final String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         final long start = System.nanoTime();
         JkLog.startTask(msg);
-        final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
-        final JkResolveResult resolveResult = runDependencyResolver.resolve(this.computeDefDependencies());
+        final JkDependencyResolver defDependencyResolver = getDefDependencyResolver();
+        final JkResolveResult resolveResult = defDependencyResolver.resolve(this.computeDefDependencies());
         if (resolveResult.getErrorReport().hasErrors()) {
             JkLog.warn(resolveResult.getErrorReport().toString());
         }
@@ -165,7 +166,7 @@ final class Engine {
             return null;
         }
         try {
-            commands.setDefDependencyResolver(this.computeDefDependencies(), getRunDependencyResolver());
+            commands.setDefDependencyResolver(this.computeDefDependencies(), getDefDependencyResolver());
             return commands;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
@@ -228,14 +229,11 @@ final class Engine {
                 .copyTo(this.resolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void wrapCompile(Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (final JkException e) {
-            JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
-            JkLog.info("Compilation of Jeka files failed. You can run jeka -CC=JkCommandSet to use default commands " +
+    private void wrapCompile(Supplier<Boolean> compileTask) {
+        boolean success = compileTask.get();
+        if (!success) {
+            throw new JkException("Compilation of Jeka files failed. You can run jeka -CC=JkCommandSet to use default commands " +
                     " instead of the ones defined in 'def'.");
-            throw e;
         }
     }
 
@@ -272,9 +270,9 @@ final class Engine {
                 .setOutputDir(resolver.defClassDir);
     }
 
-    private JkDependencyResolver getRunDependencyResolver() {
+    private JkDependencyResolver getDefDependencyResolver() {
         if (this.computeDefDependencies().hasModules()) {
-            return JkDependencyResolver.ofParent(this.defRepos);
+            return JkDependencyResolver.of().addRepos(this.defRepos);
         }
         return JkDependencyResolver.of();
     }
