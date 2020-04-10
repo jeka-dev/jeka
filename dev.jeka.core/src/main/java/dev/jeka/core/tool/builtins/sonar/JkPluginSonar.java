@@ -1,8 +1,8 @@
 package dev.jeka.core.tool.builtins.sonar;
 
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.project.JkCompileLayout;
 import dev.jeka.core.api.java.project.JkJavaProject;
@@ -30,10 +30,10 @@ public class JkPluginSonar extends JkPlugin {
         final JkPathSequence libs = project.getDependencyManagement().fetchDependencies(
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED).getFiles();
         final Path testReportDir = project.getTesting().getReportDir();
-        final JkVersionedModule module = project.getPublication().getVersionedModule();
-        final String fullName = module != null ? module.getModuleId().getDotedName() : project.getBaseDir().getFileName().toString();
-        final String name = module != null ? module.getModuleId().getName() : project.getBaseDir().getFileName().toString();
-        final JkVersion version = module != null ? module.getVersion() : JkVersion.of("");
+        final JkModuleId moduleId = project.getPublication().getModuleId();
+        final JkVersion version = project.getPublication().getVersion();
+        final String fullName = moduleId.getDotedName();
+        final String name = moduleId.getName();
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)

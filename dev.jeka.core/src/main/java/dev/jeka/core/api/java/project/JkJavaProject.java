@@ -137,7 +137,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
 
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
-                .append("Published Module & version : " + publication.getVersionedModule() + "\n")
+                .append("Published Module & version : " + publication.getModuleId() + ":" + publication.getVersion() + "\n")
                 .append("Production sources : " + compilation.getLayout().getInfo()).append("\n")
                 .append("Test sources : " + testing.getCompilation().getLayout().getInfo()).append("\n")
                 .append("Java Source Version : " + compilation.getComputedCompileSpec().getSourceVersion() + "\n")
@@ -161,11 +161,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     }
 
     private String artifactFileNamePart() {
-        JkVersionedModule versionedModule = publication.getVersionedModule();
-        if (versionedModule != null) {
-            return versionedModule.getModuleId().getDotedName();
-        }
-        return baseDir.getFileName().toString();
+        return publication.getModuleId().getDotedName();
     }
 
     private void registerArtifacts() {

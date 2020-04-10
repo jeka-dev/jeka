@@ -1,5 +1,5 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.samples.AClassicBuild;
+import dev.jeka.core.samples.LibraryBuild;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
@@ -16,7 +16,7 @@ public class FatJarBuild extends JkCommandSet {
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
     
     @JkDefImport("../dev.jeka.core-samples")
-    private AClassicBuild sampleBuild;
+    private LibraryBuild sampleBuild;
 
     @Override
     protected void setup() {

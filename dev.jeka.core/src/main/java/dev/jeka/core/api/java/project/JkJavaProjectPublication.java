@@ -9,13 +9,16 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class JkJavaProjectPublication {
 
     private final JkJavaProject project;
 
-    private JkVersionedModule versionedModule;
+    private JkModuleId moduleId;
+
+    private Supplier<JkVersion> versionSupplier;
 
     private JkRepoSet publishRepos = JkRepoSet.of();
 
@@ -34,6 +37,7 @@ public class JkJavaProjectPublication {
         this.project = project;
         this.__ = project;
         this.publishedPomMetadata = JkPublishedPomMetadata.ofParent(this);
+        this.versionSupplier = () -> JkVersion.UNSPECIFIED;
         this.postActions = JkRunnables.ofParent(this);
     }
 
@@ -43,11 +47,61 @@ public class JkJavaProjectPublication {
     }
 
     /**
-     * Returns the module name and version of this project. This information is used for naming produced artifact files,
+     * Returns the module id (group and name) for this project. This information is used for naming produced artifact files,
      * publishing. It is also consumed by tools as SonarQube.
+     * If no moduleId has been explicitly set, this methods a module id inferred from the project base directory name.
      */
-    public JkVersionedModule getVersionedModule() {
-        return versionedModule;
+    public JkModuleId getModuleId() {
+        return moduleId != null ? moduleId : JkModuleId.of(project.getBaseDir().getFileName().toString());
+    }
+
+    /**
+     * @see #getModuleId()
+     */
+    public JkJavaProjectPublication setModuleId(JkModuleId moduleId) {
+        JkUtilsAssert.argument(moduleId != null, "ModuleId cannot be null.");
+        this.moduleId = moduleId;
+        return this;
+    }
+
+    /**
+     * @see #getModuleId()
+     */
+    public JkJavaProjectPublication setModuleId(String groupAndName) { ;
+        return this.setModuleId(JkModuleId.of(groupAndName));
+    }
+
+    /**
+     * Set the version supplier used to compute this project version. For example, it can be : <ul>
+     *     <li>A hardcoded supplier as : <code>() -> 1.0.0</code><</li>
+     *     <li>A dynamic supplier based on VCS versioning as : <code>() -> JkGitWrapper.of(baseDir).getVersionFromTags</code></li>
+     *     <li>Any code retrieving version from env var, property files, ....</li>
+     * </ul>
+     * This version information is used for publishing project artifacts on binary repository, but also may be used by
+     * tools as Sonarqube to identify projects.<p>
+     * The default value is {@link JkVersion#UNSPECIFIED}
+     */
+    public JkJavaProjectPublication setVersionSupplier(Supplier<JkVersion> versionSupplier) {
+        JkUtilsAssert.argument(versionSupplier != null, "Version supplier cannot be null.");
+        this.versionSupplier = versionSupplier;
+        return this;
+    }
+
+    /**
+     * @see #setVersionSupplier(Supplier)
+     */
+    public JkJavaProjectPublication setVersion(JkVersion version) {
+        JkUtilsAssert.argument(version != null, "Version cannot be null.");
+        return this.setVersionSupplier(() -> version);
+    }
+
+    /**
+     * @see #setVersionSupplier(Supplier)
+     */
+    public JkVersion getVersion() {
+        JkVersion result = versionSupplier.get();
+        JkUtilsAssert.state(result != null, "Version returned by supplier is null.");
+        return this.versionSupplier.get();
     }
 
     public JkPublishedPomMetadata<JkJavaProjectPublication> getPublishedPomMetadata() {
@@ -60,23 +114,6 @@ public class JkJavaProjectPublication {
 
     public JkRunnables<JkJavaProjectPublication> getPostActions() {
         return postActions;
-    }
-
-    /**
-     * Sets the specified module name and version for this project.
-     * @see #getVersionedModule()
-     */
-    public JkJavaProjectPublication setVersionedModule(JkVersionedModule versionedModule) {
-        JkUtilsAssert.notNull(versionedModule, "Can't set null value for versioned module.");
-        this.versionedModule = versionedModule;
-        return this;
-    }
-
-    /**
-     * @see #setVersionedModule(JkVersionedModule)
-     */
-    public JkJavaProjectPublication setVersionedModule(String groupAndName, String version) {
-        return setVersionedModule(JkModuleId.of(groupAndName).withVersion(version));
     }
 
     public JkJavaProjectPublication setRepos(JkRepoSet publishRepos) {
@@ -98,7 +135,7 @@ public class JkJavaProjectPublication {
      * Publishes all defined artifacts.
      */
     public void publish() {
-        JkException.throwIf(versionedModule == null, "No versioned module has been set on "
+        JkException.throwIf(getVersion() == null, "No versioned module has been set on "
                 + project + ". Can't publish.");
         JkRepoSet repos = this.publishRepos;
         if (repos == null) {
@@ -111,19 +148,17 @@ public class JkJavaProjectPublication {
     }
 
     public void publishLocal() {
-        JkException.throwIf(versionedModule == null, "No versioned module has been set on "
+        JkException.throwIf(getVersion() == null, "No versioned module has been set on "
                 + project + ". Can't publish.");
         publishMaven(JkRepo.ofLocal().toSet());
         postActions.run();
     }
 
-
-
     private void publishMaven(JkRepoSet repos) {
         JkMavenPublication publication = JkMavenPublication.of(project.getArtifactProducer(), publishedPomMetadata);
         JkPublisher.of(repos, project.getOutputDir())
                 .withSigner(this.signer)
-                .publishMaven(versionedModule, publication,
+                .publishMaven(JkVersionedModule.of(moduleId, getVersion()), publication,
                         project.getDependencyManagement().getScopeDefaultedDependencies());
     }
 
@@ -143,7 +178,7 @@ public class JkJavaProjectPublication {
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
         JkLog.endTask();
         JkPublisher.of(repos, project.getOutputDir())
-                .publishIvy(versionedModule, publication, dependencies,
+                .publishIvy(JkVersionedModule.of(moduleId, getVersion()), publication, dependencies,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }
 

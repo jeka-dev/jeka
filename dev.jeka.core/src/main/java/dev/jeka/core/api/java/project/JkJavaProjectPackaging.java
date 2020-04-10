@@ -77,11 +77,7 @@ public class JkJavaProjectPackaging {
     }
 
     private JkVersionedModule defaultVersionedModule() {
-        JkVersionedModule versionedModule = project.getPublication().getVersionedModule();
-        if (versionedModule == null) {
-            return JkVersionedModule.ofRootDirName(project.getBaseDir().getFileName().toString());
-        }
-        return versionedModule;
+        return JkVersionedModule.of(project.getPublication().getModuleId(), project.getPublication().getVersion());
     }
 
     Path getArtifactFile(JkArtifactId artifactId) {

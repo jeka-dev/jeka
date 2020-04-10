@@ -102,7 +102,8 @@ public class CoreBuild extends JkCommandSet {
                     .setDisplayOutput(false)
                     .addOptions("-notimestamp").__.__
             .getPublication()
-                .setVersionedModule("dev.jeka:jeka-core", jekaVersion)
+                .setModuleId("dev.jeka:jeka-core")
+                .setVersionSupplier(git::getJkVersionFromTags)
                 .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
                 .getPublishedPomMetadata()
                     .getProjectInfo()
@@ -114,10 +115,11 @@ public class CoreBuild extends JkCommandSet {
                     .addApache2License()
                     .addGithubDeveloper("djeang", "djeangdev@yahoo.fr").__
                 .getPostActions()
-                    .append(() -> createGithubRelease(jekaVersion));
+                    .append(() -> createGithubRelease());
     }
 
-    private void createGithubRelease(String version) {
+    private void createGithubRelease() {
+        String version = javaPlugin.getProject().getPublication().getVersion().getValue();
         if (version.endsWith(".RELEASE")) {
             GithubReleaseContentEditor githubReleaseContentEditor =
                     new GithubReleaseContentEditor("jerkar/jeka", travisBranch, githubToken);
@@ -167,8 +169,7 @@ public class CoreBuild extends JkCommandSet {
 
     private void makeDocs() {
         JkLog.startTask("Making documentation");
-        String version = javaPlugin.getProject().getPublication().getVersionedModule()
-                .getVersion().getValue();
+        String version = javaPlugin.getProject().getPublication().getVersion().getValue();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }

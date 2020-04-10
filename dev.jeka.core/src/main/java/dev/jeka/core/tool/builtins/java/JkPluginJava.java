@@ -78,13 +78,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void applyOptionsToUnderlyingProject() {
-        JkVersionedModule versionedModule = project.getPublication().getVersionedModule();
-        if (versionedModule != null) {
-            project.getPackaging().getManifest()
-                    .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, versionedModule.getModuleId().getName())
-                    .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, versionedModule.getModuleId().getGroup())
-                    .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, versionedModule.getVersion().getValue());
-        }
+        JkModuleId moduleId = project.getPublication().getModuleId();
+        JkVersion version = project.getPublication().getVersion();
+        project.getPackaging().getManifest()
+                    .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName())
+                    .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup())
+                    .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
         final JkArtifactBasicProducer artifactProducer = project.getArtifactProducer();
         if (!pack.sources) {
             artifactProducer.removeArtifact(JkJavaProject.SOURCES_ARTIFACT_ID);

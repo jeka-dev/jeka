@@ -14,18 +14,11 @@ public class JkJavaPackOptions {
 
     /** When true, javadoc is created and packed in a jar file.*/
     @JkDoc("If true, javadoc jar is added in the list of artifact to produce/publish.")
-    public boolean javadoc;
+    public boolean javadoc = true;
 
     /** When true, sources are packed in a jar file.*/
     @JkDoc("If true, sources jar is added in the list of artifact to produce/publish.")
     public boolean sources = true;
-
-    /** When true, tests classes and sources are packed in jars.*/
-    @JkDoc("If true, tests jar is added in the list of artifact to produce/publish.")
-    public boolean tests;
-
-    @JkDoc("If true, test-sources jar is added in the list of artifact to produce/publish.")
-    public boolean testSources;
 
     /**
      * Returns the checksums algorithms to checksum artifact files.
