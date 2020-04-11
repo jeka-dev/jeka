@@ -1,5 +1,6 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 
@@ -24,7 +25,8 @@ public class PureApi {
                     .and("com.google.guava:guava:22.0")
                     .and(coreProject)).__
                 .getPublication()
-                    .setVersionedModule("mygroup:depender", "1.0-SNAPSHOT").__;
+                    .setModuleId("mygroup:depender")
+                    .setVersion(JkVersion.of("1.0-SNAPSHOT")).__;
         dependerProject.getArtifactProducer().makeAllArtifacts();
         dependerProject.getPublication().publish();
     }

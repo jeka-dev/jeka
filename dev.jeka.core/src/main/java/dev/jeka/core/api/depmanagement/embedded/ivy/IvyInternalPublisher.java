@@ -72,11 +72,11 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         if (dependencyResolver instanceof ChainResolver) {
             final ChainResolver resolver = (ChainResolver) dependencyResolver;
             @SuppressWarnings("rawtypes")
-            final List list = resolver.getResolvers();
+            final List<DependencyResolver> list = resolver.getResolvers();
             if (list.isEmpty()) {
                 return false;
             }
-            return isMaven((DependencyResolver) list.get(0));
+            return isMaven(list.get(0));
         }
         if (dependencyResolver instanceof AbstractPatternsBasedResolver) {
             final AbstractPatternsBasedResolver resolver = (AbstractPatternsBasedResolver) dependencyResolver;
@@ -138,7 +138,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
-            if (!isMaven(resolver) && publishRepo.getPublishConfig().getFilter().accept(versionedModule)) {
+            if (!isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(versionedModule.getVersion())) {
                 JkLog.startTask("Publishing for repository " + resolver);
                 this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
                 JkLog.endTask();
@@ -190,7 +190,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
-            if (isMaven(resolver) && publishRepo.getPublishConfig().getFilter().accept(versionedModule)) {
+            if (isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(versionedModule.getVersion())) {
                 JkLog.startTask("Publishing to " + resolver);
                 UnaryOperator<Path> effectiveSigner = publishRepo.getPublishConfig().isSignatureRequired() ? signer :
                         null;

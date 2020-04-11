@@ -47,8 +47,7 @@ public class JkJavaProjectDocumentation {
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
-        JkPathTreeSet sources = project.getCompilation().getLayout().resolveSources();
-        javadocMaker.make(classpath, sources, dir);
+        JkPathTreeSet sources = project.getCompilation().getLayout().resolveSources();javadocMaker.make(classpath, sources, dir);
     }
 
     public void runIfNecessary() {

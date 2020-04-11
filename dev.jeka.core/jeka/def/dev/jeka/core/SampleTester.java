@@ -41,7 +41,7 @@ class SampleTester {
     }
 
     void doTest() throws IOException {
-        testSampleWithJavaPlugin("AClassicBuild");
+        testSampleWithJavaPlugin("LibraryBuild");
         //testSampleWithJavaPlugin("AntStyleBuild");
         testSampleWithJavaPlugin("MavenCentralJarBuild");
         testSampleWithJavaPlugin("HttpClientTaskBuild");

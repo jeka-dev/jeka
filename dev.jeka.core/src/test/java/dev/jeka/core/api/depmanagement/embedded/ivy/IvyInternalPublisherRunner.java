@@ -37,8 +37,10 @@ public class IvyInternalPublisherRunner {
     }
 
     public static void testPublishMaven() throws IOException {
-        final IvyInternalPublisher jkIvyPublisher = IvyInternalPublisher.of(mavenRepo().with(JkRepo.JkPublishConfig.of()
-                .withUniqueSnapshot(false)).toSet(), Paths.get("jeka/output/test-out"));
+        final IvyInternalPublisher jkIvyPublisher = IvyInternalPublisher.of(
+            mavenRepo()
+                .getPublishConfig()
+                    .setUniqueSnapshot(false).__.toSet(), Paths.get("jeka/output/test-out"));
         final JkVersionedModule versionedModule = JkVersionedModule.of("mygroup:mymodule2:0.0.12-SNAPSHOT");
 
         JkArtifactBasicProducer artifactProducer = JkArtifactBasicProducer.of()

@@ -61,7 +61,7 @@ public class JkPluginRepo extends JkPlugin {
             return JkRepoConfigOptionLoader.repoFromOptions(publishRepoName);
         }
         if (!JkUtilsString.isBlank(publishUrl)) {
-            return JkRepo.of(publishUrl).withOptionalCredentials(publishUsername, publishPassword);
+            return JkRepo.of(publishUrl).setCredentials(publishUsername, publishPassword);
         }
         JkRepo optionRepo = JkRepoConfigOptionLoader.publishRepository();
         return optionRepo != null ? optionRepo : JkRepo.ofLocal();
@@ -72,7 +72,7 @@ public class JkPluginRepo extends JkPlugin {
             return JkRepoConfigOptionLoader.repoFromOptions(downloadRepoName);
         }
         if (!JkUtilsString.isBlank(downloadUrl)) {
-            return JkRepo.of(downloadUrl).withOptionalCredentials(downloadUsername, downloadPassword);
+            return JkRepo.of(downloadUrl).setCredentials(downloadUsername, downloadPassword);
         }
         return JkRepoConfigOptionLoader.downloadRepository();
     }
@@ -83,19 +83,19 @@ public class JkPluginRepo extends JkPlugin {
         sb.append("Download repository : \n");
         JkRepo download = downloadRepository();
         sb.append("\n  url : " + download.getUrl());
-        if (download.getCredential() != null) {
-            String downloadPwd = JkUtilsString.isBlank(download.getCredential().getPassword()) ? ""
+        if (download.getCredentials() != null) {
+            String downloadPwd = JkUtilsString.isBlank(download.getCredentials().getPassword()) ? ""
                     : downloadPassword.substring(0, 1) + "*******";
-            sb.append("\n  username : " + download.getCredential().getUserName())
+            sb.append("\n  username : " + download.getCredentials().getUserName())
                     .append("\n  password : " + downloadPwd);
         }
         sb.append("\n").append("Publish repository : \n");
         JkRepo publish = publishRepository();
         sb.append("\n  url : " + publish.getUrl());
-        if (publish.getCredential() != null) {
-            String publishPwd = JkUtilsString.isBlank(publish.getCredential().getPassword()) ? ""
+        if (publish.getCredentials() != null) {
+            String publishPwd = JkUtilsString.isBlank(publish.getCredentials().getPassword()) ? ""
                     : publishPassword.substring(0, 1) + "*******";
-            sb.append("\n  username : " + publish.getCredential().getUserName()).append("\n  password : " + publishPwd);
+            sb.append("\n  username : " + publish.getCredentials().getUserName()).append("\n  password : " + publishPwd);
         }
         for (Map.Entry<String, String> entry : JkRepoConfigOptionLoader.allRepositoryOptions().entrySet()) {
             sb.append("\n" + entry.getKey() + " : ").append(entry.getValue());

@@ -158,7 +158,7 @@ public class JkJavaProjectPublication {
         JkMavenPublication publication = JkMavenPublication.of(project.getArtifactProducer(), publishedPomMetadata);
         JkPublisher.of(repos, project.getOutputDir())
                 .withSigner(this.signer)
-                .publishMaven(JkVersionedModule.of(moduleId, getVersion()), publication,
+                .publishMaven(JkVersionedModule.of(getModuleId(), getVersion()), publication,
                         project.getDependencyManagement().getScopeDefaultedDependencies());
     }
 
@@ -178,7 +178,7 @@ public class JkJavaProjectPublication {
                 .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
         JkLog.endTask();
         JkPublisher.of(repos, project.getOutputDir())
-                .publishIvy(JkVersionedModule.of(moduleId, getVersion()), publication, dependencies,
+                .publishIvy(JkVersionedModule.of(getModuleId(), getVersion()), publication, dependencies,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }
 

@@ -36,15 +36,12 @@ public class JkPublisherRunner {
                 .putArtifact(JkArtifactId.of("sources", "jar"), creator)
                 .putArtifact(JkArtifactId.of("javadoc", "jar"), creator);
 
-
         JkRepo repo = JkRepo.ofMaven(Paths.get("mavenrepo"))
-                .withOptionalCredentials("myUserName", "myPassword")
-                .with(JkRepo.JkPublishConfig.of()
-                            .withUniqueSnapshot(false)
-                            .withNeedSignature(true)
-                            .withFilter(mod -> // only accept SNAPSHOT and MILESTONE
-                                mod.getVersion().isSnapshot() || mod.getVersion().getValue().endsWith("MILESTONE")
-                            ));
+                .setCredentials("myUserName", "myPassword")
+                .getPublishConfig()
+                    .setUniqueSnapshot(false)
+                    .setSignatureRequired(true)
+                    .setVersionFilter(version -> version.isSnapshot() || version.getValue().endsWith("MILESTONE")).__;
 
         JkPublisher publisher = JkPublisher.of(repo);
         publisher.publishMaven(versionedModule, JkMavenPublication.of(artifactProducer, JkPublishedPomMetadata.of()), deps);
@@ -62,11 +59,9 @@ public class JkPublisherRunner {
 
 
         JkRepo repo = JkRepo.ofIvy(Paths.get("ivyrepo"))
-                .with(JkRepo.JkPublishConfig.of()
-                        .withNeedSignature(true)
-                        .withFilter(mod -> // only accept SNAPSHOT and MILESTONE
-                                mod.getVersion().isSnapshot() || mod.getVersion().getValue().endsWith("MILESTONE")
-                        ));
+            .getPublishConfig()
+                .setSignatureRequired(true)
+                .setVersionFilter(version ->  version.isSnapshot() || version.getValue().endsWith("MILESTONE")).__;
 
         JkPublisher publisher = JkPublisher.of(repo);
         publisher.publishIvy(versionedModule, publication, deps, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING,

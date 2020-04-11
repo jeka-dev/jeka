@@ -131,7 +131,7 @@ final class IvyTranslations {
             }
             return result;
         }
-        if (repo.getUrl().getProtocol().equals("http")) {
+        if (repo.getUrl().getProtocol().equals("http") || repo.getUrl().getProtocol().equals("https")) {
             final IvyRepResolver result = new IvyRepResolver();
             result.setIvyroot(repo.getUrl().toString());
             result.setArtroot(repo.getUrl().toString());
@@ -140,7 +140,7 @@ final class IvyTranslations {
             result.setM2compatible(false);
             if (isHttp(repo.getUrl())) {
                 if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) ) {
-                    final JkRepo.JkRepoCredential credential = repo.getCredential();
+                    final JkRepo.JkRepoCredentials credential = repo.getCredentials();
                     CredentialsStore.INSTANCE.addCredentials(credential.getRealm(), repo.getUrl().getHost(),
                             credential.getUserName(), credential.getPassword());
 
@@ -150,7 +150,7 @@ final class IvyTranslations {
             result.setCheckmodified(true);
             return result;
         }
-        throw new IllegalStateException(repo + " not handled by translator.");
+        throw new IllegalStateException(repo.getUrl() .getProtocol()+ " not handled for translating repo "+ repo);
     }
 
     private static IBiblioResolver ibiblioResolver(JkRepo repo) {
@@ -160,7 +160,7 @@ final class IvyTranslations {
         result.setRoot(repo.getUrl().toString());
         result.setUsepoms(true);
         if (isHttp(repo.getUrl())) {
-            final JkRepo.JkRepoCredential credential = repo.getCredential();
+            final JkRepo.JkRepoCredentials credential = repo.getCredentials();
             if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credential != null) {
                 CredentialsStore.INSTANCE.addCredentials(credential.getRealm(),
                         repo.getUrl().getHost(), credential.getUserName(), credential.getPassword());
