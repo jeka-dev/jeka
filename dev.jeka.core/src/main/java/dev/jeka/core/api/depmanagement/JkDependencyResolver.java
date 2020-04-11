@@ -111,9 +111,8 @@ public final class JkDependencyResolver<T> {
         final String msg = scopes.length == 0 ? "Resolving dependencies " :
                 "Resolving dependencies with specified scopes " + Arrays.asList(scopes);
         JkLog.startTask(msg);
-        JkResolveResult resolveResult = (internalDepResolver == null || !dependencies.hasModules()) ? JkResolveResult.ofRoot(moduleHolder) :
-                internalDepResolver.resolve(moduleHolder, dependencies.withModulesOnly(),
-                    parameters, scopes);
+        JkResolveResult resolveResult =  !dependencies.hasModules() ? JkResolveResult.ofRoot(moduleHolder) :
+                internalDepResolver.resolve(moduleHolder, dependencies.withModulesOnly(), parameters, scopes);
         final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies,
                     JkUtilsIterable.setOf(scopes));
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
