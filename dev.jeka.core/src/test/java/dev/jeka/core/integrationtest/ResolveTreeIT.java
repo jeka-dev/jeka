@@ -70,7 +70,7 @@ public class ResolveTreeIT {
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve(deps, TEST).getDependencyTree();
+        JkDependencyNode tree = resolver.resolve(deps, TEST).assertNoError().getDependencyTree();
         System.out.println(tree.toStrings());
         JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getFirst(moduleId).getModuleInfo();
         assertTrue(moduleNodeInfo.getDeclaredVersion().getValue().equals("1.4.+"));

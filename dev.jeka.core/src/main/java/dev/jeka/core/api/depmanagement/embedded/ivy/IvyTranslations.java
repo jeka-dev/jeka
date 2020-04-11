@@ -139,10 +139,10 @@ final class IvyTranslations {
             result.setIvypattern(IvyRepResolver.DEFAULT_IVYPATTERN);
             result.setM2compatible(false);
             if (isHttp(repo.getUrl())) {
-                if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) ) {
-                    final JkRepo.JkRepoCredentials credential = repo.getCredentials();
-                    CredentialsStore.INSTANCE.addCredentials(credential.getRealm(), repo.getUrl().getHost(),
-                            credential.getUserName(), credential.getPassword());
+                final JkRepo.JkRepoCredentials credentials = repo.getCredentials();
+                if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credentials != null) {
+                    CredentialsStore.INSTANCE.addCredentials(credentials.getRealm(), repo.getUrl().getHost(),
+                            credentials.getUserName(), credentials.getPassword());
 
                 }
             }
@@ -160,10 +160,10 @@ final class IvyTranslations {
         result.setRoot(repo.getUrl().toString());
         result.setUsepoms(true);
         if (isHttp(repo.getUrl())) {
-            final JkRepo.JkRepoCredentials credential = repo.getCredentials();
-            if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credential != null) {
-                CredentialsStore.INSTANCE.addCredentials(credential.getRealm(),
-                        repo.getUrl().getHost(), credential.getUserName(), credential.getPassword());
+            final JkRepo.JkRepoCredentials credentials = repo.getCredentials();
+            if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credentials != null) {
+                CredentialsStore.INSTANCE.addCredentials(credentials.getRealm(),
+                        repo.getUrl().getHost(), credentials.getUserName(), credentials.getPassword());
 
             }
         }

@@ -59,7 +59,6 @@ public final class JkRepo {
 
     private JkRepo(URL url) {
         this.url = url;
-        this.credentials = JkRepoCredentials.of(null, null);
     }
 
     /**
