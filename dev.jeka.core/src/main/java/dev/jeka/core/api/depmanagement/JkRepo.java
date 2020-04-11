@@ -57,8 +57,11 @@ public final class JkRepo {
 
     private final JkPublishConfig publishConfig = new JkPublishConfig(this);
 
-    private JkRepo(URL url) {
+    public final boolean ivyRepo; // true if this reposotory is an Ivy one, false if it is a Maven one.
+
+    private JkRepo(URL url, boolean ivyRepo) {
         this.url = url;
+        this.ivyRepo = ivyRepo;
     }
 
     /**
@@ -71,23 +74,23 @@ public final class JkRepo {
             return ofLocal();
         }
         if (url.toLowerCase().startsWith(IVY_PREFIX)) {
-            return new JkRepo(toUrl(url.substring(4)));
+            return new JkRepo(toUrl(url.substring(4)), true);
         }
-        return new JkRepo(toUrl(url));
+        return new JkRepo(toUrl(url), false);
     }
 
     /**
      * Creates a Maven repository having the specified file location.
      */
     public static JkRepo ofMaven(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir));
+        return new JkRepo(JkUtilsPath.toUrl(dir), false);
     }
 
     /**
      * Creates a Ivy repository having the specified file location.
      */
     public static JkRepo ofIvy(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir));
+        return new JkRepo(JkUtilsPath.toUrl(dir), true);
     }
 
     /**
@@ -158,7 +161,7 @@ public final class JkRepo {
     }
 
     public boolean isIvyRepo() {
-        return this.ivyConfig != null;
+        return this.ivyRepo;
     }
 
     /**

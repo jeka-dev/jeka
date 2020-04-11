@@ -96,11 +96,9 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
     public void publish() {
         JkGpg pgp = JkGpg.ofSecretRing(Paths.get(pgpPrivateRingFile), pgpPassword);
         JkRepo repo = JkRepo.of(publishRepo)
-                .withOptionalCredentials("myRepoUserName", "myRepoPassword");
-
+                .setCredentials("myRepoUserName", "myRepoPassword");
         JkVersionedModule versionedModule = JkVersionedModule.of(
                 "myGroup:myName:0.2.1");
-
         // Optinal : if you need to add metadata in the generated pom
         JkPublishedPomMetadata info = JkPublishedPomMetadata.of()
             .getProjectInfo()

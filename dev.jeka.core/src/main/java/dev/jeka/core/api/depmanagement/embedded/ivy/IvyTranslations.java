@@ -112,7 +112,7 @@ final class IvyTranslations {
     // see
     // http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
     private static DependencyResolver toResolver(JkRepo repo, boolean download) {
-        if (! repo.isIvyRepo()) {
+        if (!repo.isIvyRepo()) {
             if (!isFileSystem(repo.getUrl()) || download) {
                 return ibiblioResolver(repo);
             }
