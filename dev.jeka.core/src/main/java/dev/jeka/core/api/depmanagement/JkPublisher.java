@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 
-import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -99,9 +99,7 @@ public final class JkPublisher {
 
     private void assertFilesToPublishExist(JkMavenPublication publication) {
         List<Path> missingFiles = publication.getArtifactLocator().getMissingFiles();
-        if (!missingFiles.isEmpty()) {
-            throw new JkException("One or several files to publish do not exist : " + missingFiles);
-        }
+        JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
      }
 
 }

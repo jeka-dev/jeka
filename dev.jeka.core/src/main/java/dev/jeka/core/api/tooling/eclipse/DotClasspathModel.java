@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -99,7 +98,7 @@ final class DotClasspathModel {
                     final String optionName = OPTION_VAR_PREFIX + var;
                     varFile = JkOptions.get(optionName);
                     if (varFile == null) {
-                        throw new JkException(
+                        throw new IllegalStateException(
                                 "No option found with name "
                                         + optionName
                                         + ". It is needed in order to build this project as it is mentionned andAccept Eclipse .classpath."

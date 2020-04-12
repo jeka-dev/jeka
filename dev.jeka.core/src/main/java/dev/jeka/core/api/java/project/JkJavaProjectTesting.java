@@ -111,8 +111,7 @@ public class JkJavaProjectTesting {
     }
 
     /**
-     * Returns if #run should fail (throwing a {@link dev.jeka.core.api.system.JkException}) if
-     * test result has failures.
+     * Returns if #run should fail (throwing a {@link IllegalArgumentException}) if test result has failures.
      */
     public boolean isBreakOnFailures() {
         return breakOnFailures;

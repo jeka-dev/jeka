@@ -26,7 +26,7 @@ public final class JkVersionedModule {
      * Creates a {@link JkVersionedModule} from the specified module and version.
      */
     public static JkVersionedModule of(JkModuleId moduleId, JkVersion version) {
-        JkUtilsAssert.notNull(version, "Null version specified for " + moduleId + ". Must be at least UNSPECIFIED.");
+        JkUtilsAssert.argument(version != null, "Null version specified for " + moduleId + ". Must be at least UNSPECIFIED.");
         return new JkVersionedModule(moduleId, version);
     }
 

@@ -49,7 +49,7 @@ public final class JkScopedDependency {
     private JkScopedDependency(JkDependency dependency, Set<JkScope> scopes,
             JkScopeMapping scopeMapping) {
         super();
-        JkUtilsAssert.notNull(dependency, "Dependency can't be null.");
+        JkUtilsAssert.argument(dependency != null, "Dependency can't be null.");
         this.dependency = dependency;
         this.scopes = scopes;
         this.scopeMapping = scopeMapping;
@@ -171,7 +171,7 @@ public final class JkScopedDependency {
      * is declared with this scoped dependency (dependency declared with 0,1 or many scopes).
      */
     public JkScopeMapping getScopeMapping() {
-        JkUtilsAssert.isTrue(this.getScopeType() == ScopeType.MAPPED,
+        JkUtilsAssert.state(this.getScopeType() == ScopeType.MAPPED,
                 "This dependency does not declare scope mappings.");
         return this.scopeMapping;
     }

@@ -3,6 +3,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
@@ -121,11 +122,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
                 publication, dependencies, Instant.now(), JkVersionProvider.of());
         final int count = publishMavenArtifacts(publication, moduleDescriptor, signer);
-        if (count <= 1) {
-            JkLog.info("Module published in " + count + " repository.");
-        } else {
-            JkLog.info("Module published in " + count + " repositories.");
-            }
+        JkLog.info("Module published in %s.", JkUtilsString.plurialize(count,
+                "repository", "repositories"));
        JkLog.endTask();
     }
 

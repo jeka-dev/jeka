@@ -1,35 +1,49 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 /**
  * Artifacts are files produced by projects in order to be published and reused by other projects. {@link JkArtifactId}
  * identifies artifacts within a project. <p>
  * The identifier is compound of a name and a file extension. The name maps with the Maven 'classifier' concept.<br/>
- * In a project, we distinguish the <i>main artifact</i> from the others : the main artifact name values to {@code null}.
+ * In a project, we distinguish the <i>main artifact</i> from the others : the main artifact name values to empty string.
  */
 public final class JkArtifactId {
 
-    private final String name, extension;
+    public static final String MAIN_ARTIFACT_NAME = "";
+
+    private final String name;
+
+    private final String extension;
 
     private JkArtifactId(String name, String extension) {
-        this.name = name == null || name.trim().length() == 0 ? null : name.trim().toLowerCase();
+        this.name = name.toLowerCase();
         this.extension = extension == null || extension.trim().length() == 0 ? null : extension.trim().toLowerCase();
     }
 
     /**
-     * Creates an artifact file id with the specified classifier and getExtension. Both can be <code>null</code>. <br/>
-     * A <code>null</code> or empty classifier generally means the main artifact. <br/>
-     * A <code>getExtension</code> or empty getExtension generally means that the file has no getExtension.<br/>
+     * Creates an artifact id with the specified name and extension. <p>
+     * The name cannot be null or be a string composed of spaces.
+     * An empty string extension generally means that the file has no extension.<br/>
      */
     public static JkArtifactId of(String name, String extension) {
+        JkUtilsAssert.argument(name != null, "Artifact name cannot be null");
+        JkUtilsAssert.argument(extension != null, "Artifact extension cannot be null (but blank is ok).");
+        JkUtilsAssert.argument(MAIN_ARTIFACT_NAME.equals(name) || !JkUtilsString.isBlank(name),
+                "Artifact name cannot be a blank string.");
         return new JkArtifactId(name, extension);
     }
 
+    /**
+     * Shorthand for <code>of(MAIN_ARTIFACT_NAME, String)</code>.
+     */
     public static JkArtifactId ofMainArtifact(String extension) {
-        return new JkArtifactId(null, extension);
+        return JkArtifactId.of(MAIN_ARTIFACT_NAME, extension);
     }
 
     public boolean isMainArtifact() {
-        return this.name == null;
+        return MAIN_ARTIFACT_NAME.equals(this.name);
     }
 
     /**
@@ -47,9 +61,9 @@ public final class JkArtifactId {
     }
 
     public String toFileName(String namePart) {
-        String classifier = getName() == null ? "" : "-" + getName();
-        String extension = getExtension() == null ? "" : "." + getExtension();
-        return namePart + classifier + extension;
+        String classifier = isMainArtifact() ? "" : "-" + getName();
+        String ext = JkUtilsString.isBlank(extension) ? "" : "." + getExtension();
+        return namePart + classifier + ext;
     }
 
     @Override

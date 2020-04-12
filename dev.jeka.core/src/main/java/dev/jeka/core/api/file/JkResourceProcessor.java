@@ -110,7 +110,7 @@ public final class JkResourceProcessor<T> {
      * Set the charset used for interpolation. This charset is not used if no interpolation occurs.
      */
     public JkResourceProcessor<T> setInterpolationCharset(Charset interpolationCharset) {
-        JkUtilsAssert.notNull(interpolationCharset, "interpolation charset cannot be null.");
+        JkUtilsAssert.argument(interpolationCharset != null, "interpolation charset cannot be null.");
         this.interpolationCharset = interpolationCharset;
         return this;
     }

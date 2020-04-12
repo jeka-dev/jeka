@@ -1,6 +1,9 @@
 package dev.jeka.core.api.system;
 
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -78,7 +81,7 @@ public final class JkLog implements Serializable {
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
-        JkUtilsAssert.notNull(verbosityArg, "Verbosity can noot be set to null.");
+        JkUtilsAssert.argument(verbosityArg != null, "Verbosity can noot be set to null.");
         verbosity = verbosityArg;
     }
 
@@ -152,7 +155,7 @@ public final class JkLog implements Serializable {
                 for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
                     System.err.println(ste);
                 }
-                throw new JkException("No start task found matching with this endTask. Check that you don't have " +
+                throw new IllegalStateException("No start task found matching with this endTask. Check that you don't have " +
                         "used an 'endTask' one too many in your code.");
 
             }

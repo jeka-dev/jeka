@@ -57,7 +57,7 @@ public final class JkDependencyResolver<T> {
     }
 
     public JkDependencyResolver<T> setRepos(JkRepoSet repos) {
-        JkUtilsAssert.notNull(repos, "repos cannot be null");
+        JkUtilsAssert.argument(repos != null, "repos cannot be null");
         this.repos = repos;
         return this;
     }

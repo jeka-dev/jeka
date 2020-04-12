@@ -43,7 +43,7 @@ class SampleTester {
     void doTest() throws IOException {
         testSampleWithJavaPlugin("LibraryBuild");
         testSampleWithJavaPlugin("SignedArtifactsBuild");
-        testSampleWithJavaPlugin("AntStyleBuild");
+        testSampleWith("AntStyleBuild", "cleanBuild");
         testSampleWithJavaPlugin("HttpClientTaskBuild");
         testSampleWithJavaPlugin("SimpleScopeBuild");
         testDepender("FatJarBuild");
@@ -89,6 +89,14 @@ class SampleTester {
                 .withFailOnError(true).runSync();
     }
 
+    private void testSampleWith(String className, String... args) {
+        JkLog.info("Test " + className + " " + Arrays.toString(args));
+        JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
+                .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
+                .andParams(args)
+                .withFailOnError(true).runSync();
+    }
+
     private void testDepender(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(this.sampleDependerBaseDir.getRoot())
@@ -126,7 +134,7 @@ class SampleTester {
 
     private void testFork() {
         testSampleWithJavaPlugin("", "-java#tests.fork");
-        JkUtilsAssert.isTrue(output.goTo("test-reports/junit").exists(), "No test report generated in test fork mode.");
+        JkUtilsAssert.state(output.goTo("test-reports/junit").exists(), "No test report generated in test fork mode.");
     }
 
     public static void main(String[] args) throws Exception {

@@ -450,15 +450,15 @@ public final class JkPathTree implements Closeable {
         Path dir;
 
         static RootHolder ofZip(Path zipFile) {
-            JkUtilsAssert.notNull(zipFile, "zip archive file can't be null.");
-            JkUtilsAssert.isTrue(!Files.exists(zipFile) || !Files.isDirectory(zipFile),
+            JkUtilsAssert.argument(zipFile != null, "zip archive file can't be null.");
+            JkUtilsAssert.argument(!Files.exists(zipFile) || !Files.isDirectory(zipFile),
                     "Specified zip file " + zipFile + " can't be a directory");
             return new RootHolder(zipFile, null);
         }
 
         static RootHolder ofDir(Path dir) {
-            JkUtilsAssert.notNull(dir, "Directory rootHolder tree can't be null.");
-            JkUtilsAssert.isTrue(!Files.exists(dir) || Files.isDirectory(dir),
+            JkUtilsAssert.argument(dir != null, "Directory rootHolder tree can't be null.");
+            JkUtilsAssert.argument(!Files.exists(dir) || Files.isDirectory(dir),
                     "Specified zip file " + dir + " must be a directory");
             return new RootHolder(null, dir);
         }

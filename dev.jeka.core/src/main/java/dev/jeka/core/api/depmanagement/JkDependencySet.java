@@ -599,7 +599,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      */
     public JkDependencySet assertNoUnspecifiedVersion() {
         final List<JkModuleDependency> unspecifieds = this.unspecifiedVersionDependencies();
-        JkUtilsAssert.isTrue(unspecifieds.isEmpty(), "Following module does not specify projectVersion : "
+        JkUtilsAssert.state(unspecifieds.isEmpty(), "Following module does not specify projectVersion : "
                 + unspecifieds);
         return this;
     }

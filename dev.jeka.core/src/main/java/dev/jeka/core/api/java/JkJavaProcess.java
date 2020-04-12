@@ -211,7 +211,7 @@ public final class JkJavaProcess {
     }
 
     private void runClassOrJarSync(String mainClassName, Path jar, String... arguments) {
-        JkUtilsAssert.isTrue(jar != null || mainClassName != null,
+        JkUtilsAssert.argument(jar != null || mainClassName != null,
                 "main class name and jar can't be both null while launching a Java process, " +
                 "please set at least one of them.");
         final List<String> command = new LinkedList<>();

@@ -7,7 +7,6 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsObject;
 
@@ -260,7 +259,7 @@ public class JkJavaProjectCompilation<T> {
     private void runCompile() {
         boolean success = getCompiler().compile(compileSpecSupplier.get());
         if (!success) {
-            throw new JkException("Compilation of Java sources failed.");
+            throw new IllegalStateException("Compilation of Java sources failed.");
         }
     }
 

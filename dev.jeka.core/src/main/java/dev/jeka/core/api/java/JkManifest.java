@@ -221,8 +221,8 @@ public final class JkManifest<T> {
     }
 
     private static Manifest read(Path file) {
-        JkUtilsAssert.isTrue(Files.exists(file), file.normalize() + " not found.");
-        JkUtilsAssert.isTrue(Files.isRegularFile(file), file.normalize() + " is directory : need file.");
+        JkUtilsAssert.argument(Files.exists(file), file.normalize() + " not found.");
+        JkUtilsAssert.argument(Files.isRegularFile(file), file.normalize() + " is directory : need file.");
         final Manifest manifest = new Manifest();
         try (InputStream is = Files.newInputStream(file)){
             manifest.read(is);

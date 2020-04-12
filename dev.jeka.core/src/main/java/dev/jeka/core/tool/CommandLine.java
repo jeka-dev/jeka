@@ -172,7 +172,7 @@ final class CommandLine {
         }
 
         static MethodInvocation pluginMethod(String pluginName, String methodName) {
-            JkUtilsAssert.isTrue(pluginName != null && !pluginName.isEmpty(),
+            JkUtilsAssert.argument(pluginName != null && !pluginName.isEmpty(),
                     "PluginName can't be null or empty");
             return new MethodInvocation(methodName, pluginName);
         }
@@ -183,7 +183,7 @@ final class CommandLine {
 
         private MethodInvocation(String methodName, String pluginName) {
             super();
-            JkUtilsAssert.isTrue(methodName != null && !methodName.isEmpty(),
+            JkUtilsAssert.argument(methodName != null && !methodName.isEmpty(),
                     "PluginName can' t be null or empty");
             this.methodName = methodName;
             this.pluginName = pluginName;

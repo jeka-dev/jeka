@@ -31,7 +31,7 @@ public final class JkJarPacker {
     }
 
     public static JkJarPacker of(JkPathTreeSet classTrees) {
-        JkUtilsAssert.isTrue(!classTrees.toList().isEmpty(), "Nothing to create jar from : " + classTrees);
+        JkUtilsAssert.argument(!classTrees.toList().isEmpty(), "Nothing to create jar from : " + classTrees);
         return new JkJarPacker(classTrees, null, null);
     }
 

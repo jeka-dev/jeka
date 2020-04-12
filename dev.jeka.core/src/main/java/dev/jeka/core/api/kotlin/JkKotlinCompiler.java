@@ -1,7 +1,6 @@
 package dev.jeka.core.api.kotlin;
 
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -44,7 +43,7 @@ public final class JkKotlinCompiler {
 
     public static JkKotlinCompiler ofKotlinHome() {
         String value = System.getenv("KOTLIN_HOME");
-        JkUtilsAssert.notNull(value, KOTLIN_HOME + " environment variable is not defined.");
+        JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
         String command = value + "/bin/kotlinc-jvm";
         return new JkKotlinCompiler(true, JkProcess.of(command));
 
@@ -52,7 +51,7 @@ public final class JkKotlinCompiler {
 
     public Path getStdLib() {
         String value = System.getenv("KOTLIN_HOME");
-        JkUtilsAssert.notNull(value, KOTLIN_HOME + " environment variable is not defined.");
+        JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
         return Paths.get(value).resolve("libexec/lib/kotlin-stdlib.jar");
     }
 
@@ -97,7 +96,7 @@ public final class JkKotlinCompiler {
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         if (!result) {
             if (failOnError) {
-                throw new JkException("Compilation failed with options " + options);
+                throw new IllegalStateException("Compilation failed with options " + options);
             }
             return false;
         }

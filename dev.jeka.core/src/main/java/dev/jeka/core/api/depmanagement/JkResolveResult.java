@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.io.Serializable;
@@ -130,7 +129,7 @@ public final class JkResolveResult {
      */
     public JkResolveResult assertNoError() {
         if (this.errorReport.hasErrors) {
-            throw new JkException(this.errorReport + "\nOn following tree : \n" + depTree.toStringTree());
+            throw new IllegalStateException(this.errorReport + "\nOn following tree : \n" + depTree.toStringTree());
         }
         return this;
     }

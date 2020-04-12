@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -30,10 +29,9 @@ public final class JkModuleDependency implements JkDependency {
 
     private JkModuleDependency(JkModuleId module, JkVersion version, String classifier,
             boolean transitive, String extension, List<JkDepExclude> excludes) {
-        JkUtilsAssert.notNull(module, " module dependency can't be instantiated without module");
-        JkUtilsAssert.notNull(version, module + " module dependency can't instantiate without versionRange");
-        JkUtilsAssert
-        .notNull(excludes, module + " module dependency can't be instantiated with null excludes, use empty list instead");
+        JkUtilsAssert.argument(module != null, "module cannot be null.");
+        JkUtilsAssert.argument(version != null, module + " version cannot be null.");
+        JkUtilsAssert.argument(excludes != null, module + " module dependency can't be instantiated with null excludes, use empty list instead");
         this.module = module;
         this.version = version;
         this.classifier = classifier;
@@ -98,9 +96,7 @@ public final class JkModuleDependency implements JkDependency {
         final String[] strings = description.split( ":");
         final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
                 ", group:name:version, 'group:value:type:version, group:of:type:artifact:version";
-        if (!isModuleDependencyDescription(description)) {
-            throw new JkException(errorMessage);
-        }
+        JkUtilsAssert.argument(isModuleDependencyDescription(description), errorMessage);
         final JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
         if (strings.length == 2) {
             return of(moduleId, JkVersion.UNSPECIFIED);

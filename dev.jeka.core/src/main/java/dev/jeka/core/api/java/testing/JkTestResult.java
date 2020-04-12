@@ -1,7 +1,5 @@
 package dev.jeka.core.api.java.testing;
 
-import dev.jeka.core.api.system.JkException;
-
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
@@ -147,7 +145,7 @@ public final class JkTestResult implements Serializable {
             printStream.println();
             printFailures(printStream);
             String message = os.toString("UTF8");
-            throw new JkException(message);
+            throw new IllegalStateException(message);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

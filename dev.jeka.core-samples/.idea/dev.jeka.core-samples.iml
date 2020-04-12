@@ -45,13 +45,13 @@
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.11.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.11-javadoc.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.11-sources.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

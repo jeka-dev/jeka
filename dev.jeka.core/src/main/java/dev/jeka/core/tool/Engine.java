@@ -10,10 +10,12 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -57,8 +59,6 @@ final class Engine {
      */
     Engine(Path baseDir) {
         super();
-        JkUtilsAssert.isTrue(baseDir.isAbsolute(), baseDir + " is not absolute.");
-        JkUtilsAssert.isTrue(Files.isDirectory(baseDir), baseDir + " is not directory.");
         this.projectBaseDir = baseDir.normalize();
         defRepos = repos();
         this.defDependencies = JkDependencySet.of();

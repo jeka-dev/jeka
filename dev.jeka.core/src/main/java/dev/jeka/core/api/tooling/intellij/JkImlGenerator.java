@@ -5,7 +5,6 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
@@ -271,7 +270,7 @@ public final class JkImlGenerator {
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         if (resolveResult.getErrorReport().hasErrors()) {
             if (failOnDepsResolutionError) {
-                throw new JkException("Fail at resolvig dependencies : " + resolveResult.getErrorReport());
+                throw new IllegalStateException("Fail at resolvig dependencies : " + resolveResult.getErrorReport());
             } else {
                 JkLog.warn(resolveResult.getErrorReport().toString());
                 JkLog.warn("The generated iml file won't take in account missing files.");

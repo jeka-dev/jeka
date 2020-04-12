@@ -2,7 +2,6 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -104,6 +103,10 @@ public class JkJavaProjectPublication {
         return this.versionSupplier.get();
     }
 
+    public UnaryOperator<Path> getSigner() {
+        return signer;
+    }
+
     public JkPublishedPomMetadata<JkJavaProjectPublication> getPublishedPomMetadata() {
         return this.publishedPomMetadata;
     }
@@ -117,7 +120,7 @@ public class JkJavaProjectPublication {
     }
 
     public JkJavaProjectPublication setRepos(JkRepoSet publishRepos) {
-        JkUtilsAssert.notNull(publishRepos, "publish repos cannot be null.");
+        JkUtilsAssert.argument(publishRepos != null, "publish repos cannot be null.");
         this.publishRepos = publishRepos;
         return this;
     }
@@ -127,15 +130,16 @@ public class JkJavaProjectPublication {
         return this;
     }
 
-    public void setSigner(UnaryOperator<Path> signer) {
+    public JkJavaProjectPublication setSigner(UnaryOperator<Path> signer) {
         this.signer = signer;
+        return this;
     }
 
     /**
      * Publishes all defined artifacts.
      */
     public void publish() {
-        JkException.throwIf(getVersion() == null, "No versioned module has been set on "
+        JkUtilsAssert.state(getVersion() != null, "No versioned module has been set on "
                 + project + ". Can't publish.");
         JkRepoSet repos = this.publishRepos;
         if (repos == null) {
@@ -148,7 +152,7 @@ public class JkJavaProjectPublication {
     }
 
     public void publishLocal() {
-        JkException.throwIf(getVersion() == null, "No versioned module has been set on "
+        JkUtilsAssert.state(getVersion() != null, "No versioned module has been set on "
                 + project + ". Can't publish.");
         publishMaven(JkRepo.ofLocal().toSet());
         postActions.run();

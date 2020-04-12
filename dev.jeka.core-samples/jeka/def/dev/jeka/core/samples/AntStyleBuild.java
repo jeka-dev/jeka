@@ -75,12 +75,12 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
     public void publish() {
         JkGpg pgp = JkGpg.ofSecretRing(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd");
         JkRepo repo = JkRepo.ofIvy(getOutputDir().resolve("ivy-repo"));
-        JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.1");
+        JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.2_SNAPSHOT");
         JkArtifactLocator artifactLocator = JkArtifactBasicProducer.of()
                 .putMainArtifact(path -> JkPathFile.of(jarFile).move(path))
                 .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, path -> JkPathTree.of(this.src).zipTo(path));
         JkPublisher.of(repo)
-                .withSigner(pgp.getSigner(null))
+                .withSigner(pgp.getSigner(""))
                 .publishMaven(versionedModule, JkMavenPublication.of(artifactLocator, JkPublishedPomMetadata.of()),
                         JkDependencySet.of());
     }

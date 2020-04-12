@@ -18,13 +18,6 @@ import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
 public class LibraryBuild extends JkCommandSet {
 
     public final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
-
-    // By default, this build will produces SHA-1 checksum for each published artifacts.
-    // As it is declared in the constructor, this setting can be overridden on command line with
-    // -java#pack.checksums=sha1,md5 for instance.
-    LibraryBuild() {
-	    javaPlugin.pack.checksums = "sha1";
-    }
     
     @Override
     protected void setup() {

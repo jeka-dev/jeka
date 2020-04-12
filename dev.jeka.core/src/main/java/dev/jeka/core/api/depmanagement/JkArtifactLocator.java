@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
  */
 public interface JkArtifactLocator {
 
-
     /**
      * Returns file ofSystem path where is supposed to be produced the specified artifact file id. This method is supposed
      * to only returns the file reference and not generate it.
@@ -24,7 +23,7 @@ public interface JkArtifactLocator {
      * classifier and 'jar" getExtension.
      */
     default JkArtifactId getMainArtifactId() {
-        return JkArtifactId.of(null, "jar");
+        return JkArtifactId.of(JkArtifactId.MAIN_ARTIFACT_NAME, "jar");
     }
 
     /**

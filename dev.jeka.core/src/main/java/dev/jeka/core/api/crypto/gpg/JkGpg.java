@@ -94,7 +94,7 @@ public final class JkGpg {
         } else {
             pass = passphrase.toCharArray();
         }
-        JkUtilsAssert.isTrue(secRing != null,
+        JkUtilsAssert.state(secRing != null,
                 "You must supply a secret ring file (as secring.gpg) to sign files");
         if (!Files.exists(getSecretRing())) {
             throw new IllegalStateException("Specified secret ring file " + secRing + " not found.");
@@ -113,7 +113,7 @@ public final class JkGpg {
      * Verifies the specified file against the specified signature.
      */
     public boolean verify(Path fileToVerify, Path signature) {
-        JkUtilsAssert.isTrue(pubRing != null,
+        JkUtilsAssert.state(pubRing != null,
                 "You must supply a public ring file (as pubring.gpg) to verify file signatures");
         if (!Files.exists(getPublicRing())) {
             throw new IllegalStateException("Specified public ring file " + getPublicRing() + " not found.");
@@ -156,7 +156,14 @@ public final class JkGpg {
         return pubRing;
     }
 
+    /**
+     * Creates a signer based on this secret ring and passphrase and using the the specified key.
+     * @param keyName The secret key to use within the t-scrfet ring. If empty string, the first key
+     *                of the secret ring is selected.
+     */
     public UnaryOperator<Path> getSigner(String keyName) {
+        JkUtilsAssert.argument(keyName != null, "key name cannot be null, use \"\" to select the first " +
+                "key present in " + Paths.get("").toAbsolutePath().relativize(this.secRing));
         return new Signer(keyName);
     }
 

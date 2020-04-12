@@ -2,6 +2,7 @@ package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -59,6 +60,7 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
 
     @Override
     public Path getArtifactPath(JkArtifactId artifactId) {
+        JkUtilsAssert.state(artifactFileFunction != null, "artifactFileFunction has not been set.");
         return artifactFileFunction.apply(artifactId);
     }
 
@@ -68,6 +70,7 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
     }
 
     public JkArtifactBasicProducer<T> setArtifactFilenameComputation(Function<JkArtifactId, Path> artifactFileFunction) {
+        JkUtilsAssert.argument(artifactFileFunction != null, "artifactFileFunction cannot be null.");
         this.artifactFileFunction = artifactFileFunction;
         return this;
     }

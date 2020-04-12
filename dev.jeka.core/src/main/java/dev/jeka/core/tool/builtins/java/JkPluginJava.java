@@ -5,7 +5,10 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
-import dev.jeka.core.api.java.project.*;
+import dev.jeka.core.api.java.project.JkCompileLayout;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectCompilation;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -100,12 +103,11 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         project.getDependencyManagement().getResolver().addRepos(downloadRepo);
-        if (pack.checksums().length > 0) {
-            project.getPackaging().setChecksumAlgorithms(pack.checksums());
-        }
         JkPluginPgp pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginPgp.class);
-        JkGpg pgp = pgpPlugin.get();
-        project.getPublication().setSigner(pgp.getSigner(pgpPlugin.keyName));
+        if (project.getPublication().getSigner() == null) {
+            JkGpg pgp = pgpPlugin.get();
+            project.getPublication().setSigner(pgp.getSigner(pgpPlugin.keyName));
+        }
 
         JkTestProcessor testProcessor = project.getTesting().getTestProcessor();
         if (tests.fork) {

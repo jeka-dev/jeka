@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 
 import java.util.*;
@@ -107,7 +106,7 @@ public class JkDependencyManagement<T> {
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {
             if (failOnDependencyResolutionError) {
-                throw new JkException(report.toString());
+                throw new IllegalStateException(report.toString());
             }
             JkLog.warn(report.toString());
         }

@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Comparator;
@@ -22,8 +22,8 @@ public final class JkModuleId {
      * Creates a project id according the specified group and name.
      */
     public static JkModuleId of(String group, String name) {
-        JkException.throwIf(JkUtilsString.isBlank(group), "Module group can't be empty");
-        JkException.throwIf(JkUtilsString.isBlank(name), "Module name can't be empty");
+        JkUtilsAssert.argument(!JkUtilsString.isBlank(group), "Module group can't be empty");
+        JkUtilsAssert.argument(!JkUtilsString.isBlank(name), "Module name can't be empty");
         return new JkModuleId(group, name);
     }
 

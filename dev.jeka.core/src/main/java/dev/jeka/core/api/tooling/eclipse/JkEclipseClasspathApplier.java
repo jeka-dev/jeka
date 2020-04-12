@@ -5,7 +5,6 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.project.JkCompileLayout;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.system.JkException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +32,7 @@ public class JkEclipseClasspathApplier {
     public void apply(JkJavaProject javaProject) {
         final Path dotClasspathFile = javaProject.getBaseDir().resolve(".classpath");
         if (!Files.exists(dotClasspathFile)) {
-            throw new JkException(".classpath file not found in " + javaProject.getBaseDir());
+            throw new IllegalArgumentException(".classpath file not found in " + javaProject.getBaseDir());
         }
         apply(javaProject, DotClasspathModel.from(dotClasspathFile));
     }

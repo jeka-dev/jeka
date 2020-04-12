@@ -22,7 +22,7 @@ public class JkClassLoader {
     }
 
     public static JkClassLoader of(ClassLoader classLoader) {
-        JkUtilsAssert.notNull(classLoader, "Wrapped classloader cannot be null.");
+        JkUtilsAssert.argument(classLoader != null, "Wrapped classloader cannot be null.");
         return new JkClassLoader(classLoader);
     }
 

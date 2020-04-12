@@ -379,7 +379,7 @@ final class IvyTranslations {
                                                      String classifier, ModuleRevisionId moduleId, Instant date) {
         final String extension = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
         final Map<String, String> extraMap;
-        if (classifier == null) {
+        if (JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
             extraMap = new HashMap<>();
         } else {
             extraMap = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);

@@ -29,8 +29,8 @@ public class JkCommandSet {
         if (baseDir == null) {
             BASE_DIR_CONTEXT.set(null);
         } else {
-            JkUtilsAssert.isTrue(baseDir.isAbsolute(), baseDir + " is not absolute");
-            JkUtilsAssert.isTrue(Files.isDirectory(baseDir), baseDir + " is not a directory.");
+            JkUtilsAssert.argument(baseDir.isAbsolute(), baseDir + " is not absolute");
+            JkUtilsAssert.argument(Files.isDirectory(baseDir), baseDir + " is not a directory.");
             BASE_DIR_CONTEXT.set(baseDir.toAbsolutePath().normalize());
         }
     }
