@@ -3,6 +3,8 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkLog;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -14,7 +16,7 @@ import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.TEST;
 
 public class JkPublisherRunner {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         JkVersionedModule versionedModule = JkVersionedModule.of("org.myorg:mylib:1.2.6");
         JkDependencySet deps = JkDependencySet.of()
@@ -31,7 +33,7 @@ public class JkPublisherRunner {
                 .addApache2License();
 
         Consumer<Path> creator = path -> JkPathFile.of(path).createIfNotExist(); // Use a fake creator
-        JkArtifactBasicProducer artifactProducer = JkArtifactBasicProducer.of()
+        JkArtifactBasicProducer artifactProducer = JkArtifactBasicProducer.of(Files.createTempDirectory("jeka"), "myproject")
                 .putMainArtifact(creator)
                 .putArtifact(JkArtifactId.of("sources", "jar"), creator)
                 .putArtifact(JkArtifactId.of("javadoc", "jar"), creator);

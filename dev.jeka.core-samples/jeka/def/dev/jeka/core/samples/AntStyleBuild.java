@@ -27,7 +27,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
     Path src = getBaseDir().resolve("src/main/java");
     Path classDir = getOutputDir().resolve("classes");
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
-    JkDependencyResolver resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral());
+    JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     JkDependencySet moduleDependencies = JkDependencySet.of()
             .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
             .and("junit:junit:4.13", JkJavaDepScopes.TEST);
@@ -76,7 +76,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
         JkGpg pgp = JkGpg.ofSecretRing(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd");
         JkRepo repo = JkRepo.ofIvy(getOutputDir().resolve("ivy-repo"));
         JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.2_SNAPSHOT");
-        JkArtifactLocator artifactLocator = JkArtifactBasicProducer.of()
+        JkArtifactLocator artifactLocator = JkArtifactBasicProducer.of(getOutputDir(), "mygroup.myname")
                 .putMainArtifact(path -> JkPathFile.of(jarFile).move(path))
                 .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, path -> JkPathTree.of(this.src).zipTo(path));
         JkPublisher.of(repo)
@@ -97,6 +97,5 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
     public static void main(String[] args) {
         JkInit.instanceOf(AntStyleBuild.class, args).cleanBuild();
     }
-
 
 }

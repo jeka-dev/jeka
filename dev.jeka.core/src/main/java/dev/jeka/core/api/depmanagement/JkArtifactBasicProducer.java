@@ -27,15 +27,14 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
 
     private JkArtifactBasicProducer(T __) {
         this.__ = __;
-
     }
 
     public static <T> JkArtifactBasicProducer<T> ofParent(T __) {
         return new JkArtifactBasicProducer<>( __);
     }
 
-    public static JkArtifactBasicProducer<Void> of() {
-        return ofParent(null);
+    public static JkArtifactBasicProducer<Void> of(Path outputDir, String filePrefixName) {
+        return new JkArtifactBasicProducer(null).setArtifactFilenameComputation(() -> outputDir, ()-> filePrefixName);
     }
 
     @Override

@@ -2,8 +2,6 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -34,28 +32,6 @@ public class IvyInternalPublisherRunner {
         final JkDependencySet deps = JkDependencySet.of().and(spring, "3.0.+", JkScopedDependencyTest.COMPILE);
         jkIvyInternalPublisher.publishIvy(versionedModule, ivyPublication, deps, null, Instant.now(),
                 JkVersionProvider.of(spring, "3.0.8"));
-    }
-
-    public static void testPublishMaven() throws IOException {
-        final IvyInternalPublisher jkIvyPublisher = IvyInternalPublisher.of(
-            mavenRepo()
-                .getPublishConfig()
-                    .setUniqueSnapshot(false).__.toSet(), Paths.get("jeka/output/test-out"));
-        final JkVersionedModule versionedModule = JkVersionedModule.of("mygroup:mymodule2:0.0.12-SNAPSHOT");
-
-        JkArtifactBasicProducer artifactProducer = JkArtifactBasicProducer.of()
-                .putMainArtifact(file -> JkUtilsPath.copy(sampleJarfile(), file))
-                .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, file -> JkUtilsPath.copy(sampleJarSourcefile(), file))
-                .putArtifact(JkArtifactId.of("other", "jar"), file -> JkUtilsPath.copy(sampleJarSourcefile(), file));
-
-
-        final JkMavenPublication publication = JkMavenPublication.of(artifactProducer, JkPublishedPomMetadata.of());
-
-        final JkModuleId spring = JkModuleId.of("org.springframework:spring-jdbc");
-        final JkDependencySet deps = JkDependencySet.of().and(spring, "2.0.+", JkScopedDependencyTest.COMPILE);
-        final JkVersionProvider versionProvider = JkVersionProvider.of(spring, "2.0.5");
-        jkIvyPublisher.publishMaven(versionedModule, publication,
-                deps.withVersionProvider(versionProvider), null);
     }
 
     private static Path sampleJarfile() {
