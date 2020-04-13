@@ -35,6 +35,8 @@ public class SonarPluginBuild extends JkCommandSet {
 
     JkPluginJacoco jacoco = getPlugin(JkPluginJacoco.class);
 
+    public boolean runSonar; // a flag to run sonar or not
+
     @JkDoc("Sonar server environment")
     public SonarEnv sonarEnv = SonarEnv.DEV;
 
@@ -60,7 +62,8 @@ public class SonarPluginBuild extends JkCommandSet {
     }
 
     public void cleanPackSonar() {
-        clean(); java.pack(); sonar.run();
+        clean(); java.pack();
+        if (runSonar) sonar.run();
     }
 
     enum SonarEnv {

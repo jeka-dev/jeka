@@ -41,11 +41,12 @@ class SampleTester {
     }
 
     void doTest() throws IOException {
-        testSampleWithJavaPlugin("LibraryBuild");
-        testSampleWithJavaPlugin("SignedArtifactsBuild");
+        testSampleWith("JavaPluginBuild", "cleanPackPublish");
+        testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
         testSampleWithJavaPlugin("ThirdPartyPoweredBuild");
         testSampleWithJavaPlugin("JacocoPluginBuild");
-        testSampleWith("AntStyleBuild", "cleanBuild");
+        testSampleWith("SonarPluginBuild", "cleanPackSonar");
+        testSampleWith("AntStyleBuild", "cleanPackPublish");
         testSampleWith("PureApiBuild", "cleanBuild");
 
         testDepender("FatJarBuild");

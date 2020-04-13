@@ -72,7 +72,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
             .runJarSync(jarFile);
     }
 
-    public void cleanBuild() {
+    public void cleanPackPublish() {
         clean();
         jar();
         javadoc();
@@ -108,7 +108,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(AntStyleBuild.class, args).cleanBuild();
+        JkInit.instanceOf(AntStyleBuild.class, args).cleanPackPublish();
     }
 
 }
