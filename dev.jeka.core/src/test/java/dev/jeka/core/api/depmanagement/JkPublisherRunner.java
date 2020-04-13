@@ -33,7 +33,7 @@ public class JkPublisherRunner {
                 .addApache2License();
 
         Consumer<Path> creator = path -> JkPathFile.of(path).createIfNotExist(); // Use a fake creator
-        JkArtifactBasicProducer artifactProducer = JkArtifactBasicProducer.of(Files.createTempDirectory("jeka"), "myproject")
+        JkStandardFileArtifactProducer artifactProducer = JkStandardFileArtifactProducer.of(Files.createTempDirectory("jeka"), "myproject")
                 .putMainArtifact(creator)
                 .putArtifact(JkArtifactId.of("sources", "jar"), creator)
                 .putArtifact(JkArtifactId.of("javadoc", "jar"), creator);

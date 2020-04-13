@@ -38,7 +38,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
 
     private final JkDependencyManagement<JkJavaProject> dependencyManagement;
 
-    private final JkArtifactBasicProducer<JkJavaProject> artifactProducer;
+    private final JkStandardFileArtifactProducer<JkJavaProject> artifactProducer;
 
     private final JkJavaProjectCompilation compilation;
 
@@ -58,7 +58,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         documentation = new JkJavaProjectDocumentation( this);
         packaging = new JkJavaProjectPackaging(this);
         publication = new JkJavaProjectPublication(this);
-        artifactProducer = JkArtifactBasicProducer.ofParent(this)
+        artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
                 .setArtifactFilenameComputation(this::getOutputDir, this::artifactFileNamePart);
         registerArtifacts();
     }
@@ -104,7 +104,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         return dependencyManagement;
     }
 
-    public JkArtifactBasicProducer<JkJavaProject> getArtifactProducer() {
+    public JkStandardFileArtifactProducer<JkJavaProject> getArtifactProducer() {
         return artifactProducer;
     }
 

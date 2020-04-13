@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -23,22 +24,24 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
  */
 @JkDefClasspath("commons-httpclient:commons-httpclient:3.1")
 @JkDefClasspath("com.google.guava:guava:21.0")
-public class HttpClientTaskBuild extends JkCommandSet {
+public class ThirdPartyPoweredBuild extends JkCommandSet {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
     
     @Override
     protected void setup() {
-        javaPlugin.getProject().getDependencyManagement().addDependencies(dependencies());
+        javaPlugin.getProject()
+            .getDependencyManagement()
+                .addDependencies(dependencies());
     }
 
-
+    // Project dependencies does not inherit from def dependencies
     private static JkDependencySet dependencies() {
         return JkDependencySet.of()
-                .and(GUAVA, "21.0")
-                .and(JAVAX_SERVLET_API, "3.1.0", PROVIDED)
-                .and(JUNIT, "4.13", TEST)
-                .and(MOCKITO_ALL, "1.10.19", TEST);
+            .and(GUAVA, "21.0")
+            .and(JAVAX_SERVLET_API, "3.1.0", PROVIDED)
+            .and(JUNIT, "4.13", TEST)
+            .and(MOCKITO_ALL, "1.10.19", TEST);
     }
 
     @JkDoc("Performs some load test using http client")
@@ -48,6 +51,15 @@ public class HttpClientTaskBuild extends JkCommandSet {
         client.executeMethod(getMethod);
         client = MoreObjects.firstNonNull(client, client); // senseless but just to illustrate we can use Guava
         // ....
+    }
+
+    public void cleanPack() {
+        clean();
+        javaPlugin.pack();
+    }
+
+    public static void main(String[] args) {
+        JkInit.instanceOf(ThirdPartyPoweredBuild.class, args).cleanPack();
     }
 
 }

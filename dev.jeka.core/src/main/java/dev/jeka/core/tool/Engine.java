@@ -94,8 +94,11 @@ final class Engine {
             path = compile().and(path);
             jkCommandSet = getCommandsInstance(commandSetClassHint, path);
             if (jkCommandSet == null) {
-                throw new JkException("Can't find or guess any command class for project hosted in " + this.projectBaseDir
-                        + " .\nAre you sure this directory is a Jeka project ?");
+                String hint = JkUtilsString.isBlank(commandSetClassHint) ? "" : " named " + commandSetClassHint;
+                String prompt = !JkUtilsString.isBlank(commandSetClassHint) ? ""
+                        : "\nAre you sure this directory is a Jeka project ?";
+                throw new JkException("Can't find or guess any command class%s in project %s.%s",
+                        hint, this.projectBaseDir, prompt);
             }
         }
         jkCommandSet.getImportedCommandSets().setImportedRunRoots(this.rootsOfImportedCommandSets);

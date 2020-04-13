@@ -43,9 +43,10 @@ class SampleTester {
     void doTest() throws IOException {
         testSampleWithJavaPlugin("LibraryBuild");
         testSampleWithJavaPlugin("SignedArtifactsBuild");
+        testSampleWithJavaPlugin("ThirdPartyPoweredBuild");
         testSampleWith("AntStyleBuild", "cleanBuild");
-        testSampleWithJavaPlugin("HttpClientTaskBuild");
-        testSampleWithJavaPlugin("SimpleScopeBuild");
+        testSampleWith("PureApiBuild", "cleanBuild");
+
         testDepender("FatJarBuild");
 
         // Test eclipse

@@ -87,7 +87,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
                     .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
-        final JkArtifactBasicProducer artifactProducer = project.getArtifactProducer();
+        final JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
         if (!pack.sources) {
             artifactProducer.removeArtifact(JkJavaProject.SOURCES_ARTIFACT_ID);
         }

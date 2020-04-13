@@ -1,6 +1,6 @@
 package dev.jeka.core.tool.builtins.java;
 
-import dev.jeka.core.api.depmanagement.JkArtifactBasicProducer;
+import dev.jeka.core.api.depmanagement.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.JkArtifactId;
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.depmanagement.JkResolveResult;
@@ -30,7 +30,7 @@ public class JkPluginWar extends JkPlugin {
 
     private JkRunnables staticResourceComputation = JkRunnables.of();
 
-    private final JkArtifactBasicProducer artifactProducer;
+    private final JkStandardFileArtifactProducer artifactProducer;
 
     public JkPluginWar(JkCommandSet run) {
         super(run);

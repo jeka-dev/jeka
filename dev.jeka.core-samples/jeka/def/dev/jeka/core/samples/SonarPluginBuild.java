@@ -25,7 +25,7 @@ public class SonarPluginBuild extends JkCommandSet {
 
     public SonarPluginBuild() {
         this.getPlugins().get(JkPluginSonar.class)
-                .prop(JkSonar.BRANCH, "myBranch");
+            .prop(JkSonar.BRANCH, "myBranch");
     }
     
     @Override

@@ -12,8 +12,8 @@ final class JkException extends RuntimeException {
     /**
      * Constructs a {@link JkException} with the specified message.
      */
-    public JkException(String message) {
-        super(message);
+    public JkException(String message, Object ... args) {
+        super(String.format(message, args));
     }
 
 }

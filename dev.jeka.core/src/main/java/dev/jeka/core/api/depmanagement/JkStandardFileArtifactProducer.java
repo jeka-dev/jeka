@@ -10,7 +10,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
+/**
+ * This {@link JkArtifactProducer} produces artifacts files at a standardized path
+ * determined by a provided function (outputPath, artifactId) -> path. <p/>
+ * This function is supposed to be supplied by the caller. To add artifacts to produce, caller has
+ * to provide a {@link Consumer<Path>} generating the artifact file at the given path.
+ */
+public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
 
     private final static Supplier<JkPathSequence> EMPTY_SUPPLIER = () -> JkPathSequence.of();
 
@@ -25,16 +31,16 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
 
     private Function<JkArtifactId, Path> artifactFileFunction;
 
-    private JkArtifactBasicProducer(T __) {
+    private JkStandardFileArtifactProducer(T __) {
         this.__ = __;
     }
 
-    public static <T> JkArtifactBasicProducer<T> ofParent(T __) {
-        return new JkArtifactBasicProducer<>( __);
+    public static <T> JkStandardFileArtifactProducer<T> ofParent(T __) {
+        return new JkStandardFileArtifactProducer<>( __);
     }
 
-    public static JkArtifactBasicProducer<Void> of(Path outputDir, String filePrefixName) {
-        return new JkArtifactBasicProducer(null).setArtifactFilenameComputation(() -> outputDir, ()-> filePrefixName);
+    public static JkStandardFileArtifactProducer<Void> of(Path outputDir, String filePrefixName) {
+        return new JkStandardFileArtifactProducer(null).setArtifactFilenameComputation(() -> outputDir, ()-> filePrefixName);
     }
 
     @Override
@@ -68,7 +74,7 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
         return new LinkedList<>(consumers.keySet());
     }
 
-    public JkArtifactBasicProducer<T> setArtifactFilenameComputation(Function<JkArtifactId, Path> artifactFileFunction) {
+    public JkStandardFileArtifactProducer<T> setArtifactFilenameComputation(Function<JkArtifactId, Path> artifactFileFunction) {
         JkUtilsAssert.argument(artifactFileFunction != null, "artifactFileFunction cannot be null.");
         this.artifactFileFunction = artifactFileFunction;
         return this;
@@ -79,33 +85,31 @@ public class JkArtifactBasicProducer<T> implements JkArtifactProducer {
      * Artifact files are generated on a given directory provided by the specified supplier. The name of the
      * artifact files will be composed as [partName](-[artifactId.name]).[artifactId.ext].
      */
-    public JkArtifactBasicProducer<T> setArtifactFilenameComputation(Supplier<Path> targetDir, Supplier<String> partName) {
+    public JkStandardFileArtifactProducer<T> setArtifactFilenameComputation(Supplier<Path> targetDir, Supplier<String> partName) {
         return setArtifactFilenameComputation(artifactId -> targetDir.get().resolve(artifactId.toFileName(partName.get())));
     }
 
-    public JkArtifactBasicProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker,
-                                                  Supplier<JkPathSequence> artifactRuntimeClasspathSupplier) {
+    public JkStandardFileArtifactProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker,
+                                                         Supplier<JkPathSequence> artifactRuntimeClasspathSupplier) {
         consumers.put(artifactId, artifactFileMaker);
         runtimeClasspathSuppliers.put(artifactId, artifactRuntimeClasspathSupplier);
         return this;
     }
 
-    public JkArtifactBasicProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
+    public JkStandardFileArtifactProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
         return putArtifact(artifactId, artifactFileMaker, EMPTY_SUPPLIER);
     }
 
-    public JkArtifactBasicProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker,
-                                                      Supplier<JkPathSequence> artifactRuntimeClasspathSupplier) {
-        consumers.put(getMainArtifactId(), artifactFileMaker);
-        runtimeClasspathSuppliers.put(getMainArtifactId(), artifactRuntimeClasspathSupplier);
-        return this;
+    public JkStandardFileArtifactProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker,
+                                                             Supplier<JkPathSequence> artifactRuntimeClasspathSupplier) {
+        return putArtifact(getMainArtifactId(), artifactFileMaker, artifactRuntimeClasspathSupplier);
     }
 
-    public JkArtifactBasicProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker) { ;
+    public JkStandardFileArtifactProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker) { ;
         return putMainArtifact(artifactFileMaker, EMPTY_SUPPLIER);
     }
 
-    public JkArtifactBasicProducer<T> removeArtifact(JkArtifactId artifactId) {
+    public JkStandardFileArtifactProducer<T> removeArtifact(JkArtifactId artifactId) {
         consumers.remove(artifactId);
         runtimeClasspathSuppliers.remove(artifactId);
         return this;

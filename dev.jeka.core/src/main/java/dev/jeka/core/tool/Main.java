@@ -56,15 +56,15 @@ public final class Main {
             if (consumer != null) {
                 consumer.restore();
             }
-            if (e instanceof JkException || e instanceof IllegalArgumentException || e instanceof IllegalStateException) {
+            if (e instanceof JkException) {
+                System.err.println(e.getMessage());
+            } else {
                 System.err.println("An error occured during def class execution : " + e.getMessage());
                 System.err.println("This is mostly due to an error in user settings or scripts.");
                 System.err.println("You can investigate using the stacktace below.");
                 System.err.println("If error reveals to coming from Jeka engine, please report to " +
                         ": https://github.com/jerkar/jeka/issues");
                 System.err.println();
-                e.printStackTrace(System.err);
-            } else {
                 e.printStackTrace(System.err);
             }
             if (Environment.standardOptions.logHeaders) {

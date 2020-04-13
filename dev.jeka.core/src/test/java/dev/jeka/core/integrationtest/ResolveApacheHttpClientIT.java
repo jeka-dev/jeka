@@ -86,7 +86,7 @@ public class ResolveApacheHttpClientIT {
     }
 
     private JkDependencyResolver resolver() {
-        return JkDependencyResolver.ofParent(JkRepo.ofMavenCentral());
+        return JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     }
 
 }

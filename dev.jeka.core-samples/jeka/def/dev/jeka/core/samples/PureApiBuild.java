@@ -13,7 +13,8 @@ import dev.jeka.core.tool.JkInit;
  */
 public class PureApiBuild extends JkCommandSet {
 
-    public void doDefault() {
+    public void cleanBuild() {
+        clean();
         JkJavaProject javaProject = JkJavaProject.of().setBaseDir(this.getBaseDir());
         javaProject.setOutputDir("jeka/output/alt-output");
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
@@ -50,6 +51,6 @@ public class PureApiBuild extends JkCommandSet {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(PureApiBuild.class, args).doDefault();
+        JkInit.instanceOf(PureApiBuild.class, args).cleanBuild();
     }
 }

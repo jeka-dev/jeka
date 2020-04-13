@@ -2,7 +2,6 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
@@ -13,11 +12,14 @@ import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
 
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 
 /**
- * Build class written in Ant style. Tasks are explicitly written in public methods using
- * low level API. This approach
+ * Build class written in Ant style. This is not expected to be the most common way of creating build class in Jeka.
+ * <p>
+ * Tasks are explicitly written in public methods using a low level API. This approach may be more flexible but requires
+ * extra coding effort.
  * 
  * @author Jerome Angibaud
  */
@@ -25,6 +27,7 @@ import java.util.List;
 public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
+    Path srcJar = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + "-sources.jar");
     Path classDir = getOutputDir().resolve("classes");
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
     JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
@@ -45,6 +48,10 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
                 .addSources(src));
         JkPathTree.of(src).andMatching(false, "**/*.java")
                 .copyTo(classDir);
+    }
+
+    public void jarSources() {
+        JkPathTree.of(src).zipTo(srcJar);
     }
 
     public void jar() {
@@ -72,17 +79,23 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
         publish();
     }
 
+    // publish poth on Maven and Ivy repo
     public void publish() {
         JkGpg pgp = JkGpg.ofSecretRing(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd");
-        JkRepo repo = JkRepo.ofIvy(getOutputDir().resolve("ivy-repo"));
+        JkRepo ivyRepo = JkRepo.ofIvy(getOutputDir().resolve("test-output/ivy-repo"));
+        JkRepo mavenRepo = JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo"));
         JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.2_SNAPSHOT");
-        JkArtifactLocator artifactLocator = JkArtifactBasicProducer.of(getOutputDir(), "mygroup.myname")
-                .putMainArtifact(path -> JkPathFile.of(jarFile).move(path))
-                .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, path -> JkPathTree.of(this.src).zipTo(path));
-        JkPublisher.of(repo)
+        JkArtifactProducer artifactProducer = JkSuppliedFileArtifactProducer.of()
+                .putMainArtifact(jarFile, this::jar)
+                .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
+        artifactProducer.makeAllMissingArtifacts();
+        JkIvyPublication ivyPublication = JkIvyPublication.of(artifactProducer);
+        JkPublisher.of(JkRepoSet.of(mavenRepo, ivyRepo))
                 .withSigner(pgp.getSigner(""))
-                .publishMaven(versionedModule, JkMavenPublication.of(artifactLocator, JkPublishedPomMetadata.of()),
-                        JkDependencySet.of());
+                .publishMaven(versionedModule, JkMavenPublication.of(artifactProducer, JkPublishedPomMetadata.of()),
+                        moduleDependencies)
+                .publishIvy(versionedModule, ivyPublication, moduleDependencies, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING,
+                        Instant.now(), JkVersionProvider.of());
     }
 
     @Override

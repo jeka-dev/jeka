@@ -52,7 +52,7 @@ public class ResolverWithoutScopeMapperIT {
     public void resolveWithOptionals() {
         final JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE", JkScopeMapping.of(COMPILE).to("compile", "master", "optional"));
-        final JkDependencyResolver resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet());
+        final JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         final JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         System.out.println(resolveResult.getDependencyTree().toStringTree());
 
@@ -65,7 +65,7 @@ public class ResolverWithoutScopeMapperIT {
     public void resolveSpringbootTestStarter() {
         final JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", JkScopeMapping.of(TEST).to("master", "runtime"));
-        final JkDependencyResolver resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet());
+        final JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         final JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         final Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
 
