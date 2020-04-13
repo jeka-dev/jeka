@@ -261,6 +261,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     }
 
     /**
+     * Same as #minus(JkModuleId) but using a string as <code>my.group:my.name</code> to specify the moduleId.
+     */
+    public JkDependencySet minus(String moduleId) {
+        return minus(JkModuleId.of(moduleId));
+    }
+
+    /**
      * Returns a dependency set identical to this one minus the dependencies on the given
      * {@link JkModuleId}. This is used to exclude a given module to all scope.
      */
@@ -284,6 +291,32 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
             }
         }
         return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
+    }
+
+    /**
+     * Returns a dependency set identical to this one minus the dependencies on the given
+     * {@link JkModuleId}. This is used to exclude a given module to all scope.
+     */
+    public JkDependencySet replaceScope(JkModuleId jkModuleId, JkScope... scopes) {
+        final List<JkScopedDependency> result = new LinkedList<>(dependencies);
+        for (final ListIterator<JkScopedDependency> it = result.listIterator(); it.hasNext();) {
+            final JkDependency dependency = it.next().getDependency();
+            if (dependency instanceof JkModuleDependency) {
+                final JkModuleDependency externalModule = (JkModuleDependency) dependency;
+                if (externalModule.getModuleId().equals(jkModuleId)) {
+                    it.remove();
+                    it.add(JkScopedDependency.of(externalModule).withScopes(scopes));
+                }
+            }
+        }
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
+    }
+
+    /**
+     * @see #replaceScope(String, JkScope...)
+     */
+    public JkDependencySet replaceScope(String moduleId, JkScope... scopes) {
+        return replaceScope(JkModuleId.of(moduleId), scopes);
     }
 
     /**

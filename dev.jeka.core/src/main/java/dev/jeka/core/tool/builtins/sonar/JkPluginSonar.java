@@ -54,7 +54,7 @@ public class JkPluginSonar extends JkPlugin {
 
     @JkDoc("Runs a SonarQube analysis based on properties defined in this plugin. " +
             "Options prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
-            "will be appended to these properties.")
+            "will be appended to sonarQube properties.")
     public void run() {
         configureSonarFrom(getCommandSet().getPlugins().get(JkPluginJava.class).getProject()).withProperties(properties).run();
     }
@@ -62,7 +62,7 @@ public class JkPluginSonar extends JkPlugin {
     /**
      * Adds a property to setupAfterPluginActivations sonar instance to run. You'll find predefined keys in {@link JkSonar}.
      */
-    public JkPluginSonar prop(String key, String value) {
+    public JkPluginSonar setProp(String key, String value) {
         this.properties.put(key, value);
         return this;
     }

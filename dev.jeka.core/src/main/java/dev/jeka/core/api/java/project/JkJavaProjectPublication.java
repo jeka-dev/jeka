@@ -23,6 +23,8 @@ public class JkJavaProjectPublication {
 
     private UnaryOperator<Path> signer;
 
+    private UnaryOperator<JkDependencySet> dependenciesConfigurer = UnaryOperator.identity();
+
     private final JkPublishedPomMetadata<JkJavaProjectPublication> publishedPomMetadata;
 
     private final JkRunnables<JkJavaProjectPublication> postActions;
@@ -97,6 +99,13 @@ public class JkJavaProjectPublication {
     /**
      * @see #setVersionSupplier(Supplier)
      */
+    public JkJavaProjectPublication setVersion(String version) {
+        return setVersion(JkVersion.of(version));
+    }
+
+    /**
+     * @see #setVersionSupplier(Supplier)
+     */
     public JkVersion getVersion() {
         JkVersion result = versionSupplier.get();
         JkUtilsAssert.state(result != null, "Version returned by supplier is null.");
@@ -125,13 +134,21 @@ public class JkJavaProjectPublication {
         return this;
     }
 
-    public JkJavaProjectPublication addRepo(JkRepo publishRepo) {
-        this.publishRepos = this.publishRepos.and(publishRepo);
+    public JkJavaProjectPublication addRepos(JkRepo ... repos) {
+        for (JkRepo repo : repos) {
+            this.publishRepos = this.publishRepos.and(repo);
+        }
         return this;
     }
 
     public JkJavaProjectPublication setSigner(UnaryOperator<Path> signer) {
         this.signer = signer;
+        return this;
+    }
+
+    public JkJavaProjectPublication setDependencies(UnaryOperator<JkDependencySet> dependenciesConfigurer) {
+        JkUtilsAssert.argument(dependenciesConfigurer != null, "Dependency configurer cannot be null.");
+        this.dependenciesConfigurer = dependenciesConfigurer;
         return this;
     }
 
@@ -160,10 +177,11 @@ public class JkJavaProjectPublication {
 
     private void publishMaven(JkRepoSet repos) {
         JkMavenPublication publication = JkMavenPublication.of(project.getArtifactProducer(), publishedPomMetadata);
+        JkDependencySet deps = project.getDependencyManagement().getScopeDefaultedDependencies();
+        deps = dependenciesConfigurer.apply(deps);
         JkPublisher.of(repos, project.getOutputDir())
                 .withSigner(this.signer)
-                .publishMaven(JkVersionedModule.of(getModuleId(), getVersion()), publication,
-                        project.getDependencyManagement().getScopeDefaultedDependencies());
+                .publishMaven(JkVersionedModule.of(getModuleId(), getVersion()), publication, deps);
     }
 
     private void publishIvy(JkRepoSet repos) {
@@ -171,7 +189,8 @@ public class JkJavaProjectPublication {
             return;
         }
         JkLog.startTask("Preparing Ivy publication");
-        final JkDependencySet dependencies = project.getDependencyManagement().getScopeDefaultedDependencies();
+        JkDependencySet deps = project.getDependencyManagement().getScopeDefaultedDependencies();
+        deps = dependenciesConfigurer.apply(deps);
         JkArtifactProducer artifactProducer = project.getArtifactProducer();
         final JkIvyPublication publication = JkIvyPublication.of(
                 artifactProducer.getMainArtifactPath(),
@@ -179,10 +198,10 @@ public class JkJavaProjectPublication {
                 .andOptional(artifactProducer.getArtifactPath(JkJavaProject.SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES.getName())
                 .andOptional(artifactProducer.getArtifactPath(JkJavaProject.JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC.getName());
         final JkVersionProvider resolvedVersions = project.getDependencyManagement().getResolver()
-                .resolve(dependencies, dependencies.getInvolvedScopes()).getResolvedVersionProvider();
+                .resolve(deps, deps.getInvolvedScopes()).getResolvedVersionProvider();
         JkLog.endTask();
         JkPublisher.of(repos, project.getOutputDir())
-                .publishIvy(JkVersionedModule.of(getModuleId(), getVersion()), publication, dependencies,
+                .publishIvy(JkVersionedModule.of(getModuleId(), getVersion()), publication, deps,
                         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }
 

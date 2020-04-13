@@ -7,6 +7,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsThrowable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,17 +78,23 @@ public class JkCommandSet {
     public static <T extends JkCommandSet> T of(Class<T> commandClass) {
         JkLog.startTask("Instantiating commandSet class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T commands = ofUninitialised(commandClass);
-        commands.initialise();
+        try {
+            commands.initialise();
+        } catch (Exception e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
         JkLog.endTask();
         return commands;
     }
 
-    void initialise() {
+    void initialise() throws Exception {
         setup();
 
         // initialise imported project after setup to let a chance master commands to modify imported commands
         // in the setup method.
-        importedCommandSets.getDirects().forEach(JkCommandSet::initialise);
+        for (JkCommandSet jkCommandSet : importedCommandSets.getDirects()) {
+            jkCommandSet.initialise();
+        }
 
         for (JkPlugin plugin : new LinkedList<>(plugins.getLoadedPlugins())) {
             List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
@@ -138,7 +145,7 @@ public class JkCommandSet {
      * This method is invoked right after options has been injected into this instance. Here, You will typically
      * configure plugins before they are activated.
      */
-    protected void setup() {
+    protected void setup() throws Exception {
         // Do nothing by default
     }
 
@@ -146,7 +153,7 @@ public class JkCommandSet {
      * This method is called once all plugin has been activated. This method is intended to overwrite what plugin
      * activation has setup.
      */
-    protected void setupAfterPluginActivations() {
+    protected void setupAfterPluginActivations() throws Exception {
         // Do nothing by default
     }
 

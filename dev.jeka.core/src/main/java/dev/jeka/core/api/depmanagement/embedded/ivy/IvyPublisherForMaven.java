@@ -23,7 +23,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
+import java.util.*;
 import java.util.function.UnaryOperator;
 
 /**
@@ -147,6 +147,7 @@ final class IvyPublisherForMaven {
         final String packaging = JkUtilsString.substringAfterLast(publication.getArtifactLocator()
                 .getMainArtifactPath().getFileName().toString(), ".");
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
+        pomWriterOptions.setMapping(new ScopeMapping());
         pomWriterOptions.setArtifactPackaging(packaging);
         Path fileToDelete = null;
         if (publication.getExtraInfo() != null) {
@@ -338,6 +339,32 @@ final class IvyPublisherForMaven {
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
         }
+    }
+
+    private static class ScopeMapping extends PomWriterOptions.ConfigurationScopeMapping {
+
+        public ScopeMapping() {
+            super(new HashMap<>());
+        }
+
+        public String getScope(String[] confs) {
+            List<String> confLists = Arrays.asList(confs);
+            if (confLists.contains("compile")) {
+                return "compile";
+            }
+            if (confLists.contains("runtime")) {
+                return "runtime";
+            }
+            if (confLists.contains("provided")) {
+                return "provided";
+            }
+            if (confLists.contains("test")) {
+                return "test";
+            }
+            return null;
+        }
+
+
     }
 
 }
