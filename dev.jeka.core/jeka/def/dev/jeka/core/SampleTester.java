@@ -137,7 +137,7 @@ class SampleTester {
 
     private void testFork() {
         testSampleWithJavaPlugin("", "-java#tests.fork");
-        JkUtilsAssert.state(output.goTo("test-reports/junit").exists(), "No test report generated in test fork mode.");
+        JkUtilsAssert.state(output.goTo("test-report").exists(), "No test report generated in test fork mode.");
     }
 
     public static void main(String[] args) throws Exception {
