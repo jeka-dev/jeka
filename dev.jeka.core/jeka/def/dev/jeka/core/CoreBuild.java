@@ -88,9 +88,9 @@ public class CoreBuild extends JkCommandSet {
                     .getCompiler()
                         .setDefault().__.__
                 .getTestProcessor()
-                    .setForkingProcess(true)
+                    .setForkingProcess(false)
                     .getEngineBehavior()
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.FULL).__.__
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
                 .getTestSelection()
                     .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
                     .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
