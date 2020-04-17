@@ -59,6 +59,8 @@ public final class JkTestProcessor<T> {
 
     private static final String JUNIT_VINTAGE_ENGINE_JAR_NAME = "junit-vintage-engine-5.6.0.jar";
 
+    private static final String JUNIT_4_JAR_NAME = "junit-4.13.jar";
+
     private static final String OPENTEST4J_JAR_NAME = "opentest4j-1.2.0.jar";
 
     private JkJavaProcess forkingProcess;
@@ -123,9 +125,14 @@ public final class JkTestProcessor<T> {
         result = addIfNeeded(result, classloader, OPENTEST4J_CLASS_NAME, OPENTEST4J_JAR_NAME);
         JkUrlClassLoader ucl = JkUrlClassLoader.of(result, classloader.get());
         Class<?> testEngineClass = ucl.toJkClassLoader().load(ENGINE_SERVICE);
+
+        // If no test engine has been registered, we assume the project to use Junit 4
+        // Thus, the vintage engine is loaded along the latest junit 4 version compatible with vintage.
         if (!ServiceLoader.load(testEngineClass, ucl.get()).iterator().hasNext()) {
             result = result.and(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION
                     + JUNIT_VINTAGE_ENGINE_JAR_NAME));
+            result = result.andPrepending(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION
+                    + JUNIT_4_JAR_NAME )); // overwrite junit4 to last version for compiance with vintage
         }
         return result;
     }
