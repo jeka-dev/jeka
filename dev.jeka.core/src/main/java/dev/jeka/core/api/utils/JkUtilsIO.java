@@ -291,7 +291,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Deserialises the content of a given input file to a Java object loaded in
+     * Deserializes the content of a given input file to a Java object loaded in
      * the specified classloader.
      */
     public static <T> T deserialize(InputStream inputStream, final ClassLoader classLoader) {
@@ -391,12 +391,13 @@ public final class JkUtilsIO {
             @Override
             public void run() {
                 try (InputStreamReader isr = new InputStreamReader(in); BufferedReader br = new BufferedReader(isr)) {
-                    String line;
-                    while (!stop.get() && (line = br.readLine()) != null) {
-                        final byte[] bytes = line.getBytes();
+                    while (!stop.get()) {
+                        int c = br.read();
+                        if (c == -1) {
+                            break;
+                        }
                         for (OutputStream out : outs) {
-                            out.write(bytes, 0, bytes.length);
-                            out.write('\n');
+                            out.write((char) c);
                             out.flush();
                         }
                     }
