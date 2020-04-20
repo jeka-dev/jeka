@@ -4,6 +4,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -26,9 +27,10 @@ public final class JkModuleDependency implements JkDependency {
     private final boolean transitive;
     private final String extension;
     private final List<JkDepExclude> excludes;
+    private final Path ideProjectDir;
 
     private JkModuleDependency(JkModuleId module, JkVersion version, String classifier,
-            boolean transitive, String extension, List<JkDepExclude> excludes) {
+            boolean transitive, String extension, List<JkDepExclude> excludes, Path ideProjectDir) {
         JkUtilsAssert.argument(module != null, "module cannot be null.");
         JkUtilsAssert.argument(version != null, module + " version cannot be null.");
         JkUtilsAssert.argument(excludes != null, module + " module dependency can't be instantiated with null excludes, use empty list instead");
@@ -38,6 +40,7 @@ public final class JkModuleDependency implements JkDependency {
         this.transitive = transitive;
         this.extension = extension;
         this.excludes = excludes;
+        this.ideProjectDir = ideProjectDir;
     }
 
     /**
@@ -54,7 +57,7 @@ public final class JkModuleDependency implements JkDependency {
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, JkVersion version) {
         return new JkModuleDependency(moduleId, version, null, true, null,
-                Collections.EMPTY_LIST);
+                Collections.EMPTY_LIST, null);
     }
 
     /**
@@ -71,7 +74,7 @@ public final class JkModuleDependency implements JkDependency {
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, String versionRange) {
         return new JkModuleDependency(moduleId, JkVersion.of(versionRange), null, true, null,
-                Collections.EMPTY_LIST);
+                Collections.EMPTY_LIST, null);
     }
 
     /**
@@ -126,7 +129,7 @@ public final class JkModuleDependency implements JkDependency {
      * Returns <code>true</code> if this dependency should be resolved transitively (returning the dependencies
      * of this dependency recursively).
      */
-    public boolean isTransitive() {
+    public boolean withTransitive() {
         return transitive;
     }
 
@@ -147,9 +150,9 @@ public final class JkModuleDependency implements JkDependency {
     /**
      * Returns a {@link JkModuleDependency} identical to this one but with the specified 'transitive' property.
      */
-    public JkModuleDependency isTransitive(boolean transitive) {
+    public JkModuleDependency withTransitive(boolean transitive) {
         return new JkModuleDependency(module, version, classifier, transitive, extension,
-                excludes);
+                excludes, ideProjectDir);
     }
 
     /**
@@ -169,7 +172,7 @@ public final class JkModuleDependency implements JkDependency {
             return this;
         }
         return new JkModuleDependency(module, version, classifier,
-                transitive, extension, excludes);
+                transitive, extension, excludes, ideProjectDir);
     }
 
     /**
@@ -177,8 +180,7 @@ public final class JkModuleDependency implements JkDependency {
      * classifier. This has meaning only for Maven module.
      */
     public JkModuleDependency withClassifier(String classifier) {
-        return new JkModuleDependency(module, version, classifier, transitive, extension,
-                excludes);
+        return new JkModuleDependency(module, version, classifier, transitive, extension, excludes, ideProjectDir);
     }
 
     /**
@@ -195,8 +197,7 @@ public final class JkModuleDependency implements JkDependency {
      */
     public JkModuleDependency withExt(String extension) {
         final String ext = JkUtilsString.isBlank(extension) ? null : extension;
-        return new JkModuleDependency(module, version, classifier, transitive, ext,
-                excludes);
+        return new JkModuleDependency(module, version, classifier, transitive, ext, excludes, ideProjectDir);
     }
 
     /**
@@ -223,7 +224,7 @@ public final class JkModuleDependency implements JkDependency {
         final List<JkDepExclude> list = new LinkedList<>(excludes);
         list.addAll(JkUtilsIterable.listOf(depExcludes));
         return new JkModuleDependency(module, version, classifier, transitive, extension,
-                Collections.unmodifiableList(list));
+                Collections.unmodifiableList(list), ideProjectDir);
     }
 
     /**
@@ -247,6 +248,16 @@ public final class JkModuleDependency implements JkDependency {
             return module + ":" + version;
         }
         return module + ":" + version + ":" + classifier;
+    }
+
+    @Override
+    public Path getIdeProjectDir() {
+        return ideProjectDir;
+    }
+
+    @Override
+    public JkModuleDependency withIdeProjectDir(Path path) {
+        return new JkModuleDependency(module, version, classifier, transitive, extension, excludes, path);
     }
 
     private static class NameComparator implements Comparator<JkModuleDependency> {

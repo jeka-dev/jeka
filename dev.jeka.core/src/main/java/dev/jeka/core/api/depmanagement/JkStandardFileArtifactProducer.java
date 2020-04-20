@@ -57,13 +57,6 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
     }
 
     @Override
-    public JkPathSequence fetchRuntimeDependencies(JkArtifactId artifactId) {
-        Supplier<JkPathSequence> supplier = runtimeClasspathSuppliers.get(artifactId);
-        supplier = supplier != null ? supplier : EMPTY_SUPPLIER;
-        return supplier.get();
-    }
-
-    @Override
     public Path getArtifactPath(JkArtifactId artifactId) {
         JkUtilsAssert.state(artifactFileFunction != null, "artifactFileFunction has not been set.");
         return artifactFileFunction.apply(artifactId);
@@ -114,6 +107,5 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
         runtimeClasspathSuppliers.remove(artifactId);
         return this;
     }
-
 
 }

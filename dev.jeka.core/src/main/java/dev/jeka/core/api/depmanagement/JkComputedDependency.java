@@ -10,7 +10,6 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * Dependency on computed resource. More concretely, this is a file dependency on files that might not
@@ -28,7 +27,22 @@ import java.util.function.Supplier;
  */
 public class JkComputedDependency implements JkFileDependency {
 
-    private static final Supplier<Iterable<Path>> EMPTY_SUPPLIER = LinkedList::new;
+    protected final Runnable runnable;
+
+    protected final Iterable<Path> files;
+
+    private final Path ideProjectDir; // Helps to generate ide metadata
+
+    /**
+     * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
+     * generating them.
+     */
+    protected JkComputedDependency(Runnable runnable, Path ideProjectBaseDir, Iterable<Path> files)  {
+        super();
+        this.runnable = runnable;
+        this.files = files;
+        this.ideProjectDir = ideProjectBaseDir;
+    }
 
     /**
      * Creates a computed dependency to the specified files and {@link JkProcess} to run for
@@ -48,7 +62,7 @@ public class JkComputedDependency implements JkFileDependency {
                 return process.toString();
             }
         };
-        return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
+        return new JkComputedDependency(runnable, null, fileSet);
     }
 
 
@@ -58,7 +72,7 @@ public class JkComputedDependency implements JkFileDependency {
      */
     public static JkComputedDependency of(Runnable runnable, Path... files) {
         final List<Path> fileSet = JkUtilsIterable.listWithoutDuplicateOf(Arrays.asList(files));
-        return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
+        return new JkComputedDependency(runnable, null, fileSet);
     }
 
     /**
@@ -69,7 +83,7 @@ public class JkComputedDependency implements JkFileDependency {
             final String className, final String... args) {
         final List<Path> fileSet = JkUtilsIterable.listWithoutDuplicateOf(JkUtilsPath.disambiguate(files));
         final Runnable runnable = () -> process.runClassSync(className, args);
-        return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
+        return new JkComputedDependency(runnable, null, fileSet);
     }
 
     /**
@@ -81,26 +95,7 @@ public class JkComputedDependency implements JkFileDependency {
         return of(JkUtilsIterable.setOf(file), process, className, args);
     }
 
-    private final Runnable runnable;
 
-    private final Iterable<Path> files;
-
-    private final Supplier<Iterable<Path>> extraFileSupplier;
-
-    private final Path ideProjectBaseDir; // Helps to generate ide metadata
-
-    /**
-     * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
-     * generating them.
-     */
-    protected JkComputedDependency(Runnable runnable, Path ideProjectBaseDir, Iterable<Path> files,
-            Supplier<Iterable<Path>> extraFileSupplier)  {
-        super();
-        this.runnable = runnable;
-        this.files = files;
-        this.ideProjectBaseDir = ideProjectBaseDir;
-        this.extraFileSupplier = extraFileSupplier;
-    }
 
     /**
      * Returns <code>true</code> if at least one of these files is missing or one of these directory is empty.
@@ -136,7 +131,6 @@ public class JkComputedDependency implements JkFileDependency {
         }
         final List<Path> result = new LinkedList<>();
         files.forEach(path -> result.add(path));
-        extraFileSupplier.get().forEach(path -> result.add(path));
         return result;
     }
 
@@ -144,8 +138,13 @@ public class JkComputedDependency implements JkFileDependency {
      * If this dependency can be represented as a project dependency in a IDE,
      * this field mentions the baseTree dir of the project.
      */
-    public Path getIdeProjectBaseDir() {
-        return ideProjectBaseDir;
+    public Path getIdeProjectDir() {
+        return ideProjectDir;
+    }
+
+    @Override
+    public JkComputedDependency withIdeProjectDir(Path path) {
+        return new JkComputedDependency(runnable, path, files);
     }
 
 

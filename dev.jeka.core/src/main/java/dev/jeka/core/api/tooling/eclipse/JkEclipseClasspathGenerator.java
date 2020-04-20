@@ -29,6 +29,12 @@ public final class JkEclipseClasspathGenerator {
 
     private static final String ENCODING = "UTF-8";
 
+    private static final String CLASSPATHENTRY = "classpathentry";
+
+    private static final String JEKA_HOME = "JEKA_HOME";
+
+    private static final String JEKA_USER_HOME= "JEKA_USER_HOME";
+
     // --------------------- content --------------------------------
 
     private final JkJavaIdeSupport ideSupport;
@@ -197,7 +203,7 @@ public final class JkEclipseClasspathGenerator {
         }
         generateSrcAndTestSrc(writer);
 
-        // write entries for project importedRuns
+        // write entries for def imported projects
         for (final Path projectFile : this.importedProjects) {
             if (!paths.add(projectFile.toAbsolutePath().toString())) {
                 continue;
@@ -212,7 +218,7 @@ public final class JkEclipseClasspathGenerator {
         }
         writeJre(writer);
 
-        // add build dependencies
+        // add def dependencies
         if (hasJekaDefDir() && defDependencyResolver != null) {
             writeDependenciesEntries(writer, defDependencies, defDependencyResolver, paths);
         }
@@ -231,7 +237,7 @@ public final class JkEclipseClasspathGenerator {
     /** convenient method to write classpath element shorter */
     private static void writeClasspathEl(XMLStreamWriter writer, String... items) throws XMLStreamException {
         final Map<String, String> map = JkUtilsIterable.mapOfAny((Object[]) items);
-        writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+        writer.writeEmptyElement(CLASSPATHENTRY);
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             writer.writeAttribute(entry.getKey(), entry.getValue());
         }
@@ -277,7 +283,7 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeJre(XMLStreamWriter writer) throws XMLStreamException {
         writer.writeCharacters("\t");
-        writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+        writer.writeEmptyElement(CLASSPATHENTRY);
         writer.writeAttribute("kind", "con");
         final String container;
         if (jreContainer != null) {
@@ -320,7 +326,6 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private void generateSrcAndTestSrc(XMLStreamWriter writer) throws XMLStreamException {
-
         final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
@@ -335,7 +340,7 @@ public final class JkEclipseClasspathGenerator {
             }
             sourcePaths.add(path);
             writer.writeCharacters("\t");
-            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATHENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
@@ -354,7 +359,7 @@ public final class JkEclipseClasspathGenerator {
             }
             sourcePaths.add(path);
             writer.writeCharacters("\t");
-            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATHENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
@@ -383,7 +388,9 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies,
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
-        final JkResolveResult resolveResult = resolver.resolve(dependencies);
+
+        // dependencies with IDE project dir will be omitted. The project dir will be added in other place.
+        final JkResolveResult resolveResult = resolver.resolve(dependencies.minusModuleDependenciesWithIdeProjectDir());
         final JkRepoSet repos = resolver.getRepos();
         for (final JkDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency
@@ -401,7 +408,7 @@ public final class JkEclipseClasspathGenerator {
                 final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
-                    final Path ideProjectBaseDir = computedDependency.getIdeProjectBaseDir();
+                    final Path ideProjectBaseDir = computedDependency.getIdeProjectDir();
                     if (ideProjectBaseDir != null) {
                         if (!allPaths.contains(ideProjectBaseDir.toAbsolutePath().toString())) {
                             writeProjectEntryIfNeeded(ideProjectBaseDir, writer, allPaths);
@@ -445,9 +452,9 @@ public final class JkEclipseClasspathGenerator {
         boolean usePathVariable = usePathVariables && bin.startsWith(JkLocator.getJekaUserHomeDir());
         boolean isVar = true;
         if (usePathVariable) {
-            binPath = DotClasspathModel.JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(bin).toString();
+            binPath = JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(bin).toString();
         } else if (usePathVariables && bin.startsWith(JkLocator.getJekaHomeDir())) {
-            binPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
+            binPath = JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
         } else {
             isVar = false;
             binPath = relativePathIfPossible(ideSupport.getProdLayout().getBaseDir(), bin).toString();
@@ -456,9 +463,9 @@ public final class JkEclipseClasspathGenerator {
         writer.writeCharacters("\t");
         boolean emptyTag = attributeProps.isEmpty() && accesRuleProps.isEmpty();
         if (emptyTag) {
-            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATHENTRY);
         } else {
-            writer.writeStartElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeStartElement(CLASSPATHENTRY);
         }
         writer.writeAttribute("kind", isVar ? "var" : "lib");
         writer.writeAttribute("path", binPath);
@@ -466,9 +473,9 @@ public final class JkEclipseClasspathGenerator {
         if (source != null && Files.exists(source)) {
             String srcPath;
             if (usePathVariables && source.startsWith(JkLocator.getJekaUserHomeDir())) {
-                srcPath = DotClasspathModel.JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(source).toString();
+                srcPath = JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(source).toString();
             } else if (usePathVariables && source.startsWith(JkLocator.getJekaHomeDir())) {
-                srcPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(source).toString();
+                srcPath = JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(source).toString();
             } else {
                 srcPath = relativePathIfPossible(ideSupport.getProdLayout().getBaseDir(), source).toString();
             }

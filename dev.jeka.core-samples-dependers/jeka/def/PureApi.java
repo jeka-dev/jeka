@@ -23,7 +23,7 @@ public class PureApi {
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and("com.google.guava:guava:22.0")
-                    .and(coreProject)).__
+                    .and(coreProject.asDependency())).__
                 .getPublication()
                     .setModuleId("mygroup:depender")
                     .setVersion(JkVersion.of("1.0-SNAPSHOT")).__;

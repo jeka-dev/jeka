@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Files;
@@ -26,12 +25,6 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      * a clean) but implementations can caches already processed phase result as compilation result or so.
      */
     void makeArtifact(JkArtifactId jkArtifactId);
-
-    /**
-     * Returns the runtime dependencies of the specified artifact file. This is useful to use the artifact file as
-     * a transitive dependency.
-     */
-    JkPathSequence fetchRuntimeDependencies(JkArtifactId jkArtifactId);
 
     /**
      * Produces all the artifact files for the specified artifact file ids.

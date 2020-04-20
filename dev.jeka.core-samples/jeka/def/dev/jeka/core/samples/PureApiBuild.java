@@ -43,7 +43,7 @@ public class PureApiBuild extends JkCommandSet {
             .getDependencyManagement().addDependencies(JkDependencySet.of()
                 .and("junit:junit", JkJavaDepScopes.TEST)
                 .and("com.sun.jersey:jersey-server:1.19.4")
-                .and(fooProject)).__;
+                .and(fooProject.asDependency())).__;
 
         barProject.getArtifactProducer()
             .putMainArtifact(barProject.getPackaging()::createFatJar) // Produced jar will embed dependencies

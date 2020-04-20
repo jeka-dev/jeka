@@ -160,6 +160,18 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
                 .setDependencyResolver(this.dependencyManagement.getResolver());
     }
 
+    public JkLocalLibDependency asDependency() {
+        return asDependency(artifactProducer.getMainArtifactId());
+    }
+
+    public JkLocalLibDependency asDependency(JkArtifactId artifactId) {
+        return JkLocalLibDependency.of(
+                () -> artifactProducer.makeArtifact(artifactId),
+                artifactProducer.getArtifactPath(artifactId),
+                this.baseDir,
+                this.publication.getPublishedDependencies());
+    }
+
     private String artifactFileNamePart() {
         return publication.getModuleId().getDotedName();
     }

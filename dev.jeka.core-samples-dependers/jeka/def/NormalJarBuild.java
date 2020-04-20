@@ -37,7 +37,7 @@ public class NormalJarBuild extends JkCommandSet {
                 .putMainArtifact(javaPlugin.getProject().getPackaging()::createFatJar).__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                    .and(sampleBuild.java.getProject()));
+                    .and(sampleBuild.java.getProject().asDependency()));
     }
 
     public void cleanPack() {

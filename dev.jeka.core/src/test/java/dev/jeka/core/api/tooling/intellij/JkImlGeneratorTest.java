@@ -7,7 +7,6 @@ import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
 import org.junit.Test;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -41,7 +40,7 @@ public class JkImlGeneratorTest {
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
                 .getDependencyManagement()
-                    .addDependencies(JkDependencySet.of().and(baseProject)).__
+                    .addDependencies(JkDependencySet.of().and(baseProject.asDependency())).__
                 .getTesting()
                     .getCompilation()
                         .getLayout()
@@ -61,7 +60,7 @@ public class JkImlGeneratorTest {
             .setBaseDir(desktop)
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                    .and(coreProject)).__;
+                    .and(coreProject.asDependency())).__;
         final JkImlGenerator desktopGenerator = JkImlGenerator.of(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.generate();
         System.out.println("\ndesktop .classpath");

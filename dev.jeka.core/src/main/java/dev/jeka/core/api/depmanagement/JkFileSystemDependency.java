@@ -13,19 +13,24 @@ import java.util.List;
  */
 public final class JkFileSystemDependency implements JkFileDependency {
 
+    private final Path ideProjectDir;
+
+    private JkFileSystemDependency(Iterable<Path> files, Path ideProjectDir) {
+        this.files = Collections.unmodifiableList(JkUtilsIterable.listWithoutDuplicateOf(files));
+        this.ideProjectDir = ideProjectDir;
+    }
+
     /**
      * Creates a {@link JkFileSystemDependency} on the specified files.
      */
     public static JkFileSystemDependency of(Iterable<Path> files) {
         final Iterable<Path> trueFiles = JkUtilsPath.disambiguate(files);
-        return new JkFileSystemDependency(trueFiles);
+        return new JkFileSystemDependency(trueFiles, null);
     }
 
     private final List<Path> files;
 
-    private JkFileSystemDependency(Iterable<Path> files) {
-        this.files = Collections.unmodifiableList(JkUtilsIterable.listWithoutDuplicateOf(files));
-    }
+
 
     @Override
     public final List<Path> getFiles() {
@@ -35,7 +40,7 @@ public final class JkFileSystemDependency implements JkFileDependency {
     public JkFileSystemDependency minusFile(Path file) {
         List<Path> result = new LinkedList<>(files);
         result.remove(file);
-        return new JkFileSystemDependency(result);
+        return new JkFileSystemDependency(result, ideProjectDir);
     }
 
     @Override
@@ -58,5 +63,15 @@ public final class JkFileSystemDependency implements JkFileDependency {
     @Override
     public int hashCode() {
         return files.hashCode();
+    }
+
+    @Override
+    public Path getIdeProjectDir() {
+        return ideProjectDir;
+    }
+
+    @Override
+    public JkFileSystemDependency withIdeProjectDir(Path path) {
+        return new JkFileSystemDependency(files, path);
     }
 }

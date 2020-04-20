@@ -486,7 +486,7 @@ final class IvyTranslations {
             final JkModuleId moduleId = moduleDep.getModuleId();
             final boolean mainArtifact = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
             JkVersion version = dependencySet.getVersion(moduleId);
-            this.put(moduleId, moduleDep.isTransitive(), version, mainArtifact);
+            this.put(moduleId, moduleDep.withTransitive(), version, mainArtifact);
 
             // fill configuration
             final List<Conf> confs = new LinkedList<>();

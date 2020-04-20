@@ -49,9 +49,9 @@ public class JkDependenciesTest {
         Path root = Files.createTempDirectory("jekatestproject");
         JkJavaProject javaProject = JkJavaProject.of()
             .setBaseDir(root);
-        JkDependencySet dependencies = JkDependencySet.of().and(javaProject);
+        JkDependencySet dependencies = JkDependencySet.of().and(javaProject.asDependency());
         JkComputedDependency computedDependency = (JkComputedDependency) dependencies.toList().get(0).getDependency();
-        Assert.assertEquals(root, computedDependency.getIdeProjectBaseDir());
+        Assert.assertEquals(root, computedDependency.getIdeProjectDir());
     }
 
 }

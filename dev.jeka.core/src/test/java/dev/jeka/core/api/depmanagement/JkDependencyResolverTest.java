@@ -44,17 +44,17 @@ public class JkDependencyResolverTest {
             .setBaseDir(root.resolve("core"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                    .and(baseProject)).__;
+                    .and(baseProject.asDependency())).__;
 
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(
                 coreProject.getDependencyManagement().getDependencies());
 
-        Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
+        Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size()); // base dir and guava
         JkDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);
         Assert.assertFalse(dependencyNode.isModuleNode());
         JkDependencyNode.JkFileNodeInfo nodeInfo = (JkDependencyNode.JkFileNodeInfo) dependencyNode.getNodeInfo();
-        Assert.assertEquals(baseProject.getBaseDir(), nodeInfo.computationOrigin().getIdeProjectBaseDir());
+        Assert.assertEquals(baseProject.getBaseDir(), nodeInfo.computationOrigin().getIdeProjectDir());
     }
 
     @Test

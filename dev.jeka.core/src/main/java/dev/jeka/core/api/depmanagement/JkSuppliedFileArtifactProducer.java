@@ -52,13 +52,6 @@ public class JkSuppliedFileArtifactProducer<T> implements JkArtifactProducer {
     }
 
     @Override
-    public JkPathSequence fetchRuntimeDependencies(JkArtifactId artifactId) {
-        Supplier<JkPathSequence> supplier = runtimeClasspathSuppliers.get(artifactId);
-        supplier = supplier != null ? supplier : EMPTY_SUPPLIER;
-        return supplier.get();
-    }
-
-    @Override
     public Path getArtifactPath(JkArtifactId artifactId) {
         FileRunnable fileRunnable = fileRunnables.get(artifactId);
         return fileRunnable == null ? null : fileRunnable.file;

@@ -175,10 +175,14 @@ public class JkJavaProjectPublication {
         postActions.run();
     }
 
+    public JkDependencySet getPublishedDependencies() {
+        JkDependencySet deps = project.getDependencyManagement().getScopeDefaultedDependencies();
+        return dependenciesConfigurer.apply(deps);
+    }
+
     private void publishMaven(JkRepoSet repos) {
         JkMavenPublication publication = JkMavenPublication.of(project.getArtifactProducer(), publishedPomMetadata);
-        JkDependencySet deps = project.getDependencyManagement().getScopeDefaultedDependencies();
-        deps = dependenciesConfigurer.apply(deps);
+        JkDependencySet deps = getPublishedDependencies();
         JkPublisher.of(repos, project.getOutputDir())
                 .withSigner(this.signer)
                 .publishMaven(JkVersionedModule.of(getModuleId(), getVersion()), publication, deps);
@@ -189,8 +193,7 @@ public class JkJavaProjectPublication {
             return;
         }
         JkLog.startTask("Preparing Ivy publication");
-        JkDependencySet deps = project.getDependencyManagement().getScopeDefaultedDependencies();
-        deps = dependenciesConfigurer.apply(deps);
+        JkDependencySet deps = getPublishedDependencies();
         JkArtifactProducer artifactProducer = project.getArtifactProducer();
         final JkIvyPublication publication = JkIvyPublication.of(
                 artifactProducer.getMainArtifactPath(),

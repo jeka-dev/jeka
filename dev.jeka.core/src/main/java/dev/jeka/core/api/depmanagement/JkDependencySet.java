@@ -137,21 +137,21 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     /**
      * Returns a clone of this object plus the specified scoped dependencies.
      */
+    public JkDependencySet and(JkLocalLibDependency dependency, JkScope ... scopes) {
+        return this
+                .and((JkDependency) dependency, scopes)
+                .and(dependency.getDependencies());
+    }
+
+
+
+    /**
+     * Returns a clone of this object plus the specified scoped dependencies.
+     */
     public JkDependencySet and(JkModuleDependency dependency, JkScopeMapping scopeMapping) {
         return this.and(JkScopedDependency.of(dependency, scopeMapping));
     }
 
-    /**
-     * Creates a {@link JkDependencySet} to the specified artifact producer.
-     * @param baseDir optional argument for indicating if the artifact procducer can be materialised by a
-     *                project/module in a ide. Can be null.
-     */
-    public JkDependencySet and(JkArtifactProducer artifactProducer, Path baseDir, List<JkArtifactId> artifactFileIds, JkScope ... scopes) {
-        final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer, baseDir
-                ,artifactFileIds);
-        final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scopes);
-        return and(scopedDependency);
-    }
 
     private static Path baseDir(Object object) {
         if (object instanceof JkFileSystemLocalizable) {
@@ -160,44 +160,10 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
         return null;
     }
 
-    /**
-     * Creates a {@link JkDependencySet} to the specified artifact producer
-     */
-    public JkDependencySet and(JkArtifactProducer artifactProducer, JkScope... scopes) {
-        return and(artifactProducer, baseDir(artifactProducer), Collections.emptyList(), scopes);
-    }
-
-    /**
-     * Creates a {@link JkDependencySet} to the specified artifact producer supplier
-     */
-    public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier, List<JkArtifactId> artifactFileIds,
-            JkScope... scopes) {
-        return and(artifactProducerSupplier.getArtifactProducer(), baseDir(artifactProducerSupplier),
-                artifactFileIds, scopes);
-    }
-
-    /**
-     * Creates a {@link JkDependencySet} to the specified artifact producer supplier
-     */
-    public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier, JkArtifactId artifactFileIds,
-            JkScope... scopes) {
-        return and(artifactProducerSupplier.getArtifactProducer(), baseDir(artifactProducerSupplier),
-                Arrays.asList(artifactFileIds), scopes);
-    }
-
-    /**
-     * Creates a {@link JkDependencySet} to the specified artifact producer supplier
-     */
-    public JkDependencySet and(JkArtifactProducer.JkSupplier artifactProducerSupplier,
-            JkScope... scopes) {
-        return and(artifactProducerSupplier.getArtifactProducer(), baseDir(artifactProducerSupplier),
-                Collections.emptyList(), scopes);
-    }
-
     public JkDependencySet and(String moduleDescription, JkScope ... scopes) {
         JkModuleDependency moduleDependency = JkModuleDependency.of(moduleDescription);
         if (moduleDependency.getClassifier() != null) {
-            moduleDependency = moduleDependency.isTransitive(false);
+            moduleDependency = moduleDependency.withTransitive(false);
         }
         return and(moduleDependency, scopes);
     }
@@ -565,6 +531,37 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
         final Set<JkDepExclude> depExcludes = new HashSet<>(this.globalExclusions);
         depExcludes.add(exclude);
         return new JkDependencySet(this.dependencies, depExcludes, this.versionProvider);
+    }
+
+    public JkDependencySet withIdeProjectDir(Path ideProjectDir) {
+        List<JkScopedDependency> result = new LinkedList<>();
+        for (JkScopedDependency scopedDependency : this.dependencies) {
+            JkDependency dependency = scopedDependency.getDependency();
+            result.add(scopedDependency.withDependency(dependency.withIdeProjectDir(ideProjectDir)));
+        }
+        return new JkDependencySet(result, globalExclusions, versionProvider);
+    }
+
+    public JkDependencySet minusModuleDependenciesWithIdeProjectDir() {
+        List<JkScopedDependency> result = new LinkedList<>();
+        for (JkScopedDependency scopedDependency : this.dependencies) {
+            JkDependency dependency = scopedDependency.getDependency();
+            if (dependency.getIdeProjectDir() == null || ! (dependency instanceof JkModuleDependency)) {
+                result.add(scopedDependency.withDependency(dependency));
+            }
+        }
+        return new JkDependencySet(result, globalExclusions, versionProvider);
+    }
+
+    public Set<Path> getIdePathDirs() {
+        Set<Path> result = new LinkedHashSet<>();
+        for (JkScopedDependency scopedDependency : this.dependencies) {
+            JkDependency dependency = scopedDependency.getDependency();
+            if (dependency.getIdeProjectDir() != null) {
+                result.add(dependency.getIdeProjectDir());
+            }
+        }
+        return result;
     }
 
     /**

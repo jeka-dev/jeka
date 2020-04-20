@@ -267,7 +267,7 @@ public final class JkImlGenerator {
 
     private void writeDependencies(JkDependencySet dependencies, JkDependencyResolver resolver, Set<Path> allPaths, Set<Path> allModules,
                                    boolean forceTest) throws XMLStreamException {
-        final JkResolveResult resolveResult = resolver.resolve(dependencies);
+        final JkResolveResult resolveResult = resolver.resolve(dependencies.minusModuleDependenciesWithIdeProjectDir());
         if (resolveResult.getErrorReport().hasErrors()) {
             if (failOnDepsResolutionError) {
                 throw new IllegalStateException("Fail at resolvig dependencies : " + resolveResult.getErrorReport());
@@ -295,7 +295,7 @@ public final class JkImlGenerator {
                 final String ideScope = forceTest ? "TEST" : ideScope(node.getNodeInfo().getDeclaredScopes());
                 final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
-                    final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectBaseDir();
+                    final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectDir();
                     if (projectDir != null && !allModules.contains(projectDir)) {
                         writeOrderEntryForModule(projectDir.getFileName().toString(), ideScope);
                         allModules.add(projectDir);
