@@ -770,7 +770,7 @@ import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
 
 class Build extends JkCommandSet {
 
-    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    final JkPluginJava java = getPlugin(JkPluginJava.class);
 
     /*
      * Configures plugins to be bound to this commandSet class. When this method is called, option
@@ -778,14 +778,11 @@ class Build extends JkCommandSet {
      */
     @Override
     protected void setup() {
-        JkJavaProject project = javaPlugin.getProject();
-        project.addDependencies(dependencies());
-    }
-
-    private JkDependencySet dependencies() {  // Example of dependencies.
-        return JkDependencySet.of()
-                .and("com.google.guava:guava:21.0")
-                .and("junit:junit:4.11", TEST);
+        java.getProject()
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and("com.google.guava:guava:21.0")
+                    .and("junit:junit:4.13", TEST));
     }
 
     public static void main(String[] args) {
@@ -803,20 +800,17 @@ Execute `jeka java#info` to see an abstract of the project setup.
 
 ## Extra function
 
-If you want to create javadoc, jar sources and  jar tests or checksums : 
-just execute `jeka clean java#pack -java#pack.tests -java#pack.sources -java#pack.checksums=sha-256`.
+If you want to create jar along javadoc and sources without testing : 
+just execute `jeka clean java#pack -java#test`.
 
-Explanation  '-' prefix means that you want to set an option value. For example `-java#pack.sources` means that 
-`JkPluginJava.pack.sources` will be injected the 'true' value.
+Explanation '-' prefix means that you want to set an option value. For example `-java#pack.sources=false` means that 
+`JkPluginJava.pack.sources` will be injected the `false` value.
 
 You can also set it by default in the build class constructor :
 
 ```Java
     protected Build() {
-        javaPlugin.pack.javadoc = true;
-        javaPlugin.pack.sources = true;
-        javaPlugin.pack.tests = true;
-        javaPlugin.pack.checksums = "sha-256";
+        java.tests.skip = true;
     }
 ```
 

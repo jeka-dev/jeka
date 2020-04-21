@@ -34,7 +34,7 @@ public class JavaPluginBuild extends JkCommandSet {
                .setModuleId("dev.jeka:sample-javaplugin")
                .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags())  // Version inferred from Git
 
-               // Published dependencies can be modified here from the one declared in dependency management.
+               // Published dependencies can be modified here from the ones declared in dependency management.
                // Here jersey-server is not supposed to be part of the API but only needed at runtime.
                .setDependencies(deps -> deps
                    .replaceScope("com.sun.jersey:jersey-server", RUNTIME))
