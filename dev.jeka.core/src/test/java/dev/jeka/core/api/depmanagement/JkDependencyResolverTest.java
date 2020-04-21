@@ -44,7 +44,7 @@ public class JkDependencyResolverTest {
             .setBaseDir(root.resolve("core"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                    .and(baseProject.asDependency())).__;
+                    .and(baseProject.toDependency())).__;
 
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(

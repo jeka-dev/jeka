@@ -41,7 +41,7 @@ public class JkJavaProjectTest {
                 .getLayout()
                     .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__
             .getDependencyManagement()
-                .addDependencies(JkDependencySet.of().and(baseProject.asDependency())).__;
+                .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__;
         //Desktop.getDesktop().open(core.toFile());
         coreProject.getArtifactProducer().makeAllArtifacts();
 
@@ -50,7 +50,7 @@ public class JkJavaProjectTest {
             .setBaseDir(desktop)
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                    .and(coreProject.asDependency())).__
+                    .and(coreProject.toDependency())).__
             .getCompilation()
                 .getLayout()
                     .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__;

@@ -44,6 +44,7 @@ class SampleTester {
         testSampleWith("JavaPluginBuild", "cleanPackPublish");
         testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
         testSampleWithJavaPlugin("ThirdPartyPoweredBuild");
+        testSampleWithJavaPlugin("Junit5Build");
         testSampleWithJavaPlugin("JacocoPluginBuild");
         testSampleWith("SonarPluginBuild", "cleanPackSonar");
         testSampleWith("AntStyleBuild", "cleanPackPublish");

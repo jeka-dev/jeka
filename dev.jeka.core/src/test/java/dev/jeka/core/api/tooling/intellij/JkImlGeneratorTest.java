@@ -40,7 +40,7 @@ public class JkImlGeneratorTest {
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
                 .getDependencyManagement()
-                    .addDependencies(JkDependencySet.of().and(baseProject.asDependency())).__
+                    .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
                 .getTesting()
                     .getCompilation()
                         .getLayout()
@@ -60,7 +60,7 @@ public class JkImlGeneratorTest {
             .setBaseDir(desktop)
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                    .and(coreProject.asDependency())).__;
+                    .and(coreProject.toDependency())).__;
         final JkImlGenerator desktopGenerator = JkImlGenerator.of(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.generate();
         System.out.println("\ndesktop .classpath");
