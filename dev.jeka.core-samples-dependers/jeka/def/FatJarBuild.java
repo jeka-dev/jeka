@@ -22,7 +22,7 @@ public class FatJarBuild extends JkCommandSet {
     protected void setup() {
         java.getProject()
             .getArtifactProducer()
-                .putMainArtifact(java.getProject().getPackaging()::createFatJar).__
+                .putMainArtifact(java.getProject().getProduction()::createFatJar).__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                         .and(sampleBuild.java.getProject().toDependency()))

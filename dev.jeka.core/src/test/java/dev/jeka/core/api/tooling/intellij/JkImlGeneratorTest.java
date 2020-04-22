@@ -72,6 +72,7 @@ public class JkImlGeneratorTest {
 
     private void configureCompileLayout(JkJavaProject javaProject) {
         javaProject
+            .getProduction()
                 .getCompilation()
                     .getLayout()
                         .emptySources().addSource("src")

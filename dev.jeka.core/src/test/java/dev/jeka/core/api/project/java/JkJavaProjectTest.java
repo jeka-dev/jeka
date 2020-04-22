@@ -26,22 +26,23 @@ public class JkJavaProjectTest {
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__
-            .getCompilation()
-                .getLayout()
-                    .emptySources().addSource("src")
-                    .emptyResources().addResource("res").includeSourceDirsInResources().__.__;
+            .getProduction()
+                .getCompilation()
+                    .getLayout()
+                        .emptySources().addSource("src")
+                        .emptyResources().addResource("res").includeSourceDirsInResources().__.__.__;
         System.out.println(baseProject.getInfo());
         baseProject.getArtifactProducer().makeAllArtifacts();
-
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of()
             .setBaseDir(core)
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
+            .getProduction()
             .getCompilation()
                 .getLayout()
-                    .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__;
+                    .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__.__;
         //Desktop.getDesktop().open(core.toFile());
         coreProject.getArtifactProducer().makeAllArtifacts();
 
@@ -51,9 +52,10 @@ public class JkJavaProjectTest {
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(coreProject.toDependency())).__
-            .getCompilation()
-                .getLayout()
-                    .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__;
+            .getProduction()
+                .getCompilation()
+                    .getLayout()
+                        .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__.__;
         //Desktop.getDesktop().open(desktop.toFile());
         //desktopProject.getArtifactProducer().makeAllArtifacts();
 

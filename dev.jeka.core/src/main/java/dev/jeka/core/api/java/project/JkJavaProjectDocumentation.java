@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.system.JkLog;
@@ -47,7 +48,7 @@ public class JkJavaProjectDocumentation {
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
-        JkPathTreeSet sources = project.getCompilation().getLayout().resolveSources();javadocMaker.make(classpath, sources, dir);
+        JkPathTreeSet sources = project.getProduction().getCompilation().getLayout().resolveSources();javadocMaker.make(classpath, sources, dir);
     }
 
     public void runIfNecessary() {
@@ -66,6 +67,16 @@ public class JkJavaProjectDocumentation {
     public JkJavaProjectDocumentation setJavadocDir(String javadocDir) {
         this.javadocDir = javadocDir;
         return this;
+    }
+
+    void createJavadocJar(Path target) {
+        project.getDocumentation().runIfNecessary();
+        Path javadocDir = project.getDocumentation().getJavadocDir();
+        if (!Files.exists(javadocDir)) {
+            throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
+                    + ". Can't create a javadoc jar until javadoc files has been generated.");
+        }
+        JkPathTree.of(javadocDir).zipTo(target);
     }
 
     void reset() {

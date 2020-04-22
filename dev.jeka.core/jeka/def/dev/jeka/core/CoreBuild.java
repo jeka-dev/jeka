@@ -74,13 +74,16 @@ public class CoreBuild extends JkCommandSet {
                 .putMainArtifact(this::doPackWithEmbedded)
                 .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
                 .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__ // define wrapper
-            .getCompilation()
-                .getLayout()
-                    .includeSourceDirsInResources().__
-                .addOptions("-Xlint:none","-g")
-                .setJavaVersion(JkJavaVersion.V8)
-                .getCompiler()
-                    .setForkingWithJavac().__.__
+            .getProduction()
+                .getManifest()
+                    .addMainClass("dev.jeka.core.tool.Main").__
+                .getCompilation()
+                    .getLayout()
+                        .includeSourceDirsInResources().__
+                    .addOptions("-Xlint:none","-g")
+                    .setJavaVersion(JkJavaVersion.V8)
+                    .getCompiler()
+                        .setForkingWithJavac().__.__.__
             .getTesting()
                 .getCompilation()
                     .getLayout()
@@ -94,9 +97,6 @@ public class CoreBuild extends JkCommandSet {
                 .getTestSelection()
                     .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
                     .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
-            .getPackaging()
-                .getManifest()
-                    .addMainClass("dev.jeka.core.tool.Main").__.__
             .getDocumentation()
                 .getJavadocProcessor()
                     .setDisplayOutput(false)
@@ -191,12 +191,12 @@ public class CoreBuild extends JkCommandSet {
 
         // Main jar
         JkJavaProject project = javaPlugin.getProject();
-        project.getPackaging().createBinJar(targetJar);
+        project.getProduction().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
-        JkPathTree classTree = JkPathTree.of(project.getCompilation().getLayout().resolveClassDir());
+        JkPathTree classTree = JkPathTree.of(project.getProduction().getCompilation().getLayout().resolveClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
             .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
@@ -224,7 +224,7 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doWrapper(Path wrapperJar) {
-        JkPathTree.of(javaPlugin.getProject().getCompilation().getLayout()
+        JkPathTree.of(javaPlugin.getProject().getProduction().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 

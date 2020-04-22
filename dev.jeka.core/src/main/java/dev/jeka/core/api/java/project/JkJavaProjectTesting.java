@@ -91,7 +91,7 @@ public class JkJavaProjectTesting {
      */
     public JkClasspath getTestClasspath() {
         return JkClasspath.of(compilation.getLayout().resolveClassDir())
-                .and(project.getCompilation().getLayout().resolveClassDir())
+                .and(project.getProduction().getCompilation().getLayout().resolveClassDir())
                 .and(project.getDependencyManagement()
                         .fetchDependencies(JkScope.SCOPES_FOR_TEST).getFiles());
     }
@@ -142,7 +142,7 @@ public class JkJavaProjectTesting {
      */
     public void run() {
         JkLog.startTask("Processing tests");
-        this.project.getCompilation().runIfNecessary();
+        this.project.getProduction().getCompilation().runIfNecessary();
         this.compilation.run();
         executeWithTestProcessor();
         afterTest.run();

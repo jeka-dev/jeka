@@ -70,6 +70,7 @@ public class JkEclipseClasspathGeneratorTest {
 
     private void configureCompileLayout(JkJavaProject javaProject) {
         javaProject
+            .getProduction()
                 .getCompilation()
                     .getLayout()
                         .emptySources().addSource("src")

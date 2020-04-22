@@ -40,23 +40,20 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
 
     private final JkStandardFileArtifactProducer<JkJavaProject> artifactProducer;
 
-    private final JkJavaProjectCompilation compilation;
-
     private final JkJavaProjectTesting testing;
 
     private final JkJavaProjectDocumentation documentation;
 
-    private final JkJavaProjectPackaging packaging;
+    private final JkJavaProjectProduction production;
 
     private final JkJavaProjectPublication publication;
 
 
     private JkJavaProject() {
         dependencyManagement = JkDependencyManagement.ofParent(this);
-        compilation = JkJavaProjectCompilation.ofProd(this);
         testing = new JkJavaProjectTesting(this);
         documentation = new JkJavaProjectDocumentation( this);
-        packaging = new JkJavaProjectPackaging(this);
+        production = new JkJavaProjectProduction(this);
         publication = new JkJavaProjectPublication(this);
         artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
                 .setArtifactFilenameComputation(this::getOutputDir, this::artifactFileNamePart);
@@ -108,16 +105,12 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         return artifactProducer;
     }
 
-    public JkJavaProjectCompilation<JkJavaProject> getCompilation() {
-        return compilation;
-    }
-
     public JkJavaProjectTesting getTesting() {
         return testing;
     }
 
-    public JkJavaProjectPackaging getPackaging() {
-        return packaging;
+    public JkJavaProjectProduction getProduction() {
+        return production;
     }
 
     public JkJavaProjectPublication getPublication() {
@@ -138,11 +131,11 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
                 .append("Published Module & version : " + publication.getModuleId() + ":" + publication.getVersion() + "\n")
-                .append("Production sources : " + compilation.getLayout().getInfo()).append("\n")
+                .append("Production sources : " + production.getCompilation().getLayout().getInfo()).append("\n")
                 .append("Test sources : " + testing.getCompilation().getLayout().getInfo()).append("\n")
-                .append("Java Source Version : " + compilation.getComputedCompileSpec().getSourceVersion() + "\n")
-                .append("Source Encoding : " + compilation.getComputedCompileSpec().getEncoding() + "\n")
-                .append("Source file count : " + compilation.getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
+                .append("Java Source Version : " + production.getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
+                .append("Source Encoding : " + production.getCompilation().getComputedCompileSpec().getEncoding() + "\n")
+                .append("Source file count : " + production.getCompilation().getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
                 .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
                 .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
@@ -153,8 +146,8 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
         return JkJavaIdeSupport.of(baseDir)
-                .setSourceVersion(compilation.getJavaVersion())
-                .setProdLayout(compilation.getLayout())
+                .setSourceVersion(production.getCompilation().getJavaVersion())
+                .setProdLayout(production.getCompilation().getLayout())
                 .setTestLayout(testing.getCompilation().getLayout())
                 .setDependencies(this.dependencyManagement.getDependencies())
                 .setDependencyResolver(this.dependencyManagement.getResolver());
@@ -177,9 +170,9 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     }
 
     private void registerArtifacts() {
-        artifactProducer.putMainArtifact(packaging::createBinJar);
-        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, packaging::createSourceJar);
-        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
+        artifactProducer.putMainArtifact(production::createBinJar);
+        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, production::createSourceJar);
+        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, documentation::createJavadocJar);
     }
 
 }

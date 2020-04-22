@@ -24,7 +24,7 @@ public class JkPluginSonar extends JkPlugin {
     }
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
-        final JkCompileLayout prodLayout = project.getCompilation().getLayout();
+        final JkCompileLayout prodLayout = project.getProduction().getCompilation().getLayout();
         final JkCompileLayout testLayout = project.getTesting().getCompilation().getLayout();
         final Path baseDir = project.getBaseDir();
         final JkPathSequence libs = project.getDependencyManagement().fetchDependencies(
@@ -37,7 +37,7 @@ public class JkPluginSonar extends JkPlugin {
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
-                .withBinaries(project.getCompilation().getLayout().resolveClassDir())
+                .withBinaries(project.getProduction().getCompilation().getLayout().resolveClassDir())
                 .withLibraries(libs)
                 .withSourcesPath(prodLayout.resolveSources().getRootDirsOrZipFiles())
                 .withTestPath(testLayout.resolveSources().getRootDirsOrZipFiles())
@@ -46,7 +46,7 @@ public class JkPluginSonar extends JkPlugin {
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,
                         baseDir.relativize(testReportDir.resolve("junit")).toString())
-                .withProperty(JkSonar.SOURCE_ENCODING, project.getCompilation().getSourceEncoding())
+                .withProperty(JkSonar.SOURCE_ENCODING, project.getProduction().getCompilation().getSourceEncoding())
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
                         baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.exec")).toString());
 
