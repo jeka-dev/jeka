@@ -5,7 +5,7 @@ package dev.jeka.core.api.depmanagement;
  */
 public final class JkResolutionParameters<T> {
 
-    private JkScopeMapping scopeMapping = JkJavaDepScopes.DEFAULT_SCOPE_MAPPING;
+    private JkScopeMapping scopeMapping = JkScope.DEFAULT_SCOPE_MAPPING;
 
     private boolean refreshed = true;
 

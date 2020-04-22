@@ -7,7 +7,6 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.util.List;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -23,7 +22,7 @@ public class ResolveWithArtifactIT {
                 .and(jgllinux)
                 .and(JkPopularModules.GUAVA, "19.0" )
                 .and("org.lwjgl:lwjgl:3.1.1")
-                .withDefaultScopes(COMPILE);
+                .withDefaultScopes(JkScope.COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
@@ -49,9 +48,9 @@ public class ResolveWithArtifactIT {
     public void artifactCountIsOk() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
-                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
-                .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
-                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE);
+                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", JkScope.COMPILE_AND_RUNTIME)
+                .and("org.springframework.boot:spring-boot-starter-test:1.5.+", JkScope.TEST)
+                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", JkScope.COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);

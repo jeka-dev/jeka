@@ -12,8 +12,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.PROVIDED;
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
+import static dev.jeka.core.api.depmanagement.JkScope.PROVIDED;
+import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 /**

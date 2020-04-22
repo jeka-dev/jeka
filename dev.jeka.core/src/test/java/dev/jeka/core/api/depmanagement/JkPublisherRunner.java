@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.function.Consumer;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.COMPILE_AND_RUNTIME;
+import static dev.jeka.core.api.depmanagement.JkScope.COMPILE_AND_RUNTIME;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.TEST;
 
 
@@ -66,7 +66,7 @@ public class JkPublisherRunner {
                 .setVersionFilter(version ->  version.isSnapshot() || version.getValue().endsWith("MILESTONE")).__;
 
         JkPublisher publisher = JkPublisher.of(repo);
-        publisher.publishIvy(versionedModule, publication, deps, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING,
+        publisher.publishIvy(versionedModule, publication, deps, JkScope.DEFAULT_SCOPE_MAPPING,
                 Instant.now(), JkVersionProvider.of());
     }
 }

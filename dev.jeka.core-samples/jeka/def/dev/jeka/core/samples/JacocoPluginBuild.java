@@ -1,7 +1,7 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
@@ -37,7 +37,7 @@ public class JacocoPluginBuild extends JkCommandSet {
         javaPlugin.getProject().getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(GUAVA, "18.0")
-                    .and(JUNIT, "4.13", JkJavaDepScopes.TEST));
+                    .and(JUNIT, "4.13", JkScope.TEST));
     }
 
     public static void main(String[] args) {

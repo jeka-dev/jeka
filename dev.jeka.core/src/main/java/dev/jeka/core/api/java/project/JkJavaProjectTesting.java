@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkClasspath;
@@ -93,7 +93,7 @@ public class JkJavaProjectTesting {
         return JkClasspath.of(compilation.getLayout().resolveClassDir())
                 .and(project.getCompilation().getLayout().resolveClassDir())
                 .and(project.getDependencyManagement()
-                        .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles());
+                        .fetchDependencies(JkScope.SCOPES_FOR_TEST).getFiles());
     }
 
     /**

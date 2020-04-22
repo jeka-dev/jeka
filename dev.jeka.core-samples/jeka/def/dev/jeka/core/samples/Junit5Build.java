@@ -9,7 +9,7 @@ import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
+import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 
 /**
  * This build class illustrates how to use directly JUnit5 Platform API.

@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.system.JkLog;
@@ -45,7 +45,7 @@ public class JkJavaProjectDocumentation {
      */
     public void run() {
         Iterable<Path> classpath = project.getDependencyManagement()
-                .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles();
+                .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
         JkPathTreeSet sources = project.getCompilation().getLayout().resolveSources();javadocMaker.make(classpath, sources, dir);
     }

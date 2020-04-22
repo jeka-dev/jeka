@@ -621,7 +621,7 @@ public class AntStyleBuild extends JkCommandSet {
     protected void setup() {
        JkResolveResult depResolution = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
                .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
-               .and("junit:junit:4.11", JkJavaDepScopes.TEST)
+               .and("junit:junit:4.11", JkScope.TEST)
        );
        classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles())
             .and(depResolution.getFiles());
@@ -761,12 +761,10 @@ any dependency you need.
 
 ```Java
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkPluginJava;
-
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
 
 class Build extends JkCommandSet {
 
@@ -782,7 +780,7 @@ class Build extends JkCommandSet {
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and("com.google.guava:guava:21.0")
-                    .and("junit:junit:4.13", TEST));
+                    .and("junit:junit:4.13", JkScope.TEST));
     }
 
     public static void main(String[] args) {

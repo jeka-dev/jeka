@@ -14,7 +14,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import java.nio.file.Path;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
+import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
 

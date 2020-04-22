@@ -347,16 +347,16 @@ public final class JkImlGenerator {
 
     private static String ideScope(Set<JkScope> scopesArg) {
         final Set<String> scopes = toStringScopes(scopesArg);
-        if (scopes.contains(JkJavaDepScopes.COMPILE.getName())) {
+        if (scopes.contains(JkScope.COMPILE.getName())) {
             return "COMPILE";
         }
-        if (scopes.contains(JkJavaDepScopes.PROVIDED.getName())) {
+        if (scopes.contains(JkScope.PROVIDED.getName())) {
             return "PROVIDED";
         }
-        if (scopes.contains(JkJavaDepScopes.RUNTIME.getName())) {
+        if (scopes.contains(JkScope.RUNTIME.getName())) {
             return "RUNTIME";
         }
-        if (scopes.contains(JkJavaDepScopes.TEST.getName())) {
+        if (scopes.contains(JkScope.TEST.getName())) {
             return "TEST";
         }
         return "COMPILE";

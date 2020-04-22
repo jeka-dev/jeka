@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.DEFAULT_SCOPE_MAPPING;
+import static dev.jeka.core.api.depmanagement.JkScope.DEFAULT_SCOPE_MAPPING;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.COMPILE;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.RUNTIME;
 import static org.junit.Assert.assertEquals;

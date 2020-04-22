@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
@@ -71,7 +71,7 @@ public class JkJavaProjectPackaging {
         project.getCompilation().runIfNecessary();
         project.getTesting().runIfNecessary();
         Iterable<Path> classpath = project.getDependencyManagement()
-                .fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles();
+                .fetchDependencies(JkScope.RUNTIME).getFiles();
         JkJarPacker.of(project.getCompilation().getLayout().resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())

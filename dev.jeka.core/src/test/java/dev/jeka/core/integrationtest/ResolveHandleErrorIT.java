@@ -3,8 +3,8 @@ package dev.jeka.core.integrationtest;
 import dev.jeka.core.api.depmanagement.*;
 import org.junit.Test;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.COMPILE_AND_RUNTIME;
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.DEFAULT_SCOPE_MAPPING;
+import static dev.jeka.core.api.depmanagement.JkScope.COMPILE_AND_RUNTIME;
+import static dev.jeka.core.api.depmanagement.JkScope.DEFAULT_SCOPE_MAPPING;
 import static org.junit.Assert.assertEquals;
 
 /**

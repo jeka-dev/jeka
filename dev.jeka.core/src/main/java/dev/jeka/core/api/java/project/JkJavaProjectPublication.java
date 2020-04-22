@@ -197,15 +197,15 @@ public class JkJavaProjectPublication {
         JkArtifactProducer artifactProducer = project.getArtifactProducer();
         final JkIvyPublication publication = JkIvyPublication.of(
                 artifactProducer.getMainArtifactPath(),
-                JkJavaDepScopes.COMPILE.getName())
-                .andOptional(artifactProducer.getArtifactPath(JkJavaProject.SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES.getName())
-                .andOptional(artifactProducer.getArtifactPath(JkJavaProject.JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC.getName());
+                JkScope.COMPILE.getName())
+                .andOptional(artifactProducer.getArtifactPath(JkJavaProject.SOURCES_ARTIFACT_ID), JkScope.SOURCES.getName())
+                .andOptional(artifactProducer.getArtifactPath(JkJavaProject.JAVADOC_ARTIFACT_ID), JkScope.JAVADOC.getName());
         final JkVersionProvider resolvedVersions = project.getDependencyManagement().getResolver()
                 .resolve(deps, deps.getInvolvedScopes()).getResolvedVersionProvider();
         JkLog.endTask();
         JkPublisher.of(repos, project.getOutputDir())
                 .publishIvy(JkVersionedModule.of(getModuleId(), getVersion()), publication, deps,
-                        JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
+                        JkScope.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
     }
 
 }

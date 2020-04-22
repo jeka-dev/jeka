@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.sonar;
 
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.project.JkCompileLayout;
@@ -28,7 +28,7 @@ public class JkPluginSonar extends JkPlugin {
         final JkCompileLayout testLayout = project.getTesting().getCompilation().getLayout();
         final Path baseDir = project.getBaseDir();
         final JkPathSequence libs = project.getDependencyManagement().fetchDependencies(
-                JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED).getFiles();
+                JkScope.RUNTIME, JkScope.PROVIDED).getFiles();
         final Path testReportDir = project.getTesting().getReportDir();
         final JkModuleId moduleId = project.getPublication().getModuleId();
         final JkVersion version = project.getPublication().getVersion();

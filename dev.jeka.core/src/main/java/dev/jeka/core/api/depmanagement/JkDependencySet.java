@@ -66,13 +66,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
         }
         return JkDependencySet.of()
                 .and(JkFileSystemDependency.of(libDir.andMatching(true, "*.jar", "compile/*.jar").getFiles()))
-                .withDefaultScopes(JkJavaDepScopes.COMPILE)
+                .withDefaultScopes(JkScope.COMPILE)
                 .and(JkFileSystemDependency.of(libDir.andMatching(true,"provided/*.jar").getFiles()))
-                .withDefaultScopes(JkJavaDepScopes.PROVIDED)
+                .withDefaultScopes(JkScope.PROVIDED)
                 .and(JkFileSystemDependency.of(libDir.andMatching(true,"runtime/*.jar").getFiles()))
-                .withDefaultScopes(JkJavaDepScopes.RUNTIME)
+                .withDefaultScopes(JkScope.RUNTIME)
                 .and(JkFileSystemDependency.of(libDir.andMatching(true,"test/*.jar").getFiles()))
-                .withDefaultScopes(JkJavaDepScopes.TEST);
+                .withDefaultScopes(JkScope.TEST);
     }
 
 
@@ -758,7 +758,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      */
     public static JkDependencySet ofTextDescription(String description) {
         final String[] lines = description.split(System.lineSeparator());
-        JkScope[] currentScopes = JkJavaDepScopes.COMPILE_AND_RUNTIME;
+        JkScope[] currentScopes = JkScope.COMPILE_AND_RUNTIME;
         final List<JkScopedDependency> list = new LinkedList<>();
         for (final String line : lines) {
             if (line.trim().isEmpty()) {
@@ -783,7 +783,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
             if (JkUtilsString.isBlank(item)) {
                 continue;
             }
-            final JkScope javaDcope = JkJavaDepScopes.of(item.trim());
+            final JkScope javaDcope = JkScope.ofMavenScope(item.trim());
             if (javaDcope != null) {
                 result.add(javaDcope);
             } else {

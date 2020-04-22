@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
@@ -268,7 +268,7 @@ public class JkJavaProjectCompilation<T> {
             .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
             .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
             .setClasspath(project.getDependencyManagement()
-                    .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_COMPILATION).getFiles())
+                    .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
             .setOutputDir(layout.resolveClassDir());
@@ -280,7 +280,7 @@ public class JkJavaProjectCompilation<T> {
                 .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
                 .setClasspath(project.getDependencyManagement()
-                        .fetchDependencies(JkJavaDepScopes.SCOPES_FOR_TEST).getFiles()
+                        .fetchDependencies(JkScope.SCOPES_FOR_TEST).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
                 .addOptions(compileOptions)

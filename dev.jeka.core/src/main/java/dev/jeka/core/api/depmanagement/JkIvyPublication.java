@@ -39,7 +39,7 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
      */
     public static JkIvyPublication of(JkArtifactProducer artifactProducer) {
         JkIvyPublication result =  of(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()),
-                JkJavaDepScopes.COMPILE.getName());
+                JkScope.COMPILE.getName());
         for (final JkArtifactId extraFileId : artifactProducer.getArtifactIds()) {
             if (extraFileId.isMainArtifact()) {
                 continue;
@@ -52,16 +52,16 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
 
     private static String scopeFor(String classifier) {
         if ("sources".equals(classifier)) {
-            return JkJavaDepScopes.SOURCES.getName();
+            return JkScope.SOURCES.getName();
         }
         if ("test".equals(classifier)) {
-            return JkJavaDepScopes.TEST.getName();
+            return JkScope.TEST.getName();
         }
         if ("test-sources".equals(classifier)) {
-            return JkJavaDepScopes.SOURCES.getName();
+            return JkScope.SOURCES.getName();
         }
         if ("javadoc".equals(classifier)) {
-            return JkJavaDepScopes.JAVADOC.getName();
+            return JkScope.JAVADOC.getName();
         }
         return classifier;
     }

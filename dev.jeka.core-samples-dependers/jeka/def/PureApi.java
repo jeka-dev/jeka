@@ -1,5 +1,5 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
@@ -16,7 +16,7 @@ public class PureApi {
             .setBaseDir(Paths.get("../dev.jeka.core-samples"))
              .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                        .and("junit:junit:4.13", JkJavaDepScopes.TEST)).__;
+                        .and("junit:junit:4.13", JkScope.TEST)).__;
 
         // A project depending on the first project + Guava
         JkJavaProject dependerProject = JkJavaProject.of()

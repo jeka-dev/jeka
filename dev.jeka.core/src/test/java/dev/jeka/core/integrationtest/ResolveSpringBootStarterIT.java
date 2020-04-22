@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.COMPILE;
+import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
 
 public class ResolveSpringBootStarterIT {
 

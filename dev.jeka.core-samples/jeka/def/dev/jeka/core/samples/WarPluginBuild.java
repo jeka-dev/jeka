@@ -12,7 +12,7 @@ import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
 import java.nio.file.Path;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.PROVIDED;
+import static dev.jeka.core.api.depmanagement.JkScope.PROVIDED;
 
 
 /**

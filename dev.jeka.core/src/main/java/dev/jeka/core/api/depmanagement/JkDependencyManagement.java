@@ -15,7 +15,7 @@ public class JkDependencyManagement<T> {
 
     private final JkDependencyResolver<JkDependencyManagement> resolver;
 
-    private JkScope[] defaultScope = JkJavaDepScopes.COMPILE_AND_RUNTIME;
+    private JkScope[] defaultScope = JkScope.COMPILE_AND_RUNTIME;
 
     private boolean failOnDependencyResolutionError = true;
 
@@ -86,7 +86,7 @@ public class JkDependencyManagement<T> {
 
     /**
      * Returns dependencies declared for this project. Dependencies declared without specifying
-     * scope are defaulted to scope {@link JkJavaDepScopes#COMPILE_AND_RUNTIME}
+     * scope are defaulted to scope {@link JkScope#COMPILE_AND_RUNTIME}
      */
     public JkDependencySet getScopeDefaultedDependencies() {
         return dependencies.withDefaultScopes(defaultScope);

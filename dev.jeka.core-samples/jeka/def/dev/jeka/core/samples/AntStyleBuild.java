@@ -33,7 +33,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
     JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     JkDependencySet moduleDependencies = JkDependencySet.of()
             .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
-            .and("junit:junit:4.13", JkJavaDepScopes.TEST);
+            .and("junit:junit:4.13", JkScope.TEST);
     List<Path> depFiles = getBaseTree().andMatching(true,"libs/**/*.jar").getFiles();
     JkResolveResult depResolution = resolver.resolve(moduleDependencies);
     JkClasspath classpath = JkClasspath
@@ -94,7 +94,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
                 .withSigner(pgp.getSigner(""))
                 .publishMaven(versionedModule, JkMavenPublication.of(artifactProducer, JkPublishedPomMetadata.of()),
                         moduleDependencies)
-                .publishIvy(versionedModule, ivyPublication, moduleDependencies, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING,
+                .publishIvy(versionedModule, ivyPublication, moduleDependencies, JkScope.DEFAULT_SCOPE_MAPPING,
                         Instant.now(), JkVersionProvider.of());
     }
 

@@ -10,8 +10,8 @@ import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.RUNTIME;
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
+import static dev.jeka.core.api.depmanagement.JkScope.RUNTIME;
+import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 
 
 /**

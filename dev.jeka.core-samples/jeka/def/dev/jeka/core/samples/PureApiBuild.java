@@ -1,9 +1,6 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
-import dev.jeka.core.api.depmanagement.JkVersionProvider;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
@@ -17,7 +14,7 @@ public class PureApiBuild extends JkCommandSet {
         clean();
         JkJavaProject javaProject = JkJavaProject.of().setBaseDir(this.getBaseDir());
         javaProject.setOutputDir("jeka/output/alt-output");
-        JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkJavaDepScopes.TEST);
+        JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkScope.TEST);
         javaProject.getDependencyManagement().addDependencies(deps);
         javaProject.getArtifactProducer().makeAllArtifacts();
     }
@@ -33,7 +30,7 @@ public class PureApiBuild extends JkCommandSet {
             .setBaseDir(this.getBaseDir().resolve("foo"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
-                    .and("junit:junit", JkJavaDepScopes.TEST)
+                    .and("junit:junit", JkScope.TEST)
                     .and("com.google.guava:guava")
                     .and("com.sun.jersey:jersey-server:1.19.4")
                     .withVersionProvider(versionProvider)).__;
@@ -41,7 +38,7 @@ public class PureApiBuild extends JkCommandSet {
         JkJavaProject barProject = JkJavaProject.of()
             .setBaseDir(this.getBaseDir().resolve("bar"))
             .getDependencyManagement().addDependencies(JkDependencySet.of()
-                .and("junit:junit", JkJavaDepScopes.TEST)
+                .and("junit:junit", JkScope.TEST)
                 .and("com.sun.jersey:jersey-server:1.19.4")
                 .and(fooProject.toDependency())).__;
 

@@ -6,7 +6,6 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Set;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -19,9 +18,9 @@ public class ResolveTreeIT {
     public void treeIsCorrect() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
-                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
-                .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
-                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE);
+                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", JkScope.COMPILE_AND_RUNTIME)
+                .and("org.springframework.boot:spring-boot-starter-test:1.5.+", JkScope.TEST)
+                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", JkScope.COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
@@ -37,21 +36,21 @@ public class ResolveTreeIT {
         JkDependencyNode starterwebNode = tree.getChildren().get(0);
         assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getModuleId());
         assertEquals(2, starterwebNode.getModuleInfo().getDeclaredScopes().size());
-        assertTrue(starterwebNode.getModuleInfo().getDeclaredScopes().contains(COMPILE));
-        assertTrue(starterwebNode.getModuleInfo().getDeclaredScopes().contains(RUNTIME));
+        assertTrue(starterwebNode.getModuleInfo().getDeclaredScopes().contains(JkScope.COMPILE));
+        assertTrue(starterwebNode.getModuleInfo().getDeclaredScopes().contains(JkScope.RUNTIME));
 
         JkDependencyNode starterNode = starterwebNode.getChildren().get(0);
         assertEquals(2, starterNode.getModuleInfo().getDeclaredScopes().size());
         Set<JkScope> scopes = starterNode.getModuleInfo().getDeclaredScopes();
-        assertTrue(scopes.contains(COMPILE));
-        assertTrue(scopes.contains(RUNTIME));
+        assertTrue(scopes.contains(JkScope.COMPILE));
+        assertTrue(scopes.contains(JkScope.RUNTIME));
 
         List<JkDependencyNode> snakeYamlNodes = starterNode.getChildren(JkModuleId.of("org.yaml:snakeyaml"));
         assertEquals(1, snakeYamlNodes.size());
         JkDependencyNode snakeYamlNode = snakeYamlNodes.get(0);
         assertEquals(1, snakeYamlNode.getModuleInfo().getDeclaredScopes().size());
         scopes = snakeYamlNode.getModuleInfo().getDeclaredScopes();
-        assertTrue(scopes.contains(RUNTIME));
+        assertTrue(scopes.contains(JkScope.RUNTIME));
 
         assertEquals(5, starterNode.getChildren().size());
 
@@ -66,11 +65,11 @@ public class ResolveTreeIT {
     public void treeDistinctDynamicAndResolvedVersion() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkModuleId moduleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
-        JkDependencySet deps = JkDependencySet.of().and(moduleId, "1.4.+", TEST);
+        JkDependencySet deps = JkDependencySet.of().and(moduleId, "1.4.+", JkScope.TEST);
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve(deps, TEST).assertNoError().getDependencyTree();
+        JkDependencyNode tree = resolver.resolve(deps, JkScope.TEST).assertNoError().getDependencyTree();
         System.out.println(tree.toStrings());
         JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getFirst(moduleId).getModuleInfo();
         assertTrue(moduleNodeInfo.getDeclaredVersion().getValue().equals("1.4.+"));
@@ -84,11 +83,11 @@ public class ResolveTreeIT {
         JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
         String directCoreVersion = "4.3.6.RELEASE";
         JkDependencySet deps = JkDependencySet.of()
-                .and(starterWebModule, "1.5.10.RELEASE", COMPILE)
-                .and(springCoreModule, directCoreVersion, COMPILE);  // force a projectVersion lower than the transitive above
+                .and(starterWebModule, "1.5.10.RELEASE", JkScope.COMPILE)
+                .and(springCoreModule, directCoreVersion, JkScope.COMPILE);  // force a projectVersion lower than the transitive above
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
+        JkResolveResult resolveResult = resolver.resolve(deps, JkScope.COMPILE);
         JkDependencyNode tree = resolveResult.getDependencyTree();
 
         JkDependencyNode bootNode = tree.getChildren().get(0);
@@ -108,10 +107,10 @@ public class ResolveTreeIT {
         JkDependencySet deps = JkDependencySet.of()
                 .and("com.googlecode.playn:playn-core:1.4")
                 .and("com.threerings:tripleplay:1.4")
-                .withDefaultScopes(COMPILE_AND_RUNTIME);
+                .withDefaultScopes(JkScope.COMPILE_AND_RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
+        JkResolveResult resolveResult = resolver.resolve(deps, JkScope.RUNTIME);
         JkDependencyNode tree = resolveResult.getDependencyTree();
         System.out.println(tree.toStringTree());
         System.out.println(resolveResult.getFiles());
@@ -122,10 +121,10 @@ public class ResolveTreeIT {
         JkDependencySet deps = JkDependencySet.of()
                 .and("com.google.guava:guava")
                 .withVersionProvider(JkVersionProvider.of("com.google.guava:guava", "22.0"))
-                .withDefaultScopes(COMPILE_AND_RUNTIME);
+                .withDefaultScopes(JkScope.COMPILE_AND_RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
+        JkResolveResult resolveResult = resolver.resolve(deps, JkScope.RUNTIME);
         JkDependencyNode tree = resolveResult.getDependencyTree();
         JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getChildren().get(0).getModuleInfo();
         assertEquals("22.0", moduleNodeInfo.getDeclaredVersion().getValue());

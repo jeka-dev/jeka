@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import java.nio.file.Paths;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.PROVIDED;
+import static dev.jeka.core.api.depmanagement.JkScope.PROVIDED;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 public class JkImlGeneratorTest {
