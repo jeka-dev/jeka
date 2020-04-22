@@ -11,4 +11,5 @@ import java.util.List;
 public interface JkFileDependency extends JkDependency {
 
     List<Path> getFiles();
+
 }

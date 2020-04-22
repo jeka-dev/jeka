@@ -1,5 +1,6 @@
 package dev.jeka.core.api.tooling;
 
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkProcess;
 
 import java.nio.file.Path;
@@ -76,6 +77,13 @@ public final class JkGitWrapper {
         } else {
             return tags.get(tags.size() -1);
         }
+    }
+
+    /**
+     * @see #getVersionFromTags()
+     */
+    public JkVersion getJkVersionFromTags() {
+        return JkVersion.of(getVersionFromTags());
     }
 
     public JkGitWrapper exec(String... args) {

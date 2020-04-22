@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A sequence of file path (folder or archive). Each file is called an <code>entry</code>.<br/>
@@ -101,10 +102,10 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
     // ------------------------------ withers and adders ------------------------------------
 
     /**
-     * @see #andPrepending(Iterable)
+     * @see #andPrepend(Iterable)
      */
-    public JkPathSequence andPrepending(Path path1, Path path2, Path... entries) {
-        return andPrepending(JkUtilsIterable.listOf2orMore(path1, path2, entries));
+    public JkPathSequence andPrepend(Path path1, Path path2, Path... entries) {
+        return andPrepend(JkUtilsIterable.listOf2orMore(path1, path2, entries));
     }
 
     /**
@@ -113,7 +114,7 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
      * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
      * instance, if so it will be interpreted as a list containing a single element which is this argument.
      */
-    public JkPathSequence andPrepending(Iterable<Path> paths) {
+    public JkPathSequence andPrepend(Iterable<Path> paths) {
         final List<Path> result = JkUtilsPath.disambiguate(paths);
         result.addAll(entries);
         return new JkPathSequence(result);
@@ -142,16 +143,20 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
      * Returns an identical path sequence but replacing relative paths with absolute paths resolved from the
      * specified base directory.
      */
-    public JkPathSequence resolveTo(Path baseDir) {
-        final List<Path> result = new LinkedList<>();
-        for(final Path entry : entries) {
-            if (entry.isAbsolute()) {
-                result.add(entry);
-            } else {
-                result.add(baseDir.toAbsolutePath().resolve(entry));
-            }
-        }
-        return new JkPathSequence(result);
+    public JkPathSequence resolvedTo(Path baseDir) {
+        return JkPathSequence.of(entries.stream()
+                .map(path -> baseDir.resolve(path))
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * Returns an identical path sequence but replacing relative paths with absolute paths resolved from the
+     * specified base directory.
+     */
+    public JkPathSequence relativizedTo(Path baseDir) {
+        return JkPathSequence.of(entries.stream()
+                .map(path -> baseDir.relativize(path))
+                .collect(Collectors.toList()));
     }
 
     // --------------- Canonical methods ------------------------------------------
@@ -181,7 +186,7 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
-            builder.append(it.next().toAbsolutePath().toString());
+            builder.append(it.next().toString());
             if (it.hasNext()) {
                 builder.append(";");
             }

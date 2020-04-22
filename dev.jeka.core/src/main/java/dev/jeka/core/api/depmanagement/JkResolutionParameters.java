@@ -1,38 +1,26 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsAssert;
-
 /**
  * Contains parameters likely to impact module resolution behavior.
  */
-public final class JkResolutionParameters {
+public final class JkResolutionParameters<T> {
+
+    private JkScopeMapping scopeMapping = JkScope.DEFAULT_SCOPE_MAPPING;
+
+    private boolean refreshed = true;
 
     /**
-     * Creates resolution parameters without default mapping and no dynamic
-     * version resolving refresh.
-     * 
-     * @see JkResolutionParameters#getScopeMapping()
-     * @see #isRefreshed()
+     * For parent chaining
      */
-    public static JkResolutionParameters of() {
-        return new JkResolutionParameters(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, true);
+    public T __;
+
+    private JkResolutionParameters(T parent) {
+        __ = parent;
     }
 
-    /**
-     * Creates resolution parameters with the specified default scope mapping
-     * and no dynamic version resolving refresh.
-     * 
-     * @see JkResolutionParameters#getScopeMapping()
-     * @see #isRefreshed()
-     */
-    public static JkResolutionParameters of(JkScopeMapping scopeMapping) {
-        JkUtilsAssert.notNull(scopeMapping,"Scope mapping cannot be null.");
-        return new JkResolutionParameters(scopeMapping, true);
+    static <T> JkResolutionParameters ofParent(T parent) {
+        return new JkResolutionParameters(parent);
     }
-
-    private final JkScopeMapping scopeMapping;
-
-    private final boolean refreshed;
 
     /**
      * Returns the default scope mapping to use for the {@link JkDependencySet}
@@ -47,6 +35,14 @@ public final class JkResolutionParameters {
     }
 
     /**
+     * @see #getScopeMapping()
+     */
+    public JkResolutionParameters<T> setScopeMapping(JkScopeMapping scopeMapping) {
+        this.scopeMapping = scopeMapping;
+        return this;
+    }
+
+    /**
      * Returns <code>true</code> if during the resolution phase, the dynamic
      * version must be resolved as well or the cache can be reused.
      */
@@ -57,21 +53,9 @@ public final class JkResolutionParameters {
     /**
      * @see JkResolutionParameters#isRefreshed()
      */
-    public JkResolutionParameters isRefreshed(boolean refreshed) {
-        return new JkResolutionParameters(scopeMapping, refreshed);
-    }
-
-    /**
-     * @see #getScopeMapping()
-     */
-    public JkResolutionParameters withScopeMapping(JkScopeMapping defaultMapping) {
-        return new JkResolutionParameters(defaultMapping, refreshed);
-    }
-
-    private JkResolutionParameters(JkScopeMapping defaultMapping, boolean refreshed) {
-        super();
-        this.scopeMapping = defaultMapping;
+    public JkResolutionParameters<T> setRefreshed(boolean refreshed) {
         this.refreshed = refreshed;
+        return this;
     }
 
     @Override

@@ -41,11 +41,15 @@ class SampleTester {
     }
 
     void doTest() throws IOException {
-        testSampleWithJavaPlugin("AClassicBuild");
-        //testSampleWithJavaPlugin("AntStyleBuild");
-        testSampleWithJavaPlugin("MavenCentralJarBuild");
-        testSampleWithJavaPlugin("HttpClientTaskBuild");
-        testSampleWithJavaPlugin("SimpleScopeBuild");
+        testSampleWith("JavaPluginBuild", "cleanPackPublish");
+        testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
+        testSampleWithJavaPlugin("ThirdPartyPoweredBuild");
+        testSampleWithJavaPlugin("Junit5Build");
+        testSampleWithJavaPlugin("JacocoPluginBuild");
+        testSampleWith("SonarPluginBuild", "cleanPackSonar");
+        testSampleWith("AntStyleBuild", "cleanPackPublish");
+        testSampleWith("PureApiBuild", "cleanBuild");
+
         testDepender("FatJarBuild");
 
         // Test eclipse
@@ -84,7 +88,15 @@ class SampleTester {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
-                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LH")
+                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LH", "-LV=false")
+                .andParams(args)
+                .withFailOnError(true).runSync();
+    }
+
+    private void testSampleWith(String className, String... args) {
+        JkLog.info("Test " + className + " " + Arrays.toString(args));
+        JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
+                .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }
@@ -126,7 +138,7 @@ class SampleTester {
 
     private void testFork() {
         testSampleWithJavaPlugin("", "-java#tests.fork");
-        JkUtilsAssert.isTrue(output.goTo("test-reports/junit").exists(), "No test report generated in test fork mode.");
+        JkUtilsAssert.state(output.goTo("test-report").exists(), "No test report generated in test fork mode.");
     }
 
     public static void main(String[] args) throws Exception {

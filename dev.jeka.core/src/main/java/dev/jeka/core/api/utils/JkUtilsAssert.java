@@ -5,21 +5,15 @@ package dev.jeka.core.api.utils;
  */
 public final class JkUtilsAssert {
 
-    /**
-     * Throws an {@link IllegalArgumentException} if the specified object is <code>null</code>.
-     */
-    public static void notNull(Object object, String message) {
-        if (object == null) {
+    public static void argument(boolean condition, String message) {
+        if (!condition) {
             throw new IllegalArgumentException(message);
         }
     }
 
-    /**
-     * Throws an {@link IllegalArgumentException} if the specified condition is <code>false</code>.
-     */
-    public static void isTrue(boolean condition, String message) {
+    public static void state(boolean condition, String message) {
         if (!condition) {
-            throw new IllegalArgumentException(message);
+            throw new IllegalStateException(message);
         }
     }
 

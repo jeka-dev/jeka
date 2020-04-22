@@ -10,6 +10,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/javaweb" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
@@ -32,26 +33,26 @@
     <orderEntry type="module-library" exported="" scope="PROVIDED">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.1.0.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/javax.servlet/javax.servlet-api/jars/javax.servlet-api-4.0.1.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.1.0-javadoc.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/javax.servlet/javax.servlet-api/jars/javax.servlet-api-4.0.1-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.1.0-sources.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/javax.servlet/javax.servlet-api/jars/javax.servlet-api-4.0.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.11.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.11-javadoc.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.11-sources.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

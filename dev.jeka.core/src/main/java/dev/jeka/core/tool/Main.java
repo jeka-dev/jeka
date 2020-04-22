@@ -1,7 +1,6 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -59,10 +58,13 @@ public final class Main {
             }
             if (e instanceof JkException) {
                 System.err.println(e.getMessage());
-                if (JkLog.isVerbose()) {
-                    e.printStackTrace(System.err);
-                }
             } else {
+                System.err.println("An error occured during def class execution : " + e.getMessage());
+                System.err.println("This is mostly due to an error in user settings or scripts.");
+                System.err.println("You can investigate using the stacktace below.");
+                System.err.println("If error reveals to coming from Jeka engine, please report to " +
+                        ": https://github.com/jerkar/jeka/issues");
+                System.err.println();
                 e.printStackTrace(System.err);
             }
             if (Environment.standardOptions.logHeaders) {
@@ -116,7 +118,7 @@ public final class Main {
 
     private static void displayIntro() {
         final int length = printAscii(false, "jeka.ascii");
-        JkLog.info(JkUtilsString.repeat(" ", length) + "The 100% Java Build Tool.\n");
+        JkLog.info(JkUtilsString.repeat(" ", length) + "The 100%% Java Build Tool.\n");
     }
 
     private static void displayOutro(long startTs) {

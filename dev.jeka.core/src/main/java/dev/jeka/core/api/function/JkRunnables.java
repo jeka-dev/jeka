@@ -4,32 +4,52 @@ package dev.jeka.core.api.function;
  * A mutable container for {@link Runnable}. From this object you can replace the underlying {@link Runnable} or
  * chain it with other ones.
  */
-public class JkRunnables implements Runnable {
+public class JkRunnables<T> implements Runnable {
 
     private Runnable runnable;
 
     /**
+     * For parent chaining
+     */
+    public final T __;
+
+    /**
      * Creates a {@link JkRunnables} delegating to the single specified {@link Runnable}.
      */
-    public static JkRunnables of(Runnable runnable) {
-        return new JkRunnables(runnable);
+    public static JkRunnables<Void> of(Runnable runnable) {
+        return of(null, runnable);
+    }
+
+    /**
+     * Same as {@link #of(Runnable)} but providing a parent chaining.
+     */
+    public static <T> JkRunnables<T> of(T parent, Runnable runnable) {
+        return new JkRunnables(parent, runnable);
     }
 
     /**
      * Creates a {@link JkRunnables} delegating to a no-op runnable.
      */
-    public static JkRunnables noOp() {
+    public static JkRunnables<Void> of() {
         return of(() -> {});
     }
 
-    private JkRunnables(Runnable runnable) {
+    /**
+     * Same as {@link #of()} but providing parent chaining
+     */
+    public static <T> JkRunnables<T> ofParent(T parent) {
+        return of(parent, () -> {});
+    }
+
+    private JkRunnables(T parent, Runnable runnable) {
         this.runnable = runnable;
+        this.__ = parent;
     }
 
     /**
      * Set the specified {@link Runnable} as the unique underlying {@link Runnable} for this container.
      */
-    public JkRunnables set(Runnable runnable) {
+    public JkRunnables<T> set(Runnable runnable) {
         this.runnable = runnable;
         return this;
     }
@@ -38,7 +58,7 @@ public class JkRunnables implements Runnable {
      * Chains this underlying {@link Runnable} with the specified one. The specified runnable will
      * be executed at the end.
      */
-    public JkRunnables chain(Runnable chainedRunnable) {
+    public JkRunnables<T> append(Runnable chainedRunnable) {
         final Runnable oldRunnable = this.runnable;
         this.runnable = () -> {oldRunnable.run(); chainedRunnable.run();};
         return this;
@@ -48,7 +68,7 @@ public class JkRunnables implements Runnable {
      * Chains this specified {@link Runnable} with the underlying one. The specified runnable will
      * be executed first.
      */
-    public JkRunnables prependChain(Runnable chainedRunnable) {
+    public JkRunnables<T> prepend(Runnable chainedRunnable) {
         final Runnable oldRunnable = this.runnable;
         this.runnable = () -> {oldRunnable.run(); chainedRunnable.run();};
         return this;

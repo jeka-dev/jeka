@@ -89,7 +89,7 @@ final class CommandResolver {
             final Class<? extends JkCommandSet> clazz = JkInternalClasspathScanner.INSTANCE
                     .loadClassesHavingNameOrSimpleName(classNameHint, JkCommandSet.class);
             if (clazz == null) {
-                JkLog.warn("No commands class found with name " + classNameHint);
+                JkLog.trace("No commandSet class found with name " + classNameHint);
                 return null;
             }
             JkCommandSet.baseDirContext(baseDir);

@@ -1,14 +1,13 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.COMPILE;
+import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
 
 public class ResolveSpringBootStarterIT {
 
@@ -18,7 +17,7 @@ public class ResolveSpringBootStarterIT {
 
     @Test
     public void resolveCompile() {
-        JkLog.setHierarchicalConsoleConsumer();
+        //JkLog.setHierarchicalConsoleConsumer();
         final JkResolveResult result = resolver().resolve(
                 JkDependencySet.of(SPRINGBOOT_STARTER, COMPILE)
                 );
@@ -40,9 +39,10 @@ public class ResolveSpringBootStarterIT {
     }
 
     private JkDependencyResolver resolver() {
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
         final JkScopeMapping mapping = JkScopeMapping.of("compile").to("compile");
-        resolver = resolver.withParams(resolver.getParams().withScopeMapping(mapping));
-        return resolver;
+        return JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral())
+                .getParams()
+                    .setScopeMapping(mapping).__;
     }
 }

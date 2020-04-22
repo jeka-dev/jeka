@@ -25,15 +25,13 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
         this.jkPublicationArtifacts = jkPublicationArtifacts;
     }
 
-
     /**
      * Creates a publication for a single artifact embodied by the specified file and
      * to published as the specified type and scopes. Here, scopes maps directly to
      * Ivy configurations (scope = configuration).
      */
     public static JkIvyPublication ofType(Path file, String type, String... scopes) {
-        return new JkIvyPublication(new HashSet<>()).and(file,
-                type, scopes);
+        return new JkIvyPublication(new HashSet<>()).and(file, type, scopes);
     }
 
     /**
@@ -41,26 +39,29 @@ public final class JkIvyPublication implements Iterable<JkIvyPublication.JkPubli
      */
     public static JkIvyPublication of(JkArtifactProducer artifactProducer) {
         JkIvyPublication result =  of(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()),
-                JkJavaDepScopes.COMPILE.getName());
+                JkScope.COMPILE.getName());
         for (final JkArtifactId extraFileId : artifactProducer.getArtifactIds()) {
+            if (extraFileId.isMainArtifact()) {
+                continue;
+            }
             final Path file = artifactProducer.getArtifactPath(extraFileId);
-            result = result.andOptional(file, extraFileId.getClassifier(), scopeFor(extraFileId.getClassifier()));
+            result = result.andOptional(file, extraFileId.getName(), scopeFor(extraFileId.getName()));
         }
         return result;
     }
 
     private static String scopeFor(String classifier) {
         if ("sources".equals(classifier)) {
-            return JkJavaDepScopes.SOURCES.getName();
+            return JkScope.SOURCES.getName();
         }
         if ("test".equals(classifier)) {
-            return JkJavaDepScopes.TEST.getName();
+            return JkScope.TEST.getName();
         }
         if ("test-sources".equals(classifier)) {
-            return JkJavaDepScopes.SOURCES.getName();
+            return JkScope.SOURCES.getName();
         }
         if ("javadoc".equals(classifier)) {
-            return JkJavaDepScopes.JAVADOC.getName();
+            return JkScope.JAVADOC.getName();
         }
         return classifier;
     }

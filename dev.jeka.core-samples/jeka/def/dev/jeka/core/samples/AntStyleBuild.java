@@ -5,52 +5,43 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
-import dev.jeka.core.api.java.project.JkJavaProjectIdeSupplier;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefClasspath;
-import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.List;
 
 /**
- * Equivalent to http://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html
+ * Build class written in Ant style. This is not expected to be the most common way of creating build class in Jeka.
+ * <p>
+ * Tasks are explicitly written in public methods using a low level API. This approach may be more flexible but requires
+ * extra coding effort.
  * 
  * @author Jerome Angibaud
  */
 @JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.6")
-public class AntStyleBuild extends JkCommandSet implements JkJavaProjectIdeSupplier {
+public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
+    Path srcJar = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + "-sources.jar");
     Path classDir = getOutputDir().resolve("classes");
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
-    JkClasspath classpath;
-    Path reportDir = getOutputDir().resolve("junitRreport");
-    JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
-
-    public JkDependencySet dependencies() {
-        return JkDependencySet.of()
-                .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
-                .and("junit:junit:4.13", JkJavaDepScopes.TEST);
-    }
-
-    public void doDefault() {
-        clean();
-        run();
-    }
-
-    @Override
-    protected void setup() {
-       JkResolveResult depResolution = resolver.resolve(dependencies());
-       classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles())
+    JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
+    JkDependencySet moduleDependencies = JkDependencySet.of()
+            .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
+            .and("junit:junit:4.13", JkScope.TEST);
+    List<Path> depFiles = getBaseTree().andMatching(true,"libs/**/*.jar").getFiles();
+    JkResolveResult depResolution = resolver.resolve(moduleDependencies);
+    JkClasspath classpath = JkClasspath
+            .of(depFiles)
             .and(depResolution.getFiles());
-    }
 
     public void compile() {
-        JkJavaCompiler.ofJdk().compile(JkJavaCompileSpec.of()
+        JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(classDir)
                 .setClasspath(classpath)
                 .setSourceAndTargetVersion(JkJavaVersion.V8)
@@ -59,78 +50,65 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaProjectIdeSuppl
                 .copyTo(classDir);
     }
 
+    public void jarSources() {
+        JkPathTree.of(src).zipTo(srcJar);
+    }
+
     public void jar() {
         compile();
-        JkManifest.ofEmpty().addMainClass("RunClass").writeToStandardLocation(classDir);
+        JkManifest.of().addMainClass("RunClass").writeToStandardLocation(classDir);
         JkPathTree.of(classDir).zipTo(jarFile);
     }
 
     public void javadoc() {
-        JkJavadocMaker.of(JkPathTreeSet.of(src), getOutputDir().resolve("javadoc")).process();
+        JkJavadocProcessor.of()
+            .make(JkClasspath.of(), JkPathTreeSet.of(src), getOutputDir().resolve("javadoc"));
     }
 
     public void run() {
         jar();
         JkJavaProcess.of().withWorkingDir(jarFile.getParent())
-        .andClasspath(classpath)
-        .runJarSync(jarFile);
+            .andClasspath(classpath)
+            .runJarSync(jarFile);
     }
 
-    public void cleanBuild() {
+    public void cleanPackPublish() {
         clean();
         jar();
+        javadoc();
+        publish();
     }
 
-    /*
-     * This part is specific to Maven publishing and does not exist in the
-     * original helloWorld ANT file
-     */
-    @JkDoc("Redefine this value to set your own publish repository.")
-    protected String publishRepo = "http://my/publish/repo";
-
-    protected String pgpPrivateRingFile = "/usr/myUser/pgp/pub";
-
-    protected String pgpPassword = "mypPgpPassword";
-
+    // publish poth on Maven and Ivy repo
     public void publish() {
-        JkGpg pgp = JkGpg.ofSecretRing(Paths.get(pgpPrivateRingFile), pgpPassword);
-        JkRepo repo = JkRepo.of(publishRepo)
-                .withOptionalCredentials("myRepoUserName", "myRepoPassword");
-
-        JkVersionedModule versionedModule = JkVersionedModule.of(
-                "myGroup:myName:0.2.1");
-
-        // Optinal : if you need to add metadata in the generated pom
-        JkMavenPublicationInfo info = JkMavenPublicationInfo
-                .of("my project", "my description", "http://myproject.github")
-                .withScm("http://scm/url/connection")
-                .andApache2License()
-                .andGitHubDeveloper("myName", "myName@provider.com");
-
-        // Optional : if you want publish sources
-        Path srcZip = getOutputDir().resolve("src.zip");
-        JkPathTree.of(srcZip).zipTo(srcZip);
-
-        JkMavenPublication publication = JkMavenPublication.of(jarFile)
-                .with(info).and(srcZip, "sources");
-        JkPublisher.of(repo).publishMaven(versionedModule, publication,
-                JkDependencySet.of());
+        JkGpg pgp = JkGpg.ofSecretRing(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd");
+        JkRepo ivyRepo = JkRepo.ofIvy(getOutputDir().resolve("test-output/ivy-repo"));
+        JkRepo mavenRepo = JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo"));
+        JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.2_SNAPSHOT");
+        JkArtifactProducer artifactProducer = JkSuppliedFileArtifactProducer.of()
+                .putMainArtifact(jarFile, this::jar)
+                .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
+        artifactProducer.makeAllMissingArtifacts();
+        JkIvyPublication ivyPublication = JkIvyPublication.of(artifactProducer);
+        JkPublisher.of(JkRepoSet.of(mavenRepo, ivyRepo))
+                .withSigner(pgp.getSigner(""))
+                .publishMaven(versionedModule, JkMavenPublication.of(artifactProducer, JkPublishedPomMetadata.of()),
+                        moduleDependencies)
+                .publishIvy(versionedModule, ivyPublication, moduleDependencies, JkScope.DEFAULT_SCOPE_MAPPING,
+                        Instant.now(), JkVersionProvider.of());
     }
 
     @Override
-    public JkJavaProjectIde getJavaProjectIde() {
-        return JkJavaProjectIde.ofDefault()
-                .withSourceLayout(JkProjectSourceLayout.ofSimpleStyle()
-                        .withSources(JkPathTreeSet.of(src))
-                        .withBaseDir(getBaseDir()))
-                .withDependencyResolver(resolver)
-                .withDependencies(dependencies());
+    public JkJavaIdeSupport getJavaIdeSupport() {
+        return JkJavaIdeSupport.of(getBaseDir())
+            .getProdLayout()
+                .emptySources().addSource(src).__
+            .setDependencies(moduleDependencies)
+            .setDependencyResolver(resolver);
     }
-
 
     public static void main(String[] args) {
-        JkInit.instanceOf(AntStyleBuild.class, args).doDefault();
+        JkInit.instanceOf(AntStyleBuild.class, args).cleanPackPublish();
     }
-
 
 }

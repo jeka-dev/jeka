@@ -1,11 +1,11 @@
 package dev.jeka.core.integrationtest;
 
-import dev.jeka.core.api.depmanagement.*;import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.COMPILE;
+import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.TEST;
 
 public class ResolveApacheHttpClientIT {
@@ -31,7 +31,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithoutDeclaredScopeButResolvedScope() {
-        JkLog.setHierarchicalConsoleConsumer();
+        //JkLog.setHierarchicalConsoleConsumer();
         JkResolveResult result = resolver().resolve(JkDependencySet.of(HTTP_CLIENT), COMPILE);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
@@ -57,7 +57,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithTestToTestScopeMapping() {
-        JkLog.setHierarchicalConsoleConsumer();
+        //JkLog.setHierarchicalConsoleConsumer();
         JkDependencySet deps =  JkDependencySet.of().and(HTTP_CLIENT,  TEST.mapTo( "test"));
         JkResolveResult result = resolver().resolve(deps);
         System.out.println(result.getDependencyTree().toStringTree());
@@ -71,7 +71,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithMultiScopeMapping() {
-        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT,  JkJavaDepScopes.DEFAULT_SCOPE_MAPPING);
+        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT,  JkScope.DEFAULT_SCOPE_MAPPING);
         JkResolveResult result = resolver().resolve(deps, TEST);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());
@@ -80,13 +80,13 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithNoOccupiedScope() {
-        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT, JkJavaDepScopes.RUNTIME);
+        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT, JkScope.RUNTIME);
         JkResolveResult result = resolver().resolve(deps, COMPILE);
         Assert.assertEquals(0, result.getFiles().getEntries().size());
     }
 
     private JkDependencyResolver resolver() {
-        return JkDependencyResolver.of(JkRepo.ofMavenCentral());
+        return JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     }
 
 }

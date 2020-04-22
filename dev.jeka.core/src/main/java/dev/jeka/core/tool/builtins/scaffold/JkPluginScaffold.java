@@ -43,7 +43,7 @@ public class JkPluginScaffold extends JkPlugin {
     public void wrap() {
         if (JkUtilsString.isBlank(this.wrapDelegatePath)) {
             final JkPluginRepo repoPlugin = this.getCommandSet().getPlugin(JkPluginRepo.class);
-            final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repoPlugin.downloadRepository().toSet());
+            final JkDependencyResolver dependencyResolver = JkDependencyResolver.ofParent(repoPlugin.downloadRepository().toSet());
             scaffolder.wrap(dependencyResolver);
         } else {
             scaffolder.wrapDelegate(this.wrapDelegatePath);

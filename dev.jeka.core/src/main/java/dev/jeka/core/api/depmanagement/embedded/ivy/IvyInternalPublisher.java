@@ -3,6 +3,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
@@ -72,11 +73,11 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         if (dependencyResolver instanceof ChainResolver) {
             final ChainResolver resolver = (ChainResolver) dependencyResolver;
             @SuppressWarnings("rawtypes")
-            final List list = resolver.getResolvers();
+            final List<DependencyResolver> list = resolver.getResolvers();
             if (list.isEmpty()) {
                 return false;
             }
-            return isMaven((DependencyResolver) list.get(0));
+            return isMaven(list.get(0));
         }
         if (dependencyResolver instanceof AbstractPatternsBasedResolver) {
             final AbstractPatternsBasedResolver resolver = (AbstractPatternsBasedResolver) dependencyResolver;
@@ -121,11 +122,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
                 publication, dependencies, Instant.now(), JkVersionProvider.of());
         final int count = publishMavenArtifacts(publication, moduleDescriptor, signer);
-        if (count <= 1) {
-            JkLog.info("Module published in " + count + " repository.");
-        } else {
-            JkLog.info("Module published in " + count + " repositories.");
-            }
+        JkLog.info("Module published in %s.", JkUtilsString.plurialize(count,
+                "repository", "repositories"));
        JkLog.endTask();
     }
 
@@ -138,7 +136,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
-            if (!isMaven(resolver) && publishRepo.getPublishConfig().getFilter().accept(versionedModule)) {
+            if (!isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(versionedModule.getVersion())) {
                 JkLog.startTask("Publishing for repository " + resolver);
                 this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
                 JkLog.endTask();
@@ -190,7 +188,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
-            if (isMaven(resolver) && publishRepo.getPublishConfig().getFilter().accept(versionedModule)) {
+            if (isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(versionedModule.getVersion())) {
                 JkLog.startTask("Publishing to " + resolver);
                 UnaryOperator<Path> effectiveSigner = publishRepo.getPublishConfig().isSignatureRequired() ? signer :
                         null;
@@ -262,7 +260,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                                                            Instant deliveryDate,
                                                            JkVersionProvider resolvedVersions) {
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                jkVersionedModule, resolvedDependencies, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, resolvedVersions);
+                jkVersionedModule, resolvedDependencies, JkScope.DEFAULT_SCOPE_MAPPING, resolvedVersions);
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
                 deliveryDate);
         return moduleDescriptor;

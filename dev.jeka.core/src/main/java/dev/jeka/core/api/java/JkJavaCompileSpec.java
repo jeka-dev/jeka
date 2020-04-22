@@ -15,7 +15,7 @@ import java.util.*;
  * Stands for a compilation settings as source and target version, encoding, annotation processing
  * or any option supported by the compileRunner.
  */
-public final class JkJavaCompileSpec {
+public final class JkJavaCompileSpec<T> implements Cloneable {
 
     public static final String SOURCE_OPTS = "-source";
 
@@ -29,22 +29,36 @@ public final class JkJavaCompileSpec {
 
     private static final String OUTPUT_DIR_OPTS = "-d";
 
-    private final List<String> options = new LinkedList<>();
+    private List<String> options = new LinkedList<>();
 
-    private final List<Path> sourceFiles = new LinkedList<>();
+    private List<Path> sourceFiles = new LinkedList<>();
 
-    private JkJavaCompileSpec() {
+    /**
+     * Owner for parent chaining
+     */
+    public final T __;
+
+    private JkJavaCompileSpec(T __) {
+        this.__ = __;
     }
 
-    public static JkJavaCompileSpec of() {
-        return new JkJavaCompileSpec();
+    public static JkJavaCompileSpec<Void> of() {
+        return ofParent(null);
     }
 
-    public JkJavaCompileSpec copy() {
-        JkJavaCompileSpec result = new JkJavaCompileSpec();
-        result.options.addAll(options);
-        result.sourceFiles.addAll(sourceFiles);
-        return result;
+    public static <T> JkJavaCompileSpec<T> ofParent(T o) {
+        return new JkJavaCompileSpec<T>(o);
+    }
+
+    public JkJavaCompileSpec<T> clone() {
+        try {
+            JkJavaCompileSpec<T> clone = (JkJavaCompileSpec<T>) super.clone();
+            clone.options = new LinkedList(options);
+            clone.sourceFiles = new LinkedList(sourceFiles);
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -62,7 +76,7 @@ public final class JkJavaCompileSpec {
         return path == null ? null : Paths.get(path);
     }
 
-    public JkJavaCompileSpec setOutputDir(Path outputDir) {
+    public JkJavaCompileSpec<T> setOutputDir(Path outputDir) {
         return addOptions(OUTPUT_DIR_OPTS, outputDir.toString());
     }
 
@@ -87,7 +101,7 @@ public final class JkJavaCompileSpec {
     /**
      * Sets the version of source code accepted.
      */
-    public JkJavaCompileSpec setSourceVersion(JkJavaVersion version) {
+    public JkJavaCompileSpec<T> setSourceVersion(JkJavaVersion version) {
         if (version == null) {
             return this;
         }
@@ -100,7 +114,7 @@ public final class JkJavaCompileSpec {
      * {@link JkJavaCompiler} can choose to use the appropriate compileRunner to compile to the
      * specified target.
      */
-    public JkJavaCompileSpec setTargetVersion(JkJavaVersion version) {
+    public JkJavaCompileSpec<T> setTargetVersion(JkJavaVersion version) {
         if (version == null) {
             return this;
         }
@@ -110,7 +124,7 @@ public final class JkJavaCompileSpec {
     /**
      * Shorthand for #setSourceVersion chained to #setTargetVersion
      */
-    public JkJavaCompileSpec setSourceAndTargetVersion(JkJavaVersion version) {
+    public JkJavaCompileSpec<T> setSourceAndTargetVersion(JkJavaVersion version) {
         return this.setSourceVersion(version).setTargetVersion(version);
     }
 
@@ -123,7 +137,7 @@ public final class JkJavaCompileSpec {
      * specified source encoding (e.g. UTF-8). If <code>null</code> is specified,
      * then default plateform encoding will be used.
      */
-    public JkJavaCompileSpec setEncoding(String encoding) {
+    public JkJavaCompileSpec<T> setEncoding(String encoding) {
         if (encoding == null) {
             return this;
         }
@@ -136,7 +150,7 @@ public final class JkJavaCompileSpec {
      * Adds specified source files to the set of java sources to compile.
      *
      **/
-    public JkJavaCompileSpec addSources(Iterable<Path> paths) {
+    public JkJavaCompileSpec<T> addSources(Iterable<Path> paths) {
         List<Path> files = JkUtilsPath.disambiguate(paths);
         for (final Path file : files) {
             if (Files.isDirectory(file)) {
@@ -148,22 +162,22 @@ public final class JkJavaCompileSpec {
         return this;
     }
 
-    public JkJavaCompileSpec addSources(JkPathTree tree) {
+    public JkJavaCompileSpec<T> addSources(JkPathTree tree) {
         if (!tree.isDefineMatcher()) {
             return addSources(tree.getRoot());
         }
         return addSources(tree.getFiles());
     }
 
-    public JkJavaCompileSpec addSources(JkPathTreeSet treeSet) {
-        treeSet.getPathTrees().forEach(this::addSources);
+    public JkJavaCompileSpec<T> addSources(JkPathTreeSet treeSet) {
+        treeSet.toList().forEach(this::addSources);
         return this;
     }
 
     /**
      * @see #addSources(Iterable)
      */
-    public JkJavaCompileSpec addSources(Path path1, Path path2, Path... files) {
+    public JkJavaCompileSpec<T> addSources(Path path1, Path path2, Path... files) {
         return addSources(JkUtilsIterable.listOf2orMore(path1, path2, files));
     }
 
@@ -180,7 +194,7 @@ public final class JkJavaCompileSpec {
      * Creates a copy of this {@link JkJavaCompiler} but with the specified
      * classpath.
      */
-    public JkJavaCompileSpec setClasspath(Iterable<Path> files) {
+    public JkJavaCompileSpec<T> setClasspath(Iterable<Path> files) {
         final String classpath = JkClasspath.of(files).toString();
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
@@ -195,14 +209,14 @@ public final class JkJavaCompileSpec {
      * to <code>javac -deprecation -cp path1 path2</code>, you should pass "-deprecation",
      * "-cp", "path1", "path2" parameters.
      */
-    public JkJavaCompileSpec addOptions(String... options) {
+    public JkJavaCompileSpec<T> addOptions(String... options) {
         return this.addOptions(Arrays.asList(options));
     }
 
     /**
      * See {@link #addOptions(String...)}
      */
-    public JkJavaCompileSpec addOptions(Iterable<String> options) {
+    public JkJavaCompileSpec<T> addOptions(Iterable<String> options) {
         options.forEach(option -> this.options.add(option));
         return this;
     }
@@ -212,7 +226,7 @@ public final class JkJavaCompileSpec {
      * So if you want to explicitly set such an option it is desirable to remove current value
      * instead of adding it at the queue of options. This method does this for you.
      */
-    public JkJavaCompileSpec setOption(String optionName, String optionValue) {
+    public JkJavaCompileSpec<T> setOption(String optionName, String optionValue) {
         addOrReplace(optionName, optionValue);
         return this;
     }
@@ -222,21 +236,21 @@ public final class JkJavaCompileSpec {
     /**
      * Sets specified annotation classes instead of using the ones discovered by default Java 6 mechanism.
      */
-    public JkJavaCompileSpec setAnnotationProcessors(String... annotationProcessorClassNames) {
+    public JkJavaCompileSpec<T> setAnnotationProcessors(String... annotationProcessorClassNames) {
         return setOption(PROCESSOR_OPTS, JkUtilsString.join(annotationProcessorClassNames, ","));
     }
 
     /**
      * Disable annotation processing.
      */
-    public JkJavaCompileSpec disableAnnotationProcessing() {
+    public JkJavaCompileSpec<T> disableAnnotationProcessing() {
         return addOptions("-proc:none");
     }
 
     /**
      * Only process annotation.
      */
-    public JkJavaCompileSpec setAnnotationProcessingOnly() {
+    public JkJavaCompileSpec<T> setAnnotationProcessingOnly() {
         return addOptions("-proc:only");
     }
 

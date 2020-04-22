@@ -20,7 +20,6 @@ public class BcGpgDoerTest {
         final boolean result = BcGpgDoer.verify(sample(), JkUtilsIO.inputStream(asmSignature.toFile()),
                 JkGpgTest.class.getResourceAsStream("pubring.gpg"));
         System.out.println(result);
-
     }
 
     private static InputStream sample() {

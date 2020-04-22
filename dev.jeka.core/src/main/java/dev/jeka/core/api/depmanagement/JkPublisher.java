@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 
-import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -73,11 +73,12 @@ public final class JkPublisher {
      *            you can mention a static version replacement. If none, you can
      *            just pass {@link JkVersionProvider#of()} }
      */
-    public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
+    public JkPublisher publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
                            JkDependencySet dependencies, JkScopeMapping defaultMapping,
                            Instant deliveryDate, JkVersionProvider resolvedVersion) {
         this.internalPublisher.publishIvy(versionedModule, publication, dependencies, defaultMapping,
                 deliveryDate, resolvedVersion);
+        return this;
     }
 
     /**
@@ -91,17 +92,17 @@ public final class JkPublisher {
      * @param dependencies
      *            The dependencies to specify in the generated pom file.
      */
-    public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
+    public JkPublisher publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencySet dependencies) {
         assertFilesToPublishExist(publication);
         this.internalPublisher.publishMaven(versionedModule, publication, dependencies.withModulesOnly(), this.signer);
+        return this;
     }
 
-    private void assertFilesToPublishExist(JkMavenPublication publication) {
-        List<Path> missingFiles = publication.missingFiles();
-        if (!missingFiles.isEmpty()) {
-            throw new JkException("One or several files to publish do not exist : " + missingFiles);
-        }
-     }
+    private JkPublisher assertFilesToPublishExist(JkMavenPublication publication) {
+        List<Path> missingFiles = publication.getArtifactLocator().getMissingFiles();
+        JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
+        return this;
+    }
 
 }

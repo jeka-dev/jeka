@@ -78,7 +78,7 @@ public class JkRepoConfigOptionLoader {
         }
         final String username = JkOptions.get("repo." + repoName + ".username");
         final String password = JkOptions.get("repo." + repoName + ".password");
-        return JkRepo.of(url.trim()).withOptionalCredentials(username, password);
+        return JkRepo.of(url.trim()).setCredentials(username, password);
     }
 
     public static Map<String, String> allRepositoryOptions() {

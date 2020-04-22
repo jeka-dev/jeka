@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.jacoco;
 
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.testplatform.JkTestProcessor;
+import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -58,9 +58,9 @@ public final class JkocoJunitEnhancer {
             return;
         }
         JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(), JkJavaProcess.of());
-        process = process.andAgent(destFile, options());
+        process = process.andAgent(agent, options());
         testProcessor.setForkingProcess(process);
-        testProcessor.getPostActions().chain(new Reporter());
+        testProcessor.getPostActions().append(new Reporter());
     }
 
     private String options() {

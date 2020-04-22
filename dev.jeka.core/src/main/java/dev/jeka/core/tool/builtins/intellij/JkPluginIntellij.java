@@ -1,8 +1,8 @@
 package dev.jeka.core.tool.builtins.intellij;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
@@ -48,11 +48,11 @@ public final class JkPluginIntellij extends JkPlugin {
     public void iml() {
         final JkImlGenerator generator;
         JkCommandSet commands = getCommandSet();
-        JkJavaProjectIde projectIde = JkPluginEclipse.getProjectIde(commands);
+        JkJavaIdeSupport projectIde = JkPluginEclipse.getProjectIde(commands);
         if (projectIde != null) {
             generator = JkImlGenerator.of(projectIde);
         } else {
-            generator = JkImlGenerator.of(commands.getBaseDir());
+            generator = JkImlGenerator.of(JkJavaIdeSupport.of(commands.getBaseDir()));
         }
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
         generator.setUseVarPath(useVarPath);
@@ -61,7 +61,8 @@ public final class JkPluginIntellij extends JkPlugin {
             defDependencies = defDependencies.minusFiles(
                     path -> path.getFileName().equals(JkLocator.getJekaJarPath().getFileName()));
         }
-        generator.setDefDependencies(commands.getDefDependencyResolver(), defDependencies);
+        generator.setDefDependencies(defDependencies);
+        generator.setDefDependencyResolver(commands.getDefDependencyResolver());
         final List<String> testModuleDeps = commands.getImportedCommandSets().getImportedCommandRoots().stream()
                 .map(path -> path.getFileName().toString())
                 .collect(Collectors.toList());
@@ -74,7 +75,6 @@ public final class JkPluginIntellij extends JkPlugin {
         Path basePath = commands.getBaseDir();
         if (commands.getPlugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = commands.getPlugins().get(JkPluginJava.class).getProject();
-            generator.setSourceJavaVersion(project.getCompileSpec().getSourceVersion());
             generator.setForceJdkVersion(forceJdkVersion);
         }
         final String xml = generator.generate();

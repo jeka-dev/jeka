@@ -9,12 +9,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
-      <excludeFolder url="file://$MODULE_DIR$/idea-output" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" scope="PROVIDED">
+    <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/provided/bouncycastle-pgp-152.jar!/" />
@@ -23,7 +23,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="PROVIDED">
+    <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/provided/classgraph-4.8.41.jar!/" />
@@ -77,7 +77,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="PROVIDED">
+    <orderEntry type="module-library" exported="" scope="PROVIDED">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/provided/junit-platform-launcher-1.6.0.jar!/" />
@@ -88,7 +88,7 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="PROVIDED">
+    <orderEntry type="module-library" exported="" scope="PROVIDED">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/provided/junit-platform-engine-1.6.0.jar!/" />
@@ -99,7 +99,7 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="PROVIDED">
+    <orderEntry type="module-library" exported="" scope="PROVIDED">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/provided/junit-platform-commons-1.6.0.jar!/" />

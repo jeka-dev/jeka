@@ -1,20 +1,17 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository
@@ -57,18 +54,17 @@ public final class JkRepo {
 
     private final URL url;
 
-    private final JkRepoCredential credential;
+    private JkRepoCredentials credentials;
 
-    private final JkRepoIvyConfig ivyConfig;
+    private final JkRepoIvyConfig ivyConfig = new JkRepoIvyConfig(this);
 
-    private final JkPublishConfig publishConfig;
+    private final JkPublishConfig publishConfig = new JkPublishConfig(this);
 
+    public final boolean ivyRepo; // true if this reposotory is an Ivy one, false if it is a Maven one.
 
-    private JkRepo(URL url, JkRepoCredential credential, JkRepoIvyConfig ivyConfig, JkPublishConfig publishConfig) {
+    private JkRepo(URL url, boolean ivyRepo) {
         this.url = url;
-        this.credential = credential;
-        this.ivyConfig = ivyConfig;
-        this.publishConfig = publishConfig;
+        this.ivyRepo = ivyRepo;
     }
 
     /**
@@ -81,23 +77,23 @@ public final class JkRepo {
             return ofLocal();
         }
         if (url.toLowerCase().startsWith(IVY_PREFIX)) {
-            return new JkRepo(toUrl(url.substring(4)), null, JkRepoIvyConfig.of(), JkPublishConfig.of());
+            return new JkRepo(toUrl(url.substring(4)), true);
         }
-        return new JkRepo(toUrl(url), null, null, JkPublishConfig.of());
+        return new JkRepo(toUrl(url), false);
     }
 
     /**
      * Creates a Maven repository having the specified file location.
      */
     public static JkRepo ofMaven(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir), null, null, JkPublishConfig.of());
+        return new JkRepo(JkUtilsPath.toUrl(dir), false);
     }
 
     /**
      * Creates a Ivy repository having the specified file location.
      */
     public static JkRepo ofIvy(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir), null, JkRepoIvyConfig.of(), JkPublishConfig.of());
+        return new JkRepo(JkUtilsPath.toUrl(dir), true);
     }
 
     /**
@@ -112,8 +108,10 @@ public final class JkRepo {
      */
     public static JkRepo ofMavenOssrhDownloadAndDeploySnapshot(String jiraId, String jiraPassword) {
         return of(MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT)
-                .with(JkRepoCredential.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"))
-                .with(JkPublishConfig.ofSnapshotOnly(false));
+                .setCredentials(JkRepoCredentials.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"))
+                .getPublishConfig()
+                    .setUniqueSnapshot(false)
+                    .setVersionFilter(JkVersion::isSnapshot).__;
     }
 
     /**
@@ -121,8 +119,11 @@ public final class JkRepo {
      */
     public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword) {
         return of(MAVEN_OSSRH_DEPLOY_RELEASE)
-                .with(JkRepoCredential.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"))
-                .with(JkPublishConfig.ofReleaseOnly(true).withChecksumAlgos("md5", "sha1"));
+                .setCredentials(jiraId, jiraPassword, "Sonatype Nexus Repository Manager")
+                .getPublishConfig()
+                    .setSignatureRequired(true)
+                    .setVersionFilter(version -> !version.isSnapshot())
+                    .setChecksumAlgos("md5", "sha1").__;
     }
 
     /**
@@ -138,8 +139,6 @@ public final class JkRepo {
     public static JkRepo ofMavenJCenter() {
         return of(JCENTERL_URL);
     }
-
-
 
     /**
      * Creates a Maven repository for publishing locally under <code></code>[USER HOME]/.jeka/publish</code> folder.
@@ -157,13 +156,6 @@ public final class JkRepo {
     }
 
     /**
-     * Returns <code>true</code> if some credential has been set on this repository.
-     */
-    public boolean hasCredentials() {
-        return credential != null;
-    }
-
-    /**
      * Returns configuration specific to Ivy repository. Returns <code>null</code> if this configuration stands
      * for a Maven repository.
      */
@@ -172,14 +164,14 @@ public final class JkRepo {
     }
 
     public boolean isIvyRepo() {
-        return this.ivyConfig != null;
+        return this.ivyRepo;
     }
 
     /**
      * Returns the getRealm of this repository.
      */
-    public final JkRepoCredential getCredential() {
-        return credential;
+    public final JkRepoCredentials getCredentials() {
+        return credentials;
     }
 
     public JkPublishConfig getPublishConfig() {
@@ -187,21 +179,25 @@ public final class JkRepo {
     }
 
     /**
-     * Returns a copy of this repository but having the specified credentials.
+     * Sets credentials to access to this repo.
      */
-    public JkRepo with(JkRepoCredential credential) {
-        return new JkRepo(this.url, credential, this.ivyConfig, this.publishConfig);
-    }
-
-    public JkRepo withOptionalCredentials(String username, String password) {
-        if (!JkUtilsString.isBlank(username)) {
-            return with(JkRepoCredential.of(username, password, null));
-        }
+    public JkRepo setCredentials(JkRepoCredentials credentials) {
+        this.credentials = credentials;
         return this;
     }
 
-    public JkRepo with(JkPublishConfig publishConfig) {
-        return new JkRepo(this.url, this.credential, this.ivyConfig, publishConfig);
+    /**
+     * @see #setCredentials(JkRepoCredentials)
+     */
+    public JkRepo setCredentials(String username, String password, String realm) {
+        return this.setCredentials(JkRepoCredentials.of(username, password, realm));
+    }
+
+    /**
+     * @see #setCredentials(JkRepoCredentials)
+     */
+    public JkRepo setCredentials(String username, String password) {
+        return this.setCredentials(username, password, null);
     }
 
     public JkRepoSet toSet() {
@@ -243,8 +239,7 @@ public final class JkRepo {
         }
     }
 
-
-    public static final class JkRepoCredential {
+    public static final class JkRepoCredentials {
 
         private final String realm;
 
@@ -252,18 +247,18 @@ public final class JkRepo {
 
         private final String password;
 
-        private JkRepoCredential(String realm, String userName, String password) {
+        private JkRepoCredentials(String realm, String userName, String password) {
             this.realm = realm;
             this.userName = userName;
             this.password = password;
         }
 
-        public static JkRepoCredential of(String username, String password) {
-            return new JkRepoCredential(null, username, password);
+        public static JkRepoCredentials of(String username, String password) {
+            return new JkRepoCredentials(null, username, password);
         }
 
-        public static JkRepoCredential of(String username, String password, String realm) {
-            return new JkRepoCredential(realm, username, password);
+        public static JkRepoCredentials of(String username, String password, String realm) {
+            return new JkRepoCredentials(realm, username, password);
         }
 
         public String getRealm() {
@@ -280,7 +275,7 @@ public final class JkRepo {
     }
 
     /**
-     * Configuration specific to Ivy.
+     * Configuration specific to Ivy. This has no effect on Maven repositories
      */
     public static final class JkRepoIvyConfig {
 
@@ -288,87 +283,72 @@ public final class JkRepo {
 
         public static final String DEFAULT_IVY_IVY_PATTERN = "[organisation]/[module]/ivy-[revision].xml";
 
+        public final JkRepo __;
+
         private final List<String> artifactPatterns;
 
         private final List<String> ivyPatterns;
 
-        private JkRepoIvyConfig(List<String> artifactPatterns, List<String> ivyPatterns) {
-            this.artifactPatterns = Collections.unmodifiableList(artifactPatterns);
-            this.ivyPatterns = Collections.unmodifiableList(ivyPatterns);
+        private JkRepoIvyConfig(JkRepo parent) {
+            this.__ = parent;
+            this.artifactPatterns = JkUtilsIterable.listOf(DEFAULT_IVY_ARTIFACT_PATTERN);
+            this.ivyPatterns = JkUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN);
         }
-
-        public static JkRepoIvyConfig of(List<String> artifactPatterns, List<String> ivyPatterns) {
-            return new JkRepoIvyConfig(artifactPatterns, ivyPatterns);
-        }
-
-        public static JkRepoIvyConfig of() {
-            return new JkRepoIvyConfig(JkUtilsIterable.listOf(DEFAULT_IVY_ARTIFACT_PATTERN),
-                    JkUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN));
-        }
-
 
         public List<String> artifactPatterns() {
-            return artifactPatterns;
+            return Collections.unmodifiableList(artifactPatterns);
         }
 
         public List<String> ivyPatterns() {
-            return ivyPatterns;
+            return Collections.unmodifiableList(ivyPatterns);
+        }
+
+        public JkRepoIvyConfig emptyArtifactPatterns() {
+            this.artifactPatterns.clear();
+            return this;
+        }
+
+        public JkRepoIvyConfig addArtifactPatterns(String ... patterns) {
+            this.artifactPatterns.addAll(Arrays.asList(patterns));
+            return this;
+        }
+
+        public JkRepoIvyConfig emptyIvyPatterns() {
+            this.ivyPatterns.clear();
+            return this;
+        }
+
+        public JkRepoIvyConfig addIvyPatterns(String ... patterns) {
+            this.ivyPatterns.addAll(Arrays.asList(patterns));
+            return this;
         }
     }
 
     /**
      * Configuration specific to publishing.
      */
-    public static class JkPublishConfig implements Serializable {
+    public static class JkPublishConfig {
 
-        private static final long serialVersionUID = 1L;
+        public final JkRepo __;
 
-        private final JkPublishFilter filter;
+        private Predicate<JkVersion> versionFilter = jkVersion -> true;
 
-        private final boolean signatureRequired;
+        private boolean signatureRequired;
 
-        private final boolean uniqueSnapshot;
+        private boolean uniqueSnapshot;
 
-        private final Set<String> checksumAlgos;
+        private Set<String> checksumAlgos = new HashSet<>();
 
-        private JkPublishConfig(JkPublishFilter filter, boolean signatureRequired, boolean uniqueSnapshot,
-                Set<String> checksumAlgos) {
-            super();
-            this.filter = filter;
-            this.uniqueSnapshot = uniqueSnapshot;
-            this.signatureRequired = signatureRequired;
-            this.checksumAlgos = Collections.unmodifiableSet(new HashSet<>(checksumAlgos));
-        }
-
-        public static JkPublishConfig of() {
-            return new JkPublishConfig(JkPublishFilter.ACCEPT_ALL, false, false,
-                    Collections.emptySet());
-        }
-
-        /**
-         * Creates a {@link JkPublishConfig} for publishing snapshot version on the specified {@link JkRepo}.
-         * Release versions are not publishable on this {@link JkPublishConfig}
-         */
-        public static JkPublishConfig ofSnapshotOnly(boolean uniqueSnapshot) {
-            return new JkPublishConfig(JkPublishFilter.ACCEPT_SNAPSHOT_ONLY, false, uniqueSnapshot,
-                    Collections.emptySet());
-        }
-
-        /**
-         * Creates a {@link JkPublishConfig} for publishing non-snapshot version on the specified {@link JkRepo}.
-         * Snapshot versions are not publishable on this {@link JkPublishConfig}
-         */
-        public static JkPublishConfig ofReleaseOnly(boolean needSignature) {
-            return new JkPublishConfig(JkPublishFilter.ACCEPT_RELEASE_ONLY, needSignature, false,
-                    Collections.emptySet());
+        private JkPublishConfig(JkRepo parent) {
+            __ = parent;
         }
 
         /**
          * Returns the filter used for this {@link JkPublishConfig}.
          * Only modules accepted by this filter will pb published on this repo.
          */
-        public JkPublishFilter getFilter() {
-            return filter;
+        public Predicate<JkVersion> getVersionFilter() {
+            return versionFilter;
         }
 
         public boolean isSignatureRequired() {
@@ -383,20 +363,25 @@ public final class JkRepo {
             return checksumAlgos;
         }
 
-        public JkPublishConfig withUniqueSnapshot(boolean uniqueSnapshot) {
-            return new JkPublishConfig(this.filter, this.signatureRequired, uniqueSnapshot, this.checksumAlgos);
+        public JkPublishConfig setUniqueSnapshot(boolean uniqueSnapshot) {
+            this.uniqueSnapshot = uniqueSnapshot;
+            return this;
         }
 
-        public JkPublishConfig withNeedSignature(boolean needSignature) {
-            return new JkPublishConfig(this.filter, needSignature, uniqueSnapshot, this.checksumAlgos);
+        public JkPublishConfig setSignatureRequired(boolean signatureRequired) {
+            this.signatureRequired = signatureRequired;
+            return this;
         }
 
-        public JkPublishConfig withFilter(JkPublishFilter filter) {
-            return new JkPublishConfig(filter, this.signatureRequired, this.uniqueSnapshot, this.checksumAlgos);
+        public JkPublishConfig setVersionFilter(Predicate<JkVersion> versionFilter) {
+            JkUtilsAssert.argument(versionFilter != null, "Filter cannot be null.");
+            this.versionFilter = versionFilter;
+            return this;
         }
 
-        public JkPublishConfig withChecksumAlgos(String... algos) {
-            return new JkPublishConfig(this.filter, this.signatureRequired, this.uniqueSnapshot, JkUtilsIterable.setOf(algos));
+        public JkPublishConfig setChecksumAlgos(String... algos) {
+            this.checksumAlgos = JkUtilsIterable.setOf(algos);
+            return this;
         }
     }
 

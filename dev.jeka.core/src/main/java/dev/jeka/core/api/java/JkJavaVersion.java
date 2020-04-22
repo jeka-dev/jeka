@@ -11,7 +11,7 @@ public final class JkJavaVersion {
      * Creates a Java specification version from the specified name.
      */
     public static JkJavaVersion of(String value) {
-        JkUtilsAssert.notNull(value, "version name can't be null. Use 7, 8, ...");
+        JkUtilsAssert.argument(value != null, "version name can't be null. Use 7, 8, ...");
         return new JkJavaVersion(value);
     }
 

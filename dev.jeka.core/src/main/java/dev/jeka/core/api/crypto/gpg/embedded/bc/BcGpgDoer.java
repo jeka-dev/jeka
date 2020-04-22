@@ -2,7 +2,7 @@ package dev.jeka.core.api.crypto.gpg.embedded.bc;
 
 import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
@@ -21,6 +21,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -88,8 +89,12 @@ final class BcGpgDoer implements JkInternalGpgDoer {
 
     public void sign(Path fileToSign, Path secringFile, String keyName, Path signatureFile, char[] pass,
                             boolean armor) {
-        JkUtilsAssert.isTrue(Files.exists(fileToSign), fileToSign + " not found.");
-        JkUtilsAssert.isTrue(Files.exists(secringFile), secringFile + " not found.");
+        JkLog.info("Sign file %s using secretkey file %s and key name '%s'.",
+                Paths.get("").toAbsolutePath().relativize(fileToSign),
+                Paths.get("").toAbsolutePath().relativize(secringFile),
+                keyName);
+        JkUtilsAssert.argument(Files.exists(fileToSign), fileToSign + " not found.");
+        JkUtilsAssert.argument(Files.exists(secringFile), secringFile + " not found.");
         JkPathFile.of(signatureFile).createIfNotExist();
         try (final InputStream toSign = Files.newInputStream(fileToSign);
              final InputStream keyRing = Files.newInputStream(secringFile);
@@ -128,7 +133,7 @@ final class BcGpgDoer implements JkInternalGpgDoer {
             throw JkUtilsThrowable.unchecked(e);
         } catch (final PGPException e) {
             if (e.getMessage().equals("checksum mismatch at 0 of 20")) {
-                throw new JkException("Secret key password is probably wrong.");
+                throw new IllegalStateException("Secret key password is probably wrong.", e);
             }
             throw JkUtilsThrowable.unchecked(e);
         }
@@ -147,7 +152,7 @@ final class BcGpgDoer implements JkInternalGpgDoer {
                 }
             }
         }
-        throw new JkException("Can't find signing key in key ring having name starting with " + prefix);
+        throw new IllegalStateException("Can't find signing key in key ring having name starting with " + prefix);
     }
 
     private static List<PGPSecretKeyRing> extractSecrectKeyRings(InputStream inputStream) {
@@ -196,7 +201,7 @@ final class BcGpgDoer implements JkInternalGpgDoer {
                     throw JkUtilsThrowable.unchecked(e);
                 }
             } else {
-                throw new JkException(
+                throw new IllegalStateException(
                         "Provided PGP file does not contain only secret key."
                                 + " Was expecting a file containing secret key only. ");
             }

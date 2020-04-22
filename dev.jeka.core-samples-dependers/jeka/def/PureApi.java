@@ -1,7 +1,10 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
+
+import java.nio.file.Paths;
 
 public class PureApi {
 
@@ -9,19 +12,22 @@ public class PureApi {
         JkLog.setHierarchicalConsoleConsumer();  // activate console logging
 
         // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
-        JkJavaProject coreProject = JkJavaProject.ofMavenLayout("../dev.jeka.core-samples");
-        coreProject.addDependencies(
-                JkDependencySet.of().and("junit:junit:4.13", JkJavaDepScopes.TEST));
+        JkJavaProject coreProject = JkJavaProject.of()
+            .setBaseDir(Paths.get("../dev.jeka.core-samples"))
+             .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                        .and("junit:junit:4.13", JkScope.TEST)).__;
 
         // A project depending on the first project + Guava
-        JkJavaProject dependerProject = JkJavaProject.ofMavenLayout(".");
-        dependerProject.setVersionedModule("mygroup:depender", "1.0-SNAPSHOT");
-        dependerProject.addDependencies(JkDependencySet.of()
-                .and("com.google.guava:guava:22.0")
-                .and(coreProject));
-
-        coreProject.getMaker().clean();
-        dependerProject.getMaker().clean().makeAllArtifacts();
-        dependerProject.getMaker().getSteps().getPublishing().publish();
+        JkJavaProject dependerProject = JkJavaProject.of()
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and("com.google.guava:guava:22.0")
+                    .and(coreProject.toDependency())).__
+                .getPublication()
+                    .setModuleId("mygroup:depender")
+                    .setVersion(JkVersion.of("1.0-SNAPSHOT")).__;
+        dependerProject.getArtifactProducer().makeAllArtifacts();
+        dependerProject.getPublication().publish();
     }
 }

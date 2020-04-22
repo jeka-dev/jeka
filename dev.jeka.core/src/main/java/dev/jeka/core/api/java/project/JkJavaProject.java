@@ -1,25 +1,11 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkArtifactProducer;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkFileSystemLocalizable;
-import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.file.JkResourceProcessor;
-import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.JkManifest;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 /**
  * Container for a Java project with classic characteristic :
@@ -28,213 +14,165 @@ import java.util.function.Supplier;
  *     <li>All Java sources file (prod + test) are wrote against the same Java version and encoding</li>
  *     <li>JkJavaProject may contain unit tests</li>
  *     <li>It can depends on any accepted dependencies (Maven module, other project, files on fs, ...)</li>
- *
  *     <li>It produces a bin jar, a source jar and a javadoc jar</li>
  *     <li>It can produce any other artifact files (fat-jar, test jar, doc, ...)</li>
- *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, version) in order to be published/reused</li>
+ *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, version) in order to be published/consumed</li>
  *     <li>It can be published on any Maven/Ivy repository, including Maven central</li>
- *
  *     <li>Part of the sources/resources may be generated</li>
- *     <li>By default, passing test suite is required to produce artifact.</li>
+ *     <li>By default, passing test suite is required to produce bin artifacts.</li>
  * </ul>
- *
- * Beside, java projects are highly extensible so you can add build tasks or alter existing ones. This
- * is done using {@link #getMaker()} object. For example you can easily add test cover or SonarQube analysis.
  *
  * It provides cache mechanism in order compile or unit test phases are executed once when generating
  * several artifact files so be aware of clean it if you want to replay some tasks with different settings.
  *
- * @See JkJavaProjectMaker
  */
-public class JkJavaProject implements JkJavaProjectIdeSupplier, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
+public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemLocalizable, JkArtifactProducer.JkSupplier {
 
-    private JkVersionedModule versionedModule;
+    public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
 
-    private JkProjectSourceLayout sourceLayout;
+    public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
 
-    private JkDependencySet dependencies;
+    private Path baseDir = Paths.get(".");
 
-    private JkJavaCompileSpec compileSpec =
-            JkJavaCompileSpec.of().setSourceAndTargetVersion(JkJavaVersion.V8).setEncoding("UTF-8");
+    private String outputDir = "jeka/output";
 
-    private final List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<>();
+    private final JkDependencyManagement<JkJavaProject> dependencyManagement;
 
-    private JkManifest manifest = JkManifest.ofEmpty();
+    private final JkStandardFileArtifactProducer<JkJavaProject> artifactProducer;
 
-    private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
+    private final JkJavaProjectTesting testing;
 
-    private final JkJavaProjectMaker maker;
+    private final JkJavaProjectDocumentation documentation;
 
-    private JkJavaProject(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout;
-        this.dependencies = JkDependencySet.of();
-        this.versionedModule = JkVersionedModule.ofRootDirName(sourceLayout.getBaseDir().getFileName().toString());
-        this.maker = new JkJavaProjectMaker(this);
+    private final JkJavaProjectProduction production;
+
+    private final JkJavaProjectPublication publication;
+
+
+    private JkJavaProject() {
+        dependencyManagement = JkDependencyManagement.ofParent(this);
+        testing = new JkJavaProjectTesting(this);
+        documentation = new JkJavaProjectDocumentation( this);
+        production = new JkJavaProjectProduction(this);
+        publication = new JkJavaProjectPublication(this);
+        artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
+                .setArtifactFilenameComputation(this::getOutputDir, this::artifactFileNamePart);
+        registerArtifacts();
     }
 
-    public static JkJavaProject of(JkProjectSourceLayout layout) {
-        return new JkJavaProject(layout);
+    public static JkJavaProject of() {
+        return new JkJavaProject();
     }
 
-    public static JkJavaProject ofMavenLayout(Path baseDir) {
-        return JkJavaProject.of(JkProjectSourceLayout.ofMavenStyle().withBaseDir(baseDir));
+    public JkJavaProject apply(Consumer<JkJavaProject> projectConsumer) {
+        projectConsumer.accept(this);
+        return this;
     }
 
-    public static JkJavaProject ofMavenLayout(String baseDir) {
-        return ofMavenLayout(Paths.get(baseDir));
+
+    // ---------------------------- Getters / setters --------------------------------------------
+
+    @Override
+    public Path getBaseDir() {
+        return this.baseDir;
     }
 
-    public static JkJavaProject ofSimpleLayout(Path baseDir) {
-        return JkJavaProject.of(JkProjectSourceLayout.ofSimpleStyle().withBaseDir(baseDir));
+    public JkJavaProject setBaseDir(Path baseDir) {
+        this.baseDir = baseDir;
+        return this;
     }
 
-    public static JkJavaProject ofSimpleLayout(String baseDir) {
-        return ofSimpleLayout(Paths.get(baseDir));
+    /**
+     * Returns path of the directory under which are produced build files
+     */
+    public Path getOutputDir() {
+        return baseDir.resolve(outputDir);
+    }
+
+    /**
+     * Sets the output path dir relative to base dir.
+     */
+    public JkJavaProject setOutputDir(String relativePath) {
+        this.outputDir = relativePath;
+        return this;
+    }
+
+    public JkDependencyManagement<JkJavaProject> getDependencyManagement() {
+        return dependencyManagement;
+    }
+
+    public JkStandardFileArtifactProducer<JkJavaProject> getArtifactProducer() {
+        return artifactProducer;
+    }
+
+    public JkJavaProjectTesting getTesting() {
+        return testing;
+    }
+
+    public JkJavaProjectProduction getProduction() {
+        return production;
+    }
+
+    public JkJavaProjectPublication getPublication() {
+        return publication;
+    }
+
+    public JkJavaProjectDocumentation getDocumentation() {
+        return documentation;
     }
 
     // -------------------------- Other -------------------------
 
     @Override
     public String toString() {
-        return "project " + this.sourceLayout.getBaseDir().getFileName();
-    }
-
-    // ---------------------------- Getters / setters --------------------------------------------
-
-    @Override
-    public Path getBaseDir() {
-        return this.getSourceLayout().getBaseDir();
-    }
-
-    public JkProjectSourceLayout getSourceLayout() {
-        return sourceLayout;
-    }
-
-    public JkDependencySet getDependencies() {
-        return this.dependencies;
-    }
-
-    public JkJavaProjectMaker getMaker() {
-        return maker;
-    }
-
-    public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout;
-        return this;
-    }
-
-    public JkJavaProject setDependencies(JkDependencySet dependencies) {
-        this.maker.cleanDependencyCache();
-        this.dependencies = dependencies;
-        return this;
-    }
-
-    public JkJavaProject addDependencies(JkDependencySet dependencies) {
-        return this.setDependencies(this.dependencies.and(dependencies));
-    }
-
-    public JkJavaProject setSourceEncoding(String encoding) {
-        this.compileSpec.setEncoding(encoding);
-        return this;
-    }
-
-    public JkJavaProject setSourceVersion(JkJavaVersion version ) {
-        this.compileSpec.setSourceAndTargetVersion(version);
-        return this;
-    }
-
-    public List<JkResourceProcessor.JkInterpolator> getResourceInterpolators() {
-        return resourceInterpolators;
-    }
-
-    public void addResourceInterpolator(PathMatcher pathMatcher, Map<String, String> valueReplacements) {
-        resourceInterpolators.add(JkResourceProcessor.JkInterpolator.of(pathMatcher, valueReplacements));
-    }
-
-    public void addResourceInterpolator(String acceptPattern, Map<String, String> valueReplacements) {
-        addResourceInterpolator(JkPathMatcher.of(acceptPattern), valueReplacements);
-    }
-
-    /**
-     * Returns the module name and version of this project. This information is used for naming produced artifact files,
-     * publishing. It is also consumed by tools as SonarQube.
-     */
-    public JkVersionedModule getVersionedModule() {
-        return versionedModule;
-    }
-
-    /**
-     * Sets the specified module name and version for this project.
-     * @see #getVersionedModule()
-     */
-    public JkJavaProject setVersionedModule(JkVersionedModule versionedModule) {
-        JkUtilsAssert.notNull(versionedModule, "Can't set null value for versioned module.");
-        this.versionedModule = versionedModule;
-        return this;
-    }
-
-    /**
-     * @see #setVersionedModule(JkVersionedModule)
-     */
-    public JkJavaProject setVersionedModule(String groupAndName, String version) {
-        return setVersionedModule(JkModuleId.of(groupAndName).withVersion(version));
-    }
-
-    public JkJavaCompileSpec getCompileSpec() {
-        return compileSpec;
-    }
-
-    public JkJavaProject setCompileSpec(JkJavaCompileSpec compileSpec) {
-        this.compileSpec = compileSpec;
-        return this;
-    }
-
-    public JkManifest getManifest() {
-        return manifest;
-    }
-
-    public JkJavaProject setManifest(JkManifest manifest) {
-        this.manifest = manifest;
-        return this;
-    }
-
-    public JkPathTreeSet getExtraFilesToIncludeInJar() {
-        return this.extraFilesToIncludeInFatJar;
-    }
-
-    /**
-     * File trees specified here will be added to the fat jar.
-     */
-    public JkJavaProject setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
-        this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
-        return this;
-    }
-
-    @Override
-    public JkArtifactProducer get() {
-        return getMaker();
+        return "project " + getBaseDir().getFileName();
     }
 
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
-                .append("Published Module & version : " + this.versionedModule + "\n")
-                .append(this.sourceLayout.getInfo()).append("\n")
-                .append("Java Source Version : " + this.getCompileSpec().getSourceVersion() + "\n")
-                .append("Source Encoding : " + this.compileSpec.getEncoding() + "\n")
-                .append("Source file count : " + this.sourceLayout.getSources().count(Integer.MAX_VALUE, false) + "\n")
-                .append("Download Repositories : " + this.maker.getDependencyResolver().getRepos() + "\n")
-                .append("Publish repositories : " + this.maker.getSteps().getPublishing().getPublishRepos()  + "\n")
-                .append("Declared Dependencies : " + this.getDependencies().toList().size() + " elements.\n")
-                .append("Defined Artifacts : " + this.get().getArtifactIds())
+                .append("Published Module & version : " + publication.getModuleId() + ":" + publication.getVersion() + "\n")
+                .append("Production sources : " + production.getCompilation().getLayout().getInfo()).append("\n")
+                .append("Test sources : " + testing.getCompilation().getLayout().getInfo()).append("\n")
+                .append("Java Source Version : " + production.getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
+                .append("Source Encoding : " + production.getCompilation().getComputedCompileSpec().getEncoding() + "\n")
+                .append("Source file count : " + production.getCompilation().getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
+                .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
+                .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
+                .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
+                .append("Defined Artifacts : " + getArtifactProducer().getArtifactIds())
                 .toString();
     }
 
     @Override
-    public JkJavaProjectIde getJavaProjectIde() {
-        return JkJavaProjectIde.ofDefault()
-                .withDependencies(this.dependencies)
-                .withDependencyResolver(this.maker.getDependencyResolver())
-                .withSourceLayout(this.sourceLayout)
-                .withSourceVersion(this.compileSpec.getSourceVersion());
+    public JkJavaIdeSupport getJavaIdeSupport() {
+        return JkJavaIdeSupport.of(baseDir)
+                .setSourceVersion(production.getCompilation().getJavaVersion())
+                .setProdLayout(production.getCompilation().getLayout())
+                .setTestLayout(testing.getCompilation().getLayout())
+                .setDependencies(this.dependencyManagement.getDependencies())
+                .setDependencyResolver(this.dependencyManagement.getResolver());
     }
+
+    public JkLocalLibDependency toDependency() {
+        return toDependency(artifactProducer.getMainArtifactId());
+    }
+
+    public JkLocalLibDependency toDependency(JkArtifactId artifactId) {
+        return JkLocalLibDependency.of(
+                () -> artifactProducer.makeArtifact(artifactId),
+                artifactProducer.getArtifactPath(artifactId),
+                this.baseDir,
+                this.publication.getPublishedDependencies());
+    }
+
+    private String artifactFileNamePart() {
+        return publication.getModuleId().getDotedName();
+    }
+
+    private void registerArtifacts() {
+        artifactProducer.putMainArtifact(production::createBinJar);
+        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, production::createSourceJar);
+        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, documentation::createJavadocJar);
+    }
+
 }

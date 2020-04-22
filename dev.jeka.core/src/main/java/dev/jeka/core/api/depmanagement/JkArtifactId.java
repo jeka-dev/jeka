@@ -1,36 +1,56 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 /**
- * Artifacts are files produced by projects in order to be published or reused by other projects.
- * This class stands for an identifier for an artifact within a project.
- * An artifact producer is likely to produce several artifact files (main jar, sources, javadoc, native jars, ...). <br/>
- * To distinguish them, Jeka uses the notion of 'classifier' and 'extension'. <br/>
- * Extension is simply the char sequence at the end of of file to determine its technical type (.exe, .jar, .zip, ...). <br/>
- * Classifier is to mention the purpose of the file (main artifact, sources, javadoc, uberjar, native lib, ...).
+ * Artifacts are files produced by projects in order to be published and reused by other projects. {@link JkArtifactId}
+ * identifies artifacts within a project. <p>
+ * The identifier is compound of a name and a file extension. The name maps with the Maven 'classifier' concept.<br/>
+ * In a project, we distinguish the <i>main artifact</i> from the others : the main artifact name values to empty string.
  */
 public final class JkArtifactId {
 
-    /**
-     * Creates an artifact file id with the specified classifier and getExtension. Both can be <code>null</code>. <br/>
-     * A <code>null</code> or empty classifier generally means the main artifact. <br/>
-     * A <code>getExtension</code> or empty getExtension generally means that the file has no getExtension.<br/>
-     */
-    public static JkArtifactId of(String classifier, String extension) {
-        return new JkArtifactId(classifier, extension);
+    public static final String MAIN_ARTIFACT_NAME = "";
+
+    private final String name;
+
+    private final String extension;
+
+    private JkArtifactId(String name, String extension) {
+        this.name = name.toLowerCase();
+        this.extension = extension == null || extension.trim().length() == 0 ? null : extension.trim().toLowerCase();
     }
 
-    private final String classifier, extension;
+    /**
+     * Creates an artifact id with the specified name and extension. <p>
+     * The name cannot be null or be a string composed of spaces.
+     * An empty string extension generally means that the file has no extension.<br/>
+     */
+    public static JkArtifactId of(String name, String extension) {
+        JkUtilsAssert.argument(name != null, "Artifact name cannot be null");
+        JkUtilsAssert.argument(extension != null, "Artifact extension cannot be null (but blank is ok).");
+        JkUtilsAssert.argument(MAIN_ARTIFACT_NAME.equals(name) || !JkUtilsString.isBlank(name),
+                "Artifact name cannot be a blank string.");
+        return new JkArtifactId(name, extension);
+    }
 
-    private JkArtifactId(String classifier, String extension) {
-        this.classifier = classifier == null || classifier.trim().length() == 0 ? null : classifier.trim().toLowerCase();
-        this.extension = extension == null || extension.trim().length() == 0 ? null : extension.trim().toLowerCase();
+    /**
+     * Shorthand for <code>of(MAIN_ARTIFACT_NAME, String)</code>.
+     */
+    public static JkArtifactId ofMainArtifact(String extension) {
+        return JkArtifactId.of(MAIN_ARTIFACT_NAME, extension);
+    }
+
+    public boolean isMainArtifact() {
+        return MAIN_ARTIFACT_NAME.equals(this.name);
     }
 
     /**
      * Returns the classifier of this object.
      */
-    public String getClassifier() {
-        return classifier;
+    public String getName() {
+        return name;
     }
 
     /**
@@ -40,28 +60,10 @@ public final class JkArtifactId {
         return extension;
     }
 
-    /**
-     * Returns <code>true</code> if any of the specified classifiers is equals to this classifier.
-     */
-    public boolean isClassifier(String... classifiers) {
-        for (String classifier : classifiers) {
-            if (classifier.trim().toLowerCase().equals(this.classifier)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns <code>true</code> if any of the specified getExtension is equals to this getExtension.
-     */
-    public boolean isExtension(String... extensions) {
-        for (String extension : extensions) {
-            if (extension.trim().toLowerCase().equals(this.extension)) {
-                return true;
-            }
-        }
-        return false;
+    public String toFileName(String namePart) {
+        String classifier = isMainArtifact() ? "" : "-" + getName();
+        String ext = JkUtilsString.isBlank(extension) ? "" : "." + getExtension();
+        return namePart + classifier + ext;
     }
 
     @Override
@@ -71,20 +73,20 @@ public final class JkArtifactId {
 
         JkArtifactId that = (JkArtifactId) o;
 
-        if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
         return extension != null ? extension.equals(that.extension) : that.extension == null;
     }
 
     @Override
     public int hashCode() {
-        int result = classifier != null ? classifier.hashCode() : 0;
+        int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (extension != null ? extension.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        String classif = classifier == null ? "[main-artifact]" : "-" + classifier;
+        String classif = name == null ? "[main-artifact]" : "-" + name;
         return "" + classif + '.' + extension;
     }
 

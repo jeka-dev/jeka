@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 

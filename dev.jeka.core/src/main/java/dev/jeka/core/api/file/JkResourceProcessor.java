@@ -1,8 +1,10 @@
 package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -11,8 +13,7 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-//import java.io.File;
+import java.util.function.Consumer;
 
 /**
  * This processor basically copies some resource files to a target folder
@@ -24,43 +25,104 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Jerome Angibaud
  */
-public final class JkResourceProcessor {
+public final class JkResourceProcessor<T> {
 
-    private final JkPathTreeSet resourceTrees;
+    private final List<JkInterpolator> interpolators = new LinkedList<>();
 
-    private final Iterable<JkInterpolator> interpolators;
+    // Charset for interpolation
+    private Charset interpolationCharset = Charset.forName("UTF-8");
 
-    private JkResourceProcessor(JkPathTreeSet trees, Iterable<JkInterpolator> interpolators) {
-        super();
-        this.resourceTrees = trees;
-        this.interpolators = interpolators;
+    /**
+     * For parent chaining
+     */
+    public final T __;
+
+    private JkResourceProcessor(T parent) {
+        this.__ = parent;
     }
 
     /**
-     * Creates a <code>JkResourceProcessor</code> jump the given
-     * <code>JkPathTreeSet</code> without processing any token replacement.
+     * Applies the specified consumer to this object.
      */
-    @SuppressWarnings("unchecked")
-    public static JkResourceProcessor of(JkPathTreeSet trees) {
-        return new JkResourceProcessor(trees, Collections.EMPTY_LIST);
+    public JkResourceProcessor<T> apply(Consumer<JkResourceProcessor> consumer) {
+        consumer.accept(this);
+        return this;
     }
 
     /**
-     * Creates a <code>JkResourceProcessor</code> jump the given
-     * <code>JkPathTree</code> without processing any token replacement.
+     * Creates an empty resource processor
      */
-    public static JkResourceProcessor of(JkPathTree tree) {
-        return of(tree.toSet());
+    public static JkResourceProcessor<Void> of() {
+        return ofParent(null);
+    }
+
+    /**
+     * Same as {@link #of()} with providing a parent chaining
+     */
+    public static <T> JkResourceProcessor<T> ofParent(T parent) {
+        return new JkResourceProcessor<>(parent);
+    }
+
+    /**
+     * Adds specified interpolators to this resource processor.
+     */
+    public JkResourceProcessor<T> addInterpolators(Iterable<JkInterpolator> interpolators) {
+        JkUtilsIterable.addAllWithoutDuplicate(this.interpolators, interpolators);
+        return this;
+    }
+
+    /**
+     * @see #addInterpolators(Iterable)
+     */
+    public JkResourceProcessor<T> addInterpolators(JkInterpolator ... interpolators) {
+        return addInterpolators(Arrays.asList(interpolators));
+    }
+
+    /**
+     * @see #addInterpolators(Iterable)
+     */
+    public JkResourceProcessor<T> addInterpolator(PathMatcher pathMatcher, Map<String, String> keyValues) {
+        return addInterpolators(JkInterpolator.of(pathMatcher, keyValues));
+    }
+
+    /**
+     * @see #addInterpolators(Iterable)
+     */
+    public JkResourceProcessor<T> addInterpolator(String acceptPattern, Map<String, String> keyValues) {
+        return addInterpolator(JkPathMatcher.of(true, acceptPattern), keyValues);
+    }
+
+    /**
+     * @see #addInterpolators(Iterable)
+     */
+    public JkResourceProcessor<T> addInterpolator(String acceptPattern, String... keyValues) {
+        return addInterpolator(acceptPattern, JkUtilsIterable.mapOfAny(keyValues));
+    }
+
+    /**
+     * Returns the charset used for interpolation
+     */
+    public Charset getInterpolationCharset() {
+        return interpolationCharset;
+    }
+
+    /**
+     * Set the charset used for interpolation. This charset is not used if no interpolation occurs.
+     */
+    public JkResourceProcessor<T> setInterpolationCharset(Charset interpolationCharset) {
+        JkUtilsAssert.argument(interpolationCharset != null, "interpolation charset cannot be null.");
+        this.interpolationCharset = interpolationCharset;
+        return this;
     }
 
     /**
      * Actually processes the resources, meaning copies the getResources to the
      * specified output directory along replacing specified tokens.
      */
-    public void generateTo(Path outputDir, Charset charset) {
-        JkLog.startTask("Coping resource files to " + outputDir);
-        final AtomicInteger count = new AtomicInteger(0);
-        for (final JkPathTree resourceTree : this.resourceTrees.getPathTrees()) {
+    public void generate(JkPathTreeSet resourceTrees, Path outputDir) {
+        JkLog.startTask("Copying resource files to %s", outputDir);
+        for (final JkPathTree resourceTree : resourceTrees.toList()) {
+            final AtomicInteger count = new AtomicInteger(0);
             if (!resourceTree.exists()) {
                 continue;
             }
@@ -72,66 +134,14 @@ public final class JkResourceProcessor {
                 if (Files.isDirectory(path)) {
                     JkUtilsPath.createDirectories(out);
                 } else {
-                    JkPathFile.of(path).copyReplacingTokens(out, data, charset);
+                    JkPathFile.of(path).copyReplacingTokens(out, data, interpolationCharset);
                     count.incrementAndGet();
                 }
             });
+            JkLog.info("%s processed from %s.", JkUtilsString.plurialize(count.get(), "file"),
+                    Paths.get("").toAbsolutePath().relativize(resourceTree.getRoot()));
         }
-        JkLog.info(count.intValue() + " file(s) copied.");
         JkLog.endTask();
-    }
-
-    /**
-     * @see JkResourceProcessor#and(JkPathTreeSet)
-     */
-    public JkResourceProcessor and(JkPathTreeSet trees) {
-        return new JkResourceProcessor(this.resourceTrees.and(trees), this.interpolators);
-    }
-
-    /**
-     * @see JkResourceProcessor#and(JkPathTreeSet)
-     */
-    public JkResourceProcessor and(JkPathTree tree) {
-        return and(tree.toSet());
-    }
-
-    /**
-     * @see JkResourceProcessor#and(JkPathTree)
-     */
-    public JkResourceProcessor and(Path dir) {
-        return and(JkPathTree.of(dir));
-    }
-
-
-
-    /**
-     * Creates a <code>JkResourceProcessor</code> identical at this one but
-     * adding the specified interpolator.
-     */
-    public JkResourceProcessor and(JkInterpolator interpolator) {
-        return and(JkUtilsIterable.listOf(interpolator));
-    }
-
-    public JkResourceProcessor andInterpolate(PathMatcher pathMatcher, Map<String, String> keyValues) {
-        return and(JkInterpolator.of(pathMatcher, keyValues));
-    }
-
-    public JkResourceProcessor andInterpolate(String acceptPattern, Map<String, String> keyValues) {
-        return andInterpolate(JkPathMatcher.of(true, acceptPattern), keyValues);
-    }
-
-    public JkResourceProcessor andInterpolate(String acceptPattern, String... keyValues) {
-        return andInterpolate(acceptPattern, JkUtilsIterable.mapOfAny(keyValues));
-    }
-
-    /**
-     * Creates a <code>JkResourceProcessor</code> identical at this one but
-     * adding the specified interpolator.
-     */
-    public JkResourceProcessor and(Iterable<JkInterpolator> interpolators) {
-        final List<JkInterpolator> list = new LinkedList<>(JkUtilsIterable.listOf(this.interpolators));
-        JkUtilsIterable.addAllWithoutDuplicate(list, interpolators);
-        return new JkResourceProcessor(this.resourceTrees, list);
     }
 
     /**
@@ -139,7 +149,7 @@ public final class JkResourceProcessor {
      * value), and the file filter to apply it. Keys are generally formatted as <code>${keyName}</code>
      * but can be of any form.
      */
-    public static class JkInterpolator {
+    private static class JkInterpolator {
 
         private final Map<String, String> keyValues;
 

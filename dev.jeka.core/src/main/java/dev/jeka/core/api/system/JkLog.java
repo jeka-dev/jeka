@@ -1,6 +1,9 @@
 package dev.jeka.core.api.system;
 
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -78,7 +81,7 @@ public final class JkLog implements Serializable {
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
-        JkUtilsAssert.notNull(verbosityArg, "Verbosity can noot be set to null.");
+        JkUtilsAssert.argument(verbosityArg != null, "Verbosity can noot be set to null.");
         verbosity = verbosityArg;
     }
 
@@ -100,8 +103,8 @@ public final class JkLog implements Serializable {
         return JkUtilsObject.firstNonNull(errorStream, JkUtilsIO.nopOuputStream());
     }
 
-    public static void info(String message) {
-        consume(JkLogEvent.ofRegular(Type.INFO, message));
+    public static void info(String message, Object... params) {
+        consume(JkLogEvent.ofRegular(Type.INFO, String.format(message, params)));
     }
 
     public static void warn(String message) {
@@ -131,8 +134,8 @@ public final class JkLog implements Serializable {
     /**
      * Logs the start of the current task. Subsequent logs will be nested in this task log until #endTask is invoked.
      */
-    public static void startTask(String message) {
-        consume(JkLogEvent.ofRegular(Type.START_TASK, message));
+    public static void startTask(String message, Object ... params) {
+        consume(JkLogEvent.ofRegular(Type.START_TASK, String.format(message, params)));
         if (shouldPrint(Type.START_TASK)) {
             currentNestedTaskLevel.incrementAndGet();
             getStartTimes().addLast(System.nanoTime());
@@ -152,7 +155,7 @@ public final class JkLog implements Serializable {
                 for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
                     System.err.println(ste);
                 }
-                throw new JkException("No start task found matching with this endTask. Check that you don't have " +
+                throw new IllegalStateException("No start task found matching with this endTask. Check that you don't have " +
                         "used an 'endTask' one too many in your code.");
 
             }

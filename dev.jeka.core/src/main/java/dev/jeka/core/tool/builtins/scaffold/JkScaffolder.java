@@ -4,10 +4,10 @@ import dev.jeka.core.api.depmanagement.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -31,8 +31,7 @@ public final class JkScaffolder {
 
     private String classFilename = "Commands.java";
 
-
-    private final JkRunnables extraActions = JkRunnables.noOp();
+    private final JkRunnables extraActions = JkRunnables.of();
 
     JkScaffolder(Path baseDir) {
         super();
@@ -59,7 +58,7 @@ public final class JkScaffolder {
     public void embed() {
         JkLog.info("Create shell files.");
         final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.bat");
-        JkException.throwIf(!Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
+        JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
                 "to shell scripts");
         JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
         JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), baseDir.resolve("jekaw"),
@@ -80,7 +79,7 @@ public final class JkScaffolder {
     public void wrap(JkDependencyResolver dependencyResolver) {
         JkLog.info("Create shell files.");
         final Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
-        JkException.throwIf(!Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
+        JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
                 "to shell scripts");
         JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
         Path jekawPath = baseDir.resolve("jekaw");
@@ -107,7 +106,7 @@ public final class JkScaffolder {
         JkPathFile newShellFile = JkPathFile.of(baseDir.resolve("jekaw"));
         Path batDelegate = baseDir.resolve(delegateFolder).resolve("jekaw.bat");
         if (!Files.exists(batDelegate) && JkUtilsSystem.IS_WINDOWS) {
-            throw new JkException("Cannot find file " + batDelegate);
+            throw new IllegalArgumentException("Cannot find file " + batDelegate);
         } else {
             String content = delegateFolder + "\\jekaw %*";
             content = content.replace('/', '\\');
@@ -115,7 +114,7 @@ public final class JkScaffolder {
         }
         Path shellDelegate = baseDir.resolve(delegateFolder).resolve("jekaw");
         if (!Files.exists(shellDelegate) && !JkUtilsSystem.IS_WINDOWS) {
-            throw new JkException("Cannot find file " + batDelegate);
+            throw new IllegalStateException("Cannot find file " + batDelegate);
         } else {
             String content ="#!/bin/sh\n\n" + delegateFolder.replace('\\', '/') + "/jekaw $@";
             newShellFile.deleteIfExist().createIfNotExist().write(content.getBytes(Charset.forName("utf8")))
@@ -136,7 +135,8 @@ public final class JkScaffolder {
     }
 
     private String jekaVersion(JkDependencyResolver dependencyResolver) {
-        final List<String> versions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID)).stream()
+        List<String> allVersions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID));
+        final List<String> versions = allVersions.stream()
                 .filter(version -> version.endsWith(".RELEASE"))
                 .collect(Collectors.toList());
         if (versions.isEmpty()) {

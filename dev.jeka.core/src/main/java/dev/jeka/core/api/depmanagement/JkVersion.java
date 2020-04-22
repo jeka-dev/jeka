@@ -66,8 +66,8 @@ public final class JkVersion implements Comparable<JkVersion> {
 
     private JkVersion(String value) {
         super();
-        JkUtilsAssert.notNull(value, "value can't be null");
-        JkUtilsAssert.isTrue(!JkUtilsString.isBlank(value), "value can't ne blank");
+        JkUtilsAssert.argument(value != null, "value can't be null");
+        JkUtilsAssert.argument(!JkUtilsString.isBlank(value), "value can't ne blank");
         this.value = value;
     }
 

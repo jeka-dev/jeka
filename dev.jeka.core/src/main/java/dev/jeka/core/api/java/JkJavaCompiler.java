@@ -1,12 +1,11 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsTime;
 
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -14,110 +13,99 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Stand for a compilation setting and process. Use this class to perform java
- * compilation.
+ * Compiler for Java source code. Underlying, it uses either a {@link JavaCompiler} instance either an external
+ * process (forked mode).
  */
-public final class JkJavaCompiler {
+public final class JkJavaCompiler<T> {
 
-    private final boolean failOnError;
+    private JkProcess forkingProcess;
 
-    private final JkProcess fork;
-
-    private final JavaCompiler compiler;
-
-    private final Map<JkJavaVersion, Path> compilerBinRepo;
-
-    private JkJavaCompiler(boolean failOnError,
-            JkProcess fork, JavaCompiler compiler, Map<JkJavaVersion, Path> compilerBinRepo) {
-        super();
-        this.failOnError = failOnError;
-        this.fork = fork;
-        this.compiler = compiler;
-        this.compilerBinRepo = compilerBinRepo;
-    }
+    private JavaCompiler compilerTool;
 
     /**
-     * Creates a {@link JkJavaCompiler} besed on {@link JavaCompiler} provided with the JDK.
+     * Owner for parent chaining
      */
-    public static JkJavaCompiler ofJdk() {
-        return new JkJavaCompiler(true, null, null, new HashMap<>());
-    }
+    public final T __;
 
-    public static JkJavaCompiler of(JavaCompiler compiler) {
-        return new JkJavaCompiler(true, null, compiler, new HashMap<>());
+    private JkJavaCompiler(T __) {
+        this.__ = __;
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified
-     * failed-on-error parameter. If <code>true</code> then
-     * a compilation error will throw a {@link IllegalStateException}.
+     * Creates a {@link JkJavaCompiler} without specifying a {@link JavaCompiler} instance or an external process.
+     * When nothing is specified, this compiler will try the default {@link JavaCompiler} instance provided
+     * by the running JDK.
      */
-    public JkJavaCompiler withFailOnError(boolean fail) {
-        return new JkJavaCompiler(fail, fork, compiler, compilerBinRepo);
+    public static JkJavaCompiler<Void> of() {
+        return ofParent(null);
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with forking the javac
-     * process. The javac process is created using specified argument defined in
-     * {@link JkProcess#ofJavaTool(String, String...)}
+     * Same as {@link #of()} but mentioning a owner for parent chaining.
      */
-    public JkJavaCompiler withForking(String... parameters) {
-        return withForking(JkProcess.ofJavaTool("javac", parameters));
+    public static <T> JkJavaCompiler<T> ofParent(T parent) {
+        return new JkJavaCompiler(parent);
     }
 
     /**
-     * As {@link #withForking(String...)} but the fork is actually done only if the
-     * <code>fork</code> parameter is <code>true</code>.
-     */
-    public JkJavaCompiler withForking(boolean fork, String... parameters) {
-        if (fork) {
-            return withForking(parameters);
-        }
-        return withForking((JkProcess) null);
-    }
-
-    public JkJavaCompiler withForking(JkProcess compileProcess) {
-        return new JkJavaCompiler(failOnError, compileProcess , compiler, compilerBinRepo);
-    }
-
-    /**
-     * As {@link #withForking(String...)} but specifying the executable for the compileRunner.
-     *
-     * @param executable The executable for the compileRunner as 'jike' or '/my/specific/jdk/javac'
-     */
-    public JkJavaCompiler withForkingOnCompiler(String executable, String... parameters) {
-        final JkProcess compileProcess = JkProcess.of(executable, parameters);
-        return withForking(compileProcess);
-    }
-
-    /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified compileRunner instance.
-     * Since in-process compilers cannot be run andAccept a withForking process, this method disables any
+     * Sets underlying java compiler tool to use.
+     * Since in-process compilers cannot be run in forking process mode, this method disables any
      * previous fork options that may have been set.
      */
-    public JkJavaCompiler withCompiler(JavaCompiler compiler) {
-        return new JkJavaCompiler(failOnError, null, compiler, compilerBinRepo);
+    public JkJavaCompiler<T> setCompilerTool(JavaCompiler compiler) {
+        this.compilerTool = compiler;
+        this.forkingProcess = null;
+        return this;
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but adding an external java compileRunner for
-     * the specified source version. The compileRunner will try to get compliant compileRunner to
-     * compile source.
+     * Sets the underlying compiler with the specified process. The process is typically a 'javac' command.
      */
-    public JkJavaCompiler withJavacBin(JkJavaVersion version, Path javacBin) {
-        final HashMap<JkJavaVersion, Path> map = new HashMap<>(this.compilerBinRepo);
-        map.put(version, javacBin);
-        return new JkJavaCompiler(failOnError, fork, compiler, map);
+    public JkJavaCompiler<T> setForkingProcess(JkProcess compileProcess) {
+        this.forkingProcess = compileProcess;
+        return this;
     }
+
+    /**
+     * Sets to default underlying compiler, meaning the compiler tool embedded in the running JDK
+     */
+    public JkJavaCompiler<T> setDefault() {
+        this.forkingProcess = null;
+        this.compilerTool = null;
+        return this;
+    }
+
+    /**
+     * Set the underlying compiler as an external process of the 'javac' tool provided with the running JDK.
+     * @see #setForkingProcess(JkProcess)
+     */
+    public JkJavaCompiler<T> setForkingWithJavac(String... parameters) {
+        return setForkingProcess(JkProcess.ofJavaTool("javac", parameters));
+    }
+
+    /**
+     * Same as {@link #setForkingWithJavac(String...)} but only operates if the specified condition is {@code true}
+     */
+    public JkJavaCompiler<T> setForkingWithJavacIf(boolean condition, String... parameters) {
+        if (condition) {
+            return setForkingWithJavac(parameters);
+        }
+        return this;
+    }
+
 
     /**
      * Returns <code>true</code> if no compiler or fork has been set on.
      */
     public boolean isDefault() {
-        return compiler == null && fork == null;
+        return compilerTool == null && forkingProcess == null;
     }
 
     /**
@@ -132,51 +120,66 @@ public final class JkJavaCompiler {
         final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
-            throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
+            throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
         }
         JkUtilsPath.createDirectories(outputDir);
-        final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
+        final JavaCompiler compiler = this.compilerTool != null ? this.compilerTool : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
-        String message = "Compiling " + compileSpec.getSourceFiles() + " source files";
+        String message = "Compiling " + compileWhatMessage(compileSpec.getSourceFiles())
+                + " to "
+                + Paths.get("").toAbsolutePath().relativize((outputDir));
         if (JkLog.verbosity().isVerbose()) {
-            message = message + " to " + outputDir + " using options : " + JkUtilsString
-                    .join(options, " ");
+            message = message + " using options : " + JkUtilsString.join(options, " ");
         }
-        long start = System.nanoTime();
         JkLog.startTask(message);
         if (compileSpec.getSourceFiles().isEmpty()) {
-            JkLog.warn("No source to compile");
+            JkLog.info("No sources file or directory specified.");
+            JkLog.endTask();
+            return true;
+        }
+        List<File> files = toFiles(compileSpec.getSourceFiles());
+        if (files.isEmpty()) {
+            JkLog.info("No Java source files found.");
             JkLog.endTask();
             return true;
         }
         final boolean result;
-        if (this.fork == null) {
-            List<File> files = toFiles(compileSpec.getSourceFiles());
+        if (this.forkingProcess == null) {
             final Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
             final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutputStream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);
-            if (files.size() > 0) {
-                JkLog.info("" + files.size() + " files to compile with " + compiler.getClass().getSimpleName());
-
-                result = task.call();
-            } else {
-                JkLog.warn("No file to compile.");
-                JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-                return true;
-            }
+            result = task.call();
         } else {
-            JkLog.info("Use a forking process to perform compilation : " + fork.getCommand());
+            JkLog.info("Use a forking process to perform compilation : " + forkingProcess.getCommand());
             result = runOnFork(compileSpec);
         }
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        JkLog.endTask();
         if (!result) {
-            if (failOnError) {
-                throw new JkException("Compilation failed with options " + options);
-            }
             return false;
         }
         return true;
+    }
+
+    private static String compileWhatMessage(List<Path> paths) {
+        List<String> folders = new LinkedList<>();
+        List<String> files = new LinkedList<>();
+        for (Path path : paths) {
+            String relPath = Paths.get("").toAbsolutePath().relativize(path).toString();
+            if (Files.isDirectory(path)) {
+                folders.add(relPath);
+            } else {
+                files.add(relPath);
+            }
+        }
+        if (paths.size() < 4) {
+            List<String> all = JkUtilsIterable.concatLists(folders, files);
+            return String.join(", ", all);
+        }
+        else {
+            return JkUtilsString.plurialize(folders.size(), "folder") + " and " +
+                    JkUtilsString.plurialize(files.size(), "file");
+        }
     }
 
     private List<File> toFiles(Collection<Path> paths) {
@@ -193,14 +196,15 @@ public final class JkJavaCompiler {
 
     private boolean runOnFork(JkJavaCompileSpec compileSpec) {
         final List<String> sourcePaths = new LinkedList<>();
-        for (final Path file : compileSpec.getSourceFiles()) {
+        List<Path> paths = compileSpec.getSourceFiles();
+        for (final Path file : paths) {
             if (Files.isDirectory(file)) {
                 JkPathTree.of(file).andMatching(true, "**/*.java").stream().forEach(path -> sourcePaths.add(path.toString()));
             } else {
                 sourcePaths.add(file.toAbsolutePath().toString());
             }
         }
-        final JkProcess jkProcess = this.fork.andParams(compileSpec.getOptions()).andParams(sourcePaths);
+        final JkProcess jkProcess = this.forkingProcess.andParams(compileSpec.getOptions()).andParams(sourcePaths);
         JkLog.info("" + sourcePaths.size() + " files to compile.");
         final int result = jkProcess.runSync();
         return (result == 0);
@@ -271,7 +275,5 @@ public final class JkJavaCompiler {
 
         }
     }
-
-
 
 }

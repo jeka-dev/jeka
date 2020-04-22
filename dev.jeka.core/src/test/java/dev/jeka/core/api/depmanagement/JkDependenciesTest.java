@@ -1,13 +1,13 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * @formatter:off
@@ -47,10 +47,11 @@ public class JkDependenciesTest {
     @Test
     public void onProject() throws IOException {
         Path root = Files.createTempDirectory("jekatestproject");
-        JkJavaProject javaProject = JkJavaProject.ofMavenLayout(root);
-        JkDependencySet dependencies = JkDependencySet.of().and(javaProject);
+        JkJavaProject javaProject = JkJavaProject.of()
+            .setBaseDir(root);
+        JkDependencySet dependencies = JkDependencySet.of().and(javaProject.toDependency());
         JkComputedDependency computedDependency = (JkComputedDependency) dependencies.toList().get(0).getDependency();
-        Assert.assertEquals(root, computedDependency.getIdeProjectBaseDir());
+        Assert.assertEquals(root, computedDependency.getIdeProjectDir());
     }
 
 }

@@ -2,30 +2,30 @@ package dev.jeka.core.tool.builtins.intellij;
 
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import org.junit.Test;
 
 import java.nio.file.Paths;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.PROVIDED;
+import static dev.jeka.core.api.depmanagement.JkScope.PROVIDED;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 public class JkImlGeneratorTest {
 
     @Test
     public void withoutJavaProject() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of(Paths.get(""));
+        JkImlGenerator imlGenerator = JkImlGenerator.of(JkJavaIdeSupport.of(Paths.get("")));
         String result = imlGenerator.generate();
         System.out.println(result);
     }
 
     @Test
     public void withJavaProject() {
-        JkJavaProject project = JkJavaProject.ofMavenLayout(Paths.get(""));
-        project.setDependencies(dependencies());
-       // project.maker().setDependencyResolver(JkDependencyResolver.of(JkRepo.maven("http://194.253.70.251:8081/nexus/content/groups/multipharma")));
-        JkImlGenerator imlGenerator = JkImlGenerator.of(project.getJavaProjectIde());
+        JkJavaProject project = JkJavaProject.of();
+        project.getDependencyManagement().addDependencies(dependencies());
+        JkImlGenerator imlGenerator = JkImlGenerator.of(project.getJavaIdeSupport());
         String result = imlGenerator.generate();
         System.out.println(result);
     }

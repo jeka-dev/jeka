@@ -1,6 +1,5 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.samples.AClassicBuild;
+import dev.jeka.core.samples.JavaPluginBuild;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.JkInit;
@@ -21,7 +20,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
  */
 public class NormalJarBuild extends JkCommandSet {
 
-    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    JkPluginJava java = getPlugin(JkPluginJava.class);
 
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.
@@ -29,23 +28,25 @@ public class NormalJarBuild extends JkCommandSet {
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
     @JkDefImport("../dev.jeka.core-samples")
-    private AClassicBuild sampleBuild;
+    private JavaPluginBuild sampleBuild;
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().getMaker().defineMainArtifactAsFatJar(true);
-        javaPlugin.getProject()
-                .setDependencies(JkDependencySet.of().and(sampleBuild.javaPlugin.getProject()))
-                .setSourceVersion(JkJavaVersion.V8);
+        java.getProject()
+            .getArtifactProducer()
+                .putMainArtifact(java.getProject().getProduction()::createFatJar).__
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and(sampleBuild.java.getProject().toDependency()));
     }
 
     public void cleanPack() {
         clean();
-        javaPlugin.pack();
+        java.pack();
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(NormalJarBuild.class).javaPlugin.clean().pack();
+        JkInit.instanceOf(NormalJarBuild.class).cleanPack();
     }
 
 }

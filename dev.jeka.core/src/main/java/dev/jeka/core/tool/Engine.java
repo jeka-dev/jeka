@@ -8,18 +8,21 @@ import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
-import dev.jeka.core.api.system.JkException;
+import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Engine having responsibility of compiling command classes, instantiate and run them.<br/>
@@ -56,8 +59,6 @@ final class Engine {
      */
     Engine(Path baseDir) {
         super();
-        JkUtilsAssert.isTrue(baseDir.isAbsolute(), baseDir + " is not absolute.");
-        JkUtilsAssert.isTrue(Files.isDirectory(baseDir), baseDir + " is not directory.");
         this.projectBaseDir = baseDir.normalize();
         defRepos = repos();
         this.defDependencies = JkDependencySet.of();
@@ -82,7 +83,7 @@ final class Engine {
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
-            path = path.andPrepending(cmdPath);
+            path = path.andPrepend(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
         preCompile();  // Need to pre-compile to get the declared def dependencies
@@ -93,8 +94,11 @@ final class Engine {
             path = compile().and(path);
             jkCommandSet = getCommandsInstance(commandSetClassHint, path);
             if (jkCommandSet == null) {
-                throw new JkException("Can't find or guess any command class for project hosted in " + this.projectBaseDir
-                        + " .\nAre you sure this directory is a Jeka project ?");
+                String hint = JkUtilsString.isBlank(commandSetClassHint) ? "" : " named " + commandSetClassHint;
+                String prompt = !JkUtilsString.isBlank(commandSetClassHint) ? ""
+                        : "\nAre you sure this directory is a Jeka project ?";
+                throw new JkException("Can't find or guess any command class%s in project %s.%s",
+                        hint, this.projectBaseDir, prompt);
             }
         }
         jkCommandSet.getImportedCommandSets().setImportedRunRoots(this.rootsOfImportedCommandSets);
@@ -114,7 +118,7 @@ final class Engine {
         for (final JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
-        return JkDependencyResolver.of(this.defRepos).resolve(deps).getFiles();
+        return JkDependencyResolver.ofParent(this.defRepos).resolve(deps).getFiles();
     }
 
     private void preCompile() {
@@ -143,8 +147,8 @@ final class Engine {
         final String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         final long start = System.nanoTime();
         JkLog.startTask(msg);
-        final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
-        final JkResolveResult resolveResult = runDependencyResolver.resolve(this.computeDefDependencies());
+        final JkDependencyResolver defDependencyResolver = getDefDependencyResolver();
+        final JkResolveResult resolveResult = defDependencyResolver.resolve(this.computeDefDependencies());
         if (resolveResult.getErrorReport().hasErrors()) {
             JkLog.warn(resolveResult.getErrorReport().toString());
         }
@@ -165,7 +169,7 @@ final class Engine {
             return null;
         }
         try {
-            commands.setDefDependencyResolver(this.computeDefDependencies(), getRunDependencyResolver());
+            commands.setDefDependencyResolver(this.computeDefDependencies(), getDefDependencyResolver());
             return commands;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
@@ -222,20 +226,17 @@ final class Engine {
             classLoader.addEntries(kotlinCompiler.getStdLib());
         }
         final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath);
-        wrapCompile(() -> JkJavaCompiler.ofJdk().compile(javaCompileSpec));
+        wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec));
         JkPathTree.of(this.resolver.defSourceDir)
                 .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")
                 .copyTo(this.resolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void wrapCompile(Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (final JkException e) {
-            JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
-            JkLog.info("Compilation of Jeka files failed. You can run jeka -CC=JkCommandSet to use default commands " +
+    private void wrapCompile(Supplier<Boolean> compileTask) {
+        boolean success = compileTask.get();
+        if (!success) {
+            throw new JkException("Compilation of Jeka files failed. You can run jeka -CC=JkCommandSet to use default commands " +
                     " instead of the ones defined in 'def'.");
-            throw e;
         }
     }
 
@@ -272,9 +273,9 @@ final class Engine {
                 .setOutputDir(resolver.defClassDir);
     }
 
-    private JkDependencyResolver getRunDependencyResolver() {
+    private JkDependencyResolver getDefDependencyResolver() {
         if (this.computeDefDependencies().hasModules()) {
-            return JkDependencyResolver.of(this.defRepos);
+            return JkDependencyResolver.of().addRepos(this.defRepos);
         }
         return JkDependencyResolver.of();
     }

@@ -1,10 +1,8 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.system.JkException;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
-import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,8 +13,7 @@ import java.util.Set;
  * Result of a module dependency resolution for a given scope.<br/>
  * When resolving a module dependencies for a given scope, we expect to get
  * <ul>
- *   <li>The list of publishLocalOnly file constituting the resolved dependencies (the jar
- *        files for instance)</li>
+ *   <li>The list of files constituting the resolved dependencies (the jar files for instance)</li>
  *   <li>The {@link JkVersionProvider} that specify which static version has been
  *        taken in account when a module dependency is declared using dynamic versions
  *        (as 1.0.+)</li>
@@ -28,13 +25,10 @@ public final class JkResolveResult {
 
     private final JkErrorReport errorReport;
 
-    private final File baseDir;
-
-    private JkResolveResult(JkDependencyNode depTree, JkErrorReport errorReport, File baseDir) {
+    private JkResolveResult(JkDependencyNode depTree, JkErrorReport errorReport) {
         super();
         this.depTree = depTree;
         this.errorReport = errorReport;
-        this.baseDir = baseDir;
     }
 
     /**
@@ -51,18 +45,18 @@ public final class JkResolveResult {
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
     public static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
-        return new JkResolveResult(depTree, errorReport, Paths.get("").toFile());
+        return new JkResolveResult(depTree, errorReport);
     }
 
     private static JkResolveResult of(JkDependencyNode dependencyTree) {
-        return new JkResolveResult(dependencyTree, JkErrorReport.allFine(), Paths.get(".").toFile());
+        return new JkResolveResult(dependencyTree, JkErrorReport.allFine());
     }
 
     /**
      * Shorthand for {@link JkDependencyNode#getResolvedFiles()} on the tree root.
      */
     public JkPathSequence getFiles() {
-        return JkPathSequence.of(this.depTree.getResolvedFiles()).withoutDuplicates().resolveTo(baseDir.toPath());
+        return JkPathSequence.of(this.depTree.getResolvedFiles()).withoutDuplicates().resolvedTo(Paths.get(""));
     }
 
     /**
@@ -101,7 +95,7 @@ public final class JkResolveResult {
         if (dependencyNode == null) {
             return JkPathSequence.of();
         }
-        return JkPathSequence.of(dependencyNode.getModuleInfo().getFiles()).withoutDuplicates().resolveTo(baseDir.toPath());
+        return JkPathSequence.of(dependencyNode.getModuleInfo().getFiles()).withoutDuplicates();
     }
 
     /**
@@ -109,11 +103,11 @@ public final class JkResolveResult {
      */
     public JkResolveResult and(JkResolveResult other) {
         return new JkResolveResult(this.depTree.withMerging(other.depTree),
-                this.errorReport.merge(other.errorReport), this.baseDir);
+                this.errorReport.merge(other.errorReport));
     }
 
     JkResolveResult withBaseDir(Path baseDir) {
-        return new JkResolveResult(this.depTree, this.errorReport, baseDir.toFile());
+        return new JkResolveResult(this.depTree, this.errorReport);
     }
 
     /**
@@ -135,7 +129,7 @@ public final class JkResolveResult {
      */
     public JkResolveResult assertNoError() {
         if (this.errorReport.hasErrors) {
-            throw new JkException(this.errorReport + "\nOn following tree : \n" + depTree.toStringTree());
+            throw new IllegalStateException(this.errorReport + "\nOn following tree : \n" + depTree.toStringTree());
         }
         return this;
     }

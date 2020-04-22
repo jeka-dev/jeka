@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -113,7 +112,7 @@ final class IvyTranslations {
     // see
     // http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
     private static DependencyResolver toResolver(JkRepo repo, boolean download) {
-        if (! repo.isIvyRepo()) {
+        if (!repo.isIvyRepo()) {
             if (!isFileSystem(repo.getUrl()) || download) {
                 return ibiblioResolver(repo);
             }
@@ -132,7 +131,7 @@ final class IvyTranslations {
             }
             return result;
         }
-        if (repo.getUrl().getProtocol().equals("http")) {
+        if (repo.getUrl().getProtocol().equals("http") || repo.getUrl().getProtocol().equals("https")) {
             final IvyRepResolver result = new IvyRepResolver();
             result.setIvyroot(repo.getUrl().toString());
             result.setArtroot(repo.getUrl().toString());
@@ -140,10 +139,10 @@ final class IvyTranslations {
             result.setIvypattern(IvyRepResolver.DEFAULT_IVYPATTERN);
             result.setM2compatible(false);
             if (isHttp(repo.getUrl())) {
-                if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) ) {
-                    final JkRepo.JkRepoCredential credential = repo.getCredential();
-                    CredentialsStore.INSTANCE.addCredentials(credential.getRealm(), repo.getUrl().getHost(),
-                            credential.getUserName(), credential.getPassword());
+                final JkRepo.JkRepoCredentials credentials = repo.getCredentials();
+                if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credentials != null) {
+                    CredentialsStore.INSTANCE.addCredentials(credentials.getRealm(), repo.getUrl().getHost(),
+                            credentials.getUserName(), credentials.getPassword());
 
                 }
             }
@@ -151,7 +150,7 @@ final class IvyTranslations {
             result.setCheckmodified(true);
             return result;
         }
-        throw new IllegalStateException(repo + " not handled by translator.");
+        throw new IllegalStateException(repo.getUrl() .getProtocol()+ " not handled for translating repo "+ repo);
     }
 
     private static IBiblioResolver ibiblioResolver(JkRepo repo) {
@@ -161,10 +160,10 @@ final class IvyTranslations {
         result.setRoot(repo.getUrl().toString());
         result.setUsepoms(true);
         if (isHttp(repo.getUrl())) {
-            final JkRepo.JkRepoCredential credential = repo.getCredential();
-            if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credential != null) {
-                CredentialsStore.INSTANCE.addCredentials(credential.getRealm(),
-                        repo.getUrl().getHost(), credential.getUserName(), credential.getPassword());
+            final JkRepo.JkRepoCredentials credentials = repo.getCredentials();
+            if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credentials != null) {
+                CredentialsStore.INSTANCE.addCredentials(credentials.getRealm(),
+                        repo.getUrl().getHost(), credentials.getUserName(), credentials.getPassword());
 
             }
         }
@@ -339,18 +338,20 @@ final class IvyTranslations {
 
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
             JkMavenPublication publication, Instant publishDate) {
-
+        JkArtifactLocator artifactLocator = publication.getArtifactLocator();
         final ModuleRevisionId moduleRevisionId = descriptor.getModuleRevisionId();
-        final String artifactName = moduleRevisionId.getName();
-        final Artifact mavenMainArtifact = toPublishedMavenArtifact(publication.getMainArtifactFiles()
-                .get(0), artifactName, null, moduleRevisionId, publishDate);
+        final String ivyArtifactName = moduleRevisionId.getName();
+        final Artifact mavenMainArtifact = toPublishedMavenArtifact(artifactLocator.getMainArtifactPath(),
+                ivyArtifactName, null, moduleRevisionId, publishDate);
         final String mainConf = "default";
         populateDescriptorWithMavenArtifact(descriptor, mainConf, mavenMainArtifact);
-
-        for (final JkClassifiedFileArtifact artifactEntry : publication.getClassifiedArtifacts()) {
-            final Path file = artifactEntry.getFile();
-            final String classifier = artifactEntry.getClassifier();
-            final Artifact mavenArtifact = toPublishedMavenArtifact(file, artifactName, classifier,
+        for (final JkArtifactId artifactId  : artifactLocator.getArtifactIds()) {
+            if (artifactId.equals(artifactLocator.getMainArtifactId())) {
+                continue;
+            }
+            final Path file = artifactLocator.getArtifactPath(artifactId);
+            final String classifier = artifactId.getName();
+            final Artifact mavenArtifact = toPublishedMavenArtifact(file, ivyArtifactName, classifier,
                     descriptor.getModuleRevisionId(), publishDate);
             populateDescriptorWithMavenArtifact(descriptor, classifier, mavenArtifact);
         }
@@ -374,11 +375,11 @@ final class IvyTranslations {
         return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), artifactName, type, extension);
     }
 
-    private static Artifact toPublishedMavenArtifact(Path artifact, String artifactName,
+    private static Artifact toPublishedMavenArtifact(Path artifactFile, String artifactName,
                                                      String classifier, ModuleRevisionId moduleId, Instant date) {
-        final String extension = JkUtilsString.substringAfterLast(artifact.getFileName().toString(), ".");
+        final String extension = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
         final Map<String, String> extraMap;
-        if (classifier == null) {
+        if (JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
             extraMap = new HashMap<>();
         } else {
             extraMap = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
@@ -485,7 +486,7 @@ final class IvyTranslations {
             final JkModuleId moduleId = moduleDep.getModuleId();
             final boolean mainArtifact = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
             JkVersion version = dependencySet.getVersion(moduleId);
-            this.put(moduleId, moduleDep.isTransitive(), version, mainArtifact);
+            this.put(moduleId, moduleDep.withTransitive(), version, mainArtifact);
 
             // fill configuration
             final List<Conf> confs = new LinkedList<>();

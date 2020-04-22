@@ -591,9 +591,9 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.java.testplatform.JkJavaTestClasses;
-import dev.jeka.core.api.java.testplatform.JkUnit;
-import dev.jeka.core.api.java.testplatform.JkUnit.JunitReportDetail;
+import dev.jeka.core.api.java.testing.JkJavaTestClasses;
+import dev.jeka.core.api.java.testing.JkUnit;
+import dev.jeka.core.api.java.testing.JkUnit.JunitReportDetail;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefClasspath;
 
@@ -619,9 +619,9 @@ public class AntStyleBuild extends JkCommandSet {
 
     @Override
     protected void setup() {
-       JkResolveResult depResolution = JkDependencyResolver.of(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
+       JkResolveResult depResolution = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
                .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
-               .and("junit:junit:4.11", JkJavaDepScopes.TEST)
+               .and("junit:junit:4.11", JkScope.TEST)
        );
        classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles())
             .and(depResolution.getFiles());
@@ -635,7 +635,7 @@ public class AntStyleBuild extends JkCommandSet {
                 .addSources(src));
         Map<String, String> varReplacement = new HashMap<>();
         varReplacement.put("${server.ip}", "123.211.11.0");
-        JkResourceProcessor.of(JkPathTreeSet.of(src)).andInterpolate("**/*.properties", varReplacement)
+        JkResourceProcessor.ofParent(JkPathTreeSet.of(src)).addInterpolator("**/*.properties", varReplacement)
                 .generateTo(classDir, Charset.forName("UTF-8"));
         JkPathTree.of(src).andMatching(false, "**/*.javaPlugin").copyTo(classDir);
     }
@@ -647,7 +647,7 @@ public class AntStyleBuild extends JkCommandSet {
     }
 
     public void javadoc() {
-        JkJavadocMaker.of(JkPathTreeSet.of(src), buildDir.resolve("javadoc")).process();
+        JkJavadocProcessor.of(JkPathTreeSet.of(src), buildDir.resolve("javadoc")).process();
     }
 
     public void run() {
@@ -761,16 +761,14 @@ any dependency you need.
 
 ```Java
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkPluginJava;
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
-
 class Build extends JkCommandSet {
 
-    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    final JkPluginJava java = getPlugin(JkPluginJava.class);
 
     /*
      * Configures plugins to be bound to this commandSet class. When this method is called, option
@@ -778,14 +776,11 @@ class Build extends JkCommandSet {
      */
     @Override
     protected void setup() {
-        JkJavaProject project = javaPlugin.getProject();
-        project.addDependencies(dependencies());
-    }
-
-    private JkDependencySet dependencies() {  // Example of dependencies.
-        return JkDependencySet.of()
-                .and("com.google.guava:guava:21.0")
-                .and("junit:junit:4.11", TEST);
+        java.getProject()
+            .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                    .and("com.google.guava:guava:21.0")
+                    .and("junit:junit:4.13", JkScope.TEST));
     }
 
     public static void main(String[] args) {
@@ -803,20 +798,17 @@ Execute `jeka java#info` to see an abstract of the project setup.
 
 ## Extra function
 
-If you want to create javadoc, jar sources and  jar tests or checksums : 
-just execute `jeka clean java#pack -java#pack.tests -java#pack.sources -java#pack.checksums=sha-256`.
+If you want to create jar along javadoc and sources without testing : 
+just execute `jeka clean java#pack -java#test`.
 
-Explanation  '-' prefix means that you want to set an option value. For example `-java#pack.sources` means that 
-`JkPluginJava.pack.sources` will be injected the 'true' value.
+Explanation '-' prefix means that you want to set an option value. For example `-java#pack.sources=false` means that 
+`JkPluginJava.pack.sources` will be injected the `false` value.
 
 You can also set it by default in the build class constructor :
 
 ```Java
     protected Build() {
-        javaPlugin.pack.javadoc = true;
-        javaPlugin.pack.sources = true;
-        javaPlugin.pack.tests = true;
-        javaPlugin.pack.checksums = "sha-256";
+        java.tests.skip = true;
     }
 ```
 

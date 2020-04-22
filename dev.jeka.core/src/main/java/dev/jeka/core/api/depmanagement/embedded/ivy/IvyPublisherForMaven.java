@@ -23,7 +23,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
+import java.util.*;
 import java.util.function.UnaryOperator;
 
 /**
@@ -75,13 +75,14 @@ final class IvyPublisherForMaven {
             final JkMavenMetadata.Versioning.JkSnapshot snap = mavenMetadata.currentSnapshot();
             version = versionForUniqueSnapshot(versionedModule.getVersion().getValue(), snap.timestamp,
                     snap.buildNumber);
-            final String pomDest = destination(versionedModule, "pom", null, version);
+            final String pomDest = destination(versionedModule, "pom", JkArtifactId.MAIN_ARTIFACT_NAME,
+                    version);
             putInRepo(pomXml, pomDest, true);
-            mavenMetadata.addSnapshotVersion("pom", null);
+            mavenMetadata.addSnapshotVersion("pom", JkArtifactId.MAIN_ARTIFACT_NAME);
             push(mavenMetadata, path);
         } else {
             version = versionedModule.getVersion().getValue();
-            final String pomDest = destination(versionedModule, "pom", null, version);
+            final String pomDest = destination(versionedModule, "pom", JkArtifactId.MAIN_ARTIFACT_NAME, version);
             putInRepo(pomXml, pomDest, true);
         }
         if (this.descriptorOutputDir == null) {
@@ -106,6 +107,7 @@ final class IvyPublisherForMaven {
                         + " already exists on repo.");
             }
         }
+        JkArtifactLocator artifactFileLocator = mavenPublication.getArtifactLocator();
         if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
             JkMavenMetadata mavenMetadata = loadMavenMedatata(path);
@@ -116,25 +118,17 @@ final class IvyPublisherForMaven {
             mavenMetadata.updateSnapshot(timestamp);
             push(mavenMetadata, path);
             final int buildNumber = mavenMetadata.currentBuildNumber();
-
             final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.getVersion()
                     .getValue(), timestamp, buildNumber);
-
-            for (final Path file : mavenPublication.getMainArtifactFiles()) {
-                publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot,
-                        mavenMetadata);
-            }
-            for (final JkMavenPublication.JkClassifiedFileArtifact classifiedArtifact : mavenPublication.getClassifiedArtifacts()) {
-                publishUniqueSnapshot(versionedModule, classifiedArtifact.getClassifier(),
-                        classifiedArtifact.getFile(), versionUniqueSnapshot, mavenMetadata);
+            for (final JkArtifactId artifactId : artifactFileLocator.getArtifactIds()) {
+                publishUniqueSnapshot(versionedModule, artifactId.getName(),
+                    artifactFileLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
             }
             return mavenMetadata;
         } else {
-            for (final Path file : mavenPublication.getMainArtifactFiles()) {
-                publishNormal(versionedModule, null, file);
-            }
-            for (final JkMavenPublication.JkClassifiedFileArtifact classifiedArtifact : mavenPublication.getClassifiedArtifacts()) {
-                publishNormal(versionedModule, classifiedArtifact.getClassifier(), classifiedArtifact.getFile());
+            for (final JkArtifactId artifactId : artifactFileLocator.getArtifactIds()) {
+                publishNormal(versionedModule, artifactId.getName(),
+                        artifactFileLocator.getArtifactPath(artifactId));
             }
             return null;
         }
@@ -150,9 +144,10 @@ final class IvyPublisherForMaven {
         } else {
             pomXml = JkUtilsPath.createTempFile("published-pom-", ".xml");
         }
-        final String packaging = JkUtilsString.substringAfterLast(publication.getMainArtifactFiles()
-                .get(0).getFileName().toString(), ".");
+        final String packaging = JkUtilsString.substringAfterLast(publication.getArtifactLocator()
+                .getMainArtifactPath().getFileName().toString(), ".");
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
+        pomWriterOptions.setMapping(new ScopeMapping());
         pomWriterOptions.setArtifactPackaging(packaging);
         Path fileToDelete = null;
         if (publication.getExtraInfo() != null) {
@@ -171,25 +166,16 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private String checkNotExist(JkVersionedModule versionedModule,
-            JkMavenPublication mavenPublication) {
-        if (!mavenPublication.getMainArtifactFiles().isEmpty()) {
-            final String pomDest = destination(versionedModule, "pom", null);
-            if (existOnRepo(pomDest)) {
-                throw new IllegalArgumentException("The main artifact already exist for " + versionedModule);
-            }
-            for (final Path file : mavenPublication.getMainArtifactFiles()) {
-                final String ext = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
-                final String dest = destination(versionedModule, ext, null);
-                if (existOnRepo(dest)) {
-                    return dest;
-                }
-            }
+    private String checkNotExist(JkVersionedModule versionedModule, JkMavenPublication mavenPublication) {
+        JkArtifactLocator artifactLocator = mavenPublication.getArtifactLocator();
+        final String pomDest = destination(versionedModule, "pom", JkArtifactId.MAIN_ARTIFACT_NAME);
+        if (existOnRepo(pomDest)) {
+            throw new IllegalArgumentException("The main artifact already exist for " + versionedModule);
         }
-        for (final JkMavenPublication.JkClassifiedFileArtifact classifiedArtifact : mavenPublication.getClassifiedArtifacts()) {
-            final String ext = JkUtilsString.substringAfterLast(
-                    classifiedArtifact.getFile().getFileName().toString(), ".");
-            final String dest = destination(versionedModule, ext, classifiedArtifact.getClassifier());
+        for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
+            Path artifactFile = artifactLocator.getArtifactPath(artifactId);
+            final String ext = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
+            final String dest = destination(versionedModule, ext, null);
             if (existOnRepo(dest)) {
                 return dest;
             }
@@ -240,7 +226,7 @@ final class IvyPublisherForMaven {
         final StringBuilder result = new StringBuilder(moduleBasePath(moduleId)).append("/")
                 .append(version).append("/").append(moduleId.getName()).append("-")
                 .append(uniqueVersion);
-        if (classifier != null) {
+        if (!JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
             result.append("-").append(classifier);
         }
         result.append(".").append(ext);
@@ -353,6 +339,32 @@ final class IvyPublisherForMaven {
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
         }
+    }
+
+    private static class ScopeMapping extends PomWriterOptions.ConfigurationScopeMapping {
+
+        public ScopeMapping() {
+            super(new HashMap<>());
+        }
+
+        public String getScope(String[] confs) {
+            List<String> confLists = Arrays.asList(confs);
+            if (confLists.contains("compile")) {
+                return "compile";
+            }
+            if (confLists.contains("runtime")) {
+                return "runtime";
+            }
+            if (confLists.contains("provided")) {
+                return "provided";
+            }
+            if (confLists.contains("test")) {
+                return "test";
+            }
+            return null;
+        }
+
+
     }
 
 }

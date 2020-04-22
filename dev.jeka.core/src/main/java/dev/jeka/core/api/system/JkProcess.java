@@ -268,7 +268,7 @@ public final class JkProcess implements Runnable {
             outputStreamGobbler.join();
             errorStreamGobbler.join();
             if (exitCode.get() != 0 && failOnError) {
-                throw new JkException("The process has returned with error code " + exitCode);
+                throw new IllegalStateException("The process has returned with error code " + exitCode);
             }
         };
         if (logCommand) {

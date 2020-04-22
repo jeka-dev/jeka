@@ -18,20 +18,19 @@ import java.util.jar.Manifest;
 
 
 /**
- * Helper class to read and write Manifest from andPrepending to file.
+ * Helper class to read and write Manifest from and to file.
  *
  * @author Jerome Angibaud
  */
-public final class JkManifest {
+public final class JkManifest<T> {
 
     /**
-     * The path where generally belongs all manifest past (relative to archive
-     * asScopedDependency)
+     * The path where generally belongs all manifest past (relative to archive root)
      */
-    public static final String PATH = "META-INF/MANIFEST.MF";
+    public static final String STANDARD_LOCATION = "META-INF/MANIFEST.MF";
 
     /**
-     * The JDK version who was running while bulding this manifest.
+     * The JDK version who was running while building this manifest.
      */
     public static final String BUILD_JDK = "Build-Jdk";
 
@@ -42,7 +41,7 @@ public final class JkManifest {
     public static final String CREATED_BY = "Created-By";
 
     /**
-     * The user has created this manifest. Normally ofSystem property
+     * The user has created this manifest. Normally of property
      * <code>user.name</code>
      */
     private static final String BUILT_BY = "Built-By";
@@ -62,42 +61,62 @@ public final class JkManifest {
      */
     public static final String IMPLEMENTATION_VENDOR = "Implementation-Vendor";
 
-
-
-    private final Manifest manifest;
+    private Manifest manifest;
 
     /**
-     * Creates a JkManifest from the specified {@link Manifest} object.
+     *  For parent chaining
      */
-    public static JkManifest of(Manifest manifest) {
-        return new JkManifest(manifest);
+    public final T __;
+
+    private JkManifest(T __) {
+        this.__ = __;
+        this.manifest = new Manifest();
+        this.manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
     }
 
     /**
-     * Creates a <code>JkManifest</code> from the specified file. The file is
-     * supposed to be a manifest file. If the manifest file does not exist, an
-     * {@link IllegalArgumentException} is thrown.
+     * Creates an empty JkManifest
      */
-    public static JkManifest of(Path manifestFile) {
-        if (!Files.exists(manifestFile)) {
-            throw new IllegalArgumentException("Manifest file " + manifestFile
-            + " not found.");
-        }
-        return new JkManifest(read(manifestFile));
+    public static JkManifest<Void> of() {
+        return ofParent(null);
     }
 
     /**
-     * Creates a <code>JkManifest</code> from the specified class dir. This
-     * method looks at the META-INF/MANIFEST.MF file inside the specified
-     * directory to create the returned manifest. If no such file is found, an
-     * empty manifest is returned.
+     * Same as {@link #of()} but providing a parent for method chaining
      */
-    public static JkManifest ofClassDir(Path classDir) {
-        final Path manifestFile = classDir.resolve(PATH);
-        if (!Files.exists(manifestFile)) {
-            return JkManifest.ofEmpty();
-        }
-        return of(manifestFile);
+    public static <T> JkManifest<T> ofParent(T parent) {
+         return new JkManifest(parent);
+    }
+
+    /**
+     * Returns the underlying JDK {@link Manifest} object.
+     */
+    public Manifest getManifest() {
+        return manifest;
+    }
+
+    /**
+     * Sets the underlying {@link Manifest} object. T
+     */
+    public JkManifest<T> setManifest(Manifest manifest) {
+        this.manifest = manifest;
+        return this;
+    }
+
+    /**
+     * Sets the underlying {@link Manifest} object from the content of the specified file.
+     */
+    public JkManifest<T> setManifestFromFile(Path file) {
+        this.manifest = read(file);
+        return this;
+    }
+
+    /**
+     * Sets the underlying {@link Manifest} object from the file present at [specified class dir]/META-INF/MANIFEST.MF
+     */
+    public JkManifest<T> setManifestFromClassRootDir(Path classDir) {
+        final Path manifestFile = classDir.resolve(STANDARD_LOCATION);
+        return this.setManifestFromFile(manifestFile);
     }
 
     /**
@@ -105,25 +124,15 @@ public final class JkManifest {
      * specified getOutputStream is supposed to contains manifest information as present
      * in a manifest file.
      */
-    public static JkManifest of(InputStream inputStream) {
-        return new JkManifest(read(inputStream));
-    }
-
-    /**
-     * Returns an empty manifest containing only the "Manifest-Version=1.0"
-     * attribute.
-     */
-    public static JkManifest ofEmpty() {
-        final Manifest manifest = new Manifest();
-        manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
-        return of(manifest);
+    public JkManifest<T> setManifestFromInputStream(InputStream inputStream) {
+        return this.setManifest(read(inputStream));
     }
 
     /**
      * Adds the specified attributes in the "main" attributes section.
      * This method return this object.
      */
-    public JkManifest addMainAttribute(Name key, String value) {
+    public JkManifest<T> addMainAttribute(Name key, String value) {
         this.manifest.getMainAttributes().putValue(key.toString(), value);
         return this;
     }
@@ -131,7 +140,7 @@ public final class JkManifest {
     /**
      * Adds the main class entry by auto-detecting the class holding the main method.
      */
-    public JkManifest addAutodetectMain(Path classDir) {
+    public JkManifest<T> addAutodetectMain(Path classDir) {
         ClassLoader classLoader = JkUrlClassLoader.of(classDir).get();
         List<String> classes = JkInternalClasspathScanner.INSTANCE.findClassesHavingMainMethod(classLoader);
         if (!classes.isEmpty()) {
@@ -145,7 +154,7 @@ public final class JkManifest {
     /**
      * @see #addMainAttribute(Name, String)
      */
-    public JkManifest addMainAttribute(String key, String value) {
+    public JkManifest<T> addMainAttribute(String key, String value) {
         this.manifest.getMainAttributes().putValue(key, value);
         return this;
     }
@@ -154,7 +163,7 @@ public final class JkManifest {
      * Adds the 'Main-Class' attribute to this manifest.
      * This method returns this object.
      */
-    public JkManifest addMainClass(String value) {
+    public JkManifest<T> addMainClass(String value) {
         return addMainAttribute(Name.MAIN_CLASS, value);
     }
 
@@ -162,7 +171,7 @@ public final class JkManifest {
      * Fills this manifest with contextual infoString : {@link #CREATED_BY},
      * {@link #BUILT_BY} and {@link #BUILD_JDK}
      */
-    public JkManifest addContextualInfo() {
+    public JkManifest<T> addContextualInfo() {
         return addMainAttribute(CREATED_BY, "Jeka").addMainAttribute(BUILT_BY,
                 System.getProperty("user.name")).addMainAttribute(BUILD_JDK,
                         System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
@@ -186,15 +195,23 @@ public final class JkManifest {
      * Adds attributes of the specified manifest to this one. This manifest attributes are overrode by those of the specified
      * one if same attribute exist.
      */
-    public JkManifest merge(JkManifest other) {
-        final Map<String, Attributes> otherEntryAttributes = other.manifest.getEntries();
+    public JkManifest<T> merge(Manifest other) {
+        final Map<String, Attributes> otherEntryAttributes = other.getEntries();
         for (final String entry : otherEntryAttributes.keySet()) {
             final Attributes otherAttributes = otherEntryAttributes.get(entry);
             final Attributes attributes = this.manifest.getAttributes(entry);
             merge(attributes, otherAttributes);
         }
-        merge(this.manifest.getMainAttributes(), other.manifest.getMainAttributes());
+        merge(this.manifest.getMainAttributes(), other.getMainAttributes());
         return this;
+    }
+
+    /**
+     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) of the
+     * specified directory.
+     */
+    public void writeToStandardLocation(Path classDir) {
+        writeTo(classDir.resolve(STANDARD_LOCATION));
     }
 
     private static void merge(Attributes attributes, Attributes others) {
@@ -204,8 +221,8 @@ public final class JkManifest {
     }
 
     private static Manifest read(Path file) {
-        JkUtilsAssert.isTrue(Files.exists(file), file.normalize() + " not found.");
-        JkUtilsAssert.isTrue(Files.isRegularFile(file), file.normalize() + " is directory : need file.");
+        JkUtilsAssert.argument(Files.exists(file), file.normalize() + " not found.");
+        JkUtilsAssert.argument(Files.isRegularFile(file), file.normalize() + " is directory : need file.");
         final Manifest manifest = new Manifest();
         try (InputStream is = Files.newInputStream(file)){
             manifest.read(is);
@@ -232,26 +249,6 @@ public final class JkManifest {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) of the
-     * specified directory.
-     */
-    public void writeToStandardLocation(Path classDir) {
-        writeTo(classDir.resolve(PATH));
-    }
-
-    private JkManifest(Manifest manifest) {
-        super();
-        this.manifest = manifest;
-    }
-
-    /**
-     * Returns the underlying JDK {@link Manifest} object.
-     */
-    public Manifest getManifest() {
-        return manifest;
     }
 
     /**

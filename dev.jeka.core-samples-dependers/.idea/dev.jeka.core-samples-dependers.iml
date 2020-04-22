@@ -11,6 +11,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
       <excludeFolder url="file://$MODULE_DIR$/../dev.jeka.core.depender-samples/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/../dev.jeka.core.depender-samples/jerkar/output" />
     </content>
@@ -18,5 +20,18 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="dev.jeka.core-samples" exported="" />
     <orderEntry type="module" module-name="dev.jeka.core" />
+    <orderEntry type="module-library" exported="" scope="TEST">
+          <library>
+            <CLASSES>
+              <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13.jar!/" />
+            </CLASSES>
+            <JAVADOC>
+              <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-javadoc.jar!/" />
+            </JAVADOC>
+            <SOURCES>
+              <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-sources.jar!/" />
+            </SOURCES>
+          </library>
+    </orderEntry>
   </component>
 </module>

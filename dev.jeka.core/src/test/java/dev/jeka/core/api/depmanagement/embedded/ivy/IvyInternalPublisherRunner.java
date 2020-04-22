@@ -34,20 +34,6 @@ public class IvyInternalPublisherRunner {
                 JkVersionProvider.of(spring, "3.0.8"));
     }
 
-    public static void testPublishMaven() throws IOException {
-        final IvyInternalPublisher jkIvyPublisher = IvyInternalPublisher.of(mavenRepo().with(JkRepo.JkPublishConfig.of()
-                .withUniqueSnapshot(false)).toSet(), Paths.get("jeka/output/test-out"));
-        final JkVersionedModule versionedModule = JkVersionedModule.of(
-                JkModuleId.of("mygroup2", "mymodule2"), JkVersion.of("0.0.12-SNAPSHOT"));
-        final JkMavenPublication publication = JkMavenPublication.of(sampleJarfile())
-                .and(sampleJarSourcefile(), "sources").and(sampleJarSourcefile(), "other");
-        final JkModuleId spring = JkModuleId.of("org.springframework:spring-jdbc");
-        final JkDependencySet deps = JkDependencySet.of().and(spring, "2.0.+", JkScopedDependencyTest.COMPILE);
-        final JkVersionProvider versionProvider = JkVersionProvider.of(spring, "2.0.5");
-        jkIvyPublisher.publishMaven(versionedModule, publication,
-                deps.withVersionProvider(versionProvider), null);
-    }
-
     private static Path sampleJarfile() {
         final URL url = IvyInternalPublisherRunner.class.getResource("myArtifactSample.jar");
         try {

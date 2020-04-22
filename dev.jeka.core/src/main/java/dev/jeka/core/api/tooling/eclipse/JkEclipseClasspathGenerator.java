@@ -3,8 +3,8 @@ package dev.jeka.core.api.tooling.eclipse;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkJavaProjectIde;
-import dev.jeka.core.api.java.project.JkProjectSourceLayout;
+import dev.jeka.core.api.java.project.JkCompileLayout;
+import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -29,18 +29,20 @@ public final class JkEclipseClasspathGenerator {
 
     private static final String ENCODING = "UTF-8";
 
+    private static final String CLASSPATHENTRY = "classpathentry";
+
+    private static final String JEKA_HOME = "JEKA_HOME";
+
+    private static final String JEKA_USER_HOME= "JEKA_USER_HOME";
+
     // --------------------- content --------------------------------
 
-    private final JkProjectSourceLayout sourceLayout;
-
-    private final JkDependencyResolver dependencyResolver;
-
-    private final JkDependencySet dependencies;
+    private final JkJavaIdeSupport ideSupport;
 
     // content for build class only
-    private JkDependencyResolver runDependencyResolver;
+    private JkDependencyResolver defDependencyResolver;
 
-    private JkDependencySet runDependencies;
+    private JkDependencySet defDependencies;
 
     // content for build class only
     private List<Path> importedProjects = new LinkedList<>();
@@ -53,8 +55,6 @@ public final class JkEclipseClasspathGenerator {
 
     private boolean includeJavadoc = true;
 
-    private final JkJavaVersion sourceVersion;
-
     private String jreContainer;
 
     /**
@@ -65,33 +65,20 @@ public final class JkEclipseClasspathGenerator {
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    private JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
-                                        JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
-        this.sourceLayout = sourceLayout;
-        this.dependencies = dependencies;
-        this.dependencyResolver = resolver;
-        this.sourceVersion = sourceVersion;
+    private JkEclipseClasspathGenerator(JkJavaIdeSupport ideSupport) {
+        this.ideSupport = ideSupport;
     }
 
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    public static JkEclipseClasspathGenerator of(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
-                                        JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
-        return new JkEclipseClasspathGenerator(sourceLayout, dependencies, resolver, sourceVersion);
+    public static JkEclipseClasspathGenerator of(JkJavaIdeSupport ideSupport) {
+        return new JkEclipseClasspathGenerator(ideSupport);
 
     }
 
-    /**
-     * Constructs a {@link JkEclipseClasspathGenerator}.
-     */
-    public static JkEclipseClasspathGenerator of(JkJavaProjectIde projectDef) {
-        return new JkEclipseClasspathGenerator(projectDef.getSourceLayout(), projectDef.getDependencies(),
-                projectDef.getDependencyResolver(), projectDef.getSourceVersion());
-    }
-
-    private boolean hasBuildDef() {
-        return new File(this.sourceLayout.getBaseDir().toFile(), JkConstants.DEF_DIR).exists();
+    private boolean hasJekaDefDir() {
+        return Files.exists(ideSupport.getProdLayout().getBaseDir().resolve(JkConstants.DEF_DIR));
     }
 
     // -------------------------- setters ----------------------------
@@ -131,10 +118,10 @@ public final class JkEclipseClasspathGenerator {
     /**
      * If the build script depends on external libraries, you must set the resolver of this dependencies here.
      */
-    public JkEclipseClasspathGenerator setRunDependencies(JkDependencyResolver buildDependencyResolver,
+    public JkEclipseClasspathGenerator setDefDependencies(JkDependencyResolver buildDependencyResolver,
                                                           JkDependencySet buildDependencies) {
-        this.runDependencyResolver = buildDependencyResolver;
-        this.runDependencies = buildDependencies;
+        this.defDependencyResolver = buildDependencyResolver;
+        this.defDependencies = buildDependencies;
         return this;
     }
 
@@ -207,8 +194,8 @@ public final class JkEclipseClasspathGenerator {
 
         final Set<String> paths = new HashSet<>();
 
-        // Write sources for build classes
-        if (hasBuildDef() && new File(sourceLayout.getBaseDir().toFile(), JkConstants.DEF_DIR).exists()) {
+        // Write sources for def classes
+        if (hasJekaDefDir()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
@@ -216,7 +203,7 @@ public final class JkEclipseClasspathGenerator {
         }
         generateSrcAndTestSrc(writer);
 
-        // write entries for project importedRuns
+        // write entries for def imported projects
         for (final Path projectFile : this.importedProjects) {
             if (!paths.add(projectFile.toAbsolutePath().toString())) {
                 continue;
@@ -226,14 +213,14 @@ public final class JkEclipseClasspathGenerator {
                     "path", "/" + projectFile.getFileName().toString());
         }
 
-        if (this.dependencyResolver != null) {
-            writeDependenciesEntries(writer, this.dependencies, this.dependencyResolver, paths);
+        if (ideSupport.getDependencyResolver() != null) {
+            writeDependenciesEntries(writer, ideSupport.getDependencies(), ideSupport.getDependencyResolver(), paths);
         }
         writeJre(writer);
 
-        // add build dependencies
-        if (hasBuildDef() && runDependencyResolver != null) {
-            writeDependenciesEntries(writer, runDependencies, runDependencyResolver, paths);
+        // add def dependencies
+        if (hasJekaDefDir() && defDependencyResolver != null) {
+            writeDependenciesEntries(writer, defDependencies, defDependencyResolver, paths);
         }
 
         // Write output
@@ -250,7 +237,7 @@ public final class JkEclipseClasspathGenerator {
     /** convenient method to write classpath element shorter */
     private static void writeClasspathEl(XMLStreamWriter writer, String... items) throws XMLStreamException {
         final Map<String, String> map = JkUtilsIterable.mapOfAny((Object[]) items);
-        writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+        writer.writeEmptyElement(CLASSPATHENTRY);
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             writer.writeAttribute(entry.getKey(), entry.getValue());
         }
@@ -296,15 +283,15 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeJre(XMLStreamWriter writer) throws XMLStreamException {
         writer.writeCharacters("\t");
-        writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+        writer.writeEmptyElement(CLASSPATHENTRY);
         writer.writeAttribute("kind", "con");
         final String container;
         if (jreContainer != null) {
             container = jreContainer;
         } else {
-            if (sourceVersion != null) {
+            if (ideSupport.getSourceVersion() != null) {
                 container = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/"
-                        + eclipseJavaVersion(sourceVersion);
+                        + eclipseJavaVersion(ideSupport.getSourceVersion());
             } else {
                 container = "org.eclipse.jdt.launching.JRE_CONTAINER";
             }
@@ -339,21 +326,21 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private void generateSrcAndTestSrc(XMLStreamWriter writer) throws XMLStreamException {
-
         final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
-        for (final JkPathTree fileTree : sourceLayout.getTests().and(sourceLayout.getTestResources()).getPathTrees()) {
+        JkCompileLayout testLayout = ideSupport.getTestLayout();
+        for (final JkPathTree fileTree : testLayout.resolveSources().and(testLayout.resolveResources()).toList()) {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = sourceLayout.getBaseDir().relativize(fileTree.getRoot()).toString().replace(File.separator, "/");
+            final String path = testLayout.getBaseDir().relativize(fileTree.getRoot()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
             sourcePaths.add(path);
             writer.writeCharacters("\t");
-            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATHENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
@@ -361,17 +348,18 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        for (final JkPathTree fileTree : sourceLayout.getSources().and(sourceLayout.getResources()).getPathTrees()) {
+        JkCompileLayout prodLayout = ideSupport.getProdLayout();
+        for (final JkPathTree fileTree : prodLayout.resolveSources().and(prodLayout.resolveResources()).toList()) {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.getBaseDir(), fileTree.getRoot()).toString().replace(File.separator, "/");
+            final String path = relativePathIfPossible(prodLayout.getBaseDir(), fileTree.getRoot()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
             sourcePaths.add(path);
             writer.writeCharacters("\t");
-            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATHENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
@@ -400,7 +388,9 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies,
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
-        final JkResolveResult resolveResult = resolver.resolve(dependencies);
+
+        // dependencies with IDE project dir will be omitted. The project dir will be added in other place.
+        final JkResolveResult resolveResult = resolver.resolve(dependencies.minusModuleDependenciesWithIdeProjectDir());
         final JkRepoSet repos = resolver.getRepos();
         for (final JkDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency
@@ -418,7 +408,7 @@ public final class JkEclipseClasspathGenerator {
                 final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
-                    final Path ideProjectBaseDir = computedDependency.getIdeProjectBaseDir();
+                    final Path ideProjectBaseDir = computedDependency.getIdeProjectDir();
                     if (ideProjectBaseDir != null) {
                         if (!allPaths.contains(ideProjectBaseDir.toAbsolutePath().toString())) {
                             writeProjectEntryIfNeeded(ideProjectBaseDir, writer, allPaths);
@@ -462,20 +452,20 @@ public final class JkEclipseClasspathGenerator {
         boolean usePathVariable = usePathVariables && bin.startsWith(JkLocator.getJekaUserHomeDir());
         boolean isVar = true;
         if (usePathVariable) {
-            binPath = DotClasspathModel.JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(bin).toString();
+            binPath = JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(bin).toString();
         } else if (usePathVariables && bin.startsWith(JkLocator.getJekaHomeDir())) {
-            binPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
+            binPath = JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
         } else {
             isVar = false;
-            binPath = relativePathIfPossible(sourceLayout.getBaseDir(), bin).toString();
+            binPath = relativePathIfPossible(ideSupport.getProdLayout().getBaseDir(), bin).toString();
         }
         binPath = binPath.replace(File.separator, "/");
         writer.writeCharacters("\t");
         boolean emptyTag = attributeProps.isEmpty() && accesRuleProps.isEmpty();
         if (emptyTag) {
-            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATHENTRY);
         } else {
-            writer.writeStartElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeStartElement(CLASSPATHENTRY);
         }
         writer.writeAttribute("kind", isVar ? "var" : "lib");
         writer.writeAttribute("path", binPath);
@@ -483,11 +473,11 @@ public final class JkEclipseClasspathGenerator {
         if (source != null && Files.exists(source)) {
             String srcPath;
             if (usePathVariables && source.startsWith(JkLocator.getJekaUserHomeDir())) {
-                srcPath = DotClasspathModel.JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(source).toString();
+                srcPath = JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(source).toString();
             } else if (usePathVariables && source.startsWith(JkLocator.getJekaHomeDir())) {
-                srcPath = DotClasspathModel.JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(source).toString();
+                srcPath = JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(source).toString();
             } else {
-                srcPath = relativePathIfPossible(sourceLayout.getBaseDir(), source).toString();
+                srcPath = relativePathIfPossible(ideSupport.getProdLayout().getBaseDir(), source).toString();
             }
             srcPath = srcPath.replace(File.separator, "/");
             writer.writeAttribute("sourcepath", srcPath);

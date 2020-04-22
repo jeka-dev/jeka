@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -26,14 +25,16 @@ public class MergeFileDepIT {
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource( "dep1").toURI());
         Path dep2File = Paths.get(MergeFileDepIT.class.getResource( "dep2").toURI());
         JkDependencySet deps = JkDependencySet.of()
-                .andFile(dep0File, TEST)
-                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
-                .andFile(dep1File, TEST)
-                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE)
-                .andFile(dep2File, COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet())
-                .withParams(JkResolutionParameters.of(DEFAULT_SCOPE_MAPPING))
-                .withModuleHolder(holder);
+                .andFile(dep0File, JkScope.TEST)
+                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", JkScope.COMPILE_AND_RUNTIME)
+                .andFile(dep1File, JkScope.TEST)
+                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", JkScope.COMPILE)
+                .andFile(dep2File, JkScope.COMPILE);
+        JkDependencyResolver resolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral())
+                .setModuleHolder(holder)
+                .getParams()
+                    .setScopeMapping(JkScope.DEFAULT_SCOPE_MAPPING).__;
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
         System.out.println(tree.toStringTree());
@@ -66,7 +67,7 @@ public class MergeFileDepIT {
 
         // Now check that file dependencies with Test Scope are not present in compile
 
-        tree = resolver.resolve(deps, COMPILE).getDependencyTree();
+        tree = resolver.resolve(deps, JkScope.COMPILE).getDependencyTree();
         System.out.println(tree.toStringTree());
 
         root = tree.getModuleInfo();
@@ -82,12 +83,12 @@ public class MergeFileDepIT {
         Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource("dep1").toURI());
         JkDependencySet deps = JkDependencySet.of()
-                .andFile(dep0File, TEST)
-                .andFile(dep1File, TEST);
+                .andFile(dep0File, JkScope.TEST)
+                .andFile(dep1File, JkScope.TEST);
         JkDependencyResolver resolver = JkDependencyResolver.of();
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
         assertEquals(2, tree.toFlattenList().size());
-        resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral().toSet());
+        resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet());
         assertEquals(2, resolver.resolve(deps).getDependencyTree().toFlattenList().size());
 
     }
