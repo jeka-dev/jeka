@@ -53,17 +53,6 @@ public final class JkScope {
             false);
 
     /**
-     * Scopes necessary for compiling production code.
-     */
-    public static final JkScope[] SCOPES_FOR_COMPILATION = new JkScope[] {COMPILE, PROVIDED};
-
-    /**
-     * Shorthand to declare both COMPILE and RUNTIME scope at once. This is the default scope for dependencies.
-     * It is equivalent to Maven 'compile'.
-     */
-    public static final JkScope[] COMPILE_AND_RUNTIME = new JkScope[] {COMPILE, RUNTIME};
-
-    /**
      * A dependency declared with this scope will be present in testing classpath only.
      *
      * A dependency resolution made with this scope will fetch dependencies declared with {@link #COMPILE}, {@link #RUNTIME} or  {@link #TEST}
@@ -75,21 +64,36 @@ public final class JkScope {
             RUNTIME, PROVIDED);
 
     /**
+     * Shorthand to declare both COMPILE and RUNTIME scope at once. This is the default scope for dependencies.
+     * It is equivalent to Maven 'compile'.
+     */
+    public static final JkScope[] COMPILE_AND_RUNTIME = new JkScope[] {COMPILE, RUNTIME};
+
+    /**
+     * Scopes necessary for compiling production code.
+     */
+    public static final JkScope[] SCOPES_FOR_COMPILATION = new JkScope[] {COMPILE, PROVIDED};
+
+    /**
      * Scopes necessary for both compiling tests and run them.
      */
     public static final JkScope[] SCOPES_FOR_TEST = new JkScope[] {TEST, PROVIDED};
+
     /** This scope is used for publication purpose */
     public static final JkScope SOURCES = of("sources",
             "Contains the source artifacts.",
             false);
+
     /** This scope is used for publication purpose */
     public static final JkScope JAVADOC = of("javadoc",
             "Contains the javadoc of this project",
             false);
+
     /**
      * Useful when using scope mapping. As documented in Ivy, it stands for the main archive.
      */
     public static final String ARCHIVE_MASTER = "archives(master)";
+
     /**
      * Scope mapping used
      */
