@@ -27,9 +27,9 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
 
     private final Map<JkArtifactId, Consumer<Path>> consumers = new HashMap<>();
 
-    private final Map<JkArtifactId, Supplier> runtimeClasspathSuppliers = new LinkedHashMap<>();
-
     private Function<JkArtifactId, Path> artifactFileFunction;
+
+    private String mainArtifactExt = "jar";
 
     private JkStandardFileArtifactProducer(T __) {
         this.__ = __;
@@ -82,30 +82,28 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
         return setArtifactFilenameComputation(artifactId -> targetDir.get().resolve(artifactId.toFileName(partName.get())));
     }
 
-    public JkStandardFileArtifactProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker,
-                                                         Supplier<JkPathSequence> artifactRuntimeClasspathSupplier) {
+    public JkStandardFileArtifactProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
         consumers.put(artifactId, artifactFileMaker);
-        runtimeClasspathSuppliers.put(artifactId, artifactRuntimeClasspathSupplier);
         return this;
     }
 
-    public JkStandardFileArtifactProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
-        return putArtifact(artifactId, artifactFileMaker, EMPTY_SUPPLIER);
+    public JkStandardFileArtifactProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker) {
+        return putArtifact(getMainArtifactId(), artifactFileMaker);
     }
 
-    public JkStandardFileArtifactProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker,
-                                                             Supplier<JkPathSequence> artifactRuntimeClasspathSupplier) {
-        return putArtifact(getMainArtifactId(), artifactFileMaker, artifactRuntimeClasspathSupplier);
-    }
-
-    public JkStandardFileArtifactProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker) { ;
-        return putMainArtifact(artifactFileMaker, EMPTY_SUPPLIER);
-    }
 
     public JkStandardFileArtifactProducer<T> removeArtifact(JkArtifactId artifactId) {
         consumers.remove(artifactId);
-        runtimeClasspathSuppliers.remove(artifactId);
         return this;
     }
 
+    @Override
+    public String getMainArtifactExt() {
+        return mainArtifactExt;
+    }
+
+    public JkStandardFileArtifactProducer<T> setMainArtifactExt(String mainArtifactExt) {
+        this.mainArtifactExt = mainArtifactExt;
+        return this;
+    }
 }

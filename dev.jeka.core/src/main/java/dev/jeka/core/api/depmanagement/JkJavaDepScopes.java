@@ -36,7 +36,7 @@ public final class JkJavaDepScopes {
      * plus their transitive dependencies declared with {@link #COMPILE } or {@link #RUNTIME}.
      */
     public static final JkScope RUNTIME = JkScope.of("runtime",
-            "Dependencies to compile the project but that should not be embedded in produced artifacts.",
+            "Dependencies to run the project but that should not be used to compile it.",
             true, COMPILE);
 
     /**

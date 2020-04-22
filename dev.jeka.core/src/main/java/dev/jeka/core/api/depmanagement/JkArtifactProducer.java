@@ -26,6 +26,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      */
     void makeArtifact(JkArtifactId jkArtifactId);
 
+
     /**
      * Produces all the artifact files for the specified artifact file ids.
      */

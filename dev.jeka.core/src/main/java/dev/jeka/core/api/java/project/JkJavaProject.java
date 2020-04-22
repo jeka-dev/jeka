@@ -177,8 +177,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     }
 
     private void registerArtifacts() {
-        artifactProducer.putMainArtifact(packaging::createBinJar,
-                () -> dependencyManagement.fetchDependencies(JkJavaDepScopes.RUNTIME).getFiles());
+        artifactProducer.putMainArtifact(packaging::createBinJar);
         artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, packaging::createSourceJar);
         artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
     }

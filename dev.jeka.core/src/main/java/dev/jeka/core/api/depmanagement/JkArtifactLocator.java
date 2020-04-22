@@ -23,7 +23,14 @@ public interface JkArtifactLocator {
      * classifier and 'jar" getExtension.
      */
     default JkArtifactId getMainArtifactId() {
-        return JkArtifactId.of(JkArtifactId.MAIN_ARTIFACT_NAME, "jar");
+        return JkArtifactId.of(JkArtifactId.MAIN_ARTIFACT_NAME, getMainArtifactExt());
+    }
+
+    /**
+     * Returns the extension used by the main artifact.
+     */
+    default String getMainArtifactExt() {
+        return "jar";
     }
 
     /**

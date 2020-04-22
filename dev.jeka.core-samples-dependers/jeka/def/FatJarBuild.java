@@ -13,16 +13,16 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
  */
 public class FatJarBuild extends JkCommandSet {
 
-    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    JkPluginJava java = getPlugin(JkPluginJava.class);
     
     @JkDefImport("../dev.jeka.core-samples")
     private JavaPluginBuild sampleBuild;
 
     @Override
     protected void setup() {
-        javaPlugin.getProject()
+        java.getProject()
             .getArtifactProducer()
-                .putMainArtifact(javaPlugin.getProject().getPackaging()::createFatJar).__
+                .putMainArtifact(java.getProject().getPackaging()::createFatJar).__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                         .and(sampleBuild.java.getProject().toDependency()))

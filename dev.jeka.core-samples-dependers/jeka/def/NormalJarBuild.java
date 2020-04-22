@@ -20,7 +20,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
  */
 public class NormalJarBuild extends JkCommandSet {
 
-    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    JkPluginJava java = getPlugin(JkPluginJava.class);
 
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.
@@ -32,9 +32,9 @@ public class NormalJarBuild extends JkCommandSet {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject()
+        java.getProject()
             .getArtifactProducer()
-                .putMainArtifact(javaPlugin.getProject().getPackaging()::createFatJar).__
+                .putMainArtifact(java.getProject().getPackaging()::createFatJar).__
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(sampleBuild.java.getProject().toDependency()));
@@ -42,7 +42,7 @@ public class NormalJarBuild extends JkCommandSet {
 
     public void cleanPack() {
         clean();
-        javaPlugin.pack();
+        java.pack();
     }
 
     public static void main(String[] args) {

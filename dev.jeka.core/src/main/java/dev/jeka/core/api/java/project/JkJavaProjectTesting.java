@@ -154,9 +154,9 @@ public class JkJavaProjectTesting {
      */
     public void runIfNecessary() {
         if (done) {
-            JkLog.trace("Test task already done. Won't perfom again.");
+            JkLog.trace("Tests has already been performed. Won't do it again.");
         } else if (skipped) {
-            JkLog.info("Tests are skipped. Won't perfom.");
+            JkLog.info("Tests are skipped. Won't perform.");
         } else {
             run();
             done = true;

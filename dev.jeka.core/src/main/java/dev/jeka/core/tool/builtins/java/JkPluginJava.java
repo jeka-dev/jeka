@@ -110,11 +110,13 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         }
 
         JkTestProcessor testProcessor = project.getTesting().getTestProcessor();
-        if (tests.fork) {
+        if (tests.fork != null && tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             testProcessor.setForkingProcess(javaProcess);
         }
-        project.getTesting().setSkipped(tests.skip);
+        if (tests.skip != null) {
+            project.getTesting().setSkipped(tests.skip);
+        }
         if (this.compilerExtraArgs != null) {
             project.getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
