@@ -2,6 +2,9 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
@@ -25,12 +28,26 @@ public class JavaPluginBuild extends JkCommandSet {
     @Override
     protected void setup() {
        java.getProject()
-            .getDependencyManagement()
+           .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and("com.google.guava:guava:21.0")
                     .and("com.sun.jersey:jersey-server:1.19.4")
-                    .and("junit:junit:4.13", TEST)).__
-            .getPublication()
+                    .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)
+                    .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)).__
+           .getCompilation()
+               .setJavaVersion(JkJavaVersion.V8).__
+           .getTesting()
+               .getTestSelection()
+                    .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
+               .getTestProcessor()
+                    .setForkingProcess(true)
+               .getEngineBehavior()
+                    .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__
+
+           // Publication is only necessary if your project is being deployed on a binary repository.
+           // Many projects as jee war jar, springboot application, tools, Graphical application
+           // does not need this section at all.
+           .getPublication()
                .setModuleId("dev.jeka:sample-javaplugin")
                .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags())  // Version inferred from Git
 

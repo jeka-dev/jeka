@@ -31,7 +31,6 @@ public final class JkScaffolder {
 
     private String classFilename = "Commands.java";
 
-
     private final JkRunnables extraActions = JkRunnables.of();
 
     JkScaffolder(Path baseDir) {

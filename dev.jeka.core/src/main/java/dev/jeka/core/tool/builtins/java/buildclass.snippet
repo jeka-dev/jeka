@@ -1,5 +1,8 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.java.testing.JkTestSelection;
+import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
@@ -8,7 +11,7 @@ import static dev.jeka.core.api.depmanagement.JkJavaDepScopes.TEST;
 
 class Build extends JkCommandSet {
 
-    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    final JkPluginJava java = getPlugin(JkPluginJava.class);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
@@ -16,18 +19,31 @@ class Build extends JkCommandSet {
      */
     @Override
     protected void setup() {
-        JkJavaProject project = javaPlugin.getProject();
-        project.addDependencies(dependencies());
-    }
+        java.getProject()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of()
+                        .and("com.google.guava:guava:21.0")
+                        .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)).__
+                .getCompilation()
+                    .setJavaVersion(JkJavaVersion.V8).__
+                .getTesting()
+                    .getTestSelection()
+                        .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
+                    .getTestProcessor()
+                        .setForkingProcess(true)
+                        .getEngineBehavior()
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__
 
-    private JkDependencySet dependencies() {  // Example of dependencies.
-        return JkDependencySet.of()
-                .and("com.google.guava:guava:21.0")
-                .and("junit:junit:4.11", TEST);
+                // Publication is only necessary if your project is being deployed on a binary repository.
+                // Many projects as jee war jar, springboot application, tools, Graphical application
+                // does not need this section at all.
+                .getPublication()
+                    .setModuleId("your.group:your.project")
+                    .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags());  // Version inferred from Git
     }
 
     public void cleanPack() {
-        clean(); javaPlugin.pack();
+        clean(); java.pack();
     }
 
     public static void main(String[] args) {
