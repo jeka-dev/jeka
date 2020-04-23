@@ -1,8 +1,8 @@
 package dev.jeka.core.api.kotlin;
 
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -160,7 +160,7 @@ public final class JkKotlinJvmCompileSpec {
      * classpath.
      */
     public JkKotlinJvmCompileSpec setClasspath(Iterable<Path> files) {
-        final String classpath = JkClasspath.of(files).toString();
+        final String classpath = JkPathSequence.of(files).toString();
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
 

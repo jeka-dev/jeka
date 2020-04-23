@@ -175,7 +175,7 @@ public final class JkJavaProcess {
      * classpath.
      */
     public JkJavaProcess withClasspath(Path path1, Path path2, Path... others) {
-        return withClasspath(JkClasspath.of(path1, path2, others));
+        return withClasspath(JkPathSequence.of(path1, path2, others));
     }
 
     /**
