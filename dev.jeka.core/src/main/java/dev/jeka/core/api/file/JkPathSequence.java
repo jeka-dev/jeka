@@ -188,7 +188,7 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
             builder.append(it.next().toString());
             if (it.hasNext()) {
-                builder.append(";");
+                builder.append(File.pathSeparator);
             }
         }
         return builder.toString();

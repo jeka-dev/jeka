@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.api.utils.JkUtilsIO.JkStreamGobbler;
@@ -22,7 +23,7 @@ public final class JkJavaProcess {
 
     private final Path javaDir;
 
-    private final JkClasspath classpath;
+    private final JkPathSequence classpath;
 
     private final List<AgentLibAndOption> agents;
 
@@ -34,7 +35,7 @@ public final class JkJavaProcess {
 
     private final Map<String, String> environment;
 
-    private JkJavaProcess(Path javaDir, Map<String, String> systemProperties, JkClasspath classpath,
+    private JkJavaProcess(Path javaDir, Map<String, String> systemProperties, JkPathSequence classpath,
             List<AgentLibAndOption> agents, Collection<String> options, Path workingDir,
             Map<String, String> environment, boolean printCommand) {
         super();
@@ -62,7 +63,7 @@ public final class JkJavaProcess {
      */
     @SuppressWarnings("unchecked")
     public static JkJavaProcess ofJavaHome(Path javaDir) {
-        return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkClasspath.of(),
+        return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkPathSequence.of(),
                 Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP, true);
     }
 
@@ -155,7 +156,7 @@ public final class JkJavaProcess {
         if (paths == null) {
             throw new IllegalArgumentException("Classpath can't be null.");
         }
-        final JkClasspath jkClasspath = JkClasspath.of(JkUtilsPath.disambiguate(paths));
+        final JkPathSequence jkClasspath = JkPathSequence.of(JkUtilsPath.disambiguate(paths));
         return new JkJavaProcess(this.javaDir, this.systemProperties, jkClasspath, this.agents,
                 this.options, this.workingDir, this.environment, this.printCommand);
     }
@@ -314,10 +315,10 @@ public final class JkJavaProcess {
     }
 
     /**
-     * Returns the classpth of this {@link JkJavaProcess}.
+     * Returns the classpath of this {@link JkJavaProcess}.
      * @return
      */
-    public JkClasspath getClasspath() {
+    public JkPathSequence getClasspath() {
         return classpath;
 
     }

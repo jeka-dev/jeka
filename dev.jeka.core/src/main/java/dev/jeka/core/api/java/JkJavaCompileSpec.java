@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -195,7 +196,7 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
      * classpath.
      */
     public JkJavaCompileSpec<T> setClasspath(Iterable<Path> files) {
-        final String classpath = JkClasspath.of(files).toString();
+        final String classpath = JkPathSequence.of(files).toString();
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
 

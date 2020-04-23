@@ -23,15 +23,13 @@ import java.util.zip.ZipFile;
  * Non existing files are accepted as valid <code>entry</code>, though they
  * won't contain any classes.
  *
- * @author Djeang
+ * @author Jerome Angibaud
  */
 public final class JkClasspath implements Iterable<Path>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private static final String WILD_CARD = "*";
-
-    private static final String PATH_SEPARATOR = System.getProperty("path.separator");
 
     private final List<Path> entries;
 
@@ -68,7 +66,7 @@ public final class JkClasspath implements Iterable<Path>, Serializable {
     public static JkClasspath ofCurrentRuntime() {
         final List<Path> files = new LinkedList<>();
         final String classpath = System.getProperty("java.class.path");
-        final String[] classpathEntries = classpath.split(PATH_SEPARATOR);
+        final String[] classpathEntries = classpath.split(File.pathSeparator);
         for (final String classpathEntry : classpathEntries) {
             files.addAll(resolveWildCard(classpathEntry));
         }
@@ -207,7 +205,7 @@ public final class JkClasspath implements Iterable<Path>, Serializable {
         for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
             builder.append(it.next().toAbsolutePath().toString());
             if (it.hasNext()) {
-                builder.append(PATH_SEPARATOR);
+                builder.append(File.pathSeparator);
             }
         }
         return builder.toString();
