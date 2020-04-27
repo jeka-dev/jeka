@@ -162,7 +162,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
                 () -> artifactProducer.makeArtifact(artifactId),
                 artifactProducer.getArtifactPath(artifactId),
                 this.baseDir,
-                this.publication.getPublishedDependencies());
+                this.publication.getMavenPublication().getDependencies());
     }
 
     private String artifactFileNamePart() {

@@ -140,7 +140,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     public JkDependencySet and(JkLocalLibDependency dependency, JkScope ... scopes) {
         return this
                 .and((JkDependency) dependency, scopes)
-                .and(dependency.getDependencies());
+                .and(dependency.getDependencies()); // transitive dependencies
     }
 
 

@@ -26,8 +26,8 @@ public class IvyInternalPublisherRunner {
         final IvyInternalPublisher jkIvyInternalPublisher = IvyInternalPublisher.of(ivyRepo().toSet(), Paths.get("jeka/output/test-out"));
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup", "mymodule"), JkVersion.of("myVersion"));
-        final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(),
-                JkScopedDependencyTest.COMPILE.getName(), JkScopedDependencyTest.TEST.getName());
+        final JkIvyPublication ivyPublication = JkIvyPublication.of()
+                .setMainArtifact(sampleJarfile(), JkScopedDependencyTest.COMPILE.getName(), JkScopedDependencyTest.TEST.getName());
         final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
         final JkDependencySet deps = JkDependencySet.of().and(spring, "3.0.+", JkScopedDependencyTest.COMPILE);
         jkIvyInternalPublisher.publishIvy(versionedModule, ivyPublication, deps, null, Instant.now(),

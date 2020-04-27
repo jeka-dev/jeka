@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -155,9 +156,10 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             throw new IllegalStateException(e);
         }
         try {
-            for (final JkIvyPublication.JkPublicationArtifact artifact : publication) {
-                final Artifact ivyArtifact = IvyTranslations.toPublishedArtifact(artifact,
-                        ivyModuleRevisionId, date);
+            Iterator<JkIvyPublication.JkPublicationArtifact> it = publication.getAllArtifacts().iterator();
+            while (it.hasNext()) {
+                JkIvyPublication.JkPublicationArtifact artifact = it.next();
+                final Artifact ivyArtifact = IvyTranslations.toPublishedArtifact(artifact, ivyModuleRevisionId, date);
                 try {
                     resolver.publish(ivyArtifact, artifact.file, true);
                 } catch (final IOException e) {

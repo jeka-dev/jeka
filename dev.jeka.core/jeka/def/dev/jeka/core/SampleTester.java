@@ -43,8 +43,8 @@ class SampleTester {
     void doTest() throws IOException {
         testSampleWith("JavaPluginBuild", "cleanPackPublish");
         testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
-        testSampleWithJavaPlugin("ThirdPartyPoweredBuild");
-        testSampleWithJavaPlugin("Junit5Build");
+        testSampleWith("ThirdPartyPoweredBuild", "cleanPack");
+        testSampleWith("Junit5Build", "cleanPack");
         testSampleWithJavaPlugin("JacocoPluginBuild");
         testSampleWith("SonarPluginBuild", "cleanPackSonar");
         testSampleWith("AntStyleBuild", "cleanPackPublish");
@@ -76,8 +76,6 @@ class SampleTester {
         //String jekaScript = sampleBaseDir.get(JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jekaw").toString();
         //JkProcess.of(jekaScript).withFailOnError(true).withWorkingDir(project).andParams("intellij#all").runSync();
         //JkLog.endTask();
-
-
 
         testDepender("NormalJarBuild");
         testFork();

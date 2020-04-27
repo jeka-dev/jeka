@@ -12,7 +12,6 @@ import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
 
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.List;
 
 /**
@@ -89,13 +88,16 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
                 .putMainArtifact(jarFile, this::jar)
                 .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
         artifactProducer.makeAllMissingArtifacts();
-        JkIvyPublication ivyPublication = JkIvyPublication.of(artifactProducer);
-        JkPublisher.of(JkRepoSet.of(mavenRepo, ivyRepo))
-                .withSigner(pgp.getSigner(""))
-                .publishMaven(versionedModule, JkMavenPublication.of(artifactProducer, JkPublishedPomMetadata.of()),
-                        moduleDependencies)
-                .publishIvy(versionedModule, ivyPublication, moduleDependencies, JkScope.DEFAULT_SCOPE_MAPPING,
-                        Instant.now(), JkVersionProvider.of());
+        JkMavenPublication.of()
+                .setArtifactLocator(artifactProducer)
+                .setDependencies(moduleDependencies)
+                .setVersionedModule(versionedModule)
+                .publish(mavenRepo.toSet(), pgp.getSigner(""));
+        JkIvyPublication.of()
+                .setVersionedModule(versionedModule)
+                .setDependencies(deps -> moduleDependencies)
+                .addArtifacts(artifactProducer)
+                .publish(ivyRepo.toSet());
     }
 
     @Override

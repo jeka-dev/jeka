@@ -105,15 +105,16 @@ public class CoreBuild extends JkCommandSet {
                 .setModuleId("dev.jeka:jeka-core")
                 .setVersionSupplier(git::getJkVersionFromTags)
                 .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
-                .getPublishedPomMetadata()
-                    .getProjectInfo()
-                        .setName("jeka")
-                        .setUrl("https://jeka.dev")
-                        .setDescription("Automate with plain Java code and nothing else.").__
-                    .getScm()
-                        .setUrl("https://github.com/jerkar/jeka.git").__
-                    .addApache2License()
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr").__
+                .getMavenPublication()
+                    .getPomMetadata()
+                        .getProjectInfo()
+                            .setName("jeka")
+                            .setUrl("https://jeka.dev")
+                            .setDescription("Automate with plain Java code and nothing else.").__
+                        .getScm()
+                            .setUrl("https://github.com/jerkar/jeka.git").__
+                        .addApache2License()
+                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr").__.__
                 .getPostActions()
                     .append(() -> createGithubRelease());
     }

@@ -322,7 +322,9 @@ final class IvyTranslations {
 
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
             JkIvyPublication publication, Instant publishDate) {
-        for (final JkIvyPublication.JkPublicationArtifact artifact : publication) {
+        Iterator<JkIvyPublication.JkPublicationArtifact> it = publication.getAllArtifacts().iterator();
+        while (it.hasNext()) {
+            JkIvyPublication.JkPublicationArtifact artifact = it.next();
             for (final JkScope jkScope : JkScope.getInvolvedScopes(artifact.jkScopes)) {
                 if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.getName())) {
                     descriptor.addConfiguration(toConfiguration(jkScope));

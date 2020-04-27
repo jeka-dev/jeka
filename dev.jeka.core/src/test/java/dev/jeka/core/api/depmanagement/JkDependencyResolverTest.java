@@ -46,9 +46,7 @@ public class JkDependencyResolverTest {
                 .addDependencies(JkDependencySet.of()
                     .and(baseProject.toDependency())).__;
 
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = dependencyResolver.resolve(
-                coreProject.getDependencyManagement().getDependencies());
+        JkResolveResult resolveResult = coreProject.getDependencyManagement().fetchDependencies();
 
         Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size()); // base dir and guava
         JkDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);

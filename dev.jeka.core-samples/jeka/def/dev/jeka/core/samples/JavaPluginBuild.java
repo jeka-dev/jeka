@@ -51,14 +51,13 @@ public class JavaPluginBuild extends JkCommandSet {
            .getPublication()
                .setModuleId("dev.jeka:sample-javaplugin")
                .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags())  // Version inferred from Git
+               .addRepos(JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
+               .getMavenPublication()
 
-               // Published dependencies can be modified here from the ones declared in dependency management.
-               // Here jersey-server is not supposed to be part of the API but only needed at runtime.
-               .setDependencies(deps -> deps
-                   .replaceScope("com.sun.jersey:jersey-server", RUNTIME))
-
-               // Use a dummy repo for demo purpose
-               .addRepos(JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo")));
+                   // Published dependencies can be modified here from the ones declared in dependency management.
+                   // Here jersey-server is not supposed to be part of the API but only needed at runtime.
+                   .setDependencies(deps -> deps
+                       .replaceScope("com.sun.jersey:jersey-server", RUNTIME));
     }
 
     public void cleanPackPublish() {

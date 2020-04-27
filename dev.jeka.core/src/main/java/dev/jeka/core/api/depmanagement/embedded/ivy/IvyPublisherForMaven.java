@@ -150,8 +150,8 @@ final class IvyPublisherForMaven {
         pomWriterOptions.setMapping(new ScopeMapping());
         pomWriterOptions.setArtifactPackaging(packaging);
         Path fileToDelete = null;
-        if (publication.getExtraInfo() != null) {
-            final Path template = JkPomTemplateGenerator.generateTemplate(publication.getExtraInfo());
+        if (publication.getPomMetadata() != null) {
+            final Path template = JkPomTemplateGenerator.generateTemplate(publication.getPomMetadata());
             pomWriterOptions.setTemplate(template.toFile());
             fileToDelete = template;
         }

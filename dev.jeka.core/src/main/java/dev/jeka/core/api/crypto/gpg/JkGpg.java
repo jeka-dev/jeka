@@ -94,12 +94,9 @@ public final class JkGpg {
         } else {
             pass = passphrase.toCharArray();
         }
-        JkUtilsAssert.state(secRing != null,
-                "You must supply a secret ring file (as secring.gpg) to sign files");
-        if (!Files.exists(getSecretRing())) {
-            throw new IllegalStateException("Specified secret ring file " + secRing + " not found.");
-        }
-        INTERNAL_GPG_DOER.sign(fileToSign, this.secRing, keyName, signatureFile, pass, true);
+        JkUtilsAssert.state(secRing != null, "You must supply a secret ring file (as secring.gpg) to sign files");
+        JkUtilsAssert.state(Files.exists(secRing), "Specified secret ring file " + secRing + " not found.");
+        INTERNAL_GPG_DOER.sign(fileToSign, secRing, keyName, signatureFile, pass, true);
     }
 
     /**
