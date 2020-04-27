@@ -7,7 +7,6 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jeka.dev/images/large-social-logo.png" align='middle'/>
 
-
 # What is Jeka ?
 
 <strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using only Java code to automate builds or tasks.
@@ -26,11 +25,16 @@ of any build-code / configuration / script.
 
 # News 
 
-* __Jeka 0.8.18.RELEASE introduces exceptional API breaks. See [release note](https://github.com/jerkar/jeka/releases/tag/0.8.18.RELEASE)__
-
+* Jeka 0.9.0.M1 is out. Until Jeka reaches version 1.0.0, minor version change (the digit in the middle) will
+  imply API change. Normally This is not a problem as wrapper usage protects users against API change.
+  0.9.0 introduces a cleaner API for defining project build. This is based on [parent chainin](https://github.com/djeang/parent-chaining/blob/master/readme.md) pattern.
+  
 * Jeka has joined OW2 organisation on january 2020 : https://projects.ow2.org/view/jeka/
 
 Last major additions :
+
+* Completely renewed API, now embracing widely *Parent Chaining*.
+* Test engine now relies on Junit 5 (still compatible with Junit 3&4)
 * Release of a [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
 * Upgraded to Ivy 2.5.0
 * Wrapper to run Jeka independently of the Jeka version installed on the host machine
