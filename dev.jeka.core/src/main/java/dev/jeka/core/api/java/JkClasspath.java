@@ -4,10 +4,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 
-import java.io.*;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +22,7 @@ import java.util.zip.ZipFile;
  *
  * @author Jerome Angibaud
  */
-public final class JkClasspath implements Iterable<Path>, Serializable {
+public final class JkClasspath implements Iterable<Path> {
 
     private static final long serialVersionUID = 1L;
 
@@ -85,23 +82,6 @@ public final class JkClasspath implements Iterable<Path>, Serializable {
     @Override
     public Iterator<Path> iterator() {
         return entries.iterator();
-    }
-
-    /**
-     * Returns this classpath as an array of URL.
-     */
-    public URL[] toArrayOfUrl() {
-        final URL[] result = new URL[this.entries.size()];
-        int i = 0;
-        for (final Path file : this.entries) {
-            try {
-                result[i] = file.toUri().toURL();
-            } catch (final MalformedURLException e) {
-                throw new IllegalStateException(file + " can't be transformed to url", e);
-            }
-            i++;
-        }
-        return result;
     }
 
     /**
@@ -180,21 +160,6 @@ public final class JkClasspath implements Iterable<Path>, Serializable {
      */
     public JkClasspath andPrepending(Path path1, Path path2, Path... others) {
         return and(JkUtilsIterable.listOf2orMore(path1, path2, others));
-    }
-
-    /**
-     * Returns a <code>JkClasspath</code> identical to this one but without duplicates.
-     * If a given file in this sequence exist twice or more, then only the first occurrence is kept in the returned
-     * sequence.
-     */
-    public JkClasspath withoutDuplicates() {
-        final List<Path> files = new LinkedList<>();
-        for (final Path file : this.entries) {
-            if (!files.contains(file)) {
-                files.add(file);
-            }
-        }
-        return new JkClasspath(files);
     }
 
     // ------------------------- canonical methods --------------------------------------
@@ -281,18 +246,6 @@ public final class JkClasspath implements Iterable<Path>, Serializable {
 
     private static String toFilePath(String className) {
         return className.replace('.', '/').concat(".class");
-    }
-
-    private  void writeObject(ObjectOutputStream oos) throws IOException {
-        List<File> files = JkUtilsPath.toFiles(this.entries);
-        oos.writeObject(files);
-    }
-
-    private  void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        List<File> files = (List<File>) ois.readObject();
-        List<Path> paths = JkUtilsPath.toPaths(files);
-        Field field = JkUtilsReflect.getField(JkClasspath.class, "entries");
-        JkUtilsReflect.setFieldValue(this, field, paths);
     }
 
 }

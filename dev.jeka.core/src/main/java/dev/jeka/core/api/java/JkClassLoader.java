@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -285,7 +286,7 @@ public class JkClassLoader {
     /**
      * Returns the classpath for this classloader excluding elements on the platform/system classloader.
      */
-    public JkClasspath getClasspath() {
+    public JkPathSequence getClasspath() {
         return JkInternalClasspathScanner.INSTANCE.getClasspath(this.delegate);
     }
 

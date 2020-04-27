@@ -89,8 +89,8 @@ public class JkJavaProjectTesting {
      * Returns the classpath to run the test. It consists in test classes + prod classes +
      * dependencies involved in TEST scope.
      */
-    public JkClasspath getTestClasspath() {
-        return JkClasspath.of(compilation.getLayout().resolveClassDir())
+    public JkPathSequence getTestClasspath() {
+        return JkPathSequence.of(compilation.getLayout().resolveClassDir())
                 .and(project.getProduction().getCompilation().getLayout().resolveClassDir())
                 .and(project.getDependencyManagement()
                         .fetchDependencies(JkScope.SCOPES_FOR_TEST).getFiles());

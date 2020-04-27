@@ -182,8 +182,8 @@ public final class JkJavaProcess {
      * Returns a {@link JkJavaProcess} identical to this one but augmenting this
      * classpath with the specified one.
      */
-    public JkJavaProcess andClasspath(JkClasspath classpath) {
-        return withClasspath(this.classpath.and(classpath));
+    public JkJavaProcess andClasspath(Iterable<Path> classpath) {
+        return withClasspath(this.classpath.and(JkUtilsPath.disambiguate(classpath)));
     }
 
     private ProcessBuilder processBuilder(List<String> command, Map<String, String> env) {

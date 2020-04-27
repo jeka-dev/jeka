@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java.testing;
 
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.function.JkUnaryOperator;
 import dev.jeka.core.api.java.*;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 import java.util.ServiceLoader;
 
 /**
@@ -115,8 +117,8 @@ public final class JkTestProcessor<T> {
         return this;
     }
 
-    private JkClasspath computeClasspath(JkClasspath testClasspath) {
-        JkClasspath result = testClasspath;
+    private List<Path> computeClasspath(JkPathSequence testClasspath) {
+        JkClasspath result = JkClasspath.of(testClasspath);
         JkClassLoader classloader = JkClassLoader.ofCurrent();
         result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_JAR_NAME);
         result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_JAR_NAME);
@@ -134,7 +136,7 @@ public final class JkTestProcessor<T> {
             result = result.andPrepending(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION
                     + JUNIT_4_JAR_NAME )); // overwrite junit4 to last version for compiance with vintage
         }
-        return result;
+        return result.getEntries();
     }
 
     private static JkClasspath addIfNeeded(JkClasspath classpath, JkClassLoader classloader,
@@ -153,7 +155,7 @@ public final class JkTestProcessor<T> {
      * Launches the specified test set with the underlying junit-platform. The classloader running the tests includes
      * the classpath of the current classloader plus the specified one.
      */
-    public JkTestResult launch(JkClasspath extraTestClasspath, JkTestSelection testSelection) {
+    public JkTestResult launch(JkPathSequence extraTestClasspath, JkTestSelection testSelection) {
         JkLog.startTask("Executing tests");
         final JkTestResult result;
         if (forkingProcess == null) {
@@ -167,12 +169,12 @@ public final class JkTestProcessor<T> {
         return result;
     }
 
-    private JkTestResult launchInClassloader(JkClasspath testClasspath, JkTestSelection testSelection) {
-        JkClasspath classpath = computeClasspath(testClasspath);
-        return JkInternalJunitDoer.instance(classpath.getEntries()).launch(engineBehavior, testSelection);
+    private JkTestResult launchInClassloader(JkPathSequence testClasspath, JkTestSelection testSelection) {
+        List<Path> classpath = computeClasspath(testClasspath);
+        return JkInternalJunitDoer.instance(classpath).launch(engineBehavior, testSelection);
     }
 
-    private JkTestResult launchInForkedProcess(JkClasspath testClasspath, JkTestSelection testSelection) {
+    private JkTestResult launchInForkedProcess(JkPathSequence testClasspath, JkTestSelection testSelection) {
         Path serializedResultPath = JkUtilsPath.createTempFile("testResult-", ".ser");
         Args args = new Args();
         args.resultFile = serializedResultPath.toAbsolutePath().toString();
@@ -182,9 +184,9 @@ public final class JkTestProcessor<T> {
         JkUtilsIO.serialize(args, serializedArgPath);
         String arg = serializedArgPath.toAbsolutePath().toString();
         JkJavaProcess process = forkingProcess
-                .withPrintCommand(false)
-                .andClasspath(JkClassLoader.ofCurrent().getClasspath().
-                        and(computeClasspath(testClasspath)).withoutDuplicates());
+            .withPrintCommand(false)
+            .andClasspath(JkClassLoader.ofCurrent().getClasspath().
+                    and(computeClasspath(testClasspath)).withoutDuplicates().getEntries());
         process.runClassSync(JkTestProcessor.class.getName(), new String[] {arg});
         JkUtilsPath.deleteFile(serializedArgPath);
         JkTestResult result = JkUtilsIO.deserialize(serializedResultPath);

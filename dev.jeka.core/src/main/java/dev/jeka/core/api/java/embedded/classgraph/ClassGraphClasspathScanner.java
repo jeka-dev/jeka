@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.embedded.classgraph;
 
-import dev.jeka.core.api.java.JkClasspath;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import io.github.classgraph.*;
@@ -108,9 +108,9 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         return result;
     }
 
-    public JkClasspath getClasspath(ClassLoader classLoader) {
+    public JkPathSequence getClasspath(ClassLoader classLoader) {
         List<File> files = new ClassGraph().scan().getClasspathFiles();
-        return JkClasspath.of(JkUtilsPath.toPaths(files));
+        return JkPathSequence.of(JkUtilsPath.toPaths(files));
     }
 
 

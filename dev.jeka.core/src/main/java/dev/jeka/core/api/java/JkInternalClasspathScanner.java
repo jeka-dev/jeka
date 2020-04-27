@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.util.List;
@@ -36,5 +37,5 @@ public interface JkInternalClasspathScanner {
     List<String> findClassesMatchingAnnotations(ClassLoader classloader,
                                                 Predicate<List<String>> annotationPredicate);
 
-    JkClasspath getClasspath(ClassLoader classLoader);
+    JkPathSequence getClasspath(ClassLoader classLoader);
 }
