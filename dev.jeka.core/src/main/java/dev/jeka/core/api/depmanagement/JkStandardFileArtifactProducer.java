@@ -39,8 +39,8 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
         return new JkStandardFileArtifactProducer<>( __);
     }
 
-    public static JkStandardFileArtifactProducer<Void> of(Path outputDir, String filePrefixName) {
-        return new JkStandardFileArtifactProducer(null).setArtifactFilenameComputation(() -> outputDir, ()-> filePrefixName);
+    public static JkStandardFileArtifactProducer<Void> of(Function<JkArtifactId, Path> artifactPathFunction) {
+        return new JkStandardFileArtifactProducer(null).setArtifactFilenameComputation(artifactPathFunction);
     }
 
     @Override
@@ -67,19 +67,15 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
         return new LinkedList<>(consumers.keySet());
     }
 
-    public JkStandardFileArtifactProducer<T> setArtifactFilenameComputation(Function<JkArtifactId, Path> artifactFileFunction) {
-        JkUtilsAssert.argument(artifactFileFunction != null, "artifactFileFunction cannot be null.");
-        this.artifactFileFunction = artifactFileFunction;
-        return this;
-    }
-
     /**
      * Specifies how the location and names or artifact files will be computed.
      * Artifact files are generated on a given directory provided by the specified supplier. The name of the
      * artifact files will be composed as [partName](-[artifactId.name]).[artifactId.ext].
      */
-    public JkStandardFileArtifactProducer<T> setArtifactFilenameComputation(Supplier<Path> targetDir, Supplier<String> partName) {
-        return setArtifactFilenameComputation(artifactId -> targetDir.get().resolve(artifactId.toFileName(partName.get())));
+    public JkStandardFileArtifactProducer<T> setArtifactFilenameComputation(Function<JkArtifactId, Path> artifactFileFunction) {
+        JkUtilsAssert.argument(artifactFileFunction != null, "artifactFileFunction cannot be null.");
+        this.artifactFileFunction = artifactFileFunction;
+        return this;
     }
 
     public JkStandardFileArtifactProducer<T> putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
@@ -106,4 +102,5 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
         this.mainArtifactExt = mainArtifactExt;
         return this;
     }
+
 }

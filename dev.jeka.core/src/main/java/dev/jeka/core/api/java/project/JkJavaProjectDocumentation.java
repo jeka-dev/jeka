@@ -69,7 +69,7 @@ public class JkJavaProjectDocumentation {
         return this;
     }
 
-    void createJavadocJar(Path target) {
+    public void createJavadocJar(Path target) {
         project.getDocumentation().runIfNecessary();
         Path javadocDir = project.getDocumentation().getJavadocDir();
         if (!Files.exists(javadocDir)) {
@@ -77,6 +77,20 @@ public class JkJavaProjectDocumentation {
                     + ". Can't create a javadoc jar until javadoc files has been generated.");
         }
         JkPathTree.of(javadocDir).zipTo(target);
+    }
+
+    public void createJavadocJar() {
+        createJavadocJar(project.getArtifactPath(JkJavaProject.JAVADOC_ARTIFACT_ID));
+    }
+
+    public void createSourceJar(Path target) {
+        JkJavaProjectCompilation compilation = project.getProduction().getCompilation();
+        compilation.getLayout().resolveSources().and(compilation
+                .getLayout().resolveGeneratedSourceDir()).zipTo(target);
+    }
+
+    public void createSourceJar() {
+        createSourceJar(project.getArtifactPath(JkJavaProject.SOURCES_ARTIFACT_ID));
     }
 
     void reset() {

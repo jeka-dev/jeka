@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java.project;
 
+import dev.jeka.core.api.depmanagement.JkArtifactId;
 import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTreeSet;
@@ -59,6 +60,10 @@ public class JkJavaProjectProduction {
                 .makeJar(target);
     }
 
+    public void createBinJar() {
+        createBinJar(project.getArtifactPath(JkArtifactId.ofMainArtifact("jar")));
+    }
+
     public void createFatJar(Path target) {
         compilation.runIfNecessary();
         project.getTesting().runIfNecessary();
@@ -70,9 +75,8 @@ public class JkJavaProjectProduction {
                 .makeFatJar(target, classpath, this.fatJarFilter);
     }
 
-    public void createSourceJar(Path target) {
-        compilation.getLayout().resolveSources().and(compilation
-                .getLayout().resolveGeneratedSourceDir()).zipTo(target);
+    public void createFatJar() {
+        createFatJar(project.getArtifactPath(JkArtifactId.of("fat", "jar")));
     }
 
     public JkPathTreeSet getExtraFilesToIncludeInJar() {
