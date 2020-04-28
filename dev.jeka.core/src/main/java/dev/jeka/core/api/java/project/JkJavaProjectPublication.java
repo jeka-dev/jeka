@@ -12,6 +12,10 @@ import java.util.function.UnaryOperator;
 
 public class JkJavaProjectPublication {
 
+    public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
+
+    public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
+
     private final JkJavaProject project;
 
     private JkModuleId moduleId;
@@ -21,6 +25,8 @@ public class JkJavaProjectPublication {
     private JkRepoSet publishRepos = JkRepoSet.of();
 
     private UnaryOperator<Path> signer;
+
+    private final JkStandardFileArtifactProducer<JkJavaProjectPublication> artifactProducer;
 
     private final JkMavenPublication<JkJavaProjectPublication> mavenPublication;
 
@@ -37,12 +43,15 @@ public class JkJavaProjectPublication {
         this.project = project;
         this.__ = project;
         this.versionSupplier = () -> JkVersion.UNSPECIFIED;
+        artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
+                .setArtifactFilenameComputation(project::getArtifactPath);
+        registerArtifacts();
         this.mavenPublication = JkMavenPublication.of(this)
-            .setArtifactLocator(() -> project.getArtifactProducer())
+            .setArtifactLocator(() -> artifactProducer)
             .setDependencies(deps -> project.getDependencyManagement().getDependencies())
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()));
         this.ivyPublication = JkIvyPublication.of(this)
-            .addArtifacts(() -> project.getArtifactProducer())
+            .addArtifacts(() -> artifactProducer)
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()))
             .setDependencies(deps -> project.getDependencyManagement().getDependencies())
             .setResolvedVersionProvider(this::getResolvedVersions);
@@ -197,4 +206,13 @@ public class JkJavaProjectPublication {
         return project.getDependencyManagement().fetchDependencies().getResolvedVersionProvider();
     }
 
+    public JkStandardFileArtifactProducer<JkJavaProjectPublication> getArtifactProducer() {
+        return artifactProducer;
+    }
+
+    private void registerArtifacts() {
+        artifactProducer.putMainArtifact(project.getProduction()::createBinJar);
+        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
+        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, project.getDocumentation()::createJavadocJar);
+    }
 }

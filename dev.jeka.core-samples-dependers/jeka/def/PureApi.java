@@ -27,7 +27,7 @@ public class PureApi {
                 .getPublication()
                     .setModuleId("mygroup:depender")
                     .setVersion(JkVersion.of("1.0-SNAPSHOT")).__;
-        dependerProject.getArtifactProducer().makeAllArtifacts();
+        dependerProject.getPublication().getArtifactProducer().makeAllArtifacts();
         dependerProject.getPublication().publish();
     }
 }

@@ -60,7 +60,7 @@ public class JkEclipseClasspathGeneratorTest {
             .setBaseDir(top.resolve("desktop"))
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of().and(coreProject.toDependency())).__;
-        desktopProject.getArtifactProducer().makeAllArtifacts();
+        desktopProject.publication.getArtifactProducer().makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.generate();

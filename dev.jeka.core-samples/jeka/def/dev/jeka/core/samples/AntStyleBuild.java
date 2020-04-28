@@ -6,7 +6,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectPublication;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
@@ -86,7 +86,7 @@ public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSu
         JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.2_SNAPSHOT");
         JkArtifactProducer artifactProducer = JkSuppliedFileArtifactProducer.of()
                 .putMainArtifact(jarFile, this::jar)
-                .putArtifact(JkJavaProject.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
+                .putArtifact(JkJavaProjectPublication.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
         artifactProducer.makeAllMissingArtifacts();
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)

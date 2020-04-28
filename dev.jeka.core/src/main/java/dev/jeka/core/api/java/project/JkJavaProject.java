@@ -1,7 +1,8 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.file.JkFileSystemLocalizable;
+import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkDependencyManagement;
+import dev.jeka.core.api.depmanagement.JkLocalLibDependency;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,11 +27,7 @@ import java.util.function.Consumer;
  * several artifact files so be aware of clean it if you want to replay some tasks with different settings.
  *
  */
-public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemLocalizable, JkArtifactProducer.JkSupplier {
-
-    public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
-
-    public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
+public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
 
     private Path baseDir = Paths.get(".");
 
@@ -38,15 +35,13 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
 
     private final JkDependencyManagement<JkJavaProject> dependencyManagement;
 
-    private final JkStandardFileArtifactProducer<JkJavaProject> artifactProducer;
-
     private final JkJavaProjectTesting testing;
 
     private final JkJavaProjectDocumentation documentation;
 
     private final JkJavaProjectProduction production;
 
-    private final JkJavaProjectPublication publication;
+    public final JkJavaProjectPublication publication;
 
     private JkJavaProject() {
         dependencyManagement = JkDependencyManagement.ofParent(this);
@@ -54,9 +49,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         documentation = new JkJavaProjectDocumentation( this);
         production = new JkJavaProjectProduction(this);
         publication = new JkJavaProjectPublication(this);
-        artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
-                .setArtifactFilenameComputation(this::getArtifactPath);
-        registerArtifacts();
     }
 
     public static JkJavaProject of() {
@@ -70,7 +62,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
 
     // ---------------------------- Getters / setters --------------------------------------------
 
-    @Override
     public Path getBaseDir() {
         return this.baseDir;
     }
@@ -97,10 +88,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
 
     public JkDependencyManagement<JkJavaProject> getDependencyManagement() {
         return dependencyManagement;
-    }
-
-    public JkStandardFileArtifactProducer<JkJavaProject> getArtifactProducer() {
-        return artifactProducer;
     }
 
     public JkJavaProjectTesting getTesting() {
@@ -137,7 +124,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
             .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
             .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
             .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
-            .append("Defined Artifacts : " + getArtifactProducer().getArtifactIds())
+            .append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds())
             .toString();
     }
 
@@ -152,13 +139,13 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
     }
 
     public JkLocalLibDependency toDependency() {
-        return toDependency(artifactProducer.getMainArtifactId());
+        return toDependency(publication.getArtifactProducer().getMainArtifactId());
     }
 
     public JkLocalLibDependency toDependency(JkArtifactId artifactId) {
         return JkLocalLibDependency.of(
-            () -> artifactProducer.makeArtifact(artifactId),
-            artifactProducer.getArtifactPath(artifactId),
+            () -> publication.getArtifactProducer().makeArtifact(artifactId),
+                publication.getArtifactProducer().getArtifactPath(artifactId),
             this.baseDir,
             this.publication.getMavenPublication().getDependencies());
     }
@@ -167,10 +154,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier, JkFileSystemL
         return baseDir.resolve(outputDir).resolve(artifactId.toFileName(publication.getModuleId().getDotedName()));
     }
 
-    private void registerArtifacts() {
-        artifactProducer.putMainArtifact(production::createBinJar);
-        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, documentation::createSourceJar);
-        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, documentation::createJavadocJar);
-    }
+
 
 }

@@ -24,8 +24,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static dev.jeka.core.api.java.project.JkJavaProject.JAVADOC_ARTIFACT_ID;
-import static dev.jeka.core.api.java.project.JkJavaProject.SOURCES_ARTIFACT_ID;
+import static dev.jeka.core.api.java.project.JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
+import static dev.jeka.core.api.java.project.JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
 
 /**
  * Build class for Jeka. Run main method to create full distrib.
@@ -70,10 +70,6 @@ public class CoreBuild extends JkCommandSet {
             javaPlugin.pack.javadoc = true;
         }
         javaPlugin.getProject()
-            .getArtifactProducer()
-                .putMainArtifact(this::doPackWithEmbedded)
-                .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
-                .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__ // define wrapper
             .getProduction()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
@@ -105,6 +101,10 @@ public class CoreBuild extends JkCommandSet {
                 .setModuleId("dev.jeka:jeka-core")
                 .setVersionSupplier(git::getJkVersionFromTags)
                 .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
+                .getArtifactProducer()
+                    .putMainArtifact(this::doPackWithEmbedded)
+                    .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
+                    .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__
                 .getMavenPublication()
                     .getPomMetadata()
                         .getProjectInfo()
@@ -137,7 +137,7 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = javaPlugin.getProject().getArtifactProducer();
+        final JkArtifactProducer artifactProducer = javaPlugin.getProject().publication.getArtifactProducer();
         artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
                 SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder());

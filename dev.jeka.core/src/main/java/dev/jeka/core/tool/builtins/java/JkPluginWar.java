@@ -6,6 +6,7 @@ import dev.jeka.core.api.depmanagement.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkCommandSet;
@@ -32,15 +33,15 @@ public class JkPluginWar extends JkPlugin {
     public JkPluginWar(JkCommandSet commandSet) {
         super(commandSet);
         this.staticResourceDir = commandSet.getBaseDir().resolve("src/main/webapp/static");
-        this.artifactProducer = commandSet.getPlugin(JkPluginJava.class).getProject().getArtifactProducer();
+        this.artifactProducer = commandSet.getPlugin(JkPluginJava.class).getProject().publication.getArtifactProducer();
 
     }
 
     @Override
     protected void init() {
         this.artifactProducer
-            .removeArtifact(JkJavaProject.JAVADOC_ARTIFACT_ID)
-            .removeArtifact(JkJavaProject.SOURCES_ARTIFACT_ID)
+            .removeArtifact(JkJavaProjectPublication.JAVADOC_ARTIFACT_ID)
+            .removeArtifact(JkJavaProjectPublication.SOURCES_ARTIFACT_ID)
             .setMainArtifactExt("war")
             .putMainArtifact(path -> doWarFile((Path) path));
     }

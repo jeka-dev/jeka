@@ -80,7 +80,7 @@ public class JkJavaProjectDocumentation {
     }
 
     public void createJavadocJar() {
-        createJavadocJar(project.getArtifactPath(JkJavaProject.JAVADOC_ARTIFACT_ID));
+        createJavadocJar(project.getArtifactPath(JkJavaProjectPublication.JAVADOC_ARTIFACT_ID));
     }
 
     public void createSourceJar(Path target) {
@@ -90,7 +90,7 @@ public class JkJavaProjectDocumentation {
     }
 
     public void createSourceJar() {
-        createSourceJar(project.getArtifactPath(JkJavaProject.SOURCES_ARTIFACT_ID));
+        createSourceJar(project.getArtifactPath(JkJavaProjectPublication.SOURCES_ARTIFACT_ID));
     }
 
     void reset() {

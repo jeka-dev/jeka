@@ -53,7 +53,7 @@ public class WarPluginBuild extends JkCommandSet {
     }
 
     public void runWarWithJetty() {
-        JkArtifactProducer artifactProducer = java.getProject().getArtifactProducer();
+        JkArtifactProducer artifactProducer = java.getProject().getPublication().getArtifactProducer();
         artifactProducer.makeMissingArtifacts();
         JkPluginRepo repo = getPlugin(JkPluginRepo.class);
         Path jettyRunner = repo.downloadRepository().toSet().get("org.eclipse.jetty:jetty-runner:" + jettyRunnerVersion);

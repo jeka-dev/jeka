@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
-import dev.jeka.core.api.file.JkFileSystemLocalizable;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.*;
 
@@ -150,14 +149,6 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      */
     public JkDependencySet and(JkModuleDependency dependency, JkScopeMapping scopeMapping) {
         return this.and(JkScopedDependency.of(dependency, scopeMapping));
-    }
-
-
-    private static Path baseDir(Object object) {
-        if (object instanceof JkFileSystemLocalizable) {
-            return ((JkFileSystemLocalizable) object).getBaseDir();
-        }
-        return null;
     }
 
     public JkDependencySet and(String moduleDescription, JkScope ... scopes) {

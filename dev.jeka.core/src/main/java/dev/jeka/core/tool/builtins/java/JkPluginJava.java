@@ -5,10 +5,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
-import dev.jeka.core.api.java.project.JkCompileLayout;
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectCompilation;
+import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -87,12 +84,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
                     .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
-        final JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
+        final JkStandardFileArtifactProducer artifactProducer = project.publication.getArtifactProducer();
         if (!pack.sources) {
-            artifactProducer.removeArtifact(JkJavaProject.SOURCES_ARTIFACT_ID);
+            artifactProducer.removeArtifact(JkJavaProjectPublication.SOURCES_ARTIFACT_ID);
         }
         if (!pack.javadoc) {
-            artifactProducer.removeArtifact(JkJavaProject.JAVADOC_ARTIFACT_ID);
+            artifactProducer.removeArtifact(JkJavaProjectPublication.JAVADOC_ARTIFACT_ID);
         }
         if (project.getProduction().getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
             project.getProduction().getCompilation().getCompiler().setForkingProcess(compilerProcess());
@@ -171,7 +168,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             "\nDoes not re-generate artifacts already generated : " +
             "execute 'clean java#pack' to re-generate artifacts.")
     public void pack() {
-        project.getArtifactProducer().makeAllMissingArtifacts();
+        project.publication.getArtifactProducer().makeAllMissingArtifacts();
     }
 
     /**
