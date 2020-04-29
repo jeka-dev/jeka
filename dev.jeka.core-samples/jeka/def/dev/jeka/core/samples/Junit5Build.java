@@ -45,6 +45,7 @@ class Junit5Build extends JkCommandSet {
                 .addDependencies(JkDependencySet.of()
                     .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)
                     .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)
+                    .and("org.jdom:jdom2:2.0.6", TEST)
                 ).__
             .getTesting()
                 .getTestProcessor()

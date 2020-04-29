@@ -42,11 +42,13 @@ public class JkInternalClassloader {
 
     public static JkInternalClassloader ofMainEmbeddedLibs(List<Path> extraEntries) {
         JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.
-        URL embeddedNameUrl = JkClassLoader.ofCurrent().get().getResource("META-INF/jeka-embedded-name");
-        String jarName = JkUtilsIO.read(embeddedNameUrl);
-        Path file = getEmbeddedLibAsPath("META-INF/" + jarName);
         List<Path> pathList = new LinkedList<>();
-        pathList.add(file);
+        URL embeddedNameUrl = JkClassLoader.ofCurrent().get().getResource("META-INF/jeka-embedded-name");
+        if (embeddedNameUrl != null) {
+            String jarName = JkUtilsIO.read(embeddedNameUrl);
+            Path file = getEmbeddedLibAsPath("META-INF/" + jarName);
+            pathList.add(file);
+        }
         pathList.addAll(extraEntries);
         List<URL> urlList = pathList.stream()
                 .map(JkUtilsPath::toUrl)

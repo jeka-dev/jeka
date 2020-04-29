@@ -134,7 +134,7 @@ public final class JkTestProcessor<T> {
             result = result.and(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION
                     + JUNIT_VINTAGE_ENGINE_JAR_NAME));
             result = result.andPrepending(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION
-                    + JUNIT_4_JAR_NAME )); // overwrite junit4 to last version for compiance with vintage
+                    + JUNIT_4_JAR_NAME )); // overwrite junit4 to last version for compliance with vintage
         }
         return result.getEntries();
     }
@@ -144,8 +144,7 @@ public final class JkTestProcessor<T> {
         JkClasspath result = classpath;
         if (!classloader.isDefined(className)) {
             if (result.getEntryContainingClass(className) == null) {
-                result = result.and(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION
-                        + jarName));
+                result = result.and(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION + jarName));
             }
         }
         return result;

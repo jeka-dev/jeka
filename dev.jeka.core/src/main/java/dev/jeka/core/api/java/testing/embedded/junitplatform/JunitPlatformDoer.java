@@ -56,7 +56,6 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         JkLog.info(testSelection.toString());
         TestPlan testPlan = launcher.discover(requestBuilder.build());
 
-
         // Setting forced listeners
         SummaryGeneratingListener summaryListener = new SummaryGeneratingListener();
         List<TestExecutionListener> listeners = new LinkedList<>();

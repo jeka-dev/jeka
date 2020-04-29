@@ -1,17 +1,18 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -84,5 +85,38 @@ public final class JkInit {
     private static Path bootDir() {
         return Paths.get(JkConstants.BOOT_DIR);
     }
+
+    /**
+     * This main method is meant to be use by external tools as IDE plugin. From here, all def classes
+     * are supposed to be already present in the current classloader.
+     */
+    public static void main(String[] args) {
+        List<String> actualArgs = new LinkedList<>();
+        String commandClassName = null;
+        for (String arg : args) {
+            if (arg.startsWith("-CC=")) {
+                commandClassName = arg.substring(4);
+            } else {
+                actualArgs.add(arg);
+            }
+        }
+        JkUtilsAssert.argument(commandClassName != null,
+                "No argument starting with '-CC=' can be found. Cannot determine Command Class");
+        Class<JkCommandSet> clazz = JkInternalClasspathScanner.INSTANCE
+                .loadClassesHavingNameOrSimpleName(commandClassName, JkCommandSet.class);
+        JkUtilsAssert.argument(clazz != null,
+                "Command class having name '" + commandClassName + "' cannot be found.");
+        String[] argsToPass = actualArgs.toArray(new String[0]);
+        JkCommandSet instance = JkInit.instanceOf(clazz, argsToPass);
+        CommandLine commandLine = CommandLine.parse(argsToPass);
+        for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {
+            if (methodInvocation.isMethodPlugin()) {
+                JkPlugin plugin = instance.getPlugins().get(methodInvocation.pluginName);
+                JkUtilsReflect.invoke(plugin, methodInvocation.methodName);
+            } else {
+                JkUtilsReflect.invoke(instance, methodInvocation.methodName);
+            }
+        }
+     }
 
 }
