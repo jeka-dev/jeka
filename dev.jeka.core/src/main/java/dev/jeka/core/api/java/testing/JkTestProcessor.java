@@ -113,6 +113,8 @@ public final class JkTestProcessor<T> {
                 return this;
             }
             this.forkingProcess = JkJavaProcess.of();
+        } else {
+            forkingProcess = null;
         }
         return this;
     }
@@ -155,11 +157,12 @@ public final class JkTestProcessor<T> {
      * the classpath of the current classloader plus the specified one.
      */
     public JkTestResult launch(JkPathSequence extraTestClasspath, JkTestSelection testSelection) {
-        JkLog.startTask("Executing tests");
         final JkTestResult result;
         if (forkingProcess == null) {
+            JkLog.startTask("Executing tests");
             result = launchInClassloader(extraTestClasspath, testSelection);
         } else {
+            JkLog.startTask("Executing tests in forked process");
             result = launchInForkedProcess(extraTestClasspath, testSelection);
         }
         postActions.run();
@@ -205,12 +208,20 @@ public final class JkTestProcessor<T> {
     }
 
     private static class Args implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
         JkEngineBehavior engineBehavior;
+
         String resultFile;
+
         JkTestSelection testSelection;
+
     }
 
     public static class JkEngineBehavior<T> implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         /**
          * Parent chaining.

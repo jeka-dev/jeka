@@ -19,6 +19,7 @@ import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
@@ -28,13 +29,6 @@ import java.util.Map;
 @JkDocPluginDeps({JkPluginRepo.class, JkPluginScaffold.class})
 public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplier {
 
-    // ------------  Options injectable by command line --------------------------------
-
-    /**
-     * Options for the publish tasks. These options are injectable from command line.
-     */
-    public final JkPublishOptions publish = new JkPublishOptions();
-
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
@@ -43,7 +37,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     /**
      * Options for the testing tasks. These options are injectable from command line.
      */
-    public final JkTestOptions tests = new JkTestOptions();
+    public final JkTestOptions test = new JkTestOptions();
 
     @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
     public String compilerExtraArgs;
@@ -56,41 +50,42 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     private JkJavaProject project;
 
-    protected JkPluginJava(JkCommandSet run) {
-        super(run);
-        this.scaffoldPlugin = run.getPlugins().get(JkPluginScaffold.class);
-        this.repoPlugin = run.getPlugins().get(JkPluginRepo.class);
+    protected JkPluginJava(JkCommandSet commandSet) {
+        super(commandSet);
+        this.scaffoldPlugin = commandSet.getPlugins().get(JkPluginScaffold.class);
+        this.repoPlugin = commandSet.getPlugins().get(JkPluginRepo.class);
 
         // Pre-configure JkJavaProject instance
         this.project = JkJavaProject.of().setBaseDir(this.getCommandSet().getBaseDir());
-        this.project.getDependencyManagement().addDependencies(JkDependencySet.ofLocal(run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
-        final Path path = run.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
+        this.project.getDependencyManagement().addDependencies(
+                JkDependencySet.ofLocal(commandSet.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
+        final Path path = commandSet.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
             this.project.getDependencyManagement().addDependencies(JkDependencySet.ofTextDescription(path));
         }
     }
 
+    @Override
+    protected void init() {
+        setupDefaultProject();
+    }
+
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
     @Override  
     protected void activate() {
-        this.applyOptionsToUnderlyingProject();
+        this.applyPostSetupOptions();
         this.setupScaffolder();
     }
 
-    private void applyOptionsToUnderlyingProject() {
+    private void setupDefaultProject() {
         JkModuleId moduleId = project.getPublication().getModuleId();
         JkVersion version = project.getPublication().getVersion();
         project.getProduction().getManifest()
                     .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup())
                     .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
-        final JkStandardFileArtifactProducer artifactProducer = project.publication.getArtifactProducer();
-        if (!pack.sources) {
-            artifactProducer.removeArtifact(JkJavaProjectPublication.SOURCES_ARTIFACT_ID);
-        }
-        if (!pack.javadoc) {
-            artifactProducer.removeArtifact(JkJavaProjectPublication.JAVADOC_ARTIFACT_ID);
-        }
+
+
         if (project.getProduction().getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
             project.getProduction().getCompilation().getCompiler().setForkingProcess(compilerProcess());
         }
@@ -105,14 +100,33 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             JkGpg pgp = pgpPlugin.get();
             project.getPublication().setSigner(pgp.getSigner(pgpPlugin.keyName));
         }
+    }
 
-        JkTestProcessor testProcessor = project.getTesting().getTestProcessor();
-        if (tests.fork != null && tests.fork) {
-            final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
-            testProcessor.setForkingProcess(javaProcess);
+    private void applyPostSetupOptions() {
+        final JkStandardFileArtifactProducer artifactProducer = project.publication.getArtifactProducer();
+        JkArtifactId sources = JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
+        if (pack.sources != null && !pack.sources) {
+            artifactProducer.removeArtifact(sources);
+        } else if (pack.sources != null && pack.sources && !artifactProducer.getArtifactIds().contains(sources)) {
+            Consumer<Path> sourceJar = project.getDocumentation()::createSourceJar;
+            artifactProducer.putArtifact(sources, sourceJar);
         }
-        if (tests.skip != null) {
-            project.getTesting().setSkipped(tests.skip);
+        JkArtifactId javadoc = JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
+        if (pack.javadoc != null && !pack.javadoc) {
+            artifactProducer.removeArtifact(javadoc);
+        } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
+            Consumer<Path> javadocJar = project.getDocumentation()::createJavadocJar;
+            artifactProducer.putArtifact(javadoc, javadocJar);
+        }
+        JkTestProcessor testProcessor = project.getTesting().getTestProcessor();
+        if (test.fork != null && test.fork && testProcessor.getForkingProcess() == null) {
+            final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.test.jvmOptions);
+            testProcessor.setForkingProcess(javaProcess);
+        } else if (test.fork != null && !test.fork && testProcessor.getForkingProcess() != null) {
+            testProcessor.setForkingProcess(false);
+        }
+        if (test.skip != null) {
+            project.getTesting().setSkipped(test.skip);
         }
         if (this.compilerExtraArgs != null) {
             project.getProduction().getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
@@ -212,13 +226,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         return project.getJavaIdeSupport();
     }
 
-    public static class JkPublishOptions {
-
-        @JkDoc("If true, publishing will occur only in the local repository.")
-        public boolean localOnly = false;
-
-    }
-
     private JkProcess compilerProcess() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
         JkJavaProjectCompilation compilation = project.getProduction().getCompilation();
@@ -226,4 +233,37 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
                 compilation.getJavaVersion().get());
     }
 
+    /**
+     * Standard options for packaging java projects.
+     */
+    public static class JkJavaPackOptions {
+
+        /** When true, javadoc is created and packed in a jar file.*/
+        @JkDoc("If true, javadoc jar is added in the list of artifact to produce/publish.")
+        public Boolean javadoc;
+
+        /** When true, sources are packed in a jar file.*/
+        @JkDoc("If true, sources jar is added in the list of artifact to produce/publish.")
+        public Boolean sources;
+
+    }
+
+    /**
+     * Options about tests
+     */
+    public static final class JkTestOptions {
+
+        /** Turn it on to skip tests. */
+        @JkDoc("If true, tests are not run.")
+        public Boolean skip;
+
+        /** Turn it on to run tests in a withForking process. */
+        @JkDoc("If true, tests will be executed in a withForking process.")
+        public Boolean fork;
+
+        /** Argument passed to the JVM if tests are withForking. Example : -Xms2G -Xmx2G */
+        @JkDoc("Argument passed to the JVM if tests are withForking. E.g. -Xms2G -Xmx2G.")
+        public String jvmOptions;
+
+    }
 }

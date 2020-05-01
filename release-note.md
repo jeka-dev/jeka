@@ -1,3 +1,11 @@
+# 0.9.0.M2
+* API polish
+* Minor bug fixes
+
+# 0.9.0.M1
+* Completely renewed API, now based on *parent chaining* pattern.
+* Full support of JUnit5
+
 # 0.8.20
 * .iml generation : avoid module entry duplicates
 * Add JkClassloader#findClassesMatchingAnnotations

@@ -43,7 +43,7 @@
 
 	<target name="run" depends="bootstrap" unless="isPR">
 		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.core" fork="true" failonerror="true">
-			<arg line="java#pack publishDocsOnGithubPage java#publish -java#tests.runIT=false -LogMaxLength=100 -LogHeaders" />
+			<arg line="java#pack publishDocsOnGithubPage java#publish -java#test.runIT=false -LogMaxLength=100 -LogHeaders" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
@@ -55,7 +55,7 @@
 	<target name="runPR" depends="bootstrap" if="isPR">
 		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.core" fork="true" failonerror="true">
 			<!-- Avoid trying to publish the jar made from a pull request -->
-			<arg line="java#pack -java#tests.runIT=false -LogMaxLength=100 -LogHeaders" />
+			<arg line="java#pack -java#test.runIT=false -LogMaxLength=100 -LogHeaders" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

@@ -37,7 +37,7 @@ public class CoreBuild extends JkCommandSet {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    final JkPluginJava java = getPlugin(JkPluginJava.class);
 
     private final JkGitWrapper git;
 
@@ -56,8 +56,6 @@ public class CoreBuild extends JkCommandSet {
     public String travisBranch;
 
     protected CoreBuild() {
-        javaPlugin.tests.fork = false;
-        javaPlugin.pack.javadoc = true;
         git = JkGitWrapper.of(this.getBaseDir());
     }
 
@@ -67,9 +65,9 @@ public class CoreBuild extends JkCommandSet {
         // Module version is driven by git repository info
         String jekaVersion = git.getVersionFromTags();
         if (!JkVersion.of(jekaVersion).isSnapshot()) {
-            javaPlugin.pack.javadoc = true;
+            java.pack.javadoc = true;
         }
-        javaPlugin.getProject()
+        java.getProject()
             .getProduction()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
@@ -87,7 +85,6 @@ public class CoreBuild extends JkCommandSet {
                     .getCompiler()
                         .setDefault().__.__
                 .getTestProcessor()
-                    .setForkingProcess(false)
                     .getEngineBehavior()
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
                 .getTestSelection()
@@ -120,7 +117,7 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void createGithubRelease() {
-        String version = javaPlugin.getProject().getPublication().getVersion().getValue();
+        String version = java.getProject().getPublication().getVersion().getValue();
         if (version.endsWith(".RELEASE")) {
             GithubReleaseContentEditor githubReleaseContentEditor =
                     new GithubReleaseContentEditor("jerkar/jeka", travisBranch, githubToken);
@@ -133,11 +130,11 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private Path distribFolder() {
-        return javaPlugin.getProject().getOutputDir().resolve("distrib");
+        return java.getProject().getOutputDir().resolve("distrib");
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = javaPlugin.getProject().publication.getArtifactProducer();
+        final JkArtifactProducer artifactProducer = java.getProject().publication.getArtifactProducer();
         artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
                 SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder());
@@ -154,7 +151,7 @@ public class CoreBuild extends JkCommandSet {
             .goTo("libs-sources")
                 .importFiles(ivySourceLibs)
                 .importFiles(artifactProducer.getArtifactPath(SOURCES_ARTIFACT_ID));
-        if (javaPlugin.pack.javadoc) {
+        if (java.pack.javadoc == null || java.pack.javadoc) {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.importFiles(artifactProducer.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
@@ -170,7 +167,7 @@ public class CoreBuild extends JkCommandSet {
 
     private void makeDocs() {
         JkLog.startTask("Making documentation");
-        String version = javaPlugin.getProject().getPublication().getVersion().getValue();
+        String version = java.getProject().getPublication().getVersion().getValue();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }
@@ -191,7 +188,7 @@ public class CoreBuild extends JkCommandSet {
         JkLog.startTask("Creating main jar");
 
         // Main jar
-        JkJavaProject project = javaPlugin.getProject();
+        JkJavaProject project = java.getProject();
         project.getProduction().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
@@ -225,12 +222,12 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doWrapper(Path wrapperJar) {
-        JkPathTree.of(javaPlugin.getProject().getProduction().getCompilation().getLayout()
+        JkPathTree.of(java.getProject().getProduction().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void publishDocsOnGithubPage() {
-        JkJavaProject project = javaPlugin.getProject();
+        JkJavaProject project = java.getProject();
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
@@ -248,7 +245,7 @@ public class CoreBuild extends JkCommandSet {
     }
 
     public void cleanPack() {
-        clean(); javaPlugin.pack();
+        clean(); java.pack();
     }
 
     public static void main(String[] args) {

@@ -7,6 +7,6 @@ public class RunBuildAndIT {
     public static void main(String[] args) {
         CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args);
         coreBuild.runIT = true;
-        coreBuild.javaPlugin.pack();
+        coreBuild.java.pack();
     }
 }
