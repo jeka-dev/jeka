@@ -1,3 +1,6 @@
+# 0.9.0.M3
+* Bug-fix on JkDependencySet#add
+
 # 0.9.0.M2
 * API polish
 * Minor bug fixes
