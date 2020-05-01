@@ -104,9 +104,6 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      * {@link JkScopedDependency}s.
      */
     public JkDependencySet and(Iterable<JkScopedDependency> others) {
-        if (!others.iterator().hasNext()) {
-            return this;
-        }
         final List<JkScopedDependency> deps = JkUtilsIterable.concatLists(this.dependencies, others);
         Set<JkDepExclude> globalExcludes = this.globalExclusions;
         JkVersionProvider versionProvider = this.versionProvider;
