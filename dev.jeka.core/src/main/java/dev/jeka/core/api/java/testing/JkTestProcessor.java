@@ -44,7 +44,9 @@ public final class JkTestProcessor<T> {
 
     private static final String PLATFORM_COMMONS_CLASS_NAME = "org.junit.platform.commons.JUnitException";
 
-    private static final String PLATFORM_ENGINE_CLASS_NAME = "org.junit.platform.engine.TestEngine";
+    // This class is absent from platform-engine 1.5.2,
+    // so if 1.5.2 is present inh the classpath, we need to add 1.6 as well.
+    private static final String PLATFORM_ENGINE_CLASS_NAME = "org.junit.platform.engine.EngineDiscoveryListener";
 
     private static final String PLATFORM_REPORT_CLASS_NAME =
             "org.junit.platform.reporting.legacy.xml.LegacyXmlReportGeneratingListener";
@@ -65,7 +67,7 @@ public final class JkTestProcessor<T> {
 
     private static final String OPENTEST4J_JAR_NAME = "opentest4j-1.2.0.jar";
 
-    private JkJavaProcess forkingProcess;
+    private JkJavaProcess forkingProcess = JkJavaProcess.of();  // Tests are forked by default
 
     private JkEngineBehavior<T> engineBehavior;
 
@@ -205,6 +207,7 @@ public final class JkTestProcessor<T> {
         JkTestResult result =
                 JkInternalJunitDoer.instance(Collections.emptyList()).launch(data.engineBehavior, data.testSelection);
         JkUtilsIO.serialize(result, Paths.get(data.resultFile));
+        System.exit(0);  // Triggers shutdown hooks
     }
 
     private static class Args implements Serializable {

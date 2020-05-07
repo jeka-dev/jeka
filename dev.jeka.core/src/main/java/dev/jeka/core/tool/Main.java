@@ -51,6 +51,7 @@ public final class Main {
             if (Environment.standardOptions.logHeaders) {
                 displayOutro(start);
             }
+            System.exit(0); // Triggers shutdown hooks
         } catch (final RuntimeException e) {
             JkLog.JkEventLogConsumer consumer = JkLog.getConsumer();
             if (consumer != null) {
@@ -59,7 +60,7 @@ public final class Main {
             if (e instanceof JkException) {
                 System.err.println(e.getMessage());
             } else {
-                System.err.println("An error occured during def class execution : " + e.getMessage());
+                System.err.println("An error occurred during def class execution : " + e.getMessage());
                 System.err.println("This is mostly due to an error in user settings or scripts.");
                 System.err.println("You can investigate using the stacktace below.");
                 System.err.println("If error reveals to coming from Jeka engine, please report to " +

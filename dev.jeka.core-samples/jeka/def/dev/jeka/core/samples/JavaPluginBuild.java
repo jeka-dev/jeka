@@ -5,7 +5,6 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
@@ -50,7 +49,8 @@ public class JavaPluginBuild extends JkCommandSet {
            // does not need this section at all.
            .getPublication()
                .setModuleId("dev.jeka:sample-javaplugin")
-               .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags())  // Version inferred from Git
+               //.setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags())  // Version inferred from Git
+               .setVersion("1.0-SNAPSHOT")
                .addRepos(JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
                .getMavenPublication()
 

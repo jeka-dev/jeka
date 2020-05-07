@@ -109,14 +109,20 @@ public final class JkInit {
         String[] argsToPass = actualArgs.toArray(new String[0]);
         JkCommandSet instance = JkInit.instanceOf(clazz, argsToPass);
         CommandLine commandLine = CommandLine.parse(argsToPass);
-        for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {
-            if (methodInvocation.isMethodPlugin()) {
-                JkPlugin plugin = instance.getPlugins().get(methodInvocation.pluginName);
-                JkUtilsReflect.invoke(plugin, methodInvocation.methodName);
-            } else {
-                JkUtilsReflect.invoke(instance, methodInvocation.methodName);
+        try {
+            for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {
+                if (methodInvocation.isMethodPlugin()) {
+                    JkPlugin plugin = instance.getPlugins().get(methodInvocation.pluginName);
+                    JkUtilsReflect.invoke(plugin, methodInvocation.methodName);
+                } else {
+                    JkUtilsReflect.invoke(instance, methodInvocation.methodName);
+                }
             }
+            System.exit(0); // Triggers shutdown hooks
+        } catch (Throwable t) {
+            System.exit(1); // Triggers shutdown hooks
         }
+
      }
 
 }
