@@ -1,3 +1,7 @@
+# 0.9.0.M4
+* Improve JkManifest
+* Various bux fixes
+
 # 0.9.0.M3
 * Bug-fix on JkDependencySet#add
 
