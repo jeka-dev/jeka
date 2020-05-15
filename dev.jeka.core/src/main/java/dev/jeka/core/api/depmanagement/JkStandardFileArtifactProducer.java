@@ -1,14 +1,15 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * This {@link JkArtifactProducer} produces artifacts files at a standardized path
@@ -18,14 +19,12 @@ import java.util.function.Supplier;
  */
 public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
 
-    private final static Supplier<JkPathSequence> EMPTY_SUPPLIER = () -> JkPathSequence.of();
-
     /**
      * For parent chaining
      */
     public final T __;
 
-    private final Map<JkArtifactId, Consumer<Path>> consumers = new HashMap<>();
+    private final Map<JkArtifactId, Consumer<Path>> consumers = new LinkedHashMap<>();
 
     private Function<JkArtifactId, Path> artifactFileFunction;
 

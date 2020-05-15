@@ -222,6 +222,7 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doWrapper(Path wrapperJar) {
+        java.getProject().getProduction().getCompilation().runIfNecessary();
         JkPathTree.of(java.getProject().getProduction().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
