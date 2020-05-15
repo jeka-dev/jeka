@@ -3,7 +3,6 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.util.Arrays;
 import java.util.List;
@@ -102,12 +101,11 @@ public final class JkDependencyResolver<T> {
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
     public JkResolveResult resolve(JkDependencySet dependencies, JkScope ... scopes) {
-        if (repos.getRepoList().isEmpty()) {
-            JkLog.warn("You are trying to resolve dependencies on no repositories. This will fail.");
+        if (repos.getRepoList().isEmpty() && dependencies.hasModules()) {
+            JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
         JkInternalDepResolver internalDepResolver = JkInternalDepResolver.of(this.repos);
         JkLog.trace("Preparing to resolve dependencies for module " + moduleHolder);
-        long start = System.nanoTime();
         final String msg = scopes.length == 0 ? "Resolving dependencies " :
                 "Resolving dependencies with specified scopes " + Arrays.asList(scopes);
         JkLog.startTask(msg);
@@ -130,7 +128,7 @@ public final class JkDependencyResolver<T> {
             JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " resolved to " +
                     plurialize(resolveResult.getFiles().getEntries().size(), "artifact file") + ".");
         }
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        JkLog.endTask();
         return resolveResult;
     }
 

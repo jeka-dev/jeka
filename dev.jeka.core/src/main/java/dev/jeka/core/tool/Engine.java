@@ -118,7 +118,7 @@ final class Engine {
         for (final JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
-        return JkDependencyResolver.ofParent(this.defRepos).resolve(deps).getFiles();
+        return JkDependencyResolver.of().addRepos(this.defRepos).resolve(deps).getFiles();
     }
 
     private void preCompile() {

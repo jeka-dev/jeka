@@ -8,6 +8,8 @@ import dev.jeka.core.api.utils.JkUtilsThrowable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -120,12 +122,29 @@ public final class JkManifest<T> {
     }
 
     /**
-     * Creates a <code>JkManifest</code> from the specified input getOutputStream. The
-     * specified getOutputStream is supposed to contains manifest information as present
+     * Set the values from the specified inputStream source.
+     * The specified inputStream is supposed to contains manifest information as present
      * in a manifest file.
      */
     public JkManifest<T> setManifestFromInputStream(InputStream inputStream) {
         return this.setManifest(read(inputStream));
+    }
+
+    /**
+     * Set the values from the specified i,n the manifest belonging to the specified class jar.
+     */
+    public JkManifest<T> setManifestFromClass(Class<?> clazz) {
+        String className = clazz.getSimpleName() + ".class";
+        String classPath = clazz.getResource(className).toString();
+        if (!classPath.startsWith("jar")) {
+            return setManifestFromInputStream(clazz.getClassLoader().getResourceAsStream(STANDARD_LOCATION));
+        }
+        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/" + STANDARD_LOCATION;
+        try {
+            return setManifestFromInputStream(new URL(manifestPath).openStream());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
