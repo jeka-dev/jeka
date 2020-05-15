@@ -87,7 +87,7 @@ public final class JkCommandSetPlugins {
         try {
             plugin = JkUtilsReflect.newInstance(pluginClass, JkCommandSet.class, this.holder);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error while instantiating plugin " + pluginClass);
+            throw new RuntimeException("Error while instantiating plugin " + pluginClass, e);
         }
         injectOptions(plugin);
         plugin.init();
