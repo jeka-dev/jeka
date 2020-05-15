@@ -83,7 +83,12 @@ public final class JkCommandSetPlugins {
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }
-        final T plugin = JkUtilsReflect.newInstance(pluginClass, JkCommandSet.class, this.holder);
+        final T plugin;
+        try {
+            plugin = JkUtilsReflect.newInstance(pluginClass, JkCommandSet.class, this.holder);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error while instantiating plugin " + pluginClass);
+        }
         injectOptions(plugin);
         plugin.init();
         loadedPlugins.add(plugin);

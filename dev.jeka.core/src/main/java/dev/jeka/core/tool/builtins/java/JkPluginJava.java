@@ -102,7 +102,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             Consumer<Path> sourceJar = project.getDocumentation()::createSourceJar;
             artifactProducer.putArtifact(sources, sourceJar);
         }
-        JkArtifactId javadoc = JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
+        JkArtifactId javadoc = JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
         if (pack.javadoc != null && !pack.javadoc) {
             artifactProducer.removeArtifact(javadoc);
         } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
