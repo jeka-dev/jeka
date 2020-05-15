@@ -156,12 +156,6 @@ public final class JkUtilsReflect {
                 constructor.setAccessible(true);
             }
             return constructor.newInstance();
-        } catch (final InvocationTargetException e) {
-            if (e.getTargetException() instanceof RuntimeException) {
-                throw (RuntimeException) e.getTargetException();
-            } else {
-                throw new RuntimeException(e.getTargetException());
-            }
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
