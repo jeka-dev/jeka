@@ -1,7 +1,9 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJarPacker;
@@ -51,9 +53,24 @@ public class JkJavaProjectProduction {
         return manifest;
     }
 
+    private void addManifestDefaults() {
+        JkModuleId moduleId = project.getPublication().getModuleId();
+        JkVersion version = project.getPublication().getVersion();
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null) {
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
+        }
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VENDOR) == null) {
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup());
+        }
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null) {
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
+        }
+    }
+
     public void createBinJar(Path target) {
         compilation.runIfNecessary();
         project.getTesting().runIfNecessary();
+        addManifestDefaults();
         JkJarPacker.of(compilation.getLayout().resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
@@ -69,6 +86,7 @@ public class JkJavaProjectProduction {
         project.getTesting().runIfNecessary();
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkScope.RUNTIME).getFiles();
+        addManifestDefaults();
         JkJarPacker.of(compilation.getLayout().resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())

@@ -4,7 +4,6 @@ import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
@@ -78,14 +77,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void setupDefaultProject() {
-        JkModuleId moduleId = project.getPublication().getModuleId();
-        JkVersion version = project.getPublication().getVersion();
-        project.getProduction().getManifest()
-                    .addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName())
-                    .addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup())
-                    .addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
-
-
         if (project.getProduction().getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
             project.getProduction().getCompilation().getCompiler().setForkingProcess(compilerProcess());
         }
