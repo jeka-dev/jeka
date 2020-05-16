@@ -131,11 +131,11 @@ public final class JkJavadocProcessor<T> {
         if (!Files.exists(javadocExe)) {
             javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
         }
-        boolean display = displayOutput == null ? JkLog.isVerbose() : displayOutput;
+        boolean verbose = displayOutput == null ? JkLog.isVerbose() : displayOutput;
         JkLog.trace(javadocExe.toString());
         JkProcess.of(javadocExe.toString())
                 .andParams(computeOptions(classpath, srcDirs, outputDir))
-                .withLogOutput(display)
+                .withLogOutput(verbose)
                 .withFailOnError(true)
                 .runSync();
     }

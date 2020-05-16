@@ -93,7 +93,7 @@ public final class JkTestSelection<T> implements Cloneable, Serializable {
     }
 
     public JkTestSelection<T> addIncludeStandardPatterns() {
-        return addExcludePatterns(STANDARD_INCLUDE_PATTERN);
+        return addIncludePatterns(STANDARD_INCLUDE_PATTERN);
     }
 
     public JkTestSelection<T> addIncludePatterns(String ...patterns) {
