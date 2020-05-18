@@ -14,7 +14,7 @@ public class JkJavaProjectDocumentation {
 
     private final JkJavaProject project;
 
-    private final JkJavadocProcessor<JkJavaProjectDocumentation> javadocMaker;
+    private final JkJavadocProcessor<JkJavaProjectDocumentation> javadocProcessor;
 
     private boolean done;
 
@@ -29,7 +29,7 @@ public class JkJavaProjectDocumentation {
      JkJavaProjectDocumentation(JkJavaProject project) {
         this.project = project;
         this.__ = project;
-        javadocMaker = JkJavadocProcessor.ofParent(this);
+        javadocProcessor = JkJavadocProcessor.ofParent(this);
     }
 
     public JkJavaProjectDocumentation apply(Consumer<JkJavaProjectDocumentation> consumer) {
@@ -38,7 +38,7 @@ public class JkJavaProjectDocumentation {
     }
 
     public JkJavadocProcessor<JkJavaProjectDocumentation> getJavadocProcessor() {
-        return javadocMaker;
+        return javadocProcessor;
     }
 
     /**
@@ -48,7 +48,8 @@ public class JkJavaProjectDocumentation {
         Iterable<Path> classpath = project.getDependencyManagement()
                 .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
-        JkPathTreeSet sources = project.getProduction().getCompilation().getLayout().resolveSources();javadocMaker.make(classpath, sources, dir);
+        JkPathTreeSet sources = project.getProduction().getCompilation().getLayout().resolveSources();
+        javadocProcessor.make(classpath, sources, dir);
     }
 
     public void runIfNecessary() {
@@ -70,12 +71,13 @@ public class JkJavaProjectDocumentation {
     }
 
     public void createJavadocJar(Path target) {
-        project.getDocumentation().runIfNecessary();
-        Path javadocDir = project.getDocumentation().getJavadocDir();
+        runIfNecessary();
+        Path javadocDir = getJavadocDir();
+        /*
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
                     + ". Can't create a javadoc jar until javadoc files has been generated.");
-        }
+        }*/
         JkPathTree.of(javadocDir).zipTo(target);
     }
 

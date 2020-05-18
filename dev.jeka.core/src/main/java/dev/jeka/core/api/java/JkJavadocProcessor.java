@@ -1,12 +1,12 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsJdk;
+import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import javax.tools.DocumentationTool;
@@ -16,11 +16,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.*;
 
 /**
  * Provides fluent interface for producing Javadoc.
@@ -47,7 +43,6 @@ public final class JkJavadocProcessor<T> {
 
     private JkJavadocProcessor(T parent) {
         this.__ = parent;
-        displayOutput = JkLog.isVerbose();
     }
 
     /**
@@ -105,7 +100,11 @@ public final class JkJavadocProcessor<T> {
             return;
         }
         //executeTool(outputDir);
-        executeCommandLine(classpath, srcDirs, outputDir);
+        if (srcDirs.count(1, false) > 0) {
+            executeCommandLine(classpath, srcDirs, outputDir);
+        } else {
+            JkLog.warn("No source file detected. Skip Javadoc.");
+        }
         JkLog.endTask();
     }
 
@@ -131,13 +130,37 @@ public final class JkJavadocProcessor<T> {
         if (!Files.exists(javadocExe)) {
             javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
         }
-        boolean verbose = displayOutput == null ? JkLog.isVerbose() : displayOutput;
+        boolean verbose = JkUtilsObject.firstNonNull(displayOutput, JkLog.isVerbose());
         JkLog.trace(javadocExe.toString());
-        JkProcess.of(javadocExe.toString())
+        LinkedHashSet packages = computePackages(srcDirs);
+        if (packages.isEmpty()) {
+            JkLog.warn("No package detected. Skip Javadoc.");
+            return;
+        }
+        JkProcess process = JkProcess.of(javadocExe.toString())
                 .andParams(computeOptions(classpath, srcDirs, outputDir))
+                .andParams(computePackages(srcDirs))
                 .withLogOutput(verbose)
-                .withFailOnError(true)
-                .runSync();
+                .withLogCommand(verbose)
+                .withFailOnError(true);
+        try {
+            process.runSync();
+        } catch (IllegalStateException e) {
+            JkLog.warn("An error occurred when generating Javadoc. Maybe there is no public class to document." +
+                    " Please relaunch the process with -LV option to see details");
+        }
+    }
+
+    private LinkedHashSet<String> computePackages(JkPathTreeSet srcDirs) {
+        LinkedHashSet<String> result = new LinkedHashSet<>();
+        for (Path relFile: srcDirs.getRelativeFiles()) {
+            Path packageDir = relFile.getParent();
+            if (packageDir != null) {
+                String packageName = packageDir.toString().replace(File.separator, ".");
+                result.add(packageName);
+            }
+        }
+        return result;
     }
 
     private List<String> computeOptions(Iterable<Path> classpath, JkPathTreeSet srcDirs, Path outputDir) {
@@ -148,10 +171,6 @@ public final class JkJavadocProcessor<T> {
         if (!contains("-sourcepath")) {
             options.add("-sourcepath");
             options.add(JkPathSequence.of(srcDirs.getRootDirsOrZipFiles()).toString());
-        }
-        if (!contains("-subpackages")) {
-            options.add("-subpackages");
-            options.add(computeSubpackages(srcDirs));
         }
         if (!contains("-d")) {
             options.add("-d");
@@ -169,23 +188,6 @@ public final class JkJavadocProcessor<T> {
         options.addAll(this.options);
         JkLog.trace(options.toString());
         return options;
-    }
-
-    private String computeSubpackages(JkPathTreeSet srcDirs) {
-        List<String> dirs = new LinkedList<>();
-        for (Path root : srcDirs.getRootDirsOrZipFiles()) {
-            try (Stream<Path> pathStream = Files.list(root).filter(path ->Files.isDirectory(path))) {
-                pathStream.forEach(path -> {
-                    JkPathTree pathTree = JkPathTree.of(path).andMatching("*.java", "**/*.java");
-                    if (pathTree.count(0, false) > 0) {
-                        dirs.add(path.getFileName().toString());
-                    }
-                });
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-        return String.join(":", dirs);
     }
 
     private boolean containsLike(String hint) {

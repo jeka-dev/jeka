@@ -23,12 +23,13 @@ class Build extends JkCommandSet {
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and("com.google.guava:guava:21.0")
-                    .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)).__
+                    .and("org.junit.jupiter:junit-jupiter:5.6.2", TEST)).__
             .getProduction()
                 .getCompilation()
                     .setJavaVersion(JkJavaVersion.V8).__.__
             .getTesting()
                 .getTestSelection()
+                    .addIncludeStandardPatterns()
                     .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
                 .getTestProcessor()
                     .setForkingProcess(true)
@@ -37,7 +38,7 @@ class Build extends JkCommandSet {
 
             // Publication is only necessary if your project is being deployed on a binary repository.
             // Many projects as jee war jar, springboot application, tools, Graphical application
-            // does not need this section at all.
+            // does not need this section at all.  In this case you can remove this section.
             .getPublication()
                 .setModuleId("your.group:your.project")
                 .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags());  // Version inferred from Git
