@@ -26,8 +26,8 @@ of any build-code / configuration / script.
 # News 
 
 * Jeka 0.9.0.M1 is out. Until Jeka reaches version 1.0.0, minor version change (the digit in the middle) will
-  imply API change. Normally This is not a problem as wrapper usage protects users against API change.
-  0.9.0 introduces a cleaner API for defining project build. This is based on [parent chainin](https://github.com/djeang/parent-chaining/blob/master/readme.md) pattern.
+  imply API change. Normally, this is not a problem as wrapper usage protects users against API change.
+  0.9 introduces a cleaner API for defining project build. This is based on [parent chainin](https://github.com/djeang/parent-chaining/blob/master/readme.md) pattern.
   
 * Jeka has joined OW2 organisation on january 2020 : https://projects.ow2.org/view/jeka/
 
