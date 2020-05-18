@@ -28,19 +28,20 @@ public class JavaPluginBuild extends JkCommandSet {
     protected void setup() {
        java.getProject()
            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                    .and("com.google.guava:guava:21.0")
-                    .and("com.sun.jersey:jersey-server:1.19.4")
-                    .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)
-                    .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)).__
+               .addDependencies(JkDependencySet.of()
+                   .and("com.google.guava:guava:21.0")
+                   .and("com.sun.jersey:jersey-server:1.19.4")
+                   .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)
+                   .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)).__
            .getProduction()
                .getCompilation()
-                .setJavaVersion(JkJavaVersion.V8).__.__
+                   .setJavaVersion(JkJavaVersion.V8).__.__
            .getTesting()
                .getTestSelection()
+                    .addIncludeStandardPatterns()
                     .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
                .getTestProcessor()
-                    .setForkingProcess(true)
+                    .setForkingProcess(false)
                .getEngineBehavior()
                     .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__
 

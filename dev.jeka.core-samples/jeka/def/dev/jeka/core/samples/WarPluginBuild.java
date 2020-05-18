@@ -48,8 +48,8 @@ public class WarPluginBuild extends JkCommandSet {
                .setSkipped(true);
     }
 
-    public void cleanPackPublish() {
-        clean(); java.pack(); java.publish(); runWarWithJetty();
+    public void cleanPackRun() {
+        clean(); java.pack(); runWarWithJetty();
     }
 
     public void runWarWithJetty() {
@@ -62,7 +62,7 @@ public class WarPluginBuild extends JkCommandSet {
     }
     
     public static void main(String[] args) {
-	    JkInit.instanceOf(WarPluginBuild.class, args).cleanPackPublish();
+	    JkInit.instanceOf(WarPluginBuild.class, args).cleanPackRun();
     }
 
 
