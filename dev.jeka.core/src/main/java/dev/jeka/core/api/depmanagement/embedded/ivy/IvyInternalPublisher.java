@@ -28,9 +28,8 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 /**
- * Jeka users : This class is not part of the public API !!! Please, Use
- * {@link JkPublisher} instead. Ivy wrapper providing high level methods. The
- * API is expressed using Jeka classes only (mostly free of Ivy classes).
+ * Jeka users : This class is not part of the public API !!!
+ * Ivy wrapper providing high level methods. The API is expressed using Jeka classes only.
  */
 final class IvyInternalPublisher implements JkInternalPublisher {
 
