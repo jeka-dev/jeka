@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkProcess;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -19,6 +20,10 @@ public final class JkGitWrapper {
 
     public static JkGitWrapper of(Path dir) {
         return new JkGitWrapper(JkProcess.of("git").withWorkingDir(dir).withFailOnError(true));
+    }
+
+    public static JkGitWrapper of(String dir) {
+        return of(Paths.get(""));
     }
 
     public JkGitWrapper withLogCommand(boolean log) {
