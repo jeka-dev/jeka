@@ -1,7 +1,6 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkArtifactId;
-import dev.jeka.core.api.depmanagement.JkDependencyManagement;
 import dev.jeka.core.api.depmanagement.JkLocalLibDependency;
 
 import java.nio.file.Path;
@@ -9,33 +8,22 @@ import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 /**
- * Container for a Java project with classic characteristic :
- * <ul>
- *     <li>Contains Java source files to be compiled</li>
- *     <li>All Java sources file (prod + test) are wrote against the same Java version and encoding</li>
- *     <li>JkJavaProject may contain unit tests</li>
- *     <li>It can depends on any accepted dependencies (Maven module, other project, files on fs, ...)</li>
- *     <li>It produces a bin jar, a source jar and a javadoc jar</li>
- *     <li>It can produce any other artifact files (fat-jar, test jar, doc, ...)</li>
- *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, version) in order to be published/consumed</li>
- *     <li>It can be published on any Maven/Ivy repository, including Maven central</li>
- *     <li>Part of the sources/resources may be generated</li>
- *     <li>By default, passing test suite is required to produce bin artifacts.</li>
+ * A Java project consists in 3 parts : <ul>
+ *    <li>{@link JkJavaProjectProduction} : responsible to compile, tests and make jars</li>
+ *    <li>{@link JkJavaProjectDocumentation} : responsible to creates javadoc, sources jar and others</li>
+ *    <li>{@link JkJavaProjectPublication} : responsible to publish the artifacts on binary repositories (Maven or Ivy)</li>
  * </ul>
- *
- * It provides cache mechanism in order compile or unit test phases are executed once when generating
- * several artifact files so be aware of clean it if you want to replay some tasks with different settings.
- *
+ * Each of these parts are optional. This mean that you don't have to set the publication part if the project is not
+ * supposed to be published. Or you don't have to set the <i>production</i> part if the project publishes artifacts
+ * that are created by other means than the <i>production<i/> part.
+ * <p>
+ * {@link JkJavaProject} defines <i>base</i> and <i>output</i> directories as they are shared with the 3 parts.
  */
 public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
 
     private Path baseDir = Paths.get(".");
 
     private String outputDir = "jeka/output";
-
-    private final JkDependencyManagement<JkJavaProject> dependencyManagement;
-
-    private final JkJavaProjectTesting testing;
 
     private final JkJavaProjectDocumentation documentation;
 
@@ -44,8 +32,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     public final JkJavaProjectPublication publication;
 
     private JkJavaProject() {
-        dependencyManagement = JkDependencyManagement.ofParent(this);
-        testing = new JkJavaProjectTesting(this);
         documentation = new JkJavaProjectDocumentation( this);
         production = new JkJavaProjectProduction(this);
         publication = new JkJavaProjectPublication(this);
@@ -86,14 +72,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return this;
     }
 
-    public JkDependencyManagement<JkJavaProject> getDependencyManagement() {
-        return dependencyManagement;
-    }
-
-    public JkJavaProjectTesting getTesting() {
-        return testing;
-    }
-
     public JkJavaProjectProduction getProduction() {
         return production;
     }
@@ -117,13 +95,13 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
             .append("Published Module & version : " + publication.getModuleId() + ":" + publication.getVersion() + "\n")
             .append("Production sources : " + production.getCompilation().getLayout().getInfo()).append("\n")
-            .append("Test sources : " + testing.getCompilation().getLayout().getInfo()).append("\n")
+            .append("Test sources : " + production.getTesting().getCompilation().getLayout().getInfo()).append("\n")
             .append("Java Source Version : " + production.getCompilation().getComputedCompileSpec().getSourceVersion() + "\n")
             .append("Source Encoding : " + production.getCompilation().getComputedCompileSpec().getEncoding() + "\n")
             .append("Source file count : " + production.getCompilation().getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
-            .append("Download Repositories : " + dependencyManagement.getResolver().getRepos() + "\n")
+            .append("Download Repositories : " + production.getDependencyManagement().getResolver().getRepos() + "\n")
             .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
-            .append("Declared Dependencies : " + dependencyManagement.getDependencies().toList().size() + " elements.\n")
+            .append("Declared Dependencies : " + production.getDependencyManagement().getDependencies().toList().size() + " elements.\n")
             .append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds())
             .toString();
     }
@@ -133,9 +111,9 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return JkJavaIdeSupport.of(baseDir)
             .setSourceVersion(production.getCompilation().getJavaVersion())
             .setProdLayout(production.getCompilation().getLayout())
-            .setTestLayout(testing.getCompilation().getLayout())
-            .setDependencies(this.dependencyManagement.getDependencies())
-            .setDependencyResolver(this.dependencyManagement.getResolver());
+            .setTestLayout(production.getTesting().getCompilation().getLayout())
+            .setDependencies(production.getDependencyManagement().getDependencies())
+            .setDependencyResolver(production.getDependencyManagement().getResolver());
     }
 
     public JkLocalLibDependency toDependency() {
@@ -153,7 +131,5 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     Path getArtifactPath(JkArtifactId artifactId) {
         return baseDir.resolve(outputDir).resolve(artifactId.toFileName(publication.getModuleId().getDotedName()));
     }
-
-
 
 }

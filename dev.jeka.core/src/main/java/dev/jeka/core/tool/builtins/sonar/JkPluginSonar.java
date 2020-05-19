@@ -25,11 +25,11 @@ public class JkPluginSonar extends JkPlugin {
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkCompileLayout prodLayout = project.getProduction().getCompilation().getLayout();
-        final JkCompileLayout testLayout = project.getTesting().getCompilation().getLayout();
+        final JkCompileLayout testLayout = project.getProduction().getTesting().getCompilation().getLayout();
         final Path baseDir = project.getBaseDir();
-        final JkPathSequence libs = project.getDependencyManagement().fetchDependencies(
+        final JkPathSequence libs = project.getProduction().getDependencyManagement().fetchDependencies(
                 JkScope.RUNTIME, JkScope.PROVIDED).getFiles();
-        final Path testReportDir = project.getTesting().getReportDir();
+        final Path testReportDir = project.getProduction().getTesting().getReportDir();
         final JkModuleId moduleId = project.getPublication().getModuleId();
         final JkVersion version = project.getPublication().getVersion();
         final String fullName = moduleId.getDotedName();

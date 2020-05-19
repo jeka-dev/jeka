@@ -77,19 +77,19 @@ public class CoreBuild extends JkCommandSet {
                     .addOptions("-Xlint:none","-g")
                     .setJavaVersion(JkJavaVersion.V8)
                     .getCompiler()
-                        .setForkingWithJavac().__.__.__
-            .getTesting()
-                .getCompilation()
-                    .getLayout()
-                        .includeSourceDirsInResources().__
-                    .getCompiler()
-                        .setDefault().__.__
-                .getTestProcessor()
-                    .getEngineBehavior()
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
-                .getTestSelection()
-                    .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
-                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__
+                        .setForkingWithJavac().__.__
+                .getTesting()
+                    .getCompilation()
+                        .getLayout()
+                            .includeSourceDirsInResources().__
+                        .getCompiler()
+                            .setDefault().__.__
+                    .getTestProcessor()
+                        .getEngineBehavior()
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
+                    .getTestSelection()
+                        .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
+                        .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__.__
             .getDocumentation()
                 .getJavadocProcessor()
                     .setDisplayOutput(false)

@@ -3,7 +3,6 @@ package dev.jeka.core.api.java.project;
 import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
@@ -24,7 +23,7 @@ import java.util.function.UnaryOperator;
  */
 public class JkJavaProjectTesting {
 
-    private final JkJavaProject project;
+    private final JkJavaProjectProduction projectProduction;
 
     private final JkJavaProjectCompilation<JkJavaProjectTesting> compilation;
 
@@ -46,12 +45,12 @@ public class JkJavaProjectTesting {
     /**
      * For parent chaining
      */
-    public final JkJavaProject __;
+    public final JkJavaProjectProduction __;
 
-    JkJavaProjectTesting(JkJavaProject project) {
-        this.project = project;
-        this.__ = project;
-        compilation = JkJavaProjectCompilation.ofTest(project, this);
+    JkJavaProjectTesting(JkJavaProjectProduction projectProduction) {
+        this.projectProduction = projectProduction;
+        this.__ = projectProduction;
+        compilation = JkJavaProjectCompilation.ofTest(projectProduction, this);
         afterTest = JkRunnables.ofParent(this);
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
@@ -91,8 +90,8 @@ public class JkJavaProjectTesting {
      */
     public JkPathSequence getTestClasspath() {
         return JkPathSequence.of(compilation.getLayout().resolveClassDir())
-                .and(project.getProduction().getCompilation().getLayout().resolveClassDir())
-                .and(project.getDependencyManagement()
+                .and(projectProduction.getCompilation().getLayout().resolveClassDir())
+                .and(projectProduction.getDependencyManagement()
                         .fetchDependencies(JkScope.SCOPES_FOR_TEST).getFiles());
     }
 
@@ -123,7 +122,7 @@ public class JkJavaProjectTesting {
     }
 
     public Path getReportDir() {
-        return project.getOutputDir().resolve(reportDir);
+        return projectProduction.getProject().getOutputDir().resolve(reportDir);
     }
 
     public JkJavaProjectTesting setReportDir(String reportDir) {
@@ -142,7 +141,7 @@ public class JkJavaProjectTesting {
      */
     public void run() {
         JkLog.startTask("Processing tests");
-        this.project.getProduction().getCompilation().runIfNecessary();
+        this.projectProduction.getCompilation().runIfNecessary();
         this.compilation.run();
         executeWithTestProcessor();
         afterTest.run();
@@ -168,7 +167,7 @@ public class JkJavaProjectTesting {
     }
 
     private void executeWithTestProcessor() {
-        UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(project.getOutputDir());
+        UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(projectProduction.getProject().getOutputDir());
         testSelection.setTestClassRoots(op);
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
         if (breakOnFailures) {

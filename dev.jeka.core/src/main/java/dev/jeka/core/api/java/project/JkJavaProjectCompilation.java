@@ -33,7 +33,7 @@ public class JkJavaProjectCompilation<T> {
      */
     public final T __;
 
-    private final JkJavaProject project;
+    private final JkJavaProjectProduction projectProduction;
 
     private final JkRunnables<JkJavaProjectCompilation<T>> beforeGenerate;
 
@@ -63,9 +63,9 @@ public class JkJavaProjectCompilation<T> {
 
     private String sourceEncoding;
 
-    private JkJavaProjectCompilation(JkJavaProject project, String scope, T parent) {
+    private JkJavaProjectCompilation(JkJavaProjectProduction projectProduction, String scope, T parent) {
         __ = parent;
-        this.project = project;
+        this.projectProduction = projectProduction;
         this.scope = scope;
         beforeGenerate = JkRunnables.ofParent(this);
         sourceGenerator = JkConsumers.ofParent(this);
@@ -75,23 +75,22 @@ public class JkJavaProjectCompilation<T> {
         afterCompile = JkRunnables.ofParent(this);
         resourceProcessor = JkResourceProcessor.ofParent(this);
         layout = JkCompileLayout.ofParent(this)
-                .setBaseDirSupplier(project::getBaseDir)
-                .setOutputDirSupplier(project::getOutputDir);
+                .setBaseDirSupplier(projectProduction.getProject()::getBaseDir)
+                .setOutputDirSupplier(projectProduction.getProject()::getOutputDir);
     }
 
-    static JkJavaProjectCompilation<JkJavaProjectProduction> ofProd(JkJavaProject project, JkJavaProjectProduction
-                                                          projectProduction) {
+    static JkJavaProjectCompilation<JkJavaProjectProduction> ofProd(JkJavaProjectProduction projectProduction) {
         JkJavaProjectCompilation result =
-                new JkJavaProjectCompilation(project, "production code", projectProduction);
+                new JkJavaProjectCompilation(projectProduction, "production code", projectProduction);
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
         return result;
     }
 
-    static JkJavaProjectCompilation<JkJavaProjectTesting> ofTest(JkJavaProject project,
+    static JkJavaProjectCompilation<JkJavaProjectTesting> ofTest(JkJavaProjectProduction projectProduction,
                                                                  JkJavaProjectTesting parent) {
         JkJavaProjectCompilation result =
-                new JkJavaProjectCompilation(project, "test code", parent);
-        result.compileSpecSupplier = () -> result.computeTestCompileSpec(project.getProduction().getCompilation());
+                new JkJavaProjectCompilation(projectProduction, "test code", parent);
+        result.compileSpecSupplier = () -> result.computeTestCompileSpec(projectProduction.getCompilation());
         result.layout
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
                 .setStandardOuputDirs(JkCompileLayout.Concern.TEST);
@@ -268,7 +267,7 @@ public class JkJavaProjectCompilation<T> {
         return JkJavaCompileSpec.of()
             .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
             .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
-            .setClasspath(project.getDependencyManagement()
+            .setClasspath(projectProduction.getDependencyManagement()
                     .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
@@ -280,7 +279,7 @@ public class JkJavaProjectCompilation<T> {
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
-                .setClasspath(project.getDependencyManagement()
+                .setClasspath(projectProduction.getDependencyManagement()
                         .fetchDependencies(JkScope.SCOPES_FOR_TEST).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))

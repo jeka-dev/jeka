@@ -34,7 +34,7 @@ public class JacocoPluginBuild extends JkCommandSet {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().getDependencyManagement()
+        javaPlugin.getProject().getProduction().getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(GUAVA, "18.0")
                     .and(JUNIT, "4.13", JkScope.TEST));

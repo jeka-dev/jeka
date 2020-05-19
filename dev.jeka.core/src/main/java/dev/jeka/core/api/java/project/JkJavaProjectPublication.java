@@ -10,6 +10,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+/**
+ * Responsible to publish artifacts on the repository. If the project does not publish anything, this part can be
+ * ignored. Jeka can publish on Maven and Ivy repositories. <p>
+ * From here, you can control what to publish and the transitive dependencies, depending on the repo system the project
+ * is published. Note that a project can be be published on many repositories of different systems.
+ */
 public class JkJavaProjectPublication {
 
     public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
@@ -48,12 +54,12 @@ public class JkJavaProjectPublication {
         registerArtifacts();
         this.mavenPublication = JkMavenPublication.of(this)
             .setArtifactLocator(() -> artifactProducer)
-            .setDependencies(deps -> project.getDependencyManagement().getDependencies())
+            .setDependencies(deps -> project.getProduction().getDependencyManagement().getDependencies())
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()));
         this.ivyPublication = JkIvyPublication.of(this)
             .addArtifacts(() -> artifactProducer)
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()))
-            .setDependencies(deps -> project.getDependencyManagement().getDependencies())
+            .setDependencies(deps -> project.getProduction().getDependencyManagement().getDependencies())
             .setResolvedVersionProvider(this::getResolvedVersions);
         this.postActions = JkRunnables.ofParent(this);
     }
@@ -203,7 +209,7 @@ public class JkJavaProjectPublication {
     }
 
     private JkVersionProvider getResolvedVersions() {
-        return project.getDependencyManagement().fetchDependencies().getResolvedVersionProvider();
+        return project.getProduction().getDependencyManagement().fetchDependencies().getResolvedVersionProvider();
     }
 
     public JkStandardFileArtifactProducer<JkJavaProjectPublication> getArtifactProducer() {

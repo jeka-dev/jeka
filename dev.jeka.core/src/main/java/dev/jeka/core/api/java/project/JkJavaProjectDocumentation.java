@@ -10,6 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
+/**
+ * Responsible to create Javadoc and Source jar.
+ */
 public class JkJavaProjectDocumentation {
 
     private final JkJavaProject project;
@@ -45,7 +48,7 @@ public class JkJavaProjectDocumentation {
      * Generates javadoc files (files + zip)
      */
     public void run() {
-        Iterable<Path> classpath = project.getDependencyManagement()
+        Iterable<Path> classpath = project.getProduction().getDependencyManagement()
                 .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
         JkPathTreeSet sources = project.getProduction().getCompilation().getLayout().resolveSources();

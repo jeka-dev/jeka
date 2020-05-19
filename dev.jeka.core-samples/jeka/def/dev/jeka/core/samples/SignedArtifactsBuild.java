@@ -58,10 +58,11 @@ public class SignedArtifactsBuild extends JkCommandSet {
     @Override
     protected void setup() {
         javaPlugin.getProject()
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                    .and(GUAVA, "18.0")
-                    .and(JUNIT, "4.13", TEST)).__
+            .getProduction()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of()
+                        .and(GUAVA, "18.0")
+                        .and(JUNIT, "4.13", TEST)).__.__
             .getPublication()
                 .setModuleId("dev.jeka.core:samples-signedArtifacts")
                 .setVersion(JkVersion.of("1.3.1"))

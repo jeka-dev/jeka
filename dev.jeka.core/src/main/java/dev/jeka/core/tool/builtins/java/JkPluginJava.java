@@ -56,11 +56,11 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
         // Pre-configure JkJavaProject instance
         this.project = JkJavaProject.of().setBaseDir(this.getCommandSet().getBaseDir());
-        this.project.getDependencyManagement().addDependencies(
+        this.project.getProduction().getDependencyManagement().addDependencies(
                 JkDependencySet.ofLocal(commandSet.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
         final Path path = commandSet.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
-            this.project.getDependencyManagement().addDependencies(JkDependencySet.ofTextDescription(path));
+            this.project.getProduction().getDependencyManagement().addDependencies(JkDependencySet.ofTextDescription(path));
         }
     }
 
@@ -85,7 +85,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             project.getPublication().addRepos(repoPlugin.publishRepository());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
-        project.getDependencyManagement().getResolver().addRepos(downloadRepo);
+        project.getProduction().getDependencyManagement().getResolver().addRepos(downloadRepo);
         JkPluginPgp pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginPgp.class);
         if (project.getPublication().getSigner() == null) {
             JkGpg pgp = pgpPlugin.get();
@@ -109,7 +109,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             Consumer<Path> javadocJar = project.getDocumentation()::createJavadocJar;
             artifactProducer.putArtifact(javadoc, javadocJar);
         }
-        JkTestProcessor testProcessor = project.getTesting().getTestProcessor();
+        JkTestProcessor testProcessor = project.getProduction().getTesting().getTestProcessor();
         if (test.fork != null && test.fork && testProcessor.getForkingProcess() == null) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.test.jvmOptions);
             testProcessor.setForkingProcess(javaProcess);
@@ -117,7 +117,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             testProcessor.setForkingProcess(false);
         }
         if (test.skip != null) {
-            project.getTesting().setSkipped(test.skip);
+            project.getProduction().getTesting().setSkipped(test.skip);
         }
         if (this.compilerExtraArgs != null) {
             project.getProduction().getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
@@ -132,7 +132,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         JkCompileLayout prodLayout = project.getProduction().getCompilation().getLayout();
         prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        JkCompileLayout testLayout = project.getTesting().getCompilation().getLayout();
+        JkCompileLayout testLayout = project.getProduction().getTesting().getCompilation().getLayout();
         testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
         scaffoldPlugin.getScaffolder().setCommandClassCode(code);
@@ -166,7 +166,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
     public void test() {
-        project.getTesting().run();
+        project.getProduction().getTesting().run();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
@@ -182,10 +182,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
         JkLog.info("Declared dependencies : ");
-        project.getDependencyManagement().getDependencies().toResolvedModuleVersions().toList()
+        project.getProduction().getDependencyManagement().getDependencies().toResolvedModuleVersions().toList()
                 .forEach(dep -> JkLog.info(dep.toString()));
         JkLog.info("Resolved to : ");
-        final JkResolveResult resolveResult = this.getProject().getDependencyManagement().fetchDependencies();
+        final JkResolveResult resolveResult = this.getProject().getProduction().getDependencyManagement().fetchDependencies();
         final JkDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
     }
@@ -209,7 +209,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @JkDoc("Fetches project dependencies in cache.")
     public void refreshDeps() {
-        project.getDependencyManagement().fetchDependencies();
+        project.getProduction().getDependencyManagement().fetchDependencies();
     }
 
     @Override

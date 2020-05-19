@@ -52,10 +52,11 @@ public class SonarPluginBuild extends JkCommandSet {
             .setProp(JkSonar.BRANCH, "myBranch");
 
         java.getProject()
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                    .and(GUAVA, "18.0")
-                    .and(JUNIT, "4.13", JkScope.TEST)).__
+            .getProduction()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of()
+                        .and(GUAVA, "18.0")
+                        .and(JUNIT, "4.13", JkScope.TEST)).__.__
             .getPublication()
                 .setModuleId("org.jerkar:samples")
                 .setVersionSupplier(JkGitWrapper.of(getBaseDir())::getJkVersionFromTags);

@@ -27,9 +27,10 @@ public class JkImlGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                    .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;
+            .getProduction()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of()
+                        .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__.__;
         final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.generate();
         System.out.println("\nbase .classpath");
@@ -39,15 +40,16 @@ public class JkImlGeneratorTest {
         final JkJavaProject coreProject = JkJavaProject.of()
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
-                .getDependencyManagement()
-                    .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
-                .getTesting()
-                    .getCompilation()
-                        .getLayout()
-                            .emptySources().addSource("test")
-                            .emptyResources().addResource("res-test").__.__
-                    .getTestProcessor()
-                        .setForkingProcess(true).__.__;
+                .getProduction()
+                    .getDependencyManagement()
+                        .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
+                    .getTesting()
+                        .getCompilation()
+                            .getLayout()
+                                .emptySources().addSource("test")
+                                .emptyResources().addResource("res-test").__.__
+                        .getTestProcessor()
+                            .setForkingProcess(true).__.__.__;
         final JkImlGenerator coreGenerator = JkImlGenerator.of(coreProject.getJavaIdeSupport());
         final String result1 = coreGenerator.generate();
         System.out.println("\ncore .classpath");
@@ -58,9 +60,10 @@ public class JkImlGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                    .and(coreProject.toDependency())).__;
+            .getProduction()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of()
+                        .and(coreProject.toDependency())).__.__;
         final JkImlGenerator desktopGenerator = JkImlGenerator.of(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.generate();
         System.out.println("\ndesktop .classpath");
@@ -81,6 +84,7 @@ public class JkImlGeneratorTest {
 
     private void configureEmptyTestCompileLayout(JkJavaProject javaProject) {
         javaProject
+            .getProduction()
                 .getTesting()
                     .getCompilation()
                         .getLayout()

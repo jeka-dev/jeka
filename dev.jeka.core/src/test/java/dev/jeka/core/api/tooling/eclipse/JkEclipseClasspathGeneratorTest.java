@@ -25,12 +25,13 @@ public class JkEclipseClasspathGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("base"))
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                    .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__;
+            .getProduction()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of()
+                        .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__.__;
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
-            .setDefDependencies(baseProject.getDependencyManagement().getResolver(),
+            .setDefDependencies(baseProject.getProduction().getDependencyManagement().getResolver(),
                     JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
@@ -39,15 +40,16 @@ public class JkEclipseClasspathGeneratorTest {
         final JkJavaProject coreProject = JkJavaProject.of()
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
+            .getProduction()
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
-            .getTesting()
-                .getCompilation()
-                    .getLayout()
-                        .emptySources().addSource("test")
-                        .emptyResources().addResource("res-test").__.__
-                .getTestProcessor()
-                    .setForkingProcess(true).__.__;
+                .getTesting()
+                    .getCompilation()
+                        .getLayout()
+                            .emptySources().addSource("test")
+                            .emptyResources().addResource("res-test").__.__
+                    .getTestProcessor()
+                        .setForkingProcess(true).__.__.__;
         final JkEclipseClasspathGenerator coreGenerator =
                 JkEclipseClasspathGenerator.of(coreProject.getJavaIdeSupport());
         final String coreClasspath = coreGenerator.generate();
@@ -58,8 +60,9 @@ public class JkEclipseClasspathGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of().and(coreProject.toDependency())).__;
+            .getProduction()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of().and(coreProject.toDependency())).__.__;
         desktopProject.publication.getArtifactProducer().makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());
@@ -79,6 +82,7 @@ public class JkEclipseClasspathGeneratorTest {
 
     private void configureTestCompileLayout(JkJavaProject javaProject) {
         javaProject
+            .getProduction()
                 .getTesting()
                     .getCompilation()
                         .getLayout()
