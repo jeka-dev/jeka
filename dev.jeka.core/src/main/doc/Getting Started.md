@@ -700,32 +700,24 @@ a standalone project, you can concentrate on the Foo project.
 
 
 ```Java
-        // --------------- Foo Project build -------------------------------------------------
+JkJavaProject coreProject = JkJavaProject.of()
+    .setBaseDir(Paths.get("../dev.jeka.core-samples"))
+     .getProduction().getDependencyManagement()
+        .addDependencies(JkDependencySet.of()
+                .and("junit:junit:4.13", JkScope.TEST)).__.__;
 
-        JkVersionProvider versionProvider = JkVersionProvider.of()
-                .and("com.google.guava:guava", "21.0")
-                .and("junit:junit", "4.12");
-
-        JkJavaProject fooProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("foo"));
-        fooProject.setDependencies(JkDependencySet.of()
-                .and("junit:junit", JkJavaDepScopes.TEST)
-                .and("com.google.guava:guava")
-                .withVersionProvider(versionProvider)
-        );
-        fooProject.getMaker().addJavadocArtifact();  // Generate Javadoc by default
-
-        // --------------- Bar Project build -------------------------------------------------
-
-        JkJavaProject barProject = JkJavaProject.ofMavenLayout(this.getBaseDir().resolve("bar"));
-        fooProject.setDependencies(JkDependencySet.of()
-                .and("junit:junit", JkJavaDepScopes.TEST)
-                .and("com.sun.jersey:jersey-server:1.19.4")
-                .and("com.google.guava:guava")
-                .and(fooProject)  // Bar project depends of Foo
-                .withVersionProvider(versionProvider)
-        );
-        barProject.getMaker().defineMainArtifactAsFatJar(true); // Produced jar will embed dependencies
-        barProject.getMaker().clean().makeAllArtifacts();  // Creates Bar jar along Foo jar (if not already built)
+// A project depending on the first project + Guava
+JkJavaProject dependerProject = JkJavaProject.of()
+    .getProduction()
+    .getDependencyManagement()
+        .addDependencies(JkDependencySet.of()
+            .and("com.google.guava:guava:22.0")
+            .and(coreProject.toDependency())).__.__
+    .getPublication()
+        .setModuleId("mygroup:depender")
+        .setVersion(JkVersion.of("1.0-SNAPSHOT")).__;
+dependerProject.getPublication().getArtifactProducer().makeAllArtifacts();
+dependerProject.getPublication().publish();       
 ```
 
 ## Build Java project using Jeka Java plugin.
@@ -777,10 +769,11 @@ class Build extends JkCommandSet {
     @Override
     protected void setup() {
         java.getProject()
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                    .and("com.google.guava:guava:21.0")
-                    .and("junit:junit:4.13", JkScope.TEST));
+            .getProduction()
+                .getDependencyManagement()
+                    .addDependencies(JkDependencySet.of()
+                        .and("com.google.guava:guava:21.0")
+                        .and("junit:junit:4.13", JkScope.TEST));
     }
 
     public static void main(String[] args) {
