@@ -20,21 +20,21 @@ class Build extends JkCommandSet {
     @Override
     protected void setup() {
         java.getProject()
-            .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                    .and("com.google.guava:guava:21.0")
-                    .and("org.junit.jupiter:junit-jupiter:5.6.2", TEST)).__
             .getProduction()
+                .getDependencyManagement()
+                .addDependencies(JkDependencySet.of()
+                        .and("com.google.guava:guava:21.0")
+                        .and("org.junit.jupiter:junit-jupiter:5.6.2", TEST)).__
                 .getCompilation()
-                    .setJavaVersion(JkJavaVersion.V8).__.__
-            .getTesting()
-                .getTestSelection()
-                    .addIncludeStandardPatterns()
-                    .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
-                .getTestProcessor()
-                    .setForkingProcess(true)
-                    .getEngineBehavior()
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__
+                    .setJavaVersion(JkJavaVersion.V8).__
+                .getTesting()
+                    .getTestSelection()
+                        .addIncludeStandardPatterns()
+                        .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
+                    .getTestProcessor()
+                        .setForkingProcess(true)
+                        .getEngineBehavior()
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__.__
 
             // Publication is only necessary if your project is being deployed on a binary repository.
             // Many projects as jee war jar, springboot application, tools, Graphical application
