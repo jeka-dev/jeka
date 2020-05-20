@@ -25,7 +25,10 @@ import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.search.SearchEngine;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.conflict.AbstractConflictManager;
+import org.apache.ivy.plugins.conflict.LatestCompatibleConflictManager;
+import org.apache.ivy.plugins.conflict.LatestConflictManager;
 import org.apache.ivy.plugins.conflict.StrictConflictManager;
+import org.apache.ivy.plugins.latest.LatestRevisionStrategy;
 import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
 import org.apache.ivy.util.url.URLHandlerRegistry;
@@ -147,11 +150,21 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
 
     private void setConflictManager(DefaultModuleDescriptor moduleDescriptor,
                                     JkResolutionParameters.JkConflictResolver conflictResolver) {
+        AbstractConflictManager abstractConflictManager = null;
         if (conflictResolver == JkResolutionParameters.JkConflictResolver.STRICT) {
+            abstractConflictManager = new StrictConflictManager();
+        } else if (conflictResolver == JkResolutionParameters.JkConflictResolver.LATEST_COMPATIBLE) {
+            abstractConflictManager = new LatestCompatibleConflictManager("LatestCompatible",
+                    new LatestRevisionStrategy());
+        } else if (conflictResolver == JkResolutionParameters.JkConflictResolver.LATEST_VERSION) {
+            abstractConflictManager = new LatestConflictManager("Lateste",
+                    new LatestRevisionStrategy());
+        }
+        if (abstractConflictManager != null) {
             PatternMatcher patternMatcher = ExactPatternMatcher.INSTANCE;
             AbstractConflictManager conflictManager = new StrictConflictManager();
             conflictManager.setSettings(ivy.getSettings());
-            moduleDescriptor.addConflictManager(ModuleId.newInstance("*", "*"), patternMatcher, conflictManager);
+            moduleDescriptor.addConflictManager(ModuleId.newInstance("*", "*"), patternMatcher, abstractConflictManager);
         }
     }
 

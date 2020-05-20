@@ -22,7 +22,18 @@ public final class JkResolutionParameters<T> {
          * Fail resolution if a there is a version conflict into the resolved tree. User has to
          * exclude unwanted version explicitly.
          */
-        STRICT;
+        STRICT,
+
+        /**
+         * Select the latest version compatible with version constraints. It act as 'strict' if
+         * no version are not expressed using constraints.
+         */
+        LATEST_COMPATIBLE,
+
+        /**
+         * Select the latest version in the resolved dependency tree.
+         */
+        LATEST_VERSION;
     }
 
     private JkScopeMapping scopeMapping = JkScope.DEFAULT_SCOPE_MAPPING;
