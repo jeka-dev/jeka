@@ -157,7 +157,7 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
             abstractConflictManager = new LatestCompatibleConflictManager("LatestCompatible",
                     new LatestRevisionStrategy());
         } else if (conflictResolver == JkResolutionParameters.JkConflictResolver.LATEST_VERSION) {
-            abstractConflictManager = new LatestConflictManager("Lateste",
+            abstractConflictManager = new LatestConflictManager("Latest",
                     new LatestRevisionStrategy());
         }
         if (abstractConflictManager != null) {
