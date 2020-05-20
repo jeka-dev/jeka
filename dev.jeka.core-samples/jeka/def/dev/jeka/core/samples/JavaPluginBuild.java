@@ -2,6 +2,7 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
@@ -29,11 +30,15 @@ public class JavaPluginBuild extends JkCommandSet {
        java.getProject()
            .getProduction()
                .getDependencyManagement()
+                   .getResolver()
+                        .getParams()
+                            .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT).__.__
                    .addDependencies(JkDependencySet.of()
                        .and("com.google.guava:guava:21.0")
                        .and("com.sun.jersey:jersey-server:1.19.4")
-                       .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)
-                       .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)).__
+                       .and("org.junit.jupiter:junit-jupiter-engine:5.6.0", TEST)
+                       .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)
+                   ).__
                .getCompilation()
                    .setJavaVersion(JkJavaVersion.V8).__
                .getTesting()

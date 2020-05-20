@@ -1,7 +1,9 @@
 package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +17,7 @@ public final class JkGitWrapper {
     private final JkProcess git;
 
     private JkGitWrapper(JkProcess process) {
-        this.git = process;
+        this.git = process.withFailOnError(false);
     }
 
     public static JkGitWrapper of(Path dir) {
@@ -75,8 +77,15 @@ public final class JkGitWrapper {
      * the version is [branch]-SNAPSHOT
      */
     public String getVersionFromTags() {
-        List<String> tags = getTagsOfCurrentCommit();
-        String branch = getCurrentBranch();
+        List<String> tags;
+        String branch;
+        try {
+            tags = getTagsOfCurrentCommit();
+            branch = getCurrentBranch();
+        } catch (IllegalStateException e) {
+            JkLog.warn(e.getMessage());
+            return JkVersion.UNSPECIFIED.getValue();
+        }
         if (tags.isEmpty()) {
             return branch + "-SNAPSHOT";
         } else {
@@ -92,9 +101,9 @@ public final class JkGitWrapper {
     }
 
     public JkGitWrapper exec(String... args) {
-        git.andParams(args).runSync();
+        int code = git.andParams(args).runSync();
+        JkUtilsAssert.state(code == 0, "Git " + git.getCommand() + " returned with error " + code);
         return this;
     }
-
 
 }

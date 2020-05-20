@@ -117,6 +117,16 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     }
 
     /**
+     * Returns a clone of this object plus the specified {@link JkScopedDependency}s.
+     */
+    public JkDependencySet andIf(boolean condition, Iterable<JkScopedDependency> others) {
+       if (!condition) {
+           return this;
+       }
+        return and(others);
+    }
+
+    /**
      * Returns a clone of this object plus the specified scoped dependencies.
      */
     public JkDependencySet and(JkScopedDependency... others) {
@@ -402,8 +412,10 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     }
 
     /**
-     * Returns overridden versions for transitive dependencies. Versions present here will
-     * overwrite versions found in transitive dependencies.
+     * Returns overridden versions for transitive dependencies and direct dependencies with no version specified on. <p>
+     * Versions present here will overwrite versions found in transitive dependencies and unversioned direct
+     * dependencies. <p>
+     * Versions present in direct dependencies won't be overridden.
      */
     public JkVersionProvider getVersionProvider() {
         return this.versionProvider;

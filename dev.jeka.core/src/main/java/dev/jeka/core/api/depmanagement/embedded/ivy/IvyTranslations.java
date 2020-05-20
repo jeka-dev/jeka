@@ -52,10 +52,11 @@ final class IvyTranslations {
                 .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
                 thisModuleRevisionId, "integration", null);
-
         populateModuleDescriptor(result, dependencies, defaultMapping, resolvedVersions);
         return result;
     }
+
+
 
     private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude, Iterable<String> allRootConfs) {
         final String type = depExclude.getType() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
@@ -290,6 +291,8 @@ final class IvyTranslations {
                     ExactOrRegexpPatternMatcher.INSTANCE,
                     new OverrideDependencyDescriptorMediator(null, version.getValue()));
         }
+
+
 
     }
 

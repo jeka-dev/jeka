@@ -14,6 +14,7 @@ import org.apache.ivy.core.module.descriptor.Configuration;
 import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
+import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
@@ -23,6 +24,10 @@ import org.apache.ivy.core.resolve.IvyNodeCallers.Caller;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.search.SearchEngine;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.conflict.AbstractConflictManager;
+import org.apache.ivy.plugins.conflict.StrictConflictManager;
+import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
+import org.apache.ivy.plugins.matcher.PatternMatcher;
 import org.apache.ivy.util.url.URLHandlerRegistry;
 
 import java.io.File;
@@ -97,8 +102,13 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
         } else {
             module = moduleArg;
         }
-        final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
-                parameters.getScopeMapping(), deps.getVersionProvider());
+        final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
+                module,
+                deps,
+                parameters.getScopeMapping(),
+                deps.getVersionProvider()
+        );
+        setConflictManager(moduleDescriptor, parameters.getConflictResolver());
 
         final String[] confs = toConfs(moduleDescriptor.getConfigurations(), resolvedScopes);
         final ResolveOptions resolveOptions = new ResolveOptions();
@@ -133,6 +143,16 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
             deleteResolveCache(module);
         }
         return resolveResult;
+    }
+
+    private void setConflictManager(DefaultModuleDescriptor moduleDescriptor,
+                                    JkResolutionParameters.JkConflictResolver conflictResolver) {
+        if (conflictResolver == JkResolutionParameters.JkConflictResolver.STRICT) {
+            PatternMatcher patternMatcher = ExactPatternMatcher.INSTANCE;
+            AbstractConflictManager conflictManager = new StrictConflictManager();
+            conflictManager.setSettings(ivy.getSettings());
+            moduleDescriptor.addConflictManager(ModuleId.newInstance("*", "*"), patternMatcher, conflictManager);
+        }
     }
 
     private void deleteResolveCache(JkVersionedModule module) {

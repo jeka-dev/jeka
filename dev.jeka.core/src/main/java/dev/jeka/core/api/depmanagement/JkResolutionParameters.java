@@ -1,13 +1,35 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+
 /**
  * Contains parameters likely to impact module resolution behavior.
  */
 public final class JkResolutionParameters<T> {
 
+    /**
+     * Strategy for resolving version conflict
+     */
+    public enum JkConflictResolver {
+
+        /**
+         * Default conflict resolver. By default, on Ivy it takes the greatest version, unless
+         * a version is expressed explicitly in direct dependency.
+         */
+        DEFAULT,
+
+        /**
+         * Fail resolution if a there is a version conflict into the resolved tree. User has to
+         * exclude unwanted version explicitly.
+         */
+        STRICT;
+    }
+
     private JkScopeMapping scopeMapping = JkScope.DEFAULT_SCOPE_MAPPING;
 
     private boolean refreshed = true;
+
+    private JkConflictResolver conflictResolver = JkConflictResolver.DEFAULT;
 
     /**
      * For parent chaining
@@ -39,6 +61,22 @@ public final class JkResolutionParameters<T> {
      */
     public JkResolutionParameters<T> setScopeMapping(JkScopeMapping scopeMapping) {
         this.scopeMapping = scopeMapping;
+        return this;
+    }
+
+    /**
+     * Returns the conflict resolver to use.
+     */
+    public JkConflictResolver getConflictResolver() {
+        return conflictResolver;
+    }
+
+    /**
+     * Set the {@link JkConflictResolver} to use.
+     */
+    public JkResolutionParameters<T> setConflictResolver(JkConflictResolver conflictResolver) {
+        JkUtilsAssert.argument(conflictResolver != null, "conflictResolver can not be null.");
+        this.conflictResolver = conflictResolver;
         return this;
     }
 

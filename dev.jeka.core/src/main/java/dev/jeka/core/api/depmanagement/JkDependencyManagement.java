@@ -13,7 +13,7 @@ public class JkDependencyManagement<T> {
 
     private final Map<Set<JkScope>, JkResolveResult> dependencyCache = new HashMap<>();
 
-    private final JkDependencyResolver<JkDependencyManagement> resolver;
+    private final JkDependencyResolver<JkDependencyManagement<T>> resolver;
 
     private JkScope[] defaultScope = JkScope.COMPILE_AND_RUNTIME;
 
@@ -56,7 +56,7 @@ public class JkDependencyManagement<T> {
         return this;
     }
 
-    public JkDependencyResolver<JkDependencyManagement> getResolver() {
+    public JkDependencyResolver<JkDependencyManagement<T>> getResolver() {
         return resolver;
     }
 
