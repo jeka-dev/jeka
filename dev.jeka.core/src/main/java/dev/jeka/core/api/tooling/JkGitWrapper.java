@@ -28,6 +28,10 @@ public final class JkGitWrapper {
         return of(Paths.get(""));
     }
 
+    public static JkGitWrapper of() {
+        return of("");
+    }
+
     public JkGitWrapper withLogCommand(boolean log) {
         return new JkGitWrapper(this.git.withLogCommand(log));
     }

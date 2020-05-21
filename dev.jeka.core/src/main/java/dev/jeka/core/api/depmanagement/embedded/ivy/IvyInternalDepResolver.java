@@ -162,8 +162,7 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
         }
         if (abstractConflictManager != null) {
             PatternMatcher patternMatcher = ExactPatternMatcher.INSTANCE;
-            AbstractConflictManager conflictManager = new StrictConflictManager();
-            conflictManager.setSettings(ivy.getSettings());
+            abstractConflictManager.setSettings(ivy.getSettings());
             moduleDescriptor.addConflictManager(ModuleId.newInstance("*", "*"), patternMatcher, abstractConflictManager);
         }
     }

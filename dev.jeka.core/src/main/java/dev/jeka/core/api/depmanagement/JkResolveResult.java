@@ -184,4 +184,5 @@ public final class JkResolveResult {
             return sb.toString();
         }
     }
+
 }
