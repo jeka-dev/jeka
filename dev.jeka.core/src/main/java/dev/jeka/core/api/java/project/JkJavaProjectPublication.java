@@ -54,12 +54,12 @@ public class JkJavaProjectPublication {
         registerArtifacts();
         this.mavenPublication = JkMavenPublication.of(this)
             .setArtifactLocator(() -> artifactProducer)
-            .setDependencies(deps -> project.getProduction().getDependencyManagement().getDependencies())
+            .setDependencies(deps -> project.getJarProduction().getDependencyManagement().getDependencies())
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()));
         this.ivyPublication = JkIvyPublication.of(this)
             .addArtifacts(() -> artifactProducer)
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()))
-            .setDependencies(deps -> project.getProduction().getDependencyManagement().getDependencies())
+            .setDependencies(deps -> project.getJarProduction().getDependencyManagement().getDependencies())
             .setResolvedVersionProvider(this::getResolvedVersions);
         this.postActions = JkRunnables.ofParent(this);
     }
@@ -209,7 +209,7 @@ public class JkJavaProjectPublication {
     }
 
     private JkVersionProvider getResolvedVersions() {
-        return project.getProduction().getDependencyManagement().fetchDependencies().getResolvedVersionProvider();
+        return project.getJarProduction().getDependencyManagement().fetchDependencies().getResolvedVersionProvider();
     }
 
     public JkStandardFileArtifactProducer<JkJavaProjectPublication> getArtifactProducer() {
@@ -217,7 +217,7 @@ public class JkJavaProjectPublication {
     }
 
     private void registerArtifacts() {
-        artifactProducer.putMainArtifact(project.getProduction()::createBinJar);
+        artifactProducer.putMainArtifact(project.getJarProduction()::createBinJar);
         artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
         artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, project.getDocumentation()::createJavadocJar);
     }

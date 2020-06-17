@@ -23,7 +23,7 @@ import java.util.function.UnaryOperator;
  */
 public class JkJavaProjectTesting {
 
-    private final JkJavaProjectProduction projectProduction;
+    private final JkJavaProjectJarProduction projectProduction;
 
     private final JkJavaProjectCompilation<JkJavaProjectTesting> compilation;
 
@@ -45,9 +45,9 @@ public class JkJavaProjectTesting {
     /**
      * For parent chaining
      */
-    public final JkJavaProjectProduction __;
+    public final JkJavaProjectJarProduction __;
 
-    JkJavaProjectTesting(JkJavaProjectProduction projectProduction) {
+    JkJavaProjectTesting(JkJavaProjectJarProduction projectProduction) {
         this.projectProduction = projectProduction;
         this.__ = projectProduction;
         compilation = JkJavaProjectCompilation.ofTest(projectProduction, this);

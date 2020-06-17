@@ -14,25 +14,24 @@ import java.util.function.Consumer;
  * Responsible to produce jar files. It involves compilation and unit testing.
  * Compilation and tests can be run independently without creating jars.
  * <p>
- * Java project production has common characteristic :
+ * Java Project Jar Production has common characteristics :
  * <ul>
  *     <li>Contains Java source files to be compiled</li>
  *     <li>All Java sources file (prod + test) are wrote against the same Java version and encoding</li>
  *     <li>The project may contain unit tests</li>
  *     <li>It can depends on any accepted dependencies (Maven module, other project, files on fs, ...)</li>
- *     <li>It produces a bin jar, a source jar and a javadoc jar</li>
- *     <li>It can produce any other artifact files (fat-jar, test jar, doc, ...)</li>
  *     <li>Part of the sources/resources may be generated</li>
- *     <li>By default, passing test suite is required to produce bin artifacts.</li>
+ *     <li>By default, passing test suite is required to produce Jars.</li>
  * </ul>
+ * Integration tests are outside of {@link JkJavaProjectJarProduction} scope.
  */
-public class JkJavaProjectProduction {
+public class JkJavaProjectJarProduction {
 
     private final JkJavaProject project;
 
-    private final JkDependencyManagement<JkJavaProjectProduction> dependencyManagement;
+    private final JkDependencyManagement<JkJavaProjectJarProduction> dependencyManagement;
 
-    private final JkJavaProjectCompilation<JkJavaProjectProduction> compilation;
+    private final JkJavaProjectCompilation<JkJavaProjectJarProduction> compilation;
 
     private final JkJavaProjectTesting testing;
 
@@ -47,7 +46,7 @@ public class JkJavaProjectProduction {
      */
     public JkJavaProject __;
 
-    JkJavaProjectProduction(JkJavaProject project) {
+    JkJavaProjectJarProduction(JkJavaProject project) {
         this.project = project;
         this.__ = project;
         dependencyManagement = JkDependencyManagement.ofParent(this);
@@ -56,16 +55,16 @@ public class JkJavaProjectProduction {
         manifest = JkManifest.ofParent(this);
     }
 
-    public JkJavaProjectProduction apply(Consumer<JkJavaProjectProduction> consumer) {
+    public JkJavaProjectJarProduction apply(Consumer<JkJavaProjectJarProduction> consumer) {
         consumer.accept(this);
         return this;
     }
 
-    public JkDependencyManagement<JkJavaProjectProduction> getDependencyManagement() {
+    public JkDependencyManagement<JkJavaProjectJarProduction> getDependencyManagement() {
         return dependencyManagement;
     }
 
-    public JkJavaProjectCompilation<JkJavaProjectProduction> getCompilation() {
+    public JkJavaProjectCompilation<JkJavaProjectJarProduction> getCompilation() {
         return compilation;
     }
 
@@ -73,7 +72,7 @@ public class JkJavaProjectProduction {
         return testing;
     }
 
-    public JkManifest<JkJavaProjectProduction> getManifest() {
+    public JkManifest<JkJavaProjectJarProduction> getManifest() {
         return manifest;
     }
 
@@ -131,7 +130,7 @@ public class JkJavaProjectProduction {
     /**
      * File trees specified here will be added to the fat jar.
      */
-    public JkJavaProjectProduction setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
+    public JkJavaProjectJarProduction setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;
     }

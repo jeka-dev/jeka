@@ -48,10 +48,10 @@ public class JkJavaProjectDocumentation {
      * Generates javadoc files (files + zip)
      */
     public void run() {
-        Iterable<Path> classpath = project.getProduction().getDependencyManagement()
+        Iterable<Path> classpath = project.getJarProduction().getDependencyManagement()
                 .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
-        JkPathTreeSet sources = project.getProduction().getCompilation().getLayout().resolveSources();
+        JkPathTreeSet sources = project.getJarProduction().getCompilation().getLayout().resolveSources();
         javadocProcessor.make(classpath, sources, dir);
     }
 
@@ -89,7 +89,7 @@ public class JkJavaProjectDocumentation {
     }
 
     public void createSourceJar(Path target) {
-        JkJavaProjectCompilation compilation = project.getProduction().getCompilation();
+        JkJavaProjectCompilation compilation = project.getJarProduction().getCompilation();
         compilation.getLayout().resolveSources().and(compilation
                 .getLayout().resolveGeneratedSourceDir()).zipTo(target);
     }

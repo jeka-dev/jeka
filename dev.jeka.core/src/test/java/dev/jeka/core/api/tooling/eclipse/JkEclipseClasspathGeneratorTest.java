@@ -25,13 +25,13 @@ public class JkEclipseClasspathGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("base"))
-            .getProduction()
+            .getJarProduction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__.__;
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
-            .setDefDependencies(baseProject.getProduction().getDependencyManagement().getResolver(),
+            .setDefDependencies(baseProject.getJarProduction().getDependencyManagement().getResolver(),
                     JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
@@ -40,7 +40,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkJavaProject coreProject = JkJavaProject.of()
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
-            .getProduction()
+            .getJarProduction()
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
                 .getTesting()
@@ -60,7 +60,7 @@ public class JkEclipseClasspathGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
-            .getProduction()
+            .getJarProduction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of().and(coreProject.toDependency())).__.__;
         desktopProject.publication.getArtifactProducer().makeAllArtifacts();
@@ -73,7 +73,7 @@ public class JkEclipseClasspathGeneratorTest {
 
     private void configureCompileLayout(JkJavaProject javaProject) {
         javaProject
-            .getProduction()
+            .getJarProduction()
                 .getCompilation()
                     .getLayout()
                         .emptySources().addSource("src")
@@ -82,7 +82,7 @@ public class JkEclipseClasspathGeneratorTest {
 
     private void configureTestCompileLayout(JkJavaProject javaProject) {
         javaProject
-            .getProduction()
+            .getJarProduction()
                 .getTesting()
                     .getCompilation()
                         .getLayout()

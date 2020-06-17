@@ -27,7 +27,7 @@ public class JkImlGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
-            .getProduction()
+            .getJarProduction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__.__;
@@ -40,7 +40,7 @@ public class JkImlGeneratorTest {
         final JkJavaProject coreProject = JkJavaProject.of()
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
-                .getProduction()
+                .getJarProduction()
                     .getDependencyManagement()
                         .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
                     .getTesting()
@@ -60,7 +60,7 @@ public class JkImlGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
-            .getProduction()
+            .getJarProduction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and(coreProject.toDependency())).__.__;
@@ -75,7 +75,7 @@ public class JkImlGeneratorTest {
 
     private void configureCompileLayout(JkJavaProject javaProject) {
         javaProject
-            .getProduction()
+            .getJarProduction()
                 .getCompilation()
                     .getLayout()
                         .emptySources().addSource("src")
@@ -84,7 +84,7 @@ public class JkImlGeneratorTest {
 
     private void configureEmptyTestCompileLayout(JkJavaProject javaProject) {
         javaProject
-            .getProduction()
+            .getJarProduction()
                 .getTesting()
                     .getCompilation()
                         .getLayout()

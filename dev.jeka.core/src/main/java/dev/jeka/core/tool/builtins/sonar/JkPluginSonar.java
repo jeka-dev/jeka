@@ -24,12 +24,12 @@ public class JkPluginSonar extends JkPlugin {
     }
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
-        final JkCompileLayout prodLayout = project.getProduction().getCompilation().getLayout();
-        final JkCompileLayout testLayout = project.getProduction().getTesting().getCompilation().getLayout();
+        final JkCompileLayout prodLayout = project.getJarProduction().getCompilation().getLayout();
+        final JkCompileLayout testLayout = project.getJarProduction().getTesting().getCompilation().getLayout();
         final Path baseDir = project.getBaseDir();
-        final JkPathSequence libs = project.getProduction().getDependencyManagement().fetchDependencies(
+        final JkPathSequence libs = project.getJarProduction().getDependencyManagement().fetchDependencies(
                 JkScope.RUNTIME, JkScope.PROVIDED).getFiles();
-        final Path testReportDir = project.getProduction().getTesting().getReportDir();
+        final Path testReportDir = project.getJarProduction().getTesting().getReportDir();
         final JkModuleId moduleId = project.getPublication().getModuleId();
         final JkVersion version = project.getPublication().getVersion();
         final String fullName = moduleId.getDotedName();
@@ -37,7 +37,7 @@ public class JkPluginSonar extends JkPlugin {
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
-                .withBinaries(project.getProduction().getCompilation().getLayout().resolveClassDir())
+                .withBinaries(project.getJarProduction().getCompilation().getLayout().resolveClassDir())
                 .withLibraries(libs)
                 .withSourcesPath(prodLayout.resolveSources().getRootDirsOrZipFiles())
                 .withTestPath(testLayout.resolveSources().getRootDirsOrZipFiles())
@@ -46,7 +46,7 @@ public class JkPluginSonar extends JkPlugin {
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,
                         baseDir.relativize(testReportDir.resolve("junit")).toString())
-                .withProperty(JkSonar.SOURCE_ENCODING, project.getProduction().getCompilation().getSourceEncoding())
+                .withProperty(JkSonar.SOURCE_ENCODING, project.getJarProduction().getCompilation().getSourceEncoding())
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
                         baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.exec")).toString());
 

@@ -52,7 +52,7 @@ public class SonarPluginBuild extends JkCommandSet {
             .setProp(JkSonar.BRANCH, "myBranch");
 
         java.getProject()
-            .getProduction()
+            .getJarProduction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and(GUAVA, "18.0")

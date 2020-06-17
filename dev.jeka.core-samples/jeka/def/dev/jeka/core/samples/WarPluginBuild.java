@@ -35,7 +35,7 @@ public class WarPluginBuild extends JkCommandSet {
     @Override
     protected void setup() {
        java.getProject()
-           .getProduction()
+           .getJarProduction()
                .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                        .and("com.google.guava:guava:21.0")

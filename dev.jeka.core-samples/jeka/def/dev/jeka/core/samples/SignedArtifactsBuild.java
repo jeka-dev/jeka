@@ -58,7 +58,7 @@ public class SignedArtifactsBuild extends JkCommandSet {
     @Override
     protected void setup() {
         javaPlugin.getProject()
-            .getProduction()
+            .getJarProduction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and(GUAVA, "18.0")

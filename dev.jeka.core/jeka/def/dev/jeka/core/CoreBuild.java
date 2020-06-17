@@ -68,7 +68,7 @@ public class CoreBuild extends JkCommandSet {
             java.pack.javadoc = true;
         }
         java.getProject()
-            .getProduction()
+            .getJarProduction()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
                 .getCompilation()
@@ -189,12 +189,12 @@ public class CoreBuild extends JkCommandSet {
 
         // Main jar
         JkJavaProject project = java.getProject();
-        project.getProduction().createBinJar(targetJar);
+        project.getJarProduction().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
-        JkPathTree classTree = JkPathTree.of(project.getProduction().getCompilation().getLayout().resolveClassDir());
+        JkPathTree classTree = JkPathTree.of(project.getJarProduction().getCompilation().getLayout().resolveClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
             .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
@@ -222,8 +222,8 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doWrapper(Path wrapperJar) {
-        java.getProject().getProduction().getCompilation().runIfNecessary();
-        JkPathTree.of(java.getProject().getProduction().getCompilation().getLayout()
+        java.getProject().getJarProduction().getCompilation().runIfNecessary();
+        JkPathTree.of(java.getProject().getJarProduction().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 

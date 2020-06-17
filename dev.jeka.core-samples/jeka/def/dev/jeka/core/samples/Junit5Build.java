@@ -41,7 +41,7 @@ class Junit5Build extends JkCommandSet {
     @Override
     protected void setup() {
         java.getProject()
-            .getProduction()
+            .getJarProduction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)

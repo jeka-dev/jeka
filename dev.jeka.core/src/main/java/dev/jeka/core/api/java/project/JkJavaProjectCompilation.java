@@ -33,7 +33,7 @@ public class JkJavaProjectCompilation<T> {
      */
     public final T __;
 
-    private final JkJavaProjectProduction projectProduction;
+    private final JkJavaProjectJarProduction projectProduction;
 
     private final JkRunnables<JkJavaProjectCompilation<T>> beforeGenerate;
 
@@ -63,7 +63,7 @@ public class JkJavaProjectCompilation<T> {
 
     private String sourceEncoding;
 
-    private JkJavaProjectCompilation(JkJavaProjectProduction projectProduction, String scope, T parent) {
+    private JkJavaProjectCompilation(JkJavaProjectJarProduction projectProduction, String scope, T parent) {
         __ = parent;
         this.projectProduction = projectProduction;
         this.scope = scope;
@@ -79,14 +79,14 @@ public class JkJavaProjectCompilation<T> {
                 .setOutputDirSupplier(projectProduction.getProject()::getOutputDir);
     }
 
-    static JkJavaProjectCompilation<JkJavaProjectProduction> ofProd(JkJavaProjectProduction projectProduction) {
+    static JkJavaProjectCompilation<JkJavaProjectJarProduction> ofProd(JkJavaProjectJarProduction projectProduction) {
         JkJavaProjectCompilation result =
                 new JkJavaProjectCompilation(projectProduction, "production code", projectProduction);
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
         return result;
     }
 
-    static JkJavaProjectCompilation<JkJavaProjectTesting> ofTest(JkJavaProjectProduction projectProduction,
+    static JkJavaProjectCompilation<JkJavaProjectTesting> ofTest(JkJavaProjectJarProduction projectProduction,
                                                                  JkJavaProjectTesting parent) {
         JkJavaProjectCompilation result =
                 new JkJavaProjectCompilation(projectProduction, "test code", parent);
