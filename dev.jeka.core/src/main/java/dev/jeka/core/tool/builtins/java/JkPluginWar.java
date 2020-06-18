@@ -33,7 +33,7 @@ public class JkPluginWar extends JkPlugin {
     public JkPluginWar(JkCommandSet commandSet) {
         super(commandSet);
         this.staticResourceDir = commandSet.getBaseDir().resolve("src/main/webapp/static");
-        this.artifactProducer = commandSet.getPlugin(JkPluginJava.class).getProject().publication.getArtifactProducer();
+        this.artifactProducer = commandSet.getPlugin(JkPluginJava.class).getProject().getPublication().getArtifactProducer();
 
     }
 

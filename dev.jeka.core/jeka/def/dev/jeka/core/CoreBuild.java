@@ -134,7 +134,7 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = java.getProject().publication.getArtifactProducer();
+        final JkArtifactProducer artifactProducer = java.getProject().getPublication().getArtifactProducer();
         artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
                 SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder());

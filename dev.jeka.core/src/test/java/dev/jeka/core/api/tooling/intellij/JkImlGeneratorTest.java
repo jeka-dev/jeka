@@ -69,7 +69,7 @@ public class JkImlGeneratorTest {
         System.out.println("\ndesktop .classpath");
         System.out.println(result2);
 
-        desktopProject.publication.getArtifactProducer().makeAllArtifacts();
+        desktopProject.getPublication().getArtifactProducer().makeAllArtifacts();
         JkPathTree.of(top).deleteContent();
     }
 

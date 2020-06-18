@@ -31,7 +31,7 @@ public class JkJavaProjectTest {
                         .emptySources().addSource("src")
                         .emptyResources().addResource("res").includeSourceDirsInResources().__.__.__;
         System.out.println(baseProject.getInfo());
-        baseProject.publication.getArtifactProducer().makeAllArtifacts();
+        baseProject.getPublication().getArtifactProducer().makeAllArtifacts();
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of()
@@ -43,7 +43,7 @@ public class JkJavaProjectTest {
                     .getLayout()
                         .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__.__;
         //Desktop.getDesktop().open(core.toFile());
-        coreProject.publication.getArtifactProducer().makeAllArtifacts();
+        coreProject.getPublication().getArtifactProducer().makeAllArtifacts();
 
         final Path desktop = top.resolve("desktop");
         final JkJavaProject desktopProject = JkJavaProject.of()

@@ -29,7 +29,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
 
     private final JkJavaProjectJarProduction jarProduction;
 
-    public final JkJavaProjectPublication publication;
+    private final JkJavaProjectPublication publication;
 
     private JkJavaProject() {
         documentation = new JkJavaProjectDocumentation( this);

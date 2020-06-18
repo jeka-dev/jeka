@@ -94,7 +94,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void applyPostSetupOptions() {
-        final JkStandardFileArtifactProducer artifactProducer = project.publication.getArtifactProducer();
+        final JkStandardFileArtifactProducer artifactProducer = project.getPublication().getArtifactProducer();
         JkArtifactId sources = JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
         if (pack.sources != null && !pack.sources) {
             artifactProducer.removeArtifact(sources);
@@ -173,7 +173,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             "\nDoes not re-generate artifacts already generated : " +
             "execute 'clean java#pack' to re-generate artifacts.")
     public void pack() {
-        project.publication.getArtifactProducer().makeAllMissingArtifacts();
+        project.getPublication().getArtifactProducer().makeAllMissingArtifacts();
     }
 
     /**

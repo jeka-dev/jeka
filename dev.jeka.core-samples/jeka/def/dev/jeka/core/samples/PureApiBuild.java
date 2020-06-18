@@ -16,7 +16,7 @@ public class PureApiBuild extends JkCommandSet {
         javaProject.setOutputDir("jeka/output/alt-output");
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkScope.TEST);
         javaProject.getJarProduction().getDependencyManagement().addDependencies(deps);
-        javaProject.publication.getArtifactProducer().makeAllArtifacts();
+        javaProject.getPublication().getArtifactProducer().makeAllArtifacts();
     }
 
     // Bar project depends on Foo
@@ -44,7 +44,7 @@ public class PureApiBuild extends JkCommandSet {
                     .and("com.sun.jersey:jersey-server:1.19.4")
                     .and(fooProject.toDependency())).__.__;
 
-        barProject.publication.getArtifactProducer()
+        barProject.getPublication().getArtifactProducer()
             .putMainArtifact(barProject.getJarProduction()::createFatJar) // Produced jar will embed dependencies
             .makeAllArtifacts();
     }
