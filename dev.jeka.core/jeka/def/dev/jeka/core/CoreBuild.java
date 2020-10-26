@@ -242,7 +242,7 @@ public class CoreBuild extends JkCommandSet {
         JkGitWrapper gitTemp = JkGitWrapper.of(tempRepo).withLogCommand(true);
         gitTemp.exec("add", "*");
         gitTemp.withFailOnError(false).exec("commit", "-am", "Doc");
-        gitTemp.exec("push");
+        gitTemp.exec("push").withLogCommand(true).withLogOutput(true);
     }
 
     public void cleanPack() {
