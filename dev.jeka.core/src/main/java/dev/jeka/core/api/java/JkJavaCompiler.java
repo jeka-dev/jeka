@@ -165,11 +165,11 @@ public final class JkJavaCompiler<T> {
         List<String> folders = new LinkedList<>();
         List<String> files = new LinkedList<>();
         for (Path path : paths) {
-            String relPath = Paths.get("").toAbsolutePath().relativize(path).toString();
+            Path relPath = path.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(path) : path;
             if (Files.isDirectory(path)) {
-                folders.add(relPath);
+                folders.add(relPath.toString());
             } else {
-                files.add(relPath);
+                files.add(relPath.toString());
             }
         }
         if (paths.size() < 4) {
