@@ -107,7 +107,7 @@ public final class JkGitWrapper {
     public JkGitWrapper exec(String... args) {
         JkProcess gitCommand = git.andParams(args);
         int code = gitCommand.runSync();
-        JkUtilsAssert.state(code == 0, "Command " + git + " returned with error " + code);
+        JkUtilsAssert.state(code == 0, "Command " + gitCommand + " returned with error " + code);
         return this;
     }
 
