@@ -1,9 +1,10 @@
 package dev.jeka.core.api.utils;
 
-import sun.misc.Unsafe;
+import dev.jeka.core.api.java.JkClassLoader;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -27,6 +28,8 @@ public final class JkUtilsSystem {
      * Windows.
      */
     public static final boolean IS_WINDOWS = isWindows();
+
+    private static final Class UNSAFE_CLASS = JkClassLoader.ofCurrent().loadIfExist("sun.misc.Unsafe");
 
     private static boolean isWindows() {
         final String osName = System.getProperty("os.name");
@@ -68,13 +71,22 @@ public final class JkUtilsSystem {
      * removing this warning.
      */
     public static void disableUnsafeWarning() {
+        if (UNSAFE_CLASS == null) {
+            return;
+        }
+        // Try to use sun.misc.Unsafe class if present
+        // https://stackoverflow.com/questions/46454995/how-to-hide-warning-illegal-reflective-access-in-java-9-without-jvm-argument
         try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            Field theUnsafe = UNSAFE_CLASS.getDeclaredField("theUnsafe");
             theUnsafe.setAccessible(true);
-            Unsafe unsafe = (Unsafe) theUnsafe.get(null);
+            Object unsafe = theUnsafe.get(null);
             Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
             Field logger = cls.getDeclaredField("logger");
-            unsafe.putObjectVolatile(cls, unsafe.staticFieldOffset(logger), null);
+            Method staticFieldOffsetMethod = UNSAFE_CLASS.getMethod("staticFieldOffset", Field.class);
+            long staticFieldOffset = (long) staticFieldOffsetMethod.invoke(unsafe, logger);
+            Method putObjectVolatileMethod = UNSAFE_CLASS.getMethod("putObjectVolatile", Object.class,
+                    Long.class, Object.class);
+            putObjectVolatileMethod.invoke(cls, staticFieldOffset, null);
         } catch (Exception e) {
             // ignore
         }
