@@ -51,7 +51,7 @@ public final class JkGitWrapper {
     public boolean isRemoteEqual() {
         Object local = git.andParams("rev-parse", "@").runAndReturnOutputAsLines();
         Object remote = git.andParams("rev-parse", "@{u}").runAndReturnOutputAsLines();
-        return  local.equals(remote);
+        return local.equals(remote);
     }
 
     public boolean isWorkspaceDirty() {
@@ -93,7 +93,7 @@ public final class JkGitWrapper {
         if (tags.isEmpty()) {
             return branch + "-SNAPSHOT";
         } else {
-            return tags.get(tags.size() -1);
+            return tags.get(tags.size() - 1);
         }
     }
 
@@ -107,7 +107,7 @@ public final class JkGitWrapper {
     public JkGitWrapper exec(String... args) {
         JkProcess gitCommand = git.andParams(args);
         int code = gitCommand.runSync();
-        JkUtilsAssert.state(code == 0, "Command " + gitCommand + " returned with error " + code);
+        JkUtilsAssert.state(code == 0 || !git.isFailOnError(), "Command " + gitCommand + " returned with error " + code);
         return this;
     }
 

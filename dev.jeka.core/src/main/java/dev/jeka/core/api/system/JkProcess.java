@@ -337,6 +337,14 @@ public final class JkProcess implements Runnable {
         return this.command;
     }
 
+    /**
+     * Returns <code>true</code> if this process must throw an execption if the underlying process returns
+     * code different than 0.
+     */
+    public boolean isFailOnError() {
+        return failOnError;
+    }
+
     @Override
     public String toString() {
         return this.command + " " + JkUtilsString.join(parameters, " ");
