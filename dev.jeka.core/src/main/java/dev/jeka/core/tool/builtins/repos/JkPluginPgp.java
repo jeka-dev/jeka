@@ -38,8 +38,14 @@ public class JkPluginPgp extends JkPlugin {
     protected void init() {
         Path localPub = getCommandSet().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
         Path pub = JkUtilsPath.firstExisting(publicRingPath, localPub, JkGpg.getDefaultPubring());
+        if (pub == null) {
+            pub = JkGpg.getDefaultPubring();
+        }
         Path localSec = getCommandSet().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
         Path sec = JkUtilsPath.firstExisting(secretRingPath, localSec, JkGpg.getDefaultSecring());
+        if (sec == null) {
+            sec = JkGpg.getDefaultSecring();
+        }
         this.pgp = JkGpg.of(pub, sec, secretKeyPassword);
     }
 

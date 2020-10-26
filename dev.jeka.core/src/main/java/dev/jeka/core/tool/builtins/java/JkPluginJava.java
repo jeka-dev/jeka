@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 /**
  * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
@@ -89,7 +90,8 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         JkPluginPgp pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginPgp.class);
         if (project.getPublication().getSigner() == null) {
             JkGpg pgp = pgpPlugin.get();
-            project.getPublication().setSigner(pgp.getSigner(pgpPlugin.keyName));
+            UnaryOperator<Path> signer  = pgp.getSigner(pgpPlugin.keyName);
+            project.getPublication().setSigner(signer); // Use signer defined in Gpg plugin
         }
     }
 
