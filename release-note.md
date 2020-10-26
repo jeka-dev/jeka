@@ -1,3 +1,7 @@
+# 0.9.0.M11
+* Bug fixes related to JDK11+
+* Bug Fixes related to GPG defaults
+
 # 0.9.0.M4
 * Improve JkManifest
 * Various bux fixes
