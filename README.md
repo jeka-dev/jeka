@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jerkar/jeka.svg?branch=master)](https://travis-ci.org/jerkar/jeka)
+[![Build Status](https://travis-ci.com/jerkar/jeka.svg?branch=master)](https://travis-ci.com/jerkar/jeka)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.jeka/jeka-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22dev.jeka%22%20AND%20a:%22jeka-core%22) 
 [![Gitter](https://badges.gitter.im/jeka-tool/community.svg)](https://gitter.im/jeka-tool/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 <br/>
@@ -43,7 +43,7 @@ Last major additions :
 Jeka now uses these features to release itself.
 
 # Roadmap/Ideas
-
+ 
 * Stabilise api from user feedback. API is quite workable now but may be improved.
 * Provides a graphical plugin for better integration with Eclipse
 * Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
