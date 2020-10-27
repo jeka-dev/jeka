@@ -12,7 +12,7 @@ import java.nio.file.Path;
         "- Path mentioned in this plugin options 'publicRingPath' 'secretRingPath'.",
         "- If none, project local path [root]/jeka/pgp/pub[sec]ring.gpg",
         "- If none,  standard location ([USER HOME]/AppData/Roaming/gnupg/pub[sec]ring.gpg on Windows and [USER_HOME]/.gnupg/pub[sec]ring.gpg on *nix"})
-public class JkPluginPgp extends JkPlugin {
+public class JkPluginGpg extends JkPlugin {
 
     @JkDoc("Path for the public key ring.")
     @JkEnv("GPG_PUBLIC_RING")
@@ -29,9 +29,9 @@ public class JkPluginPgp extends JkPlugin {
     @JkDoc("Key name to sign and verify.")
     public String keyName = "";
 
-    private JkGpg pgp;
+    private JkGpg gpg;
 
-    protected JkPluginPgp(JkCommandSet commands) {
+    protected JkPluginGpg(JkCommandSet commands) {
         super(commands);
     }
 
@@ -46,23 +46,23 @@ public class JkPluginPgp extends JkPlugin {
         if (sec == null) {
             sec = JkGpg.getDefaultSecring();
         }
-        this.pgp = JkGpg.of(pub, sec, secretKeyPassword);
+        this.gpg = JkGpg.of(pub, sec, secretKeyPassword);
     }
 
     /**
      * Returns JkGpg from option settings
      */
     public JkGpg get() {
-        return pgp;
+        return gpg;
     }
 
-    @JkDoc("Displays PGP settings.")
+    @JkDoc("Displays GPG settings.")
     public void display() {
         StringBuilder sb = new StringBuilder();
         JkGpg pgp = get();
-        sb.append("PGP public ring path : " + pgp.getPublicRing());
-        sb.append("\nPGP secret ring path : " + pgp.getSecretRing());
-        sb.append("\nPGP key name : " + keyName);
+        sb.append("GPG public ring path : " + pgp.getPublicRing());
+        sb.append("\nGPG secret ring path : " + pgp.getSecretRing());
+        sb.append("\nGPG key name : " + keyName);
         JkLog.info(sb.toString());
     }
 

@@ -43,6 +43,10 @@ public final class JkGpg {
         return new JkGpg(pubRing, secRing, password);
     }
 
+    public boolean isPublicAndSecretRingExist() {
+        return Files.exists(pubRing) && Files.exists(secRing);
+    }
+
     public static Path getDefaultPubring() {
         if (JkUtilsSystem.IS_WINDOWS) {
             return USER_HOME.resolve("AppData/Roaming/gnupg/pubring.gpg");
@@ -113,7 +117,7 @@ public final class JkGpg {
         JkUtilsAssert.state(pubRing != null,
                 "You must supply a public ring file (as pubring.gpg) to verify file signatures");
         if (!Files.exists(getPublicRing())) {
-            throw new IllegalStateException("Specified public ring file " + getPublicRing() + " not found.");
+            throw new IllegalStateException("Specified public ring file " + pubRing+ " not found.");
         }
         return INTERNAL_GPG_DOER.verify(fileToVerify, pubRing, signature);
     }
@@ -159,8 +163,8 @@ public final class JkGpg {
      *                of the secret ring is selected.
      */
     public UnaryOperator<Path> getSigner(String keyName) {
-        JkUtilsAssert.argument(keyName != null, "key name cannot be null, use \"\" to select the first " +
-                "key present in " + Paths.get("").toAbsolutePath().relativize(this.secRing));
+        JkUtilsAssert.argument(keyName != null, "Key name cannot be null. Use \"\" to select the first " +
+                "key present in " + this.secRing);
         return new Signer(keyName);
     }
 

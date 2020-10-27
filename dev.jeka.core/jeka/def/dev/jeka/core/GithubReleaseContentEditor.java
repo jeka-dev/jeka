@@ -70,7 +70,7 @@ class GithubReleaseContentEditor {
 
     private static Map<String, String> parseReleaseContents(Path mdFile) {
         String currentTag = null;
-        Map<String, String> result = new TreeMap<>(JkVersion.SEMANTIC_COMARATOR);
+        Map<String, String> result = new TreeMap<>(JkVersion.VERSION_COMPARATOR);
         StringBuilder currentContent = new StringBuilder();
         List<String> lines = JkUtilsPath.readAllLines(mdFile);
         for (String line : lines) {

@@ -151,7 +151,7 @@ public final class JkDependencyResolver<T> {
      */
     public List<String> searchVersions(JkModuleId moduleId) {
         return JkInternalDepResolver.of(this.repos).searchVersions(moduleId).stream()
-                .sorted(JkVersion.SEMANTIC_COMARATOR).collect(Collectors.toList());
+                .sorted(JkVersion.VERSION_COMPARATOR).collect(Collectors.toList());
     }
 
     @Override

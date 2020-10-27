@@ -11,7 +11,7 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.repos.JkPluginPgp;
+import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
@@ -87,12 +87,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         project.getJarProduction().getDependencyManagement().getResolver().addRepos(downloadRepo);
-        JkPluginPgp pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginPgp.class);
-        if (project.getPublication().getSigner() == null) {
-            JkGpg pgp = pgpPlugin.get();
-            UnaryOperator<Path> signer  = pgp.getSigner(pgpPlugin.keyName);
-            project.getPublication().setSigner(signer); // Use signer defined in Gpg plugin
-        }
+        JkPluginGpg pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginGpg.class);
+
+        // Use signer from GPG plugin as default
+        JkGpg gpg = pgpPlugin.get();
+        UnaryOperator<Path> signer  = gpg.getSigner(pgpPlugin.keyName);
+        project.getPublication().setSigner(signer);
     }
 
     private void applyPostSetupOptions() {

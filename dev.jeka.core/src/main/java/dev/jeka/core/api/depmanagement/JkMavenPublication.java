@@ -79,7 +79,7 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
-public JkMavenPublication<T> setArtifactLocator(JkArtifactLocator artifactLocatorArg) {
+    public JkMavenPublication<T> setArtifactLocator(JkArtifactLocator artifactLocatorArg) {
         this.artifactLocator = () -> artifactLocatorArg;
         return this;
     }

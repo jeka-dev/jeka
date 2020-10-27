@@ -30,7 +30,7 @@ public class JkJavaProjectPublication {
 
     private JkRepoSet publishRepos = JkRepoSet.of();
 
-    private UnaryOperator<Path> signer;
+    private UnaryOperator<Path> signer;  // Can be null
 
     private final JkStandardFileArtifactProducer<JkJavaProjectPublication> artifactProducer;
 
