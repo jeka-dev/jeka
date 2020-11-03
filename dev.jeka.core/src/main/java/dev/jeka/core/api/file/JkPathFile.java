@@ -222,4 +222,8 @@ public final class JkPathFile {
         }
     }
 
+    @Override
+    public String toString() {
+        return path.toString();
+    }
 }

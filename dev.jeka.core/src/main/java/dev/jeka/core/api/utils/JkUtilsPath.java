@@ -333,6 +333,14 @@ public final class JkUtilsPath {
         return visitor.count;
     }
 
+    /**
+     * Returns the relative path to working dir of the specified path. Returns the specified path itself,
+     * if this one is already relative.
+     */
+    public static Path relativizeFromWorkingDir(Path path) {
+        return path.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(path) : path;
+    }
+
     private static class CopyDirVisitor extends SimpleFileVisitor<Path> {
 
         CopyDirVisitor(Path fromDir, Path toDir, PathMatcher pathMatcher, CopyOption ... options) {

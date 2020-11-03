@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -127,8 +126,7 @@ public final class JkJavaCompiler<T> {
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
         String message = "Compiling " + compileWhatMessage(compileSpec.getSourceFiles())
-                + " to "
-                + Paths.get("").toAbsolutePath().relativize((outputDir));
+                + " to " + outputDir;
         if (JkLog.verbosity().isVerbose()) {
             message = message + " using options : " + JkUtilsString.join(options, " ");
         }
@@ -165,7 +163,7 @@ public final class JkJavaCompiler<T> {
         List<String> folders = new LinkedList<>();
         List<String> files = new LinkedList<>();
         for (Path path : paths) {
-            Path relPath = path.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(path) : path;
+            Path relPath = JkUtilsPath.relativizeFromWorkingDir(path);
             if (Files.isDirectory(path)) {
                 folders.add(relPath.toString());
             } else {

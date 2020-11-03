@@ -4,6 +4,7 @@ import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGInputStream;
@@ -21,7 +22,6 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,8 +90,8 @@ final class BcGpgDoer implements JkInternalGpgDoer {
     public void sign(Path fileToSign, Path secringFile, String keyName, Path signatureFile, char[] pass,
                             boolean armor) {
         JkLog.info("Sign file %s using secretkey file %s and key name '%s'.",
-                Paths.get("").toAbsolutePath().relativize(fileToSign),
-                Paths.get("").toAbsolutePath().relativize(secringFile),
+                JkUtilsPath.relativizeFromWorkingDir(fileToSign),
+                JkUtilsPath.relativizeFromWorkingDir(secringFile),
                 keyName);
         JkUtilsAssert.argument(Files.exists(fileToSign), fileToSign + " not found.");
         JkUtilsAssert.argument(Files.exists(secringFile), secringFile + " not found.");

@@ -8,7 +8,6 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
@@ -195,7 +194,7 @@ public final class JkTestSelection<T> implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return "testClassRoots=" + testClassRoots.relativizedTo(Paths.get("").toAbsolutePath()) +
+        return "testClassRoots=" + testClassRoots.relativizeFromWorkingDir() +
                 ", includePatterns=" + includePatterns +
                 ", excludePatterns=" + excludePatterns +
                 ", includeTags=" + includeTags +

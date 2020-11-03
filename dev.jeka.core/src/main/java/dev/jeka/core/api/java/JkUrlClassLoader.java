@@ -107,7 +107,7 @@ public final class JkUrlClassLoader {
     /**
      * Creates a <code>JkClassLoader</code>, child of this one and having the specified entries.
      */
-    public JkUrlClassLoader getChild(Iterable<Path> extraEntries) {
+    public JkUrlClassLoader createChild(Iterable<Path> extraEntries) {
         final Iterable<Path> paths = JkUtilsPath.disambiguate(extraEntries);
         return new JkUrlClassLoader(new URLClassLoader(toUrl(paths), this.delegate));
     }

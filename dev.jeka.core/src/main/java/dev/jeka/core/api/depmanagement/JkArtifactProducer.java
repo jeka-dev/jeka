@@ -1,10 +1,10 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 
@@ -70,8 +70,8 @@ public interface JkArtifactProducer extends JkArtifactLocator {
             if (!Files.exists(path)) {
                 makeArtifact(artifactFileId);
             } else {
-                Path resultFile = Paths.get("").toAbsolutePath().relativize(path);
-                JkLog.info("Making artifact file " + resultFile + " ... Skip : already exist.");
+                JkLog.info("Making artifact file " + JkUtilsPath.relativizeFromWorkingDir(path)
+                        + " ... Skip : already exist.");
             }
         }
     }

@@ -153,9 +153,9 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
      * Returns an identical path sequence but replacing relative paths with absolute paths resolved from the
      * specified base directory.
      */
-    public JkPathSequence relativizedTo(Path baseDir) {
+    public JkPathSequence relativizeFromWorkingDir() {
         return JkPathSequence.of(entries.stream()
-                .map(path -> baseDir.relativize(path))
+                .map(JkUtilsPath::relativizeFromWorkingDir)
                 .collect(Collectors.toList()));
     }
 

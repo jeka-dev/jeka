@@ -139,7 +139,7 @@ public final class JkResourceProcessor<T> {
                 }
             });
             JkLog.info("%s processed from %s.", JkUtilsString.plurialize(count.get(), "file"),
-                    Paths.get("").toAbsolutePath().relativize(resourceTree.getRoot()));
+                    JkUtilsPath.relativizeFromWorkingDir(resourceTree.getRoot()));
         }
         JkLog.endTask();
     }
