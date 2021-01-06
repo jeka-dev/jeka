@@ -1,9 +1,24 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkInfo;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Plugin instances are owned by a <code>JkCommandSet</code> instance. The relationship is bidirectional :
@@ -26,17 +41,7 @@ public abstract class JkPlugin {
      */
     protected JkPlugin(JkCommandSet commandSet) {
         this.commandSet = commandSet;
-        if (getLowestJekaCompatibleVersion() != null && JkInfo.getJekaVersion() != null) {
-            JkVersion runningJekaVersion = JkVersion.of(JkInfo.getJekaVersion());
-            JkVersion minVersion = JkVersion.of(getLowestJekaCompatibleVersion());
-            if (runningJekaVersion.isSnapshot()) {
-                JkLog.warn("You are not running a release Jeka version. Plugin " + this +
-                        " which is compatible with Jeka version " + minVersion + " or greater may not work properly.");
-            } else if (runningJekaVersion.compareTo(minVersion) < 0) {
-                JkLog.warn("You are running Jeka version " + runningJekaVersion + " but " + this
-                        + " plugin is supposed to work with " + minVersion + " or higher. It may not work properly." );
-            }
-        }
+        checkCompatibility();;
     }
 
     @JkDoc("Displays help about this plugin.")
@@ -55,6 +60,27 @@ public abstract class JkPlugin {
      * running Jeka version is lower then a warning log will be emitted.
      */
     protected String getLowestJekaCompatibleVersion() {
+        return null;
+    }
+
+    /**
+     * When publishing a plugin, authors can not guess which future version of Jeka will break compatibility.
+     * To keep track of breaking change, a register can be maintained and be accessible at the returned url.
+     * <p>
+     * The register is expected to be a simple flat file.
+     * Each row is structured as <code>pluginVersion : jekaVersion</code>.
+     * <p>
+     * The example below means that :<ul>
+     *     <li>Every plugin version equal or greater than 1.2.1.RELEASE is incompatible with any version of jeka equals or greater than 0.9.1.RELEASE</li>
+     *     <li>And every plugin version equal or greater than 1.3.0.RELEASE is incompatible with any version of jeka equals or greater than 0.9.5.M1</li>
+     * </ul>
+     *
+     * <pre><code>
+     *     1.2.1.RELEASE : 0.9.1.RELEASE
+     *     1.3.0.RELEASE : 0.9.5.M1
+     * </code></pre>
+     */
+    protected String getBreakingVersionRegisterUrl() {
         return null;
     }
 
@@ -82,4 +108,134 @@ public abstract class JkPlugin {
     public String toString() {
         return this.getClass().getName();
     }
+
+    private void checkCompatibility() {
+
+        // Check Jeka version is not too low
+        JkVersion jekaVersion = JkVersion.of(JkInfo.getJekaVersion());
+        if (getLowestJekaCompatibleVersion() != null && !jekaVersion.isUnspecified()) {
+            JkVersion minVersion = JkVersion.of(getLowestJekaCompatibleVersion());
+            if (jekaVersion.isSnapshot()) {
+                JkLog.warn("You are not running a release Jeka version. Plugin " + this +
+                        " which is compatible with Jeka version " + minVersion + " or greater may not work properly.");
+            } else if (jekaVersion.compareTo(minVersion) < 0) {
+                JkLog.warn("You are running Jeka version " + jekaVersion + " but " + this
+                        + " plugin is supposed to work with " + minVersion + " or higher. It may not work properly.");
+            }
+        }
+
+        // Check Jeka version is not too high
+        if (this.getBreakingVersionRegisterUrl() == null) {
+            return;
+        }
+        JkVersion pluginVersion = JkVersion.of(
+                JkManifest.of().setManifestFromClass(this.getClass())
+                        .getMainAttribute(JkManifest.IMPLEMENTATION_VERSION));
+        if (!pluginVersion.isSnapshot() && !jekaVersion.isSnapshot()) {
+            Path cachePath = JkLocator.getJekaHomeDir().resolve("cache")
+                    .resolve(this.getClass().getName() + "-compatibility.txt");
+
+            // Read cache
+            if (Files.exists(cachePath)) {
+                List<String> lines = JkUtilsPath.readAllLines(cachePath);
+                for (String line : lines) {
+                    String[] items = line.split(":");
+                    if (items.length <=2) {
+                        continue;
+                    }
+                    JkVersion plugin = JkVersion.of(items[0].trim());
+                    JkVersion jeka = JkVersion.of(items[1].trim());
+
+                    // found in cache
+                    if (pluginVersion.getValue().equals(plugin) && jekaVersion.getValue().equals(jeka)) {
+                        if (items.length > 2) {
+                            String breakingVersion = items[3].trim();
+                            logJekaBreakingVersion(jekaVersion, pluginVersion, breakingVersion);
+                            return;
+                        }
+                    }
+                }
+
+                // Not found in cache
+                try {
+                    CompatibilityBreak compatibilityBreak = CompatibilityBreak.of(this.getBreakingVersionRegisterUrl());
+                    JkVersion breakingVersion = compatibilityBreak.getBreakingJekaVersion(pluginVersion, jekaVersion);
+                    if (breakingVersion != null) {
+                        logJekaBreakingVersion(jekaVersion, pluginVersion, breakingVersion.getValue());
+                    }
+
+                    // Store in cache
+                    String line = pluginVersion.getValue() + " : " + jekaVersion;
+                    if (breakingVersion != null) {
+                        line = line + " : " + breakingVersion;
+                    }
+                    JkUtilsPath.write(cachePath, line.getBytes(Charset.forName("UTF-8")), StandardOpenOption.APPEND);
+                } catch (Exception e) {
+                    JkLog.warn("Unable to fetch url " + this.getBreakingVersionRegisterUrl());
+                    JkLog.warn(e.getMessage());
+                    JkLog.warn(this.getClass().getName() + " version compatibility won't be checked");
+                    return;
+                }
+
+            }
+        }
+    }
+
+    private void logJekaBreakingVersion(JkVersion jekaVersion, JkVersion pluginVersion, String breakingVersion) {
+        JkLog.warn("You are running Jeka version " + jekaVersion + " but plugin " + this.getClass().getName()
+                + " version " + pluginVersion + " is know to not work with jeka version " + breakingVersion
+                + " higher.");
+        JkLog.warn("Please use a Jeka version lower than " + breakingVersion + " or a higher plugin version.");
+    }
+
+    static class CompatibilityBreak {
+
+        private final Map<JkVersion, JkVersion> versionMap;
+
+        private CompatibilityBreak(Map<JkVersion, JkVersion> versionMap) {
+            this.versionMap = versionMap;
+        }
+
+        static CompatibilityBreak of(String url) {
+            try (InputStream is = JkUtilsIO.inputStream(new URL(url))){
+                return of(is);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        static CompatibilityBreak of(InputStream inputStream) {
+            List<String> lines = JkUtilsIO.readAsLines(inputStream);
+            Map<JkVersion, JkVersion> versionMap = new LinkedHashMap<>();
+            for (String line : lines) {
+                String[] items = line.split(":");
+                if (items.length != 2) {
+                    continue;
+                }
+                JkVersion pluginVersion = JkVersion.of(items[0].trim());
+                JkVersion jekaVersion = JkVersion.of(items[1].trim());
+                versionMap.put(pluginVersion, jekaVersion);
+            }
+            return new CompatibilityBreak(versionMap);
+        }
+
+        JkVersion getBreakingJekaVersion(JkVersion pluginVersion, JkVersion jekaVersion) {
+            JkVersion result = null;
+            for (Map.Entry<JkVersion, JkVersion> entry : this.versionMap.entrySet()) {
+                if (pluginVersion.compareTo(entry.getKey()) > 0) {
+                    continue;
+                }
+                if (jekaVersion.compareTo(entry.getValue()) < 0) {
+                    continue;
+                }
+                if (result == null) {
+                    result = entry.getValue();
+                } else if (entry.getValue().compareTo(result) < 0) {
+                    result = entry.getValue();
+                }
+            }
+            return result;
+        }
+    }
+
 }

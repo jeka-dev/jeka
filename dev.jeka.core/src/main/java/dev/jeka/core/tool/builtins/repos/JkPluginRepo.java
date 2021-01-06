@@ -82,20 +82,21 @@ public class JkPluginRepo extends JkPlugin {
         StringBuilder sb = new StringBuilder();
         sb.append("Download repository : \n");
         JkRepo download = downloadRepository();
-        sb.append("\n  url : " + download.getUrl());
+        sb.append("  url : " + download.getUrl() + "\n");
         if (download.getCredentials() != null) {
             String downloadPwd = JkUtilsString.isBlank(download.getCredentials().getPassword()) ? ""
                     : downloadPassword.substring(0, 1) + "*******";
-            sb.append("\n  username : " + download.getCredentials().getUserName())
+            sb.append("  username : " + download.getCredentials().getUserName())
                     .append("\n  password : " + downloadPwd);
         }
         sb.append("\n").append("Publish repository : \n");
         JkRepo publish = publishRepository();
-        sb.append("\n  url : " + publish.getUrl());
+        sb.append("  url : " + publish.getUrl() + "\n");
         if (publish.getCredentials() != null) {
             String publishPwd = JkUtilsString.isBlank(publish.getCredentials().getPassword()) ? ""
                     : publishPassword.substring(0, 1) + "*******";
-            sb.append("\n  username : " + publish.getCredentials().getUserName()).append("\n  password : " + publishPwd);
+            sb.append("  username : " + publish.getCredentials().getUserName()).append("\n  password : " + publishPwd)
+                .append("\n");
         }
         for (Map.Entry<String, String> entry : JkRepoConfigOptionLoader.allRepositoryOptions().entrySet()) {
             sb.append("\n" + entry.getKey() + " : ").append(entry.getValue());

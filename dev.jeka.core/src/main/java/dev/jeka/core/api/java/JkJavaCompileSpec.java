@@ -192,8 +192,7 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
     // ------------------ classpath --------------------------------
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified
-     * classpath.
+     * Set the compiler classpath with the specified files
      */
     public JkJavaCompileSpec<T> setClasspath(Iterable<Path> files) {
         final String classpath = JkPathSequence.of(files).toString();

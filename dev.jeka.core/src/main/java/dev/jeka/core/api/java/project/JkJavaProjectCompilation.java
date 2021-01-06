@@ -59,9 +59,9 @@ public class JkJavaProjectCompilation<T> {
 
     private Supplier<JkJavaCompileSpec> compileSpecSupplier;
 
-    private JkJavaVersion javaVersion;
+    private JkJavaVersion javaVersion = DEFAULT_JAVA_VERSION;
 
-    private String sourceEncoding;
+    private String sourceEncoding = DEFAULT_ENCODING;
 
     private JkJavaProjectCompilation(JkJavaProjectJarProduction projectProduction, String scope, T parent) {
         __ = parent;
@@ -100,10 +100,6 @@ public class JkJavaProjectCompilation<T> {
     public JkJavaProjectCompilation apply(Consumer<JkJavaProjectCompilation> consumer) {
         consumer.accept(this);
         return this;
-    }
-
-    void reset() {
-        done = false;
     }
 
     public JkCompileLayout<JkJavaProjectCompilation<T>> getLayout() {
@@ -196,7 +192,7 @@ public class JkJavaProjectCompilation<T> {
      * Returns encoding to use to read Java source files
      */
     public String getSourceEncoding() {
-        return getComputedCompileSpec().getEncoding();
+        return sourceEncoding;
     }
 
     /**
@@ -233,7 +229,7 @@ public class JkJavaProjectCompilation<T> {
      * Gets the Java version used as source and target version
      */
     public JkJavaVersion getJavaVersion() {
-        return getComputedCompileSpec().getSourceVersion();
+        return javaVersion;
     }
 
     /**
@@ -244,11 +240,7 @@ public class JkJavaProjectCompilation<T> {
         return this;
     }
 
-    /**
-     * Computes and returns the compile specification to pass to Java computer. The returned result is created
-     * at each invokation and modify it has no side effect.
-     */
-    public JkJavaCompileSpec getComputedCompileSpec() {
+    private JkJavaCompileSpec getComputedCompileSpec() {
         return compileSpecSupplier.get();
     }
 

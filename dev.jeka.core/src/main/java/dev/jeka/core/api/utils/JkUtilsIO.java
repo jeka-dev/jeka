@@ -1,6 +1,7 @@
 package dev.jeka.core.api.utils;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +39,14 @@ public final class JkUtilsIO {
                 // Do nothing
             }
         };
+    }
+
+    public static URL toUrl(String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
