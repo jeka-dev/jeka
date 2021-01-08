@@ -1,6 +1,7 @@
 # 0.9.0.M13 Ongoing
 * Use same version comparator as Maven
 * Clean Gpg Plugin
+* Plugin version compatibility check Experimental
 
 # 0.9.0.M11
 * Bug fixes related to JDK11+
