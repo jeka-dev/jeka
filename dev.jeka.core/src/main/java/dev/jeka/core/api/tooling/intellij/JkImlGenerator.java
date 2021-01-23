@@ -49,7 +49,7 @@ public final class JkImlGenerator {
     private JkDependencySet defDependencies;
 
     /** Can be empty but not null */
-    private Iterable<String> extraJekaModules = JkUtilsIterable.listOf();
+    private Iterable<String> extraJekaModules = Collections.emptyList();
 
     private boolean forceJdkVersion;
 
@@ -62,7 +62,7 @@ public final class JkImlGenerator {
     private final Set<String> processedLibEntries = new HashSet<>();
 
     // Keep trace of already processed module entries to avoid duplicates
-    private final Set<String> processedModueEntries = new HashSet<>();
+    private final Set<String> processedModuleEntries = new HashSet<>();
 
     private XMLStreamWriter writer;
 
@@ -258,12 +258,11 @@ public final class JkImlGenerator {
         return false;
     }
 
-    private void writeExtraJekaLodules(Iterable<String> moduleNames)
-            throws XMLStreamException {
+    private void writeExtraJekaLodules(Iterable<String> moduleNames) throws XMLStreamException {
         for (final String moduleName : moduleNames) {
-            if (!processedModueEntries.contains(moduleName)) {
+            if (!processedModuleEntries.contains(moduleName)) {
                 writeOrderEntryForModule(moduleName, "TEST", true);
-                processedModueEntries.add(moduleName);
+                processedModuleEntries.add(moduleName);
             }
         }
     }
@@ -441,10 +440,10 @@ public final class JkImlGenerator {
     }
 
     private void writeOrderEntryForModule(String ideaModuleName, String scope, boolean forJeka) throws XMLStreamException {
-        if (processedModueEntries.contains(ideaModuleName)) {
+        if (processedModuleEntries.contains(ideaModuleName)) {
             return;
         }
-        processedModueEntries.add(ideaModuleName);
+        processedModuleEntries.add(ideaModuleName);
         writer.writeCharacters(T2);
         writer.writeEmptyElement("orderEntry");
         writer.writeAttribute("type", "module");

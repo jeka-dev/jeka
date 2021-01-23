@@ -6,6 +6,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 
 import java.nio.file.Paths;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -22,6 +23,16 @@ public class JkJavaProjectSimpleFacade {
 
     public JkJavaProjectSimpleFacade setJavaVersion(JkJavaVersion version) {
         project.getConstruction().getCompilation().setJavaVersion(version);
+        return this;
+    }
+
+    public JkJavaProjectSimpleFacade applyOnProject(Consumer<JkJavaProject> projectConsumer) {
+        project.apply(projectConsumer);
+        return this;
+    }
+
+    public JkJavaProjectSimpleFacade apply(Consumer<JkJavaProjectSimpleFacade> facadeConsumer) {
+        facadeConsumer.accept(this);
         return this;
     }
 

@@ -104,7 +104,7 @@ public class JkCommandSet {
                 JkLog.error("Plugin " + plugin.name() + " has caused build instantiation failure.");
                 throw e;
             }
-            JkLog.startTask("Plugin " + plugin.name() + " activated with options " + HelpDisplayer.optionValues(defs));
+            JkLog.info("Plugin " + plugin.name() + " activated with options " + HelpDisplayer.optionValues(defs));
         }
 
         // Extra run configuration

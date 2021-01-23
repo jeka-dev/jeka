@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,14 +67,15 @@ public final class JkPluginIntellij extends JkPlugin {
         }
         generator.setDefDependencies(defDependencies);
         generator.setDefDependencyResolver(commands.getDefDependencyResolver());
-        final List<String> commandModuleDeps = commands.getImportedCommandSets().getImportedCommandRoots().stream()
-                .map(path -> path.getFileName().toString())
-                .collect(Collectors.toList());
+        List<String> commandModuleDeps = new LinkedList<>();
         if (!JkUtilsString.isBlank(this.imlJekaExtraModules)) {
             for (String module : JkUtilsString.splitTrimmed(this.imlJekaExtraModules, ",")) {
                 commandModuleDeps.add(module);
             }
         }
+        commands.getImportedCommandSets().getImportedCommandRoots().stream()
+                .map(path -> path.getFileName().toString())
+                .forEach(commandModuleDeps::add);
         generator.setExtraJekaModules(commandModuleDeps);
         Path basePath = commands.getBaseDir();
         if (commands.getPlugins().hasLoaded(JkPluginJava.class)) {
