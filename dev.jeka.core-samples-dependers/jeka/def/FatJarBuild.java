@@ -23,11 +23,10 @@ public class FatJarBuild extends JkCommandSet {
         java.getProject()
             .getPublication()
                 .getArtifactProducer()
-                    .putMainArtifact(java.getProject().getJarProduction()::createFatJar).__.__
-            .getJarProduction()
-                .getDependencyManagement()
-                    .addDependencies(JkDependencySet.of()
-                            .and(sampleBuild.java.getProject().toDependency()))
+                    .putMainArtifact(java.getProject().getConstruction()::createFatJar).__.__
+            .simpleFacade()
+                .addDependencies(JkDependencySet.of()
+                    .and(sampleBuild.java.getProject().toDependency()))
         ;
     }
    

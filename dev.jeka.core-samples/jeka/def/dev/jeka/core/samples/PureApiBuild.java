@@ -15,7 +15,7 @@ public class PureApiBuild extends JkCommandSet {
         JkJavaProject javaProject = JkJavaProject.of().setBaseDir(this.getBaseDir());
         javaProject.setOutputDir("jeka/output/alt-output");
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkScope.TEST);
-        javaProject.getJarProduction().getDependencyManagement().addDependencies(deps);
+        javaProject.getConstruction().getDependencyManagement().addDependencies(deps);
         javaProject.getPublication().getArtifactProducer().makeAllArtifacts();
     }
 
@@ -28,7 +28,7 @@ public class PureApiBuild extends JkCommandSet {
 
         JkJavaProject fooProject = JkJavaProject.of()
             .setBaseDir(this.getBaseDir().resolve("foo"))
-            .getJarProduction()
+            .getConstruction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and("junit:junit", JkScope.TEST)
@@ -38,14 +38,14 @@ public class PureApiBuild extends JkCommandSet {
 
         JkJavaProject barProject = JkJavaProject.of()
             .setBaseDir(this.getBaseDir().resolve("bar"))
-            .getJarProduction()
+            .getConstruction()
                 .getDependencyManagement().addDependencies(JkDependencySet.of()
                     .and("junit:junit", JkScope.TEST)
                     .and("com.sun.jersey:jersey-server:1.19.4")
                     .and(fooProject.toDependency())).__.__;
 
         barProject.getPublication().getArtifactProducer()
-            .putMainArtifact(barProject.getJarProduction()::createFatJar) // Produced jar will embed dependencies
+            .putMainArtifact(barProject.getConstruction()::createFatJar) // Produced jar will embed dependencies
             .makeAllArtifacts();
     }
 

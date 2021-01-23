@@ -23,7 +23,7 @@ public class JkJavaProjectTest {
         Path base = top.resolve("base");
         JkJavaProject baseProject = JkJavaProject.of()
             .setBaseDir(base)
-            .getJarProduction().getDependencyManagement()
+            .getConstruction().getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__
                 .getCompilation()
@@ -36,7 +36,7 @@ public class JkJavaProjectTest {
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = JkJavaProject.of()
             .setBaseDir(core)
-            .getJarProduction()
+            .getConstruction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
                 .getCompilation()
@@ -48,7 +48,7 @@ public class JkJavaProjectTest {
         final Path desktop = top.resolve("desktop");
         final JkJavaProject desktopProject = JkJavaProject.of()
             .setBaseDir(desktop)
-            .getJarProduction()
+            .getConstruction()
             .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                     .and(coreProject.toDependency())).__

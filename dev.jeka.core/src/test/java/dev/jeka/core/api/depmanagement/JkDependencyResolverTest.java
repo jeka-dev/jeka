@@ -36,19 +36,19 @@ public class JkDependencyResolverTest {
 
         JkJavaProject baseProject = JkJavaProject.of()
             .setBaseDir(root.resolve("base"))
-            .getJarProduction()
+            .getConstruction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and(JkPopularModules.GUAVA, TestConstants.GUAVA_VERSION)).__.__;;
 
         JkJavaProject coreProject = JkJavaProject.of()
             .setBaseDir(root.resolve("core"))
-            .getJarProduction()
+            .getConstruction()
                 .getDependencyManagement()
                     .addDependencies(JkDependencySet.of()
                         .and(baseProject.toDependency())).__.__;
 
-        JkResolveResult resolveResult = coreProject.getJarProduction().getDependencyManagement().fetchDependencies();
+        JkResolveResult resolveResult = coreProject.getConstruction().getDependencyManagement().fetchDependencies();
 
         Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size()); // base dir and guava
         JkDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);

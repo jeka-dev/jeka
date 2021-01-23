@@ -34,14 +34,12 @@ public class WarPluginBuild extends JkCommandSet {
 
     @Override
     protected void setup() {
-       java.getProject()
-           .getJarProduction()
-               .getDependencyManagement()
-                    .addDependencies(JkDependencySet.of()
+       java.getProject().simpleFacade()
+               .addDependencies(JkDependencySet.of()
                        .and("com.google.guava:guava:21.0")
-                       .and("javax.servlet:javax.servlet-api:jar:4.0.1", PROVIDED)).__
+                       .and("javax.servlet:javax.servlet-api:jar:4.0.1", PROVIDED))
+               .setJavaVersion(JkJavaVersion.V8).getProject().getConstruction()
                .getCompilation()
-                    .setJavaVersion(JkJavaVersion.V8)
                     .getLayout()
                         .emptySources().addSource("src/main/javaweb").__.__
                .getTesting()

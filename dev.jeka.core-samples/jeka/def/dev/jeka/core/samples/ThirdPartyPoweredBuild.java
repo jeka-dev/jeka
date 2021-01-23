@@ -30,7 +30,7 @@ public class ThirdPartyPoweredBuild extends JkCommandSet {
     
     @Override
     protected void setup() {
-        javaPlugin.getProject().getJarProduction()
+        javaPlugin.getProject().getConstruction()
             .getDependencyManagement()
                 .addDependencies(dependencies());
     }

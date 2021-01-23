@@ -42,6 +42,9 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
     public String compilerExtraArgs;
 
+    @JkDoc("Scaffolded code won't use the simple facade over JkJavaProject")
+    public boolean noFacade;
+
     // ----------------------------------------------------------------------------------
 
     private final JkPluginRepo repoPlugin;
@@ -57,11 +60,11 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
         // Pre-configure JkJavaProject instance
         this.project = JkJavaProject.of().setBaseDir(this.getCommandSet().getBaseDir());
-        this.project.getJarProduction().getDependencyManagement().addDependencies(
+        this.project.getConstruction().getDependencyManagement().addDependencies(
                 JkDependencySet.ofLocal(commandSet.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
         final Path path = commandSet.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
-            this.project.getJarProduction().getDependencyManagement().addDependencies(JkDependencySet.ofTextDescription(path));
+            this.project.getConstruction().getDependencyManagement().addDependencies(JkDependencySet.ofTextDescription(path));
         }
     }
 
@@ -78,15 +81,15 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void setupDefaultProject() {
-        if (project.getJarProduction().getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
-            project.getJarProduction().getCompilation().getCompiler().setForkingProcess(compilerProcess());
+        if (project.getConstruction().getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
+            project.getConstruction().getCompilation().getCompiler().setForkingProcess(compilerProcess());
         }
         if (project.getPublication().getPublishRepos() == null
                 || project.getPublication().getPublishRepos().getRepoList().isEmpty()) {
             project.getPublication().addRepos(repoPlugin.publishRepository());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
-        project.getJarProduction().getDependencyManagement().getResolver().addRepos(downloadRepo);
+        project.getConstruction().getDependencyManagement().getResolver().addRepos(downloadRepo);
         JkPluginGpg pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginGpg.class);
 
         // Use signer from GPG plugin as default
@@ -111,7 +114,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             Consumer<Path> javadocJar = project.getDocumentation()::createJavadocJar;
             artifactProducer.putArtifact(javadoc, javadocJar);
         }
-        JkTestProcessor testProcessor = project.getJarProduction().getTesting().getTestProcessor();
+        JkTestProcessor testProcessor = project.getConstruction().getTesting().getTestProcessor();
         if (test.fork != null && test.fork && testProcessor.getForkingProcess() == null) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.test.jvmOptions);
             testProcessor.setForkingProcess(javaProcess);
@@ -119,22 +122,23 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             testProcessor.setForkingProcess(false);
         }
         if (test.skip != null) {
-            project.getJarProduction().getTesting().setSkipped(test.skip);
+            project.getConstruction().getTesting().setSkipped(test.skip);
         }
         if (this.compilerExtraArgs != null) {
-            project.getJarProduction().getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+            project.getConstruction().getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
     }
 
     private void setupScaffolder() {
-        String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
+        String snippet = noFacade ? "buildclass.snippet" : "buildclassfacade.snippet";
+        String template = JkUtilsIO.read(JkPluginJava.class.getResource(snippet));
         String baseDirName = getCommandSet().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
-        JkCompileLayout prodLayout = project.getJarProduction().getCompilation().getLayout();
+        JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
         prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        JkCompileLayout testLayout = project.getJarProduction().getTesting().getCompilation().getLayout();
+        JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
         testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
         scaffoldPlugin.getScaffolder().setCommandClassCode(code);
@@ -163,12 +167,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
-        project.getJarProduction().getCompilation().run();
+        project.getConstruction().getCompilation().run();
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
     public void test() {
-        project.getJarProduction().getTesting().run();
+        project.getConstruction().getTesting().run();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
@@ -184,10 +188,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
         JkLog.info("Declared dependencies : ");
-        project.getJarProduction().getDependencyManagement().getDependencies().toResolvedModuleVersions().toList()
+        project.getConstruction().getDependencyManagement().getDependencies().toResolvedModuleVersions().toList()
                 .forEach(dep -> JkLog.info(dep.toString()));
         JkLog.info("Resolved to : ");
-        final JkResolveResult resolveResult = this.getProject().getJarProduction().getDependencyManagement().fetchDependencies();
+        final JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyManagement().fetchDependencies();
         final JkDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
     }
@@ -211,7 +215,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @JkDoc("Fetches project dependencies in cache.")
     public void refreshDeps() {
-        project.getJarProduction().getDependencyManagement().fetchDependencies();
+        project.getConstruction().getDependencyManagement().fetchDependencies();
     }
 
     @Override
@@ -221,7 +225,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     private JkProcess compilerProcess() {
         final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
-        JkJavaProjectCompilation compilation = project.getJarProduction().getCompilation();
+        JkJavaProjectCompilation compilation = project.getConstruction().getCompilation();
         return JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
                 compilation.getJavaVersion().get());
     }

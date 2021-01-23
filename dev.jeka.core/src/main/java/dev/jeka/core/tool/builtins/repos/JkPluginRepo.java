@@ -101,7 +101,6 @@ public class JkPluginRepo extends JkPlugin {
         for (Map.Entry<String, String> entry : JkRepoConfigOptionLoader.allRepositoryOptions().entrySet()) {
             sb.append("\n" + entry.getKey() + " : ").append(entry.getValue());
         }
-
         JkLog.info(sb.toString());
     }
 

@@ -98,14 +98,13 @@ public class JkCommandSet {
 
         for (JkPlugin plugin : new LinkedList<>(plugins.getLoadedPlugins())) {
             List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
-            JkLog.startTask("Activating plugin " + plugin.name() + " with options " + HelpDisplayer.optionValues(defs));
             try {
                 plugin.activate();
             } catch (RuntimeException e) {
                 JkLog.error("Plugin " + plugin.name() + " has caused build instantiation failure.");
                 throw e;
             }
-            JkLog.endTask();
+            JkLog.startTask("Plugin " + plugin.name() + " activated with options " + HelpDisplayer.optionValues(defs));
         }
 
         // Extra run configuration

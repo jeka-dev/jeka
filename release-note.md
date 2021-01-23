@@ -1,7 +1,11 @@
 # 0.9.0.M13 Ongoing
+* Add a simple facade over JkJavaProject to address common case conveniently
+* Renaming JkJavaProjectJarProduction to JkJavaProjectConstruction
 * Use same version comparator as Maven
 * Clean Gpg Plugin
 * Plugin version compatibility check Experimental
+* Can make public field / property in JkCommandSet/JkPlugin not appear has option, using @JkDoc(hide = true)
+
 
 # 0.9.0.M11
 * Bug fixes related to JDK11+

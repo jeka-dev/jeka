@@ -28,7 +28,7 @@ public class JavaPluginBuild extends JkCommandSet {
     @Override
     protected void setup() {
        java.getProject()
-           .getJarProduction()
+           .getConstruction()
                .getDependencyManagement()
                    .getResolver()
                         .getParams()

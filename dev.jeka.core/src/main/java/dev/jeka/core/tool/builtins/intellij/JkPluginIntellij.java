@@ -2,7 +2,6 @@ package dev.jeka.core.tool.builtins.intellij;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
@@ -36,8 +35,11 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("If true, dependency to Jeka jar will be excluded (assuming it will be got from a module dependencies")
     public boolean imlSkipJeka;
 
-    @JkDoc("Comma separated modules to be added as dependencies with 'test' scope")
-    public String imlTestExtraModules;
+    @JkDoc("Comma separated modules to be added as dependencies for jeka classpath")
+    public String imlJekaExtraModules;
+
+    @JkDoc("Override JEKA_HOME environment variable")
+    public Path jekaHome;
 
     protected JkPluginIntellij(JkCommandSet run) {
         super(run);
@@ -56,6 +58,7 @@ public final class JkPluginIntellij extends JkPlugin {
         }
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
         generator.setUseVarPath(useVarPath);
+        generator.setExplicitJekaHome(jekaHome);
         JkDependencySet defDependencies = commands.getDefDependencies();
         if (imlSkipJeka) {
             defDependencies = defDependencies.minusFiles(
@@ -63,18 +66,18 @@ public final class JkPluginIntellij extends JkPlugin {
         }
         generator.setDefDependencies(defDependencies);
         generator.setDefDependencyResolver(commands.getDefDependencyResolver());
-        final List<String> testModuleDeps = commands.getImportedCommandSets().getImportedCommandRoots().stream()
+        final List<String> commandModuleDeps = commands.getImportedCommandSets().getImportedCommandRoots().stream()
                 .map(path -> path.getFileName().toString())
                 .collect(Collectors.toList());
-        if (!JkUtilsString.isBlank(this.imlTestExtraModules)) {
-            for (String module : JkUtilsString.splitTrimmed(this.imlTestExtraModules, ",")) {
-                testModuleDeps.add(module);
+        if (!JkUtilsString.isBlank(this.imlJekaExtraModules)) {
+            for (String module : JkUtilsString.splitTrimmed(this.imlJekaExtraModules, ",")) {
+                commandModuleDeps.add(module);
             }
         }
-        generator.setImportedTestModules(testModuleDeps);
+        generator.setExtraJekaModules(commandModuleDeps);
         Path basePath = commands.getBaseDir();
         if (commands.getPlugins().hasLoaded(JkPluginJava.class)) {
-            JkJavaProject project = commands.getPlugins().get(JkPluginJava.class).getProject();
+            commands.getPlugins().get(JkPluginJava.class);
             generator.setForceJdkVersion(forceJdkVersion);
         }
         final String xml = generator.generate();

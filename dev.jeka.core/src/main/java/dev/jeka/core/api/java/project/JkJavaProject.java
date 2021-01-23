@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 /**
  * A Java project consists in 3 parts : <ul>
- *    <li>{@link JkJavaProjectJarProduction} : responsible to compile, tests and make jars</li>
+ *    <li>{@link JkJavaProjectConstruction} : responsible to compile, tests and make jars</li>
  *    <li>{@link JkJavaProjectDocumentation} : responsible to creates javadoc, sources jar and others</li>
  *    <li>{@link JkJavaProjectPublication} : responsible to publish the artifacts on binary repositories (Maven or Ivy)</li>
  * </ul>
@@ -27,13 +27,13 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
 
     private final JkJavaProjectDocumentation documentation;
 
-    private final JkJavaProjectJarProduction jarProduction;
+    private final JkJavaProjectConstruction construction;
 
     private final JkJavaProjectPublication publication;
 
     private JkJavaProject() {
         documentation = new JkJavaProjectDocumentation( this);
-        jarProduction = new JkJavaProjectJarProduction(this);
+        construction = new JkJavaProjectConstruction(this);
         publication = new JkJavaProjectPublication(this);
     }
 
@@ -44,6 +44,10 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     public JkJavaProject apply(Consumer<JkJavaProject> projectConsumer) {
         projectConsumer.accept(this);
         return this;
+    }
+
+    public JkJavaProjectSimpleFacade simpleFacade() {
+        return new JkJavaProjectSimpleFacade(this);
     }
 
     // ---------------------------- Getters / setters --------------------------------------------
@@ -72,8 +76,8 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return this;
     }
 
-    public JkJavaProjectJarProduction getJarProduction() {
-        return jarProduction;
+    public JkJavaProjectConstruction getConstruction() {
+        return construction;
     }
 
     public JkJavaProjectPublication getPublication() {
@@ -94,14 +98,14 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     public String getInfo() {
         return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
             .append("Published Module & version : " + publication.getModuleId() + ":" + publication.getVersion() + "\n")
-            .append("Production sources : " + jarProduction.getCompilation().getLayout().getInfo()).append("\n")
-            .append("Test sources : " + jarProduction.getTesting().getCompilation().getLayout().getInfo()).append("\n")
-            .append("Java Source Version : " + jarProduction.getCompilation().getJavaVersion() + "\n")
-            .append("Source Encoding : " + jarProduction.getCompilation().getSourceEncoding() + "\n")
-            .append("Source file count : " + jarProduction.getCompilation().getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
-            .append("Download Repositories : " + jarProduction.getDependencyManagement().getResolver().getRepos() + "\n")
+            .append("Production sources : " + construction.getCompilation().getLayout().getInfo()).append("\n")
+            .append("Test sources : " + construction.getTesting().getCompilation().getLayout().getInfo()).append("\n")
+            .append("Java Source Version : " + construction.getCompilation().getJavaVersion() + "\n")
+            .append("Source Encoding : " + construction.getCompilation().getSourceEncoding() + "\n")
+            .append("Source file count : " + construction.getCompilation().getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
+            .append("Download Repositories : " + construction.getDependencyManagement().getResolver().getRepos() + "\n")
             .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
-            .append("Declared Dependencies : " + jarProduction.getDependencyManagement().getDependencies().toList().size() + " elements.\n")
+            .append("Declared Dependencies : " + construction.getDependencyManagement().getDependencies().toList().size() + " elements.\n")
             .append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds())
             .toString();
     }
@@ -109,11 +113,11 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
         return JkJavaIdeSupport.of(baseDir)
-            .setSourceVersion(jarProduction.getCompilation().getJavaVersion())
-            .setProdLayout(jarProduction.getCompilation().getLayout())
-            .setTestLayout(jarProduction.getTesting().getCompilation().getLayout())
-            .setDependencies(jarProduction.getDependencyManagement().getDependencies())
-            .setDependencyResolver(jarProduction.getDependencyManagement().getResolver());
+            .setSourceVersion(construction.getCompilation().getJavaVersion())
+            .setProdLayout(construction.getCompilation().getLayout())
+            .setTestLayout(construction.getTesting().getCompilation().getLayout())
+            .setDependencies(construction.getDependencyManagement().getDependencies())
+            .setDependencyResolver(construction.getDependencyManagement().getResolver());
     }
 
     public JkLocalLibDependency toDependency() {

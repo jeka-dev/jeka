@@ -57,7 +57,7 @@ public class JkPluginGpg extends JkPlugin {
     }
 
     @JkDoc("Displays GPG settings.")
-    public void display() {
+    public void info() {
         StringBuilder sb = new StringBuilder();
         JkGpg pgp = get();
         sb.append("GPG public ring path : " + pgp.getPublicRing());

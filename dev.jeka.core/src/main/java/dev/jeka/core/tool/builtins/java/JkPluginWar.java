@@ -20,7 +20,9 @@ import java.nio.file.Path;
 /**
  * Plugin for building WAR file (Jee Web Archive).
  */
-@JkDoc("Basic plugin for building war file artifact (Java Web archive).")
+@JkDoc("Basic plugin for building war file artifact (Java Web archive). \n" +
+        "When initialized, it modifies the Java project hold by the Java plugin in order to \n" +
+        "generate the web.xml file and build an extra artifact (war).")
 @JkDocPluginDeps({JkPluginJava.class})
 public class JkPluginWar extends JkPlugin {
 
@@ -46,8 +48,8 @@ public class JkPluginWar extends JkPlugin {
             .putMainArtifact(path -> doWarFile((Path) path));
     }
 
-    public static void generateWarDir(JkJavaProject project, Path dest, Path staticResourceDir) {
-        project.getJarProduction().getCompilation().runIfNecessary();
+    private static void generateWarDir(JkJavaProject project, Path dest, Path staticResourceDir) {
+        project.getConstruction().getCompilation().runIfNecessary();
         JkPathTree root = JkPathTree.of(dest);
         JkPathTree webinf = JkPathTree.of(project.getBaseDir().resolve("src/main/webapp/WEB-INF"));
         if (!webinf.exists() || webinf.count(1, false) == 0) {
@@ -58,8 +60,8 @@ public class JkPluginWar extends JkPlugin {
         if (Files.exists(staticResourceDir)) {
             JkPathTree.of(staticResourceDir).copyTo(root.getRoot());
         }
-        JkPathTree.of(project.getJarProduction().getCompilation().getLayout().resolveClassDir()).copyTo(root.get("WEB-INF/classes"));
-        JkResolveResult resolveResult = project.getJarProduction().getDependencyManagement().fetchDependencies(JkScope.RUNTIME);
+        JkPathTree.of(project.getConstruction().getCompilation().getLayout().resolveClassDir()).copyTo(root.get("WEB-INF/classes"));
+        JkResolveResult resolveResult = project.getConstruction().getDependencyManagement().fetchDependencies(JkScope.RUNTIME);
         JkPathTree lib = root.goTo("lib");
         resolveResult.getFiles().withoutDuplicates().getEntries().forEach(path ->  lib.importFiles(path));
     }

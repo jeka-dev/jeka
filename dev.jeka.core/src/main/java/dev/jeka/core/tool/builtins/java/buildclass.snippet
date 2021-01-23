@@ -20,7 +20,7 @@ class Build extends JkCommandSet {
     @Override
     protected void setup() {
         java.getProject()
-            .getJarProduction()
+            .getConstruction()
                 .getDependencyManagement()
                 .addDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")

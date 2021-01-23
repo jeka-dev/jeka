@@ -2,10 +2,10 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkScope;
-import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.builtins.git.JkPluginGit;
 import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.sonar.JkPluginSonar;
@@ -33,6 +33,8 @@ public class SonarPluginBuild extends JkCommandSet {
 
     JkPluginSonar sonar = getPlugin(JkPluginSonar.class);
 
+    JkPluginGit git = getPlugin(JkPluginGit.class);
+
     JkPluginJacoco jacoco = getPlugin(JkPluginJacoco.class);
 
     public boolean runSonar; // a flag to run sonar or not
@@ -50,16 +52,12 @@ public class SonarPluginBuild extends JkCommandSet {
         sonar
             .setProp(JkSonar.HOST_URL, sonarEnv.url)
             .setProp(JkSonar.BRANCH, "myBranch");
-
-        java.getProject()
-            .getJarProduction()
-                .getDependencyManagement()
-                    .addDependencies(JkDependencySet.of()
-                        .and(GUAVA, "18.0")
-                        .and(JUNIT, "4.13", JkScope.TEST)).__.__
-            .getPublication()
-                .setModuleId("org.jerkar:samples")
-                .setVersionSupplier(JkGitWrapper.of(getBaseDir())::getJkVersionFromTags);
+        java.getProject().simpleFacade()
+            .addDependencies(JkDependencySet.of()
+                .and(GUAVA, "18.0")
+                .and(JUNIT, "4.13", JkScope.TEST))
+            .setPublishedVersion(git.getWrapper()::getVersionFromTags)
+            .setPublishedModuleId("org.jerkar:samples");
     }
 
     public void cleanPackSonar() {

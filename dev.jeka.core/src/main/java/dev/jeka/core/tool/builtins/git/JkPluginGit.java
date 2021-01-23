@@ -32,4 +32,8 @@ public class JkPluginGit extends JkPlugin {
         final String newTag = JkPrompt.ask("Enter new tag : ");
         git.withLogCommand(true).tagAndPush(newTag);
     }
+
+    public JkGitWrapper getWrapper() {
+        return git;
+    }
 }

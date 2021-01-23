@@ -23,15 +23,15 @@ import java.util.function.Consumer;
  *     <li>Part of the sources/resources may be generated</li>
  *     <li>By default, passing test suite is required to produce Jars.</li>
  * </ul>
- * Integration tests are outside of {@link JkJavaProjectJarProduction} scope.
+ * Integration tests are outside of {@link JkJavaProjectConstruction} scope.
  */
-public class JkJavaProjectJarProduction {
+public class JkJavaProjectConstruction {
 
     private final JkJavaProject project;
 
-    private final JkDependencyManagement<JkJavaProjectJarProduction> dependencyManagement;
+    private final JkDependencyManagement<JkJavaProjectConstruction> dependencyManagement;
 
-    private final JkJavaProjectCompilation<JkJavaProjectJarProduction> compilation;
+    private final JkJavaProjectCompilation<JkJavaProjectConstruction> compilation;
 
     private final JkJavaProjectTesting testing;
 
@@ -46,7 +46,7 @@ public class JkJavaProjectJarProduction {
      */
     public JkJavaProject __;
 
-    JkJavaProjectJarProduction(JkJavaProject project) {
+    JkJavaProjectConstruction(JkJavaProject project) {
         this.project = project;
         this.__ = project;
         dependencyManagement = JkDependencyManagement.ofParent(this);
@@ -55,16 +55,16 @@ public class JkJavaProjectJarProduction {
         manifest = JkManifest.ofParent(this);
     }
 
-    public JkJavaProjectJarProduction apply(Consumer<JkJavaProjectJarProduction> consumer) {
+    public JkJavaProjectConstruction apply(Consumer<JkJavaProjectConstruction> consumer) {
         consumer.accept(this);
         return this;
     }
 
-    public JkDependencyManagement<JkJavaProjectJarProduction> getDependencyManagement() {
+    public JkDependencyManagement<JkJavaProjectConstruction> getDependencyManagement() {
         return dependencyManagement;
     }
 
-    public JkJavaProjectCompilation<JkJavaProjectJarProduction> getCompilation() {
+    public JkJavaProjectCompilation<JkJavaProjectConstruction> getCompilation() {
         return compilation;
     }
 
@@ -72,7 +72,7 @@ public class JkJavaProjectJarProduction {
         return testing;
     }
 
-    public JkManifest<JkJavaProjectJarProduction> getManifest() {
+    public JkManifest<JkJavaProjectConstruction> getManifest() {
         return manifest;
     }
 
@@ -130,7 +130,7 @@ public class JkJavaProjectJarProduction {
     /**
      * File trees specified here will be added to the fat jar.
      */
-    public JkJavaProjectJarProduction setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
+    public JkJavaProjectConstruction setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;
     }
