@@ -65,14 +65,14 @@ public abstract class JkPlugin {
 
     /**
      * When publishing a plugin, authors can not guess which future version of Jeka will break compatibility.
-     * To keep track of breaking change, a register can be maintained and be accessible at the returned url.
+     * To keep track of breaking change, a registry can be maintained to be accessible at the specified url.
      * <p>
      * The register is expected to be a simple flat file.
      * Each row is structured as <code>pluginVersion : jekaVersion</code>.
      * <p>
      * The example below means that :<ul>
-     *     <li>Every plugin version equal or greater than 1.2.1.RELEASE is incompatible with any version of jeka equals or greater than 0.9.1.RELEASE</li>
-     *     <li>And every plugin version equal or greater than 1.3.0.RELEASE is incompatible with any version of jeka equals or greater than 0.9.5.M1</li>
+     *     <li>Every plugin version equal or lower than 1.2.1.RELEASE is incompatible with any version of jeka equals or greater than 0.9.1.RELEASE</li>
+     *     <li>Every plugin version equal or lower than 1.3.0.RELEASE is incompatible with any version of jeka equals or greater than 0.9.5.M1</li>
      * </ul>
      *
      * <pre><code>
@@ -80,7 +80,7 @@ public abstract class JkPlugin {
      *     1.3.0.RELEASE : 0.9.5.M1
      * </code></pre>
      */
-    protected String getBreakingVersionRegisterUrl() {
+    protected String getBreakingVersionRegistryUrl() {
         return null;
     }
 
@@ -125,7 +125,7 @@ public abstract class JkPlugin {
         }
 
         // Check Jeka version is not too high
-        if (this.getBreakingVersionRegisterUrl() == null) {
+        if (this.getBreakingVersionRegistryUrl() == null) {
             return;
         }
         JkVersion pluginVersion = JkVersion.of(
@@ -141,7 +141,7 @@ public abstract class JkPlugin {
 
         // -- Not in cache, read from url then put in cache
         if (cacheBreakingVersion == null) {
-            CompatibilityBreak compatibilityBreak = CompatibilityBreak.of(this.getBreakingVersionRegisterUrl());
+            CompatibilityBreak compatibilityBreak = CompatibilityBreak.of(this.getBreakingVersionRegistryUrl());
             String urlBreakingVersion = compatibilityBreak.getBreakingJekaVersion(pluginVersion, jekaVersion);
             if (urlBreakingVersion != null) {
                 logJekaBreakingVersion(jekaVersion, pluginVersion, urlBreakingVersion);

@@ -1,9 +1,5 @@
-package dev.jeka.core.tool.builtins.java;
-
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.testing.JkTestProcessor;
-import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkCommandSet;
 import dev.jeka.core.tool.JkInit;
@@ -27,8 +23,7 @@ class Build extends JkCommandSet {
                 .and("com.google.guava:guava:21.0")
                 .and("org.junit.jupiter:junit-jupiter:5.6.2", TEST))
 
-
-            // On ly necessary if your project si published in a binary repository.
+            // On ly necessary if your project is published in a binary repository.
             .setPublishedModuleId("your.group:your.project")
             .setPublishedVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags());  // Version inferred from Git
     }

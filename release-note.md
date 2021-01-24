@@ -1,4 +1,8 @@
-# 0.9.0.M13 Ongoing
+# 0.9.1.RELEASE
+* Buf Fix on scaffolding Java project
+* Typo fixes
+
+# 0.9.0.RELEASE
 * Add a simple facade over JkJavaProject to address common case conveniently
 * Renaming JkJavaProjectJarProduction to JkJavaProjectConstruction
 * Use same version comparator as Maven
