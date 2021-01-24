@@ -202,7 +202,7 @@ public abstract class JkPlugin {
 
         void addEntry(JkVersion pluginVersion, JkVersion jekaVersion, String breakingVersion) {
             if (!exist()) {
-                JkUtilsPath.createFile(cachePath);
+                JkUtilsPath.createFileSafely(cachePath);
             }
             String line = pluginVersion.getValue() + " : " + jekaVersion;
             if (breakingVersion != null) {
