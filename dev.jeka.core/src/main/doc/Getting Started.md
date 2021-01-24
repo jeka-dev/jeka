@@ -10,9 +10,9 @@ __[JEKA USER HOME]__ : Refers to the folder where Jeka stores caches, binary rep
 
 
 
-Thank to the wrapper feature, you don't need to install Jeka on your machine to run it... except if you are 
+Thank to the wrapper feature, normally you don't need to install Jeka on your machine to run it... except if you are 
 creating projects from scratch. 
-As it's what we are going to do in this tutorial, you need to get it properly installed. 
+As it's what we are going to do in this tutorial, you have to get it properly installed. 
 
 1. Download and unzip the lastest *core-x.x.x-distrib.zip* file found on [snapshot](https://oss.sonatype.org/content/repositories/snapshots/org/jeka/core/) or [release](https://repo1.maven.org/maven2/org/jeka/core/) repository to the directory you want to install Jeka. 
 2. Add _JEKA HOME_ (repositoty where you have unzipped the distribution) to your PATH environment. 
