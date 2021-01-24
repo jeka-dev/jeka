@@ -176,6 +176,9 @@ public abstract class JkPlugin {
         }
 
         String breakingVersion(JkVersion pluginVersion, JkVersion jekaVersion) {
+            if (!exist()) {
+                return null;
+            }
             List<String> lines = JkUtilsPath.readAllLines(cachePath);
             for (String line : lines) {
                 String[] items = line.split(":");
