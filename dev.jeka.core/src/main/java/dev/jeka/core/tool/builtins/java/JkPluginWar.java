@@ -40,7 +40,7 @@ public class JkPluginWar extends JkPlugin {
     }
 
     @Override
-    protected void init() {
+    protected void beforeSetup() {
         this.artifactProducer
             .removeArtifact(JkJavaProjectPublication.JAVADOC_ARTIFACT_ID)
             .removeArtifact(JkJavaProjectPublication.SOURCES_ARTIFACT_ID)

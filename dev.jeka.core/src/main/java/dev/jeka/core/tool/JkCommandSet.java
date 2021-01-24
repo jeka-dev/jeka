@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-
 /**
  * Base class for defining commands executable from command line.
  *
@@ -90,7 +89,7 @@ public class JkCommandSet {
     void initialise() throws Exception {
         setup();
 
-        // initialise imported project after setup to let a chance master commands to modify imported commands
+        // initialise imported projects after setup to let a chance master commands to modify imported commands
         // in the setup method.
         for (JkCommandSet jkCommandSet : importedCommandSets.getDirects()) {
             jkCommandSet.initialise();
@@ -99,7 +98,7 @@ public class JkCommandSet {
         for (JkPlugin plugin : new LinkedList<>(plugins.getLoadedPlugins())) {
             List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
             try {
-                plugin.activate();
+                plugin.afterSetup();
             } catch (RuntimeException e) {
                 JkLog.error("Plugin " + plugin.name() + " has caused build instantiation failure.");
                 throw e;
@@ -108,7 +107,7 @@ public class JkCommandSet {
         }
 
         // Extra run configuration
-        setupAfterPluginActivations();
+        postSetup();
         List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(this).optionDefs();
         JkLog.info(this.getClass().getSimpleName() + " instance initialized with options " + HelpDisplayer.optionValues(defs));
         baseDirContext(null);
@@ -139,26 +138,23 @@ public class JkCommandSet {
         return commands;
     }
 
-
     /**
-     * This method is invoked right after options has been injected into this instance. Here, You will typically
-     * configure plugins before they are activated.
+     * Configure your build and plugins here.
+     * At this point, option values has been injected and {@link JkPlugin#beforeSetup()} method invoked on all plugins.
      */
     protected void setup() throws Exception {
         // Do nothing by default
     }
 
     /**
-     * This method is called once all plugin has been activated. This method is intended to overwrite what plugin
-     * activation has setup.
+     * This method is called once {@link JkPlugin#afterSetup()} method has been invoked on all plugins.
+     * It gives a chance to the command class to override some plugin settings.
      */
-    protected void setupAfterPluginActivations() throws Exception {
+    protected void postSetup() throws Exception {
         // Do nothing by default
     }
 
-
     // -------------------------------- accessors ---------------------------------------
-
 
     /**
      * Returns the base directory tree for this project. All file/directory path are

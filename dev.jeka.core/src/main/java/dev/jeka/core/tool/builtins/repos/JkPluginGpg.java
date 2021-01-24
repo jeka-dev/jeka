@@ -35,7 +35,7 @@ public class JkPluginGpg extends JkPlugin {
         super(commands);
     }
 
-    protected void init() {
+    protected void beforeSetup() {
         Path localPub = getCommandSet().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
         Path pub = JkUtilsPath.firstExisting(publicRingPath, localPub, JkGpg.getDefaultPubring());
         if (pub == null) {

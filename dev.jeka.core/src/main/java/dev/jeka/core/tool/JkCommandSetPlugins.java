@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsThrowable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -87,10 +88,14 @@ public final class JkCommandSetPlugins {
         try {
             plugin = JkUtilsReflect.newInstance(pluginClass, JkCommandSet.class, this.holder);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error while instantiating plugin " + pluginClass, e);
+            throw new RuntimeException("Error while instantiating plugin class " + pluginClass, e);
         }
         injectOptions(plugin);
-        plugin.init();
+        try {
+            plugin.beforeSetup();
+        } catch (Exception e) {
+            throw JkUtilsThrowable.unchecked(e, "Error while initializing plugin " + plugin);
+        }
         loadedPlugins.add(plugin);
         return plugin;
     }

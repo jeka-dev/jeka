@@ -69,13 +69,13 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     @Override
-    protected void init() {
+    protected void beforeSetup() {
         setupDefaultProject();
     }
 
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
     @Override  
-    protected void activate() {
+    protected void afterSetup() {
         this.applyPostSetupOptions();
         this.setupScaffolder();
     }

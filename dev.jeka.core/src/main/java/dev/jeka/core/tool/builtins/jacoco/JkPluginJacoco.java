@@ -23,7 +23,7 @@ public class JkPluginJacoco extends JkPlugin {
     @JkDoc("Configures java plugin in order unit tests are run with Jacoco coverage tool. Result is located in [OUTPUT DIR]/"
             + OUTPUT_RELATIVE_PATH + " file.")
     @Override
-    protected void activate() {
+    protected void afterSetup() {
         JkPluginJava pluginJava = getCommandSet().getPlugins().get(JkPluginJava.class);
         final JkJavaProject project = pluginJava.getProject();
         final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutputDir().resolve

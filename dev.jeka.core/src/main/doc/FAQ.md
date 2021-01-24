@@ -9,7 +9,7 @@ folder and mention where is located the project to build.
 @Override
 protected void setup() {  // project to build lies in a sibling folder. 
       Path projectPath = this.baseDir().resolve("../myProject");   
-      java.getProject().setBaseDir(projectPath);
+      java.getProject().simpleFacade().setBaseDir(projectPath);
       ...
 ```
 
@@ -44,8 +44,7 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkDefClasspath("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 public class Build extends JkCommandSet{
-    java.getProject()_
-        .getCompilation()
+    java.getProject().getConstruction().getCompilation()
              .getCompiler().setCompilerTool(new EclipseCompiler());
 }
 ```

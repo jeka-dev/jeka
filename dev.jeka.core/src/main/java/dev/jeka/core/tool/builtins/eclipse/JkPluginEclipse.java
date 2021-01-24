@@ -54,7 +54,7 @@ public final class JkPluginEclipse extends JkPlugin {
 
     @Override
     @JkDoc("Adds .classpath and .project generation to scaffolding.")
-    protected void activate() {
+    protected void afterSetup() {
         scaffold.getScaffolder().getExtraActions().append(this::files);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 

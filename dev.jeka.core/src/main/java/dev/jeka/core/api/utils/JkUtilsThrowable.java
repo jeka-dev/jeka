@@ -25,7 +25,6 @@ public final class JkUtilsThrowable {
      * Same as {@link #unchecked(Exception)} but specifying an error message.
      */
     public static RuntimeException unchecked(Throwable e, String message) {
-
         if (e instanceof RuntimeException) {
             return (RuntimeException) e;
         }

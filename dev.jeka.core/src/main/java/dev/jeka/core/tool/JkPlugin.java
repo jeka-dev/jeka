@@ -50,9 +50,22 @@ public abstract class JkPlugin {
     }
 
     /**
-     * Override this method to modify the commands itself or its bound plugins.
+     * Override this method to initialize the plugin.
+     * This method is invoked right after plugin option fields has been injected and prior
+     * {@link JkCommandSet#setup()} is invoked.
      */
-    protected void activate() {
+    protected void beforeSetup() throws Exception {
+    }
+
+    /**
+     * Override this method to perform some actions, once the plugin has been setup by
+     * {@link JkCommandSet#setup()} method.<p>
+     * Typically, some plugins have to configure other ones (For instance, <i>java</i> plugin configures
+     * <i>scaffold</i> plugin to instruct what to use as a template build class). Those kind of
+     * configuration is better done here as the setup made in {@link JkCommandSet} is likely
+     * to impact the result of the configuration.
+     */
+    protected void afterSetup() throws Exception {
     }
 
     /**
@@ -82,12 +95,6 @@ public abstract class JkPlugin {
      */
     protected String getBreakingVersionRegistryUrl() {
         return null;
-    }
-
-    /**
-     * This method is invoked right after plugin options has been injected
-     */
-    protected void init() {
     }
 
     public final String name() {
