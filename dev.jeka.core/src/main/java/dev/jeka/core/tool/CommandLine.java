@@ -74,7 +74,7 @@ final class CommandLine {
             }
         }
         if (result.isEmpty() && master) {
-            result.add(MethodInvocation.normal(JkConstants.DEFAULT_METHOD));
+            //result.add(MethodInvocation.normal(JkConstants.DEFAULT_METHOD));
         }
         return result;
     }

@@ -27,17 +27,19 @@ public final class JkInit {
         JkLog.setHierarchicalConsoleConsumer();
         Environment.initialize(args);
         JkLog.Verbosity verbosity = JkLog.verbosity();
+        if (Environment.standardOptions.logRuntimeInformation != null) {
+            displayRuntimeInfo();
+        }
         if (!Environment.standardOptions.logHeaders) {
             JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
         }
-        displayInfo();
         final T jkCommands = JkCommandSet.of(clazz);
         JkLog.info("Jeka commands are ready to be executed.");
         JkLog.setVerbosity(verbosity);
         return jkCommands;
     }
 
-    static void displayInfo() {
+    static void displayRuntimeInfo() {
         StringBuilder sb = new StringBuilder()
                 .append("\nWorking Directory : " + System.getProperty("user.dir"))
                 .append("\nJava Home : " + System.getProperty("java.home"))

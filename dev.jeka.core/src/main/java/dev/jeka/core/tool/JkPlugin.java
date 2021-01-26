@@ -143,30 +143,32 @@ public abstract class JkPlugin {
         if (pluginVersion.isSnapshot() || jekaVersion.isSnapshot()) {
             return;
         }
+        PluginAndJekaVersion effectiveVersions = new PluginAndJekaVersion(pluginVersion, jekaVersion);
         CompatibilityCache cache = new CompatibilityCache(this);
-        String cacheBreakingVersion = cache.breakingVersion(pluginVersion, jekaVersion);
+        PluginAndJekaVersion cachedBreakingVersion = cache.findBreakingVersion(effectiveVersions);
 
         // -- Not in cache, read from url then put in cache
-        if (cacheBreakingVersion == null) {
+        if (cachedBreakingVersion == null) {
             CompatibilityBreak compatibilityBreak = CompatibilityBreak.of(this.getBreakingVersionRegistryUrl());
-            String urlBreakingVersion = compatibilityBreak.getBreakingJekaVersion(pluginVersion, jekaVersion);
-            if (urlBreakingVersion != null) {
-                logJekaBreakingVersion(jekaVersion, pluginVersion, urlBreakingVersion);
+            PluginAndJekaVersion remoteBreakingVersion
+                    = compatibilityBreak.getBreakingJekaVersion(effectiveVersions);
+            if (remoteBreakingVersion != null) {
+                logJekaBreakingVersion(effectiveVersions, remoteBreakingVersion);
             }
-            cache.addEntry(pluginVersion, jekaVersion, urlBreakingVersion);
+            cache.addEntry(effectiveVersions, remoteBreakingVersion);
 
         // -- Present in cache and cache says the two versions are not compatible
-        } else if (!cacheBreakingVersion.isEmpty()) {
-            logJekaBreakingVersion(jekaVersion, pluginVersion, cacheBreakingVersion);
+        } else if (cachedBreakingVersion != PluginAndJekaVersion.EMPTY) {
+            logJekaBreakingVersion(effectiveVersions, cachedBreakingVersion);
         }
     }
 
-
-    private void logJekaBreakingVersion(JkVersion jekaVersion, JkVersion pluginVersion, String breakingVersion) {
-        JkLog.warn("You are running Jeka version " + jekaVersion + " but plugin " + this.getClass().getName()
-                + " version " + pluginVersion + " is know to not work with jeka version " + breakingVersion
-                + " higher.");
-        JkLog.warn("Please use a Jeka version lower than " + breakingVersion + " or a higher plugin version.");
+    private void logJekaBreakingVersion(PluginAndJekaVersion effectiveVersions, PluginAndJekaVersion breakingVersion ) {
+        JkLog.error("You are running Jeka version " + effectiveVersions.jekaVersion + " but plugin "
+                + this.getClass().getName() + " version " + effectiveVersions.pluginVersion
+                + " does not work with jeka version " + breakingVersion.jekaVersion + " or higher.");
+        JkLog.error("Please use a Jeka version lower than " + breakingVersion.jekaVersion + " or a plugin version higher than "
+                + breakingVersion.pluginVersion);
     }
 
     private static class CompatibilityCache {
@@ -174,7 +176,7 @@ public abstract class JkPlugin {
         private final Path cachePath;
 
         CompatibilityCache(JkPlugin plugin) {
-            cachePath = JkLocator.getJekaHomeDir().resolve("cache")
+            cachePath = JkLocator.getJekaHomeDir().resolve("plugins-compatibility")
                     .resolve(this.getClass().getName() + "-compatibility.txt");
         }
 
@@ -182,7 +184,8 @@ public abstract class JkPlugin {
             return Files.exists(cachePath);
         }
 
-        String breakingVersion(JkVersion pluginVersion, JkVersion jekaVersion) {
+        // Returns null if no such entry found. Return EMPTY if entry found but no breaking version detected
+        PluginAndJekaVersion findBreakingVersion(PluginAndJekaVersion effectiveVersions) {
             if (!exist()) {
                 return null;
             }
@@ -192,28 +195,26 @@ public abstract class JkPlugin {
                 if (items.length <=2) {
                     continue;
                 }
-                JkVersion plugin = JkVersion.of(items[0].trim());
-                JkVersion jeka = JkVersion.of(items[1].trim());
+                PluginAndJekaVersion cachedBreakingVersion = new PluginAndJekaVersion(items[0].trim(), items[1].trim());
 
                 // found in cache
-                if (pluginVersion.getValue().equals(plugin) && jekaVersion.getValue().equals(jeka)) {
+                if (cachedBreakingVersion.equals(effectiveVersions)) {
                     if (items.length > 2) {
-                        String breakingVersion = items[3].trim();
-                        return breakingVersion;
+                        return new PluginAndJekaVersion(items[3].trim(), items[4].trim());
                     }
-                    return "";
+                    return PluginAndJekaVersion.EMPTY; // already searched and that was ok
                 }
             }
             return null;
         }
 
-        void addEntry(JkVersion pluginVersion, JkVersion jekaVersion, String breakingVersion) {
+        void addEntry(PluginAndJekaVersion effectiveVersions, PluginAndJekaVersion breakingVersions) {
             if (!exist()) {
                 JkUtilsPath.createFileSafely(cachePath);
             }
-            String line = pluginVersion.getValue() + " : " + jekaVersion;
-            if (breakingVersion != null) {
-                line = line + " : " + breakingVersion;
+            String line = effectiveVersions.pluginVersion + " : " + effectiveVersions.jekaVersion;
+            if (breakingVersions != null) {
+                line = line + " : " + breakingVersions.pluginVersion + " : " + breakingVersions.jekaVersion + "\n";
             }
             JkUtilsPath.write(cachePath, line.getBytes(Charset.forName("UTF-8")), StandardOpenOption.APPEND);
         }
@@ -250,22 +251,65 @@ public abstract class JkPlugin {
             return new CompatibilityBreak(versionMap);
         }
 
-        String getBreakingJekaVersion(JkVersion pluginVersion, JkVersion jekaVersion) {
-            JkVersion result = null;
+        PluginAndJekaVersion getBreakingJekaVersion(PluginAndJekaVersion effectiveVersions) {
+            Map.Entry<JkVersion, JkVersion> result = null;
             for (Map.Entry<JkVersion, JkVersion> entry : this.versionMap.entrySet()) {
-                if (pluginVersion.compareTo(entry.getKey()) > 0) {
+                if (effectiveVersions.pluginVersion.compareTo(entry.getKey()) > 0) {
                     continue;
                 }
-                if (jekaVersion.compareTo(entry.getValue()) < 0) {
+                if (effectiveVersions.jekaVersion.compareTo(entry.getValue()) < 0) {
                     continue;
                 }
                 if (result == null) {
-                    result = entry.getValue();
-                } else if (entry.getValue().compareTo(result) < 0) {
-                    result = entry.getValue();
+                    result = entry;
+                } else if (entry.getValue().compareTo(result.getValue()) < 0) {
+                    result = entry;
                 }
             }
-            return result == null ? null : result.getValue();
+            return result == null ? null : new PluginAndJekaVersion(result.getKey(), result.getValue());
+        }
+    }
+
+    static class PluginAndJekaVersion {
+
+        static final PluginAndJekaVersion EMPTY = new PluginAndJekaVersion((JkVersion) null, null);
+
+        final JkVersion pluginVersion;
+
+        final JkVersion jekaVersion;
+
+        PluginAndJekaVersion(JkVersion pluginVersion, JkVersion jekaVersion) {
+            this.pluginVersion = pluginVersion;
+            this.jekaVersion = jekaVersion;
+        }
+
+        PluginAndJekaVersion(String pluginVersion, String jekaVersion) {
+            this(JkVersion.of(pluginVersion), JkVersion.of(jekaVersion));
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PluginAndJekaVersion that = (PluginAndJekaVersion) o;
+            if (pluginVersion != null ? !pluginVersion.equals(that.pluginVersion) : that.pluginVersion != null)
+                return false;
+            return jekaVersion != null ? jekaVersion.equals(that.jekaVersion) : that.jekaVersion == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = pluginVersion != null ? pluginVersion.hashCode() : 0;
+            result = 31 * result + (jekaVersion != null ? jekaVersion.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "PluginAndJekaVersion{" +
+                    "pluginVersion=" + pluginVersion +
+                    ", jekaVersion=" + jekaVersion +
+                    '}';
         }
     }
 

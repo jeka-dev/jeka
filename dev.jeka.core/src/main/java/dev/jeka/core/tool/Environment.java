@@ -89,6 +89,8 @@ class Environment {
 
         boolean logHeaders;
 
+        String logRuntimeInformation;
+
         int logMaxLength = -1;
 
         String commandClass;
@@ -100,6 +102,7 @@ class Environment {
             this.logQuiteVerbose = valueOf(Boolean.class, map, false, "LogQuiteVerbose", "LQV");
             this.logHeaders = valueOf(Boolean.class, map, false,"LogHeaders", "LH");
             this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
+            this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
             this.commandClass = valueOf(String.class, map, null, "CommandClass", "CC");
         }
 

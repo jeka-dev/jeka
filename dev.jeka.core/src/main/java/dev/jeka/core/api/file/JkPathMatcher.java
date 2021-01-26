@@ -117,12 +117,12 @@ public final class JkPathMatcher implements PathMatcher {
 
     public JkPathMatcher and(PathMatcher other) {
         return new JkPathMatcher(new AndMatcher(this.matcher, other),
-                this.label + " & " + other.toString());
+                this.label + " && " + other.toString());
     }
 
     public JkPathMatcher or(PathMatcher other) {
         return new JkPathMatcher(new OrMatcher(this.matcher, other),
-                this.label + " | " + other.toString());
+                this.label + " || " + other.toString());
     }
 
     public JkPathMatcher and(boolean positive, FileSystem fileSystem, String ...patterns) {

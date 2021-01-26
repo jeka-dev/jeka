@@ -112,6 +112,9 @@ final class FieldInjector {
         if (type.equals(Boolean.class) || type.equals(boolean.class)) {
             return true;
         }
+        if (type.equals(String.class)) {
+            return "";
+        }
         return null;
     }
 
@@ -124,7 +127,6 @@ final class FieldInjector {
         if (type.equals(String.class)) {
             return stringValue;
         }
-
         if (type.equals(Boolean.class) || type.equals(boolean.class)) {
             return Boolean.valueOf(stringValue);
         }

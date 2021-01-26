@@ -114,11 +114,14 @@ final class Engine {
     }
 
     private JkPathSequence pathOf(List<? extends JkDependency> dependencies) {
-        JkDependencySet deps = JkDependencySet.of();
+        //JkDependencySet deps = JkDependencySet.of(defDependencies);
+        /*
         for (final JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
-        return JkDependencyResolver.of().addRepos(this.defRepos).resolve(deps).getFiles();
+        */
+
+        return JkDependencyResolver.of().addRepos(this.defRepos).resolve(JkDependencySet.of(defDependencies)).getFiles();
     }
 
     private void preCompile() {
@@ -153,6 +156,12 @@ final class Engine {
             JkLog.warn(resolveResult.getErrorReport().toString());
         }
         final JkPathSequence runPath = resolveResult.getFiles();
+        if (Environment.standardOptions.logRuntimeInformation != null) {
+            JkLog.Verbosity currentVerbosity = JkLog.verbosity();
+            JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
+            JkLog.info("Classpath : " + runPath.toPath());
+            JkLog.setVerbosity(currentVerbosity);
+        }
         path.addAll(runPath.getEntries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
         compileDef(JkPathSequence.of(path));
@@ -247,7 +256,11 @@ final class Engine {
             }
             runProject(jkCommandSet, commandLine.getSubProjectMethods());
         }
-        runProject(jkCommandSet, commandLine.getMasterMethods());
+        List<CommandLine.MethodInvocation> methods = commandLine.getMasterMethods();
+        if (methods.isEmpty() && Environment.standardOptions.logRuntimeInformation == null) {
+            methods = Collections.singletonList(CommandLine.MethodInvocation.normal(JkConstants.DEFAULT_METHOD));
+        }
+        runProject(jkCommandSet, methods);
     }
 
     private boolean hasKotlin() {

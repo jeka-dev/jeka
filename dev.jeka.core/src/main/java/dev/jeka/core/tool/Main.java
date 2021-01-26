@@ -39,12 +39,15 @@ public final class Main {
             Environment.initialize(args);
             JkLog.setHierarchicalConsoleConsumer();
             final JkLog.Verbosity verbosity = JkLog.verbosity();
-            if (!Environment.standardOptions.logHeaders) {
-                JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
-            } else {
+            if (Environment.standardOptions.logHeaders) {
                 displayIntro();
             }
-            JkInit.displayInfo();
+            if (Environment.standardOptions.logRuntimeInformation != null) {
+                JkInit.displayRuntimeInfo();
+            }
+            if (!Environment.standardOptions.logHeaders) {
+                JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
+            }
             final Path workingDir = Paths.get("").toAbsolutePath();
             final Engine engine = new Engine(workingDir);
             engine.execute(Environment.commandLine, Environment.standardOptions.commandClass, verbosity);

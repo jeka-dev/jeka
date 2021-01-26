@@ -1,3 +1,7 @@
+# 0.9.4.RELEASE (ongoing)
+* Improve log messages on plugin compatibility break
+* Rename plugin lifecycle methods to `beforeSetup` and `afterSetup`.
+
 # 0.9.1.RELEASE
 * Buf Fix on scaffolding Java project
 * Typo fixes

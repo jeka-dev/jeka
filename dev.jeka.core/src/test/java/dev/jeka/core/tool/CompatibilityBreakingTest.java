@@ -1,6 +1,6 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.tool.JkPlugin.PluginAndJekaVersion;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,17 +12,15 @@ public class CompatibilityBreakingTest {
     public void test() {
         InputStream is = CompatibilityBreakingTest.class.getResourceAsStream("compatibilitybreak.txt");
         JkPlugin.CompatibilityBreak compatibilityBreak = JkPlugin.CompatibilityBreak.of(is);
-        JkVersion pluginDeclared0 = JkVersion.of("1.2.1.RELEASE");
-        JkVersion pluginDeclared1 = JkVersion.of("1.3.0.RELEASE");
-        JkVersion jekaDeclared0 = JkVersion.of("0.9.1.RELEASE");
-        JkVersion jekaDeclared1 = JkVersion.of("0.9.5.M1");
-        String result = compatibilityBreak.getBreakingJekaVersion(pluginDeclared0, jekaDeclared0);
-        Assert.assertEquals(jekaDeclared0.getValue(), result);
-        JkVersion pluginGreater = JkVersion.of("1.4.0.RELEASE");
-        result = compatibilityBreak.getBreakingJekaVersion(pluginGreater, jekaDeclared1);
+        PluginAndJekaVersion break0 = new PluginAndJekaVersion("1.2.1.RELEASE", "0.9.1.RELEASE");
+        PluginAndJekaVersion break1 = new PluginAndJekaVersion("1.3.0.RELEASE", "0.9.5.M1");
+        PluginAndJekaVersion result = compatibilityBreak.getBreakingJekaVersion(break0);
+        Assert.assertEquals(break0, result);
+        PluginAndJekaVersion pluginGreater = new PluginAndJekaVersion("1.4.0.RELEASE", break1.jekaVersion.getValue());
+        result = compatibilityBreak.getBreakingJekaVersion(pluginGreater);
         Assert.assertNull(result);
-        JkVersion pluginLower = JkVersion.of("1.0.0.RELEASE");
-        result = compatibilityBreak.getBreakingJekaVersion(pluginLower, jekaDeclared1);
-        Assert.assertEquals(jekaDeclared0.getValue(), result);
+        PluginAndJekaVersion pluginLower = new PluginAndJekaVersion("1.0.0.RELEASE", break1.jekaVersion.getValue());
+        result = compatibilityBreak.getBreakingJekaVersion(pluginLower);
+        Assert.assertEquals(break0, result);
     }
 }
