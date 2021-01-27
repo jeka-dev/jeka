@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
@@ -40,12 +39,14 @@ public final class JkInit {
     }
 
     static void displayRuntimeInfo() {
-        StringBuilder sb = new StringBuilder()
-                .append("\nWorking Directory : " + System.getProperty("user.dir"))
-                .append("\nJava Home : " + System.getProperty("java.home"))
-                .append("\nJava Version : " + System.getProperty("java.version") + ", "
-                        + System.getProperty("java.vendor"))
-                .append("\nJeka Version : " + JkInfo.getJekaVersion());
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
+        sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(Environment.commandLine.rawArgs()), " "));
+        sb.append(propsAsString("Specified System Properties", Environment.systemProps));
+        sb.append(propsAsString("Specified Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
+        sb.append("\nJava Home : " + System.getProperty("java.home"));
+        sb.append("\nJava Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
+        sb.append("\nJeka Version : " + JkInfo.getJekaVersion());
         if ( embedded(JkLocator.getJekaHomeDir().normalize())) {
             sb.append("\nJeka Home : " + bootDir().normalize() + " ( embedded !!! )");
         } else {
@@ -54,13 +55,6 @@ public final class JkInit {
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
         sb.append("\nJeka Def Repositories : " + Engine.repos().toString());
         sb.append("\nJeka Repository Cache : " + JkLocator.getJekaRepositoryCache());
-        if (JkLog.isVerbose()) {
-            sb.append("\nJeka Classpath : " + JkClassLoader.ofCurrent());
-        }
-        sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(Environment.commandLine.rawArgs()), " "));
-        sb.append(propsAsString("Specified System Properties", Environment.systemProps));
-        sb.append("\nStandard Options : " + Environment.standardOptions);
-        sb.append(propsAsString("Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
         JkLog.info(sb.toString());
     }
 

@@ -4,10 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkClasspath;
-import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkLocator;
@@ -67,7 +64,7 @@ final class Engine {
 
     <T extends JkCommandSet> T getCommands(Class<T> baseClass, boolean initialised) {
         if (resolver.needCompile()) {
-            this.compile();
+            this.compile(true);
         }
         return resolver.resolve(baseClass, initialised);
     }
@@ -76,22 +73,19 @@ final class Engine {
      * Pre-compile and compile command classes (if needed) then execute methods mentioned in command line
      */
     void execute(CommandLine commandLine, String commandSetClassHint, JkLog.Verbosity verbosityToRestore) {
-        defDependencies = defDependencies.andScopelessDependencies(commandLine.dependencies());
         final long start = System.nanoTime();
         JkLog.startTask("Compile def and initialise commandSet classes");
         JkCommandSet jkCommandSet = null;
         JkPathSequence path = JkPathSequence.of();
-        if (!commandLine.dependencies().isEmpty()) {
-            final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
-            path = path.andPrepend(cmdPath);
-            JkLog.trace("Command line extra path : " + cmdPath);
-        }
         preCompile();  // Need to pre-compile to get the declared def dependencies
         if (!JkUtilsString.isBlank(commandSetClassHint)) {  // First find a class in the existing classpath without compiling
+            if (Environment.standardOptions.logRuntimeInformation != null) {
+                path = path.and(compile(false));
+            }
             jkCommandSet = getCommandsInstance(commandSetClassHint, path);
         }
         if (jkCommandSet == null) {
-            path = compile().and(path);
+            path = compile(true).and(path);
             jkCommandSet = getCommandsInstance(commandSetClassHint, path);
             if (jkCommandSet == null) {
                 String hint = JkUtilsString.isBlank(commandSetClassHint) ? "" : " named " + commandSetClassHint;
@@ -105,23 +99,16 @@ final class Engine {
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         JkLog.info("Jeka commands are ready to be executed.");
         JkLog.setVerbosity(verbosityToRestore);
+        if (Environment.standardOptions.logRuntimeInformation != null) {
+            JkLog.info("Jeka Classpath : ");
+            path.iterator().forEachRemaining(item -> JkLog.info("    " + item));
+        }
         try {
             this.launch(jkCommandSet, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
         }
-    }
-
-    private JkPathSequence pathOf(List<? extends JkDependency> dependencies) {
-        //JkDependencySet deps = JkDependencySet.of(defDependencies);
-        /*
-        for (final JkDependency dependency : dependencies) {
-            deps = deps.and(dependency);
-        }
-        */
-
-        return JkDependencyResolver.of().addRepos(this.defRepos).resolve(JkDependencySet.of(defDependencies)).getFiles();
     }
 
     private void preCompile() {
@@ -135,13 +122,13 @@ final class Engine {
     }
 
     // Compiles and returns the runtime classpath
-    private JkPathSequence compile() {
+    private JkPathSequence compile(boolean compileSources) {
         final LinkedHashSet<Path> entries = new LinkedHashSet<>();
-        compile(new HashSet<>(), entries);
+        compile(new HashSet<>(), entries, compileSources);
         return JkPathSequence.of(entries).withoutDuplicates();
     }
 
-    private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path) {
+    private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path, boolean compileSources) {
         if (!this.resolver.hasDefSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
             return;
         }
@@ -155,16 +142,12 @@ final class Engine {
         if (resolveResult.getErrorReport().hasErrors()) {
             JkLog.warn(resolveResult.getErrorReport().toString());
         }
-        final JkPathSequence runPath = resolveResult.getFiles();
-        if (Environment.standardOptions.logRuntimeInformation != null) {
-            JkLog.Verbosity currentVerbosity = JkLog.verbosity();
-            JkLog.setVerbosity(JkLog.Verbosity.NORMAL);
-            JkLog.info("Classpath : " + runPath.toPath());
-            JkLog.setVerbosity(currentVerbosity);
-        }
+        JkPathSequence runPath = resolveResult.getFiles();
         path.addAll(runPath.getEntries());
-        path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
-        compileDef(JkPathSequence.of(path));
+        path.addAll(compileDependentProjects(yetCompiledProjects, path, compileSources).getEntries());
+        if (compileSources) {
+            compileDef(JkPathSequence.of(path));
+        }
         path.add(this.resolver.defClassDir);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
@@ -207,7 +190,9 @@ final class Engine {
         return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
-    private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
+    private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects,
+                                                    LinkedHashSet<Path>  pathEntries,
+                                                    boolean compileSources) {
         JkPathSequence pathSequence = JkPathSequence.of();
         boolean compileImports = !this.rootsOfImportedCommandSets.isEmpty();
         if (compileImports) {
@@ -216,7 +201,7 @@ final class Engine {
         }
         for (final Path file : this.rootsOfImportedCommandSets) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
-            engine.compile(yetCompiledProjects, pathEntries);
+            engine.compile(yetCompiledProjects, pathEntries, compileSources);
             pathSequence = pathSequence.and(file);
         }
         if (compileImports) {

@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -26,7 +25,6 @@ final class CommandLine {
         result.masterMethods = extractMethods(words, true);
         result.subProjectMethods = extractMethods(words, false);
         result.pluginOptions = extractPluginOptions(words);
-        result.runDependencies = dependencies(words);
         result.rawArgs = words;
         return result;
     }
@@ -41,23 +39,10 @@ final class CommandLine {
 
     private List<PluginOptions> pluginOptions;
 
-    private List<JkModuleDependency> runDependencies;
-
     private String[] rawArgs;
 
     private CommandLine() {
         super();
-    }
-
-    private static List<JkModuleDependency> dependencies(String[] words) {
-        final List<JkModuleDependency> result = new LinkedList<>();
-        for (final String word : words) {
-            if (word.startsWith(MODULE_SYMBOL_CHAR)) {
-                final String dependencyDef = word.substring(1);
-                result.add(JkModuleDependency.of(dependencyDef));
-            }
-        }
-        return result;
     }
 
     private static List<MethodInvocation> extractMethods(String[] words, boolean master) {
@@ -234,10 +219,6 @@ final class CommandLine {
 
     List<PluginOptions> getPluginOptions() {
         return pluginOptions;
-    }
-
-    List<JkModuleDependency> dependencies() {
-        return this.runDependencies;
     }
 
     String[] rawArgs() {
