@@ -77,7 +77,7 @@ public final class JkLog implements Serializable {
      * This set the default consumer. This consumer displays logs in the console in a hierarchical style.
      */
     public static void setHierarchicalConsoleConsumer() {
-        setConsumer(new JkHierarchicalConsoleLogConsumer());
+        setConsumer(new JkBraceConsoleLogConsumer());
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {

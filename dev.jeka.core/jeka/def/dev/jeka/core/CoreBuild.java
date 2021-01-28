@@ -249,6 +249,23 @@ public class CoreBuild extends JkCommandSet {
         clean(); java.pack();
     }
 
+    public void testLogOutputs() {
+        JkLog.startTask("----------------");
+            JkLog.info("aaaaaaaaaaaaaa");
+            JkLog.startTask("----------------");
+                JkLog.info("uiuiuiuiuiuiuiuiuiu");
+                JkLog.startTask("----------------");
+                    JkLog.info("oooo");
+                JkLog.endTask();
+            JkLog.endTask("kkkkkkkkkkkk");
+
+            JkLog.startTask("----------------");
+            JkLog.info("cccccccccc");
+            JkLog.endTask();
+        JkLog.endTask();
+    }
+
+
     public static void main(String[] args) {
         JkInit.instanceOf(CoreBuild.class, args).cleanPack();
     }
