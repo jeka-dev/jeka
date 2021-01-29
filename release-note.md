@@ -1,12 +1,9 @@
 # 0.9.4.RELEASE (ongoing)
 * Improve log messages on plugin compatibility break
 * Rename plugin lifecycle methods to `beforeSetup` and `afterSetup`.
-* Add -LRI option to display Jeka Runtime Information
 * Improved log setup
 * Add BRACE and INDENT logger style : set Default logger style to INDENT
-* New log options
-
-
+* New log options (LRI, LB, LSU)
 
 # 0.9.1.RELEASE
 * Buf Fix on scaffolding Java project
