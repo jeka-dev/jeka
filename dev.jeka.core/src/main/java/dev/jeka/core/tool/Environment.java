@@ -87,7 +87,11 @@ class Environment {
 
         boolean logVerbose;
 
-        boolean logHeaders;
+        boolean logBanner;
+
+        boolean logSetup;
+
+        JkLog.Style logStyle;
 
         String logRuntimeInformation;
 
@@ -100,9 +104,11 @@ class Environment {
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "LogVerbose", "LV");
             this.logQuiteVerbose = valueOf(Boolean.class, map, false, "LogQuiteVerbose", "LQV");
-            this.logHeaders = valueOf(Boolean.class, map, false,"LogHeaders", "LH");
-            this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
+            this.logBanner = valueOf(Boolean.class, map, false,"LogBanner", "LB");
+            this.logSetup = valueOf(Boolean.class, map, false,"LogSetup", "LSU");
             this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
+            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
+            this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
             this.commandClass = valueOf(String.class, map, null, "CommandClass", "CC");
         }
 
@@ -113,7 +119,7 @@ class Environment {
         @Override
         public String toString() {
             return "CommandSetClass=" + JkUtilsObject.toString(commandClass) + ", LogVerbose=" + logVerbose
-                    + ", LogHeaders=" + logHeaders + ", LogMaxLength=" + logMaxLength;
+                    + ", LogHeaders=" + logBanner + ", LogMaxLength=" + logMaxLength;
         }
 
         private <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... optionNames) {

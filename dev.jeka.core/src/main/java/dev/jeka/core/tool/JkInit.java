@@ -23,13 +23,13 @@ public final class JkInit {
      * Creates an instance of the specified command class and displays information about this class andPrepending environment.
      */
     public static <T extends JkCommandSet> T instanceOf(Class<T> clazz, String... args) {
-        JkLog.setConsumer(JkLog.Style.INDENT);
         Environment.initialize(args);
+        JkLog.setConsumer(Environment.standardOptions.logStyle);
         JkLog.Verbosity verbosity = JkLog.verbosity();
         if (Environment.standardOptions.logRuntimeInformation != null) {
             displayRuntimeInfo();
         }
-        if (!Environment.standardOptions.logHeaders) {
+        if (!Environment.standardOptions.logBanner) {
             JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
         }
         final T jkCommands = JkCommandSet.of(clazz);

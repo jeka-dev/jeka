@@ -47,7 +47,9 @@ final class HelpDisplayer {
         sb.append("  -LogVerbose (shorthand -LV) : logs 'trace' level.\n");
         sb.append("  -LogQuiteVerbose (shorthand -LQV) : logs 'trace' level + Ivy trace level.\n");
         sb.append("  -LogRuntimeInfo (shorthand -LRI) : logs Jeka runtime information.\n");
-        sb.append("  -LogHeaders (shorthand -LH) : logs intro and def classes compilation steps.\n");
+        sb.append("  -LogBanner (shorthand -LB) : logs intro and outro banners.\n");
+        sb.append("  -LogSetup (shorthand -LSU) : logs Jeka classes setup process.\n");
+        sb.append("  -LogStyle (shorthand -LS) : choose the display log style : INDENT(default), BRACE or SQUARE.\n");
         sb.append("  -LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");
         sb.append("  -CommandClass (shorthand -CC) : Force to use the specified class as the command class to invoke. It can be the short name of the class (without package prefix).\n");
         return sb.toString();

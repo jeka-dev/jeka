@@ -36,4 +36,6 @@ public class JkPluginGit extends JkPlugin {
     public JkGitWrapper getWrapper() {
         return git;
     }
+
+
 }

@@ -305,16 +305,16 @@ final class Engine {
             throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + run.getClass());
         }
         String fullMethodName = run.getClass().getName() + "#" + methodName;
-        if (Environment.standardOptions.logHeaders) {
+        if (Environment.standardOptions.logSetup) {
             JkLog.startTask("\nExecute method : " + fullMethodName);
         }
         try {
             JkUtilsReflect.invoke(run, method);
-            if (Environment.standardOptions.logHeaders) {
+            if (Environment.standardOptions.logSetup) {
                 JkLog.endTask("Method " + fullMethodName + " succeeded in %d milliseconds.");
             }
         } catch (final RuntimeException e) {
-            if (Environment.standardOptions.logHeaders) {
+            if (Environment.standardOptions.logSetup) {
                 JkLog.endTask("Method " + fullMethodName + " failed in %d milliseconds.");
             }
             throw e;

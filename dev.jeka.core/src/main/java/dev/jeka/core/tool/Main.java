@@ -37,21 +37,21 @@ public final class Main {
         JkUtilsSystem.disableUnsafeWarning();
         try {
             Environment.initialize(args);
-            JkLog.setConsumer(JkLog.Style.INDENT);
+            JkLog.setConsumer(Environment.standardOptions.logStyle);
             final JkLog.Verbosity verbosity = JkLog.verbosity();
-            if (Environment.standardOptions.logHeaders) {
+            if (Environment.standardOptions.logBanner) {
                 displayIntro();
             }
             if (Environment.standardOptions.logRuntimeInformation != null) {
                 JkInit.displayRuntimeInfo();
             }
-            if (!Environment.standardOptions.logHeaders) {
+            if (!Environment.standardOptions.logSetup) {
                 JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
             }
             final Path workingDir = Paths.get("").toAbsolutePath();
             final Engine engine = new Engine(workingDir);
             engine.execute(Environment.commandLine, Environment.standardOptions.commandClass, verbosity);
-            if (Environment.standardOptions.logHeaders) {
+            if (Environment.standardOptions.logBanner) {
                 displayOutro(start);
             }
             System.exit(0); // Triggers shutdown hooks
@@ -71,7 +71,7 @@ public final class Main {
                 System.err.println();
                 e.printStackTrace(System.err);
             }
-            if (Environment.standardOptions.logHeaders) {
+            if (Environment.standardOptions.logBanner) {
                 final int length = printAscii(true, "failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");
@@ -97,7 +97,7 @@ public final class Main {
         final Engine engine = new Engine(projectDir);
         Environment.initialize(args);
         final JkLog.Verbosity verbosity = JkLog.verbosity();
-        if (!Environment.standardOptions.logHeaders) {
+        if (!Environment.standardOptions.logSetup) {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
         engine.execute(Environment.commandLine, Environment.standardOptions.commandClass, verbosity);
