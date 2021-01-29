@@ -164,7 +164,7 @@ public final class JkTestProcessor<T> {
             JkLog.startTask("Executing tests");
             result = launchInClassloader(extraTestClasspath, testSelection);
         } else {
-            JkLog.startTask("Executing tests in forked process");
+            JkLog.startTask("Execute tests in forked process");
             result = launchInForkedProcess(extraTestClasspath, testSelection);
         }
         postActions.run();

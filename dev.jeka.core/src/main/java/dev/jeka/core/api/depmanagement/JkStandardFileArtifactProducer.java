@@ -47,7 +47,7 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
                     "Artifact defined are : " + consumers.entrySet());
         }
         Path path = getArtifactPath(artifactId);
-        JkLog.startTask("Making artifact " + path.getFileName());
+        JkLog.startTask("Make artifact " + path.getFileName());
         consumer.accept(path);
         JkLog.endTask();
     }

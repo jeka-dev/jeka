@@ -306,7 +306,7 @@ final class Engine {
         }
         String fullMethodName = run.getClass().getName() + "#" + methodName;
         if (Environment.standardOptions.logHeaders) {
-            JkLog.startTask("\nExecuting method : " + fullMethodName);
+            JkLog.startTask("\nExecute method : " + fullMethodName);
         }
         try {
             JkUtilsReflect.invoke(run, method);

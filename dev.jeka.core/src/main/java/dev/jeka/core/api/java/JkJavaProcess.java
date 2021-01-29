@@ -234,7 +234,7 @@ public final class JkJavaProcess {
         }
         command.addAll(Arrays.asList(arguments));
         if (printCommand) {
-            JkLog.startTask("Starting java program : " + execPart);
+            JkLog.startTask("Start java program : " + execPart);
             JkLog.info(String.join("\n", command));
         }
         final int result;

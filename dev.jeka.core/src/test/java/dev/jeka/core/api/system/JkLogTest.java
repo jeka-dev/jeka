@@ -4,7 +4,7 @@ public class JkLogTest {
 
     //@Test
     public void testMultithread() throws Exception {
-        JkLog.setHierarchicalConsoleConsumer();
+        JkLog.setConsumer(JkLog.Style.INDENT);
         JkLog.info("toto");
         Runnable runnable = () -> {
             JkLog.startTask("new thread");

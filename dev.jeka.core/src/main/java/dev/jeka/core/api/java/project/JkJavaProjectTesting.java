@@ -140,7 +140,7 @@ public class JkJavaProjectTesting {
      * </ul>
      */
     public void run() {
-        JkLog.startTask("Processing tests");
+        JkLog.startTask("Process tests");
         this.projectProduction.getCompilation().runIfNecessary();
         this.compilation.run();
         executeWithTestProcessor();

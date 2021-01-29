@@ -94,7 +94,7 @@ public final class JkSonar {
         if (!enabled) {
             JkLog.info("Sonar analysis skipped.");
         }
-        JkLog.startTask("Launching Sonar analysis");
+        JkLog.startTask("Launch Sonar analysis");
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             javaProcess().runClassSync("org.sonar.runner.Main", "-e", "-X");
         } else {

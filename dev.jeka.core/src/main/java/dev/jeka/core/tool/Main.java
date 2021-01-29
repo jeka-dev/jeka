@@ -37,7 +37,7 @@ public final class Main {
         JkUtilsSystem.disableUnsafeWarning();
         try {
             Environment.initialize(args);
-            JkLog.setHierarchicalConsoleConsumer();
+            JkLog.setConsumer(JkLog.Style.INDENT);
             final JkLog.Verbosity verbosity = JkLog.verbosity();
             if (Environment.standardOptions.logHeaders) {
                 displayIntro();

@@ -94,7 +94,7 @@ public final class JkJavadocProcessor<T> {
      * Actually processes and creates the javadoc files.
      */
     public void make(Iterable<Path> classpath, JkPathTreeSet srcDirs, Path outputDir) {
-        JkLog.startTask("Generating javadoc");
+        JkLog.startTask("Generate javadoc");
         if (srcDirs.hasNoExistingRoot()) {
             JkLog.warn("No sources found in " + srcDirs);
             return;

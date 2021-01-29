@@ -70,7 +70,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
             if (!Files.exists(path)) {
                 makeArtifact(artifactFileId);
             } else {
-                JkLog.info("Making artifact file " + JkUtilsPath.relativizeFromWorkingDir(path)
+                JkLog.info("Make artifact file " + JkUtilsPath.relativizeFromWorkingDir(path)
                         + " ... Skip : already exist.");
             }
         }

@@ -105,7 +105,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
                            JkDependencySet dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,
                            JkVersionProvider resolvedVersions) {
-        JkLog.startTask( "Publishing on Ivy repositories");
+        JkLog.startTask( "Publish on Ivy repositories");
         final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
             publication, dependencies, defaultMapping, deliveryDate, resolvedVersions);
         int publishCount = publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
@@ -118,7 +118,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
                              JkDependencySet dependencies, UnaryOperator<Path> signer) {
-        JkLog.startTask("Publishing on Maven repositories");
+        JkLog.startTask("Publish on Maven repositories");
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
                 publication, dependencies, Instant.now(), JkVersionProvider.of());
         final int count = publishMavenArtifacts(publication, moduleDescriptor, signer);
@@ -137,7 +137,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (!isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(versionedModule.getVersion())) {
-                JkLog.startTask("Publishing for repository " + resolver);
+                JkLog.startTask("Publish for repository " + resolver);
                 this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
                 JkLog.endTask();
                 count++;
@@ -190,7 +190,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(versionedModule.getVersion())) {
-                JkLog.startTask("Publishing to " + resolver);
+                JkLog.startTask("Publish to " + resolver);
                 UnaryOperator<Path> effectiveSigner = publishRepo.getPublishConfig().isSignatureRequired() ? signer :
                         null;
                 final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(

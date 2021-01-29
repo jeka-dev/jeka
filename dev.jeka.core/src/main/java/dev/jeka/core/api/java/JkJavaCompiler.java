@@ -125,7 +125,7 @@ public final class JkJavaCompiler<T> {
         final JavaCompiler compiler = this.compilerTool != null ? this.compilerTool : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
-        String message = "Compiling " + compileWhatMessage(compileSpec.getSourceFiles())
+        String message = "Compile " + compileWhatMessage(compileSpec.getSourceFiles())
                 + " to " + outputDir;
         if (JkLog.verbosity().isVerbose()) {
             message = message + " using options : " + JkUtilsString.join(options, " ");

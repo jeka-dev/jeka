@@ -3,7 +3,7 @@ package dev.jeka.core.api.system;
 import java.io.*;
 import java.nio.charset.Charset;
 
-public final class JkHierarchicalConsoleLogConsumer implements JkLog.JkEventLogConsumer, Serializable {
+public final class JkSquareConsoleLogConsumer implements JkLog.JkEventLogConsumer, Serializable {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -57,7 +57,7 @@ public final class JkHierarchicalConsoleLogConsumer implements JkLog.JkEventLogC
     }
 
     public static void setMaxLength(int maxLength) {
-        JkHierarchicalConsoleLogConsumer.maxLength = maxLength;
+        JkSquareConsoleLogConsumer.maxLength = maxLength;
     }
 
     @Override
@@ -127,7 +127,7 @@ public final class JkHierarchicalConsoleLogConsumer implements JkLog.JkEventLogC
             delegate.write(b);
             lastByte = b;
             lineLength ++;  // approximate 1 byte = 1 char (untrue for special characters).
-            if (JkHierarchicalConsoleLogConsumer.maxLength > -1 && lineLength > JkHierarchicalConsoleLogConsumer.maxLength) {
+            if (JkSquareConsoleLogConsumer.maxLength > -1 && lineLength > JkSquareConsoleLogConsumer.maxLength) {
                 lineLength = 0;
                 if (handlingStart) {
                     this.write(("\n" + new String(MARGIN_UNIT, UTF8) + "  ").getBytes(UTF8));

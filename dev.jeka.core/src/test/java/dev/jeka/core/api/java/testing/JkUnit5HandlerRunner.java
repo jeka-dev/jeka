@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 public class JkUnit5HandlerRunner {
 
     public static void main(String[] args) {
-        JkLog.setHierarchicalConsoleConsumer();
+        JkLog.setConsumer(JkLog.Style.INDENT);
         //JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkDependencyResolver resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(JkDependencySet.of().and("org.junit.vintage:junit-vintage-engine:jar:5.6.0"));

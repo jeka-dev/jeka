@@ -115,7 +115,7 @@ public class JkJavaProjectCompilation<T> {
      * </ul>
      */
     public void run() {
-        JkLog.startTask("Compilation and resource processing of " + scope);
+        JkLog.startTask("Compile and process resources for scope '" + scope + "'");
         beforeGenerate.run();
         sourceGenerator.accept(this.layout.resolveGeneratedSourceDir());
         resourceGenerator.accept(this.layout.resolveGeneratedResourceDir());

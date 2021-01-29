@@ -203,7 +203,7 @@ public class JkJavaProjectPublication {
         if (!repos.hasIvyRepo()) {
             return;
         }
-        JkLog.startTask("Preparing Ivy publication");
+        JkLog.startTask("Prepare Ivy publication");
         this.ivyPublication.publish(repos);
         JkLog.endTask();
     }

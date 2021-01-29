@@ -106,8 +106,8 @@ public final class JkDependencyResolver<T> {
         }
         JkInternalDepResolver internalDepResolver = JkInternalDepResolver.of(this.repos);
         JkLog.trace("Preparing to resolve dependencies for module " + moduleHolder);
-        final String msg = scopes.length == 0 ? "Resolving dependencies " :
-                "Resolving dependencies with specified scopes " + Arrays.asList(scopes);
+        final String msg = scopes.length == 0 ? "Resolve dependencies " :
+                "Resolve dependencies with specified scopes " + Arrays.asList(scopes);
         JkLog.startTask(msg);
         JkResolveResult resolveResult;
         if (dependencies.hasModules()) {

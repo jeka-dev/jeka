@@ -10,7 +10,7 @@ public class JkJavaCompilerRunner {
     public static void main(String[] args) {
         //System.out.println(JkJavaCompiler.currentJdkSourceVersion());
         //System.out.println(ToolProvider.getSystemJavaCompiler().getSourceVersions());
-        JkLog.setHierarchicalConsoleConsumer();
+        JkLog.setConsumer(JkLog.Style.INDENT);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(Paths.get("jeka/output/bin"))

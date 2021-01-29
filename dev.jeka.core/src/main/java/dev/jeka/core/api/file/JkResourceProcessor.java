@@ -120,7 +120,7 @@ public final class JkResourceProcessor<T> {
      * specified output directory along replacing specified tokens.
      */
     public void generate(JkPathTreeSet resourceTrees, Path outputDir) {
-        JkLog.startTask("Copying resource files to %s", outputDir);
+        JkLog.startTask("Copy resource files to %s", outputDir);
         for (final JkPathTree resourceTree : resourceTrees.toList()) {
             final AtomicInteger count = new AtomicInteger(0);
             if (!resourceTree.exists()) {

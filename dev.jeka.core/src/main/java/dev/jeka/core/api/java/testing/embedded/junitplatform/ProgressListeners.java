@@ -103,7 +103,7 @@ class ProgressListeners {
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
             long testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isTest());
-            System.out.print("Launching " + testCount + " tests ");
+            System.out.print("Launch " + testCount + " tests ");
             System.out.flush();
         }
 

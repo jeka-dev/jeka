@@ -75,7 +75,7 @@ public class JkCommandSet {
      * and plugin activation.
      */
     public static <T extends JkCommandSet> T of(Class<T> commandClass) {
-        JkLog.startTask("Instantiating commandSet class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        JkLog.startTask("Instantiate commandSet class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T commands = ofUninitialised(commandClass);
         try {
             commands.initialise();

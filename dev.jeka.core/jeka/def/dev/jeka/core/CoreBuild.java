@@ -166,14 +166,14 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void makeDocs() {
-        JkLog.startTask("Making documentation");
+        JkLog.startTask("Make documentation");
         String version = java.getProject().getPublication().getVersion().getValue();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }
 
     void testSamples()  {
-        JkLog.startTask("Launching integration tests on samples");
+        JkLog.startTask("Launch integration tests on samples");
         SampleTester sampleTester = new SampleTester(this.getBaseTree());
         sampleTester.restoreEclipseClasspathFile = true;
         try {
@@ -185,7 +185,6 @@ public class CoreBuild extends JkCommandSet {
     }
 
     private void doPackWithEmbedded(Path targetJar) {
-        JkLog.startTask("Creating main jar");
 
         // Main jar
         JkJavaProject project = java.getProject();
@@ -218,7 +217,6 @@ public class CoreBuild extends JkCommandSet {
 
         // Cleanup
         JkUtilsPath.deleteIfExists(embeddedJar);
-        JkLog.endTask();
     }
 
     private void doWrapper(Path wrapperJar) {
@@ -262,6 +260,8 @@ public class CoreBuild extends JkCommandSet {
             JkLog.startTask("----------------");
             JkLog.info("cccccccccc");
             JkLog.endTask();
+        JkLog.endTask();
+        JkLog.startTask("uuuuuuuuuuuuuuuuu");
         JkLog.endTask();
     }
 

@@ -19,7 +19,7 @@ public class ResolveGoogleApiClient {
     @Test
     @Ignore // Ivy issue
     public void httpClientVersionProperlyResolver() {
-        JkLog.setHierarchicalConsoleConsumer();
+        JkLog.setConsumer(JkLog.Style.INDENT);
         JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         JkResolveResult result = resolver().resolve(
                 JkDependencySet.of().and(GOOGLE_API_CLIENT, COMPILE));

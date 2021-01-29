@@ -6,7 +6,7 @@ import dev.jeka.core.api.system.JkLog;
 public class PureApi {
 
     public static void main(String[] args) {
-        JkLog.setHierarchicalConsoleConsumer();  // activate console logging
+        JkLog.setConsumer(JkLog.Style.INDENT);  // activate console logging
 
         // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
         JkJavaProject coreProject = JkJavaProject.of().simpleFacade()

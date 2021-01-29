@@ -35,6 +35,19 @@ public final class JkLog implements Serializable {
             return this == VERBOSE || this == QUITE_VERBOSE;
         }
     }
+    
+    public enum Style {
+        BRACE(new JkBraceConsoleLogConsumer()),
+        SQUARE(new JkSquareConsoleLogConsumer()),
+        INDENT(new JkIndentConsoleLogConsumer());
+
+        private final JkEventLogConsumer consumer;
+
+
+        Style(JkEventLogConsumer consumer) {
+            this.consumer = consumer;
+        }
+    }
 
     private static JkEventLogConsumer consumer;
 
@@ -58,9 +71,9 @@ public final class JkLog implements Serializable {
     }
 
     /**
-     * By default events are not consumed, meaning nothing appends when {@link #info(String)},
+     * By default events are not consumed, meaning nothing appends when {@link #info(String, Object...)} (String)},
      * {@link #error(String)}, {@link #warn(String)} or {@link #trace(String)} are invoked.
-     * Thus users have to set explicitly a consumer using this method or {@link #setHierarchicalConsoleConsumer()}.
+     * Thus users have to set explicitly a consumer using this method or {@link #setConsumer(Style)} ()}.
      */
     public static void setConsumer(JkEventLogConsumer consumerArg) {
         if (consumer != null) {
@@ -76,8 +89,8 @@ public final class JkLog implements Serializable {
     /**
      * This set the default consumer. This consumer displays logs in the console in a hierarchical style.
      */
-    public static void setHierarchicalConsoleConsumer() {
-        setConsumer(new JkBraceConsoleLogConsumer());
+    public static void setConsumer(Style style) {
+        setConsumer(style.consumer);
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {

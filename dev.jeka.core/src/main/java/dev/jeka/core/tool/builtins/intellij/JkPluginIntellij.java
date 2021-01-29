@@ -138,7 +138,7 @@ public final class JkPluginIntellij extends JkPlugin {
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
-            JkLog.startTask("Generating iml file on " + projectFolder);
+            JkLog.startTask("Generate iml file on " + projectFolder);
             try {
                 Main.exec(projectFolder, "intellij#iml");
             } catch (Exception e) {

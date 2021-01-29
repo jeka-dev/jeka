@@ -273,7 +273,7 @@ public final class JkProcess implements Runnable {
         };
         if (logCommand) {
             String workingDirName = this.workingDir == null ? "" : this.workingDir.toString() +  ">";
-            JkLog.startTask("Starting program : " + workingDirName + commands.toString());
+            JkLog.startTask("Start program : " + workingDirName + commands.toString());
             runnable.run();
             JkLog.endTask();
         } else {
