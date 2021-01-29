@@ -2,6 +2,7 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.api.utils.JkUtilsIO.JkStreamGobbler;
 
@@ -211,6 +212,32 @@ public final class JkJavaProcess {
         runClassOrJarSync(mainClassName, null, arguments);
     }
 
+    /**
+     * Returns a {@link JkProcess} ready to be run.
+     */
+    public JkProcess toProcess(String mainClassName, Path jar, String... arguments) {
+        JkUtilsAssert.argument(jar != null || mainClassName != null,
+                "main class name and jar can't be both null while launching a Java process, " +
+                        "please set at least one of them.");
+        final List<String> args = new LinkedList<>();
+        final OptionAndEnv optionAndEnv = optionsAndEnv();
+        args.add(getRunningJavaCommand());
+        args.addAll(optionAndEnv.options);
+        if (jar != null) {
+            if (!Files.exists(jar)) {
+                throw new IllegalStateException("Executable jar " + jar + " not found.");
+            }
+            args.add("-jar");
+            args.add(jar.toString());
+        }
+        if (mainClassName != null) {
+            args.add(mainClassName);
+        }
+        args.addAll(Arrays.asList(arguments));
+        return JkProcess.of(getRunningJavaCommand(), args.toArray(new String[0]))
+                .withLogCommand(printCommand);
+    }
+
     private void runClassOrJarSync(String mainClassName, Path jar, String... arguments) {
         JkUtilsAssert.argument(jar != null || mainClassName != null,
                 "main class name and jar can't be both null while launching a Java process, " +
@@ -258,6 +285,8 @@ public final class JkJavaProcess {
             JkLog.endTask();
         }
     }
+
+
 
     private OptionAndEnv optionsAndEnv() {
         final List<String> options = new LinkedList<>();
