@@ -53,16 +53,16 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     private JkJavaProject project;
 
-    protected JkPluginJava(JkCommandSet commandSet) {
-        super(commandSet);
-        this.scaffoldPlugin = commandSet.getPlugins().get(JkPluginScaffold.class);
-        this.repoPlugin = commandSet.getPlugins().get(JkPluginRepo.class);
+    protected JkPluginJava(JkClass jkClass) {
+        super(jkClass);
+        this.scaffoldPlugin = jkClass.getPlugins().get(JkPluginScaffold.class);
+        this.repoPlugin = jkClass.getPlugins().get(JkPluginRepo.class);
 
         // Pre-configure JkJavaProject instance
-        this.project = JkJavaProject.of().setBaseDir(this.getCommandSet().getBaseDir());
+        this.project = JkJavaProject.of().setBaseDir(this.getJkClass().getBaseDir());
         this.project.getConstruction().getDependencyManagement().addDependencies(
-                JkDependencySet.ofLocal(commandSet.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
-        final Path path = commandSet.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
+                JkDependencySet.ofLocal(jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
+        final Path path = jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
         if (Files.exists(path)) {
             this.project.getConstruction().getDependencyManagement().addDependencies(JkDependencySet.ofTextDescription(path));
         }
@@ -95,7 +95,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
             resolver.addRepos(downloadRepo);
         }
-        JkPluginGpg pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginGpg.class);
+        JkPluginGpg pgpPlugin = this.getJkClass().getPlugins().get(JkPluginGpg.class);
 
         // Use signer from GPG plugin as default
         JkGpg gpg = pgpPlugin.get();
@@ -137,7 +137,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     private void setupScaffolder() {
         String snippet = noFacade ? "buildclass.snippet" : "buildclassfacade.snippet";
         String template = JkUtilsIO.read(JkPluginJava.class.getResource(snippet));
-        String baseDirName = getCommandSet().getBaseDir().getFileName().toString();
+        String baseDirName = getJkClass().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
         JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
@@ -146,7 +146,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
         testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
         testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        scaffoldPlugin.getScaffolder().setCommandClassCode(code);
+        scaffoldPlugin.getScaffolder().setJekaClassCode(code);
         scaffoldPlugin.getScaffolder().setClassFilename("Build.java");
     }
 

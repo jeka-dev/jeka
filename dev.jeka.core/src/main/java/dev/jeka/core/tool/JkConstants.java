@@ -24,7 +24,7 @@ public final class JkConstants {
 
     static final String BOOT_DIR = JEKA_DIR + "/boot";
 
-    static final Class<? extends JkCommandSet> DEFAULT_COMMAND_CLASS = JkCommandSet.class;
+    static final Class<? extends JkClass> DEFAULT_JEKA_CLASS = JkClass.class;
 
     /**
      * Relative path to the project where the def classes will be

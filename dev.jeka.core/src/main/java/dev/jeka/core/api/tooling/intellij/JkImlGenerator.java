@@ -97,10 +97,10 @@ public final class JkImlGenerator {
         writeContent();
         writeOrderEntrySourceFolder();
         Context context = new Context();
-        JkResolveResult commandResolveResult = null;
+        JkResolveResult jkClassResolveResult = null;
         if (this.defDependencyResolver != null) {
-            commandResolveResult = resolve(this.defDependencies, this.defDependencyResolver);
-            markJekaDeps(commandResolveResult, context);
+            jkClassResolveResult = resolve(this.defDependencies, this.defDependencyResolver);
+            markJekaDeps(jkClassResolveResult, context);
         }
         if (this.ideSupport.getDependencyResolver()!= null) {
             JkResolveResult resolveResult = resolve(ideSupport.getDependencies(), ideSupport.getDependencyResolver());
@@ -108,7 +108,7 @@ public final class JkImlGenerator {
                     context, false);
         }
         if (this.defDependencyResolver != null) {
-            writeDependencies(commandResolveResult, this.defDependencyResolver.getRepos(), context, true);
+            writeDependencies(jkClassResolveResult, this.defDependencyResolver.getRepos(), context, true);
         }
         writeExtraJekaLodules(this.extraJekaModules);
         writeFoot();

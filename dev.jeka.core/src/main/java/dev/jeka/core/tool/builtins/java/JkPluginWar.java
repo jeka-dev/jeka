@@ -9,7 +9,7 @@ import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
@@ -32,10 +32,10 @@ public class JkPluginWar extends JkPlugin {
 
     private final JkStandardFileArtifactProducer artifactProducer;
 
-    public JkPluginWar(JkCommandSet commandSet) {
-        super(commandSet);
-        this.staticResourceDir = commandSet.getBaseDir().resolve("src/main/webapp/static");
-        this.artifactProducer = commandSet.getPlugin(JkPluginJava.class).getProject().getPublication().getArtifactProducer();
+    public JkPluginWar(JkClass jkClass) {
+        super(jkClass);
+        this.staticResourceDir = jkClass.getBaseDir().resolve("src/main/webapp/static");
+        this.artifactProducer = jkClass.getPlugin(JkPluginJava.class).getProject().getPublication().getArtifactProducer();
 
     }
 
@@ -75,7 +75,7 @@ public class JkPluginWar extends JkPlugin {
     }
 
     private void doWarFile(Path file) {
-        JkPluginJava pluginJava = this.getCommandSet().getPlugin(JkPluginJava.class);
+        JkPluginJava pluginJava = this.getJkClass().getPlugin(JkPluginJava.class);
         JkJavaProject project = pluginJava.getProject();
         staticResourceComputation.run();
         Path temp = JkUtilsPath.createTempDirectory("jeka-war");

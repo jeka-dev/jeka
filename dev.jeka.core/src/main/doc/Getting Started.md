@@ -60,12 +60,12 @@ Specified System Properties : none.
 Standard Options : RunClass=null, LogVerbose=false, LogHeaders=true, LogMaxLength=230
 Options :   LH=null  LML=230  jdk.9=C:/Program Files (x86)/Java/jdk9.0.1 jdk.10=C:/Program Files (x86)/Java/jdk10.0.2  repo.download.url=https://repo.maven.apache.org/maven2/
 Compile and initialise commandSet classes ...
-│ Initializing class JkCommandSet at C:\Users\djeang\IdeaProjects\jeka ...
+│ Initializing class JkClass at C:\Users\djeang\IdeaProjects\jeka ...
 │ │ Run instance initialized with options []
 │ └ Done in 57 milliseconds.
 └ Done in 336 milliseconds.
 Jeka commands are ready to be executed.
-Method : help on JkCommandSet
+Method : help on JkClass
 Usage:
 jeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]
 
@@ -118,20 +118,20 @@ __Def Classpath :__ Classpath on which depend _def classes_ to get compiled and 
 By default, it consists in _Jeka_ core classes but it can be augmented with any third party lib or _def classpath_ coming 
 from other Jeka projects. 
 
-__CommandSet Classes :__ Classes extending `JkCommandSet`. Their public no-arg methods can be invoked from the command line 
+__Jeka Classes :__ Classes extending `JkClass`. Their public no-arg methods can be invoked from the command line 
  if they belong to _def classpath_. Their public properties can be set from the command line as well. 
- Also, _plugins_ are bound to _commandSet classes_. Typically, _def classes_  include one _commandSet class_.
+ Also, _plugins_ are bound to _Jeka Class_. Typically, _def classes_  include one _Jeka class_.
 
-__Command :__ Java method member of _commandSet class_ invokable from command line. 
+__Jeka Method :__ Java method member of _cJeka class_ invokable from command line. 
 They must be instance method (not static), public, zero-args and returning void. 
-Every method verifying these constraints within a _commandSet class_ or a _plugin_  is considered as a _command_.
+Every method verifying these constraints within a _JkClass class_ or a _plugin_  is considered as a _command_.
  
 __Options :__ This is a set of key-value used to inject parameters. Options can be mentioned 
-as command line arguments, stored in specific files or hard coded in _commandSet classes_. Options can be injected 
-in _commandSet class_ or _plugin_ instance fields.
+as command line arguments, stored in specific files or hard coded in _Jeka classes_. Options can be injected 
+in _Jeka class_ or _plugin_ instance fields.
 
 __Plugins :__ Classes extending `JkPlugin` and named as _JkPluginXxxxx_ where_Xxxxx_ is the name of the plugin. In short, a plugin 
-add dynamically commands and options to the running _commandSet class_.
+add dynamically commands and options to the running _Jeka class_.
 
 # Basic automation project
 
@@ -154,10 +154,10 @@ sample1
 4. Import the project in your IDE. Everything should be Ok, in particular *Build.java* should compile and execute within your IDE.
 
 ```java
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 
-class Commands extends JkCommandSet {
+class Commands extends JkClass {
 
     public static void main(String[] args) {
         Commands commands = JkInit.instanceOf(Commands.class, args);
@@ -173,13 +173,13 @@ Add the following method to the `Commands` class.
 
 ```java
 import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-class Commands extends JkCommandSet {
+class Commands extends JkClass {
 
     public void displayGoogle() throws MalformedURLException {
         String content = JkUtilsIO.read(new URL("https://www.google.com/"));
@@ -203,17 +203,17 @@ From class Commands :
   Methods :
     displayGoogle : No description available.
 
-From class JkCommandSet :
+From class JkClass :
   Methods :
     clean : Cleans the output directory.
-    help : Displays all available methods and options defined for this commandSet class.
+    help : Displays all available methods and options defined for this Jeka class.
 ...
 ```
 
 Any public instance method with no-args and returning `void` fits to be a _command_. You can call several _commands_ in a single row.
 
 You can also launch/debug command directly from your IDE, using the *main* method. Note that for so, you must instantiate 
-your _commandSet class_ using `JkInit.instanceOf`.
+your _Jeka class_ using `JkInit.instanceOf`.
 
 ## Self document your method
 
@@ -241,7 +241,7 @@ May you like to see Google page source but you probably want to apply this metho
 To make it configurable, just declare the url in a public field so its value can be injected from command line.
 
 ```java
-class Commands extends JkCommandSet {
+class Commands extends JkClass {
 
     @JkDoc("The url to display content.")   // Optional self documentation
     public String url = "https://www.google.com/";
@@ -273,7 +273,7 @@ From class Commands :
 ...
 ```
 
-## Use 3rd party libs in your commandSet class
+## Use 3rd party libs in your Jeka class
 
 You can mention inline the external libraries you need to compile and execute your _command class_. For exemple, you main need *Apache HttpClient* library to perform some non basic HTTP tasks.
 
@@ -282,7 +282,7 @@ You can mention inline the external libraries you need to compile and execute yo
 ```java
 @JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.8")  // Can import files from Maven repos
 @JkDefClasspath("../local_libs/my-utility.jar")   // or simply located locally
-class Commands extends JkCommandSet {
+class Commands extends JkClass {
    ...
 }
 ```
@@ -302,19 +302,19 @@ public void post() {
 ```
 Execute *post* method as usual : `jeka post`.
 
-## Import a commandSet class from another Jeka project
+## Import a Jeka class from another Jeka project
 
 Imagine that you want to want to reuse *displayContent* method from project _sample1_ in another project. Let's create a new _sample2_ project located in a sibling folder than _sample1_.
 
 1. Execute `mkdir sample2` then `cd sample2` followed by `jeka scaffold#run intellij#` (or `jeka scaffold#run eclipse#`)
-2. Rename sample2 _commandSet class_ 'Sample2Commands` to avoid name collision. Be careful to rename its filename as well unless Jeka will fail.
-3. Add a field of type `JkCommandSet` annotated with `JkImportProject` and the relative path of _sample1_ as value.
+2. Rename sample2 _Jeka class_ 'Sample2Commands` to avoid name collision. Be careful to rename its filename as well unless Jeka will fail.
+3. Add a field of type `JkClass` annotated with `JkImportProject` and the relative path of _sample1_ as value.
  
 ```java
-class Sample2Commands extends JkCommandSet {
+class Sample2Commands extends JkClass {
 
     @JkDefClasspathProject("../sample1")
-    private JkCommandSet sample1Commands;
+    private JkClass sample1Commands;
 
     public void hello() throws MalformedURLException {
         System.out.println("Hello World");
@@ -322,12 +322,12 @@ class Sample2Commands extends JkCommandSet {
     
 }
 ```
-4. Execute `jeka intellij#iml` (or `jeka eclipse#files`) to add _sample1_ dependencies to your IDE. Now _Sampl2Commands_ can refer to the _commandSet class_ of _sample1_.
+4. Execute `jeka intellij#iml` (or `jeka eclipse#files`) to add _sample1_ dependencies to your IDE. Now _Sampl2Commands_ can refer to the _Jeka class_ of _sample1_.
 
-5. Replace _JkCommandSet_ Type by the _Commands_ type from _sample1_ and use it in method implementation.
+5. Replace _JkClass_ Type by the _Commands_ type from _sample1_ and use it in method implementation.
 
 ```java
-class Sample2Commands extends JkCommandSet {
+class Sample2Commands extends JkClass {
 
     @JkDefClasspathProject("../sample1")
     private Commands sample1Commands;  // This class comes from sample1
@@ -364,16 +364,16 @@ Content of https://fr.wikipedia.org
 
 ## Restrictions
 
-Except that _commandSet classes_ must have the same name than their filename, there is not known restriction about what you can do with _commandSet classes_ or _def classes_. 
+Except that _Jeka classes_ must have the same name than their filename, there is not known restriction about what you can do with _Jeka classes_ or _def classes_. 
 You can define as many classes as you want into def directory. Organise them within Java packages or not. 
 
 # Work with plugins
 
-Each _commandSet class_ instance acts as a registry for plugins. In turn, plugins can interact each other through this registry.
+Each _Jeka class_ instance acts as a registry for plugins. In turn, plugins can interact each other through this registry.
 
 ## Write your first plugin
 
-Let's implement similar commandSet as previously but using plugins :
+Let's implement similar Jeka as previously but using plugins :
 
 * Create a new project 'sample-plugins' as we did for 'sample1". 
 * Remove all classes that has been created in 'jeka/def' : we don't need it for now.
@@ -386,7 +386,7 @@ public class JkPluginWebReader extends JkPlugin {
     @JkDoc("The url to display content.")
     public String url = "https://www.google.com/";
 
-    protected JkPluginWebReader(JkCommandSet commands) {
+    protected JkPluginWebReader(JkClass commands) {
         super(commands);
     }
 
@@ -414,26 +414,26 @@ Now you can execute `jeka webReader#help` to display which options and commands 
 
 To execute `displayContent` command : `jeka webReader#displayContent -webReader#url=https://twitter.com`.
 
-You don't need to have a _commandSet class_ defined in _jeka/def_. By default Jeka uses `dev.jeka.core.tool.JkCommandSet`.
+You don't need to have a _Jeka class_ defined in _jeka/def_. By default Jeka uses `dev.jeka.core.tool.JkClass`.
 
 ## What did happened behind the scene ?
 
-Mentioning `webReader#` on the command line has instantiated _JkPluginWebReader_ class, attaching it to the current _commandSet class_ instance.
+Mentioning `webReader#` on the command line has instantiated _JkPluginWebReader_ class, attaching it to the current _Jeka class_ instance.
 
 Mentioning `webReader#displayContent -webReader#url=https://twitter.com`  has injected the url value and invoke 
 `JkPluginWebReader#displayContent` method on the instance plugin. 
-This mechanism is similar to options/commands existing on _commandSet class_.
+This mechanism is similar to options/commands existing on _Jeka class_.
 
-## Configure plugins within the commandSet class
+## Configure plugins within the Jeka class
 
-You may need to configure default options on plugins and invoke them from the _commandSet classes_ without specifying 
+You may need to configure default options on plugins and invoke them from the _Jeka classes_ without specifying 
 everything from the command line. 
 
-For such create a _commandSet class_ within the same project and declare the plugin as below. In the _commandSet class_ constructor 
+For such create a _Jeka class_ within the same project and declare the plugin as below. In the _Jeka class_ constructor 
 you can redefine plugin state as its default field values. 
 
 ```
-public class MyCommands extends JkCommandSet {
+public class MyCommands extends JkClass {
 
     private final JkPluginWebReader webReaderPlugin = getPlugin(JkPluginWebReader.class);
 
@@ -452,7 +452,7 @@ Now, if you execute `jeka webReader#help` you'll notice that the default `url` v
 
 You can also use `jeka show` as a shorthand for `jeka webReader#displayContent`.
 
-Note : You can also configure plugin by overriding `JkCommandSet@setup` methods. In this case 
+Note : You can also configure plugin by overriding `JkClass@setup` methods. In this case 
 the values set here will override the ones provided by command line.
 
 ## Configure/Enhance a plugin from another one
@@ -461,7 +461,7 @@ It's quite common to have a plugin that acts as an enhancer of another one. For 
  plugin by adding test coverage when tests are run. 
  
 Of course this kind of mechanism is possible because _Java_ plugin test feature has been designed to be extendable 
- but the idea is that a plugin can access or load any other plugins from its owning _commandSet class_. 
+ but the idea is that a plugin can access or load any other plugins from its owning _Jeka class_. 
  
 Let's modify the webReader plugin in order it can allow the url be modified from the outside.
 
@@ -473,8 +473,8 @@ public class JkPluginWebReader extends JkPlugin {
 
     private UnaryOperator<URL> urlTransformer = url -> url;
 
-    protected JkPluginWebReader(JkCommandSet commandSet) {
-        super(commandSet);
+    protected JkPluginWebReader(JkClass Jeka) {
+        super(Jeka);
     }
 
     @JkDoc("Fetch Google page and display its source on the console.")
@@ -497,13 +497,13 @@ Now let's create a plugin HttpsIzer in _jeka/def_ that forces the webReader plug
 ```
 public class JkPluginHttpsIzer extends JkPlugin {
 
-    protected JkPluginHttpsIzer(JkCommandSet commandSet) {
+    protected JkPluginHttpsIzer(JkClass Jeka) {
         super(commands);
     }
 
     @Override
     protected void activate() {
-        boolean webReaderPresent = this.getCommandSet().getPlugins().hasLoaded(JkPluginWebReader.class);
+        boolean webReaderPresent = this.getJkClass().getPlugins().hasLoaded(JkPluginWebReader.class);
         if (!webReaderPresent) {
             return;
         }
@@ -514,7 +514,7 @@ public class JkPluginHttpsIzer extends JkPlugin {
                 throw new IllegalArgumentException(e);
             }
         };
-        JkPluginWebReader webReader = this.getCommandSet().getPlugins().get(JkPluginWebReader.class);
+        JkPluginWebReader webReader = this.getJkClass().getPlugins().get(JkPluginWebReader.class);
         webReader.setUrlTransformer(urlTransformer);
     }
 }
@@ -526,9 +526,9 @@ Reading content from https://jeka.dev
 ...
 ```
 
-**Explanation:** Adding `httpIzer#` instantiates and binds httpIzer plugin to its owning _commandSet class_ instance. 
+**Explanation:** Adding `httpIzer#` instantiates and binds httpIzer plugin to its owning _Jeka class_ instance. 
 During this process, `JkPlugin#activate` method is invoked. By default this method does nothing but as we have 
-overrode it in `JkPluginHttpsIzer`, it modifies the `JkPluginWebReader` plugin bound to the owning _commandSet_ instance.
+overrode it in `JkPluginHttpsIzer`, it modifies the `JkPluginWebReader` plugin bound to the owning _Jeka_ instance.
 
 
 ## Reuse a plugin across projects
@@ -561,11 +561,11 @@ As for any other jar, you can declare it in a `@JkDefClasspath` annotation.
 
 ```
 @JkDefClasspath("org.myorg:myjekaplugin:0.1")
-class MyBuid extends JkCommandSet {
+class MyBuid extends JkClass {
 }
 ```
 
-If you don't have declared it in a _commandSet class_ `@JkDefClasspath` annotation you can still invoke it from 
+If you don't have declared it in a _Jeka class_ `@JkDefClasspath` annotation you can still invoke it from 
 the command line : `jeka @org.myorg:myjekaplugin:0.1 myPlugin#doSomething`.
 
 
@@ -594,7 +594,7 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.java.testing.JkJavaTestClasses;
 import dev.jeka.core.api.java.testing.JkUnit;
 import dev.jeka.core.api.java.testing.JkUnit.JunitReportDetail;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 
 import java.nio.charset.Charset;
@@ -603,7 +603,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.6")
-public class AntStyleBuild extends JkCommandSet {
+public class AntStyleBuild extends JkClass {
 
     Path src = getBaseDir().resolve("src/main/javaPlugin");
     Path buildDir = getBaseDir().resolve("build/output");
@@ -755,15 +755,15 @@ any dependency you need.
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkPluginJava;
 
-class Build extends JkCommandSet {
+class Build extends JkClass {
 
     final JkPluginJava java = getPlugin(JkPluginJava.class);
 
     /*
-     * Configures plugins to be bound to this commandSet class. When this method is called, option
+     * Configures plugins to be bound to this Jeka class. When this method is called, option
      * fields have already been injected from command line.
      */
     @Override

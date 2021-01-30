@@ -97,7 +97,7 @@ class Environment {
 
         int logMaxLength = -1;
 
-        String commandClass;
+        String jkClassName;
 
         private final Set<String> names = new HashSet<>();
 
@@ -109,7 +109,7 @@ class Environment {
             this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
             this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
-            this.commandClass = valueOf(String.class, map, null, "CommandClass", "CC");
+            this.jkClassName = valueOf(String.class, map, null, "JekaClass", "JKC");
         }
 
         Set<String> names() {
@@ -118,7 +118,7 @@ class Environment {
 
         @Override
         public String toString() {
-            return "CommandSetClass=" + JkUtilsObject.toString(commandClass) + ", LogVerbose=" + logVerbose
+            return "JkClass=" + JkUtilsObject.toString(jkClassName) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logBanner + ", LogMaxLength=" + logMaxLength;
         }
 

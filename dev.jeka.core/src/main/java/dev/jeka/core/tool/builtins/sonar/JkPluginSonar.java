@@ -19,8 +19,8 @@ public class JkPluginSonar extends JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
 
-    public JkPluginSonar(JkCommandSet run) {
-        super(run);
+    public JkPluginSonar(JkClass jkClass) {
+        super(jkClass);
     }
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
@@ -56,7 +56,7 @@ public class JkPluginSonar extends JkPlugin {
             "Options prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
             "will be appended to sonarQube properties.")
     public void run() {
-        configureSonarFrom(getCommandSet().getPlugins().get(JkPluginJava.class).getProject()).withProperties(properties).run();
+        configureSonarFrom(getJkClass().getPlugins().get(JkPluginJava.class).getProject()).withProperties(properties).run();
     }
 
     /**

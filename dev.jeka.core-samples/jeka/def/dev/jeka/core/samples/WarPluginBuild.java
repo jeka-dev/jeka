@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.java.JkPluginWar;
@@ -22,7 +22,7 @@ import static dev.jeka.core.api.depmanagement.JkScope.PROVIDED;
  * @author Jerome Angibaud
  * @formatter:off
  */
-public class WarPluginBuild extends JkCommandSet {
+public class WarPluginBuild extends JkClass {
 
     public int port = 8080;
 

@@ -2,7 +2,7 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkScope;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
@@ -22,7 +22,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
  *
  * Jacoco report is generated in <i>jeka/output/jacoco</i>.
  */
-public class JacocoPluginBuild extends JkCommandSet {
+public class JacocoPluginBuild extends JkClass {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 

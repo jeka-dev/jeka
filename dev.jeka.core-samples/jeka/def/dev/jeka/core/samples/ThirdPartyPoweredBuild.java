@@ -2,7 +2,7 @@ package dev.jeka.core.samples;
 
 import com.google.common.base.MoreObjects;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
@@ -24,7 +24,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
  */
 @JkDefClasspath("commons-httpclient:commons-httpclient:3.1")
 @JkDefClasspath("com.google.guava:guava:21.0")
-public class ThirdPartyPoweredBuild extends JkCommandSet {
+public class ThirdPartyPoweredBuild extends JkClass {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
     

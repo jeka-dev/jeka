@@ -16,7 +16,7 @@ protected void setup() {  // project to build lies in a sibling folder.
 ### My commandSet class does not compile so I can't invoke any Jeka method as 'help' or 'scaffold#run'. What can I do ?
 
 You can specify a built-in commandSet class to run. This way, compilation won't occur.
-For example `jeka -CommandClass=JkCommandSet` or `jeka -CC=JkCommandSet scaffold#run java#"`.
+For example `jeka -JKC` or `jeka -JKC scaffold#run java#"`.
 
 # Compilation
 
@@ -27,8 +27,6 @@ If code must be build on a another JDK version, you can specify JDK path for dif
 Just mention it as option, for example in your _[JEKA HOME]/options.properties_ file.
 
 ```
-jdk.6=/software/jdk6
-jdk.7=/software/jdk7
 jdk.9=/software/jdk9
 ...
 ```
@@ -43,7 +41,7 @@ Jeka can use any JSR199 Java compiler to compile your Java code. Just set the co
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkDefClasspath("org.eclipse.jdt.core.compiler:ecj:4.6.1")
-public class Build extends JkCommandSet{
+public class Build extends JkClass{
     java.getProject().getConstruction().getCompilation()
              .getCompiler().setCompilerTool(new EclipseCompiler());
 }

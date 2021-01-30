@@ -2,13 +2,13 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 
 /**
  * This should be run with org.jerkar.samples as working dir.
  */
-public class PureApiBuild extends JkCommandSet {
+public class PureApiBuild extends JkClass {
 
     public void cleanBuild() {
         clean();

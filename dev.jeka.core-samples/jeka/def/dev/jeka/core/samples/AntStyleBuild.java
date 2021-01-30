@@ -7,7 +7,7 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.java.project.JkJavaProjectPublication;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
 
@@ -23,7 +23,7 @@ import java.util.List;
  * @author Jerome Angibaud
  */
 @JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.6")
-public class AntStyleBuild extends JkCommandSet implements JkJavaIdeSupport.JkSupplier {
+public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
     Path srcJar = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + "-sources.jar");

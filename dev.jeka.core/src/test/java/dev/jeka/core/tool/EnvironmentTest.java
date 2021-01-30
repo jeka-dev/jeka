@@ -8,8 +8,8 @@ public class EnvironmentTest {
 
     @Test
     public void initialize() {
-        Environment.initialize(new String[] {"-LV=true", "-CC=HttpClientTaskBuild", "clean", "java#pack", "java#publish"
-                , "-java#publish.localOnly", "-LH"});
-        assertEquals("HttpClientTaskBuild", Environment.standardOptions.commandClass);
+        Environment.initialize(new String[] {"-LV=true", "-JKC=HttpClientTaskBuild", "clean", "java#pack", "java#publish"
+                , "-java#publish.localOnly", "-LB"});
+        assertEquals("HttpClientTaskBuild", Environment.standardOptions.jkClassName);
     }
 }

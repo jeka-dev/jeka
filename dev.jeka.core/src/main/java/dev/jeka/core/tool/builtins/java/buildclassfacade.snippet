@@ -1,13 +1,13 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.tooling.JkGitWrapper;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 
-class Build extends JkCommandSet {
+class Build extends JkClass {
 
     final JkPluginJava java = getPlugin(JkPluginJava.class);
 

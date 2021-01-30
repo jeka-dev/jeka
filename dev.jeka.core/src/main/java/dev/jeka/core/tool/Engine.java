@@ -22,11 +22,11 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * Engine having responsibility of compiling command classes, instantiate and run them.<br/>
- * Command class sources are expected to lie in [project base dir]/jeka/def <br/>
+ * Engine having responsibility of compiling def classes, instantiate Jeka class and run it.<br/>
+ * Jeka class sources are expected to lie in [project base dir]/jeka/def <br/>
  * Classes having simple name starting with '_' are ignored.
  *
- * Command classes can have dependencies on jars : <ul>
+ * Jeka classes can have dependencies on jars : <ul>
  *     <li>located in [base dir]/jeka/boot directory</li>
  *     <li>declared in {@link JkDefClasspath} annotation</li>
  * </ul>
@@ -45,11 +45,11 @@ final class Engine {
 
     private JkRepoSet defRepos;
 
-    private List<Path> rootsOfImportedCommandSets = new LinkedList<>();
+    private List<Path> rootsOfImportedJekaClasses = new LinkedList<>();
 
     private List<String> compileOptions = new LinkedList<>();
 
-    private final CommandResolver resolver;
+    private final JkClassResolver resolver;
 
     /**
      * Constructs an engine for the specified base directory.
@@ -59,10 +59,10 @@ final class Engine {
         this.projectBaseDir = baseDir.normalize();
         defRepos = repos();
         this.defDependencies = JkDependencySet.of();
-        this.resolver = new CommandResolver(baseDir);
+        this.resolver = new JkClassResolver(baseDir);
     }
 
-    <T extends JkCommandSet> T getCommands(Class<T> baseClass, boolean initialised) {
+    <T extends JkClass> T getJkClass(Class<T> baseClass, boolean initialised) {
         if (resolver.needCompile()) {
             this.compile(true);
         }
@@ -70,41 +70,41 @@ final class Engine {
     }
 
     /**
-     * Pre-compile and compile command classes (if needed) then execute methods mentioned in command line
+     * Pre-compile and compile Jeka classes (if needed) then execute methods mentioned in command line
      */
-    void execute(CommandLine commandLine, String commandSetClassHint, JkLog.Verbosity verbosityToRestore) {
+    void execute(CommandLine commandLine, String jkClassHint, JkLog.Verbosity verbosityToRestore) {
         final long start = System.nanoTime();
-        JkLog.startTask("Compile def and initialise commandSet classes");
-        JkCommandSet jkCommandSet = null;
+        JkLog.startTask("Compile def and initialise Jeka classes");
+        JkClass jkClass = null;
         JkPathSequence path = JkPathSequence.of();
         preCompile();  // Need to pre-compile to get the declared def dependencies
-        if (!JkUtilsString.isBlank(commandSetClassHint)) {  // First find a class in the existing classpath without compiling
+        if (!JkUtilsString.isBlank(jkClassHint)) {  // First find a class in the existing classpath without compiling
             if (Environment.standardOptions.logRuntimeInformation != null) {
                 path = path.and(compile(false));
             }
-            jkCommandSet = getCommandsInstance(commandSetClassHint, path);
+            jkClass = getJkClassInstance(jkClassHint, path);
         }
-        if (jkCommandSet == null) {
+        if (jkClass == null) {
             path = compile(true).and(path);
-            jkCommandSet = getCommandsInstance(commandSetClassHint, path);
-            if (jkCommandSet == null) {
-                String hint = JkUtilsString.isBlank(commandSetClassHint) ? "" : " named " + commandSetClassHint;
-                String prompt = !JkUtilsString.isBlank(commandSetClassHint) ? ""
+            jkClass = getJkClassInstance(jkClassHint, path);
+            if (jkClass == null) {
+                String hint = JkUtilsString.isBlank(jkClassHint) ? "" : " named " + jkClassHint;
+                String prompt = !JkUtilsString.isBlank(jkClassHint) ? ""
                         : "\nAre you sure this directory is a Jeka project ?";
-                throw new JkException("Can't find or guess any command class%s in project %s.%s",
+                throw new JkException("Can't find or guess any Jeka class %s in project %s.%s",
                         hint, this.projectBaseDir, prompt);
             }
         }
-        jkCommandSet.getImportedCommandSets().setImportedRunRoots(this.rootsOfImportedCommandSets);
+        jkClass.getImportedJkClasses().setImportedRunRoots(this.rootsOfImportedJekaClasses);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        JkLog.info("Jeka commands are ready to be executed.");
+        JkLog.info("Jeka classes are ready to be executed.");
         JkLog.setVerbosity(verbosityToRestore);
         if (Environment.standardOptions.logRuntimeInformation != null) {
             JkLog.info("Jeka Classpath : ");
             path.iterator().forEachRemaining(item -> JkLog.info("    " + item));
         }
         try {
-            this.launch(jkCommandSet, commandLine);
+            this.launch(jkClass, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -117,7 +117,7 @@ final class Engine {
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.defDependencies = this.defDependencies.and(parser.dependencies());
         this.defRepos = parser.importRepos().and(defRepos);
-        this.rootsOfImportedCommandSets = parser.projects();
+        this.rootsOfImportedJekaClasses = parser.projects();
         this.compileOptions = parser.compileOptions();
     }
 
@@ -152,17 +152,17 @@ final class Engine {
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
-    private JkCommandSet getCommandsInstance(String commandClassHint, JkPathSequence runtimePath) {
+    private JkClass getJkClassInstance(String jkClassHint, JkPathSequence runtimePath) {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
-        final JkCommandSet commands = resolver.resolve(commandClassHint);
-        if (commands == null) {
+        final JkClass jkClass = resolver.resolve(jkClassHint);
+        if (jkClass == null) {
             return null;
         }
         try {
-            commands.setDefDependencyResolver(this.computeDefDependencies(), getDefDependencyResolver());
-            return commands;
+            jkClass.setDefDependencyResolver(this.computeDefDependencies(), getDefDependencyResolver());
+            return jkClass;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -194,12 +194,12 @@ final class Engine {
                                                     LinkedHashSet<Path>  pathEntries,
                                                     boolean compileSources) {
         JkPathSequence pathSequence = JkPathSequence.of();
-        boolean compileImports = !this.rootsOfImportedCommandSets.isEmpty();
+        boolean compileImports = !this.rootsOfImportedJekaClasses.isEmpty();
         if (compileImports) {
-            JkLog.startTask("Compile command classes of dependent projects : "
-                    + toRelativePaths(this.projectBaseDir, this.rootsOfImportedCommandSets));
+            JkLog.startTask("Compile Jeka classes of dependent projects : "
+                    + toRelativePaths(this.projectBaseDir, this.rootsOfImportedJekaClasses));
         }
-        for (final Path file : this.rootsOfImportedCommandSets) {
+        for (final Path file : this.rootsOfImportedJekaClasses) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries, compileSources);
             pathSequence = pathSequence.and(file);
@@ -229,23 +229,23 @@ final class Engine {
     private void wrapCompile(Supplier<Boolean> compileTask) {
         boolean success = compileTask.get();
         if (!success) {
-            throw new JkException("Compilation of Jeka files failed. You can run jeka -CC=JkCommandSet to use default commands " +
+            throw new JkException("Compilation of Jeka files failed. You can run jeka -JKC to use default JkClass " +
                     " instead of the ones defined in 'def'.");
         }
     }
 
-    private void launch(JkCommandSet jkCommandSet, CommandLine commandLine) {
+    private void launch(JkClass jkClass, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkCommandSet importedCommands : jkCommandSet.getImportedCommandSets().getAll()) {
-                runProject(importedCommands, commandLine.getSubProjectMethods());
+            for (final JkClass importedJkClass : jkClass.getImportedJkClasses().getAll()) {
+                runProject(importedJkClass, commandLine.getSubProjectMethods());
             }
-            runProject(jkCommandSet, commandLine.getSubProjectMethods());
+            runProject(jkClass, commandLine.getSubProjectMethods());
         }
         List<CommandLine.MethodInvocation> methods = commandLine.getMasterMethods();
         if (methods.isEmpty() && Environment.standardOptions.logRuntimeInformation == null) {
             methods = Collections.singletonList(CommandLine.MethodInvocation.normal(JkConstants.DEFAULT_METHOD));
         }
-        runProject(jkCommandSet, methods);
+        runProject(jkClass, methods);
     }
 
     private boolean hasKotlin() {
@@ -278,19 +278,19 @@ final class Engine {
         return JkDependencyResolver.of();
     }
 
-    private static void runProject(JkCommandSet jkCommandSet, List<CommandLine.MethodInvocation> invokes) {
+    private static void runProject(JkClass jkClass, List<CommandLine.MethodInvocation> invokes) {
         for (final CommandLine.MethodInvocation methodInvocation : invokes) {
-            invokeMethodOnCommandSetOrPlugin(jkCommandSet, methodInvocation);
+            invokeMethodOnCommandSetOrPlugin(jkClass, methodInvocation);
         }
     }
 
-    private static void invokeMethodOnCommandSetOrPlugin(JkCommandSet commandSet,
+    private static void invokeMethodOnCommandSetOrPlugin(JkClass jkClass,
                                                          CommandLine.MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
-            final JkPlugin plugin = commandSet.getPlugins().get(methodInvocation.pluginName);
+            final JkPlugin plugin = jkClass.getPlugins().get(methodInvocation.pluginName);
             invokeMethodOnCommandsOrPlugin(plugin, methodInvocation.methodName);
         } else {
-            invokeMethodOnCommandsOrPlugin(commandSet, methodInvocation.methodName);
+            invokeMethodOnCommandsOrPlugin(jkClass, methodInvocation.methodName);
         }
     }
 

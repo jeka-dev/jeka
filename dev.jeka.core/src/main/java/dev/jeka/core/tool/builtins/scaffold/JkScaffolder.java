@@ -27,15 +27,15 @@ public final class JkScaffolder {
 
     private final Path baseDir;
 
-    private String commandClassCode;
+    private String jkClassCode;
 
-    private String classFilename = "Commands.java";
+    private String classFilename = "Jeka.java";
 
     private final JkRunnables extraActions = JkRunnables.of();
 
     JkScaffolder(Path baseDir) {
         super();
-        this.commandClassCode = "";
+        this.jkClassCode = "";
         this.baseDir= baseDir;
     }
 
@@ -48,7 +48,7 @@ public final class JkScaffolder {
         JkLog.info("Create " + def);
         final Path buildClass = def.resolve(classFilename);
         JkLog.info("Create " + buildClass);
-        JkUtilsPath.write(buildClass, commandClassCode.getBytes(Charset.forName("UTF-8")));
+        JkUtilsPath.write(buildClass, jkClassCode.getBytes(Charset.forName("UTF-8")));
         extraActions.run();
     }
 
@@ -122,8 +122,8 @@ public final class JkScaffolder {
         }
     }
 
-    public void setCommandClassCode(String code) {
-        this.commandClassCode = code;
+    public void setJekaClassCode(String code) {
+        this.jkClassCode = code;
     }
 
     public void setClassFilename(String classFilename) {

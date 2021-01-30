@@ -31,17 +31,17 @@ public class JkPluginGpg extends JkPlugin {
 
     private JkGpg gpg;
 
-    protected JkPluginGpg(JkCommandSet commands) {
-        super(commands);
+    protected JkPluginGpg(JkClass jkClass) {
+        super(jkClass);
     }
 
     protected void beforeSetup() {
-        Path localPub = getCommandSet().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
+        Path localPub = getJkClass().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
         Path pub = JkUtilsPath.firstExisting(publicRingPath, localPub, JkGpg.getDefaultPubring());
         if (pub == null) {
             pub = JkGpg.getDefaultPubring();
         }
-        Path localSec = getCommandSet().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
+        Path localSec = getJkClass().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
         Path sec = JkUtilsPath.firstExisting(secretRingPath, localSec, JkGpg.getDefaultSecring());
         if (sec == null) {
             sec = JkGpg.getDefaultSecring();

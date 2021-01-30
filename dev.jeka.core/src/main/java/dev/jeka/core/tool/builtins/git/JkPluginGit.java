@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.git;
 
 import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.tooling.JkGitWrapper;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 
@@ -11,9 +11,9 @@ public class JkPluginGit extends JkPlugin {
 
     private final JkGitWrapper git;
 
-    protected JkPluginGit(JkCommandSet commands) {
-        super(commands);
-        git = JkGitWrapper.of(commands.getBaseDir());
+    protected JkPluginGit(JkClass jkClass) {
+        super(jkClass);
+        git = JkGitWrapper.of(jkClass.getBaseDir());
     }
 
     @JkDoc("Perform a dirty check first then put a tag at the HEAD and push it to remote.")

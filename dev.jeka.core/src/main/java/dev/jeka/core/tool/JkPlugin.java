@@ -21,26 +21,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Plugin instances are owned by a <code>JkCommandSet</code> instance. The relationship is bidirectional :
- * <code>JkCommandSet</code> instances can invoke plugin methods and vice-versa.<p>
+ * Plugin instances are owned by a <code>JkClass</code> instance. The relationship is bidirectional :
+ * <code>JkClass</code> instances can invoke plugin methods and vice-versa.<p>
  *
- * Therefore plugins can interact with (or load) other plugins from the owning <code>JkCommandSet</code> instance
+ * Therefore plugins can interact with (or load) other plugins from the owning <code>JkClass</code> instance
  * (which is a quite common pattern).
  */
 public abstract class JkPlugin {
 
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
-    private final JkCommandSet commandSet;
+    private final JkClass jkClass;
 
     /*
-     * Plugin instances are likely to be configured by the owning <code>JkCommandSet</code> instance, before options
+     * Plugin instances are likely to be configured by the owning <code>JkClass</code> instance, before options
      * are injected.
      * If a plugin needs to initialize state before options are injected, you have to do it in the
      * constructor.
      */
-    protected JkPlugin(JkCommandSet commandSet) {
-        this.commandSet = commandSet;
+    protected JkPlugin(JkClass jkClass) {
+        this.jkClass = jkClass;
         checkCompatibility();;
     }
 
@@ -52,17 +52,17 @@ public abstract class JkPlugin {
     /**
      * Override this method to initialize the plugin.
      * This method is invoked right after plugin option fields has been injected and prior
-     * {@link JkCommandSet#setup()} is invoked.
+     * {@link JkClass#setup()} is invoked.
      */
     protected void beforeSetup() throws Exception {
     }
 
     /**
      * Override this method to perform some actions, once the plugin has been setup by
-     * {@link JkCommandSet#setup()} method.<p>
+     * {@link JkClass#setup()} method.<p>
      * Typically, some plugins have to configure other ones (For instance, <i>java</i> plugin configures
      * <i>scaffold</i> plugin to instruct what to use as a template build class). Those kind of
-     * configuration is better done here as the setup made in {@link JkCommandSet} is likely
+     * configuration is better done here as the setup made in {@link JkClass} is likely
      * to impact the result of the configuration.
      */
     protected void afterSetup() throws Exception {
@@ -107,8 +107,8 @@ public abstract class JkPlugin {
         return JkUtilsString.uncapitalize(suffix);
     }
 
-    protected JkCommandSet getCommandSet() {
-        return commandSet;
+    protected JkClass getJkClass() {
+        return jkClass;
     }
 
     @Override

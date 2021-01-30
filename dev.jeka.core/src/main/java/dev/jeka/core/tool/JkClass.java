@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Base class for defining commands executable from command line.
+ * Base class for defining methods executable from command line.
  *
  * @author Jerome Angibaud
  */
-public class JkCommandSet {
+public class JkClass {
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
@@ -37,13 +37,13 @@ public class JkCommandSet {
 
     private final Path baseDir;
 
-    private JkCommandSetPlugins plugins;
+    private JkClassPlugins plugins;
 
     private JkDependencyResolver defDependencyResolver;
 
     private JkDependencySet defDependencies;
 
-    private final JkImportedCommandSets importedCommandSets;
+    private final JkImportedJkClasses importedJkClasses;
 
     // ------------------ options --------------------------------------------------------
 
@@ -53,50 +53,50 @@ public class JkCommandSet {
     // ------------------ Instantiation cycle  --------------------------------------
 
     /**
-     * Constructs a {@link JkCommandSet}. Using constructor alone won't give you an instance populated with runtime options
+     * Constructs a {@link JkClass}. Using constructor alone won't give you an instance populated with runtime options
      * neither decorated with plugins. <br/>
-     * Use {@link JkCommandSet#of(Class)} to get instances populated with options and decorated with plugins.
+     * Use {@link JkClass#of(Class)} to get instances populated with options and decorated with plugins.
      */
-    protected JkCommandSet() {
+    protected JkClass() {
         final Path baseDirContext = BASE_DIR_CONTEXT.get();
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
         // Instantiating imported runs
-        this.importedCommandSets = JkImportedCommandSets.of(this);
+        this.importedJkClasses = JkImportedJkClasses.of(this);
 
         // Instantiate plugins
-        this.plugins = new JkCommandSetPlugins(this, Environment.commandLine.getPluginOptions());
+        this.plugins = new JkClassPlugins(this, Environment.commandLine.getPluginOptions());
     }
 
     /**
-     * Creates a instance of the specified command class (extending JkCommandSet), including option injection, plugin loading
+     * Creates a instance of the specified Jeka class (extending JkClass), including option injection, plugin loading
      * and plugin activation.
      */
-    public static <T extends JkCommandSet> T of(Class<T> commandClass) {
-        JkLog.startTask("Instantiate commandSet class " + commandClass.getName() + " at " + BASE_DIR_CONTEXT.get());
-        final T commands = ofUninitialised(commandClass);
+    public static <T extends JkClass> T of(Class<T> jkClass) {
+        JkLog.startTask("Instantiate Jeka class " + jkClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        final T jkClassInstance = ofUninitialised(jkClass);
         try {
-            commands.initialise();
+            jkClassInstance.initialise();
         } catch (Exception e) {
             throw JkUtilsThrowable.unchecked(e);
         }
         JkLog.endTask();
-        return commands;
+        return jkClassInstance;
     }
 
     void initialise() throws Exception {
         setup();
 
-        // initialise imported projects after setup to let a chance master commands to modify imported commands
-        // in the setup method.
-        for (JkCommandSet jkCommandSet : importedCommandSets.getDirects()) {
-            jkCommandSet.initialise();
+        // initialise imported projects after setup to let a chance master Jeka class
+        // to modify imported Jeka classes in the setup method.
+        for (JkClass jkClass : importedJkClasses.getDirects()) {
+            jkClass.initialise();
         }
 
         for (JkPlugin plugin : new LinkedList<>(plugins.getLoadedPlugins())) {
-            List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
+            List<ProjectDef.JkClassOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
             try {
                 plugin.afterSetup();
             } catch (RuntimeException e) {
@@ -108,34 +108,34 @@ public class JkCommandSet {
 
         // Extra run configuration
         postSetup();
-        List<ProjectDef.CommandOptionDef> defs = ProjectDef.RunClassDef.of(this).optionDefs();
+        List<ProjectDef.JkClassOptionDef> defs = ProjectDef.RunClassDef.of(this).optionDefs();
         JkLog.info(this.getClass().getSimpleName() + " instance initialized with options " + HelpDisplayer.optionValues(defs));
         baseDirContext(null);
     }
 
-    static <T extends JkCommandSet> T ofUninitialised(Class<T> commandClass) {
+    static <T extends JkClass> T ofUninitialised(Class<T> jkClass) {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
-        final T commands = JkUtilsReflect.newInstance(commandClass);
-        final JkCommandSet jkCommandSet = commands;
+        final T jkCkass = JkUtilsReflect.newInstance(jkClass);
+        final JkClass jkClassInstance = jkCkass;
 
         // Inject options & environment variables
-        JkOptions.populateFields(commands, JkOptions.readSystemAndUserOptions());
-        FieldInjector.injectEnv(commands);
-        Set<String> unusedCmdOptions = JkOptions.populateFields(commands, Environment.commandLine.getCommandOptions());
+        JkOptions.populateFields(jkCkass, JkOptions.readSystemAndUserOptions());
+        FieldInjector.injectEnv(jkCkass);
+        Set<String> unusedCmdOptions = JkOptions.populateFields(jkCkass, Environment.commandLine.getCommandOptions());
         unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key
-                + "' from command line does not match with any field of class " + commands.getClass().getName()));
+                + "' from command line does not match with any field of class " + jkCkass.getClass().getName()));
 
         // Load plugins declared in command line and inject options
-        jkCommandSet.plugins.loadCommandLinePlugins();
-        List<JkPlugin> plugins = jkCommandSet.getPlugins().getLoadedPlugins();
+        jkClassInstance.plugins.loadCommandLinePlugins();
+        List<JkPlugin> plugins = jkClassInstance.getPlugins().getLoadedPlugins();
         for (JkPlugin plugin : plugins) {
-            if (!jkCommandSet.plugins.getLoadedPlugins().contains(plugin)) {
-                jkCommandSet.plugins.injectOptions(plugin);
+            if (!jkClassInstance.plugins.getLoadedPlugins().contains(plugin)) {
+                jkClassInstance.plugins.injectOptions(plugin);
             }
         }
-        return commands;
+        return jkCkass;
     }
 
     /**
@@ -148,7 +148,7 @@ public class JkCommandSet {
 
     /**
      * This method is called once {@link JkPlugin#afterSetup()} method has been invoked on all plugins.
-     * It gives a chance to the command class to override some plugin settings.
+     * It gives a chance to the Jeka class to override some plugin settings.
      */
     protected void postSetup() throws Exception {
         // Do nothing by default
@@ -181,13 +181,13 @@ public class JkCommandSet {
     /**
      * Returns the container of loaded plugins for this instance.
      */
-    public JkCommandSetPlugins getPlugins() {
+    public JkClassPlugins getPlugins() {
         return this.plugins;
     }
 
     /**
      * Shorthand to <code>getPlugins().get(<Pluginclass>)</code>.
-     * Returns the plugin instance of the specified class loaded in the holding JkCommandSet instance. If it does not hold
+     * Returns the plugin instance of the specified class loaded in the holding JkClass instance. If it does not hold
      * a plugin of the specified class at call time, the plugin is loaded then returned.
      */
     public <T extends JkPlugin> T getPlugin(Class<T> pluginClass) {
@@ -210,7 +210,7 @@ public class JkCommandSet {
     }
 
     /**
-     * Dependencies necessary to compile the this command class. It is not the dependencies for building the project.
+     * Dependencies necessary to compile the this Jeka class. It is not the dependencies for building the project.
      */
     public final JkDependencySet getDefDependencies() {
         return defDependencies;
@@ -219,8 +219,8 @@ public class JkCommandSet {
     /**
      * Returns imported runs with plugins applied on.
      */
-    public final JkImportedCommandSets getImportedCommandSets() {
-        return importedCommandSets;
+    public final JkImportedJkClasses getImportedJkClasses() {
+        return importedJkClasses;
     }
 
     // ------------------------------ Command line methods ------------------------------
@@ -239,7 +239,7 @@ public class JkCommandSet {
     /**
      * Displays all available methods defined in this run.
      */
-    @JkDoc("Displays all available methods and options defined for this commandSet class.")
+    @JkDoc("Displays all available methods and options defined for this Jeka class.")
     public void help() {
         if (help.xml || help.xmlFile != null) {
             HelpDisplayer.help(this, help.xmlFile);

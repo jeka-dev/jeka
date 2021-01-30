@@ -50,7 +50,7 @@ public final class Main {
             }
             final Path workingDir = Paths.get("").toAbsolutePath();
             final Engine engine = new Engine(workingDir);
-            engine.execute(Environment.commandLine, Environment.standardOptions.commandClass, verbosity);
+            engine.execute(Environment.commandLine, Environment.standardOptions.jkClassName, verbosity);
             if (Environment.standardOptions.logBanner) {
                 displayOutro(start);
             }
@@ -100,7 +100,7 @@ public final class Main {
         if (!Environment.standardOptions.logSetup) {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
-        engine.execute(Environment.commandLine, Environment.standardOptions.commandClass, verbosity);
+        engine.execute(Environment.commandLine, Environment.standardOptions.jkClassName, verbosity);
     }
 
     private static int printAscii(boolean error, String fileName) {

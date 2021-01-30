@@ -6,7 +6,7 @@ import dev.jeka.core.api.depmanagement.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
@@ -21,7 +21,7 @@ import static dev.jeka.core.api.depmanagement.JkScope.TEST;
  * @author Jerome Angibaud
  * @formatter:off
  */
-public class JavaPluginBuild extends JkCommandSet {
+public class JavaPluginBuild extends JkClass {
 
     public final JkPluginJava java = getPlugin(JkPluginJava.class);
     

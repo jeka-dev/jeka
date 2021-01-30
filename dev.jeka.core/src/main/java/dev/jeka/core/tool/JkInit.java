@@ -21,9 +21,9 @@ import java.util.Map;
 public final class JkInit {
 
     /**
-     * Creates an instance of the specified command class and displays information about this class andPrepending environment.
+     * Creates an instance of the specified Jeka class and displays information about this class andPrepending environment.
      */
-    public static <T extends JkCommandSet> T instanceOf(Class<T> clazz, String... args) {
+    public static <T extends JkClass> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
         JkLog.setConsumer(Environment.standardOptions.logStyle);
         JkLog.Verbosity verbosity = JkLog.verbosity();
@@ -35,10 +35,10 @@ public final class JkInit {
         if (!Environment.standardOptions.logBanner) {
             JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
         }
-        final T jkCommands = JkCommandSet.of(clazz);
-        JkLog.info("Jeka commands are ready to be executed.");
+        final T jkClass = JkClass.of(clazz);
+        JkLog.info("Jeka methods are ready to be executed.");
         JkLog.setVerbosity(verbosity);
-        return jkCommands;
+        return jkClass;
     }
 
     static void displayRuntimeInfo() {
@@ -91,22 +91,22 @@ public final class JkInit {
      */
     public static void main(String[] args) {
         List<String> actualArgs = new LinkedList<>();
-        String commandClassName = null;
+        String jkClassName = null;
         for (String arg : args) {
             if (arg.startsWith("-CC=")) {
-                commandClassName = arg.substring(4);
+                jkClassName = arg.substring(4);
             } else {
                 actualArgs.add(arg);
             }
         }
-        JkUtilsAssert.argument(commandClassName != null,
-                "No argument starting with '-CC=' can be found. Cannot determine Command Class");
-        Class<JkCommandSet> clazz = JkInternalClasspathScanner.INSTANCE
-                .loadClassesHavingNameOrSimpleName(commandClassName, JkCommandSet.class);
+        JkUtilsAssert.argument(jkClassName != null,
+                "No argument starting with '-CC=' can be found. Cannot determine Jeka Class");
+        Class<JkClass> clazz = JkInternalClasspathScanner.INSTANCE
+                .loadClassesHavingNameOrSimpleName(jkClassName, JkClass.class);
         JkUtilsAssert.argument(clazz != null,
-                "Command class having name '" + commandClassName + "' cannot be found.");
+                "Jeka class having name '" + jkClassName + "' cannot be found.");
         String[] argsToPass = actualArgs.toArray(new String[0]);
-        JkCommandSet instance = JkInit.instanceOf(clazz, argsToPass);
+        JkClass instance = JkInit.instanceOf(clazz, argsToPass);
         CommandLine commandLine = CommandLine.parse(argsToPass);
         try {
             for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {

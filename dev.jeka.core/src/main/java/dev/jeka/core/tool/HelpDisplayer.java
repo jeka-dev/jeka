@@ -17,18 +17,18 @@ import java.util.stream.Collectors;
 
 final class HelpDisplayer {
 
-    static void help(JkCommandSet jkCommandSet) {
+    static void help(JkClass jkClass) {
         if (JkOptions.containsKey("Plugins")) {
-            helpPlugins(jkCommandSet);
+            helpPlugins(jkClass);
             return;
         }
         StringBuilder sb = new StringBuilder()
                 .append("Usage: \n\njeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
-                .append("Executes the specified methods defined in commandSet class or plugins using the specified options and system properties.\n\n")
+                .append("Executes the specified methods defined in Jeka class or plugins using the specified options and system properties.\n\n")
                 .append("Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
                 .append("\nAvailable methods and options :\n")
-                .append(RunClassDef.of(jkCommandSet).description());
+                .append(RunClassDef.of(jkClass).description());
 
         // List plugins
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
@@ -43,7 +43,7 @@ final class HelpDisplayer {
 
     private static String standardOptions() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Built-in options (these options are not specific to a plugin or a command class) :\n");
+        sb.append("Built-in options (these options are not specific to a plugin or a Jeka class) :\n");
         sb.append("  -LogVerbose (shorthand -LV) : logs 'trace' level.\n");
         sb.append("  -LogQuiteVerbose (shorthand -LQV) : logs 'trace' level + Ivy trace level.\n");
         sb.append("  -LogRuntimeInfo (shorthand -LRI) : logs Jeka runtime information.\n");
@@ -51,11 +51,11 @@ final class HelpDisplayer {
         sb.append("  -LogSetup (shorthand -LSU) : logs Jeka classes setup process.\n");
         sb.append("  -LogStyle (shorthand -LS) : choose the display log style : INDENT(default), BRACE or SQUARE.\n");
         sb.append("  -LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");
-        sb.append("  -CommandClass (shorthand -CC) : Force to use the specified class as the command class to invoke. It can be the short name of the class (without package prefix).\n");
+        sb.append("  -JekaClass (shorthand -JKC) : Force to use the specified class as the Jeka class to invoke. It can be the short name of the class (without package prefix).\n");
         return sb.toString();
     }
 
-    static void help(JkCommandSet run, Path xmlFile) {
+    static void help(JkClass run, Path xmlFile) {
         final Document document = JkUtilsXml.createDocument();
         final Element runEl = RunClassDef.of(run).toElement(document);
         document.appendChild(runEl);
@@ -72,30 +72,30 @@ final class HelpDisplayer {
         }
     }
 
-    private static void helpPlugins(JkCommandSet jkCommandSet) {
-        JkLog.info(helpPluginsDescription(jkCommandSet));
+    private static void helpPlugins(JkClass jkClass) {
+        JkLog.info(helpPluginsDescription(jkClass));
     }
 
     static void helpPlugin(JkPlugin plugin) {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         for (PluginDescription pluginDescription : pluginDescriptions) {
             if (pluginDescription.shortName().equals(plugin.name())) {
-                JkLog.info(helpPluginDescription(plugin.getCommandSet(), pluginDescription));
+                JkLog.info(helpPluginDescription(plugin.getJkClass(), pluginDescription));
                 return;
             }
         }
     }
 
-    private static String helpPluginsDescription(JkCommandSet jkCommandSet) {
+    private static String helpPluginsDescription(JkClass jkClass) {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         StringBuilder sb = new StringBuilder();
         for (final PluginDescription description : pluginDescriptions) {
-            sb.append(helpPluginDescription(jkCommandSet, description));
+            sb.append(helpPluginDescription(jkClass, description));
         }
         return sb.toString();
     }
 
-    private static String helpPluginDescription(JkCommandSet jkCommandSet, PluginDescription description) {
+    private static String helpPluginDescription(JkClass jkClass, PluginDescription description) {
         StringBuilder sb = new StringBuilder();
         sb.append("\nPlugin Class : " + description.fullName());
         sb.append("\nPlugin Name : " + description.shortName());
@@ -120,17 +120,17 @@ final class HelpDisplayer {
             sb.append("\nActivation Effect : Not documented.");
         }
         final JkPlugin plugin;
-        if (jkCommandSet.getPlugins().hasLoaded(description.pluginClass())) {
-            plugin = jkCommandSet.getPlugin(description.pluginClass());
+        if (jkClass.getPlugins().hasLoaded(description.pluginClass())) {
+            plugin = jkClass.getPlugin(description.pluginClass());
         } else {
-            plugin = JkUtilsReflect.newInstance(description.pluginClass(), JkCommandSet.class, jkCommandSet);
+            plugin = JkUtilsReflect.newInstance(description.pluginClass(), JkClass.class, jkClass);
         }
         sb.append("\n");
         sb.append(RunClassDef.of(plugin).flatDescription(description.shortName() + "#"));
         return sb.toString();
     }
 
-    static List<String> optionValues(List<ProjectDef.CommandOptionDef> optionDefs) {
+    static List<String> optionValues(List<ProjectDef.JkClassOptionDef> optionDefs) {
         return optionDefs.stream().map(optionDef -> optionDef.shortDescription()).collect(Collectors.toList());
     }
 

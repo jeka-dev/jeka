@@ -7,7 +7,7 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProjectPublication;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
@@ -34,7 +34,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
  *
  * @author Jerome Angibaud
  */
-public class SignedArtifactsBuild extends JkCommandSet {
+public class SignedArtifactsBuild extends JkClass {
 
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
 

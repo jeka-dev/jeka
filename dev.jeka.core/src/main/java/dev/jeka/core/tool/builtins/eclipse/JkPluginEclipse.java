@@ -38,7 +38,7 @@ public final class JkPluginEclipse extends JkPlugin {
 
     private final JkPluginScaffold scaffold;
 
-    protected JkPluginEclipse(JkCommandSet run) {
+    protected JkPluginEclipse(JkClass run) {
         super(run);
         this.scaffold = run.getPlugins().get(JkPluginScaffold.class);
     }
@@ -61,17 +61,17 @@ public final class JkPluginEclipse extends JkPlugin {
     @JkDoc("Generates Eclipse files (.classpath and .project) in the current directory. The files reflect project " +
             "dependencies and source layout.")
     public void files() {
-        final Path dotProject = getCommandSet().getBaseDir().resolve(".project");
-        JkJavaIdeSupport projectIde = getProjectIde(getCommandSet());
+        final Path dotProject = getJkClass().getBaseDir().resolve(".project");
+        JkJavaIdeSupport projectIde = getProjectIde(getJkClass());
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
-            for (final JkCommandSet depRun : getCommandSet().getImportedCommandSets().getDirects()) {
+            for (final JkClass depRun : getJkClass().getImportedJkClasses().getDirects()) {
                 importedRunProjects.add(depRun.getBaseTree().getRoot());
             }
             final JkEclipseClasspathGenerator classpathGenerator =
                     JkEclipseClasspathGenerator.of(projectIde);
-            classpathGenerator.setDefDependencies(getCommandSet().getDefDependencyResolver(),
-                    getCommandSet().getDefDependencies());
+            classpathGenerator.setDefDependencies(getJkClass().getDefDependencyResolver(),
+                    getJkClass().getDefDependencies());
             classpathGenerator.setIncludeJavadoc(this.javadoc);
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedProjects(importedRunProjects);
@@ -83,18 +83,18 @@ public final class JkPluginEclipse extends JkPlugin {
                 classpathGenerator.addAccessRules(entry.getKey(), entry.getValue());
             });
             final String result = classpathGenerator.generate();
-            final Path dotClasspath = getCommandSet().getBaseDir().resolve(".classpath");
+            final Path dotClasspath = getJkClass().getBaseDir().resolve(".classpath");
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
             JkLog.info("File " + dotClasspath + " generated.");
 
             if (!Files.exists(dotProject)) {
-                JkEclipseProjectGenerator.ofJavaNature(getCommandSet().getBaseTree().getRoot().getFileName().toString())
+                JkEclipseProjectGenerator.ofJavaNature(getJkClass().getBaseTree().getRoot().getFileName().toString())
                         .writeTo(dotProject);
                 JkLog.info("File " + dotProject + " generated.");
             }
         } else {
             if (!Files.exists(dotProject)) {
-                JkEclipseProjectGenerator.ofSimpleNature(getCommandSet().getBaseTree().getRoot().getFileName().toString())
+                JkEclipseProjectGenerator.ofSimpleNature(getJkClass().getBaseTree().getRoot().getFileName().toString())
                         .writeTo(dotProject);
                 JkLog.info("File " + dotProject + " generated.");
             }
@@ -103,7 +103,7 @@ public final class JkPluginEclipse extends JkPlugin {
 
     @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jeka/def directory are taken in account. See eclipse#files.")
     public void all() {
-        final Iterable<Path> folders = getCommandSet().getBaseTree()
+        final Iterable<Path> folders = getJkClass().getBaseTree()
                 .andMatching(true,"**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andMatching(false,"**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());
@@ -146,12 +146,12 @@ public final class JkPluginEclipse extends JkPlugin {
         return this;
     }
 
-    public static JkJavaIdeSupport getProjectIde(JkCommandSet commands) {
-        if (commands instanceof JkJavaIdeSupport.JkSupplier) {
-            JkJavaIdeSupport.JkSupplier supplier = (JkJavaIdeSupport.JkSupplier) commands;
+    public static JkJavaIdeSupport getProjectIde(JkClass jkClass) {
+        if (jkClass instanceof JkJavaIdeSupport.JkSupplier) {
+            JkJavaIdeSupport.JkSupplier supplier = (JkJavaIdeSupport.JkSupplier) jkClass;
             return supplier.getJavaIdeSupport();
         }
-        List<JkJavaIdeSupport.JkSupplier> suppliers = commands.getPlugins().getLoadedPluginInstanceOf(
+        List<JkJavaIdeSupport.JkSupplier> suppliers = jkClass.getPlugins().getLoadedPluginInstanceOf(
                 JkJavaIdeSupport.JkSupplier.class);
         return suppliers.stream()
                 .filter(supplier -> supplier != null)

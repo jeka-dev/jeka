@@ -1,7 +1,7 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
@@ -30,7 +30,7 @@ import static dev.jeka.core.api.depmanagement.JkScope.TEST;
  * {@link org.junit.platform.launcher.LauncherDiscoveryRequest}.
  */
 @JkDefClasspath("org.junit.platform:junit-platform-launcher:1.6.0")
-class Junit5Build extends JkCommandSet {
+class Junit5Build extends JkClass {
 
     final JkPluginJava java = getPlugin(JkPluginJava.class);
 

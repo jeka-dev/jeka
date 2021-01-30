@@ -1,6 +1,6 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.samples.JavaPluginBuild;
-import dev.jeka.core.tool.JkCommandSet;
+import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
@@ -11,7 +11,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
  * 
  * @formatter:off
  */
-public class FatJarBuild extends JkCommandSet {
+public class FatJarBuild extends JkClass {
 
     JkPluginJava java = getPlugin(JkPluginJava.class);
     

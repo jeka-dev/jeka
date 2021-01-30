@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /*
- * Defines command classes defined on a given project.
+ * Defines Jeka classes defined on a given project.
  *
  * @author Jerome Angibaud
  */
@@ -28,12 +28,12 @@ final class ProjectDef {
 
         private final List<RunMethodDef> methodDefs;
 
-        private final List<CommandOptionDef> optionDefs;
+        private final List<JkClassOptionDef> optionDefs;
 
         private final Object runOrPlugin;
 
         private RunClassDef(Object runOrPlugin, List<RunMethodDef> methodDefs,
-                            List<CommandOptionDef> optionDefs) {
+                            List<JkClassOptionDef> optionDefs) {
             super();
             this.runOrPlugin = runOrPlugin;
             this.methodDefs = Collections.unmodifiableList(methodDefs);
@@ -44,7 +44,7 @@ final class ProjectDef {
             return methodDefs;
         }
 
-        List<CommandOptionDef> optionDefs() {
+        List<JkClassOptionDef> optionDefs() {
             return optionDefs;
         }
 
@@ -55,9 +55,9 @@ final class ProjectDef {
                 methods.add(RunMethodDef.of(method));
             }
             Collections.sort(methods);
-            final List<CommandOptionDef> options = new LinkedList<>();
+            final List<JkClassOptionDef> options = new LinkedList<>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
-                options.add(CommandOptionDef.of(run, nameAndField.field,
+                options.add(JkClassOptionDef.of(run, nameAndField.field,
                         nameAndField.name, nameAndField.rootClass));
             }
             Collections.sort(options);
@@ -99,7 +99,7 @@ final class ProjectDef {
 
         String description() {
             StringBuilder stringBuilder = new StringBuilder();
-            for (Class<? extends JkCommandSet> buildClass : this.runClassHierarchy()) {
+            for (Class<? extends JkClass> buildClass : this.runClassHierarchy()) {
                 stringBuilder.append(description(buildClass, "", true, false));
             }
             return stringBuilder.toString();
@@ -113,11 +113,11 @@ final class ProjectDef {
 
         private String description(Class<?> runClass, String prefix, boolean withHeader, boolean includeHierarchy) {
             List<RunMethodDef> methods = includeHierarchy ? this.methodDefs : this.methodsOf(runClass);
-            List<CommandOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(runClass);
+            List<JkClassOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(runClass);
             if (methods.isEmpty() && options.isEmpty()) {
                 return "";
             }
-            String classWord = JkCommandSet.class.isAssignableFrom(runClass) ? "class" : "plugin";
+            String classWord = JkClass.class.isAssignableFrom(runClass) ? "class" : "plugin";
             StringBuilder stringBuilder = new StringBuilder();
             if (withHeader) {
                 stringBuilder.append("\nFrom " + classWord + " " + runClass.getName() + " :\n");
@@ -138,18 +138,18 @@ final class ProjectDef {
             }
             if (!options.isEmpty()) {
                 stringBuilder.append(margin + "Options :\n");
-                for (CommandOptionDef optionDef : options) {
+                for (JkClassOptionDef optionDef : options) {
                     stringBuilder.append(optionDef.description(prefix, margin));
                 }
             }
             return stringBuilder.toString();
         }
 
-        Map<String, String> optionValues(JkCommandSet run) {
+        Map<String, String> optionValues(JkClass run) {
             final Map<String, String> result = new LinkedHashMap<>();
-            for (final CommandOptionDef optionDef : this.optionDefs) {
+            for (final JkClassOptionDef optionDef : this.optionDefs) {
                 final String name = optionDef.name;
-                final Object value = CommandOptionDef.value(run, name);
+                final Object value = JkClassOptionDef.value(run, name);
                 result.put(name, JkUtilsObject.toString(value));
             }
             return result;
@@ -165,18 +165,18 @@ final class ProjectDef {
             }
             final Element optionsEl = document.createElement("options");
             runEl.appendChild(optionsEl);
-            for (final CommandOptionDef commandOptionDef : this.optionDefs) {
-                final Element optionEl = commandOptionDef.toElement(document);
+            for (final JkClassOptionDef jkClassOptionDef : this.optionDefs) {
+                final Element optionEl = jkClassOptionDef.toElement(document);
                 optionsEl.appendChild(optionEl);
             }
             return runEl;
         }
 
-        private List<Class<? extends JkCommandSet>> runClassHierarchy() {
-            List<Class<? extends JkCommandSet>> result = new ArrayList<>();
+        private List<Class<? extends JkClass>> runClassHierarchy() {
+            List<Class<? extends JkClass>> result = new ArrayList<>();
             Class<?> current = this.runOrPlugin.getClass();
-            while (JkCommandSet.class.isAssignableFrom(current) || JkPlugin.class.isAssignableFrom(current)) {
-                result.add((Class<? extends JkCommandSet>) current);
+            while (JkClass.class.isAssignableFrom(current) || JkPlugin.class.isAssignableFrom(current)) {
+                result.add((Class<? extends JkClass>) current);
                 current = current.getSuperclass();
             }
             return result;
@@ -187,8 +187,8 @@ final class ProjectDef {
                     .collect(Collectors.toList());
         }
 
-        private List<CommandOptionDef> optionsOf(Class<?> runClass) {
-            return this.optionDefs.stream().filter(commandOptionDef -> runClass.equals(commandOptionDef.rootDeclaringClass))
+        private List<JkClassOptionDef> optionsOf(Class<?> runClass) {
+            return this.optionDefs.stream().filter(jkClassOptionDef -> runClass.equals(jkClassOptionDef.rootDeclaringClass))
                     .collect(Collectors.toList());
         }
     }
@@ -249,12 +249,12 @@ final class ProjectDef {
     }
 
     /**
-     * Definition for run option. Run options are fields belonging to a
-     * command class.
+     * Definition for Jeka class option. Jeka class options are fields belonging to a
+     * Jeka class.
      *
      * @author Jerome Angibaud
      */
-     static final class CommandOptionDef implements Comparable<CommandOptionDef> {
+     static final class JkClassOptionDef implements Comparable<JkClassOptionDef> {
 
         private final String name;
 
@@ -270,7 +270,7 @@ final class ProjectDef {
 
         private final String envVarName;
 
-        private CommandOptionDef(String name, String description, Object jkRun, Object defaultValue,
+        private JkClassOptionDef(String name, String description, Object jkRun, Object defaultValue,
                                  Class<?> type, Class<?> declaringClass, String envVarName) {
             super();
             this.name = name;
@@ -282,14 +282,14 @@ final class ProjectDef {
             this.envVarName = envVarName;
         }
 
-        static CommandOptionDef of(Object instance, Field field, String name, Class<?> rootDeclaringClass) {
+        static JkClassOptionDef of(Object instance, Field field, String name, Class<?> rootDeclaringClass) {
             final JkDoc opt = field.getAnnotation(JkDoc.class);
             final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
             final Class<?> type = field.getType();
             final Object defaultValue = value(instance, name);
             final JkEnv env = field.getAnnotation(JkEnv.class);
             final String envVarName = env != null ? env.value() : null;
-            return new CommandOptionDef(name, descr, instance, defaultValue, type, rootDeclaringClass, envVarName);
+            return new JkClassOptionDef(name, descr, instance, defaultValue, type, rootDeclaringClass, envVarName);
         }
 
         private static Object value(Object runInstance, String optName) {
@@ -307,7 +307,7 @@ final class ProjectDef {
         }
 
         @Override
-        public int compareTo(CommandOptionDef other) {
+        public int compareTo(JkClassOptionDef other) {
             if (this.run.getClass().equals(other.run.getClass())) {
                 return this.name.compareTo(other.name);
             }

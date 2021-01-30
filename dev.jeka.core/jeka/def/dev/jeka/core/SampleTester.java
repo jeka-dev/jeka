@@ -86,7 +86,7 @@ class SampleTester {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
-                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LH", "-LV=false")
+                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LB", "-LV=false")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }
@@ -94,7 +94,8 @@ class SampleTester {
     private void testSampleWith(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
+                .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
+                .andParams("-LB")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }
@@ -102,8 +103,8 @@ class SampleTester {
     private void testDepender(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(this.sampleDependerBaseDir.getRoot())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
-                .withParams("clean", "java#pack", "-LH")
+                .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
+                .withParams("clean", "java#pack", "-LB")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }

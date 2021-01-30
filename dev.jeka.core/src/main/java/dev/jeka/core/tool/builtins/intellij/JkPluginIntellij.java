@@ -42,7 +42,7 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Override JEKA_HOME environment variable")
     public Path jekaHome;
 
-    protected JkPluginIntellij(JkCommandSet run) {
+    protected JkPluginIntellij(JkClass run) {
         super(run);
     }
 
@@ -50,36 +50,36 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates Idea [my-module].iml file.")
     public void iml() {
         final JkImlGenerator generator;
-        JkCommandSet commands = getCommandSet();
-        JkJavaIdeSupport projectIde = JkPluginEclipse.getProjectIde(commands);
+        JkClass jkClass = getJkClass();
+        JkJavaIdeSupport projectIde = JkPluginEclipse.getProjectIde(jkClass);
         if (projectIde != null) {
             generator = JkImlGenerator.of(projectIde);
         } else {
-            generator = JkImlGenerator.of(JkJavaIdeSupport.of(commands.getBaseDir()));
+            generator = JkImlGenerator.of(JkJavaIdeSupport.of(jkClass.getBaseDir()));
         }
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
         generator.setUseVarPath(useVarPath);
         generator.setExplicitJekaHome(jekaHome);
-        JkDependencySet defDependencies = commands.getDefDependencies();
+        JkDependencySet defDependencies = jkClass.getDefDependencies();
         if (imlSkipJeka) {
             defDependencies = defDependencies.minusFiles(
                     path -> path.getFileName().equals(JkLocator.getJekaJarPath().getFileName()));
         }
         generator.setDefDependencies(defDependencies);
-        generator.setDefDependencyResolver(commands.getDefDependencyResolver());
-        List<String> commandModuleDeps = new LinkedList<>();
+        generator.setDefDependencyResolver(jkClass.getDefDependencyResolver());
+        List<String> jkClassModuleDeps = new LinkedList<>();
         if (!JkUtilsString.isBlank(this.imlJekaExtraModules)) {
             for (String module : JkUtilsString.splitTrimmed(this.imlJekaExtraModules, ",")) {
-                commandModuleDeps.add(module);
+                jkClassModuleDeps.add(module);
             }
         }
-        commands.getImportedCommandSets().getImportedCommandRoots().stream()
+        jkClass.getImportedJkClasses().getImportedJkClassRoots().stream()
                 .map(path -> path.getFileName().toString())
-                .forEach(commandModuleDeps::add);
-        generator.setExtraJekaModules(commandModuleDeps);
-        Path basePath = commands.getBaseDir();
-        if (commands.getPlugins().hasLoaded(JkPluginJava.class)) {
-            commands.getPlugins().get(JkPluginJava.class);
+                .forEach(jkClassModuleDeps::add);
+        generator.setExtraJekaModules(jkClassModuleDeps);
+        Path basePath = jkClass.getBaseDir();
+        if (jkClass.getPlugins().hasLoaded(JkPluginJava.class)) {
+            jkClass.getPlugins().get(JkPluginJava.class);
             generator.setForceJdkVersion(forceJdkVersion);
         }
         final String xml = generator.generate();
@@ -123,8 +123,8 @@ public final class JkPluginIntellij extends JkPlugin {
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file.")
     public void modulesXml() {
-        final Path current = getCommandSet().getBaseTree().getRoot();
-        final Iterable<Path> imls = getCommandSet().getBaseTree().andMatching(true,"**.iml").getFiles();
+        final Path current = getJkClass().getBaseTree().getRoot();
+        final Iterable<Path> imls = getJkClass().getBaseTree().andMatching(true,"**.iml").getFiles();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
         JkLog.info("File generated at : " + modulesXmlGenerator.outputFile());
@@ -132,7 +132,7 @@ public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void allIml() {
-        final Iterable<Path> folders = getCommandSet().getBaseTree()
+        final Iterable<Path> folders = getJkClass().getBaseTree()
                 .andMatching(true, "**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andMatching(false, "**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());
@@ -142,13 +142,13 @@ public final class JkPluginIntellij extends JkPlugin {
             try {
                 Main.exec(projectFolder, "intellij#iml");
             } catch (Exception e) {
-                JkLog.warn("Generating Iml failed : Try to generate it using -CC=JkCommandSet option. Failure cause : ");
+                JkLog.warn("Generating Iml failed : Try to generate it using -CC=JkClass option. Failure cause : ");
                 JkLog.warn(e.getMessage());
                 PrintWriter printWriter = new PrintWriter(JkLog.getErrorStream());
                 e.printStackTrace(printWriter);
                 printWriter.flush();
                 try {
-                    Main.exec(projectFolder, "intellij#iml", "-CC=JkCommandSet");
+                    Main.exec(projectFolder, "intellij#iml", "-CC=JkClass");
                 } catch (Exception e1) {
                     JkLog.warn("Generating Iml file failed;");
                 }
