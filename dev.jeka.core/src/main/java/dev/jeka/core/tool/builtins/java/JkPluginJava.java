@@ -81,15 +81,20 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void setupDefaultProject() {
-        if (project.getConstruction().getCompilation().getCompiler().isDefault()) {  // If no compiler specified, try to set the best fitted
-            project.getConstruction().getCompilation().getCompiler().setForkingProcess(compilerProcess());
+        JkJavaProjectConstruction construction = project.getConstruction();
+        JkJavaCompiler compiler = construction.getCompilation().getCompiler();
+        if (compiler.isDefault()) {  // If no compiler specified, try to set the best fitted
+            compiler.setForkingProcess(compilerProcess());
         }
         if (project.getPublication().getPublishRepos() == null
                 || project.getPublication().getPublishRepos().getRepoList().isEmpty()) {
             project.getPublication().addRepos(repoPlugin.publishRepository());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
-        project.getConstruction().getDependencyManagement().getResolver().addRepos(downloadRepo);
+        JkDependencyResolver resolver = construction.getDependencyManagement().getResolver();
+        if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
+            resolver.addRepos(downloadRepo);
+        }
         JkPluginGpg pgpPlugin = this.getCommandSet().getPlugins().get(JkPluginGpg.class);
 
         // Use signer from GPG plugin as default

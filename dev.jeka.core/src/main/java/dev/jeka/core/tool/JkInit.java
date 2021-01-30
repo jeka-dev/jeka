@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
@@ -28,6 +29,8 @@ public final class JkInit {
         JkLog.Verbosity verbosity = JkLog.verbosity();
         if (Environment.standardOptions.logRuntimeInformation != null) {
             displayRuntimeInfo();
+            JkLog.info("Jeka Classpath : ");
+            JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.info("    " + item));
         }
         if (!Environment.standardOptions.logBanner) {
             JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);

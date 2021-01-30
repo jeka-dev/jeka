@@ -3,6 +3,7 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -106,6 +107,10 @@ public final class JkRepoSet {
 
     public boolean hasIvyRepo() {
         return this.repos.stream().anyMatch(JkRepo::isIvyRepo);
+    }
+
+    public boolean contains(URL url) {
+        return this.repos.stream().anyMatch(repo -> url.equals(repo.getUrl()));
     }
 
     @Override

@@ -11,8 +11,6 @@ public final class JkIndentConsoleLogConsumer implements JkLog.JkEventLogConsume
 
     private static final byte[] MARGIN_UNIT = ("   ").getBytes(UTF8);
 
-    private static int maxLength = -1;
-
     private transient MarginStream marginOut;
 
     private transient MarginStream marginErr;
@@ -52,14 +50,19 @@ public final class JkIndentConsoleLogConsumer implements JkLog.JkEventLogConsume
 
     @Override
     public void accept(JkLog.JkLogEvent event) {
-        final MarginStream marginStream = (event.getType() == JkLog.Type.ERROR) ? marginErr : marginOut;
-        final PrintStream stream = (event.getType() == JkLog.Type.ERROR) ? System.err : System.out;
+        JkLog.Type logType = event.getType();
+        PrintStream stream = System.out;
+        if (logType == JkLog.Type.ERROR || logType == JkLog.Type.WARN) {
+            stream.flush();
+            stream = System.err;
+        }
         String message = event.getMessage();
-        if (event.getType() == JkLog.Type.END_TASK) {
-        } else if (event.getType() == JkLog.Type.START_TASK) {
+        if (logType == JkLog.Type.END_TASK) {
+        } else if (logType== JkLog.Type.START_TASK) {
             stream.print(message);
-            marginStream.notifyStart();
-        }  else {
+            marginOut.notifyStart();
+            marginErr.notifyStart();
+        } else {
             stream.println(message);
         }
     }

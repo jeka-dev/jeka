@@ -85,10 +85,37 @@ public class JkJavaProjectSimpleFacade {
         return this;
     }
 
-    public JkJavaProjectSimpleFacade includeTestSuffixedByIT(boolean include) {
-        project.getConstruction().getTesting().getTestSelection()
-                .addIncludePatternsIf(include, JkTestSelection.IT_INCLUDE_PATTERN);
+    /**
+     * By default, every classes in test folder are run. If you add a exclude filter,
+     * tests accepting this filter won't be run.
+     * @param condition : the filter will be added only if this parameter is <code>true</code>.
+     */
+    public JkJavaProjectSimpleFacade addTestExcludeFilterSuffixedBy(String suffix, boolean condition) {
+        if (condition) {
+            project.getConstruction().getTesting().getTestSelection().addExcludePatterns(".*" + suffix);
+        }
         return this;
+    }
+
+    /**
+     * By default, every classes in test folder are run. If you add an include filter, only
+     * tests accepting one of the declared filters will run.
+     * @param condition : the filter will be added only if this parameter is <code>true</code>.
+     */
+    public JkJavaProjectSimpleFacade addTestIncludeFilterSuffixedBy(String suffix, boolean condition) {
+        project.getConstruction().getTesting().getTestSelection().addIncludePatternsIf(condition, ".*" + suffix);
+        return this;
+    }
+
+    /**
+     * @see #addTestIncludeFilterSuffixedBy(String, boolean)
+     * Adds a test include filters for test classes named as <code>^(Test.*|.+[.$]Test.*|.*Tests?)$</code>.
+     * This is a standard filter in many tools.
+     */
+    public JkJavaProjectSimpleFacade addTestIncludeFilterOnStandardNaming(boolean condition) {
+        project.getConstruction().getTesting().getTestSelection().addIncludePatternsIf(condition,
+                JkTestSelection.STANDARD_INCLUDE_PATTERN);
+       return this;
     }
 
     public JkJavaProject getProject() {
