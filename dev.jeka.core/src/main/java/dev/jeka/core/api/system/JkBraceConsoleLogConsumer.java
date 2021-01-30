@@ -59,9 +59,12 @@ public final class JkBraceConsoleLogConsumer implements JkLog.JkEventLogConsumer
     @Override
     public void accept(JkLog.JkLogEvent event) {
         final MarginStream marginStream = (event.getType() == JkLog.Type.ERROR) ? marginErr : marginOut;
-
-        final PrintStream stream = (event.getType() == JkLog.Type.ERROR) ? System.err : System.out;
+        PrintStream stream = System.out;
         String message = event.getMessage();
+        if (event.getType() == JkLog.Type.ERROR || event.getType() == JkLog.Type.WARN) {
+            stream.flush();
+            stream = System.err;
+        }
         if (event.getType() == JkLog.Type.END_TASK) {
             marginStream.closingBrace = true;
             stream.print("}");
@@ -77,7 +80,8 @@ public final class JkBraceConsoleLogConsumer implements JkLog.JkEventLogConsumer
         } else if (event.getType() == JkLog.Type.START_TASK) {
             stream.print(message);
             stream.print(" {");
-            marginStream.notifyStart();
+            marginOut.notifyStart();
+            marginErr.notifyStart();
         }  else {
             stream.println(message);
         }
