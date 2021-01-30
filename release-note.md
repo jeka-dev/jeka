@@ -1,4 +1,4 @@
-# 0.9.4.RELEASE (ongoing)
+# 0.9.4.RELEASE
 * Improve log messages on plugin compatibility break
 * Rename plugin lifecycle methods to `beforeSetup` and `afterSetup`.
 * Improved log setup
