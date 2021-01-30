@@ -1,4 +1,5 @@
 # 0.9.4.RELEASE
+* Rename JkCommandSet to JkClass
 * Improve log messages on plugin compatibility break
 * Rename plugin lifecycle methods to `beforeSetup` and `afterSetup`.
 * Improved log setup
