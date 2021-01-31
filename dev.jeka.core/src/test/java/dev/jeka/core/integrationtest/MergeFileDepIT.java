@@ -34,7 +34,7 @@ public class MergeFileDepIT {
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder)
                 .getParams()
-                    .setScopeMapping(JkScope.DEFAULT_SCOPE_MAPPING).__;
+                    .setScopeMapping(JkScopeMapping.DEFAULT_SCOPE_MAPPING).__;
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
         System.out.println(tree.toStringTree());

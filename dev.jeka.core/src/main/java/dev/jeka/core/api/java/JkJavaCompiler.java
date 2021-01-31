@@ -249,9 +249,9 @@ public final class JkJavaCompiler<T> {
         final String path = jdkLocations.get(key);
         if (path == null) {
             JkLog.warn("Current JDK does not match with source version " + version + ".\n" +
-                    " No exact matching JDK found for version " + version + ".\n" +
-                    " Will use the current one which is version " + currentJdkSourceVersion() + ".\n" +
-                    " Pass option -jdk." + version + "=[JDK location] to specify the JDK to use for Java version " + version);
+                    "No exact matching JDK found for version " + version + ".\n" +
+                    "Will use the current one which is version " + currentJdkSourceVersion() + ".\n" +
+                    "Pass option -jdk." + version + "=[JDK location] to specify the JDK to use for Java version " + version);
             return null;
         }
         final String cmd = path + "/bin/javac";

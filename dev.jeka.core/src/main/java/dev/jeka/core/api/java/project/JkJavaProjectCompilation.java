@@ -256,23 +256,25 @@ public class JkJavaProjectCompilation<T> {
     }
 
     private JkJavaCompileSpec computeProdCompileSpec() {
+        JkScope[] scopes = new JkScope[] {JkScope.COMPILE, JkScope.PROVIDED};
         return JkJavaCompileSpec.of()
             .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
             .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
             .setClasspath(projectProduction.getDependencyManagement()
-                    .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles())
+                    .fetchDependencies(scopes).getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
             .setOutputDir(layout.resolveClassDir());
     }
 
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
+        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.PROVIDED};
         JkJavaCompileSpec prodSpec = prodStep.getComputedCompileSpec();
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
                 .setClasspath(projectProduction.getDependencyManagement()
-                        .fetchDependencies(JkScope.SCOPES_FOR_TEST).getFiles()
+                        .fetchDependencies(scopes).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
                 .addOptions(compileOptions)

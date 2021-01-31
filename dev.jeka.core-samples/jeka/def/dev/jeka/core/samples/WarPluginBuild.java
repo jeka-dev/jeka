@@ -2,6 +2,7 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
@@ -11,9 +12,6 @@ import dev.jeka.core.tool.builtins.java.JkPluginWar;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
 import java.nio.file.Path;
-
-import static dev.jeka.core.api.depmanagement.JkScope.PROVIDED;
-
 
 /**
  * This builds a Java library and publish it on a maven repo using Java plugin. A Java library means a jar that
@@ -37,7 +35,7 @@ public class WarPluginBuild extends JkClass {
        java.getProject().simpleFacade()
                .addDependencies(JkDependencySet.of()
                        .and("com.google.guava:guava:21.0")
-                       .and("javax.servlet:javax.servlet-api:jar:4.0.1", PROVIDED))
+                       .and("javax.servlet:javax.servlet-api:jar:4.0.1", JkScope.PROVIDED))
                .setJavaVersion(JkJavaVersion.V8).getProject().getConstruction()
                .getCompilation()
                     .getLayout()

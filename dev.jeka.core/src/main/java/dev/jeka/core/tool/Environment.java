@@ -97,7 +97,7 @@ class Environment {
 
         int logMaxLength = -1;
 
-        String jkClassName;
+        private String jkClassName;
 
         private final Set<String> names = new HashSet<>();
 
@@ -114,6 +114,13 @@ class Environment {
 
         Set<String> names() {
             return names;
+        }
+
+        String jkClassName() {
+            if ("".equals(jkClassName)) {
+                return JkConstants.DEFAULT_JEKA_CLASS.getName();
+            }
+            return jkClassName;
         }
 
         @Override

@@ -229,7 +229,7 @@ final class Engine {
     private void wrapCompile(Supplier<Boolean> compileTask) {
         boolean success = compileTask.get();
         if (!success) {
-            throw new JkException("Compilation of Jeka files failed. You can run jeka -JKC to use default JkClass " +
+            throw new JkException("Compilation of Jeka files failed. You can run jeka -JKC= to use default JkClass " +
                     " instead of the ones defined in 'def'.");
         }
     }

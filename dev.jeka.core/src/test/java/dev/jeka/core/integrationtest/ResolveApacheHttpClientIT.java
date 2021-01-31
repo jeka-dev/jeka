@@ -71,7 +71,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithMultiScopeMapping() {
-        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT,  JkScope.DEFAULT_SCOPE_MAPPING);
+        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT,  JkScopeMapping.DEFAULT_SCOPE_MAPPING);
         JkResolveResult result = resolver().resolve(deps, TEST);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());

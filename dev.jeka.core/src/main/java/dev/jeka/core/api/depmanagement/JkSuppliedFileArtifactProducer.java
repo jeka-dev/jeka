@@ -48,6 +48,7 @@ public class JkSuppliedFileArtifactProducer<T> implements JkArtifactProducer {
         Path path = fileRunnable.file;
         JkLog.startTask("Make artifact " + path.getFileName());
         fileRunnable.runnable.run();
+        JkLog.info("Artifact created at " + path);
         JkLog.endTask();
     }
 

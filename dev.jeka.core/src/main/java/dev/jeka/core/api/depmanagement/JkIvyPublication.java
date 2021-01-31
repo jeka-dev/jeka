@@ -32,7 +32,7 @@ public final class JkIvyPublication<T> {
 
     private Supplier<JkVersionProvider> resolvedVersionProvider = () -> JkVersionProvider.of();
 
-    private JkScopeMapping scopeMapping = JkScope.DEFAULT_SCOPE_MAPPING;
+    private JkScopeMapping scopeMapping = JkScopeMapping.DEFAULT_SCOPE_MAPPING;
 
     private Supplier<? extends JkArtifactLocator> artifactLocator;
 

@@ -12,7 +12,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
 
-import static dev.jeka.core.api.depmanagement.JkScope.PROVIDED;
+import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
 import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
@@ -39,7 +39,7 @@ public class ThirdPartyPoweredBuild extends JkClass {
     private static JkDependencySet dependencies() {
         return JkDependencySet.of()
             .and(GUAVA, "21.0")
-            .and(JAVAX_SERVLET_API, "3.1.0", PROVIDED)
+            .and(JAVAX_SERVLET_API, "3.1.0", COMPILE)
             .and(JUNIT, "4.13", TEST)
             .and(MOCKITO_ALL, "1.10.19", TEST);
     }

@@ -19,6 +19,19 @@ import java.util.stream.Collectors;
  */
 public final class JkScopeMapping {
 
+    /**
+     * Useful when using scope mapping. As documented in Ivy, it stands for the main archive.
+     */
+    public static final String ARCHIVE_MASTER = "archives(master)";
+
+    /**
+     * Scope mapping used by default.
+     */
+    public static final JkScopeMapping DEFAULT_SCOPE_MAPPING = JkScopeMapping
+            .of(JkScope.COMPILE).to(ARCHIVE_MASTER, JkScope.COMPILE.getName() + "(default)")
+            .and(JkScope.PROVIDED).to(ARCHIVE_MASTER, JkScope.COMPILE.getName() + "(default)")
+            .and(JkScope.RUNTIME).to(ARCHIVE_MASTER, JkScope.RUNTIME.getName() + "(default)")
+            .and(JkScope.TEST).to(ARCHIVE_MASTER, JkScope.RUNTIME.getName() + "(default)");
     private final Map<JkScope, Set<String>> map;
 
     // -------- Factory methods ----------------------------

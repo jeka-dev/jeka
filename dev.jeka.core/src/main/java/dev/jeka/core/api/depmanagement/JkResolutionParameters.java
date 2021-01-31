@@ -36,7 +36,7 @@ public final class JkResolutionParameters<T> {
         LATEST_VERSION;
     }
 
-    private JkScopeMapping scopeMapping = JkScope.DEFAULT_SCOPE_MAPPING;
+    private JkScopeMapping scopeMapping = JkScopeMapping.DEFAULT_SCOPE_MAPPING;
 
     private boolean refreshed = true;
 

@@ -48,8 +48,9 @@ public class JkJavaProjectDocumentation {
      * Generates javadoc files (files + zip)
      */
     public void run() {
+        JkScope[] scopes = new JkScope[] {JkScope.COMPILE, JkScope.PROVIDED};
         Iterable<Path> classpath = project.getConstruction().getDependencyManagement()
-                .fetchDependencies(JkScope.SCOPES_FOR_COMPILATION).getFiles();
+                .fetchDependencies(scopes).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
         JkPathTreeSet sources = project.getConstruction().getCompilation().getLayout().resolveSources();
         javadocProcessor.make(classpath, sources, dir);

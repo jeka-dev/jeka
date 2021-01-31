@@ -89,10 +89,11 @@ public class JkJavaProjectTesting {
      * dependencies involved in TEST scope.
      */
     public JkPathSequence getTestClasspath() {
+        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.PROVIDED};
         return JkPathSequence.of(compilation.getLayout().resolveClassDir())
                 .and(projectProduction.getCompilation().getLayout().resolveClassDir())
                 .and(projectProduction.getDependencyManagement()
-                        .fetchDependencies(JkScope.SCOPES_FOR_TEST).getFiles());
+                        .fetchDependencies(scopes).getFiles());
     }
 
     /**
