@@ -81,9 +81,6 @@ final class IvyTranslations {
 
     private static Configuration toConfiguration(JkScope jkScope) {
         final List<String> extendedScopes = new LinkedList<>();
-        for (final JkScope parent : jkScope.getExtendedScopes()) {
-            extendedScopes.add(parent.getName());
-        }
         final Visibility visibility = Visibility.PUBLIC;
         return new Configuration(jkScope.getName(), visibility, jkScope.getDescription(),
                 extendedScopes.toArray(new String[0]), jkScope.isTransitive(), null);
@@ -250,11 +247,11 @@ final class IvyTranslations {
                                                  JkVersionProvider resolvedVersions) {
 
         // Add configuration definitions
-        for (final JkScope involvedScope : dependencies.getInvolvedScopes()) {
+        for (final JkScope involvedScope : dependencies.getDeclaredScopes()) {
             final Configuration configuration = toConfiguration(involvedScope);
             moduleDescriptor.addConfiguration(configuration);
         }
-        if (dependencies.getInvolvedScopes().isEmpty()) {
+        if (dependencies.getDeclaredScopes().isEmpty()) {
             moduleDescriptor.addConfiguration(DEFAULT_CONFIGURATION);
         }
         for (final JkScope scope : defaultMapping.getEntries()) {
@@ -328,14 +325,13 @@ final class IvyTranslations {
         Iterator<JkIvyPublication.JkPublicationArtifact> it = publication.getAllArtifacts().iterator();
         while (it.hasNext()) {
             JkIvyPublication.JkPublicationArtifact artifact = it.next();
-            for (final JkScope jkScope : JkScope.getInvolvedScopes(artifact.jkScopes)) {
+            for (final JkScope jkScope : artifact.jkScopes) {
                 if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.getName())) {
                     descriptor.addConfiguration(toConfiguration(jkScope));
                 }
             }
-            final Artifact ivyArtifact = toPublishedArtifact(artifact,
-                    descriptor.getModuleRevisionId(), publishDate);
-            for (final JkScope jkScope : JkScope.getInvolvedScopes(artifact.jkScopes)) {
+            final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
+            for (final JkScope jkScope : artifact.jkScopes) {
                 descriptor.addArtifact(jkScope.getName(), ivyArtifact);
             }
         }
@@ -491,7 +487,9 @@ final class IvyTranslations {
             final JkModuleId moduleId = moduleDep.getModuleId();
             final boolean mainArtifact = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
             JkVersion version = dependencySet.getVersion(moduleId);
-            this.put(moduleId, moduleDep.withTransitive(), version, mainArtifact);
+            // TODO
+            boolean transitive = moduleDep.getTransitivity() != JkTransitivity.NONE;
+            this.put(moduleId, transitive, version, mainArtifact);
 
             // fill configuration
             final List<Conf> confs = new LinkedList<>();

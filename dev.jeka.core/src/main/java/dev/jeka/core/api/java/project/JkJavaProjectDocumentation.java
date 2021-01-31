@@ -48,7 +48,7 @@ public class JkJavaProjectDocumentation {
      * Generates javadoc files (files + zip)
      */
     public void run() {
-        JkScope[] scopes = new JkScope[] {JkScope.COMPILE, JkScope.PROVIDED};
+        JkScope[] scopes = new JkScope[] {JkScope.COMPILE};
         Iterable<Path> classpath = project.getConstruction().getDependencyManagement()
                 .fetchDependencies(scopes).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);

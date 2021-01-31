@@ -192,7 +192,7 @@ public class JkDependencyNode {
     private static void addFileDepsToTree(JkDependencySet dependencies, Set<JkScope> scopes, List<JkDependencyNode> result,
             Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
         for (final JkScopedDependency scopedDependency : depsUntilLast(dependencies, moduleId)) {
-            if (scopes.isEmpty() || scopedDependency.isInvolvedInAnyOf(scopes)) {
+            if (scopes.isEmpty() || scopedDependency.containsAny(scopes)) {
                 final JkFileDependency fileDep = (JkFileDependency) scopedDependency.getDependency();
                 if (!addedFileDeps.contains(fileDep)) {
                     final JkDependencyNode fileNode = JkDependencyNode.ofFileDep(fileDep, scopedDependency.getScopes());

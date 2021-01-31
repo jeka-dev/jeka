@@ -1,9 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
-
-import java.util.*;
 
 /**
  * Defines a context where is defined dependencies of a given project. According
@@ -45,15 +42,8 @@ public final class JkScope {
      */
     public static final JkScope RUNTIME = of("runtime",
             "Dependencies to run the project but not needed to compile it.",
-            true, COMPILE);
+            true);
 
-    /**
-     * A dependency declared with this scope will be available at compile time but won't be part of the packaged
-     * product (similar to Maven scope 'provided').
-     */
-    public static final JkScope PROVIDED = of("provided",
-            "Dependencies to compile the project but that should not be embedded in produced artifacts.",
-            false);
 
     /**
      * A dependency declared with this scope will be present in testing classpath only.
@@ -63,8 +53,7 @@ public final class JkScope {
      */
     public static final JkScope TEST = of("test",
             "Dependencies necessary to compile and run tests.",
-            true,
-            RUNTIME, PROVIDED);
+            true);
 
     /**
      * Shorthand to declare both COMPILE and RUNTIME scope at once.
@@ -86,10 +75,8 @@ public final class JkScope {
      * Creates a new {@link JkScope} passing its name.
      */
     public static JkScope of(String name) {
-        return new JkScope(name, new HashSet<>(), "", true);
+        return new JkScope(name,  "", true);
     }
-
-    private final Set<JkScope> extendedScopes;
 
     private final String name;
 
@@ -97,38 +84,23 @@ public final class JkScope {
 
     private final boolean transitive;
 
-    private JkScope(String name, Set<JkScope> extendedScopes, String description,
+    private JkScope(String name, String description,
             boolean transitive) {
         super();
         final String illegal = JkUtilsString.firstMatching(name, ",", "->");
         if (illegal != null) {
             throw new IllegalArgumentException("Scope name can't contain '" + illegal + "'");
         }
-        this.extendedScopes = Collections.unmodifiableSet(extendedScopes);
         this.name = name;
         this.description = description;
         this.transitive = transitive;
     }
 
-    public static JkScope of(String name, String description, boolean transitive, JkScope ... extending) {
-        return new JkScope(name, JkUtilsIterable.setOf(extending), description, transitive);
+    public static JkScope of(String name, String description, boolean transitive) {
+        return new JkScope(name, description, transitive);
     }
 
-    public static JkScope ofMavenScope(String name) {
-        if (name.equalsIgnoreCase("compile")) {
-            return COMPILE;
-        }
-        if (name.equalsIgnoreCase("runtime")) {
-            return RUNTIME;
-        }
-        if (name.equalsIgnoreCase("test")) {
-            return TEST;
-        }
-        if (name.equalsIgnoreCase("provided")) {
-            return PROVIDED;
-        }
-        return null;
-    }
+
 
     /**
      * Returns the name of this scope. Name is used as identifier for scopes.
@@ -145,14 +117,6 @@ public final class JkScope {
     }
 
     /**
-     * Scopes that are extended by this one.
-     *
-     */
-    public Set<JkScope> getExtendedScopes() {
-        return this.extendedScopes;
-    }
-
-    /**
      * Returns <code>true</code> if the dependencies defined with this scope should be resolved recursively
      * (meaning returning the dependencies of the dependencies and so on)
      */
@@ -161,81 +125,10 @@ public final class JkScope {
     }
 
     /**
-     * Returns scopes this scope inherits from. It returns recursively parent scopes, parent of parent scopes
-     * and so on.
-     */
-    public List<JkScope> getAncestorScopes() {
-        final List<JkScope> list = new LinkedList<>();
-        list.add(this);
-        for (final JkScope scope : this.extendedScopes) {
-            for (final JkScope jkScope : scope.getAncestorScopes()) {
-                if (!list.contains(jkScope)) {
-                    list.add(jkScope);
-                }
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Returns this scope or its first ancestors found present in the specified scopes.
-     */
-    public List<JkScope> getCommonScopes(Collection<JkScope> scopes) {
-        if (scopes.contains(this)) {
-            return JkUtilsIterable.listOf(this);
-        }
-        final List<JkScope> result = new LinkedList<>();
-        for (final JkScope scope : this.extendedScopes) {
-            if (scopes.contains(scope)) {
-                result.add(scope);
-            } else {
-                result.addAll(scope.getCommonScopes(scopes));
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Returns <code>true</code> if this scope extends the specified one.
-     */
-    public boolean isExtending(JkScope jkScope) {
-        if (extendedScopes == null || extendedScopes.isEmpty()) {
-            return false;
-        }
-        for (final JkScope parent : extendedScopes) {
-            if (parent.equals(jkScope) || parent.isExtending(jkScope)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-
-    /**
      * Returns a {@link JkScopeMapping} from this {@link JkScope} to the specified one.
      */
     public JkScopeMapping mapTo(String ... targetScopes) {
         return JkScopeMapping.of(this).to(targetScopes);
-    }
-
-    /**
-     * Returns <code>true</code> if this scope is one or is extending any of the specified scopes.
-     */
-    public boolean isInOrIsExtendingAnyOf(Iterable<? extends JkScope> scopes) {
-        for (final JkScope scope : scopes) {
-            if (scope.equals(this) || this.isExtending(scope)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @see #isInOrIsExtendingAnyOf(Iterable)
-     */
-    public boolean isInOrIsExtendingAnyOf(JkScope... scopes) {
-        return isInOrIsExtendingAnyOf(Arrays.asList(scopes));
     }
 
     @Override
@@ -267,17 +160,5 @@ public final class JkScope {
     public String toString() {
         return name;
     }
-
-    /**
-     * returns all specified scopes and all of their ancestors.
-     */
-    public static Set<JkScope> getInvolvedScopes(Iterable<JkScope> scopes) {
-        final Set<JkScope> result = JkUtilsIterable.setOf(scopes);
-        for (final JkScope jkScope : scopes) {
-            result.addAll(jkScope.getAncestorScopes());
-        }
-        return result;
-    }
-
 
 }

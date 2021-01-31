@@ -21,7 +21,7 @@ public class TransitiveExcludeIT {
     @Test
     public void handleNonTransitive() {
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of(BOOT_TEST_AND_VERSION).withTransitive(false));
+                .and(JkModuleDependency.of(BOOT_TEST_AND_VERSION).withTransitivity(JkTransitivity.NONE));
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);

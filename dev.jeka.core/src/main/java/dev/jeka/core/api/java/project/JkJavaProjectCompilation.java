@@ -256,7 +256,7 @@ public class JkJavaProjectCompilation<T> {
     }
 
     private JkJavaCompileSpec computeProdCompileSpec() {
-        JkScope[] scopes = new JkScope[] {JkScope.COMPILE, JkScope.PROVIDED};
+        JkScope[] scopes = new JkScope[] {JkScope.COMPILE};
         return JkJavaCompileSpec.of()
             .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
             .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
@@ -268,7 +268,7 @@ public class JkJavaProjectCompilation<T> {
     }
 
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
-        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.PROVIDED};
+        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.COMPILE};
         JkJavaCompileSpec prodSpec = prodStep.getComputedCompileSpec();
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())

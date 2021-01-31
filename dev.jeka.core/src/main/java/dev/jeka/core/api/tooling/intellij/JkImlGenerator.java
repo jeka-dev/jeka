@@ -375,10 +375,10 @@ public final class JkImlGenerator {
 
     private static String ideScope(Set<JkScope> scopesArg) {
         final Set<String> scopes = toStringScopes(scopesArg);
-        if (scopes.contains(JkScope.COMPILE.getName())) {
-            return "COMPILE";
-        }
-        if (scopes.contains(JkScope.PROVIDED.getName())) {
+        if (scopes.contains(JkScope.COMPILE.getName()))  {
+            if (scopes.contains(JkScope.RUNTIME.getName())) {
+                return "COMPILE";
+            }
             return "PROVIDED";
         }
         if (scopes.contains(JkScope.RUNTIME.getName())) {

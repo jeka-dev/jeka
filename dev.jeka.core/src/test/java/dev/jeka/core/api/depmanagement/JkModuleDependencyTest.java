@@ -9,9 +9,9 @@ public class JkModuleDependencyTest {
     @Test
     public void testOf() {
         final JkModuleDependency dep = JkModuleDependency.of("group:name::sources:version")
-                .withTransitive(true).withExt("zip");
+                .withTransitivity(JkTransitivity.ALL).withExt("zip");
         Assert.assertEquals("sources", dep.getClassifier());
-        Assert.assertTrue(dep.withTransitive());
+        Assert.assertEquals(JkTransitivity.ALL, dep.getTransitivity());
 
         final JkModuleDependency dep2 = JkModuleDependency.of("group:name:zip:sources:version");
         Assert.assertEquals("zip", dep2.getExt());

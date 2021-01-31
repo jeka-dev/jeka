@@ -3,7 +3,6 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -86,38 +85,6 @@ public final class JkScopedDependency {
     }
 
     /**
-     * Returns <code>true</code> if this scoped dependency should be taken in account when one grabs the dependencies for
-     * the specified scope.
-     */
-    public boolean isInvolvedIn(JkScope scope) {
-        if (scopeMapping == null) {
-            return scope.isInOrIsExtendingAnyOf(scopes);
-        }
-        return scope.isInOrIsExtendingAnyOf(scopeMapping.getEntries());
-    }
-
-    /**
-     * Returns <code>true</code> if this scoped dependency should be taken in account when one grabs the dependencies for
-     * any of the specified scopes.
-     */
-    public boolean isInvolvedInAnyOf(Iterable<JkScope> scopes) {
-        for (final JkScope scope : scopes) {
-            if (isInvolvedIn(scope)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns <code>true</code> if this scoped dependency should be taken in account when one grabs the dependencies for
-     * any of the specified scopes.
-     */
-    public boolean isInvolvedInAnyOf(JkScope... scopes) {
-        return isInvolvedInAnyOf(Arrays.asList(scopes));
-    }
-
-    /**
      * Return wether this scoped dependency is declared with either scope nor scope mapping.
      * If no scopes and scope mapping is declared, this method returns {@link ScopeType#UNSET}.
      */
@@ -137,6 +104,15 @@ public final class JkScopedDependency {
      */
     public Set<JkScope> getScopes() {
         return this.scopes;
+    }
+
+    public boolean containsAny(Iterable<JkScope> scopes) {
+        for (JkScope scope : scopes) {
+            if (this.scopes.contains(scope)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -64,10 +64,10 @@ public class ResolverWithScopeMapperIT {
     @Test
     public void resolveWithSeveralScopes() {
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkPopularModules.GUAVA, "19.0", JkScope.COMPILE)
-                .and (JkPopularModules.JAVAX_SERVLET_API, "3.1.0", JkScope.PROVIDED);
+                .and(JkPopularModules.GUAVA, "19.0", JkScope.COMPILE_AND_RUNTIME)
+                .and (JkPopularModules.JAVAX_SERVLET_API, "3.1.0", JkScope.COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps, JkScope.COMPILE, JkScope.PROVIDED);
+        JkResolveResult resolveResult = resolver.resolve(deps, JkScope.COMPILE);
         assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
         assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());

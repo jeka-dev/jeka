@@ -65,13 +65,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
         }
         return JkDependencySet.of()
                 .and(JkFileSystemDependency.of(libDir.andMatching(true, "*.jar", "compile/*.jar").getFiles()))
-                .withDefaultScopes(JkScope.COMPILE)
-                .and(JkFileSystemDependency.of(libDir.andMatching(true,"provided/*.jar").getFiles()))
-                .withDefaultScopes(JkScope.PROVIDED)
+                    .withDefaultScopes(JkScope.COMPILE)
+                .and(JkFileSystemDependency.of(libDir.andMatching(true,"compile+runtime/*.jar").getFiles()))
+                    .withDefaultScopes(JkScope.COMPILE_AND_RUNTIME)
                 .and(JkFileSystemDependency.of(libDir.andMatching(true,"runtime/*.jar").getFiles()))
-                .withDefaultScopes(JkScope.RUNTIME)
+                        .withDefaultScopes(JkScope.RUNTIME)
                 .and(JkFileSystemDependency.of(libDir.andMatching(true,"test/*.jar").getFiles()))
-                .withDefaultScopes(JkScope.TEST);
+                    .withDefaultScopes(JkScope.TEST);
     }
 
 
@@ -161,7 +161,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     public JkDependencySet and(String moduleDescription, JkScope ... scopes) {
         JkModuleDependency moduleDependency = JkModuleDependency.of(moduleDescription);
         if (moduleDependency.getClassifier() != null) {
-            moduleDependency = moduleDependency.withTransitive(false);
+            moduleDependency = moduleDependency.withTransitivity(JkTransitivity.RUNTIME);
         }
         return and(moduleDependency, scopes);
     }
@@ -478,15 +478,6 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
     }
 
     /**
-     * Returns all scopes that are involved in these dependencies. That means if one of these scoped
-     * dependencies is declared with scope 'FOO' and scope 'BAR' extends scope 'FOO', then 'FOO' andPrepending 'BAR' is
-     * part of involved scopes.
-     */
-    public Set<JkScope> getInvolvedScopes() {
-        return JkScope.getInvolvedScopes(getDeclaredScopes());
-    }
-
-    /**
      * Returns <code>true</code> if this object contains dependency on external
      * module whose rely on dynamic version. It can be either dynamic version as
      * "1.3.+", "[1.0, 2.0[" ,... or snapshot version as defined in Maven (as
@@ -751,9 +742,6 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
      * org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
      * org.fluentlenium:fluentlenium-assertj:3.2.0
      * org.fluentlenium:fluentlenium-junit:3.2.0
-     *
-     * - PROVIDED
-     * org.projectlombok:lombok:1.16.16
      * </pre>
      */
     public static JkDependencySet ofTextDescription(String description) {
@@ -783,7 +771,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
             if (JkUtilsString.isBlank(item)) {
                 continue;
             }
-            final JkScope javaDcope = JkScope.ofMavenScope(item.trim());
+            final JkScope javaDcope = ofStandardName(item.trim());
             if (javaDcope != null) {
                 result.add(javaDcope);
             } else {
@@ -791,6 +779,19 @@ public class JkDependencySet implements Iterable<JkScopedDependency> {
             }
         }
         return result.toArray(new JkScope[0]);
+    }
+
+    private static JkScope ofStandardName(String name) {
+        if (name.equalsIgnoreCase("compile")) {
+            return JkScope.COMPILE;
+        }
+        if (name.equalsIgnoreCase("runtime")) {
+            return JkScope.RUNTIME;
+        }
+        if (name.equalsIgnoreCase("test")) {
+            return JkScope.TEST;
+        }
+        return null;
     }
 
 }

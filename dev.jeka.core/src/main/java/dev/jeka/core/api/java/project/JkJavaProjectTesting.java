@@ -89,7 +89,7 @@ public class JkJavaProjectTesting {
      * dependencies involved in TEST scope.
      */
     public JkPathSequence getTestClasspath() {
-        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.PROVIDED};
+        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.COMPILE, JkScope.RUNTIME};
         return JkPathSequence.of(compilation.getLayout().resolveClassDir())
                 .and(projectProduction.getCompilation().getLayout().resolveClassDir())
                 .and(projectProduction.getDependencyManagement()

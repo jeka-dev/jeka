@@ -35,7 +35,7 @@ public class WarPluginBuild extends JkClass {
        java.getProject().simpleFacade()
                .addDependencies(JkDependencySet.of()
                        .and("com.google.guava:guava:21.0")
-                       .and("javax.servlet:javax.servlet-api:jar:4.0.1", JkScope.PROVIDED))
+                       .and("javax.servlet:javax.servlet-api:jar:4.0.1", JkScope.COMPILE))
                .setJavaVersion(JkJavaVersion.V8).getProject().getConstruction()
                .getCompilation()
                     .getLayout()

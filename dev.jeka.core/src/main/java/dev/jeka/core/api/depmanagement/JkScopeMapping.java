@@ -29,7 +29,6 @@ public final class JkScopeMapping {
      */
     public static final JkScopeMapping DEFAULT_SCOPE_MAPPING = JkScopeMapping
             .of(JkScope.COMPILE).to(ARCHIVE_MASTER, JkScope.COMPILE.getName() + "(default)")
-            .and(JkScope.PROVIDED).to(ARCHIVE_MASTER, JkScope.COMPILE.getName() + "(default)")
             .and(JkScope.RUNTIME).to(ARCHIVE_MASTER, JkScope.RUNTIME.getName() + "(default)")
             .and(JkScope.TEST).to(ARCHIVE_MASTER, JkScope.RUNTIME.getName() + "(default)");
     private final Map<JkScope, Set<String>> map;

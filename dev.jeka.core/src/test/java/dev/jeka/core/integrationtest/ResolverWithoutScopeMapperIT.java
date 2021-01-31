@@ -31,24 +31,6 @@ public class ResolverWithoutScopeMapperIT {
     }
 
     @Test
-    public void resolveInheritedScopes() {
-        final JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.APACHE_COMMONS_DBCP, "1.4", COMPILE);
-        final JkDependencyResolver resolver = JkDependencyResolver.of().setRepos(REPOS);
-
-        // runtime classpath should embed the dependency as well cause 'RUNTIME' scope extends 'COMPILE'
-        JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
-        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
-        assertTrue(resolveResult.contains(JkModuleId.of("commons-pool")));
-        assertTrue(resolveResult.contains(JkModuleId.of("commons-dbcp")));
-
-        // test classpath should embed the dependency as well
-        resolveResult = resolver.resolve(deps, TEST);
-        assertTrue(resolveResult.contains(JkModuleId.of("commons-pool")));
-        assertTrue(resolveResult.contains(JkModuleId.of("commons-dbcp")));
-        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
-    }
-
-    @Test
     public void resolveWithOptionals() {
         final JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE", JkScopeMapping.of(COMPILE).to("compile", "master", "optional"));

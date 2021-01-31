@@ -194,7 +194,7 @@ public class CoreBuild extends JkClass {
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
         JkPathTree classTree = JkPathTree.of(project.getConstruction().getCompilation().getLayout().resolveClassDir());
-        Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/provided");
+        Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/compile");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
             .andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
             .andZip(providedLibs.resolve("classgraph-4.8.41.jar"))
