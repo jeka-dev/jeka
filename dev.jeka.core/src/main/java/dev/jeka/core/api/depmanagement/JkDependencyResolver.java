@@ -2,7 +2,6 @@ package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -88,37 +87,26 @@ public final class JkDependencyResolver<T> {
     }
 
     /**
-     * @see JkDependencyResolver#resolve(JkDependencySet, JkScope...)
-     */
-    public JkResolveResult resolve(JkDependencySet dependencies, Iterable<JkScope> scopes) {
-        return resolve(dependencies, JkUtilsIterable.arrayOf(scopes, JkScope.class));
-    }
-
-    /**
      * Resolves the specified dependencies (dependencies declared as module) for the specified scopes.
      * @param dependencies the dependencies to resolve.
-     * @param scopes scope for resolution (compile, runtime, ...). If no scope is specified, then it is resolved for all scopes.
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
-    public JkResolveResult resolve(JkDependencySet dependencies, JkScope ... scopes) {
+    public JkResolveResult resolve(JkDependencySet dependencies) {
         if (repos.getRepoList().isEmpty() && dependencies.hasModules()) {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
         JkInternalDepResolver internalDepResolver = JkInternalDepResolver.of(this.repos);
         JkLog.trace("Preparing to resolve dependencies for module " + moduleHolder);
-        final String msg = scopes.length == 0 ? "Resolve dependencies " :
-                "Resolve dependencies with specified scopes " + Arrays.asList(scopes);
-        JkLog.startTask(msg);
+        JkLog.startTask("Resolve dependencies");
         JkResolveResult resolveResult;
         if (dependencies.hasModules()) {
             JkUtilsAssert.state(!repos.getRepoList().isEmpty(), "Cannot resolve module dependency cause no " +
                     "repos has defined on resolver " + this);
-            resolveResult = internalDepResolver.resolve(moduleHolder, dependencies.withModulesOnly(), parameters, scopes);
+            resolveResult = internalDepResolver.resolve(moduleHolder, dependencies.withModulesOnly(), parameters);
         } else {
             resolveResult = JkResolveResult.ofRoot(moduleHolder);
         }
-        final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies,
-                    JkUtilsIterable.setOf(scopes));
+        final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies);
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module")
@@ -127,6 +115,13 @@ public final class JkDependencyResolver<T> {
         } else {
             JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " resolved to " +
                     plurialize(resolveResult.getFiles().getEntries().size(), "artifact file") + ".");
+        }
+        JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
+        if (report.hasErrors()) {
+            if (parameters.isFailOnDependencyResolutionError()) {
+                throw new IllegalStateException(report.toString());
+            }
+            JkLog.warn(report.toString());
         }
         JkLog.endTask();
         return resolveResult;

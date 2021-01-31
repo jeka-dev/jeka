@@ -1,6 +1,7 @@
 package dev.jeka.core.api.tooling.intellij;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -287,7 +288,7 @@ public final class JkImlGenerator {
     }
 
     private JkResolveResult resolve(JkDependencySet dependencies, JkDependencyResolver resolver) {
-        return resolver.resolve(dependencies.minusModuleDependenciesWithIdeProjectDir());
+        return resolver.resolve(dependencies.minusModuleDependenciesHavingIdeProjectDir());
     }
 
     private void writeDependencies(JkResolveResult resolveResult, JkRepoSet repos,

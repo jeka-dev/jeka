@@ -10,8 +10,8 @@ import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
-import static dev.jeka.core.api.depmanagement.JkScope.RUNTIME;
-import static dev.jeka.core.api.depmanagement.JkScope.TEST;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.RUNTIME;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.TEST;
 
 
 /**
@@ -29,7 +29,7 @@ public class JavaPluginBuild extends JkClass {
     protected void setup() {
        java.getProject()
            .getConstruction()
-               .getDependencyManagement()
+               .getDependencyResolver()
                    .getResolver()
                         .getParams()
                             .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT).__.__

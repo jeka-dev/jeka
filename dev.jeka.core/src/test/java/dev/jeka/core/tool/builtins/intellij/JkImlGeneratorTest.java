@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.nio.file.Paths;
 
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
-import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE;
 
 public class JkImlGeneratorTest {
 
@@ -24,7 +24,7 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProject() {
         JkJavaProject project = JkJavaProject.of();
-        project.getConstruction().getDependencyManagement().addDependencies(dependencies());
+        project.getConstruction().getDependencyResolver().addDependencies(dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of(project.getJavaIdeSupport());
         String result = imlGenerator.generate();
         System.out.println(result);

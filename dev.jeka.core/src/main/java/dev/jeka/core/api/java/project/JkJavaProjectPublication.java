@@ -1,6 +1,8 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
+import dev.jeka.core.api.depmanagement.tooling.JkMavenPublication;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -54,12 +56,12 @@ public class JkJavaProjectPublication {
         registerArtifacts();
         this.mavenPublication = JkMavenPublication.of(this)
             .setArtifactLocator(() -> artifactProducer)
-            .setDependencies(deps -> project.getConstruction().getDependencyManagement().getDependencies())
+            .setDependencies(deps -> project.getConstruction().getDependencyResolver().getDependencies())
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()));
         this.ivyPublication = JkIvyPublication.of(this)
             .addArtifacts(() -> artifactProducer)
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()))
-            .setDependencies(deps -> project.getConstruction().getDependencyManagement().getDependencies())
+            .setDependencies(deps -> project.getConstruction().getDependencyResolver().getDependencies())
             .setResolvedVersionProvider(this::getResolvedVersions);
         this.postActions = JkRunnables.ofParent(this);
     }
@@ -209,7 +211,7 @@ public class JkJavaProjectPublication {
     }
 
     private JkVersionProvider getResolvedVersions() {
-        return project.getConstruction().getDependencyManagement().fetchDependencies().getResolvedVersionProvider();
+        return project.getConstruction().getDependencyResolver().resolveDependencies().getResolvedVersionProvider();
     }
 
     public JkStandardFileArtifactProducer<JkJavaProjectPublication> getArtifactProducer() {

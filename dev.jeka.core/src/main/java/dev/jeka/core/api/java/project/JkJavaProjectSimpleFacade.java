@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 /**
  * Simple facade over {@link JkJavaProject} to access common setting conveniently.
@@ -56,10 +57,26 @@ public class JkJavaProjectSimpleFacade {
         return this;
     }
 
-    public JkJavaProjectSimpleFacade addDependencies(JkDependencySet dependencies) {
-        project.getConstruction().getDependencyManagement().addDependencies(dependencies);
+    public JkJavaProjectSimpleFacade addCompileDependencies(JkDependencySet dependencies) {
+        project.getConstruction().getCompilation().addDependencies(dependencies);
         return this;
     }
+
+    public JkJavaProjectSimpleFacade addTestDependencies(JkDependencySet dependencies) {
+        project.getConstruction().getTesting().getCompilation().addDependencies(dependencies);
+        return this;
+    }
+
+    /**
+     * Specify the dependencies to add or remove from the production compilation dependencies to
+     * get the runtime dependencies.
+     * @param modifier An function that define the runtime dependencies from the compilation ones.
+     */
+    public JkJavaProjectSimpleFacade setRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
+        project.getConstruction().setRuntimeDependencies(modifier);
+        return this;
+    }
+
 
     public JkJavaProjectSimpleFacade setPublishedVersion(Supplier<String> versionSupplier) {
         project.getPublication().setVersionSupplier(() -> JkVersion.of(versionSupplier.get()));

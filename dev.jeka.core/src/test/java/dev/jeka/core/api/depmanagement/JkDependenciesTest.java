@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Assert;
@@ -18,7 +19,7 @@ public class JkDependenciesTest {
 
     @Test
     public void testAnd() {
-        final JkScopeMapping run2run = JkScopeMapping.of(JkScopedDependencyTest.RUNTIME).to(JkScopedDependencyTest.RUNTIME.getName());
+        final JkIvyConfigurationMapping run2run = JkIvyConfigurationMapping.of(JkScopedDependencyTest.RUNTIME).to(JkScopedDependencyTest.RUNTIME.getName());
         final JkDependencySet deps = JkDependencySet.of()
                 .and("hibernate:hjmlm:1212.0")
                 .and("spring:spring:6.3", JkScopedDependencyTest.COMPILE)
@@ -35,8 +36,8 @@ public class JkDependenciesTest {
 
     @Test
     public void testEquals() {
-        final JkScopeMapping run2runA = JkScopeMapping.of(JkScopedDependencyTest.RUNTIME).to(JkScopedDependencyTest.COMPILE.getName());
-        final JkScopeMapping run2runB = JkScopeMapping.of(JkScopedDependencyTest.RUNTIME).to(JkScopedDependencyTest.COMPILE.getName());
+        final JkIvyConfigurationMapping run2runA = JkIvyConfigurationMapping.of(JkScopedDependencyTest.RUNTIME).to(JkScopedDependencyTest.COMPILE.getName());
+        final JkIvyConfigurationMapping run2runB = JkIvyConfigurationMapping.of(JkScopedDependencyTest.RUNTIME).to(JkScopedDependencyTest.COMPILE.getName());
         Assert.assertEquals(run2runA, run2runB);
     }
 

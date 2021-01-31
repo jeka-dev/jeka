@@ -2,6 +2,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.JkDependencyNode.JkModuleNodeInfo;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -51,6 +52,10 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
 
     private static final String[] IVY_24_ALL_CONF = new String[] { "*(public)" };
 
+    private static final String COMPILE = "compile";
+
+    private static final String RUNTIME ="runtime";
+
     private final Ivy ivy;
 
     private IvyInternalDepResolver(Ivy ivy) {
@@ -98,22 +103,21 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
     @SuppressWarnings("unchecked")
     @Override
     public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencySet deps,
-                                   JkResolutionParameters parameters, JkScope ... resolvedScopes) {
+                                   JkResolutionParameters parameters) {
         final JkVersionedModule module;
         if (moduleArg == null) {
             module = anonymousVersionedModule();
         } else {
             module = moduleArg;
         }
-        final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
+        final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toResolutionModuleDescriptor(
                 module,
                 deps,
-                parameters.getScopeMapping(),
                 deps.getVersionProvider()
         );
         setConflictManager(moduleDescriptor, parameters.getConflictResolver());
 
-        final String[] confs = toConfs(moduleDescriptor.getConfigurations(), resolvedScopes);
+        final String[] confs = toConfs(moduleDescriptor.getConfigurations());
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);
@@ -122,9 +126,12 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
         resolveOptions.setRefresh(parameters.isRefreshed());
         resolveOptions.setCheckIfChanged(true);
         resolveOptions.setOutputReport(true);
+        /*
         if (resolvedScopes.length == 0) {   // if no scope, verbose ivy report turns in exception
             resolveOptions.setOutputReport(false);
         }
+
+         */
         final ResolveReport ivyReport;
         try {
             ivyReport = ivy.resolve(moduleDescriptor, resolveOptions);
@@ -340,7 +347,7 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
         return result;
     }
 
-    private String[] toConfs(Configuration[] declaredConfigurations, JkScope ... resolvedScopes) {
+    private String[] toConfs(Configuration[] declaredConfigurations, JkScope... resolvedScopes) {
         final Set<String> result = new HashSet<>();
         for (Configuration declaredConf : declaredConfigurations) {
             for (JkScope scope : resolvedScopes) {

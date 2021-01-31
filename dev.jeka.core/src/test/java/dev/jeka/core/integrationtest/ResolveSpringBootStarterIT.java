@@ -1,13 +1,14 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE;
 
 public class ResolveSpringBootStarterIT {
 
@@ -39,7 +40,7 @@ public class ResolveSpringBootStarterIT {
     }
 
     private JkDependencyResolver resolver() {
-        final JkScopeMapping mapping = JkScopeMapping.of("compile").to("compile");
+        final JkIvyConfigurationMapping mapping = JkIvyConfigurationMapping.of("compile").to("compile");
         return JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .getParams()

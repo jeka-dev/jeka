@@ -1,7 +1,7 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
@@ -53,7 +53,7 @@ public class SonarPluginBuild extends JkClass {
             .setProp(JkSonar.HOST_URL, sonarEnv.url)
             .setProp(JkSonar.BRANCH, "myBranch");
         java.getProject().simpleFacade()
-            .addDependencies(JkDependencySet.of()
+            .addComileDependencies(JkDependencySet.of()
                 .and(GUAVA, "18.0")
                 .and(JUNIT, "4.13", JkScope.TEST))
             .setPublishedVersion(git.getWrapper()::getVersionFromTags)

@@ -1,5 +1,6 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.tooling;
 
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -32,7 +33,7 @@ public final class JkIvyPublication<T> {
 
     private Supplier<JkVersionProvider> resolvedVersionProvider = () -> JkVersionProvider.of();
 
-    private JkScopeMapping scopeMapping = JkScopeMapping.DEFAULT_SCOPE_MAPPING;
+    private JkIvyConfigurationMapping scopeMapping = JkIvyConfigurationMapping.RESOLVE_MAPPING;
 
     private Supplier<? extends JkArtifactLocator> artifactLocator;
 
@@ -77,7 +78,7 @@ public final class JkIvyPublication<T> {
         return this;
     }
 
-    public JkIvyPublication<T> setScopeMapping(JkScopeMapping scopeMapping) {
+    public JkIvyPublication<T> setScopeMapping(JkIvyConfigurationMapping scopeMapping) {
         this.scopeMapping = scopeMapping;
         return this;
     }

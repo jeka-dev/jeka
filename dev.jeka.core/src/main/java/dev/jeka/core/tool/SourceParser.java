@@ -119,7 +119,7 @@ final class SourceParser {
             } else  if (dependency.contains("*")) {
                 if (dependency.contains("*")) {
                     for (Path path : JkPathTree.of(baseDir).andMatching(true, dependency).getFiles()) {
-                        result = result.andFile(path);
+                        result = result.andFiles(path);
                     }
                 }
             } else {
@@ -133,7 +133,7 @@ final class SourceParser {
                                 + "' mentionned in @JkDefClasspath does not exist.");
                     }
                 }
-                result = result.andFile(depFile);
+                result = result.andFiles(depFile);
             }
         }
         return result;

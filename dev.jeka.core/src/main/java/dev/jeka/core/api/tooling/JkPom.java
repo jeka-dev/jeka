@@ -1,7 +1,9 @@
 package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkScopedDependencies;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -17,7 +19,7 @@ import java.util.Map;
 
 /**
  * Wraps a POM file (Ideally an effective POM file) and provides convenient methods to extract
- * information jump.
+ * information on.
  *
  * @author Jerome Angibaud
  */
@@ -82,12 +84,12 @@ public final class JkPom {
     /**
      * The dependencies declared in this POM.
      */
-    public JkDependencySet getDependencies() {
+    public JkScopedDependencies getDependencies() {
         return dependencies(dependenciesElement(), getProperties());
     }
 
     /**
-     * The map groupId:ArtifactId -> version provideded by the <code>dependencyManagement</code>
+     * The map groupId:ArtifactId -> version provided by the <code>dependencyManagement</code>
      * section of this POM.
      */
     public JkVersionProvider getVersionProvider() {
@@ -97,10 +99,8 @@ public final class JkPom {
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
-        final JkDependencySet dependencies = dependencies(dependenciesEl, getProperties());
-        for (final JkScopedDependency scopedDependency : dependencies) {
-            final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .getDependency();
+        final JkScopedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
+        for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
             final JkVersionedModule versionedModule = JkVersionedModule.of(
                     moduleDependency.getModuleId(),
                     JkVersion.of(moduleDependency.getVersion().getValue()));
@@ -157,12 +157,9 @@ public final class JkPom {
         if (dependencyManagementEl() == null) {
             return result;
         }
-        final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
-                "dependencies");
-        final JkDependencySet dependencies = dependencies(dependenciesEl, getProperties());
-        for (final JkScopedDependency scopedDependency : dependencies) {
-            final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .getDependency();
+        final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(), "dependencies");
+        final JkScopedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
+        for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
             if (!moduleDependency.getExcludes().isEmpty()) {
                 result = result.and(moduleDependency.getModuleId(), moduleDependency.getExcludes());
             }
@@ -184,16 +181,15 @@ public final class JkPom {
         return JkRepoSet.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
-    private JkDependencySet dependencies(Element dependenciesEl, Map<String, String> props) {
-        List<JkScopedDependency> scopedDependencies = new LinkedList<>();
+    private JkScopedDependencies dependencies(Element dependenciesEl, Map<String, String> props) {
+        List<JkScopedDependencies.Entry> scopedDependencies = new LinkedList<>();
         for (final Element dependencyEl : JkUtilsXml.directChildren(dependenciesEl, "dependency")) {
-            scopedDependencies.add(jkDependency(dependencyEl, props));
+            scopedDependencies.add(scopedDep(dependencyEl, props));
         }
-        return JkDependencySet.of(scopedDependencies);
+        return JkScopedDependencies.of(scopedDependencies);
     }
 
-    private JkScopedDependency jkDependency(Element mvnDependency, Map<String, String> props) {
-
+    private JkScopedDependencies.Entry scopedDep(Element mvnDependency, Map<String, String> props) {
         final String groupId = JkUtilsXml.directChildText(mvnDependency, "groupId");
         final String artifactId = JkUtilsXml.directChildText(mvnDependency, "artifactId");
         final String version = resolveProps(JkUtilsXml.directChildText(mvnDependency, "version"), props) ;
@@ -213,14 +209,11 @@ public final class JkPom {
                 moduleDependency = moduleDependency.andExclude(jkDepExclude(exclusionElement));
             }
         }
-        final String scope = JkUtilsXml.directChildText(mvnDependency, "scope");
-        final JkScope[] jkScopes;
-        if (scope == null || scope.equalsIgnoreCase("compile")) {
-            jkScopes = new JkScope[0];
-        } else {
-            jkScopes =  new JkScope[] {JkScope.of(scope)};
-        }
-        return JkScopedDependency.of(moduleDependency, jkScopes);
+        String scope = JkUtilsXml.directChildText(mvnDependency, "scope");
+        scope = JkUtilsObject.firstNonNull(scope, "compile");
+        JkScopedDependencies.Scope realScope = JkUtilsObject.valueOfEnum(JkScopedDependencies.Scope.class,
+                scope.toUpperCase());
+        return JkScopedDependencies.Entry.of(realScope, moduleDependency);
     }
 
     private JkDepExclude jkDepExclude(Element exclusionEl) {

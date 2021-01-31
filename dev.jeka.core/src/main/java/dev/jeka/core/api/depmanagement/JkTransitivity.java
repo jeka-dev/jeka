@@ -20,13 +20,7 @@ public enum  JkTransitivity {
 
     /**
      * Dependency will be fetch along transitive dependencies declared as 'runtime'
-     */
-    RUNTIME,
-
-    /**
-     * Dependency will be fetch along transitive dependencies declared as 'runtime'
      * or 'compile'
      */
-    ALL
-
+    RUNTIME;
 }

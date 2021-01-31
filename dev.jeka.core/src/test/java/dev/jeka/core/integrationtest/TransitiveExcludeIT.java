@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 

@@ -1,4 +1,4 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.tooling;
 
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -44,6 +44,13 @@ public final class JkScope {
             "Dependencies to run the project but not needed to compile it.",
             true);
 
+    /**
+     * A dependency declared with this scope will be available at compile time but won't be part of the packaged
+     * product (similar to Maven scope 'provided').
+     */
+    public static final JkScope PROVIDED = of("provided",
+            "Dependencies to compile the project but that should not be embedded in produced artifacts.",
+            false);
 
     /**
      * A dependency declared with this scope will be present in testing classpath only.
@@ -54,6 +61,8 @@ public final class JkScope {
     public static final JkScope TEST = of("test",
             "Dependencies necessary to compile and run tests.",
             true);
+
+
 
     /**
      * Shorthand to declare both COMPILE and RUNTIME scope at once.
@@ -85,7 +94,7 @@ public final class JkScope {
     private final boolean transitive;
 
     private JkScope(String name, String description,
-            boolean transitive) {
+                    boolean transitive) {
         super();
         final String illegal = JkUtilsString.firstMatching(name, ",", "->");
         if (illegal != null) {
@@ -99,8 +108,6 @@ public final class JkScope {
     public static JkScope of(String name, String description, boolean transitive) {
         return new JkScope(name, description, transitive);
     }
-
-
 
     /**
      * Returns the name of this scope. Name is used as identifier for scopes.
@@ -124,12 +131,6 @@ public final class JkScope {
         return this.transitive;
     }
 
-    /**
-     * Returns a {@link JkScopeMapping} from this {@link JkScope} to the specified one.
-     */
-    public JkScopeMapping mapTo(String ... targetScopes) {
-        return JkScopeMapping.of(this).to(targetScopes);
-    }
 
     @Override
     public int hashCode() {

@@ -3,8 +3,8 @@ package dev.jeka.core.integrationtest;
 import dev.jeka.core.api.depmanagement.*;
 import org.junit.Test;
 
-import static dev.jeka.core.api.depmanagement.JkScope.COMPILE_AND_RUNTIME;
-import static dev.jeka.core.api.depmanagement.JkScopeMapping.DEFAULT_SCOPE_MAPPING;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE_AND_RUNTIME;
+import static dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping.RESOLVE_MAPPING;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -20,7 +20,7 @@ public class ResolveHandleErrorIT {
         JkDependencyResolver resolver = JkDependencyResolver.of()
             .addRepos(JkRepo.ofMavenCentral())
             .getParams()
-                .setScopeMapping(DEFAULT_SCOPE_MAPPING).__
+                .setScopeMapping(RESOLVE_MAPPING).__
             .setModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolveResult.JkErrorReport errorReport = resolveResult.getErrorReport();

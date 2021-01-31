@@ -390,7 +390,7 @@ public final class JkEclipseClasspathGenerator {
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
 
         // dependencies with IDE project dir will be omitted. The project dir will be added in other place.
-        final JkResolveResult resolveResult = resolver.resolve(dependencies.minusModuleDependenciesWithIdeProjectDir());
+        final JkResolveResult resolveResult = resolver.resolve(dependencies.minusModuleDependenciesHavingIdeProjectDir());
         final JkRepoSet repos = resolver.getRepos();
         for (final JkDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency

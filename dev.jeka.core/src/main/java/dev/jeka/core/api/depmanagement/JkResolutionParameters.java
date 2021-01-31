@@ -36,11 +36,11 @@ public final class JkResolutionParameters<T> {
         LATEST_VERSION;
     }
 
-    private JkScopeMapping scopeMapping = JkScopeMapping.DEFAULT_SCOPE_MAPPING;
-
     private boolean refreshed = true;
 
     private JkConflictResolver conflictResolver = JkConflictResolver.DEFAULT;
+
+    private boolean failOnDependencyResolutionError = true;
 
     /**
      * For parent chaining
@@ -53,26 +53,6 @@ public final class JkResolutionParameters<T> {
 
     static <T> JkResolutionParameters ofParent(T parent) {
         return new JkResolutionParameters(parent);
-    }
-
-    /**
-     * Returns the default scope mapping to use for the {@link JkDependencySet}
-     * to be resolved. <code>null</code> means no default scope mapping.
-     * 
-     * @see <a href=
-     *      "http://ant.apache.org/ivy/history/2.3.0/ivyfile/configurations.html">
-     *      Ivy configuration doc</a>
-     */
-    public JkScopeMapping getScopeMapping() {
-        return scopeMapping;
-    }
-
-    /**
-     * @see #getScopeMapping()
-     */
-    public JkResolutionParameters<T> setScopeMapping(JkScopeMapping scopeMapping) {
-        this.scopeMapping = scopeMapping;
-        return this;
     }
 
     /**
@@ -107,9 +87,17 @@ public final class JkResolutionParameters<T> {
         return this;
     }
 
-    @Override
-    public String toString() {
-        return "scope mapping : " + scopeMapping + ", isRefreshed : " + refreshed;
+
+    public boolean isFailOnDependencyResolutionError() {
+        return failOnDependencyResolutionError;
     }
 
+    /**
+     * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise
+     * just log a warn message. <code>false</code> by default.
+     */
+    public JkResolutionParameters<T> setFailOnDependencyResolutionError(boolean failOnDependencyResolutionError) {
+        this.failOnDependencyResolutionError = failOnDependencyResolutionError;
+        return this;
+    }
 }

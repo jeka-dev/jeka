@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
@@ -51,11 +51,13 @@ public class JkJavaProjectCompilation<T> {
 
     private final JkCompileLayout<JkJavaProjectCompilation<T>> layout;
 
-    private final String scope;
+    private JkDependencySet dependencySet = JkDependencySet.of();
 
     private final LinkedList<String> compileOptions = new LinkedList<>();
 
     private boolean done;
+
+    private String purpose;
 
     private Supplier<JkJavaCompileSpec> compileSpecSupplier;
 
@@ -63,10 +65,10 @@ public class JkJavaProjectCompilation<T> {
 
     private String sourceEncoding = DEFAULT_ENCODING;
 
-    private JkJavaProjectCompilation(JkJavaProjectConstruction projectProduction, String scope, T parent) {
+    private JkJavaProjectCompilation(JkJavaProjectConstruction projectProduction, String purpose, T parent) {
         __ = parent;
+        this.purpose = purpose;
         this.projectProduction = projectProduction;
-        this.scope = scope;
         beforeGenerate = JkRunnables.ofParent(this);
         sourceGenerator = JkConsumers.ofParent(this);
         resourceGenerator = JkConsumers.ofParent(this);
@@ -115,7 +117,7 @@ public class JkJavaProjectCompilation<T> {
      * </ul>
      */
     public void run() {
-        JkLog.startTask("Compile and process resources for scope '" + scope + "'");
+        JkLog.startTask("Compile and process resources for '" + purpose + "'");
         beforeGenerate.run();
         sourceGenerator.accept(this.layout.resolveGeneratedSourceDir());
         resourceGenerator.accept(this.layout.resolveGeneratedResourceDir());
@@ -240,6 +242,18 @@ public class JkJavaProjectCompilation<T> {
         return this;
     }
 
+    /**
+     * Sets the Java version used for both source and target.
+     */
+    public JkJavaProjectCompilation<T> addDependencies(JkDependencySet dependencySet) {
+        this.dependencySet = dependencySet.and(dependencySet);
+        return this;
+    }
+
+    public JkDependencySet getDependencies() {
+        return dependencySet;
+    }
+
     private JkJavaCompileSpec getComputedCompileSpec() {
         return compileSpecSupplier.get();
     }
@@ -256,25 +270,21 @@ public class JkJavaProjectCompilation<T> {
     }
 
     private JkJavaCompileSpec computeProdCompileSpec() {
-        JkScope[] scopes = new JkScope[] {JkScope.COMPILE};
         return JkJavaCompileSpec.of()
             .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
             .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
-            .setClasspath(projectProduction.getDependencyManagement()
-                    .fetchDependencies(scopes).getFiles())
+            .setClasspath(projectProduction.getDependencyResolver().resolve(dependencySet).getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
             .setOutputDir(layout.resolveClassDir());
     }
 
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
-        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.COMPILE};
         JkJavaCompileSpec prodSpec = prodStep.getComputedCompileSpec();
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
-                .setClasspath(projectProduction.getDependencyManagement()
-                        .fetchDependencies(scopes).getFiles()
+                .setClasspath(projectProduction.getDependencyResolver().resolve(dependencySet).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
                 .addOptions(compileOptions)

@@ -587,7 +587,7 @@ tests and produce jars using Jeka low-level API.
 
 ```Java
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.java.*;
@@ -753,7 +753,7 @@ any dependency you need.
 
 ```Java
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkPluginJava;

@@ -1,6 +1,8 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
@@ -34,7 +36,7 @@ public class MergeFileDepIT {
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder)
                 .getParams()
-                    .setScopeMapping(JkScopeMapping.DEFAULT_SCOPE_MAPPING).__;
+                    .setScopeMapping(JkIvyConfigurationMapping.RESOLVE_MAPPING).__;
         JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
         System.out.println(tree.toStringTree());

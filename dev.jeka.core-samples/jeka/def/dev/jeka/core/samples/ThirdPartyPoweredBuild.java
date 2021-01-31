@@ -12,8 +12,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
 
-import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
-import static dev.jeka.core.api.depmanagement.JkScope.TEST;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.TEST;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 /**
@@ -31,7 +31,7 @@ public class ThirdPartyPoweredBuild extends JkClass {
     @Override
     protected void setup() {
         javaPlugin.getProject().getConstruction()
-            .getDependencyManagement()
+            .getDependencyResolver()
                 .addDependencies(dependencies());
     }
 

@@ -1,5 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Test;
 
@@ -26,7 +28,7 @@ public class JkScopedDependencyTest {
         final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
         final JkScope aScope = JkScope.of("aScope");
         final JkScopedDependency scopedDep = JkScopedDependency.of(dep,
-                JkScopeMapping.of(aScope, RUNTIME).to(PROVIDED.getName()));
+                JkIvyConfigurationMapping.of(aScope, RUNTIME).to(PROVIDED.getName()));
 
 
         assertEquals(JkUtilsIterable.setOf(PROVIDED.getName()), scopedDep.getScopeMapping().getMappedScopes(RUNTIME));

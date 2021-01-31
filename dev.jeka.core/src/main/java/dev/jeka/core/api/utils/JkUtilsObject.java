@@ -55,4 +55,12 @@ public final class JkUtilsObject {
         return object.toString();
     }
 
+    public static <T extends Enum<T>> T valueOfEnum(Class<T> enumType, String name) {
+        try {
+            return Enum.valueOf(enumType, name);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return null;
+        }
+    }
+
 }

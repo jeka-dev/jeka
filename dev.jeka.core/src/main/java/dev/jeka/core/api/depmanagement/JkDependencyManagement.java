@@ -1,8 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.system.JkLog;
-
-import java.util.*;
 
 /**
  * A structure to manage consistently dependencies and their resolution.
@@ -11,13 +10,13 @@ import java.util.*;
  */
 public class JkDependencyManagement<T> {
 
-    private final Map<Set<JkScope>, JkResolveResult> dependencyCache = new HashMap<>();
+    private JkResolveResult cachedResult = null;
 
     private final JkDependencyResolver<JkDependencyManagement<T>> resolver;
 
     private JkScope[] defaultScope = JkScope.COMPILE_AND_RUNTIME;
 
-    private boolean failOnDependencyResolutionError = true;
+
 
     /**
      * For parent chaining
@@ -45,13 +44,13 @@ public class JkDependencyManagement<T> {
     }
 
     public JkDependencyManagement<T> removeDependencies() {
-        dependencyCache.clear();
+        cachedResult = null;
         this.dependencies = JkDependencySet.of();
         return this;
     }
 
     public JkDependencyManagement<T> addDependencies(JkDependencySet dependencies) {
-        dependencyCache.clear();;
+        cachedResult = null;
         this.dependencies = this.dependencies.and(dependencies);
         return this;
     }
@@ -60,14 +59,7 @@ public class JkDependencyManagement<T> {
         return resolver;
     }
 
-    /**
-     * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise
-     * just log a warn message. <code>false</code> by default.
-     */
-    public JkDependencyManagement<T> setFailOnDependencyResolutionError(boolean fail) {
-        this.failOnDependencyResolutionError = fail;
-        return this;
-    }
+
 
     public JkScope[] getDefaultScope() {
         return defaultScope;
@@ -80,32 +72,25 @@ public class JkDependencyManagement<T> {
     // ------------
 
     public JkDependencyManagement<T> cleanCache() {
-        dependencyCache.clear();
+        cachedResult = null;
         return this;
-    }
-
-    /**
-     * Returns dependencies declared for this project. Dependencies declared without specifying
-     * scope are defaulted to scope {@link JkScope#COMPILE_AND_RUNTIME}
-     */
-    public JkDependencySet getScopeDefaultedDependencies() {
-        return dependencies.withDefaultScopes(defaultScope);
     }
 
     /**
      * Returns lib paths standing for the resolution of this project dependencies for the specified dependency scopes.
      */
-    public JkResolveResult fetchDependencies(JkScope... scopes) {
-        final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
-        return dependencyCache.computeIfAbsent(scopeSet, this::resolveDependencies);
+    public JkResolveResult resolveDependencies() {
+        if (cachedResult == null) {
+            cachedResult = this.fetchDependencies();
+        }
+        return cachedResult;
     }
 
-    private JkResolveResult resolveDependencies(Set<JkScope>  scopes)  {
-        JkResolveResult resolveResult =
-                resolver.resolve(getScopeDefaultedDependencies(), scopes);
+    private JkResolveResult fetchDependencies()  {
+        JkResolveResult resolveResult = resolver.resolve(dependencies);
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {
-            if (failOnDependencyResolutionError) {
+            if (resolver.getParams().isFailOnDependencyResolutionError()) {
                 throw new IllegalStateException(report.toString());
             }
             JkLog.warn(report.toString());

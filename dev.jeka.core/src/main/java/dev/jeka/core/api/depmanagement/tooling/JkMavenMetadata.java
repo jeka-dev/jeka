@@ -1,6 +1,9 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.tooling;
 
-import dev.jeka.core.api.depmanagement.JkMavenMetadata.Versioning.JkSnapshot;
+import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.tooling.JkMavenMetadata.Versioning.JkSnapshot;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.w3c.dom.Document;

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by angibaudj on 20-06-17.
+ * Created by Jerome Angibaud on 20-06-17.
  */
 final class IvyArtifactContainer {
 

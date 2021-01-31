@@ -9,7 +9,7 @@ import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
 
-import static dev.jeka.core.api.depmanagement.JkScope.TEST;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.TEST;
 
 /**
  * This build class illustrates how to use directly JUnit5 Platform API.
@@ -42,7 +42,7 @@ class Junit5Build extends JkClass {
     protected void setup() {
         java.getProject()
             .getConstruction()
-                .getDependencyManagement()
+                .getDependencyResolver()
                     .addDependencies(JkDependencySet.of()
                         .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)
                         .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)

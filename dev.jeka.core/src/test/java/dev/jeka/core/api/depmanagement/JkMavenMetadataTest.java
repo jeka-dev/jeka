@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.tooling.JkMavenMetadata;
 import org.junit.Assert;
 import org.junit.Test;
 

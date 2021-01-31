@@ -173,12 +173,10 @@ final class Engine {
 
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
-        JkScopeMapping scope = JkScope.of("*").mapTo("default(*)");
-        return JkDependencySet.of(defDependencies
+        return defDependencies
                 .andFiles(bootLibs())
                 .andFiles(JkClasspath.ofCurrentRuntime()).minusLastIf(!devMode)
-                .andFile(JkLocator.getJekaJarPath()).minusLastIf(devMode)
-                .withDefaultScope(scope));
+                .andFiles(JkLocator.getJekaJarPath()).minusLastIf(devMode);
     }
 
     private JkPathSequence bootLibs() {

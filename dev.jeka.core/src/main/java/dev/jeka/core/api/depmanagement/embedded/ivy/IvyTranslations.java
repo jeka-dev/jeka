@@ -1,7 +1,10 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkScopedDependency.ScopeType;
+import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
+import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
+import dev.jeka.core.api.depmanagement.tooling.JkMavenPublication;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -45,8 +48,59 @@ final class IvyTranslations {
     private IvyTranslations() {
     }
 
+    static DefaultModuleDescriptor toResolutionModuleDescriptor(JkVersionedModule module,
+                                                                  JkDependencySet dependencies,
+                                                                  JkVersionProvider resolvedVersions) {
+        final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
+                .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
+        final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(
+                thisModuleRevisionId, "integration", null);
+
+        populateModuleDescriptorForResolution(moduleDescriptor, dependencies, resolvedVersions);
+        return moduleDescriptor;
+    }
+
+    private static void populateModuleDescriptorForResolution(DefaultModuleDescriptor moduleDescriptor,
+                                                 JkDependencySet dependencies,
+                                                 JkVersionProvider resolvedVersions) {
+
+        // Add dependencies
+        JkIvyConfigurationMapping defaultConfigMappling = JkIvyConfigurationMapping.of();
+        DependenciesContainer dependencyContainer = new DependenciesContainer(defaultConfigMappling, dependencies);
+        for (JkModuleDependency moduleDependency : dependencies.getModuleDependencies()) {
+            String targetConf = JkTransitivity.COMPILE == moduleDependency.getTransitivity() ?
+                    "compile" : "runtime";
+            JkIvyConfigurationMapping.Entry depConfMapping = JkIvyConfigurationMapping.Entry.of("*",
+                    JkIvyConfigurationMapping.ARCHIVE_MASTER, targetConf + "(default)");
+            dependencyContainer.populate(moduleDependency, depConfMapping);
+        }
+        for (final DependencyDescriptor dependencyDescriptor : dependencyContainer.toDependencyDescriptors()) {
+
+            // If we don't set parent, force version on resolution won't work
+            final Field field = JkUtilsReflect.getField(DefaultDependencyDescriptor.class, "parentId");
+            JkUtilsReflect.setFieldValue(dependencyDescriptor, field, moduleDescriptor.getModuleRevisionId());
+            moduleDescriptor.addDependency(dependencyDescriptor);
+        }
+
+        // -- Add dependency exclusion
+        for (final JkDepExclude exclude : dependencies.getGlobalExclusions()) {
+            final DefaultExcludeRule rule = toExcludeRule(exclude, Arrays.asList(moduleDescriptor.getConfigurationsNames()));
+            moduleDescriptor.addExcludeRule(rule);
+        }
+
+        // -- Add version override for transitive dependency
+        for (final JkModuleId moduleId : resolvedVersions.getModuleIds()) {
+            final JkVersion version = resolvedVersions.getVersionOf(moduleId);
+            moduleDescriptor.addDependencyDescriptorMediator(toModuleId(moduleId),
+                    ExactOrRegexpPatternMatcher.INSTANCE,
+                    new OverrideDependencyDescriptorMediator(null, version.getValue()));
+        }
+
+    }
+/*
     static DefaultModuleDescriptor toPublicationLessModule(JkVersionedModule module,
-                                                           JkDependencySet dependencies, JkScopeMapping defaultMapping,
+                                                           JkDependencySet dependencies,
+                                                           JkIvyConfigurationMapping defaultMapping,
                                                            JkVersionProvider resolvedVersions) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
                 .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
@@ -55,7 +109,7 @@ final class IvyTranslations {
         populateModuleDescriptor(result, dependencies, defaultMapping, resolvedVersions);
         return result;
     }
-
+*/
 
 
     private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude, Iterable<String> allRootConfs) {
@@ -79,11 +133,11 @@ final class IvyTranslations {
         return result;
     }
 
-    private static Configuration toConfiguration(JkScope jkScope) {
+    private static Configuration createConfiguration(String configName, String description, boolean transitive,
+                                                     String ... extendConf) {
         final List<String> extendedScopes = new LinkedList<>();
         final Visibility visibility = Visibility.PUBLIC;
-        return new Configuration(jkScope.getName(), visibility, jkScope.getDescription(),
-                extendedScopes.toArray(new String[0]), jkScope.isTransitive(), null);
+        return new Configuration(configName, visibility, description, extendConf, transitive, null);
     }
 
     static ModuleRevisionId toModuleRevisionId(JkModuleId moduleId, JkVersion version) {
@@ -229,36 +283,25 @@ final class IvyTranslations {
         return chainResolver;
     }
 
-    private static String toIvyExpression(JkScopeMapping scopeMapping) {
-        final List<String> list = new LinkedList<>();
-        for (final JkScope scope : scopeMapping.getEntries()) {
-            final List<String> targets = new LinkedList<>();
-            for (final String target : scopeMapping.getMappedScopes(scope)) {
-                targets.add(target);
-            }
-            final String item = scope.getName() + " -> " + JkUtilsString.join(targets, ",");
-            list.add(item);
-        }
-        return JkUtilsString.join(list, "; ");
-    }
-
+/*
     private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor,
-                                                 JkDependencySet dependencies, JkScopeMapping defaultMapping,
+                                                 JkDependencySet dependencies,
+                                                 JkIvyConfigurationMapping defaultMapping,
                                                  JkVersionProvider resolvedVersions) {
 
         // Add configuration definitions
         for (final JkScope involvedScope : dependencies.getDeclaredScopes()) {
-            final Configuration configuration = toConfiguration(involvedScope);
+            final Configuration configuration = createConfiguration(involvedScope);
             moduleDescriptor.addConfiguration(configuration);
         }
         if (dependencies.getDeclaredScopes().isEmpty()) {
             moduleDescriptor.addConfiguration(DEFAULT_CONFIGURATION);
         }
         for (final JkScope scope : defaultMapping.getEntries()) {
-            final Configuration configuration = toConfiguration(scope);
+            final Configuration configuration = createConfiguration(scope);
             moduleDescriptor.addConfiguration(configuration);
         }
-        moduleDescriptor.setDefaultConfMapping(toIvyExpression(defaultMapping));
+        moduleDescriptor.setDefaultConfMapping(defaultMapping.toIvyExpression());
 
         // Add dependencies
         final DependenciesContainer dependencyContainer = new DependenciesContainer(defaultMapping, dependencies);
@@ -289,24 +332,24 @@ final class IvyTranslations {
                     new OverrideDependencyDescriptorMediator(null, version.getValue()));
         }
 
-
-
     }
 
-    private static JkScopeMapping resolveSimple(JkScope scope, JkScopeMapping defaultMapping) {
-        final JkScopeMapping result;
+ */
+/*
+    private static JkIvyConfigurationMapping resolveSimple(String scope, JkIvyConfigurationMapping defaultMapping) {
+        final JkIvyConfigurationMapping result;
         if (scope == null) {
             if (defaultMapping == null) {
-                result = JkScopeMapping.of(JkScope.of("default")).to("default");
+                result = JkIvyConfigurationMapping.of(JkScope.of("default")).to("default");
             } else {
                 result = defaultMapping;
             }
         } else {
             if (defaultMapping == null) {
-                result = JkScopeMapping.of(scope).to(scope.getName());
+                result = JkIvyConfigurationMapping.of(scope).to(scope.getName());
             } else {
                 if (defaultMapping.getEntries().contains(scope)) {
-                    result = JkScopeMapping.of(scope).to(defaultMapping.getMappedScopes(scope));
+                    result = JkIvyConfigurationMapping.of(scope).to(defaultMapping.getMappedScopes(scope));
                 } else {
                     result = scope.mapTo(scope.getName() + "(default)");
                 }
@@ -316,10 +359,13 @@ final class IvyTranslations {
         return result;
     }
 
+ */
+
     private static String completePattern(String url, String pattern) {
         return url + "/" + pattern;
     }
 
+    /*
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
             JkIvyPublication publication, Instant publishDate) {
         Iterator<JkIvyPublication.JkPublicationArtifact> it = publication.getAllArtifacts().iterator();
@@ -327,7 +373,7 @@ final class IvyTranslations {
             JkIvyPublication.JkPublicationArtifact artifact = it.next();
             for (final JkScope jkScope : artifact.jkScopes) {
                 if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.getName())) {
-                    descriptor.addConfiguration(toConfiguration(jkScope));
+                    descriptor.addConfiguration(createConfiguration(jkScope));
                 }
             }
             final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
@@ -337,8 +383,10 @@ final class IvyTranslations {
         }
     }
 
+     */
+
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
-            JkMavenPublication publication, Instant publishDate) {
+                                                        JkMavenPublication publication, Instant publishDate) {
         JkArtifactLocator artifactLocator = publication.getArtifactLocator();
         final ModuleRevisionId moduleRevisionId = descriptor.getModuleRevisionId();
         final String ivyArtifactName = moduleRevisionId.getName();
@@ -368,7 +416,7 @@ final class IvyTranslations {
     }
 
     static Artifact toPublishedArtifact(JkIvyPublication.JkPublicationArtifact artifact,
-            ModuleRevisionId moduleId, Instant date) {
+                                        ModuleRevisionId moduleId, Instant date) {
         final String artifactName = JkUtilsString.isBlank(artifact.name) ? moduleId.getName()
                 : artifact.name;
         final String extension = JkUtilsObject.firstNonNull(artifact.extension, "");
@@ -473,50 +521,60 @@ final class IvyTranslations {
 
         private final Map<JkModuleId, DependencyDefinition> definitions = new LinkedHashMap<>();
 
-        private final JkScopeMapping defaultMapping;
+        private final JkIvyConfigurationMapping defaultMapping;
 
         private final JkDependencySet dependencySet;
 
-        DependenciesContainer(JkScopeMapping defaultMapping, JkDependencySet dependencySet) {
+        DependenciesContainer(JkIvyConfigurationMapping defaultMapping, JkDependencySet dependencySet) {
             this.defaultMapping = defaultMapping;
             this.dependencySet = dependencySet;
         }
 
-        void populate(JkScopedDependency scopedDependency) {
-            final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.getDependency();
+        void populate(JkModuleDependency moduleDep, JkIvyConfigurationMapping.Entry depConfMapping) {
             final JkModuleId moduleId = moduleDep.getModuleId();
-            final boolean mainArtifact = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
+            final boolean isMainArtifact = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
             JkVersion version = dependencySet.getVersion(moduleId);
-            // TODO
             boolean transitive = moduleDep.getTransitivity() != JkTransitivity.NONE;
-            this.put(moduleId, transitive, version, mainArtifact);
+            this.put(moduleId, transitive, version, isMainArtifact);
+
+            //fillConfigurationAndReturnMasterConfs(depConfMapping)
+            this.addArtifact(moduleId, new HashSet<>(), moduleDep.getClassifier(), moduleDep.getExt());
+
+            final boolean mainArtifactFlag = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
+            this.flagAsMainArtifact(moduleId, mainArtifactFlag);
+
+            // fill artifact exclusion
+            for (final JkDepExclude depExclude : moduleDep.getExcludes()) {
+                this.addExludes(moduleId, depExclude);
+            }
+        }
+/*
+        private Set<String> fillConfigurationAndReturnMasterConfs(JkIvyConfigurationMapping.Entry depConfMapping) {
 
             // fill configuration
             final List<Conf> confs = new LinkedList<>();
-            if (scopedDependency.getScopeType() == ScopeType.UNSET) {
+            if (depConfMapping.getFrom().isEmpty()) {
                 if (defaultMapping.getEntries().isEmpty()) {
                     confs.add(new Conf("*", "*"));
                 } else {
-                    for (final JkScope entryScope : defaultMapping.getEntries()) {
-                        for (final String mappedScope : defaultMapping.getMappedScopes(entryScope)) {
+                    for (JkIvyConfigurationMapping.Entry entry : defaultMapping.getEntries()) {
+                        for (final String conf : defaultMapping.getMappedScopes(entryScope)) {
                             confs.add(new Conf(entryScope.getName(), mappedScope));
                         }
                     }
                 }
-            }
-            else if (scopedDependency.getScopeType() == ScopeType.SIMPLE) {
-                for (final JkScope scope : scopedDependency.getScopes()) {
-                    final JkScopeMapping mapping = resolveSimple(scope, defaultMapping);
+            } else if (dependency.getScopeType() == ScopeType.SIMPLE) {
+                for (final JkScope scope : dependency.getScopes()) {
+                    final JkIvyConfigurationMapping mapping = resolveSimple(scope, defaultMapping);
                     for (final JkScope fromScope : mapping.getEntries()) {
                         for (final String mappedScope : mapping.getMappedScopes(fromScope)) {
                             confs.add(new Conf(fromScope.getName(), mappedScope));
                         }
                     }
-
                 }
-            } else if (scopedDependency.getScopeType() == ScopeType.MAPPED) {
-                for (final JkScope scope : scopedDependency.getScopeMapping().getEntries()) {
-                    for (final String mappedScope : scopedDependency.getScopeMapping()
+            } else if (dependency.getScopeType() == ScopeType.MAPPED) {
+                for (final JkScope scope : dependency.getScopeMapping().getEntries()) {
+                    for (final String mappedScope : dependency.getScopeMapping()
                             .getMappedScopes(scope)) {
                         confs.add(new Conf(scope.getName(), mappedScope));
                     }
@@ -535,22 +593,16 @@ final class IvyTranslations {
                 this.addConf(moduleId, conf);
                 masterConfs.add(conf.masterConf);
             }
-            this.addArtifact(moduleId, masterConfs, moduleDep.getClassifier(), moduleDep.getExt());
-
-            final boolean mainArtifactFlag = moduleDep.getClassifier() == null && moduleDep.getExt() == null;
-            this.flagAsMainArtifact(moduleId, mainArtifactFlag);
-
-            // fill artifact exclusion
-            for (final JkDepExclude depExclude : moduleDep.getExcludes()) {
-                this.addExludes(moduleId, depExclude);
-            }
+            return masterConfs;
         }
+
+ */
 
 
         private void put(JkModuleId moduleId, boolean transitive, JkVersion version, boolean mainArtifact) {
             final DependencyDefinition definition = definitions.computeIfAbsent(moduleId, k -> new DependencyDefinition());
 
-            // if dependency has been declared only once non-transive and once transitive then we consider it has non-transitive
+            // if dependency has been declared only once non-transitive and once transitive then we consider it has non-transitive
             definition.transitive = definition.transitive && transitive;
 
             definition.version = version;

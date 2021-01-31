@@ -2,7 +2,7 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
@@ -33,7 +33,7 @@ public class WarPluginBuild extends JkClass {
     @Override
     protected void setup() {
        java.getProject().simpleFacade()
-               .addDependencies(JkDependencySet.of()
+               .addComileDependencies(JkDependencySet.of()
                        .and("com.google.guava:guava:21.0")
                        .and("javax.servlet:javax.servlet-api:jar:4.0.1", JkScope.COMPILE))
                .setJavaVersion(JkJavaVersion.V8).getProject().getConstruction()

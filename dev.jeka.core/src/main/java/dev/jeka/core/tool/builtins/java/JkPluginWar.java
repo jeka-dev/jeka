@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.depmanagement.JkResolveResult;
-import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.depmanagement.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
@@ -61,7 +61,7 @@ public class JkPluginWar extends JkPlugin {
             JkPathTree.of(staticResourceDir).copyTo(root.getRoot());
         }
         JkPathTree.of(project.getConstruction().getCompilation().getLayout().resolveClassDir()).copyTo(root.get("WEB-INF/classes"));
-        JkResolveResult resolveResult = project.getConstruction().getDependencyManagement().fetchDependencies(JkScope.RUNTIME);
+        JkResolveResult resolveResult = project.getConstruction().getDependencyResolver().resolveDependencies(JkScope.RUNTIME);
         JkPathTree lib = root.goTo("lib");
         resolveResult.getFiles().withoutDuplicates().getEntries().forEach(path ->  lib.importFiles(path));
     }

@@ -25,7 +25,7 @@ public class FatJarBuild extends JkClass {
                 .getArtifactProducer()
                     .putMainArtifact(java.getProject().getConstruction()::createFatJar).__.__
             .simpleFacade()
-                .addDependencies(JkDependencySet.of()
+                .addComileDependencies(JkDependencySet.of()
                     .and(sampleBuild.java.getProject().toDependency()))
         ;
     }

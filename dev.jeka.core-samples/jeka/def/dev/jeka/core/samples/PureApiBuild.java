@@ -1,6 +1,7 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
@@ -15,7 +16,7 @@ public class PureApiBuild extends JkClass {
         JkJavaProject javaProject = JkJavaProject.of().setBaseDir(this.getBaseDir());
         javaProject.setOutputDir("jeka/output/alt-output");
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12", JkScope.TEST);
-        javaProject.getConstruction().getDependencyManagement().addDependencies(deps);
+        javaProject.getConstruction().getDependencyResolver().addDependencies(deps);
         javaProject.getPublication().getArtifactProducer().makeAllArtifacts();
     }
 
@@ -29,7 +30,7 @@ public class PureApiBuild extends JkClass {
         JkJavaProject fooProject = JkJavaProject.of()
             .setBaseDir(this.getBaseDir().resolve("foo"))
             .getConstruction()
-                .getDependencyManagement()
+                .getDependencyResolver()
                     .addDependencies(JkDependencySet.of()
                         .and("junit:junit", JkScope.TEST)
                         .and("com.google.guava:guava")
@@ -39,7 +40,7 @@ public class PureApiBuild extends JkClass {
         JkJavaProject barProject = JkJavaProject.of()
             .setBaseDir(this.getBaseDir().resolve("bar"))
             .getConstruction()
-                .getDependencyManagement().addDependencies(JkDependencySet.of()
+                .getDependencyResolver().addDependencies(JkDependencySet.of()
                     .and("junit:junit", JkScope.TEST)
                     .and("com.sun.jersey:jersey-server:1.19.4")
                     .and(fooProject.toDependency())).__.__;

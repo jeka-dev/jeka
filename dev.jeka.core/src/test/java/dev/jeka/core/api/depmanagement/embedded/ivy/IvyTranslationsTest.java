@@ -2,6 +2,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
@@ -10,7 +11,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static dev.jeka.core.api.depmanagement.JkScopeMapping.DEFAULT_SCOPE_MAPPING;
+import static dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping.RESOLVE_MAPPING;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.COMPILE;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.RUNTIME;
 import static org.junit.Assert.assertEquals;
@@ -29,7 +30,7 @@ public class IvyTranslationsTest {
 
         // handle multiple artifacts properly
         JkDependencySet deps = deps();
-        final DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps, DEFAULT_SCOPE_MAPPING,
+        final DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps, RESOLVE_MAPPING,
                 versionProvider);
         final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
         assertEquals(1, dependencyDescriptors.length);

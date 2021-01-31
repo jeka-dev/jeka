@@ -103,9 +103,9 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
             .append("Java Source Version : " + construction.getCompilation().getJavaVersion() + "\n")
             .append("Source Encoding : " + construction.getCompilation().getSourceEncoding() + "\n")
             .append("Source file count : " + construction.getCompilation().getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
-            .append("Download Repositories : " + construction.getDependencyManagement().getResolver().getRepos() + "\n")
+            .append("Download Repositories : " + construction.getDependencyResolver().getResolver().getRepos() + "\n")
             .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
-            .append("Declared Dependencies : " + construction.getDependencyManagement().getDependencies().toList().size() + " elements.\n")
+            .append("Declared Dependencies : " + construction.getDependencyResolver().getDependencies().toList().size() + " elements.\n")
             .append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds())
             .toString();
     }
@@ -116,8 +116,8 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
             .setSourceVersion(construction.getCompilation().getJavaVersion())
             .setProdLayout(construction.getCompilation().getLayout())
             .setTestLayout(construction.getTesting().getCompilation().getLayout())
-            .setDependencies(construction.getDependencyManagement().getDependencies())
-            .setDependencyResolver(construction.getDependencyManagement().getResolver());
+            .setDependencies(construction.getDependencyResolver().getDependencies())
+            .setDependencyResolver(construction.getDependencyResolver().getResolver());
     }
 
     public JkLocalLibDependency toDependency() {

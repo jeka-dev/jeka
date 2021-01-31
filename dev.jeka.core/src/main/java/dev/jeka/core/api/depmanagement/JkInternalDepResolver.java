@@ -15,11 +15,10 @@ public interface JkInternalDepResolver {
 
     /**
      * @param  module The resolved module. Only use for caching purpose. Can be <code>null</code>
-     * @param resolvedScopes scopes to resolve. Generally only one is provided.
      * @param parameters can be null.
      */
     JkResolveResult resolve(JkVersionedModule module, JkDependencySet deps,
-            JkResolutionParameters parameters, JkScope... resolvedScopes);
+            JkResolutionParameters parameters);
 
     File get(JkModuleDependency dependency);
 

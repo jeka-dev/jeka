@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
+import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE;
 
 public class ResolveGoogleApiClient {
 

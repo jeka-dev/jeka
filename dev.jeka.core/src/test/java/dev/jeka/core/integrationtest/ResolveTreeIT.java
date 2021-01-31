@@ -1,6 +1,7 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import org.junit.Test;
 
 import java.util.List;

@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -50,16 +51,16 @@ public class JkDependencyNode {
         return new JkDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<>()));
     }
 
-    JkDependencyNode mergeNonModules(JkDependencySet dependencies, Set<JkScope> scopes) {
+    JkDependencyNode mergeNonModules(JkDependencySet dependencies) {
         final List<JkDependencyNode> result = new LinkedList<>();
         final Set<JkFileDependency> addedFileDeps = new HashSet<>();
         for (final JkDependencyNode node : this.children) {
             if (node.isModuleNode()) {
-                addFileDepsToTree(dependencies, scopes, result, addedFileDeps, node.moduleId());
+                addFileDepsToTree(dependencies, result, addedFileDeps, node.moduleId());
                 result.add(node);
             }
         }
-        addFileDepsToTree(dependencies, scopes, result, addedFileDeps, null);
+        addFileDepsToTree(dependencies, result, addedFileDeps, null);
         return new JkDependencyNode(this.nodeInfo,result);
     }
 
@@ -189,16 +190,14 @@ public class JkDependencyNode {
         return new JkDependencyNode(this.nodeInfo, resultChildren);
     }
 
-    private static void addFileDepsToTree(JkDependencySet dependencies, Set<JkScope> scopes, List<JkDependencyNode> result,
-            Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
-        for (final JkScopedDependency scopedDependency : depsUntilLast(dependencies, moduleId)) {
-            if (scopes.isEmpty() || scopedDependency.containsAny(scopes)) {
-                final JkFileDependency fileDep = (JkFileDependency) scopedDependency.getDependency();
-                if (!addedFileDeps.contains(fileDep)) {
-                    final JkDependencyNode fileNode = JkDependencyNode.ofFileDep(fileDep, scopedDependency.getScopes());
-                    addedFileDeps.add(fileDep);
-                    result.add(fileNode);
-                }
+    private static void addFileDepsToTree(JkDependencySet dependencies, List<JkDependencyNode> result,
+                                          Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
+        for (final JkDependency dependency : depsUntilLast(dependencies, moduleId)) {
+            final JkFileDependency fileDep = (JkFileDependency) dependency;
+            if (!addedFileDeps.contains(fileDep)) {
+                final JkDependencyNode fileNode = JkDependencyNode.ofFileDep(fileDep, Collections.emptySet());
+                addedFileDeps.add(fileDep);
+                result.add(fileNode);
             }
         }
     }
@@ -310,7 +309,7 @@ public class JkDependencyNode {
         }
 
         public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
+                                          Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
             return new JkModuleNodeInfo(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts);
         }
 
@@ -323,12 +322,12 @@ public class JkDependencyNode {
         private final boolean treeRoot;
 
         JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
+                         Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
             this(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts, false);
         }
 
         JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
+                         Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
             this.moduleId = moduleId;
             this.declaredVersion = declaredVersion;
             this.declaredScopes = declaredScopes;
@@ -390,18 +389,18 @@ public class JkDependencyNode {
 
     }
 
-    private static List<JkScopedDependency> depsUntilLast(JkDependencySet deps, JkModuleId to) {
-        final List<JkScopedDependency> result = new LinkedList<>();
-        final List<JkScopedDependency> partialResult = new LinkedList<>();
-        for (final JkScopedDependency scopedDependency : deps) {
-            if (scopedDependency.getDependency() instanceof JkModuleDependency) {
-                final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.getDependency();
+    private static List<JkDependency> depsUntilLast(JkDependencySet deps, JkModuleId to) {
+        final List<JkDependency> result = new LinkedList<>();
+        final List<JkDependency> partialResult = new LinkedList<>();
+        for (final JkDependency dependency : deps.toList()) {
+            if (dependency instanceof JkModuleDependency) {
+                final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
                 if (moduleDependency.getModuleId().equals(to)) {
                     result.addAll(partialResult);
                     partialResult.clear();
                 }
-            } else if (scopedDependency.getDependency() instanceof JkFileDependency) {
-                partialResult.add(scopedDependency);
+            } else if (dependency instanceof JkFileDependency) {
+                partialResult.add(dependency);
             }
         }
         if (to == null) {
