@@ -27,36 +27,29 @@ public class JavaPluginBuild extends JkClass {
     
     @Override
     protected void setup() {
-       java.getProject()
-           .getConstruction()
-               .getDependencyResolver()
-                   .getResolver()
-                        .getParams()
-                            .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT).__.__
-                   .addDependencies(JkDependencySet.of()
+       java.getProject().simpleFacade()
+               .addCompileDependencies(JkDependencySet.of()
                        .and("com.google.guava:guava:21.0")
                        .and("com.sun.jersey:jersey-server:1.19.4")
-                       .and("org.junit.jupiter:junit-jupiter-engine:5.6.0", TEST)
-                       .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)
-                   ).__
-               .getCompilation()
-                   .setJavaVersion(JkJavaVersion.V8).__
+                       .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
+               .addTestDependencies(JkDependencySet.of()
+                       .and("org.junit.jupiter:junit-jupiter-engine:5.6.0")
+                       .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0"))
+               .addTestExcludeFilterSuffixedBy("IT", false)
+               .setJavaVersion(JkJavaVersion.V8)
+               .setPublishedModuleId("dev.jeka:sample-javaplugin")
+               .setPublishedVersion("1.0-SNAPSHOT")
+       .getProject()
+           .getConstruction()
+               .getDependencyResolver()
+                    .getParams()
+                            .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT).__.__
                .getTesting()
-                   .getTestSelection()
-                        .addIncludeStandardPatterns()
-                        .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
                    .getTestProcessor()
                         .setForkingProcess(false)
                    .getEngineBehavior()
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__.__
-
-           // Publication is only necessary if your project is being deployed on a binary repository.
-           // Many projects as jee war jar, springboot application, tools, Graphical application
-           // does not need this section at all.
            .getPublication()
-               .setModuleId("dev.jeka:sample-javaplugin")
-               //.setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags())  // Version inferred from Git
-               .setVersion("1.0-SNAPSHOT")
                .addRepos(JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
                .getMavenPublication()
 

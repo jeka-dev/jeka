@@ -392,7 +392,7 @@ public class JkDependencyNode {
     private static List<JkDependency> depsUntilLast(JkDependencySet deps, JkModuleId to) {
         final List<JkDependency> result = new LinkedList<>();
         final List<JkDependency> partialResult = new LinkedList<>();
-        for (final JkDependency dependency : deps.toList()) {
+        for (final JkDependency dependency : deps.getDependencies()) {
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
                 if (moduleDependency.getModuleId().equals(to)) {

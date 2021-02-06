@@ -3,6 +3,7 @@ package dev.jeka.core.api.java.project;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.tooling.JkMavenPublication;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -54,15 +55,20 @@ public class JkJavaProjectPublication {
         artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
                 .setArtifactFilenameComputation(project::getArtifactPath);
         registerArtifacts();
+        JkQualifiedDependencies mavenDefaultPublishedDependencies = JkMavenPublication.getPublishDependencies(
+                project.getConstruction().getCompilation().getDependencies(),
+                project.getConstruction().getRuntimeDependencies(), JkVersionedModule.ConflictStrategy.FAIL);
         this.mavenPublication = JkMavenPublication.of(this)
             .setArtifactLocator(() -> artifactProducer)
-            .setDependencies(deps -> project.getConstruction().getDependencyResolver().getDependencies())
+            .setDependencies(deps -> mavenDefaultPublishedDependencies)
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()));
+        JkQualifiedDependencies ivyDefaultPublishedDependencies = JkIvyPublication.getPublishDependencies(
+                project.getConstruction().getCompilation().getDependencies(),
+                project.getConstruction().getRuntimeDependencies(), JkVersionedModule.ConflictStrategy.FAIL);
         this.ivyPublication = JkIvyPublication.of(this)
             .addArtifacts(() -> artifactProducer)
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()))
-            .setDependencies(deps -> project.getConstruction().getDependencyResolver().getDependencies())
-            .setResolvedVersionProvider(this::getResolvedVersions);
+            .setDependencies(deps -> ivyDefaultPublishedDependencies);
         this.postActions = JkRunnables.ofParent(this);
     }
 
@@ -208,10 +214,6 @@ public class JkJavaProjectPublication {
         JkLog.startTask("Prepare Ivy publication");
         this.ivyPublication.publish(repos);
         JkLog.endTask();
-    }
-
-    private JkVersionProvider getResolvedVersions() {
-        return project.getConstruction().getDependencyResolver().resolveDependencies().getResolvedVersionProvider();
     }
 
     public JkStandardFileArtifactProducer<JkJavaProjectPublication> getArtifactProducer() {

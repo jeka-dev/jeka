@@ -1,11 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-
-import java.util.Collections;
-import java.util.Set;
-
 /**
  * Information about excluding artifacts or whole modules.
  *
@@ -15,18 +9,16 @@ public final class JkDepExclude {
 
     private final JkModuleId moduleId;
 
-    private final String type;
+    private final String classifier;
 
-    private final String ext;
+    private final String extension;
 
-    private final Set<JkScope> scopes;
 
-    private JkDepExclude(JkModuleId moduleId, String type, String ext, Set<JkScope> scopes) {
+    private JkDepExclude(JkModuleId moduleId, String classifier, String extension) {
         super();
         this.moduleId = moduleId;
-        this.type = type;
-        this.ext = ext;
-        this.scopes = scopes;
+        this.classifier = classifier;
+        this.extension = extension;
     }
 
     /**
@@ -34,7 +26,7 @@ public final class JkDepExclude {
      */
     @SuppressWarnings("unchecked")
     public static JkDepExclude of(JkModuleId moduleId) {
-        return new JkDepExclude(moduleId, null, null, Collections.EMPTY_SET);
+        return new JkDepExclude(moduleId, null, null);
     }
 
     /**
@@ -57,7 +49,7 @@ public final class JkDepExclude {
      * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
      */
     public JkDepExclude withType(String typeArg) {
-        return new JkDepExclude(moduleId, typeArg, ext, scopes);
+        return new JkDepExclude(moduleId, typeArg, extension);
     }
 
     /**
@@ -66,16 +58,7 @@ public final class JkDepExclude {
      * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
      */
     public JkDepExclude withExt(String extension) {
-        return new JkDepExclude(moduleId, type, extension, scopes);
-    }
-
-    /**
-     * Returns a exclusion identical to this one but narrowed to the specified scopes.
-     * When some scopes are defined, the exclusion is effective only if the dependency
-     * likely to hold the module to exclude is declared with one of the specified scopes.
-     */
-    public JkDepExclude withScopes(JkScope... scopes) {
-        return new JkDepExclude(moduleId, type, ext, Collections.unmodifiableSet(JkUtilsIterable.setOf(scopes)));
+        return new JkDepExclude(moduleId, classifier, extension);
     }
 
     /**
@@ -88,24 +71,33 @@ public final class JkDepExclude {
     /**
      * Returns the type of the artifact file to exclude.
      */
-    public String getType() {
-        return type;
+    public String getClassifier() {
+        return classifier;
     }
 
     /**
      * Returns the getExtension for the artifact files to exclude. If not <code>null</code>
      * only file artifact having this getExtension will be effectively excluded.
      */
-    public String getExt() {
-        return ext;
+    public String getExtension() {
+        return extension;
     }
 
-    /**
-     * Returns the scopes that render the exclusion effective.
-     * @see #withScopes(JkScope...)
-     */
-    public Set<JkScope> getScopes() {
-        return scopes;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JkDepExclude that = (JkDepExclude) o;
+        if (!moduleId.equals(that.moduleId)) return false;
+        if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
+        return extension != null ? extension.equals(that.extension) : that.extension == null;
     }
 
+    @Override
+    public int hashCode() {
+        int result = moduleId.hashCode();
+        result = 31 * result + (classifier != null ? classifier.hashCode() : 0);
+        result = 31 * result + (extension != null ? extension.hashCode() : 0);
+        return result;
+    }
 }

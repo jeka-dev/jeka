@@ -12,8 +12,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
 
-import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE;
-import static dev.jeka.core.api.depmanagement.tooling.JkScope.TEST;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 /**
@@ -30,18 +28,15 @@ public class ThirdPartyPoweredBuild extends JkClass {
     
     @Override
     protected void setup() {
-        javaPlugin.getProject().getConstruction()
-            .getDependencyResolver()
-                .addDependencies(dependencies());
-    }
-
-    // Project dependencies does not inherit from def dependencies
-    private static JkDependencySet dependencies() {
-        return JkDependencySet.of()
-            .and(GUAVA, "21.0")
-            .and(JAVAX_SERVLET_API, "3.1.0", COMPILE)
-            .and(JUNIT, "4.13", TEST)
-            .and(MOCKITO_ALL, "1.10.19", TEST);
+        javaPlugin.getProject().simpleFacade()
+            .addCompileDependencies(JkDependencySet.of()
+                .and(JAVAX_SERVLET_API.version("3.1.0"))
+                .and(GUAVA.version("21.0")))
+            .setRuntimeDependencies(compileDeps -> compileDeps
+                .minus(JAVAX_SERVLET_API))
+            .addTestDependencies(JkDependencySet.of()
+                .and(JUNIT.version("4.13"))
+                .and(MOCKITO_ALL.version("1.10.19")));
     }
 
     @JkDoc("Performs some load test using http client")

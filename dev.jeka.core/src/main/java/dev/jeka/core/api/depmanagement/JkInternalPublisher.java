@@ -3,6 +3,7 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.tooling.JkMavenPublication;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -19,11 +20,11 @@ public interface JkInternalPublisher {
     String FACTORY_CLASS_NAME = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalPublisherFactory";
 
     void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-                    JkDependencySet dependencies, JkIvyConfigurationMapping defaultMapping, Instant deliveryDate,
-                    JkVersionProvider resolvedVersion);
+                    JkQualifiedDependencies dependencies,
+                    JkIvyConfigurationMapping defaultMapping, Instant deliveryDate);
 
     void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-            JkDependencySet dependencies, UnaryOperator<Path> signer);
+                      JkQualifiedDependencies dependencies, UnaryOperator<Path> signer);
 
     static JkInternalPublisher of(JkRepoSet publishRepos, Path artifactDir) {
         final Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(FACTORY_CLASS_NAME);

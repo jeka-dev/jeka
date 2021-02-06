@@ -1,7 +1,8 @@
 package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.tooling.JkScopedDependencies;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependency;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -84,7 +85,7 @@ public final class JkPom {
     /**
      * The dependencies declared in this POM.
      */
-    public JkScopedDependencies getDependencies() {
+    public JkQualifiedDependencies getDependencies() {
         return dependencies(dependenciesElement(), getProperties());
     }
 
@@ -99,7 +100,7 @@ public final class JkPom {
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
-        final JkScopedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
+        final JkQualifiedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
         for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
             final JkVersionedModule versionedModule = JkVersionedModule.of(
                     moduleDependency.getModuleId(),
@@ -158,7 +159,7 @@ public final class JkPom {
             return result;
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(), "dependencies");
-        final JkScopedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
+        final JkQualifiedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
         for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
             if (!moduleDependency.getExcludes().isEmpty()) {
                 result = result.and(moduleDependency.getModuleId(), moduleDependency.getExcludes());
@@ -181,15 +182,15 @@ public final class JkPom {
         return JkRepoSet.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
-    private JkScopedDependencies dependencies(Element dependenciesEl, Map<String, String> props) {
-        List<JkScopedDependencies.Entry> scopedDependencies = new LinkedList<>();
+    private JkQualifiedDependencies dependencies(Element dependenciesEl, Map<String, String> props) {
+        List<JkQualifiedDependency> scopedDependencies = new LinkedList<>();
         for (final Element dependencyEl : JkUtilsXml.directChildren(dependenciesEl, "dependency")) {
             scopedDependencies.add(scopedDep(dependencyEl, props));
         }
-        return JkScopedDependencies.of(scopedDependencies);
+        return JkQualifiedDependencies.of(scopedDependencies);
     }
 
-    private JkScopedDependencies.Entry scopedDep(Element mvnDependency, Map<String, String> props) {
+    private JkQualifiedDependency scopedDep(Element mvnDependency, Map<String, String> props) {
         final String groupId = JkUtilsXml.directChildText(mvnDependency, "groupId");
         final String artifactId = JkUtilsXml.directChildText(mvnDependency, "artifactId");
         final String version = resolveProps(JkUtilsXml.directChildText(mvnDependency, "version"), props) ;
@@ -211,9 +212,9 @@ public final class JkPom {
         }
         String scope = JkUtilsXml.directChildText(mvnDependency, "scope");
         scope = JkUtilsObject.firstNonNull(scope, "compile");
-        JkScopedDependencies.Scope realScope = JkUtilsObject.valueOfEnum(JkScopedDependencies.Scope.class,
+        JkQualifiedDependencies.Scope realScope = JkUtilsObject.valueOfEnum(JkQualifiedDependencies.Scope.class,
                 scope.toUpperCase());
-        return JkScopedDependencies.Entry.of(realScope, moduleDependency);
+        return JkQualifiedDependency.of(realScope, moduleDependency);
     }
 
     private JkDepExclude jkDepExclude(Element exclusionEl) {

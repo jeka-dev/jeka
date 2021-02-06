@@ -8,7 +8,6 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,9 +25,9 @@ public class JkDependencySet {
 
     private final JkVersionProvider versionProvider;
 
-    private JkDependencySet(Iterable<JkDependency> dependencies, Set<JkDepExclude> excludes, JkVersionProvider explicitVersions) {
+    private JkDependencySet(List<JkDependency> dependencies, Set<JkDepExclude> excludes, JkVersionProvider explicitVersions) {
         super();
-        this.dependencies = Collections.unmodifiableList(JkUtilsIterable.listOf(dependencies));
+        this.dependencies = Collections.unmodifiableList(dependencies);
         this.globalExclusions = Collections.unmodifiableSet(excludes);
         this.versionProvider = explicitVersions;
     }
@@ -50,12 +49,12 @@ public class JkDependencySet {
     /**
      * Creates a {@link JkDependencySet} to the specified scoped dependencies.
      */
-    public static JkDependencySet of(Iterable<JkDependency> dependencies) {
+    public static JkDependencySet of(List<JkDependency> dependencies) {
         return new JkDependencySet(dependencies, Collections.emptySet(), JkVersionProvider.of());
     }
 
     public static JkDependencySet of(JkDependency dependency) {
-        return of(Collections.singleton(dependency));
+        return of(JkUtilsIterable.listOf(dependency));
     }
 
     /**
@@ -71,43 +70,66 @@ public class JkDependencySet {
         }
         return JkDependencySet.of()
                 .and(JkFileSystemDependency.of(libDir.andMatching(true, "*.jar", "compile/*.jar").getFiles()))
-                .and(JkFileSystemDependency.of(libDir.andMatching(true,"compile+runtime/*.jar").getFiles()))
-                .and(JkFileSystemDependency.of(libDir.andMatching(true,"runtime/*.jar").getFiles()))
-                .and(JkFileSystemDependency.of(libDir.andMatching(true,"test/*.jar").getFiles()));
+                .and(JkFileSystemDependency.of(libDir.andMatching(true, "compile+runtime/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andMatching(true, "runtime/*.jar").getFiles()))
+                .and(JkFileSystemDependency.of(libDir.andMatching(true, "test/*.jar").getFiles()));
     }
-
 
     /**
      * Returns the unmodifiable list list of scoped dependencies for this object.
      */
-    public List<JkDependency> toList() {
+    public List<JkDependency> getDependencies() {
         return this.dependencies;
     }
 
     public JkVersion getVersion(JkModuleId moduleId) {
-        final JkDependency dep = this.get(moduleId);
-        if (dep == null) {
-            throw new IllegalArgumentException("No module " + moduleId + " declared in this dependency set " + this.withModulesOnly());
-        }
-        final JkModuleDependency moduleDependency = (JkModuleDependency) dep;
+        JkModuleDependency moduleDependency = moduleDeps()
+                .filter(dep -> moduleId.equals(dep.getModuleId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No module " + moduleId
+                        + " declared in this dependency set " + this.withModuleDependenciesOnly()));
         JkVersion version = moduleDependency.getVersion();
         if (!version.isUnspecified()) {
             return version;
         }
-        version =  this.versionProvider.getVersionOf(moduleId);
-        if (version != null) {
-            return version;
-        }
-        return JkVersion.UNSPECIFIED;
+        return version == null ? JkVersion.UNSPECIFIED : version;
     }
 
     /**
-     * Returns a clone of this object plus the specified
-     * {@link JkDependency}s.
+     * Returns a clone of this object plus the specifies {@link JkDependency}s, at the
+     * specified place and condition.
      */
-    public JkDependencySet and(Iterable<JkDependency> others) {
-        final List<JkDependency> deps = JkUtilsIterable.concatLists(this.dependencies, others);
-        return new JkDependencySet(deps, globalExclusions, versionProvider);
+    public JkDependencySet and(Hint hint, List<JkDependency> others) {
+        final List<JkDependency> result = new LinkedList<>(this.dependencies);
+        if (hint == null) {
+            result.addAll(others);
+            return new JkDependencySet(result, globalExclusions, versionProvider);
+        }
+        if (hint.condition == false) {
+            return this;
+        }
+        if (hint.first == false) {
+            result.addAll(0, others);
+            return new JkDependencySet(result, globalExclusions, versionProvider);
+        }
+        if (hint.before == null) {
+            result.addAll(others);
+            return new JkDependencySet(result, globalExclusions, versionProvider);
+        }
+        int index = result.indexOf(hint.before);
+        if (index == -1) {
+            throw new IllegalArgumentException("No dependency " + hint.before + " found on " + result);
+        }
+        result.addAll(index, others);
+        return new JkDependencySet(result, globalExclusions, versionProvider);
+    }
+
+    /**
+     * Returns a clone of this object plus the specified {@link JkDependency}s at the tail of
+     * this one.
+     */
+    public JkDependencySet and(List<JkDependency> others) {
+        return and(null, others);
     }
 
     public JkDependencySet and(JkDependencySet other) {
@@ -118,152 +140,70 @@ public class JkDependencySet {
         return new JkDependencySet(deps, newGlobalExcludes, newVersionProvider);
     }
 
-    /**
-     * Returns a clone of this object plus the specified scoped dependencies.
-     */
+    public JkDependencySet and(Hint hint, JkDependency... others) {
+        return and(hint, Arrays.asList(others));
+    }
+
     public JkDependencySet and(JkDependency... others) {
-        return and(Arrays.asList(others));
+        return and(null, others);
     }
 
-
-    public JkDependencySet and(String moduleDescription, JkTransitivity transitivity) {
-        JkModuleDependency moduleDependency = JkModuleDependency.of(moduleDescription).withTransitivity(transitivity);
-        if (moduleDependency.getClassifier() != null) {
-            moduleDependency = moduleDependency.withTransitivity(JkTransitivity.RUNTIME);
-        }
-        return and(moduleDependency);
+    public JkDependencySet and(Hint hint, String moduleDescriptor) {
+        return and(hint, JkModuleDependency.of(moduleDescriptor));
     }
 
-    public JkDependencySet and(String moduleDescription) {
-        return and(moduleDescription, null);
+    public JkDependencySet and(String moduleDescriptor) {
+        return and(null, moduleDescriptor);
     }
 
-    public JkDependencySet and(JkModuleId moduleId, String version, JkTransitivity transitivity) {
-        return and(JkModuleDependency.of(moduleId, version).withTransitivity(transitivity));
+    public JkDependencySet and(Hint hint, String moduleDescriptor, JkTransitivity transitivity) {
+        return and(hint, JkModuleDependency.of(moduleDescriptor).withTransitivity(transitivity));
     }
 
-    public JkDependencySet and(JkModuleId moduleId, String version) {
-        return and(moduleId, version, (JkTransitivity) null);
+    public JkDependencySet and(String moduleDescriptor, JkTransitivity transitivity) {
+        return and(null, moduleDescriptor, transitivity);
+    }
+
+    public JkDependencySet andFiles(Hint hint, Iterable<Path> paths) {
+        return and(hint, JkFileSystemDependency.of(paths));
     }
 
     public JkDependencySet andFiles(Iterable<Path> paths) {
-        return and(JkFileSystemDependency.of(paths));
+        return andFiles(null, paths);
     }
 
-    public JkDependencySet andFiles(String ...paths) {
-        return andFiles(Stream.of(paths).map(Paths::get).collect(Collectors.toList()));
+    public JkDependencySet andFiles(Hint hint, String... paths) {
+        return andFiles(hint, Stream.of(paths).map(Paths::get).collect(Collectors.toList()));
     }
 
-    public JkDependencySet andFiles(Path ... paths) {
-        return andFiles(Arrays.asList(paths));
+    public JkDependencySet andFiles(String... paths) {
+        return andFiles(null, paths);
     }
 
-    /**
-     * Returns a dependency set identical to this one minus the dependencies on the given
-     * {@link JkModuleId}. This is used to exclude a given module to all scope.
-     */
-    public JkDependencySet minus(JkModuleId jkModuleId) {
-        final List<JkDependency> result = new LinkedList<>(dependencies);
-        for (final Iterator<JkDependency> it = result.iterator(); it.hasNext();) {
-            final JkDependency dependency = it.next();
-            if (dependency instanceof JkModuleDependency) {
-                final JkModuleDependency externalModule = (JkModuleDependency) dependency;
-                if (externalModule.getModuleId().equals(jkModuleId)) {
-                    it.remove();
-                }
-            }
-        }
+    public JkDependencySet minus(List<JkDependency> dependencies) {
+        List<JkDependency> result = new LinkedList<>(dependencies);
+        result.removeAll(dependencies);
         return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
     }
 
-    /**
-     * Same as #minus(JkModuleId) but using a string as <code>my.group:my.name</code> to specify the moduleId.
-     */
+    public JkDependencySet minus(JkDependency dependency) {
+        List<JkDependency> list = JkUtilsIterable.listOf(dependency);
+        return minus(list);
+    }
+
+    public JkDependencySet minus(JkModuleId moduleId) {
+        return minus(JkModuleDependency.of(moduleId, JkVersion.UNSPECIFIED));
+    }
+
     public JkDependencySet minus(String moduleId) {
         return minus(JkModuleId.of(moduleId));
     }
 
-    /**
-     * Returns a dependency set identical to this one minus the dependencies on the given
-     * {@link JkModuleId}. This is used to exclude a given module to all scope.
-     */
-    public JkDependencySet minusFiles(Predicate<Path> pathPredicate) {
-        final List<JkDependency> result = new LinkedList<>();
-        for (JkDependency dependency : this.dependencies) {
-            if (dependency instanceof JkFileSystemDependency) {
-                JkFileSystemDependency fileDependency = (JkFileSystemDependency) dependency;
-                JkFileSystemDependency resultDependency = fileDependency;
-                for (Path path : fileDependency.getFiles()) {
-                    if (pathPredicate.test(path)) {
-                        resultDependency = resultDependency.minusFile(path);
-                    }
-                }
-                if (!resultDependency.getFiles().isEmpty()) {
-                    result.add(resultDependency);
-                }
-            } else {
-                result.add(dependency);
-            }
-        }
-        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
-    }
 
-    /**
-     * Returns a clone of this dependencySet but removing the last element if the specified condition is met.
-     */
-    public JkDependencySet minusLastIf(boolean condition) {
-        if (!condition) {
-            return this;
-        }
-        final LinkedList<JkDependency> deps = new LinkedList<>(dependencies);
-        deps.removeLast();
-        return new JkDependencySet(deps, globalExclusions, versionProvider);
-    }
 
-    /**
-     * Returns a clone of this dependencySet but adding dependency exclusion on the the last element.
-     */
-    public JkDependencySet withLocalExclusion(JkDepExclude exclusion) {
-        if (dependencies.isEmpty()) {
-            return this;
-        }
-        final LinkedList<JkDependency> deps = new LinkedList<>(dependencies);
-        final JkDependency last = deps.getLast();
-        if (last instanceof JkModuleDependency) {
-            JkModuleDependency moduleDependency = (JkModuleDependency) last;
-            moduleDependency = moduleDependency.andExclude(exclusion);
-            deps.removeLast();
-            deps.add(moduleDependency);
-            return new JkDependencySet(deps, globalExclusions, versionProvider);
-        }
-        return this;
-    }
 
-    /**
-     * @See #withLocalExclusion
-     * @param groupAndNames moduleIds to exclude (e.g. "a.group:a.name", "another.group:another.name", ...).
-     */
-    public JkDependencySet withLocalExclusions(String ... groupAndNames) {
-        if (dependencies.isEmpty()) {
-            return this;
-        }
-        final LinkedList<JkDependency> deps = new LinkedList<>(dependencies);
-        final JkDependency last = deps.getLast();
-        if (last instanceof JkModuleDependency) {
-            JkModuleDependency moduleDependency = (JkModuleDependency) last;
-            final List<JkDepExclude> excludes = new LinkedList<>();
-            for (final String groupAndName : groupAndNames) {
-                excludes.add(JkDepExclude.of(groupAndName));
-            }
-            moduleDependency = moduleDependency.andExclude(excludes);
-            deps.removeLast();
-            deps.add(moduleDependency);
-            return new JkDependencySet(deps, globalExclusions, versionProvider);
-        }
-        return this;
-    }
 
-    public JkDependencySet withReplacingTransitivity(JkTransitivity formerTransitivity, JkTransitivity newTransitivity) {
+    public JkDependencySet withTransitivityReplacement(JkTransitivity formerTransitivity, JkTransitivity newTransitivity) {
         final List<JkDependency> list = new LinkedList<>();
         for (JkDependency dep : this.dependencies) {
             if (dep instanceof JkModuleDependency) {
@@ -301,13 +241,6 @@ public class JkDependencySet {
      */
     public boolean hasModules() {
         return dependencies.stream().filter(JkModuleDependency.class::isInstance).findAny().isPresent();
-    }
-
-    /**
-     * Returns the dependencies to be excluded to the transitive chain when using this dependency.
-     */
-    public Set<JkDepExclude> getGlobalExclusions() {
-        return this.globalExclusions;
     }
 
     /**
@@ -367,11 +300,7 @@ public class JkDependencySet {
         return moduleDeps().anyMatch(dep -> dep.getVersion().isDynamicAndResovable());
     }
 
-    public JkDependencySet withGlobalExclusion(JkDepExclude exclude) {
-        final Set<JkDepExclude> depExcludes = new HashSet<>(this.globalExclusions);
-        depExcludes.add(exclude);
-        return new JkDependencySet(this.dependencies, depExcludes, this.versionProvider);
-    }
+
 
     public JkDependencySet withIdeProjectDir(Path ideProjectDir) {
         List<JkDependency> result = new LinkedList<>();
@@ -384,11 +313,15 @@ public class JkDependencySet {
     public JkDependencySet minusModuleDependenciesHavingIdeProjectDir() {
         List<JkDependency> result = new LinkedList<>();
         for (JkDependency dependency : this.dependencies) {
-            if (dependency.getIdeProjectDir() == null || ! (dependency instanceof JkModuleDependency)) {
+            if (dependency.getIdeProjectDir() == null || !(dependency instanceof JkModuleDependency)) {
                 result.add(dependency);
             }
         }
         return new JkDependencySet(result, globalExclusions, versionProvider);
+    }
+
+    public JkDependencySetMerge merge(JkDependencySet other) {
+        return JkDependencySetMerge.of(this, other);
     }
 
     public Set<Path> getIdePathDirs() {
@@ -401,100 +334,141 @@ public class JkDependencySet {
         return result;
     }
 
-    /**
-     * Returns a set a dependency set identical to this one but excluding the specified exclude
-     * from the transitive dependencies of the specified module.
-     */
-    public JkDependencySet withLocalExclusion(JkModuleId fromModule, JkDepExclude exclude) {
-        final List<JkDependency> list = new LinkedList<>();
-        for (final JkDependency dep : this.dependencies) {
-            if (dep instanceof JkModuleDependency) {
-                final JkModuleDependency moduleDependency = (JkModuleDependency) dep;
-                list.add(moduleDependency.andExclude(exclude));
-            } else {
-                list.add(dep);
-            }
-        }
-        return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
-    }
 
     /**
      * Returns a JkDependencySet similar to this one but removing duplicates on module dependencies. Such duplicates
-     * occurres when two module dependencies have been declared with the same JkModuleId. The removed dependency is
+     * occur when two module dependencies have been declared with the same JkModuleId. The removed dependency is
      * the one with the lower or unspecified version.
      * It has been introduced to satisfy https://github.com/jerkar/jeka/issues/135
      */
     public JkDependencySet minusDuplicates() {
-        Map<JkModuleId, JkVersion> moduleIdVersionMap = new HashMap<>();
-        for (JkDependency dependency : this.dependencies) {
-            if (dependency instanceof JkModuleDependency) {
-                JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                JkModuleId moduleId = moduleDependency.getModuleId();
-                JkVersion version = moduleDependency.getVersion();
-                JkVersion mapVersion = moduleIdVersionMap.get(moduleId);
-                if (mapVersion == null || mapVersion.isUnspecified() || (version != null && version.isGreaterThan(mapVersion))) {
-                    moduleIdVersionMap.put(moduleId, version);
-                }
-            }
-        }
-        List<JkDependency> result = new LinkedList<>();
-        Set<JkModuleId> moduleIds = new HashSet<>();
-        for (JkDependency dependency : this.dependencies) {
-            if (dependency instanceof JkModuleDependency) {
-                JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                JkModuleId moduleId = moduleDependency.getModuleId();
-                if (moduleIds.contains(moduleId)) {
-                    continue;
-                }
-                moduleIds.add(moduleId);
-                JkModuleDependency replacingModuleDep = moduleDependency.withVersion(moduleIdVersionMap.get(moduleId));
-                result.add(replacingModuleDep);
-            } else {
-                result.add(dependency);
-            }
-        }
+        List<JkDependency> result = dependencies.stream().distinct().collect(Collectors.toList());
         return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
     }
 
     /**
-     * Throws a <code>IllegalStateException</code> if one of the module
-     * dependencies has an unspecified projectVersion.
+     * Returns
+     */
+    public JkDependencySet withResolvedVersionConflicts(JkVersionedModule.ConflictStrategy conflictStrategy) {
+        Map<JkModuleId, JkVersion> moduleIdVersionMap = new HashMap<>();
+        dependencies.stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .map(JkModuleDependency.class::cast)
+                .forEach(dep -> {
+                    moduleIdVersionMap.putIfAbsent(dep.getModuleId(),dep.getVersion());
+                    moduleIdVersionMap.computeIfPresent(dep.getModuleId(),
+                            (moduleId, version) -> JkVersionedModule.of(moduleId, version)
+                                    .resolveConflict(dep.getVersion(), conflictStrategy).getVersion());
+        });
+        List<JkDependency> result = dependencies.stream()
+                .map(dependency -> {
+                    if (dependency instanceof JkModuleDependency) {
+                        JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
+                        return moduleDependency.withVersion(moduleIdVersionMap.get(moduleDependency.getModuleId()));
+                    }
+                    return dependency;
+                })
+                .collect(Collectors.toList());
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
+    }
+
+    /**
+     * Throws a <code>IllegalStateException</code> if one of the module dependencies has an unspecified version.
      */
     public JkDependencySet assertNoUnspecifiedVersion() {
-        final List<JkModuleDependency> unspecifieds = this.unspecifiedVersionDependencies();
+        final List<JkModuleDependency> unspecifieds = getVersionedDependencies().stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .map(JkModuleDependency.class::cast)
+                .filter(dep -> dep.getVersion().isUnspecified())
+                .collect(Collectors.toList());
         JkUtilsAssert.state(unspecifieds.isEmpty(), "Following module does not specify projectVersion : "
                 + unspecifieds);
         return this;
     }
 
-    public JkDependencySet toResolvedModuleVersions() {
-        final List<JkDependency> list = new LinkedList<>();
-        for (final JkDependency dep : this.dependencies) {
-            if (dep instanceof JkModuleDependency) {
-                JkModuleDependency moduleDependency = (JkModuleDependency) dep;
-                if (moduleDependency.getVersion().isUnspecified()) {
-                    final JkVersion providedVersion = this.versionProvider.getVersionOf(moduleDependency.getModuleId());
-                    if (providedVersion != null) {
-                        moduleDependency = moduleDependency.withVersion(providedVersion);
+    /**
+     * Returns all dependencies, adding <code>versionProvider</code> versions to module dependencies
+     * that does not specify one.
+     */
+    public List<JkDependency> getVersionedDependencies() {
+        return dependencies.stream()
+                .map(dependency -> {
+                    if (dependency instanceof JkModuleDependency) {
+                        JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
+                        JkVersion providedVersion = versionProvider.getVersionOf(moduleDependency.getModuleId());
+                        if (moduleDependency.getVersion().isUnspecified() && providedVersion != null) {
+                            return moduleDependency.withVersion(providedVersion);
+                        }
                     }
-                }
-                list.add(moduleDependency);
-            } else {
-                list.add(dep);
-            }
-        }
-        return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
+                    return dependency;
+                })
+                .collect(Collectors.toList());
     }
 
-    private List<JkModuleDependency> unspecifiedVersionDependencies() {
-        final List<JkModuleDependency> result = new LinkedList<>();
-        for (final JkModuleDependency moduleDependency : this.extractModuleDependencies()) {
-            if (moduleDependency.hasUnspecifedVersion()) {
-                result.add(moduleDependency);
-            }
-        }
-        return result;
+    public List<JkModuleDependency> getVersionedModuleDependencies() {
+        return getVersionedDependencies().stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .map(JkModuleDependency.class::cast)
+                .collect(Collectors.toList());
     }
+
+    /**
+     * Returns all dependencies declared as {@link JkModuleDependency}.
+     */
+    public JkDependencySet withModuleDependenciesOnly() {
+        final List<JkDependency> result = moduleDeps().collect(Collectors.toList());
+        return new JkDependencySet(result, globalExclusions, versionProvider);
+    }
+
+    /**
+     * Returns a clone of this dependencySet but adding dependency exclusion on the the last element.
+     */
+    public JkDependencySet withLocalExclusion(JkDepExclude... exclusions) {
+        if (dependencies.isEmpty()) {
+            return this;
+        }
+        final LinkedList<JkDependency> deps = new LinkedList<>(dependencies);
+        final JkDependency last = deps.getLast();
+        if (last instanceof JkModuleDependency) {
+            JkModuleDependency moduleDependency = (JkModuleDependency) last;
+            for (JkDepExclude exclusion : exclusions) {
+                moduleDependency = moduleDependency.andExclude(exclusion);
+            }
+            deps.removeLast();
+            deps.add(moduleDependency);
+            return new JkDependencySet(deps, globalExclusions, versionProvider);
+        }
+        return this;
+    }
+
+    /**
+     * @param groupAndNames moduleIds to exclude (e.g. "a.group:a.name", "another.group:another.name", ...).
+     * @See #withLocalExclusion
+     */
+    public JkDependencySet withLocalExclusions(String... groupAndNames) {
+        JkDepExclude[] excludes = Arrays.stream(groupAndNames).map(JkDependencySet::of)
+                .toArray(JkDepExclude[]::new);
+        return withLocalExclusion(excludes);
+    }
+
+    /**
+     * Returns the dependencies to be excluded to the transitive chain when using this dependency.
+     */
+    public Set<JkDepExclude> getGlobalExclusions() {
+        return this.globalExclusions;
+    }
+
+    public JkDependencySet andGlobalExclusion(JkDepExclude exclude) {
+        final Set<JkDepExclude> depExcludes = new HashSet<>(this.globalExclusions);
+        depExcludes.add(exclude);
+        return new JkDependencySet(this.dependencies, depExcludes, this.versionProvider);
+    }
+
+    public JkDependencySet withGlobalExclusion(Set<JkDepExclude> excludes) {
+        final Set<JkDepExclude> depExcludes = new HashSet<>(excludes);
+        return new JkDependencySet(this.dependencies, Collections.unmodifiableSet(depExcludes), this.versionProvider);
+    }
+
 
     /**
      * Returns the java codes that declare these dependencies.
@@ -521,16 +495,35 @@ public class JkDependencySet {
         return builder.toString();
     }
 
-    /**
-     * Returns all dependencies declared as {@link JkModuleDependency}.
-     */
-    public JkDependencySet withModulesOnly() {
-        final List<JkDependency> result = moduleDeps().collect(Collectors.toList());
-        return new JkDependencySet(result, globalExclusions, versionProvider);
-    }
+    public static class Hint {
 
-    private List<JkModuleDependency> extractModuleDependencies() {
-        return moduleDeps().collect(Collectors.toList());
-    }
+        private final JkDependency before;
 
+        private final boolean condition;
+
+        private final boolean first;
+
+        private Hint(JkDependency before, boolean condition, boolean first) {
+            this.before = before;
+            this.condition = condition;
+            this.first = first;
+        }
+
+        public static Hint before(JkDependency dependency) {
+            return new Hint(dependency, true, false);
+        }
+
+        public static Hint firstAndIf(boolean condition) {
+            return new Hint(null, true, true);
+        }
+
+        public static Hint lastAndIf(boolean condition) {
+            return new Hint(null, true, false);
+        }
+
+        public static Hint beforeAndIf(JkDependency dependency, boolean condition) {
+            return new Hint(dependency, condition, false);
+        }
+
+    }
 }

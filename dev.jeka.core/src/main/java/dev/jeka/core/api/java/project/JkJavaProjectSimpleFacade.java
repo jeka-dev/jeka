@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -39,6 +40,11 @@ public class JkJavaProjectSimpleFacade {
 
     public JkJavaProjectSimpleFacade setBaseDir(String path) {
         project.setBaseDir(Paths.get(path));
+        return this;
+    }
+
+    public JkJavaProjectSimpleFacade setBaseDir(Path path) {
+        project.setBaseDir(path);
         return this;
     }
 

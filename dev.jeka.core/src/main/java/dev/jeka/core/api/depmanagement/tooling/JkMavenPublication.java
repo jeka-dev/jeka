@@ -1,6 +1,9 @@
 package dev.jeka.core.api.depmanagement.tooling;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.JkInternalPublisher;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
@@ -22,7 +25,7 @@ public final class JkMavenPublication<T> {
 
     private final JkPomMetadata<JkMavenPublication<T>> pomMetadata = JkPomMetadata.ofParent(this);
 
-    private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
+    private Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencies = UnaryOperator.identity();
 
     private Supplier<JkVersionedModule> versionedModule;
 
@@ -44,17 +47,17 @@ public final class JkMavenPublication<T> {
         return this.pomMetadata;
     }
 
-    public JkMavenPublication<T> setDependencies(JkDependencySet dependencies) {
+    public JkMavenPublication<T> setDependencies(JkQualifiedDependencies dependencies) {
         return setDependencies(deps -> dependencies);
     }
 
-    public JkMavenPublication<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkMavenPublication<T> setDependencies(Function<JkQualifiedDependencies, JkQualifiedDependencies> modifier) {
         this.dependencies = dependencies.andThen(modifier);
         return this;
     }
 
-    public JkDependencySet getDependencies() {
-        return dependencies.apply(JkDependencySet.of());
+    public JkQualifiedDependencies getDependencies() {
+        return dependencies.apply(JkQualifiedDependencies.of());
     }
 
     public JkVersionedModule getVersionedModule() {
@@ -96,7 +99,8 @@ public final class JkMavenPublication<T> {
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        internalPublisher.publishMaven(getVersionedModule(), this, getDependencies().withModulesOnly(), signer);
+        internalPublisher.publishMaven(getVersionedModule(), this,
+                getDependencies().withModuleDependenciesOnly(), signer);
         return this;
     }
 
@@ -107,5 +111,7 @@ public final class JkMavenPublication<T> {
                 ", extraInfo=" + pomMetadata +
                 '}';
     }
+
+
 
 }

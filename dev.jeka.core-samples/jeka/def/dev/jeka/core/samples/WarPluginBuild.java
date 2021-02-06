@@ -2,7 +2,6 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
@@ -33,13 +32,17 @@ public class WarPluginBuild extends JkClass {
     @Override
     protected void setup() {
        java.getProject().simpleFacade()
-               .addComileDependencies(JkDependencySet.of()
+               .addCompileDependencies(JkDependencySet.of()
                        .and("com.google.guava:guava:21.0")
-                       .and("javax.servlet:javax.servlet-api:jar:4.0.1", JkScope.COMPILE))
-               .setJavaVersion(JkJavaVersion.V8).getProject().getConstruction()
-               .getCompilation()
-                    .getLayout()
-                        .emptySources().addSource("src/main/javaweb").__.__
+                       .and("javax.servlet:javax.servlet-api:jar:4.0.1"))
+               .setRuntimeDependencies(compileDeps -> compileDeps
+                       .minus("javax.servlet:javax.servlet-api"))
+               .setJavaVersion(JkJavaVersion.V8)
+               .getProject()
+                    .getConstruction()
+                        .getCompilation()
+                            .getLayout()
+                                .emptySources().addSource("src/main/javaweb").__.__
                .getTesting()
                    .setSkipped(true);
     }

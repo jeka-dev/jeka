@@ -113,22 +113,16 @@ final class IvyTranslations {
 
 
     private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude, Iterable<String> allRootConfs) {
-        final String type = depExclude.getType() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
-                .getType();
-        final String ext = depExclude.getExt() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
-                .getExt();
+        final String type = depExclude.getClassifier() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
+                .getClassifier();
+        final String ext = depExclude.getExtension() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
+                .getExtension();
         final ArtifactId artifactId = new ArtifactId(toModuleId(depExclude.getModuleId()), "*", type,
                 ext);
         final DefaultExcludeRule result = new DefaultExcludeRule(artifactId,
                 ExactPatternMatcher.INSTANCE, null);
-        for (final JkScope scope : depExclude.getScopes()) {
-            result.addConfiguration(scope.getName());
-        }
-        if (depExclude.getScopes().isEmpty()) {
-            for (final String conf : allRootConfs) {
-                result.addConfiguration(conf);
-            }
-
+        for (final String conf : allRootConfs) {
+            result.addConfiguration(conf);
         }
         return result;
     }

@@ -102,7 +102,7 @@ public final class JkDependencyResolver<T> {
         if (dependencies.hasModules()) {
             JkUtilsAssert.state(!repos.getRepoList().isEmpty(), "Cannot resolve module dependency cause no " +
                     "repos has defined on resolver " + this);
-            resolveResult = internalDepResolver.resolve(moduleHolder, dependencies.withModulesOnly(), parameters);
+            resolveResult = internalDepResolver.resolve(moduleHolder, dependencies.withModuleDependenciesOnly(), parameters);
         } else {
             resolveResult = JkResolveResult.ofRoot(moduleHolder);
         }

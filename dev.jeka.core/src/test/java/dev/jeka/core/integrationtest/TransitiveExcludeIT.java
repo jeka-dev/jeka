@@ -46,7 +46,7 @@ public class TransitiveExcludeIT {
         JkDepExclude exclude = JkDepExclude.of(BOOT_TEST).withScopes(COMPILE);
         JkDependencySet deps = JkDependencySet.of()
                 .and(BOOT_TEST_AND_VERSION, COMPILE)
-                .withGlobalExclusion(exclude);
+                .andGlobalExclusion(exclude);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);  // works with non empty scopes resolution
         assertFalse(resolveResult.contains(JkModuleId.of(BOOT_TEST)));
@@ -56,7 +56,7 @@ public class TransitiveExcludeIT {
         exclude = JkDepExclude.of(BOOT_TEST);
         deps = JkDependencySet.of()
                 .and(BOOT_TEST_AND_VERSION, COMPILE)
-                .withGlobalExclusion(exclude);
+                .andGlobalExclusion(exclude);
         resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
         resolveResult = resolver.resolve(deps);  // works with non empty scopes resolution

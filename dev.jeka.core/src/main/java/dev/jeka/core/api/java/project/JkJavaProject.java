@@ -2,6 +2,8 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkArtifactId;
 import dev.jeka.core.api.depmanagement.JkLocalLibDependency;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -102,22 +104,33 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
             .append("Test sources : " + construction.getTesting().getCompilation().getLayout().getInfo()).append("\n")
             .append("Java Source Version : " + construction.getCompilation().getJavaVersion() + "\n")
             .append("Source Encoding : " + construction.getCompilation().getSourceEncoding() + "\n")
-            .append("Source file count : " + construction.getCompilation().getLayout().resolveSources().count(Integer.MAX_VALUE, false) + "\n")
-            .append("Download Repositories : " + construction.getDependencyResolver().getResolver().getRepos() + "\n")
+            .append("Source file count : " + construction.getCompilation().getLayout().resolveSources()
+                    .count(Integer.MAX_VALUE, false) + "\n")
+            .append("Download Repositories : " + construction.getDependencyResolver().getRepos() + "\n")
             .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
-            .append("Declared Dependencies : " + construction.getDependencyResolver().getDependencies().toList().size() + " elements.\n")
+            .append("Declared Compile Dependencies : " + construction.getCompilation().getDependencies()
+                    .getDependencies().size() + " elements.\n")
+            .append("Declared Runtime Dependencies : " + construction.getRuntimeDependencies()
+                        .getDependencies().size() + " elements.\n")
+            .append("Declared Test Dependencies : " + construction.getTesting().getCompilation().getDependencies()
+                        .getDependencies().size() + " elements.\n")
             .append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds())
             .toString();
     }
 
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
+        JkQualifiedDependencies qualifiedDependencies = JkQualifiedDependencies.computeIdeDependencies(
+                construction.getCompilation().getDependencies(),
+                construction.getTesting().getCompilation().getDependencies(),
+                construction.getRuntimeDependencies(),
+                JkVersionedModule.ConflictStrategy.TAKE_FIRST);
         return JkJavaIdeSupport.of(baseDir)
             .setSourceVersion(construction.getCompilation().getJavaVersion())
             .setProdLayout(construction.getCompilation().getLayout())
             .setTestLayout(construction.getTesting().getCompilation().getLayout())
-            .setDependencies(construction.getDependencyResolver().getDependencies())
-            .setDependencyResolver(construction.getDependencyResolver().getResolver());
+            .setDependencies(qualifiedDependencies)
+            .setDependencyResolver(construction.getDependencyResolver());
     }
 
     public JkLocalLibDependency toDependency() {
@@ -129,7 +142,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
             () -> publication.getArtifactProducer().makeArtifact(artifactId),
                 publication.getArtifactProducer().getArtifactPath(artifactId),
             this.baseDir,
-            this.publication.getMavenPublication().getDependencies());
+            construction.getCompilation().getDependencies().merge(construction.getRuntimeDependencies()).getResult());
     }
 
     Path getArtifactPath(JkArtifactId artifactId) {

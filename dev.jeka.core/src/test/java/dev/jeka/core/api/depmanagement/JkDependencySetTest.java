@@ -14,7 +14,7 @@ public class JkDependencySetTest {
         URL url = JkDependencySetTest.class.getResource("dependencies.txt");
         JkDependencySet dependencySet = JkDependencySet.ofTextDescription(url);
         assertEquals(4, dependencySet.getDeclaredScopes().size());
-        assertEquals(10, dependencySet.toList().size());
+        assertEquals(10, dependencySet.getDependencies().size());
     }
 
     @Test

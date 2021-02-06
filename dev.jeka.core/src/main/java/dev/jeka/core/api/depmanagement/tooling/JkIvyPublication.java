@@ -29,9 +29,7 @@ public final class JkIvyPublication<T> {
 
     private Supplier<JkVersionedModule> versionedModule;
 
-    private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
-
-    private Supplier<JkVersionProvider> resolvedVersionProvider = () -> JkVersionProvider.of();
+    private Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencies = UnaryOperator.identity();
 
     private JkIvyConfigurationMapping scopeMapping = JkIvyConfigurationMapping.RESOLVE_MAPPING;
 
@@ -63,19 +61,14 @@ public final class JkIvyPublication<T> {
         return setVersionedModule(() -> versionedModule);
     }
 
-    public JkIvyPublication<T> setDependencies(UnaryOperator<JkDependencySet> modifier) {
+    public JkIvyPublication<T> setDependencies(UnaryOperator<JkQualifiedDependencies> modifier) {
         JkUtilsAssert.argument(modifier != null, "Dependency modifier cannot be null.");
         this.dependencies = dependencies.andThen(modifier);
         return this;
     }
 
-    public JkDependencySet getDependencies() {
-        return dependencies.apply(JkDependencySet.of());
-    }
-
-    public JkIvyPublication<T> setResolvedVersionProvider(Supplier<JkVersionProvider> resolvedVersionProvider) {
-        this.resolvedVersionProvider = resolvedVersionProvider;
-        return this;
+    public JkQualifiedDependencies getDependencies() {
+        return dependencies.apply(JkQualifiedDependencies.of());
     }
 
     public JkIvyPublication<T> setScopeMapping(JkIvyConfigurationMapping scopeMapping) {
@@ -182,7 +175,7 @@ public final class JkIvyPublication<T> {
         JkUtilsAssert.state(versionedModule != null, "Versioned module provider cannot be null.");
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
         internalPublisher.publishIvy(versionedModule.get(), this, getDependencies(), scopeMapping,
-                Instant.now(), resolvedVersionProvider.get());
+                Instant.now());
     }
 
     private static JkPublicationArtifact toPublication(String artifactName, Path artifactFile, String type, String... scopes) {
@@ -228,6 +221,14 @@ public final class JkIvyPublication<T> {
             return JkScope.JAVADOC.getName();
         }
         return classifier;
+    }
+
+    public static JkQualifiedDependencies getPublishDependencies(JkDependencySet compileDependencies,
+                                                          JkDependencySet runtimeDependencies,
+                                                          JkVersionedModule.ConflictStrategy strategy) {
+        JkDependencySetMerge dependencySetMerge = compileDependencies.merge(runtimeDependencies);
+        return JkQualifiedDependencies.of(); // TODO
+
     }
 
 

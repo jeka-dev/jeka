@@ -260,6 +260,11 @@ public final class JkModuleDependency implements JkDependency {
         return new JkModuleDependency(module, version, classifier, transitivity, extension, excludes, path);
     }
 
+    public JkVersionedModule toVersionedModule() {
+        return JkVersionedModule.of(module, version);
+    }
+
+
     private static class NameComparator implements Comparator<JkModuleDependency> {
 
         @Override
@@ -269,4 +274,43 @@ public final class JkModuleDependency implements JkDependency {
 
     }
 
+    /*
+     * The equals method is implemented to consider equals two modules dependencies
+     * that may be not the same level of precision. ut at list, they should have
+     * the same moduleId in common.<br/>
+     * For example 'mygroup:myart:1.0' is considered equals to 'mygroup:myart'.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JkModuleDependency that = (JkModuleDependency) o;
+        if (!module.equals(that.module)) return false;
+        if (!equalsOrOneIsUnspecified(version, that.version)) return false;
+        if (!equalsOrOneIsNull(classifier, that.classifier)) return false;
+        if (!equalsOrOneIsNull(extension, that.extension)) return false;
+        return equalsOrOneIsNull(excludes, that.excludes);
+    }
+
+    @Override
+    public int hashCode() {
+        return module.hashCode();
+    }
+
+    private static boolean equalsOrOneIsNull(Object first, Object second) {
+        if (first == null || second == null) {
+            return true;
+        }
+        return first.equals(second);
+    }
+
+    private static boolean equalsOrOneIsUnspecified(JkVersion first, JkVersion second) {
+        if (first == null || second == null) {
+            return true;
+        }
+        if (first.isUnspecified() || second.isUnspecified()) {
+            return true;
+        }
+        return first.equals(second);
+    }
 }

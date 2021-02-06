@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.tooling.JkMavenPublication;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -106,11 +107,11 @@ final class IvyInternalPublisher implements JkInternalPublisher {
      */
     @Override
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-                           JkDependencySet dependencies, JkIvyConfigurationMapping defaultMapping, Instant deliveryDate,
-                           JkVersionProvider resolvedVersions) {
+                           JkQualifiedDependencies dependencies, JkIvyConfigurationMapping defaultMapping,
+                           Instant deliveryDate) {
         JkLog.startTask( "Publish on Ivy repositories");
         final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
-            publication, dependencies, defaultMapping, deliveryDate, resolvedVersions);
+            publication, dependencies, defaultMapping, deliveryDate);
         int publishCount = publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
         if (publishCount == 0) {
             JkLog.warn("No Ivy repository matching for " + versionedModule + " found. Configured repos are " + publishRepos);
@@ -120,10 +121,10 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-                             JkDependencySet dependencies, UnaryOperator<Path> signer) {
+                             JkQualifiedDependencies dependencies, UnaryOperator<Path> signer) {
         JkLog.startTask("Publish on Maven repositories");
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
-                publication, dependencies, Instant.now(), JkVersionProvider.of());
+                publication, dependencies, Instant.now());
         final int count = publishMavenArtifacts(publication, moduleDescriptor, signer);
         JkLog.info("Module published in %s.", JkUtilsString.plurialize(count,
                 "repository", "repositories"));
@@ -217,8 +218,10 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     }
 
     private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule,
-                                                    JkIvyPublication publication, JkDependencySet dependencies,
-                                                    JkIvyConfigurationMapping defaultMapping, Instant deliveryDate, JkVersionProvider resolvedVersions) {
+                                                    JkIvyPublication publication,
+                                                    JkQualifiedDependencies dependencies,
+                                                    JkIvyConfigurationMapping defaultMapping,
+                                                    Instant deliveryDate) {
 /*
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
                 jkVersionedModule, dependencies, defaultMapping, resolvedVersions);
@@ -263,9 +266,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     private DefaultModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule,
                                                            JkMavenPublication publication,
-                                                           JkDependencySet resolvedDependencies,
-                                                           Instant deliveryDate,
-                                                           JkVersionProvider resolvedVersions) {
+                                                           JkQualifiedDependencies resolvedDependencies,
+                                                           Instant deliveryDate) {
         /*
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
                 jkVersionedModule,
