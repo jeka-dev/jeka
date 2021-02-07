@@ -8,14 +8,15 @@ import static org.junit.Assert.assertEquals;
 public class JkDependencySetTest {
 
     @Test
-    public void testWithoutDuplicate() {
+    public void normalised_takeHighest_ok() {
         JkDependencySet dependencySet = JkDependencySet.of()
                 .and("my.group:module:2.0")
                 .and("my.group:module:2.8")
                 .andFiles("./foo.jar")
                 .and("my.group:module")
                 .and("other:other")
-                .minusDuplicates();
+                .normalised(JkVersionedModule.ConflictStrategy.TAKE_HIGHEST);
+        assertEquals(3, dependencySet.getDependencies().size());
         assertEquals("2.8", dependencySet.getVersion(JkModuleId.of("my.group:module")).getValue());
     }
 

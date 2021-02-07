@@ -30,8 +30,8 @@ public class JkEclipseClasspathGeneratorTest {
                         .and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6"))).getProject();
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
-            .setDefDependencies(baseProject.getConstruction().getDependencyResolver().getResolver(),
-                    JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
+            .setDefDependencies(baseProject.getConstruction().getDependencyResolver(),
+                    JkDependencySet.of().and(JkPopularModules.GUAVA.version("21.0")));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);
@@ -40,7 +40,7 @@ public class JkEclipseClasspathGeneratorTest {
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
             .getConstruction()
-            .getDependencyResolver()
+            .getCompilation()
                 .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
                 .getTesting()
                     .getCompilation()
@@ -60,7 +60,7 @@ public class JkEclipseClasspathGeneratorTest {
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
             .getConstruction()
-                .getDependencyResolver()
+                .getCompilation()
                     .addDependencies(JkDependencySet.of().and(coreProject.toDependency())).__.__;
         desktopProject.getPublication().getArtifactProducer().makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =

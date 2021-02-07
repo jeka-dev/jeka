@@ -28,9 +28,9 @@ public class JkImlGeneratorTest {
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
             .getConstruction()
-                .getDependencyResolver()
+                .getCompilation()
                     .addDependencies(JkDependencySet.of()
-                        .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__.__;
+                        .and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6"))).__.__;
         final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.generate();
         System.out.println("\nbase .classpath");
@@ -41,7 +41,7 @@ public class JkImlGeneratorTest {
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
                 .getConstruction()
-                    .getDependencyResolver()
+                    .getCompilation()
                         .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
                     .getTesting()
                         .getCompilation()
@@ -61,7 +61,7 @@ public class JkImlGeneratorTest {
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
             .getConstruction()
-                .getDependencyResolver()
+                .getCompilation()
                     .addDependencies(JkDependencySet.of()
                         .and(coreProject.toDependency())).__.__;
         final JkImlGenerator desktopGenerator = JkImlGenerator.of(desktopProject.getJavaIdeSupport());

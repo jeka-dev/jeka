@@ -29,7 +29,7 @@ public class MergeFileDepIT {
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource( "dep1").toURI());
         Path dep2File = Paths.get(MergeFileDepIT.class.getResource( "dep2").toURI());
         JkDependencySet deps = JkDependencySet.of()
-                .andFile(dep0File, JkScope.TEST)
+                .andFiles(dep0File, JkScope.TEST)
                 .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", JkScope.COMPILE_AND_RUNTIME)
                 .andFile(dep1File, JkScope.TEST)
                 .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", JkScope.COMPILE)
