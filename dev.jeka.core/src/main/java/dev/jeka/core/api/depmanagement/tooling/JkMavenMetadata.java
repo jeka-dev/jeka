@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement.tooling;
 
-import dev.jeka.core.api.depmanagement.JkArtifactId;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.tooling.JkMavenMetadata.Versioning.JkSnapshot;

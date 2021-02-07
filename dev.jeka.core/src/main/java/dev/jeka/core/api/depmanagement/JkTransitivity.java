@@ -23,4 +23,14 @@ public enum  JkTransitivity {
      * or 'compile'
      */
     RUNTIME;
+
+    public static JkTransitivity ofDeepest(JkTransitivity left, JkTransitivity right) {
+        if (left == null) {
+            return right;
+        }
+        if (right == null) {
+            return left;
+        }
+        return left.ordinal() > right.ordinal() ? left : right;
+    }
 }

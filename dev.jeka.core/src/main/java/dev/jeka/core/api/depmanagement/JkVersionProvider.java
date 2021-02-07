@@ -1,11 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Association between getModuleIds and version.
@@ -124,6 +122,23 @@ public final class JkVersionProvider {
     @Override
     public String toString() {
         return this.map.toString();
+    }
+
+    /**
+     * Returns the java codes that declare these dependencies.
+     */
+    public String toJavaCode(int margin) {
+        final String indent = JkUtilsString.repeat(" ", margin);
+        final StringBuilder builder = new StringBuilder();
+        builder.append("JkVersionProvider.of()");
+        for (final Map.Entry<JkModuleId, JkVersion> entry : map.entrySet()) {
+            JkModuleId moduleId = entry.getKey();
+            JkVersion version = entry.getValue();
+            builder.append("\n").append(indent).append(".and(\"")
+                    .append(moduleId.getGroupAndName() + "\", ")
+                    .append("\"" + version + "\")");
+        }
+        return builder.toString();
     }
 
 }

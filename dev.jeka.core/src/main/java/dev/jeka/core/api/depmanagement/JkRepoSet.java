@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.io.File;
@@ -17,7 +18,7 @@ import java.util.List;
 public final class JkRepoSet {
 
     // Cached resolver
-    private transient JkInternalDepResolver ivyResolver;
+    private transient JkInternalDependencyResolver ivyResolver;
 
     private final List<JkRepo> repos;
 
@@ -122,7 +123,7 @@ public final class JkRepoSet {
      * Retrieves directly the file embodying the specified the external dependency.
      */
     public Path get(JkModuleDependency moduleDependency) {
-        final JkInternalDepResolver depResolver = getIvyResolver();
+        final JkInternalDependencyResolver depResolver = getIvyResolver();
         final File file = depResolver.get(moduleDependency);
         if (file == null) {
             return null;
@@ -144,9 +145,9 @@ public final class JkRepoSet {
         return get(JkModuleDependency.of(moduleGroupVersion));
     }
 
-    private JkInternalDepResolver getIvyResolver() {
+    private JkInternalDependencyResolver getIvyResolver() {
         if (ivyResolver == null) {
-            ivyResolver = JkInternalDepResolver.of(this);
+            ivyResolver = JkInternalDependencyResolver.of(this);
         }
         return ivyResolver;
     }

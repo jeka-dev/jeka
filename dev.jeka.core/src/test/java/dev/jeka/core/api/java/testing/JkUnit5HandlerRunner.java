@@ -1,9 +1,9 @@
 package dev.jeka.core.api.java.testing;
 
-import dev.jeka.core.api.depmanagement.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
 

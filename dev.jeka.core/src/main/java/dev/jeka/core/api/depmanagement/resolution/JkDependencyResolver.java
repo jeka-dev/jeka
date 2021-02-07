@@ -1,5 +1,6 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.resolution;
 
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -64,7 +65,7 @@ public final class JkDependencyResolver<T> {
         return setRepos(this.repos.and(repos));
     }
 
-    public JkDependencyResolver<T> addRepos(JkRepo ... repos) {
+    public JkDependencyResolver<T> addRepos(JkRepo... repos) {
         return addRepos(JkRepoSet.of(Arrays.asList(repos)));
     }
 
@@ -95,18 +96,19 @@ public final class JkDependencyResolver<T> {
         if (repos.getRepoList().isEmpty() && dependencies.hasModules()) {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
-        JkInternalDepResolver internalDepResolver = JkInternalDepResolver.of(this.repos);
+        JkInternalDependencyResolver internalDepResolver = JkInternalDependencyResolver.of(this.repos);
         JkLog.trace("Preparing to resolve dependencies for module " + moduleHolder);
         JkLog.startTask("Resolve dependencies");
         JkResolveResult resolveResult;
         if (dependencies.hasModules()) {
             JkUtilsAssert.state(!repos.getRepoList().isEmpty(), "Cannot resolve module dependency cause no " +
                     "repos has defined on resolver " + this);
-            resolveResult = internalDepResolver.resolve(moduleHolder, dependencies.withModuleDependenciesOnly(), parameters);
+            resolveResult = internalDepResolver.resolve(moduleHolder, dependencies.normalised()
+                    .withModuleDependenciesOnly(), parameters);
         } else {
             resolveResult = JkResolveResult.ofRoot(moduleHolder);
         }
-        final JkDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies);
+        final JkResolvedDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(dependencies);
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module")
@@ -131,21 +133,21 @@ public final class JkDependencyResolver<T> {
      * Returns an alphabetical sorted list of groupId present in these repositories
      */
     public List<String> searchGroups() {
-        return JkInternalDepResolver.of(this.repos).searchGroups();
+        return JkInternalDependencyResolver.of(this.repos).searchGroups();
     }
 
     /**
      * Returns an alphabetical sorted list of module ids present in these repositories for the specified groupId.
      */
     public List<String> searchModules(String groupId) {
-        return JkInternalDepResolver.of(this.repos).searchModules(groupId);
+        return JkInternalDependencyResolver.of(this.repos).searchModules(groupId);
     }
 
     /**
      * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
      */
     public List<String> searchVersions(JkModuleId moduleId) {
-        return JkInternalDepResolver.of(this.repos).searchVersions(moduleId).stream()
+        return JkInternalDependencyResolver.of(this.repos).searchVersions(moduleId).stream()
                 .sorted(JkVersion.VERSION_COMPARATOR).collect(Collectors.toList());
     }
 

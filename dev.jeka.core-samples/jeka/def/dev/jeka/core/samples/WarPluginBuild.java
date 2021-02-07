@@ -1,6 +1,6 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.depmanagement.JkArtifactProducer;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;

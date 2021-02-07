@@ -1,6 +1,10 @@
 package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkCompileLayout;
@@ -21,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides method to generate Eclipse .classpath metadata files.
@@ -220,7 +225,9 @@ public final class JkEclipseClasspathGenerator {
 
         // add def dependencies
         if (hasJekaDefDir() && defDependencyResolver != null) {
-            writeDependenciesEntries(writer, defDependencies, defDependencyResolver, paths);
+            JkQualifiedDependencies qualifiedDependencies =
+                    JkQualifiedDependencies.ofDependencies(defDependencies.getDependencies());
+            writeDependenciesEntries(writer, qualifiedDependencies, defDependencyResolver, paths);
         }
 
         // Write output
@@ -386,16 +393,20 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies,
+    private void writeDependenciesEntries(XMLStreamWriter writer, JkQualifiedDependencies dependencies,
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
 
         // dependencies with IDE project dir will be omitted. The project dir will be added in other place.
-        final JkResolveResult resolveResult = resolver.resolve(dependencies.minusModuleDependenciesHavingIdeProjectDir());
+        List<JkDependency> deps = dependencies.getEntries().stream()
+                .map(qDep -> qDep.getDependency())
+                .filter(dep -> dep.getIdeProjectDir() == null)
+                .collect(Collectors.toList());
+        final JkResolveResult resolveResult = resolver.resolve(JkDependencySet.of(deps));
         final JkRepoSet repos = resolver.getRepos();
-        for (final JkDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
+        for (final JkResolvedDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency
             if (node.isModuleNode()) {
-                final JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
+                final JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
                 JkDependency dependency = JkModuleDependency.of(moduleNodeInfo.getModuleId().getGroupAndName());
                 Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
                 Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);
@@ -405,7 +416,7 @@ public final class JkEclipseClasspathGenerator {
 
                 // File dependencies (file system + computed)
             } else {
-                final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
+                final JkResolvedDependencyNode.JkFileNodeInfo fileNodeInfo = (JkResolvedDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
                     final Path ideProjectBaseDir = computedDependency.getIdeProjectDir();

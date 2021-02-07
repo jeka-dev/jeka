@@ -1,6 +1,6 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.resolution;
 
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -15,17 +15,17 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-public class JkDependencyNode {
+public class JkResolvedDependencyNode {
 
     private static final String INDENT = "    ";
 
     private final JkNodeInfo nodeInfo;
 
-    private final List<JkDependencyNode> children;
+    private final List<JkResolvedDependencyNode> children;
 
     private final JkVersionProvider resolvedVersions;
 
-    private JkDependencyNode(JkNodeInfo nodeInfo, List<JkDependencyNode> children) {
+    private JkResolvedDependencyNode(JkNodeInfo nodeInfo, List<JkResolvedDependencyNode> children) {
         this.nodeInfo = nodeInfo;
         this.children = children;
         this.resolvedVersions = compute(nodeInfo, children);
@@ -34,34 +34,34 @@ public class JkDependencyNode {
     /**
      * Returns an empty instance of tree.
      */
-    static JkDependencyNode ofEmpty(JkNodeInfo nodeInfo) {
-        return new JkDependencyNode(nodeInfo, new LinkedList<>());
+    static JkResolvedDependencyNode ofEmpty(JkNodeInfo nodeInfo) {
+        return new JkResolvedDependencyNode(nodeInfo, new LinkedList<>());
     }
 
     /**
      * Constructs a node for the specified versioned module having the specified
      * direct flatten.
      */
-    public static JkDependencyNode ofModuleDep(JkModuleNodeInfo moduleNodeInfo, List<JkDependencyNode> children) {
-        return new JkDependencyNode(moduleNodeInfo, Collections.unmodifiableList(children));
+    public static JkResolvedDependencyNode ofModuleDep(JkModuleNodeInfo moduleNodeInfo, List<JkResolvedDependencyNode> children) {
+        return new JkResolvedDependencyNode(moduleNodeInfo, Collections.unmodifiableList(children));
     }
 
-    public static JkDependencyNode ofFileDep(JkFileDependency dependency, Set<JkScope> scopes) {
+    public static JkResolvedDependencyNode ofFileDep(JkFileDependency dependency, Set<String> scopes) {
         final JkNodeInfo moduleInfo = JkFileNodeInfo.of(scopes, dependency);
-        return new JkDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<>()));
+        return new JkResolvedDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<>()));
     }
 
-    JkDependencyNode mergeNonModules(JkDependencySet dependencies) {
-        final List<JkDependencyNode> result = new LinkedList<>();
+    JkResolvedDependencyNode mergeNonModules(JkDependencySet dependencies) {
+        final List<JkResolvedDependencyNode> result = new LinkedList<>();
         final Set<JkFileDependency> addedFileDeps = new HashSet<>();
-        for (final JkDependencyNode node : this.children) {
+        for (final JkResolvedDependencyNode node : this.children) {
             if (node.isModuleNode()) {
                 addFileDepsToTree(dependencies, result, addedFileDeps, node.moduleId());
                 result.add(node);
             }
         }
         addFileDepsToTree(dependencies, result, addedFileDeps, null);
-        return new JkDependencyNode(this.nodeInfo,result);
+        return new JkResolvedDependencyNode(this.nodeInfo,result);
     }
 
     /**
@@ -70,7 +70,7 @@ public class JkDependencyNode {
     public List<Path> getResolvedFiles() {
         final List<Path> list = new LinkedList<>();
         JkUtilsIterable.addAllWithoutDuplicate(list, this.nodeInfo.getFiles());
-        for (final JkDependencyNode child : children) {
+        for (final JkResolvedDependencyNode child : children) {
             JkUtilsIterable.addAllWithoutDuplicate(list, child.getResolvedFiles());
         }
         return list;
@@ -105,7 +105,7 @@ public class JkDependencyNode {
     /**
      * Returns the children nodes for this node in the tree structure.
      */
-    public List<JkDependencyNode> getChildren() {
+    public List<JkResolvedDependencyNode> getChildren() {
         return children;
     }
 
@@ -117,7 +117,7 @@ public class JkDependencyNode {
         if (this.isModuleNode() && moduleId.equals(this.getModuleInfo().getModuleId()) && !this.getModuleInfo().isEvicted()) {
             return true;
         }
-        for (final JkDependencyNode child : this.children) {
+        for (final JkResolvedDependencyNode child : this.children) {
             final boolean contains = child.contains(moduleId);
             if (contains) {
                 return true;
@@ -145,7 +145,7 @@ public class JkDependencyNode {
         if (!root && this.isModuleNode() && !this.getModuleInfo().isEvicted()) {
             result.add(this.getModuleInfo().moduleId.withVersion(this.getModuleInfo().resolvedVersion.getValue()));
         }
-        for (final JkDependencyNode child : this.children) {
+        for (final JkResolvedDependencyNode child : this.children) {
             result.addAll(child.resolvedModules(false));
         }
         return result;
@@ -154,9 +154,9 @@ public class JkDependencyNode {
     /**
      * Returns the children nodes for this node having the specified getModuleId.
      */
-    public List<JkDependencyNode> getChildren(JkModuleId moduleId) {
-        final List<JkDependencyNode> result = new LinkedList<>();
-        for (final JkDependencyNode child : getChildren()) {
+    public List<JkResolvedDependencyNode> getChildren(JkModuleId moduleId) {
+        final List<JkResolvedDependencyNode> result = new LinkedList<>();
+        for (final JkResolvedDependencyNode child : getChildren()) {
             if (child.getModuleInfo().getModuleId().equals(moduleId)) {
                 result.add(child);
             }
@@ -167,8 +167,8 @@ public class JkDependencyNode {
     /**
      * Returns the getChild node having the specified getModuleId.
      */
-    public JkDependencyNode getChild(JkModuleId moduleId) {
-        for (final JkDependencyNode node : children) {
+    public JkResolvedDependencyNode getChild(JkModuleId moduleId) {
+        for (final JkResolvedDependencyNode node : children) {
             if (node.moduleId().equals(moduleId)) {
                 return node;
             }
@@ -180,22 +180,22 @@ public class JkDependencyNode {
      * Returns a merge of this dependency node with the specified one. The
      * children of the merged node is a union of the two node children.
      */
-    public JkDependencyNode withMerging(JkDependencyNode other) {
-        final List<JkDependencyNode> resultChildren = new LinkedList<>(this.children);
-        for (final JkDependencyNode otherNodeChild : other.children) {
+    public JkResolvedDependencyNode withMerging(JkResolvedDependencyNode other) {
+        final List<JkResolvedDependencyNode> resultChildren = new LinkedList<>(this.children);
+        for (final JkResolvedDependencyNode otherNodeChild : other.children) {
             if (!otherNodeChild.isModuleNode() || !directChildrenContains(otherNodeChild.getModuleInfo().getModuleId())) {
                 resultChildren.add(otherNodeChild);
             }
         }
-        return new JkDependencyNode(this.nodeInfo, resultChildren);
+        return new JkResolvedDependencyNode(this.nodeInfo, resultChildren);
     }
 
-    private static void addFileDepsToTree(JkDependencySet dependencies, List<JkDependencyNode> result,
+    private static void addFileDepsToTree(JkDependencySet dependencies, List<JkResolvedDependencyNode> result,
                                           Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
         for (final JkDependency dependency : depsUntilLast(dependencies, moduleId)) {
             final JkFileDependency fileDep = (JkFileDependency) dependency;
             if (!addedFileDeps.contains(fileDep)) {
-                final JkDependencyNode fileNode = JkDependencyNode.ofFileDep(fileDep, Collections.emptySet());
+                final JkResolvedDependencyNode fileNode = JkResolvedDependencyNode.ofFileDep(fileDep, Collections.emptySet());
                 addedFileDeps.add(fileDep);
                 result.add(fileNode);
             }
@@ -205,9 +205,9 @@ public class JkDependencyNode {
     /**
      * Returns all nodes descendant of this one, deep first.
      */
-    public List<JkDependencyNode> toFlattenList() {
-        final List<JkDependencyNode> result = new LinkedList<>();
-        for (final JkDependencyNode child : this.getChildren()) {
+    public List<JkResolvedDependencyNode> toFlattenList() {
+        final List<JkResolvedDependencyNode> result = new LinkedList<>();
+        for (final JkResolvedDependencyNode child : this.getChildren()) {
             result.add(child);
             result.addAll(child.toFlattenList());
         }
@@ -217,11 +217,11 @@ public class JkDependencyNode {
     /**
      * Returns first node descendant of this one standing for the specified getModuleId, deep first.
      */
-    public JkDependencyNode getFirst(JkModuleId moduleId) {
+    public JkResolvedDependencyNode getFirst(JkModuleId moduleId) {
         if (this.isModuleNode() && moduleId.equals(this.moduleId())) {
             return this;
         }
-        for (final JkDependencyNode child : this.toFlattenList()) {
+        for (final JkResolvedDependencyNode child : this.toFlattenList()) {
             if (child.isModuleNode() && moduleId.equals(child.moduleId())) {
                 return child;
             }
@@ -230,7 +230,7 @@ public class JkDependencyNode {
     }
 
     private boolean directChildrenContains(JkModuleId moduleId) {
-        for (final JkDependencyNode dependencyNode : this.children) {
+        for (final JkResolvedDependencyNode dependencyNode : this.children) {
             if (dependencyNode.isModuleNode() && dependencyNode.moduleId().equals(moduleId)) {
                 return true;
             }
@@ -259,7 +259,7 @@ public class JkDependencyNode {
             if (this.nodeInfo != null) {
                 expandeds.add(this.moduleId());
             }
-            for (final JkDependencyNode child : children) {
+            for (final JkResolvedDependencyNode child : children) {
                 result.addAll(child.toStrings(true, indentLevel+1, expandeds));
             }
         }
@@ -290,7 +290,7 @@ public class JkDependencyNode {
 
         List<Path> getFiles();
 
-        Set<JkScope> getDeclaredScopes();
+        Set<String> getDeclaredScopes();
 
     }
 
@@ -308,26 +308,26 @@ public class JkDependencyNode {
                     new HashSet<>(), new HashSet<>(), versionedModule.getVersion(), new LinkedList<>(), true);
         }
 
-        public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                                          Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
+        public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion, Set<String> declaredScopes,
+                                          Set<String> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
             return new JkModuleNodeInfo(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts);
         }
 
         private final JkModuleId moduleId;
         private final JkVersion declaredVersion;
-        private final Set<JkScope> declaredScopes;  // the left conf mapping side in the caller dependency description
-        private final Set<JkScope> rootScopes; // scopes fetching this node to baseTree
+        private final Set<String> declaredScopes;  // the left conf mapping side in the caller dependency description
+        private final Set<String> rootScopes; // scopes fetching this node to baseTree
         private final JkVersion resolvedVersion;
         private final List<File> artifacts; // Path is not serializable
         private final boolean treeRoot;
 
-        JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                         Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
+        JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<String> declaredScopes,
+                         Set<String> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
             this(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts, false);
         }
 
-        JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
-                         Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
+        JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<String> declaredScopes,
+                         Set<String> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
             this.moduleId = moduleId;
             this.declaredVersion = declaredVersion;
             this.declaredScopes = declaredScopes;
@@ -353,11 +353,11 @@ public class JkDependencyNode {
         }
 
         @Override
-        public Set<JkScope> getDeclaredScopes() {
+        public Set<String> getDeclaredScopes() {
             return declaredScopes;
         }
 
-        public Set<JkScope> getResolvedScopes() {
+        public Set<String> getResolvedScopes() {
             return rootScopes;
         }
 
@@ -409,7 +409,7 @@ public class JkDependencyNode {
         return result;
     }
 
-    private static JkVersionProvider compute(JkNodeInfo nodeInfo, List<JkDependencyNode> children) {
+    private static JkVersionProvider compute(JkNodeInfo nodeInfo, List<JkResolvedDependencyNode> children) {
         JkVersionProvider result = JkVersionProvider.of();
         if (nodeInfo instanceof JkModuleNodeInfo) {
             final JkModuleNodeInfo moduleNodeInfo = (JkModuleNodeInfo) nodeInfo;
@@ -417,7 +417,7 @@ public class JkDependencyNode {
                 result = result.and(moduleNodeInfo.moduleId, moduleNodeInfo.resolvedVersion);
             }
         }
-        for (final JkDependencyNode child : children) {
+        for (final JkResolvedDependencyNode child : children) {
             result = result.and(compute(child.getNodeInfo(), child.getChildren()));
         }
         return result;
@@ -427,7 +427,7 @@ public class JkDependencyNode {
 
         private static final long serialVersionUID = 1L;
 
-        public static JkFileNodeInfo of(Set<JkScope> scopes, JkFileDependency dependency) {
+        public static JkFileNodeInfo of(Set<String> scopes, JkFileDependency dependency) {
             if (dependency instanceof JkComputedDependency) {
                 final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
                 return new JkFileNodeInfo(computedDependency.getFiles(), scopes, computedDependency);
@@ -438,11 +438,11 @@ public class JkDependencyNode {
         // for serialization we need to use File class instead of Path
         private final List<File> files;
 
-        private final Set<JkScope> scopes;
+        private final Set<String> scopes;
 
         private final JkComputedDependency computationOrigin;
 
-        private JkFileNodeInfo(List<Path> files, Set<JkScope> scopes, JkComputedDependency origin) {
+        private JkFileNodeInfo(List<Path> files, Set<String> scopes, JkComputedDependency origin) {
             this.files = Collections.unmodifiableList(new LinkedList<>(JkUtilsPath.toFiles(files)));
             this.scopes = Collections.unmodifiableSet(new HashSet<>(scopes));
             this.computationOrigin = origin;
@@ -468,7 +468,7 @@ public class JkDependencyNode {
         }
 
         @Override
-        public Set<JkScope> getDeclaredScopes() {
+        public Set<String> getDeclaredScopes() {
             return scopes;
         }
 

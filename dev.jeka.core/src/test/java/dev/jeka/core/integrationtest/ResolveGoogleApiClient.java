@@ -1,6 +1,8 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Ignore;

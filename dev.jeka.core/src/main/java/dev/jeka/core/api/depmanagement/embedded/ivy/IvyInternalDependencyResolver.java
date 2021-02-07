@@ -1,7 +1,8 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkDependencyNode.JkModuleNodeInfo;
+import dev.jeka.core.api.depmanagement.resolution.*;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode.JkModuleNodeInfo;
 import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
@@ -46,7 +47,7 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud
  */
-final class IvyInternalDepResolver implements JkInternalDepResolver {
+final class IvyInternalDependencyResolver implements JkInternalDependencyResolver {
 
     private static final Random RANDOM = new Random();
 
@@ -58,14 +59,14 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
 
     private final Ivy ivy;
 
-    private IvyInternalDepResolver(Ivy ivy) {
+    private IvyInternalDependencyResolver(Ivy ivy) {
         super();
         this.ivy = ivy;
     }
 
-    private static IvyInternalDepResolver of(IvySettings ivySettings) {
+    private static IvyInternalDependencyResolver of(IvySettings ivySettings) {
         final Ivy ivy = ivy(ivySettings);
-        return new IvyInternalDepResolver(ivy);
+        return new IvyInternalDependencyResolver(ivy);
     }
 
     static Ivy ivy(IvySettings ivySettings) {
@@ -95,7 +96,7 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
      * Creates an instance using specified repository for publishing and the
      * specified repositories for resolving.
      */
-    public static IvyInternalDepResolver of(JkRepoSet resolveRepos) {
+    public static IvyInternalDependencyResolver of(JkRepoSet resolveRepos) {
         IvySettings ivySettings = ivySettingsOf(resolveRepos);
         return of(ivySettings);
     }
@@ -199,7 +200,7 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
             IvyArtifactContainer ivyArtifactContainer) {
 
         // Compute dependency tree
-        final JkDependencyNode tree = createTree(nodes, rootVersionedModule, ivyArtifactContainer);
+        final JkResolvedDependencyNode tree = createTree(nodes, rootVersionedModule, ivyArtifactContainer);
         return JkResolveResult.of(tree, errorReport);
     }
 
@@ -254,10 +255,10 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
                 .collect(Collectors.toList());
     }
 
-    private static JkDependencyNode createTree(Iterable<IvyNode> nodes, JkVersionedModule rootVersionedModule,
-            IvyArtifactContainer artifactContainer) {
+    private static JkResolvedDependencyNode createTree(Iterable<IvyNode> nodes, JkVersionedModule rootVersionedModule,
+                                                       IvyArtifactContainer artifactContainer) {
         final IvyTreeResolver treeResolver = new IvyTreeResolver(nodes, artifactContainer);
-        final JkDependencyNode.JkModuleNodeInfo treeRootNodeInfo = JkDependencyNode.JkModuleNodeInfo.ofRoot(rootVersionedModule);
+        final JkResolvedDependencyNode.JkModuleNodeInfo treeRootNodeInfo = JkResolvedDependencyNode.JkModuleNodeInfo.ofRoot(rootVersionedModule);
         return treeResolver.createNode(treeRootNodeInfo);
     }
 
@@ -310,21 +311,21 @@ final class IvyInternalDepResolver implements JkInternalDepResolver {
             return false;
         }
 
-        JkDependencyNode createNode(JkModuleNodeInfo holder) {
+        JkResolvedDependencyNode createNode(JkModuleNodeInfo holder) {
             if (parentChildMap.get(holder.getModuleId()) == null || holder.isEvicted()) {
-                return JkDependencyNode.ofModuleDep(holder, new LinkedList<>());
+                return JkResolvedDependencyNode.ofModuleDep(holder, new LinkedList<>());
             }
 
-            List<JkDependencyNode.JkModuleNodeInfo> moduleNodeInfos = parentChildMap.get(holder.getModuleId());
+            List<JkResolvedDependencyNode.JkModuleNodeInfo> moduleNodeInfos = parentChildMap.get(holder.getModuleId());
             if (moduleNodeInfos == null) {
                 moduleNodeInfos = new LinkedList<>();
             }
-            final List<JkDependencyNode> childNodes = new LinkedList<>();
+            final List<JkResolvedDependencyNode> childNodes = new LinkedList<>();
             for (final JkModuleNodeInfo moduleNodeInfo : moduleNodeInfos) {
-                final JkDependencyNode childNode = createNode(moduleNodeInfo);
+                final JkResolvedDependencyNode childNode = createNode(moduleNodeInfo);
                 childNodes.add(childNode);
             }
-            return JkDependencyNode.ofModuleDep(holder, childNodes);
+            return JkResolvedDependencyNode.ofModuleDep(holder, childNodes);
         }
 
     }

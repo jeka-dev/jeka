@@ -61,7 +61,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     private static IvyInternalPublisher of(IvySettings ivySettings, JkRepoSet publishRepos,
                                            Path descriptorOutputDir) {
-        final Ivy ivy = IvyInternalDepResolver.ivy(ivySettings);
+        final Ivy ivy = IvyInternalDependencyResolver.ivy(ivySettings);
         return new IvyInternalPublisher(ivy, publishRepos, descriptorOutputDir);
     }
 

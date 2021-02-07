@@ -25,10 +25,9 @@ public class JkEclipseClasspathGeneratorTest {
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("base"))
-            .getConstruction()
-                .getDependencyResolver()
-                    .addDependencies(JkDependencySet.of()
-                        .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__.__;
+            .simpleFacade()
+                .addCompileDependencies(JkDependencySet.of()
+                        .and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6"))).getProject();
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
             .setDefDependencies(baseProject.getConstruction().getDependencyResolver().getResolver(),

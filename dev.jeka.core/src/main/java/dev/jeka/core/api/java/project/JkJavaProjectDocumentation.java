@@ -50,7 +50,7 @@ public class JkJavaProjectDocumentation {
         JkJavaProjectConstruction construction = project.getConstruction();
         JkJavaProjectCompilation compilation = construction.getCompilation();
         Iterable<Path> classpath = construction.getDependencyResolver()
-                .resolve(compilation.getDependencies()).getFiles();
+                .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
         JkPathTreeSet sources = compilation.getLayout().resolveSources();
         javadocProcessor.make(classpath, sources, dir);

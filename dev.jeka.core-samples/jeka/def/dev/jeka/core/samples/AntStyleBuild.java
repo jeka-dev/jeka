@@ -1,10 +1,15 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
+import dev.jeka.core.api.depmanagement.artifact.JkSuppliedFileArtifactProducer;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.tooling.JkMavenPublication;
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
@@ -33,19 +38,18 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
     Path classDir = getOutputDir().resolve("classes");
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
     JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-    JkDependencySet moduleDependencies = JkDependencySet.of()
-            .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
-            .and("junit:junit:4.13", JkScope.TEST);
+    JkDependencySet prodDependencies = JkDependencySet.of()
+            .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final");
+    JkDependencySet testDependencies = JkDependencySet.of()
+            .and("junit:junit:4.13");
     List<Path> depFiles = getBaseTree().andMatching(true,"libs/**/*.jar").getFiles();
-    JkResolveResult depResolution = resolver.resolve(moduleDependencies);
-    JkClasspath classpath = JkClasspath
-            .of(depFiles)
-            .and(depResolution.getFiles());
+    JkPathSequence prodClasspath = resolver.resolve(prodDependencies).getFiles();
+    JkPathSequence testClasspath = resolver.resolve(testDependencies.and(prodDependencies)).getFiles();
 
     public void compile() {
         JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(classDir)
-                .setClasspath(classpath)
+                .setClasspath(prodClasspath)
                 .setSourceAndTargetVersion(JkJavaVersion.V8)
                 .addSources(src));
         JkPathTree.of(src).andMatching(false, "**/*.java")
@@ -70,7 +74,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
     public void run() {
         jar();
         JkJavaProcess.of().withWorkingDir(jarFile.getParent())
-            .andClasspath(classpath)
+            .andClasspath(prodClasspath)
             .runJarSync(jarFile);
     }
 
@@ -93,12 +97,12 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
         artifactProducer.makeAllMissingArtifacts();
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)
-                .setDependencies(moduleDependencies)
+                .setDependencies(prodDependencies)
                 .setVersionedModule(versionedModule)
                 .publish(mavenRepo.toSet(), pgp.getSigner(""));
         JkIvyPublication.of()
                 .setVersionedModule(versionedModule)
-                .setDependencies(deps -> moduleDependencies)
+                .setDependencies(prodDependencies, prodDependencies, testDependencies)
                 .addArtifacts(artifactProducer)
                 .publish(ivyRepo.toSet());
     }
@@ -108,7 +112,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
         return JkJavaIdeSupport.of(getBaseDir())
             .getProdLayout()
                 .emptySources().addSource(src).__
-            .setDependencies(moduleDependencies)
+            .setDependencies(prodDependencies, prodDependencies, testDependencies)
             .setDependencyResolver(resolver);
     }
 

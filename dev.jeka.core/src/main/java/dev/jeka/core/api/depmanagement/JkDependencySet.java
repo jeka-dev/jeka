@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -55,24 +54,6 @@ public class JkDependencySet {
 
     public static JkDependencySet of(JkDependency dependency) {
         return of(JkUtilsIterable.listOf(dependency));
-    }
-
-    /**
-     * Creates a {@link JkDependencySet} based on jars located under the specified directory. Jars are
-     * supposed to lie in a directory structure standing for the different scopes they are intended.
-     * So jars needed for compilation are supposed to be in <code>baseDir/compile</code>, jar needed for
-     * test are supposed to be in <code>baseDir/test</code> and so on.
-     */
-    public static JkDependencySet ofLocal(Path baseDir) {
-        final JkPathTree libDir = JkPathTree.of(baseDir);
-        if (!libDir.exists()) {
-            return JkDependencySet.of();
-        }
-        return JkDependencySet.of()
-                .and(JkFileSystemDependency.of(libDir.andMatching(true, "*.jar", "compile/*.jar").getFiles()))
-                .and(JkFileSystemDependency.of(libDir.andMatching(true, "compile+runtime/*.jar").getFiles()))
-                .and(JkFileSystemDependency.of(libDir.andMatching(true, "runtime/*.jar").getFiles()))
-                .and(JkFileSystemDependency.of(libDir.andMatching(true, "test/*.jar").getFiles()));
     }
 
     /**
@@ -152,6 +133,14 @@ public class JkDependencySet {
         return and(hint, JkModuleDependency.of(moduleDescriptor));
     }
 
+    public JkDependencySet and(Hint hint, JkModuleId moduleId) {
+        return and(hint, moduleId.toString());
+    }
+
+    public JkDependencySet and(JkModuleId moduleId) {
+        return and(null, moduleId.toString());
+    }
+
     public JkDependencySet and(String moduleDescriptor) {
         return and(null, moduleDescriptor);
     }
@@ -198,10 +187,6 @@ public class JkDependencySet {
     public JkDependencySet minus(String moduleId) {
         return minus(JkModuleId.of(moduleId));
     }
-
-
-
-
 
     public JkDependencySet withTransitivityReplacement(JkTransitivity formerTransitivity, JkTransitivity newTransitivity) {
         final List<JkDependency> list = new LinkedList<>();
@@ -334,22 +319,11 @@ public class JkDependencySet {
         return result;
     }
 
-
     /**
-     * Returns a JkDependencySet similar to this one but removing duplicates on module dependencies. Such duplicates
-     * occur when two module dependencies have been declared with the same JkModuleId. The removed dependency is
-     * the one with the lower or unspecified version.
-     * It has been introduced to satisfy https://github.com/jerkar/jeka/issues/135
+     * Removes duplicates and select a versoin according the specified strayegy in
+     * case of duplicate with distinct versions.
      */
-    public JkDependencySet minusDuplicates() {
-        List<JkDependency> result = dependencies.stream().distinct().collect(Collectors.toList());
-        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
-    }
-
-    /**
-     * Returns
-     */
-    public JkDependencySet withResolvedVersionConflicts(JkVersionedModule.ConflictStrategy conflictStrategy) {
+    public JkDependencySet normalised(JkVersionedModule.ConflictStrategy conflictStrategy) {
         Map<JkModuleId, JkVersion> moduleIdVersionMap = new HashMap<>();
         dependencies.stream()
                 .filter(JkModuleDependency.class::isInstance)
@@ -369,7 +343,12 @@ public class JkDependencySet {
                     return dependency;
                 })
                 .collect(Collectors.toList());
-        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
+        List<JkDependency> cleanedResult = result.stream().distinct().collect(Collectors.toList());
+        return new JkDependencySet(cleanedResult, this.globalExclusions, this.versionProvider);
+    }
+
+    public JkDependencySet normalised() {
+        return normalised(JkVersionedModule.ConflictStrategy.FAIL);
     }
 
     /**
@@ -469,17 +448,14 @@ public class JkDependencySet {
         return new JkDependencySet(this.dependencies, Collections.unmodifiableSet(depExcludes), this.versionProvider);
     }
 
-
     /**
      * Returns the java codes that declare these dependencies.
-     *
-     * @formatter:off
      */
-    public String toJavaCode(int indentCount) {
+    public static String toJavaCode(int indentCount, List<JkDependency> dependencies) {
         final String indent = JkUtilsString.repeat(" ", indentCount);
         final StringBuilder builder = new StringBuilder();
         builder.append("JkDependencySet.of()");
-        for (final JkDependency dependency : this.dependencies) {
+        for (final JkDependency dependency : dependencies) {
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDep = (JkModuleDependency) dependency;
                 builder.append("\n").append(indent).append(".and(\"")

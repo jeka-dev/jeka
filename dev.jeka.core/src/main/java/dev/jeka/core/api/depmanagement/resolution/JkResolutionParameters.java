@@ -1,4 +1,4 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
 

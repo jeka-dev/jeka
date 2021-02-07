@@ -1,10 +1,15 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.java.JkClasspath;
+import dev.jeka.core.api.java.JkJavaCompileSpec;
+import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkLocator;
@@ -20,6 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Supplier;
+
+import static dev.jeka.core.api.depmanagement.JkDependencySet.Hint.lastAndIf;
 
 /**
  * Engine having responsibility of compiling def classes, instantiate Jeka class and run it.<br/>
@@ -175,8 +182,8 @@ final class Engine {
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
         return defDependencies
                 .andFiles(bootLibs())
-                .andFiles(JkClasspath.ofCurrentRuntime()).minusLastIf(!devMode)
-                .andFiles(JkLocator.getJekaJarPath()).minusLastIf(devMode);
+                .andFiles(lastAndIf(!devMode), JkClasspath.ofCurrentRuntime())
+                .andFiles(lastAndIf(devMode), JkLocator.getJekaJarPath());
     }
 
     private JkPathSequence bootLibs() {

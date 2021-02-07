@@ -1,6 +1,8 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJarPacker;
@@ -114,7 +116,8 @@ public class JkJavaProjectConstruction {
     public void createFatJar(Path target) {
         compilation.runIfNecessary();
         testing.runIfNecessary();
-        Iterable<Path> classpath = dependencyResolver.resolve(getRuntimeDependencies()).getFiles();
+        Iterable<Path> classpath = dependencyResolver.resolve(getRuntimeDependencies()
+                .normalised(project.getDuplicateConflictStrategy())).getFiles();
         addManifestDefaults();
         JkJarPacker.of(compilation.getLayout().resolveClassDir())
                 .withManifest(manifest)

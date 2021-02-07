@@ -1,24 +1,35 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.resolution;
 
+import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 
 /**
  * Not part of the public API.
  */
-public interface JkInternalDepResolver {
+public interface JkInternalDependencyResolver {
 
     /**
      * @param  module The resolved module. Only use for caching purpose. Can be <code>null</code>
      * @param parameters can be null.
      */
-    JkResolveResult resolve(JkVersionedModule module, JkDependencySet deps,
-            JkResolutionParameters parameters);
+    default JkResolveResult resolve(JkVersionedModule module, JkDependencySet deps,
+                                    JkResolutionParameters parameters) {
+        List<JkDependency> depList = deps.normalised(JkVersionedModule.ConflictStrategy.FAIL)
+                .getVersionedDependencies();
+        return resolve(module, JkQualifiedDependencies.ofDependencies(depList), deps.getGlobalExclusions(),
+                parameters);
+    }
+
+    JkResolveResult resolve(JkVersionedModule module, JkQualifiedDependencies deps, Set<JkDepExclude>
+            globalExcludes, JkResolutionParameters parameters);
 
     File get(JkModuleDependency dependency);
 
@@ -28,14 +39,14 @@ public interface JkInternalDepResolver {
 
     List<String> searchVersions(JkModuleId moduleId);
 
-    static JkInternalDepResolver of(JkRepoSet repos) {
+    static JkInternalDependencyResolver of(JkRepoSet repos) {
         final String factoryClassName = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalDepResolverFactory";
         Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(factoryClassName);
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
         }
         return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(
-                JkInternalDepResolver.class, factoryClassName, "of", repos);
+                JkInternalDependencyResolver.class, factoryClassName, "of", repos);
     }
 
 }

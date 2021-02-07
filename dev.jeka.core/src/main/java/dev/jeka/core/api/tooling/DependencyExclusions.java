@@ -1,25 +1,25 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.tooling;
 
+import dev.jeka.core.api.depmanagement.JkDepExclude;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.util.*;
 
 /**
- * Holds information about transitive dependencies to exclude.
- * 
  * @author Jerome Angibaud
  */
-public class JkDependencyExclusions {
+class DependencyExclusions {
 
     private final Map<JkModuleId, List<JkDepExclude>> exclusions;
 
-    private JkDependencyExclusions(Map<JkModuleId, List<JkDepExclude>> exclusions) {
+    private DependencyExclusions(Map<JkModuleId, List<JkDepExclude>> exclusions) {
         super();
         this.exclusions = Collections.unmodifiableMap(exclusions);
     }
 
-    public static JkDependencyExclusions of() {
-        return new JkDependencyExclusions(Collections.emptyMap());
+    public static DependencyExclusions of() {
+        return new DependencyExclusions(Collections.emptyMap());
     }
 
     /**
@@ -46,14 +46,14 @@ public class JkDependencyExclusions {
     /**
      * Adds specified exclusions on the specified module.
      */
-    public JkDependencyExclusions and(String groupAndName, String... excludedModuleIds) {
+    public DependencyExclusions and(String groupAndName, String... excludedModuleIds) {
         return and(JkModuleId.of(groupAndName), excludedModuleIds);
     }
 
     /**
      * Adds specified exclusions on the specified module.
      */
-    public JkDependencyExclusions and(JkModuleId moduleId, String... excludedModuleIds) {
+    public DependencyExclusions and(JkModuleId moduleId, String... excludedModuleIds) {
         final List<JkDepExclude> depExcludes = new LinkedList<>();
         for (final String excludeId : excludedModuleIds) {
             depExcludes.add(JkDepExclude.of(excludeId));
@@ -65,7 +65,7 @@ public class JkDependencyExclusions {
     /**
      * Adds specified exclusions on the specified module.
      */
-    public JkDependencyExclusions and(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
+    public DependencyExclusions and(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
         List<JkDepExclude> excludes = exclusions.get(moduleId);
         if (excludes == null) {
             excludes = new LinkedList<>();
@@ -73,7 +73,7 @@ public class JkDependencyExclusions {
         excludes.addAll(JkUtilsIterable.listOf(depExcludes));
         Map map = new HashMap(this.exclusions);
         map.put(moduleId, excludes);
-        return new JkDependencyExclusions(map);
+        return new DependencyExclusions(map);
     }
 
 }

@@ -1,11 +1,11 @@
 package dev.jeka.core.tool.builtins.java;
 
-import dev.jeka.core.api.depmanagement.JkResolveResult;
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
-import dev.jeka.core.api.depmanagement.JkStandardFileArtifactProducer;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectConstruction;
 import dev.jeka.core.api.java.project.JkJavaProjectPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -49,7 +49,8 @@ public class JkPluginWar extends JkPlugin {
     }
 
     private static void generateWarDir(JkJavaProject project, Path dest, Path staticResourceDir) {
-        project.getConstruction().getCompilation().runIfNecessary();
+        JkJavaProjectConstruction construction = project.getConstruction();
+        construction.getCompilation().runIfNecessary();
         JkPathTree root = JkPathTree.of(dest);
         JkPathTree webinf = JkPathTree.of(project.getBaseDir().resolve("src/main/webapp/WEB-INF"));
         if (!webinf.exists() || webinf.count(1, false) == 0) {
@@ -60,8 +61,9 @@ public class JkPluginWar extends JkPlugin {
         if (Files.exists(staticResourceDir)) {
             JkPathTree.of(staticResourceDir).copyTo(root.getRoot());
         }
-        JkPathTree.of(project.getConstruction().getCompilation().getLayout().resolveClassDir()).copyTo(root.get("WEB-INF/classes"));
-        JkResolveResult resolveResult = project.getConstruction().getDependencyResolver().resolveDependencies(JkScope.RUNTIME);
+        JkPathTree.of(construction.getCompilation().getLayout().resolveClassDir()).copyTo(root.get("WEB-INF/classes"));
+        JkResolveResult resolveResult = construction.getDependencyResolver()
+                .resolve(construction.getRuntimeDependencies());
         JkPathTree lib = root.goTo("lib");
         resolveResult.getFiles().withoutDuplicates().getEntries().forEach(path ->  lib.importFiles(path));
     }

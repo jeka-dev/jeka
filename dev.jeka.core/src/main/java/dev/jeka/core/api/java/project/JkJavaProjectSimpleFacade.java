@@ -2,6 +2,7 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 
@@ -103,7 +104,7 @@ public class JkJavaProjectSimpleFacade {
     }
 
     public JkJavaProjectSimpleFacade setPublishedDependencies(
-            Function<JkDependencySet, JkDependencySet> dependencyModifier) {
+            Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencyModifier) {
         project.getPublication().getMavenPublication().setDependencies(dependencyModifier);
         return this;
     }

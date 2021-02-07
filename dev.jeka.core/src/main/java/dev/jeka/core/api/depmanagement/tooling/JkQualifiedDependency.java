@@ -49,6 +49,12 @@ public class JkQualifiedDependency {
         return result;
     }
 
+
+    @Override
+    public String toString() {
+        return "qualifier='" + qualifier + ", " + dependency;
+    }
+
     public JkQualifiedDependency withQualifier(String qualifier) {
         return of(qualifier, this.dependency);
     }

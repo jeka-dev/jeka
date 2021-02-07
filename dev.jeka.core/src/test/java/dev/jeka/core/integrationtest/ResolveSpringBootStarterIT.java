@@ -1,6 +1,9 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,9 +28,9 @@ public class ResolveSpringBootStarterIT {
         System.out.println(resolver().getParams().getScopeMapping());
         System.out.println(result.getDependencyTree().toStringTree());
         result.getFiles().forEach(System.out::println);
-        final List<JkDependencyNode> slf4japiNodes = result.getDependencyTree().toFlattenList().stream()
+        final List<JkResolvedDependencyNode> slf4japiNodes = result.getDependencyTree().toFlattenList().stream()
                 .filter(node -> node.getModuleInfo().getModuleId().equals(SLF4J_API)).collect(Collectors.toList());
-        for (final JkDependencyNode slf4japiNode : slf4japiNodes) {
+        for (final JkResolvedDependencyNode slf4japiNode : slf4japiNodes) {
             System.out.println("---------------------");
             System.out.println(slf4japiNode);
             slf4japiNode.getResolvedFiles().forEach(System.out::println);

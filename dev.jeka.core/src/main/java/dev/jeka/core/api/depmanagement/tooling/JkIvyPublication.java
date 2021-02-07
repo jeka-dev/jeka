@@ -1,6 +1,9 @@
 package dev.jeka.core.api.depmanagement.tooling;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -31,7 +34,7 @@ public final class JkIvyPublication<T> {
 
     private Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencies = UnaryOperator.identity();
 
-    private JkIvyConfigurationMapping scopeMapping = JkIvyConfigurationMapping.RESOLVE_MAPPING;
+    private JkIvyConfigurationMapping configurationMapping = JkIvyConfigurationMapping.RESOLVE_MAPPING;
 
     private Supplier<? extends JkArtifactLocator> artifactLocator;
 
@@ -67,12 +70,28 @@ public final class JkIvyPublication<T> {
         return this;
     }
 
+    public JkIvyPublication<T> setDependencies(JkQualifiedDependencies configuredDependencies) {
+        return setDependencies(deps-> configuredDependencies);
+    }
+
+    public JkIvyPublication<T> setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test,
+                                               JkVersionedModule.ConflictStrategy conflictStrategy) {
+        return setDependencies(JkQualifiedDependencies.computeIvyPublishDependencies(compile, runtime, test,
+                conflictStrategy));
+    }
+
+    public JkIvyPublication<T> setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
+        return setDependencies(compile, runtime, test, JkVersionedModule.ConflictStrategy.FAIL);
+    }
+
+
+
     public JkQualifiedDependencies getDependencies() {
         return dependencies.apply(JkQualifiedDependencies.of());
     }
 
-    public JkIvyPublication<T> setScopeMapping(JkIvyConfigurationMapping scopeMapping) {
-        this.scopeMapping = scopeMapping;
+    public JkIvyPublication<T> setConfigurationMapping(JkIvyConfigurationMapping configurationMapping) {
+        this.configurationMapping = configurationMapping;
         return this;
     }
 
@@ -100,13 +119,13 @@ public final class JkIvyPublication<T> {
 
     private static List<JkIvyPublication.JkPublicationArtifact> toArtifacts(JkArtifactLocator artifactLocator) {
         List<JkIvyPublication.JkPublicationArtifact> result = new LinkedList<>();
-        result.add(toPublication(null, artifactLocator.getMainArtifactPath(), null, JkScope.COMPILE.getName()));
+        result.add(toPublication(null, artifactLocator.getMainArtifactPath(), null, "compile"));
         for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
             if (artifactId.isMainArtifact()) {
                 continue;
             }
             final Path file = artifactLocator.getArtifactPath(artifactId);
-            result.add(toPublication(artifactId.getName(), file, null, scopeFor(artifactId.getName())));
+            result.add(toPublication(artifactId.getName(), file, null, configurationFor(artifactId.getName())));
         }
         return result;
     }
@@ -131,7 +150,7 @@ public final class JkIvyPublication<T> {
      */
     public JkIvyPublication<T> addArtifact(String artifactName, Path artifactFile, String type, String... scopes) {
         extraArtifacts.add(new JkPublicationArtifact(artifactName, artifactFile, type,
-                JkUtilsIterable.setOf(scopes).stream().map(JkScope::of).collect(Collectors.toSet())));
+                JkUtilsIterable.setOf(scopes).stream().collect(Collectors.toSet())));
         return this;
     }
 
@@ -174,24 +193,24 @@ public final class JkIvyPublication<T> {
         }
         JkUtilsAssert.state(versionedModule != null, "Versioned module provider cannot be null.");
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        internalPublisher.publishIvy(versionedModule.get(), this, getDependencies(), scopeMapping,
+        internalPublisher.publishIvy(versionedModule.get(), this, getDependencies(), configurationMapping,
                 Instant.now());
     }
 
     private static JkPublicationArtifact toPublication(String artifactName, Path artifactFile, String type, String... scopes) {
         return new JkPublicationArtifact(artifactName, artifactFile, type,
-                JkUtilsIterable.setOf(scopes).stream().map(JkScope::of).collect(Collectors.toSet()));
+                JkUtilsIterable.setOf(scopes).stream().collect(Collectors.toSet()));
     }
 
     public static class JkPublicationArtifact {
 
-        private JkPublicationArtifact(String name, Path path, String type, Set<JkScope> jkScopes) {
+        private JkPublicationArtifact(String name, Path path, String type, Set<String> configuration) {
             super();
             this.file = path.toFile();
             this.extension = path.getFileName().toString().contains(".") ? JkUtilsString.substringAfterLast(
                     path.getFileName().toString(), ".") : null;
                     this.type = type;
-                    this.jkScopes = jkScopes;
+                    this.configuration = configuration;
                     this.name = name;
         }
 
@@ -199,7 +218,7 @@ public final class JkIvyPublication<T> {
 
         public final String type;
 
-        public final Set<JkScope> jkScopes;
+        public final Set<String> configuration;
 
         public final String name;
 
@@ -207,18 +226,18 @@ public final class JkIvyPublication<T> {
 
     }
 
-    private static String scopeFor(String classifier) {
+    private static String configurationFor(String classifier) {
         if ("sources".equals(classifier)) {
-            return JkScope.SOURCES.getName();
+            return "sources";
         }
         if ("test".equals(classifier)) {
-            return JkScope.TEST.getName();
+            return "test";
         }
         if ("test-sources".equals(classifier)) {
-            return JkScope.SOURCES.getName();
+            return "test-sources";
         }
         if ("javadoc".equals(classifier)) {
-            return JkScope.JAVADOC.getName();
+            return "javadoc";
         }
         return classifier;
     }

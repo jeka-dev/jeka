@@ -1,6 +1,9 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.Test;
@@ -28,7 +31,7 @@ public class ResolveWithArtifactIT {
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
-        JkDependencyNode treeRoot = resolveResult.getDependencyTree();
+        JkResolvedDependencyNode treeRoot = resolveResult.getDependencyTree();
         System.out.println(resolveResult.getFiles());
         System.out.println(treeRoot.toStringTree());
 
@@ -38,7 +41,7 @@ public class ResolveWithArtifactIT {
         assertEquals(2, treeRoot.getChildren().size());
         assertEquals(3, treeRoot.getResolvedFiles().size());
 
-        JkDependencyNode lwjglNode = treeRoot.getChildren().get(0);
+        JkResolvedDependencyNode lwjglNode = treeRoot.getChildren().get(0);
         List<Path> lwjglFiles = lwjglNode.getNodeInfo().getFiles();
         System.out.println(lwjglFiles);
         assertEquals(2, lwjglFiles.size());
@@ -56,7 +59,7 @@ public class ResolveWithArtifactIT {
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
-        JkDependencyNode tree = resolveResult.getDependencyTree();
+        JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         System.out.println(tree.toStringTree());
         System.out.println(JkUtilsString.join(resolveResult.getFiles(), "\n"));
         System.out.println("-----");

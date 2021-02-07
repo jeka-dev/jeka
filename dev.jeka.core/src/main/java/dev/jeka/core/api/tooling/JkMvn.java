@@ -5,7 +5,6 @@ import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependency;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
@@ -179,7 +178,7 @@ public final class JkMvn implements Runnable {
         final String[] items = description.trim().split(":");
         if (items.length == 5) {
             final String classifier = items[2];
-            final Scope scope = JkUtilsObject.valueOfEnum(Scope.class, items[4].toUpperCase());
+            final String scope = JkPom.toScope(items[4]);
             JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1], items[3]);
             if (!"jar".equals(classifier)) {
                 dependency = dependency.withClassifier(classifier);
@@ -187,7 +186,7 @@ public final class JkMvn implements Runnable {
             return JkQualifiedDependency.of(scope, dependency);
         }
         if (items.length == 4) {
-            final Scope scope = JkUtilsObject.valueOfEnum(Scope.class, items[3].toUpperCase());
+            final String scope = JkPom.toScope(items[3]);
             final JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1],
                     items[2]);
             return JkQualifiedDependency.of(scope, dependency);

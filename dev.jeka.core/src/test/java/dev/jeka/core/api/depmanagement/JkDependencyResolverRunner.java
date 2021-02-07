@@ -1,5 +1,8 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+
 public class JkDependencyResolverRunner {
 
     public static void main(String[] args) {

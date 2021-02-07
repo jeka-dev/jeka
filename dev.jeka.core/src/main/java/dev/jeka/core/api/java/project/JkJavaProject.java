@@ -1,7 +1,7 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkArtifactId;
-import dev.jeka.core.api.depmanagement.JkLocalLibDependency;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.JkLocalProjectDependency;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 
@@ -26,6 +26,9 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     private Path baseDir = Paths.get(".");
 
     private String outputDir = "jeka/output";
+
+    private JkVersionedModule.ConflictStrategy duplicateConflictStrategy =
+            JkVersionedModule.ConflictStrategy.FAIL;
 
     private final JkJavaProjectDocumentation documentation;
 
@@ -75,6 +78,15 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
      */
     public JkJavaProject setOutputDir(String relativePath) {
         this.outputDir = relativePath;
+        return this;
+    }
+
+    public JkVersionedModule.ConflictStrategy getDuplicateConflictStrategy() {
+        return duplicateConflictStrategy;
+    }
+
+    public JkJavaProject setDuplicateConflictStrategy(JkVersionedModule.ConflictStrategy duplicateConflictStrategy) {
+        this.duplicateConflictStrategy = duplicateConflictStrategy;
         return this;
     }
 
@@ -133,12 +145,12 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
             .setDependencyResolver(construction.getDependencyResolver());
     }
 
-    public JkLocalLibDependency toDependency() {
+    public JkLocalProjectDependency toDependency() {
         return toDependency(publication.getArtifactProducer().getMainArtifactId());
     }
 
-    public JkLocalLibDependency toDependency(JkArtifactId artifactId) {
-        return JkLocalLibDependency.of(
+    public JkLocalProjectDependency toDependency(JkArtifactId artifactId) {
+        return JkLocalProjectDependency.of(
             () -> publication.getArtifactProducer().makeArtifact(artifactId),
                 publication.getArtifactProducer().getArtifactPath(artifactId),
             this.baseDir,

@@ -21,11 +21,10 @@ public class JkJavaProjectTest {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
 
         Path base = top.resolve("base");
-        JkJavaProject baseProject = JkJavaProject.of()
+        JkJavaProject baseProject = JkJavaProject.of().simpleFacade()
             .setBaseDir(base)
-            .getConstruction().getDependencyResolver()
-                .addDependencies(JkDependencySet.of()
-                    .and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.6")).__
+            .addCompileDependencies(JkDependencySet.of(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6")))
+            .getProject().getConstruction()
                 .getCompilation()
                     .getLayout()
                         .emptySources().addSource("src")
@@ -37,7 +36,7 @@ public class JkJavaProjectTest {
         final JkJavaProject coreProject = JkJavaProject.of()
             .setBaseDir(core)
             .getConstruction()
-                .getDependencyResolver()
+                .getCompilation()
                     .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
                 .getCompilation()
                     .getLayout()
@@ -49,7 +48,7 @@ public class JkJavaProjectTest {
         final JkJavaProject desktopProject = JkJavaProject.of()
             .setBaseDir(desktop)
             .getConstruction()
-            .getDependencyResolver()
+            .getCompilation()
                 .addDependencies(JkDependencySet.of()
                     .and(coreProject.toDependency())).__
                 .getCompilation()

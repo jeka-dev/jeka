@@ -7,22 +7,22 @@ import java.util.Collections;
 /*
  * A dependency on a jar produced locally along its dependencies for consumers.
  */
-public class JkLocalLibDependency extends JkComputedDependency  {
+public class JkLocalProjectDependency extends JkComputedDependency  {
 
     // published dependencies
     private JkDependencySet dependencies;
 
     /*
-     * Constructs a {@link JkLocalLibDependency} from an artifact producer and the artifact file id
+     * Constructs a {@link JkLocalProjectDependency} from an artifact producer and the artifact file id
      * one is interested on.
      */
-    private JkLocalLibDependency(Runnable producer, Path file, Path ideProjectDir, JkDependencySet dependencies) {
+    private JkLocalProjectDependency(Runnable producer, Path file, Path ideProjectDir, JkDependencySet dependencies) {
         super(producer, ideProjectDir, Collections.singleton(file));
         this.dependencies = dependencies.withIdeProjectDir(ideProjectDir);
     }
 
     /**
-     * Constructs a {@link JkLocalLibDependency} from an artifact producer and the artifact file id
+     * Constructs a {@link JkLocalProjectDependency} from an artifact producer and the artifact file id
      * one is interested on.
      * @param producer The runnable producing the jar file.
      * @param file The jar file
@@ -31,8 +31,8 @@ public class JkLocalLibDependency extends JkComputedDependency  {
      *                     the dependencies needed to compile the jar but the ones that would be
      *                     published.
      */
-    public static JkLocalLibDependency of(Runnable producer, Path file, Path basedir, JkDependencySet dependencies) {
-        return new JkLocalLibDependency(producer, file, basedir, dependencies);
+    public static JkLocalProjectDependency of(Runnable producer, Path file, Path basedir, JkDependencySet dependencies) {
+        return new JkLocalProjectDependency(producer, file, basedir, dependencies);
 
     }
 
@@ -45,7 +45,7 @@ public class JkLocalLibDependency extends JkComputedDependency  {
     }
 
     @Override
-    public JkLocalLibDependency withIdeProjectDir(Path path) {
-        return new JkLocalLibDependency(runnable, files.iterator().next(), path, dependencies);
+    public JkLocalProjectDependency withIdeProjectDir(Path path) {
+        return new JkLocalProjectDependency(runnable, files.iterator().next(), path, dependencies);
     }
 }

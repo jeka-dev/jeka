@@ -1,6 +1,8 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import org.junit.Test;
 
 import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE_AND_RUNTIME;

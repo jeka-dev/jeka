@@ -18,6 +18,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies.*;
+
 /**
  * Wraps a POM file (Ideally an effective POM file) and provides convenient methods to extract
  * information on.
@@ -25,6 +27,9 @@ import java.util.Map;
  * @author Jerome Angibaud
  */
 public final class JkPom {
+
+    private static final List<String> KNOWN_SCOPE = JkUtilsIterable.listOf(COMPILE_SCOPE, RUNTIME_SCOPE,
+            PROVIDED_SCOPE, TEST_SCOPE);
 
     private final Document pomDoc;
 
@@ -150,11 +155,11 @@ public final class JkPom {
     }
 
     /**
-     * The {@link JkDependencyExclusions} instance provided by the <code>dependencyManagement</code>
+     * The {@link DependencyExclusions} instance provided by the <code>dependencyManagement</code>
      * section of this POM.
      */
-    public JkDependencyExclusions getDependencyExclusion() {
-        JkDependencyExclusions result = JkDependencyExclusions.of();
+    public DependencyExclusions getDependencyExclusion() {
+        DependencyExclusions result = DependencyExclusions.of();
         if (dependencyManagementEl() == null) {
             return result;
         }
@@ -211,9 +216,8 @@ public final class JkPom {
             }
         }
         String scope = JkUtilsXml.directChildText(mvnDependency, "scope");
-        scope = JkUtilsObject.firstNonNull(scope, "compile");
-        JkQualifiedDependencies.Scope realScope = JkUtilsObject.valueOfEnum(JkQualifiedDependencies.Scope.class,
-                scope.toUpperCase());
+        scope = JkUtilsObject.firstNonNull(scope, COMPILE_SCOPE);
+        String realScope = toScope(scope);
         return JkQualifiedDependency.of(realScope, moduleDependency);
     }
 
@@ -236,6 +240,17 @@ public final class JkPom {
             }
         }
         return value;
+    }
+
+    static String toScope(String candidate)  {
+        if (candidate == null) {
+            return null;
+        }
+        String normalized = candidate.trim().toLowerCase();
+        if (KNOWN_SCOPE.contains(normalized)) {
+            return candidate;
+        }
+        return null;
     }
 
 }

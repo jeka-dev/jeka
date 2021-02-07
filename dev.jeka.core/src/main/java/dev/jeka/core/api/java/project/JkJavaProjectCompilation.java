@@ -33,7 +33,7 @@ public class JkJavaProjectCompilation<T> {
      */
     public final T __;
 
-    private final JkJavaProjectConstruction projectProduction;
+    private final JkJavaProjectConstruction construction;
 
     private final JkRunnables<JkJavaProjectCompilation<T>> beforeGenerate;
 
@@ -65,10 +65,10 @@ public class JkJavaProjectCompilation<T> {
 
     private String sourceEncoding = DEFAULT_ENCODING;
 
-    private JkJavaProjectCompilation(JkJavaProjectConstruction projectProduction, String purpose, T parent) {
+    private JkJavaProjectCompilation(JkJavaProjectConstruction construction, String purpose, T parent) {
         __ = parent;
         this.purpose = purpose;
-        this.projectProduction = projectProduction;
+        this.construction = construction;
         beforeGenerate = JkRunnables.ofParent(this);
         sourceGenerator = JkConsumers.ofParent(this);
         resourceGenerator = JkConsumers.ofParent(this);
@@ -77,8 +77,8 @@ public class JkJavaProjectCompilation<T> {
         afterCompile = JkRunnables.ofParent(this);
         resourceProcessor = JkResourceProcessor.ofParent(this);
         layout = JkCompileLayout.ofParent(this)
-                .setBaseDirSupplier(projectProduction.getProject()::getBaseDir)
-                .setOutputDirSupplier(projectProduction.getProject()::getOutputDir);
+                .setBaseDirSupplier(construction.getProject()::getBaseDir)
+                .setOutputDirSupplier(construction.getProject()::getOutputDir);
     }
 
     static JkJavaProjectCompilation<JkJavaProjectConstruction> ofProd(JkJavaProjectConstruction projectProduction) {
@@ -273,7 +273,7 @@ public class JkJavaProjectCompilation<T> {
         return JkJavaCompileSpec.of()
             .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
             .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
-            .setClasspath(projectProduction.getDependencyResolver().resolve(dependencySet).getFiles())
+            .setClasspath(construction.getDependencyResolver().resolve(dependencySet).getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
             .setOutputDir(layout.resolveClassDir());
@@ -284,7 +284,7 @@ public class JkJavaProjectCompilation<T> {
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
                 .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
-                .setClasspath(projectProduction.getDependencyResolver().resolve(dependencySet).getFiles()
+                .setClasspath(construction.getDependencyResolver().resolve(dependencySet).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
                 .addOptions(compileOptions)

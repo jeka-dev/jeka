@@ -1,6 +1,8 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
 import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.utils.JkUtilsSystem;

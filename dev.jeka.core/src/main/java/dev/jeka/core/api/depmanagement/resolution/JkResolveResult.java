@@ -1,5 +1,6 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.resolution;
 
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
@@ -21,11 +22,11 @@ import java.util.Set;
  */
 public final class JkResolveResult {
 
-    private final JkDependencyNode depTree;
+    private final JkResolvedDependencyNode depTree;
 
     private final JkErrorReport errorReport;
 
-    private JkResolveResult(JkDependencyNode depTree, JkErrorReport errorReport) {
+    private JkResolveResult(JkResolvedDependencyNode depTree, JkErrorReport errorReport) {
         super();
         this.depTree = depTree;
         this.errorReport = errorReport;
@@ -35,25 +36,25 @@ public final class JkResolveResult {
      * Creates an empty {@link JkResolveResult}
      */
     static JkResolveResult ofRoot(JkVersionedModule module) {
-        final JkDependencyNode.JkModuleNodeInfo nodeInfo = module == null ?
-                JkDependencyNode.JkModuleNodeInfo.ofAnonymousRoot() :
-                    JkDependencyNode.JkModuleNodeInfo.ofRoot(module);
-                return of(JkDependencyNode.ofEmpty(nodeInfo));
+        final JkResolvedDependencyNode.JkModuleNodeInfo nodeInfo = module == null ?
+                JkResolvedDependencyNode.JkModuleNodeInfo.ofAnonymousRoot() :
+                    JkResolvedDependencyNode.JkModuleNodeInfo.ofRoot(module);
+                return of(JkResolvedDependencyNode.ofEmpty(nodeInfo));
     }
 
     /**
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
-    public static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
+    public static JkResolveResult of(JkResolvedDependencyNode depTree, JkErrorReport errorReport) {
         return new JkResolveResult(depTree, errorReport);
     }
 
-    private static JkResolveResult of(JkDependencyNode dependencyTree) {
+    private static JkResolveResult of(JkResolvedDependencyNode dependencyTree) {
         return new JkResolveResult(dependencyTree, JkErrorReport.allFine());
     }
 
     /**
-     * Shorthand for {@link JkDependencyNode#getResolvedFiles()} on the tree root.
+     * Shorthand for {@link JkResolvedDependencyNode#getResolvedFiles()} on the tree root.
      */
     public JkPathSequence getFiles() {
         return JkPathSequence.of(this.depTree.getResolvedFiles()).withoutDuplicates().resolvedTo(Paths.get(""));
@@ -91,7 +92,7 @@ public final class JkResolveResult {
      * Returns files the specified module is resolved to.
      */
     public JkPathSequence getFilesFor(JkModuleId moduleId) {
-        final JkDependencyNode dependencyNode = this.depTree.getFirst(moduleId);
+        final JkResolvedDependencyNode dependencyNode = this.depTree.getFirst(moduleId);
         if (dependencyNode == null) {
             return JkPathSequence.of();
         }
@@ -113,7 +114,7 @@ public final class JkResolveResult {
     /**
      * Returns the dependency tree for this dependency resolution.
      */
-    public JkDependencyNode getDependencyTree() {
+    public JkResolvedDependencyNode getDependencyTree() {
         return this.depTree;
     }
 

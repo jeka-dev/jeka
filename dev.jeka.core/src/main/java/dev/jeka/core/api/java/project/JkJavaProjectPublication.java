@@ -1,6 +1,8 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.tooling.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
@@ -55,9 +57,10 @@ public class JkJavaProjectPublication {
         artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
                 .setArtifactFilenameComputation(project::getArtifactPath);
         registerArtifacts();
-        JkQualifiedDependencies mavenDefaultPublishedDependencies = JkMavenPublication.getPublishDependencies(
-                project.getConstruction().getCompilation().getDependencies(),
-                project.getConstruction().getRuntimeDependencies(), JkVersionedModule.ConflictStrategy.FAIL);
+        JkQualifiedDependencies mavenDefaultPublishedDependencies =
+                JkQualifiedDependencies.computeMavenPublishDependencies(
+                    project.getConstruction().getCompilation().getDependencies(),
+                    project.getConstruction().getRuntimeDependencies(), JkVersionedModule.ConflictStrategy.FAIL);
         this.mavenPublication = JkMavenPublication.of(this)
             .setArtifactLocator(() -> artifactProducer)
             .setDependencies(deps -> mavenDefaultPublishedDependencies)

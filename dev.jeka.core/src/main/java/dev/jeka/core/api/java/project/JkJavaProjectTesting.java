@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
@@ -95,10 +95,10 @@ public class JkJavaProjectTesting {
         JkDependencySet dependencies = prodCompilation.getDependencies()
                 .and(compilation.getDependencies())
                 .and(construction.getRuntimeDependencies())
-                .minusDuplicates();
+                .normalised(construction.getProject().getDuplicateConflictStrategy());
         return JkPathSequence.of(compilation.getLayout().resolveClassDir())
                 .and(prodCompilation.getLayout().resolveClassDir())
-                .and(resolver.resolve(dependencies).getFiles());
+                .and(resolver.resolve(dependencies.normalised(construction.getProject().getDuplicateConflictStrategy())).getFiles());
     }
 
     /**

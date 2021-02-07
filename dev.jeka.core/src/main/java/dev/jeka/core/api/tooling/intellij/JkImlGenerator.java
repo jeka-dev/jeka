@@ -1,7 +1,10 @@
 package dev.jeka.core.api.tooling.intellij;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -22,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides method to generate and read Eclipse metadata files.
@@ -100,10 +104,10 @@ public final class JkImlGenerator {
         Context context = new Context();
         JkResolveResult jkClassResolveResult = null;
         if (this.defDependencyResolver != null) {
-            jkClassResolveResult = resolve(this.defDependencies, this.defDependencyResolver);
+            jkClassResolveResult = defDependencyResolver.resolve(defDependencies);
             markJekaDeps(jkClassResolveResult, context);
         }
-        if (this.ideSupport.getDependencyResolver()!= null) {
+        if (this.ideSupport.getDependencyResolver() != null) {
             JkResolveResult resolveResult = resolve(ideSupport.getDependencies(), ideSupport.getDependencyResolver());
             writeDependencies(resolveResult, ideSupport.getDependencyResolver().getRepos(),
                     context, false);
@@ -269,12 +273,13 @@ public final class JkImlGenerator {
     }
 
     private void markJekaDeps(JkResolveResult resolveResult, Context context) {
-        final JkDependencyNode tree = resolveResult.getDependencyTree();
-        for (final JkDependencyNode node : tree.toFlattenList()) {
+        final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        for (final JkResolvedDependencyNode node : tree.toFlattenList()) {
             if (node.isModuleNode()) { //maven module
                 toLibPath(node.getModuleInfo(), null, null).forEach(libPath -> context.forJekaPaths.add(libPath.bin));
             } else {
-                final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
+                final JkResolvedDependencyNode.JkFileNodeInfo fileNodeInfo =
+                        (JkResolvedDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectDir();
                     if (projectDir != null && !context.allModules.contains(projectDir)) {
@@ -287,8 +292,12 @@ public final class JkImlGenerator {
         }
     }
 
-    private JkResolveResult resolve(JkDependencySet dependencies, JkDependencyResolver resolver) {
-        return resolver.resolve(dependencies.minusModuleDependenciesHavingIdeProjectDir());
+    private JkResolveResult resolve(JkQualifiedDependencies dependencies, JkDependencyResolver resolver) {
+        List<JkDependency> deps = dependencies.getEntries().stream()
+                .map(qDep -> qDep.getDependency())
+                .filter(dep -> dep.getIdeProjectDir() == null)
+                .collect(Collectors.toList());
+        return resolver.resolve(JkQualifiedDependencies.ofDependencies(deps));
     }
 
     private void writeDependencies(JkResolveResult resolveResult, JkRepoSet repos,
@@ -302,8 +311,8 @@ public final class JkImlGenerator {
                 JkLog.warn("The generated iml file won't take in account missing files.");
             }
         }
-        final JkDependencyNode tree = resolveResult.getDependencyTree();
-        for (final JkDependencyNode node : tree.toFlattenList()) {
+        final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        for (final JkResolvedDependencyNode node : tree.toFlattenList()) {
 
             // Maven dependency
             if (node.isModuleNode()) {
@@ -320,7 +329,7 @@ public final class JkImlGenerator {
                 // File dependencies (file ofSystem + computed)
             } else {
                 final String ideScope = forceTest ? "TEST" : ideScope(node.getNodeInfo().getDeclaredScopes());
-                final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
+                final JkResolvedDependencyNode.JkFileNodeInfo fileNodeInfo = (JkResolvedDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectDir();
                     if (projectDir != null && !context.allModules.contains(projectDir)) {
@@ -347,7 +356,7 @@ public final class JkImlGenerator {
         }
     }
 
-    private List<LibPath> toLibPath(JkDependencyNode.JkModuleNodeInfo moduleInfo, JkRepoSet repos, String scope) {
+    private List<LibPath> toLibPath(JkResolvedDependencyNode.JkModuleNodeInfo moduleInfo, JkRepoSet repos, String scope) {
         final List<LibPath> result = new LinkedList<>();
         final JkModuleId moduleId = moduleInfo.getModuleId();
         final JkVersion version = moduleInfo.getResolvedVersion();

@@ -2,6 +2,9 @@ package dev.jeka.core.integrationtest;
 
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Test;
@@ -105,7 +108,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularModules.GUAVA, "19.0", JkScope.COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
+        JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
         assertTrue(tree.getModuleInfo().getDeclaredScopes().isEmpty());
     }
 

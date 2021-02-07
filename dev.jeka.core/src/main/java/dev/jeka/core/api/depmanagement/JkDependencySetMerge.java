@@ -40,18 +40,23 @@ public final class JkDependencySetMerge {
         Iterator<JkDependency> rightIt = right.getDependencies().iterator();
         while (leftIt.hasNext()) {
             JkDependency leftDep = leftIt.next();
-            boolean foundRightDep = false;
-            while (rightIt.hasNext() && !foundRightDep) {
+            JkDependency matchingRightDep = null;
+            while (rightIt.hasNext() && matchingRightDep == null) {
                 JkDependency rightDep = rightIt.next();
                 if (leftDep.equals(rightDep)) {
-                    foundRightDep = true;
+                    matchingRightDep = rightDep;
                 } else if (!left.getDependencies().contains(rightDep) && !result.contains(rightDep)) {
                     absentFromLeft.add(rightDep);
                     result.add(rightDep);
                 }
             }
-            if (!foundRightDep) {
+            if (matchingRightDep == null) {
                 absentFromRight.add(leftDep);
+            } else if (leftDep instanceof JkModuleDependency) {
+                JkModuleDependency leftModDep = (JkModuleDependency) leftDep;
+                JkModuleDependency rightModDep = (JkModuleDependency) matchingRightDep;
+                leftDep = leftModDep.withTransitivity(
+                        JkTransitivity.ofDeepest(leftModDep.getTransitivity(), rightModDep.getTransitivity()));
             }
             result.add(leftDep);
         }

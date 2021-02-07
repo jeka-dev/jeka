@@ -1,6 +1,8 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
 import dev.jeka.core.api.depmanagement.tooling.JkScope;
 import org.junit.Test;
@@ -37,32 +39,32 @@ public class MergeFileDepIT {
                 .setModuleHolder(holder)
                 .getParams()
                     .setScopeMapping(JkIvyConfigurationMapping.RESOLVE_MAPPING).__;
-        JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
+        JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
         System.out.println(tree.toStringTree());
 
-        JkDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
+        JkResolvedDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredScopes().isEmpty());
         assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(5, tree.getChildren().size());
 
-        JkDependencyNode file0Node = tree.getChildren().get(0);
+        JkResolvedDependencyNode file0Node = tree.getChildren().get(0);
         List<Path> expected = new LinkedList<>();
         expected.add(dep0File);
         assertEquals(expected, file0Node.getResolvedFiles());
 
-        JkDependencyNode starterwebNode = tree.getChildren().get(1);
+        JkResolvedDependencyNode starterwebNode = tree.getChildren().get(1);
         assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getModuleId());
 
-        JkDependencyNode file1Node = tree.getChildren().get(2);
+        JkResolvedDependencyNode file1Node = tree.getChildren().get(2);
         List<Path> expected1 = new LinkedList<>();
         expected1.add(dep1File);
         assertEquals(expected1, file1Node.getResolvedFiles());
 
-        JkDependencyNode jsonRpcNode = tree.getChildren().get(3);
+        JkResolvedDependencyNode jsonRpcNode = tree.getChildren().get(3);
         assertEquals(JkModuleId.of("com.github.briandilley.jsonrpc4j:jsonrpc4j"), jsonRpcNode.getModuleInfo().getModuleId());
 
-        JkDependencyNode file2Node = tree.getChildren().get(4);
+        JkResolvedDependencyNode file2Node = tree.getChildren().get(4);
         List<Path> expected2 = new LinkedList<>();
         expected2.add(dep2File);
         assertEquals(expected2, file2Node.getResolvedFiles());
@@ -88,7 +90,7 @@ public class MergeFileDepIT {
                 .andFile(dep0File, JkScope.TEST)
                 .andFile(dep1File, JkScope.TEST);
         JkDependencyResolver resolver = JkDependencyResolver.of();
-        JkDependencyNode tree = resolver.resolve(deps).getDependencyTree();
+        JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
         assertEquals(2, tree.toFlattenList().size());
         resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet());
         assertEquals(2, resolver.resolve(deps).getDependencyTree().toFlattenList().size());

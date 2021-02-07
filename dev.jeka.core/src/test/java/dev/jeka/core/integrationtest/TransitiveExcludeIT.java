@@ -1,6 +1,9 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import org.junit.Test;
 
 import java.util.List;
@@ -25,7 +28,7 @@ public class TransitiveExcludeIT {
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
-        List<JkDependencyNode> nodes = resolveResult.getDependencyTree().toFlattenList();
+        List<JkResolvedDependencyNode> nodes = resolveResult.getDependencyTree().toFlattenList();
         assertEquals(1, nodes.size());
     }
 

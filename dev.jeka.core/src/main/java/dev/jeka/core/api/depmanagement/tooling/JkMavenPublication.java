@@ -1,9 +1,7 @@
 package dev.jeka.core.api.depmanagement.tooling;
 
-import dev.jeka.core.api.depmanagement.JkArtifactLocator;
-import dev.jeka.core.api.depmanagement.JkInternalPublisher;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
@@ -49,6 +47,20 @@ public final class JkMavenPublication<T> {
 
     public JkMavenPublication<T> setDependencies(JkQualifiedDependencies dependencies) {
         return setDependencies(deps -> dependencies);
+    }
+
+    public JkMavenPublication<T> setDependencies(JkDependencySet compileDeps, JkDependencySet runtimeDeps,
+                                                 JkVersionedModule.ConflictStrategy conflictStrategy) {
+        return setDependencies(JkQualifiedDependencies.computeMavenPublishDependencies(compileDeps, runtimeDeps,
+                conflictStrategy));
+    }
+
+    public JkMavenPublication<T> setDependencies(JkDependencySet compileDeps, JkDependencySet runtimeDeps) {
+        return setDependencies(compileDeps, runtimeDeps, JkVersionedModule.ConflictStrategy.FAIL);
+    }
+
+    public JkMavenPublication<T> setDependencies(JkDependencySet runtimeDeps) {
+        return setDependencies(JkDependencySet.of(), runtimeDeps);
     }
 
     public JkMavenPublication<T> setDependencies(Function<JkQualifiedDependencies, JkQualifiedDependencies> modifier) {

@@ -2,6 +2,11 @@ package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.project.*;
@@ -15,7 +20,6 @@ import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -60,12 +64,16 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
         // Pre-configure JkJavaProject instance
         this.project = JkJavaProject.of().setBaseDir(this.getJkClass().getBaseDir());
-        this.project.getConstruction().getDependencyResolver().addDependencies(
-                JkDependencySet.ofLocal(jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs")));
-        final Path path = jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt");
-        if (Files.exists(path)) {
-            this.project.getConstruction().getDependencyResolver();
-        }
+
+        // Get dependencies located locally or declared in text file
+        CommonDependencies localDeps = CommonDependencies.ofLocal(
+                jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs"));
+        CommonDependencies textDeps = CommonDependencies.ofTextDescriptionIfExist(
+                jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"));
+        CommonDependencies extraDeps = localDeps.and(textDeps);
+        this.project.getConstruction().getCompilation().addDependencies(extraDeps.getCompile());
+        this.project.getConstruction().setRuntimeDependencies(compileDeps -> extraDeps.getRuntime());
+        this.project.getConstruction().getTesting().getCompilation().addDependencies(extraDeps.getTest());
     }
 
     @Override
@@ -91,7 +99,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             project.getPublication().addRepos(repoPlugin.publishRepository());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
-        JkDependencyResolver resolver = construction.getDependencyResolver().getResolver();
+        JkDependencyResolver resolver = construction.getDependencyResolver();
         if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
             resolver.addRepos(downloadRepo);
         }
@@ -192,12 +200,18 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        JkLog.info("Declared dependencies : ");
-        project.getConstruction().getDependencyResolver().getDependencies().toResolvedModuleVersions().toList()
-                .forEach(dep -> JkLog.info(dep.toString()));
+        JkJavaProjectConstruction construction = project.getConstruction();
+        showDeclaredDependencies("compile", construction.getCompilation().getDependencies());
+        showDeclaredDependencies("runtime", construction.getRuntimeDependencies());
+        showDeclaredDependencies("test", construction.getTesting().getCompilation().getDependencies());
+    }
+
+    private void showDeclaredDependencies(String purpose, JkDependencySet deps) {
+        JkLog.info("Declared dependencies for " + purpose + " : ");
+        deps.normalised().getDependencies().forEach(dep -> JkLog.info(dep.toString()));
         JkLog.info("Resolved to : ");
-        final JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolveDependencies();
-        final JkDependencyNode tree = resolveResult.getDependencyTree();
+        final JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolve(deps);
+        final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
     }
 
@@ -205,7 +219,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     public void info() {
         JkLog.info(this.project.getInfo());
         JkLog.info("\nExecute 'java#showDependencies' to display details on dependencies.");
-
     }
 
     @JkDoc("Publishes produced artifacts to configured repository.")
@@ -216,11 +229,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @JkDoc("Publishes produced artifacts to local repository.")
     public void publishLocal() {
         project.getPublication().publishLocal();
-    }
-
-    @JkDoc("Fetches project dependencies in cache.")
-    public void refreshDeps() {
-        project.getConstruction().getDependencyResolver().resolveDependencies();
     }
 
     @Override

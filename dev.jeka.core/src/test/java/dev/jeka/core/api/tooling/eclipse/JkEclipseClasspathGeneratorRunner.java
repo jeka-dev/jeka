@@ -16,7 +16,7 @@ public class JkEclipseClasspathGeneratorRunner {
         JkModuleDependency moduleDependency = JkModuleDependency.of("junit:junit:4.11");
         JkFileSystemDependency fileDep = JkFileSystemDependency.of(zip);
         JkJavaProject project = JkJavaProject.of().getConstruction()
-                .getDependencyResolver()
+                .getCompilation()
                     .addDependencies(JkDependencySet.of()
                             .and(fileDep)
                             .and(moduleDependency)).__.__;
