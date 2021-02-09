@@ -2,7 +2,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
+import dev.jeka.core.api.depmanagement.publication.JkScope;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping.RESOLVE_MAPPING;
+import static dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet.RESOLVE_MAPPING;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.COMPILE;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.RUNTIME;
 import static org.junit.Assert.assertEquals;

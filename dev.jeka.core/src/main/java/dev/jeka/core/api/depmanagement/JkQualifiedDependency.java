@@ -1,12 +1,11 @@
-package dev.jeka.core.api.depmanagement.tooling;
-
-import dev.jeka.core.api.depmanagement.JkDependency;
+package dev.jeka.core.api.depmanagement;
 
 /**
  * Many tools as Maven, Ivy, Gradle or Intellij qualify dependencies according their purpose and how
- * they should be used for resolution or publication.
+ * they should be used for resolution or publication. <p>
  * Maven and Intellij use 'scope' concept for this purpose, while Gradle and Ivy use 'configuration'.
- * This class aims at representing one dependency associated with such a qualifier.
+ * This class aims at representing one dependency associated with such a qualifier, in order to
+ * help integration with those tools.
  */
 public class JkQualifiedDependency {
 

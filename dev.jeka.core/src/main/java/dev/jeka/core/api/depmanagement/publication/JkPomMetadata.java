@@ -1,4 +1,4 @@
-package dev.jeka.core.api.depmanagement.tooling;
+package dev.jeka.core.api.depmanagement.publication;
 
 import java.io.Serializable;
 import java.util.Collections;

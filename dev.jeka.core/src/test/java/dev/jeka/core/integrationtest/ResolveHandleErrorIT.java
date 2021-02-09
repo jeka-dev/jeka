@@ -5,8 +5,8 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import org.junit.Test;
 
-import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE_AND_RUNTIME;
-import static dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping.RESOLVE_MAPPING;
+import static dev.jeka.core.api.depmanagement.publication.JkScope.COMPILE_AND_RUNTIME;
+import static dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet.RESOLVE_MAPPING;
 import static org.junit.Assert.assertEquals;
 
 /**

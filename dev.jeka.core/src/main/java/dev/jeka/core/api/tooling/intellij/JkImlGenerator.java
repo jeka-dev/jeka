@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -108,7 +108,7 @@ public final class JkImlGenerator {
             markJekaDeps(jkClassResolveResult, context);
         }
         if (this.ideSupport.getDependencyResolver() != null) {
-            JkResolveResult resolveResult = resolve(ideSupport.getDependencies(), ideSupport.getDependencyResolver());
+            JkResolveResult resolveResult = resolveWithIdeSupport();
             writeDependencies(resolveResult, ideSupport.getDependencyResolver().getRepos(),
                     context, false);
         }
@@ -292,12 +292,12 @@ public final class JkImlGenerator {
         }
     }
 
-    private JkResolveResult resolve(JkQualifiedDependencies dependencies, JkDependencyResolver resolver) {
-        List<JkDependency> deps = dependencies.getEntries().stream()
+    private JkResolveResult resolveWithIdeSupport() {
+        List<JkDependency> deps = ideSupport.getDependencies().getQualifiedDependencies().stream()
                 .map(qDep -> qDep.getDependency())
                 .filter(dep -> dep.getIdeProjectDir() == null)
                 .collect(Collectors.toList());
-        return resolver.resolve(JkQualifiedDependencies.ofDependencies(deps));
+        return ideSupport.getDependencyResolver().resolve(JkQualifiedDependencies.ofDependencies(deps));
     }
 
     private void writeDependencies(JkResolveResult resolveResult, JkRepoSet repos,
@@ -375,26 +375,17 @@ public final class JkImlGenerator {
         return result;
     }
 
-    private static Set<String> toStringScopes(Set<JkScope> scopes) {
-        final Set<String> result = new HashSet<>();
-        for (final JkScope scope : scopes) {
-            result.add(scope.getName());
-        }
-        return result;
-    }
-
-    private static String ideScope(Set<JkScope> scopesArg) {
-        final Set<String> scopes = toStringScopes(scopesArg);
-        if (scopes.contains(JkScope.COMPILE.getName()))  {
-            if (scopes.contains(JkScope.RUNTIME.getName())) {
+    private static String ideScope(Set<String> scopes) {
+        if (scopes.contains(JkQualifiedDependencies.COMPILE_SCOPE))  {
+            if (scopes.contains(JkQualifiedDependencies.RUNTIME_SCOPE)) {
                 return "COMPILE";
             }
             return "PROVIDED";
         }
-        if (scopes.contains(JkScope.RUNTIME.getName())) {
+        if (scopes.contains(JkQualifiedDependencies.RUNTIME_SCOPE)) {
             return "RUNTIME";
         }
-        if (scopes.contains(JkScope.TEST.getName())) {
+        if (scopes.contains(JkQualifiedDependencies.TEST_SCOPE)) {
             return "TEST";
         }
         return "COMPILE";

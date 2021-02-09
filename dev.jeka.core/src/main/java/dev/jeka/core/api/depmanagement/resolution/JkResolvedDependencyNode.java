@@ -51,7 +51,7 @@ public class JkResolvedDependencyNode {
         return new JkResolvedDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<>()));
     }
 
-    JkResolvedDependencyNode mergeNonModules(JkDependencySet dependencies) {
+    JkResolvedDependencyNode mergeNonModules(List<? extends JkDependency> dependencies) {
         final List<JkResolvedDependencyNode> result = new LinkedList<>();
         final Set<JkFileDependency> addedFileDeps = new HashSet<>();
         for (final JkResolvedDependencyNode node : this.children) {
@@ -190,7 +190,7 @@ public class JkResolvedDependencyNode {
         return new JkResolvedDependencyNode(this.nodeInfo, resultChildren);
     }
 
-    private static void addFileDepsToTree(JkDependencySet dependencies, List<JkResolvedDependencyNode> result,
+    private static void addFileDepsToTree(List<? extends JkDependency> dependencies, List<JkResolvedDependencyNode> result,
                                           Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
         for (final JkDependency dependency : depsUntilLast(dependencies, moduleId)) {
             final JkFileDependency fileDep = (JkFileDependency) dependency;
@@ -389,10 +389,10 @@ public class JkResolvedDependencyNode {
 
     }
 
-    private static List<JkDependency> depsUntilLast(JkDependencySet deps, JkModuleId to) {
+    private static List<JkDependency> depsUntilLast(List<? extends JkDependency> dependencies, JkModuleId to) {
         final List<JkDependency> result = new LinkedList<>();
         final List<JkDependency> partialResult = new LinkedList<>();
-        for (final JkDependency dependency : deps.getDependencies()) {
+        for (final JkDependency dependency : dependencies) {
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
                 if (moduleDependency.getModuleId().equals(to)) {

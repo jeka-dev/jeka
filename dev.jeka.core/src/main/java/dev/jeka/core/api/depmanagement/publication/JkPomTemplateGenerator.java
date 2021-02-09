@@ -1,9 +1,9 @@
-package dev.jeka.core.api.depmanagement.tooling;
+package dev.jeka.core.api.depmanagement.publication;
 
-import dev.jeka.core.api.depmanagement.tooling.JkPomMetadata.JkDeveloperInfo;
-import dev.jeka.core.api.depmanagement.tooling.JkPomMetadata.JkLicenseInfo;
-import dev.jeka.core.api.depmanagement.tooling.JkPomMetadata.JkProjectInfo;
-import dev.jeka.core.api.depmanagement.tooling.JkPomMetadata.JkScmInfo;
+import dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkDeveloperInfo;
+import dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkLicenseInfo;
+import dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkProjectInfo;
+import dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkScmInfo;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;

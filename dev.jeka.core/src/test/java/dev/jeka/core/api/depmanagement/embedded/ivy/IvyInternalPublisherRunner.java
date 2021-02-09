@@ -2,7 +2,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
+import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

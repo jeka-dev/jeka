@@ -1,9 +1,9 @@
 package dev.jeka.core.integrationtest;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
 import org.junit.Test;
 
 import java.util.Set;
@@ -36,7 +36,7 @@ public class ResolverWithoutScopeMapperIT {
     @Test
     public void resolveWithOptionals() {
         final JkDependencySet deps = JkDependencySet.of()
-                .and(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE", JkIvyConfigurationMapping.of(COMPILE).to("compile", "master", "optional"));
+                .and(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE", JkIvyConfigurationMappingSet.of(COMPILE).to("compile", "master", "optional"));
         final JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         final JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         System.out.println(resolveResult.getDependencyTree().toStringTree());
@@ -49,7 +49,7 @@ public class ResolverWithoutScopeMapperIT {
     @Test
     public void resolveSpringbootTestStarter() {
         final JkDependencySet deps = JkDependencySet.of()
-                .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", JkIvyConfigurationMapping.of(TEST).to("master", "runtime"));
+                .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", JkIvyConfigurationMappingSet.of(TEST).to("master", "runtime"));
         final JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         final JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         final Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();

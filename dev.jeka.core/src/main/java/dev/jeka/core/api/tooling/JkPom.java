@@ -1,8 +1,8 @@
 package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
-import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependency;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependency;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -18,7 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies.*;
+import static dev.jeka.core.api.depmanagement.JkQualifiedDependencies.*;
 
 /**
  * Wraps a POM file (Ideally an effective POM file) and provides convenient methods to extract
@@ -166,8 +166,8 @@ public final class JkPom {
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(), "dependencies");
         final JkQualifiedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
         for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
-            if (!moduleDependency.getExcludes().isEmpty()) {
-                result = result.and(moduleDependency.getModuleId(), moduleDependency.getExcludes());
+            if (!moduleDependency.getExclusioins().isEmpty()) {
+                result = result.and(moduleDependency.getModuleId(), moduleDependency.getExclusioins());
             }
         }
         return result;
@@ -221,10 +221,10 @@ public final class JkPom {
         return JkQualifiedDependency.of(realScope, moduleDependency);
     }
 
-    private JkDepExclude jkDepExclude(Element exclusionEl) {
+    private JkDependencyExclusion jkDepExclude(Element exclusionEl) {
         final String groupId = JkUtilsXml.directChildText(exclusionEl, "groupId");
         final String artifactId = JkUtilsXml.directChildText(exclusionEl, "artifactId");
-        return JkDepExclude.of(groupId, artifactId);
+        return JkDependencyExclusion.of(groupId, artifactId);
 
     }
 

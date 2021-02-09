@@ -1,4 +1,4 @@
-package dev.jeka.core.api.depmanagement.tooling;
+package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;

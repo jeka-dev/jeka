@@ -1,6 +1,6 @@
 package dev.jeka.core.api.tooling;
 
-import dev.jeka.core.api.depmanagement.JkDepExclude;
+import dev.jeka.core.api.depmanagement.JkDependencyExclusion;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
@@ -11,9 +11,9 @@ import java.util.*;
  */
 class DependencyExclusions {
 
-    private final Map<JkModuleId, List<JkDepExclude>> exclusions;
+    private final Map<JkModuleId, List<JkDependencyExclusion>> exclusions;
 
-    private DependencyExclusions(Map<JkModuleId, List<JkDepExclude>> exclusions) {
+    private DependencyExclusions(Map<JkModuleId, List<JkDependencyExclusion>> exclusions) {
         super();
         this.exclusions = Collections.unmodifiableMap(exclusions);
     }
@@ -32,7 +32,7 @@ class DependencyExclusions {
     /**
      * Returns the transitive dependency module to exclude to the specified module.
      */
-    public List<JkDepExclude> get(JkModuleId moduleId) {
+    public List<JkDependencyExclusion> get(JkModuleId moduleId) {
         return exclusions.get(moduleId);
     }
 
@@ -54,9 +54,9 @@ class DependencyExclusions {
      * Adds specified exclusions on the specified module.
      */
     public DependencyExclusions and(JkModuleId moduleId, String... excludedModuleIds) {
-        final List<JkDepExclude> depExcludes = new LinkedList<>();
+        final List<JkDependencyExclusion> depExcludes = new LinkedList<>();
         for (final String excludeId : excludedModuleIds) {
-            depExcludes.add(JkDepExclude.of(excludeId));
+            depExcludes.add(JkDependencyExclusion.of(excludeId));
         }
         return and(moduleId, depExcludes);
     }
@@ -65,8 +65,8 @@ class DependencyExclusions {
     /**
      * Adds specified exclusions on the specified module.
      */
-    public DependencyExclusions and(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
-        List<JkDepExclude> excludes = exclusions.get(moduleId);
+    public DependencyExclusions and(JkModuleId moduleId, Iterable<JkDependencyExclusion> depExcludes) {
+        List<JkDependencyExclusion> excludes = exclusions.get(moduleId);
         if (excludes == null) {
             excludes = new LinkedList<>();
         }

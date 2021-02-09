@@ -1,9 +1,8 @@
-package dev.jeka.core.api.depmanagement;
+package dev.jeka.core.api.depmanagement.publication;
 
-import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
-import dev.jeka.core.api.depmanagement.tooling.JkIvyPublication;
-import dev.jeka.core.api.depmanagement.tooling.JkMavenPublication;
-import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -13,15 +12,29 @@ import java.time.Instant;
 import java.util.function.UnaryOperator;
 
 /**
- * Not part of the public API
+ * Not part of the public API.
  */
 public interface JkInternalPublisher {
 
     String FACTORY_CLASS_NAME = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalPublisherFactory";
 
+    /**
+     * Publishes the specified module to the repository mentioned in the publicatioin.
+     *
+     * @param versionedModule
+     *            The module/version to publish.
+     * @param publication
+     *            The artifacts to publish.
+     * @param dependencies
+     *            The dependencies of the published module.
+     * @param defaultMapping
+     *            The default scope mapping of the published module
+     * @param deliveryDate
+     *            The delivery date.
+     */
     void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
                     JkQualifiedDependencies dependencies,
-                    JkIvyConfigurationMapping defaultMapping, Instant deliveryDate);
+                    JkIvyConfigurationMappingSet defaultMapping, Instant deliveryDate);
 
     void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
                       JkQualifiedDependencies dependencies, UnaryOperator<Path> signer);

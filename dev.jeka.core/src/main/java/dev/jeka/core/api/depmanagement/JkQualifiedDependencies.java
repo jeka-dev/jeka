@@ -1,11 +1,6 @@
-package dev.jeka.core.api.depmanagement.tooling;
+package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.*;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -27,18 +22,34 @@ public class JkQualifiedDependencies {
 
     public static final String RUNTIME_TARGET_CONF = "runtime(default)";
 
-    public static final String TEST_TARGET_CONF = "runtime(default)";
+    public static final String TEST_TARGET_CONF = "test(default)";
 
+    private static final Map<JkTransitivity, String> TRANSITIVITY_TARGET_CONF_MAP = new HashMap<>();
 
+    static {
+        TRANSITIVITY_TARGET_CONF_MAP.put(JkTransitivity.NONE, MASTER_TARGET_CONF);
+        TRANSITIVITY_TARGET_CONF_MAP.put(JkTransitivity.COMPILE, MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF);
+        TRANSITIVITY_TARGET_CONF_MAP.put(JkTransitivity.RUNTIME, MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF
+                + ", " + RUNTIME_TARGET_CONF);
 
-    private final List<JkQualifiedDependency> entries;
+    }
 
-    private JkQualifiedDependencies(List<JkQualifiedDependency> entries) {
-        this.entries = entries;
+    private final List<JkQualifiedDependency> qualifiedDependencies;
+
+    // Transitive dependencies globally excluded
+    private final Set<JkDependencyExclusion> globalExclusions;
+
+    private final JkVersionProvider versionProvider;
+
+    private JkQualifiedDependencies(List<JkQualifiedDependency> qualifiedDependencies, Set<JkDependencyExclusion>
+            globalExclusions, JkVersionProvider versionProvider) {
+        this.qualifiedDependencies = Collections.unmodifiableList(qualifiedDependencies);
+        this.globalExclusions = Collections.unmodifiableSet(globalExclusions);
+        this.versionProvider = versionProvider;
     }
 
     public static JkQualifiedDependencies of() {
-        return new JkQualifiedDependencies(Collections.emptyList());
+        return new JkQualifiedDependencies(Collections.emptyList(), Collections.emptySet(), JkVersionProvider.of());
     }
 
     public static JkQualifiedDependencies ofDependencies(List<JkDependency> dependencies) {
@@ -46,23 +57,42 @@ public class JkQualifiedDependencies {
     }
 
     public static JkQualifiedDependencies of(List<JkQualifiedDependency> qualifiedDependencies) {
-        return new JkQualifiedDependencies(qualifiedDependencies);
+        return new JkQualifiedDependencies(qualifiedDependencies, Collections.emptySet(), JkVersionProvider.of());
     }
 
-    public List<JkQualifiedDependency> getEntries() {
-        return entries;
+    public static JkQualifiedDependencies of(JkDependencySet dependencySet) {
+        return ofDependencies(dependencySet.getDependencies())
+                .withGlobalExclusions(dependencySet.getGlobalExclusions());
+    }
+
+    public List<JkQualifiedDependency> getQualifiedDependencies() {
+        return qualifiedDependencies;
+    }
+
+    public List<JkDependency> getDependencies() {
+        return qualifiedDependencies.stream()
+                .map(JkQualifiedDependency::getDependency)
+                .collect(Collectors.toList());
     }
 
     public List<JkModuleDependency> getModuleDependencies() {
-        return entries.stream()
+        return qualifiedDependencies.stream()
                 .map(JkQualifiedDependency::getDependency)
                 .filter(JkModuleDependency.class::isInstance)
                 .map(JkModuleDependency.class::cast)
                 .collect(Collectors.toList());
     }
 
+    public Set<JkDependencyExclusion> getGlobalExclusions() {
+        return globalExclusions;
+    }
+
+    public JkVersionProvider getVersionProvider() {
+        return versionProvider;
+    }
+
     public JkQualifiedDependencies remove(JkDependency dependency) {
-        return of(entries.stream()
+        return of(qualifiedDependencies.stream()
                 .filter(qDep -> !qDep.equals(dependency))
                 .collect(Collectors.toList())
         );
@@ -73,7 +103,7 @@ public class JkQualifiedDependencies {
     }
 
     public JkQualifiedDependencies replaceQualifier(JkDependency dependency, String qualifier) {
-        return of(entries.stream()
+        return of(qualifiedDependencies.stream()
                 .map(qDep -> qDep.getDependency().equals(dependency) ? qDep.withQualifier(qualifier) : qDep)
                 .collect(Collectors.toList())
         );
@@ -85,11 +115,33 @@ public class JkQualifiedDependencies {
 
 
     public JkQualifiedDependencies withModuleDependenciesOnly() {
-        return of(entries.stream()
+        return of(qualifiedDependencies.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)
                 .collect(Collectors.toList())
         );
     }
+
+    /**
+     * These exclusions only stands for dependencies that are retrieved transitively. This means that
+     * this not involves dependencies explicitly declared here.
+     */
+    public JkQualifiedDependencies withGlobalExclusions(Set<JkDependencyExclusion> exclusions) {
+        Set<JkDependencyExclusion> newExclusions = new HashSet<>(this.globalExclusions);
+        newExclusions.addAll(exclusions);
+        return new JkQualifiedDependencies(qualifiedDependencies, Collections.unmodifiableSet(newExclusions),
+                versionProvider);
+    }
+
+    /**
+     * These exclusions only stands for dependencies that are retrieved transitively. This means that
+     * this not involves dependencies explicitly declared here.
+     */
+    public JkQualifiedDependencies withVersionProvider(JkVersionProvider versionProvider) {
+        return new JkQualifiedDependencies(qualifiedDependencies, globalExclusions, this.versionProvider
+            .and(versionProvider));
+    }
+
+
 
     public static JkQualifiedDependencies computeMavenPublishDependencies(JkDependencySet compileDeps,
                                                                       JkDependencySet runtimeDeps,
@@ -104,7 +156,8 @@ public class JkQualifiedDependencies {
             }
             result.add(JkQualifiedDependency.of(scope, moduleDependency));
         }
-        return JkQualifiedDependencies.of(result);
+        return new JkQualifiedDependencies(result, merge.getResult().getGlobalExclusions(),
+                merge.getResult().getVersionProvider());
     }
 
     public static JkQualifiedDependencies computeIdeDependencies(JkDependencySet compileDeps,
@@ -130,7 +183,8 @@ public class JkQualifiedDependencies {
             }
             result.add(JkQualifiedDependency.of(scope, dependency));
         }
-        return JkQualifiedDependencies.of(result);
+        return new JkQualifiedDependencies(result, mergeWithTest.getResult().getGlobalExclusions(),
+                mergeWithTest.getResult().getVersionProvider());
     }
 
     public static JkQualifiedDependencies computeIdeDependencies(JkDependencySet compileDeps,
@@ -164,24 +218,25 @@ public class JkQualifiedDependencies {
             } else {
                 configurationSource = TEST_SCOPE;
                 configurationTarget = MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF + ", "
-                        + RUNTIME_TARGET_CONF + ", " + TEST_SCOPE;
+                        + RUNTIME_TARGET_CONF + ", " + TEST_TARGET_CONF;
             }
-            if (dependency.getTransitivity() == JkTransitivity.NONE) {
-                configurationTarget = MASTER_TARGET_CONF;
-            } else if (dependency.getTransitivity() == JkTransitivity.COMPILE) {
-                configurationTarget = MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF;
-            } else if (dependency.getTransitivity() == JkTransitivity.RUNTIME) {
-                configurationTarget = MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF + ", " + RUNTIME_TARGET_CONF;
+            if (dependency.getTransitivity() != null) {
+                configurationTarget = getIvyTargetConfigurations(dependency.getTransitivity());
             }
             String configuration = configurationSource + " -> " + configurationTarget;
             result.add(JkQualifiedDependency.of(configuration, dependency));
         }
-        return JkQualifiedDependencies.of(result);
+        return new JkQualifiedDependencies(result, mergeWithTest.getResult().getGlobalExclusions(),
+                mergeWithTest.getResult().getVersionProvider());
+    }
+
+    public static String getIvyTargetConfigurations(JkTransitivity transitivity) {
+        return TRANSITIVITY_TARGET_CONF_MAP.get(transitivity);
     }
 
     public List<JkDependency> getDependenciesHavingQualifier(String ... qualifiers) {
         List<String> list = Arrays.asList(qualifiers);
-        return entries.stream()
+        return qualifiedDependencies.stream()
                 .filter(qDep -> list.contains(qDep))
                 .map(JkQualifiedDependency::getDependency)
                 .collect(Collectors.toList());

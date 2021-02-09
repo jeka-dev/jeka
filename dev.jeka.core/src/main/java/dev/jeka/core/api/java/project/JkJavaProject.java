@@ -3,7 +3,7 @@ package dev.jeka.core.api.java.project;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.JkLocalProjectDependency;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
-import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

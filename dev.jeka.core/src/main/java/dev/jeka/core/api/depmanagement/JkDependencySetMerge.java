@@ -5,6 +5,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Result of merging two {@link JkDependencySet}. <p>
+ * Merging consists in taking the dependencies of 2 {@link JkDependencySet} and create a third one containing
+ * dependencies of the two ones, eliminating duplicates and preserving order.
+ */
 public final class JkDependencySetMerge {
 
     private final List<JkDependency> absentDependenciesFromLeft;
@@ -66,7 +71,7 @@ public final class JkDependencySetMerge {
             result.add(rightDep);
         }
         JkVersionProvider mergedVersionProvider = left.getVersionProvider().and(right.getVersionProvider());
-        HashSet<JkDepExclude> mergedExcludes = new HashSet<>(left.getGlobalExclusions());
+        HashSet<JkDependencyExclusion> mergedExcludes = new HashSet<>(left.getGlobalExclusions());
         mergedExcludes.addAll(right.getGlobalExclusions());
         JkDependencySet mergedDependencySet = JkDependencySet.of(result).withGlobalExclusion(mergedExcludes)
                 .withVersionProvider(mergedVersionProvider);

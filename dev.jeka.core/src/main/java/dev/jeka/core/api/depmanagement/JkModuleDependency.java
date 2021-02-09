@@ -8,12 +8,12 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * A dependency on an external module. External modules are supposed to be
- * located in a repository. The version range identify which versions are likely
- * to be compatible with the project to build.<br/>
- * For example, <code>org.hibernate:hibernate-core:3.0.+</code> is a legal
- * description for an external module dependency.
+ * A dependency on an external module supposed to be located in a binary repository. <p>
+ * The version or version range identify which versions are likely to be compatible with the project to build.<br/>
+ * For example, both <code>org.hibernate:hibernate-core:3.0.+</code> and
+ * <code>org.hibernate:hibernate-core:3.0.1</code> are a legal descriptions for module dependency.
  * <p/>
+ *
  * You can also define exclusions on module dependencies so artifact or entire
  * module won't be catch up by the dependency manager.
  *
@@ -26,11 +26,11 @@ public final class JkModuleDependency implements JkDependency {
     private final String classifier;
     private final JkTransitivity transitivity;
     private final String extension;
-    private final List<JkDepExclude> excludes;
+    private final List<JkDependencyExclusion> excludes;
     private final Path ideProjectDir;
 
     private JkModuleDependency(JkModuleId module, JkVersion version, String classifier,
-               JkTransitivity transitivity, String extension, List<JkDepExclude> excludes, Path ideProjectDir) {
+                               JkTransitivity transitivity, String extension, List<JkDependencyExclusion> excludes, Path ideProjectDir) {
         JkUtilsAssert.argument(module != null, "module cannot be null.");
         JkUtilsAssert.argument(version != null, module + " version cannot be null.");
         JkUtilsAssert.argument(excludes != null, module + " module dependency can't be instantiated with null excludes, use empty list instead");
@@ -204,7 +204,7 @@ public final class JkModuleDependency implements JkDependency {
      * Returns a JkModuleDependency identical to this one but adding the
      * specified exclusion.
      */
-    public JkModuleDependency andExclude(JkDepExclude... depExcludes) {
+    public JkModuleDependency andExclude(JkDependencyExclusion... depExcludes) {
         return andExclude(Arrays.asList(depExcludes));
     }
 
@@ -213,15 +213,15 @@ public final class JkModuleDependency implements JkDependency {
      * specified exclusion.
      */
     public JkModuleDependency andExclude(String groupeAndName) {
-        return andExclude(JkDepExclude.of(groupeAndName));
+        return andExclude(JkDependencyExclusion.of(groupeAndName));
     }
 
     /**
      * Returns a JkModuleDependency identical to this one but adding the
      * specified exclusion.
      */
-    public JkModuleDependency andExclude(Iterable<JkDepExclude> depExcludes) {
-        final List<JkDepExclude> list = new LinkedList<>(excludes);
+    public JkModuleDependency andExclude(Iterable<JkDependencyExclusion> depExcludes) {
+        final List<JkDependencyExclusion> list = new LinkedList<>(excludes);
         list.addAll(JkUtilsIterable.listOf(depExcludes));
         return new JkModuleDependency(module, version, classifier, transitivity, extension,
                 Collections.unmodifiableList(list), ideProjectDir);
@@ -238,7 +238,7 @@ public final class JkModuleDependency implements JkDependency {
     /**
      * Returns modules to exclude to the transitive chain.
      */
-    public List<JkDepExclude> getExcludes() {
+    public List<JkDependencyExclusion> getExclusioins() {
         return excludes;
     }
 

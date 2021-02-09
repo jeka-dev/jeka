@@ -1,5 +1,5 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
+import dev.jeka.core.api.depmanagement.publication.JkScope;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 

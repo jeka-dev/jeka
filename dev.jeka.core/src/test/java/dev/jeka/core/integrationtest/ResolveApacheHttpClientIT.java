@@ -3,13 +3,13 @@ package dev.jeka.core.integrationtest;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.depmanagement.tooling.JkIvyConfigurationMapping;
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
+import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet;
+import dev.jeka.core.api.depmanagement.publication.JkScope;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static dev.jeka.core.api.depmanagement.tooling.JkScope.COMPILE;
+import static dev.jeka.core.api.depmanagement.publication.JkScope.COMPILE;
 import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.TEST;
 
 public class ResolveApacheHttpClientIT {
@@ -75,7 +75,7 @@ public class ResolveApacheHttpClientIT {
 
     @Test
     public void resolveWithMultiScopeMapping() {
-        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT,  JkIvyConfigurationMapping.RESOLVE_MAPPING);
+        JkDependencySet deps = JkDependencySet.of().and(HTTP_CLIENT,  JkIvyConfigurationMappingSet.RESOLVE_MAPPING);
         JkResolveResult result = resolver().resolve(deps, TEST);
         System.out.println(result.getDependencyTree().toStringTree());
         Assert.assertEquals(1, result.getDependencyTree().getChildren().size());

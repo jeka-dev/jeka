@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import dev.jeka.core.api.depmanagement.tooling.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkCompileLayout;
@@ -397,7 +397,7 @@ public final class JkEclipseClasspathGenerator {
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
 
         // dependencies with IDE project dir will be omitted. The project dir will be added in other place.
-        List<JkDependency> deps = dependencies.getEntries().stream()
+        List<JkDependency> deps = dependencies.getQualifiedDependencies().stream()
                 .map(qDep -> qDep.getDependency())
                 .filter(dep -> dep.getIdeProjectDir() == null)
                 .collect(Collectors.toList());

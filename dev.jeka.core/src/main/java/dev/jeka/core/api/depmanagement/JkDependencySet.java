@@ -11,8 +11,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A set of {@link JkDependency} generally standing for the entire
- * dependencies of a project/module.
+ * A set of {@link JkDependency} generally standing for a given purpose (compile, test, runtime) in a project build. <p>
+ * {@link JkDependencySet} also holds a {@link JkVersionProvider} and a set of JkDepe
+ *
  *
  * @author Jerome Angibaud.
  */
@@ -20,11 +21,11 @@ public class JkDependencySet {
 
     private final List<JkDependency> dependencies;
 
-    private final Set<JkDepExclude> globalExclusions;
+    private final Set<JkDependencyExclusion> globalExclusions;
 
     private final JkVersionProvider versionProvider;
 
-    private JkDependencySet(List<JkDependency> dependencies, Set<JkDepExclude> excludes, JkVersionProvider explicitVersions) {
+    private JkDependencySet(List<JkDependency> dependencies, Set<JkDependencyExclusion> excludes, JkVersionProvider explicitVersions) {
         super();
         this.dependencies = Collections.unmodifiableList(dependencies);
         this.globalExclusions = Collections.unmodifiableSet(excludes);
@@ -115,7 +116,7 @@ public class JkDependencySet {
 
     public JkDependencySet and(JkDependencySet other) {
         final List<JkDependency> deps = JkUtilsIterable.concatLists(this.dependencies, other.dependencies);
-        Set<JkDepExclude> newGlobalExcludes = new HashSet<>(this.globalExclusions);
+        Set<JkDependencyExclusion> newGlobalExcludes = new HashSet<>(this.globalExclusions);
         newGlobalExcludes.addAll(other.globalExclusions);
         JkVersionProvider newVersionProvider = this.versionProvider.and(other.versionProvider);
         return new JkDependencySet(deps, newGlobalExcludes, newVersionProvider);
@@ -402,7 +403,7 @@ public class JkDependencySet {
     /**
      * Returns a clone of this dependencySet but adding dependency exclusion on the the last element.
      */
-    public JkDependencySet withLocalExclusion(JkDepExclude... exclusions) {
+    public JkDependencySet withLocalExclusion(JkDependencyExclusion... exclusions) {
         if (dependencies.isEmpty()) {
             return this;
         }
@@ -410,7 +411,7 @@ public class JkDependencySet {
         final JkDependency last = deps.getLast();
         if (last instanceof JkModuleDependency) {
             JkModuleDependency moduleDependency = (JkModuleDependency) last;
-            for (JkDepExclude exclusion : exclusions) {
+            for (JkDependencyExclusion exclusion : exclusions) {
                 moduleDependency = moduleDependency.andExclude(exclusion);
             }
             deps.removeLast();
@@ -425,26 +426,26 @@ public class JkDependencySet {
      * @See #withLocalExclusion
      */
     public JkDependencySet withLocalExclusions(String... groupAndNames) {
-        JkDepExclude[] excludes = Arrays.stream(groupAndNames).map(JkDependencySet::of)
-                .toArray(JkDepExclude[]::new);
+        JkDependencyExclusion[] excludes = Arrays.stream(groupAndNames).map(JkDependencySet::of)
+                .toArray(JkDependencyExclusion[]::new);
         return withLocalExclusion(excludes);
     }
 
     /**
      * Returns the dependencies to be excluded to the transitive chain when using this dependency.
      */
-    public Set<JkDepExclude> getGlobalExclusions() {
+    public Set<JkDependencyExclusion> getGlobalExclusions() {
         return this.globalExclusions;
     }
 
-    public JkDependencySet andGlobalExclusion(JkDepExclude exclude) {
-        final Set<JkDepExclude> depExcludes = new HashSet<>(this.globalExclusions);
+    public JkDependencySet andGlobalExclusion(JkDependencyExclusion exclude) {
+        final Set<JkDependencyExclusion> depExcludes = new HashSet<>(this.globalExclusions);
         depExcludes.add(exclude);
         return new JkDependencySet(this.dependencies, depExcludes, this.versionProvider);
     }
 
-    public JkDependencySet withGlobalExclusion(Set<JkDepExclude> excludes) {
-        final Set<JkDepExclude> depExcludes = new HashSet<>(excludes);
+    public JkDependencySet withGlobalExclusion(Set<JkDependencyExclusion> excludes) {
+        final Set<JkDependencyExclusion> depExcludes = new HashSet<>(excludes);
         return new JkDependencySet(this.dependencies, Collections.unmodifiableSet(depExcludes), this.versionProvider);
     }
 

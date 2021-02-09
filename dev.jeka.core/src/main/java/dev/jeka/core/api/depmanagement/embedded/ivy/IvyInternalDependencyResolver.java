@@ -3,20 +3,15 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.*;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode.JkModuleNodeInfo;
-import dev.jeka.core.api.depmanagement.tooling.JkScope;
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.apache.ivy.Ivy;
-import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
-import org.apache.ivy.core.module.descriptor.Configuration;
 import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
-import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
@@ -25,15 +20,6 @@ import org.apache.ivy.core.resolve.IvyNode;
 import org.apache.ivy.core.resolve.IvyNodeCallers.Caller;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.search.SearchEngine;
-import org.apache.ivy.core.settings.IvySettings;
-import org.apache.ivy.plugins.conflict.AbstractConflictManager;
-import org.apache.ivy.plugins.conflict.LatestCompatibleConflictManager;
-import org.apache.ivy.plugins.conflict.LatestConflictManager;
-import org.apache.ivy.plugins.conflict.StrictConflictManager;
-import org.apache.ivy.plugins.latest.LatestRevisionStrategy;
-import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
-import org.apache.ivy.plugins.matcher.PatternMatcher;
-import org.apache.ivy.util.url.URLHandlerRegistry;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -41,10 +27,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Jeka users : This class is not part of the public API !!! Please, Use
- * {@link JkDependencyResolver} instead. Ivy wrapper providing high level methods. The
- * API is expressed using Jeka classes only (mostly free of Ivy classes).
- *
  * @author Jerome Angibaud
  */
 final class IvyInternalDependencyResolver implements JkInternalDependencyResolver {
@@ -64,46 +46,12 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         this.ivy = ivy;
     }
 
-    private static IvyInternalDependencyResolver of(IvySettings ivySettings) {
-        final Ivy ivy = ivy(ivySettings);
-        return new IvyInternalDependencyResolver(ivy);
+    static IvyInternalDependencyResolver of(JkRepoSet resolveRepos) {
+        return new IvyInternalDependencyResolver(IvyTranslatorToIvy.toIvy(resolveRepos));
     }
 
-    static Ivy ivy(IvySettings ivySettings) {
-        final Ivy ivy = new Ivy();
-        ivy.getLoggerEngine().popLogger();
-        ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
-        ivy.getLoggerEngine().setShowProgress(JkLog.verbosity() == JkLog.Verbosity.VERBOSE);
-        ivy.getLoggerEngine().clearProblems();
-        IvyContext.getContext().setIvy(ivy);
-        ivy.setSettings(ivySettings);
-        ivy.bind();
-        URLHandlerRegistry.setDefault(new IvyFollowRedirectUrlHandler());
-        return ivy;
-    }
-
-    /**
-     * Creates an <code>IvySettings</code> to the specified repositories.
-     */
-    private static IvySettings ivySettingsOf(JkRepoSet resolveRepos) {
-        final IvySettings ivySettings = new IvySettings();
-        IvyTranslations.populateIvySettingsWithRepo(ivySettings, resolveRepos);
-        ivySettings.setDefaultCache(JkLocator.getJekaRepositoryCache().toFile());
-        return ivySettings;
-    }
-
-    /**
-     * Creates an instance using specified repository for publishing and the
-     * specified repositories for resolving.
-     */
-    public static IvyInternalDependencyResolver of(JkRepoSet resolveRepos) {
-        IvySettings ivySettings = ivySettingsOf(resolveRepos);
-        return of(ivySettings);
-    }
-
-    @SuppressWarnings("unchecked")
     @Override
-    public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencySet deps,
+    public JkResolveResult resolve(JkVersionedModule moduleArg, JkQualifiedDependencies deps,
                                    JkResolutionParameters parameters) {
         final JkVersionedModule module;
         if (moduleArg == null) {
@@ -111,14 +59,9 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         } else {
             module = moduleArg;
         }
-        final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toResolutionModuleDescriptor(
-                module,
-                deps,
-                deps.getVersionProvider()
-        );
-        setConflictManager(moduleDescriptor, parameters.getConflictResolver());
-
-        final String[] confs = toConfs(moduleDescriptor.getConfigurations());
+        final DefaultModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toResolutionModuleDescriptor(
+                module, deps, parameters, this.ivy.getSettings());
+        final String[] confs = new String[] {"*"};
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);
@@ -127,12 +70,6 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         resolveOptions.setRefresh(parameters.isRefreshed());
         resolveOptions.setCheckIfChanged(true);
         resolveOptions.setOutputReport(true);
-        /*
-        if (resolvedScopes.length == 0) {   // if no scope, verbose ivy report turns in exception
-            resolveOptions.setOutputReport(false);
-        }
-
-         */
         final ResolveReport ivyReport;
         try {
             ivyReport = ivy.resolve(moduleDescriptor, resolveOptions);
@@ -154,59 +91,6 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
             deleteResolveCache(module);
         }
         return resolveResult;
-    }
-
-    private void setConflictManager(DefaultModuleDescriptor moduleDescriptor,
-                                    JkResolutionParameters.JkConflictResolver conflictResolver) {
-        AbstractConflictManager abstractConflictManager = null;
-        if (conflictResolver == JkResolutionParameters.JkConflictResolver.STRICT) {
-            abstractConflictManager = new StrictConflictManager();
-        } else if (conflictResolver == JkResolutionParameters.JkConflictResolver.LATEST_COMPATIBLE) {
-            abstractConflictManager = new LatestCompatibleConflictManager("LatestCompatible",
-                    new LatestRevisionStrategy());
-        } else if (conflictResolver == JkResolutionParameters.JkConflictResolver.LATEST_VERSION) {
-            abstractConflictManager = new LatestConflictManager("Latest",
-                    new LatestRevisionStrategy());
-        }
-        if (abstractConflictManager != null) {
-            PatternMatcher patternMatcher = ExactPatternMatcher.INSTANCE;
-            abstractConflictManager.setSettings(ivy.getSettings());
-            moduleDescriptor.addConflictManager(ModuleId.newInstance("*", "*"), patternMatcher, abstractConflictManager);
-        }
-    }
-
-    private void deleteResolveCache(JkVersionedModule module) {
-        final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
-        final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
-        final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
-        propsFile.delete();
-        final File xmlFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
-        xmlFile.delete();
-    }
-
-    private static String logLevel() {
-        if (JkLog.Verbosity.MUTE == JkLog.verbosity()) {
-            return "quiet";
-        }
-        if (JkLog.Verbosity.VERBOSE == JkLog.verbosity()) {
-            return "verbose";
-        }
-        return "download-only";
-    }
-
-    private static JkResolveResult getResolveConf(List<IvyNode> nodes,
-            JkVersionedModule rootVersionedModule,
-            JkResolveResult.JkErrorReport errorReport,
-            IvyArtifactContainer ivyArtifactContainer) {
-
-        // Compute dependency tree
-        final JkResolvedDependencyNode tree = createTree(nodes, rootVersionedModule, ivyArtifactContainer);
-        return JkResolveResult.of(tree, errorReport);
-    }
-
-    private static JkVersionedModule anonymousVersionedModule() {
-        final String version = Long.toString(RANDOM.nextLong());
-        return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.of(version));
     }
 
     @Override
@@ -255,6 +139,42 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                 .collect(Collectors.toList());
     }
 
+
+    private void deleteResolveCache(JkVersionedModule module) {
+        final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
+        final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
+        final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
+        propsFile.delete();
+        final File xmlFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
+        xmlFile.delete();
+    }
+
+    private static String logLevel() {
+        if (JkLog.Verbosity.MUTE == JkLog.verbosity()) {
+            return "quiet";
+        }
+        if (JkLog.Verbosity.VERBOSE == JkLog.verbosity()) {
+            return "verbose";
+        }
+        return "download-only";
+    }
+
+    private static JkResolveResult getResolveConf(List<IvyNode> nodes,
+            JkVersionedModule rootVersionedModule,
+            JkResolveResult.JkErrorReport errorReport,
+            IvyArtifactContainer ivyArtifactContainer) {
+
+        // Compute dependency tree
+        final JkResolvedDependencyNode tree = createTree(nodes, rootVersionedModule, ivyArtifactContainer);
+        return JkResolveResult.of(tree, errorReport);
+    }
+
+    private static JkVersionedModule anonymousVersionedModule() {
+        final String version = Long.toString(RANDOM.nextLong());
+        return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.of(version));
+    }
+
+
     private static JkResolvedDependencyNode createTree(Iterable<IvyNode> nodes, JkVersionedModule rootVersionedModule,
                                                        IvyArtifactContainer artifactContainer) {
         final IvyTreeResolver treeResolver = new IvyTreeResolver(nodes, artifactContainer);
@@ -276,7 +196,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                 }
                 final JkModuleId moduleId = JkModuleId.of(node.getId().getOrganisation(), node.getId().getName());
                 final JkVersion resolvedVersion = JkVersion.of(node.getResolvedId().getRevision());
-                final Set<JkScope> rootScopes = IvyTranslations.toJkScopes(node.getRootModuleConfigurations());
+                final Set<String> rootScopes = JkUtilsIterable.setOf(node.getRootModuleConfigurations());
 
                 List<Path> artifacts;
                 if (!node.isCompletelyEvicted()) {
@@ -290,7 +210,8 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                     final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
                     final List<JkModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.getModuleId(), k -> new LinkedList<>());
                     final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
-                    final Set<JkScope> declaredScopes = IvyTranslations.toJkScopes(dependencyDescriptor.getModuleConfigurations());
+                    final Set<String> declaredScopes = JkUtilsIterable.setOf(
+                            dependencyDescriptor.getModuleConfigurations());
                     final JkVersion version = JkVersion.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());
                     final JkModuleNodeInfo moduleNodeInfo  = JkModuleNodeInfo.of(moduleId, version, declaredScopes,
@@ -327,9 +248,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
             }
             return JkResolvedDependencyNode.ofModuleDep(holder, childNodes);
         }
-
     }
-
 
     private List<JkModuleDepProblem> moduleProblems(List<IvyNode> ivyNodes) {
         final List<JkModuleDepProblem> result = new LinkedList<>();
@@ -346,21 +265,6 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
             }
         }
         return result;
-    }
-
-    private String[] toConfs(Configuration[] declaredConfigurations, JkScope... resolvedScopes) {
-        final Set<String> result = new HashSet<>();
-        for (Configuration declaredConf : declaredConfigurations) {
-            for (JkScope scope : resolvedScopes) {
-                if (declaredConf.getName().equals(scope.getName())) {
-                    result.add(scope.getName());
-                }
-            }
-        }
-        if (result.isEmpty() && resolvedScopes.length == 0) {
-            return IVY_24_ALL_CONF;
-        }
-        return JkUtilsIterable.arrayOf(result, String.class);
     }
 
 }

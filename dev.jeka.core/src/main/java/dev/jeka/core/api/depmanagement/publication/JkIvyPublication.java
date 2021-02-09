@@ -1,4 +1,4 @@
-package dev.jeka.core.api.depmanagement.tooling;
+package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
@@ -34,7 +34,7 @@ public final class JkIvyPublication<T> {
 
     private Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencies = UnaryOperator.identity();
 
-    private JkIvyConfigurationMapping configurationMapping = JkIvyConfigurationMapping.RESOLVE_MAPPING;
+    private JkIvyConfigurationMappingSet configurationMapping = JkIvyConfigurationMappingSet.RESOLVE_MAPPING;
 
     private Supplier<? extends JkArtifactLocator> artifactLocator;
 
@@ -90,7 +90,7 @@ public final class JkIvyPublication<T> {
         return dependencies.apply(JkQualifiedDependencies.of());
     }
 
-    public JkIvyPublication<T> setConfigurationMapping(JkIvyConfigurationMapping configurationMapping) {
+    public JkIvyPublication<T> setConfigurationMapping(JkIvyConfigurationMappingSet configurationMapping) {
         this.configurationMapping = configurationMapping;
         return this;
     }

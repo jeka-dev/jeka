@@ -1,11 +1,11 @@
 package dev.jeka.core.api.depmanagement;
 
 /**
- * Information about excluding artifacts or whole modules.
+ * A piece of information aiming at excluding transitive dependencies.
  *
  * @author Jerome Angibaud
  */
-public final class JkDepExclude {
+public final class JkDependencyExclusion {
 
     private final JkModuleId moduleId;
 
@@ -14,7 +14,7 @@ public final class JkDepExclude {
     private final String extension;
 
 
-    private JkDepExclude(JkModuleId moduleId, String classifier, String extension) {
+    private JkDependencyExclusion(JkModuleId moduleId, String classifier, String extension) {
         super();
         this.moduleId = moduleId;
         this.classifier = classifier;
@@ -25,21 +25,21 @@ public final class JkDepExclude {
      * Creates an exclusion of the specified module.
      */
     @SuppressWarnings("unchecked")
-    public static JkDepExclude of(JkModuleId moduleId) {
-        return new JkDepExclude(moduleId, null, null);
+    public static JkDependencyExclusion of(JkModuleId moduleId) {
+        return new JkDependencyExclusion(moduleId, null, null);
     }
 
     /**
      * Creates an exclusion of the specified module.
      */
-    public static JkDepExclude of(String group, String name) {
+    public static JkDependencyExclusion of(String group, String name) {
         return of(JkModuleId.of(group, name));
     }
 
     /**
      * Creates an exclusion of the specified module.
      */
-    public static JkDepExclude of(String groupAndName) {
+    public static JkDependencyExclusion of(String groupAndName) {
         return of(JkModuleId.of(groupAndName));
     }
 
@@ -48,8 +48,8 @@ public final class JkDepExclude {
      * Types generally corresponds to getExtension or classifier but not always.
      * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
      */
-    public JkDepExclude withType(String typeArg) {
-        return new JkDepExclude(moduleId, typeArg, extension);
+    public JkDependencyExclusion withType(String typeArg) {
+        return new JkDependencyExclusion(moduleId, typeArg, extension);
     }
 
     /**
@@ -57,8 +57,8 @@ public final class JkDepExclude {
      * Types generally corresponds to getExtension or classifier but not always.
      * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
      */
-    public JkDepExclude withExt(String extension) {
-        return new JkDepExclude(moduleId, classifier, extension);
+    public JkDependencyExclusion withExt(String extension) {
+        return new JkDependencyExclusion(moduleId, classifier, extension);
     }
 
     /**
@@ -87,7 +87,7 @@ public final class JkDepExclude {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        JkDepExclude that = (JkDepExclude) o;
+        JkDependencyExclusion that = (JkDependencyExclusion) o;
         if (!moduleId.equals(that.moduleId)) return false;
         if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
         return extension != null ? extension.equals(that.extension) : that.extension == null;
