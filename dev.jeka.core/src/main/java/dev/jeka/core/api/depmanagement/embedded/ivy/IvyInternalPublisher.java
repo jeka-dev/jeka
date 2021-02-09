@@ -1,11 +1,13 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.publication.JkInternalPublisher;
 import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -17,7 +19,6 @@ import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.MDArtifact;
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
-import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
@@ -32,10 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-/**
- * Jeka users : This class is not part of the public API !!!
- * Ivy wrapper providing high level methods. The API is expressed using Jeka classes only.
- */
 final class IvyInternalPublisher implements JkInternalPublisher {
 
     private final Ivy ivy;
@@ -51,20 +48,10 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         this.descriptorOutputDir = descriptorOutputDir;
     }
 
-    /**
-     * Creates an <code>IvySettings</code> to the specified repositories.
-     */
-    private static IvySettings ivySettingsOf(JkRepoSet publishRepos) {
-        final IvySettings ivySettings = new IvySettings();
-        IvyTranslations.populateIvySettingsWithPublishRepo(ivySettings, publishRepos);
-        return ivySettings;
-    }
-
-    private static IvyInternalPublisher of(JkRepoSet publishRepos, Path descriptorOutputDir) {
+    static IvyInternalPublisher of(JkRepoSet publishRepos, Path descriptorOutputDir) {
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos);
         return new IvyInternalPublisher(ivy, publishRepos, descriptorOutputDir);
     }
-
 
     private static boolean isMaven(DependencyResolver dependencyResolver) {
         if (dependencyResolver instanceof ChainResolver) {
@@ -85,8 +72,10 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
 
     @Override
-    public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-                           JkQualifiedDependencies dependencies, JkIvyConfigurationMappingSet defaultMapping,
+    public void publishIvy(JkVersionedModule versionedModule,
+                           JkIvyPublication publication,
+                           JkQualifiedDependencies dependencies,
+                           JkIvyConfigurationMappingSet defaultMapping,
                            Instant deliveryDate) {
         JkLog.startTask( "Publish on Ivy repositories");
         final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
@@ -204,13 +193,13 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                                                     Instant deliveryDate) {
 
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                jkVersionedModule, dependencies, defaultMapping, resolvedVersions);
+                jkVersionedModule, dependencies, defaultMapping, dependencies.getVersionProvider());
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
                 deliveryDate);
         return moduleDescriptor;
 
 
-        return null;
+
     }
 
     private Path createIvyFile(ModuleDescriptor moduleDescriptor) {
@@ -246,20 +235,20 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     private DefaultModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule,
                                                            JkMavenPublication publication,
-                                                           JkQualifiedDependencies resolvedDependencies,
+                                                           JkQualifiedDependencies dependencies,
                                                            Instant deliveryDate) {
-        /*
+
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
                 jkVersionedModule,
-                resolvedDependencies,
+                dependencies,
                 JkIvyConfigurationMappingSet.RESOLVE_MAPPING,
-                resolvedVersions);
+                dependencies.getVersionProvider());
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
                 deliveryDate);
         return moduleDescriptor;
 
-         */
-        return null;
+
+
     }
 
     private static void commitPublication(DependencyResolver resolver) {

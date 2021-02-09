@@ -1,13 +1,18 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
+import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.conflict.AbstractConflictManager;
 import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
+
+import java.util.Map;
 
 import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToConfiguration.toConfigurationToDeclare;
 import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToConflictManager.bind;
@@ -16,10 +21,10 @@ import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToDepend
 
 class IvyTranslatorToModuleDescriptor {
 
-    static DefaultModuleDescriptor toResolutionModuleDescriptor(JkVersionedModule module,
-                                                                JkQualifiedDependencies dependencies,
-                                                                JkResolutionParameters resolutionParameters,
-                                                                IvySettings ivySettings) {
+    static DefaultModuleDescriptor toResolveModuleDescriptor(JkVersionedModule module,
+                                                             JkQualifiedDependencies dependencies,
+                                                             JkResolutionParameters resolutionParameters,
+                                                             IvySettings ivySettings) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
                 .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
@@ -51,6 +56,31 @@ class IvyTranslatorToModuleDescriptor {
                     ExactOrRegexpPatternMatcher.INSTANCE,
                     new OverrideDependencyDescriptorMediator(null, version.getValue()));
         }
+        return result;
+    }
+
+    static DefaultModuleDescriptor toPublishModuleDescriptor(JkVersionedModule module,
+                                                                JkQualifiedDependencies dependencies,
+                                                                JkMavenPublication mavenPublication,
+                                                                JkResolutionParameters resolutionParameters,
+                                                                IvySettings ivySettings) {
+        DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies, resolutionParameters,
+                ivySettings);
+        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module,
+                mavenPublication.getArtifactLocator());
+        IvyTranslatorToArtifact.bind(result, artifactMap);
+        return result;
+    }
+
+    static DefaultModuleDescriptor toPublishModuleDescriptor(JkVersionedModule module,
+                                                                 JkQualifiedDependencies dependencies,
+                                                                 JkIvyPublication mavenPublication,
+                                                                 JkResolutionParameters parameters,
+                                                                 IvySettings ivySettings) {
+        DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies, parameters, ivySettings);
+        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module,
+                mavenPublication.getArtifactLocator());
+        IvyTranslatorToArtifact.bind(result, artifactMap);
         return result;
     }
 

@@ -101,7 +101,7 @@ final class IvyTranslations {
     }
 
     static DefaultModuleDescriptor toPublicationLessModule(JkVersionedModule module,
-                                                           JkDependencySet dependencies,
+                                                           JkQualifiedDependencies dependencies,
                                                            JkIvyConfigurationMappingSet defaultMapping,
                                                            JkVersionProvider resolvedVersions) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
@@ -281,7 +281,7 @@ final class IvyTranslations {
 
 
     private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor,
-                                                 JkDependencySet dependencies,
+                                                 JkQualifiedDependencies dependencies,
                                                  JkIvyConfigurationMappingSet defaultMapping,
                                                  JkVersionProvider resolvedVersions) {
 
@@ -366,8 +366,8 @@ final class IvyTranslations {
         Iterator<JkIvyPublication.JkPublicationArtifact> it = publication.getAllArtifacts().iterator();
         while (it.hasNext()) {
             JkIvyPublication.JkPublicationArtifact artifact = it.next();
-            for (final JkScope jkScope : artifact.jkScopes) {
-                if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.getName())) {
+            for (final String jkScope : artifact.configuration) {
+                if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope)) {
                     descriptor.addConfiguration(createConfiguration(jkScope));
                 }
             }
@@ -419,7 +419,7 @@ final class IvyTranslations {
         return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), artifactName, type, extension);
     }
 
-    private static Artifact toPublishedMavenArtifact(Path artifactFile, String artifactName,
+    private static Artifact toPublishedMavenArtifact(Path artifactFile,
                                                      String classifier, ModuleRevisionId moduleId, Instant date) {
         final String extension = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
         final Map<String, String> extraMap;
@@ -428,7 +428,7 @@ final class IvyTranslations {
         } else {
             extraMap = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
         }
-        return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), artifactName, extension, extension, extraMap);
+        return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), moduleId.getName(), extension, extension, extraMap);
     }
 
 

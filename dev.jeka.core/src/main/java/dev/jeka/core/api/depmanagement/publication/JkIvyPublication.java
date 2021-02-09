@@ -36,7 +36,7 @@ public final class JkIvyPublication<T> {
 
     private JkIvyConfigurationMappingSet configurationMapping = JkIvyConfigurationMappingSet.RESOLVE_MAPPING;
 
-    private Supplier<? extends JkArtifactLocator> artifactLocator;
+    private Supplier<? extends JkArtifactLocator> artifactLocatorSupplier;
 
     private JkPublicationArtifact mainArtifact;
 
@@ -84,8 +84,6 @@ public final class JkIvyPublication<T> {
         return setDependencies(compile, runtime, test, JkVersionedModule.ConflictStrategy.FAIL);
     }
 
-
-
     public JkQualifiedDependencies getDependencies() {
         return dependencies.apply(JkQualifiedDependencies.of());
     }
@@ -96,7 +94,7 @@ public final class JkIvyPublication<T> {
     }
 
     public JkIvyPublication<T> clear() {
-        this.artifactLocator = null;
+        this.artifactLocatorSupplier = null;
         this.mainArtifact = null;
         this.extraArtifacts.clear();
         return this;
@@ -106,7 +104,7 @@ public final class JkIvyPublication<T> {
      * Adds all the artifacts defined in the specified artifactLocator.
      */
     public JkIvyPublication<T> addArtifacts(Supplier<JkArtifactLocator> artifactLocator) {
-        this.artifactLocator = artifactLocator;
+        this.artifactLocatorSupplier = artifactLocator;
         return this;
     }
 
@@ -177,8 +175,8 @@ public final class JkIvyPublication<T> {
 
     public List<JkPublicationArtifact> getAllArtifacts() {
         List<JkPublicationArtifact> result = new LinkedList<>();
-        if (artifactLocator != null) {
-            result.addAll(toArtifacts(artifactLocator.get()));
+        if (artifactLocatorSupplier != null) {
+            result.addAll(toArtifacts(artifactLocatorSupplier.get()));
         }
         if (mainArtifact != null) {
             result.add(mainArtifact);
