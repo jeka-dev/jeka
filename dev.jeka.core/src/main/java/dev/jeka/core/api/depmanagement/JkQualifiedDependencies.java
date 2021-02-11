@@ -98,6 +98,20 @@ public class JkQualifiedDependencies {
         );
     }
 
+    public JkQualifiedDependencies and(JkQualifiedDependency qualifiedDependency) {
+        List<JkQualifiedDependency> result = new LinkedList<>(this.qualifiedDependencies);
+        result.add(qualifiedDependency);
+        return new JkQualifiedDependencies(result, globalExclusions, versionProvider);
+    }
+
+    public JkQualifiedDependencies and(String qualifier, JkDependency dependency) {
+        return and(JkQualifiedDependency.of(qualifier, dependency));
+    }
+
+    public JkQualifiedDependencies and(String qualifier, String moduleDependencyDescriptor) {
+        return and(qualifier, JkModuleDependency.of(moduleDependencyDescriptor));
+    }
+
     public JkQualifiedDependencies remove(String dep) {
         return remove(JkModuleDependency.of(dep));
     }

@@ -8,7 +8,6 @@ import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.function.UnaryOperator;
 
 /**
@@ -27,14 +26,9 @@ public interface JkInternalPublisher {
      *            The artifacts to publish.
      * @param dependencies
      *            The dependencies of the published module.
-     * @param defaultMapping
-     *            The default scope mapping of the published module
-     * @param deliveryDate
-     *            The delivery date.
      */
     void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-                    JkQualifiedDependencies dependencies,
-                    JkIvyConfigurationMappingSet defaultMapping, Instant deliveryDate);
+                    JkQualifiedDependencies dependencies);
 
     void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
                       JkQualifiedDependencies dependencies, UnaryOperator<Path> signer);

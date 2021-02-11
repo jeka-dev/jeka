@@ -3,43 +3,29 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
-import org.apache.ivy.core.settings.IvySettings;
-import org.apache.ivy.plugins.conflict.AbstractConflictManager;
 import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
 
+import java.util.List;
 import java.util.Map;
 
-import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToConfiguration.toConfigurationToDeclare;
-import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToConflictManager.bind;
-import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToConflictManager.toConflictManager;
+import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToConfiguration.toMasterConfigurations;
 import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToDependency.*;
 
 class IvyTranslatorToModuleDescriptor {
 
     static DefaultModuleDescriptor toResolveModuleDescriptor(JkVersionedModule module,
-                                                             JkQualifiedDependencies dependencies,
-                                                             JkResolutionParameters resolutionParameters,
-                                                             IvySettings ivySettings) {
+                                                             JkQualifiedDependencies dependencies) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
                 .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
                 thisModuleRevisionId, "integration", null);
 
-        // Add conflict manager if needed
-        AbstractConflictManager conflictManager = toConflictManager(resolutionParameters.getConflictResolver());
-        if (conflictManager != null) {
-            bind(result, conflictManager, ivySettings);
-        }
-
         // Add configurations
-        toConfigurationToDeclare(dependencies).stream()
-                .map(IvyTranslatorToConfiguration::toSimpleConfiguration)
-                .forEach(conf -> result.addConfiguration(conf));
+        toMasterConfigurations(dependencies).forEach(conf -> result.addConfiguration(conf));
 
         // Add dependencies
         toDependencyDescriptors(dependencies).forEach(dep -> IvyTranslatorToDependency.bind(result, dep));
@@ -61,11 +47,8 @@ class IvyTranslatorToModuleDescriptor {
 
     static DefaultModuleDescriptor toPublishModuleDescriptor(JkVersionedModule module,
                                                                 JkQualifiedDependencies dependencies,
-                                                                JkMavenPublication mavenPublication,
-                                                                JkResolutionParameters resolutionParameters,
-                                                                IvySettings ivySettings) {
-        DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies, resolutionParameters,
-                ivySettings);
+                                                                JkMavenPublication mavenPublication) {
+        DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
         Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module,
                 mavenPublication.getArtifactLocator());
         IvyTranslatorToArtifact.bind(result, artifactMap);
@@ -74,13 +57,11 @@ class IvyTranslatorToModuleDescriptor {
 
     static DefaultModuleDescriptor toPublishModuleDescriptor(JkVersionedModule module,
                                                                  JkQualifiedDependencies dependencies,
-                                                                 JkIvyPublication mavenPublication,
-                                                                 JkResolutionParameters parameters,
-                                                                 IvySettings ivySettings) {
-        DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies, parameters, ivySettings);
-        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module,
-                mavenPublication.getArtifactLocator());
-        IvyTranslatorToArtifact.bind(result, artifactMap);
+                                                                 JkIvyPublication ivyPublication) {
+        DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
+        List<IvyTranslatorToArtifact.ArtifactAndConfigurations> artifactAndConfigurationsList =
+            IvyTranslatorToArtifact.toIvyArtifacts(module, ivyPublication.getAllArtifacts());
+        IvyTranslatorToArtifact.bind(result, artifactAndConfigurationsList);
         return result;
     }
 

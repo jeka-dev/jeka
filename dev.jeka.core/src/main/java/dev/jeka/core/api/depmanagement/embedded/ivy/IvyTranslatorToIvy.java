@@ -1,17 +1,23 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.resolver.AbstractResolver;
 import org.apache.ivy.util.url.URLHandlerRegistry;
 
 class IvyTranslatorToIvy {
 
-    static Ivy toIvy(JkRepoSet repoSet) {
-        IvySettings ivySettings = ivySettingsOf(repoSet);
+    private static final String MAIN_RESOLVER_NAME = "MAIN";
+
+    private static final String MAIN_CONFLICT_MANAGER = "MAIN";
+
+    static Ivy toIvy(JkRepoSet repoSet, JkResolutionParameters parameters) {
+        IvySettings ivySettings = ivySettingsOf(repoSet, parameters);
         return ivy(ivySettings);
     }
 
@@ -31,12 +37,19 @@ class IvyTranslatorToIvy {
     /**
      * Creates an <code>IvySettings</code> to the specified repositories.
      */
-    private static IvySettings ivySettingsOf(JkRepoSet resolveRepos) {
+    private static IvySettings ivySettingsOf(JkRepoSet repos, JkResolutionParameters parameters) {
         final IvySettings ivySettings = new IvySettings();
-        IvyTranslations.populateIvySettingsWithRepo(ivySettings, resolveRepos);
+        final AbstractResolver resolver = IvyTranslatorToResolver.toChainResolver(repos);
+        resolver.setName(MAIN_RESOLVER_NAME);
+        ivySettings.addResolver(resolver);
+        ivySettings.setDefaultResolver(MAIN_RESOLVER_NAME);
+        ivySettings.setDefaultConflictManager(IvyTranslatorToConflictManager.toConflictManager(
+                parameters.getConflictResolver()));
         ivySettings.setDefaultCache(JkLocator.getJekaRepositoryCache().toFile());
         return ivySettings;
     }
+
+
 
 
 }

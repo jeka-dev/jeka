@@ -1,17 +1,16 @@
 package dev.jeka.core.integrationtest;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static dev.jeka.core.api.depmanagement.publication.JkScope.COMPILE;
 
 public class ResolveSpringBootStarterIT {
 
@@ -22,10 +21,7 @@ public class ResolveSpringBootStarterIT {
     @Test
     public void resolveCompile() {
         //JkLog.setHierarchicalConsoleConsumer();
-        final JkResolveResult result = resolver().resolve(
-                JkDependencySet.of(SPRINGBOOT_STARTER, COMPILE)
-                );
-        System.out.println(resolver().getParams().getScopeMapping());
+        final JkResolveResult result = resolver().resolve(JkDependencySet.of(SPRINGBOOT_STARTER));
         System.out.println(result.getDependencyTree().toStringTree());
         result.getFiles().forEach(System.out::println);
         final List<JkResolvedDependencyNode> slf4japiNodes = result.getDependencyTree().toFlattenList().stream()
@@ -43,10 +39,7 @@ public class ResolveSpringBootStarterIT {
     }
 
     private JkDependencyResolver resolver() {
-        final JkIvyConfigurationMappingSet mapping = JkIvyConfigurationMappingSet.of("compile").to("compile");
         return JkDependencyResolver.of()
-                .addRepos(JkRepo.ofMavenCentral())
-                .getParams()
-                    .setScopeMapping(mapping).__;
+                .addRepos(JkRepo.ofMavenCentral());
     }
 }

@@ -32,7 +32,7 @@ final class IvyArtifactContainer {
     }
 
     private void put(ModuleRevisionId moduleRevisionId, Path file) {
-        JkVersionedModule versionedModule = IvyTranslations.toJkVersionedModule(moduleRevisionId);
+        JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(moduleRevisionId);
         List<Path> files = map.computeIfAbsent(versionedModule, k -> new LinkedList<>());
         files.add(file);
     }

@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static dev.jeka.core.api.depmanagement.publication.JkScope.COMPILE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -45,20 +44,19 @@ public class TransitiveExcludeIT {
 
     @Test
     public void handleGlobalExcludes() {
-
-        JkDependencyExclusion exclude = JkDependencyExclusion.of(BOOT_TEST).withScopes(COMPILE);
+        JkDependencyExclusion exclude = JkDependencyExclusion.of(BOOT_TEST);
         JkDependencySet deps = JkDependencySet.of()
-                .and(BOOT_TEST_AND_VERSION, COMPILE)
+                .and(BOOT_TEST_AND_VERSION)
                 .andGlobalExclusion(exclude);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);  // works with non empty scopes resolution
+        JkResolveResult resolveResult = resolver.resolve(deps);  // works with non empty scopes resolution
         assertFalse(resolveResult.contains(JkModuleId.of(BOOT_TEST)));
 
         // Test with JkDependencyExclusion without scope specified of the exclusion
 
         exclude = JkDependencyExclusion.of(BOOT_TEST);
         deps = JkDependencySet.of()
-                .and(BOOT_TEST_AND_VERSION, COMPILE)
+                .and(BOOT_TEST_AND_VERSION)
                 .andGlobalExclusion(exclude);
         resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());

@@ -11,7 +11,6 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -131,33 +130,33 @@ public final class JkIvyPublication<T> {
     /**
      * @see #addArtifact(String, Path, String, String...)
      */
-    public JkIvyPublication<T> setMainArtifact(Path file, String... scopes) {
-        return setMainArtifactWithType(file, null, scopes);
+    public JkIvyPublication<T> setMainArtifact(Path file, String... configurationNames) {
+        return setMainArtifactWithType(file, null, configurationNames);
     }
 
     /**
      * @see #addArtifact(String, Path, String, String...)
      */
-    public JkIvyPublication<T> setMainArtifactWithType(Path file, String type, String... scopes) {
-        this.mainArtifact = toPublication(null, file, type, scopes);
+    public JkIvyPublication<T> setMainArtifactWithType(Path file, String type, String... configurationNames) {
+        this.mainArtifact = toPublication(null, file, type, configurationNames);
         return this;
     }
 
     /**
      * Adds the specified artifact to the publication.
      */
-    public JkIvyPublication<T> addArtifact(String artifactName, Path artifactFile, String type, String... scopes) {
+    public JkIvyPublication<T> addArtifact(String artifactName, Path artifactFile, String type, String... configurationNames) {
         extraArtifacts.add(new JkPublicationArtifact(artifactName, artifactFile, type,
-                JkUtilsIterable.setOf(scopes).stream().collect(Collectors.toSet())));
+                JkUtilsIterable.setOf(configurationNames).stream().collect(Collectors.toSet())));
         return this;
     }
 
     /**
      * Same as {@link #setMainArtifact(Path, String...)} (Path, String...)} but effective only if the specified file exists.
      */
-    public JkIvyPublication<T> addOptionalArtifact(Path file, String... scopes) {
+    public JkIvyPublication<T> addOptionalArtifact(Path file, String... configurationNames) {
         if (Files.exists(file)) {
-            return setMainArtifact(file, scopes);
+            return setMainArtifact(file, configurationNames);
         }
         return this;
     }
@@ -166,9 +165,9 @@ public final class JkIvyPublication<T> {
      * Same as {@link #setMainArtifact(Path, String...)} (Path, String, String...)} but effective only if the specified file
      * exists.
      */
-    public JkIvyPublication<T> addOptionalArtifactWithType(Path file, String type, String... scopes) {
+    public JkIvyPublication<T> addOptionalArtifactWithType(Path file, String type, String... configurationNames) {
         if (Files.exists(file)) {
-            return setMainArtifactWithType(file, type, scopes);
+            return setMainArtifactWithType(file, type, configurationNames);
         }
         return this;
     }
@@ -191,24 +190,24 @@ public final class JkIvyPublication<T> {
         }
         JkUtilsAssert.state(versionedModule != null, "Versioned module provider cannot be null.");
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        internalPublisher.publishIvy(versionedModule.get(), this, getDependencies(), configurationMapping,
-                Instant.now());
+        internalPublisher.publishIvy(versionedModule.get(), this, getDependencies());
     }
 
-    private static JkPublicationArtifact toPublication(String artifactName, Path artifactFile, String type, String... scopes) {
+    private static JkPublicationArtifact toPublication(String artifactName, Path artifactFile, String type,
+                                                       String... configurationNames) {
         return new JkPublicationArtifact(artifactName, artifactFile, type,
-                JkUtilsIterable.setOf(scopes).stream().collect(Collectors.toSet()));
+                JkUtilsIterable.setOf(configurationNames).stream().collect(Collectors.toSet()));
     }
 
     public static class JkPublicationArtifact {
 
-        private JkPublicationArtifact(String name, Path path, String type, Set<String> configuration) {
+        private JkPublicationArtifact(String name, Path path, String type, Set<String> configurationNames) {
             super();
             this.file = path.toFile();
             this.extension = path.getFileName().toString().contains(".") ? JkUtilsString.substringAfterLast(
                     path.getFileName().toString(), ".") : null;
                     this.type = type;
-                    this.configuration = configuration;
+                    this.configurationNames = configurationNames;
                     this.name = name;
         }
 
@@ -216,7 +215,7 @@ public final class JkIvyPublication<T> {
 
         public final String type;
 
-        public final Set<String> configuration;
+        public final Set<String> configurationNames;
 
         public final String name;
 

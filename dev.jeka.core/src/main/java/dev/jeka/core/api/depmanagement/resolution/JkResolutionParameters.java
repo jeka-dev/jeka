@@ -55,6 +55,10 @@ public final class JkResolutionParameters<T> {
         return new JkResolutionParameters(parent);
     }
 
+    public static JkResolutionParameters of() {
+        return new JkResolutionParameters(null);
+    }
+
     /**
      * Returns the conflict resolver to use.
      */

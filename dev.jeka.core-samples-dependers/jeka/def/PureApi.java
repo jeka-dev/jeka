@@ -1,5 +1,4 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.publication.JkScope;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 
@@ -11,12 +10,12 @@ public class PureApi {
         // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
         JkJavaProject coreProject = JkJavaProject.of().simpleFacade()
                 .setBaseDir("../dev.jeka.core-samples")
-                .addComileDependencies(JkDependencySet.of()
-                    .and("junit:junit:4.13", JkScope.TEST)).getProject();
+                .addTestDependencies(JkDependencySet.of()
+                    .and("junit:junit:4.13")).getProject();
 
         // A project depending on the first project + Guava
         JkJavaProject dependerProject = JkJavaProject.of().simpleFacade()
-                .addComileDependencies(JkDependencySet.of()
+                .addCompileDependencies(JkDependencySet.of()
                     .and("com.google.guava:guava:22.0")
                     .and(coreProject.toDependency()))
                 .setPublishedModuleId("mygroup:depender")

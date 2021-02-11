@@ -39,15 +39,14 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
 
     private static final String RUNTIME ="runtime";
 
-    private final Ivy ivy;
+    private final JkRepoSet repoSet;
 
-    private IvyInternalDependencyResolver(Ivy ivy) {
-        super();
-        this.ivy = ivy;
+    private IvyInternalDependencyResolver(JkRepoSet repoSet) {
+        this.repoSet = repoSet;
     }
 
     static IvyInternalDependencyResolver of(JkRepoSet resolveRepos) {
-        return new IvyInternalDependencyResolver(IvyTranslatorToIvy.toIvy(resolveRepos));
+        return new IvyInternalDependencyResolver(resolveRepos);
     }
 
     @Override
@@ -60,7 +59,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
             module = moduleArg;
         }
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
-                module, deps, parameters, this.ivy.getSettings());
+                module, deps);
         final String[] confs = new String[] {"*"};
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
@@ -71,6 +70,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         resolveOptions.setCheckIfChanged(true);
         resolveOptions.setOutputReport(true);
         final ResolveReport ivyReport;
+        Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, parameters);
         try {
             ivyReport = ivy.resolve(moduleDescriptor, resolveOptions);
         } catch (final Exception e) {
@@ -88,15 +88,15 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         final JkResolveResult resolveResult = getResolveConf(ivyReport.getDependencies(), module,
                 errorReport, artifactContainer);
         if (moduleArg == null) {
-            deleteResolveCache(module);
+            deleteResolveCache(module, ivy);
         }
         return resolveResult;
     }
 
     @Override
     public File get(JkModuleDependency dependency) {
-        final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(dependency.getModuleId(),
-                dependency.getVersion());
+        final ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency
+                .toModuleRevisionId(dependency.toVersionedModule());
         final boolean isMetadata = "pom".equalsIgnoreCase(dependency.getExt());
         final String typeAndExt = JkUtilsObject.firstNonNull(dependency.getExt(), "jar");
         final DefaultArtifact artifact;
@@ -111,13 +111,15 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
             artifact = new DefaultArtifact(moduleRevisionId, null, dependency.getModuleId().getName(), typeAndExt,
                     typeAndExt, extra);
         }
+        Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, JkResolutionParameters.of());
         final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());
         return report.getLocalFile();
     }
 
     @Override
     public List<String> searchGroups() {
-        SearchEngine searchEngine = new SearchEngine(this.ivy.getSettings());
+        Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, JkResolutionParameters.of());
+        SearchEngine searchEngine = new SearchEngine(ivy.getSettings());
         return Arrays.asList(searchEngine.listOrganisations()).stream()
                 .sorted()
                 .collect(Collectors.toList());
@@ -125,7 +127,8 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
 
     @Override
     public List<String> searchModules(String groupId) {
-        SearchEngine searchEngine = new SearchEngine(this.ivy.getSettings());
+        Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, JkResolutionParameters.of());
+        SearchEngine searchEngine = new SearchEngine(ivy.getSettings());
         return Arrays.asList(searchEngine.listModules(groupId)).stream()
                 .sorted()
                 .collect(Collectors.toList());
@@ -133,16 +136,17 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
 
     @Override
     public List<String> searchVersions(JkModuleId moduleId) {
-        SearchEngine searchEngine = new SearchEngine(this.ivy.getSettings());
+        Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, JkResolutionParameters.of());
+        SearchEngine searchEngine = new SearchEngine(ivy.getSettings());
         return Arrays.asList(searchEngine.listRevisions(moduleId.getGroup(), moduleId.getName())).stream()
                 .sorted()
                 .collect(Collectors.toList());
     }
 
 
-    private void deleteResolveCache(JkVersionedModule module) {
-        final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
-        final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
+    private void deleteResolveCache(JkVersionedModule module, Ivy ivy) {
+        final ResolutionCacheManager cacheManager = ivy.getSettings().getResolutionCacheManager();
+        final ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(module);
         final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
         propsFile.delete();
         final File xmlFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
@@ -207,8 +211,10 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
 
                 final Caller[] callers = node.getAllCallers();
                 for (final Caller caller : callers) {
-                    final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
-                    final List<JkModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.getModuleId(), k -> new LinkedList<>());
+                    final JkVersionedModule parent = IvyTranslatorToDependency
+                            .toJkVersionedModule(caller.getModuleRevisionId());
+                    final List<JkModuleNodeInfo> list = parentChildMap.computeIfAbsent(
+                            parent.getModuleId(), k -> new LinkedList<>());
                     final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
                     final Set<String> declaredScopes = JkUtilsIterable.setOf(
                             dependencyDescriptor.getModuleConfigurations());
@@ -257,7 +263,8 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                 continue;
             }
             if (ivyNode.hasProblem()) {
-                final JkModuleId jkModuleId = JkModuleId.of(ivyNode.getModuleId().getOrganisation(), ivyNode.getModuleId().getName());
+                final JkModuleId jkModuleId = JkModuleId.of(ivyNode.getModuleId().getOrganisation(),
+                        ivyNode.getModuleId().getName());
                 final JkModuleDepProblem problem = JkModuleDepProblem.of(jkModuleId,
                         ivyNode.getId().getRevision(),
                         ivyNode.getProblemMessage());

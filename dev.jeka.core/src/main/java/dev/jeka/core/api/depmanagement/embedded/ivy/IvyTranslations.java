@@ -1,37 +1,8 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
-import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMapping;
-import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet;
-import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
-import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsObject;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
-import org.apache.ivy.core.module.descriptor.*;
-import org.apache.ivy.core.module.descriptor.Configuration.Visibility;
-import org.apache.ivy.core.module.id.ArtifactId;
-import org.apache.ivy.core.module.id.ModuleId;
-import org.apache.ivy.core.module.id.ModuleRevisionId;
-import org.apache.ivy.core.settings.IvySettings;
-import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
-import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
-import org.apache.ivy.plugins.matcher.PatternMatcher;
-import org.apache.ivy.plugins.repository.file.FileRepository;
-import org.apache.ivy.plugins.resolver.*;
-import org.apache.ivy.util.url.CredentialsStore;
-
-import java.io.File;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.*;
-
 final class IvyTranslations {
+
+    /*
 
     private static final String MAIN_RESOLVER_NAME = "MAIN";
 
@@ -253,10 +224,6 @@ final class IvyTranslations {
         }
     }
 
-    static String publishResolverUrl(DependencyResolver resolver) {
-        return resolver.getName().substring(PUBLISH_RESOLVER_NAME.length());
-    }
-
     static List<RepositoryResolver> publishResolverOf(IvySettings ivySettings) {
         final List<RepositoryResolver> resolvers = new LinkedList<>();
         for (final Object resolverObject : ivySettings.getResolvers()) {
@@ -371,7 +338,7 @@ final class IvyTranslations {
                     descriptor.addConfiguration(createConfiguration(jkScope));
                 }
             }
-            final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
+            final Artifact ivyArtifact = toIvyArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
             for (final JkScope jkScope : artifact.jkScopes) {
                 descriptor.addArtifact(jkScope.getName(), ivyArtifact);
             }
@@ -410,8 +377,8 @@ final class IvyTranslations {
         descriptor.addExtraAttributeNamespace(EXTRA_PREFIX, EXTRA_NAMESPACE);
     }
 
-    static Artifact toPublishedArtifact(JkIvyPublication.JkPublicationArtifact artifact,
-                                        ModuleRevisionId moduleId, Instant date) {
+    static Artifact toIvyArtifact(JkIvyPublication.JkPublicationArtifact artifact,
+                                  ModuleRevisionId moduleId, Instant date) {
         final String artifactName = JkUtilsString.isBlank(artifact.name) ? moduleId.getName()
                 : artifact.name;
         final String extension = JkUtilsObject.firstNonNull(artifact.extension, "");
@@ -680,5 +647,7 @@ final class IvyTranslations {
 
 
     }
+
+     */
 
 }

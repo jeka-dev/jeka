@@ -1,8 +1,9 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
-import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.publication.JkScope;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkVersionProvider;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
@@ -11,9 +12,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet.RESOLVE_MAPPING;
-import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.COMPILE;
-import static dev.jeka.core.api.depmanagement.JkScopedDependencyTest.RUNTIME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -29,9 +27,8 @@ public class IvyTranslationsTest {
         final JkVersionProvider versionProvider = JkVersionProvider.of();
 
         // handle multiple artifacts properly
-        JkDependencySet deps = deps();
-        final DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps, RESOLVE_MAPPING,
-                versionProvider);
+        final DefaultModuleDescriptor desc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
+                OWNER, deps());
         final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
         assertEquals(1, dependencyDescriptors.length);
         final DependencyDescriptor depDesc = dependencyDescriptors[0];
@@ -45,10 +42,10 @@ public class IvyTranslationsTest {
 
     }
 
-    private static JkDependencySet deps() {
-        return JkDependencySet.of()
-                .and("aGroup:aName:1", COMPILE)
-                .and("aGroup:aName::linux:1", RUNTIME, JkScope.of("toto"));
+    private static JkQualifiedDependencies deps() {
+        return JkQualifiedDependencies.of()
+                .and("compile", "aGroup:aName:1")
+                .and("runtime, toto", "aGroup:aName::linux:1");
     }
 
     private DependencyArtifactDescriptor findArtifactIn(DependencyArtifactDescriptor[] artifactDescs, String classsifier) {

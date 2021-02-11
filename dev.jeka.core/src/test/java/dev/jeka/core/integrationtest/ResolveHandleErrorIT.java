@@ -1,12 +1,13 @@
 package dev.jeka.core.integrationtest;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import org.junit.Test;
 
-import static dev.jeka.core.api.depmanagement.publication.JkScope.COMPILE_AND_RUNTIME;
-import static dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet.RESOLVE_MAPPING;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -18,11 +19,9 @@ public class ResolveHandleErrorIT {
     public void artifactNotFound() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkPopularModules.JAVAX_SERVLET_API, "2.5.3", COMPILE_AND_RUNTIME);  // does not exist
+                .and(JkPopularModules.JAVAX_SERVLET_API.version("2.5.3"));  // does not exist
         JkDependencyResolver resolver = JkDependencyResolver.of()
             .addRepos(JkRepo.ofMavenCentral())
-            .getParams()
-                .setScopeMapping(RESOLVE_MAPPING).__
             .setModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolveResult.JkErrorReport errorReport = resolveResult.getErrorReport();

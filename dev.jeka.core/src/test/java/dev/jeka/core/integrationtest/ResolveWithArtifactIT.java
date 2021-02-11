@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import dev.jeka.core.api.depmanagement.publication.JkScope;
 import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.Test;
 
@@ -24,9 +23,8 @@ public class ResolveWithArtifactIT {
         JkModuleDependency jgllinux = JkModuleDependency.of("org.lwjgl:lwjgl::natives-linux:3.1.1");
         JkDependencySet deps = JkDependencySet.of()
                 .and(jgllinux)
-                .and(JkPopularModules.GUAVA, "19.0" )
-                .and("org.lwjgl:lwjgl:3.1.1")
-                .withDefaultScopes(JkScope.COMPILE);
+                .and(JkPopularModules.GUAVA.version("19.0"))
+                .and("org.lwjgl:lwjgl:3.1.1");
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
@@ -51,10 +49,10 @@ public class ResolveWithArtifactIT {
     @Test
     public void artifactCountIsOk() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
-        JkDependencySet deps = JkDependencySet.of()
-                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", JkScope.COMPILE_AND_RUNTIME)
-                .and("org.springframework.boot:spring-boot-starter-test:1.5.+", JkScope.TEST)
-                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", JkScope.COMPILE);
+        JkQualifiedDependencies deps = JkQualifiedDependencies.of()
+                .and("comple, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE")
+                .and("test", "org.springframework.boot:spring-boot-starter-test:1.5.+")
+                .and("compile", "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0");
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);

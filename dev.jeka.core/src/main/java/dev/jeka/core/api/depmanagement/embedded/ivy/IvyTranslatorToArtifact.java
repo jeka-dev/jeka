@@ -15,10 +15,7 @@ import org.apache.ivy.core.module.id.ModuleRevisionId;
 
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class IvyTranslatorToArtifact {
 
@@ -39,14 +36,14 @@ class IvyTranslatorToArtifact {
         return result;
     }
 
-    static Map<String, Artifact> toIvyArtifacts(JkVersionedModule versionedModule,
+    static List<ArtifactAndConfigurations> toIvyArtifacts(JkVersionedModule versionedModule,
                                                 List<JkIvyPublication.JkPublicationArtifact> jkArtifacts) {
-        Map<String, Artifact> result = new HashMap<>();
+        List<ArtifactAndConfigurations> result = new LinkedList<>();
         Instant now = Instant.now();
         for (JkIvyPublication.JkPublicationArtifact jkArtifact : jkArtifacts) {
             ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(versionedModule);
             final Artifact artifact = toIvyArtifact(jkArtifact, moduleRevisionId, now);
-            result.put(jkArtifact.configuration, artifact);
+            result.add(new ArtifactAndConfigurations(artifact, jkArtifact.configurationNames));
         }
         return result;
     }
@@ -62,6 +59,19 @@ class IvyTranslatorToArtifact {
         });
     }
 
+    static void bind(DefaultModuleDescriptor descriptor, List<ArtifactAndConfigurations> artifactAndConfigurations) {
+        artifactAndConfigurations.forEach(artifactAndConfs -> {
+            Set<String> actualConfs = artifactAndConfs.configurations.isEmpty() ? Collections.singleton("default") :
+                    artifactAndConfs.configurations;
+            for (String actualConf : actualConfs) {
+                if (descriptor.getConfiguration(actualConf) == null) {
+                    descriptor.addConfiguration(new Configuration(actualConf));
+                }
+                descriptor.addArtifact(actualConf, artifactAndConfs.artifact);
+            }
+        });
+    }
+
     private static Artifact toMavenArtifact(Path artifactFile, String classifier, ModuleRevisionId moduleId, Instant date) {
         final String extension = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
         final Map<String, String> extraMap;
@@ -74,12 +84,24 @@ class IvyTranslatorToArtifact {
                 extraMap);
     }
 
-    private static Artifact toIvyArtifact(JkIvyPublication.JkPublicationArtifact artifact,
+    static Artifact toIvyArtifact(JkIvyPublication.JkPublicationArtifact artifact,
                                   ModuleRevisionId moduleId, Instant date) {
         final String name = JkUtilsString.isBlank(artifact.name) ? moduleId.getName() : artifact.name;
         final String extension = JkUtilsObject.firstNonNull(artifact.extension, "");
         final String type = JkUtilsObject.firstNonNull(artifact.type, extension);
         return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), name, type, extension);
+    }
+
+    static class ArtifactAndConfigurations {
+
+        final Set<String> configurations;
+
+        final Artifact artifact;
+
+        public ArtifactAndConfigurations(Artifact artifact, Set<String> configurations) {
+            this.configurations = configurations;
+            this.artifact = artifact;
+        }
     }
 
 

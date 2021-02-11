@@ -2,19 +2,24 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.repository.file.FileRepository;
 import org.apache.ivy.plugins.resolver.*;
 import org.apache.ivy.util.url.CredentialsStore;
 
 import java.io.File;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 
 class IvyTranslatorToResolver {
+
+    private static final String PUBLISH_RESOLVER_NAME = "publisher:";
 
     private static final String MAVEN_ARTIFACT_PATTERN =
             "/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
-    static ChainResolver toChainResolver(JkRepoSet repos) {
+    static AbstractResolver toChainResolver(JkRepoSet repos) {
         final ChainResolver chainResolver = new ChainResolver();
         for (final JkRepo jkRepo : repos.getRepoList()) {
             final DependencyResolver resolver = toResolver(jkRepo, true);
@@ -22,6 +27,21 @@ class IvyTranslatorToResolver {
             chainResolver.add(resolver);
         }
         return chainResolver;
+    }
+
+    static List<RepositoryResolver> publishResolverOf(IvySettings ivySettings) {
+        final List<RepositoryResolver> resolvers = new LinkedList<>();
+        for (final Object resolverObject : ivySettings.getResolvers()) {
+            final RepositoryResolver resolver = (RepositoryResolver) resolverObject;
+            if (resolver.getName() != null && resolver.getName().startsWith(PUBLISH_RESOLVER_NAME)) {
+                resolvers.add(resolver);
+            }
+        }
+        return resolvers;
+    }
+
+    static String publishResolverUrl(DependencyResolver resolver) {
+        return resolver.getName().substring(PUBLISH_RESOLVER_NAME.length());
     }
 
     // see

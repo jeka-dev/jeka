@@ -3,8 +3,6 @@ package dev.jeka.core.integrationtest;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMappingSet;
-import dev.jeka.core.api.depmanagement.publication.JkScope;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
@@ -12,7 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -28,17 +25,15 @@ public class MergeFileDepIT {
         Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource( "dep1").toURI());
         Path dep2File = Paths.get(MergeFileDepIT.class.getResource( "dep2").toURI());
-        JkDependencySet deps = JkDependencySet.of()
-                .andFiles(dep0File, JkScope.TEST)
-                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", JkScope.COMPILE_AND_RUNTIME)
-                .andFile(dep1File, JkScope.TEST)
-                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", JkScope.COMPILE)
-                .andFile(dep2File, JkScope.COMPILE);
+        JkQualifiedDependencies deps = JkQualifiedDependencies.of()
+                .and("test", JkFileSystemDependency.of(dep0File))
+                .and("compile, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE")
+                .and("test", JkFileSystemDependency.of(dep1File))
+                .and("compile", "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0")
+                .and("compile", JkFileSystemDependency.of(dep2File));
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
-                .setModuleHolder(holder)
-                .getParams()
-                    .setScopeMapping(JkIvyConfigurationMappingSet.RESOLVE_MAPPING).__;
+                .setModuleHolder(holder);
         JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
 
         System.out.println(tree.toStringTree());
@@ -71,7 +66,7 @@ public class MergeFileDepIT {
 
         // Now check that file dependencies with Test Scope are not present in compile
 
-        tree = resolver.resolve(deps, JkScope.COMPILE).getDependencyTree();
+        tree = resolver.resolve(deps).getDependencyTree();  // intilay was resolve on compile
         System.out.println(tree.toStringTree());
 
         root = tree.getModuleInfo();
@@ -87,8 +82,8 @@ public class MergeFileDepIT {
         Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource("dep1").toURI());
         JkDependencySet deps = JkDependencySet.of()
-                .andFile(dep0File, JkScope.TEST)
-                .andFile(dep1File, JkScope.TEST);
+                .andFiles(dep0File)
+                .andFiles(dep1File);
         JkDependencyResolver resolver = JkDependencyResolver.of();
         JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
         assertEquals(2, tree.toFlattenList().size());

@@ -1,14 +1,15 @@
 package dev.jeka.core.integrationtest;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import static dev.jeka.core.api.depmanagement.publication.JkScope.COMPILE;
 
 public class ResolveGoogleApiClient {
 
@@ -24,7 +25,7 @@ public class ResolveGoogleApiClient {
         JkLog.setConsumer(JkLog.Style.INDENT);
         JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         JkResolveResult result = resolver().resolve(
-                JkDependencySet.of().and(GOOGLE_API_CLIENT, COMPILE));
+                JkDependencySet.of().and(GOOGLE_API_CLIENT));
        // System.out.println(result.getDependencyTree().toStringTree());
         JkVersion httpVersion = result.getDependencyTree().getResolvedVersions().getVersionOf(GOOGLE_HTTP_CLIENT);
         Assert.assertEquals(EXPECTED_HTTP_CLIENT_VERSION, httpVersion);
