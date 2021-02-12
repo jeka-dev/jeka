@@ -102,7 +102,7 @@ public final class JkRepoSet {
         return null;
     }
 
-    public List<JkRepo> getRepoList() {
+    public List<JkRepo> getRepos() {
         return repos;
     }
 

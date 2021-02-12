@@ -21,7 +21,7 @@ class IvyTranslatorToResolver {
 
     static AbstractResolver toChainResolver(JkRepoSet repos) {
         final ChainResolver chainResolver = new ChainResolver();
-        for (final JkRepo jkRepo : repos.getRepoList()) {
+        for (final JkRepo jkRepo : repos.getRepos()) {
             final DependencyResolver resolver = toResolver(jkRepo, true);
             resolver.setName(jkRepo.toString());
             chainResolver.add(resolver);
