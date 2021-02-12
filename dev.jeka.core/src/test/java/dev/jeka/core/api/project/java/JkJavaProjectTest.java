@@ -36,7 +36,7 @@ public class JkJavaProjectTest {
             .setBaseDir(core)
             .getConstruction()
                 .getCompilation()
-                    .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
+                    .addDependencies(JkDependencySet.of(baseProject.toDependency())).__
                 .getCompilation()
                     .getLayout()
                         .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__.__;

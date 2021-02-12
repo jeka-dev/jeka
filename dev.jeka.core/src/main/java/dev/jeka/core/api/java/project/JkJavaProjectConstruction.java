@@ -54,7 +54,7 @@ public class JkJavaProjectConstruction {
     JkJavaProjectConstruction(JkJavaProject project) {
         this.project = project;
         this.__ = project;
-        dependencyResolver = JkDependencyResolver.ofParent(this);
+        dependencyResolver = JkDependencyResolver.ofParent(this).addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
         compilation = JkJavaProjectCompilation.ofProd(this);
         testing = new JkJavaProjectTesting(this);
         manifest = JkManifest.ofParent(this);

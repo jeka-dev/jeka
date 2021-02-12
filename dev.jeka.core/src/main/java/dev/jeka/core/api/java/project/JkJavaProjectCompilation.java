@@ -246,7 +246,7 @@ public class JkJavaProjectCompilation<T> {
      * Sets the Java version used for both source and target.
      */
     public JkJavaProjectCompilation<T> addDependencies(JkDependencySet dependencySet) {
-        this.dependencySet = dependencySet.and(dependencySet);
+        this.dependencySet = this.dependencySet.and(dependencySet);
         return this;
     }
 
