@@ -27,8 +27,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
 
     private String outputDir = "jeka/output";
 
-    private JkVersionedModule.ConflictStrategy duplicateConflictStrategy =
-            JkVersionedModule.ConflictStrategy.FAIL;
+    private JkVersionedModule.ConflictStrategy duplicateConflictStrategy = JkVersionedModule.ConflictStrategy.FAIL;
 
     private final JkJavaProjectDocumentation documentation;
 

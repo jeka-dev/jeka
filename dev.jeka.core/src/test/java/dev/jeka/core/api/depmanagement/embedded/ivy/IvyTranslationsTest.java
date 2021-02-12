@@ -39,13 +39,12 @@ public class IvyTranslationsTest {
         final DependencyArtifactDescriptor linuxArt = findArtifactIn(artifactDescs, "linux");
         assertNotNull(linuxArt);
         System.out.println(Arrays.asList(linuxArt.getConfigurations()));
-
     }
 
     private static JkQualifiedDependencies deps() {
         return JkQualifiedDependencies.of()
-                .and("compile", "aGroup:aName:1")
-                .and("runtime, toto", "aGroup:aName::linux:1");
+                .and("compile", "aGroup:aName:1.0")
+                .and("runtime, toto", "aGroup:aName:linux:1.0");
     }
 
     private DependencyArtifactDescriptor findArtifactIn(DependencyArtifactDescriptor[] artifactDescs, String classsifier) {
@@ -56,9 +55,5 @@ public class IvyTranslationsTest {
         }
         return null;
     }
-
-
-
-
 
 }

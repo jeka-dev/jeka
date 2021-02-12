@@ -2,6 +2,7 @@ package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
@@ -155,6 +156,9 @@ public class JkDependencySet {
     }
 
     public JkDependencySet andFiles(Hint hint, Iterable<Path> paths) {
+        if (JkUtilsPath.disambiguate(paths).isEmpty()) {
+            return this;
+        }
         return and(hint, JkFileSystemDependency.of(paths));
     }
 

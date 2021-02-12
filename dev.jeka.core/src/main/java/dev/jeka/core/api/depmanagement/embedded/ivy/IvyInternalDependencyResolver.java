@@ -97,10 +97,9 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
     public File get(JkModuleDependency dependency) {
         final ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency
                 .toModuleRevisionId(dependency.toVersionedModule());
-        final boolean isMetadata = "pom".equalsIgnoreCase(dependency.getExt());
-        final String typeAndExt = JkUtilsObject.firstNonNull(dependency.getExt(), "jar");
+        final String typeAndExt = JkUtilsObject.firstNonNull(dependency.getType(), "jar");
         final DefaultArtifact artifact;
-        if (isMetadata) {
+        if ("pom".equals(dependency.getType())) {
             artifact = new DefaultArtifact(moduleRevisionId, null, dependency.getModuleId().getName(), typeAndExt,
                     typeAndExt, true);
         } else {

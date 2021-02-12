@@ -166,8 +166,8 @@ public final class JkPom {
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(), "dependencies");
         final JkQualifiedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
         for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
-            if (!moduleDependency.getExclusioins().isEmpty()) {
-                result = result.and(moduleDependency.getModuleId(), moduleDependency.getExclusioins());
+            if (!moduleDependency.getExclusions().isEmpty()) {
+                result = result.and(moduleDependency.getModuleId(), moduleDependency.getExclusions());
             }
         }
         return result;
@@ -202,7 +202,7 @@ public final class JkPom {
         JkModuleDependency moduleDependency = JkModuleDependency.of(groupId, artifactId, version);
         final String type = JkUtilsXml.directChildText(mvnDependency, "type");
         if (type != null) {
-            moduleDependency = moduleDependency.withExt(type);
+            moduleDependency = moduleDependency.withType(type);
         }
         final String classifier = JkUtilsXml.directChildText(mvnDependency, "classifier");
         if (classifier != null) {

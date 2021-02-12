@@ -42,7 +42,7 @@ class IvyTranslatorToDependency {
         boolean changing = version.isDynamic() || version.isSnapshot();
         DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(moduleRevisionId, false, changing);
         String masterConfs = configurationMapping.getLeftAsIvYExpression();
-        moduleDependency.getExclusioins().forEach(exclusion ->
+        moduleDependency.getExclusions().forEach(exclusion ->
                 result.addExcludeRule(masterConfs, toExcludeRule(exclusion)));
         String dependencyConfs = dependencyConfs(configurationMapping, moduleDependency.getTransitivity());
         result.addDependencyConfiguration(masterConfs, dependencyConfs);

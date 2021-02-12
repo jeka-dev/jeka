@@ -2,7 +2,6 @@ package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -22,24 +21,30 @@ import java.util.*;
 public final class JkModuleDependency implements JkDependency {
 
     private final JkModuleId module;
+
     private final JkVersion version;
+
     private final String classifier;
+
+    private final String type;
+
     private final JkTransitivity transitivity;
-    private final String extension;
-    private final List<JkDependencyExclusion> excludes;
+
+    private final List<JkDependencyExclusion> exclusions;
+
     private final Path ideProjectDir;
 
-    private JkModuleDependency(JkModuleId module, JkVersion version, String classifier,
-                               JkTransitivity transitivity, String extension, List<JkDependencyExclusion> excludes, Path ideProjectDir) {
+    private JkModuleDependency(JkModuleId module, JkVersion version, String classifier, String type,
+                               JkTransitivity transitivity, List<JkDependencyExclusion> exclusions, Path ideProjectDir) {
         JkUtilsAssert.argument(module != null, "module cannot be null.");
         JkUtilsAssert.argument(version != null, module + " version cannot be null.");
-        JkUtilsAssert.argument(excludes != null, module + " module dependency can't be instantiated with null excludes, use empty list instead");
+        JkUtilsAssert.argument(exclusions != null, module + " module dependency can't be instantiated with null excludes, use empty list instead");
         this.module = module;
         this.version = version;
         this.classifier = classifier;
+        this.type = type;
         this.transitivity = transitivity;
-        this.extension = extension;
-        this.excludes = excludes;
+        this.exclusions = exclusions;
         this.ideProjectDir = ideProjectDir;
     }
 
@@ -56,8 +61,7 @@ public final class JkModuleDependency implements JkDependency {
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, JkVersion version) {
-        return new JkModuleDependency(moduleId, version, null, JkTransitivity.RUNTIME, null,
-                Collections.EMPTY_LIST, null);
+        return new JkModuleDependency(moduleId, version, null, null, null, Collections.EMPTY_LIST, null);
     }
 
     /**
@@ -73,7 +77,7 @@ public final class JkModuleDependency implements JkDependency {
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, String versionRange) {
-        return new JkModuleDependency(moduleId, JkVersion.of(versionRange), null, JkTransitivity.RUNTIME, null,
+        return new JkModuleDependency(moduleId, JkVersion.of(versionRange), null, null, null,
                 Collections.EMPTY_LIST, null);
     }
 
@@ -90,15 +94,14 @@ public final class JkModuleDependency implements JkDependency {
      * Description can be :
      * group:name
      * group:name:version
-     * group:name:type:version
-     * group:name:type:artifact:version
+     * group:name:classifier:version
      *
      * Version can be a '?' if it is unspecified.
      */
     public static JkModuleDependency of(String description) {
         final String[] strings = description.split( ":");
         final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
-                ", group:name:version, 'group:value:type:version, group:of:type:artifact:version";
+                ", group:name:version, 'group:name:classifier:version";
         JkUtilsAssert.argument(isModuleDependencyDescription(description), errorMessage);
         final JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
         if (strings.length == 2) {
@@ -107,13 +110,7 @@ public final class JkModuleDependency implements JkDependency {
         if (strings.length == 3) {
             return of(moduleId, JkVersion.of(strings[2]));
         }
-        if (strings.length ==4) {
-            return of(moduleId, JkVersion.of(strings[3])).withExt(strings[2]);
-        }
-        else { // length = 5
-            return of(moduleId, JkVersion.of(strings[4]))
-                    .withClassifier(strings[3]).withExt(strings[2]);
-        }
+        return of(moduleId, JkVersion.of(strings[3])).withClassifier(strings[2]);
     }
 
     /**
@@ -122,7 +119,7 @@ public final class JkModuleDependency implements JkDependency {
      */
     public static boolean isModuleDependencyDescription(String candidate) {
         final String[] strings = candidate.split( ":");
-        return strings.length >= 2 && strings.length <= 5;
+        return strings.length >= 2 && strings.length <= 4;
     }
 
     /**
@@ -151,14 +148,13 @@ public final class JkModuleDependency implements JkDependency {
      * Returns a {@link JkModuleDependency} identical to this one but with the specified 'transitive' property.
      */
     public JkModuleDependency withTransitivity(JkTransitivity transitivity) {
-        return new JkModuleDependency(module, version, classifier, transitivity, extension,
-                excludes, ideProjectDir);
+        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, ideProjectDir);
     }
 
     /**
      * Returns <code>true</code> if the version of the module for this dependency is not specified.
      */
-    public boolean hasUnspecifedVersion() {
+    public boolean hasUnspecifiedVersion() {
         return this.version.isUnspecified();
     }
 
@@ -171,8 +167,7 @@ public final class JkModuleDependency implements JkDependency {
         if (version == null) {
             return this;
         }
-        return new JkModuleDependency(module, version, classifier,
-                transitivity, extension, excludes, ideProjectDir);
+        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, ideProjectDir);
     }
 
     /**
@@ -180,8 +175,19 @@ public final class JkModuleDependency implements JkDependency {
      * classifier. This has meaning only for Maven module.
      */
     public JkModuleDependency withClassifier(String classifier) {
-        return new JkModuleDependency(module, version, classifier, transitivity, extension, excludes, ideProjectDir);
+        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, ideProjectDir);
     }
+
+    /**
+     * Returns a JkModuleDependency identical to this one but with the specified
+     * type.
+     * @see JkModuleDependency#getType()
+     */
+    public JkModuleDependency withType(String type) {
+        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, ideProjectDir);
+    }
+
+
 
     /**
      * Returns the classifier for this module dependency or <code>null</code> if
@@ -192,12 +198,12 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Returns a JkModuleDependency identical to this one but with the specified
-     * artifact getExtension.
+     * Returns the 'type' of this dependency. Type values <code>null</code> most of the time, but can refer to
+     * a file extension or metadata indication as 'pom'. Example values are 'pom', 'war', 'test-jar'.
+     * It maps with Maven concept of dependency type and  Ivy concept of artifact type.
      */
-    public JkModuleDependency withExt(String extension) {
-        final String ext = JkUtilsString.isBlank(extension) ? null : extension;
-        return new JkModuleDependency(module, version, classifier, transitivity, ext, excludes, ideProjectDir);
+    public String getType() {
+        return type;
     }
 
     /**
@@ -221,25 +227,17 @@ public final class JkModuleDependency implements JkDependency {
      * specified exclusion.
      */
     public JkModuleDependency andExclude(Iterable<JkDependencyExclusion> depExcludes) {
-        final List<JkDependencyExclusion> list = new LinkedList<>(excludes);
+        final List<JkDependencyExclusion> list = new LinkedList<>(exclusions);
         list.addAll(JkUtilsIterable.listOf(depExcludes));
-        return new JkModuleDependency(module, version, classifier, transitivity, extension,
+        return new JkModuleDependency(module, version, classifier, type, transitivity,
                 Collections.unmodifiableList(list), ideProjectDir);
-    }
-
-    /**
-     * Returns the getExtension for this module dependency or <code>null</code> if
-     * the dependency is done on the the default getExtension.
-     */
-    public String getExt() {
-        return this.extension;
     }
 
     /**
      * Returns modules to exclude to the transitive chain.
      */
-    public List<JkDependencyExclusion> getExclusioins() {
-        return excludes;
+    public List<JkDependencyExclusion> getExclusions() {
+        return exclusions;
     }
 
     @Override
@@ -257,7 +255,7 @@ public final class JkModuleDependency implements JkDependency {
 
     @Override
     public JkModuleDependency withIdeProjectDir(Path path) {
-        return new JkModuleDependency(module, version, classifier, transitivity, extension, excludes, path);
+        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, path);
     }
 
     public JkVersionedModule toVersionedModule() {
@@ -288,8 +286,7 @@ public final class JkModuleDependency implements JkDependency {
         if (!module.equals(that.module)) return false;
         if (!equalsOrOneIsUnspecified(version, that.version)) return false;
         if (!equalsOrOneIsNull(classifier, that.classifier)) return false;
-        if (!equalsOrOneIsNull(extension, that.extension)) return false;
-        return equalsOrOneIsNull(excludes, that.excludes);
+        return equalsOrOneIsNull(exclusions, that.exclusions);
     }
 
     @Override

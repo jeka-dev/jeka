@@ -29,7 +29,6 @@ public class JkJavaProjectTest {
                     .getLayout()
                         .emptySources().addSource("src")
                         .emptyResources().addResource("res").includeSourceDirsInResources().__.__.__;
-        System.out.println(baseProject.getInfo());
         baseProject.getPublication().getArtifactProducer().makeAllArtifacts();
 
         final Path core = top.resolve("core");
