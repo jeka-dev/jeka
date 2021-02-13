@@ -87,7 +87,8 @@ public class ResolveTreeIT {
         String directCoreVersion = "4.3.6.RELEASE";
         JkDependencySet deps = JkDependencySet.of()
                 .and(starterWebModule.version("1.5.10.RELEASE").withTransitivity(JkTransitivity.COMPILE))
-                .and(springCoreModule.version(directCoreVersion).withTransitivity(JkTransitivity.COMPILE));  // force a projectVersion lower than the transitive above
+                // force a version lower than the transitive above
+                .and(springCoreModule.version(directCoreVersion).withTransitivity(JkTransitivity.COMPILE));
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
@@ -99,7 +100,7 @@ public class ResolveTreeIT {
         assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.getResolvedVersion().getValue());  // cause evicted
 
         // As the spring-core projectVersion is declared as direct dependency and the declared projectVersion is exact (not dynamic)
-        // then the resolved projectVersion should the one declared.
+        // then the resolved version should the direct one.
         JkResolvedDependencyNode.JkModuleNodeInfo springCoreDirectModuleNodeInfo = tree.getChildren().get(1).getModuleInfo();
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getDeclaredVersion().getValue());
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getResolvedVersion().getValue());

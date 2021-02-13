@@ -19,15 +19,11 @@ import java.nio.file.Paths;
 public class JkDependencyResolverTest {
 
     @Test
-    public void resolveModuleDependencies() throws Exception {
+    public void resolve_only1ModuleDependencies_ok() throws Exception {
         JkLog.Verbosity verbosity = JkLog.verbosity();
-        JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
-        //JkLog.setHierarchicalConsoleConsumer();
         JkDependencySet dependencies = JkDependencySet.of()
-                .and(JkPopularModules.GUAVA)
-                .and(TestConstants.GUAVA_VERSION);
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                .addRepos(JkRepo.ofMavenCentral());
+                .and(JkPopularModules.GUAVA + ":" + TestConstants.GUAVA_VERSION);
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
         resolveResult.assertNoError();
         Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
@@ -41,16 +37,11 @@ public class JkDependencyResolverTest {
         JkJavaProject baseProject = JkJavaProject.of().simpleFacade()
             .setBaseDir(root.resolve("base"))
             .addCompileDependencies(JkDependencySet.of()
-                .and(JkPopularModules.GUAVA)
-                .and(TestConstants.GUAVA_VERSION)
-            ).getProject();
+                .and("com.google.guava:guava:" + TestConstants.GUAVA_VERSION)).getProject();
 
-        JkJavaProject coreProject = JkJavaProject.of()
+        JkJavaProject coreProject = JkJavaProject.of().simpleFacade()
             .setBaseDir(root.resolve("core"))
-            .getConstruction()
-                .getCompilation()
-                    .addDependencies(JkDependencySet.of()
-                        .and(baseProject.toDependency())).__.__;
+            .addCompileDependencies(JkDependencySet.of(baseProject.toDependency())).getProject();
 
         JkResolveResult resolveResult = coreProject.getConstruction().getDependencyResolver().resolve(
                 coreProject.getConstruction().getCompilation().getDependencies());
@@ -63,12 +54,11 @@ public class JkDependencyResolverTest {
     }
 
     @Test
-    public void resolveMixedTypeDependencies() throws Exception {
+    public void resolve_fileAndModuleDependencies_ok() throws Exception {
         URL sampleJarUrl = JkDependencyResolverTest.class.getResource("myArtifactSample.jar");
         Path jarFile = Paths.get(sampleJarUrl.toURI());
         JkDependencySet dependencies = JkDependencySet.of()
-                .and(JkPopularModules.GUAVA)
-                .and(TestConstants.GUAVA_VERSION)
+                .and(JkPopularModules.GUAVA.version(TestConstants.GUAVA_VERSION))
                 .andFiles(jarFile);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
@@ -77,7 +67,7 @@ public class JkDependencyResolverTest {
     }
 
     @Test
-    public void resolveOnlyFilesDependencies() throws Exception {
+    public void resolve_onlyFilesDependencies_ok() throws Exception {
         URL sampleJarUrl = JkDependencyResolverTest.class.getResource("myArtifactSample.jar");
         Path jarFile = Paths.get(sampleJarUrl.toURI());
         JkDependencySet dependencies = JkDependencySet.of()

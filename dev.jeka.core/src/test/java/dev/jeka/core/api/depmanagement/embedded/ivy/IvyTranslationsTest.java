@@ -2,18 +2,13 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
-import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
-import dev.jeka.core.api.utils.JkUtilsObject;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Created by angibaudj on 08-03-17.
@@ -22,51 +17,23 @@ public class IvyTranslationsTest {
 
     private static final JkVersionedModule OWNER = JkVersionedModule.of("ownerGroup:ownerName:ownerVersion");
 
-    private static JkQualifiedDependencies deps() {
-        return JkQualifiedDependencies.of()
-                .and("compile", "aGroup:aName:1.0")
-                .and("runtime, toto -> *", "aGroup:aName:linux:1.0");
-    }
-
     @Test
     public void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn2dependencies() {
         JkQualifiedDependencies deps =JkQualifiedDependencies.of()
                 .and(null, "aGroup:aName:1.0")
-                .and(null, "aGroup:aName:linux:1.0");
+                .and(null, "aGroup:aName:linux:1.0")
+                .and(null, "bGroup:bName:win:exe:1.0");
         final DefaultModuleDescriptor desc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
                 OWNER, deps);
         final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
-        assertEquals(2, dependencyDescriptors.length);
+        assertEquals(3, dependencyDescriptors.length);
+        DependencyArtifactDescriptor linuxArtifact = dependencyDescriptors[1].getAllDependencyArtifacts()[0];
+        assertEquals("jar", linuxArtifact.getType());
+        assertEquals("linux", linuxArtifact.getName());
+        DependencyArtifactDescriptor winArtifact = dependencyDescriptors[2].getAllDependencyArtifacts()[0];
+        assertEquals("exe", winArtifact.getType());
+        assertEquals("win", winArtifact.getName());
     }
 
-    @Test
-    public void toPublicationLessModule() throws Exception {
-        final JkVersionProvider versionProvider = JkVersionProvider.of();
-
-        // handle multiple artifacts properly
-        final DefaultModuleDescriptor desc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
-                OWNER, deps());
-        final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
-        assertEquals(1, dependencyDescriptors.length);
-        final DependencyDescriptor depDesc = dependencyDescriptors[0];
-        final DependencyArtifactDescriptor[] artifactDescs = depDesc.getAllDependencyArtifacts();
-        assertEquals(2, artifactDescs.length);
-        final DependencyArtifactDescriptor mainArt = findArtifactIn(artifactDescs, null);
-        assertNotNull(mainArt);
-        final DependencyArtifactDescriptor linuxArt = findArtifactIn(artifactDescs, "linux");
-        assertNotNull(linuxArt);
-        System.out.println(Arrays.asList(linuxArt.getConfigurations()));
-    }
-
-
-
-    private DependencyArtifactDescriptor findArtifactIn(DependencyArtifactDescriptor[] artifactDescs, String classsifier) {
-        for (final DependencyArtifactDescriptor item : artifactDescs) {
-            if (JkUtilsObject.equals(item.getAttribute("classifier"), classsifier)) {
-                return item;
-            }
-        }
-        return null;
-    }
 
 }

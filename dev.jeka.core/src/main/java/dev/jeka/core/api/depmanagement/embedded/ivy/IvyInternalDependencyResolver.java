@@ -60,7 +60,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         }
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
                 module, deps);
-        final String[] confs = new String[] {"*"};
+        final String[] confs = moduleDescriptor.getConfigurationsNames();
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);

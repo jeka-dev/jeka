@@ -39,8 +39,12 @@ class IvyTranslatorToDependency {
                 moduleDependency.getModuleId().getGroup(), moduleDependency.getModuleId().getName(),
                 version.getValue());
         boolean changing = version.isDynamic() || version.isSnapshot();
-        DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(moduleRevisionId, false, changing);
-        String masterConfs = configurationMapping.getLeftAsIvYExpression();
+        boolean isTransitive = moduleDependency.getTransitivity() != JkTransitivity.NONE;
+        boolean force = true;
+        DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, false, changing,
+                isTransitive);
+        String masterConfs =  configurationMapping.getLeft().isEmpty() ? IvyTranslatorToConfiguration.DEFAULT
+                : configurationMapping.getLeftAsIvYExpression();
         moduleDependency.getExclusions().forEach(exclusion ->
                 result.addExcludeRule(masterConfs, toExcludeRule(exclusion)));
         String dependencyConfs = dependencyConfs(configurationMapping, moduleDependency.getTransitivity());

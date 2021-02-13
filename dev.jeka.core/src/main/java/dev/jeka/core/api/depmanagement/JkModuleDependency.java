@@ -95,13 +95,15 @@ public final class JkModuleDependency implements JkDependency {
      * group:name
      * group:name:version
      * group:name:classifier:version
+     * group:name:classifier:type:version
      *
      * Version can be a '?' if it is unspecified.
      */
     public static JkModuleDependency of(String description) {
         final String[] strings = description.split( ":");
         final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
-                ", group:name:version, 'group:name:classifier:version";
+                ", group:name:version, 'group:name:classifier:version, 'group:name:classifier:type:version'.\n" +
+                "'?' can be used in place of 'version' if this one is unspecified.";
         JkUtilsAssert.argument(isModuleDependencyDescription(description), errorMessage);
         final JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
         if (strings.length == 2) {
@@ -109,8 +111,10 @@ public final class JkModuleDependency implements JkDependency {
         }
         if (strings.length == 3) {
             return of(moduleId, JkVersion.of(strings[2]));
+        } if (strings.length == 4) {
+            return of(moduleId, JkVersion.of(strings[3])).withClassifier(strings[2]);
         }
-        return of(moduleId, JkVersion.of(strings[3])).withClassifier(strings[2]);
+        return of(moduleId, JkVersion.of(strings[4])).withClassifier(strings[2]).withType(strings[3]);
     }
 
     /**
@@ -119,7 +123,7 @@ public final class JkModuleDependency implements JkDependency {
      */
     public static boolean isModuleDependencyDescription(String candidate) {
         final String[] strings = candidate.split( ":");
-        return strings.length >= 2 && strings.length <= 4;
+        return strings.length >= 2 && strings.length <= 5;
     }
 
     /**

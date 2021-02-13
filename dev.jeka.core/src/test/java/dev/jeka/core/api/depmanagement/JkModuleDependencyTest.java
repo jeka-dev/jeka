@@ -8,16 +8,11 @@ public class JkModuleDependencyTest {
 
     @Test
     public void testOf() {
-        final JkModuleDependency dep = JkModuleDependency.of("group:name:sources:version")
-                .withTransitivity(JkTransitivity.RUNTIME).withType("zip");
+        final JkModuleDependency dep = JkModuleDependency.of("group:name:sources:zip:version")
+                .withTransitivity(JkTransitivity.NONE);
         Assert.assertEquals("sources", dep.getClassifier());
-        Assert.assertEquals(JkTransitivity.RUNTIME, dep.getTransitivity());
-
-        final JkModuleDependency dep2 = JkModuleDependency.of("group:name:zip:sources:version");
-        Assert.assertEquals("zip", dep2.getType());
-
-        final JkModuleDependency dep3 = JkModuleDependency.of("group:name:version:sources");
-
+        Assert.assertEquals("zip", dep.getType());
+        Assert.assertEquals(JkTransitivity.NONE, dep.getTransitivity());
     }
 
 }
