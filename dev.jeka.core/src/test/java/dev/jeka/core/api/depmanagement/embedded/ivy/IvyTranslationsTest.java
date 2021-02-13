@@ -22,6 +22,23 @@ public class IvyTranslationsTest {
 
     private static final JkVersionedModule OWNER = JkVersionedModule.of("ownerGroup:ownerName:ownerVersion");
 
+    private static JkQualifiedDependencies deps() {
+        return JkQualifiedDependencies.of()
+                .and("compile", "aGroup:aName:1.0")
+                .and("runtime, toto -> *", "aGroup:aName:linux:1.0");
+    }
+
+    @Test
+    public void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn2dependencies() {
+        JkQualifiedDependencies deps =JkQualifiedDependencies.of()
+                .and(null, "aGroup:aName:1.0")
+                .and(null, "aGroup:aName:linux:1.0");
+        final DefaultModuleDescriptor desc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
+                OWNER, deps);
+        final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
+        assertEquals(2, dependencyDescriptors.length);
+    }
+
     @Test
     public void toPublicationLessModule() throws Exception {
         final JkVersionProvider versionProvider = JkVersionProvider.of();
@@ -41,11 +58,7 @@ public class IvyTranslationsTest {
         System.out.println(Arrays.asList(linuxArt.getConfigurations()));
     }
 
-    private static JkQualifiedDependencies deps() {
-        return JkQualifiedDependencies.of()
-                .and("compile", "aGroup:aName:1.0")
-                .and("runtime, toto", "aGroup:aName:linux:1.0");
-    }
+
 
     private DependencyArtifactDescriptor findArtifactIn(DependencyArtifactDescriptor[] artifactDescs, String classsifier) {
         for (final DependencyArtifactDescriptor item : artifactDescs) {

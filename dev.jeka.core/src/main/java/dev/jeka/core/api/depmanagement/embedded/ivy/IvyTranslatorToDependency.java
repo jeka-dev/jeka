@@ -2,11 +2,10 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMapping;
+import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsReflect;
-import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
-import org.apache.ivy.core.module.descriptor.DefaultExcludeRule;
-import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
-import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
+import dev.jeka.core.api.utils.JkUtilsString;
+import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
@@ -46,6 +45,11 @@ class IvyTranslatorToDependency {
                 result.addExcludeRule(masterConfs, toExcludeRule(exclusion)));
         String dependencyConfs = dependencyConfs(configurationMapping, moduleDependency.getTransitivity());
         result.addDependencyConfiguration(masterConfs, dependencyConfs);
+        String classifier = moduleDependency.getClassifier();
+        if (!JkUtilsString.isBlank(classifier)) {
+            result.addDependencyArtifact(masterConfs, toDependencyArtifact(result, classifier,
+                    moduleDependency.getType()));
+        }
         return result;
     }
 
@@ -81,6 +85,15 @@ class IvyTranslatorToDependency {
                 JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
                 JkVersion.of(moduleRevisionId.getRevision()));
     }
+
+    private static DependencyArtifactDescriptor toDependencyArtifact(DependencyDescriptor dependencyDescriptor,
+                                                                     String classifier, String type) {
+        String name = classifier;
+        String artifactType = JkUtilsObject.firstNonNull(type, "jar");
+        return new DefaultDependencyArtifactDescriptor(dependencyDescriptor, name, artifactType, artifactType,
+                null, null);
+    }
+
 
 
 }

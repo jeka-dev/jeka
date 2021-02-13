@@ -45,9 +45,9 @@ class IvyTranslatorToModuleDescriptor {
         return result;
     }
 
-    static DefaultModuleDescriptor toPublishModuleDescriptor(JkVersionedModule module,
-                                                                JkQualifiedDependencies dependencies,
-                                                                JkMavenPublication mavenPublication) {
+    static DefaultModuleDescriptor toMavenPublishModuleDescriptor(JkVersionedModule module,
+                                                                  JkQualifiedDependencies dependencies,
+                                                                  JkMavenPublication mavenPublication) {
         DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
         Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module,
                 mavenPublication.getArtifactLocator());
@@ -55,9 +55,9 @@ class IvyTranslatorToModuleDescriptor {
         return result;
     }
 
-    static DefaultModuleDescriptor toPublishModuleDescriptor(JkVersionedModule module,
-                                                                 JkQualifiedDependencies dependencies,
-                                                                 JkIvyPublication ivyPublication) {
+    static DefaultModuleDescriptor toIvyPublishModuleDescriptor(JkVersionedModule module,
+                                                                JkQualifiedDependencies dependencies,
+                                                                JkIvyPublication ivyPublication) {
         DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
         List<IvyTranslatorToArtifact.ArtifactAndConfigurations> artifactAndConfigurationsList =
             IvyTranslatorToArtifact.toIvyArtifacts(module, ivyPublication.getAllArtifacts());

@@ -92,6 +92,7 @@ class IvyTranslatorToArtifact {
         return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), name, type, extension);
     }
 
+
     static class ArtifactAndConfigurations {
 
         final Set<String> configurations;

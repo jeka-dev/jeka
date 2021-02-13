@@ -74,7 +74,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                            JkIvyPublication publication,
                            JkQualifiedDependencies dependencies) {
         JkLog.startTask( "Publish on Ivy repositories");
-        final ModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toPublishModuleDescriptor(
+        final ModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toIvyPublishModuleDescriptor(
                 versionedModule, dependencies, publication);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
         int publishCount = publishIvyArtifacts(publication, Instant.now(), moduleDescriptor, ivy.getSettings());
@@ -219,7 +219,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                                                            JkMavenPublication publication,
                                                            JkQualifiedDependencies dependencies,
                                                            Instant deliveryDate) {
-        return IvyTranslatorToModuleDescriptor.toPublishModuleDescriptor(versionedModule, dependencies, publication);
+        return IvyTranslatorToModuleDescriptor.toMavenPublishModuleDescriptor(versionedModule, dependencies, publication);
     }
 
     private static void commitPublication(DependencyResolver resolver) {
