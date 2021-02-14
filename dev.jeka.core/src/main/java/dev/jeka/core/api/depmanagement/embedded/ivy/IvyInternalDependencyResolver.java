@@ -9,11 +9,13 @@ import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
+import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
+import org.apache.ivy.core.report.ConfigurationResolveReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.DownloadOptions;
 import org.apache.ivy.core.resolve.IvyNode;
@@ -69,23 +71,22 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         resolveOptions.setRefresh(parameters.isRefreshed());
         resolveOptions.setCheckIfChanged(true);
         resolveOptions.setOutputReport(true);
-        final ResolveReport ivyReport;
+        final ResolveReport resolveReport;
         Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, parameters);
         try {
-            ivyReport = ivy.resolve(moduleDescriptor, resolveOptions);
+            resolveReport = ivy.resolve(moduleDescriptor, resolveOptions);
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
         }
         final JkResolveResult.JkErrorReport errorReport;
-        if (ivyReport.hasError()) {
-            errorReport = JkResolveResult.JkErrorReport.failure(moduleProblems(
-                    ivyReport.getDependencies()));
+        if (resolveReport.hasError()) {
+            errorReport = JkResolveResult.JkErrorReport.failure(problems(resolveReport));
         } else {
             errorReport = JkResolveResult.JkErrorReport.allFine();
         }
-        final ArtifactDownloadReport[] artifactDownloadReports = ivyReport.getAllArtifactsReports();
+        final ArtifactDownloadReport[] artifactDownloadReports = resolveReport.getAllArtifactsReports();
         final IvyArtifactContainer artifactContainer = IvyArtifactContainer.of(artifactDownloadReports);
-        final JkResolveResult resolveResult = getResolveConf(ivyReport.getDependencies(), module,
+        final JkResolveResult resolveResult = getResolveConf(resolveReport.getDependencies(), module,
                 errorReport, artifactContainer);
         if (moduleArg == null) {
             deleteResolveCache(module, ivy);
@@ -255,6 +256,22 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         }
     }
 
+    private List<JkModuleDepProblem> problems(ResolveReport resolveReport) {
+        List<JkModuleDepProblem> result = new LinkedList<>();
+        for (String configuration : resolveReport.getConfigurations()) {
+            ConfigurationResolveReport configurationResolveReport = resolveReport.getConfigurationReport(configuration);
+            for (ArtifactDownloadReport failedArtifactReport : configurationResolveReport.getFailedArtifactsReports()) {
+                Artifact artifact = failedArtifactReport.getArtifact();
+                ModuleRevisionId moduleRevisionId = artifact.getModuleRevisionId();
+                JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(moduleRevisionId);
+                String text = failedArtifactReport.getName() + " : " + failedArtifactReport.getDownloadDetails();
+                result.add(JkModuleDepProblem.of(versionedModule, text));
+            }
+        }
+        result.addAll(moduleProblems(resolveReport.getDependencies()));
+        return result;
+    }
+
     private List<JkModuleDepProblem> moduleProblems(List<IvyNode> ivyNodes) {
         final List<JkModuleDepProblem> result = new LinkedList<>();
         for (final IvyNode ivyNode : ivyNodes) {
@@ -262,12 +279,10 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                 continue;
             }
             if (ivyNode.hasProblem()) {
-                final JkModuleId jkModuleId = JkModuleId.of(ivyNode.getModuleId().getOrganisation(),
-                        ivyNode.getModuleId().getName());
-                final JkModuleDepProblem problem = JkModuleDepProblem.of(jkModuleId,
-                        ivyNode.getId().getRevision(),
-                        ivyNode.getProblemMessage());
-                result.add(problem);
+                JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(ivyNode.getId());
+                String text = ivyNode.getProblemMessage();
+                JkModuleDepProblem moduleDepProblem = JkModuleDepProblem.of(versionedModule, text);
+                result.add(moduleDepProblem);
             }
         }
         return result;

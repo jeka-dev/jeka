@@ -365,7 +365,7 @@ public class JkDependencySet {
                 .map(JkModuleDependency.class::cast)
                 .filter(dep -> dep.getVersion().isUnspecified())
                 .collect(Collectors.toList());
-        JkUtilsAssert.state(unspecifieds.isEmpty(), "Following module does not specify projectVersion : "
+        JkUtilsAssert.state(unspecifieds.isEmpty(), "Following module does not specify version : "
                 + unspecifieds);
         return this;
     }
@@ -416,7 +416,7 @@ public class JkDependencySet {
         if (last instanceof JkModuleDependency) {
             JkModuleDependency moduleDependency = (JkModuleDependency) last;
             for (JkDependencyExclusion exclusion : exclusions) {
-                moduleDependency = moduleDependency.andExclude(exclusion);
+                moduleDependency = moduleDependency.andExclusion(exclusion);
             }
             deps.removeLast();
             deps.add(moduleDependency);
@@ -442,10 +442,15 @@ public class JkDependencySet {
         return this.globalExclusions;
     }
 
-    public JkDependencySet andGlobalExclusion(JkDependencyExclusion exclude) {
-        final Set<JkDependencyExclusion> depExcludes = new HashSet<>(this.globalExclusions);
-        depExcludes.add(exclude);
-        return new JkDependencySet(this.dependencies, depExcludes, this.versionProvider);
+    public JkDependencySet andGlobalExclusion(JkDependencyExclusion exclusion) {
+        final Set<JkDependencyExclusion> depExclusion = new HashSet<>(this.globalExclusions);
+        depExclusion.add(exclusion);
+        return new JkDependencySet(this.dependencies, depExclusion, this.versionProvider);
+    }
+
+    public JkDependencySet andGlobalExclusion(String groupAndName) {
+        JkDependencyExclusion depExclusion = JkDependencyExclusion.of(groupAndName);
+        return andGlobalExclusion(depExclusion);
     }
 
     public JkDependencySet withGlobalExclusion(Set<JkDependencyExclusion> excludes) {

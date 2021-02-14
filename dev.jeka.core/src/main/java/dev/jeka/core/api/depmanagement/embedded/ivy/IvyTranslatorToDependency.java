@@ -13,6 +13,7 @@ import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -54,33 +55,34 @@ class IvyTranslatorToDependency {
             final Set<String> dependencyConfs =  configurationMapping.getRight().isEmpty() ?
                     Collections.singleton(null) : configurationMapping.getRight();
             for (String dependencyConf : dependencyConfs) {
-                String effectiveConf = dependencyConfs(dependencyConf, moduleDependency.getTransitivity());
-                result.addDependencyConfiguration(masterConf, effectiveConf);
+                Set<String> effectiveDepConfs = dependencyConfs(dependencyConf, moduleDependency.getTransitivity());
+                effectiveDepConfs.forEach(depConf -> result.addDependencyConfiguration(masterConf, depConf));
             }
             if (!JkUtilsString.isBlank(classifier)) {
-                result.addDependencyArtifact(masterConf, toDependencyArtifact(result, classifier,
-                        moduleDependency.getType()));
+                result.addDependencyArtifact(masterConf, IvyTranslatorToArtifact.toArtifactDependencyDescriptor(
+                        result, classifier, moduleDependency.getType()));
             }
         }
         return result;
     }
 
-    private static String dependencyConfs(String dependencyConf, JkTransitivity transitivity) {
+    private static Set<String> dependencyConfs(String dependencyConf, JkTransitivity transitivity) {
         if (dependencyConf != null) {
-            return dependencyConf;
+            return Collections.singleton(dependencyConf);
         }
-        if (transitivity == null) {
-            JkQualifiedDependencies.getIvyTargetConfigurations(JkTransitivity.RUNTIME);
-        }
-        return JkQualifiedDependencies.getIvyTargetConfigurations(transitivity);
+        JkTransitivity effectiveTransitivity = JkUtilsObject.firstNonNull(transitivity, JkTransitivity.RUNTIME);
+        String ivyExpression = JkQualifiedDependencies.getIvyTargetConfigurations(effectiveTransitivity);
+        return JkIvyConfigurationMapping.of(ivyExpression).getLeft();
     }
 
-    static DefaultExcludeRule toExcludeRule(JkDependencyExclusion depExclude) {
+    static DefaultExcludeRule toExcludeRule(JkDependencyExclusion depExclude, String... configurationNames) {
         String type = depExclude.getClassifier() == null ? PatternMatcher.ANY_EXPRESSION : depExclude.getClassifier();
         String ext = depExclude.getExtension() == null ? PatternMatcher.ANY_EXPRESSION : depExclude.getExtension();
         ModuleId moduleId = toModuleId(depExclude.getModuleId());
         ArtifactId artifactId = new ArtifactId(moduleId, "*", type, ext);
-        return new DefaultExcludeRule(artifactId, ExactPatternMatcher.INSTANCE, null);
+        DefaultExcludeRule result = new DefaultExcludeRule(artifactId, ExactPatternMatcher.INSTANCE, null);
+        Arrays.stream(configurationNames).forEach(name -> result.addConfiguration(name));
+        return result;
     }
 
     static ModuleId toModuleId(JkModuleId moduleId) {
@@ -97,15 +99,5 @@ class IvyTranslatorToDependency {
                 JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
                 JkVersion.of(moduleRevisionId.getRevision()));
     }
-
-    private static DependencyArtifactDescriptor toDependencyArtifact(DependencyDescriptor dependencyDescriptor,
-                                                                     String classifier, String type) {
-        String name = classifier;
-        String artifactType = JkUtilsObject.firstNonNull(type, "jar");
-        return new DefaultDependencyArtifactDescriptor(dependencyDescriptor, name, artifactType, artifactType,
-                null, null);
-    }
-
-
 
 }

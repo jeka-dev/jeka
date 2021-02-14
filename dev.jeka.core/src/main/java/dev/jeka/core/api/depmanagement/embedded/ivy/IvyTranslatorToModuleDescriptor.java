@@ -31,7 +31,8 @@ class IvyTranslatorToModuleDescriptor {
         toDependencyDescriptors(dependencies).forEach(dep -> IvyTranslatorToDependency.bind(result, dep));
 
         // Add global exclusions
-        dependencies.getGlobalExclusions().stream().map(exclusion -> toExcludeRule(exclusion))
+        dependencies.getGlobalExclusions().stream().map(exclusion -> toExcludeRule(exclusion,
+                result.getConfigurationsNames()))
                 .forEach(excludeRule -> result.addExcludeRule(excludeRule));
 
         // Add version overwrites for transitive dependencies

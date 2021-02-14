@@ -40,7 +40,6 @@ public final class JkDependencySetMerge {
     public static JkDependencySetMerge of(JkDependencySet left, JkDependencySet right) {
         List<JkDependency> result = new LinkedList<>();
         List<JkDependency> absentFromLeft = new LinkedList<>();
-        List<JkDependency> absentFromRight = new LinkedList<>();
         Iterator<JkDependency> leftIt = left.getDependencies().iterator();
         Iterator<JkDependency> rightIt = right.getDependencies().iterator();
         while (leftIt.hasNext()) {
@@ -55,9 +54,7 @@ public final class JkDependencySetMerge {
                     result.add(rightDep);
                 }
             }
-            if (matchingRightDep == null) {
-                absentFromRight.add(leftDep);
-            } else if (leftDep instanceof JkModuleDependency) {
+            if (matchingRightDep != null && leftDep instanceof JkModuleDependency) {
                 JkModuleDependency leftModDep = (JkModuleDependency) leftDep;
                 JkModuleDependency rightModDep = (JkModuleDependency) matchingRightDep;
                 leftDep = leftModDep.withTransitivity(
@@ -70,6 +67,8 @@ public final class JkDependencySetMerge {
             absentFromLeft.add(rightDep);
             result.add(rightDep);
         }
+        List<JkDependency> absentFromRight = new LinkedList(left.getDependencies());
+        absentFromRight.removeAll(right.getDependencies());
         JkVersionProvider mergedVersionProvider = left.getVersionProvider().and(right.getVersionProvider());
         HashSet<JkDependencyExclusion> mergedExcludes = new HashSet<>(left.getGlobalExclusions());
         mergedExcludes.addAll(right.getGlobalExclusions());

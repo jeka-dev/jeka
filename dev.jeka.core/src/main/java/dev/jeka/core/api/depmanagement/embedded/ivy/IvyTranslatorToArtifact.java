@@ -7,10 +7,7 @@ import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
-import org.apache.ivy.core.module.descriptor.Artifact;
-import org.apache.ivy.core.module.descriptor.Configuration;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
-import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
+import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 
 import java.nio.file.Path;
@@ -72,16 +69,26 @@ class IvyTranslatorToArtifact {
         });
     }
 
+    static DependencyArtifactDescriptor toArtifactDependencyDescriptor(DependencyDescriptor dependencyDescriptor,
+                                                                       String classifier, String type) {
+        String name = classifier;
+        String artifactType = JkUtilsObject.firstNonNull(type, "jar");
+        Map<String, String> extraAttribute = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
+        return new DefaultDependencyArtifactDescriptor(dependencyDescriptor, name, artifactType, artifactType,
+                null, extraAttribute);
+
+    }
+
     private static Artifact toMavenArtifact(Path artifactFile, String classifier, ModuleRevisionId moduleId, Instant date) {
         final String extension = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
-        final Map<String, String> extraMap;
+        final Map<String, String> extraAttribute;
         if (JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
-            extraMap = new HashMap<>();
+            extraAttribute = new HashMap<>();
         } else {
-            extraMap = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
+            extraAttribute = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
         }
         return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), moduleId.getName(), extension, extension,
-                extraMap);
+                extraAttribute);
     }
 
     static Artifact toIvyArtifact(JkIvyPublication.JkPublicationArtifact artifact,

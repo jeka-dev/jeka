@@ -58,25 +58,8 @@ public class ResolverWithScopeMapperIT {
         assertEquals(directCoreVersion, resolveResult.getVersionOf(springCoreModule).getValue());
     }
 
-    /*
-     * Spring-boot 1.5.3 has a dependency on spring-core which is higher than 4.0.0.
-     * Nevertheless, if we declare spring-core with version 4.0.0 as direct dependency,
-     * this one should be taken in account, and not the the higher one coming transitive dependency.
-     */
-    @Test
-    public void resolveWithSeveralScopes() {
-        JkDependencySet compile = JkDependencySet.of()
-                .and(JkPopularModules.GUAVA.version("19.0"))
-                .and (JkPopularModules.JAVAX_SERVLET_API);
-        JkDependencySet runtime = compile.minus(JkPopularModules.JAVAX_SERVLET_API);
-        JkQualifiedDependencies qdeps = JkQualifiedDependencies.computeIdeDependencies(compile, runtime,
-                JkDependencySet.of());
-        JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(qdeps);
-        assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
-        assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
-        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
-    }
+
+
 
     @Test
     public void getRuntimeTransitiveWithRuntime() {

@@ -92,6 +92,13 @@ public class JkQualifiedDependencies {
         return versionProvider;
     }
 
+    public List<JkQualifiedDependency> findByModule(String moduleId) {
+        JkModuleDependency moduleDependency = JkModuleDependency.of(moduleId);
+        return this.qualifiedDependencies.stream()
+                .filter(qDep -> qDep.getDependency().equals(moduleDependency))
+                .collect(Collectors.toList());
+    }
+
     public JkQualifiedDependencies remove(JkDependency dependency) {
         List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
                 .filter(qDep -> !qDep.equals(dependency))

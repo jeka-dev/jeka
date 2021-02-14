@@ -17,34 +17,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class ResolveWithArtifactIT {
 
-    @Test
-    public void artifactsAreHandled() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
-        JkModuleDependency jgllinux = JkModuleDependency.of("org.lwjgl:lwjgl::natives-linux:3.1.1");
-        JkDependencySet deps = JkDependencySet.of()
-                .and(jgllinux)
-                .and(JkPopularModules.GUAVA.version("19.0"))
-                .and("org.lwjgl:lwjgl:3.1.1");
-        JkDependencyResolver resolver = JkDependencyResolver.of()
-                .addRepos(JkRepo.ofMavenCentral())
-                .setModuleHolder(holder);
-        JkResolveResult resolveResult = resolver.resolve(deps);
-        JkResolvedDependencyNode treeRoot = resolveResult.getDependencyTree();
-        System.out.println(resolveResult.getFiles());
-        System.out.println(treeRoot.toStringTree());
-
-        // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
-        // it should results in a single node.
-        // The classpath order will also place all artifacts jump a same module subsequently
-        assertEquals(2, treeRoot.getChildren().size());
-        assertEquals(3, treeRoot.getResolvedFiles().size());
-
-        JkResolvedDependencyNode lwjglNode = treeRoot.getChildren().get(0);
-        List<Path> lwjglFiles = lwjglNode.getNodeInfo().getFiles();
-        System.out.println(lwjglFiles);
-        assertEquals(2, lwjglFiles.size());
-
-    }
 
     @Test
     public void artifactCountIsOk() {

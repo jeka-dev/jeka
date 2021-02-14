@@ -2,15 +2,12 @@ package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 
 /**
  * Information about problem when resolving dependencies
  */
 public class JkModuleDepProblem {
-
-    public static JkModuleDepProblem of(JkModuleId moduleId, String version, String text) {
-        return new JkModuleDepProblem(moduleId, JkVersion.of(version), text);
-    }
 
     private final JkModuleId moduleId;
 
@@ -22,6 +19,14 @@ public class JkModuleDepProblem {
         this.moduleId = moduleId;
         this.version= version;
         this.problemText = problemText;
+    }
+
+    public static JkModuleDepProblem of(JkModuleId moduleId, String version, String text) {
+        return new JkModuleDepProblem(moduleId, JkVersion.of(version), text);
+    }
+
+    public static JkModuleDepProblem of(JkVersionedModule versionedModule, String text) {
+        return of(versionedModule.getModuleId(), versionedModule.getVersion().getValue(), text);
     }
 
     /**

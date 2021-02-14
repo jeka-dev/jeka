@@ -212,7 +212,7 @@ public final class JkPom {
         if (exclusionsEl != null) {
             for (final Element exclusionElement : JkUtilsXml.directChildren(exclusionsEl,
                     "exclusion")) {
-                moduleDependency = moduleDependency.andExclude(jkDepExclude(exclusionElement));
+                moduleDependency = moduleDependency.andExclusion(jkDepExclude(exclusionElement));
             }
         }
         String scope = JkUtilsXml.directChildText(mvnDependency, "scope");

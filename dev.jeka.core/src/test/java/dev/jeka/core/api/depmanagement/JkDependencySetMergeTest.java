@@ -1,24 +1,24 @@
 package dev.jeka.core.api.depmanagement;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class JkDependencySetMergeTest {
 
     @Test
-    public void modulesAreProperlySorted() {
+    public void of_distinctSets_mergeCorrectly() {
         JkDependencySet left = of("A", "B", "C", "D", "E", "F", "Z");
-        JkDependencySet rigth = of("Z","A", "B", "Y", "V", "E", "X");
-        JkDependencySet result = of("A", "B", "C", "D", "Y", "V", "E", "F", "Z", "X");
-        JkDependencySetMerge merge = JkDependencySetMerge.of(left, rigth);
-        Assert.assertEquals(result, merge.getResult());
+        JkDependencySet right = of("Z","A", "B", "Y", "V", "E", "X");
+        JkDependencySet expectedResult = of("A", "B", "C", "D", "Y", "V", "E", "F", "Z", "X");
+        JkDependencySetMerge merge = JkDependencySetMerge.of(left, right);
+        assertEquals(of("Y", "V", "X").getDependencies(), merge.getAbsentDependenciesFromLeft());
+        assertEquals(of("C", "D", "F").getDependencies(), merge.getAbsentDependenciesFromRight());
+        assertEquals(expectedResult, merge.getResult());
     }
-
 
     private static JkDependencySet of (String ... depNames) {
         List<JkDependency> dependencies = new LinkedList<>();
