@@ -128,5 +128,4 @@ class IvyTranslatorToResolver {
         return url + "/" + pattern;
     }
 
-
 }
