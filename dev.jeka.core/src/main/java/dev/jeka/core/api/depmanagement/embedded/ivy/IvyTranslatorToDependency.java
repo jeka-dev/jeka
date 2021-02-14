@@ -13,13 +13,15 @@ import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 class IvyTranslatorToDependency {
 
     static List<DefaultDependencyDescriptor> toDependencyDescriptors(JkQualifiedDependencies dependencies) {
-        return dependencies.getQualifiedDependencies().stream()
+        return dependencies.replaceUnspecifiedVersionsWithProvider().getQualifiedDependencies().stream()
                 .map(qDep -> toDependencyDescriptor(qDep.getQualifier(), (JkModuleDependency) qDep.getDependency()))
                 .collect(Collectors.toList());
     }
@@ -40,29 +42,35 @@ class IvyTranslatorToDependency {
                 version.getValue());
         boolean changing = version.isDynamic() || version.isSnapshot();
         boolean isTransitive = moduleDependency.getTransitivity() != JkTransitivity.NONE;
-        boolean force = true;
-        DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, false, changing,
+        final boolean force = !version.isDynamic();
+        DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, force, changing,
                 isTransitive);
-        String masterConfs =  configurationMapping.getLeft().isEmpty() ? IvyTranslatorToConfiguration.DEFAULT
-                : configurationMapping.getLeftAsIvYExpression();
-        moduleDependency.getExclusions().forEach(exclusion ->
-                result.addExcludeRule(masterConfs, toExcludeRule(exclusion)));
-        String dependencyConfs = dependencyConfs(configurationMapping, moduleDependency.getTransitivity());
-        result.addDependencyConfiguration(masterConfs, dependencyConfs);
+        final Set<String> masterConfs =  configurationMapping.getLeft().isEmpty() ?
+                Collections.singleton(IvyTranslatorToConfiguration.DEFAULT) : configurationMapping.getLeft();
         String classifier = moduleDependency.getClassifier();
-        if (!JkUtilsString.isBlank(classifier)) {
-            result.addDependencyArtifact(masterConfs, toDependencyArtifact(result, classifier,
-                    moduleDependency.getType()));
+        for (String masterConf : masterConfs) {
+            moduleDependency.getExclusions().forEach(exclusion ->
+                    result.addExcludeRule(masterConf, toExcludeRule(exclusion)));
+            final Set<String> dependencyConfs =  configurationMapping.getRight().isEmpty() ?
+                    Collections.singleton(null) : configurationMapping.getRight();
+            for (String dependencyConf : dependencyConfs) {
+                String effectiveConf = dependencyConfs(dependencyConf, moduleDependency.getTransitivity());
+                result.addDependencyConfiguration(masterConf, effectiveConf);
+            }
+            if (!JkUtilsString.isBlank(classifier)) {
+                result.addDependencyArtifact(masterConf, toDependencyArtifact(result, classifier,
+                        moduleDependency.getType()));
+            }
         }
         return result;
     }
 
-    private static String dependencyConfs(JkIvyConfigurationMapping confMapping, JkTransitivity transitivity) {
-        if (!confMapping.getRight().isEmpty()) {
-            return confMapping.getRightAsIvYExpression();
+    private static String dependencyConfs(String dependencyConf, JkTransitivity transitivity) {
+        if (dependencyConf != null) {
+            return dependencyConf;
         }
         if (transitivity == null) {
-            return "*";
+            JkQualifiedDependencies.getIvyTargetConfigurations(JkTransitivity.RUNTIME);
         }
         return JkQualifiedDependencies.getIvyTargetConfigurations(transitivity);
     }

@@ -62,7 +62,8 @@ public class JkQualifiedDependencies {
 
     public static JkQualifiedDependencies of(JkDependencySet dependencySet) {
         return ofDependencies(dependencySet.getDependencies())
-                .withGlobalExclusions(dependencySet.getGlobalExclusions());
+                .withGlobalExclusions(dependencySet.getGlobalExclusions())
+                .withVersionProvider(dependencySet.getVersionProvider());
     }
 
     public List<JkQualifiedDependency> getQualifiedDependencies() {
@@ -92,10 +93,10 @@ public class JkQualifiedDependencies {
     }
 
     public JkQualifiedDependencies remove(JkDependency dependency) {
-        return of(qualifiedDependencies.stream()
+        List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
                 .filter(qDep -> !qDep.equals(dependency))
-                .collect(Collectors.toList())
-        );
+                .collect(Collectors.toList());
+        return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
     }
 
     public JkQualifiedDependencies and(JkQualifiedDependency qualifiedDependency) {
@@ -117,22 +118,21 @@ public class JkQualifiedDependencies {
     }
 
     public JkQualifiedDependencies replaceQualifier(JkDependency dependency, String qualifier) {
-        return of(qualifiedDependencies.stream()
+        List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
                 .map(qDep -> qDep.getDependency().equals(dependency) ? qDep.withQualifier(qualifier) : qDep)
-                .collect(Collectors.toList())
-        );
+                .collect(Collectors.toList());
+        return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
     }
 
     public JkQualifiedDependencies replaceQualifier(String dependency, String qualifier) {
         return replaceQualifier(JkModuleDependency.of(dependency), qualifier);
     }
 
-
     public JkQualifiedDependencies withModuleDependenciesOnly() {
-        return of(qualifiedDependencies.stream()
+        List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)
-                .collect(Collectors.toList())
-        );
+                .collect(Collectors.toList());
+        return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
     }
 
     /**
@@ -155,7 +155,22 @@ public class JkQualifiedDependencies {
             .and(versionProvider));
     }
 
-
+    public JkQualifiedDependencies replaceUnspecifiedVersionsWithProvider() {
+        List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
+                .map(qDep -> {
+                    if (qDep.getDependency() instanceof JkModuleDependency) {
+                        JkModuleDependency moduleDependency = (JkModuleDependency) qDep.getDependency();
+                        JkVersion providedVersion = versionProvider.getVersionOf(moduleDependency.getModuleId());
+                        if (moduleDependency.getVersion().isUnspecified() && providedVersion != null) {
+                            return JkQualifiedDependency.of(qDep.getQualifier(),
+                                    moduleDependency.withVersion(providedVersion));
+                        }
+                    }
+                    return qDep;
+                })
+                .collect(Collectors.toList());
+        return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
+    }
 
     public static JkQualifiedDependencies computeMavenPublishDependencies(JkDependencySet compileDeps,
                                                                       JkDependencySet runtimeDeps,

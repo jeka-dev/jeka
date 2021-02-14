@@ -17,6 +17,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class ResolveTreeIT {
 
+
+
     @Test
     public void treeIsCorrect() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
@@ -81,7 +83,7 @@ public class ResolveTreeIT {
     }
 
     @Test
-    public void treeHandleMultipleVersionWithLastestVersionWinConflictManager() {
+    public void resolve_sameDependencyAsDirectAndTransitiveWithDistinctVersion_directWin() {
         JkModuleId starterWebModule = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
         String directCoreVersion = "4.3.6.RELEASE";
@@ -106,30 +108,8 @@ public class ResolveTreeIT {
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getResolvedVersion().getValue());
     }
 
-    @Test
-    public void triplePlayAnd() {
-        JkDependencySet deps = JkDependencySet.of()
-                .and("com.googlecode.playn:playn-core:1.4")
-                .and("com.threerings:tripleplay:1.4");
-        JkDependencyResolver resolver = JkDependencyResolver.of()
-                .addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps);
-        JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
-        System.out.println(tree.toStringTree());
-        System.out.println(resolveResult.getFiles());
-    }
 
-    @Test
-    public void versionProvider() {
-        JkDependencySet deps = JkDependencySet.of()
-                .and("com.google.guava:guava")
-                .withVersionProvider(JkVersionProvider.of("com.google.guava:guava", "22.0"));
-        JkDependencyResolver resolver = JkDependencyResolver.of()
-                .addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps);
-        JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
-        JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getChildren().get(0).getModuleInfo();
-        assertEquals("22.0", moduleNodeInfo.getDeclaredVersion().getValue());
-    }
+
+
 
 }

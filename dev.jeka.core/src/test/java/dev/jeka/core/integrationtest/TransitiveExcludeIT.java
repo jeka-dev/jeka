@@ -3,12 +3,8 @@ package dev.jeka.core.integrationtest;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import org.junit.Test;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -20,27 +16,9 @@ public class TransitiveExcludeIT {
 
     private static final String BOOT_TEST_AND_VERSION = BOOT_TEST + ":1.5.3.RELEASE";
 
-    @Test
-    public void handleNonTransitive() {
-        JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of(BOOT_TEST_AND_VERSION).withTransitivity(JkTransitivity.NONE));
-        JkDependencyResolver resolver = JkDependencyResolver.of()
-                .addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps);
-        List<JkResolvedDependencyNode> nodes = resolveResult.getDependencyTree().toFlattenList();
-        assertEquals(1, nodes.size());
-    }
 
-    @Test
-    public void handleExcludes() {
-        JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of(BOOT_TEST_AND_VERSION)
-                        .andExclude(BOOT_TEST)
-                        .andExclude("org.springframework.boot:spring-boot-test-autoconfigure"));
-        JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps);
-        assertFalse(resolveResult.contains(JkModuleId.of(BOOT_TEST)));
-    }
+
+
 
     @Test
     public void handleGlobalExcludes() {

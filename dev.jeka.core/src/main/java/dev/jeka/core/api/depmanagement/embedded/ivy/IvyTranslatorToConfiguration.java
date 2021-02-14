@@ -12,6 +12,8 @@ class IvyTranslatorToConfiguration {
 
     static final String DEFAULT = "default";
 
+    static final String ALL = "*";
+
     static Set<Configuration> toMasterConfigurations(JkQualifiedDependencies dependencies) {
         Set<Configuration> result = dependencies.getQualifiedDependencies().stream()
                 .map(qDep -> qDep.getQualifier())
