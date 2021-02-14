@@ -4,8 +4,10 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMapping;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
-import org.apache.ivy.core.module.descriptor.*;
+import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
+import org.apache.ivy.core.module.descriptor.DefaultExcludeRule;
+import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
+import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
@@ -13,18 +15,27 @@ import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 class IvyTranslatorToDependency {
 
     static List<DefaultDependencyDescriptor> toDependencyDescriptors(JkQualifiedDependencies dependencies) {
-        return dependencies.replaceUnspecifiedVersionsWithProvider().getQualifiedDependencies().stream()
-                .map(qDep -> toDependencyDescriptor(qDep.getQualifier(), (JkModuleDependency) qDep.getDependency()))
-                .collect(Collectors.toList());
+        List<JkQualifiedDependency> qualifiedDependencies = dependencies.replaceUnspecifiedVersionsWithProvider()
+                .getQualifiedDependencies();
+        Map<JkVersionedModule, Set<ClassifierAndType>> moduleClassifierTypesMap =
+                mapModuleToClassifierType(qualifiedDependencies);
+        List<DefaultDependencyDescriptor> result = new LinkedList<>();
+        for (JkQualifiedDependency qualifiedDependency : qualifiedDependencies) {
+            JkModuleDependency moduleDependency = (JkModuleDependency) qualifiedDependency.getDependency();
+            Set<ClassifierAndType> classifierAndTypes = moduleClassifierTypesMap.get(
+                    moduleDependency.toVersionedModule());
+            if (classifierAndTypes == null) {
+                continue;
+            }
+            classifierAndTypes.remove(moduleDependency.toVersionedModule());
+            result.add(toDependencyDescriptor(qualifiedDependency.getQualifier(), moduleDependency, classifierAndTypes));
+        }
+        return result;
     }
 
     static void bind(DefaultModuleDescriptor moduleDescriptor, DependencyDescriptor dependencyDescriptor) {
@@ -35,7 +46,9 @@ class IvyTranslatorToDependency {
         moduleDescriptor.addDependency(dependencyDescriptor);
     }
 
-    private static DefaultDependencyDescriptor toDependencyDescriptor(String qualifier, JkModuleDependency moduleDependency) {
+    private static DefaultDependencyDescriptor toDependencyDescriptor(String qualifier,
+                                                                      JkModuleDependency moduleDependency,
+                                                                      Set<ClassifierAndType> classifierAndTypes) {
         JkIvyConfigurationMapping configurationMapping = JkIvyConfigurationMapping.of(qualifier);
         JkVersion version = moduleDependency.getVersion();
         ModuleRevisionId moduleRevisionId = ModuleRevisionId.newInstance(
@@ -48,7 +61,6 @@ class IvyTranslatorToDependency {
                 isTransitive);
         final Set<String> masterConfs =  configurationMapping.getLeft().isEmpty() ?
                 Collections.singleton(IvyTranslatorToConfiguration.DEFAULT) : configurationMapping.getLeft();
-        String classifier = moduleDependency.getClassifier();
         for (String masterConf : masterConfs) {
             moduleDependency.getExclusions().forEach(exclusion ->
                     result.addExcludeRule(masterConf, toExcludeRule(exclusion)));
@@ -58,9 +70,13 @@ class IvyTranslatorToDependency {
                 Set<String> effectiveDepConfs = dependencyConfs(dependencyConf, moduleDependency.getTransitivity());
                 effectiveDepConfs.forEach(depConf -> result.addDependencyConfiguration(masterConf, depConf));
             }
-            if (!JkUtilsString.isBlank(classifier)) {
+            for (ClassifierAndType classifierAndType : classifierAndTypes) {
+                if (classifierAndType.classifier == null && classifierAndType.classifier == null
+                        && classifierAndTypes.size() <= 1) {
+                    continue;
+                }
                 result.addDependencyArtifact(masterConf, IvyTranslatorToArtifact.toArtifactDependencyDescriptor(
-                        result, classifier, moduleDependency.getType()));
+                        result, classifierAndType.classifier, classifierAndType.type));
             }
         }
         return result;
@@ -98,6 +114,46 @@ class IvyTranslatorToDependency {
         return JkVersionedModule.of(
                 JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
                 JkVersion.of(moduleRevisionId.getRevision()));
+    }
+
+    private static Map<JkVersionedModule, Set<ClassifierAndType>> mapModuleToClassifierType(
+            List<JkQualifiedDependency> dependencies) {
+        Map<JkVersionedModule, Set<ClassifierAndType>> result = new HashMap<>();
+        for (JkQualifiedDependency qualifiedDependency : dependencies) {
+            JkModuleDependency moduleDependency = (JkModuleDependency) qualifiedDependency.getDependency();
+            JkVersionedModule versionedModule = moduleDependency.toVersionedModule();
+            result.putIfAbsent(versionedModule, new HashSet<>());
+            result.get(versionedModule).add(new ClassifierAndType(moduleDependency));
+        }
+        return result;
+    }
+
+    private static class ClassifierAndType {
+
+        private String classifier;
+
+        private String type;
+
+        public ClassifierAndType(JkModuleDependency moduleDependency) {
+            this.classifier = moduleDependency.getClassifier();
+            this.type = moduleDependency.getType();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ClassifierAndType that = (ClassifierAndType) o;
+            if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
+            return type != null ? type.equals(that.type) : that.type == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = classifier != null ? classifier.hashCode() : 0;
+            result = 31 * result + (type != null ? type.hashCode() : 0);
+            return result;
+        }
     }
 
 }

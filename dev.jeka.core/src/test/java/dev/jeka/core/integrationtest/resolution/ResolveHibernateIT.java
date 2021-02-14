@@ -1,16 +1,14 @@
-package dev.jeka.core.integrationtest;
+package dev.jeka.core.integrationtest.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import org.junit.Test;
 
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class ResolverWithoutScopeMapperIT {
+public class ResolveHibernateIT {
 
     private static final JkRepoSet REPOS = JkRepo.ofMavenCentral().toSet();
 
@@ -32,17 +30,6 @@ public class ResolverWithoutScopeMapperIT {
     }
 
 
-    @Test
-    public void resolveSpringbootTestStarter() {
-        final JkDependencySet deps = JkDependencySet.of()
-                .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", JkTransitivity.RUNTIME);
-        final JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps);
-        final Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
 
-        // According presence or absence of cache it could be 24 or 25
-        assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() >= 24);
-        assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() <= 25);
-    }
 
 }

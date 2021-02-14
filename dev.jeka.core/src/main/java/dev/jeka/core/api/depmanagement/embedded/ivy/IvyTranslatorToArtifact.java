@@ -72,10 +72,11 @@ class IvyTranslatorToArtifact {
     static DependencyArtifactDescriptor toArtifactDependencyDescriptor(DependencyDescriptor dependencyDescriptor,
                                                                        String classifier, String type) {
         String name = dependencyDescriptor.getDependencyId().getName();
-        String artifactType = JkUtilsObject.firstNonNull(type, "jar");
-        Map<String, String> extraAttribute = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
-        return new DefaultDependencyArtifactDescriptor(dependencyDescriptor, name, artifactType, artifactType,
-                null, extraAttribute);
+        String effectiveType = JkUtilsObject.firstNonNull(type, "jar");
+        Map<String, String> extraAttributes = JkUtilsString.isBlank(classifier) ? Collections.emptyMap() :
+            JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
+        return new DefaultDependencyArtifactDescriptor(dependencyDescriptor, name, effectiveType, effectiveType,
+                null, extraAttributes);
 
     }
 

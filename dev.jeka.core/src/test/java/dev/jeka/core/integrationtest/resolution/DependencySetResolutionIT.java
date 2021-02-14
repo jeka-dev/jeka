@@ -6,7 +6,9 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import org.junit.Test;
 
+import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -103,5 +105,96 @@ public class DependencySetResolutionIT {
         assertEquals(2, lwjglFiles.size());
 
     }
+
+    @Test
+    public void resolve_notExistingModuleId_reportError() {
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
+        JkDependencySet deps = JkDependencySet.of()
+                .and(JkPopularModules.JAVAX_SERVLET_API.version("2.5.3"));  // does not exist
+        JkDependencyResolver resolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral())
+                .setModuleHolder(holder)
+                .getParams().setFailOnDependencyResolutionError(false).__;
+        JkResolveResult resolveResult = resolver.resolve(deps);
+        JkResolveResult.JkErrorReport errorReport = resolveResult.getErrorReport();
+        System.out.println(errorReport.getModuleProblems());
+        assertEquals(1, errorReport.getModuleProblems().size());
+    }
+
+    @Test
+    public void resolve_sameDependencyAsDirectAndTransitiveWithDistinctVersion_directWin() {
+        JkModuleId starterWebModule = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
+        JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
+        String directCoreVersion = "4.3.6.RELEASE";
+        JkDependencySet deps = JkDependencySet.of()
+                .and(starterWebModule.version("1.5.10.RELEASE").withTransitivity(JkTransitivity.COMPILE))
+                // force a version lower than the transitive above
+                .and(springCoreModule.version(directCoreVersion).withTransitivity(JkTransitivity.COMPILE));
+        JkDependencyResolver resolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = resolver.resolve(deps);
+        JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+
+        JkResolvedDependencyNode bootNode = tree.getChildren().get(0);
+        JkResolvedDependencyNode.JkModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.getFirst(springCoreModule).getModuleInfo();
+        assertEquals("4.3.14.RELEASE", springCoreTransitiveModuleNodeInfo.getDeclaredVersion().getValue());
+        assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.getResolvedVersion().getValue());  // cause evicted
+
+        // As the spring-core projectVersion is declared as direct dependency and the declared projectVersion is exact (not dynamic)
+        // then the resolved version should the direct one.
+        JkResolvedDependencyNode.JkModuleNodeInfo springCoreDirectModuleNodeInfo = tree.getChildren().get(1).getModuleInfo();
+        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getDeclaredVersion().getValue());
+        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getResolvedVersion().getValue());
+    }
+
+    @Test
+    public void resolve_usingDynamicVersion_ok() {
+        JkModuleId moduleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
+        JkDependencySet deps = JkDependencySet.of().and(moduleId.version("1.4.+"));
+        JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
+        JkResolvedDependencyNode tree = resolver.resolve(deps).assertNoError().getDependencyTree();
+        System.out.println(tree.toStrings());
+        JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getFirst(moduleId).getModuleInfo();
+        assertTrue(moduleNodeInfo.getDeclaredVersion().getValue().equals("1.4.+"));
+        String resolvedVersionName = moduleNodeInfo.getResolvedVersion().getValue();
+        assertEquals("1.4.7.RELEASE", resolvedVersionName);
+    }
+
+    @Test
+    public void resolve_compileTransitivity_dontFetchRuntimeTransitiveDependencies() {
+        JkDependencySet deps = JkDependencySet.of()
+                .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", JkTransitivity.COMPILE);
+        JkDependencyResolver resolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = resolver.resolve(deps);
+        boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
+        assertFalse(snakeyamlHere);
+    }
+
+    @Test
+    public void resolve_runtimeTransitivity_fetchRuntimeTransitiveDependencies() {
+        JkDependencySet deps = JkDependencySet.of()
+                .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", JkTransitivity.RUNTIME);
+        JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = resolver.resolve(deps);
+        boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
+        assertTrue(snakeyamlHere);
+    }
+
+    @Test
+    public void resolve_fileDependenciesOnly_ok() throws URISyntaxException {
+        Path dep0File = Paths.get(DependencySetResolutionIT.class.getResource("dep0").toURI());
+        Path dep1File = Paths.get(DependencySetResolutionIT.class.getResource("dep1").toURI());
+        JkDependencySet deps = JkDependencySet.of()
+                .andFiles(dep0File)
+                .andFiles(dep1File);
+        JkDependencyResolver resolver = JkDependencyResolver.of();
+        JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
+        assertEquals(2, tree.toFlattenList().size());
+        resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet());
+        assertEquals(2, resolver.resolve(deps).getDependencyTree().toFlattenList().size());
+
+    }
+
 
 }

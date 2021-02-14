@@ -278,7 +278,7 @@ public final class JkModuleDependency implements JkDependency {
 
     /*
      * The equals method is implemented to consider equals two modules dependencies
-     * that may be not the same level of precision. ut at list, they should have
+     * that may be not the same level of precision. At least, they should have
      * the same moduleId in common.<br/>
      * For example 'mygroup:myart:1.0' is considered equals to 'mygroup:myart'.
      */
@@ -290,6 +290,7 @@ public final class JkModuleDependency implements JkDependency {
         if (!module.equals(that.module)) return false;
         if (!equalsOrOneIsUnspecified(version, that.version)) return false;
         if (!equalsOrOneIsNull(classifier, that.classifier)) return false;
+        if (!equalsOrOneIsNull(type, that.type)) return false;
         return equalsOrOneIsNull(exclusions, that.exclusions);
     }
 

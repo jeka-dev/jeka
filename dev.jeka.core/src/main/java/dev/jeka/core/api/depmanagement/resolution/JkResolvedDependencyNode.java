@@ -374,7 +374,7 @@ public class JkResolvedDependencyNode {
             final String declaredVersionLabel = getDeclaredVersion().getValue().equals(resolvedVersionName) ? "" : " as " + getDeclaredVersion();
             return moduleId + ":" + resolvedVersion
                     + " (present in " + rootScopes + ")"
-                    + " (declared" + declaredVersionLabel + " for scope " + declaredScopes + ")";
+                    + " (declared" + declaredVersionLabel + " " + declaredScopes + ")";
         }
 
         public boolean isEvicted() {

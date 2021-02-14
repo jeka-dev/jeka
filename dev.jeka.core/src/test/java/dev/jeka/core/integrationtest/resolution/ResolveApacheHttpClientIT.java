@@ -1,4 +1,4 @@
-package dev.jeka.core.integrationtest;
+package dev.jeka.core.integrationtest.resolution;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;

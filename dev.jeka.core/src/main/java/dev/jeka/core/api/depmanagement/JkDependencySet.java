@@ -325,7 +325,7 @@ public class JkDependencySet {
     }
 
     /**
-     * Removes duplicates and select a versoin according the specified strayegy in
+     * Removes duplicates and select a version according the specified strategy in
      * case of duplicate with distinct versions.
      */
     public JkDependencySet normalised(JkVersionedModule.ConflictStrategy conflictStrategy) {
@@ -348,8 +348,8 @@ public class JkDependencySet {
                     return dependency;
                 })
                 .collect(Collectors.toList());
-        List<JkDependency> cleanedResult = result.stream().distinct().collect(Collectors.toList());
-        return new JkDependencySet(cleanedResult, this.globalExclusions, this.versionProvider);
+        //List<JkDependency> cleanedResult = result.stream().distinct().collect(Collectors.toList());
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
     }
 
     public JkDependencySet normalised() {
