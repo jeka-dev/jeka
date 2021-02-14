@@ -93,7 +93,7 @@ public class DependencySetResolutionIT {
 
         // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
         // it should results in a single node.
-        // The classpath order will also place all artifacts to a same module.
+        // The classpath order will also place all artifacts of a same module sequentially.
         assertEquals(2, treeRoot.getChildren().size());
         assertEquals(3, treeRoot.getResolvedFiles().size());
 
