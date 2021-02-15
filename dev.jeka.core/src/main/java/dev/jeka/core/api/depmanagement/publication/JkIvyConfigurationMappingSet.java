@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public final class JkIvyConfigurationMappingSet {
 
     /**
-     * Scope mapping used by default.
+     * Configuratioin mapping used by default.
      */
     public static final JkIvyConfigurationMappingSet RESOLVE_MAPPING = JkIvyConfigurationMappingSet.of()
             .add("compile", "archives(master), compile(default)" )
@@ -26,7 +26,7 @@ public final class JkIvyConfigurationMappingSet {
     }
 
     /**
-     * Creates an empty scope mapping.
+     * Creates an empty configuration mapping.
      */
     @SuppressWarnings("unchecked")
     public static JkIvyConfigurationMappingSet of() {
@@ -56,7 +56,7 @@ public final class JkIvyConfigurationMappingSet {
 
 
     /**
-     * Returns all the scopes declared on the left side of this scope mapping.
+     * Returns all configurations declared on the left side.
      */
     public List<JkIvyConfigurationMapping> getConfigurationMappings() {
         return configurationMappings;

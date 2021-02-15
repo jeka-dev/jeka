@@ -200,7 +200,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                 }
                 final JkModuleId moduleId = JkModuleId.of(node.getId().getOrganisation(), node.getId().getName());
                 final JkVersion resolvedVersion = JkVersion.of(node.getResolvedId().getRevision());
-                final Set<String> rootScopes = JkUtilsIterable.setOf(node.getRootModuleConfigurations());
+                final Set<String> rootConfigurations = JkUtilsIterable.setOf(node.getRootModuleConfigurations());
 
                 List<Path> artifacts;
                 if (!node.isCompletelyEvicted()) {
@@ -216,12 +216,12 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                     final List<JkModuleNodeInfo> list = parentChildMap.computeIfAbsent(
                             parent.getModuleId(), k -> new LinkedList<>());
                     final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
-                    final Set<String> declaredScopes = JkUtilsIterable.setOf(
+                    final Set<String> masterConfigurations = JkUtilsIterable.setOf(
                             dependencyDescriptor.getModuleConfigurations());
                     final JkVersion version = JkVersion.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());
-                    final JkModuleNodeInfo moduleNodeInfo  = JkModuleNodeInfo.of(moduleId, version, declaredScopes,
-                            rootScopes, resolvedVersion, artifacts);
+                    final JkModuleNodeInfo moduleNodeInfo  = JkModuleNodeInfo.of(moduleId, version,
+                            masterConfigurations, rootConfigurations, resolvedVersion, artifacts);
                     if (!containSame(list, moduleId)) {
                         list.add(moduleNodeInfo);
                     }

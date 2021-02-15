@@ -22,7 +22,7 @@ public final class JkIvyConfigurationMapping {
     private static final String ARROW = "->";
 
     /**
-     * Useful when using scope mapping. As documented in Ivy, it stands for the main archive.
+     * Useful when using configuration mapping. As documented in Ivy, it stands for the main archive.
      */
     public static final String ARCHIVE_MASTER = "archives(master)";
 

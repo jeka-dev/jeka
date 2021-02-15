@@ -18,7 +18,7 @@ public class IvyTranslationsTest {
     private static final JkVersionedModule OWNER = JkVersionedModule.of("ownerGroup:ownerName:ownerVersion");
 
     @Test
-    public void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn2dependencies() {
+    public void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn1dependencies() {
         JkQualifiedDependencies deps =JkQualifiedDependencies.of()
                 .and(null, "aGroup:aName:1.0")
                 .and(null, "aGroup:aName:linux:1.0")
@@ -26,13 +26,13 @@ public class IvyTranslationsTest {
         final DefaultModuleDescriptor desc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
                 OWNER, deps);
         final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
-        assertEquals(3, dependencyDescriptors.length);
-        DependencyArtifactDescriptor linuxArtifact = dependencyDescriptors[1].getAllDependencyArtifacts()[0];
+        assertEquals(2, dependencyDescriptors.length);
+        DependencyArtifactDescriptor linuxArtifact = dependencyDescriptors[0].getAllDependencyArtifacts()[1];
         assertEquals("jar", linuxArtifact.getType());
-        assertEquals("linux", linuxArtifact.getName());
-        DependencyArtifactDescriptor winArtifact = dependencyDescriptors[2].getAllDependencyArtifacts()[0];
+        assertEquals("linux", linuxArtifact.getExtraAttribute("classifier"));
+        DependencyArtifactDescriptor winArtifact = dependencyDescriptors[1].getAllDependencyArtifacts()[0];
         assertEquals("exe", winArtifact.getType());
-        assertEquals("win", winArtifact.getName());
+        assertEquals("win", winArtifact.getExtraAttribute("classifier"));
     }
 
 

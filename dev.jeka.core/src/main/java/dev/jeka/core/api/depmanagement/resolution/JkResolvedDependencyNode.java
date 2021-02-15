@@ -46,8 +46,8 @@ public class JkResolvedDependencyNode {
         return new JkResolvedDependencyNode(moduleNodeInfo, Collections.unmodifiableList(children));
     }
 
-    public static JkResolvedDependencyNode ofFileDep(JkFileDependency dependency, Set<String> scopes) {
-        final JkNodeInfo moduleInfo = JkFileNodeInfo.of(scopes, dependency);
+    public static JkResolvedDependencyNode ofFileDep(JkFileDependency dependency, Set<String> configurations) {
+        final JkNodeInfo moduleInfo = JkFileNodeInfo.of(configurations, dependency);
         return new JkResolvedDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<>()));
     }
 
@@ -290,7 +290,7 @@ public class JkResolvedDependencyNode {
 
         List<Path> getFiles();
 
-        Set<String> getDeclaredScopes();
+        Set<String> getDeclaredConfigurations();
 
     }
 
@@ -308,30 +308,34 @@ public class JkResolvedDependencyNode {
                     new HashSet<>(), new HashSet<>(), versionedModule.getVersion(), new LinkedList<>(), true);
         }
 
-        public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion, Set<String> declaredScopes,
-                                          Set<String> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
-            return new JkModuleNodeInfo(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts);
+        public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion,
+                                          Set<String> declaredConfigurations,
+                                          Set<String> rootConfigurations,
+                                          JkVersion resolvedVersion,
+                                          List<Path> artifacts) {
+            return new JkModuleNodeInfo(moduleId, declaredVersion, declaredConfigurations, rootConfigurations,
+                    resolvedVersion, artifacts);
         }
 
         private final JkModuleId moduleId;
         private final JkVersion declaredVersion;
-        private final Set<String> declaredScopes;  // the left conf mapping side in the caller dependency description
-        private final Set<String> rootScopes; // scopes fetching this node to baseTree
+        private final Set<String> declaredConfigurations;  // the left conf mapping side in the caller dependency description
+        private final Set<String> rootConfigurations; // configurations fetching this node to baseTree
         private final JkVersion resolvedVersion;
         private final List<File> artifacts; // Path is not serializable
         private final boolean treeRoot;
 
-        JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<String> declaredScopes,
-                         Set<String> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
-            this(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts, false);
+        JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<String> declaredConfigurations,
+                         Set<String> rootConfigurations, JkVersion resolvedVersion, List<Path> artifacts) {
+            this(moduleId, declaredVersion, declaredConfigurations, rootConfigurations, resolvedVersion, artifacts, false);
         }
 
-        JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<String> declaredScopes,
-                         Set<String> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
+        JkModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<String> declaredConfigurations,
+                         Set<String> rootConfigurations, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
             this.moduleId = moduleId;
             this.declaredVersion = declaredVersion;
-            this.declaredScopes = declaredScopes;
-            this.rootScopes = rootScopes;
+            this.declaredConfigurations = declaredConfigurations;
+            this.rootConfigurations = rootConfigurations;
             this.resolvedVersion = resolvedVersion;
             this.artifacts = Collections.unmodifiableList(new LinkedList<>(JkUtilsPath.toFiles(artifacts)));
             this.treeRoot = treeRoot;
@@ -353,12 +357,12 @@ public class JkResolvedDependencyNode {
         }
 
         @Override
-        public Set<String> getDeclaredScopes() {
-            return declaredScopes;
+        public Set<String> getDeclaredConfigurations() {
+            return declaredConfigurations;
         }
 
-        public Set<String> getResolvedScopes() {
-            return rootScopes;
+        public Set<String> getRootConfigurations() {
+            return rootConfigurations;
         }
 
         public JkVersion getResolvedVersion() {
@@ -373,8 +377,8 @@ public class JkResolvedDependencyNode {
             final String resolvedVersionName = isEvicted() ? "(evicted)" : resolvedVersion.getValue();
             final String declaredVersionLabel = getDeclaredVersion().getValue().equals(resolvedVersionName) ? "" : " as " + getDeclaredVersion();
             return moduleId + ":" + resolvedVersion
-                    + " (present in " + rootScopes + ")"
-                    + " (declared" + declaredVersionLabel + " " + declaredScopes + ")";
+                    + " (present in " + rootConfigurations + ")"
+                    + " (declared" + declaredVersionLabel + " " + declaredConfigurations + ")";
         }
 
         public boolean isEvicted() {
@@ -427,24 +431,24 @@ public class JkResolvedDependencyNode {
 
         private static final long serialVersionUID = 1L;
 
-        public static JkFileNodeInfo of(Set<String> scopes, JkFileDependency dependency) {
+        public static JkFileNodeInfo of(Set<String> configurations, JkFileDependency dependency) {
             if (dependency instanceof JkComputedDependency) {
                 final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
-                return new JkFileNodeInfo(computedDependency.getFiles(), scopes, computedDependency);
+                return new JkFileNodeInfo(computedDependency.getFiles(), configurations, computedDependency);
             }
-            return new JkFileNodeInfo(dependency.getFiles() ,scopes, null);
+            return new JkFileNodeInfo(dependency.getFiles() ,configurations, null);
         }
 
         // for serialization we need to use File class instead of Path
         private final List<File> files;
 
-        private final Set<String> scopes;
+        private final Set<String> configurations;
 
         private final JkComputedDependency computationOrigin;
 
-        private JkFileNodeInfo(List<Path> files, Set<String> scopes, JkComputedDependency origin) {
+        private JkFileNodeInfo(List<Path> files, Set<String> configurations, JkComputedDependency origin) {
             this.files = Collections.unmodifiableList(new LinkedList<>(JkUtilsPath.toFiles(files)));
-            this.scopes = Collections.unmodifiableSet(new HashSet<>(scopes));
+            this.configurations = Collections.unmodifiableSet(new HashSet<>(configurations));
             this.computationOrigin = origin;
         }
 
@@ -468,8 +472,8 @@ public class JkResolvedDependencyNode {
         }
 
         @Override
-        public Set<String> getDeclaredScopes() {
-            return scopes;
+        public Set<String> getDeclaredConfigurations() {
+            return configurations;
         }
 
         @Override

@@ -65,7 +65,7 @@ public class QualifiedDependenciesResolutionIT {
         System.out.println(tree.toStringTree());
 
         JkResolvedDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
-        assertTrue(root.getDeclaredScopes().isEmpty());
+        assertTrue(root.getDeclaredConfigurations().isEmpty());
         assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(5, tree.getChildren().size());
 
@@ -96,7 +96,7 @@ public class QualifiedDependenciesResolutionIT {
         System.out.println(tree.toStringTree());
 
         root = tree.getModuleInfo();
-        assertTrue(root.getDeclaredScopes().isEmpty());
+        assertTrue(root.getDeclaredConfigurations().isEmpty());
         assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(5, tree.getChildren().size());
     }
@@ -116,27 +116,27 @@ public class QualifiedDependenciesResolutionIT {
         System.out.println(tree.toStringTree());
 
         JkResolvedDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
-        assertTrue(root.getDeclaredScopes().isEmpty());
+        assertTrue(root.getDeclaredConfigurations().isEmpty());
         assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(3, tree.getChildren().size());
 
         JkResolvedDependencyNode starterwebNode = tree.getChildren().get(0);
         assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getModuleId());
-        assertEquals(2, starterwebNode.getModuleInfo().getDeclaredScopes().size());
-        assertTrue(starterwebNode.getModuleInfo().getDeclaredScopes().contains("compile"));
-        assertTrue(starterwebNode.getModuleInfo().getDeclaredScopes().contains("runtime"));
+        assertEquals(2, starterwebNode.getModuleInfo().getDeclaredConfigurations().size());
+        assertTrue(starterwebNode.getModuleInfo().getDeclaredConfigurations().contains("compile"));
+        assertTrue(starterwebNode.getModuleInfo().getDeclaredConfigurations().contains("runtime"));
 
         JkResolvedDependencyNode starterNode = starterwebNode.getChildren().get(0);
-        assertEquals(2, starterNode.getModuleInfo().getDeclaredScopes().size());
-        Set<String> scopes = starterNode.getModuleInfo().getDeclaredScopes();
+        assertEquals(2, starterNode.getModuleInfo().getDeclaredConfigurations().size());
+        Set<String> scopes = starterNode.getModuleInfo().getDeclaredConfigurations();
         assertTrue(scopes.contains("compile"));
         assertTrue(scopes.contains("runtime"));
 
         List<JkResolvedDependencyNode> snakeYamlNodes = starterNode.getChildren(JkModuleId.of("org.yaml:snakeyaml"));
         assertEquals(1, snakeYamlNodes.size());
         JkResolvedDependencyNode snakeYamlNode = snakeYamlNodes.get(0);
-        assertEquals(1, snakeYamlNode.getModuleInfo().getDeclaredScopes().size());
-        scopes = snakeYamlNode.getModuleInfo().getDeclaredScopes();
+        assertEquals(1, snakeYamlNode.getModuleInfo().getDeclaredConfigurations().size());
+        scopes = snakeYamlNode.getModuleInfo().getDeclaredConfigurations();
         assertTrue(scopes.contains("runtime"));
 
         assertEquals(5, starterNode.getChildren().size());

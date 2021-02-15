@@ -29,9 +29,11 @@ class CommonDependencies {
     private static final List<String> KNOWN_QUALIFIER = JkUtilsIterable.listOf(COMPILE, COMPILE_AND_RUNTIME,
             RUNTIME, TEST);
 
+
+    // All necessary dependencies for the compile
     private final JkDependencySet compile;
 
-    // All necessary deps for the runtime
+    // All necessary dependencies for the runtime
     private final JkDependencySet runtime;
 
     // Only additional dependencies for testing
@@ -137,7 +139,8 @@ class CommonDependencies {
             final JkModuleDependency dependency = JkModuleDependency.of(line.trim());
             if (COMPILE_AND_RUNTIME.equals(currentQualifier) || COMPILE.equals(currentQualifier)) {
                 compile = compile.and(dependency);
-            } else if (COMPILE_AND_RUNTIME.equals(currentQualifier) || RUNTIME.equals(currentQualifier)) {
+            }
+            if (COMPILE_AND_RUNTIME.equals(currentQualifier) || RUNTIME.equals(currentQualifier)) {
                 runtime = runtime.and(dependency);
             } else if (TEST.equals(currentQualifier)) {
                 test = test.and(dependency);

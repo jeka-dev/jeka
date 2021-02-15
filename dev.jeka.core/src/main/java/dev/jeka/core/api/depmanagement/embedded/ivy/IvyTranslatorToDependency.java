@@ -27,12 +27,12 @@ class IvyTranslatorToDependency {
         List<DefaultDependencyDescriptor> result = new LinkedList<>();
         for (JkQualifiedDependency qualifiedDependency : qualifiedDependencies) {
             JkModuleDependency moduleDependency = (JkModuleDependency) qualifiedDependency.getDependency();
-            Set<ClassifierAndType> classifierAndTypes = moduleClassifierTypesMap.get(
-                    moduleDependency.toVersionedModule());
+            JkVersionedModule versionedModule = moduleDependency.toVersionedModule();
+            Set<ClassifierAndType> classifierAndTypes = moduleClassifierTypesMap.get(versionedModule);
             if (classifierAndTypes == null) {
-                continue;
+                continue;  // We don't want to add 2 times the same module
             }
-            classifierAndTypes.remove(moduleDependency.toVersionedModule());
+            moduleClassifierTypesMap.remove(versionedModule);
             result.add(toDependencyDescriptor(qualifiedDependency.getQualifier(), moduleDependency, classifierAndTypes));
         }
         return result;

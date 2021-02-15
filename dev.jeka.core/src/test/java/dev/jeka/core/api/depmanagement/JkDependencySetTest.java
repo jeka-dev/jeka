@@ -16,7 +16,6 @@ public class JkDependencySetTest {
                 .and("my.group:module")
                 .and("other:other")
                 .normalised(JkVersionedModule.ConflictStrategy.TAKE_HIGHEST);
-        assertEquals(3, dependencySet.getDependencies().size());
         assertEquals("2.8", dependencySet.getVersion(JkModuleId.of("my.group:module")).getValue());
     }
 

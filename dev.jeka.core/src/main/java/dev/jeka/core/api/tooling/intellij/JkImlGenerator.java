@@ -316,7 +316,7 @@ public final class JkImlGenerator {
 
             // Maven dependency
             if (node.isModuleNode()) {
-                final String ideScope = forceTest ? "TEST" : ideScope(node.getModuleInfo().getResolvedScopes());
+                final String ideScope = forceTest ? "TEST" : ideScope(node.getModuleInfo().getRootConfigurations());
                 final List<LibPath> paths = toLibPath(node.getModuleInfo(), repos, ideScope);
                 for (final LibPath libPath : paths) {
                     if (!context.allPaths.contains(libPath.bin)) {
@@ -328,7 +328,7 @@ public final class JkImlGenerator {
 
                 // File dependencies (file ofSystem + computed)
             } else {
-                final String ideScope = forceTest ? "TEST" : ideScope(node.getNodeInfo().getDeclaredScopes());
+                final String ideScope = forceTest ? "TEST" : ideScope(node.getNodeInfo().getDeclaredConfigurations());
                 final JkResolvedDependencyNode.JkFileNodeInfo fileNodeInfo = (JkResolvedDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectDir();
