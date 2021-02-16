@@ -1,4 +1,4 @@
-package dev.jeka.core.api.tooling.eclipse;
+package dev.jeka.core.integrationtest.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;

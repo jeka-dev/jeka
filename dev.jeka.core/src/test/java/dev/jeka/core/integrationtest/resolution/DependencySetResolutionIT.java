@@ -4,9 +4,12 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.system.JkLog;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -82,11 +85,9 @@ public class DependencySetResolutionIT {
     @Test
     public void resolve_moduleWithMainAndExtraArtifact_bothArtifactsArePresentInResult() {
         JkModuleDependency lwjgl= JkModuleDependency.of("org.lwjgl:lwjgl:3.1.1");
-        JkModuleDependency lwjglLinux = lwjgl.withClassifier("natives-linux");
         JkDependencySet deps = JkDependencySet.of()
-                .and(lwjglLinux)
-                .and(COMMONS_LOGIN_102)
-                .and(lwjgl);
+                .and(lwjgl.andClassifier("natives-linux"))
+                .and(COMMONS_LOGIN_102);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolvedDependencyNode treeRoot = resolveResult.getDependencyTree();
@@ -194,6 +195,43 @@ public class DependencySetResolutionIT {
         resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet());
         assertEquals(2, resolver.resolve(deps).getDependencyTree().toFlattenList().size());
 
+    }
+
+    @Test
+    public void resolve_onlyFilesDependencies_ok() throws Exception {
+        URL sampleJarUrl = DependencySetResolutionIT.class.getResource("myArtifactSample.jar");
+        Path jarFile = Paths.get(sampleJarUrl.toURI());
+        JkDependencySet dependencies = JkDependencySet.of()
+                .andFiles(jarFile);
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
+        Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
+    }
+
+    @Test
+    public void resolve_fileAndModuleDependencies_ok() throws Exception {
+        URL sampleJarUrl = DependencySetResolutionIT.class.getResource("myArtifactSample.jar");
+        Path jarFile = Paths.get(sampleJarUrl.toURI());
+        JkDependencySet dependencies = JkDependencySet.of()
+                .and(JkPopularModules.GUAVA.version("23.0"))
+                .andFiles(jarFile);
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
+        Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size());
+        resolveResult.assertNoError();
+    }
+
+    @Test
+    public void resolve_only1ModuleDependencies_ok() throws Exception {
+        JkLog.Verbosity verbosity = JkLog.verbosity();
+        JkDependencySet dependencies = JkDependencySet.of()
+                .and(JkPopularModules.GUAVA + ":23.0");
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
+        resolveResult.assertNoError();
+        Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
+        JkLog.setVerbosity(verbosity);
     }
 
 

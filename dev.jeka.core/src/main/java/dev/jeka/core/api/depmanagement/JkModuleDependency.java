@@ -20,31 +20,29 @@ import java.util.*;
  */
 public final class JkModuleDependency implements JkDependency {
 
-    private final JkModuleId module;
+    private final JkModuleId moduleId;
 
     private final JkVersion version;
-
-    private final String classifier;
-
-    private final String type;
 
     private final JkTransitivity transitivity;
 
     private final List<JkDependencyExclusion> exclusions;
 
+    private final Set<JkArtifactSpecification> artifactSpecifications;
+
     private final Path ideProjectDir;
 
-    private JkModuleDependency(JkModuleId module, JkVersion version, String classifier, String type,
-                               JkTransitivity transitivity, List<JkDependencyExclusion> exclusions, Path ideProjectDir) {
-        JkUtilsAssert.argument(module != null, "module cannot be null.");
-        JkUtilsAssert.argument(version != null, module + " version cannot be null.");
-        JkUtilsAssert.argument(exclusions != null, module + " module dependency can't be instantiated with null excludes, use empty list instead");
-        this.module = module;
+    private JkModuleDependency(JkModuleId moduleId, JkVersion version,
+                               JkTransitivity transitivity, List<JkDependencyExclusion> exclusions,
+                               Set<JkArtifactSpecification> artifactSpecifications, Path ideProjectDir) {
+        JkUtilsAssert.argument(moduleId != null, "module cannot be null.");
+        JkUtilsAssert.argument(version != null, moduleId + " version cannot be null.");
+        JkUtilsAssert.argument(exclusions != null, moduleId + " module dependency can't be instantiated with null excludes, use empty list instead");
+        this.moduleId = moduleId;
         this.version = version;
-        this.classifier = classifier;
-        this.type = type;
         this.transitivity = transitivity;
         this.exclusions = exclusions;
+        this.artifactSpecifications = artifactSpecifications;
         this.ideProjectDir = ideProjectDir;
     }
 
@@ -61,14 +59,14 @@ public final class JkModuleDependency implements JkDependency {
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, JkVersion version) {
-        return new JkModuleDependency(moduleId, version, null, null, null, Collections.EMPTY_LIST, null);
+        return new JkModuleDependency(moduleId, version, null, Collections.emptyList(), Collections.emptySet(), null);
     }
 
     /**
      * Creates a {@link JkModuleDependency} to the specified versioned module.
      */
     public static JkModuleDependency of(JkVersionedModule versionedModule) {
-        return of(versionedModule.getModuleId(), versionedModule.getVersion().getValue());
+        return of(versionedModule.getModuleId(), versionedModule.getVersion());
     }
 
     /**
@@ -77,8 +75,7 @@ public final class JkModuleDependency implements JkDependency {
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, String versionRange) {
-        return new JkModuleDependency(moduleId, JkVersion.of(versionRange), null, null, null,
-                Collections.EMPTY_LIST, null);
+        return of(moduleId.withVersion(versionRange));
     }
 
     /**
@@ -114,7 +111,7 @@ public final class JkModuleDependency implements JkDependency {
         } if (strings.length == 4) {
             return of(moduleId, JkVersion.of(strings[3])).withClassifier(strings[2]);
         }
-        return of(moduleId, JkVersion.of(strings[4])).withClassifier(strings[2]).withType(strings[3]);
+        return of(moduleId, JkVersion.of(strings[4])).withClassifierAndType(strings[2], strings[3]);
     }
 
     /**
@@ -138,7 +135,7 @@ public final class JkModuleDependency implements JkDependency {
      * Returns the getModuleId of this dependency.
      */
     public JkModuleId getModuleId() {
-        return module;
+        return moduleId;
     }
 
     /**
@@ -152,7 +149,7 @@ public final class JkModuleDependency implements JkDependency {
      * Returns a {@link JkModuleDependency} identical to this one but with the specified 'transitive' property.
      */
     public JkModuleDependency withTransitivity(JkTransitivity transitivity) {
-        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, ideProjectDir);
+        return new JkModuleDependency(moduleId, version, transitivity, exclusions, artifactSpecifications, ideProjectDir);
     }
 
     /**
@@ -171,43 +168,54 @@ public final class JkModuleDependency implements JkDependency {
         if (version == null) {
             return this;
         }
-        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, ideProjectDir);
+        return new JkModuleDependency(moduleId, version, transitivity, exclusions, artifactSpecifications, ideProjectDir);
     }
 
     /**
-     * Returns a JkModuleDependency identical to this one but with the specified
-     * classifier. This has meaning only for Maven module.
+     * @see #withClassifierAndType(String, String)
      */
     public JkModuleDependency withClassifier(String classifier) {
-        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, ideProjectDir);
+        return withClassifierAndType(classifier, null);
     }
 
     /**
      * Returns a JkModuleDependency identical to this one but with the specified
-     * type.
-     * @see JkModuleDependency#getType()
+     * classifier and type as the only {@link JkArtifactSpecification} for this dependency
      */
-    public JkModuleDependency withType(String type) {
-        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, ideProjectDir);
-    }
-
-
-
-    /**
-     * Returns the classifier for this module dependency or <code>null</code> if
-     * the dependency is done on the main artifact.
-     */
-    public String getClassifier() {
-        return this.classifier;
+    public JkModuleDependency withClassifierAndType(String classifier, String type) {
+        JkArtifactSpecification artifactSpecification = new JkArtifactSpecification(classifier, type);
+        Set<JkArtifactSpecification> artifactSpecifications = Collections.singleton(artifactSpecification);
+        return new JkModuleDependency(moduleId, version, transitivity, exclusions, artifactSpecifications, ideProjectDir);
     }
 
     /**
-     * Returns the 'type' of this dependency. Type values <code>null</code> most of the time, but can refer to
-     * a file extension or metadata indication as 'pom'. Example values are 'pom', 'war', 'test-jar'.
-     * It maps with Maven concept of dependency type and  Ivy concept of artifact type.
+     * @see #andClassifierAndType(String, String)
      */
-    public String getType() {
-        return type;
+    public JkModuleDependency andClassifier(String classifier) {
+        return andClassifierAndType(classifier, null);
+    }
+
+    /**
+     * Returns a JkModuleDependency identical to this one but adding the specified
+     * classifier and type {@link JkArtifactSpecification}.
+     */
+    public JkModuleDependency andClassifierAndType(String classifier, String type) {
+        JkArtifactSpecification artifactSpecification = new JkArtifactSpecification(classifier, type);
+        Set<JkArtifactSpecification> set = new LinkedHashSet<>(this.artifactSpecifications);
+        if (set.isEmpty()) {
+            set.add(JkArtifactSpecification.MAIN);
+        }
+        set.add(artifactSpecification);
+        return new JkModuleDependency(moduleId, version, transitivity, exclusions, Collections.unmodifiableSet(set),
+                ideProjectDir);
+    }
+
+    /**
+     * Returns the {@link JkArtifactSpecification}s for this module dependency. It can e empty if no
+     * artifact specification as een set. In this case, only the main artifact is taken in account.
+     */
+    public Set<JkArtifactSpecification> getArtifactSpecifications() {
+        return this.artifactSpecifications;
     }
 
     /**
@@ -233,8 +241,8 @@ public final class JkModuleDependency implements JkDependency {
     public JkModuleDependency andExclusion(Iterable<JkDependencyExclusion> depExcludes) {
         final List<JkDependencyExclusion> list = new LinkedList<>(exclusions);
         list.addAll(JkUtilsIterable.listOf(depExcludes));
-        return new JkModuleDependency(module, version, classifier, type, transitivity,
-                Collections.unmodifiableList(list), ideProjectDir);
+        return new JkModuleDependency(moduleId, version, transitivity,
+                Collections.unmodifiableList(list), artifactSpecifications, ideProjectDir);
     }
 
     /**
@@ -246,10 +254,10 @@ public final class JkModuleDependency implements JkDependency {
 
     @Override
     public String toString() {
-        if (classifier == null) {
-            return module + ":" + version;
-        }
-        return module + ":" + version + ":" + classifier;
+        StringBuilder result = new StringBuilder(moduleId + ":" + version);
+        artifactSpecifications.forEach(spec ->
+                result.append("(classifier=" + spec.classifier + ", type=" + spec.type + ")"));
+        return result.toString();
     }
 
     @Override
@@ -259,11 +267,11 @@ public final class JkModuleDependency implements JkDependency {
 
     @Override
     public JkModuleDependency withIdeProjectDir(Path path) {
-        return new JkModuleDependency(module, version, classifier, type, transitivity, exclusions, path);
+        return new JkModuleDependency(moduleId, version, transitivity, exclusions, artifactSpecifications, path);
     }
 
     public JkVersionedModule toVersionedModule() {
-        return JkVersionedModule.of(module, version);
+        return JkVersionedModule.of(moduleId, version);
     }
 
 
@@ -276,27 +284,28 @@ public final class JkModuleDependency implements JkDependency {
 
     }
 
-    /*
-     * The equals method is implemented to consider equals two modules dependencies
-     * that may be not the same level of precision. At least, they should have
-     * the same moduleId in common.<br/>
-     * For example 'mygroup:myart:1.0' is considered equals to 'mygroup:myart'.
-     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JkModuleDependency that = (JkModuleDependency) o;
-        if (!module.equals(that.module)) return false;
-        if (!equalsOrOneIsUnspecified(version, that.version)) return false;
-        if (!equalsOrOneIsNull(classifier, that.classifier)) return false;
-        if (!equalsOrOneIsNull(type, that.type)) return false;
-        return equalsOrOneIsNull(exclusions, that.exclusions);
+        if (!moduleId.equals(that.moduleId)) return false;
+        if (version != null ? !version.equals(that.version) : that.version != null) return false;
+        if (transitivity != that.transitivity) return false;
+        if (!exclusions.equals(that.exclusions)) return false;
+        if (!artifactSpecifications.equals(that.artifactSpecifications)) return false;
+        return ideProjectDir != null ? ideProjectDir.equals(that.ideProjectDir) : that.ideProjectDir == null;
     }
 
     @Override
     public int hashCode() {
-        return module.hashCode();
+        int result = moduleId.hashCode();
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (transitivity != null ? transitivity.hashCode() : 0);
+        result = 31 * result + exclusions.hashCode();
+        result = 31 * result + artifactSpecifications.hashCode();
+        result = 31 * result + (ideProjectDir != null ? ideProjectDir.hashCode() : 0);
+        return result;
     }
 
     private static boolean equalsOrOneIsNull(Object first, Object second) {
@@ -314,5 +323,42 @@ public final class JkModuleDependency implements JkDependency {
             return true;
         }
         return first.equals(second);
+    }
+
+    /**
+     * When declaring a module dependency, we implicitly request for the main artifact of this module. Nevertheless,
+     * we can request for getting others artifacts in place or additionally of the main one.
+     * This class aims at specifying which artifact are we interested for the dependency.
+     */
+    public static class JkArtifactSpecification {
+
+        /** Stands for the main artifact */
+        public static final JkArtifactSpecification MAIN = new JkArtifactSpecification(null, null);
+
+        private final String classifier;
+
+        private final String type;
+
+        private JkArtifactSpecification (String classifier, String type) {
+            this.classifier = classifier;
+            this.type = type;
+        }
+
+        public String getClassifier() {
+            return classifier;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
+
+    @Override
+    public boolean matches(JkDependency other) {
+        if (other instanceof JkModuleDependency) {
+            JkModuleDependency moduleDependency = (JkModuleDependency) other;
+            return this.moduleId.equals(moduleDependency.moduleId);
+        }
+        return false;
     }
 }

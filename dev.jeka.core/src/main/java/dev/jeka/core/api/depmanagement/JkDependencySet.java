@@ -65,21 +65,8 @@ public class JkDependencySet {
         return this.dependencies;
     }
 
-    public JkVersion getVersion(JkModuleId moduleId) {
-        JkModuleDependency moduleDependency = moduleDeps()
-                .filter(dep -> moduleId.equals(dep.getModuleId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No module " + moduleId
-                        + " declared in this dependency set " + this.withModuleDependenciesOnly()));
-        JkVersion version = moduleDependency.getVersion();
-        if (!version.isUnspecified()) {
-            return version;
-        }
-        return version == null ? JkVersion.UNSPECIFIED : version;
-    }
-
     /**
-     * Returns a clone of this object plus the specifies {@link JkDependency}s, at the
+     * Returns a clone of this object plus the specified {@link JkDependency}s, at the
      * specified place and condition.
      */
     public JkDependencySet and(Hint hint, List<JkDependency> others) {
@@ -99,12 +86,23 @@ public class JkDependencySet {
             result.addAll(others);
             return new JkDependencySet(result, globalExclusions, versionProvider);
         }
-        int index = result.indexOf(hint.before);
+        int index = firstIndexMatching(hint.before);
         if (index == -1) {
             throw new IllegalArgumentException("No dependency " + hint.before + " found on " + result);
         }
         result.addAll(index, others);
         return new JkDependencySet(result, globalExclusions, versionProvider);
+    }
+
+    private int firstIndexMatching(JkDependency dependency) {
+        int i = 0;
+        for (JkDependency dep : dependencies) {
+            if (dep.matches(dependency)) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
     }
 
     /**
@@ -253,9 +251,15 @@ public class JkDependencySet {
      * {@link JkModuleId}. Returns <code>null</code> if no dependency on this
      * module exists in this object.
      */
-    public JkDependency get(JkModuleId moduleId) {
+    public JkModuleDependency get(String moduleId) {
         return moduleDeps()
-                .filter(dep -> dep.getModuleId().equals(moduleId))
+                .filter(dep -> dep.getModuleId().toString().equals(moduleId))
+                .findFirst().orElse(null);
+    }
+
+    public <T extends JkDependency> T getMatching(T dependency) {
+        return (T) this.dependencies.stream()
+                .filter(dep -> dep.matches(dependency))
                 .findFirst().orElse(null);
     }
 

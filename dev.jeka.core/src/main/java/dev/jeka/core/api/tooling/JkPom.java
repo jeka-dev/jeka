@@ -201,12 +201,9 @@ public final class JkPom {
         final String version = resolveProps(JkUtilsXml.directChildText(mvnDependency, "version"), props) ;
         JkModuleDependency moduleDependency = JkModuleDependency.of(groupId, artifactId, version);
         final String type = JkUtilsXml.directChildText(mvnDependency, "type");
-        if (type != null) {
-            moduleDependency = moduleDependency.withType(type);
-        }
         final String classifier = JkUtilsXml.directChildText(mvnDependency, "classifier");
-        if (classifier != null) {
-            moduleDependency = moduleDependency.withClassifier(classifier);
+        if (type != null || classifier != null) {
+            moduleDependency = moduleDependency.andClassifierAndType(classifier, type);
         }
         final Element exclusionsEl = JkUtilsXml.directChild(mvnDependency, "exclusions");
         if (exclusionsEl != null) {

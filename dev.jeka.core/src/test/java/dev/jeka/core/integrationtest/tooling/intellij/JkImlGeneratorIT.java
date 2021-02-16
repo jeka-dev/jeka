@@ -1,10 +1,11 @@
-package dev.jeka.core.api.tooling.intellij;
+package dev.jeka.core.integrationtest.tooling.intellij;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorTest;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
+import dev.jeka.core.integrationtest.tooling.eclipse.JkEclipseClasspathGeneratorIT;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.nio.file.Paths;
 /**
  * Created by angibaudj on 21-09-17.
  */
-public class JkImlGeneratorTest {
+public class JkImlGeneratorIT {
 
     @Test
     public void generate() throws Exception {
@@ -93,8 +94,8 @@ public class JkImlGeneratorTest {
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
-        final Path dest = Files.createTempDirectory(JkEclipseClasspathGeneratorTest.class.getName());
-        final Path zip = Paths.get(JkEclipseClasspathGeneratorTest.class.getResource(zipName).toURI());
+        final Path dest = Files.createTempDirectory(JkEclipseClasspathGeneratorIT.class.getName());
+        final Path zip = Paths.get(JkEclipseClasspathGeneratorIT.class.getResource(zipName).toURI());
         JkPathTree.ofZip(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;

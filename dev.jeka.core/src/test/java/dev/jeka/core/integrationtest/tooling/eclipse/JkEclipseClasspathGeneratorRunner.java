@@ -1,4 +1,4 @@
-package dev.jeka.core.api.tooling.eclipse;
+package dev.jeka.core.integrationtest.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 public class JkEclipseClasspathGeneratorRunner {
 
     public static void main(String[] args) throws URISyntaxException {
-        final Path zip = Paths.get(JkEclipseClasspathGeneratorTest.class.getResource(JkEclipseClasspathGeneratorTest.ZIP_NAME).toURI());
+        final Path zip = Paths.get(JkEclipseClasspathGeneratorIT.class.getResource(JkEclipseClasspathGeneratorIT.ZIP_NAME).toURI());
         JkModuleDependency moduleDependency = JkModuleDependency.of("junit:junit:4.11");
         JkFileSystemDependency fileDep = JkFileSystemDependency.of(zip);
         JkJavaProject project = JkJavaProject.of().getConstruction()

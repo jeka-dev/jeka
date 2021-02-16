@@ -1,4 +1,4 @@
-package dev.jeka.core.api.tooling.eclipse;
+package dev.jeka.core.integrationtest.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 // Test on a project structure as Base -> Core -> Desktop
-public class JkEclipseClasspathGeneratorTest {
+public class JkEclipseClasspathGeneratorIT {
 
     static final String ZIP_NAME = "sample-multi-scriptless.zip";
 
@@ -90,8 +90,8 @@ public class JkEclipseClasspathGeneratorTest {
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
-        final Path dest = Files.createTempDirectory(JkEclipseClasspathGeneratorTest.class.getName());
-        final Path zip = Paths.get(JkEclipseClasspathGeneratorTest.class.getResource(zipName).toURI());
+        final Path dest = Files.createTempDirectory(JkEclipseClasspathGeneratorIT.class.getName());
+        final Path zip = Paths.get(JkEclipseClasspathGeneratorIT.class.getResource(zipName).toURI());
         JkPathTree.ofZip(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;

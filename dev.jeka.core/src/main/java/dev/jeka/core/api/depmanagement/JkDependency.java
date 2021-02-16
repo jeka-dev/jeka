@@ -29,5 +29,15 @@ public interface JkDependency {
      */
     JkDependency withIdeProjectDir(Path path);
 
+    /**
+     * Returns <code>true</code> if the specified dependency matches with this one. <p>
+     * Matching means that two matching dependencies can not be declared in a same dependency set
+     * as it will be considered as a duplicate or result in a conflict. <p>
+     * For example "com.google:guava:21.0" is matching with "com.google:guava:23.0" even if they are not equals.
+     */
+    default boolean matches(JkDependency other) {
+        return this.equals(other);
+    }
+
 
 }

@@ -19,7 +19,7 @@ public class JkQualifiedDependenciesTest {
                 JkDependencySet.of());
         JkQualifiedDependency guava = qdeps.findByModule(GUAVA.toString()).get(0);
         JkQualifiedDependency servlet = qdeps.findByModule(JAVAX_SERVLET_API.toString()).get(0);
-        Assert.assertEquals("compile, runtime, test", guava.getQualifier() );
+        Assert.assertEquals("compile", guava.getQualifier() );
         Assert.assertEquals("provided", servlet.getQualifier() );
     }
 }

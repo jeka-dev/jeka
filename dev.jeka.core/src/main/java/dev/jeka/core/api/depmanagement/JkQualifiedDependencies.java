@@ -93,9 +93,9 @@ public class JkQualifiedDependencies {
     }
 
     public List<JkQualifiedDependency> findByModule(String moduleId) {
-        JkModuleDependency moduleDependency = JkModuleDependency.of(moduleId);
         return this.qualifiedDependencies.stream()
-                .filter(qDep -> qDep.getDependency().equals(moduleDependency))
+                .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)
+                .filter(qDep -> qDep.getModuleDependency().getModuleId().toString().equals(moduleId))
                 .collect(Collectors.toList());
     }
 
@@ -240,7 +240,7 @@ public class JkQualifiedDependencies {
                 .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
             final String configurationSource;
             String configurationTarget;
-            if (mergeWithProd.getResult().getDependencies().contains(dependency)) {
+            if (mergeWithProd.getResult().getMatching(dependency) != null) {
                 if (mergeWithProd.getAbsentDependenciesFromRight().contains(dependency)) {
                     configurationSource = COMPILE_SCOPE;
                     configurationTarget = MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF;

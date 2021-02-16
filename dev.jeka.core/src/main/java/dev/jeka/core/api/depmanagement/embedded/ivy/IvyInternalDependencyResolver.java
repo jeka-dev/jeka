@@ -98,18 +98,22 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
     public File get(JkModuleDependency dependency) {
         final ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency
                 .toModuleRevisionId(dependency.toVersionedModule());
-        final String typeAndExt = JkUtilsObject.firstNonNull(dependency.getType(), "jar");
+        JkModuleDependency.JkArtifactSpecification artifactSpecification =
+                dependency.getArtifactSpecifications().isEmpty() ? JkModuleDependency.JkArtifactSpecification.MAIN :
+                        dependency.getArtifactSpecifications().iterator().next();
         final DefaultArtifact artifact;
-        if ("pom".equals(dependency.getType())) {
-            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.getModuleId().getName(), typeAndExt,
-                    typeAndExt, true);
+        String type = JkUtilsObject.firstNonNull(artifactSpecification.getType(), "jar");
+        if ("pom".equals(artifactSpecification.getType())) {
+            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.getModuleId().getName(), type,
+                    type, true);
         } else {
+            String classifier = artifactSpecification.getClassifier();
             final Map<String, String> extra = new HashMap<>();
-            if (dependency.getClassifier() != null) {
-                extra.put("classifier", dependency.getClassifier());
+            if (classifier != null) {
+                extra.put("classifier", classifier);
             }
-            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.getModuleId().getName(), typeAndExt,
-                    typeAndExt, extra);
+            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.getModuleId().getName(), type,
+                    type, extra);
         }
         Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, JkResolutionParameters.of());
         final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());

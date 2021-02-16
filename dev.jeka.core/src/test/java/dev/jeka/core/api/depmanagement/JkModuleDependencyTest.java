@@ -10,8 +10,10 @@ public class JkModuleDependencyTest {
     public void testOf() {
         final JkModuleDependency dep = JkModuleDependency.of("group:name:sources:zip:version")
                 .withTransitivity(JkTransitivity.NONE);
-        Assert.assertEquals("sources", dep.getClassifier());
-        Assert.assertEquals("zip", dep.getType());
+        JkModuleDependency.JkArtifactSpecification artifactSpecification =
+                dep.getArtifactSpecifications().iterator().next();
+        Assert.assertEquals("sources", artifactSpecification.getClassifier());
+        Assert.assertEquals("zip", artifactSpecification.getType());
         Assert.assertEquals(JkTransitivity.NONE, dep.getTransitivity());
     }
 
