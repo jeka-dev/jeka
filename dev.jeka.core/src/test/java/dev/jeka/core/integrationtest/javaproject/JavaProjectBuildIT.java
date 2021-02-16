@@ -29,8 +29,7 @@ public class JavaProjectBuildIT {
                 .setBaseDir(root.resolve("core"))
                 .addCompileDependencies(JkDependencySet.of(baseProject.toDependency())).getProject();
 
-        JkResolveResult resolveResult = coreProject.getConstruction().getDependencyResolver().resolve(
-                coreProject.getConstruction().getCompilation().getDependencies());
+        JkResolveResult resolveResult = coreProject.getConstruction().getCompilation().resolveDependencies();
 
         Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size()); // base dir and guava
         JkResolvedDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);

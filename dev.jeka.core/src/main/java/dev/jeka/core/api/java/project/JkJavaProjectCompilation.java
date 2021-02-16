@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
@@ -250,6 +251,10 @@ public class JkJavaProjectCompilation<T> {
         return this;
     }
 
+    public JkResolveResult resolveDependencies() {
+        return construction.getDependencyResolver().resolve(dependencySet);
+    }
+
     public JkDependencySet getDependencies() {
         return dependencySet;
     }
@@ -273,7 +278,7 @@ public class JkJavaProjectCompilation<T> {
         return JkJavaCompileSpec.of()
             .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
             .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
-            .setClasspath(construction.getDependencyResolver().resolve(dependencySet).getFiles())
+            .setClasspath(resolveDependencies().getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
             .setOutputDir(layout.resolveClassDir());
