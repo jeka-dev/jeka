@@ -13,11 +13,11 @@ public class JkDependencySetMergeTest {
     public void of_distinctSets_mergeCorrectly() {
         JkDependencySet left = of("A", "B", "C", "D", "E", "F", "Z");
         JkDependencySet right = of("Z","A", "B", "Y", "V", "E", "X");
-        JkDependencySet expectedResult = of("A", "B", "C", "D", "Y", "V", "E", "F", "Z", "X");
+        JkDependencySet expectedResult = of("A", "B", "C", "D", "E", "F", "Z", "Y", "V", "X");
         JkDependencySetMerge merge = JkDependencySetMerge.of(left, right);
         assertEquals(of("Y", "V", "X").getDependencies(), merge.getAbsentDependenciesFromLeft());
         assertEquals(of("C", "D", "F").getDependencies(), merge.getAbsentDependenciesFromRight());
-        assertEquals(expectedResult, merge.getResult());
+        assertEquals(expectedResult.getDependencies(), merge.getResult().getDependencies());
     }
 
     private static JkDependencySet of (String ... depNames) {

@@ -22,4 +22,6 @@ public class JkQualifiedDependenciesTest {
         Assert.assertEquals("compile", guava.getQualifier() );
         Assert.assertEquals("provided", servlet.getQualifier() );
     }
+
+
 }

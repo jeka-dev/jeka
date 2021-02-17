@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,35 +39,21 @@ public final class JkDependencySetMerge {
     public static JkDependencySetMerge of(JkDependencySet left, JkDependencySet right) {
         List<JkDependency> result = new LinkedList<>();
         List<JkDependency> absentFromLeft = new LinkedList<>();
-        Iterator<JkDependency> leftIt = left.getDependencies().iterator();
-        Iterator<JkDependency> rightIt = right.getDependencies().iterator();
-        while (leftIt.hasNext()) {
-            JkDependency leftDep = leftIt.next();
-            JkDependency matchingRightDep = null;
-            while (rightIt.hasNext() && matchingRightDep == null) {
-                JkDependency rightDep = rightIt.next();
-                if (leftDep.equals(rightDep)) {
-                    matchingRightDep = rightDep;
-                } else if (!left.getDependencies().contains(rightDep) && !result.contains(rightDep)) {
-                    absentFromLeft.add(rightDep);
-                    result.add(rightDep);
-                }
-            }
-            if (matchingRightDep != null && leftDep instanceof JkModuleDependency) {
-                JkModuleDependency leftModDep = (JkModuleDependency) leftDep;
-                JkModuleDependency rightModDep = (JkModuleDependency) matchingRightDep;
-                leftDep = leftModDep.withTransitivity(
-                        JkTransitivity.ofDeepest(leftModDep.getTransitivity(), rightModDep.getTransitivity()));
+        List<JkDependency> absentFromRight = new LinkedList<>();
+        for (JkDependency leftDep : left.getDependencies()) {
+            JkDependency matchingRightDep = right.getMatching(leftDep);
+            if (matchingRightDep == null) {
+                absentFromRight.add(leftDep);
             }
             result.add(leftDep);
         }
-        while (rightIt.hasNext()) {
-            JkDependency rightDep = rightIt.next();
-            absentFromLeft.add(rightDep);
-            result.add(rightDep);
+        for (JkDependency rightDep : right.getDependencies()) {
+            JkDependency matchingLeftDep = left.getMatching(rightDep);
+            if (matchingLeftDep == null) {
+                absentFromLeft.add(rightDep);
+                result.add(rightDep);
+            }
         }
-        List<JkDependency> absentFromRight = new LinkedList(left.getDependencies());
-        absentFromRight.removeAll(right.getDependencies());
         JkVersionProvider mergedVersionProvider = left.getVersionProvider().and(right.getVersionProvider());
         HashSet<JkDependencyExclusion> mergedExcludes = new HashSet<>(left.getGlobalExclusions());
         mergedExcludes.addAll(right.getGlobalExclusions());

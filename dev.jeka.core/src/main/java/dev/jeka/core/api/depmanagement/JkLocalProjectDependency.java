@@ -10,15 +10,15 @@ import java.util.Collections;
 public class JkLocalProjectDependency extends JkComputedDependency  {
 
     // published dependencies
-    private JkDependencySet dependencies;
+    private JkDependencySet transitiveDependencies;
 
     /*
      * Constructs a {@link JkLocalProjectDependency} from an artifact producer and the artifact file id
      * one is interested on.
      */
-    private JkLocalProjectDependency(Runnable producer, Path file, Path ideProjectDir, JkDependencySet dependencies) {
+    private JkLocalProjectDependency(Runnable producer, Path file, Path ideProjectDir, JkDependencySet transitiveDependencies) {
         super(producer, ideProjectDir, Collections.singleton(file));
-        this.dependencies = dependencies.withIdeProjectDir(ideProjectDir);
+        this.transitiveDependencies = transitiveDependencies.withIdeProjectDir(ideProjectDir);
     }
 
     /**
@@ -40,12 +40,12 @@ public class JkLocalProjectDependency extends JkComputedDependency  {
      * Returns the dependencies that will be consumed by the depender. This is not the
      * the dependencies needed to compile the jar but the ones that would be published.
      */
-    public JkDependencySet getDependencies() {
-        return dependencies;
+    public JkDependencySet getTransitiveDependencies() {
+        return transitiveDependencies;
     }
 
     @Override
     public JkLocalProjectDependency withIdeProjectDir(Path path) {
-        return new JkLocalProjectDependency(runnable, files.iterator().next(), path, dependencies);
+        return new JkLocalProjectDependency(runnable, files.iterator().next(), path, transitiveDependencies);
     }
 }

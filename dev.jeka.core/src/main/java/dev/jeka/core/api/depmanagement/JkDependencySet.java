@@ -173,8 +173,13 @@ public class JkDependencySet {
     }
 
     public JkDependencySet minus(List<JkDependency> dependencies) {
-        List<JkDependency> result = new LinkedList<>(dependencies);
-        result.removeAll(dependencies);
+        List<JkDependency> result = new LinkedList<>(this.getDependencies());
+        for (JkDependency dependency : dependencies) {
+            JkDependency matchingDependency = this.getMatching(dependency);
+            if (matchingDependency != null) {
+                result.remove(matchingDependency);
+            }
+        }
         return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
     }
 
