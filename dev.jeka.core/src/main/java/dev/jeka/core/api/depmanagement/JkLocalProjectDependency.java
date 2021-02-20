@@ -78,4 +78,9 @@ public class JkLocalProjectDependency extends JkComputedDependency
         return new JkLocalProjectDependency(runnable, files.iterator().next(), getIdeProjectDir(),
                 exportedDependencies, transitivity);
     }
+
+    public JkLocalProjectDependency withoutExportedDependencies() {
+        return new JkLocalProjectDependency(runnable, files.iterator().next(), getIdeProjectDir(),
+                Collections.emptyList(), transitivity);
+    }
 }

@@ -89,7 +89,9 @@ public final class JkDependencyResolver<T> {
     }
 
     public JkResolveResult resolve(JkDependencySet dependencies) {
-        return resolve(JkQualifiedDependencies.of(dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)));
+        return resolve(JkQualifiedDependencies.of(
+                dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)
+                            .mergeLocalProjectExportedDependencies()));
     }
 
     /**

@@ -215,13 +215,14 @@ public class JkDependencySet {
         for (JkDependency dependency : dependencies) {
             if (dependency instanceof JkLocalProjectDependency) {
                 JkLocalProjectDependency localProjectDependency = (JkLocalProjectDependency) dependency;
+                result.add(localProjectDependency.withoutExportedDependencies());
                 List<JkDependency> exportedDependencies = localProjectDependency.getExportedDependencies();
                 JkDependencySet recursiveExportedDependencies =
                         JkDependencySet.of(exportedDependencies).mergeLocalProjectExportedDependencies();
                 for (JkDependency exportedDependency : recursiveExportedDependencies.dependencies) {
                     JkDependency matchedDependency = getMatching(exportedDependency);
                     if (matchedDependency == null) {
-                        result.add(dependency);
+                        result.add(exportedDependency);
                     }
                 }
             } else {
