@@ -18,7 +18,7 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-public final class JkModuleDependency implements JkDependency {
+public final class JkModuleDependency implements JkFileDependency.JkTransitivityDependency {
 
     private final JkModuleId moduleId;
 

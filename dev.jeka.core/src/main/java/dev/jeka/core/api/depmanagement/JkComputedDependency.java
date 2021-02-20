@@ -147,7 +147,6 @@ public class JkComputedDependency implements JkFileDependency {
         return new JkComputedDependency(runnable, path, files);
     }
 
-
     @Override
     public String toString() {
         return this.runnable.toString();

@@ -3,7 +3,10 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Association between getModuleIds and version.
@@ -11,6 +14,13 @@ import java.util.*;
  * @author Jerome Angibaud
  */
 public final class JkVersionProvider {
+
+    private final Map<JkModuleId, JkVersion> map;
+
+    private JkVersionProvider(Map<JkModuleId, JkVersion> map) {
+        super();
+        this.map = map;
+    }
 
     /**
      * @see #of(JkModuleId, JkVersion)
@@ -50,13 +60,6 @@ public final class JkVersionProvider {
             result.put(module.getModuleId(), module.getVersion());
         }
         return new JkVersionProvider(result);
-    }
-
-    private final Map<JkModuleId, JkVersion> map;
-
-    private JkVersionProvider(Map<JkModuleId, JkVersion> map) {
-        super();
-        this.map = map;
     }
 
     /**
@@ -122,6 +125,10 @@ public final class JkVersionProvider {
     @Override
     public String toString() {
         return this.map.toString();
+    }
+
+    public Map<JkModuleId, JkVersion> toMap() {
+        return Collections.unmodifiableMap(map);
     }
 
     /**

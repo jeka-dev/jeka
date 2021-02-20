@@ -26,10 +26,10 @@ public class JkDependencySet {
 
     private final JkVersionProvider versionProvider;
 
-    private JkDependencySet(List<JkDependency> dependencies, Set<JkDependencyExclusion> excludes, JkVersionProvider explicitVersions) {
+    private JkDependencySet(List<JkDependency> dependencies, Set<JkDependencyExclusion> exclusions, JkVersionProvider explicitVersions) {
         super();
         this.dependencies = Collections.unmodifiableList(dependencies);
-        this.globalExclusions = Collections.unmodifiableSet(excludes);
+        this.globalExclusions = Collections.unmodifiableSet(exclusions);
         this.versionProvider = explicitVersions;
     }
 
@@ -209,6 +209,30 @@ public class JkDependencySet {
         }
         return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
     }
+
+    public JkDependencySet mergeLocalProjectExportedDependencies() {
+        List<JkDependency> result = new LinkedList<>();
+        for (JkDependency dependency : dependencies) {
+            if (dependency instanceof JkLocalProjectDependency) {
+                JkLocalProjectDependency localProjectDependency = (JkLocalProjectDependency) dependency;
+                List<JkDependency> exportedDependencies = localProjectDependency.getExportedDependencies();
+                JkDependencySet recursiveExportedDependencies =
+                        JkDependencySet.of(exportedDependencies).mergeLocalProjectExportedDependencies();
+                for (JkDependency exportedDependency : recursiveExportedDependencies.dependencies) {
+                    JkDependency matchedDependency = getMatching(exportedDependency);
+                    if (matchedDependency == null) {
+                        result.add(dependency);
+                    }
+                }
+            } else {
+                result.add(dependency);
+            }
+        }
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
+
+    }
+
+
 
     /**
      * Returns a clone of this object but using specified version provider to override

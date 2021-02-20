@@ -165,8 +165,7 @@ public class DependencySetResolutionIT {
     public void resolve_compileTransitivity_dontFetchRuntimeTransitiveDependencies() {
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", JkTransitivity.COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of()
-                .addRepos(JkRepo.ofMavenCentral());
+        JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
         boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
         assertFalse(snakeyamlHere);

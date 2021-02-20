@@ -1,12 +1,11 @@
 package dev.jeka.core.api.java.project;
 
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.JkLocalProjectDependency;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -145,15 +144,20 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     }
 
     public JkLocalProjectDependency toDependency() {
-        return toDependency(publication.getArtifactProducer().getMainArtifactId());
+        return toDependency(publication.getArtifactProducer().getMainArtifactId(), null);
     }
 
-    public JkLocalProjectDependency toDependency(JkArtifactId artifactId) {
-        return JkLocalProjectDependency.of(
-            () -> publication.getArtifactProducer().makeArtifact(artifactId),
-                publication.getArtifactProducer().getArtifactPath(artifactId),
-            this.baseDir,
-            construction.getCompilation().getDependencies().merge(construction.getRuntimeDependencies()).getResult());
+    public JkLocalProjectDependency toDependency(JkTransitivity transitivity) {
+        return toDependency(publication.getArtifactProducer().getMainArtifactId(), transitivity);
+    }
+
+    public JkLocalProjectDependency toDependency(JkArtifactId artifactId, JkTransitivity transitivity) {
+       Runnable maker = () -> publication.getArtifactProducer().makeArtifact(artifactId);
+       Path artifactPath = publication.getArtifactProducer().getArtifactPath(artifactId);
+       List<JkDependency> exportedDependencies = construction.getCompilation().getDependencies()
+               .merge(construction.getRuntimeDependencies()).getResult().getDependencies();
+        return JkLocalProjectDependency.of(maker, artifactPath, this.baseDir, exportedDependencies)
+                .withTransitivity(transitivity);
     }
 
     Path getArtifactPath(JkArtifactId artifactId) {
