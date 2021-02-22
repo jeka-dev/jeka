@@ -57,7 +57,9 @@ public class JkJavaProjectCompilation<T> {
 
     private final JkCompileLayout<JkJavaProjectCompilation<T>> layout;
 
-    private Function<JkDependencySet, JkDependencySet> dependencySetSupplier = deps -> JkDependencySet.of();
+    private Function<JkDependencySet, JkDependencySet> dependenciesModifier = deps -> deps;
+
+    private Supplier<JkDependencySet> dependencyBootSupplier = () -> JkDependencySet.of();
 
     private final LinkedList<String> compileOptions = new LinkedList<>();
 
@@ -98,6 +100,7 @@ public class JkJavaProjectCompilation<T> {
                                                                  JkJavaProjectTesting parent) {
         JkJavaProjectCompilation result =
                 new JkJavaProjectCompilation(construction, TEST_PURPOSE, parent);
+        result.dependencyBootSupplier = construction.getCompilation()::getDependencies;
         result.compileSpecSupplier = () -> result.computeTestCompileSpec(construction.getCompilation());
         result.layout
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
@@ -253,7 +256,7 @@ public class JkJavaProjectCompilation<T> {
     }
 
     public JkJavaProjectCompilation<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        this.dependencySetSupplier = dependencySetSupplier.andThen(modifier);
+        this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
     }
 
@@ -262,7 +265,7 @@ public class JkJavaProjectCompilation<T> {
     }
 
     public JkDependencySet getDependencies() {
-        return dependencySetSupplier.apply(JkDependencySet.of());
+        return dependenciesModifier.apply(dependencyBootSupplier.get());
     }
 
     private JkJavaCompileSpec getComputedCompileSpec() {

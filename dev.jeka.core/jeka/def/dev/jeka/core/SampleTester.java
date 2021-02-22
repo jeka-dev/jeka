@@ -96,6 +96,7 @@ class SampleTester {
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
                 .andParams("-LB")
+                .andParams("-LRI")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }

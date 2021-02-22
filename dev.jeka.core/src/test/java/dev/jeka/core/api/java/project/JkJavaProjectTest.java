@@ -16,7 +16,10 @@ public class JkJavaProjectTest {
                 .getCompilation().getDependencies();
         JkDependencySet testCompileDeps = javaProject.getConstruction().getTesting()
                 .getCompilation().getDependencies();
+        Assert.assertEquals(1, compileDeps.getDependencies().size());
         Assert.assertNotNull(compileDeps.get("a:a"));
+        Assert.assertEquals(2, testCompileDeps.getDependencies().size());
         Assert.assertNotNull(testCompileDeps.get("a:a"));
+        Assert.assertNotNull(testCompileDeps.get("b:b"));
     }
 }
