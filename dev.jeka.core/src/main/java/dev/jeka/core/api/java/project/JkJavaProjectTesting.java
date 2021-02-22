@@ -34,7 +34,7 @@ public class JkJavaProjectTesting {
 
     private JkTestSelection testSelection;
 
-    // replative path from output dir
+    // relative path from output dir
     private String reportDir = "test-report";
 
     private boolean done;
