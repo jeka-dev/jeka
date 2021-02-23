@@ -125,8 +125,8 @@ public final class JkDependencyResolver<T> {
                     + resolveResult.getInvolvedModules());
             JkLog.info(plurialize(resolveResult.getFiles().getEntries().size(), "artifact") + ".");
         } else {
-            JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " resolved to " +
-                    plurialize(resolveResult.getFiles().getEntries().size(), "artifact file") + ".");
+            JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " : " +
+                    plurialize(resolveResult.getFiles().getEntries().size(), " file") + ".");
         }
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {

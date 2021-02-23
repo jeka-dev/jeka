@@ -9,12 +9,8 @@ import org.apache.ivy.util.url.CredentialsStore;
 
 import java.io.File;
 import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
 
 class IvyTranslatorToResolver {
-
-    private static final String PUBLISH_RESOLVER_NAME = "publisher:";
 
     private static final String MAVEN_ARTIFACT_PATTERN =
             "/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
@@ -29,24 +25,15 @@ class IvyTranslatorToResolver {
         return chainResolver;
     }
 
-    static List<RepositoryResolver> publishResolverOf(IvySettings ivySettings) {
-        final List<RepositoryResolver> resolvers = new LinkedList<>();
-        for (final Object resolverObject : ivySettings.getResolvers()) {
-            final AbstractResolver resolver = (AbstractResolver) resolverObject;
-            if (resolver.getName() != null && resolver.getName().startsWith(PUBLISH_RESOLVER_NAME)) {
-                resolvers.add((RepositoryResolver) resolver);
-            }
-        }
-        return resolvers;
-    }
-
-    static String publishResolverUrl(DependencyResolver resolver) {
-        return resolver.getName().substring(PUBLISH_RESOLVER_NAME.length());
+    static RepositoryResolver convertToPublishAndBind(JkRepo repo, IvySettings ivySettings) {
+        RepositoryResolver resolver = toResolver(repo, false);
+        ivySettings.addResolver(resolver);
+        return resolver;
     }
 
     // see
     // http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
-    private static DependencyResolver toResolver(JkRepo repo, boolean download) {
+    private static RepositoryResolver toResolver(JkRepo repo, boolean download) {
         if (!repo.isIvyRepo()) {
             if (!isFileSystem(repo.getUrl()) || download) {
                 return ibiblioResolver(repo);

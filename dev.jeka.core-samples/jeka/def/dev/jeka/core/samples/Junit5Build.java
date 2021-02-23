@@ -44,7 +44,7 @@ class Junit5Build extends JkClass {
                     .getCompilation()
                         .addDependencies(JkDependencySet.of()
                             .and("org.junit.jupiter:junit-jupiter-engine:5.1.0")
-                            .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0")
+                            .and("org.junit.vintage:junit-vintage-engine:5.6.0")
                             .and("org.jdom:jdom2:2.0.6")
                         ).__
                     .getTestProcessor()
