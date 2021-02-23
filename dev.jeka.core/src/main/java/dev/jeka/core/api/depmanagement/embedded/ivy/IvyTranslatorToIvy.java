@@ -7,6 +7,7 @@ import dev.jeka.core.api.system.JkLog;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.conflict.AbstractConflictManager;
 import org.apache.ivy.plugins.resolver.AbstractResolver;
 import org.apache.ivy.util.url.URLHandlerRegistry;
 
@@ -43,8 +44,12 @@ class IvyTranslatorToIvy {
         resolver.setName(MAIN_RESOLVER_NAME);
         ivySettings.addResolver(resolver);
         ivySettings.setDefaultResolver(MAIN_RESOLVER_NAME);
-        ivySettings.setDefaultConflictManager(IvyTranslatorToConflictManager.toConflictManager(
-                parameters.getConflictResolver()));
+        AbstractConflictManager conflictManager = IvyTranslatorToConflictManager.toConflictManager(
+                parameters.getConflictResolver());
+        if (conflictManager != null) {
+            conflictManager.setSettings(ivySettings);
+            ivySettings.setDefaultConflictManager(conflictManager);
+        }
         ivySettings.setDefaultCache(JkLocator.getJekaRepositoryCache().toFile());
         return ivySettings;
     }

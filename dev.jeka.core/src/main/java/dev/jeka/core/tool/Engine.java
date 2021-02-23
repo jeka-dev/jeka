@@ -86,7 +86,7 @@ final class Engine {
         JkPathSequence path = JkPathSequence.of();
         preCompile();  // Need to pre-compile to get the declared def dependencies
         if (!JkUtilsString.isBlank(jkClassHint)) {  // First find a class in the existing classpath without compiling
-            if (Environment.standardOptions.logRuntimeInformation != null) {
+            if (Environment.standardOptions.jkClassName() != null) {
                 path = path.and(compile(false));
             }
             jkClass = getJkClassInstance(jkClassHint, path);
@@ -163,7 +163,7 @@ final class Engine {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
-        final JkClass jkClass = resolver.resolve(jkClassHint);
+        final JkClass jkClass = resolver.resolveQuietly(jkClassHint);
         if (jkClass == null) {
             return null;
         }

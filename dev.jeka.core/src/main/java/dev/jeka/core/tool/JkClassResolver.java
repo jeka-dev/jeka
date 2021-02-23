@@ -38,6 +38,15 @@ final class JkClassResolver {
         return resolve(classNameHint, JkClass.class, true);
     }
 
+    JkClass resolveQuietly(String classNameHint) {
+        try {
+            return resolve(classNameHint);
+        } catch (RuntimeException e) {
+            JkLog.warn("Error reading class hint " + classNameHint + " : " + e.getMessage());
+            return null;
+        }
+    }
+
     /**
      * Resolves the {@link JkClass} instance to use on this project.
      */
