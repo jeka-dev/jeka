@@ -18,7 +18,7 @@ import java.util.List;
 public final class JkRepoSet {
 
     // Cached resolver
-    private transient JkInternalDependencyResolver ivyResolver;
+    private transient JkInternalDependencyResolver internalDependencyResolver;
 
     private final List<JkRepo> repos;
 
@@ -123,7 +123,7 @@ public final class JkRepoSet {
      * Retrieves directly the file embodying the specified the external dependency.
      */
     public Path get(JkModuleDependency moduleDependency) {
-        final JkInternalDependencyResolver depResolver = getIvyResolver();
+        final JkInternalDependencyResolver depResolver = getInternalDependencyResolver();
         final File file = depResolver.get(moduleDependency);
         if (file == null) {
             return null;
@@ -145,11 +145,11 @@ public final class JkRepoSet {
         return get(JkModuleDependency.of(moduleGroupVersion));
     }
 
-    private JkInternalDependencyResolver getIvyResolver() {
-        if (ivyResolver == null) {
-            ivyResolver = JkInternalDependencyResolver.of(this);
+    private JkInternalDependencyResolver getInternalDependencyResolver() {
+        if (internalDependencyResolver == null) {
+            internalDependencyResolver = JkInternalDependencyResolver.of(this);
         }
-        return ivyResolver;
+        return internalDependencyResolver;
     }
 
 }
