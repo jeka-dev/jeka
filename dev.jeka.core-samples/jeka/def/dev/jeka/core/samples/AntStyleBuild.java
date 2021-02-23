@@ -30,7 +30,7 @@ import java.util.List;
  * 
  * @author Jerome Angibaud
  */
-@JkDefClasspath("org.apache.httpcomponents:httpclient:jar:4.5.6")
+@JkDefClasspath("org.apache.httpcomponents:httpclient:4.5.6")
 public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");

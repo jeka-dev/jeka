@@ -40,6 +40,18 @@ public class DependencySetResolutionIT {
     }
 
     @Test
+    public void resolve_jerseyServer_ok() {
+        JkDependencySet deps = JkDependencySet.of()
+                .and(JkModuleDependency.of("com.sun.jersey:jersey-server:1.19.4")
+                        .withTransitivity(JkTransitivity.NONE));
+        JkDependencyResolver resolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = resolver.resolve(deps);
+        List<JkResolvedDependencyNode> nodes = resolveResult.getDependencyTree().toFlattenList();
+        assertEquals(1, nodes.size());
+    }
+
+    @Test
     public void resolve_dependencyDeclaredAsNonTransitive_ok() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkModuleDependency.of(SPRINGBOOT_TEST_AND_VERSION).withTransitivity(JkTransitivity.NONE));
