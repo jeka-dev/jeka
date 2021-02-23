@@ -32,9 +32,9 @@ class IvyTranslatorToResolver {
     static List<RepositoryResolver> publishResolverOf(IvySettings ivySettings) {
         final List<RepositoryResolver> resolvers = new LinkedList<>();
         for (final Object resolverObject : ivySettings.getResolvers()) {
-            final RepositoryResolver resolver = (RepositoryResolver) resolverObject;
+            final AbstractResolver resolver = (AbstractResolver) resolverObject;
             if (resolver.getName() != null && resolver.getName().startsWith(PUBLISH_RESOLVER_NAME)) {
-                resolvers.add(resolver);
+                resolvers.add((RepositoryResolver) resolver);
             }
         }
         return resolvers;

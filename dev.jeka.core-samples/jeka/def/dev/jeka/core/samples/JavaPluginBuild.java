@@ -29,7 +29,6 @@ public class JavaPluginBuild extends JkClass {
                        .and("com.sun.jersey:jersey-server:1.19.4")
                        .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
                .addTestDependencies(JkDependencySet.of()
-                       .and("org.junit.jupiter:junit-jupiter-engine:5.6.0")
                        .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
                .addTestExcludeFilterSuffixedBy("IT", false)
                .setJavaVersion(JkJavaVersion.V8)
