@@ -9,7 +9,6 @@ import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsObject;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -283,10 +282,18 @@ public class JkJavaProjectCompilation<T> {
         }
     }
 
+    private String effectiveSourceEncoding() {
+        return sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING;
+    }
+
+    private JkJavaVersion effectiveSourceVersion() {
+        return javaVersion != null ? javaVersion : DEFAULT_JAVA_VERSION;
+    }
+
     private JkJavaCompileSpec computeProdCompileSpec() {
         return JkJavaCompileSpec.of()
-            .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
-            .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
+            .setSourceAndTargetVersion(effectiveSourceVersion())
+            .setEncoding(effectiveSourceEncoding())
             .setClasspath(resolveDependencies().getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
@@ -294,11 +301,10 @@ public class JkJavaProjectCompilation<T> {
     }
 
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
-        JkJavaCompileSpec prodSpec = prodStep.getComputedCompileSpec();
         JkDependencySet dependencies = getDependencies();
         return JkJavaCompileSpec.of()
-                .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
-                .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
+                .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodStep.effectiveSourceVersion())
+                .setEncoding(sourceEncoding != null ? sourceEncoding : prodStep.effectiveSourceEncoding())
                 .setClasspath(construction.getDependencyResolver().resolve(dependencies).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))

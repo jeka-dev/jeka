@@ -15,8 +15,6 @@ class IvyTranslatorToIvy {
 
     private static final String MAIN_RESOLVER_NAME = "MAIN";
 
-    private static final String MAIN_CONFLICT_MANAGER = "MAIN";
-
     static Ivy toIvy(JkRepoSet repoSet, JkResolutionParameters parameters) {
         IvySettings ivySettings = ivySettingsOf(repoSet, parameters);
         return ivy(ivySettings);
@@ -53,8 +51,5 @@ class IvyTranslatorToIvy {
         ivySettings.setDefaultCache(JkLocator.getJekaRepositoryCache().toFile());
         return ivySettings;
     }
-
-
-
 
 }

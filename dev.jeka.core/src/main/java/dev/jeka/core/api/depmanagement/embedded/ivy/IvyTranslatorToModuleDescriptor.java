@@ -3,12 +3,15 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 
@@ -21,8 +24,7 @@ class IvyTranslatorToModuleDescriptor {
                                                              JkQualifiedDependencies dependencies) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
                 .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
-        final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
-                thisModuleRevisionId, "integration", null);
+        final DefaultModuleDescriptor result = newDefaultModuleDescriptor(thisModuleRevisionId);
 
         // Add configurations
         toMasterConfigurations(dependencies).forEach(conf -> result.addConfiguration(conf));
@@ -64,6 +66,22 @@ class IvyTranslatorToModuleDescriptor {
             IvyTranslatorToArtifact.toIvyArtifacts(module, ivyPublication.getAllArtifacts());
         IvyTranslatorToArtifact.bind(result, artifactAndConfigurationsList);
         return result;
+    }
+
+    private static DefaultModuleDescriptor newDefaultModuleDescriptor(ModuleRevisionId moduleRevisionId) {
+        JkLog.Verbosity verbosity = JkLog.verbosity();
+        if (!JkLog.isVerbose()) {  // Avoid internal ivy system.output emitted on DefaultModuleDescriptor constructor
+            PrintStream previous = System.out;
+            System.setOut(JkUtilsIO.nopPrintStream());
+            try {
+                return new DefaultModuleDescriptor(moduleRevisionId, "integration", null);
+            } finally {
+                System.setOut(previous);
+                JkLog.setVerbosity(verbosity);
+            }
+        } else {
+            return new DefaultModuleDescriptor(moduleRevisionId, "integration", null);
+        }
     }
 
 
