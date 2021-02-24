@@ -85,7 +85,7 @@ class SampleTester {
     private void testSampleWithJavaPlugin(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-CC=" + className)
+                .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
                 .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LB", "-LV=false")
                 .andParams(args)
                 .withFailOnError(true).runSync();
@@ -95,7 +95,7 @@ class SampleTester {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
-                .andParams("-LB", "-LRI", "-LSU")
+                .andParams("-LB", "-LRI", "-LSU", "-LV")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }

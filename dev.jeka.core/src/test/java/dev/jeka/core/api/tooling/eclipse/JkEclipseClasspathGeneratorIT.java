@@ -1,4 +1,4 @@
-package dev.jeka.core.integrationtest.tooling.eclipse;
+package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;

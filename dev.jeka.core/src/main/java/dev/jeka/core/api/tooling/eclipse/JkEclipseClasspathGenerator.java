@@ -1,4 +1,4 @@
-package dev.jeka.core.integrationtest.tooling.eclipse;
+package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -34,7 +34,7 @@ public final class JkEclipseClasspathGenerator {
 
     private static final String ENCODING = "UTF-8";
 
-    private static final String CLASSPATHENTRY = "classpathentry";
+    private static final String CLASSPATH_ENTRY = "classpathentry";
 
     private static final String JEKA_HOME = "JEKA_HOME";
 
@@ -244,7 +244,7 @@ public final class JkEclipseClasspathGenerator {
     /** convenient method to write classpath element shorter */
     private static void writeClasspathEl(XMLStreamWriter writer, String... items) throws XMLStreamException {
         final Map<String, String> map = JkUtilsIterable.mapOfAny((Object[]) items);
-        writer.writeEmptyElement(CLASSPATHENTRY);
+        writer.writeEmptyElement(CLASSPATH_ENTRY);
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             writer.writeAttribute(entry.getKey(), entry.getValue());
         }
@@ -290,7 +290,7 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeJre(XMLStreamWriter writer) throws XMLStreamException {
         writer.writeCharacters("\t");
-        writer.writeEmptyElement(CLASSPATHENTRY);
+        writer.writeEmptyElement(CLASSPATH_ENTRY);
         writer.writeAttribute("kind", "con");
         final String container;
         if (jreContainer != null) {
@@ -347,7 +347,7 @@ public final class JkEclipseClasspathGenerator {
             }
             sourcePaths.add(path);
             writer.writeCharacters("\t");
-            writer.writeEmptyElement(CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATH_ENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
@@ -366,7 +366,7 @@ public final class JkEclipseClasspathGenerator {
             }
             sourcePaths.add(path);
             writer.writeCharacters("\t");
-            writer.writeEmptyElement(CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATH_ENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
@@ -474,9 +474,9 @@ public final class JkEclipseClasspathGenerator {
         writer.writeCharacters("\t");
         boolean emptyTag = attributeProps.isEmpty() && accesRuleProps.isEmpty();
         if (emptyTag) {
-            writer.writeEmptyElement(CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATH_ENTRY);
         } else {
-            writer.writeStartElement(CLASSPATHENTRY);
+            writer.writeStartElement(CLASSPATH_ENTRY);
         }
         writer.writeAttribute("kind", isVar ? "var" : "lib");
         writer.writeAttribute("path", binPath);

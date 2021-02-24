@@ -39,7 +39,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
     JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     JkDependencySet prodDependencies = JkDependencySet.of()
-            .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final");
+            .and("org.hibernate:hibernate-entitymanager:5.4.2.Final");
     JkDependencySet testDependencies = JkDependencySet.of()
             .and("junit:junit:4.13");
     List<Path> depFiles = getBaseTree().andMatching(true,"libs/**/*.jar").getFiles();

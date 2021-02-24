@@ -107,7 +107,7 @@ public final class JkDependencyResolver<T> {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
         JkInternalDependencyResolver internalDepResolver = JkInternalDependencyResolver.of(this.repos);
-        JkLog.trace("Preparing to resolve dependencies for module " + moduleHolder);
+        JkLog.trace("Preparing to resolve dependencies");
         JkLog.startTask("Resolve dependencies");
         JkResolveResult resolveResult;
         if (hasModule) {
