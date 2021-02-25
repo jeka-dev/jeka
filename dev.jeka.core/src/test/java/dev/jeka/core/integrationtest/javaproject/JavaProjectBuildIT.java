@@ -1,5 +1,6 @@
 package dev.jeka.core.integrationtest.javaproject;
 
+import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
@@ -13,6 +14,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class JavaProjectBuildIT {
 
@@ -44,6 +46,23 @@ public class JavaProjectBuildIT {
         JkPathTree.ofZip(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;
+    }
+
+    @Test
+    public void publish_maven_ok() {
+        JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .addCompileDependencies(JkDependencySet.of()
+                        .and("com.google.guava:guava:23.0")
+                        .and("javax.servlet:javax.servlet-api:4.0.1"))
+                .setRuntimeDependencies(deps -> deps
+                        .and("org.postgresql:postgresql:jar:42.2.19")
+                        .minus("javax.servlet:javax.servlet-api"))
+                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .getProject();
+        project.getConstruction().getDependencyResolver().resolve(project.getConstruction().getRuntimeDependencies());
+        List<JkDependency> dependencies = project.getPublication().getMavenPublication()
+                .getDependencies().getDependencies();
+        System.out.println(dependencies);
     }
 
 }

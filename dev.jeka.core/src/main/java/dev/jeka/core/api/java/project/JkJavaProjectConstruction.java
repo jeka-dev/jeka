@@ -81,7 +81,7 @@ public class JkJavaProjectConstruction {
         return manifest;
     }
 
-    public JkJavaProject getProject() {
+    JkJavaProject getProject() {
         return project;
     }
 
