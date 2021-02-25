@@ -21,4 +21,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Jeka bootstrapped with ANT
-      run: ant -buildfile ./github/workflows/build.xml
+      run: ant -buildfile .github/workflows/build.xml
