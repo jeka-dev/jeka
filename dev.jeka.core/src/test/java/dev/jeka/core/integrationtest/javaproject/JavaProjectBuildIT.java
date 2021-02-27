@@ -2,6 +2,8 @@ package dev.jeka.core.integrationtest.javaproject;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
+import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathTree;
@@ -24,12 +26,12 @@ public class JavaProjectBuildIT {
 
         JkJavaProject baseProject = JkJavaProject.of().simpleFacade()
                 .setBaseDir(root.resolve("base"))
-                .addCompileDependencies(JkDependencySet.of()
+                .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")).getProject();
 
         JkJavaProject coreProject = JkJavaProject.of().simpleFacade()
                 .setBaseDir(root.resolve("core"))
-                .addCompileDependencies(JkDependencySet.of(baseProject.toDependency())).getProject();
+                .setCompileDependencies(deps -> deps.and(baseProject.toDependency())).getProject();
 
         JkResolveResult resolveResult = coreProject.getConstruction().getCompilation().resolveDependencies();
 
@@ -49,20 +51,47 @@ public class JavaProjectBuildIT {
     }
 
     @Test
-    public void publish_maven_ok() {
+    public void getTestDependencies_ok() {
         JkJavaProject project = JkJavaProject.of().simpleFacade()
-                .addCompileDependencies(JkDependencySet.of()
-                        .and("com.google.guava:guava:23.0")
+                .setCompileDependencies(deps -> deps
+                        .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
                 .setRuntimeDependencies(deps -> deps
-                        .and("org.postgresql:postgresql:jar:42.2.19")
+                        .and("org.postgresql:postgresql:42.2.19")
+                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
+                .setTestDependencies(deps -> deps
+                        .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
+                )
+                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .getProject();
+        JkDependencySet testDependencies = project.getConstruction().getTesting().getCompilation().getDependencies();
+        System.out.println(project.getInfo());
+        Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
+        Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
+        Assert.assertEquals("org.mockito:mockito-core", testDependencies.getModuleDependencies().get(0)
+                .getModuleId().toString());
+    }
+
+    @Test
+    public void publish_maven_ok() {
+        JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .setCompileDependencies(deps -> deps
+                        .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
+                        .and("javax.servlet:javax.servlet-api:4.0.1"))
+                .setRuntimeDependencies(deps -> deps
+                        .and("org.postgresql:postgresql:42.2.19")
+                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
+                        .minus("javax.servlet:javax.servlet-api"))
+                .setTestDependencies(deps -> deps
+                        .and("org.mockito:mockito-core:2.10.0")
+                )
                 .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
                 .getProject();
         project.getConstruction().getDependencyResolver().resolve(project.getConstruction().getRuntimeDependencies());
         List<JkDependency> dependencies = project.getPublication().getMavenPublication()
                 .getDependencies().getDependencies();
-        System.out.println(dependencies);
+        System.out.println(project.getInfo());
     }
 
 }

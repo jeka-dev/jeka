@@ -1,11 +1,7 @@
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-
-import static dev.jeka.core.api.depmanagement.publication.JkScope.TEST;
 
 class Build extends JkClass {
 
@@ -19,13 +15,14 @@ class Build extends JkClass {
     protected void setup() {
         java.getProject().simpleFacade()
             .setJavaVersion(JkJavaVersion.V8)
-            .addComileDependencies(JkDependencySet.of()
-                .and("com.google.guava:guava:21.0")
-                .and("org.junit.jupiter:junit-jupiter:5.6.2", TEST))
+            .setCompileDependencies(deps -> deps
+                .and("com.google.guava:guava:21.0"))
+            .setTestDependencies(deps -> deps
+                .and("org.junit.jupiter:junit-jupiter:5.6.2"))
 
             // On ly necessary if your project is published in a binary repository.
             .setPublishedModuleId("your.group:your.project")
-            .setPublishedVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags());  // Version inferred from Git
+            .setPublishedVersionFromGit();  // Version inferred from Git
     }
 
     public void cleanPack() {

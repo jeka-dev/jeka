@@ -1,6 +1,5 @@
 package dev.jeka.core.api.tooling.eclipse;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.java.project.JkJavaProject;
@@ -17,7 +16,7 @@ public class JkEclipseClasspathGeneratorRunner {
         JkFileSystemDependency fileDep = JkFileSystemDependency.of(zip);
         JkJavaProject project = JkJavaProject.of().getConstruction()
                 .getCompilation()
-                    .addDependencies(JkDependencySet.of()
+                    .setDependencies(deps -> deps
                             .and(fileDep)
                             .and(moduleDependency)).__.__;
         JkEclipseClasspathGenerator generator = JkEclipseClasspathGenerator.of(project.getJavaIdeSupport());

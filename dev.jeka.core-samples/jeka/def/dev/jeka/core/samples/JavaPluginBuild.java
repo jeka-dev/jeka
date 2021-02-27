@@ -1,6 +1,5 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -24,11 +23,11 @@ public class JavaPluginBuild extends JkClass {
     @Override
     protected void setup() {
        java.getProject().simpleFacade()
-               .addCompileDependencies(JkDependencySet.of()
+               .setCompileDependencies(deps -> deps
                        .and("com.google.guava:guava:21.0")
                        .and("com.sun.jersey:jersey-server:1.19.4")
                        .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
-               .addTestDependencies(JkDependencySet.of()
+               .setTestDependencies(deps -> deps
                        .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
                .addTestExcludeFilterSuffixedBy("IT", false)
                .setJavaVersion(JkJavaVersion.V8)

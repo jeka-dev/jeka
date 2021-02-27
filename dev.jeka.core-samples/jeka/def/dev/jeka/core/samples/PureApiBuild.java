@@ -17,7 +17,7 @@ public class PureApiBuild extends JkClass {
         JkJavaProject javaProject = JkJavaProject.of().setBaseDir(this.getBaseDir());
         javaProject.setOutputDir("jeka/output/alt-output");
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT.version("4.12"));
-        javaProject.getConstruction().getTesting().getCompilation().addDependencies(deps);
+        javaProject.getConstruction().getTesting().getCompilation().setDependencies(dep -> deps);
         javaProject.getPublication().getArtifactProducer().makeAllArtifacts();
     }
 
@@ -30,20 +30,20 @@ public class PureApiBuild extends JkClass {
 
         JkJavaProject fooProject = JkJavaProject.of().simpleFacade()
             .setBaseDir(this.getBaseDir().resolve("foo"))
-            .addCompileDependencies(JkDependencySet.of()
+            .setCompileDependencies(deps -> deps
                     .and("com.google.guava:guava")
                     .and("com.sun.jersey:jersey-server:1.19.4")
                     .withVersionProvider(versionProvider))
-            .addTestDependencies(JkDependencySet.of()
+            .setTestDependencies(deps -> deps
                         .and("junit:junit"))
             .getProject();
 
         JkJavaProject barProject = JkJavaProject.of().simpleFacade()
             .setBaseDir(this.getBaseDir().resolve("bar"))
-            .addCompileDependencies(JkDependencySet.of()
+            .setCompileDependencies(deps -> deps
                     .and("com.sun.jersey:jersey-server:1.19.4")
                     .and(fooProject.toDependency()))
-            .addTestDependencies(JkDependencySet.of()
+            .setTestDependencies(deps -> deps
                     .and("junit:junit")
                     .withVersionProvider(versionProvider))
             .getProject();

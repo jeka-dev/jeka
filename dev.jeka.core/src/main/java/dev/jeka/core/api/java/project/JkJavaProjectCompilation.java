@@ -99,7 +99,8 @@ public class JkJavaProjectCompilation<T> {
                                                                  JkJavaProjectTesting parent) {
         JkJavaProjectCompilation result =
                 new JkJavaProjectCompilation(construction, TEST_PURPOSE, parent);
-        result.dependencyBootSupplier = construction.getCompilation()::getDependencies;
+        result.dependencyBootSupplier = () -> construction.getRuntimeDependencies().merge(construction
+            .getCompilation().getDependencies()).getResult();
         result.compileSpecSupplier = () -> result.computeTestCompileSpec(construction.getCompilation());
         result.layout
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
@@ -248,10 +249,6 @@ public class JkJavaProjectCompilation<T> {
     public JkJavaProjectCompilation<T> setJavaVersion(JkJavaVersion javaVersion) {
         this.javaVersion = javaVersion;
         return this;
-    }
-
-    public JkJavaProjectCompilation<T> addDependencies(JkDependencySet dependencySet) {
-        return setDependencies(deps -> deps.and(dependencySet));
     }
 
     public JkJavaProjectCompilation<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {

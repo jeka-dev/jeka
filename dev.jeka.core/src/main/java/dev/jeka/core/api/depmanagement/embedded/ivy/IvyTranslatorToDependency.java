@@ -15,16 +15,13 @@ import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class IvyTranslatorToDependency {
 
     static List<DefaultDependencyDescriptor> toDependencyDescriptors(JkQualifiedDependencies dependencies) {
-        return dependencies.replaceUnspecifiedVersionsWithProvider().getQualifiedDependencies().stream()
+        return dependencies.replaceUnspecifiedVersionsWithProvider().getEntries().stream()
                 .map(qDep -> toDependencyDescriptor(qDep.getQualifier(), (JkModuleDependency) qDep.getDependency()))
                 .collect(Collectors.toList());
     }
@@ -61,8 +58,7 @@ class IvyTranslatorToDependency {
                 effectiveDepConfs.forEach(depConf -> result.addDependencyConfiguration(masterConf, depConf));
             }
             for (JkModuleDependency.JkArtifactSpecification artifactSpecification :
-                 moduleDependency.getArtifactSpecifications()) {
-
+                    moduleDependency.getArtifactSpecifications()) {
                 result.addDependencyArtifact(masterConf, IvyTranslatorToArtifact.toArtifactDependencyDescriptor(
                         result, artifactSpecification.getClassifier(), artifactSpecification.getType()));
             }
@@ -81,7 +77,7 @@ class IvyTranslatorToDependency {
 
     static DefaultExcludeRule toExcludeRule(JkDependencyExclusion depExclude, String... configurationNames) {
         String type = depExclude.getClassifier() == null ? PatternMatcher.ANY_EXPRESSION : depExclude.getClassifier();
-        String ext = depExclude.getExtension() == null ? PatternMatcher.ANY_EXPRESSION : depExclude.getExtension();
+        String ext = depExclude.getType() == null ? PatternMatcher.ANY_EXPRESSION : depExclude.getType();
         ModuleId moduleId = toModuleId(depExclude.getModuleId());
         ArtifactId artifactId = new ArtifactId(moduleId, "*", type, ext);
         DefaultExcludeRule result = new DefaultExcludeRule(artifactId, ExactPatternMatcher.INSTANCE, null);

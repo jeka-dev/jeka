@@ -1,6 +1,5 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
@@ -42,7 +41,7 @@ class Junit5Build extends JkClass {
             .getConstruction()
                 .getTesting()
                     .getCompilation()
-                        .addDependencies(JkDependencySet.of()
+                        .setDependencies(deps -> deps
                             .and("org.junit.jupiter:junit-jupiter-engine:5.1.0")
                             .and("org.junit.vintage:junit-vintage-engine:5.6.0")
                             .and("org.jdom:jdom2:2.0.6")

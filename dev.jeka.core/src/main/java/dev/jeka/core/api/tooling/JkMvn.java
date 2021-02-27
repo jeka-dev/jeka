@@ -181,7 +181,7 @@ public final class JkMvn implements Runnable {
             final String scope = JkPom.toScope(items[4]);
             JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1], items[3]);
             if (!"jar".equals(classifier)) {
-                dependency = dependency.withClassifier(classifier);
+                dependency = dependency.withClassifiers(classifier);
             }
             return JkQualifiedDependency.of(scope, dependency);
         }

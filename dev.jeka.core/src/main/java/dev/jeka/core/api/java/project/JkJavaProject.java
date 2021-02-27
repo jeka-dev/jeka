@@ -108,7 +108,10 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     }
 
     public String getInfo() {
-        return new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
+        JkDependencySet compileDependencies = construction.getCompilation().getDependencies();
+        JkDependencySet runtimeDependencies = construction.getRuntimeDependencies();
+        JkDependencySet testDependencies = construction.getTesting().getCompilation().getDependencies();
+        StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
             .append("Published Module & version : " + publication.getModuleId() + ":" + publication.getVersion() + "\n")
             .append("Production sources : " + construction.getCompilation().getLayout().getInfo()).append("\n")
             .append("Test sources : " + construction.getTesting().getCompilation().getLayout().getInfo()).append("\n")
@@ -118,14 +121,15 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
                     .count(Integer.MAX_VALUE, false) + "\n")
             .append("Download Repositories : " + construction.getDependencyResolver().getRepos() + "\n")
             .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
-            .append("Declared Compile Dependencies : " + construction.getCompilation().getDependencies()
-                    .getDependencies().size() + " elements.\n")
-            .append("Declared Runtime Dependencies : " + construction.getRuntimeDependencies()
-                        .getDependencies().size() + " elements.\n")
-            .append("Declared Test Dependencies : " + construction.getTesting().getCompilation().getDependencies()
-                        .getDependencies().size() + " elements.\n")
-            .append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds())
-            .toString();
+            .append("Declared Compile Dependencies : " + compileDependencies.getEntries().size() + " elements.\n");
+        compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
+        builder.append("Declared Runtime Dependencies : " + runtimeDependencies
+                .getEntries().size() + " elements.\n");
+        runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
+        builder.append("Declared Test Dependencies : " + testDependencies.getEntries().size() + " elements.\n");
+        testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
+        builder.append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds());
+        return builder.toString();
     }
 
     @Override
@@ -155,7 +159,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
        Runnable maker = () -> publication.getArtifactProducer().makeArtifact(artifactId);
        Path artifactPath = publication.getArtifactProducer().getArtifactPath(artifactId);
        List<JkDependency> exportedDependencies = construction.getCompilation().getDependencies()
-               .merge(construction.getRuntimeDependencies()).getResult().getDependencies();
+               .merge(construction.getRuntimeDependencies()).getResult().getEntries();
         return JkLocalProjectDependency.of(maker, artifactPath, this.baseDir, exportedDependencies)
                 .withTransitivity(transitivity);
     }

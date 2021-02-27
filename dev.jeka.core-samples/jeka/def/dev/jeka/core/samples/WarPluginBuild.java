@@ -1,7 +1,6 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
@@ -32,7 +31,7 @@ public class WarPluginBuild extends JkClass {
     @Override
     protected void setup() {
        java.getProject().simpleFacade()
-               .addCompileDependencies(JkDependencySet.of()
+               .setCompileDependencies(deps -> deps
                        .and("com.google.guava:guava:21.0")
                        .and("javax.servlet:javax.servlet-api:4.0.1"))
                .setRuntimeDependencies(compileDeps -> compileDeps
@@ -57,7 +56,8 @@ public class WarPluginBuild extends JkClass {
         JkPluginRepo repo = getPlugin(JkPluginRepo.class);
         Path jettyRunner = repo.downloadRepository().toSet().get("org.eclipse.jetty:jetty-runner:" + jettyRunnerVersion);
         JkJavaProcess.of()
-                .runJarSync(jettyRunner, artifactProducer.getMainArtifactPath().toString(), "--port", Integer.toString(port));
+                .runJarSync(jettyRunner, artifactProducer.getMainArtifactPath().toString(), "--port",
+                        Integer.toString(port));
     }
     
     public static void main(String[] args) {

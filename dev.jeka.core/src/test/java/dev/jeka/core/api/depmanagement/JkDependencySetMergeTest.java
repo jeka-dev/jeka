@@ -15,9 +15,9 @@ public class JkDependencySetMergeTest {
         JkDependencySet right = of("Z","A", "B", "Y", "V", "E", "X");
         JkDependencySet expectedResult = of("A", "B", "C", "D", "E", "F", "Z", "Y", "V", "X");
         JkDependencySetMerge merge = JkDependencySetMerge.of(left, right);
-        assertEquals(of("Y", "V", "X").getDependencies(), merge.getAbsentDependenciesFromLeft());
-        assertEquals(of("C", "D", "F").getDependencies(), merge.getAbsentDependenciesFromRight());
-        assertEquals(expectedResult.getDependencies(), merge.getResult().getDependencies());
+        assertEquals(of("Y", "V", "X").getEntries(), merge.getAbsentDependenciesFromLeft());
+        assertEquals(of("C", "D", "F").getEntries(), merge.getAbsentDependenciesFromRight());
+        assertEquals(expectedResult.getEntries(), merge.getResult().getEntries());
     }
 
     private static JkDependencySet of (String ... depNames) {

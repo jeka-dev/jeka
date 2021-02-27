@@ -86,6 +86,4 @@ public class JkPluginWar extends JkPlugin {
         JkPathTree.of(temp).deleteRoot();
     }
 
-
-
 }

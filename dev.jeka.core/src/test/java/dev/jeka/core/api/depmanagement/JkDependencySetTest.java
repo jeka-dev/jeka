@@ -27,7 +27,7 @@ public class JkDependencySetTest {
                 .and(secondaryDeps())
                 .and("klklkl:lklk:mlml")
                 .and("hhhhh:ll:ppp");
-        Assert.assertEquals(secondaryDeps().getDependencies().size() + 4, deps.getDependencies().size());
+        Assert.assertEquals(secondaryDeps().getEntries().size() + 4, deps.getEntries().size());
     }
 
     private static JkDependencySet secondaryDeps() {

@@ -4,6 +4,9 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Test;
@@ -243,6 +246,36 @@ public class DependencySetResolutionIT {
         resolveResult.assertNoError();
         Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
         JkLog.setVerbosity(verbosity);
+    }
+
+    @Test
+    public void resolve_usingSeveralClassifierOnSingleLine_ok() {
+        JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .setJavaVersion(JkJavaVersion.V11)
+                .setCompileDependencies(deps -> deps
+                        .and("org.openjfx:javafx-controls:win,linux,mac:11.0.2", JkTransitivity.NONE))
+                .getProject();
+        JkResolveResult resolveResult = project.getConstruction().getCompilation().resolveDependencies();
+        resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
+        JkPathSequence paths = resolveResult.getFiles();
+        paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
+        assertEquals(3, paths.getEntries().size());
+        // the order Ivy resolve classifiers cannot be controlled
+    }
+
+    @Test
+    public void resolve_usingSeveralClassifiersIncludingDefaultOne_ok() {
+        JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .setJavaVersion(JkJavaVersion.V11)
+                .setCompileDependencies(deps -> deps
+                        .and("org.openjfx:javafx-controls:win,:11.0.2", JkTransitivity.NONE))
+                .getProject();
+        JkResolveResult resolveResult = project.getConstruction().getCompilation().resolveDependencies();
+        resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
+        JkPathSequence paths = resolveResult.getFiles();
+        paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
+        assertEquals(2, paths.getEntries().size());
+        // the order Ivy resolve classifiers cannot be controlled
     }
 
 

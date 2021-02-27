@@ -293,7 +293,7 @@ public final class JkImlGenerator {
     }
 
     private JkResolveResult resolveWithIdeSupport() {
-        List<JkDependency> deps = ideSupport.getDependencies().getQualifiedDependencies().stream()
+        List<JkDependency> deps = ideSupport.getDependencies().getEntries().stream()
                 .map(qDep -> qDep.getDependency())
                 .filter(dep -> dep.getIdeProjectDir() == null)
                 .collect(Collectors.toList());
@@ -367,8 +367,8 @@ public final class JkImlGenerator {
             libPath.bin = file;
             libPath.scope = scope;
             if (repos != null) {
-                libPath.source = repos.get(JkModuleDependency.of(versionedModule).withClassifier("sources"));
-                libPath.javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifier("javadoc"));
+                libPath.source = repos.get(JkModuleDependency.of(versionedModule).withClassifiers("sources"));
+                libPath.javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifiers("javadoc"));
             }
             result.add(libPath);
         }

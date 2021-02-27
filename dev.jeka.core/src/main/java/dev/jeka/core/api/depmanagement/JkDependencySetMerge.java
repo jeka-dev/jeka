@@ -40,14 +40,14 @@ public final class JkDependencySetMerge {
         List<JkDependency> result = new LinkedList<>();
         List<JkDependency> absentFromLeft = new LinkedList<>();
         List<JkDependency> absentFromRight = new LinkedList<>();
-        for (JkDependency leftDep : left.getDependencies()) {
+        for (JkDependency leftDep : left.getEntries()) {
             JkDependency matchingRightDep = right.getMatching(leftDep);
             if (matchingRightDep == null) {
                 absentFromRight.add(leftDep);
             }
             result.add(leftDep);
         }
-        for (JkDependency rightDep : right.getDependencies()) {
+        for (JkDependency rightDep : right.getEntries()) {
             JkDependency matchingLeftDep = left.getMatching(rightDep);
             if (matchingLeftDep == null) {
                 absentFromLeft.add(rightDep);

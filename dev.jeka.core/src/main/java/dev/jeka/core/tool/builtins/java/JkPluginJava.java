@@ -71,9 +71,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         CommonDependencies textDeps = CommonDependencies.ofTextDescriptionIfExist(
                 jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"));
         CommonDependencies extraDeps = localDeps.and(textDeps);
-        this.project.getConstruction().getCompilation().addDependencies(extraDeps.getCompile());
-        this.project.getConstruction().setRuntimeDependencies(compileDeps -> extraDeps.getRuntime());
-        this.project.getConstruction().getTesting().getCompilation().addDependencies(extraDeps.getTest());
+        this.project.getConstruction().getCompilation().setDependencies(deps -> deps.and(extraDeps.getCompile()));
+        this.project.getConstruction().setRuntimeDependencies(deps -> extraDeps.getRuntime());
+        this.project.getConstruction().getTesting().getCompilation().setDependencies(
+                deps -> extraDeps.getTest().and(deps));
     }
 
     @Override
@@ -208,7 +209,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     private void showDeclaredDependencies(String purpose, JkDependencySet deps) {
         JkLog.info("Declared dependencies for " + purpose + " : ");
-        deps.normalised().getDependencies().forEach(dep -> JkLog.info(dep.toString()));
+        deps.normalised().getEntries().forEach(dep -> JkLog.info(dep.toString()));
         JkLog.info("Resolved to : ");
         final JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolve(deps);
         final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();

@@ -34,7 +34,7 @@ public class JkQualifiedDependencies {
 
     }
 
-    private final List<JkQualifiedDependency> qualifiedDependencies;
+    private final List<JkQualifiedDependency> entries;
 
     // Transitive dependencies globally excluded
     private final Set<JkDependencyExclusion> globalExclusions;
@@ -43,7 +43,7 @@ public class JkQualifiedDependencies {
 
     private JkQualifiedDependencies(List<JkQualifiedDependency> qualifiedDependencies, Set<JkDependencyExclusion>
             globalExclusions, JkVersionProvider versionProvider) {
-        this.qualifiedDependencies = Collections.unmodifiableList(qualifiedDependencies);
+        this.entries = Collections.unmodifiableList(qualifiedDependencies);
         this.globalExclusions = Collections.unmodifiableSet(globalExclusions);
         this.versionProvider = versionProvider;
     }
@@ -61,23 +61,23 @@ public class JkQualifiedDependencies {
     }
 
     public static JkQualifiedDependencies of(JkDependencySet dependencySet) {
-        return ofDependencies(dependencySet.getDependencies())
+        return ofDependencies(dependencySet.getEntries())
                 .withGlobalExclusions(dependencySet.getGlobalExclusions())
                 .withVersionProvider(dependencySet.getVersionProvider());
     }
 
-    public List<JkQualifiedDependency> getQualifiedDependencies() {
-        return qualifiedDependencies;
+    public List<JkQualifiedDependency> getEntries() {
+        return entries;
     }
 
     public List<JkDependency> getDependencies() {
-        return qualifiedDependencies.stream()
+        return entries.stream()
                 .map(JkQualifiedDependency::getDependency)
                 .collect(Collectors.toList());
     }
 
     public List<JkModuleDependency> getModuleDependencies() {
-        return qualifiedDependencies.stream()
+        return entries.stream()
                 .map(JkQualifiedDependency::getDependency)
                 .filter(JkModuleDependency.class::isInstance)
                 .map(JkModuleDependency.class::cast)
@@ -93,21 +93,21 @@ public class JkQualifiedDependencies {
     }
 
     public List<JkQualifiedDependency> findByModule(String moduleId) {
-        return this.qualifiedDependencies.stream()
+        return this.entries.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)
                 .filter(qDep -> qDep.getModuleDependency().getModuleId().toString().equals(moduleId))
                 .collect(Collectors.toList());
     }
 
     public JkQualifiedDependencies remove(JkDependency dependency) {
-        List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
+        List<JkQualifiedDependency> dependencies = entries.stream()
                 .filter(qDep -> !qDep.equals(dependency))
                 .collect(Collectors.toList());
         return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
     }
 
     public JkQualifiedDependencies and(JkQualifiedDependency qualifiedDependency) {
-        List<JkQualifiedDependency> result = new LinkedList<>(this.qualifiedDependencies);
+        List<JkQualifiedDependency> result = new LinkedList<>(this.entries);
         result.add(qualifiedDependency);
         return new JkQualifiedDependencies(result, globalExclusions, versionProvider);
     }
@@ -125,7 +125,7 @@ public class JkQualifiedDependencies {
     }
 
     public JkQualifiedDependencies replaceQualifier(JkDependency dependency, String qualifier) {
-        List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
+        List<JkQualifiedDependency> dependencies = entries.stream()
                 .map(qDep -> qDep.getDependency().equals(dependency) ? qDep.withQualifier(qualifier) : qDep)
                 .collect(Collectors.toList());
         return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
@@ -136,7 +136,7 @@ public class JkQualifiedDependencies {
     }
 
     public JkQualifiedDependencies withModuleDependenciesOnly() {
-        List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
+        List<JkQualifiedDependency> dependencies = entries.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)
                 .collect(Collectors.toList());
         return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
@@ -149,7 +149,7 @@ public class JkQualifiedDependencies {
     public JkQualifiedDependencies withGlobalExclusions(Set<JkDependencyExclusion> exclusions) {
         Set<JkDependencyExclusion> newExclusions = new HashSet<>(this.globalExclusions);
         newExclusions.addAll(exclusions);
-        return new JkQualifiedDependencies(qualifiedDependencies, Collections.unmodifiableSet(newExclusions),
+        return new JkQualifiedDependencies(entries, Collections.unmodifiableSet(newExclusions),
                 versionProvider);
     }
 
@@ -158,12 +158,12 @@ public class JkQualifiedDependencies {
      * this not involves dependencies explicitly declared here.
      */
     public JkQualifiedDependencies withVersionProvider(JkVersionProvider versionProvider) {
-        return new JkQualifiedDependencies(qualifiedDependencies, globalExclusions, this.versionProvider
+        return new JkQualifiedDependencies(entries, globalExclusions, this.versionProvider
             .and(versionProvider));
     }
 
     public JkQualifiedDependencies replaceUnspecifiedVersionsWithProvider() {
-        List<JkQualifiedDependency> dependencies = qualifiedDependencies.stream()
+        List<JkQualifiedDependency> dependencies = entries.stream()
                 .map(qDep -> {
                     if (qDep.getDependency() instanceof JkModuleDependency) {
                         JkModuleDependency moduleDependency = (JkModuleDependency) qDep.getDependency();
@@ -206,7 +206,7 @@ public class JkQualifiedDependencies {
         for (JkDependency dependency : mergeWithTest.getResult().normalised(strategy)
                 .assertNoUnspecifiedVersion().getVersionedDependencies()) {
             final String scope;
-            if (mergeWithProd.getResult().getDependencies().contains(dependency)) {
+            if (mergeWithProd.getResult().getEntries().contains(dependency)) {
                 if (mergeWithProd.getAbsentDependenciesFromRight().contains(dependency)) {
                     scope = PROVIDED_SCOPE;
                 } else if (mergeWithProd.getAbsentDependenciesFromLeft().contains(dependency)) {
@@ -272,7 +272,7 @@ public class JkQualifiedDependencies {
 
     public List<JkDependency> getDependenciesHavingQualifier(String ... qualifiers) {
         List<String> list = Arrays.asList(qualifiers);
-        return qualifiedDependencies.stream()
+        return entries.stream()
                 .filter(qDep -> list.contains(qDep))
                 .map(JkQualifiedDependency::getDependency)
                 .collect(Collectors.toList());

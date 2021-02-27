@@ -12,9 +12,9 @@ public class CommonDependenciesTest {
     public void testFromDescription()  {
         URL url = CommonDependenciesTest.class.getResource("dependencies.txt");
         CommonDependencies commonDeps = CommonDependencies.ofTextDescription(url);
-        assertEquals(3, commonDeps.getCompile().getDependencies().size());
-        assertEquals(5, commonDeps.getRuntime().getDependencies().size());
-        assertEquals(4, commonDeps.getTest().getDependencies().size());
+        assertEquals(3, commonDeps.getCompile().getEntries().size());
+        assertEquals(5, commonDeps.getRuntime().getEntries().size());
+        assertEquals(4, commonDeps.getTest().getEntries().size());
     }
 
 }

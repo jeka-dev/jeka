@@ -1,6 +1,5 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
@@ -34,10 +33,10 @@ public class JacocoPluginBuild extends JkClass {
     @Override
     protected void setup() {
         javaPlugin.getProject().simpleFacade()
-                .addCompileDependencies(JkDependencySet.of()
+                .setCompileDependencies(deps -> deps
                     .and(GUAVA.version("18.0"))
                 )
-                .addTestDependencies(JkDependencySet.of()
+                .setTestDependencies(deps -> deps
                     .and(JUNIT.version("4.13"))
                 );
     }

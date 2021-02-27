@@ -26,7 +26,7 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("base"))
             .simpleFacade()
-                .addCompileDependencies(JkDependencySet.of()
+                .setCompileDependencies(deps -> deps
                         .and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6"))).getProject();
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
@@ -41,7 +41,7 @@ public class JkEclipseClasspathGeneratorIT {
             .setBaseDir(top.resolve("core"))
             .getConstruction()
             .getCompilation()
-                .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
+                .setDependencies(deps -> deps.and(baseProject.toDependency())).__
                 .getTesting()
                     .getCompilation()
                         .getLayout()
@@ -61,7 +61,7 @@ public class JkEclipseClasspathGeneratorIT {
             .setBaseDir(top.resolve("desktop"))
             .getConstruction()
                 .getCompilation()
-                    .addDependencies(JkDependencySet.of().and(coreProject.toDependency())).__.__;
+                    .setDependencies(deps -> deps.and(coreProject.toDependency())).__.__;
         desktopProject.getPublication().getArtifactProducer().makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());

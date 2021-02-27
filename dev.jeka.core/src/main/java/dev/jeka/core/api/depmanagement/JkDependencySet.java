@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  */
 public class JkDependencySet {
 
-    private final List<JkDependency> dependencies;
+    private final List<JkDependency> entries;
 
     private final Set<JkDependencyExclusion> globalExclusions;
 
@@ -28,7 +28,7 @@ public class JkDependencySet {
 
     private JkDependencySet(List<JkDependency> dependencies, Set<JkDependencyExclusion> exclusions, JkVersionProvider explicitVersions) {
         super();
-        this.dependencies = Collections.unmodifiableList(dependencies);
+        this.entries = Collections.unmodifiableList(dependencies);
         this.globalExclusions = Collections.unmodifiableSet(exclusions);
         this.versionProvider = explicitVersions;
     }
@@ -61,8 +61,8 @@ public class JkDependencySet {
     /**
      * Returns the unmodifiable list list of scoped dependencies for this object.
      */
-    public List<JkDependency> getDependencies() {
-        return this.dependencies;
+    public List<JkDependency> getEntries() {
+        return this.entries;
     }
 
     /**
@@ -70,7 +70,7 @@ public class JkDependencySet {
      * specified place and condition.
      */
     public JkDependencySet and(Hint hint, List<JkDependency> others) {
-        final List<JkDependency> result = new LinkedList<>(this.dependencies);
+        final List<JkDependency> result = new LinkedList<>(this.entries);
         if (hint == null) {
             result.addAll(others);
             return new JkDependencySet(result, globalExclusions, versionProvider);
@@ -78,7 +78,7 @@ public class JkDependencySet {
         if (hint.condition == false) {
             return this;
         }
-        if (hint.first == false) {
+        if (hint.first == true) {
             result.addAll(0, others);
             return new JkDependencySet(result, globalExclusions, versionProvider);
         }
@@ -96,7 +96,7 @@ public class JkDependencySet {
 
     private int firstIndexMatching(JkDependency dependency) {
         int i = 0;
-        for (JkDependency dep : dependencies) {
+        for (JkDependency dep : entries) {
             if (dep.matches(dependency)) {
                 return i;
             }
@@ -114,7 +114,7 @@ public class JkDependencySet {
     }
 
     public JkDependencySet and(JkDependencySet other) {
-        final List<JkDependency> deps = JkUtilsIterable.concatLists(this.dependencies, other.dependencies);
+        final List<JkDependency> deps = JkUtilsIterable.concatLists(this.entries, other.entries);
         Set<JkDependencyExclusion> newGlobalExcludes = new HashSet<>(this.globalExclusions);
         newGlobalExcludes.addAll(other.globalExclusions);
         JkVersionProvider newVersionProvider = this.versionProvider.and(other.versionProvider);
@@ -173,7 +173,7 @@ public class JkDependencySet {
     }
 
     public JkDependencySet minus(List<JkDependency> dependencies) {
-        List<JkDependency> result = new LinkedList<>(this.getDependencies());
+        List<JkDependency> result = new LinkedList<>(this.getEntries());
         for (JkDependency dependency : dependencies) {
             JkDependency matchingDependency = this.getMatching(dependency);
             if (matchingDependency != null) {
@@ -196,9 +196,9 @@ public class JkDependencySet {
         return minus(JkModuleId.of(moduleId));
     }
 
-    public JkDependencySet withTransitivityReplacement(JkTransitivity formerTransitivity, JkTransitivity newTransitivity) {
+    public JkDependencySet withGlobalTransitivityReplacement(JkTransitivity formerTransitivity, JkTransitivity newTransitivity) {
         final List<JkDependency> list = new LinkedList<>();
-        for (JkDependency dep : this.dependencies) {
+        for (JkDependency dep : this.entries) {
             if (dep instanceof JkModuleDependency) {
                 JkModuleDependency moduleDependency = (JkModuleDependency) dep;
                 if (Objects.equals(moduleDependency.getTransitivity(), formerTransitivity)) {
@@ -210,16 +210,34 @@ public class JkDependencySet {
         return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
     }
 
+    public JkDependencySet withTransitivity(String moduleId, JkTransitivity newTransitivity) {
+        final List<JkDependency> list = new LinkedList<>();
+        for (JkDependency dep : this.entries) {
+            if (dep instanceof JkModuleDependency) {
+                JkModuleDependency moduleDependency = (JkModuleDependency) dep;
+                if (JkModuleId.of(moduleId).equals(moduleDependency.getModuleId())) {
+                    dep = moduleDependency.withTransitivity(newTransitivity);
+                }
+            }
+            list.add(dep);
+        }
+        return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
+    }
+
+
+
+
+
     public JkDependencySet mergeLocalProjectExportedDependencies() {
         List<JkDependency> result = new LinkedList<>();
-        for (JkDependency dependency : dependencies) {
+        for (JkDependency dependency : entries) {
             if (dependency instanceof JkLocalProjectDependency) {
                 JkLocalProjectDependency localProjectDependency = (JkLocalProjectDependency) dependency;
                 result.add(localProjectDependency.withoutExportedDependencies());
                 List<JkDependency> exportedDependencies = localProjectDependency.getExportedDependencies();
                 JkDependencySet recursiveExportedDependencies =
                         JkDependencySet.of(exportedDependencies).mergeLocalProjectExportedDependencies();
-                for (JkDependency exportedDependency : recursiveExportedDependencies.dependencies) {
+                for (JkDependency exportedDependency : recursiveExportedDependencies.entries) {
                     JkDependency matchedDependency = getMatching(exportedDependency);
                     if (matchedDependency == null) {
                         result.add(exportedDependency);
@@ -241,7 +259,7 @@ public class JkDependencySet {
      * by the specified one, there is no addition.
      */
     public JkDependencySet withVersionProvider(JkVersionProvider versionProvider) {
-        return new JkDependencySet(this.dependencies, this.getGlobalExclusions(), versionProvider);
+        return new JkDependencySet(this.entries, this.getGlobalExclusions(), versionProvider);
     }
 
     /**
@@ -250,7 +268,7 @@ public class JkDependencySet {
      * to the specified one.
      */
     public JkDependencySet andVersionProvider(JkVersionProvider versionProvider) {
-        return new JkDependencySet(this.dependencies, this.getGlobalExclusions(), this.versionProvider.and(versionProvider));
+        return new JkDependencySet(this.entries, this.getGlobalExclusions(), this.versionProvider.and(versionProvider));
     }
 
     /**
@@ -258,7 +276,7 @@ public class JkDependencySet {
      * {@link JkModuleDependency}.
      */
     public boolean hasModules() {
-        return dependencies.stream().filter(JkModuleDependency.class::isInstance).findAny().isPresent();
+        return entries.stream().filter(JkModuleDependency.class::isInstance).findAny().isPresent();
     }
 
     /**
@@ -273,7 +291,7 @@ public class JkDependencySet {
 
     @Override
     public String toString() {
-        return dependencies.toString();
+        return entries.toString();
     }
 
     /**
@@ -288,7 +306,7 @@ public class JkDependencySet {
     }
 
     public <T extends JkDependency> T getMatching(T dependency) {
-        return (T) this.dependencies.stream()
+        return (T) this.entries.stream()
                 .filter(dep -> dep.matches(dependency))
                 .findFirst().orElse(null);
     }
@@ -298,7 +316,7 @@ public class JkDependencySet {
     }
 
     private Stream<JkModuleDependency> moduleDeps() {
-        return this.dependencies.stream()
+        return this.entries.stream()
                 .filter(JkModuleDependency.class::isInstance)
                 .map(JkModuleDependency.class::cast);
     }
@@ -328,7 +346,7 @@ public class JkDependencySet {
 
     public JkDependencySet withIdeProjectDir(Path ideProjectDir) {
         List<JkDependency> result = new LinkedList<>();
-        for (JkDependency dependency : this.dependencies) {
+        for (JkDependency dependency : this.entries) {
             result.add(dependency.withIdeProjectDir(ideProjectDir));
         }
         return new JkDependencySet(result, globalExclusions, versionProvider);
@@ -336,7 +354,7 @@ public class JkDependencySet {
 
     public JkDependencySet minusModuleDependenciesHavingIdeProjectDir() {
         List<JkDependency> result = new LinkedList<>();
-        for (JkDependency dependency : this.dependencies) {
+        for (JkDependency dependency : this.entries) {
             if (dependency.getIdeProjectDir() == null || !(dependency instanceof JkModuleDependency)) {
                 result.add(dependency);
             }
@@ -350,7 +368,7 @@ public class JkDependencySet {
 
     public Set<Path> getIdePathDirs() {
         Set<Path> result = new LinkedHashSet<>();
-        for (JkDependency dependency : this.dependencies) {
+        for (JkDependency dependency : this.entries) {
             if (dependency.getIdeProjectDir() != null) {
                 result.add(dependency.getIdeProjectDir());
             }
@@ -364,7 +382,7 @@ public class JkDependencySet {
      */
     public JkDependencySet normalised(JkVersionedModule.ConflictStrategy conflictStrategy) {
         Map<JkModuleId, JkVersion> moduleIdVersionMap = new HashMap<>();
-        dependencies.stream()
+        entries.stream()
                 .filter(JkModuleDependency.class::isInstance)
                 .map(JkModuleDependency.class::cast)
                 .forEach(dep -> {
@@ -373,7 +391,7 @@ public class JkDependencySet {
                             (moduleId, version) -> JkVersionedModule.of(moduleId, version)
                                     .resolveConflict(dep.getVersion(), conflictStrategy).getVersion());
         });
-        List<JkDependency> result = dependencies.stream()
+        List<JkDependency> result = entries.stream()
                 .map(dependency -> {
                     if (dependency instanceof JkModuleDependency) {
                         JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
@@ -409,7 +427,7 @@ public class JkDependencySet {
      * that does not specify one.
      */
     public List<JkDependency> getVersionedDependencies() {
-        return dependencies.stream()
+        return entries.stream()
                 .map(dependency -> {
                     if (dependency instanceof JkModuleDependency) {
                         JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
@@ -442,10 +460,10 @@ public class JkDependencySet {
      * Returns a clone of this dependencySet but adding dependency exclusion on the the last element.
      */
     public JkDependencySet withLocalExclusion(JkDependencyExclusion... exclusions) {
-        if (dependencies.isEmpty()) {
+        if (entries.isEmpty()) {
             return this;
         }
-        final LinkedList<JkDependency> deps = new LinkedList<>(dependencies);
+        final LinkedList<JkDependency> deps = new LinkedList<>(entries);
         final JkDependency last = deps.getLast();
         if (last instanceof JkModuleDependency) {
             JkModuleDependency moduleDependency = (JkModuleDependency) last;
@@ -479,7 +497,7 @@ public class JkDependencySet {
     public JkDependencySet andGlobalExclusion(JkDependencyExclusion exclusion) {
         final Set<JkDependencyExclusion> depExclusion = new HashSet<>(this.globalExclusions);
         depExclusion.add(exclusion);
-        return new JkDependencySet(this.dependencies, depExclusion, this.versionProvider);
+        return new JkDependencySet(this.entries, depExclusion, this.versionProvider);
     }
 
     public JkDependencySet andGlobalExclusion(String groupAndName) {
@@ -489,7 +507,7 @@ public class JkDependencySet {
 
     public JkDependencySet withGlobalExclusion(Set<JkDependencyExclusion> excludes) {
         final Set<JkDependencyExclusion> depExcludes = new HashSet<>(excludes);
-        return new JkDependencySet(this.dependencies, Collections.unmodifiableSet(depExcludes), this.versionProvider);
+        return new JkDependencySet(this.entries, Collections.unmodifiableSet(depExcludes), this.versionProvider);
     }
 
     /**
@@ -534,7 +552,11 @@ public class JkDependencySet {
         }
 
         public static Hint firstAndIf(boolean condition) {
-            return new Hint(null, true, true);
+            return new Hint(null, condition, true);
+        }
+
+        public static Hint first() {
+            return firstAndIf(true);
         }
 
         public static Hint lastAndIf(boolean condition) {

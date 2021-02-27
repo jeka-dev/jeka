@@ -1,7 +1,6 @@
 package dev.jeka.core.samples;
 
 import com.google.common.base.MoreObjects;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
@@ -29,12 +28,12 @@ public class ThirdPartyPoweredBuild extends JkClass {
     @Override
     protected void setup() {
         javaPlugin.getProject().simpleFacade()
-            .addCompileDependencies(JkDependencySet.of()
+            .setCompileDependencies(deps -> deps
                 .and(JAVAX_SERVLET_API.version("3.1.0"))
                 .and(GUAVA.version("21.0")))
             .setRuntimeDependencies(compileDeps -> compileDeps
                 .minus(JAVAX_SERVLET_API))
-            .addTestDependencies(JkDependencySet.of()
+            .setTestDependencies(deps -> deps
                 .and(JUNIT.version("4.13"))
                 .and(MOCKITO_ALL.version("1.10.19")));
     }

@@ -226,7 +226,7 @@ public final class JkEclipseClasspathGenerator {
         // add def dependencies
         if (hasJekaDefDir() && defDependencyResolver != null) {
             JkQualifiedDependencies qualifiedDependencies =
-                    JkQualifiedDependencies.ofDependencies(defDependencies.getDependencies());
+                    JkQualifiedDependencies.ofDependencies(defDependencies.getEntries());
             writeDependenciesEntries(writer, qualifiedDependencies, defDependencyResolver, paths);
         }
 
@@ -397,7 +397,7 @@ public final class JkEclipseClasspathGenerator {
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
 
         // dependencies with IDE project dir will be omitted. The project dir will be added in other place.
-        List<JkDependency> deps = dependencies.getQualifiedDependencies().stream()
+        List<JkDependency> deps = dependencies.getEntries().stream()
                 .map(qDep -> qDep.getDependency())
                 .filter(dep -> dep.getIdeProjectDir() == null)
                 .collect(Collectors.toList());
@@ -440,10 +440,10 @@ public final class JkEclipseClasspathGenerator {
     private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<Path> files,
                                   JkRepoSet repos, Set<String> paths, Properties attributeProps,
                                   Properties accessRuleProps) throws XMLStreamException {
-        final Path source = repos.get(JkModuleDependency.of(versionedModule).withClassifier("sources"));
+        final Path source = repos.get(JkModuleDependency.of(versionedModule).withClassifiers("sources"));
         Path javadoc = null;
         if (source == null || !Files.exists(source) || this.includeJavadoc) {
-            javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifier("javadoc"));
+            javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifiers("javadoc"));
         }
         if (javadoc != null) {
             attributeProps.put("javadoc_location", javadocAttributeValue(javadoc));

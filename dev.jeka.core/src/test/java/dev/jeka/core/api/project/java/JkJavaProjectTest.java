@@ -1,6 +1,5 @@
 package dev.jeka.core.api.project.java;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkCompileLayout;
@@ -23,7 +22,7 @@ public class JkJavaProjectTest {
         Path base = top.resolve("base");
         JkJavaProject baseProject = JkJavaProject.of().simpleFacade()
             .setBaseDir(base)
-            .addCompileDependencies(JkDependencySet.of(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6")))
+            .setCompileDependencies(deps -> deps.and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6")))
             .getProject().getConstruction()
                 .getCompilation()
                     .getLayout()
@@ -36,7 +35,7 @@ public class JkJavaProjectTest {
             .setBaseDir(core)
             .getConstruction()
                 .getCompilation()
-                    .addDependencies(JkDependencySet.of(baseProject.toDependency())).__
+                    .setDependencies(deps -> deps.and(baseProject.toDependency())).__
                 .getCompilation()
                     .getLayout()
                         .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__.__;
@@ -48,7 +47,7 @@ public class JkJavaProjectTest {
             .setBaseDir(desktop)
             .getConstruction()
             .getCompilation()
-                .addDependencies(JkDependencySet.of()
+                .setDependencies(deps -> deps
                     .and(coreProject.toDependency())).__
                 .getCompilation()
                     .getLayout()

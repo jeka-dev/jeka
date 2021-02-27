@@ -1,5 +1,8 @@
 package dev.jeka.core.api.depmanagement;
 
+import java.util.Objects;
+import java.util.Optional;
+
 /**
  * A piece of information aiming at excluding transitive dependencies.
  *
@@ -9,16 +12,13 @@ public final class JkDependencyExclusion {
 
     private final JkModuleId moduleId;
 
-    private final String classifier;
+    private final JkModuleDependency.JkArtifactSpecification artifactSpecification;
 
-    private final String extension;
-
-
-    private JkDependencyExclusion(JkModuleId moduleId, String classifier, String extension) {
+    private JkDependencyExclusion(JkModuleId moduleId,
+                                  JkModuleDependency.JkArtifactSpecification artifactSpecification) {
         super();
         this.moduleId = moduleId;
-        this.classifier = classifier;
-        this.extension = extension;
+        this.artifactSpecification = artifactSpecification;
     }
 
     /**
@@ -26,7 +26,7 @@ public final class JkDependencyExclusion {
      */
     @SuppressWarnings("unchecked")
     public static JkDependencyExclusion of(JkModuleId moduleId) {
-        return new JkDependencyExclusion(moduleId, null, null);
+        return new JkDependencyExclusion(moduleId, null);
     }
 
     /**
@@ -43,22 +43,16 @@ public final class JkDependencyExclusion {
         return of(JkModuleId.of(groupAndName));
     }
 
-    /**
-     * Returns an exclusion identical to this one but with the specified type.
-     * Types generally corresponds to getExtension or classifier but not always.
-     * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
-     */
-    public JkDependencyExclusion withType(String typeArg) {
-        return new JkDependencyExclusion(moduleId, typeArg, extension);
+    public JkDependencyExclusion withClassierAndType(String classifier, String type) {
+        return new JkDependencyExclusion(moduleId, JkModuleDependency.JkArtifactSpecification.of(classifier, type));
     }
 
-    /**
-     * Returns an exclusion identical to this one but with the specified getExtension.
-     * Types generally corresponds to getExtension or classifier but not always.
-     * Some examples are <i>jar</i>, <i>test-jar</i>, <i>test-client</i>.
-     */
-    public JkDependencyExclusion withExt(String extension) {
-        return new JkDependencyExclusion(moduleId, classifier, extension);
+    public JkDependencyExclusion withType(String type) {
+        return withClassierAndType(null, type);
+    }
+
+    public JkDependencyExclusion withClassifier(String classifier) {
+        return withClassierAndType(classifier, null);
     }
 
     /**
@@ -68,19 +62,12 @@ public final class JkDependencyExclusion {
         return moduleId;
     }
 
-    /**
-     * Returns the type of the artifact file to exclude.
-     */
     public String getClassifier() {
-        return classifier;
+        return Optional.ofNullable(artifactSpecification).map(spec -> spec.getClassifier()).orElse(null);
     }
 
-    /**
-     * Returns the getExtension for the artifact files to exclude. If not <code>null</code>
-     * only file artifact having this getExtension will be effectively excluded.
-     */
-    public String getExtension() {
-        return extension;
+    public String getType() {
+        return Optional.ofNullable(artifactSpecification).map(spec -> spec.getType()).orElse(null);
     }
 
     @Override
@@ -89,15 +76,13 @@ public final class JkDependencyExclusion {
         if (o == null || getClass() != o.getClass()) return false;
         JkDependencyExclusion that = (JkDependencyExclusion) o;
         if (!moduleId.equals(that.moduleId)) return false;
-        if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
-        return extension != null ? extension.equals(that.extension) : that.extension == null;
+        return Objects.equals(artifactSpecification, that.artifactSpecification);
     }
 
     @Override
     public int hashCode() {
         int result = moduleId.hashCode();
-        result = 31 * result + (classifier != null ? classifier.hashCode() : 0);
-        result = 31 * result + (extension != null ? extension.hashCode() : 0);
+        result = 31 * result + (artifactSpecification != null ? artifactSpecification.hashCode() : 0);
         return result;
     }
 }

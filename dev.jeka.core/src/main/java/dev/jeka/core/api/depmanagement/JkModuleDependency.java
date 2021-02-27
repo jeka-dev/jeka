@@ -91,8 +91,11 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
      * Description can be :
      * group:name
      * group:name:version
-     * group:name:classifier:version
-     * group:name:classifier:type:version
+     * group:name:classifiers...:version
+     * group:name:classifiers:type:version
+     *
+     * classifiers may be a single classifier or a a list of as <i>linux,mac</i>. The empty string
+     * stands for the default classifier.
      *
      * Version can be a '?' if it is unspecified.
      */
@@ -109,9 +112,9 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
         if (strings.length == 3) {
             return of(moduleId, JkVersion.of(strings[2]));
         } if (strings.length == 4) {
-            return of(moduleId, JkVersion.of(strings[3])).withClassifier(strings[2]);
+            return of(moduleId, JkVersion.of(strings[3])).withClassifiers(strings[2]);
         }
-        return of(moduleId, JkVersion.of(strings[4])).withClassifierAndType(strings[2], strings[3]);
+        return of(moduleId, JkVersion.of(strings[4])).withClassifiersAndType(strings[2], strings[3]);
     }
 
     /**
@@ -172,20 +175,26 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
     }
 
     /**
-     * @see #withClassifierAndType(String, String)
+     * @see #withClassifiersAndType(String, String)
      */
-    public JkModuleDependency withClassifier(String classifier) {
-        return withClassifierAndType(classifier, null);
+    public JkModuleDependency withClassifiers(String classifier) {
+        return withClassifiersAndType(classifier, null);
     }
 
     /**
      * Returns a JkModuleDependency identical to this one but with the specified
-     * classifier and type as the only {@link JkArtifactSpecification} for this dependency
+     * classifiers and type as the only {@link JkArtifactSpecification} for this dependency
+     * @param classifiers classifiers separated with ','. Example 'linux,max' stands for
+     *                    linux and mac classifier. ',mac' stands for the default classifier +
+     *                    mac classifier
      */
-    public JkModuleDependency withClassifierAndType(String classifier, String type) {
-        JkArtifactSpecification artifactSpecification = new JkArtifactSpecification(classifier, type);
-        Set<JkArtifactSpecification> artifactSpecifications = Collections.singleton(artifactSpecification);
-        return new JkModuleDependency(moduleId, version, transitivity, exclusions, artifactSpecifications, ideProjectDir);
+    public JkModuleDependency withClassifiersAndType(String classifiers, String type) {
+        Set<JkArtifactSpecification> artifactSpecifications = new LinkedHashSet<>();
+        for (String classifier : (classifiers + " ").split(",")) {
+            artifactSpecifications.add(new JkArtifactSpecification(classifier.trim(), type));
+        }
+        return new JkModuleDependency(moduleId, version, transitivity, exclusions,
+                Collections.unmodifiableSet(artifactSpecifications), ideProjectDir);
     }
 
     /**
@@ -257,6 +266,9 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
         StringBuilder result = new StringBuilder(moduleId + ":" + version);
         artifactSpecifications.forEach(spec ->
                 result.append("(classifier=" + spec.classifier + ", type=" + spec.type + ")"));
+        if (transitivity != null) {
+            result.append(" transitivity:" + transitivity);
+        }
         return result.toString();
     }
 
@@ -342,6 +354,10 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
         private JkArtifactSpecification (String classifier, String type) {
             this.classifier = classifier;
             this.type = type;
+        }
+
+        public static JkArtifactSpecification of(String classifier, String type) {
+            return new JkArtifactSpecification(classifier, type);
         }
 
         public String getClassifier() {

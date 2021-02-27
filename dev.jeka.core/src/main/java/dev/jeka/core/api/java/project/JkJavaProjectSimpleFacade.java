@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestSelection;
+import dev.jeka.core.api.tooling.JkGitWrapper;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,13 +65,13 @@ public class JkJavaProjectSimpleFacade {
         return this;
     }
 
-    public JkJavaProjectSimpleFacade addCompileDependencies(JkDependencySet dependencies) {
-        project.getConstruction().getCompilation().addDependencies(dependencies);
+    public JkJavaProjectSimpleFacade setCompileDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.getConstruction().getCompilation().setDependencies(modifier);
         return this;
     }
 
-    public JkJavaProjectSimpleFacade addTestDependencies(JkDependencySet dependencies) {
-        project.getConstruction().getTesting().getCompilation().addDependencies(dependencies);
+    public JkJavaProjectSimpleFacade setTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.getConstruction().getTesting().getCompilation().setDependencies(modifier);
         return this;
     }
 
@@ -92,6 +93,14 @@ public class JkJavaProjectSimpleFacade {
 
     public JkJavaProjectSimpleFacade setPublishedVersion(String version) {
         return setPublishedVersion(() -> version);
+    }
+
+    /**
+     * The published version will be computed according the git repository.
+     * @see JkGitWrapper#getVersionFromTags()
+     */
+    public JkJavaProjectSimpleFacade setPublishedVersionFromGit() {
+        return setPublishedVersion(() -> JkGitWrapper.of(getProject().getBaseDir()).getVersionFromTags());
     }
 
     /**

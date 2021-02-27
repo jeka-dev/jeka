@@ -1,7 +1,6 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
@@ -57,10 +56,10 @@ public class SignedArtifactsBuild extends JkClass {
     @Override
     protected void setup() {
         javaPlugin.getProject().simpleFacade()
-            .addCompileDependencies(JkDependencySet.of()
+            .setCompileDependencies(deps -> deps
                 .and(GUAVA.version("18.0"))
             )
-            .addTestDependencies(JkDependencySet.of()
+            .setTestDependencies(deps -> deps
                 .and(JUNIT.version("4.13"))
             )
             .getProject()

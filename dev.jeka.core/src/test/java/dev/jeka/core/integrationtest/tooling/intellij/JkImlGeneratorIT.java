@@ -1,11 +1,10 @@
 package dev.jeka.core.integrationtest.tooling.intellij;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorIT;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -30,7 +29,7 @@ public class JkImlGeneratorIT {
             .setBaseDir(base)
             .getConstruction()
                 .getCompilation()
-                    .addDependencies(JkDependencySet.of()
+                    .setDependencies(deps -> deps
                         .and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6"))).__.__;
         final JkImlGenerator baseGenerator = JkImlGenerator.of(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.generate();
@@ -43,7 +42,7 @@ public class JkImlGeneratorIT {
                 .setBaseDir(core)
                 .getConstruction()
                     .getCompilation()
-                        .addDependencies(JkDependencySet.of().and(baseProject.toDependency())).__
+                        .setDependencies(deps -> deps.and(baseProject.toDependency())).__
                     .getTesting()
                         .getCompilation()
                             .getLayout()
@@ -63,7 +62,7 @@ public class JkImlGeneratorIT {
             .setBaseDir(desktop)
             .getConstruction()
                 .getCompilation()
-                    .addDependencies(JkDependencySet.of()
+                    .setDependencies(deps -> deps
                         .and(coreProject.toDependency())).__.__;
         final JkImlGenerator desktopGenerator = JkImlGenerator.of(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.generate();

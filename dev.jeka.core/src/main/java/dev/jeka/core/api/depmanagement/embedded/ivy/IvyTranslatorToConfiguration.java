@@ -15,7 +15,7 @@ class IvyTranslatorToConfiguration {
     static final String ALL = "*";
 
     static Set<Configuration> toMasterConfigurations(JkQualifiedDependencies dependencies) {
-        Set<Configuration> result = dependencies.getQualifiedDependencies().stream()
+        Set<Configuration> result = dependencies.getEntries().stream()
                 .map(qDep -> qDep.getQualifier())
                 .map(JkIvyConfigurationMapping::of)
                 .flatMap(cm -> cm.getLeft().stream())
