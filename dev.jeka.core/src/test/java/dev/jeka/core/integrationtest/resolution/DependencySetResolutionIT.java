@@ -260,7 +260,6 @@ public class DependencySetResolutionIT {
         JkPathSequence paths = resolveResult.getFiles();
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
         assertEquals(3, paths.getEntries().size());
-        // the order Ivy resolve classifiers cannot be controlled
     }
 
     @Test

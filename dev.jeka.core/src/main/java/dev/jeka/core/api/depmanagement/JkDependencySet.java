@@ -69,7 +69,9 @@ public class JkDependencySet {
      * Returns a clone of this object plus the specified {@link JkDependency}s, at the
      * specified place and condition.
      */
-    public JkDependencySet and(Hint hint, List<JkDependency> others) {
+    public JkDependencySet and(Hint hint, JkDependencySet other) {
+        List<JkDependency> others = other.entries;
+        JkDependencySet proto = this.and(other);
         final List<JkDependency> result = new LinkedList<>(this.entries);
         if (hint == null) {
             result.addAll(others);
@@ -91,7 +93,11 @@ public class JkDependencySet {
             throw new IllegalArgumentException("No dependency " + hint.before + " found on " + result);
         }
         result.addAll(index, others);
-        return new JkDependencySet(result, globalExclusions, versionProvider);
+        return new JkDependencySet(result, proto.globalExclusions, proto.versionProvider);
+    }
+
+    public JkDependencySet and(Hint hint, List<JkDependency> others) {
+        return and(hint, JkDependencySet.of(others));
     }
 
     private int firstIndexMatching(JkDependency dependency) {

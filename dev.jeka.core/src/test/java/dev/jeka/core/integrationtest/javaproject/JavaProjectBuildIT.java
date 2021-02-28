@@ -50,28 +50,7 @@ public class JavaProjectBuildIT {
         return dest;
     }
 
-    @Test
-    public void getTestDependencies_ok() {
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
-                .setCompileDependencies(deps -> deps
-                        .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
-                        .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .setRuntimeDependencies(deps -> deps
-                        .and("org.postgresql:postgresql:42.2.19")
-                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
-                        .minus("javax.servlet:javax.servlet-api"))
-                .setTestDependencies(deps -> deps
-                        .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
-                )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
-                .getProject();
-        JkDependencySet testDependencies = project.getConstruction().getTesting().getCompilation().getDependencies();
-        System.out.println(project.getInfo());
-        Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
-        Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
-        Assert.assertEquals("org.mockito:mockito-core", testDependencies.getModuleDependencies().get(0)
-                .getModuleId().toString());
-    }
+
 
     @Test
     public void publish_maven_ok() {

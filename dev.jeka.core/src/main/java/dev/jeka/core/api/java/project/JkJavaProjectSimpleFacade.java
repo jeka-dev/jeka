@@ -1,8 +1,8 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGitWrapper;
@@ -73,6 +73,13 @@ public class JkJavaProjectSimpleFacade {
     public JkJavaProjectSimpleFacade setTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         project.getConstruction().getTesting().getCompilation().setDependencies(modifier);
         return this;
+    }
+
+    /**
+     * Add specified dependencies at head of preset dependencies.
+     */
+    public JkJavaProjectSimpleFacade addTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+        return setTestDependencies(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
     }
 
     /**
