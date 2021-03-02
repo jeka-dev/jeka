@@ -84,10 +84,10 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-                             JkQualifiedDependencies dependencies, UnaryOperator<Path> signer) {
+                             JkDependencySet dependencies, UnaryOperator<Path> signer) {
         JkLog.startTask("Publish on Maven repositories");
-        final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
-                publication, dependencies, Instant.now());
+        final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptorForMavenPublish(versionedModule,
+                publication, dependencies);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
         final int count = publishMavenArtifacts(publication, ivy.getSettings(), moduleDescriptor, signer);
         JkLog.info("Module published in %s.", JkUtilsString.plurialize(count, "repository", "repositories"));
@@ -211,11 +211,11 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         }
     }
 
-    private DefaultModuleDescriptor createModuleDescriptor(JkVersionedModule versionedModule,
+    private DefaultModuleDescriptor createModuleDescriptorForMavenPublish(JkVersionedModule versionedModule,
                                                            JkMavenPublication publication,
-                                                           JkQualifiedDependencies dependencies,
-                                                           Instant deliveryDate) {
-        return IvyTranslatorToModuleDescriptor.toMavenPublishModuleDescriptor(versionedModule, dependencies, publication);
+                                                           JkDependencySet dependencies) {
+        return IvyTranslatorToModuleDescriptor.toMavenPublishModuleDescriptor(versionedModule, dependencies,
+                publication);
     }
 
     private static void commitPublication(DependencyResolver resolver) {

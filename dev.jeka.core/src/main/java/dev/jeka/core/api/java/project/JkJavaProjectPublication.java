@@ -57,13 +57,13 @@ public class JkJavaProjectPublication {
         artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
                 .setArtifactFilenameComputation(project::getArtifactPath);
         registerArtifacts();
-        JkQualifiedDependencies mavenDefaultPublishedDependencies =
-                JkQualifiedDependencies.computeMavenPublishDependencies(
-                    project.getConstruction().getCompilation().getDependencies(),
-                    project.getConstruction().getRuntimeDependencies(), JkVersionedModule.ConflictStrategy.FAIL);
+        JkVersionedModule.ConflictStrategy conflictStrategy = project.getDuplicateConflictStrategy();
         this.mavenPublication = JkMavenPublication.of(this)
             .setArtifactLocator(() -> artifactProducer)
-            .setDependencies(deps -> mavenDefaultPublishedDependencies)
+            .setDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
+                    project.getConstruction().getCompilation().getDependencies(),
+                    project.getConstruction().getRuntimeDependencies(),
+                    conflictStrategy))
             .setVersionedModule(() -> getModuleId().withVersion(versionSupplier.get()));
         JkQualifiedDependencies ivyDefaultPublishedDependencies = JkIvyPublication.getPublishDependencies(
                 project.getConstruction().getCompilation().getDependencies(),

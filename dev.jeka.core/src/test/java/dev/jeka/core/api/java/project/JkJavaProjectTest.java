@@ -2,9 +2,17 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
+import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
+import dev.jeka.core.api.file.JkPathTree;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JkJavaProjectTest {
 
@@ -72,5 +80,79 @@ public class JkJavaProjectTest {
                 .getModuleId().toString());
         Assert.assertEquals("io.rest-assured:rest-assured", testDependencies.getModuleDependencies().get(1)
                 .getModuleId().toString());
+    }
+
+    @Test
+    public void getPublishMavenDependencies_ok() {
+        JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .setCompileDependencies(deps -> deps
+                        .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
+                        .and("javax.servlet:javax.servlet-api:4.0.1"))
+                .setRuntimeDependencies(deps -> deps
+                        .and("org.postgresql:postgresql:42.2.19")
+                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
+                        .minus("javax.servlet:javax.servlet-api"))
+                .addTestDependencies(deps -> deps
+                        .and("org.mockito:mockito-core:2.10.0")
+                        .and("io.rest-assured:rest-assured:4.3.3")
+                )
+                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .setPublishedDependencies(deps -> deps.minus("org.postgresql:postgresql"))
+                .getProject();
+        JkDependencySet publishDeps = project.getPublication().getMavenPublication().getDependencies();
+        publishDeps.getEntries().forEach(System.out::println);
+        Assert.assertEquals(JkTransitivity.COMPILE, publishDeps.get("javax.servlet:javax.servlet-api").getTransitivity());
+    }
+
+    @Test
+    public void makeAllArtifacts() throws Exception {
+        final Path top = unzipToDir("sample-multi-scriptless.zip");
+
+        Path base = top.resolve("base");
+        JkJavaProject baseProject = JkJavaProject.of().simpleFacade()
+                .setBaseDir(base)
+                .setCompileDependencies(deps -> deps.and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6")))
+                .getProject().getConstruction()
+                .getCompilation()
+                .getLayout()
+                .emptySources().addSource("src")
+                .emptyResources().addResource("res").includeSourceDirsInResources().__.__.__;
+        baseProject.getPublication().getArtifactProducer().makeAllArtifacts();
+
+        final Path core = top.resolve("core");
+        final JkJavaProject coreProject = JkJavaProject.of()
+                .setBaseDir(core)
+                .getConstruction()
+                .getCompilation()
+                .setDependencies(deps -> deps.and(baseProject.toDependency())).__
+                .getCompilation()
+                .getLayout()
+                .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__.__;
+        //Desktop.getDesktop().open(core.toFile());
+        coreProject.getPublication().getArtifactProducer().makeAllArtifacts();
+
+        final Path desktop = top.resolve("desktop");
+        final JkJavaProject desktopProject = JkJavaProject.of()
+                .setBaseDir(desktop)
+                .getConstruction()
+                .getCompilation()
+                .setDependencies(deps -> deps
+                        .and(coreProject.toDependency())).__
+                .getCompilation()
+                .getLayout()
+                .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__.__;
+        //Desktop.getDesktop().open(desktop.toFile());
+        //desktopProject.getArtifactProducer().makeAllArtifacts();
+
+        // Desktop.getDesktop().open(desktop);
+        JkPathTree.of(top).deleteRoot();
+    }
+
+    private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
+        final Path dest = Files.createTempDirectory(JkJavaProjectTest.class.getName());
+        final Path zip = Paths.get(JkJavaProjectTest.class.getResource(zipName).toURI());
+        JkPathTree.ofZip(zip).copyTo(dest);
+        System.out.println("unzipped in " + dest);
+        return dest;
     }
 }

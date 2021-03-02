@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement.publication;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
@@ -31,7 +32,7 @@ public interface JkInternalPublisher {
                     JkQualifiedDependencies dependencies);
 
     void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-                      JkQualifiedDependencies dependencies, UnaryOperator<Path> signer);
+                      JkDependencySet dependencySet, UnaryOperator<Path> signer);
 
     static JkInternalPublisher of(JkRepoSet publishRepos, Path artifactDir) {
         final Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(FACTORY_CLASS_NAME);

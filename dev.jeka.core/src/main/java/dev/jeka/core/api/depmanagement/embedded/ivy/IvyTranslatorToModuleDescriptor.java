@@ -14,6 +14,7 @@ import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToConfiguration.toMasterConfigurations;
 import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToDependency.*;
@@ -49,9 +50,19 @@ class IvyTranslatorToModuleDescriptor {
     }
 
     static DefaultModuleDescriptor toMavenPublishModuleDescriptor(JkVersionedModule module,
-                                                                  JkQualifiedDependencies dependencies,
+                                                                  JkDependencySet dependencies,
                                                                   JkMavenPublication mavenPublication) {
-        DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
+        List<JkQualifiedDependency> qualifiedDependencies = dependencies.getEntries().stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .map(JkModuleDependency.class::cast)
+                .map(dep -> {
+                    JkTransitivity transitivity = dep.getTransitivity();
+                    String qualifier = JkTransitivity.COMPILE.equals(transitivity) ? "compile" : "runtime";
+                    return JkQualifiedDependency.of(qualifier, dep);
+                })
+                .collect(Collectors.toList());
+        DefaultModuleDescriptor result = toResolveModuleDescriptor(module,
+                JkQualifiedDependencies.of(qualifiedDependencies));
         Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module,
                 mavenPublication.getArtifactLocator());
         IvyTranslatorToArtifact.bind(result, artifactMap);

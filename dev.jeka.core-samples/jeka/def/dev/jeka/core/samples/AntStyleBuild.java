@@ -97,7 +97,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
         artifactProducer.makeAllMissingArtifacts();
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)
-                .setDependencies(prodDependencies)
+                .setDependencies(deps -> prodDependencies)
                 .setVersionedModule(versionedModule)
                 .publish(mavenRepo.toSet(), pgp.getSigner(""));
         JkIvyPublication.of()

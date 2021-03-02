@@ -179,22 +179,7 @@ public class JkQualifiedDependencies {
         return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
     }
 
-    public static JkQualifiedDependencies computeMavenPublishDependencies(JkDependencySet compileDeps,
-                                                                      JkDependencySet runtimeDeps,
-                                                                      JkVersionedModule.ConflictStrategy strategy) {
-        JkDependencySetMerge merge = compileDeps.merge(runtimeDeps);
-        List<JkQualifiedDependency> result = new LinkedList<>();
-        for (JkModuleDependency moduleDependency : merge.getResult().normalised(strategy)
-                .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
-            String scope = RUNTIME_SCOPE;
-            if (merge.getAbsentDependenciesFromRight().contains(moduleDependency)) {
-                scope = COMPILE_SCOPE;
-            }
-            result.add(JkQualifiedDependency.of(scope, moduleDependency));
-        }
-        return new JkQualifiedDependencies(result, merge.getResult().getGlobalExclusions(),
-                merge.getResult().getVersionProvider());
-    }
+
 
     public static JkQualifiedDependencies computeIdeDependencies(JkDependencySet compileDeps,
                                                                  JkDependencySet runtimeDeps,

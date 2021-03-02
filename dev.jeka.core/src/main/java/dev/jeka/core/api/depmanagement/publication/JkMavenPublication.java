@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -23,7 +24,7 @@ public final class JkMavenPublication<T> {
 
     private final JkPomMetadata<JkMavenPublication<T>> pomMetadata = JkPomMetadata.ofParent(this);
 
-    private Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencies = UnaryOperator.identity();
+    private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
     private Supplier<JkVersionedModule> versionedModule;
 
@@ -45,31 +46,13 @@ public final class JkMavenPublication<T> {
         return this.pomMetadata;
     }
 
-    public JkMavenPublication<T> setDependencies(JkQualifiedDependencies dependencies) {
-        return setDependencies(deps -> dependencies);
-    }
-
-    public JkMavenPublication<T> setDependencies(JkDependencySet compileDeps, JkDependencySet runtimeDeps,
-                                                 JkVersionedModule.ConflictStrategy conflictStrategy) {
-        return setDependencies(JkQualifiedDependencies.computeMavenPublishDependencies(compileDeps, runtimeDeps,
-                conflictStrategy));
-    }
-
-    public JkMavenPublication<T> setDependencies(JkDependencySet compileDeps, JkDependencySet runtimeDeps) {
-        return setDependencies(compileDeps, runtimeDeps, JkVersionedModule.ConflictStrategy.FAIL);
-    }
-
-    public JkMavenPublication<T> setDependencies(JkDependencySet runtimeDeps) {
-        return setDependencies(JkDependencySet.of(), runtimeDeps);
-    }
-
-    public JkMavenPublication<T> setDependencies(Function<JkQualifiedDependencies, JkQualifiedDependencies> modifier) {
+    public JkMavenPublication<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependencies = dependencies.andThen(modifier);
         return this;
     }
 
-    public JkQualifiedDependencies getDependencies() {
-        return dependencies.apply(JkQualifiedDependencies.of());
+    public JkDependencySet getDependencies() {
+        return dependencies.apply(JkDependencySet.of());
     }
 
     public JkVersionedModule getVersionedModule() {
@@ -111,8 +94,7 @@ public final class JkMavenPublication<T> {
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        internalPublisher.publishMaven(getVersionedModule(), this,
-                getDependencies().withModuleDependenciesOnly(), signer);
+        internalPublisher.publishMaven(getVersionedModule(), this, getDependencies(), signer);
         return this;
     }
 
@@ -122,6 +104,22 @@ public final class JkMavenPublication<T> {
                 "artifactFileLocator=" + artifactLocator +
                 ", extraInfo=" + pomMetadata +
                 '}';
+    }
+
+    public static JkDependencySet computeMavenPublishDependencies(JkDependencySet compileDeps,
+                                                                          JkDependencySet runtimeDeps,
+                                                                          JkVersionedModule.ConflictStrategy strategy) {
+        JkDependencySetMerge merge = runtimeDeps.merge(compileDeps);
+        List<JkDependency> result = new LinkedList<>();
+        for (JkModuleDependency moduleDependency : merge.getResult().normalised(strategy)
+                .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
+            JkTransitivity transitivity = JkTransitivity.RUNTIME;
+            if (merge.getAbsentDependenciesFromLeft().contains(moduleDependency)) {
+                transitivity = JkTransitivity.COMPILE;
+            }
+            result.add(moduleDependency.withTransitivity(transitivity));
+        }
+        return JkDependencySet.of(result);
     }
 
 

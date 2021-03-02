@@ -1,13 +1,11 @@
 package dev.jeka.core.integrationtest.javaproject;
 
-import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,7 +14,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class JavaProjectBuildIT {
 
@@ -53,10 +50,12 @@ public class JavaProjectBuildIT {
 
 
     @Test
-    public void publish_maven_ok() {
+    public void publish_maven_ok() throws IOException, URISyntaxException {
+        Path root = unzipToDir("sample-multiproject.zip");
         JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .setBaseDir(root.resolve("base"))
                 .setCompileDependencies(deps -> deps
-                        .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
+                        .and("com.google.guava:guava:23.0", JkTransitivity.RUNTIME)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
                 .setRuntimeDependencies(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
@@ -65,11 +64,11 @@ public class JavaProjectBuildIT {
                 .setTestDependencies(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion-snapshot")
                 .getProject();
-        project.getConstruction().getDependencyResolver().resolve(project.getConstruction().getRuntimeDependencies());
-        List<JkDependency> dependencies = project.getPublication().getMavenPublication()
-                .getDependencies().getDependencies();
+        JkLog.setConsumer(JkLog.Style.INDENT);
+        project.getPublication().getArtifactProducer().makeAllArtifacts();
+        project.getPublication().publishLocal();
         System.out.println(project.getInfo());
     }
 
