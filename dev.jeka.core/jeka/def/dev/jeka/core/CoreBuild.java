@@ -237,7 +237,7 @@ public class CoreBuild extends JkClass {
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
         makeDocs();
         JkPathTree.of(distribFolder().resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
-        JkGitWrapper gitTemp = JkGitWrapper.of(tempRepo).withLogCommand(true);
+        JkGitWrapper gitTemp = JkGitWrapper.of(tempRepo).withLogCommand(true).withFailOnError(true);
         gitTemp.exec("add", "*");
         gitTemp.withFailOnError(false).exec("commit", "-am", "Doc");
         gitTemp.exec("push");
