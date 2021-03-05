@@ -36,7 +36,7 @@
 
 	<target name="run" depends="bootstrap">
 		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.core" fork="true" failonerror="true">
-			<arg line="java#pack publishDocsOnGithubPage java#publish -java#test.fork=true -java#test.runIT=false -LB />
+			<arg line="java#pack publishDocsOnGithubPage java#publish -java#test.fork=true -java#test.runIT=false -LB" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
