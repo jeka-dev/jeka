@@ -1,12 +1,14 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# A push on master will build, test and publish Jeka on OSSRH.
+# Beside it will push the built documentation on the Jeka landing page.
 
-name: Java CI with Jeka
+# If a tag is present on the last commit, Jeka will publish versioned artifacts according tag name on OSSRH public repo.
+# If no tag is present, the buiilt artifacts will be published to OSSRH snapshot repository.
+# This logic is implemented within the Jeka build.
+
+name: Java Build and Publish
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
     branches: [ master ]
 
 jobs:
