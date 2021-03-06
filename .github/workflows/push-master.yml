@@ -2,7 +2,7 @@
 # Beside it will push the built documentation on the Jeka landing page.
 
 # If a tag is present on the last commit, Jeka will publish versioned artifacts according tag name on OSSRH public repo.
-# If no tag is present, the buiilt artifacts will be published to OSSRH snapshot repository.
+# If no tag is present, the built artifacts will be published to OSSRH snapshot repository.
 # This logic is implemented within the Jeka build.
 
 name: Java Build and Publish
