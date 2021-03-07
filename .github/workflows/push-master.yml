@@ -23,8 +23,6 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Jeka bootstrapped with ANT
-      with:
-        token: ${{secrets.GH_TOKEN}}
       env:
         OSSRH_USER: ${{ secrets.OSSRH_USER }}
         OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
