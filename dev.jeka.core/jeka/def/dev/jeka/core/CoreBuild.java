@@ -226,6 +226,7 @@ public class CoreBuild extends JkClass {
     }
 
     public void publishDocsOnGithubPage() {
+        clean();
         JkJavaProject project = java.getProject();
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
