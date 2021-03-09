@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository
@@ -50,8 +51,6 @@ public final class JkRepo {
      */
     public static final String JCENTERL_URL = "https://jcenter.bintray.com";
 
-    private static final String IVY_PREFIX = "ivy:";
-
     private final URL url;
 
     private JkRepoCredentials credentials;
@@ -60,11 +59,8 @@ public final class JkRepo {
 
     private final JkPublishConfig publishConfig = new JkPublishConfig(this);
 
-    public final boolean ivyRepo; // true if this reposotory is an Ivy one, false if it is a Maven one.
-
-    private JkRepo(URL url, boolean ivyRepo) {
+    private JkRepo(URL url) {
         this.url = url;
-        this.ivyRepo = ivyRepo;
     }
 
     /**
@@ -76,24 +72,14 @@ public final class JkRepo {
         if (url.equals(LOCAL_NAME)) {
             return ofLocal();
         }
-        if (url.toLowerCase().startsWith(IVY_PREFIX)) {
-            return new JkRepo(toUrl(url.substring(4)), true);
-        }
-        return new JkRepo(toUrl(url), false);
+        return new JkRepo(toUrl(url));
     }
 
     /**
      * Creates a Maven repository having the specified file location.
      */
-    public static JkRepo ofMaven(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir), false);
-    }
-
-    /**
-     * Creates a Ivy repository having the specified file location.
-     */
-    public static JkRepo ofIvy(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir), true);
+    public static JkRepo of(Path dir) {
+        return new JkRepo(JkUtilsPath.toUrl(dir));
     }
 
     /**
@@ -117,12 +103,14 @@ public final class JkRepo {
     /**
      * Creates an OSSRH repository for deploying released artifacts.
      */
-    public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword) {
+    public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword,
+                                                   UnaryOperator<Path> signer) {
         return of(MAVEN_OSSRH_DEPLOY_RELEASE)
                 .setCredentials(jiraId, jiraPassword, "Sonatype Nexus Repository Manager")
                 .getPublishConfig()
                     .setSignatureRequired(true)
                     .setVersionFilter(version -> !version.isSnapshot())
+                    .setSigner(signer)
                     .setChecksumAlgos("md5", "sha1").__;
     }
 
@@ -145,7 +133,7 @@ public final class JkRepo {
      */
     public static JkRepo ofLocal() {
         final Path file = JkLocator.getJekaUserHomeDir().resolve("maven-publish-dir");
-        return JkRepo.ofMaven(file);
+        return JkRepo.of(file);
     }
 
     /**
@@ -161,10 +149,6 @@ public final class JkRepo {
      */
     public JkRepoIvyConfig getIvyConfig() {
         return this.ivyConfig;
-    }
-
-    public boolean isIvyRepo() {
-        return this.ivyRepo;
     }
 
     /**
@@ -339,6 +323,8 @@ public final class JkRepo {
 
         private Set<String> checksumAlgos = new HashSet<>();
 
+        private UnaryOperator<Path> signer;
+
         private JkPublishConfig(JkRepo parent) {
             __ = parent;
         }
@@ -363,6 +349,10 @@ public final class JkRepo {
             return checksumAlgos;
         }
 
+        public UnaryOperator<Path> getSigner() {
+            return signer;
+        }
+
         public JkPublishConfig setUniqueSnapshot(boolean uniqueSnapshot) {
             this.uniqueSnapshot = uniqueSnapshot;
             return this;
@@ -383,6 +373,12 @@ public final class JkRepo {
             this.checksumAlgos = JkUtilsIterable.setOf(algos);
             return this;
         }
+
+        public JkPublishConfig setSigner(UnaryOperator<Path> signer) {
+            this.signer = signer;
+            return this;
+        }
+
     }
 
 }

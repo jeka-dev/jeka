@@ -30,6 +30,8 @@ public final class JkMavenPublication<T> {
 
     private Supplier<JkArtifactLocator> artifactLocator;
 
+    private JkRepoSet repoSet;
+
     private JkMavenPublication(T parent) {
         this.__ = parent;
     }

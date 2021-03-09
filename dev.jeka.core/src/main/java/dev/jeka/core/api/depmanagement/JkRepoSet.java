@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 /**
  * A set of {@link JkRepo}
@@ -77,9 +78,9 @@ public final class JkRepoSet {
     /**
      * Creates a JkRepoSet for publishing on <a href="http://central.sonatype.org/">OSSRH</a>
      */
-    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password) {
+    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password, UnaryOperator<Path> signer) {
         return of(JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(userName, password),
-                JkRepo.ofMavenOssrhDeployRelease(userName, password));
+                JkRepo.ofMavenOssrhDeployRelease(userName, password, signer));
     }
 
     /**

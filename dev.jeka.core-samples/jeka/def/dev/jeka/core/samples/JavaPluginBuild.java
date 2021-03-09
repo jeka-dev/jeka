@@ -1,6 +1,7 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
@@ -50,7 +51,7 @@ public class JavaPluginBuild extends JkClass {
                    // Published dependencies can be modified here from the ones declared in dependency management.
                    // Here jersey-server is not supposed to be part of the API but only needed at runtime.
                    .setDependencies(deps -> deps
-                       .replaceQualifier("com.sun.jersey:jersey-server", "runtime"));
+                       .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME));
     }
 
     public void cleanPackPublish() {
