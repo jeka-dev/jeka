@@ -88,8 +88,8 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
     // publish poth on Maven and Ivy repo
     public void publish() {
         JkGpg pgp = JkGpg.ofSecretRing(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd");
-        JkRepo ivyRepo = JkRepo.ofIvy(getOutputDir().resolve("test-output/ivy-repo"));
-        JkRepo mavenRepo = JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo"));
+        JkRepo ivyRepo = JkRepo.of(getOutputDir().resolve("test-output/ivy-repo"));
+        JkRepo mavenRepo = JkRepo.of(getOutputDir().resolve("test-output/maven-repo"));
         JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.2_SNAPSHOT");
         JkArtifactProducer artifactProducer = JkSuppliedFileArtifactProducer.of()
                 .putMainArtifact(jarFile, this::jar)
@@ -98,13 +98,17 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)
                 .setDependencies(deps -> prodDependencies)
-                .setVersionedModule(versionedModule)
-                .publish(mavenRepo.toSet(), pgp.getSigner(""));
+                .setModuleId(versionedModule.getModuleId().toString())
+                .setVersion(versionedModule.getVersion().getValue())
+                .addRepos(mavenRepo.getPublishConfig().setSigner(pgp.getSigner("")).__)
+                .publish();
         JkIvyPublication.of()
-                .setVersionedModule(versionedModule)
+                .setModuleId(versionedModule.getModuleId().toString())
+                .setVersion(versionedModule.getVersion().getValue())
                 .setDependencies(prodDependencies, prodDependencies, testDependencies)
                 .addArtifacts(artifactProducer)
-                .publish(ivyRepo.toSet());
+                .addRepos(ivyRepo)
+                .publish();
     }
 
     @Override

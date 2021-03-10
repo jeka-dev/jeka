@@ -18,6 +18,7 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -40,6 +41,8 @@ public class CoreBuild extends JkClass {
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
     final JkPluginJava java = getPlugin(JkPluginJava.class);
+
+    final JkPluginGpg gpg = getPlugin(JkPluginGpg.class);
 
     private final JkGitWrapper git;
 
@@ -97,14 +100,14 @@ public class CoreBuild extends JkClass {
                     .setDisplayOutput(false)
                     .addOptions("-notimestamp").__.__
             .getPublication()
-                .setModuleId("dev.jeka:jeka-core")
-                .setVersionSupplier(git::getJkVersionFromTags)
-                .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd))
                 .getArtifactProducer()
                     .putMainArtifact(this::doPackWithEmbedded)
                     .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
                     .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__
-                .getMavenPublication()
+                .getMaven()
+                    .setModuleId("dev.jeka:jeka-core")
+                    .setVersion(git::getVersionFromTags)
+                    .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner("")))
                     .getPomMetadata()
                         .getProjectInfo()
                             .setName("jeka")
@@ -119,7 +122,7 @@ public class CoreBuild extends JkClass {
     }
 
     private void createGithubRelease() {
-        String version = java.getProject().getPublication().getVersion().getValue();
+        String version = java.getProject().getPublication().getMaven().getVersion();
         if (version.endsWith(".RELEASE")) {
             GithubReleaseContentEditor githubReleaseContentEditor =
                     new GithubReleaseContentEditor("jerkar/jeka", travisBranch, githubToken);
@@ -169,7 +172,7 @@ public class CoreBuild extends JkClass {
 
     private void makeDocs() {
         JkLog.startTask("Make documentation");
-        String version = java.getProject().getPublication().getVersion().getValue();
+        String version = java.getProject().getPublication().getMaven().getVersion();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }

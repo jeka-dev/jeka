@@ -32,8 +32,8 @@ public class JavaPluginBuild extends JkClass {
                        .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
                .addTestExcludeFilterSuffixedBy("IT", false)
                .setJavaVersion(JkJavaVersion.V8)
-               .setPublishedModuleId("dev.jeka:sample-javaplugin")
-               .setPublishedVersion("1.0-SNAPSHOT")
+               .setPublishedMavenModuleId("dev.jeka:sample-javaplugin")
+               .setPublishedMavenVersion("1.0-SNAPSHOT")
        .getProject()
            .getConstruction()
                .getDependencyResolver()
@@ -45,8 +45,8 @@ public class JavaPluginBuild extends JkClass {
                    .getEngineBehavior()
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__.__
            .getPublication()
-               .addRepos(JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
-               .getMavenPublication()
+               .getMaven()
+                    .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
 
                    // Published dependencies can be modified here from the ones declared in dependency management.
                    // Here jersey-server is not supposed to be part of the API but only needed at runtime.

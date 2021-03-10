@@ -17,8 +17,8 @@ public class PureApi {
                 .setCompileDependencies(deps -> deps
                     .and("com.google.guava:guava:22.0")
                     .and(coreProject.toDependency()))
-                .setPublishedModuleId("mygroup:depender")
-                .setPublishedVersion("1.0-SNAPSHOT").getProject();
+                .setPublishedMavenModuleId("mygroup:depender")
+                .setPublishedMavenVersion("1.0-SNAPSHOT").getProject();
 
         dependerProject.getPublication().getArtifactProducer().makeAllArtifacts();
         dependerProject.getPublication().publish();

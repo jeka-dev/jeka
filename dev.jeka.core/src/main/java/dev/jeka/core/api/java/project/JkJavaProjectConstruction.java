@@ -86,16 +86,17 @@ public class JkJavaProjectConstruction {
     }
 
     private void addManifestDefaults() {
+
         JkModuleId moduleId = project.getPublication().getModuleId();
-        JkVersion version = project.getPublication().getVersion();
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null) {
+        String version = project.getPublication().getVersion();
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && moduleId != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
         }
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VENDOR) == null) {
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VENDOR) == null && moduleId != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup());
         }
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null) {
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null && version != null) {
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
         }
     }
 

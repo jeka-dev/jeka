@@ -37,15 +37,14 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     private final Path descriptorOutputDir;
 
-    private IvyInternalPublisher(Ivy ivy, JkRepoSet publishRepo, Path descriptorOutputDir) {
+    private IvyInternalPublisher(JkRepoSet publishRepo, Path descriptorOutputDir) {
         super();
         this.publishRepos = publishRepo;
         this.descriptorOutputDir = descriptorOutputDir;
     }
 
     static IvyInternalPublisher of(JkRepoSet publishRepos, Path descriptorOutputDir) {
-        final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
-        return new IvyInternalPublisher(ivy, publishRepos, descriptorOutputDir);
+        return new IvyInternalPublisher(publishRepos, descriptorOutputDir);
     }
 
     private static boolean isMaven(DependencyResolver dependencyResolver) {
@@ -84,12 +83,12 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-                             JkDependencySet dependencies, UnaryOperator<Path> signer) {
+                             JkDependencySet dependencies) {
         JkLog.startTask("Publish on Maven repositories");
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptorForMavenPublish(versionedModule,
                 publication, dependencies);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
-        final int count = publishMavenArtifacts(publication, ivy.getSettings(), moduleDescriptor, signer);
+        final int count = publishMavenArtifacts(publication, ivy.getSettings(), moduleDescriptor);
         JkLog.info("Module published in %s.", JkUtilsString.plurialize(count, "repository", "repositories"));
         JkLog.endTask();
     }
@@ -150,7 +149,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     }
 
     private int publishMavenArtifacts(JkMavenPublication publication, IvySettings ivySettings,
-                                      DefaultModuleDescriptor moduleDescriptor, UnaryOperator<Path> signer) {
+                                      DefaultModuleDescriptor moduleDescriptor) {
         int count = 0;
         for (JkRepo publishRepo : this.publishRepos.getRepos()) {
             RepositoryResolver resolver = IvyTranslatorToResolver.convertToPublishAndBind(publishRepo, ivySettings);
@@ -160,9 +159,13 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             if (isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(version)) {
                 JkLog.startTask("Publish to " + publishRepo.getUrl());
                 boolean signatureRequired = publishRepo.getPublishConfig().isSignatureRequired();
-                UnaryOperator<Path> effectiveSigner = signatureRequired ? signer :null;
+                UnaryOperator<Path> signer = publishRepo.getPublishConfig().getSigner();
+                if (signatureRequired && signer == null) {
+                    throw new IllegalStateException("Repo " + publishRepo + " requires file signature but " +
+                            "no siigner has been defined on.");
+                }
                 IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
-                    effectiveSigner, resolver, descriptorOutputDir,
+                    signer, resolver, descriptorOutputDir,
                     publishRepo.getPublishConfig().isUniqueSnapshot(),
                     publishRepo.getPublishConfig().getChecksumAlgos());
                 ivyPublisherForMaven.publish(moduleDescriptor, publication);

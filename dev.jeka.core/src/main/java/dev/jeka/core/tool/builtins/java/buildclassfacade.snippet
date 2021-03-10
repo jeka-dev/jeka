@@ -21,8 +21,8 @@ class Build extends JkClass {
                 .and("org.junit.jupiter:junit-jupiter:5.6.2"))
 
             // On ly necessary if your project is published in a binary repository.
-            .setPublishedModuleId("your.group:your.project")
-            .setPublishedVersionFromGit();  // Version inferred from Git
+            .setPublishedMavenModuleId("your.group:your.project")
+            .setPublishedMavenVersionFromGit();  // Version inferred from Git
     }
 
     public void cleanPack() {

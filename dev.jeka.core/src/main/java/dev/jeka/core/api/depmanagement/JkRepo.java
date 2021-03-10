@@ -4,7 +4,6 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -51,6 +50,8 @@ public final class JkRepo {
      */
     public static final String JCENTERL_URL = "https://jcenter.bintray.com";
 
+    private static final String IVY_PREFIX = "ivy:";
+
     private final URL url;
 
     private JkRepoCredentials credentials;
@@ -59,8 +60,11 @@ public final class JkRepo {
 
     private final JkPublishConfig publishConfig = new JkPublishConfig(this);
 
-    private JkRepo(URL url) {
+    public final boolean ivyRepo; // true if this reposotory is an Ivy one, false if it is a Maven one.
+
+    private JkRepo(URL url, boolean ivyRepo) {
         this.url = url;
+        this.ivyRepo = ivyRepo;
     }
 
     /**
@@ -72,14 +76,17 @@ public final class JkRepo {
         if (url.equals(LOCAL_NAME)) {
             return ofLocal();
         }
-        return new JkRepo(toUrl(url));
+        if (url.toLowerCase().startsWith(IVY_PREFIX)) {
+            return new JkRepo(toUrl(url.substring(4)), true);
+        }
+        return new JkRepo(toUrl(url), false);
     }
 
     /**
      * Creates a Maven repository having the specified file location.
      */
     public static JkRepo of(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir));
+        return JkRepo.of(dir.toString());
     }
 
     /**
@@ -149,6 +156,10 @@ public final class JkRepo {
      */
     public JkRepoIvyConfig getIvyConfig() {
         return this.ivyConfig;
+    }
+
+    public boolean isIvyRepo() {
+        return this.ivyRepo;
     }
 
     /**

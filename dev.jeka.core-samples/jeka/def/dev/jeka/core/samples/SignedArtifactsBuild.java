@@ -3,7 +3,6 @@ package dev.jeka.core.samples;
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProjectPublication;
 import dev.jeka.core.tool.JkClass;
@@ -12,6 +11,7 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import java.nio.file.Path;
+import java.util.function.UnaryOperator;
 
 import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
 import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
@@ -64,33 +64,34 @@ public class SignedArtifactsBuild extends JkClass {
             )
             .getProject()
             .getPublication()
-                .setModuleId("dev.jeka.core:samples-signedArtifacts")
-                .setVersion(JkVersion.of("1.3.1"))
-                .setSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
                 .apply(this::configForLocalRepo)
-                .getMavenPublication()
-                .getPomMetadata()
-                    .getProjectInfo()
-                        .setName("my project")
-                        .setDescription("My description")
-                        .setUrl("https://github.com/jerkar/jeka/samples").__
-                    .getScm()
-                        .setConnection("https://github.com/jerkar/sample.git").__
-                    .addApache2License()
-                    .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
+                .getMaven()
+                .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
+                    .setModuleId("dev.jeka.core:samples-signedArtifacts")
+                    .setVersion("1.3.1")
+                    .getPomMetadata()
+                        .getProjectInfo()
+                            .setName("my project")
+                            .setDescription("My description")
+                            .setUrl("https://github.com/jerkar/jeka/samples").__
+                        .getScm()
+                            .setConnection("https://github.com/jerkar/sample.git").__
+                        .addApache2License()
+                        .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
     }
 
     private void configForOssrh(JkJavaProjectPublication publication) {
-        publication
-                .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd));
+        UnaryOperator<Path> signer = JkGpg.ofSecretRing(secringPath, secringPassword).getSigner("");
+        publication.getMaven()
+                .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
     }
 
     private void configForLocalRepo(JkJavaProjectPublication publication) {
-        JkRepo repo = JkRepo.ofMaven(dummyRepoPath)
+        JkRepo repo = JkRepo.of(dummyRepoPath)
             .getPublishConfig()
                 .setChecksumAlgos("sha1", "md5")
                 .setSignatureRequired(true).__;
-        publication.setRepos(repo.toSet());
+        publication.getMaven().setRepos(repo.toSet());
     }
 
     public void cleanPackPublish() {

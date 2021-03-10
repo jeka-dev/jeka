@@ -2,6 +2,7 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +26,8 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     private Path baseDir = Paths.get(".");
 
     private String outputDir = "jeka/output";
+
+    private String artifactBaseName;  // artifact files will be named as artifactBaseName-classifier.ext
 
     private JkVersionedModule.ConflictStrategy duplicateConflictStrategy = JkVersionedModule.ConflictStrategy.FAIL;
 
@@ -100,6 +103,15 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return documentation;
     }
 
+    public String getArtifactBaseName() {
+        return artifactBaseName != null ? artifactBaseName : baseDir.getFileName().toString();
+    }
+
+    public JkJavaProject setArtifactBaseName(String artifactBaseName) {
+        this.artifactBaseName = artifactBaseName;
+        return this;
+    }
+
     // -------------------------- Other -------------------------
 
     @Override
@@ -112,7 +124,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         JkDependencySet runtimeDependencies = construction.getRuntimeDependencies();
         JkDependencySet testDependencies = construction.getTesting().getCompilation().getDependencies();
         StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
-            .append("Published Module & version : " + publication.getModuleId() + ":" + publication.getVersion() + "\n")
             .append("Production sources : " + construction.getCompilation().getLayout().getInfo()).append("\n")
             .append("Test sources : " + construction.getTesting().getCompilation().getLayout().getInfo()).append("\n")
             .append("Java Source Version : " + construction.getCompilation().getJavaVersion() + "\n")
@@ -120,7 +131,6 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
             .append("Source file count : " + construction.getCompilation().getLayout().resolveSources()
                     .count(Integer.MAX_VALUE, false) + "\n")
             .append("Download Repositories : " + construction.getDependencyResolver().getRepos() + "\n")
-            .append("Publish repositories : " + publication.getPublishRepos()  + "\n")
             .append("Declared Compile Dependencies : " + compileDependencies.getEntries().size() + " elements.\n");
         compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
         builder.append("Declared Runtime Dependencies : " + runtimeDependencies
@@ -129,6 +139,15 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         builder.append("Declared Test Dependencies : " + testDependencies.getEntries().size() + " elements.\n");
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
         builder.append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds());
+        JkMavenPublication mavenPublication = publication.getMaven();
+        if (mavenPublication.getModuleId() != null) {
+            builder
+                .append("Publish Maven repositories : " + mavenPublication.getRepos()  + "\n")
+                .append("Published Maven Module & version : " +
+                        mavenPublication.getModuleId().withVersion(mavenPublication.getVersion()) + "\n")
+                .append("Published Maven Dependencies :");
+            mavenPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
+        }
         return builder.toString();
     }
 
@@ -165,7 +184,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     }
 
     Path getArtifactPath(JkArtifactId artifactId) {
-        return baseDir.resolve(outputDir).resolve(artifactId.toFileName(publication.getModuleId().getDotedName()));
+        return baseDir.resolve(outputDir).resolve(artifactId.toFileName(getArtifactBaseName()));
     }
 
 }

@@ -11,10 +11,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -29,7 +26,13 @@ public final class JkIvyPublication<T> {
 
     public final T __;
 
-    private Supplier<JkVersionedModule> versionedModule;
+    private JkModuleId moduleId;
+
+    private Supplier<String> versionSupplier = () -> null;
+
+    private JkRepoSet repos = JkRepoSet.of();
+
+    private UnaryOperator<Path> defaultSigner;  // Can be null
 
     private Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencies = UnaryOperator.identity();
 
@@ -53,14 +56,46 @@ public final class JkIvyPublication<T> {
         return new JkIvyPublication<>(null);
     }
 
-    public JkIvyPublication<T> setVersionedModule(Supplier<JkVersionedModule> versionedModule) {
-        JkUtilsAssert.argument(versionedModule != null, "VersionedModule supplier cannot be null.");
-        this.versionedModule = versionedModule;
+    public JkIvyPublication<T> setModuleId(String moduleId) {
+        this.moduleId = JkModuleId.of(moduleId);
         return this;
     }
 
-    public JkIvyPublication<T> setVersionedModule(JkVersionedModule versionedModule) {
-        return setVersionedModule(() -> versionedModule);
+    public JkIvyPublication<T> setVersion(Supplier<String> version) {
+        this.versionSupplier = version;
+        return this;
+    }
+
+    public JkIvyPublication<T> setVersion(String version) {
+        this.versionSupplier = () -> version;
+        return this;
+    }
+
+    public JkModuleId getModuleId() {
+        return moduleId;
+    }
+
+    public String getVersion() {
+        return versionSupplier.get();
+    }
+
+    public JkRepoSet getRepos() {
+        return repos;
+    }
+
+    public JkIvyPublication<T> setRepos(JkRepoSet repos) {
+        this.repos = repos;
+        return this;
+    }
+
+    public JkIvyPublication<T> addRepos(JkRepo ...repoArgs) {
+        Arrays.stream(repoArgs).forEach(repo -> repos = repos.and(repo));
+        return this;
+    }
+
+    public JkIvyPublication<T> setDefaultSigner(UnaryOperator<Path> defaultSigner) {
+        this.defaultSigner = defaultSigner;
+        return this;
     }
 
     public JkIvyPublication<T> setDependencies(UnaryOperator<JkQualifiedDependencies> modifier) {
@@ -184,13 +219,11 @@ public final class JkIvyPublication<T> {
         return result;
     }
 
-    public void publish(JkRepoSet repos) {
-        if (!repos.hasIvyRepo()) {
-            return;
-        }
-        JkUtilsAssert.state(versionedModule != null, "Versioned module provider cannot be null.");
+    public void publish() {
+        JkUtilsAssert.state(moduleId != null, "moduleIId cannot be null.");
+        JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        internalPublisher.publishIvy(versionedModule.get(), this, getDependencies());
+        internalPublisher.publishIvy(moduleId.withVersion(versionSupplier.get()), this, getDependencies());
     }
 
     private static JkPublicationArtifact toPublication(String artifactName, Path artifactFile, String type,

@@ -46,7 +46,7 @@ public class JkJavaProjectTest {
                 .setTestDependencies(deps -> deps
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .setPublishedMavenModuleId("my:project").setPublishedMavenVersion("MyVersion")
                 .getProject();
         JkDependencySet testDependencies = project.getConstruction().getTesting().getCompilation().getDependencies();
         System.out.println(project.getInfo());
@@ -70,7 +70,7 @@ public class JkJavaProjectTest {
                         .and("org.mockito:mockito-core:2.10.0")
                         .and("io.rest-assured:rest-assured:4.3.3")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .setPublishedMavenModuleId("my:project").setPublishedMavenVersion("MyVersion")
                 .getProject();
         JkDependencySet testDependencies = project.getConstruction().getTesting().getCompilation().getDependencies();
         System.out.println(project.getInfo());
@@ -96,10 +96,10 @@ public class JkJavaProjectTest {
                         .and("org.mockito:mockito-core:2.10.0")
                         .and("io.rest-assured:rest-assured:4.3.3")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .setPublishedMavenModuleId("my:project").setPublishedMavenVersion("MyVersion")
                 .setPublishedDependencies(deps -> deps.minus("org.postgresql:postgresql"))
                 .getProject();
-        JkDependencySet publishDeps = project.getPublication().getMavenPublication().getDependencies();
+        JkDependencySet publishDeps = project.getPublication().getMaven().getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
         Assert.assertEquals(JkTransitivity.COMPILE, publishDeps.get("javax.servlet:javax.servlet-api").getTransitivity());
     }

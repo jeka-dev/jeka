@@ -84,13 +84,6 @@ public final class JkRepoSet {
     }
 
     /**
-     * Creates a JkRepoSet for downloading from <a href="http://central.sonatype.org/">OSSRH</a>
-     */
-    public static JkRepoSet ofOssrhSnapshotAndRelease() {
-        return ofOssrhSnapshotAndRelease(null, null);
-    }
-
-    /**
      * Return the individual repository from this set having the specified url.
      * Returns <code>null</code> if no such repository found.
      */
@@ -105,10 +98,6 @@ public final class JkRepoSet {
 
     public List<JkRepo> getRepos() {
         return repos;
-    }
-
-    public boolean hasIvyRepo() {
-        return this.repos.stream().anyMatch(JkRepo::isIvyRepo);
     }
 
     public boolean contains(URL url) {

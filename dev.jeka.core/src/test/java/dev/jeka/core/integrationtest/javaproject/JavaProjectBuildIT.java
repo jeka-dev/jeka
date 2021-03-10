@@ -55,7 +55,7 @@ public class JavaProjectBuildIT {
         JkJavaProject project = JkJavaProject.of().simpleFacade()
                 .setBaseDir(root.resolve("base"))
                 .setCompileDependencies(deps -> deps
-                        .and("com.google.guava:guava:23.0", JkTransitivity.RUNTIME)
+                        .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
                 .setRuntimeDependencies(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
@@ -64,12 +64,16 @@ public class JavaProjectBuildIT {
                 .setTestDependencies(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion-snapshot")
+                .setPublishedMavenModuleId("my:project").setPublishedMavenVersion("MyVersion-snapshot")
+                .setPublishedMavenVersion("1-SNAPSHOT")
                 .getProject();
         JkLog.setConsumer(JkLog.Style.INDENT);
         project.getPublication().getArtifactProducer().makeAllArtifacts();
-        project.getPublication().publishLocal();
+        project.getPublication().getMaven().publishLocal();
         System.out.println(project.getInfo());
+        Assert.assertEquals(JkTransitivity.COMPILE, project.getPublication().getMaven().getDependencies()
+                .get("com.google.guava:guava").getTransitivity());
+
     }
 
 }

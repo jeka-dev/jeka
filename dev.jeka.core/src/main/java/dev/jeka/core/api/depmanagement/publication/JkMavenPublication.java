@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -26,11 +27,15 @@ public final class JkMavenPublication<T> {
 
     private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
-    private Supplier<JkVersionedModule> versionedModule;
+    private JkModuleId moduleId;
+
+    private Supplier<String> versionSupplier = () -> null;
 
     private Supplier<JkArtifactLocator> artifactLocator;
 
-    private JkRepoSet repoSet;
+    private JkRepoSet repos = JkRepoSet.ofLocal();
+
+    private UnaryOperator<Path> defaultSigner;  // Can be null
 
     private JkMavenPublication(T parent) {
         this.__ = parent;
@@ -57,17 +62,35 @@ public final class JkMavenPublication<T> {
         return dependencies.apply(JkDependencySet.of());
     }
 
-    public JkVersionedModule getVersionedModule() {
-        return versionedModule.get();
-    }
-
-    public JkMavenPublication<T> setVersionedModule(Supplier<JkVersionedModule> versionedModule) {
-        this.versionedModule = versionedModule;
+    public JkMavenPublication<T> setModuleId(String moduleId) {
+        this.moduleId = JkModuleId.of(moduleId);
         return this;
     }
 
-    public JkMavenPublication<T> setVersionedModule(JkVersionedModule versionedModuleArg) {
-        this.versionedModule = () -> versionedModuleArg;
+    public JkMavenPublication<T> setVersion(Supplier<String> version) {
+        this.versionSupplier = version;
+        return this;
+    }
+
+    public JkMavenPublication<T> setVersion(String version) {
+        this.versionSupplier = () -> version;
+        return this;
+    }
+
+    public JkModuleId getModuleId() {
+        return moduleId;
+    }
+
+    public String getVersion() {
+        return versionSupplier.get();
+    }
+
+    public UnaryOperator<Path> getDefaultSigner() {
+        return defaultSigner;
+    }
+
+    public JkMavenPublication<T> setDefaultSigner(UnaryOperator<Path> signer) {
+        this.defaultSigner = signer;
         return this;
     }
 
@@ -85,18 +108,46 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
+    public JkRepoSet getRepos() {
+        return repos;
+    }
+
+    public JkMavenPublication<T> setRepos(JkRepoSet repoSet) {
+        this.repos = repoSet;
+        return this;
+    }
+
+    public JkMavenPublication<T> addRepos(JkRepo ...repoArgs) {
+        Arrays.stream(repoArgs).forEach(repo -> repos = repos.and(repo));
+        return this;
+    }
+
     /**
-     * Publishes the specified publication on the Maven repositories of this publisher.
-     *
-     * @param signer can be null.
+     * Publishes this publication to its defined repositories
      */
-    public JkMavenPublication publish(JkRepoSet repos, UnaryOperator<Path> signer) {
+    public JkMavenPublication<T> publish() {
+        publish(this.repos);
+        return this;
+    }
+
+    /**
+     * Publishes this publication on the local repository
+     */
+    public JkMavenPublication<T> publishLocal() {
+        publish(JkRepoSet.ofLocal());
+        return this;
+    }
+
+
+    private JkMavenPublication publish(JkRepoSet repos) {
         JkUtilsAssert.state(artifactLocator != null, "artifact locator cannot be null.");
-        JkUtilsAssert.state(versionedModule != null, "versioned module cannot be null.");
+        JkUtilsAssert.state(moduleId != null, "moduleIId cannot be null.");
+        JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        internalPublisher.publishMaven(getVersionedModule(), this, getDependencies(), signer);
+        JkVersionedModule versionedModule = moduleId.withVersion(versionSupplier.get());
+        internalPublisher.publishMaven(versionedModule, this, getDependencies());
         return this;
     }
 
@@ -115,9 +166,9 @@ public final class JkMavenPublication<T> {
         List<JkDependency> result = new LinkedList<>();
         for (JkModuleDependency moduleDependency : merge.getResult().normalised(strategy)
                 .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
-            JkTransitivity transitivity = JkTransitivity.RUNTIME;
-            if (merge.getAbsentDependenciesFromLeft().contains(moduleDependency)) {
-                transitivity = JkTransitivity.COMPILE;
+            JkTransitivity transitivity = JkTransitivity.COMPILE;
+            if (merge.getAbsentDependenciesFromRight().contains(moduleDependency)) {
+                transitivity = JkTransitivity.RUNTIME;
             }
             result.add(moduleDependency.withTransitivity(transitivity));
         }

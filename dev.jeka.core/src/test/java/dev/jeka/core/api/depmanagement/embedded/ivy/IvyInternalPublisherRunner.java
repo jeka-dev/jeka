@@ -54,13 +54,13 @@ public class IvyInternalPublisherRunner {
     private static JkRepo ivyRepo() throws IOException {
         final Path baseDir = Paths.get("jeka/output/testIvyRepo");
         Files.createDirectories(baseDir);
-        return JkRepo.ofIvy(baseDir);
+        return JkRepo.of(baseDir);
     }
 
     private static JkRepo mavenRepo() throws IOException {
         final Path baseDir = Paths.get( "jeka/output/mavenRepo");
         Files.createDirectories(baseDir);
-        return JkRepo.ofMaven(baseDir);
+        return JkRepo.of(baseDir);
     }
 
 }

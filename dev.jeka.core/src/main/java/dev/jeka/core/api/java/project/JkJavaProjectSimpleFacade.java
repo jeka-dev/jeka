@@ -1,7 +1,6 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGitWrapper;
@@ -92,35 +91,35 @@ public class JkJavaProjectSimpleFacade {
     }
 
 
-    public JkJavaProjectSimpleFacade setPublishedVersion(Supplier<String> versionSupplier) {
-        project.getPublication().setVersionSupplier(() -> JkVersion.of(versionSupplier.get()));
+    public JkJavaProjectSimpleFacade setPublishedMavenVersion(Supplier<String> versionSupplier) {
+        project.getPublication().getMaven().setVersion(versionSupplier);
         return this;
     }
 
-    public JkJavaProjectSimpleFacade setPublishedVersion(String version) {
-        return setPublishedVersion(() -> version);
+    public JkJavaProjectSimpleFacade setPublishedMavenVersion(String version) {
+        return setPublishedMavenVersion(() -> version);
     }
 
     /**
      * The published version will be computed according the git repository.
      * @see JkGitWrapper#getVersionFromTags()
      */
-    public JkJavaProjectSimpleFacade setPublishedVersionFromGit() {
-        return setPublishedVersion(() -> JkGitWrapper.of(getProject().getBaseDir()).getVersionFromTags());
+    public JkJavaProjectSimpleFacade setPublishedMavenVersionFromGit() {
+        return setPublishedMavenVersion(() -> JkGitWrapper.of(getProject().getBaseDir()).getVersionFromTags());
     }
 
     /**
      * @param moduleId group + artifactId to use when publishing on a binary repository.
      *                 Must be formatted as 'group:artifactId'
      */
-    public JkJavaProjectSimpleFacade setPublishedModuleId(String moduleId) {
-        project.getPublication().setModuleId(moduleId);
+    public JkJavaProjectSimpleFacade setPublishedMavenModuleId(String moduleId) {
+        project.getPublication().getMaven().setModuleId(moduleId);
         return this;
     }
 
     public JkJavaProjectSimpleFacade setPublishedDependencies(
             Function<JkDependencySet, JkDependencySet> dependencyModifier) {
-        project.getPublication().getMavenPublication().setDependencies(dependencyModifier);
+        project.getPublication().getMaven().setDependencies(dependencyModifier);
         return this;
     }
 

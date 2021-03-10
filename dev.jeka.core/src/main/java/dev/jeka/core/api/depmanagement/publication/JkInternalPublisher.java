@@ -9,7 +9,6 @@ import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;
-import java.util.function.UnaryOperator;
 
 /**
  * Not part of the public API.
@@ -32,7 +31,7 @@ public interface JkInternalPublisher {
                     JkQualifiedDependencies dependencies);
 
     void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-                      JkDependencySet dependencySet, UnaryOperator<Path> signer);
+                      JkDependencySet dependencySet);
 
     static JkInternalPublisher of(JkRepoSet publishRepos, Path artifactDir) {
         final Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(FACTORY_CLASS_NAME);

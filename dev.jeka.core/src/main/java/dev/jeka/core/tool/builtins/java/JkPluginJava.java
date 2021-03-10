@@ -1,7 +1,8 @@
 package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -79,26 +80,13 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @Override
     protected void beforeSetup() {
-        setupDefaultProject();
-    }
-
-    @JkDoc("Improves scaffolding by creating a project structure ready to build.")
-    @Override  
-    protected void afterSetup() {
-        this.applyPostSetupOptions();
-        this.setupScaffolder();
-    }
-
-    private void setupDefaultProject() {
         JkJavaProjectConstruction construction = project.getConstruction();
         JkJavaCompiler compiler = construction.getCompilation().getCompiler();
         if (compiler.isDefault()) {  // If no compiler specified, try to set the best fitted
             compiler.setForkingProcess(compilerProcess());
         }
-        if (project.getPublication().getPublishRepos() == null
-                || project.getPublication().getPublishRepos().getRepos().isEmpty()) {
-            project.getPublication().addRepos(repoPlugin.publishRepository());
-        }
+        project.getPublication().getMaven().setRepos(repoPlugin.publishRepository().toSet());
+        project.getPublication().getIvy().setRepos(repoPlugin.publishRepository().toSet());
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         JkDependencyResolver resolver = construction.getDependencyResolver();
         if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
@@ -109,7 +97,15 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         // Use signer from GPG plugin as default
         JkGpg gpg = pgpPlugin.get();
         UnaryOperator<Path> signer  = gpg.getSigner(pgpPlugin.keyName);
-        project.getPublication().setSigner(signer);
+        project.getPublication().getMaven().setDefaultSigner(signer);
+        project.getPublication().getIvy().setDefaultSigner(signer);
+    }
+
+    @JkDoc("Improves scaffolding by creating a project structure ready to build.")
+    @Override  
+    protected void afterSetup() {
+        this.applyPostSetupOptions();
+        this.setupScaffolder();
     }
 
     private void applyPostSetupOptions() {
@@ -229,7 +225,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @JkDoc("Publishes produced artifacts to local repository.")
     public void publishLocal() {
-        project.getPublication().publishLocal();
+        project.getPublication().getMaven().publishLocal();
     }
 
     @Override
