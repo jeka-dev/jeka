@@ -138,7 +138,6 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
-
     private JkMavenPublication publish(JkRepoSet repos) {
         JkUtilsAssert.state(artifactLocator != null, "artifact locator cannot be null.");
         JkUtilsAssert.state(moduleId != null, "moduleIId cannot be null.");

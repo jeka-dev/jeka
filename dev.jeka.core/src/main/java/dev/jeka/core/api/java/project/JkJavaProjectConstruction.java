@@ -86,7 +86,6 @@ public class JkJavaProjectConstruction {
     }
 
     private void addManifestDefaults() {
-
         JkModuleId moduleId = project.getPublication().getModuleId();
         String version = project.getPublication().getVersion();
         if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && moduleId != null) {
