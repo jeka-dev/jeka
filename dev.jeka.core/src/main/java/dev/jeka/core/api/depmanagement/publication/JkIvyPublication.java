@@ -222,7 +222,7 @@ public final class JkIvyPublication<T> {
     public void publish() {
         JkUtilsAssert.state(moduleId != null, "moduleIId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
-        JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
+        JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos.withDefaultSigner(defaultSigner), null);
         internalPublisher.publishIvy(moduleId.withVersion(versionSupplier.get()), this, getDependencies());
     }
 

@@ -126,7 +126,7 @@ public final class JkMavenPublication<T> {
      * Publishes this publication to its defined repositories
      */
     public JkMavenPublication<T> publish() {
-        publish(this.repos);
+        publish(this.repos.withDefaultSigner(defaultSigner));
         return this;
     }
 

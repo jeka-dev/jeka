@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * A set of {@link JkRepo}
@@ -133,6 +134,20 @@ public final class JkRepoSet {
      */
     public Path get(String moduleGroupVersion) {
         return get(JkModuleDependency.of(moduleGroupVersion));
+    }
+
+    public JkRepoSet withDefaultSigner(UnaryOperator<Path> signer) {
+        List<JkRepo> reposCopy = repos.stream()
+                .map(repo -> {
+                    if (repo.getPublishConfig().getSigner() == null
+                            && repo.getPublishConfig().isSignatureRequired()) {
+                        JkRepo repoCopy = repo.copy();
+                        repoCopy.getPublishConfig().setSigner(signer);
+                        return repoCopy;
+                    }
+                    return repo;
+                }).collect(Collectors.toList());
+        return new JkRepoSet(reposCopy);
     }
 
     private JkInternalDependencyResolver getInternalDependencyResolver() {

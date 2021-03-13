@@ -184,7 +184,9 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     }
 
     Path getArtifactPath(JkArtifactId artifactId) {
-        return baseDir.resolve(outputDir).resolve(artifactId.toFileName(getArtifactBaseName()));
+        JkModuleId moduleId = publication.getModuleId();
+        String fileBaseName = moduleId != null ? moduleId.getDotedName() : this.getArtifactBaseName();
+        return baseDir.resolve(outputDir).resolve(artifactId.toFileName(fileBaseName));
     }
 
 }

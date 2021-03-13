@@ -45,20 +45,15 @@ public final class JkRepo {
      */
     public static final String MAVEN_OSSRH_PUBLIC_DOWNLOAD_RELEASE_AND_SNAPSHOT = "https://oss.sonatype.org/content/groups/public/";
 
-    /**
-     * URL of the JCenter ivy repository.
-     */
-    public static final String JCENTERL_URL = "https://jcenter.bintray.com";
-
     private static final String IVY_PREFIX = "ivy:";
 
     private final URL url;
 
     private JkRepoCredentials credentials;
 
-    private final JkRepoIvyConfig ivyConfig = new JkRepoIvyConfig(this);
+    private JkRepoIvyConfig ivyConfig = new JkRepoIvyConfig(this);
 
-    private final JkPublishConfig publishConfig = new JkPublishConfig(this);
+    private JkPublishConfig publishConfig = new JkPublishConfig(this);
 
     public final boolean ivyRepo; // true if this reposotory is an Ivy one, false if it is a Maven one.
 
@@ -126,13 +121,6 @@ public final class JkRepo {
      */
     public static JkRepo ofMavenOssrhPublicDownload() {
         return of(MAVEN_OSSRH_PUBLIC_DOWNLOAD_RELEASE_AND_SNAPSHOT);
-    }
-
-    /**
-     * Creates a JCenter repository.
-     */
-    public static JkRepo ofMavenJCenter() {
-        return of(JCENTERL_URL);
     }
 
     /**
@@ -211,6 +199,14 @@ public final class JkRepo {
         return url.equals(jkRepo.url);
     }
 
+    public JkRepo copy() {
+        JkRepo result = new JkRepo(url, ivyRepo);
+        result.credentials = credentials;
+        result.ivyConfig = ivyConfig.copy(result);
+        result.publishConfig = publishConfig.copy(result);
+        return result;
+    }
+
     @Override
     public int hashCode() {
         return url.hashCode();
@@ -286,8 +282,8 @@ public final class JkRepo {
 
         private JkRepoIvyConfig(JkRepo parent) {
             this.__ = parent;
-            this.artifactPatterns = JkUtilsIterable.listOf(DEFAULT_IVY_ARTIFACT_PATTERN);
-            this.ivyPatterns = JkUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN);
+            this.artifactPatterns = new LinkedList<>(JkUtilsIterable.listOf(DEFAULT_IVY_ARTIFACT_PATTERN));
+            this.ivyPatterns = new LinkedList<>(JkUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN));
         }
 
         public List<String> artifactPatterns() {
@@ -316,6 +312,15 @@ public final class JkRepo {
         public JkRepoIvyConfig addIvyPatterns(String ... patterns) {
             this.ivyPatterns.addAll(Arrays.asList(patterns));
             return this;
+        }
+
+        private JkRepoIvyConfig copy(JkRepo parent) {
+            JkRepoIvyConfig result = new JkRepoIvyConfig(parent);
+            result.artifactPatterns.clear();
+            result.artifactPatterns.addAll(artifactPatterns);
+            result.ivyPatterns.clear();
+            result.ivyPatterns.addAll(ivyPatterns);
+            return result;
         }
     }
 
@@ -388,6 +393,16 @@ public final class JkRepo {
         public JkPublishConfig setSigner(UnaryOperator<Path> signer) {
             this.signer = signer;
             return this;
+        }
+
+        private JkPublishConfig copy(JkRepo parent) {
+            JkPublishConfig result = new JkPublishConfig(parent);
+            result.signer = signer;
+            result.checksumAlgos = new HashSet<>(checksumAlgos);
+            result.signatureRequired = signatureRequired;
+            result.uniqueSnapshot = uniqueSnapshot;
+            result.versionFilter = versionFilter;
+            return result;
         }
 
     }
