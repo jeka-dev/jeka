@@ -1,8 +1,8 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
-import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import org.apache.ivy.core.module.descriptor.Artifact;
@@ -28,7 +28,7 @@ class IvyTranslatorToModuleDescriptor {
         final DefaultModuleDescriptor result = newDefaultModuleDescriptor(thisModuleRevisionId);
 
         // Add configurations
-        toMasterConfigurations(dependencies).forEach(conf -> result.addConfiguration(conf));
+        toMasterConfigurations(dependencies).forEach(configuration -> result.addConfiguration(configuration));
 
         // Add dependencies
         toDependencyDescriptors(dependencies).forEach(dep -> IvyTranslatorToDependency.bind(result, dep));
@@ -51,7 +51,7 @@ class IvyTranslatorToModuleDescriptor {
 
     static DefaultModuleDescriptor toMavenPublishModuleDescriptor(JkVersionedModule module,
                                                                   JkDependencySet dependencies,
-                                                                  JkMavenPublication mavenPublication) {
+                                                                  JkArtifactLocator artifactLocator) {
         List<JkQualifiedDependency> qualifiedDependencies = dependencies.getEntries().stream()
                 .filter(JkModuleDependency.class::isInstance)
                 .map(JkModuleDependency.class::cast)
@@ -63,18 +63,17 @@ class IvyTranslatorToModuleDescriptor {
                 .collect(Collectors.toList());
         DefaultModuleDescriptor result = toResolveModuleDescriptor(module,
                 JkQualifiedDependencies.of(qualifiedDependencies));
-        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module,
-                mavenPublication.getArtifactLocator());
+        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module, artifactLocator);
         IvyTranslatorToArtifact.bind(result, artifactMap);
         return result;
     }
 
     static DefaultModuleDescriptor toIvyPublishModuleDescriptor(JkVersionedModule module,
                                                                 JkQualifiedDependencies dependencies,
-                                                                JkIvyPublication ivyPublication) {
+                                                                List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts) {
         DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
         List<IvyTranslatorToArtifact.ArtifactAndConfigurations> artifactAndConfigurationsList =
-            IvyTranslatorToArtifact.toIvyArtifacts(module, ivyPublication.getAllArtifacts());
+            IvyTranslatorToArtifact.toIvyArtifacts(module, publishedArtifacts);
         IvyTranslatorToArtifact.bind(result, artifactAndConfigurationsList);
         return result;
     }

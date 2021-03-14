@@ -1,7 +1,6 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
@@ -47,17 +46,16 @@ public class JkJavaProjectPublication {
         registerArtifacts();
         JkVersionedModule.ConflictStrategy conflictStrategy = project.getDuplicateConflictStrategy();
         this.maven = JkMavenPublication.of(this)
-            .setArtifactLocator(() -> artifactProducer)
+            .setArtifactLocatorSupplier(() -> artifactProducer)
             .setDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
                     project.getConstruction().getCompilation().getDependencies(),
                     project.getConstruction().getRuntimeDependencies(),
                     conflictStrategy));
-        JkQualifiedDependencies ivyDefaultPublishedDependencies = JkIvyPublication.getPublishDependencies(
-                project.getConstruction().getCompilation().getDependencies(),
-                project.getConstruction().getRuntimeDependencies(), JkVersionedModule.ConflictStrategy.FAIL);
         this.ivy = JkIvyPublication.of(this)
             .addArtifacts(() -> artifactProducer)
-            .setDependencies(deps -> ivyDefaultPublishedDependencies);
+            .setDependencies(deps -> JkIvyPublication.getPublishDependencies(
+                    project.getConstruction().getCompilation().getDependencies(),
+                    project.getConstruction().getRuntimeDependencies(), conflictStrategy));
         this.postActions = JkRunnables.ofParent(this);
     }
 

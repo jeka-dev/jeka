@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.publication.JkIvyConfigurationMapping;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
@@ -36,7 +35,7 @@ class IvyTranslatorToDependency {
 
     private static DefaultDependencyDescriptor toDependencyDescriptor(String qualifier,
                                                                       JkModuleDependency moduleDependency) {
-        JkIvyConfigurationMapping configurationMapping = JkIvyConfigurationMapping.of(qualifier);
+
         JkVersion version = moduleDependency.getVersion();
         ModuleRevisionId moduleRevisionId = ModuleRevisionId.newInstance(
                 moduleDependency.getModuleId().getGroup(), moduleDependency.getModuleId().getName(),
@@ -46,23 +45,26 @@ class IvyTranslatorToDependency {
         final boolean force = !version.isDynamic();
         DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, force, changing,
                 isTransitive);
-        final Set<String> masterConfs =  configurationMapping.getLeft().isEmpty() ?
-                Collections.singleton(IvyTranslatorToConfiguration.DEFAULT) : configurationMapping.getLeft();
-        for (String masterConf : masterConfs) {
-            moduleDependency.getExclusions().forEach(exclusion ->
-                    result.addExcludeRule(masterConf, toExcludeRule(exclusion)));
-            final Set<String> dependencyConfs =  configurationMapping.getRight().isEmpty() ?
-                    Collections.singleton(null) : configurationMapping.getRight();
-            for (String dependencyConf : dependencyConfs) {
-                Set<String> effectiveDepConfs = dependencyConfs(dependencyConf, moduleDependency.getTransitivity());
-                effectiveDepConfs.forEach(depConf -> result.addDependencyConfiguration(masterConf, depConf));
-            }
-            for (JkModuleDependency.JkArtifactSpecification artifactSpecification :
-                    moduleDependency.getArtifactSpecifications()) {
-                result.addDependencyArtifact(masterConf, IvyTranslatorToArtifact.toArtifactDependencyDescriptor(
-                        result, artifactSpecification.getClassifier(), artifactSpecification.getType()));
-            }
-        }
+        List<IvyConfigurationMapping> configurationMappings = IvyConfigurationMapping.ofMultiple(qualifier);
+       for (IvyConfigurationMapping configurationMapping : configurationMappings) {
+        //IvyConfigurationMapping configurationMapping = IvyConfigurationMapping.of(qualifier);
+           final Set<String> masterConfigurations = configurationMapping.getLeft().isEmpty() ?
+                   Collections.singleton(IvyTranslatorToConfiguration.DEFAULT) : configurationMapping.getLeft();
+           for (String masterConfiguration : masterConfigurations) {
+               moduleDependency.getExclusions().forEach(exclusion ->
+                       result.addExcludeRule(masterConfiguration, toExcludeRule(exclusion)));
+               final Set<String> dependencyConfigurations = configurationMapping.getRight().isEmpty() ?
+                       Collections.singleton(null) : configurationMapping.getRight();
+               for (String dependencyConfiguration : dependencyConfigurations) {
+                   Set<String> effectiveDepConfs = dependencyConfs(dependencyConfiguration, moduleDependency.getTransitivity());
+                   effectiveDepConfs.forEach(depConf -> result.addDependencyConfiguration(masterConfiguration, depConf));
+               }
+               for (JkModuleDependency.JkArtifactSpecification artifactSpecification : moduleDependency.getArtifactSpecifications()) {
+                   result.addDependencyArtifact(masterConfiguration, IvyTranslatorToArtifact.toArtifactDependencyDescriptor(
+                           result, artifactSpecification.getClassifier(), artifactSpecification.getType()));
+               }
+           }
+       }
         return result;
     }
 
@@ -72,7 +74,7 @@ class IvyTranslatorToDependency {
         }
         JkTransitivity effectiveTransitivity = JkUtilsObject.firstNonNull(transitivity, JkTransitivity.RUNTIME);
         String ivyExpression = JkQualifiedDependencies.getIvyTargetConfigurations(effectiveTransitivity);
-        return JkIvyConfigurationMapping.of(ivyExpression).getLeft();
+        return IvyConfigurationMapping.of(ivyExpression).getLeft();
     }
 
     static DefaultExcludeRule toExcludeRule(JkDependencyExclusion depExclude, String... configurationNames) {

@@ -36,8 +36,6 @@ public final class JkIvyPublication<T> {
 
     private Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencies = UnaryOperator.identity();
 
-    private JkIvyConfigurationMappingSet configurationMapping = JkIvyConfigurationMappingSet.RESOLVE_MAPPING;
-
     private Supplier<? extends JkArtifactLocator> artifactLocatorSupplier;
 
     private JkPublicationArtifact mainArtifact;
@@ -120,11 +118,6 @@ public final class JkIvyPublication<T> {
 
     public JkQualifiedDependencies getDependencies() {
         return dependencies.apply(JkQualifiedDependencies.of());
-    }
-
-    public JkIvyPublication<T> setConfigurationMapping(JkIvyConfigurationMappingSet configurationMapping) {
-        this.configurationMapping = configurationMapping;
-        return this;
     }
 
     public JkIvyPublication<T> clear() {
@@ -220,10 +213,18 @@ public final class JkIvyPublication<T> {
     }
 
     public void publish() {
+        publish(repos);
+    }
+
+    public void publishLocal() {
+        publish(JkRepo.ofLocalIvy().toSet());
+    }
+
+    private void publish(JkRepoSet repos) {
         JkUtilsAssert.state(moduleId != null, "moduleIId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos.withDefaultSigner(defaultSigner), null);
-        internalPublisher.publishIvy(moduleId.withVersion(versionSupplier.get()), this, getDependencies());
+        internalPublisher.publishIvy(moduleId.withVersion(versionSupplier.get()), getAllArtifacts(), getDependencies());
     }
 
     private static JkPublicationArtifact toPublication(String artifactName, Path artifactFile, String type,
@@ -275,8 +276,21 @@ public final class JkIvyPublication<T> {
     public static JkQualifiedDependencies getPublishDependencies(JkDependencySet compileDependencies,
                                                           JkDependencySet runtimeDependencies,
                                                           JkVersionedModule.ConflictStrategy strategy) {
-        JkDependencySetMerge dependencySetMerge = compileDependencies.merge(runtimeDependencies);
-        return JkQualifiedDependencies.of(); // TODO
+        JkDependencySetMerge merge = compileDependencies.merge(runtimeDependencies);
+        List<JkQualifiedDependency> result = new LinkedList<>();
+        for (JkModuleDependency moduleDependency : merge.getResult().normalised(strategy)
+                .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
+            String configuration = "compile->compile(*),master(*)";
+            if (merge.getAbsentDependenciesFromRight().contains(moduleDependency)) {
+               // compile only dependency
+            } else if (merge.getAbsentDependenciesFromLeft().contains(moduleDependency)) {
+                configuration = "runtime->runtime(*),master(*)";
+            } else {
+                configuration = configuration + ";runtime -> runtime(*),master(*)";
+            }
+            result.add(JkQualifiedDependency.of(configuration, moduleDependency));
+        }
+        return JkQualifiedDependencies.of(result);
 
     }
 

@@ -3,6 +3,7 @@ package dev.jeka.core.api.java.project;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.file.JkPathTree;
 import org.junit.Assert;
@@ -102,6 +103,28 @@ public class JkJavaProjectTest {
         JkDependencySet publishDeps = project.getPublication().getMaven().getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
         Assert.assertEquals(JkTransitivity.COMPILE, publishDeps.get("javax.servlet:javax.servlet-api").getTransitivity());
+    }
+
+    @Test
+    public void getPublishIvyDependencies_ok() {
+        JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .setCompileDependencies(deps -> deps
+                        .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
+                        .and("javax.servlet:javax.servlet-api:4.0.1"))
+                .setRuntimeDependencies(deps -> deps
+                        .and("org.postgresql:postgresql:42.2.19")
+                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
+                        .minus("javax.servlet:javax.servlet-api"))
+                .addTestDependencies(deps -> deps
+                        .and("org.mockito:mockito-core:2.10.0")
+                        .and("io.rest-assured:rest-assured:4.3.3")
+                ).getProject();
+        project.getPublication().getIvy()
+                .setModuleId("my:module")
+                .setVersion("0.1");
+        System.out.println(project.getConstruction().getCompilation().getDependencies());
+        JkQualifiedDependencies publishDeps = project.getPublication().getIvy().getDependencies();
+        publishDeps.getEntries().forEach(System.out::println);
     }
 
     @Test

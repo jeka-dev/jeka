@@ -30,7 +30,7 @@ public class IvyInternalPublisherRunner {
                 .setMainArtifact(sampleJarfile(), "compile", "test");
         final JkQualifiedDependencies deps = JkQualifiedDependencies.of().of()
                 .and("compile", "org.springframework:spring-jdbc:3.0.+");
-        jkIvyInternalPublisher.publishIvy(versionedModule, ivyPublication, deps);
+        jkIvyInternalPublisher.publishIvy(versionedModule, ivyPublication.getAllArtifacts(), deps);
     }
 
     private static Path sampleJarfile() {

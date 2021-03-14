@@ -1,9 +1,6 @@
-package dev.jeka.core.api.depmanagement.publication;
+package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -17,7 +14,7 @@ import java.util.stream.Collectors;
  *
  * This concept matches strictly with the <i>configuration</i> concept found in Ivy : <a href="http://wrongnotes.blogspot.be/2014/02/simplest-explanation-of-ivy.html">see here.</a>.
  */
-public final class JkIvyConfigurationMapping {
+final class IvyConfigurationMapping {
 
     private static final String ARROW = "->";
 
@@ -36,27 +33,41 @@ public final class JkIvyConfigurationMapping {
 
     private final Set<String> right;
 
-    private JkIvyConfigurationMapping(Set<String> left, Set<String> right) {
+    private static final IvyConfigurationMapping EMPTY =
+            new IvyConfigurationMapping(Collections.emptySet(), Collections.emptySet());
+
+    private IvyConfigurationMapping(Set<String> left, Set<String> right) {
         this.left = left;
         this.right = right;
     }
 
-    public static JkIvyConfigurationMapping of(Set<String> left, Set<String> right) {
-        return new JkIvyConfigurationMapping(left, right);
+    public static IvyConfigurationMapping of(Set<String> left, Set<String> right) {
+        return new IvyConfigurationMapping(left, right);
     }
 
-    public static JkIvyConfigurationMapping of(String left, String ... rights) {
-        return new JkIvyConfigurationMapping(Collections.singleton(left), Collections.unmodifiableSet(
+    public static IvyConfigurationMapping of(String left, String ... rights) {
+        return new IvyConfigurationMapping(Collections.singleton(left), Collections.unmodifiableSet(
                 new HashSet<>(Arrays.asList(rights))));
     }
 
-    public static JkIvyConfigurationMapping of(String ivyExpression) {
+    public static List<IvyConfigurationMapping> ofMultiple(String ivyExpression) {
         if (ivyExpression == null) {
-            return new JkIvyConfigurationMapping(Collections.emptySet(), Collections.emptySet());
+            return Collections.singletonList(EMPTY);
         }
-        String[] items = ivyExpression.split(ARROW);
+        String[] items = ivyExpression.split(";");
+        return Arrays.stream(items)
+                .map(IvyConfigurationMapping::of)
+                .collect(Collectors.toList());
+
+    }
+
+    public static IvyConfigurationMapping of(String ivyItemExpression) {
+        if (ivyItemExpression == null) {
+            return EMPTY;
+        }
+        String[] items = ivyItemExpression.split(ARROW);
         if (items.length > 2) {
-            throw new IllegalArgumentException("More than one '->' detected in iivy expression " + ivyExpression);
+            throw new IllegalArgumentException("More than one '->' detected in ivy expression " + ivyItemExpression);
         }
         final Set<String> right;
         if (items.length == 1) {
@@ -64,41 +75,19 @@ public final class JkIvyConfigurationMapping {
         } else {
             right = ofPart(items[1]);
         }
-        return new JkIvyConfigurationMapping(ofPart(items[0]), right);
+        return new IvyConfigurationMapping(ofPart(items[0]), right);
     }
 
     public Set<String> getLeft() {
         return left;
     }
 
-    public String getLeftAsIvYExpression() {
-        return left.isEmpty() ? "*" : String.join(", ", left);
-    }
-
-    public String getRightAsIvYExpression() {
-        return right.isEmpty() ? "*" : String.join(", ", right);
-    }
-
     public Set<String> getRight() {
         return right;
-    }
-
-    public boolean hasFromEqualsTo(String... froms) {
-        return this.left.equals(new HashSet<>(Arrays.asList(froms)));
-    }
-
-    public boolean hasFrom(String from) {
-        return this.left.contains(from);
-    }
-
-    public String toIvyExpression() {
-        return getLeftAsIvYExpression() + " " + ARROW +  " " + getRightAsIvYExpression();
     }
 
     private static Set<String> ofPart(String comaSeparated) {
         return Arrays.stream(comaSeparated.split(",")).map(String::trim).collect(Collectors.toSet());
     }
-
-
 
 }

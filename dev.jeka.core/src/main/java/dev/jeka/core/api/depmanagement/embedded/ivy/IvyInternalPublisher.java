@@ -1,9 +1,10 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkInternalPublisher;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
-import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
+import dev.jeka.core.api.depmanagement.publication.JkPomMetadata;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -67,13 +68,13 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     @Override
     public void publishIvy(JkVersionedModule versionedModule,
-                           JkIvyPublication publication,
+                           List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts,
                            JkQualifiedDependencies dependencies) {
         JkLog.startTask( "Publish on Ivy repositories");
         final ModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toIvyPublishModuleDescriptor(
-                versionedModule, dependencies, publication);
+                versionedModule, dependencies, publishedArtifacts);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(JkRepoSet.of(), JkResolutionParameters.of());
-        int publishCount = publishIvyArtifacts(publication, Instant.now(), moduleDescriptor, ivy.getSettings());
+        int publishCount = publishIvyArtifacts(publishedArtifacts, Instant.now(), moduleDescriptor, ivy.getSettings());
         if (publishCount == 0) {
             JkLog.warn("No Ivy repository matching for " + versionedModule + " found. Configured repos are "
                     + publishRepos);
@@ -82,18 +83,18 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     }
 
     @Override
-    public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-                             JkDependencySet dependencies) {
+    public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
+                             JkPomMetadata metadata, JkDependencySet dependencies) {
         JkLog.startTask("Publish on Maven repositories");
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptorForMavenPublish(versionedModule,
-                publication, dependencies);
+                artifactLocator, dependencies);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
-        final int count = publishMavenArtifacts(publication, ivy.getSettings(), moduleDescriptor);
+        final int count = publishMavenArtifacts(artifactLocator, metadata, ivy.getSettings(), moduleDescriptor);
         JkLog.info("Module published in %s.", JkUtilsString.plurialize(count, "repository", "repositories"));
         JkLog.endTask();
     }
 
-    private int publishIvyArtifacts(JkIvyPublication publication, Instant date,
+    private int publishIvyArtifacts(List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts, Instant date,
             ModuleDescriptor moduleDescriptor, IvySettings ivySettings) {
         int count = 0;
         for (JkRepo publishRepo : this.publishRepos.getRepos()) {
@@ -103,7 +104,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             JkVersion version = versionedModule.getVersion();
             if (!isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(version)) {
                 JkLog.startTask("Publish for repository " + resolver);
-                this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor, ivySettings);
+                this.publishIvyArtifacts(resolver, publishedArtifacts, date, moduleDescriptor, ivySettings);
                 JkLog.endTask();
                 count++;
             }
@@ -113,8 +114,9 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
 
 
-    private void publishIvyArtifacts(DependencyResolver resolver, JkIvyPublication publication,
-            Instant date, ModuleDescriptor moduleDescriptor, IvySettings ivySettings) {
+    private void publishIvyArtifacts(DependencyResolver resolver,
+                                     List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts,
+                                     Instant date, ModuleDescriptor moduleDescriptor, IvySettings ivySettings) {
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         try {
             resolver.beginPublishTransaction(ivyModuleRevisionId, true);
@@ -122,7 +124,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             throw new IllegalStateException(e);
         }
         try {
-            Iterator<JkIvyPublication.JkPublicationArtifact> it = publication.getAllArtifacts().iterator();
+            Iterator<JkIvyPublication.JkPublicationArtifact> it = publishedArtifacts.iterator();
             while (it.hasNext()) {
                 JkIvyPublication.JkPublicationArtifact artifact = it.next();
                 final Artifact ivyArtifact = IvyTranslatorToArtifact.toIvyArtifact(artifact, ivyModuleRevisionId, date);
@@ -148,8 +150,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         updateCache(moduleDescriptor, ivySettings);
     }
 
-    private int publishMavenArtifacts(JkMavenPublication publication, IvySettings ivySettings,
-                                      DefaultModuleDescriptor moduleDescriptor) {
+    private int publishMavenArtifacts(JkArtifactLocator artifactLocator, JkPomMetadata pomMetadata,
+                                      IvySettings ivySettings, DefaultModuleDescriptor moduleDescriptor) {
         int count = 0;
         for (JkRepo publishRepo : this.publishRepos.getRepos()) {
             RepositoryResolver resolver = IvyTranslatorToResolver.convertToPublishAndBind(publishRepo, ivySettings);
@@ -168,7 +170,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                     signer, resolver, descriptorOutputDir,
                     publishRepo.getPublishConfig().isUniqueSnapshot(),
                     publishRepo.getPublishConfig().getChecksumAlgos());
-                ivyPublisherForMaven.publish(moduleDescriptor, publication);
+                ivyPublisherForMaven.publish(moduleDescriptor, artifactLocator, pomMetadata);
                 count++;
                 JkLog.endTask();
             }
@@ -215,10 +217,10 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     }
 
     private DefaultModuleDescriptor createModuleDescriptorForMavenPublish(JkVersionedModule versionedModule,
-                                                           JkMavenPublication publication,
+                                                           JkArtifactLocator artifactLocator,
                                                            JkDependencySet dependencies) {
         return IvyTranslatorToModuleDescriptor.toMavenPublishModuleDescriptor(versionedModule, dependencies,
-                publication);
+                artifactLocator);
     }
 
     private static void commitPublication(DependencyResolver resolver) {

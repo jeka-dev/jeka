@@ -2,6 +2,7 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 
 import java.nio.file.Path;
@@ -147,6 +148,15 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
                         mavenPublication.getModuleId().withVersion(mavenPublication.getVersion()) + "\n")
                 .append("Published Maven Dependencies :");
             mavenPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
+        }
+        JkIvyPublication ivyPublication = publication.getIvy();
+        if (ivyPublication.getModuleId() != null) {
+            builder
+                    .append("Publish Ivy repositories : " + ivyPublication.getRepos()  + "\n")
+                    .append("Published Ivy Module & version : " +
+                            ivyPublication.getModuleId().withVersion(mavenPublication.getVersion()) + "\n")
+                    .append("Published Ivy Dependencies :");
+            ivyPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
         }
         return builder.toString();
     }

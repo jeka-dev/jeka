@@ -47,8 +47,6 @@ public class JavaProjectBuildIT {
         return dest;
     }
 
-
-
     @Test
     public void publish_maven_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
@@ -73,6 +71,32 @@ public class JavaProjectBuildIT {
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.COMPILE, project.getPublication().getMaven().getDependencies()
                 .get("com.google.guava:guava").getTransitivity());
+
+    }
+
+    @Test
+    public void publish_ivy_ok() throws IOException, URISyntaxException {
+        Path root = unzipToDir("sample-multiproject.zip");
+        JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .setBaseDir(root.resolve("base"))
+                .setCompileDependencies(deps -> deps
+                        .and("com.google.guava:guava:23.0")
+                        .and("javax.servlet:javax.servlet-api:4.0.1"))
+                .setRuntimeDependencies(deps -> deps
+                        .and("org.postgresql:postgresql:42.2.19")
+                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
+                        .minus("javax.servlet:javax.servlet-api"))
+                .setTestDependencies(deps -> deps
+                        .and("org.mockito:mockito-core:2.10.0")
+                ).getProject();
+        project.getPublication().getIvy()
+                .setModuleId("my:module")
+                .setVersion("0.1");
+        JkLog.setConsumer(JkLog.Style.INDENT);
+        project.getPublication().getArtifactProducer().makeAllArtifacts();
+        project.getPublication().getIvy().publishLocal();
+        System.out.println(project.getInfo());
+
 
     }
 

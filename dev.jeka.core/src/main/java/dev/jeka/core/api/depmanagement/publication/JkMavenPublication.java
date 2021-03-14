@@ -31,7 +31,7 @@ public final class JkMavenPublication<T> {
 
     private Supplier<String> versionSupplier = () -> null;
 
-    private Supplier<JkArtifactLocator> artifactLocator;
+    private Supplier<JkArtifactLocator> artifactLocatorSupplier;
 
     private JkRepoSet repos = JkRepoSet.ofLocal();
 
@@ -95,16 +95,16 @@ public final class JkMavenPublication<T> {
     }
 
     public JkArtifactLocator getArtifactLocator() {
-        return artifactLocator.get();
+        return artifactLocatorSupplier.get();
     }
 
-    public JkMavenPublication<T> setArtifactLocator(Supplier<JkArtifactLocator> artifactLocator) {
-        this.artifactLocator = artifactLocator;
+    public JkMavenPublication<T> setArtifactLocatorSupplier(Supplier<JkArtifactLocator> artifactLocatorSupplier) {
+        this.artifactLocatorSupplier = artifactLocatorSupplier;
         return this;
     }
 
     public JkMavenPublication<T> setArtifactLocator(JkArtifactLocator artifactLocatorArg) {
-        this.artifactLocator = () -> artifactLocatorArg;
+        this.artifactLocatorSupplier = () -> artifactLocatorArg;
         return this;
     }
 
@@ -139,21 +139,21 @@ public final class JkMavenPublication<T> {
     }
 
     private JkMavenPublication publish(JkRepoSet repos) {
-        JkUtilsAssert.state(artifactLocator != null, "artifact locator cannot be null.");
+        JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
         JkUtilsAssert.state(moduleId != null, "moduleIId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
         JkVersionedModule versionedModule = moduleId.withVersion(versionSupplier.get());
-        internalPublisher.publishMaven(versionedModule, this, getDependencies());
+        internalPublisher.publishMaven(versionedModule, getArtifactLocator(), pomMetadata, getDependencies());
         return this;
     }
 
     @Override
     public String toString() {
         return "JkMavenPublication{" +
-                "artifactFileLocator=" + artifactLocator +
+                "artifactFileLocator=" + artifactLocatorSupplier +
                 ", extraInfo=" + pomMetadata +
                 '}';
     }

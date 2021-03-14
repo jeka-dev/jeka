@@ -132,6 +132,14 @@ public final class JkRepo {
     }
 
     /**
+     * Creates a Ivy repository for publishing locally under <code></code>[USER HOME]/.jeka/publish</code> folder.
+     */
+    public static JkRepo ofLocalIvy() {
+        final Path file = JkLocator.getJekaUserHomeDir().resolve("ivy-publish-dir");
+        return JkRepo.of(IVY_PREFIX + file);
+    }
+
+    /**
      * Returns the url of this repository.
      */
     public final URL getUrl() {
