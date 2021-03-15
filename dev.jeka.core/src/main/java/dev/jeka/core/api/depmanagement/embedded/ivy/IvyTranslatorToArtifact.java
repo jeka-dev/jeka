@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -34,10 +35,10 @@ class IvyTranslatorToArtifact {
     }
 
     static List<ArtifactAndConfigurations> toIvyArtifacts(JkVersionedModule versionedModule,
-                                                List<JkIvyPublication.JkPublicationArtifact> jkArtifacts) {
+                                                List<JkIvyPublication.JkPublishedArtifact> jkArtifacts) {
         List<ArtifactAndConfigurations> result = new LinkedList<>();
         Instant now = Instant.now();
-        for (JkIvyPublication.JkPublicationArtifact jkArtifact : jkArtifacts) {
+        for (JkIvyPublication.JkPublishedArtifact jkArtifact : jkArtifacts) {
             ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(versionedModule);
             final Artifact artifact = toIvyArtifact(jkArtifact, moduleRevisionId, now);
             result.add(new ArtifactAndConfigurations(artifact, jkArtifact.configurationNames));
@@ -92,10 +93,12 @@ class IvyTranslatorToArtifact {
                 extraAttribute);
     }
 
-    static Artifact toIvyArtifact(JkIvyPublication.JkPublicationArtifact artifact,
+    static Artifact toIvyArtifact(JkIvyPublication.JkPublishedArtifact artifact,
                                   ModuleRevisionId moduleId, Instant date) {
-        final String name = JkUtilsString.isBlank(artifact.name) ? moduleId.getName() : artifact.name;
-        final String extension = JkUtilsObject.firstNonNull(artifact.extension, "");
+        final String name = JkUtilsString.isBlank(artifact.name) ? moduleId.getOrganisation() + "."
+                + moduleId.getName() : artifact.name;
+        final String extension = JkUtilsObject.firstNonNull(artifact.extension,
+                JkPathFile.of(artifact.file).getExtension(), "");
         final String type = JkUtilsObject.firstNonNull(artifact.type, extension);
         return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), name, type, extension);
     }

@@ -70,7 +70,7 @@ class IvyTranslatorToModuleDescriptor {
 
     static DefaultModuleDescriptor toIvyPublishModuleDescriptor(JkVersionedModule module,
                                                                 JkQualifiedDependencies dependencies,
-                                                                List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts) {
+                                                                List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts) {
         DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
         List<IvyTranslatorToArtifact.ArtifactAndConfigurations> artifactAndConfigurationsList =
             IvyTranslatorToArtifact.toIvyArtifacts(module, publishedArtifacts);

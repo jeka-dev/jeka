@@ -4,11 +4,10 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -38,9 +37,9 @@ public final class JkIvyPublication<T> {
 
     private Supplier<? extends JkArtifactLocator> artifactLocatorSupplier;
 
-    private JkPublicationArtifact mainArtifact;
+    private JkPublishedArtifact mainArtifact;
 
-    private final Set<JkPublicationArtifact> extraArtifacts = new HashSet<>();
+    private final Set<JkPublishedArtifact> extraArtifacts = new HashSet<>();
 
     private JkIvyPublication(T parent) {
         this.__ = parent;
@@ -142,15 +141,15 @@ public final class JkIvyPublication<T> {
         return addArtifacts(() -> artifactProducer);
     }
 
-    private static List<JkIvyPublication.JkPublicationArtifact> toArtifacts(JkArtifactLocator artifactLocator) {
-        List<JkIvyPublication.JkPublicationArtifact> result = new LinkedList<>();
-        result.add(toPublication(null, artifactLocator.getMainArtifactPath(), null, "compile"));
+    private static List<JkPublishedArtifact> toPublishedArtifacts(JkArtifactLocator artifactLocator) {
+        List<JkPublishedArtifact> result = new LinkedList<>();
+        result.add(toPublishedArtifact(null, artifactLocator.getMainArtifactPath(), null, "compile"));
         for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
             if (artifactId.isMainArtifact()) {
                 continue;
             }
             final Path file = artifactLocator.getArtifactPath(artifactId);
-            result.add(toPublication(artifactId.getName(), file, null, configurationFor(artifactId.getName())));
+            result.add(toPublishedArtifact(null, file, artifactId.getName(), configurationFor(artifactId.getName())));
         }
         return result;
     }
@@ -166,7 +165,7 @@ public final class JkIvyPublication<T> {
      * @see #addArtifact(String, Path, String, String...)
      */
     public JkIvyPublication<T> setMainArtifactWithType(Path file, String type, String... configurationNames) {
-        this.mainArtifact = toPublication(null, file, type, configurationNames);
+        this.mainArtifact = toPublishedArtifact(null, file, type, configurationNames);
         return this;
     }
 
@@ -174,8 +173,9 @@ public final class JkIvyPublication<T> {
      * Adds the specified artifact to the publication.
      */
     public JkIvyPublication<T> addArtifact(String artifactName, Path artifactFile, String type, String... configurationNames) {
-        extraArtifacts.add(new JkPublicationArtifact(artifactName, artifactFile, type,
-                JkUtilsIterable.setOf(configurationNames).stream().collect(Collectors.toSet())));
+        extraArtifacts.add(new JkPublishedArtifact(artifactName, artifactFile, type,
+                JkPathFile.of(artifactFile).getExtension(),
+                Arrays.stream(configurationNames).collect(Collectors.toSet())));
         return this;
     }
 
@@ -200,10 +200,10 @@ public final class JkIvyPublication<T> {
         return this;
     }
 
-    public List<JkPublicationArtifact> getAllArtifacts() {
-        List<JkPublicationArtifact> result = new LinkedList<>();
+    public List<JkPublishedArtifact> getAllArtifacts() {
+        List<JkPublishedArtifact> result = new LinkedList<>();
         if (artifactLocatorSupplier != null) {
-            result.addAll(toArtifacts(artifactLocatorSupplier.get()));
+            result.addAll(toPublishedArtifacts(artifactLocatorSupplier.get()));
         }
         if (mainArtifact != null) {
             result.add(mainArtifact);
@@ -227,25 +227,24 @@ public final class JkIvyPublication<T> {
         internalPublisher.publishIvy(moduleId.withVersion(versionSupplier.get()), getAllArtifacts(), getDependencies());
     }
 
-    private static JkPublicationArtifact toPublication(String artifactName, Path artifactFile, String type,
-                                                       String... configurationNames) {
-        return new JkPublicationArtifact(artifactName, artifactFile, type,
+    private static JkPublishedArtifact toPublishedArtifact(String artifactName, Path artifactFile, String type,
+                                                           String... configurationNames) {
+        return new JkPublishedArtifact(artifactName, artifactFile, type, null,
                 JkUtilsIterable.setOf(configurationNames).stream().collect(Collectors.toSet()));
     }
 
-    public static class JkPublicationArtifact {
+    public static class JkPublishedArtifact {
 
-        private JkPublicationArtifact(String name, Path path, String type, Set<String> configurationNames) {
+        private JkPublishedArtifact(String name, Path path, String type, String extension, Set<String> configurationNames) {
             super();
-            this.file = path.toFile();
-            this.extension = path.getFileName().toString().contains(".") ? JkUtilsString.substringAfterLast(
-                    path.getFileName().toString(), ".") : null;
-                    this.type = type;
-                    this.configurationNames = configurationNames;
-                    this.name = name;
+            this.file = path;
+            this.extension = extension;
+            this.type = type;
+            this.configurationNames = configurationNames;
+            this.name = name;
         }
 
-        public final File file;  // path not serializable
+        public final Path file;  // path not serializable
 
         public final String type;
 
@@ -253,7 +252,7 @@ public final class JkIvyPublication<T> {
 
         public final String name;
 
-        public final String extension;
+        public final String extension;  // if not null, override the implicit file extensiion
 
     }
 

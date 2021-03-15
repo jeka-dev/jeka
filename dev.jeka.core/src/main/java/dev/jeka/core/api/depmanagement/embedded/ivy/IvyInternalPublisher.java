@@ -68,7 +68,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
     @Override
     public void publishIvy(JkVersionedModule versionedModule,
-                           List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts,
+                           List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts,
                            JkQualifiedDependencies dependencies) {
         JkLog.startTask( "Publish on Ivy repositories");
         final ModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toIvyPublishModuleDescriptor(
@@ -94,8 +94,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         JkLog.endTask();
     }
 
-    private int publishIvyArtifacts(List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts, Instant date,
-            ModuleDescriptor moduleDescriptor, IvySettings ivySettings) {
+    private int publishIvyArtifacts(List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts, Instant date,
+                                    ModuleDescriptor moduleDescriptor, IvySettings ivySettings) {
         int count = 0;
         for (JkRepo publishRepo : this.publishRepos.getRepos()) {
             RepositoryResolver resolver = IvyTranslatorToResolver.convertToPublishAndBind(publishRepo, ivySettings);
@@ -115,7 +115,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
 
     private void publishIvyArtifacts(DependencyResolver resolver,
-                                     List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts,
+                                     List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts,
                                      Instant date, ModuleDescriptor moduleDescriptor, IvySettings ivySettings) {
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         try {
@@ -124,12 +124,12 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             throw new IllegalStateException(e);
         }
         try {
-            Iterator<JkIvyPublication.JkPublicationArtifact> it = publishedArtifacts.iterator();
+            Iterator<JkIvyPublication.JkPublishedArtifact> it = publishedArtifacts.iterator();
             while (it.hasNext()) {
-                JkIvyPublication.JkPublicationArtifact artifact = it.next();
+                JkIvyPublication.JkPublishedArtifact artifact = it.next();
                 final Artifact ivyArtifact = IvyTranslatorToArtifact.toIvyArtifact(artifact, ivyModuleRevisionId, date);
                 try {
-                    resolver.publish(ivyArtifact, artifact.file, true);
+                    resolver.publish(ivyArtifact, artifact.file.toFile(), true);
                 } catch (final IOException e) {
                     throw new IllegalStateException(e);
                 }

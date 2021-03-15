@@ -29,7 +29,7 @@ public interface JkInternalPublisher {
      * @param dependencies
      *            The dependencies of the published module.
      */
-    void publishIvy(JkVersionedModule versionedModule, List<JkIvyPublication.JkPublicationArtifact> publishedArtifacts,
+    void publishIvy(JkVersionedModule versionedModule, List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts,
                     JkQualifiedDependencies dependencies);
 
     void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator, JkPomMetadata pomMetadata,

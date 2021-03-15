@@ -222,6 +222,15 @@ public final class JkPathFile {
         }
     }
 
+    public String getExtension() {
+        String filename = path.getFileName().toString();
+        int index = filename.lastIndexOf(".");
+        if (index < 0) {
+            return null;
+        }
+        return  filename.substring(index + 1);
+    }
+
     @Override
     public String toString() {
         return path.toString();
