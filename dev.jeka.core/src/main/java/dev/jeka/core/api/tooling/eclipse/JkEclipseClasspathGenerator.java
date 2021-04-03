@@ -1,6 +1,10 @@
 package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkCompileLayout;
@@ -21,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides method to generate Eclipse .classpath metadata files.
@@ -29,7 +34,7 @@ public final class JkEclipseClasspathGenerator {
 
     private static final String ENCODING = "UTF-8";
 
-    private static final String CLASSPATHENTRY = "classpathentry";
+    private static final String CLASSPATH_ENTRY = "classpathentry";
 
     private static final String JEKA_HOME = "JEKA_HOME";
 
@@ -220,7 +225,9 @@ public final class JkEclipseClasspathGenerator {
 
         // add def dependencies
         if (hasJekaDefDir() && defDependencyResolver != null) {
-            writeDependenciesEntries(writer, defDependencies, defDependencyResolver, paths);
+            JkQualifiedDependencies qualifiedDependencies =
+                    JkQualifiedDependencies.ofDependencies(defDependencies.getEntries());
+            writeDependenciesEntries(writer, qualifiedDependencies, defDependencyResolver, paths);
         }
 
         // Write output
@@ -237,7 +244,7 @@ public final class JkEclipseClasspathGenerator {
     /** convenient method to write classpath element shorter */
     private static void writeClasspathEl(XMLStreamWriter writer, String... items) throws XMLStreamException {
         final Map<String, String> map = JkUtilsIterable.mapOfAny((Object[]) items);
-        writer.writeEmptyElement(CLASSPATHENTRY);
+        writer.writeEmptyElement(CLASSPATH_ENTRY);
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             writer.writeAttribute(entry.getKey(), entry.getValue());
         }
@@ -283,7 +290,7 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeJre(XMLStreamWriter writer) throws XMLStreamException {
         writer.writeCharacters("\t");
-        writer.writeEmptyElement(CLASSPATHENTRY);
+        writer.writeEmptyElement(CLASSPATH_ENTRY);
         writer.writeAttribute("kind", "con");
         final String container;
         if (jreContainer != null) {
@@ -340,7 +347,7 @@ public final class JkEclipseClasspathGenerator {
             }
             sourcePaths.add(path);
             writer.writeCharacters("\t");
-            writer.writeEmptyElement(CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATH_ENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
@@ -359,7 +366,7 @@ public final class JkEclipseClasspathGenerator {
             }
             sourcePaths.add(path);
             writer.writeCharacters("\t");
-            writer.writeEmptyElement(CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATH_ENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
@@ -386,16 +393,20 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies,
+    private void writeDependenciesEntries(XMLStreamWriter writer, JkQualifiedDependencies dependencies,
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
 
         // dependencies with IDE project dir will be omitted. The project dir will be added in other place.
-        final JkResolveResult resolveResult = resolver.resolve(dependencies.minusModuleDependenciesWithIdeProjectDir());
+        List<JkDependency> deps = dependencies.getEntries().stream()
+                .map(qDep -> qDep.getDependency())
+                .filter(dep -> dep.getIdeProjectDir() == null)
+                .collect(Collectors.toList());
+        final JkResolveResult resolveResult = resolver.resolve(JkDependencySet.of(deps));
         final JkRepoSet repos = resolver.getRepos();
-        for (final JkDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
+        for (final JkResolvedDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency
             if (node.isModuleNode()) {
-                final JkDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
+                final JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
                 JkDependency dependency = JkModuleDependency.of(moduleNodeInfo.getModuleId().getGroupAndName());
                 Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
                 Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);
@@ -405,7 +416,7 @@ public final class JkEclipseClasspathGenerator {
 
                 // File dependencies (file system + computed)
             } else {
-                final JkDependencyNode.JkFileNodeInfo fileNodeInfo = (JkDependencyNode.JkFileNodeInfo) node.getNodeInfo();
+                final JkResolvedDependencyNode.JkFileNodeInfo fileNodeInfo = (JkResolvedDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
                     final Path ideProjectBaseDir = computedDependency.getIdeProjectDir();
@@ -429,10 +440,10 @@ public final class JkEclipseClasspathGenerator {
     private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<Path> files,
                                   JkRepoSet repos, Set<String> paths, Properties attributeProps,
                                   Properties accessRuleProps) throws XMLStreamException {
-        final Path source = repos.get(JkModuleDependency.of(versionedModule).withClassifier("sources"));
+        final Path source = repos.get(JkModuleDependency.of(versionedModule).withClassifiers("sources"));
         Path javadoc = null;
         if (source == null || !Files.exists(source) || this.includeJavadoc) {
-            javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifier("javadoc"));
+            javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifiers("javadoc"));
         }
         if (javadoc != null) {
             attributeProps.put("javadoc_location", javadocAttributeValue(javadoc));
@@ -463,9 +474,9 @@ public final class JkEclipseClasspathGenerator {
         writer.writeCharacters("\t");
         boolean emptyTag = attributeProps.isEmpty() && accesRuleProps.isEmpty();
         if (emptyTag) {
-            writer.writeEmptyElement(CLASSPATHENTRY);
+            writer.writeEmptyElement(CLASSPATH_ENTRY);
         } else {
-            writer.writeStartElement(CLASSPATHENTRY);
+            writer.writeStartElement(CLASSPATH_ENTRY);
         }
         writer.writeAttribute("kind", isVar ? "var" : "lib");
         writer.writeAttribute("path", binPath);

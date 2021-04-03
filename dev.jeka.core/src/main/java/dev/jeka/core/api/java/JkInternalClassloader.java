@@ -75,8 +75,7 @@ public class JkInternalClassloader {
 
     /**
      * Creates an instance of the specified class in this classloader and
-     * callable from the current thread classloader. Arguments ans result are
-     * serialized (if needed) so we keep compatibility between classes.
+     * callable from the current thread classloader.
      */
     @SuppressWarnings("unchecked")
     public <T> T createCrossClassloaderProxy(Class<T> interfaze, String className,

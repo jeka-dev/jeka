@@ -2,8 +2,8 @@ package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.depmanagement.JkScope;
-import dev.jeka.core.api.depmanagement.JkScopedDependency;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependency;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -95,10 +95,10 @@ public final class JkMvn implements Runnable {
     /**
      * Reads the dependencies of this Maven project
      */
-    public JkDependencySet readDependencies() {
+    public JkQualifiedDependencies readDependencies() {
         final Path file = JkUtilsPath.createTempFile("dependency", ".txt");
         commands("dependency:list", "-DoutputFile=" + file).run();
-        final JkDependencySet result = fromMvnFlatFile(file);
+        final JkQualifiedDependencies result = fromMvnFlatFile(file);
         JkUtilsPath.deleteFile(file);
         return result;
     }
@@ -163,41 +163,42 @@ public final class JkMvn implements Runnable {
      * </ul>
      *
      */
-    public static JkDependencySet fromMvnFlatFile(Path flatFile) {
-        List<JkScopedDependency> scopedDependencies = new LinkedList<>();
+    public static JkQualifiedDependencies fromMvnFlatFile(Path flatFile) {
+        List<JkQualifiedDependency> result = new LinkedList<>();
         for (final String line : JkUtilsPath.readAllLines(flatFile)) {
-            final JkScopedDependency scopedDependency = mvnDep(line);
+            JkQualifiedDependency scopedDependency = mvnDep(line);
             if (scopedDependency != null) {
-                scopedDependencies.add(scopedDependency);
+                result.add(scopedDependency);
             }
         }
-        return JkDependencySet.of(scopedDependencies);
+        return JkQualifiedDependencies.of(result);
     }
 
-    private static JkScopedDependency mvnDep(String description) {
+    private static JkQualifiedDependency mvnDep(String description) {
         final String[] items = description.trim().split(":");
         if (items.length == 5) {
             final String classifier = items[2];
-            final JkScope scope = JkScope.of(items[4]);
+            final String scope = JkPom.toScope(items[4]);
             JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1], items[3]);
             if (!"jar".equals(classifier)) {
-                dependency = dependency.withClassifier(classifier);
+                dependency = dependency.withClassifiers(classifier);
             }
-            return JkScopedDependency.of(dependency, scope);
+            return JkQualifiedDependency.of(scope, dependency);
         }
         if (items.length == 4) {
-            final JkScope scope = JkScope.of(items[3]);
+            final String scope = JkPom.toScope(items[3]);
             final JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1],
                     items[2]);
-            return JkScopedDependency.of(dependency, scope);
+            return JkQualifiedDependency.of(scope, dependency);
         }
         if (items.length == 3) {
             final JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1],
                     items[2]);
-            return JkScopedDependency.of(dependency);
+            return JkQualifiedDependency.of(null, dependency);
         }
         return null;
-
     }
+
+
 
 }

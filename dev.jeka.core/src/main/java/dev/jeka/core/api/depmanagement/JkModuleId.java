@@ -106,6 +106,10 @@ public final class JkModuleId {
         return JkVersionedModule.of(this, version);
     }
 
+    public JkModuleDependency version(String version) {
+        return JkModuleDependency.of(this, version);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

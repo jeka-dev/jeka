@@ -38,6 +38,15 @@ final class JkClassResolver {
         return resolve(classNameHint, JkClass.class, true);
     }
 
+    JkClass resolveQuietly(String classNameHint) {
+        try {
+            return resolve(classNameHint);
+        } catch (RuntimeException e) {
+            JkLog.warn("Error reading class hint " + classNameHint + " : " + e.getMessage());
+            return null;
+        }
+    }
+
     /**
      * Resolves the {@link JkClass} instance to use on this project.
      */
@@ -56,6 +65,7 @@ final class JkClassResolver {
 
     boolean needCompile() {
         if (!this.hasDefSource()) {
+            JkLog.trace("No def sources found. Skip compile.");
             return false;
         }
         final JkPathTree dir = JkPathTree.of(defSourceDir);
@@ -75,9 +85,12 @@ final class JkClassResolver {
                         .loadGivenClassSourcePathIfExist(pathName);
                 if (clazz == null) {
                     return true;
+                } else {
+                    JkLog.trace("Def class " + clazz + " already present in classpath.");
                 }
             }
         }
+        JkLog.trace("All def classes are already present in classpath. Skip compile.");
         return false;
     }
 

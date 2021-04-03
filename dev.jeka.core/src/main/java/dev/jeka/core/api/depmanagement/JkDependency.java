@@ -5,12 +5,11 @@ import java.nio.file.Path;
 /**
  * Interface standing for a dependency. It can be a either :
  * <ul>
- * <li>An external module as <code>org.hibernate:hibernate-core:3.0.+</code></li>
+ * <li>An external module as <code>org.hibernate:hibernate-core:3.0.1</code></li>
  * <li>A project inside a multi-project build</li>
  * <li>Some files on the file system</li>
+ * <li>A process that produces 0 or n files</li>
  * </ul>
- * Each dependency is associated with a scope mapping to determine precisely in
- * which scenario the dependency is necessary.
  *
  * @author Jerome Angibaud
  */
@@ -29,6 +28,16 @@ public interface JkDependency {
      * @see #getIdeProjectDir()
      */
     JkDependency withIdeProjectDir(Path path);
+
+    /**
+     * Returns <code>true</code> if the specified dependency matches with this one. <p>
+     * Matching means that two matching dependencies can not be declared in a same dependency set
+     * as it will be considered as a duplicate or result in a conflict. <p>
+     * For example "com.google:guava:21.0" is matching with "com.google:guava:23.0" even if they are not equals.
+     */
+    default boolean matches(JkDependency other) {
+        return this.equals(other);
+    }
 
 
 }

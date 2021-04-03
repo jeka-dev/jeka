@@ -1,6 +1,8 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJarPacker;
@@ -9,6 +11,7 @@ import dev.jeka.core.api.java.JkManifest;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 /**
  * Responsible to produce jar files. It involves compilation and unit testing.
@@ -29,7 +32,7 @@ public class JkJavaProjectConstruction {
 
     private final JkJavaProject project;
 
-    private final JkDependencyManagement<JkJavaProjectConstruction> dependencyManagement;
+    private final JkDependencyResolver<JkJavaProjectConstruction> dependencyResolver;
 
     private final JkJavaProjectCompilation<JkJavaProjectConstruction> compilation;
 
@@ -40,6 +43,8 @@ public class JkJavaProjectConstruction {
     private final JkManifest manifest;
 
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
+
+    private UnaryOperator<JkDependencySet> dependencySetModifier = x -> x;
     
     /**
      * For Parent chaining
@@ -49,7 +54,7 @@ public class JkJavaProjectConstruction {
     JkJavaProjectConstruction(JkJavaProject project) {
         this.project = project;
         this.__ = project;
-        dependencyManagement = JkDependencyManagement.ofParent(this);
+        dependencyResolver = JkDependencyResolver.ofParent(this).addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
         compilation = JkJavaProjectCompilation.ofProd(this);
         testing = new JkJavaProjectTesting(this);
         manifest = JkManifest.ofParent(this);
@@ -60,8 +65,8 @@ public class JkJavaProjectConstruction {
         return this;
     }
 
-    public JkDependencyManagement<JkJavaProjectConstruction> getDependencyManagement() {
-        return dependencyManagement;
+    public JkDependencyResolver<JkJavaProjectConstruction> getDependencyResolver() {
+        return dependencyResolver;
     }
 
     public JkJavaProjectCompilation<JkJavaProjectConstruction> getCompilation() {
@@ -76,21 +81,21 @@ public class JkJavaProjectConstruction {
         return manifest;
     }
 
-    public JkJavaProject getProject() {
+    JkJavaProject getProject() {
         return project;
     }
 
     private void addManifestDefaults() {
         JkModuleId moduleId = project.getPublication().getModuleId();
-        JkVersion version = project.getPublication().getVersion();
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null) {
+        String version = project.getPublication().getVersion();
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && moduleId != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
         }
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VENDOR) == null) {
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VENDOR) == null && moduleId != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup());
         }
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null) {
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null && version != null) {
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
         }
     }
 
@@ -111,7 +116,8 @@ public class JkJavaProjectConstruction {
     public void createFatJar(Path target) {
         compilation.runIfNecessary();
         testing.runIfNecessary();
-        Iterable<Path> classpath = dependencyManagement.fetchDependencies(JkScope.RUNTIME).getFiles();
+        Iterable<Path> classpath = dependencyResolver.resolve(getRuntimeDependencies()
+                .normalised(project.getDuplicateConflictStrategy())).getFiles();
         addManifestDefaults();
         JkJarPacker.of(compilation.getLayout().resolveClassDir())
                 .withManifest(manifest)
@@ -134,5 +140,20 @@ public class JkJavaProjectConstruction {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;
     }
+
+    /**
+     * Specify the dependencies to add or remove from the production compilation dependencies to
+     * get the runtime dependencies.
+     * @param modifier An function that define the runtime dependencies from the compilation ones.
+     */
+    public JkJavaProjectConstruction setRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
+        this.dependencySetModifier = modifier;
+        return this;
+    }
+
+    public JkDependencySet getRuntimeDependencies() {
+        return dependencySetModifier.apply(compilation.getDependencies());
+    }
+
 
 }

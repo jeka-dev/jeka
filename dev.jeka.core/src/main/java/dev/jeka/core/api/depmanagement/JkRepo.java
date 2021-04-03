@@ -4,7 +4,6 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -12,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository
@@ -45,20 +45,15 @@ public final class JkRepo {
      */
     public static final String MAVEN_OSSRH_PUBLIC_DOWNLOAD_RELEASE_AND_SNAPSHOT = "https://oss.sonatype.org/content/groups/public/";
 
-    /**
-     * URL of the JCenter ivy repository.
-     */
-    public static final String JCENTERL_URL = "https://jcenter.bintray.com";
-
     private static final String IVY_PREFIX = "ivy:";
 
     private final URL url;
 
     private JkRepoCredentials credentials;
 
-    private final JkRepoIvyConfig ivyConfig = new JkRepoIvyConfig(this);
+    private JkRepoIvyConfig ivyConfig = new JkRepoIvyConfig(this);
 
-    private final JkPublishConfig publishConfig = new JkPublishConfig(this);
+    private JkPublishConfig publishConfig = new JkPublishConfig(this);
 
     public final boolean ivyRepo; // true if this reposotory is an Ivy one, false if it is a Maven one.
 
@@ -85,15 +80,8 @@ public final class JkRepo {
     /**
      * Creates a Maven repository having the specified file location.
      */
-    public static JkRepo ofMaven(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir), false);
-    }
-
-    /**
-     * Creates a Ivy repository having the specified file location.
-     */
-    public static JkRepo ofIvy(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir), true);
+    public static JkRepo of(Path dir) {
+        return JkRepo.of(dir.toString());
     }
 
     /**
@@ -117,12 +105,14 @@ public final class JkRepo {
     /**
      * Creates an OSSRH repository for deploying released artifacts.
      */
-    public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword) {
+    public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword,
+                                                   UnaryOperator<Path> signer) {
         return of(MAVEN_OSSRH_DEPLOY_RELEASE)
                 .setCredentials(jiraId, jiraPassword, "Sonatype Nexus Repository Manager")
                 .getPublishConfig()
                     .setSignatureRequired(true)
                     .setVersionFilter(version -> !version.isSnapshot())
+                    .setSigner(signer)
                     .setChecksumAlgos("md5", "sha1").__;
     }
 
@@ -134,18 +124,19 @@ public final class JkRepo {
     }
 
     /**
-     * Creates a JCenter repository.
-     */
-    public static JkRepo ofMavenJCenter() {
-        return of(JCENTERL_URL);
-    }
-
-    /**
      * Creates a Maven repository for publishing locally under <code></code>[USER HOME]/.jeka/publish</code> folder.
      */
     public static JkRepo ofLocal() {
         final Path file = JkLocator.getJekaUserHomeDir().resolve("maven-publish-dir");
-        return JkRepo.ofMaven(file);
+        return JkRepo.of(file);
+    }
+
+    /**
+     * Creates a Ivy repository for publishing locally under <code></code>[USER HOME]/.jeka/publish</code> folder.
+     */
+    public static JkRepo ofLocalIvy() {
+        final Path file = JkLocator.getJekaUserHomeDir().resolve("ivy-publish-dir");
+        return JkRepo.of(IVY_PREFIX + file);
     }
 
     /**
@@ -214,6 +205,14 @@ public final class JkRepo {
         }
         final JkRepo jkRepo = (JkRepo) o;
         return url.equals(jkRepo.url);
+    }
+
+    public JkRepo copy() {
+        JkRepo result = new JkRepo(url, ivyRepo);
+        result.credentials = credentials;
+        result.ivyConfig = ivyConfig.copy(result);
+        result.publishConfig = publishConfig.copy(result);
+        return result;
     }
 
     @Override
@@ -291,8 +290,8 @@ public final class JkRepo {
 
         private JkRepoIvyConfig(JkRepo parent) {
             this.__ = parent;
-            this.artifactPatterns = JkUtilsIterable.listOf(DEFAULT_IVY_ARTIFACT_PATTERN);
-            this.ivyPatterns = JkUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN);
+            this.artifactPatterns = new LinkedList<>(JkUtilsIterable.listOf(DEFAULT_IVY_ARTIFACT_PATTERN));
+            this.ivyPatterns = new LinkedList<>(JkUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN));
         }
 
         public List<String> artifactPatterns() {
@@ -322,6 +321,15 @@ public final class JkRepo {
             this.ivyPatterns.addAll(Arrays.asList(patterns));
             return this;
         }
+
+        private JkRepoIvyConfig copy(JkRepo parent) {
+            JkRepoIvyConfig result = new JkRepoIvyConfig(parent);
+            result.artifactPatterns.clear();
+            result.artifactPatterns.addAll(artifactPatterns);
+            result.ivyPatterns.clear();
+            result.ivyPatterns.addAll(ivyPatterns);
+            return result;
+        }
     }
 
     /**
@@ -338,6 +346,8 @@ public final class JkRepo {
         private boolean uniqueSnapshot;
 
         private Set<String> checksumAlgos = new HashSet<>();
+
+        private UnaryOperator<Path> signer;
 
         private JkPublishConfig(JkRepo parent) {
             __ = parent;
@@ -363,6 +373,10 @@ public final class JkRepo {
             return checksumAlgos;
         }
 
+        public UnaryOperator<Path> getSigner() {
+            return signer;
+        }
+
         public JkPublishConfig setUniqueSnapshot(boolean uniqueSnapshot) {
             this.uniqueSnapshot = uniqueSnapshot;
             return this;
@@ -383,6 +397,22 @@ public final class JkRepo {
             this.checksumAlgos = JkUtilsIterable.setOf(algos);
             return this;
         }
+
+        public JkPublishConfig setSigner(UnaryOperator<Path> signer) {
+            this.signer = signer;
+            return this;
+        }
+
+        private JkPublishConfig copy(JkRepo parent) {
+            JkPublishConfig result = new JkPublishConfig(parent);
+            result.signer = signer;
+            result.checksumAlgos = new HashSet<>(checksumAlgos);
+            result.signatureRequired = signatureRequired;
+            result.uniqueSnapshot = uniqueSnapshot;
+            result.versionFilter = versionFilter;
+            return result;
+        }
+
     }
 
 }

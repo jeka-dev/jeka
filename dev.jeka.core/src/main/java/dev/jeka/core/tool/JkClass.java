@@ -1,6 +1,6 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;

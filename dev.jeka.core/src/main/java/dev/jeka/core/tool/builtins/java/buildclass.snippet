@@ -1,4 +1,3 @@
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
@@ -6,8 +5,6 @@ import dev.jeka.core.api.tooling.JkGitWrapper;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-
-import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 
 class Build extends JkClass {
 
@@ -21,16 +18,16 @@ class Build extends JkClass {
     protected void setup() {
         java.getProject()
             .getConstruction()
-                .getDependencyManagement()
-                .addDependencies(JkDependencySet.of()
-                        .and("com.google.guava:guava:21.0")
-                        .and("org.junit.jupiter:junit-jupiter:5.6.2", TEST)).__
                 .getCompilation()
-                    .setJavaVersion(JkJavaVersion.V8).__
+                    .setJavaVersion(JkJavaVersion.V8)
+                    .setDependencies(deps -> deps
+                        .and("com.google.guava:guava:21.0")).__
 
                 // this testing setup is almost default setting, this is here for illustration purpose
                 // If default is ok for you, you can remove it.
                 .getTesting()
+                    .getCompilation().setDependencies(deps -> deps
+                        .and("org.junit.jupiter:junit-jupiter:5.6.2")).__
                     .getTestSelection()
                         .addIncludeStandardPatterns()
                         .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
@@ -42,7 +39,7 @@ class Build extends JkClass {
             // Publication is only necessary if your project is being deployed on a binary repository.
             // Many projects as jee war jar, springboot application, tools, Graphical application
             // does not need this section at all.  In this case you can remove it.
-            .getPublication()
+            .getPublication().getMaven()
                 .setModuleId("your.group:your.project")
                 .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags());  // Version inferred from Git
     }

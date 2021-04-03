@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
@@ -23,7 +24,7 @@ import java.util.function.UnaryOperator;
  */
 public class JkJavaProjectTesting {
 
-    private final JkJavaProjectConstruction projectProduction;
+    private final JkJavaProjectConstruction construction;
 
     private final JkJavaProjectCompilation<JkJavaProjectTesting> compilation;
 
@@ -33,7 +34,7 @@ public class JkJavaProjectTesting {
 
     private JkTestSelection testSelection;
 
-    // replative path from output dir
+    // relative path from output dir
     private String reportDir = "test-report";
 
     private boolean done;
@@ -47,10 +48,10 @@ public class JkJavaProjectTesting {
      */
     public final JkJavaProjectConstruction __;
 
-    JkJavaProjectTesting(JkJavaProjectConstruction projectProduction) {
-        this.projectProduction = projectProduction;
-        this.__ = projectProduction;
-        compilation = JkJavaProjectCompilation.ofTest(projectProduction, this);
+    JkJavaProjectTesting(JkJavaProjectConstruction construction) {
+        this.construction = construction;
+        this.__ = construction;
+        compilation = JkJavaProjectCompilation.ofTest(construction, this);
         afterTest = JkRunnables.ofParent(this);
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
@@ -89,11 +90,15 @@ public class JkJavaProjectTesting {
      * dependencies involved in TEST scope.
      */
     public JkPathSequence getTestClasspath() {
-        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.PROVIDED};
+        JkDependencyResolver resolver = construction.getDependencyResolver();
+        JkJavaProjectCompilation prodCompilation = construction.getCompilation();
+        JkDependencySet dependencies = prodCompilation.getDependencies()
+                .and(compilation.getDependencies())
+                .and(construction.getRuntimeDependencies())
+                .normalised(construction.getProject().getDuplicateConflictStrategy());
         return JkPathSequence.of(compilation.getLayout().resolveClassDir())
-                .and(projectProduction.getCompilation().getLayout().resolveClassDir())
-                .and(projectProduction.getDependencyManagement()
-                        .fetchDependencies(scopes).getFiles());
+                .and(prodCompilation.getLayout().resolveClassDir())
+                .and(resolver.resolve(dependencies.normalised(construction.getProject().getDuplicateConflictStrategy())).getFiles());
     }
 
     /**
@@ -123,7 +128,7 @@ public class JkJavaProjectTesting {
     }
 
     public Path getReportDir() {
-        return projectProduction.getProject().getOutputDir().resolve(reportDir);
+        return construction.getProject().getOutputDir().resolve(reportDir);
     }
 
     public JkJavaProjectTesting setReportDir(String reportDir) {
@@ -142,7 +147,7 @@ public class JkJavaProjectTesting {
      */
     public void run() {
         JkLog.startTask("Process tests");
-        this.projectProduction.getCompilation().runIfNecessary();
+        this.construction.getCompilation().runIfNecessary();
         this.compilation.run();
         executeWithTestProcessor();
         afterTest.run();
@@ -168,7 +173,7 @@ public class JkJavaProjectTesting {
     }
 
     private void executeWithTestProcessor() {
-        UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(projectProduction.getProject().getOutputDir());
+        UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(construction.getProject().getOutputDir());
         testSelection.setTestClassRoots(op);
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
         if (breakOnFailures) {

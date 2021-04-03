@@ -1,6 +1,6 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
-import dev.jeka.core.api.depmanagement.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkRunnables;

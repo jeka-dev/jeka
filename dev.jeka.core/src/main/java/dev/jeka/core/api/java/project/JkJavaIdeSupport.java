@@ -1,8 +1,10 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.java.JkJavaVersion;
 
 import java.nio.file.Path;
@@ -22,7 +24,7 @@ public class JkJavaIdeSupport {
 
     private JkCompileLayout<JkJavaIdeSupport>  testLayout;
 
-    private JkDependencySet dependencies;
+    private JkQualifiedDependencies dependencies;
 
     private JkJavaVersion sourceVersion;
 
@@ -30,7 +32,7 @@ public class JkJavaIdeSupport {
 
     private JkJavaIdeSupport(Path baseDir) {
         this.prodLayout = JkCompileLayout.ofParent(this).setBaseDir(baseDir);
-        this.dependencies = JkDependencySet.of();
+        this.dependencies = JkQualifiedDependencies.of();
         this.sourceVersion = JkJavaVersion.V8;
         this.dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());;
     }
@@ -47,7 +49,7 @@ public class JkJavaIdeSupport {
         return testLayout;
     }
 
-    public JkDependencySet getDependencies() {
+    public JkQualifiedDependencies getDependencies() {
         return dependencies;
     }
 
@@ -69,9 +71,18 @@ public class JkJavaIdeSupport {
         return this;
     }
 
-    public JkJavaIdeSupport setDependencies(JkDependencySet dependencies) {
+    public JkJavaIdeSupport setDependencies(JkQualifiedDependencies dependencies) {
         this.dependencies = dependencies;
         return this;
+    }
+
+    public JkJavaIdeSupport setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test,
+                                            JkVersionedModule.ConflictStrategy conflictStrategy) {
+        return setDependencies(JkQualifiedDependencies.computeIdeDependencies(compile, runtime, test, conflictStrategy));
+    }
+
+    public JkJavaIdeSupport setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
+        return setDependencies(compile, runtime, test, JkVersionedModule.ConflictStrategy.FAIL);
     }
 
     public JkJavaIdeSupport setSourceVersion(JkJavaVersion sourceVersion) {

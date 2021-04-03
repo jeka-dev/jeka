@@ -10,7 +10,6 @@ import org.junit.Test;
 import java.nio.file.Paths;
 
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
-import static dev.jeka.core.api.depmanagement.JkScope.COMPILE;
 
 public class JkImlGeneratorTest {
 
@@ -24,7 +23,7 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProject() {
         JkJavaProject project = JkJavaProject.of();
-        project.getConstruction().getDependencyManagement().addDependencies(dependencies());
+        project.getConstruction().getCompilation().setDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of(project.getJavaIdeSupport());
         String result = imlGenerator.generate();
         System.out.println(result);
@@ -32,10 +31,10 @@ public class JkImlGeneratorTest {
 
     private JkDependencySet dependencies() {
         return JkDependencySet.of()
-                .and(GUAVA, "21.0")
-                .and(JAVAX_SERVLET_API, "3.1.0", COMPILE)
-                .and(JUNIT, "4.11")
-                .and(MOCKITO_ALL, "1.10.19");
+                .and(GUAVA.version("21.0"))
+                .and(JAVAX_SERVLET_API.version("3.1.0"))
+                .and(JUNIT.version("4.11"))
+                .and(MOCKITO_ALL.version("1.10.19"));
     }
 
 }

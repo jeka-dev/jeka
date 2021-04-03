@@ -1,5 +1,7 @@
 package dev.jeka.core.tool.builtins.maven;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkClass;
@@ -16,11 +18,25 @@ public class JkPluginPom extends JkPlugin {
         super(jkClass);
     }
 
-    @JkDoc("Prints Java code for declaring dependencies on console based on pom.xml. The pom.xml file is supposed to be in root directory.")
+    @JkDoc("Margin to print dependency code.")
+    public int margin = 6;
+
+    @JkDoc("Displays Java code for declaring dependencies on console based on pom.xml. The pom.xml file is supposed to be in root directory.")
     public void dependencyCode() {
+
         Path pomPath = getJkClass().getBaseDir().resolve("pom.xml");
         JkUtilsAssert.state(Files.exists(pomPath), "No pom file found at " + pomPath);
         JkPom pom = JkPom.of(pomPath);
-        System.out.println(pom.getDependencies().withVersionProvider(pom.getVersionProvider()).toJavaCode(6));
+        System.out.println("Compile");
+        System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(null,
+                JkQualifiedDependencies.COMPILE_SCOPE, JkQualifiedDependencies.PROVIDED_SCOPE)));
+        System.out.println(".withVersionProvider(" + pom.getVersionProvider().toJavaCode(margin) + ")");
+
+        System.out.println("\nRuntime");
+        System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(
+                JkQualifiedDependencies.RUNTIME_SCOPE)));
+        System.out.println("\nTest");
+        System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(
+                JkQualifiedDependencies.TEST_SCOPE)));
     }
 }

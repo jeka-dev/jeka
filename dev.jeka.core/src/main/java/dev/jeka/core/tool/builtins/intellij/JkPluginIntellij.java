@@ -1,6 +1,7 @@
 package dev.jeka.core.tool.builtins.intellij;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
@@ -62,8 +63,8 @@ public final class JkPluginIntellij extends JkPlugin {
         generator.setExplicitJekaHome(jekaHome);
         JkDependencySet defDependencies = jkClass.getDefDependencies();
         if (imlSkipJeka) {
-            defDependencies = defDependencies.minusFiles(
-                    path -> path.getFileName().equals(JkLocator.getJekaJarPath().getFileName()));
+            defDependencies = defDependencies
+                    .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath().getFileName()));
         }
         generator.setDefDependencies(defDependencies);
         generator.setDefDependencyResolver(jkClass.getDefDependencyResolver());

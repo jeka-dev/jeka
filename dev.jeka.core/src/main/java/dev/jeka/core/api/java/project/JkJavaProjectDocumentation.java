@@ -1,6 +1,5 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkScope;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavadocProcessor;
@@ -48,11 +47,12 @@ public class JkJavaProjectDocumentation {
      * Generates javadoc files (files + zip)
      */
     public void run() {
-        JkScope[] scopes = new JkScope[] {JkScope.COMPILE, JkScope.PROVIDED};
-        Iterable<Path> classpath = project.getConstruction().getDependencyManagement()
-                .fetchDependencies(scopes).getFiles();
+        JkJavaProjectConstruction construction = project.getConstruction();
+        JkJavaProjectCompilation compilation = construction.getCompilation();
+        Iterable<Path> classpath = construction.getDependencyResolver()
+                .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
-        JkPathTreeSet sources = project.getConstruction().getCompilation().getLayout().resolveSources();
+        JkPathTreeSet sources = compilation.getLayout().resolveSources();
         javadocProcessor.make(classpath, sources, dir);
     }
 

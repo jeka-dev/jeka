@@ -1,6 +1,13 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata;
+import dev.jeka.core.api.depmanagement.publication.JkPomMetadata;
+import dev.jeka.core.api.depmanagement.publication.JkPomTemplateGenerator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -23,7 +30,10 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 
 /**
@@ -52,7 +62,7 @@ final class IvyPublisherForMaven {
         this.checksumAlgos = checksumAlgos;
     }
 
-    void publish(DefaultModuleDescriptor moduleDescriptor, JkMavenPublication publication) {
+    void publish(DefaultModuleDescriptor moduleDescriptor, JkArtifactLocator artifactLocator, JkPomMetadata metadata) {
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         try {
             resolver.beginPublishTransaction(ivyModuleRevisionId, true);
@@ -61,12 +71,11 @@ final class IvyPublisherForMaven {
         }
 
         // publish artifacts
-        final JkVersionedModule versionedModule = IvyTranslations
-                .toJkVersionedModule(ivyModuleRevisionId);
-        final JkMavenMetadata returnedMetaData = publish(versionedModule, publication);
+        final JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(ivyModuleRevisionId);
+        final JkMavenMetadata returnedMetaData = publish(versionedModule, artifactLocator);
 
         // publish pom
-        final Path pomXml = makePom(moduleDescriptor, publication);
+        final Path pomXml = makePom(moduleDescriptor, artifactLocator, metadata);
         final String version;
         if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
@@ -98,16 +107,14 @@ final class IvyPublisherForMaven {
         commitPublication(resolver);
     }
 
-    private JkMavenMetadata publish(JkVersionedModule versionedModule,
-                                    JkMavenPublication mavenPublication) {
+    private JkMavenMetadata publish(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator) {
         if (!versionedModule.getVersion().isSnapshot()) {
-            final String existing = checkNotExist(versionedModule, mavenPublication);
+            final String existing = checkNotExist(versionedModule, artifactLocator);
             if (existing != null) {
                 throw new IllegalArgumentException("Artifact " + existing
                         + " already exists on repo.");
             }
         }
-        JkArtifactLocator artifactFileLocator = mavenPublication.getArtifactLocator();
         if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
             JkMavenMetadata mavenMetadata = loadMavenMedatata(path);
@@ -120,21 +127,20 @@ final class IvyPublisherForMaven {
             final int buildNumber = mavenMetadata.currentBuildNumber();
             final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.getVersion()
                     .getValue(), timestamp, buildNumber);
-            for (final JkArtifactId artifactId : artifactFileLocator.getArtifactIds()) {
+            for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
                 publishUniqueSnapshot(versionedModule, artifactId.getName(),
-                    artifactFileLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
+                    artifactLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
             }
             return mavenMetadata;
         } else {
-            for (final JkArtifactId artifactId : artifactFileLocator.getArtifactIds()) {
-                publishNormal(versionedModule, artifactId.getName(),
-                        artifactFileLocator.getArtifactPath(artifactId));
+            for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
+                publishNormal(versionedModule, artifactId.getName(), artifactLocator.getArtifactPath(artifactId));
             }
             return null;
         }
     }
 
-    private Path makePom(ModuleDescriptor moduleDescriptor, JkMavenPublication publication) {
+    private Path makePom(ModuleDescriptor moduleDescriptor, JkArtifactLocator artifactLocator, JkPomMetadata metadata) {
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         final String artifactName = ivyModuleRevisionId.getName();
         final Path pomXml;
@@ -144,14 +150,14 @@ final class IvyPublisherForMaven {
         } else {
             pomXml = JkUtilsPath.createTempFile("published-pom-", ".xml");
         }
-        final String packaging = JkUtilsString.substringAfterLast(publication.getArtifactLocator()
+        final String packaging = JkUtilsString.substringAfterLast(artifactLocator
                 .getMainArtifactPath().getFileName().toString(), ".");
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
         pomWriterOptions.setMapping(new ScopeMapping());
         pomWriterOptions.setArtifactPackaging(packaging);
         Path fileToDelete = null;
-        if (publication.getPomMetadata() != null) {
-            final Path template = JkPomTemplateGenerator.generateTemplate(publication.getPomMetadata());
+        if (metadata != null) {
+            final Path template = JkPomTemplateGenerator.generateTemplate(metadata);
             pomWriterOptions.setTemplate(template.toFile());
             fileToDelete = template;
         }
@@ -166,8 +172,7 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private String checkNotExist(JkVersionedModule versionedModule, JkMavenPublication mavenPublication) {
-        JkArtifactLocator artifactLocator = mavenPublication.getArtifactLocator();
+    private String checkNotExist(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator) {
         final String pomDest = destination(versionedModule, "pom", JkArtifactId.MAIN_ARTIFACT_NAME);
         if (existOnRepo(pomDest)) {
             throw new IllegalArgumentException("The main artifact already exist for " + versionedModule);

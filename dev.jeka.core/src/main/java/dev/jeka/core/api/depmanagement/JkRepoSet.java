@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.io.File;
@@ -8,6 +9,8 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * A set of {@link JkRepo}
@@ -17,7 +20,7 @@ import java.util.List;
 public final class JkRepoSet {
 
     // Cached resolver
-    private transient JkInternalDepResolver ivyResolver;
+    private transient JkInternalDependencyResolver internalDependencyResolver;
 
     private final List<JkRepo> repos;
 
@@ -76,16 +79,9 @@ public final class JkRepoSet {
     /**
      * Creates a JkRepoSet for publishing on <a href="http://central.sonatype.org/">OSSRH</a>
      */
-    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password) {
+    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password, UnaryOperator<Path> signer) {
         return of(JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(userName, password),
-                JkRepo.ofMavenOssrhDeployRelease(userName, password));
-    }
-
-    /**
-     * Creates a JkRepoSet for downloading from <a href="http://central.sonatype.org/">OSSRH</a>
-     */
-    public static JkRepoSet ofOssrhSnapshotAndRelease() {
-        return ofOssrhSnapshotAndRelease(null, null);
+                JkRepo.ofMavenOssrhDeployRelease(userName, password, signer));
     }
 
     /**
@@ -101,12 +97,8 @@ public final class JkRepoSet {
         return null;
     }
 
-    public List<JkRepo> getRepoList() {
+    public List<JkRepo> getRepos() {
         return repos;
-    }
-
-    public boolean hasIvyRepo() {
-        return this.repos.stream().anyMatch(JkRepo::isIvyRepo);
     }
 
     public boolean contains(URL url) {
@@ -122,7 +114,7 @@ public final class JkRepoSet {
      * Retrieves directly the file embodying the specified the external dependency.
      */
     public Path get(JkModuleDependency moduleDependency) {
-        final JkInternalDepResolver depResolver = getIvyResolver();
+        final JkInternalDependencyResolver depResolver = getInternalDependencyResolver();
         final File file = depResolver.get(moduleDependency);
         if (file == null) {
             return null;
@@ -144,11 +136,25 @@ public final class JkRepoSet {
         return get(JkModuleDependency.of(moduleGroupVersion));
     }
 
-    private JkInternalDepResolver getIvyResolver() {
-        if (ivyResolver == null) {
-            ivyResolver = JkInternalDepResolver.of(this);
+    public JkRepoSet withDefaultSigner(UnaryOperator<Path> signer) {
+        List<JkRepo> reposCopy = repos.stream()
+                .map(repo -> {
+                    if (repo.getPublishConfig().getSigner() == null
+                            && repo.getPublishConfig().isSignatureRequired()) {
+                        JkRepo repoCopy = repo.copy();
+                        repoCopy.getPublishConfig().setSigner(signer);
+                        return repoCopy;
+                    }
+                    return repo;
+                }).collect(Collectors.toList());
+        return new JkRepoSet(reposCopy);
+    }
+
+    private JkInternalDependencyResolver getInternalDependencyResolver() {
+        if (internalDependencyResolver == null) {
+            internalDependencyResolver = JkInternalDependencyResolver.of(this);
         }
-        return ivyResolver;
+        return internalDependencyResolver;
     }
 
 }

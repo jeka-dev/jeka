@@ -12,17 +12,17 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * Dependency on computed resource. More concretely, this is a file dependency on files that might not
+ * Dependency on computed resource. More concretely, this is a {@link JkFileDependency }on files that might not
  * be present at the time of the build and that has to be generated. Instances of this class are
  * responsible to generate the missing files. <p>
  *
  * Computed dependencies are instantiated by providing expected files and a {@link Runnable} that
- * generates these files in case one of them misses. <p>
+ * generates these files in case one of them is missng. <p>
  *
- * This is yet simple but quite powerful mechanism, cause the runnable can be anything as Maven or ANT build
+ * This is yet simple but quite powerful mechanism, cause the runnable can be anything as a Maven or  a ANT build
  * of another project, a Jeka build of another project, ... <p>
  *
- * This is the way for creating multi-projet (and multi-techno if desired) builds.
+ * This is the way to create multi-projects (and multi-techno) builds.
  *
  */
 public class JkComputedDependency implements JkFileDependency {
@@ -146,7 +146,6 @@ public class JkComputedDependency implements JkFileDependency {
     public JkComputedDependency withIdeProjectDir(Path path) {
         return new JkComputedDependency(runnable, path, files);
     }
-
 
     @Override
     public String toString() {

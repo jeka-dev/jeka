@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.JkInternalPublisher;
+import dev.jeka.core.api.depmanagement.publication.JkInternalPublisher;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 
 import java.nio.file.Path;

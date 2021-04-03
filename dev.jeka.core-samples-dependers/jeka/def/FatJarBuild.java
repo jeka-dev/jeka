@@ -1,4 +1,3 @@
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.samples.JavaPluginBuild;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
@@ -25,7 +24,7 @@ public class FatJarBuild extends JkClass {
                 .getArtifactProducer()
                     .putMainArtifact(java.getProject().getConstruction()::createFatJar).__.__
             .simpleFacade()
-                .addDependencies(JkDependencySet.of()
+                .setCompileDependencies(deps -> deps
                     .and(sampleBuild.java.getProject().toDependency()))
         ;
     }

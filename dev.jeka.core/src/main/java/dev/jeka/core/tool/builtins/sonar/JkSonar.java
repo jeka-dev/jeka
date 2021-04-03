@@ -1,7 +1,6 @@
 package dev.jeka.core.tool.builtins.sonar;
 
 
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
@@ -65,14 +64,14 @@ public final class JkSonar {
         this.enabled = enabled;
     }
 
-    public static JkSonar of(String projectKey, String projectName, JkVersion version) {
+    public static JkSonar of(String projectKey, String projectName, String version) {
         JkUtilsAssert.argument(projectName != null, "Project name can't be null.");
         JkUtilsAssert.argument(projectKey != null, "Project key can't be null.");
         JkUtilsAssert.argument(version != null, "Project version can't be null.");
         final Map<String, String> map = new HashMap<>();
         map.put(PROJECT_KEY, projectKey);
         map.put(PROJECT_NAME, projectName);
-        map.put(PROJECT_VERSION, version.getValue());
+        map.put(PROJECT_VERSION, version);
         map.put(WORKING_DIRECTORY, ".sonarTempDir");
         map.put(VERBOSE, Boolean.toString(JkLog.Verbosity.VERBOSE == JkLog.verbosity()));
         final Properties properties = System.getProperties();

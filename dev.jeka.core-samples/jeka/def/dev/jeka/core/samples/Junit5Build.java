@@ -1,6 +1,5 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
@@ -8,8 +7,6 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
-
-import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 
 /**
  * This build class illustrates how to use directly JUnit5 Platform API.
@@ -42,13 +39,13 @@ class Junit5Build extends JkClass {
     protected void setup() {
         java.getProject()
             .getConstruction()
-                .getDependencyManagement()
-                    .addDependencies(JkDependencySet.of()
-                        .and("org.junit.jupiter:junit-jupiter-engine:5.1.0", TEST)
-                        .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)
-                        .and("org.jdom:jdom2:2.0.6", TEST)
-                    ).__
                 .getTesting()
+                    .getCompilation()
+                        .setDependencies(deps -> deps
+                            .and("org.junit.jupiter:junit-jupiter-engine:5.1.0")
+                            .and("org.junit.vintage:junit-vintage-engine:5.6.0")
+                            .and("org.jdom:jdom2:2.0.6")
+                        ).__
                     .getTestProcessor()
                         .getEngineBehavior()
                             .setLauncherConfigurer(builder -> builder  // Junit5-platform API. see nit.org/junit5/docs/5.3.0/api/org/junit/platform/launcher/core/LauncherConfig.html

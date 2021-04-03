@@ -1,14 +1,16 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestSelection;
+import dev.jeka.core.api.tooling.JkGitWrapper;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 /**
  * Simple facade over {@link JkJavaProject} to access common setting conveniently.
@@ -41,6 +43,11 @@ public class JkJavaProjectSimpleFacade {
         return this;
     }
 
+    public JkJavaProjectSimpleFacade setBaseDir(Path path) {
+        project.setBaseDir(path);
+        return this;
+    }
+
     public JkJavaProjectSimpleFacade setJavaSourceEncoding(String sourceEncoding) {
         project.getConstruction().getCompilation().setSourceEncoding(sourceEncoding);
         return this;
@@ -56,32 +63,63 @@ public class JkJavaProjectSimpleFacade {
         return this;
     }
 
-    public JkJavaProjectSimpleFacade addDependencies(JkDependencySet dependencies) {
-        project.getConstruction().getDependencyManagement().addDependencies(dependencies);
+    public JkJavaProjectSimpleFacade setCompileDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.getConstruction().getCompilation().setDependencies(modifier);
         return this;
     }
 
-    public JkJavaProjectSimpleFacade setPublishedVersion(Supplier<String> versionSupplier) {
-        project.getPublication().setVersionSupplier(() -> JkVersion.of(versionSupplier.get()));
+    public JkJavaProjectSimpleFacade setTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.getConstruction().getTesting().getCompilation().setDependencies(modifier);
         return this;
     }
 
-    public JkJavaProjectSimpleFacade setPublishedVersion(String version) {
-        return setPublishedVersion(() -> version);
+    /**
+     * Add specified dependencies at head of preset dependencies.
+     */
+    public JkJavaProjectSimpleFacade addTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+        return setTestDependencies(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
+    }
+
+    /**
+     * Specify the dependencies to add or remove from the production compilation dependencies to
+     * get the runtime dependencies.
+     * @param modifier An function that define the runtime dependencies from the compilation ones.
+     */
+    public JkJavaProjectSimpleFacade setRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
+        project.getConstruction().setRuntimeDependencies(modifier);
+        return this;
+    }
+
+
+    public JkJavaProjectSimpleFacade setPublishedMavenVersion(Supplier<String> versionSupplier) {
+        project.getPublication().getMaven().setVersion(versionSupplier);
+        return this;
+    }
+
+    public JkJavaProjectSimpleFacade setPublishedMavenVersion(String version) {
+        return setPublishedMavenVersion(() -> version);
+    }
+
+    /**
+     * The published version will be computed according the git repository.
+     * @see JkGitWrapper#getVersionFromTags()
+     */
+    public JkJavaProjectSimpleFacade setPublishedMavenVersionFromGit() {
+        return setPublishedMavenVersion(() -> JkGitWrapper.of(getProject().getBaseDir()).getVersionFromTags());
     }
 
     /**
      * @param moduleId group + artifactId to use when publishing on a binary repository.
      *                 Must be formatted as 'group:artifactId'
      */
-    public JkJavaProjectSimpleFacade setPublishedModuleId(String moduleId) {
-        project.getPublication().setModuleId(moduleId);
+    public JkJavaProjectSimpleFacade setPublishedMavenModuleId(String moduleId) {
+        project.getPublication().getMaven().setModuleId(moduleId);
         return this;
     }
 
     public JkJavaProjectSimpleFacade setPublishedDependencies(
             Function<JkDependencySet, JkDependencySet> dependencyModifier) {
-        project.getPublication().getMavenPublication().setDependencies(dependencyModifier);
+        project.getPublication().getMaven().setDependencies(dependencyModifier);
         return this;
     }
 

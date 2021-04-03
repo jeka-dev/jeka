@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by angibaudj on 20-06-17.
+ * Created by Jerome Angibaud on 20-06-17.
  */
 final class IvyArtifactContainer {
 
@@ -32,7 +32,7 @@ final class IvyArtifactContainer {
     }
 
     private void put(ModuleRevisionId moduleRevisionId, Path file) {
-        JkVersionedModule versionedModule = IvyTranslations.toJkVersionedModule(moduleRevisionId);
+        JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(moduleRevisionId);
         List<Path> files = map.computeIfAbsent(versionedModule, k -> new LinkedList<>());
         files.add(file);
     }

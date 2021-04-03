@@ -2,6 +2,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -9,7 +10,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 
 
 @SuppressWarnings("javadoc")
@@ -27,11 +27,10 @@ public class IvyInternalPublisherRunner {
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup", "mymodule"), JkVersion.of("myVersion"));
         final JkIvyPublication ivyPublication = JkIvyPublication.of()
-                .setMainArtifact(sampleJarfile(), JkScopedDependencyTest.COMPILE.getName(), JkScopedDependencyTest.TEST.getName());
-        final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
-        final JkDependencySet deps = JkDependencySet.of().and(spring, "3.0.+", JkScopedDependencyTest.COMPILE);
-        jkIvyInternalPublisher.publishIvy(versionedModule, ivyPublication, deps, null, Instant.now(),
-                JkVersionProvider.of(spring, "3.0.8"));
+                .setMainArtifact(sampleJarfile(), "compile", "test");
+        final JkQualifiedDependencies deps = JkQualifiedDependencies.of().of()
+                .and("compile", "org.springframework:spring-jdbc:3.0.+");
+        jkIvyInternalPublisher.publishIvy(versionedModule, ivyPublication.getAllArtifacts(), deps);
     }
 
     private static Path sampleJarfile() {
@@ -55,13 +54,13 @@ public class IvyInternalPublisherRunner {
     private static JkRepo ivyRepo() throws IOException {
         final Path baseDir = Paths.get("jeka/output/testIvyRepo");
         Files.createDirectories(baseDir);
-        return JkRepo.ofIvy(baseDir);
+        return JkRepo.of(baseDir);
     }
 
     private static JkRepo mavenRepo() throws IOException {
         final Path baseDir = Paths.get( "jeka/output/mavenRepo");
         Files.createDirectories(baseDir);
-        return JkRepo.ofMaven(baseDir);
+        return JkRepo.of(baseDir);
     }
 
 }

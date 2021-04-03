@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * A dependency on files located on file ofSystem.
+ * A dependency on files located on file system.
  */
 public final class JkFileSystemDependency implements JkFileDependency {
 
@@ -29,8 +29,6 @@ public final class JkFileSystemDependency implements JkFileDependency {
     }
 
     private final List<Path> files;
-
-
 
     @Override
     public final List<Path> getFiles() {

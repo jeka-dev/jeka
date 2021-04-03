@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkScope;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
@@ -8,7 +9,6 @@ import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsObject;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -28,12 +29,16 @@ public class JkJavaProjectCompilation<T> {
 
     private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V8;
 
+    private static final String PRODUCTION_PURPOSE = "production";
+
+    private static final String TEST_PURPOSE = "test";
+
     /**
      * For parent chaining
      */
     public final T __;
 
-    private final JkJavaProjectConstruction projectProduction;
+    private final JkJavaProjectConstruction construction;
 
     private final JkRunnables<JkJavaProjectCompilation<T>> beforeGenerate;
 
@@ -51,11 +56,15 @@ public class JkJavaProjectCompilation<T> {
 
     private final JkCompileLayout<JkJavaProjectCompilation<T>> layout;
 
-    private final String scope;
+    private Function<JkDependencySet, JkDependencySet> dependenciesModifier = deps -> deps;
+
+    private Supplier<JkDependencySet> dependencyBootSupplier = () -> JkDependencySet.of();
 
     private final LinkedList<String> compileOptions = new LinkedList<>();
 
     private boolean done;
+
+    private String purpose;
 
     private Supplier<JkJavaCompileSpec> compileSpecSupplier;
 
@@ -63,10 +72,10 @@ public class JkJavaProjectCompilation<T> {
 
     private String sourceEncoding = DEFAULT_ENCODING;
 
-    private JkJavaProjectCompilation(JkJavaProjectConstruction projectProduction, String scope, T parent) {
+    private JkJavaProjectCompilation(JkJavaProjectConstruction construction, String purpose, T parent) {
         __ = parent;
-        this.projectProduction = projectProduction;
-        this.scope = scope;
+        this.purpose = purpose;
+        this.construction = construction;
         beforeGenerate = JkRunnables.ofParent(this);
         sourceGenerator = JkConsumers.ofParent(this);
         resourceGenerator = JkConsumers.ofParent(this);
@@ -75,22 +84,24 @@ public class JkJavaProjectCompilation<T> {
         afterCompile = JkRunnables.ofParent(this);
         resourceProcessor = JkResourceProcessor.ofParent(this);
         layout = JkCompileLayout.ofParent(this)
-                .setBaseDirSupplier(projectProduction.getProject()::getBaseDir)
-                .setOutputDirSupplier(projectProduction.getProject()::getOutputDir);
+                .setBaseDirSupplier(construction.getProject()::getBaseDir)
+                .setOutputDirSupplier(construction.getProject()::getOutputDir);
     }
 
     static JkJavaProjectCompilation<JkJavaProjectConstruction> ofProd(JkJavaProjectConstruction projectProduction) {
         JkJavaProjectCompilation result =
-                new JkJavaProjectCompilation(projectProduction, "production code", projectProduction);
+                new JkJavaProjectCompilation(projectProduction, PRODUCTION_PURPOSE, projectProduction);
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
         return result;
     }
 
-    static JkJavaProjectCompilation<JkJavaProjectTesting> ofTest(JkJavaProjectConstruction projectProduction,
+    static JkJavaProjectCompilation<JkJavaProjectTesting> ofTest(JkJavaProjectConstruction construction,
                                                                  JkJavaProjectTesting parent) {
         JkJavaProjectCompilation result =
-                new JkJavaProjectCompilation(projectProduction, "test code", parent);
-        result.compileSpecSupplier = () -> result.computeTestCompileSpec(projectProduction.getCompilation());
+                new JkJavaProjectCompilation(construction, TEST_PURPOSE, parent);
+        result.dependencyBootSupplier = () -> construction.getRuntimeDependencies().merge(construction
+            .getCompilation().getDependencies()).getResult();
+        result.compileSpecSupplier = () -> result.computeTestCompileSpec(construction.getCompilation());
         result.layout
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
                 .setStandardOuputDirs(JkCompileLayout.Concern.TEST);
@@ -115,7 +126,7 @@ public class JkJavaProjectCompilation<T> {
      * </ul>
      */
     public void run() {
-        JkLog.startTask("Compile and process resources for scope '" + scope + "'");
+        JkLog.startTask("Make " + purpose);
         beforeGenerate.run();
         sourceGenerator.accept(this.layout.resolveGeneratedSourceDir());
         resourceGenerator.accept(this.layout.resolveGeneratedResourceDir());
@@ -131,7 +142,7 @@ public class JkJavaProjectCompilation<T> {
      */
     public void runIfNecessary() {
         if (done) {
-            JkLog.trace("Compilation task already done. Won't perfom again.");
+            JkLog.trace("Compilation task already done. Won't perform again.");
         } else {
             run();
             done = true;
@@ -240,6 +251,19 @@ public class JkJavaProjectCompilation<T> {
         return this;
     }
 
+    public JkJavaProjectCompilation<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+        this.dependenciesModifier = dependenciesModifier.andThen(modifier);
+        return this;
+    }
+
+    public JkResolveResult resolveDependencies() {
+        return construction.getDependencyResolver().resolve(getDependencies());
+    }
+
+    public JkDependencySet getDependencies() {
+        return dependenciesModifier.apply(dependencyBootSupplier.get());
+    }
+
     private JkJavaCompileSpec getComputedCompileSpec() {
         return compileSpecSupplier.get();
     }
@@ -255,26 +279,30 @@ public class JkJavaProjectCompilation<T> {
         }
     }
 
+    private String effectiveSourceEncoding() {
+        return sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING;
+    }
+
+    private JkJavaVersion effectiveSourceVersion() {
+        return javaVersion != null ? javaVersion : DEFAULT_JAVA_VERSION;
+    }
+
     private JkJavaCompileSpec computeProdCompileSpec() {
-        JkScope[] scopes = new JkScope[] {JkScope.COMPILE, JkScope.PROVIDED};
         return JkJavaCompileSpec.of()
-            .setSourceAndTargetVersion(JkUtilsObject.firstNonNull(this.javaVersion, DEFAULT_JAVA_VERSION))
-            .setEncoding(sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING)
-            .setClasspath(projectProduction.getDependencyManagement()
-                    .fetchDependencies(scopes).getFiles())
+            .setSourceAndTargetVersion(effectiveSourceVersion())
+            .setEncoding(effectiveSourceEncoding())
+            .setClasspath(resolveDependencies().getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
             .setOutputDir(layout.resolveClassDir());
     }
 
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
-        JkScope[] scopes = new JkScope[] {JkScope.TEST, JkScope.PROVIDED};
-        JkJavaCompileSpec prodSpec = prodStep.getComputedCompileSpec();
+        JkDependencySet dependencies = getDependencies();
         return JkJavaCompileSpec.of()
-                .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodSpec.getSourceVersion())
-                .setEncoding(sourceEncoding != null ? sourceEncoding : prodSpec.getEncoding())
-                .setClasspath(projectProduction.getDependencyManagement()
-                        .fetchDependencies(scopes).getFiles()
+                .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodStep.effectiveSourceVersion())
+                .setEncoding(sourceEncoding != null ? sourceEncoding : prodStep.effectiveSourceEncoding())
+                .setClasspath(construction.getDependencyResolver().resolve(dependencies).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
                 .addOptions(compileOptions)

@@ -1,10 +1,15 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.java.JkClasspath;
+import dev.jeka.core.api.java.JkJavaCompileSpec;
+import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkLocator;
@@ -20,6 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Supplier;
+
+import static dev.jeka.core.api.depmanagement.JkDependencySet.Hint.lastAndIf;
 
 /**
  * Engine having responsibility of compiling def classes, instantiate Jeka class and run it.<br/>
@@ -72,16 +79,14 @@ final class Engine {
     /**
      * Pre-compile and compile Jeka classes (if needed) then execute methods mentioned in command line
      */
-    void execute(CommandLine commandLine, String jkClassHint, JkLog.Verbosity verbosityToRestore) {
+    void execute(CommandLine commandLine, JkLog.Verbosity verbosityToRestore) {
         final long start = System.nanoTime();
         JkLog.startTask("Compile def and initialise Jeka classes");
         JkClass jkClass = null;
         JkPathSequence path = JkPathSequence.of();
+        String jkClassHint = Environment.standardOptions.jkClassName();
         preCompile();  // Need to pre-compile to get the declared def dependencies
         if (!JkUtilsString.isBlank(jkClassHint)) {  // First find a class in the existing classpath without compiling
-            if (Environment.standardOptions.logRuntimeInformation != null) {
-                path = path.and(compile(false));
-            }
             jkClass = getJkClassInstance(jkClassHint, path);
         }
         if (jkClass == null) {
@@ -94,6 +99,8 @@ final class Engine {
                 throw new JkException("Can't find or guess any Jeka class %s in project %s.%s",
                         hint, this.projectBaseDir, prompt);
             }
+        } else {
+            path = compile(false).and(path);
         }
         jkClass.getImportedJkClasses().setImportedRunRoots(this.rootsOfImportedJekaClasses);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -114,6 +121,7 @@ final class Engine {
     private void preCompile() {
         final List<Path> sourceFiles = JkPathTree.of(resolver.defSourceDir)
                 .andMatcher(JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER)).getFiles();
+        JkLog.trace("Parse source code of " + sourceFiles);
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.defDependencies = this.defDependencies.and(parser.dependencies());
         this.defRepos = parser.importRepos().and(defRepos);
@@ -156,7 +164,7 @@ final class Engine {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
-        final JkClass jkClass = resolver.resolve(jkClassHint);
+        final JkClass jkClass = resolver.resolveQuietly(jkClassHint);
         if (jkClass == null) {
             return null;
         }
@@ -173,12 +181,10 @@ final class Engine {
 
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
-        JkScopeMapping scope = JkScope.of("*").mapTo("default(*)");
-        return JkDependencySet.of(defDependencies
+        return defDependencies
                 .andFiles(bootLibs())
-                .andFiles(JkClasspath.ofCurrentRuntime()).minusLastIf(!devMode)
-                .andFile(JkLocator.getJekaJarPath()).minusLastIf(devMode)
-                .withDefaultScope(scope));
+                .andFiles(lastAndIf(!devMode), JkClasspath.ofCurrentRuntime())
+                .andFiles(lastAndIf(devMode), JkLocator.getJekaJarPath());
     }
 
     private JkPathSequence bootLibs() {

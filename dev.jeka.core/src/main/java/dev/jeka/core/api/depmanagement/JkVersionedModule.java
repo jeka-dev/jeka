@@ -118,4 +118,33 @@ public final class JkVersionedModule {
         .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, getVersion().getValue());
     }
 
+    public JkVersionedModule resolveConflict(JkVersion other, ConflictStrategy strategy) {
+        if (version.isUnspecified()) {
+            return withVersion(other);
+        }
+        if (other.isUnspecified()) {
+            return this;
+        }
+        if (strategy == ConflictStrategy.FAIL && !version.equals(other)) {
+            throw new IllegalStateException("Module " + this.moduleId + " has been declared with oth version " + version +
+                    " and " + other);
+        }
+        if (version.isSnapshot() && !other.isSnapshot()) {
+            return withVersion(other);
+        }
+        if (!version.isSnapshot() && other.isSnapshot()) {
+            return this;
+        }
+        if (strategy == ConflictStrategy.TAKE_FIRST) {
+            return this;
+        }
+        return strategy == ConflictStrategy.TAKE_HIGHEST && version.isGreaterThan(other) ?
+                this : this.withVersion(other);
+    }
+
+    public enum ConflictStrategy {
+        TAKE_FIRST, TAKE_HIGHEST, TAKE_LOWEST, FAIL
+    }
+
+
 }

@@ -1,17 +1,13 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkResolutionParameters;
+import dev.jeka.core.api.depmanagement.JkTransitivity;
+import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
-import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-
-import static dev.jeka.core.api.depmanagement.JkScope.RUNTIME;
-import static dev.jeka.core.api.depmanagement.JkScope.TEST;
 
 
 /**
@@ -27,43 +23,35 @@ public class JavaPluginBuild extends JkClass {
     
     @Override
     protected void setup() {
-       java.getProject()
-           .getConstruction()
-               .getDependencyManagement()
-                   .getResolver()
-                        .getParams()
-                            .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT).__.__
-                   .addDependencies(JkDependencySet.of()
+       java.getProject().simpleFacade()
+               .setCompileDependencies(deps -> deps
                        .and("com.google.guava:guava:21.0")
                        .and("com.sun.jersey:jersey-server:1.19.4")
-                       .and("org.junit.jupiter:junit-jupiter-engine:5.6.0", TEST)
-                       .and("org.junit.vintage:junit-vintage-engine:jar:5.6.0", TEST)
-                   ).__
-               .getCompilation()
-                   .setJavaVersion(JkJavaVersion.V8).__
+                       .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
+               .setTestDependencies(deps -> deps
+                       .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
+               .addTestExcludeFilterSuffixedBy("IT", false)
+               .setJavaVersion(JkJavaVersion.V8)
+               .setPublishedMavenModuleId("dev.jeka:sample-javaplugin")
+               .setPublishedMavenVersion("1.0-SNAPSHOT")
+       .getProject()
+           .getConstruction()
+               .getDependencyResolver()
+                    .getParams()
+                            .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT).__.__
                .getTesting()
-                   .getTestSelection()
-                        .addIncludeStandardPatterns()
-                        .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
                    .getTestProcessor()
                         .setForkingProcess(false)
                    .getEngineBehavior()
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__.__
-
-           // Publication is only necessary if your project is being deployed on a binary repository.
-           // Many projects as jee war jar, springboot application, tools, Graphical application
-           // does not need this section at all.
            .getPublication()
-               .setModuleId("dev.jeka:sample-javaplugin")
-               //.setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags())  // Version inferred from Git
-               .setVersion("1.0-SNAPSHOT")
-               .addRepos(JkRepo.ofMaven(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
-               .getMavenPublication()
+               .getMaven()
+                    .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
 
                    // Published dependencies can be modified here from the ones declared in dependency management.
                    // Here jersey-server is not supposed to be part of the API but only needed at runtime.
                    .setDependencies(deps -> deps
-                       .replaceScope("com.sun.jersey:jersey-server", RUNTIME));
+                       .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME));
     }
 
     public void cleanPackPublish() {

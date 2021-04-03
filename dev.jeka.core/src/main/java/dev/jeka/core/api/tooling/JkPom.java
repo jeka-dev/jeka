@@ -1,7 +1,10 @@
 package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependency;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -15,13 +18,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static dev.jeka.core.api.depmanagement.JkQualifiedDependencies.*;
+
 /**
  * Wraps a POM file (Ideally an effective POM file) and provides convenient methods to extract
- * information jump.
+ * information on.
  *
  * @author Jerome Angibaud
  */
 public final class JkPom {
+
+    private static final List<String> KNOWN_SCOPE = JkUtilsIterable.listOf(COMPILE_SCOPE, RUNTIME_SCOPE,
+            PROVIDED_SCOPE, TEST_SCOPE);
 
     private final Document pomDoc;
 
@@ -82,12 +90,12 @@ public final class JkPom {
     /**
      * The dependencies declared in this POM.
      */
-    public JkDependencySet getDependencies() {
+    public JkQualifiedDependencies getDependencies() {
         return dependencies(dependenciesElement(), getProperties());
     }
 
     /**
-     * The map groupId:ArtifactId -> version provideded by the <code>dependencyManagement</code>
+     * The map groupId:ArtifactId -> version provided by the <code>dependencyManagement</code>
      * section of this POM.
      */
     public JkVersionProvider getVersionProvider() {
@@ -97,10 +105,8 @@ public final class JkPom {
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
-        final JkDependencySet dependencies = dependencies(dependenciesEl, getProperties());
-        for (final JkScopedDependency scopedDependency : dependencies) {
-            final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .getDependency();
+        final JkQualifiedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
+        for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
             final JkVersionedModule versionedModule = JkVersionedModule.of(
                     moduleDependency.getModuleId(),
                     JkVersion.of(moduleDependency.getVersion().getValue()));
@@ -149,22 +155,19 @@ public final class JkPom {
     }
 
     /**
-     * The {@link JkDependencyExclusions} instance provided by the <code>dependencyManagement</code>
+     * The {@link DependencyExclusions} instance provided by the <code>dependencyManagement</code>
      * section of this POM.
      */
-    public JkDependencyExclusions getDependencyExclusion() {
-        JkDependencyExclusions result = JkDependencyExclusions.of();
+    public DependencyExclusions getDependencyExclusion() {
+        DependencyExclusions result = DependencyExclusions.of();
         if (dependencyManagementEl() == null) {
             return result;
         }
-        final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
-                "dependencies");
-        final JkDependencySet dependencies = dependencies(dependenciesEl, getProperties());
-        for (final JkScopedDependency scopedDependency : dependencies) {
-            final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .getDependency();
-            if (!moduleDependency.getExcludes().isEmpty()) {
-                result = result.and(moduleDependency.getModuleId(), moduleDependency.getExcludes());
+        final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(), "dependencies");
+        final JkQualifiedDependencies scopedDependencies = dependencies(dependenciesEl, getProperties());
+        for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
+            if (!moduleDependency.getExclusions().isEmpty()) {
+                result = result.and(moduleDependency.getModuleId(), moduleDependency.getExclusions());
             }
         }
         return result;
@@ -184,49 +187,41 @@ public final class JkPom {
         return JkRepoSet.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
-    private JkDependencySet dependencies(Element dependenciesEl, Map<String, String> props) {
-        List<JkScopedDependency> scopedDependencies = new LinkedList<>();
+    private JkQualifiedDependencies dependencies(Element dependenciesEl, Map<String, String> props) {
+        List<JkQualifiedDependency> scopedDependencies = new LinkedList<>();
         for (final Element dependencyEl : JkUtilsXml.directChildren(dependenciesEl, "dependency")) {
-            scopedDependencies.add(jkDependency(dependencyEl, props));
+            scopedDependencies.add(scopedDep(dependencyEl, props));
         }
-        return JkDependencySet.of(scopedDependencies);
+        return JkQualifiedDependencies.of(scopedDependencies);
     }
 
-    private JkScopedDependency jkDependency(Element mvnDependency, Map<String, String> props) {
-
+    private JkQualifiedDependency scopedDep(Element mvnDependency, Map<String, String> props) {
         final String groupId = JkUtilsXml.directChildText(mvnDependency, "groupId");
         final String artifactId = JkUtilsXml.directChildText(mvnDependency, "artifactId");
         final String version = resolveProps(JkUtilsXml.directChildText(mvnDependency, "version"), props) ;
         JkModuleDependency moduleDependency = JkModuleDependency.of(groupId, artifactId, version);
         final String type = JkUtilsXml.directChildText(mvnDependency, "type");
-        if (type != null) {
-            moduleDependency = moduleDependency.withExt(type);
-        }
         final String classifier = JkUtilsXml.directChildText(mvnDependency, "classifier");
-        if (classifier != null) {
-            moduleDependency = moduleDependency.withClassifier(classifier);
+        if (type != null || classifier != null) {
+            moduleDependency = moduleDependency.andClassifierAndType(classifier, type);
         }
         final Element exclusionsEl = JkUtilsXml.directChild(mvnDependency, "exclusions");
         if (exclusionsEl != null) {
             for (final Element exclusionElement : JkUtilsXml.directChildren(exclusionsEl,
                     "exclusion")) {
-                moduleDependency = moduleDependency.andExclude(jkDepExclude(exclusionElement));
+                moduleDependency = moduleDependency.andExclusion(jkDepExclude(exclusionElement));
             }
         }
-        final String scope = JkUtilsXml.directChildText(mvnDependency, "scope");
-        final JkScope[] jkScopes;
-        if (scope == null || scope.equalsIgnoreCase("compile")) {
-            jkScopes = new JkScope[0];
-        } else {
-            jkScopes =  new JkScope[] {JkScope.of(scope)};
-        }
-        return JkScopedDependency.of(moduleDependency, jkScopes);
+        String scope = JkUtilsXml.directChildText(mvnDependency, "scope");
+        scope = JkUtilsObject.firstNonNull(scope, COMPILE_SCOPE);
+        String realScope = toScope(scope);
+        return JkQualifiedDependency.of(realScope, moduleDependency);
     }
 
-    private JkDepExclude jkDepExclude(Element exclusionEl) {
+    private JkDependencyExclusion jkDepExclude(Element exclusionEl) {
         final String groupId = JkUtilsXml.directChildText(exclusionEl, "groupId");
         final String artifactId = JkUtilsXml.directChildText(exclusionEl, "artifactId");
-        return JkDepExclude.of(groupId, artifactId);
+        return JkDependencyExclusion.of(groupId, artifactId);
 
     }
 
@@ -242,6 +237,17 @@ public final class JkPom {
             }
         }
         return value;
+    }
+
+    static String toScope(String candidate)  {
+        if (candidate == null) {
+            return null;
+        }
+        String normalized = candidate.trim().toLowerCase();
+        if (KNOWN_SCOPE.contains(normalized)) {
+            return candidate;
+        }
+        return null;
     }
 
 }

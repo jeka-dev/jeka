@@ -25,8 +25,8 @@ public class JavaSourceParserTest {
         SourceParser parser = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("with3Imports.javasource"));
         final JkDependencySet dependencies = parser.dependencies();
-        Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
-        Assert.assertEquals(1, JkUtilsIterable.listOf(parser.importRepos()).size());
+        Assert.assertEquals(3, dependencies.getEntries().size());
+        Assert.assertEquals(1, parser.importRepos().getRepos().size());
     }
 
     @Test
@@ -34,15 +34,15 @@ public class JavaSourceParserTest {
         SourceParser parser = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("with3MultiImports.javasource"));
         final JkDependencySet dependencies = parser.dependencies();
-        Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
-        Assert.assertEquals(2, JkUtilsIterable.listOf(parser.importRepos().getRepoList()).size());
+        Assert.assertEquals(3, dependencies.getEntries().size());
+        Assert.assertEquals(2, parser.importRepos().getRepos().size());
     }
 
     @Test
     public void withoutImport() {
         final JkDependencySet dependencies = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("withoutImport.javasource")).dependencies();
-        Assert.assertEquals(0, JkUtilsIterable.listOf(dependencies).size());
+        Assert.assertEquals(0, dependencies.getEntries().size());
     }
 
     @Test
