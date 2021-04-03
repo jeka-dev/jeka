@@ -8,7 +8,7 @@
 
 	<property name="bin" location="jeka-bin" />
 
-	<fileset id="libs" dir="dev.jeka.core/jeka/libs/provided">
+	<fileset id="libs" dir="dev.jeka.core/jeka/libs/compile">
 		<include name='**/*.jar' />
 	</fileset>
 
