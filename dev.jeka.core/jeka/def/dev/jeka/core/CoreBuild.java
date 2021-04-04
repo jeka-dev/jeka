@@ -118,7 +118,7 @@ public class CoreBuild extends JkClass {
                         .addApache2License()
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr").__.__
                 .getPostActions()
-                    .append(() -> createGithubRelease());
+                    .append(this::createGithubRelease);
     }
 
     private void createGithubRelease() {

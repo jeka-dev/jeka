@@ -140,7 +140,7 @@ public final class JkMavenPublication<T> {
 
     private JkMavenPublication publish(JkRepoSet repos) {
         JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
-        JkUtilsAssert.state(moduleId != null, "moduleIId cannot be null.");
+        JkUtilsAssert.state(moduleId != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);

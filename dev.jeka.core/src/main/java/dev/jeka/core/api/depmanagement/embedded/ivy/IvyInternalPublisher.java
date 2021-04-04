@@ -85,7 +85,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
                              JkPomMetadata metadata, JkDependencySet dependencies) {
-        JkLog.startTask("Publish on Maven repositories");
+        JkLog.startTask("Publish " + versionedModule + " on Maven repositories");
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptorForMavenPublish(versionedModule,
                 artifactLocator, dependencies);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
