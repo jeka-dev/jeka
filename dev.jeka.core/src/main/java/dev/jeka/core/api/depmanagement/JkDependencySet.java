@@ -465,7 +465,7 @@ public class JkDependencySet {
     /**
      * Returns a clone of this dependencySet but adding dependency exclusion on the the last element.
      */
-    public JkDependencySet withLocalExclusion(JkDependencyExclusion... exclusions) {
+    public JkDependencySet withLocalExclusions(JkDependencyExclusion... exclusions) {
         if (entries.isEmpty()) {
             return this;
         }
@@ -488,9 +488,9 @@ public class JkDependencySet {
      * @See #withLocalExclusion
      */
     public JkDependencySet withLocalExclusions(String... groupAndNames) {
-        JkDependencyExclusion[] excludes = Arrays.stream(groupAndNames).map(JkDependencySet::of)
+        JkDependencyExclusion[] excludes = Arrays.stream(groupAndNames).map(JkDependencyExclusion::of)
                 .toArray(JkDependencyExclusion[]::new);
-        return withLocalExclusion(excludes);
+        return withLocalExclusions(excludes);
     }
 
     /**

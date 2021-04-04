@@ -43,6 +43,9 @@ final class JkClassResolver {
             return resolve(classNameHint);
         } catch (RuntimeException e) {
             JkLog.warn("Error reading class hint " + classNameHint + " : " + e.getMessage());
+            if (JkLog.isVerbose()) {
+                e.printStackTrace();
+            }
             return null;
         }
     }

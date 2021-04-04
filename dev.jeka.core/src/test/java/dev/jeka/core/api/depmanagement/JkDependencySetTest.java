@@ -11,6 +11,7 @@ public class JkDependencySetTest {
     public void normalised_takeHighest_ok() {
         JkDependencySet dependencySet = JkDependencySet.of()
                 .and("my.group:module:2.0")
+                    .withLocalExclusions("a_transitive:dependency")
                 .and("my.group:module:2.8")
                 .andFiles("./foo.jar")
                 .and("my.group:module")

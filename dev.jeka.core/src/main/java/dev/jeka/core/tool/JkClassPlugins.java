@@ -86,9 +86,15 @@ public final class JkClassPlugins {
         }
         final T plugin;
         try {
+            PluginCompatibilityBreakChecker.checkCompatibility(pluginClass);
             plugin = JkUtilsReflect.newInstance(pluginClass, JkClass.class, this.holder);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error while instantiating plugin class " + pluginClass, e);
+        } catch (Throwable t) {  // Catch LinkageError
+            if (t instanceof LinkageError) {
+                throw new RuntimeException("Plugin class " + pluginClass
+                        + " seems not compatible with this Jeka version as this plugin reference an unknown class " +
+                        "from Jeka", t);
+            }
+            throw new RuntimeException("Error while instantiating plugin class " + pluginClass, t);
         }
         injectOptions(plugin);
         try {

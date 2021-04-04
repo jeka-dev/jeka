@@ -19,7 +19,7 @@ public class JkManifestTest {
         final JkManifest manifest = JkManifest.of().addMainAttribute(Name.MAIN_CLASS,
                 mainClassName);
         manifest.writeTo(file);
-        final String readMainClass = JkManifest.of().setManifestFromFile(file)
+        final String readMainClass = JkManifest.of().loadFromFile(file)
                 .getManifest().getMainAttributes().get(Name.MAIN_CLASS).toString();
         Assert.assertEquals(mainClassName, readMainClass);
     }

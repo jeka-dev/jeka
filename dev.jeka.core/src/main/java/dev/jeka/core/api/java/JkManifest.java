@@ -95,50 +95,40 @@ public final class JkManifest<T> {
     }
 
     /**
-     * Sets the underlying {@link Manifest} object. T
+     * Set the underlying {@link Manifest} with the specified one.
      */
-    public JkManifest<T> setManifest(Manifest manifest) {
+    public JkManifest<T> set(Manifest manifest) {
         this.manifest = manifest;
         return this;
     }
 
     /**
-     * Sets the underlying {@link Manifest} object from the content of the specified file.
+     * Loads the manifest file from the specified path and set it as the underlying manifest.
      */
-    public JkManifest<T> setManifestFromFile(Path file) {
+    public JkManifest<T> loadFromFile(Path file) {
         this.manifest = read(file);
         return this;
     }
 
     /**
-     * Sets the underlying {@link Manifest} object from the file present at [specified class dir]/META-INF/MANIFEST.MF
+     * Loads the manifest from the specified input stream and set it as the underlying manifest.
      */
-    public JkManifest<T> setManifestFromClassRootDir(Path classDir) {
-        final Path manifestFile = classDir.resolve(STANDARD_LOCATION);
-        return this.setManifestFromFile(manifestFile);
+    public JkManifest<T> loadFromInputStream(InputStream inputStream) {
+        return this.set(read(inputStream));
     }
 
     /**
-     * Set the values from the specified inputStream source.
-     * The specified inputStream is supposed to contains manifest information as present
-     * in a manifest file.
+     * Loads the manifest from the jar or the base class directory the specified class belongs to.
      */
-    public JkManifest<T> setManifestFromInputStream(InputStream inputStream) {
-        return this.setManifest(read(inputStream));
-    }
-
-    /**
-     * Set the values from the specified i,n the manifest belonging to the specified class jar.
-     */
-    public JkManifest<T> setManifestFromClass(Class<?> clazz) {
+    public JkManifest<T> loadFromClass(Class<?> clazz) {
         String className = clazz.getSimpleName() + ".class";
         String classPath = clazz.getResource(className).toString();
         if (!classPath.startsWith("jar")) {
-            return setManifestFromInputStream(clazz.getClassLoader().getResourceAsStream(STANDARD_LOCATION));
+            return loadFromInputStream(clazz.getClassLoader().getResourceAsStream(STANDARD_LOCATION));
         }
         String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/" + STANDARD_LOCATION;
         try {
-            return setManifestFromInputStream(new URL(manifestPath).openStream());
+            return loadFromInputStream(new URL(manifestPath).openStream());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

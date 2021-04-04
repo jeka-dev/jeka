@@ -1,5 +1,6 @@
 # 0.9.5
 * Deep rework of dependency management API. Removal of 'scope' context.
+* Fix plugin version compatibility checker
 
 # 0.9.4.RELEASE
 * Rename JkCommandSet to JkClass
