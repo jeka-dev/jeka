@@ -66,6 +66,7 @@ public class CoreBuild extends JkClass {
 
     @Override
     protected void setup()  {
+        System.out.println("-----------------------------" + git.getVersionFromTags());
 
         // Module version is driven by git repository info
         String jekaVersion = git.getVersionFromTags();
