@@ -70,9 +70,33 @@ public final class JkGitWrapper {
         return git.andParams("log", "--oneline", "--format=%B", "-n 1", "HEAD").withLogOutput(false).runAndReturnOutputAsLines();
     }
 
+    /**
+     * Convenient method to extract information from the last commit title.
+     * It splits tittle is separated words, then it looks for the fist word starting
+     * with the specified prefix. The returned suffix is the word found minus the prefix.<p/>
+     * This method returns <code>null</code> if no such prefix found.
+     *
+     * For example, if the tittle is 'Release_0.9.5.RC1 : Rework Dependencies', then
+     * invoking this method with 'Release_' argument will return '0.9.5.RC1'.
+     */
+    public String extractSuffixFromLastCommitTittle(String prefix) {
+        String[] words = prefix.split(" ");
+        for (String word : words) {
+            if (word.startsWith(prefix)) {
+                return word.substring(prefix.length());
+            }
+        }
+        return null;
+    }
+
     public JkGitWrapper tagAndPush(String name) {
-        git.andParams("tag", name).runSync();
+        tag(name);
         git.andParams("push", "origin", "--tags").runSync();
+        return this;
+    }
+
+    public JkGitWrapper tag(String name) {
+        git.andParams("tag", name).runSync();
         return this;
     }
 

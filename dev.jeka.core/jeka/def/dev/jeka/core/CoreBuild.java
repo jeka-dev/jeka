@@ -99,6 +99,8 @@ public class CoreBuild extends JkClass {
                     .setDisplayOutput(false)
                     .addOptions("-notimestamp").__.__
             .getPublication()
+                .getPreActions()
+                    .append(this::tagIfReleaseMentionedInCurrentCommit).__
                 .getArtifactProducer()
                     .putMainArtifact(this::doPackWithEmbedded)
                     .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
@@ -120,8 +122,14 @@ public class CoreBuild extends JkClass {
                     .append(this::createGithubRelease);
     }
 
-    private String getVersion() {
-        git.getLastCommitMessage();
+    private void tagIfReleaseMentionedInCurrentCommit() {
+        if (git.isWorkspaceDirty()) {
+            return;
+        }
+        String releaseVersion = git.extractSuffixFromLastCommitTittle("Release:");
+        if (releaseVersion != null) {
+            git.tag(releaseVersion);
+        }
     }
 
     private void createGithubRelease() {

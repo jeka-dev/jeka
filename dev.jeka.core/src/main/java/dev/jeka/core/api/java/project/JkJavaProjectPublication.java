@@ -31,6 +31,8 @@ public class JkJavaProjectPublication {
 
     private final JkIvyPublication<JkJavaProjectPublication> ivy;
 
+    private final JkRunnables<JkJavaProjectPublication> preActions;
+
     private final JkRunnables<JkJavaProjectPublication> postActions;
 
     /**
@@ -56,12 +58,17 @@ public class JkJavaProjectPublication {
             .setDependencies(deps -> JkIvyPublication.getPublishDependencies(
                     project.getConstruction().getCompilation().getDependencies(),
                     project.getConstruction().getRuntimeDependencies(), conflictStrategy));
+        this.preActions = JkRunnables.ofParent(this);
         this.postActions = JkRunnables.ofParent(this);
     }
 
     public JkJavaProjectPublication apply(Consumer<JkJavaProjectPublication> consumer) {
         consumer.accept(this);
         return this;
+    }
+
+    public JkRunnables<JkJavaProjectPublication> getPreActions() {
+        return preActions;
     }
 
     public JkRunnables<JkJavaProjectPublication> getPostActions() {
@@ -81,12 +88,14 @@ public class JkJavaProjectPublication {
     }
 
     public void publish() {
+        preActions.run();
         if (maven.getModuleId() != null) {
             maven.publish();
         }
         if (ivy.getModuleId() != null) {
             ivy.publish();
         }
+        postActions.run();
     }
 
     private void registerArtifacts() {
