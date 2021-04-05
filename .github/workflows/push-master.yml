@@ -27,5 +27,5 @@ jobs:
       env:
         OSSRH_USER: ${{ secrets.OSSRH_USER }}
         OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
-        GPG_PASSPHRASE: ${{ sercets.GPG_PASSPHRASE }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
