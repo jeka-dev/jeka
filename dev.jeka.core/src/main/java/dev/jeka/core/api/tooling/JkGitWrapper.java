@@ -80,7 +80,11 @@ public final class JkGitWrapper {
      * invoking this method with 'Release_' argument will return '0.9.5.RC1'.
      */
     public String extractSuffixFromLastCommitTittle(String prefix) {
-        String[] words = prefix.split(" ");
+        List<String> messageLines = getLastCommitMessage();
+        if (messageLines.isEmpty()) {
+            return null;
+        }
+        String[] words = messageLines.get(0).split(" ");
         for (String word : words) {
             if (word.startsWith(prefix)) {
                 return word.substring(prefix.length());

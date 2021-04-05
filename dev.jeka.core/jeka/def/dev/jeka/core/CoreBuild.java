@@ -128,6 +128,7 @@ public class CoreBuild extends JkClass {
         }
         String releaseVersion = git.extractSuffixFromLastCommitTittle("Release:");
         if (releaseVersion != null) {
+            JkLog.info("Tagging with " + releaseVersion + " for release.");
             git.tag(releaseVersion);
         }
     }
