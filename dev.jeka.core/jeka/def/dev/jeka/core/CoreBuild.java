@@ -120,6 +120,10 @@ public class CoreBuild extends JkClass {
                     .append(this::createGithubRelease);
     }
 
+    private String getVersion() {
+        git.getLastCommitMessage();
+    }
+
     private void createGithubRelease() {
         String version = java.getProject().getPublication().getMaven().getVersion();
         if (version.endsWith(".RELEASE")) {
