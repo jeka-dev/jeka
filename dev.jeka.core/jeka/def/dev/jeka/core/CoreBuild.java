@@ -57,8 +57,6 @@ public class CoreBuild extends JkClass {
     @JkEnv("GH_TOKEN")
     public String githubToken;
 
-    @JkEnv("TRAVIS_BRANCH")
-    public String travisBranch;
 
     protected CoreBuild() {
         git = JkGitWrapper.of(this.getBaseDir());
@@ -126,7 +124,7 @@ public class CoreBuild extends JkClass {
         String version = java.getProject().getPublication().getMaven().getVersion();
         if (version.endsWith(".RELEASE")) {
             GithubReleaseContentEditor githubReleaseContentEditor =
-                    new GithubReleaseContentEditor("jerkar/jeka", travisBranch, githubToken);
+                    new GithubReleaseContentEditor("jerkar/jeka", "master", githubToken);
             String releaseNote = githubReleaseContentEditor.getReleaseNoteForTag(
                     this.getBaseDir().resolve("../release-note.md"), version);
             if (releaseNote!= null) {
