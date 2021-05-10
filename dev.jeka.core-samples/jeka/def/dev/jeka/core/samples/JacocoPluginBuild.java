@@ -1,5 +1,6 @@
 package dev.jeka.core.samples;
 
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
@@ -22,7 +23,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
  */
 public class JacocoPluginBuild extends JkClass {
 
-    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    public JkPluginJava java = getPlugin(JkPluginJava.class);
 
     /*
      * This is not necessary to declare plugins as members. <code>getPlugin(JkPluginJacoco.class)</code>can be
@@ -32,7 +33,7 @@ public class JacocoPluginBuild extends JkClass {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().simpleFacade()
+        java.getProject().simpleFacade()
                 .setCompileDependencies(deps -> deps
                     .and(GUAVA.version("18.0"))
                 )
@@ -42,7 +43,12 @@ public class JacocoPluginBuild extends JkClass {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(JacocoPluginBuild.class, args).javaPlugin.test();
+        JkInit.instanceOf(JacocoPluginBuild.class, args).java.test();
+    }
+
+    public void printIml() {
+        JkImlGenerator imlGenerator = JkImlGenerator.of(java.getJavaIdeSupport());
+        System.out.println(imlGenerator.generate());
     }
 
 }

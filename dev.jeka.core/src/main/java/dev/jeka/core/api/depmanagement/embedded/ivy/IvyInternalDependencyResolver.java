@@ -226,14 +226,14 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                             .getDynamicConstraintDependencyRevisionId().getRevision());
                     final JkModuleNodeInfo moduleNodeInfo  = JkModuleNodeInfo.of(moduleId, version,
                             masterConfigurations, rootConfigurations, resolvedVersion, artifacts);
-                    if (!containSame(list, moduleId)) {
+                    if (!containsSame(list, moduleId)) {
                         list.add(moduleNodeInfo);
                     }
                 }
             }
         }
 
-        private static boolean containSame(List<JkModuleNodeInfo> list, JkModuleId moduleId) {
+        private static boolean containsSame(List<JkModuleNodeInfo> list, JkModuleId moduleId) {
             for (final JkModuleNodeInfo moduleNodeInfo : list) {
                 if (moduleNodeInfo.getModuleId().equals(moduleId)) {
                     return true;

@@ -1,3 +1,5 @@
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.samples.JavaPluginBuild;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
@@ -5,12 +7,11 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 /**
- * Simple build demonstrating how Jerkar can handle multi-project build.
+ * Simple build demonstrating how Jeka can handle multi-project build.
  * <p>
- * Here, the project depends on the <code>org.jerkar.samples</code> getSibling project.
- * More precisely, on the jar file produced by <code>MavenStyleBuild</code>.
+ * Here, the project depends on the <code>dev.jeka.core-samples</code> sibling project.
  * <p>
- * Compilation depends on a jar produced by <code>org.jerkar.samples</code>
+ * Compilation depends on a jar produced by <code>dev.jeka.core-samples</code>
  * project and from its transitive dependencies.
  * 
  * @author Jerome Angibaud
@@ -29,6 +30,7 @@ public class NormalJarBuild extends JkClass {
     @JkDefImport("../dev.jeka.core-samples")
     private JavaPluginBuild sampleBuild;
 
+
     @Override
     protected void setup() {
         java.getProject()
@@ -43,6 +45,13 @@ public class NormalJarBuild extends JkClass {
     public void cleanPack() {
         clean();
         java.pack();
+    }
+
+    public void printIml() {
+        JkImlGenerator imlGenerator = JkImlGenerator.of(java.getJavaIdeSupport())
+                .setDefDependencies(JkDependencySet.of(sampleBuild.java.getProject().toDependency()))
+                .setDefDependencyResolver(this.getDefDependencyResolver());
+        System.out.println(imlGenerator.generate());
     }
 
     public static void main(String[] args) {

@@ -72,14 +72,14 @@ public final class JkGitWrapper {
 
     /**
      * Convenient method to extract information from the last commit title.
-     * It splits tittle is separated words, then it looks for the fist word starting
+     * This splits title is separated words, then looks for the fist word starting
      * with the specified prefix. The returned suffix is the word found minus the prefix.<p/>
      * This method returns <code>null</code> if no such prefix found.
      *
-     * For example, if the tittle is 'Release_0.9.5.RC1 : Rework Dependencies', then
-     * invoking this method with 'Release_' argument will return '0.9.5.RC1'.
+     * For example, if the title is 'Release:0.9.5.RC1 : Rework Dependencies', then
+     * invoking this method with 'Release:' argument will return '0.9.5.RC1'.
      */
-    public String extractSuffixFromLastCommitTittle(String prefix) {
+    public String extractSuffixFromLastCommitTitle(String prefix) {
         List<String> messageLines = getLastCommitMessage();
         if (messageLines.isEmpty()) {
             return null;

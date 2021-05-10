@@ -194,6 +194,10 @@ public class JkDependencySet {
         return minus(list);
     }
 
+    public JkDependencySet minus(Path path) {
+        return minus(JkFileSystemDependency.of(path));
+    }
+
     public JkDependencySet minus(JkModuleId moduleId) {
         return minus(JkModuleDependency.of(moduleId, JkVersion.UNSPECIFIED));
     }
@@ -230,10 +234,6 @@ public class JkDependencySet {
         return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
     }
 
-
-
-
-
     public JkDependencySet mergeLocalProjectExportedDependencies() {
         List<JkDependency> result = new LinkedList<>();
         for (JkDependency dependency : entries) {
@@ -254,7 +254,6 @@ public class JkDependencySet {
             }
         }
         return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
-
     }
 
 
@@ -434,16 +433,7 @@ public class JkDependencySet {
      */
     public List<JkDependency> getVersionedDependencies() {
         return entries.stream()
-                .map(dependency -> {
-                    if (dependency instanceof JkModuleDependency) {
-                        JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                        JkVersion providedVersion = versionProvider.getVersionOf(moduleDependency.getModuleId());
-                        if (moduleDependency.getVersion().isUnspecified() && providedVersion != null) {
-                            return moduleDependency.withVersion(providedVersion);
-                        }
-                    }
-                    return dependency;
-                })
+                .map(versionProvider::version)
                 .collect(Collectors.toList());
     }
 

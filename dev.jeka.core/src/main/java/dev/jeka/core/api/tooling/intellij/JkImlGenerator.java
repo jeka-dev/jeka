@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -25,14 +24,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Provides method to generate and read Eclipse metadata files.
  */
 public final class JkImlGenerator {
 
-    private static final String FOR_JEKA_ATTRIUTE = "forJeka";
+    private static final String FOR_JEKA_ATTRIBUTE = "forJeka";
 
     private static final String ENCODING = "UTF-8";
 
@@ -77,9 +75,6 @@ public final class JkImlGenerator {
         this.ideSupport = ideSupport;
     }
 
-    /**
-     * Constructs a {@link JkImlGenerator} to the project base directory
-     */
     public static JkImlGenerator of(JkJavaIdeSupport ideSupport) {
         return new JkImlGenerator(ideSupport);
     }
@@ -101,21 +96,18 @@ public final class JkImlGenerator {
         writeJdk();
         writeContent();
         writeOrderEntrySourceFolder();
-        Context context = new Context();
-        JkResolveResult jkClassResolveResult = null;
-        if (this.defDependencyResolver != null) {
-            jkClassResolveResult = defDependencyResolver.resolve(defDependencies);
-            markJekaDeps(jkClassResolveResult, context);
-        }
+        Set<Path> processedPaths  = new HashSet<>();
         if (this.ideSupport.getDependencyResolver() != null) {
-            JkResolveResult resolveResult = resolveWithIdeSupport();
-            writeDependencies(resolveResult, ideSupport.getDependencyResolver().getRepos(),
-                    context, false);
+            JkResolveResult resolveResult = ideSupport.getDependencyResolver().resolve(ideSupport.getDependencies());
+            JkRepoSet repos = ideSupport.getDependencyResolver().getRepos();
+            writeDependencies(resolveResult, repos, processedPaths, false);
         }
         if (this.defDependencyResolver != null) {
-            writeDependencies(jkClassResolveResult, this.defDependencyResolver.getRepos(), context, true);
+            JkResolveResult resolveResult = defDependencyResolver
+                    .resolveWithoutLocalProjectTransitiveDependenciies(defDependencies);
+            writeDependencies(resolveResult, this.defDependencyResolver.getRepos(), processedPaths, true);
         }
-        writeExtraJekaLodules(this.extraJekaModules);
+        writeExtraJekaModules(this.extraJekaModules);
         writeFoot();
         writer.close();
         return fos.toString(ENCODING);
@@ -211,7 +203,6 @@ public final class JkImlGenerator {
         }
 
         // Write production sources
-
         if (ideSupport.getProdLayout() != null) {
             for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveSources().toList()) {
                 if (fileTree.exists()) {
@@ -263,7 +254,7 @@ public final class JkImlGenerator {
         return false;
     }
 
-    private void writeExtraJekaLodules(Iterable<String> moduleNames) throws XMLStreamException {
+    private void writeExtraJekaModules(Iterable<String> moduleNames) throws XMLStreamException {
         for (final String moduleName : moduleNames) {
             if (!processedModuleEntries.contains(moduleName)) {
                 writeOrderEntryForModule(moduleName, "TEST", true);
@@ -272,37 +263,9 @@ public final class JkImlGenerator {
         }
     }
 
-    private void markJekaDeps(JkResolveResult resolveResult, Context context) {
-        final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
-        for (final JkResolvedDependencyNode node : tree.toFlattenList()) {
-            if (node.isModuleNode()) { //maven module
-                toLibPath(node.getModuleInfo(), null, null).forEach(libPath -> context.forJekaPaths.add(libPath.bin));
-            } else {
-                final JkResolvedDependencyNode.JkFileNodeInfo fileNodeInfo =
-                        (JkResolvedDependencyNode.JkFileNodeInfo) node.getNodeInfo();
-                if (fileNodeInfo.isComputed()) {
-                    final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectDir();
-                    if (projectDir != null && !context.allModules.contains(projectDir)) {
-                        context.allModules.add(projectDir);
-                    }
-                } else {
-                    context.forJekaPaths.addAll(fileNodeInfo.getFiles());
-                }
-            }
-        }
-    }
-
-    private JkResolveResult resolveWithIdeSupport() {
-        List<JkDependency> deps = ideSupport.getDependencies().getEntries().stream()
-                .map(qDep -> qDep.getDependency())
-                .filter(dep -> dep.getIdeProjectDir() == null)
-                .collect(Collectors.toList());
-        return ideSupport.getDependencyResolver().resolve(JkQualifiedDependencies.ofDependencies(deps));
-    }
-
     private void writeDependencies(JkResolveResult resolveResult, JkRepoSet repos,
-                                   Context context,
-                                   boolean forceTest) throws XMLStreamException {
+                                   Set<Path> processedPaths,
+                                   boolean forJeka) throws XMLStreamException {
         if (resolveResult.getErrorReport().hasErrors()) {
             if (failOnDepsResolutionError) {
                 throw new IllegalStateException("Fail at resolvig dependencies : " + resolveResult.getErrorReport());
@@ -316,42 +279,41 @@ public final class JkImlGenerator {
 
             // Maven dependency
             if (node.isModuleNode()) {
-                final String ideScope = forceTest ? "TEST" : ideScope(node.getModuleInfo().getRootConfigurations());
+                final String ideScope = forJeka ? "TEST" : ideScope(node.getModuleInfo().getRootConfigurations());
                 final List<LibPath> paths = toLibPath(node.getModuleInfo(), repos, ideScope);
                 for (final LibPath libPath : paths) {
-                    if (!context.allPaths.contains(libPath.bin)) {
-                        boolean forJeka = context.allPaths.contains(libPath.bin);
-                        writeOrderEntryForLib(libPath, context);
-                        context.allPaths.add(libPath.bin);
+                    if (!processedPaths.contains(libPath.bin)) {
+                        processedPaths.contains(libPath.bin);
+                        writeOrderEntryForLib(libPath, forJeka);
+                        processedPaths.add(libPath.bin);
                     }
                 }
 
                 // File dependencies (file ofSystem + computed)
             } else {
-                final String ideScope = forceTest ? "TEST" : ideScope(node.getNodeInfo().getDeclaredConfigurations());
+                final String ideScope = forJeka ? "TEST" : ideScope(node.getNodeInfo().getDeclaredConfigurations());
                 final JkResolvedDependencyNode.JkFileNodeInfo fileNodeInfo = (JkResolvedDependencyNode.JkFileNodeInfo) node.getNodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final Path projectDir = fileNodeInfo.computationOrigin().getIdeProjectDir();
-                    if (projectDir != null && !context.allModules.contains(projectDir)) {
-                        boolean forJeka = context.forJekaPaths.contains(projectDir);
+                    if (projectDir != null) {
                         writeOrderEntryForModule(projectDir.getFileName().toString(), ideScope, forJeka);
-                        context.allModules.add(projectDir);
+                        processedPaths.add(projectDir);
                     }
                 } else {
-                    writeFileEntries(fileNodeInfo.getFiles(), processedLibEntries, ideScope, context);
+                    writeFileEntries(fileNodeInfo.getFiles(), processedLibEntries, ideScope, forJeka);
                 }
             }
         }
     }
 
-    private void writeFileEntries(Iterable<Path> files, Set<String> paths, String ideScope, Context context) throws XMLStreamException {
+    private void writeFileEntries(Iterable<Path> files, Set<String> paths, String ideScope, boolean forJeka) throws XMLStreamException {
         for (final Path file : files) {
             final LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = ideScope;
             libPath.source = lookForSources(file);
             libPath.javadoc = lookForJavadoc(file);
-            writeOrderEntryForLib(libPath, context);
+            writeOrderEntryForLib(libPath, forJeka);
             paths.add(file.toString());
         }
     }
@@ -413,7 +375,7 @@ public final class JkImlGenerator {
         writer.writeCharacters("\n");
     }
 
-    private void writeOrderEntryForLib(LibPath libPath, Context context) throws XMLStreamException {
+    private void writeOrderEntryForLib(LibPath libPath, boolean forJeka) throws XMLStreamException {
         writer.writeCharacters(T2);
         writer.writeStartElement("orderEntry");
         writer.writeAttribute("type", "module-library");
@@ -421,8 +383,8 @@ public final class JkImlGenerator {
             writer.writeAttribute("scope", libPath.scope);
         }
         writer.writeAttribute("exported", "");
-        if (context.forJekaPaths.contains(libPath.bin)) {
-            writer.writeAttribute(FOR_JEKA_ATTRIUTE, "");
+        if (forJeka) {
+            writer.writeAttribute(FOR_JEKA_ATTRIBUTE, "");
         }
         writer.writeCharacters("\n");
         writer.writeCharacters(T3);
@@ -454,7 +416,7 @@ public final class JkImlGenerator {
         writer.writeAttribute("module-name", ideaModuleName);
         writer.writeAttribute("exported", "");
         if (forJeka) {
-            writer.writeAttribute(FOR_JEKA_ATTRIUTE, "");
+            writer.writeAttribute(FOR_JEKA_ATTRIBUTE, "");
         }
         writer.writeCharacters("\n");
     }
@@ -664,10 +626,10 @@ public final class JkImlGenerator {
         if (candidates.isEmpty()) {
             return null;
         }
-        return candidates.stream().filter(JkImlGenerator::isPlateformPlugin).findFirst().orElse(null);
+        return candidates.stream().filter(JkImlGenerator::isPlatformPlugin).findFirst().orElse(null);
     }
 
-    private static boolean isPlateformPlugin(Path pluginXmlFile) {
+    private static boolean isPlatformPlugin(Path pluginXmlFile) {
         try {
             Document doc = JkUtilsXml.documentFrom(pluginXmlFile);
             Element root = JkUtilsXml.directChild(doc, "idea-plugin");
@@ -675,12 +637,5 @@ public final class JkImlGenerator {
         } catch (RuntimeException e) {
             return false;
         }
-    }
-
-    private static class Context {
-        Set<Path> allModules = new HashSet<>();
-        Set<Path> allPaths  = new HashSet<>();
-        Set<Path> forJekaModules = new HashSet<>();
-        Set<Path> forJekaPaths = new HashSet<>();
     }
 }

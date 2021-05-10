@@ -4,7 +4,7 @@ import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 /**
- * Simple build demonstrating of how Jerkar can handle multi-project build.
+ * Simple build demonstrating of how Jeka can handle multi-project build.
  * 
  * @author Jerome Angibaud
  * 
@@ -25,8 +25,7 @@ public class FatJarBuild extends JkClass {
                     .putMainArtifact(java.getProject().getConstruction()::createFatJar).__.__
             .simpleFacade()
                 .setCompileDependencies(deps -> deps
-                    .and(sampleBuild.java.getProject().toDependency()))
-        ;
+                    .and(sampleBuild.java.getProject().toDependency()));
     }
    
 }

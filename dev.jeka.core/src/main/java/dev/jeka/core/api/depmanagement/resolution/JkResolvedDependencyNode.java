@@ -55,8 +55,8 @@ public class JkResolvedDependencyNode {
         final List<JkResolvedDependencyNode> result = new LinkedList<>();
         final Set<JkFileDependency> addedFileDeps = new HashSet<>();
         for (final JkResolvedDependencyNode node : this.children) {
-            if (node.isModuleNode()) {
-                addFileDepsToTree(dependencies, result, addedFileDeps, node.moduleId());
+                    if (node.isModuleNode()) {
+                        addFileDepsToTree(dependencies, result, addedFileDeps, node.moduleId());
                 result.add(node);
             }
         }
@@ -246,21 +246,21 @@ public class JkResolvedDependencyNode {
         if (this.isModuleNode()) {
             return this.toStrings(false, -1, new HashSet<>());
         }
-        return JkUtilsIterable.listOf(this.getModuleInfo().toString());
+        return Collections.singletonList(this.getModuleInfo().toString());
     }
 
-    private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> expandeds) {
+    private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> extendedModules) {
         final List<String> result = new LinkedList<>();
         if (showRoot) {
             final String label = nodeInfo.toString();
             result.add(JkUtilsString.repeat(INDENT, indentLevel) + label);
         }
-        if (this.nodeInfo == null || (this.isModuleNode() && !expandeds.contains(this.moduleId()))) {
+        if (this.nodeInfo == null || (this.isModuleNode() && !extendedModules.contains(this.moduleId()))) {
             if (this.nodeInfo != null) {
-                expandeds.add(this.moduleId());
+                extendedModules.add(this.moduleId());
             }
             for (final JkResolvedDependencyNode child : children) {
-                result.addAll(child.toStrings(true, indentLevel+1, expandeds));
+                result.addAll(child.toStrings(true, indentLevel+1, extendedModules));
             }
         }
         return result;
@@ -298,25 +298,6 @@ public class JkResolvedDependencyNode {
 
         private static final long serialVersionUID = 1L;
 
-        static JkModuleNodeInfo ofAnonymousRoot() {
-            return new JkModuleNodeInfo(JkModuleId.of("anonymousGroup:anonymousName"), JkVersion.UNSPECIFIED,
-                    new HashSet<>(), new HashSet<>(), JkVersion.UNSPECIFIED, new LinkedList<>());
-        }
-
-        public static JkModuleNodeInfo ofRoot(JkVersionedModule versionedModule) {
-            return new JkModuleNodeInfo(versionedModule.getModuleId(), versionedModule.getVersion(),
-                    new HashSet<>(), new HashSet<>(), versionedModule.getVersion(), new LinkedList<>(), true);
-        }
-
-        public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion,
-                                          Set<String> declaredConfigurations,
-                                          Set<String> rootConfigurations,
-                                          JkVersion resolvedVersion,
-                                          List<Path> artifacts) {
-            return new JkModuleNodeInfo(moduleId, declaredVersion, declaredConfigurations, rootConfigurations,
-                    resolvedVersion, artifacts);
-        }
-
         private final JkModuleId moduleId;
         private final JkVersion declaredVersion;
         private final Set<String> declaredConfigurations;  // the left conf mapping side in the caller dependency description
@@ -339,6 +320,25 @@ public class JkResolvedDependencyNode {
             this.resolvedVersion = resolvedVersion;
             this.artifacts = Collections.unmodifiableList(new LinkedList<>(JkUtilsPath.toFiles(artifacts)));
             this.treeRoot = treeRoot;
+        }
+
+        static JkModuleNodeInfo ofAnonymousRoot() {
+            return new JkModuleNodeInfo(JkModuleId.of("anonymousGroup:anonymousName"), JkVersion.UNSPECIFIED,
+                    new HashSet<>(), new HashSet<>(), JkVersion.UNSPECIFIED, new LinkedList<>());
+        }
+
+        public static JkModuleNodeInfo ofRoot(JkVersionedModule versionedModule) {
+            return new JkModuleNodeInfo(versionedModule.getModuleId(), versionedModule.getVersion(),
+                    new HashSet<>(), new HashSet<>(), versionedModule.getVersion(), new LinkedList<>(), true);
+        }
+
+        public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion,
+                                          Set<String> declaredConfigurations,
+                                          Set<String> rootConfigurations,
+                                          JkVersion resolvedVersion,
+                                          List<Path> artifacts) {
+            return new JkModuleNodeInfo(moduleId, declaredVersion, declaredConfigurations, rootConfigurations,
+                    resolvedVersion, artifacts);
         }
 
         public JkModuleId getModuleId() {
@@ -390,7 +390,6 @@ public class JkResolvedDependencyNode {
             return JkUtilsPath.toPaths(artifacts);
         }
 
-
     }
 
     private static List<JkDependency> depsUntilLast(List<? extends JkDependency> dependencies, JkModuleId to) {
@@ -403,7 +402,7 @@ public class JkResolvedDependencyNode {
                     result.addAll(partialResult);
                     partialResult.clear();
                 }
-            } else if (dependency instanceof JkFileDependency) {
+            } else {
                 partialResult.add(dependency);
             }
         }

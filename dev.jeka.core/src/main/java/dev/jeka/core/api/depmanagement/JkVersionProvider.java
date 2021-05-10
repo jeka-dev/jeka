@@ -69,6 +69,18 @@ public final class JkVersionProvider {
         return this.map.get(moduleId);
     }
 
+    public JkDependency version(JkDependency dependency) {
+        if (! (dependency instanceof JkModuleDependency)) {
+            return dependency;
+        }
+        JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
+        JkVersion providedVersion = this.getVersionOf(moduleDependency.getModuleId());
+        if (moduleDependency.getVersion().isUnspecified() && providedVersion != null) {
+            return moduleDependency.withVersion(providedVersion);
+        }
+        return moduleDependency;
+    }
+
     /**
      * Returns <code>true</code> if this providers is empty.
      */

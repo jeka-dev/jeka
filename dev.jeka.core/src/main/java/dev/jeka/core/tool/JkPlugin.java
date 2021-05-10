@@ -28,13 +28,13 @@ public abstract class JkPlugin {
      *     1.3.0.RELEASE : 0.9.5.M1
      * </code></pre>
      */
-    public static final String MANIFEST_BREAKING_CHANGE_URL_ENTRY = "JEKA_BREAKING_CHANGE_URL";
+    public static final String MANIFEST_BREAKING_CHANGE_URL_ENTRY = "Jeka-Breaking-Change-Url";
 
     /**
      * Manifest entry containing the lowest Jeka version which is compatible with a plugin. If value not <code>null</code>  and
      * running Jeka version is lower then a warning log will be emitted.
      */
-    public static final String MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY = "JEKA_LOWEST_COMPATIBLE_VERSION";
+    public static final String MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY = "Jeka-Lowest-Compatible-Version";
 
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 

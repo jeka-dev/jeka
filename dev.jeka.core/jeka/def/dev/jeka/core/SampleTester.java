@@ -104,7 +104,7 @@ class SampleTester {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(this.sampleDependerBaseDir.getRoot())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
-                .withParams("clean", "java#pack", "-LB")
+                .withParams("clean", "java#pack", "-LB", "-LRI", "-LSU")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }

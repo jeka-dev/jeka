@@ -181,20 +181,21 @@ public class JkQualifiedDependencies {
 
 
 
-    public static JkQualifiedDependencies computeIdeDependencies(JkDependencySet compileDeps,
-                                                                 JkDependencySet runtimeDeps,
-                                                                 JkDependencySet testDeps,
+    public static JkQualifiedDependencies computeIdeDependencies(JkDependencySet allCompileDeps,
+                                                                 JkDependencySet allRuntimeDeps,
+                                                                 JkDependencySet allTestDeps,
                                                                  JkVersionedModule.ConflictStrategy strategy) {
-        JkDependencySetMerge mergeWithProd = compileDeps.merge(runtimeDeps);
-        JkDependencySetMerge mergeWithTest = mergeWithProd.getResult().merge(testDeps);
+        JkDependencySetMerge prodMerge = allCompileDeps.merge(allRuntimeDeps);
+        JkDependencySetMerge testMerge = prodMerge.getResult().merge(allTestDeps);
         List<JkQualifiedDependency> result = new LinkedList<>();
-        for (JkDependency dependency : mergeWithTest.getResult().normalised(strategy)
-                .assertNoUnspecifiedVersion().getVersionedDependencies()) {
+        List<JkDependency> dependencies = testMerge.getResult().normalised(strategy)
+                .assertNoUnspecifiedVersion().getEntries();
+        for (JkDependency dependency : dependencies) {
             final String scope;
-            if (mergeWithProd.getResult().getEntries().contains(dependency)) {
-                if (mergeWithProd.getAbsentDependenciesFromRight().contains(dependency)) {
+            if (prodMerge.getResult().getEntries().contains(dependency)) {
+                if (prodMerge.getAbsentDependenciesFromRight().contains(dependency)) {
                     scope = PROVIDED_SCOPE;
-                } else if (mergeWithProd.getAbsentDependenciesFromLeft().contains(dependency)) {
+                } else if (prodMerge.getAbsentDependenciesFromLeft().contains(dependency)) {
                     scope = RUNTIME_SCOPE;
                 } else {
                     scope = COMPILE_SCOPE;
@@ -202,10 +203,12 @@ public class JkQualifiedDependencies {
             } else {
                 scope = TEST_SCOPE;
             }
-            result.add(JkQualifiedDependency.of(scope, dependency));
+            JkDependency versionedDependency = testMerge.getResult().getVersionProvider().version(dependency);
+            result.add(JkQualifiedDependency.of(scope, versionedDependency));
+
         }
-        return new JkQualifiedDependencies(result, mergeWithTest.getResult().getGlobalExclusions(),
-                mergeWithTest.getResult().getVersionProvider());
+        return new JkQualifiedDependencies(result, testMerge.getResult().getGlobalExclusions(),
+                testMerge.getResult().getVersionProvider());
     }
 
     public static JkQualifiedDependencies computeIdeDependencies(JkDependencySet compileDeps,

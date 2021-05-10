@@ -64,7 +64,6 @@ public class CoreBuild extends JkClass {
 
     @Override
     protected void setup()  {
-        System.out.println("-----------------------------" + git.getVersionFromTags());
 
         // Module version is driven by git repository info
         String jekaVersion = git.getVersionFromTags();
@@ -126,7 +125,7 @@ public class CoreBuild extends JkClass {
         if (git.isWorkspaceDirty()) {
             return;
         }
-        String releaseVersion = git.extractSuffixFromLastCommitTittle("Release:");
+        String releaseVersion = git.extractSuffixFromLastCommitTitle("Release:");
         if (releaseVersion != null) {
             JkLog.info("Tagging with " + releaseVersion + " for release.");
             git.tag(releaseVersion);

@@ -130,12 +130,12 @@ To build the project without running whole integration test suite, run `dev.jeka
 
 ## How to Release ?
 
-Release is done automatically by Travis at each git push. If there is no tag on the current commit then it goes to a 
-SNAPSHOT deploy on OSSRH. If there is a tag, it goes to a publish on Maven central.
+Release is done automatically by Github action on PUSH on *master*.
+If the last commit message title contains a word like 'Release:XXX' then a tag XXX is created and 
+the binaries will be published on Maven Central.
+Otherwise, the binary wll be smply pushed on OSSRH snapshot.
 
 To really deploy to Maven central, a manual action it still needed to [close/release repository](https://oss.sonatype.org).
-
-To create a tag conveniently, just execute `jeka git#tagRemote` from your console and answer to the prompt. 
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jeka.dev/images/logo-whole-bg.jpg" width='420' height='420' align='center'/>

@@ -278,10 +278,7 @@ final class Engine {
     }
 
     private JkDependencyResolver getDefDependencyResolver() {
-        if (this.computeDefDependencies().hasModules()) {
-            return JkDependencyResolver.of().addRepos(this.defRepos);
-        }
-        return JkDependencyResolver.of();
+        return JkDependencyResolver.of().addRepos(this.defRepos);
     }
 
     private static void runProject(JkClass jkClass, List<CommandLine.MethodInvocation> invokes) {

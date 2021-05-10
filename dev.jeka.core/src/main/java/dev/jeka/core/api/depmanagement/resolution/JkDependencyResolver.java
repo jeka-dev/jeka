@@ -94,6 +94,11 @@ public final class JkDependencyResolver<T> {
                             .mergeLocalProjectExportedDependencies()));
     }
 
+    public JkResolveResult resolveWithoutLocalProjectTransitiveDependenciies(JkDependencySet dependencies) {
+        return resolve(JkQualifiedDependencies.of(
+                dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)));
+    }
+
     /**
      * Resolves the specified dependencies (dependencies declared as module) for the specified scopes.
      * @param qualifiedDependencies the dependencies to resolve.
