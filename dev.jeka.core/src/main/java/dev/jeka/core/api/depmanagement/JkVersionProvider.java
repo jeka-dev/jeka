@@ -90,6 +90,7 @@ public final class JkVersionProvider {
 
     /**
      * Returns a {@link JkVersionProvider} that is a union of this provider and the specified one.
+     * The versions present in the specified one will override versions specified in this one.
      */
     public JkVersionProvider and(JkVersionProvider other) {
         final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);

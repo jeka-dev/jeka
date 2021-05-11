@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -89,13 +89,13 @@ public final class JkDependencyResolver<T> {
     }
 
     public JkResolveResult resolve(JkDependencySet dependencies) {
-        return resolve(JkQualifiedDependencies.of(
+        return resolve(JkQualifiedDependencySet.of(
                 dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)
                             .mergeLocalProjectExportedDependencies()));
     }
 
     public JkResolveResult resolveWithoutLocalProjectTransitiveDependenciies(JkDependencySet dependencies) {
-        return resolve(JkQualifiedDependencies.of(
+        return resolve(JkQualifiedDependencySet.of(
                 dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)));
     }
 
@@ -104,9 +104,10 @@ public final class JkDependencyResolver<T> {
      * @param qualifiedDependencies the dependencies to resolve.
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
-    public JkResolveResult resolve(JkQualifiedDependencies qualifiedDependencies) {
+    public JkResolveResult resolve(JkQualifiedDependencySet qualifiedDependencies) {
         List<JkDependency> allDependencies = qualifiedDependencies.getDependencies();
-        JkQualifiedDependencies moduleQualifiedDependencies = qualifiedDependencies.withModuleDependenciesOnly();
+        JkQualifiedDependencySet moduleQualifiedDependencies = qualifiedDependencies.withModuleDependenciesOnly()
+                .replaceUnspecifiedVersionsWithProvider().assertNoUnspecifiedVersion();
         boolean hasModule = !moduleQualifiedDependencies.getDependencies().isEmpty();
         if (repos.getRepos().isEmpty() && hasModule) {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");

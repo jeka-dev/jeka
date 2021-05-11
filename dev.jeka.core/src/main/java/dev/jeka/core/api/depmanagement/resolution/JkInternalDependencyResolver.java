@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -23,11 +23,11 @@ public interface JkInternalDependencyResolver {
                                     JkResolutionParameters parameters) {
         List<JkDependency> depList = deps.normalised(JkVersionedModule.ConflictStrategy.FAIL)
                 .getVersionedDependencies();
-        return resolve(module, JkQualifiedDependencies.ofDependencies(depList)
+        return resolve(module, JkQualifiedDependencySet.ofDependencies(depList)
                         .withGlobalExclusions(deps.getGlobalExclusions()), parameters);
     }
 
-    JkResolveResult resolve(JkVersionedModule module, JkQualifiedDependencies deps, JkResolutionParameters parameters);
+    JkResolveResult resolve(JkVersionedModule module, JkQualifiedDependencySet deps, JkResolutionParameters parameters);
 
     File get(JkModuleDependency dependency);
 

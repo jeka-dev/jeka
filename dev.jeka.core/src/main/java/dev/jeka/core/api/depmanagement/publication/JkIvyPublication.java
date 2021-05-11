@@ -33,7 +33,7 @@ public final class JkIvyPublication<T> {
 
     private UnaryOperator<Path> defaultSigner;  // Can be null
 
-    private Function<JkQualifiedDependencies, JkQualifiedDependencies> dependencies = UnaryOperator.identity();
+    private Function<JkQualifiedDependencySet, JkQualifiedDependencySet> dependencies = UnaryOperator.identity();
 
     private Supplier<? extends JkArtifactLocator> artifactLocatorSupplier;
 
@@ -95,19 +95,19 @@ public final class JkIvyPublication<T> {
         return this;
     }
 
-    public JkIvyPublication<T> setDependencies(UnaryOperator<JkQualifiedDependencies> modifier) {
+    public JkIvyPublication<T> setDependencies(UnaryOperator<JkQualifiedDependencySet> modifier) {
         JkUtilsAssert.argument(modifier != null, "Dependency modifier cannot be null.");
         this.dependencies = dependencies.andThen(modifier);
         return this;
     }
 
-    public JkIvyPublication<T> setDependencies(JkQualifiedDependencies configuredDependencies) {
+    public JkIvyPublication<T> setDependencies(JkQualifiedDependencySet configuredDependencies) {
         return setDependencies(deps-> configuredDependencies);
     }
 
     public JkIvyPublication<T> setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test,
                                                JkVersionedModule.ConflictStrategy conflictStrategy) {
-        return setDependencies(JkQualifiedDependencies.computeIvyPublishDependencies(compile, runtime, test,
+        return setDependencies(JkQualifiedDependencySet.computeIvyPublishDependencies(compile, runtime, test,
                 conflictStrategy));
     }
 
@@ -115,8 +115,8 @@ public final class JkIvyPublication<T> {
         return setDependencies(compile, runtime, test, JkVersionedModule.ConflictStrategy.FAIL);
     }
 
-    public JkQualifiedDependencies getDependencies() {
-        return dependencies.apply(JkQualifiedDependencies.of());
+    public JkQualifiedDependencySet getDependencies() {
+        return dependencies.apply(JkQualifiedDependencySet.of());
     }
 
     public JkIvyPublication<T> clear() {
@@ -272,9 +272,9 @@ public final class JkIvyPublication<T> {
         return classifier;
     }
 
-    public static JkQualifiedDependencies getPublishDependencies(JkDependencySet compileDependencies,
-                                                          JkDependencySet runtimeDependencies,
-                                                          JkVersionedModule.ConflictStrategy strategy) {
+    public static JkQualifiedDependencySet getPublishDependencies(JkDependencySet compileDependencies,
+                                                                  JkDependencySet runtimeDependencies,
+                                                                  JkVersionedModule.ConflictStrategy strategy) {
         JkDependencySetMerge merge = compileDependencies.merge(runtimeDependencies);
         List<JkQualifiedDependency> result = new LinkedList<>();
         for (JkModuleDependency moduleDependency : merge.getResult().normalised(strategy)
@@ -289,7 +289,7 @@ public final class JkIvyPublication<T> {
             }
             result.add(JkQualifiedDependency.of(configuration, moduleDependency));
         }
-        return JkQualifiedDependencies.of(result);
+        return JkQualifiedDependencySet.of(result);
 
     }
 

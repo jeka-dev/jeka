@@ -7,7 +7,6 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -163,7 +162,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
 
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
-        JkQualifiedDependencies qualifiedDependencies = JkQualifiedDependencies.computeIdeDependencies(
+        JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
                 construction.getCompilation().getDependencies(),
                 construction.getRuntimeDependencies(),
                 construction.getTesting().getCompilation().getDependencies(),
@@ -187,8 +186,8 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     public JkLocalProjectDependency toDependency(JkArtifactId artifactId, JkTransitivity transitivity) {
        Runnable maker = () -> publication.getArtifactProducer().makeArtifact(artifactId);
        Path artifactPath = publication.getArtifactProducer().getArtifactPath(artifactId);
-       List<JkDependency> exportedDependencies = construction.getCompilation().getDependencies()
-               .merge(construction.getRuntimeDependencies()).getResult().getEntries();
+       JkDependencySet exportedDependencies = construction.getCompilation().getDependencies()
+               .merge(construction.getRuntimeDependencies()).getResult();
         return JkLocalProjectDependency.of(maker, artifactPath, this.baseDir, exportedDependencies)
                 .withTransitivity(transitivity);
     }

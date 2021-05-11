@@ -28,7 +28,7 @@ public class IvyInternalPublisherRunner {
                 JkModuleId.of("mygroup", "mymodule"), JkVersion.of("myVersion"));
         final JkIvyPublication ivyPublication = JkIvyPublication.of()
                 .setMainArtifact(sampleJarfile(), "compile", "test");
-        final JkQualifiedDependencies deps = JkQualifiedDependencies.of().of()
+        final JkQualifiedDependencySet deps = JkQualifiedDependencySet.of().of()
                 .and("compile", "org.springframework:spring-jdbc:3.0.+");
         jkIvyInternalPublisher.publishIvy(versionedModule, ivyPublication.getAllArtifacts(), deps);
     }

@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkCompileLayout;
@@ -225,8 +225,8 @@ public final class JkEclipseClasspathGenerator {
 
         // add def dependencies
         if (hasJekaDefDir() && defDependencyResolver != null) {
-            JkQualifiedDependencies qualifiedDependencies =
-                    JkQualifiedDependencies.ofDependencies(defDependencies.getEntries());
+            JkQualifiedDependencySet qualifiedDependencies =
+                    JkQualifiedDependencySet.ofDependencies(defDependencies.getEntries());
             writeDependenciesEntries(writer, qualifiedDependencies, defDependencyResolver, paths);
         }
 
@@ -393,7 +393,7 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeDependenciesEntries(XMLStreamWriter writer, JkQualifiedDependencies dependencies,
+    private void writeDependenciesEntries(XMLStreamWriter writer, JkQualifiedDependencySet dependencies,
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
 
         // dependencies with IDE project dir will be omitted. The project dir will be added in other place.

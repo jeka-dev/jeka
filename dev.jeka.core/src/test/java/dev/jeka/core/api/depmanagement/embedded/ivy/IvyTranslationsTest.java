@@ -2,7 +2,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
@@ -20,7 +20,7 @@ public class IvyTranslationsTest {
 
     @Test
     public void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn1dependencies() {
-        JkQualifiedDependencies deps =JkQualifiedDependencies.of()
+        JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and(null, JkModuleDependency.of("aGroup:aName:1.0").andClassifier("linux"))
                 .and(null, "bGroup:bName:win:exe:1.0");
         final DefaultModuleDescriptor desc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(

@@ -1,12 +1,14 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * A bunch of {@link JkQualifiedDependency}
  */
-public class JkQualifiedDependencies {
+public class JkQualifiedDependencySet {
 
     public static final String COMPILE_SCOPE = "compile"; // compile scope for published dependencies
 
@@ -41,26 +43,26 @@ public class JkQualifiedDependencies {
 
     private final JkVersionProvider versionProvider;
 
-    private JkQualifiedDependencies(List<JkQualifiedDependency> qualifiedDependencies, Set<JkDependencyExclusion>
+    private JkQualifiedDependencySet(List<JkQualifiedDependency> qualifiedDependencies, Set<JkDependencyExclusion>
             globalExclusions, JkVersionProvider versionProvider) {
         this.entries = Collections.unmodifiableList(qualifiedDependencies);
         this.globalExclusions = Collections.unmodifiableSet(globalExclusions);
         this.versionProvider = versionProvider;
     }
 
-    public static JkQualifiedDependencies of() {
-        return new JkQualifiedDependencies(Collections.emptyList(), Collections.emptySet(), JkVersionProvider.of());
+    public static JkQualifiedDependencySet of() {
+        return new JkQualifiedDependencySet(Collections.emptyList(), Collections.emptySet(), JkVersionProvider.of());
     }
 
-    public static JkQualifiedDependencies ofDependencies(List<JkDependency> dependencies) {
+    public static JkQualifiedDependencySet ofDependencies(List<JkDependency> dependencies) {
         return of(dependencies.stream().map(dep -> JkQualifiedDependency.of(null, dep)).collect(Collectors.toList()));
     }
 
-    public static JkQualifiedDependencies of(List<JkQualifiedDependency> qualifiedDependencies) {
-        return new JkQualifiedDependencies(qualifiedDependencies, Collections.emptySet(), JkVersionProvider.of());
+    public static JkQualifiedDependencySet of(List<JkQualifiedDependency> qualifiedDependencies) {
+        return new JkQualifiedDependencySet(qualifiedDependencies, Collections.emptySet(), JkVersionProvider.of());
     }
 
-    public static JkQualifiedDependencies of(JkDependencySet dependencySet) {
+    public static JkQualifiedDependencySet of(JkDependencySet dependencySet) {
         return ofDependencies(dependencySet.getEntries())
                 .withGlobalExclusions(dependencySet.getGlobalExclusions())
                 .withVersionProvider(dependencySet.getVersionProvider());
@@ -99,57 +101,57 @@ public class JkQualifiedDependencies {
                 .collect(Collectors.toList());
     }
 
-    public JkQualifiedDependencies remove(JkDependency dependency) {
+    public JkQualifiedDependencySet remove(JkDependency dependency) {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .filter(qDep -> !qDep.equals(dependency))
                 .collect(Collectors.toList());
-        return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
+        return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
-    public JkQualifiedDependencies and(JkQualifiedDependency qualifiedDependency) {
+    public JkQualifiedDependencySet and(JkQualifiedDependency qualifiedDependency) {
         List<JkQualifiedDependency> result = new LinkedList<>(this.entries);
         result.add(qualifiedDependency);
-        return new JkQualifiedDependencies(result, globalExclusions, versionProvider);
+        return new JkQualifiedDependencySet(result, globalExclusions, versionProvider);
     }
 
-    public JkQualifiedDependencies and(String qualifier, JkDependency dependency) {
+    public JkQualifiedDependencySet and(String qualifier, JkDependency dependency) {
         return and(JkQualifiedDependency.of(qualifier, dependency));
     }
 
-    public JkQualifiedDependencies and(String qualifier, String moduleDependencyDescriptor) {
+    public JkQualifiedDependencySet and(String qualifier, String moduleDependencyDescriptor) {
         return and(qualifier, JkModuleDependency.of(moduleDependencyDescriptor));
     }
 
-    public JkQualifiedDependencies remove(String dep) {
+    public JkQualifiedDependencySet remove(String dep) {
         return remove(JkModuleDependency.of(dep));
     }
 
-    public JkQualifiedDependencies replaceQualifier(JkDependency dependency, String qualifier) {
+    public JkQualifiedDependencySet replaceQualifier(JkDependency dependency, String qualifier) {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .map(qDep -> qDep.getDependency().equals(dependency) ? qDep.withQualifier(qualifier) : qDep)
                 .collect(Collectors.toList());
-        return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
+        return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
-    public JkQualifiedDependencies replaceQualifier(String dependency, String qualifier) {
+    public JkQualifiedDependencySet replaceQualifier(String dependency, String qualifier) {
         return replaceQualifier(JkModuleDependency.of(dependency), qualifier);
     }
 
-    public JkQualifiedDependencies withModuleDependenciesOnly() {
+    public JkQualifiedDependencySet withModuleDependenciesOnly() {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)
                 .collect(Collectors.toList());
-        return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
+        return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
     /**
      * These exclusions only stands for dependencies that are retrieved transitively. This means that
      * this not involves dependencies explicitly declared here.
      */
-    public JkQualifiedDependencies withGlobalExclusions(Set<JkDependencyExclusion> exclusions) {
+    public JkQualifiedDependencySet withGlobalExclusions(Set<JkDependencyExclusion> exclusions) {
         Set<JkDependencyExclusion> newExclusions = new HashSet<>(this.globalExclusions);
         newExclusions.addAll(exclusions);
-        return new JkQualifiedDependencies(entries, Collections.unmodifiableSet(newExclusions),
+        return new JkQualifiedDependencySet(entries, Collections.unmodifiableSet(newExclusions),
                 versionProvider);
     }
 
@@ -157,12 +159,12 @@ public class JkQualifiedDependencies {
      * These exclusions only stands for dependencies that are retrieved transitively. This means that
      * this not involves dependencies explicitly declared here.
      */
-    public JkQualifiedDependencies withVersionProvider(JkVersionProvider versionProvider) {
-        return new JkQualifiedDependencies(entries, globalExclusions, this.versionProvider
+    public JkQualifiedDependencySet withVersionProvider(JkVersionProvider versionProvider) {
+        return new JkQualifiedDependencySet(entries, globalExclusions, this.versionProvider
             .and(versionProvider));
     }
 
-    public JkQualifiedDependencies replaceUnspecifiedVersionsWithProvider() {
+    public JkQualifiedDependencySet replaceUnspecifiedVersionsWithProvider() {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .map(qDep -> {
                     if (qDep.getDependency() instanceof JkModuleDependency) {
@@ -176,15 +178,15 @@ public class JkQualifiedDependencies {
                     return qDep;
                 })
                 .collect(Collectors.toList());
-        return new JkQualifiedDependencies(dependencies, globalExclusions, versionProvider);
+        return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
 
 
-    public static JkQualifiedDependencies computeIdeDependencies(JkDependencySet allCompileDeps,
-                                                                 JkDependencySet allRuntimeDeps,
-                                                                 JkDependencySet allTestDeps,
-                                                                 JkVersionedModule.ConflictStrategy strategy) {
+    public static JkQualifiedDependencySet computeIdeDependencies(JkDependencySet allCompileDeps,
+                                                                  JkDependencySet allRuntimeDeps,
+                                                                  JkDependencySet allTestDeps,
+                                                                  JkVersionedModule.ConflictStrategy strategy) {
         JkDependencySetMerge prodMerge = allCompileDeps.merge(allRuntimeDeps);
         JkDependencySetMerge testMerge = prodMerge.getResult().merge(allTestDeps);
         List<JkQualifiedDependency> result = new LinkedList<>();
@@ -207,20 +209,20 @@ public class JkQualifiedDependencies {
             result.add(JkQualifiedDependency.of(scope, versionedDependency));
 
         }
-        return new JkQualifiedDependencies(result, testMerge.getResult().getGlobalExclusions(),
+        return new JkQualifiedDependencySet(result, testMerge.getResult().getGlobalExclusions(),
                 testMerge.getResult().getVersionProvider());
     }
 
-    public static JkQualifiedDependencies computeIdeDependencies(JkDependencySet compileDeps,
-                                                                 JkDependencySet runtimeDeps,
-                                                                 JkDependencySet testDeps) {
+    public static JkQualifiedDependencySet computeIdeDependencies(JkDependencySet compileDeps,
+                                                                  JkDependencySet runtimeDeps,
+                                                                  JkDependencySet testDeps) {
         return computeIdeDependencies(compileDeps, runtimeDeps, testDeps, JkVersionedModule.ConflictStrategy.FAIL);
     }
 
-    public static JkQualifiedDependencies computeIvyPublishDependencies(JkDependencySet compileDeps,
-                                                                        JkDependencySet runtimeDeps,
-                                                                        JkDependencySet testDeps,
-                                                                        JkVersionedModule.ConflictStrategy strategy) {
+    public static JkQualifiedDependencySet computeIvyPublishDependencies(JkDependencySet compileDeps,
+                                                                         JkDependencySet runtimeDeps,
+                                                                         JkDependencySet testDeps,
+                                                                         JkVersionedModule.ConflictStrategy strategy) {
         JkDependencySetMerge mergeWithProd = compileDeps.merge(runtimeDeps);
         JkDependencySetMerge mergeWithTest = mergeWithProd.getResult().merge(testDeps);
         List<JkQualifiedDependency> result = new LinkedList<>();
@@ -250,7 +252,7 @@ public class JkQualifiedDependencies {
             String configuration = configurationSource + " -> " + configurationTarget;
             result.add(JkQualifiedDependency.of(configuration, dependency));
         }
-        return new JkQualifiedDependencies(result, mergeWithTest.getResult().getGlobalExclusions(),
+        return new JkQualifiedDependencySet(result, mergeWithTest.getResult().getGlobalExclusions(),
                 mergeWithTest.getResult().getVersionProvider());
     }
 
@@ -264,6 +266,15 @@ public class JkQualifiedDependencies {
                 .filter(qDep -> list.contains(qDep))
                 .map(JkQualifiedDependency::getDependency)
                 .collect(Collectors.toList());
+    }
+
+    public JkQualifiedDependencySet assertNoUnspecifiedVersion() {
+        final List<JkModuleDependency> unspecifiedVersionLodules = getModuleDependencies().stream()
+                .filter(dep -> dep.getVersion().isUnspecified())
+                .collect(Collectors.toList());
+        JkUtilsAssert.state(unspecifiedVersionLodules.isEmpty(), "Following module does not specify version : "
+                + unspecifiedVersionLodules);
+        return this;
     }
 
 

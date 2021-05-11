@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 /**
  * A set of {@link JkDependency} generally standing for a given purpose (compile, test, runtime) in a project build. <p>
- * {@link JkDependencySet} also holds a {@link JkVersionProvider} and a set of JkDepe
+ * {@link JkDependencySet} also holds a {@link JkVersionProvider} and a set of {@link JkDependencyExclusion}.
  *
  *
  * @author Jerome Angibaud.
@@ -236,13 +236,15 @@ public class JkDependencySet {
 
     public JkDependencySet mergeLocalProjectExportedDependencies() {
         List<JkDependency> result = new LinkedList<>();
+        JkVersionProvider mergedVersionProvider = this.versionProvider;
         for (JkDependency dependency : entries) {
             if (dependency instanceof JkLocalProjectDependency) {
                 JkLocalProjectDependency localProjectDependency = (JkLocalProjectDependency) dependency;
                 result.add(localProjectDependency.withoutExportedDependencies());
-                List<JkDependency> exportedDependencies = localProjectDependency.getExportedDependencies();
+                JkDependencySet exportedDependencies = localProjectDependency.getExportedDependencies();
+                mergedVersionProvider = exportedDependencies.versionProvider.and(mergedVersionProvider);
                 JkDependencySet recursiveExportedDependencies =
-                        JkDependencySet.of(exportedDependencies).mergeLocalProjectExportedDependencies();
+                        exportedDependencies.mergeLocalProjectExportedDependencies();
                 for (JkDependency exportedDependency : recursiveExportedDependencies.entries) {
                     JkDependency matchedDependency = getMatching(exportedDependency);
                     if (matchedDependency == null) {
@@ -253,7 +255,7 @@ public class JkDependencySet {
                 result.add(dependency);
             }
         }
-        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
+        return new JkDependencySet(result, this.globalExclusions, mergedVersionProvider);
     }
 
 

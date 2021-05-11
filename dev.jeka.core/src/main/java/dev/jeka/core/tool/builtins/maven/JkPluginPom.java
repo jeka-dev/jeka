@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.maven;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkClass;
@@ -29,14 +29,14 @@ public class JkPluginPom extends JkPlugin {
         JkPom pom = JkPom.of(pomPath);
         System.out.println("Compile");
         System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(null,
-                JkQualifiedDependencies.COMPILE_SCOPE, JkQualifiedDependencies.PROVIDED_SCOPE)));
+                JkQualifiedDependencySet.COMPILE_SCOPE, JkQualifiedDependencySet.PROVIDED_SCOPE)));
         System.out.println(".withVersionProvider(" + pom.getVersionProvider().toJavaCode(margin) + ")");
 
         System.out.println("\nRuntime");
         System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencies.RUNTIME_SCOPE)));
+                JkQualifiedDependencySet.RUNTIME_SCOPE)));
         System.out.println("\nTest");
         System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencies.TEST_SCOPE)));
+                JkQualifiedDependencySet.TEST_SCOPE)));
     }
 }

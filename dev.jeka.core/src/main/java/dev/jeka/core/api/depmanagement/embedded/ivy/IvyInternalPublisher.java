@@ -69,7 +69,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     @Override
     public void publishIvy(JkVersionedModule versionedModule,
                            List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts,
-                           JkQualifiedDependencies dependencies) {
+                           JkQualifiedDependencySet dependencies) {
         JkLog.startTask( "Publish on Ivy repositories");
         final ModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toIvyPublishModuleDescriptor(
                 versionedModule, dependencies, publishedArtifacts);

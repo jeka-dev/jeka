@@ -13,7 +13,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
         implements JkFileDependency.JkTransitivityDependency {
 
     // exported dependencies
-    private List<JkDependency> exportedDependencies;
+    private JkDependencySet exportedDependencies;
 
     private JkTransitivity transitivity;
 
@@ -22,12 +22,15 @@ public class JkLocalProjectDependency extends JkComputedDependency
      * one is interested on.
      */
     private JkLocalProjectDependency(Runnable producer, Path file, Path ideProjectDir,
-                                     List<JkDependency> exportedDependencies,
+                                     JkDependencySet exportedDependencies,
                                      JkTransitivity transitivity) {
         super(producer, ideProjectDir, Collections.singleton(file));
-        this.exportedDependencies = exportedDependencies.stream()
+        List<JkDependency> relocatedDependencies = exportedDependencies.getEntries().stream()
                 .map(dep -> dep.withIdeProjectDir(ideProjectDir))
                 .collect(Collectors.toList());
+        this.exportedDependencies = JkDependencySet.of(relocatedDependencies)
+                .withGlobalExclusion(exportedDependencies.getGlobalExclusions())
+                .withVersionProvider(exportedDependencies.getVersionProvider());
         this.transitivity = transitivity;
     }
 
@@ -42,7 +45,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
      *                     published.
      */
     public static JkLocalProjectDependency of(Runnable producer, Path file, Path basedir,
-                                              List<JkDependency> dependencies) {
+                                              JkDependencySet dependencies) {
         return new JkLocalProjectDependency(producer, file, basedir, dependencies, null);
     }
 
@@ -50,18 +53,21 @@ public class JkLocalProjectDependency extends JkComputedDependency
      * Returns the dependencies that will be consumed by the depender. This is not the
      * the dependencies needed to compile the jar but the ones that would be published.
      */
-    public List<JkDependency> getExportedDependencies() {
+    public JkDependencySet getExportedDependencies() {
         if (this.transitivity == null || this.transitivity == JkTransitivity.RUNTIME) {
             return exportedDependencies;
         }
         if (transitivity == JkTransitivity.COMPILE) {
-            return exportedDependencies.stream()
+            List<JkDependency> filteredDependencies = exportedDependencies.getEntries().stream()
                     .filter(JkTransitivityDependency.class::isInstance)
                     .map(JkTransitivityDependency.class::cast)
                     .filter(dep -> JkTransitivity.COMPILE.equals(dep.getTransitivity()))
                     .collect(Collectors.toList());
+            return JkDependencySet.of(filteredDependencies)
+                    .withVersionProvider(exportedDependencies.getVersionProvider())
+                    .withGlobalExclusion(exportedDependencies.getGlobalExclusions());
         }
-        return Collections.emptyList();  // Transitivity == NONE
+        return JkDependencySet.of();
     }
 
     public JkTransitivity getTransitivity() {
@@ -81,6 +87,11 @@ public class JkLocalProjectDependency extends JkComputedDependency
 
     public JkLocalProjectDependency withoutExportedDependencies() {
         return new JkLocalProjectDependency(runnable, files.iterator().next(), getIdeProjectDir(),
-                Collections.emptyList(), transitivity);
+                JkDependencySet.of(), transitivity);
+    }
+
+    @Override
+    public String toString() {
+        return "Project : " + this.getIdeProjectDir();
     }
 }

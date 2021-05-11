@@ -22,7 +22,7 @@ public class QualifiedDependenciesResolutionIT {
 
     @Test
     public void resolve_qualifierWith2MasterConfigurations_ok() {
-        JkQualifiedDependencies deps = JkQualifiedDependencies.of()
+        JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("compile, runtime", "com.github.djeang:vincer-dom:1.3.0");
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
@@ -36,7 +36,7 @@ public class QualifiedDependenciesResolutionIT {
                 .and (JAVAX_SERVLET_API)
                 .andVersionProvider(JkVersionProvider.of(JAVAX_SERVLET_API, "4.0.1"));
         JkDependencySet runtime = compile.minus(JAVAX_SERVLET_API);
-        JkQualifiedDependencies qdeps = JkQualifiedDependencies.computeIdeDependencies(compile, runtime,
+        JkQualifiedDependencySet qdeps = JkQualifiedDependencySet.computeIdeDependencies(compile, runtime,
                 JkDependencySet.of());
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(qdeps);
@@ -51,7 +51,7 @@ public class QualifiedDependenciesResolutionIT {
         Path dep0File = Paths.get(QualifiedDependenciesResolutionIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(QualifiedDependenciesResolutionIT.class.getResource( "dep1").toURI());
         Path dep2File = Paths.get(QualifiedDependenciesResolutionIT.class.getResource( "dep2").toURI());
-        JkQualifiedDependencies deps = JkQualifiedDependencies.of()
+        JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("test", JkFileSystemDependency.of(dep0File))
                 .and("compile, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE")
                 .and("test", JkFileSystemDependency.of(dep1File))
@@ -104,7 +104,7 @@ public class QualifiedDependenciesResolutionIT {
     @Test
     public void resolve_manyModules_resultTreeIsCorrect() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
-        JkQualifiedDependencies deps = JkQualifiedDependencies.of()
+        JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("compile, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE")
                 .and("test", "org.springframework.boot:spring-boot-starter-test:1.5.+")
                 .and("compile", "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0");
@@ -151,7 +151,7 @@ public class QualifiedDependenciesResolutionIT {
     @Test
     public void resolve_manyModules_artifactCountIsCorrect() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
-        JkQualifiedDependencies deps = JkQualifiedDependencies.of()
+        JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("comple, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE")
                 .and("test", "org.springframework.boot:spring-boot-starter-test:1.5.+")
                 .and("compile", "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0");

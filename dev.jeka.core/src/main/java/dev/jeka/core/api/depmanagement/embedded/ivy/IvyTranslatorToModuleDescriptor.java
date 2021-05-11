@@ -22,7 +22,7 @@ import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToDepend
 class IvyTranslatorToModuleDescriptor {
 
     static DefaultModuleDescriptor toResolveModuleDescriptor(JkVersionedModule module,
-                                                             JkQualifiedDependencies dependencies) {
+                                                             JkQualifiedDependencySet dependencies) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
                 .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
         final DefaultModuleDescriptor result = newDefaultModuleDescriptor(thisModuleRevisionId);
@@ -62,14 +62,14 @@ class IvyTranslatorToModuleDescriptor {
                 })
                 .collect(Collectors.toList());
         DefaultModuleDescriptor result = toResolveModuleDescriptor(module,
-                JkQualifiedDependencies.of(qualifiedDependencies));
+                JkQualifiedDependencySet.of(qualifiedDependencies));
         Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module, artifactLocator);
         IvyTranslatorToArtifact.bind(result, artifactMap);
         return result;
     }
 
     static DefaultModuleDescriptor toIvyPublishModuleDescriptor(JkVersionedModule module,
-                                                                JkQualifiedDependencies dependencies,
+                                                                JkQualifiedDependencySet dependencies,
                                                                 List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts) {
         DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
         List<IvyTranslatorToArtifact.ArtifactAndConfigurations> artifactAndConfigurationsList =

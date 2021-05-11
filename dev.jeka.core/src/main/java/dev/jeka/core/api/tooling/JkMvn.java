@@ -2,7 +2,7 @@ package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependency;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -95,10 +95,10 @@ public final class JkMvn implements Runnable {
     /**
      * Reads the dependencies of this Maven project
      */
-    public JkQualifiedDependencies readDependencies() {
+    public JkQualifiedDependencySet readDependencies() {
         final Path file = JkUtilsPath.createTempFile("dependency", ".txt");
         commands("dependency:list", "-DoutputFile=" + file).run();
-        final JkQualifiedDependencies result = fromMvnFlatFile(file);
+        final JkQualifiedDependencySet result = fromMvnFlatFile(file);
         JkUtilsPath.deleteFile(file);
         return result;
     }
@@ -163,7 +163,7 @@ public final class JkMvn implements Runnable {
      * </ul>
      *
      */
-    public static JkQualifiedDependencies fromMvnFlatFile(Path flatFile) {
+    public static JkQualifiedDependencySet fromMvnFlatFile(Path flatFile) {
         List<JkQualifiedDependency> result = new LinkedList<>();
         for (final String line : JkUtilsPath.readAllLines(flatFile)) {
             JkQualifiedDependency scopedDependency = mvnDep(line);
@@ -171,7 +171,7 @@ public final class JkMvn implements Runnable {
                 result.add(scopedDependency);
             }
         }
-        return JkQualifiedDependencies.of(result);
+        return JkQualifiedDependencySet.of(result);
     }
 
     private static JkQualifiedDependency mvnDep(String description) {

@@ -52,7 +52,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
     }
 
     @Override
-    public JkResolveResult resolve(JkVersionedModule moduleArg, JkQualifiedDependencies deps,
+    public JkResolveResult resolve(JkVersionedModule moduleArg, JkQualifiedDependencySet deps,
                                    JkResolutionParameters parameters) {
         final JkVersionedModule module;
         if (moduleArg == null) {

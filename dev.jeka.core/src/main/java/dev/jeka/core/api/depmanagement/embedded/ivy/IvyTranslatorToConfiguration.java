@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import org.apache.ivy.core.module.descriptor.Configuration;
 
 import java.util.Collections;
@@ -11,7 +11,7 @@ class IvyTranslatorToConfiguration {
 
     static final String DEFAULT = "default";
 
-    static Set<Configuration> toMasterConfigurations(JkQualifiedDependencies dependencies) {
+    static Set<Configuration> toMasterConfigurations(JkQualifiedDependencySet dependencies) {
         Set<Configuration> result = dependencies.getEntries().stream()
                 .map(qDep -> qDep.getQualifier())
                 .flatMap(qualifier -> IvyConfigurationMapping.ofMultiple(qualifier).stream())

@@ -3,7 +3,7 @@ package dev.jeka.core.api.java.project;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencies;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.file.JkPathTree;
 import org.junit.Assert;
@@ -123,7 +123,7 @@ public class JkJavaProjectTest {
                 .setModuleId("my:module")
                 .setVersion("0.1");
         System.out.println(project.getConstruction().getCompilation().getDependencies());
-        JkQualifiedDependencies publishDeps = project.getPublication().getIvy().getDependencies();
+        JkQualifiedDependencySet publishDeps = project.getPublication().getIvy().getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
     }
 

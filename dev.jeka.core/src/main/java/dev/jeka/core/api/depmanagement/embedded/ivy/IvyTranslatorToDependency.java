@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 class IvyTranslatorToDependency {
 
-    static List<DefaultDependencyDescriptor> toDependencyDescriptors(JkQualifiedDependencies dependencies) {
+    static List<DefaultDependencyDescriptor> toDependencyDescriptors(JkQualifiedDependencySet dependencies) {
         return dependencies.replaceUnspecifiedVersionsWithProvider().getEntries().stream()
                 .map(qDep -> toDependencyDescriptor(qDep.getQualifier(), (JkModuleDependency) qDep.getDependency()))
                 .collect(Collectors.toList());
@@ -73,7 +73,7 @@ class IvyTranslatorToDependency {
             return Collections.singleton(dependencyConf);
         }
         JkTransitivity effectiveTransitivity = JkUtilsObject.firstNonNull(transitivity, JkTransitivity.RUNTIME);
-        String ivyExpression = JkQualifiedDependencies.getIvyTargetConfigurations(effectiveTransitivity);
+        String ivyExpression = JkQualifiedDependencySet.getIvyTargetConfigurations(effectiveTransitivity);
         return IvyConfigurationMapping.of(ivyExpression).getLeft();
     }
 
