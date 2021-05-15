@@ -104,7 +104,7 @@ public final class JkImlGenerator {
         }
         if (this.defDependencyResolver != null) {
             JkResolveResult resolveResult = defDependencyResolver
-                    .resolveWithoutLocalProjectTransitiveDependenciies(defDependencies);
+                    .resolveWithoutLocalProjectTransitiveDependencies(defDependencies);
             writeDependencies(resolveResult, this.defDependencyResolver.getRepos(), processedPaths, true);
         }
         writeExtraJekaModules(this.extraJekaModules);

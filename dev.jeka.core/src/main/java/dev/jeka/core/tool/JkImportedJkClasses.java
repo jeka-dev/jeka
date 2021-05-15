@@ -68,8 +68,8 @@ public final class JkImportedJkClasses {
         return importedRunRoots;
     }
 
-    void setImportedRunRoots(List<Path> roots) {
-        this.importedRunRoots = Collections.unmodifiableList(roots);
+    void setImportedRunRoots(Set<Path> roots) {
+        this.importedRunRoots = new LinkedList<>(roots);
     }
 
     private List<JkClass> resolveTransitiveRuns(Set<Path> files) {

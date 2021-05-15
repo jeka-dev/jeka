@@ -242,9 +242,9 @@ public class JkDependencySet {
                 JkLocalProjectDependency localProjectDependency = (JkLocalProjectDependency) dependency;
                 result.add(localProjectDependency.withoutExportedDependencies());
                 JkDependencySet exportedDependencies = localProjectDependency.getExportedDependencies();
-                mergedVersionProvider = exportedDependencies.versionProvider.and(mergedVersionProvider);
                 JkDependencySet recursiveExportedDependencies =
                         exportedDependencies.mergeLocalProjectExportedDependencies();
+                mergedVersionProvider = recursiveExportedDependencies.versionProvider.and(mergedVersionProvider);
                 for (JkDependency exportedDependency : recursiveExportedDependencies.entries) {
                     JkDependency matchedDependency = getMatching(exportedDependency);
                     if (matchedDependency == null) {

@@ -94,13 +94,14 @@ public final class JkDependencyResolver<T> {
                             .mergeLocalProjectExportedDependencies()));
     }
 
-    public JkResolveResult resolveWithoutLocalProjectTransitiveDependenciies(JkDependencySet dependencies) {
+    public JkResolveResult resolveWithoutLocalProjectTransitiveDependencies(JkDependencySet dependencies) {
         return resolve(JkQualifiedDependencySet.of(
                 dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)));
     }
 
     /**
-     * Resolves the specified dependencies (dependencies declared as module) for the specified scopes.
+     * Resolves the specified qualified dependencies. The qualification stands for dependency 'scope' or 'configuration'.
+     *
      * @param qualifiedDependencies the dependencies to resolve.
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */

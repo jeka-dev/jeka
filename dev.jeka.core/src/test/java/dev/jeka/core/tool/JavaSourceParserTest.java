@@ -8,6 +8,8 @@ import org.junit.Test;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 @SuppressWarnings("javadoc")
@@ -47,12 +49,13 @@ public class JavaSourceParserTest {
 
     @Test
     public void with2ProjectImports() {
-        final List<Path> projects = SourceParser.of(Paths.get(""),
+        final LinkedHashSet<Path> projects = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("with2projectImports.javasource"))
                 .projects();
+        List<Path> projectList = new LinkedList<>(projects);
         Assert.assertEquals(2, projects.size());
-        Assert.assertEquals("dev.jeka.core", projects.get(0).getFileName().toString());
-        Assert.assertEquals("src", projects.get(1).getFileName().toString());
+        Assert.assertEquals("dev.jeka.core", projectList.get(0).getFileName().toString());
+        Assert.assertEquals("src", projectList.get(1).getFileName().toString());
     }
 
 }

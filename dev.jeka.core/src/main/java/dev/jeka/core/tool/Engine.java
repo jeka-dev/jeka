@@ -52,7 +52,7 @@ final class Engine {
 
     private JkRepoSet defRepos;
 
-    private List<Path> rootsOfImportedJekaClasses = new LinkedList<>();
+    private LinkedHashSet<Path> rootsOfImportedJekaClasses = new LinkedHashSet<>();
 
     private List<String> compileOptions = new LinkedList<>();
 
@@ -152,7 +152,7 @@ final class Engine {
         }
         JkPathSequence runPath = resolveResult.getFiles();
         path.addAll(runPath.getEntries());
-        path.addAll(compileDependentProjects(yetCompiledProjects, path, compileSources).getEntries());
+        compileDependentProjects(yetCompiledProjects, path, compileSources);
         if (compileSources) {
             compileDef(JkPathSequence.of(path));
         }
@@ -196,10 +196,9 @@ final class Engine {
         return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
-    private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects,
+    private void compileDependentProjects(Set<Path> yetCompiledProjects,
                                                     LinkedHashSet<Path>  pathEntries,
                                                     boolean compileSources) {
-        JkPathSequence pathSequence = JkPathSequence.of();
         boolean compileImports = !this.rootsOfImportedJekaClasses.isEmpty();
         if (compileImports) {
             JkLog.startTask("Compile Jeka classes of dependent projects : "
@@ -208,12 +207,10 @@ final class Engine {
         for (final Path file : this.rootsOfImportedJekaClasses) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries, compileSources);
-            pathSequence = pathSequence.and(file);
         }
         if (compileImports) {
             JkLog.endTask();
         }
-        return pathSequence;
     }
 
     private void compileDef(JkPathSequence defClasspath) {
@@ -328,7 +325,7 @@ final class Engine {
         return JkRepoSet.of(JkRepoConfigOptionLoader.defRepository(), JkRepo.ofLocal());
     }
 
-    private static List<String> toRelativePaths(Path from, List<Path>  files) {
+    private static List<String> toRelativePaths(Path from, LinkedHashSet<Path>  files) {
         final List<String> result = new LinkedList<>();
         for (final Path file : files) {
             final String relPath = from.relativize(file).toString();
