@@ -1,14 +1,17 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.system.JkSquareConsoleLogConsumer;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkSquareConsoleLogConsumer;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 class Environment {
 
@@ -25,7 +28,11 @@ class Environment {
     static void initialize(String[] commandLineArgs) {
 
         // Parse command line
-        final CommandLine commandLine = CommandLine.parse(commandLineArgs);
+        Map<String, String> presets = preset();
+        String[] extras = JkUtilsString.translateCommandline(presets.get("_append"));
+        String[] actualCommandLineArgs = Stream.concat(Arrays.stream(commandLineArgs), Arrays.stream(extras))
+                .toArray(String[]::new);
+        final CommandLine commandLine = CommandLine.parse(actualCommandLineArgs);
 
         // Take all defined system properties (command line, ofSystem.properties files) and
         // inject them in the system.
@@ -46,7 +53,6 @@ class Environment {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
         JkSquareConsoleLogConsumer.setMaxLength(standardOptions.logMaxLength);
-
         Environment.systemProps = sysProps;
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;
@@ -143,7 +149,14 @@ class Environment {
             }
             return defaultValue;
         }
+    }
 
+    private static Map<String, String> preset() {
+        Path presetCommandsFile = Paths.get("jeka/cmd.properties");
+        if (Files.exists(presetCommandsFile)) {
+            return JkUtilsFile.readPropertyFileAsMap(presetCommandsFile);
+        }
+        return Collections.emptyMap();
     }
 
 }
