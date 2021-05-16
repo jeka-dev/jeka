@@ -54,8 +54,8 @@ final class JkClassResolver {
      * Resolves the {@link JkClass} instance to use on this project.
      */
     @SuppressWarnings("unchecked")
-    <T extends JkClass> T resolve(Class<T> baseClass, boolean initialised) {
-        return (T) resolve(null, baseClass, initialised);
+    <T extends JkClass> T resolve(Class<T> baseClass, boolean initialise) {
+        return (T) resolve(null, baseClass, initialise);
     }
 
     boolean hasDefSource() {
@@ -98,7 +98,7 @@ final class JkClassResolver {
     }
 
     @SuppressWarnings("unchecked")
-    private JkClass resolve(String classNameHint, Class<? extends JkClass> baseClass, boolean initialised) {
+    private JkClass resolve(String classNameHint, Class<? extends JkClass> baseClass, boolean initialize) {
 
         // If class name specified in options.
         if (!JkUtilsString.isBlank(classNameHint)) {
@@ -111,7 +111,7 @@ final class JkClassResolver {
             JkClass.baseDirContext(baseDir);
             final JkClass run;
             try {
-                run = initialised ? JkClass.of(clazz) : JkClass.ofUninitialised(clazz);
+                run = initialize ? JkClass.of(clazz) : JkClass.ofUninitialized(clazz);
             } finally {
                 JkClass.baseDirContext(null);
             }
@@ -123,20 +123,20 @@ final class JkClassResolver {
             final JkPathTree dir = JkPathTree.of(defSourceDir);
             for (final Path path : dir.getRelativeFiles()) {
                 if (path.toString().endsWith(".java") || path.toString().endsWith(".kt")) {
-                    final Class<?> clazz = JkClassLoader.ofCurrent().loadGivenClassSourcePath(path.toString());
+                    final Class<? extends JkClass> clazz =
+                            JkClassLoader.ofCurrent().loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
                         JkClass.baseDirContext(baseDir);
                         final JkClass run;
                         try {
-                            run = JkClass.of((Class<? extends JkClass>) clazz);
+                            run = initialize ? JkClass.of(clazz) : JkClass.ofUninitialized(clazz);
                         } finally {
                             JkClass.baseDirContext(null);
                         }
                         return run;
                     }
                 }
-
             }
         }
 

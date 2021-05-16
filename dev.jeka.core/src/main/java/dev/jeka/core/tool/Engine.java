@@ -69,11 +69,11 @@ final class Engine {
         this.resolver = new JkClassResolver(baseDir);
     }
 
-    <T extends JkClass> T getJkClass(Class<T> baseClass, boolean initialised) {
+    <T extends JkClass> T getJkClass(Class<T> baseClass, boolean initialise) {
         if (resolver.needCompile()) {
             this.compile(true);
         }
-        return resolver.resolve(baseClass, initialised);
+        return resolver.resolve(baseClass, initialise);
     }
 
     /**

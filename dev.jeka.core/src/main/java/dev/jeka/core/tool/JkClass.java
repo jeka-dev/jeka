@@ -76,7 +76,7 @@ public class JkClass {
      */
     public static <T extends JkClass> T of(Class<T> jkClass) {
         JkLog.startTask("Instantiate Jeka class " + jkClass.getName() + " at " + BASE_DIR_CONTEXT.get());
-        final T jkClassInstance = ofUninitialised(jkClass);
+        final T jkClassInstance = ofUninitialized(jkClass);
         try {
             jkClassInstance.initialise();
         } catch (Exception e) {
@@ -113,7 +113,7 @@ public class JkClass {
         baseDirContext(null);
     }
 
-    static <T extends JkClass> T ofUninitialised(Class<T> jkClass) {
+    static <T extends JkClass> T ofUninitialized(Class<T> jkClass) {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
