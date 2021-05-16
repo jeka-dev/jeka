@@ -133,7 +133,7 @@ To build the project without running whole integration test suite, run `dev.jeka
 Release is done automatically by Github action on PUSH on *master*.
 If the last commit message title contains a word like 'Release:XXX' then a tag XXX is created and 
 the binaries will be published on Maven Central.
-Otherwise, the binary wll be smply pushed on OSSRH snapshot.
+Otherwise, the binary wll be simply pushed on OSSRH snapshot.
 
 To really deploy to Maven central, a manual action it still needed to [close/release repository](https://oss.sonatype.org).
 
