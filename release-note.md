@@ -1,4 +1,4 @@
-# 0.9.5
+# 0.9.10
 * Deep rework of dependency management API. Removal of 'scope' context.
 * Fix plugin version compatibility checker
 * Fix duplicate setup on nested projects
