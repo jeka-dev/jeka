@@ -1,6 +1,5 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
@@ -46,9 +45,10 @@ public class JacocoPluginBuild extends JkClass {
         JkInit.instanceOf(JacocoPluginBuild.class, args).java.test();
     }
 
-    public void printIml() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of(java.getJavaIdeSupport());
-        System.out.println(imlGenerator.generate());
+    public void showDependencies() {
+        java.showDependencies();
     }
+
+
 
 }

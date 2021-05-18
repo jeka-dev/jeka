@@ -4,6 +4,8 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.Serializable;
@@ -266,6 +268,30 @@ public class JkResolvedDependencyNode {
         return result;
     }
 
+    public Element toDomElement(Document document, boolean root) {
+        Element element;
+        if (root) {
+            element = document.createElement("rootDependency");
+        } else {
+            element = document.createElement("dependency");
+            if (nodeInfo != null && nodeInfo instanceof JkModuleNodeInfo) {
+                JkModuleNodeInfo moduleNodeInfo = (JkModuleNodeInfo) nodeInfo;
+                element.setAttribute("moduleId", moduleNodeInfo.moduleId.toString());
+                element.setAttribute("resolvedVersion", moduleNodeInfo.resolvedVersion.getValue());
+                if (moduleNodeInfo.isEvicted()) {
+                    element.setAttribute("evicted", "true");
+                }
+                element.setAttribute("declaredVersion", moduleNodeInfo.declaredVersion.getValue());
+                element.setAttribute("configurations", String.join(",", moduleNodeInfo.declaredConfigurations));
+            }
+        }
+        for (JkResolvedDependencyNode childNode : children) {
+            Element childElement = childNode.toDomElement(document, false);
+            element.appendChild(childElement);
+        }
+        return element;
+    }
+
     /**
      * Returns a complete representation string of the tree.
      */
@@ -376,10 +402,14 @@ public class JkResolvedDependencyNode {
             }
             final String resolvedVersionName = isEvicted() ? "(evicted)" : resolvedVersion.getValue();
             final String declaredVersionLabel = getDeclaredVersion().getValue().equals(resolvedVersionName) ? "" : " as " + getDeclaredVersion();
-            return moduleId + ":" + resolvedVersion
-                    + " (present in " + rootConfigurations + ")"
-                    + " (declared" + declaredVersionLabel + " " + declaredConfigurations + ")";
+            String module = moduleId + ":" + resolvedVersion;
+            if (!declaredConfigurations.equals(Collections.singleton("default"))) {
+                module = module + " (declared " + declaredVersionLabel  + declaredConfigurations + ")";
+            }
+            return module;
         }
+
+
 
         public boolean isEvicted() {
             return resolvedVersion == null;
@@ -391,6 +421,8 @@ public class JkResolvedDependencyNode {
         }
 
     }
+
+
 
     private static List<JkDependency> depsUntilLast(List<? extends JkDependency> dependencies, JkModuleId to) {
         final List<JkDependency> result = new LinkedList<>();

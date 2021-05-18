@@ -2,13 +2,13 @@ package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.project.*;
@@ -21,8 +21,17 @@ import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -50,6 +59,9 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     @JkDoc("Scaffolded code won't use the simple facade over JkJavaProject")
     public boolean noFacade;
+
+    @JkDoc("The output file for the xml dependency description.")
+    public Path output;
 
     // ----------------------------------------------------------------------------------
 
@@ -206,14 +218,43 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     private void showDependencies(String purpose, JkDependencySet deps) {
         JkLog.info("\nDeclared dependencies for " + purpose + " : ");
-        deps.getEntries().stream()
-                .map(dep -> !(dep instanceof JkModuleDependency))
-                .forEach(dep -> JkLog.info(dep.toString()));
+        JkLog.info("------------------------------");
         deps.getVersionedDependencies().forEach(dep -> JkLog.info(dep.toString()));
-        JkLog.info("Resolved to : ");
+        JkLog.info("------------------------------");
         final JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolve(deps);
         final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        JkLog.info("------------------------------");
         JkLog.info(String.join("\n", tree.toStrings()));
+    }
+
+    @JkDoc("Displays resolved dependency tree in xml")
+    public void showDependenciesXml() {
+        Transformer transformer = null;
+        try {
+            transformer = TransformerFactory.newInstance().newTransformer();
+        } catch (TransformerConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        Writer out;
+        if (output == null) {
+            out = new PrintWriter(JkLog.getOutputStream());
+        } else {
+            try {
+                JkPathFile.of(output).createIfNotExist();
+                out = new FileWriter(output.toFile());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        Document document = depsAsXml();
+        try {
+            transformer.transform(new DOMSource(document), new StreamResult(out));
+        } catch (TransformerException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @JkDoc("Displays information about the Java project to build.")
@@ -232,6 +273,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         project.getPublication().getMaven().publishLocal();
     }
 
+
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
         return project.getJavaIdeSupport();
@@ -243,6 +285,45 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         return JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
                 compilation.getJavaVersion().get());
     }
+
+    private Document depsAsXml()  {
+        Document document;
+        try {
+             document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+        Element root = document.createElement("dependencies");
+        document.appendChild(root);
+        root.appendChild(xmlDeps(document, "compile", project.getConstruction().getCompilation().getDependencies()));
+        root.appendChild(xmlDeps(document, "runtime", project.getConstruction().getRuntimeDependencies()));
+        root.appendChild(xmlDeps(document, "test", project.getConstruction()
+                .getTesting().getCompilation().getDependencies()));
+        return document;
+    }
+
+    private Element xmlDeps(Document document, String purpose, JkDependencySet deps) {
+        JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolve(deps);
+        JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        Element element = tree.toDomElement(document, true);
+        element.setAttribute("purpose", purpose);
+        return element;
+    }
+
+    public static JkJavaIdeSupport getProjectIde(JkClass jkClass) {
+        if (jkClass instanceof JkJavaIdeSupport.JkSupplier) {
+            JkJavaIdeSupport.JkSupplier supplier = (JkJavaIdeSupport.JkSupplier) jkClass;
+            return supplier.getJavaIdeSupport();
+        }
+        List<JkJavaIdeSupport.JkSupplier> suppliers = jkClass.getPlugins().getLoadedPluginInstanceOf(
+                JkJavaIdeSupport.JkSupplier.class);
+        return suppliers.stream()
+                .filter(supplier -> supplier != null)
+                .map(supplier -> supplier.getJavaIdeSupport())
+                .filter(projectIde -> projectIde != null)
+                .findFirst().orElse(null);
+    }
+
 
     /**
      * Standard options for packaging java projects.
@@ -277,4 +358,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         public String jvmOptions;
 
     }
+
+
 }

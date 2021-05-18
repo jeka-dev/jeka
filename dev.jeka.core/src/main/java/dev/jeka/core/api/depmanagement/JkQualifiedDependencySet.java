@@ -137,6 +137,13 @@ public class JkQualifiedDependencySet {
         return replaceQualifier(JkModuleDependency.of(dependency), qualifier);
     }
 
+    public JkQualifiedDependencySet withQualifiersOnly(String ... qualifiers) {
+        List<JkQualifiedDependency> dependencies = entries.stream()
+                .filter(dep -> Arrays.asList(qualifiers).contains(dep.getQualifier()))
+                .collect(Collectors.toList());
+        return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
+    }
+
     public JkQualifiedDependencySet withModuleDependenciesOnly() {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)

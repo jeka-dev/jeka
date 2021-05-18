@@ -29,6 +29,7 @@ public class JavaPluginBuild extends JkClass {
                        .and("com.google.guava:guava:21.0")
                        .and("com.sun.jersey:jersey-server:1.19.4")
                        .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
+               .setRuntimeDependencies(deps -> deps.minus("org.junit.jupiter:junit-jupiter-engine"))
                .setTestDependencies(deps -> deps
                        .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
                .addTestExcludeFilterSuffixedBy("IT", false)
@@ -64,6 +65,10 @@ public class JavaPluginBuild extends JkClass {
         JkImlGenerator imlGenerator = JkImlGenerator.of(this.java.getJavaIdeSupport());
         String iml = imlGenerator.generate();
         System.out.println(iml);
+    }
+
+    public void showDependencies() {
+        java.showDependenciesXml();
     }
     
     public static void main(String[] args) {

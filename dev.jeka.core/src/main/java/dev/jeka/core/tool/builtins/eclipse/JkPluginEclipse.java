@@ -62,7 +62,7 @@ public final class JkPluginEclipse extends JkPlugin {
             "dependencies and source layout.")
     public void files() {
         final Path dotProject = getJkClass().getBaseDir().resolve(".project");
-        JkJavaIdeSupport projectIde = getProjectIde(getJkClass());
+        JkJavaIdeSupport projectIde = JkPluginJava.getProjectIde(getJkClass());
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
             for (final JkClass depRun : getJkClass().getImportedJkClasses().getDirects()) {
@@ -144,20 +144,6 @@ public final class JkPluginEclipse extends JkPlugin {
         this.accessRules.putIfAbsent(dependency, new Properties());
         this.accessRules.get(dependency).put(kind, pattern);
         return this;
-    }
-
-    public static JkJavaIdeSupport getProjectIde(JkClass jkClass) {
-        if (jkClass instanceof JkJavaIdeSupport.JkSupplier) {
-            JkJavaIdeSupport.JkSupplier supplier = (JkJavaIdeSupport.JkSupplier) jkClass;
-            return supplier.getJavaIdeSupport();
-        }
-        List<JkJavaIdeSupport.JkSupplier> suppliers = jkClass.getPlugins().getLoadedPluginInstanceOf(
-                JkJavaIdeSupport.JkSupplier.class);
-        return suppliers.stream()
-                .filter(supplier -> supplier != null)
-                .map(supplier -> supplier.getJavaIdeSupport())
-                .filter(projectIde -> projectIde != null)
-                .findFirst().orElse(null);
     }
 
 }

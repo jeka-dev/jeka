@@ -9,7 +9,6 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.eclipse.JkPluginEclipse;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 import java.io.PrintWriter;
@@ -52,7 +51,7 @@ public final class JkPluginIntellij extends JkPlugin {
     public void iml() {
         final JkImlGenerator generator;
         JkClass jkClass = getJkClass();
-        JkJavaIdeSupport projectIde = JkPluginEclipse.getProjectIde(jkClass);
+        JkJavaIdeSupport projectIde = JkPluginJava.getProjectIde(jkClass);
         if (projectIde != null) {
             generator = JkImlGenerator.of(projectIde);
         } else {
