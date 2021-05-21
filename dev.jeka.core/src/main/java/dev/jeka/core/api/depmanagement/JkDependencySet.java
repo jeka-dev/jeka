@@ -26,7 +26,7 @@ public class JkDependencySet {
 
     private final JkVersionProvider versionProvider;
 
-    private JkDependencySet(List<JkDependency> dependencies, Set<JkDependencyExclusion> exclusions, JkVersionProvider explicitVersions) {
+    private JkDependencySet(List<? extends JkDependency> dependencies, Set<JkDependencyExclusion> exclusions, JkVersionProvider explicitVersions) {
         super();
         this.entries = Collections.unmodifiableList(dependencies);
         this.globalExclusions = Collections.unmodifiableSet(exclusions);
@@ -50,7 +50,7 @@ public class JkDependencySet {
     /**
      * Creates a {@link JkDependencySet} to the specified scoped dependencies.
      */
-    public static JkDependencySet of(List<JkDependency> dependencies) {
+    public static JkDependencySet of(List<? extends JkDependency> dependencies) {
         return new JkDependencySet(dependencies, Collections.emptySet(), JkVersionProvider.of());
     }
 
@@ -96,7 +96,7 @@ public class JkDependencySet {
         return new JkDependencySet(result, proto.globalExclusions, proto.versionProvider);
     }
 
-    public JkDependencySet and(Hint hint, List<JkDependency> others) {
+    public JkDependencySet and(Hint hint, List<? extends JkDependency> others) {
         return and(hint, JkDependencySet.of(others));
     }
 
@@ -115,7 +115,7 @@ public class JkDependencySet {
      * Returns a clone of this object plus the specified {@link JkDependency}s at the tail of
      * this one.
      */
-    public JkDependencySet and(List<JkDependency> others) {
+    public JkDependencySet and(List<? extends JkDependency> others) {
         return and(null, others);
     }
 

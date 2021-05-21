@@ -82,6 +82,7 @@ final class Engine {
     void execute(CommandLine commandLine, JkLog.Verbosity verbosityToRestore) {
         final long start = System.nanoTime();
         JkLog.startTask("Compile def and initialise Jeka classes");
+        defDependencies = defDependencies.and(commandLine.dependencies());
         JkClass jkClass = null;
         JkPathSequence path = JkPathSequence.of();
         String jkClassHint = Environment.standardOptions.jkClassName();
