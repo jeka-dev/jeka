@@ -13,7 +13,7 @@
 Builds/tasks definition are expressed in pure Java code to leverage of IDE power and Java ecosystem directly.
 Users can code, run, debug, model, distribute buid features as they would do for production code.
 
-```Java
+```java
 @JkDefClasspath("dev.jeka:springboot-plugin:3.0.0.RC7")
 class Build extends JkClass {
 
