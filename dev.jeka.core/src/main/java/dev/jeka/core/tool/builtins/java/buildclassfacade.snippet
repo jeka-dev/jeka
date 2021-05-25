@@ -20,7 +20,7 @@ class Build extends JkClass {
             .setTestDependencies(deps -> deps
                 .and("org.junit.jupiter:junit-jupiter:5.6.2"))
 
-            // On ly necessary if your project is published in a binary repository.
+            // Only necessary if your project is published in a binary repository.
             .setPublishedMavenModuleId("your.group:your.project")
             .setPublishedMavenVersionFromGit();  // Version inferred from Git
     }

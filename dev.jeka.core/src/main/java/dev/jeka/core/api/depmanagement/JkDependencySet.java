@@ -511,21 +511,21 @@ public class JkDependencySet {
     /**
      * Returns the java codes that declare these dependencies.
      */
-    public static String toJavaCode(int indentCount, List<JkDependency> dependencies) {
+    public static String toJavaCode(int indentCount, List<JkDependency> dependencies, boolean and) {
+        String method = and ? "and" : "minus";
         final String indent = JkUtilsString.repeat(" ", indentCount);
         final StringBuilder builder = new StringBuilder();
-        builder.append("JkDependencySet.of()");
         for (final JkDependency dependency : dependencies) {
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDep = (JkModuleDependency) dependency;
-                builder.append("\n").append(indent).append(".and(\"")
+                builder.append(indent).append(".").append(method).append("(\"")
                 .append(moduleDep.getModuleId().getGroup()).append(":")
                 .append(moduleDep.getModuleId().getName());
                 if (!moduleDep.getVersion().isUnspecified()) {
                     builder.append(":" + moduleDep.getVersion().getValue());
                 }
                 builder.append('"');
-                builder.append(")");
+                builder.append(")\n");
             }
         }
         return builder.toString();

@@ -19,24 +19,25 @@ public class JkPluginPom extends JkPlugin {
     }
 
     @JkDoc("Margin to print dependency code.")
-    public int margin = 6;
+    public int margin = 4;
 
     @JkDoc("Displays Java code for declaring dependencies on console based on pom.xml. The pom.xml file is supposed to be in root directory.")
     public void dependencyCode() {
-
         Path pomPath = getJkClass().getBaseDir().resolve("pom.xml");
         JkUtilsAssert.state(Files.exists(pomPath), "No pom file found at " + pomPath);
         JkPom pom = JkPom.of(pomPath);
         System.out.println("Compile");
         System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(null,
-                JkQualifiedDependencySet.COMPILE_SCOPE, JkQualifiedDependencySet.PROVIDED_SCOPE)));
-        System.out.println(".withVersionProvider(" + pom.getVersionProvider().toJavaCode(margin) + ")");
+                JkQualifiedDependencySet.COMPILE_SCOPE, JkQualifiedDependencySet.PROVIDED_SCOPE), true));
 
-        System.out.println("\nRuntime");
+        System.out.println("Runtime");
+        System.out.print(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(
+                JkQualifiedDependencySet.RUNTIME_SCOPE), true));
         System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencySet.RUNTIME_SCOPE)));
-        System.out.println("\nTest");
+                JkQualifiedDependencySet.PROVIDED_SCOPE), false));
+
+        System.out.println("Test");
         System.out.println(JkDependencySet.toJavaCode(margin, pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencySet.TEST_SCOPE)));
+                JkQualifiedDependencySet.TEST_SCOPE), true));
     }
 }

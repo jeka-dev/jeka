@@ -270,7 +270,7 @@ public class JkQualifiedDependencySet {
     public List<JkDependency> getDependenciesHavingQualifier(String ... qualifiers) {
         List<String> list = Arrays.asList(qualifiers);
         return entries.stream()
-                .filter(qDep -> list.contains(qDep))
+                .filter(qDep -> list.contains(qDep.getQualifier()))
                 .map(JkQualifiedDependency::getDependency)
                 .collect(Collectors.toList());
     }

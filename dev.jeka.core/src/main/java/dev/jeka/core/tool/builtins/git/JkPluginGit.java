@@ -26,8 +26,8 @@ public class JkPluginGit extends JkPlugin {
            System.out.println("Git workspace is dirty. Please clean your Git workspace and retry");
             //return;
         }
-        System.out.println("Existing tags :");
-        git.exec("tag", "--sort=creatordate");
+        System.out.println("Existing tags on origin :");
+        git.exec("ls-remote", "--tag", "--sort=creatordate", "origin");
         System.out.println("You are about to tag commit : " + git.getCurrentCommit());
         final String newTag = JkPrompt.ask("Enter new tag : ");
         git.withLogCommand(true).tagAndPush(newTag);

@@ -116,10 +116,8 @@ public class CoreBuild extends JkClass {
                         .getScm()
                             .setUrl("https://github.com/jerkar/jeka.git").__
                         .addApache2License()
-                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr").__.__
-                .getPostActions()
-                    .append(this::createGithubRelease);
-    }
+                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+        }
 
     private void tagIfReleaseMentionedInCurrentCommit() {
         if (git.isWorkspaceDirty()) {
@@ -129,19 +127,7 @@ public class CoreBuild extends JkClass {
         if (releaseVersion != null) {
             JkLog.info("Tagging with " + releaseVersion + " for release.");
             git.tag(releaseVersion);
-        }
-    }
-
-    private void createGithubRelease() {
-        String version = java.getProject().getPublication().getMaven().getVersion();
-        if (version.endsWith(".RELEASE")) {
-            GithubReleaseContentEditor githubReleaseContentEditor =
-                    new GithubReleaseContentEditor("jerkar/jeka", "master", githubToken);
-            String releaseNote = githubReleaseContentEditor.getReleaseNoteForTag(
-                    this.getBaseDir().resolve("../release-note.md"), version);
-            if (releaseNote!= null) {
-                githubReleaseContentEditor.createRelease(version, releaseNote);
-            }
+            git.exec("push", "origin", releaseVersion);
         }
     }
 
@@ -263,25 +249,6 @@ public class CoreBuild extends JkClass {
     public void cleanPack() {
         clean(); java.pack();
     }
-
-    public void testLogOutputs() {
-        JkLog.startTask("----------------");
-            JkLog.info("aaaaaaaaaaaaaa");
-            JkLog.startTask("----------------");
-                JkLog.info("uiuiuiuiuiuiuiuiuiu");
-                JkLog.startTask("----------------");
-                    JkLog.info("oooo");
-                JkLog.endTask();
-            JkLog.endTask("kkkkkkkkkkkk");
-
-            JkLog.startTask("----------------");
-            JkLog.info("cccccccccc");
-            JkLog.endTask();
-        JkLog.endTask();
-        JkLog.startTask("uuuuuuuuuuuuuuuuu");
-        JkLog.endTask();
-    }
-
 
     public static void main(String[] args) {
         JkInit.instanceOf(CoreBuild.class, args).cleanPack();

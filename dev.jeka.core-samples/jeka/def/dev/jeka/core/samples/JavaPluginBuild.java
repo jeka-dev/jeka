@@ -9,6 +9,7 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.maven.JkPluginPom;
 
 
 /**
@@ -65,6 +66,11 @@ public class JavaPluginBuild extends JkClass {
         JkImlGenerator imlGenerator = JkImlGenerator.of(this.java.getJavaIdeSupport());
         String iml = imlGenerator.generate();
         System.out.println(iml);
+    }
+
+    public void printMvn() {
+        JkPluginPom pluginPom = getPlugin(JkPluginPom.class);
+        pluginPom.dependencyCode();
     }
 
     public void showDependencies() {
