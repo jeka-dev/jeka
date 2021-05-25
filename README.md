@@ -8,19 +8,49 @@
 
 # What is Jeka ?
 
-<strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using only Java code to automate builds or tasks.
+<strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using only Java code to automate builds, tasks or pipelines.
 
-Forget about verbose Poms and rigid Maven structure. Get rid of Gradle scripting/DSL.  
+Builds/tasks definition are expressed in pure Java code to leverage of IDE power and Java ecosystem directly.
+Users can code, run, debug, model, distribute buid features as they would do for production code.
 
-Enjoy all the engineering power you are comfortable with : Java code, IDE, 3rd party libs, binary repositories, .... 
+```Java
+@JkDefClasspath("dev.jeka:springboot-plugin:3.0.0.RC7")
+class Build extends JkClass {
 
-Model, refactor, run, debug, reuse automation assets across tasks and projects. Exactly as you do with your regular Java code. 
+    private final JkPluginSpringboot springboot = getPlugin(JkPluginSpringboot.class);
 
-Also, __Jeka conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of code/configuration. 
+    public boolean runIT = true;
 
+    @Override
+    protected void setup() {
+        springboot.setSpringbootVersion("2.2.6.RELEASE");
+        springboot.javaPlugin().getProject().simpleFacade()
+            .setCompileDependencies(deps -> deps
+                .and("org.springframework.boot:spring-boot-starter-web")
+            )
+            .setTestDependencies(deps -> deps
+                .and("org.springframework.boot:spring-boot-starter-test")
+                    .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
+            )
+            .addTestExcludeFilterSuffixedBy("IT", !runIT);
+    }
+
+    public void cleanPack() {
+        clean();
+        springboot.javaPlugin().pack();
+    }
+
+}
+```
+
+Also, Jeka comes with powerful conventions and dynamic plugin mechanism allowing to perform exotic tasks without requiring a single line of code/configuration.
 For example `jeka java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
 performs a complete build running unit tests under Jacoco coverage tools and performs SonarQube analysis on a Java project free 
 of any build-code / configuration / script. 
+
+For better user experience, please use [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
+
+
 
 # News 
 
@@ -31,6 +61,7 @@ of any build-code / configuration / script.
 
 Last major additions :
 
+* Reworked [dependency management](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Reference%20Guide/2.3.%20Dependency%20management.md)
 * Completely renewed API, now embracing widely *Parent Chaining*.
 * Test engine now relies on Junit 5 (still compatible with Junit 3&4)
 * Release of a [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
