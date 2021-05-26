@@ -339,13 +339,13 @@ public final class JkImlGenerator {
 
     private static String ideScope(Set<String> scopes) {
         if (scopes.contains(JkQualifiedDependencySet.COMPILE_SCOPE))  {
-            if (scopes.contains(JkQualifiedDependencySet.RUNTIME_SCOPE)) {
-                return "COMPILE";
-            }
-            return "PROVIDED";
+            return "COMPILE";
         }
         if (scopes.contains(JkQualifiedDependencySet.RUNTIME_SCOPE)) {
             return "RUNTIME";
+        }
+        if (scopes.contains(JkQualifiedDependencySet.PROVIDED_SCOPE)) {
+            return "PROVIDED";
         }
         if (scopes.contains(JkQualifiedDependencySet.TEST_SCOPE)) {
             return "TEST";
