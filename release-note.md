@@ -3,7 +3,7 @@
 * Fix plugin version compatibility checker
 * Fix duplicate setup on nested projects
 * Add automated extra command line arguments via jeka/cmd.properties file 
-
+ 
 # 0.9.4.RELEASE
 * Rename JkCommandSet to JkClass
 * Improve log messages on plugin compatibility break
