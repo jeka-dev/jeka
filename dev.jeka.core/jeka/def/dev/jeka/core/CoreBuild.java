@@ -46,6 +46,8 @@ public class CoreBuild extends JkClass {
 
     private final JkGitWrapper git;
 
+    private String taggedReleaseVersion;
+
     public boolean runIT;
 
     @JkEnv("OSSRH_USER")
@@ -75,6 +77,8 @@ public class CoreBuild extends JkClass {
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
                 .getCompilation()
+                    .getPreGenerateActions()
+                        .append(this::tagIfReleaseMentionedInCurrentCommit).__
                     .getLayout()
                         .includeSourceDirsInResources().__
                     .addOptions("-Xlint:none","-g")
@@ -99,7 +103,7 @@ public class CoreBuild extends JkClass {
                     .addOptions("-notimestamp").__.__
             .getPublication()
                 .getPreActions()
-                    .append(this::tagIfReleaseMentionedInCurrentCommit).__
+                    .append(this::pushTagIfReleaseMentionedInCurrentCommit).__
                 .getArtifactProducer()
                     .putMainArtifact(this::doPackWithEmbedded)
                     .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
@@ -123,11 +127,16 @@ public class CoreBuild extends JkClass {
         if (git.isWorkspaceDirty()) {
             return;
         }
-        String releaseVersion = git.extractSuffixFromLastCommitTitle("Release:");
-        if (releaseVersion != null) {
-            JkLog.info("Tagging with " + releaseVersion + " for release.");
-            git.tag(releaseVersion);
-            git.exec("push", "origin", releaseVersion);
+        taggedReleaseVersion = git.extractSuffixFromLastCommitTitle("Release:");
+        if (taggedReleaseVersion != null) {
+            JkLog.info("Tagging with " + taggedReleaseVersion + " for release.");
+            git.tag(taggedReleaseVersion);
+        }
+    }
+
+    private void pushTagIfReleaseMentionedInCurrentCommit() {
+        if (taggedReleaseVersion != null) {
+            git.exec("push", "origin", taggedReleaseVersion);
         }
     }
 

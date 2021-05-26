@@ -40,15 +40,15 @@ public class JkJavaProjectCompilation<T> {
 
     private final JkJavaProjectConstruction construction;
 
-    private final JkRunnables<JkJavaProjectCompilation<T>> beforeGenerate;
+    private final JkRunnables<JkJavaProjectCompilation<T>> preGenerateActions;
 
-    private final JkRunnables<JkJavaProjectCompilation<T>> beforeCompile;
+    private final JkRunnables<JkJavaProjectCompilation<T>> preCompileActions;
 
     private final JkConsumers<Path, JkJavaProjectCompilation<T>> sourceGenerator;
 
     private final JkConsumers<Path, JkJavaProjectCompilation<T>> resourceGenerator;
 
-    private final JkRunnables<JkJavaProjectCompilation<T>> afterCompile;
+    private final JkRunnables<JkJavaProjectCompilation<T>> postCompileActions;
 
     private final JkJavaCompiler<JkJavaProjectCompilation<T>> compiler;
 
@@ -76,12 +76,12 @@ public class JkJavaProjectCompilation<T> {
         __ = parent;
         this.purpose = purpose;
         this.construction = construction;
-        beforeGenerate = JkRunnables.ofParent(this);
+        preGenerateActions = JkRunnables.ofParent(this);
         sourceGenerator = JkConsumers.ofParent(this);
         resourceGenerator = JkConsumers.ofParent(this);
-        beforeCompile = JkRunnables.ofParent(this);
+        preCompileActions = JkRunnables.ofParent(this);
         compiler = JkJavaCompiler.ofParent(this);
-        afterCompile = JkRunnables.ofParent(this);
+        postCompileActions = JkRunnables.ofParent(this);
         resourceProcessor = JkResourceProcessor.ofParent(this);
         layout = JkCompileLayout.ofParent(this)
                 .setBaseDirSupplier(construction.getProject()::getBaseDir)
@@ -127,13 +127,13 @@ public class JkJavaProjectCompilation<T> {
      */
     public void run() {
         JkLog.startTask("Make " + purpose);
-        beforeGenerate.run();
+        preGenerateActions.run();
         sourceGenerator.accept(this.layout.resolveGeneratedSourceDir());
         resourceGenerator.accept(this.layout.resolveGeneratedResourceDir());
         processResources();
-        beforeCompile.run();
+        preCompileActions.run();
         runCompile();
-        afterCompile.run();
+        postCompileActions.run();
         JkLog.endTask();
     }
 
@@ -153,16 +153,16 @@ public class JkJavaProjectCompilation<T> {
      * Returns the runnables to run prior source and resource generation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables<JkJavaProjectCompilation<T>> getBeforeGenerate() {
-        return beforeGenerate;
+    public JkRunnables<JkJavaProjectCompilation<T>> getPreGenerateActions() {
+        return preGenerateActions;
     }
 
     /**
      * Returns the runnables to run after source and resource generation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables<JkJavaProjectCompilation<T>> getBeforeCompile() {
-        return beforeCompile;
+    public JkRunnables<JkJavaProjectCompilation<T>> getPreCompileActions() {
+        return preCompileActions;
     }
 
     /**
@@ -195,8 +195,8 @@ public class JkJavaProjectCompilation<T> {
      * Returns the runnables to be run after compilation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables getAfterCompile() {
-        return afterCompile;
+    public JkRunnables getPostCompileActions() {
+        return postCompileActions;
     }
 
     /**

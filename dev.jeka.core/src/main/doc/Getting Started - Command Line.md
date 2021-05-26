@@ -10,7 +10,7 @@ __[JEKA USER HOME]__ : Refers to the folder where Jeka stores caches, binary rep
 
 
 
-Thank to the wrapper feature, normally you don't need to install Jeka on your machine to run it... except if you are 
+Thanks to the wrapper feature, normally you don't need to install Jeka on your machine to run it... except if you are 
 creating projects from scratch. 
 As it's what we are going to do in this tutorial, you have to get it properly installed. 
 
