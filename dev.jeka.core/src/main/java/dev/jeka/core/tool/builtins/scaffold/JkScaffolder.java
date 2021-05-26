@@ -29,7 +29,7 @@ public final class JkScaffolder {
 
     private String jkClassCode;
 
-    private String classFilename = "Jeka.java";
+    private String classFilename = "Commands.java";
 
     private final JkRunnables extraActions = JkRunnables.of();
 
