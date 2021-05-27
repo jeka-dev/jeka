@@ -215,7 +215,7 @@ final class ProjectDef {
 
         static RunMethodDef of(Method method) {
             final JkDoc jkDoc = JkUtilsReflect.getInheritedAnnotation(method, JkDoc.class);
-            final String descr = jkDoc != null ? JkUtilsString.join(jkDoc.value(), "\n") : null;
+            final String descr = jkDoc != null ? String.join("\n", jkDoc.value()) : null;
             return new RunMethodDef(method.getName(), descr, method.getDeclaringClass());
         }
 
@@ -284,7 +284,7 @@ final class ProjectDef {
 
         static JkClassOptionDef of(Object instance, Field field, String name, Class<?> rootDeclaringClass) {
             final JkDoc opt = field.getAnnotation(JkDoc.class);
-            final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
+            final String descr = opt != null ? String.join("\n", opt.value()) : null;
             final Class<?> type = field.getType();
             final Object defaultValue = value(instance, name);
             final JkEnv env = field.getAnnotation(JkEnv.class);

@@ -65,7 +65,7 @@ public final class Main {
             } else {
                 System.err.println("An error occurred during def class execution : " + e.getMessage());
                 System.err.println("This is mostly due to an error in user settings or scripts.");
-                System.err.println("You can investigate using the stacktace below.");
+                System.err.println("You can investigate using the stacktrace below or relaunching the command with option -LS=DEBUG.");
                 System.err.println("If error reveals to coming from Jeka engine, please report to " +
                         ": https://github.com/jerkar/jeka/issues");
                 System.err.println();

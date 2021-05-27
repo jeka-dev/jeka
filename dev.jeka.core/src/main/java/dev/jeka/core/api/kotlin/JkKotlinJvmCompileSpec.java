@@ -7,7 +7,6 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -202,7 +201,7 @@ public final class JkKotlinJvmCompileSpec {
      * Sets specified annotation classes instead of using the ones discovered by default Java 6 mechanism.
      */
     public JkKotlinJvmCompileSpec setAnnotationProcessors(String... annotationProcessorClassNames) {
-        return setOption(PROCESSOR_OPTS, JkUtilsString.join(annotationProcessorClassNames, ","));
+        return setOption(PROCESSOR_OPTS, String.join(",", annotationProcessorClassNames));
     }
 
     /**

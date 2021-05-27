@@ -347,7 +347,7 @@ public final class JkProcess implements Runnable {
 
     @Override
     public String toString() {
-        return this.command + " " + JkUtilsString.join(parameters, " ");
+        return this.command + " " + String.join(" ", parameters);
     }
 
 }

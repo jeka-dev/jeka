@@ -39,7 +39,8 @@ public final class JkLog implements Serializable {
     public enum Style {
         BRACE(new JkBraceConsoleLogConsumer()),
         SQUARE(new JkSquareConsoleLogConsumer()),
-        INDENT(new JkIndentConsoleLogConsumer());
+        INDENT(new JkIndentConsoleLogConsumer()),
+        DEBUG(new JkDebugConsoleLogConsumer());
 
         private final JkEventLogConsumer consumer;
 

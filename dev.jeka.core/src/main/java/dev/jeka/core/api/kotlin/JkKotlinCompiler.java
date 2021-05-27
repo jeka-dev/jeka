@@ -5,7 +5,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.nio.file.Files;
@@ -81,8 +80,7 @@ public final class JkKotlinCompiler {
         JkUtilsPath.createDirectories(outputDir);
         String message = "Compiling Kotlin " + compileSpec.getSourceFiles() + " source files";
         if (JkLog.verbosity().isVerbose()) {
-            message = message + " to " + outputDir + " using options : " + JkUtilsString
-                    .join(options, " ");
+            message = message + " to " + outputDir + " using options : " + String.join(" ", options);
         }
         long start = System.nanoTime();
         JkLog.startTask(message);

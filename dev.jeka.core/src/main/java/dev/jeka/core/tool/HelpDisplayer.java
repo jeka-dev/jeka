@@ -33,7 +33,7 @@ final class HelpDisplayer {
         // List plugins
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         List<String> names = pluginDescriptions.stream().map(pluginDescription -> pluginDescription.shortName()).collect(Collectors.toList());
-        sb.append("\nAvailable plugins in classpath : ").append(JkUtilsString.join(names, ", "))
+        sb.append("\nAvailable plugins in classpath : ").append(String.join(", ", names))
                 .append(".\n");
 
         sb.append("\nType 'jeka [pluginName]#help' to get help on a particular plugin (ex : 'jeka java#help'). ");
@@ -49,7 +49,7 @@ final class HelpDisplayer {
         sb.append("  -LogRuntimeInfo (shorthand -LRI) : logs Jeka runtime information.\n");
         sb.append("  -LogBanner (shorthand -LB) : logs intro and outro banners.\n");
         sb.append("  -LogSetup (shorthand -LSU) : logs Jeka classes setup process.\n");
-        sb.append("  -LogStyle (shorthand -LS) : choose the display log style : INDENT(default), BRACE or SQUARE.\n");
+        sb.append("  -LogStyle (shorthand -LS) : choose the display log style : INDENT(default), BRACE, SQUARE or DEBUG.\n");
         sb.append("  -LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");
         sb.append("  -JekaClass (shorthand -JKC) : Force to use the specified class as the Jeka class to invoke. It can be the short name of the class (without package prefix).\n");
         return sb.toString();
@@ -101,7 +101,7 @@ final class HelpDisplayer {
         sb.append("\nPlugin Name : " + description.shortName());
         List<String> deps = description.pluginDependencies();
         if (!deps.isEmpty()) {
-            sb.append("\nDepends on plugins : " + JkUtilsString.join(deps, ", "));
+            sb.append("\nDepends on plugins : " + String.join(", ", deps));
         }
         final List<String> explanations = description.explanation();
         if (!explanations.isEmpty()) {

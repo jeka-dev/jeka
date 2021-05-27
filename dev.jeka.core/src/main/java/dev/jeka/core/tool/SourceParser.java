@@ -143,7 +143,7 @@ final class SourceParser {
      * Returns <code>true</code> if the candidate string is a valid module dependency description.
      */
     private static boolean isModuleDependencyDescription(String candidate) {
-        final int colonCount = JkUtilsString.countOccurence(candidate, ':');
+        final int colonCount = JkUtilsString.countOccurrence(candidate, ':');
         return colonCount == 2 || colonCount == 3;
     }
 

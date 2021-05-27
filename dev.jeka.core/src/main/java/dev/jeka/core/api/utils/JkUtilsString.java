@@ -12,14 +12,6 @@ import java.util.*;
 public final class JkUtilsString {
 
     /**
-     * Creates a string by concatenating items array of specified items,
-     * separating each with the specified separator.
-     */
-    public static String join(String[] items, String separator) {
-        return join(Arrays.asList(items), separator);
-    }
-
-    /**
      * Same as {@link #join(String[], String)} but expecting an {@link Iterable}
      * instead of an array
      */
@@ -81,7 +73,7 @@ public final class JkUtilsString {
     /**
      * Returns occurrence count of the specified character into the specified string.
      */
-    public static int countOccurence(String matchedString, char occurrence) {
+    public static int countOccurrence(String matchedString, char occurrence) {
         int count = 0;
         for (final char c : matchedString.toCharArray()) {
             if (c == occurrence) {
@@ -431,4 +423,15 @@ public final class JkUtilsString {
         return string.toLowerCase().replace('-', '_');
     }
 
+    public static String padEnd(String string, int minLength, char padChar) {
+        if (string.length() >= minLength) {
+            return string;
+        }
+        StringBuilder sb = new StringBuilder(minLength);
+        sb.append(string);
+        for (int i = string.length(); i < minLength; i++) {
+            sb.append(padChar);
+        }
+        return sb.toString();
+    }
 }

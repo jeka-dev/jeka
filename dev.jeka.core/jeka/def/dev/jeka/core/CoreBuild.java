@@ -259,6 +259,14 @@ public class CoreBuild extends JkClass {
         clean(); java.pack();
     }
 
+    public void playWithLog() {
+        JkLog.info("Hello");
+        JkLog.startTask("starting a task");
+        JkLog.warn("hello2");
+        JkLog.endTask();
+        JkLog.error("finish");
+    }
+
     public static void main(String[] args) {
         JkInit.instanceOf(CoreBuild.class, args).cleanPack();
     }

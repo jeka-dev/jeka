@@ -59,7 +59,8 @@ public class JkJavaProjectSimpleFacade {
      */
     public JkJavaProjectSimpleFacade setSimpleLayout() {
         project.getConstruction().getCompilation().getLayout().setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
-        project.getConstruction().getCompilation().getLayout().setSourceSimpleStyle(JkCompileLayout.Concern.TEST);
+        project.getConstruction().getTesting().getCompilation().getLayout()
+                .setSourceSimpleStyle(JkCompileLayout.Concern.TEST);
         return this;
     }
 

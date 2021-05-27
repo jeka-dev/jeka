@@ -5,7 +5,6 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -237,7 +236,7 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
      * Sets specified annotation classes instead of using the ones discovered by default Java 6 mechanism.
      */
     public JkJavaCompileSpec<T> setAnnotationProcessors(String... annotationProcessorClassNames) {
-        return setOption(PROCESSOR_OPTS, JkUtilsString.join(annotationProcessorClassNames, ","));
+        return setOption(PROCESSOR_OPTS, String.join(",", annotationProcessorClassNames));
     }
 
     /**

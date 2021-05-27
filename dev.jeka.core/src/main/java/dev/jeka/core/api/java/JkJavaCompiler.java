@@ -128,7 +128,7 @@ public final class JkJavaCompiler<T> {
         String message = "Compile " + compileWhatMessage(compileSpec.getSourceFiles())
                 + " to " + outputDir;
         if (JkLog.verbosity().isVerbose()) {
-            message = message + " using options : " + JkUtilsString.join(options, " ");
+            message = message + " using options : " + String.join(" ", options);
         }
         JkLog.startTask(message);
         if (compileSpec.getSourceFiles().isEmpty()) {

@@ -193,12 +193,12 @@ final class CommandLine {
             if (word.startsWith("-")) {
                 return false;
             }
-            return JkUtilsString.countOccurence(word, PLUGIN_SYMBOL_CHAR) == 1
+            return JkUtilsString.countOccurrence(word, PLUGIN_SYMBOL_CHAR) == 1
                     && !word.startsWith(PLUGIN_SYMBOL) && !word.endsWith(PLUGIN_SYMBOL);
         }
 
         private static boolean isPluginActivation(String word) {
-            return JkUtilsString.countOccurence(word, PLUGIN_SYMBOL_CHAR) == 1
+            return JkUtilsString.countOccurrence(word, PLUGIN_SYMBOL_CHAR) == 1
                     && !word.startsWith(PLUGIN_SYMBOL) && word.endsWith(PLUGIN_SYMBOL);
         }
 

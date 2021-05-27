@@ -44,7 +44,7 @@ public final class JkInit {
     static void displayRuntimeInfo() {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
-        sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(Environment.commandLine.rawArgs()), " "));
+        sb.append("\nCommand Line : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
         sb.append(propsAsString("Specified System Properties", Environment.systemProps));
         sb.append(propsAsString("Specified Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
         sb.append("\nJava Home : " + System.getProperty("java.home"));
@@ -56,7 +56,7 @@ public final class JkInit {
             sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
-        sb.append("\nJeka Def Repositories : " + Engine.repos().toString());
+        sb.append("\nJeka Def Repositories : " + Engine.repos());
         sb.append("\nJeka Repository Cache : " + JkLocator.getJekaRepositoryCache());
         JkLog.info(sb.toString());
     }
