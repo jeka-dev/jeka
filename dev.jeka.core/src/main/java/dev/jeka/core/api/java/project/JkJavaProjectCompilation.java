@@ -7,7 +7,6 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
@@ -24,10 +23,6 @@ import java.util.function.Supplier;
  * They also can modify {@link JkJavaCompiler} and {@link JkJavaCompileSpec} to use.
  */
 public class JkJavaProjectCompilation<T> {
-
-    private static final String DEFAULT_ENCODING = "UTF-8";
-
-    private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V8;
 
     private static final String PRODUCTION_PURPOSE = "production";
 
@@ -50,8 +45,6 @@ public class JkJavaProjectCompilation<T> {
 
     private final JkRunnables<JkJavaProjectCompilation<T>> postCompileActions;
 
-    private final JkJavaCompiler<JkJavaProjectCompilation<T>> compiler;
-
     private final JkResourceProcessor<JkJavaProjectCompilation<T>> resourceProcessor;
 
     private final JkCompileLayout<JkJavaProjectCompilation<T>> layout;
@@ -68,9 +61,9 @@ public class JkJavaProjectCompilation<T> {
 
     private Supplier<JkJavaCompileSpec> compileSpecSupplier;
 
-    private JkJavaVersion javaVersion = DEFAULT_JAVA_VERSION;
 
-    private String sourceEncoding = DEFAULT_ENCODING;
+
+
 
     private JkJavaProjectCompilation(JkJavaProjectConstruction construction, String purpose, T parent) {
         __ = parent;
@@ -80,7 +73,6 @@ public class JkJavaProjectCompilation<T> {
         sourceGenerator = JkConsumers.ofParent(this);
         resourceGenerator = JkConsumers.ofParent(this);
         preCompileActions = JkRunnables.ofParent(this);
-        compiler = JkJavaCompiler.ofParent(this);
         postCompileActions = JkRunnables.ofParent(this);
         resourceProcessor = JkResourceProcessor.ofParent(this);
         layout = JkCompileLayout.ofParent(this)
@@ -184,14 +176,6 @@ public class JkJavaProjectCompilation<T> {
     }
 
     /**
-     * Returns the compiler compiling Java sources of this project. The returned instance is mutable
-     * so users can modify it from this method return.
-     */
-    public JkJavaCompiler<JkJavaProjectCompilation<T>> getCompiler() {
-        return this.compiler;
-    }
-
-    /**
      * Returns the runnables to be run after compilation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
@@ -199,20 +183,7 @@ public class JkJavaProjectCompilation<T> {
         return postCompileActions;
     }
 
-    /**
-     * Returns encoding to use to read Java source files
-     */
-    public String getSourceEncoding() {
-        return sourceEncoding;
-    }
 
-    /**
-     * Set the encoding to use to read Java source files
-     */
-    public JkJavaProjectCompilation<T> setSourceEncoding(String sourceEncoding) {
-        this.sourceEncoding = sourceEncoding;
-        return this;
-    }
 
     /**
      * Returns extra compile options passed to the compiler
@@ -236,21 +207,6 @@ public class JkJavaProjectCompilation<T> {
         return resourceProcessor;
     }
 
-    /**
-     * Gets the Java version used as source and target version
-     */
-    public JkJavaVersion getJavaVersion() {
-        return javaVersion;
-    }
-
-    /**
-     * Sets the Java version used for both source and target.
-     */
-    public JkJavaProjectCompilation<T> setJavaVersion(JkJavaVersion javaVersion) {
-        this.javaVersion = javaVersion;
-        return this;
-    }
-
     public JkJavaProjectCompilation<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
@@ -264,33 +220,21 @@ public class JkJavaProjectCompilation<T> {
         return dependenciesModifier.apply(dependencyBootSupplier.get());
     }
 
-    private JkJavaCompileSpec getComputedCompileSpec() {
-        return compileSpecSupplier.get();
-    }
-
     private void processResources() {
         this.getResourceProcessor().generate(layout.resolveResources(), layout.resolveClassDir());
     }
 
     private void runCompile() {
-        boolean success = getCompiler().compile(compileSpecSupplier.get());
+        boolean success = construction.getCompiler().compile(compileSpecSupplier.get());
         if (!success) {
             throw new IllegalStateException("Compilation of Java sources failed.");
         }
     }
 
-    private String effectiveSourceEncoding() {
-        return sourceEncoding != null ? sourceEncoding : DEFAULT_ENCODING;
-    }
-
-    private JkJavaVersion effectiveSourceVersion() {
-        return javaVersion != null ? javaVersion : DEFAULT_JAVA_VERSION;
-    }
-
     private JkJavaCompileSpec computeProdCompileSpec() {
         return JkJavaCompileSpec.of()
-            .setSourceAndTargetVersion(effectiveSourceVersion())
-            .setEncoding(effectiveSourceEncoding())
+            .setSourceAndTargetVersion(construction.getJavaVersion())
+            .setEncoding(construction.getSourceEncoding())
             .setClasspath(resolveDependencies().getFiles())
             .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
             .addOptions(compileOptions)
@@ -300,8 +244,8 @@ public class JkJavaProjectCompilation<T> {
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
         JkDependencySet dependencies = getDependencies();
         return JkJavaCompileSpec.of()
-                .setSourceAndTargetVersion(javaVersion != null ? javaVersion : prodStep.effectiveSourceVersion())
-                .setEncoding(sourceEncoding != null ? sourceEncoding : prodStep.effectiveSourceEncoding())
+                .setSourceAndTargetVersion(construction.getJavaVersion())
+                .setEncoding(construction.getSourceEncoding())
                 .setClasspath(construction.getDependencyResolver().resolve(dependencies).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))

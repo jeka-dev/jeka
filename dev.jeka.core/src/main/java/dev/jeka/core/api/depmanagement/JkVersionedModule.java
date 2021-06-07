@@ -1,9 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-
-import java.util.jar.Attributes;
 
 /**
  * Identifies a given module in a given version
@@ -107,15 +104,6 @@ public final class JkVersionedModule {
     @Override
     public String toString() {
         return moduleId + ":" + version;
-    }
-
-    /**
-     * Fills <code>implementation title</code> and <code>implentation version </code> attributes of the
-     * specified manifest.
-     */
-    public void populateManifest(JkManifest manifest) {
-        manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, getModuleId().getDotedName())
-        .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, getVersion().getValue());
     }
 
     public JkVersionedModule resolveConflict(JkVersion other, ConflictStrategy strategy) {

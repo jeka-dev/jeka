@@ -181,8 +181,11 @@ public class JkCompileLayout<T> {
         return setResources(JkPathTreeSet.ofEmpty());
     }
 
-    public JkCompileLayout<T> includeSourceDirsInResources() {
-        return setResources(resources.and(sources.withMatcher(JAVA_RESOURCE_MATCHER)));
+    /**
+     * All non .java files located in a source directory will be considered as a resource (copied in classes file)
+     */
+    public JkCompileLayout<T> mixResourcesAndSources() {
+        return setResources(sources.withMatcher(JAVA_RESOURCE_MATCHER));
     }
 
     public JkCompileLayout<T> setBaseDirSupplier(Supplier<Path> supplier) {

@@ -1,6 +1,7 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
@@ -76,21 +77,19 @@ public class CoreBuild extends JkClass {
             .getConstruction()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
+                .getCompiler()
+                    .setForkParams().__
+                .setJavaVersion(JkJavaVersion.V8)
                 .getCompilation()
                     .getPreGenerateActions()
                         .append(this::tagIfReleaseMentionedInCurrentCommit).__
                     .getLayout()
-                        .includeSourceDirsInResources().__
-                    .addOptions("-Xlint:none","-g")
-                    .setJavaVersion(JkJavaVersion.V8)
-                    .getCompiler()
-                        .setForkingWithJavac().__.__
+                        .mixResourcesAndSources().__
+                    .addOptions("-Xlint:none","-g").__
                 .getTesting()
                     .getCompilation()
                         .getLayout()
-                            .includeSourceDirsInResources().__
-                        .getCompiler()
-                            .setDefault().__.__
+                            .mixResourcesAndSources().__.__
                     .getTestProcessor()
                         .getEngineBehavior()
                             .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
@@ -262,6 +261,7 @@ public class CoreBuild extends JkClass {
     public void playWithLog() {
         JkLog.info("Hello");
         JkLog.startTask("starting a task");
+        System.out.println("uuuuuuuuuuuuuuuuu");
         JkLog.warn("hello2");
         JkLog.endTask();
         JkLog.error("finish");

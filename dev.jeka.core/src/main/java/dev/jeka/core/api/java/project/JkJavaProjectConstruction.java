@@ -9,6 +9,8 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJarPacker;
+import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkManifest;
 
 import java.nio.file.Path;
@@ -33,7 +35,17 @@ import java.util.function.UnaryOperator;
  */
 public class JkJavaProjectConstruction {
 
+    private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V8;
+
+    private static final String DEFAULT_ENCODING = "UTF-8";
+
     private final JkJavaProject project;
+
+    private final JkJavaCompiler<JkJavaProjectConstruction> compiler;
+
+    private JkJavaVersion javaVersion = DEFAULT_JAVA_VERSION;
+
+    private String sourceEncoding = DEFAULT_ENCODING;
 
     private final JkDependencyResolver<JkJavaProjectConstruction> dependencyResolver;
 
@@ -58,6 +70,7 @@ public class JkJavaProjectConstruction {
         this.project = project;
         this.__ = project;
         dependencyResolver = JkDependencyResolver.ofParent(this).addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
+        compiler = JkJavaCompiler.ofParent(this);
         compilation = JkJavaProjectCompilation.ofProd(this);
         testing = new JkJavaProjectTesting(this);
         manifest = JkManifest.ofParent(this);
@@ -70,6 +83,44 @@ public class JkJavaProjectConstruction {
 
     public JkDependencyResolver<JkJavaProjectConstruction> getDependencyResolver() {
         return dependencyResolver;
+    }
+
+    /**
+     * Returns the compiler compiling Java sources for this project. The returned instance is mutable
+     * so users can modify it from this method return.
+     */
+    public JkJavaCompiler<JkJavaProjectConstruction> getCompiler() {
+        return compiler;
+    }
+
+    /**
+     * Sets the Java version used for both source and target.
+     */
+    public JkJavaProjectConstruction setJavaVersion(JkJavaVersion javaVersion) {
+        this.javaVersion = javaVersion;
+        return this;
+    }
+
+    /**
+     * Gets the Java version used as source and target version
+     */
+    public JkJavaVersion getJavaVersion() {
+        return javaVersion != null ? javaVersion : DEFAULT_JAVA_VERSION;
+    }
+
+    /**
+     * Returns encoding to use to read Java source files
+     */
+    public String getSourceEncoding() {
+        return sourceEncoding;
+    }
+
+    /**
+     * Set the encoding to use to read Java source files
+     */
+    public JkJavaProjectConstruction setSourceEncoding(String sourceEncoding) {
+        this.sourceEncoding = sourceEncoding;
+        return this;
     }
 
     public JkJavaProjectCompilation<JkJavaProjectConstruction> getCompilation() {

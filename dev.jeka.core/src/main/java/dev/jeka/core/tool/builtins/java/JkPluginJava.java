@@ -14,7 +14,6 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
@@ -32,7 +31,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -94,10 +92,8 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @Override
     protected void beforeSetup() {
         JkJavaProjectConstruction construction = project.getConstruction();
-        JkJavaCompiler compiler = construction.getCompilation().getCompiler();
-        if (compiler.isDefault()) {  // If no compiler specified, try to set the best fitted
-            compiler.setForkingProcess(compilerProcess());
-        }
+        JkJavaCompiler compiler = construction.getCompiler();
+        compiler.setJdkHomeProps(JkOptions.getAllStartingWith("jdk."));
         project.getPublication().getMaven().setRepos(repoPlugin.publishRepository().toSet());
         project.getPublication().getIvy().setRepos(repoPlugin.publishRepository().toSet());
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
@@ -279,13 +275,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         return project.getJavaIdeSupport();
     }
 
-    private JkProcess compilerProcess() {
-        final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
-        JkJavaProjectCompilation compilation = project.getConstruction().getCompilation();
-        return JkJavaCompiler.getForkedProcessOnJavaSourceVersion(jdkOptions,
-                compilation.getJavaVersion().get());
-    }
-
     private Document depsAsXml()  {
         Document document;
         try {
@@ -358,6 +347,4 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         public String jvmOptions;
 
     }
-
-
 }

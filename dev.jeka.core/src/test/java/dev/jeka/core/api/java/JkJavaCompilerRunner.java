@@ -8,13 +8,11 @@ import java.nio.file.Paths;
 public class JkJavaCompilerRunner {
 
     public static void main(String[] args) {
-        //System.out.println(JkJavaCompiler.currentJdkSourceVersion());
-        //System.out.println(ToolProvider.getSystemJavaCompiler().getSourceVersions());
         JkLog.setConsumer(JkLog.Style.INDENT);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(Paths.get("jeka/output/bin"))
-                .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V6.get()));
+                .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V11.get()));
     }
 
 }

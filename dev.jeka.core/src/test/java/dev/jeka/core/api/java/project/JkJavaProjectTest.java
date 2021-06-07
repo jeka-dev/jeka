@@ -139,7 +139,7 @@ public class JkJavaProjectTest {
                 .getCompilation()
                 .getLayout()
                 .emptySources().addSource("src")
-                .emptyResources().addResource("res").includeSourceDirsInResources().__.__.__;
+                .emptyResources().addResource("res").mixResourcesAndSources().__.__.__;
         baseProject.getPublication().getArtifactProducer().makeAllArtifacts();
 
         final Path core = top.resolve("core");

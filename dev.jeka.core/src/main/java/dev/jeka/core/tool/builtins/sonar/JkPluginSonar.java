@@ -2,7 +2,6 @@ package dev.jeka.core.tool.builtins.sonar;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.project.JkCompileLayout;
 import dev.jeka.core.api.java.project.JkJavaProject;
@@ -49,7 +48,7 @@ public class JkPluginSonar extends JkPlugin {
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,
                         baseDir.relativize(testReportDir.resolve("junit")).toString())
-                .withProperty(JkSonar.SOURCE_ENCODING, project.getConstruction().getCompilation().getSourceEncoding())
+                .withProperty(JkSonar.SOURCE_ENCODING, project.getConstruction().getSourceEncoding())
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
                         baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.exec")).toString());
 

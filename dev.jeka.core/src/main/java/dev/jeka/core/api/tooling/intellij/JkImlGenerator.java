@@ -473,18 +473,6 @@ public final class JkImlGenerator {
     }
 
     private static String jdkVersion(JkJavaVersion javaVersion) {
-        if (JkJavaVersion.V1_4.equals(javaVersion)) {
-            return "1.4";
-        }
-        if (JkJavaVersion.V5.equals(javaVersion)) {
-            return "1.5";
-        }
-        if (JkJavaVersion.V6.equals(javaVersion)) {
-            return "1.6";
-        }
-        if (JkJavaVersion.V7.equals(javaVersion)) {
-            return "1.7";
-        }
         if (JkJavaVersion.V8.equals(javaVersion)) {
             return "1.8";
         }

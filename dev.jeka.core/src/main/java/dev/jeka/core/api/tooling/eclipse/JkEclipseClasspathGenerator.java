@@ -252,21 +252,6 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private static String eclipseJavaVersion(JkJavaVersion compilerVersion) {
-        if (JkJavaVersion.V1_3.equals(compilerVersion)) {
-            return "J2SE-1.3";
-        }
-        if (JkJavaVersion.V1_4.equals(compilerVersion)) {
-            return "J2SE-1.4";
-        }
-        if (JkJavaVersion.V5.equals(compilerVersion)) {
-            return "J2SE-1.5";
-        }
-        if (JkJavaVersion.V6.equals(compilerVersion)) {
-            return "JavaSE-1.6";
-        }
-        if (JkJavaVersion.V7.equals(compilerVersion)) {
-            return "JavaSE-1.7";
-        }
         if (JkJavaVersion.V8.equals(compilerVersion)) {
             return "JavaSE-1.8";
         }

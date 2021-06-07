@@ -24,7 +24,7 @@ public class JkJavaProjectSimpleFacade {
     }
 
     public JkJavaProjectSimpleFacade setJavaVersion(JkJavaVersion version) {
-        project.getConstruction().getCompilation().setJavaVersion(version);
+        project.getConstruction().setJavaVersion(version);
         return this;
     }
 
@@ -49,7 +49,7 @@ public class JkJavaProjectSimpleFacade {
     }
 
     public JkJavaProjectSimpleFacade setJavaSourceEncoding(String sourceEncoding) {
-        project.getConstruction().getCompilation().setSourceEncoding(sourceEncoding);
+        project.getConstruction().setSourceEncoding(sourceEncoding);
         return this;
     }
 
@@ -61,6 +61,15 @@ public class JkJavaProjectSimpleFacade {
         project.getConstruction().getCompilation().getLayout().setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
         project.getConstruction().getTesting().getCompilation().getLayout()
                 .setSourceSimpleStyle(JkCompileLayout.Concern.TEST);
+        return this;
+    }
+
+    /**
+     * The resources will be located in same dirs than sources.
+     */
+    public JkJavaProjectSimpleFacade mixResourcesAndSources() {
+        project.getConstruction().getCompilation().getLayout().mixResourcesAndSources();
+        project.getConstruction().getTesting().getCompilation().getLayout().mixResourcesAndSources();
         return this;
     }
 
@@ -123,6 +132,8 @@ public class JkJavaProjectSimpleFacade {
         project.getPublication().getMaven().setDependencies(dependencyModifier);
         return this;
     }
+
+
 
     /**
      * By default, every classes in test folder are run. If you add a exclude filter,

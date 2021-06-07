@@ -132,21 +132,33 @@ public final class JkDebugConsoleLogConsumer implements JkLog.JkEventLogConsumer
 
     private static String stackTraceSuffix() {
         StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-        boolean jkLogFound = false;
+        StackTraceElement element = findStackElementNext(elements, JkLog.class, null);
+        if (element == null) {
+            element = findStackElementNext(elements, PrintStream.class, "print");
+        }
+        if (element != null) {
+            return JkUtilsString.padEnd(format(element), STACKTRACE_PREFIX_SIZE, ' ') + ":";
+        }
+        return JkUtilsString.padEnd("", STACKTRACE_PREFIX_SIZE, ' ') + ":";
+    }
+
+    private static StackTraceElement findStackElementNext(StackTraceElement[] elements, Class clazz, String method) {
+        boolean found = false;
         for (int i = 0; i < elements.length; i++) {
             StackTraceElement stackTraceElement = elements[i];
             String className = stackTraceElement.getClassName();
-            boolean jkLogClass = className.equals(JkLog.class.getName());
-            if (jkLogClass) {
-                jkLogFound = true;
+            boolean matchClass = className.equals(clazz.getName());
+            boolean matchMethod = method == null ? true : method.equals(stackTraceElement.getMethodName());
+            if (matchClass && matchMethod) {
+                found = true;
                 continue;
             }
-            if (jkLogFound && !jkLogClass) {
-                return format(stackTraceElement) + ":";
+            if (found && !matchClass) {
+                return stackTraceElement;
             }
 
         }
-        return JkUtilsString.padEnd("", STACKTRACE_PREFIX_SIZE, ' ') + ":";
+        return null;
     }
 
     private static String format(StackTraceElement stackTraceElement) {
@@ -172,7 +184,6 @@ public final class JkDebugConsoleLogConsumer implements JkLog.JkEventLogConsumer
             }
         }
         return String.join(".", resultItems);
-
     }
 
 }

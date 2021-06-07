@@ -1,34 +1,20 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 /**
  * Java specification version
  */
-public final class JkJavaVersion {
+public final class JkJavaVersion implements Comparable<JkJavaVersion> {
 
     /**
      * Creates a Java specification version from the specified name.
      */
     public static JkJavaVersion of(String value) {
-        JkUtilsAssert.argument(value != null, "version name can't be null. Use 7, 8, ...");
+        JkUtilsAssert.argument(value != null, "version name can't be null. Use 8, 9, 10, 11...");
         return new JkJavaVersion(value);
     }
-
-    /** Stands for Java version 1.3 */
-    public static final JkJavaVersion V1_3 = JkJavaVersion.of("1.3");
-
-    /** Stands for Java version 1.4 */
-    public  static final JkJavaVersion V1_4 = JkJavaVersion.of("1.4");
-
-    /** Stands for Java version 5 */
-    public static final JkJavaVersion V5 = JkJavaVersion.of("5");
-
-    /** Stands for Java version 6 */
-    public static final JkJavaVersion V6 = JkJavaVersion.of("6");
-
-    /** Stands for Java version 7 */
-    public static final JkJavaVersion V7 = JkJavaVersion.of("7");
 
     /** Stands for Java version 8 */
     public static final JkJavaVersion V8 = JkJavaVersion.of("8");
@@ -93,4 +79,11 @@ public final class JkJavaVersion {
     public String toString() {
         return value;
     }
+
+    @Override
+    public int compareTo(JkJavaVersion o) {
+        return JkVersion.of(value).compareTo(JkVersion.of(o.value));
+    }
+
+
 }

@@ -601,7 +601,10 @@ tests and produce jars using Jeka low-level API.
 
 ```Java
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;import dev.jeka.core.api.depmanagement.publication.JkScope;import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.publication.JkScope;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.java.*;
@@ -633,12 +636,12 @@ public class AntStyleBuild extends JkClass {
 
     @Override
     protected void setup() {
-       JkResolveResult depResolution = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
-               .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
-               .and("junit:junit:4.11", JkScope.TEST)
-       );
-       classpath = JkClasspath.of(getBaseTree().andMatching(true,"libs/**/*.jar").getFiles())
-            .and(depResolution.getFiles());
+        JkResolveResult depResolution = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral()).resolve(JkDependencySet.of()
+                .and("org.hibernate:hibernate-entitymanager:jar:5.4.2.Final")
+                .and("junit:junit:4.11", JkScope.TEST)
+        );
+        classpath = JkClasspath.of(getBaseTree().andMatching(true, "libs/**/*.jar").getFiles())
+                .and(depResolution.getFiles());
     }
 
     public void compile() {
@@ -667,8 +670,8 @@ public class AntStyleBuild extends JkClass {
     public void run() {
         jar();
         JkJavaProcess.of().withWorkingDir(jarFile.getParent())
-            .andClasspath(classpath)
-            .runJarSync(jarFile);
+                .andClasspath(classpath)
+                .runJarSync(jarFile);
     }
 
     public void cleanBuild() {
@@ -679,11 +682,11 @@ public class AntStyleBuild extends JkClass {
     public void junit() {
         jar();
         JkUnit.of().withForking()
-        .withReportDir(reportDir)
-        .withReport(JunitReportDetail.FULL)
-        .run(JkJavaTestClasses.of(
-                classpath.andPrepending(jarFile),
-                JkPathTree.of(classDir).andMatching(true, "**/*Test.class", "*Test.class") ));
+                .withReportDir(reportDir)
+                .withReport(JunitReportDetail.FULL)
+                .run(JkJavaTestClasses.of(
+                        classpath.andPrepending(jarFile),
+                        JkPathTree.of(classDir).andMatching(true, "**/*Test.class", "*Test.class")));
     }
 
 }
