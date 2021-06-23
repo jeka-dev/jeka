@@ -1,9 +1,10 @@
-# 0.9.10 (ongoing)
+# 0.9.10.RELEASE
 * Deep rework of dependency management API. Removal of 'scope' context.
 * Fix plugin version compatibility checker
 * Fix duplicate setup on nested projects
 * Add automated extra command line arguments via jeka/cmd.properties file 
 * More consistent compilation handling
+* Minor fixes on JkPluginPom
  
 # 0.9.4.RELEASE
 * Rename JkCommandSet to JkClass
