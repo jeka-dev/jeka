@@ -111,11 +111,20 @@ public class JkJavaProjectSimpleFacade {
     }
 
     /**
-     * The published version will be computed according the git repository.
-     * @see JkGitWrapper#getVersionFromTags()
+     * The published version will be computed according the current git tag.
+     * @see JkGitWrapper#getVersionFromTag()
      */
-    public JkJavaProjectSimpleFacade setPublishedMavenVersionFromGit() {
-        return setPublishedMavenVersion(() -> JkGitWrapper.of(getProject().getBaseDir()).getVersionFromTags());
+    public JkJavaProjectSimpleFacade setPublishedMavenVersionFromGitTag() {
+        return setPublishedMavenVersion(() -> JkGitWrapper.of(getProject().getBaseDir()).getVersionFromTag());
+    }
+
+    /**
+     * The published version will be computed according the git last commit message.
+     * @see JkGitWrapper#getVersionFromCommitMessage(String)
+     */
+    public JkJavaProjectSimpleFacade setPublishedVersionFromGitTagCommitMessage(String suffixKeyword) {
+        return setPublishedMavenVersion(() -> JkGitWrapper.of(getProject().getBaseDir())
+                .getVersionFromCommitMessage(suffixKeyword));
     }
 
     /**
@@ -132,8 +141,6 @@ public class JkJavaProjectSimpleFacade {
         project.getPublication().getMaven().setDependencies(dependencyModifier);
         return this;
     }
-
-
 
     /**
      * By default, every classes in test folder are run. If you add a exclude filter,

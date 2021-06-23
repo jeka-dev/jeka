@@ -91,7 +91,11 @@ public final class JkPom {
      * The dependencies declared in this POM.
      */
     public JkQualifiedDependencySet getDependencies() {
-        return dependencies(dependenciesElement(), getProperties());
+        Element dependenciesEl = dependenciesElement();
+        if (dependenciesEl == null) {
+            return JkQualifiedDependencySet.of();
+        }
+        return dependencies(dependenciesEl, getProperties());
     }
 
     /**
@@ -100,11 +104,15 @@ public final class JkPom {
      */
     public JkVersionProvider getVersionProvider() {
         final List<JkVersionedModule> versionedModules = new LinkedList<>();
-        if (dependencyManagementEl() == null) {
+        Element dependencyManagementEl = dependencyManagementEl();
+        if (dependencyManagementEl == null) {
             return JkVersionProvider.of();
         }
-        final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
+        final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl,
                 "dependencies");
+        if (dependenciesEl == null) {
+            return JkVersionProvider.of();
+        }
         final JkQualifiedDependencySet scopedDependencies = dependencies(dependenciesEl, getProperties());
         for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
             final JkVersionedModule versionedModule = JkVersionedModule.of(
@@ -160,10 +168,14 @@ public final class JkPom {
      */
     public DependencyExclusions getDependencyExclusion() {
         DependencyExclusions result = DependencyExclusions.of();
-        if (dependencyManagementEl() == null) {
+        Element dependencyManagementEl = dependencyManagementEl();
+        if (dependencyManagementEl == null) {
             return result;
         }
-        final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(), "dependencies");
+        final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl, "dependencies");
+        if (dependenciesEl == null) {
+            return result;
+        }
         final JkQualifiedDependencySet scopedDependencies = dependencies(dependenciesEl, getProperties());
         for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
             if (!moduleDependency.getExclusions().isEmpty()) {

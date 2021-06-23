@@ -69,7 +69,7 @@ public class CoreBuild extends JkClass {
     protected void setup()  {
 
         // Module version is driven by git repository info
-        String jekaVersion = git.getVersionFromTags();
+        String jekaVersion = git.getVersionFromTag();
         if (!JkVersion.of(jekaVersion).isSnapshot()) {
             java.pack.javadoc = true;
         }
@@ -109,7 +109,7 @@ public class CoreBuild extends JkClass {
                     .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__
                 .getMaven()
                     .setModuleId("dev.jeka:jeka-core")
-                    .setVersion(git::getVersionFromTags)
+                    .setVersion(git::getVersionFromTag)
                     .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner("")))
                     .getPomMetadata()
                         .getProjectInfo()
@@ -126,7 +126,7 @@ public class CoreBuild extends JkClass {
         if (git.isWorkspaceDirty()) {
             return;
         }
-        taggedReleaseVersion = git.extractSuffixFromLastCommitTitle("Release:");
+        taggedReleaseVersion = git.extractSuffixFromLastCommitMessage("Release:");
         if (taggedReleaseVersion != null) {
             JkLog.info("Tagging with " + taggedReleaseVersion + " for release.");
             git.tag(taggedReleaseVersion);

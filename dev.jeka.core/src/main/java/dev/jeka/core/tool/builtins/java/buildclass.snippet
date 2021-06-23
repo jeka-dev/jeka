@@ -41,7 +41,7 @@ class Build extends JkClass {
             // does not need this section at all.  In this case you can remove it.
             .getPublication().getMaven()
                 .setModuleId("your.group:your.project")
-                .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTags());  // Version inferred from Git
+                .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTag());  // Version inferred from Git
     }
 
     public void cleanPack() {

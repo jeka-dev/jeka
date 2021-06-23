@@ -22,7 +22,7 @@ class Build extends JkClass {
 
             // Only necessary if your project is published in a binary repository.
             .setPublishedMavenModuleId("your.group:your.project")
-            .setPublishedMavenVersionFromGit();  // Version inferred from Git
+            .setPublishedMavenVersionFromGitTag();  // Version inferred from Git
     }
 
     public void cleanPack() {

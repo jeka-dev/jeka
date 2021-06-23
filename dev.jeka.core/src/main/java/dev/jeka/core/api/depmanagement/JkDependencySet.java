@@ -518,14 +518,14 @@ public class JkDependencySet {
         for (final JkDependency dependency : dependencies) {
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDep = (JkModuleDependency) dependency;
-                builder.append(indent).append(".").append(method).append("(\"")
-                .append(moduleDep.getModuleId().getGroup()).append(":")
-                .append(moduleDep.getModuleId().getName());
-                if (!moduleDep.getVersion().isUnspecified()) {
-                    builder.append(":" + moduleDep.getVersion().getValue());
+                String dependencyString = moduleDep.getModuleId().getGroup() + ":" + moduleDep.getModuleId().getName();
+                if (and && !moduleDep.getVersion().isUnspecified()) {
+                    dependencyString = dependencyString + ":" + moduleDep.getVersion().getValue();
                 }
-                builder.append('"');
-                builder.append(")\n");
+                builder.append(indent).append(".").append(method).append("(\"")
+                        .append(dependencyString)
+                        .append('"')
+                        .append(")\n");
             }
         }
         return builder.toString();

@@ -71,7 +71,7 @@ public final class JkGitWrapper {
     }
 
     /**
-     * Convenient method to extract information from the last commit title.
+     * Convenient method to extract information from the last commit message title.
      * This splits title is separated words, then looks for the fist word starting
      * with the specified prefix. The returned suffix is the word found minus the prefix.<p/>
      * This method returns <code>null</code> if no such prefix found.
@@ -79,7 +79,7 @@ public final class JkGitWrapper {
      * For example, if the title is 'Release:0.9.5.RC1 : Rework Dependencies', then
      * invoking this method with 'Release:' argument will return '0.9.5.RC1'.
      */
-    public String extractSuffixFromLastCommitTitle(String prefix) {
+    public String extractSuffixFromLastCommitMessage(String prefix) {
         List<String> messageLines = getLastCommitMessage();
         if (messageLines.isEmpty()) {
             return null;
@@ -105,10 +105,32 @@ public final class JkGitWrapper {
     }
 
     /**
+     * Returns version according the last commit message. If the commit message contains a word
+     * starting with the specified prefix keyword then the substring following this suffix will be
+     * returned.<br/>
+     * If no such prefix found, then a version formatted as [branch]-SNAPSHOT will be returned
+     */
+    public String getVersionFromCommitMessage(String prefixKeyword) {
+        String afterSuffix = extractSuffixFromLastCommitMessage(prefixKeyword);
+        if (afterSuffix != null) {
+            return afterSuffix;
+        }
+        String branch;
+        try {
+            branch = getCurrentBranch();
+            return branch + "-SNAPSHOT";
+        } catch (IllegalStateException e) {
+            JkLog.warn(e.getMessage());
+            return JkVersion.UNSPECIFIED.getValue();
+        }
+    }
+
+
+    /**
      * If the current commit is tagged then the version is the tag name (last in alphabetical order). Otherwise
      * the version is [branch]-SNAPSHOT
      */
-    public String getVersionFromTags() {
+    public String getVersionFromTag() {
         List<String> tags;
         String branch;
         try {
@@ -126,10 +148,10 @@ public final class JkGitWrapper {
     }
 
     /**
-     * @see #getVersionFromTags()
+     * @see #getVersionFromTag()
      */
-    public JkVersion getJkVersionFromTags() {
-        return JkVersion.of(getVersionFromTags());
+    public JkVersion getJkVersionFromTag() {
+        return JkVersion.of(getVersionFromTag());
     }
 
     public JkGitWrapper exec(String... args) {

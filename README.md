@@ -27,6 +27,10 @@ class Build extends JkClass {
         springboot.javaPlugin().getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and("org.springframework.boot:spring-boot-starter-web")
+                .and("org.projectlombok:lombok:1.18.20")
+            )
+            .setRuntimeDependencies(deps -> deps
+                .minus("org.projectlombok:lombok")
             )
             .setTestDependencies(deps -> deps
                 .and("org.springframework.boot:spring-boot-starter-test")
