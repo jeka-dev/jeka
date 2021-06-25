@@ -9,7 +9,7 @@ In this example, we will create a project to automate tasks (no Java project to 
 
 We will code simple functions that can executed both in IDE and in command line.
 
-## Create a Jeka module
+## Hello World !
 
 Right click on folder or module > Jeka > Generate Jeka files and folders...
 
