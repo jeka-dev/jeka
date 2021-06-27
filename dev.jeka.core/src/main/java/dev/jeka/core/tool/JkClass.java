@@ -75,7 +75,7 @@ public class JkClass {
      * and plugin activation.
      */
     public static <T extends JkClass> T of(Class<T> jkClass) {
-        JkLog.startTask("Instantiate Jeka class " + jkClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        JkLog.startTask("Instantiating Jeka class " + jkClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T jkClassInstance = ofUninitialized(jkClass);
         try {
             jkClassInstance.initialise();
@@ -97,19 +97,19 @@ public class JkClass {
 
         for (JkPlugin plugin : new LinkedList<>(plugins.getLoadedPlugins())) {
             List<ProjectDef.JkClassOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
+            JkLog.startTask("Activating Plugin " + plugin.name() + " with options "
+                    + HelpDisplayer.optionValues(defs));
             try {
                 plugin.afterSetup();
             } catch (RuntimeException e) {
                 JkLog.error("Plugin " + plugin.name() + " has caused build instantiation failure.");
                 throw e;
             }
-            JkLog.info("Plugin " + plugin.name() + " activated with options " + HelpDisplayer.optionValues(defs));
+            JkLog.endTask();
         }
 
         // Extra run configuration
         postSetup();
-        List<ProjectDef.JkClassOptionDef> defs = ProjectDef.RunClassDef.of(this).optionDefs();
-        JkLog.info(this.getClass().getSimpleName() + " instance initialized with options " + HelpDisplayer.optionValues(defs));
         baseDirContext(null);
     }
 

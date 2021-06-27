@@ -1,16 +1,13 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 
 import java.nio.charset.Charset;
@@ -31,12 +28,20 @@ public final class JkScaffolder {
 
     private String classFilename = "Commands.java";
 
+    private String wrapperJekaVersion;
+
     private final JkRunnables extraActions = JkRunnables.of();
 
     JkScaffolder(Path baseDir) {
         super();
         this.jkClassCode = "";
         this.baseDir= baseDir;
+    }
+
+
+    public JkScaffolder setWrapperJekaVersion(String wrapperJekaVersion) {
+        this.wrapperJekaVersion = wrapperJekaVersion;
+        return this;
     }
 
     /**
@@ -92,13 +97,17 @@ public final class JkScaffolder {
         final Path target = wrapperFolder.resolve(jekaWrapperJar.getFileName());
         JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
-        final String version = jekaVersion(dependencyResolver);
+        final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion(dependencyResolver)
+                : wrapperJekaVersion;
         Path tempProps = JkUtilsPath.createTempFile("jeka-", ".properties");
-        JkPathFile.of(tempProps)
-                .replaceContentBy(JkScaffolder.class.getResource("jeka.properties"))
-                .copyReplacingTokens(wrapperFolder.resolve("jeka.properties"),
-                        JkUtilsIterable.mapOf("${version}", version), Charset.forName("utf-8"))
-                .deleteIfExist();
+        Path jekaPropertiesPath = wrapperFolder.resolve("jeka.properties");
+        if (!Files.exists(jekaPropertiesPath)) {
+            JkPathFile.of(tempProps)
+                    .replaceContentBy(JkScaffolder.class.getResource("jeka.properties"))
+                    .copyReplacingTokens(jekaPropertiesPath,
+                            JkUtilsIterable.mapOf("${version}", version), Charset.forName("utf-8"))
+                    .deleteIfExist();
+        }
     }
 
     public void wrapDelegate(String delegateFolder) {

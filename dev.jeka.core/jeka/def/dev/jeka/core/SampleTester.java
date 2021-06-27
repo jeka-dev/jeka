@@ -41,6 +41,7 @@ class SampleTester {
     }
 
     void doTest() throws IOException {
+        testScaffoldWithExternalPlugin();
         testSampleWith("JavaPluginBuild", "cleanPackPublish");
         testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
         testSampleWith("ThirdPartyPoweredBuild", "cleanPack");
@@ -69,17 +70,9 @@ class SampleTester {
         }
         JkLog.endTask();
 
-        // Test intellij  => pb when used with wrapper as the jeka location is mentioned relative to original sample dir
-        //JkLog.startTask("Test Intellij generate all");
-        //Path project = JkUtilsPath.createTempDirectory("jeka-test-");
-        //sampleBaseDir.andMatching(false, ".idea/**/*", "jeka/output/**/*").copyTo(project);
-        //String jekaScript = sampleBaseDir.get(JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jekaw").toString();
-        //JkProcess.of(jekaScript).withFailOnError(true).withWorkingDir(project).andParams("intellij#all").runSync();
-        //JkLog.endTask();
-
         testDepender("NormalJarBuild");
         testFork();
-        //testScaffoldJava();
+
     }
 
     private void testSampleWithJavaPlugin(String className, String... args) {
@@ -138,6 +131,16 @@ class SampleTester {
     private void testFork() {
         testSampleWithJavaPlugin("", "-java#tests.fork");
         JkUtilsAssert.state(output.goTo("test-report").exists(), "No test report generated in test fork mode.");
+    }
+
+    private void testScaffoldWithExternalPlugin() {
+        JkLog.info("Test scaffold with springboot plugin");
+        Path dir = JkUtilsPath.createTempDirectory("jeka-test");
+        JkProcess.of("jeka").withWorkingDir(dir)
+                .andParams("-LB", "-LRI", "-LSU", "-LV=false", "-JKC=",
+                        "scaffold#run", "@dev.jeka:springboot-plugin:+", "springboot#")
+                .withFailOnError(true).runSync();
+        JkPathTree.of(dir).deleteRoot();
     }
 
     public static void main(String[] args) throws Exception {

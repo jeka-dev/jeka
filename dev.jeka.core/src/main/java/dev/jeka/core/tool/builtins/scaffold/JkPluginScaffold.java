@@ -19,6 +19,9 @@ public class JkPluginScaffold extends JkPlugin {
     @JkDoc("If set then the wrapper shell script will delegate 'jekaw' call to jekaw script located in the specified folder")
     public String wrapDelegatePath;
 
+    @JkDoc("Set the Jeka version to fetch for the wrapper. If null, it will use the same Jeka version than the running one.")
+    public String wrapperJekaVersion;
+
     protected JkPluginScaffold(JkClass jkClass) {
         super(jkClass);
         this.scaffolder = new JkScaffolder(jkClass.getBaseDir());

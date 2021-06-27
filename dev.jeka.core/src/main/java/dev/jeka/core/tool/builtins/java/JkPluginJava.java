@@ -213,14 +213,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void showDependencies(String purpose, JkDependencySet deps) {
-        JkLog.info("\nDeclared dependencies for " + purpose + " : ");
-        JkLog.info("------------------------------");
-        deps.getVersionedDependencies().forEach(dep -> JkLog.info(dep.toString()));
-        JkLog.info("------------------------------");
+        JkLog.info("\nDependencies for " + purpose + " : ");
         final JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolve(deps);
         final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info("------------------------------");
         JkLog.info(String.join("\n", tree.toStrings()));
+        JkLog.info("");
     }
 
     @JkDoc("Displays resolved dependency tree in xml")

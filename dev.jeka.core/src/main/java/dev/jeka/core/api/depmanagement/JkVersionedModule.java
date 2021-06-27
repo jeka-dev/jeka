@@ -114,8 +114,8 @@ public final class JkVersionedModule {
             return this;
         }
         if (strategy == ConflictStrategy.FAIL && !version.equals(other)) {
-            throw new IllegalStateException("Module " + this.moduleId + " has been declared with oth version " + version +
-                    " and " + other);
+            throw new IllegalStateException("Module " + this.moduleId + " has been declared with both version '" + version +
+                    "' and '" + other + "'");
         }
         if (version.isSnapshot() && !other.isSnapshot()) {
             return withVersion(other);

@@ -105,7 +105,6 @@ final class JkClassResolver {
             final Class<? extends JkClass> clazz = JkInternalClasspathScanner.INSTANCE
                     .loadClassesHavingNameOrSimpleName(classNameHint, JkClass.class);
             if (clazz == null) {
-                JkLog.trace("No Jeka class found with name " + classNameHint);
                 return null;
             }
             JkClass.baseDirContext(baseDir);

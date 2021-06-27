@@ -95,7 +95,7 @@ public final class JkGitWrapper {
 
     public JkGitWrapper tagAndPush(String name) {
         tag(name);
-        git.andParams("push", "origin", "--tags").runSync();
+        git.andParams("push", "origin", name).runSync();
         return this;
     }
 

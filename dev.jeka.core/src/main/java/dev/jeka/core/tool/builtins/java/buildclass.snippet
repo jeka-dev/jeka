@@ -18,10 +18,11 @@ class Build extends JkClass {
     protected void setup() {
         java.getProject()
             .getConstruction()
+                .setJavaVersion(JkJavaVersion.V8)
                 .getCompilation()
-                    .setJavaVersion(JkJavaVersion.V8)
                     .setDependencies(deps -> deps
-                        .and("com.google.guava:guava:21.0")).__
+                        .and("com.google.guava:guava:21.0")
+                    ).__
 
                 // this testing setup is almost default setting, this is here for illustration purpose
                 // If default is ok for you, you can remove it.

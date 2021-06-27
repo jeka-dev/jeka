@@ -29,13 +29,14 @@ import java.util.function.Supplier;
 import static dev.jeka.core.api.depmanagement.JkDependencySet.Hint.lastAndIf;
 
 /**
- * Engine having responsibility of compiling def classes, instantiate Jeka class and run it.<br/>
+ * Engine having responsibility of compiling def classes, instantiate Jeka class, plugins and run it.<br/>
  * Jeka class sources are expected to lie in [project base dir]/jeka/def <br/>
  * Classes having simple name starting with '_' are ignored.
  *
  * Jeka classes can have dependencies on jars : <ul>
  *     <li>located in [base dir]/jeka/boot directory</li>
  *     <li>declared in {@link JkDefClasspath} annotation</li>
+ *     <li>declared in command-line, using '@'</li>
  * </ul>
  */
 final class Engine {
@@ -71,7 +72,7 @@ final class Engine {
 
     <T extends JkClass> T getJkClass(Class<T> baseClass, boolean initialise) {
         if (resolver.needCompile()) {
-            this.compile(true);
+            this.resolveAndCompile(true);
         }
         return resolver.resolve(baseClass, initialise);
     }
@@ -82,26 +83,35 @@ final class Engine {
     void execute(CommandLine commandLine, JkLog.Verbosity verbosityToRestore) {
         final long start = System.nanoTime();
         JkLog.startTask("Compile def and initialise Jeka classes");
-        defDependencies = defDependencies.and(commandLine.dependencies());
+        List<JkModuleDependency> commandLineDependencies = commandLine.getDefDependencies();
+        JkLog.trace("Add following dependencies to Jeka classpath : " + commandLineDependencies);
+        defDependencies = defDependencies
+                .and(commandLineDependencies)
+                .and(dependenciesOnJeka());
         JkClass jkClass = null;
-        JkPathSequence path = JkPathSequence.of();
+        JkPathSequence path;
         String jkClassHint = Environment.standardOptions.jkClassName();
         preCompile();  // Need to pre-compile to get the declared def dependencies
-        if (!JkUtilsString.isBlank(jkClassHint)) {  // First find a class in the existing classpath without compiling
-            jkClass = getJkClassInstance(jkClassHint, path);
+
+        // First try to instantiate class without compiling and resolving
+        // if a jeka class has been specified and no extra dependencies defined in command line.
+        if (!JkUtilsString.isBlank(jkClassHint) && Environment.commandLine.getDefDependencies().isEmpty()) {  // First find a class in the existing classpath without compiling
+            jkClass = getJkClassInstance(jkClassHint, JkPathSequence.of());
         }
+
+        // No Jkclass has been foud
         if (jkClass == null) {
-            path = compile(true).and(path);
+            path = resolveAndCompile(true);
             jkClass = getJkClassInstance(jkClassHint, path);
             if (jkClass == null) {
                 String hint = JkUtilsString.isBlank(jkClassHint) ? "" : " named " + jkClassHint;
                 String prompt = !JkUtilsString.isBlank(jkClassHint) ? ""
                         : "\nAre you sure this directory is a Jeka project ?";
-                throw new JkException("Can't find or guess any Jeka class %s in project %s.%s",
+                throw new JkException("Can't find or guess any Jeka class%s in project %s.%s",
                         hint, this.projectBaseDir, prompt);
             }
         } else {
-            path = compile(false).and(path);
+            path = resolveAndCompile(false);
         }
         jkClass.getImportedJkClasses().setImportedRunRoots(this.rootsOfImportedJekaClasses);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -130,36 +140,47 @@ final class Engine {
         this.compileOptions = parser.compileOptions();
     }
 
-    // Compiles and returns the runtime classpath
-    private JkPathSequence compile(boolean compileSources) {
-        final LinkedHashSet<Path> entries = new LinkedHashSet<>();
-        compile(new HashSet<>(), entries, compileSources);
-        return JkPathSequence.of(entries).withoutDuplicates();
+    /*
+     * Resolves dependencies and compiles and sources classes contained in jeka/def.
+     * It returns a path sequence containing the resolved dependencies and result of compilation.
+     */
+    private JkPathSequence resolveAndCompile(boolean compileSources) {
+        return resolveAndCompile(new HashSet<>(), JkPathSequence.of(), compileSources);
     }
 
-    private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path, boolean compileSources) {
+    private JkPathSequence resolveAndCompile(Set<Path> yetCompiledProjects, JkPathSequence path, boolean compileSources) {
         if (!this.resolver.hasDefSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
-            return;
+            if (Environment.commandLine.getDefDependencies().isEmpty()) {
+                return JkPathSequence.of();
+            } else {
+                return dependenciesPath();
+            }
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
         final String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         final long start = System.nanoTime();
         JkLog.startTask(msg);
+        JkPathSequence dependencyPath = dependenciesPath().andPrepend(path).withoutDuplicates();
+        JkPathSequence projectDependenciesPath =
+                resolveAndCompileDependentProjects(yetCompiledProjects, dependencyPath, compileSources);
+        if (compileSources) {
+            compileDef(dependencyPath.and(projectDependenciesPath));
+        }
+        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        return dependencyPath.and(projectDependenciesPath).and(this.resolver.defClassDir).withoutDuplicates();
+    }
+
+    private JkPathSequence dependenciesPath() {
         final JkDependencyResolver defDependencyResolver = getDefDependencyResolver();
-        final JkResolveResult resolveResult = defDependencyResolver.resolve(this.computeDefDependencies());
+        final JkResolveResult resolveResult = defDependencyResolver.resolve(this.defDependencies);
         if (resolveResult.getErrorReport().hasErrors()) {
             JkLog.warn(resolveResult.getErrorReport().toString());
         }
-        JkPathSequence runPath = resolveResult.getFiles();
-        path.addAll(runPath.getEntries());
-        compileDependentProjects(yetCompiledProjects, path, compileSources);
-        if (compileSources) {
-            compileDef(JkPathSequence.of(path));
-        }
-        path.add(this.resolver.defClassDir);
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        return resolveResult.getFiles().withoutDuplicates();
     }
+
+
 
     private JkClass getJkClassInstance(String jkClassHint, JkPathSequence runtimePath) {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
@@ -170,7 +191,7 @@ final class Engine {
             return null;
         }
         try {
-            jkClass.setDefDependencyResolver(this.computeDefDependencies(), getDefDependencyResolver());
+            jkClass.setDefDependencyResolver(this.defDependencies, getDefDependencyResolver());
             return jkClass;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
@@ -178,7 +199,7 @@ final class Engine {
         }
     }
 
-    private JkDependencySet computeDefDependencies() {
+    private JkDependencySet dependenciesOnJeka() {
 
         // If true, we assume Jeka is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
@@ -197,21 +218,30 @@ final class Engine {
         return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
-    private void compileDependentProjects(Set<Path> yetCompiledProjects,
-                                                    LinkedHashSet<Path>  pathEntries,
-                                                    boolean compileSources) {
+    /*
+     * Resolves dependencies and compiles project that this one depends on.
+     * It returns a path resulting of the dependency resolution and compilation output.
+     */
+    private JkPathSequence resolveAndCompileDependentProjects(Set<Path> yetCompiledProjects,
+                                                              JkPathSequence compilePath,
+                                                              boolean compileSources) {
         boolean compileImports = !this.rootsOfImportedJekaClasses.isEmpty();
         if (compileImports) {
             JkLog.startTask("Compile Jeka classes of dependent projects : "
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedJekaClasses));
         }
+        JkPathSequence inputPath = compilePath;
+        JkPathSequence result = JkPathSequence.of();
         for (final Path file : this.rootsOfImportedJekaClasses) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
-            engine.compile(yetCompiledProjects, pathEntries, compileSources);
+            JkPathSequence resultPath = engine.resolveAndCompile(yetCompiledProjects, compilePath, compileSources);
+            inputPath = inputPath.and(resultPath);
+            result = result.and(resultPath);
         }
         if (compileImports) {
             JkLog.endTask();
         }
+        return result.withoutDuplicates();
     }
 
     private void compileDef(JkPathSequence defClasspath) {

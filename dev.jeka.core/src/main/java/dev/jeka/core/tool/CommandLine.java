@@ -26,7 +26,7 @@ final class CommandLine {
         result.masterMethods = extractMethods(words, true);
         result.subProjectMethods = extractMethods(words, false);
         result.pluginOptions = extractPluginOptions(words);
-        result.runDependencies = dependencies(words);
+        result.defDependencies = dependencies(words);
         result.rawArgs = words;
         return result;
     }
@@ -41,7 +41,7 @@ final class CommandLine {
 
     private List<PluginOptions> pluginOptions;
 
-    private List<JkModuleDependency> runDependencies;
+    private List<JkModuleDependency> defDependencies;
 
     private String[] rawArgs;
 
@@ -236,8 +236,8 @@ final class CommandLine {
         return pluginOptions;
     }
 
-    List<JkModuleDependency> dependencies() {
-        return this.runDependencies;
+    List<JkModuleDependency> getDefDependencies() {
+        return this.defDependencies;
     }
 
     String[] rawArgs() {

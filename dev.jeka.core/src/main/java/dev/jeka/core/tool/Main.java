@@ -61,6 +61,7 @@ public final class Main {
                 consumer.restore();
             }
             if (e instanceof JkException) {
+                System.err.println();
                 System.err.println(e.getMessage());
             } else {
                 System.err.println("An error occurred during def class execution : " + e.getMessage());
