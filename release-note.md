@@ -1,7 +1,6 @@
 # 0.9.11
 * Fix dependency issue when importing module via command-line '@'
-
-
+* Minor console output improvement
 
 # 0.9.10.RELEASE
 * Deep rework of dependency management API. Removal of 'scope' context.
