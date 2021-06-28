@@ -186,10 +186,7 @@ final class Engine {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
-        final JkClass jkClass = resolver.resolveQuietly(jkClassHint);
-        if (jkClass == null) {
-            return null;
-        }
+        final JkClass jkClass = resolver.resolve(jkClassHint);
         try {
             jkClass.setDefDependencyResolver(this.defDependencies, getDefDependencyResolver());
             return jkClass;
@@ -234,7 +231,7 @@ final class Engine {
         JkPathSequence result = JkPathSequence.of();
         for (final Path file : this.rootsOfImportedJekaClasses) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
-            JkPathSequence resultPath = engine.resolveAndCompile(yetCompiledProjects, compilePath, compileSources);
+            JkPathSequence resultPath = engine.resolveAndCompile(yetCompiledProjects, inputPath, compileSources);
             inputPath = inputPath.and(resultPath);
             result = result.and(resultPath);
         }

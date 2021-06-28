@@ -1,3 +1,8 @@
+# 0.9.11
+* Fix dependency issue when importing module via command-line '@'
+
+
+
 # 0.9.10.RELEASE
 * Deep rework of dependency management API. Removal of 'scope' context.
 * Fix plugin version compatibility checker
