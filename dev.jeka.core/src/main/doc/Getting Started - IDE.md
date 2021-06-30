@@ -3,7 +3,7 @@
 Install direcly plugin from [here](https://plugins.jetbrains.com/plugin/13489-jeka) 
 or search 'jeka' in Intellij Marketplace
 
-# Create a simple automation project
+# Create simple automation projects
 
 In this example, we will create a project to automate tasks (no Java project to build).
 
