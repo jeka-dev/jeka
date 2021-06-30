@@ -14,21 +14,19 @@ We will code simple functions that can executed both in IDE and in command line.
 Right click on folder or module > Jeka > Generate Jeka files and folders...
 
 ![plot](images/generate-jeka-files.png)
-<br/><br/><br/><br/>
+<br/><br/><br/>
 This opens a dialog box. Press OK.
 
 ![plot](images/create-jeka-files.png)
 
 <br/><br/><br/><br/>
-This generates a Jeka folder structure with a empty Jeka class.
+This generates a Jeka folder structure with an empty Jeka class.
 
-On the right side of your IDE, you can expand nodes to navigate on Jeka commands you can perform.
+On the right side of your IDE, you can expand nodes to navigate on Jeka commands that you can perform. These commands come from either the JkClass or from plugin present in classpath.
 
-These commands come from either the JkClass or from plugin present in classpath.
-
-Click Commands > help to trigger the `help` method coming from `JkClass`. 
-This will display a contextual help for the available commands and options.
-You can also invoke the help command using command line `./jekaw help`
+Click *Commands > help* to trigger the `help` method coming from `JkClass`. 
+This will display a contextual help for available commands and options.
+You can also invoke the `help` command using command line `./jekaw help`
 
 You can now add your own commands just by declaring a public no-arg method returning `void`.
 
@@ -36,9 +34,9 @@ For adding options, just declare a public field as shown below.
 
 The `helloWorld` command is invokable both from the IDE (run/debug) and from the command line using `./jekaw helloWorld -name=Joe`
 
-You can write as many commands as you want in your Jeka class, and your project can also contain many Jeka class. 
+You can write as many commands as you want in your Jeka classes, and your project can also contain many Jeka classes. 
 The first Jeka class found is the default Jeka class (sorted by name/package). To run `doSomething` method on 
-a class named `this.is.MyJekaCommands`a Jeka class, execute `./jekaw -JKC=MyJekaCommands doSomething`.
+a class named `here.is.MyJekaCommands`, execute `./jekaw -JKC=MyJekaCommands doSomething`.
 
 ![plot](images/scaffolded-1.png)
 
@@ -52,14 +50,14 @@ make it available on IDE classpath.
 
 ![plot](images/import-guava.png)
 
-<br/><br/><br/><br/>
+<br/><br/>
 Now you can use guava to improve your commands using *guava* inside.
 
 ![plot](images/run-guava.png)
 
-<br/><br/><br/><br/>
+<br/><br/>
 
-# Build a Java Project
+# Create a Java Project
 
 Jeka bundles Java project build capabilities. Of course, you can use your favorite build tool (Maven, Gradle, ...) 
 beside Jeka in your project and let Jeka delegate builds to these tools, but you might prefer to let Jeka build 
@@ -74,7 +72,7 @@ The box *'delegate Jeka Wrapper to'* means that the module *tutorial-2* will reu
 project, to use the same Jeka Version, defined in one place.
 
 ![plot](images/create-jeka-files-java.png)
-<br/><br/><br/><br/>
+<br/><br/>
 
 This generates a Build template class in `jeka/def` along source folders.
 
@@ -85,24 +83,32 @@ on this class or available plugin.
 
 <br/><br/>
 After modifying your dependencies, don't forget to refresh module in order intellij take it in account.
+Invoke `cleanPack` to build project from scratch.
 
 ![plot](images/refresh.png)
 <br/><br/>
 Now your project is ready to code. You'll find many project examples at https://github.com/jerkar/working-examples
 
+<br/><br/>
 
+# Create a Springboot Project
 
+Jeka offers a plugin mechanism that 3rd party to extend the product. An external plugin for Springboot 
+exists, you can directly set it up using Intellij Plugin.
 
+Right click on folder or module > Jeka > Generate Jeka files and folders...
 
+This opens a dialog box. Select *Springboot* and press OK.
 
+This generates a sample project along its build class based on the last *Springboot* version.
 
+You can invoke regular commands as *clean*,*pack*, ... The plugin offers additional commands 
+to run the application from the built jar.
 
+![plot](images/scaffolded-springboot-1.png)
+<br/><br/>
 
-# Make a plugin
+The plugin offers popular Spring modules as Constants to help you add dependencies.
 
-A plugin is a collection of commands and options (meaning public no-args methods and fields) that can be bind to any 
-JkClass in order to augment it or modify its behavior. 
-
-For common usage, you don't need to write your own plugin but you will probably uses the ones that are bundled with 
-Jeka. The simplest think to understand how it works, is to write your own one.
+![plot](images/scaffolded-springboot-2.png)
 
