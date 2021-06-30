@@ -82,12 +82,12 @@ on this class or available plugin.
 ![plot](images/scaffolded-java.png)
 
 <br/><br/>
-After modifying your dependencies, don't forget to refresh module in order intellij take it in account.
+After modifying your dependencies, do not forget to refresh module in order intellij take it in account.
 Invoke `cleanPack` to build project from scratch.
 
 ![plot](images/refresh.png)
 <br/><br/>
-Now your project is ready to code. You'll find many project examples at https://github.com/jerkar/working-examples
+Now your project is ready to code. You will find many project examples at https://github.com/jerkar/working-examples
 
 <br/><br/>
 
