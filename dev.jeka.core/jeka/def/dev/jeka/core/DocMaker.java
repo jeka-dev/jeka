@@ -1,26 +1,19 @@
 package dev.jeka.core;
 
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
+import org.commonmark.node.*;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
+
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.commonmark.node.AbstractVisitor;
-import org.commonmark.node.HardLineBreak;
-import org.commonmark.node.Heading;
-import org.commonmark.node.HtmlInline;
-import org.commonmark.node.Link;
-import org.commonmark.node.Node;
-import org.commonmark.node.Text;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
-
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
 
 /*
  * Utility class to build friendly HTML doc from markdown files.
@@ -68,7 +61,7 @@ class DocMaker {
     private String createSingleReferenceMdPage() {
         final StringBuilder sb = new StringBuilder();
         final List<Path> paths = docSource.goTo("Reference Guide").getFiles();
-        paths.sort((path1, path2) -> path1.compareTo(path2));
+        paths.sort(Path::compareTo);
         for(final Path path : paths) {
             final String content = new String(JkUtilsPath.readAllBytes(path), Charset.forName("UTF8"));
             sb.append(content);

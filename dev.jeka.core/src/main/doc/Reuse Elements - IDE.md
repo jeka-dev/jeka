@@ -27,11 +27,6 @@ can much smarter thing
 
 
 
-
-
-
-## 
-
 # Make a plugin
 
 A plugin is a collection of commands and options (meaning public no-args methods and fields) that can be bind to any 

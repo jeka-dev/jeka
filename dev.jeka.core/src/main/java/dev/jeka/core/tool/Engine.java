@@ -93,8 +93,8 @@ final class Engine {
         String jkClassHint = Environment.standardOptions.jkClassName();
         preCompile();  // Need to pre-compile to get the declared def dependencies
 
-        // First try to instantiate class without compiling and resolving
-        // if a jeka class has been specified and no extra dependencies defined in command line.
+        // First try to instantiate class without compiling and resolving if a jeka class
+        // has been specified and no extra dependencies defined in command line.
         if (!JkUtilsString.isBlank(jkClassHint) && Environment.commandLine.getDefDependencies().isEmpty()) {  // First find a class in the existing classpath without compiling
             jkClass = getJkClassInstance(jkClassHint, JkPathSequence.of());
         }
@@ -180,13 +180,14 @@ final class Engine {
         return resolveResult.getFiles().withoutDuplicates();
     }
 
-
-
     private JkClass getJkClassInstance(String jkClassHint, JkPathSequence runtimePath) {
         final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
         final JkClass jkClass = resolver.resolve(jkClassHint);
+        if (jkClass == null) {
+            return null;
+        }
         try {
             jkClass.setDefDependencyResolver(this.defDependencies, getDefDependencyResolver());
             return jkClass;
