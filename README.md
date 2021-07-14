@@ -8,7 +8,7 @@
 
 # What is Jeka ?
 
-<strong>Jeka</strong> (formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using *Java* as its main language instead of using XML or Groovy/Kotlin DSLs.
+<strong>Jeka</strong> (formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
 
 Build/task definitions are expressed with plain *Java* classes to leverage IDE power and Java ecosystem seamlessly.
 
@@ -18,8 +18,8 @@ Jeka offers an execution engine, a build API and a powerful plugin architecture 
 
 # Based on simple ideas
 
-- Write any *Java* public no-args method then run it from both IDE and command line indifferently.
-- Use a simple Java library for building Java projects programmatically.
+- Run Java methods from both IDE and command line indifferently.
+- Simply use Java libraries for building Java projects programmatically.
 - Use standard plugins to implement/custom common tasks.
 
 <br/>
