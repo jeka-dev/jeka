@@ -10,8 +10,9 @@
 
 <strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using *Java* as its main language instead of using XML or Groovy/Kotlin DSLs.
 
-Builds/tasks definition are expressed in pure Java code to leverage IDE power and Java ecosystem seamlessly.
-Users can code, model, run, debug, distribute build scripts as they would do for production code.
+Builds/tasks definition are expressed with plain Java classes to leverage IDE power and Java ecosystem seamlessly.
+
+Jeka users can code, model, run, debug, distribute their build scripts as they would do for production code.
 
 ```java
 @JkDefClasspath("dev.jeka:springboot-plugin:3.0.0.RC7")
