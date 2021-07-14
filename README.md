@@ -8,7 +8,7 @@
 
 # What is Jeka ?
 
-<strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using *Java* as main language (instead of XML ot Groovy/Kotlin DSL)
+<strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using *Java* as main language instead of XML or Groovy/Kotlin DSL.
 
 Builds/tasks definition are expressed in pure Java code to leverage IDE power and Java ecosystem seamlessly.
 Users can code, model, run, debug, distribute build scripts as they would do for production code.
