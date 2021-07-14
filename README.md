@@ -16,7 +16,11 @@ Build scripts can be coded, modeled, run, debugged and reused as regular code.
 
 Jeka offers an execution engine, a build API and a powerful plugin architecture to make your automation tasks a breeze. 
 
-For better user experience, please use [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
+## Based on simple ideas
+
+- Write any *Java* public no-args method then run it from both IDE and command line indifferently.
+- Use a simple Java library for building Java projects programmatically.
+- Use standard plugins to implement/custom common tasks.
 
 <br/>
 
@@ -53,7 +57,11 @@ class Build extends JkClass {
 
 }
 ```
+```shell
+/home/me/myproject>jeka cleanPack
+```
 <br/>
+For better user experience, please use [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
 
 # News 
 
