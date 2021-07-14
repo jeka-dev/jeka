@@ -10,9 +10,15 @@
 
 <strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using *Java* as its main language instead of using XML or Groovy/Kotlin DSLs.
 
-Builds/tasks definition are expressed with plain Java classes to leverage IDE power and Java ecosystem seamlessly.
+Build/task definitions are expressed with plain *Java* classes to leverage IDE power and Java ecosystem seamlessly.
 
-Jeka users can code, model, run, debug, distribute their build scripts as they would do for production code.
+Build scripts can be coded, modeled, run, debugged and reused as regular code.
+
+Jeka offers an execution engine, a build API and a powerful plugin architecture to make your automation tasks a breeze. 
+
+For better user experience, please use [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
+
+<br/>
 
 ```java
 @JkDefClasspath("dev.jeka:springboot-plugin:3.0.0.RC7")
@@ -47,15 +53,7 @@ class Build extends JkClass {
 
 }
 ```
-
-Also, Jeka comes with powerful conventions and dynamic plugin mechanism allowing to perform exotic tasks without requiring a single line of code/configuration.
-For example `jeka java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
-performs a complete build running unit tests under Jacoco coverage tools and performs SonarQube analysis on a Java project free 
-of any build-code / configuration / script. 
-
-For better user experience, please use [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
-
-
+<br/>
 
 # News 
 
