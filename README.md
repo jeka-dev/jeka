@@ -58,7 +58,7 @@ class Build extends JkClass {
 }
 ```
 ```shell
-/home/me/myproject>jeka cleanPack -runIT=true
+/home/me/myproject>jeka cleanPack -runIT=false
 ```
 <br/>
 
