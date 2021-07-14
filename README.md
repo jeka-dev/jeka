@@ -61,6 +61,7 @@ class Build extends JkClass {
 /home/me/myproject>jeka cleanPack
 ```
 <br/>
+
 For better user experience, please use [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
 
 # News 
