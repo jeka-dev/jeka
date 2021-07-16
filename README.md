@@ -23,6 +23,7 @@ Jeka offers an execution engine, a build API and a powerful plugin architecture 
 - Use standard plugins to implement/custom common tasks.
 
 <br/>
+<sub>This is an example of a build class for a simple Springboot project.</sub>
 
 ```java
 @JkDefClasspath("dev.jeka:springboot-plugin:3.0.0.RC7")
@@ -57,12 +58,16 @@ class Build extends JkClass {
 
 }
 ```
-```shell
-/home/me/myproject>jeka cleanPack -runIT=false
+<sub>To build the project, execute ´cleanPack´ from your IDE or execute the following command line.</sub>
 ```
-<br/>
+/home/me/myproject>./jekaw cleanPack -runIT=false
+```
 
-For better user experience, please use [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
+# User friendly
+Thanks to wrapper and [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 
+You only need a JDK 8 or higher.
+
+Getting started in 5mn : [Here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
 
 # News 
 
