@@ -1,19 +1,19 @@
-# How to use _'Jeka'_ to create simple automation projects
+# How to use Jeka to create simple automation projects
 
 The below example will show simple functions that can executed both in IDE and command line.
 
 ### Install Intellij Plugin
 
 Install plugin directly from [here](https://plugins.jetbrains.com/plugin/13489-jeka)
-or search _'jeka'_ in Intellij Marketplace.
+or search _jeka_ in Intellij Marketplace.
 
 ### Hello World !
 
-Right-click on a folder or module >> "Jeka" >> "Generate Jeka files and folders..."
+Right-click on a module, then _Jeka_ > _Generate Jeka files and folders..._
 
 ![plot](images/generate-jeka-files.png)
 <br/><br/>
-Dialog box will be open with default selection and click "OK". 
+Dialog box will be open with default selection and click _OK_. 
 
 
 ![plot](images/create-jeka-files.png)
@@ -23,7 +23,7 @@ The _Jeka_ folder structure will be generated with an empty _Jeka_ class.
 
 On the right side of the IDE, nodes can be expanded to navigate on Jeka commands. These commands either come from the `JkClass` or plugin in classpath.
 
-Click *"Commands" >> "Help"* to trigger the `help` method coming from `JkClass`.
+Click _Commands_ > _help_ to trigger the `help` method coming from `JkClass`.
 This will display a contextual help from a list of all available commands and options.
 The `help` command can be also invoked by using command line `./jekaw help`
 
@@ -92,10 +92,10 @@ Now your project is ready to code. You will find many project examples at https:
 
 # Create a Springboot Project
 
-Jeka offers a plugin mechanism that 3rd party to extend the product. An external plugin for Springboot 
-exists, you can directly set it up using Intellij Plugin.
+Jeka offers a plugin mechanism to let 3rd parties extend the product. An external plugin for Springboot 
+exists and is tightly integrated in Intellij Plugin.
 
-Right click on folder or module > Jeka > Generate Jeka files and folders...
+Right click oo a module then _Jeka_ > _Generate Jeka files and folders..._
 
 This opens a dialog box. Select *Springboot* and press OK.
 
@@ -107,7 +107,7 @@ to run the application from the built jar.
 ![plot](images/scaffolded-springboot-1.png)
 <br/><br/>
 
-The plugin offers popular Spring modules as Constants to help you add dependencies.
+The plugin proposes popular _Spring_ modules as constant to help pickup dependencies.
 
 ![plot](images/scaffolded-springboot-2.png)
 
