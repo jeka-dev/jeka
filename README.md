@@ -8,10 +8,22 @@
 
 # What is Jeka ?
 
-<strong>Jeka</strong>(formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using only Java code to automate builds, tasks or pipelines.
+<strong>Jeka</strong> (formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
 
-Builds/tasks definition are expressed in pure Java code to leverage of IDE power and Java ecosystem directly.
-Users can code, run, debug, model, distribute buid features as they would do for production code.
+Build/task definitions are expressed with plain *Java* classes to leverage IDE power and Java ecosystem seamlessly.
+
+Build scripts can be coded, modeled, run, debugged and reused as regular code.
+
+Jeka offers an execution engine, a build API and a powerful plugin architecture to make your automation tasks a breeze. 
+
+# Based on simple ideas
+
+- Run Java methods from both IDE and command line indifferently.
+- Simply use Java libraries for building Java projects programmatically.
+- Use standard plugins to implement/custom common tasks.
+
+<br/>
+<sub>This is an example of a build class for a simple Springboot project.</sub>
 
 ```java
 @JkDefClasspath("dev.jeka:springboot-plugin:3.0.0.RC7")
@@ -46,15 +58,16 @@ class Build extends JkClass {
 
 }
 ```
+<sub>To build the project, execute ´cleanPack´ from your IDE or execute the following command line.</sub>
+```
+/home/me/myproject>./jekaw cleanPack -runIT=false
+```
 
-Also, Jeka comes with powerful conventions and dynamic plugin mechanism allowing to perform exotic tasks without requiring a single line of code/configuration.
-For example `jeka java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
-performs a complete build running unit tests under Jacoco coverage tools and performs SonarQube analysis on a Java project free 
-of any build-code / configuration / script. 
+# User friendly
+Thanks to wrapper and [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 
+You only need a JDK 8 or higher.
 
-For better user experience, please use [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
-
-
+Getting started in 5 minutes : [Here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
 
 # News 
 
