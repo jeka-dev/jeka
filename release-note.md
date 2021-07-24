@@ -1,4 +1,4 @@
-# 0.9.11.RELRASE
+# 0.9.11.RELEASE
 * Fix dependency issue when importing module via command-line '@'
 * Fix running explicit Build class
 * Minor console output improvement
