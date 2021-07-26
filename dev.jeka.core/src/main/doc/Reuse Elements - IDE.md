@@ -1,4 +1,4 @@
-# Reuse build elements
+# Reuse build elements (Work in progress)
 
 Jeka offers flexible and powerful mechanisms to reuse build elements, like : 
 - Simply add Java dependencies to your *def* classes
