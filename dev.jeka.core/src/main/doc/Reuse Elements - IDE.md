@@ -27,7 +27,7 @@ can much smarter thing
 
 
 
-# Make a plugin
+# Create your own plugin
 
 A plugin is a collection of commands and options (meaning public no-args methods and fields) that can be bind to any 
 JkClass in order to augment it or modify its behavior. 
