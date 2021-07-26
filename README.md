@@ -67,7 +67,7 @@ class Build extends JkClass {
 Thanks to wrapper and [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 
 You only need a JDK 8 or higher.
 
-Getting started in 5 minutes : [Here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
+Getting started in 9 minutes : [Here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
 
 # News 
 
