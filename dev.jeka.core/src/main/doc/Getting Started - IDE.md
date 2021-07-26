@@ -76,7 +76,7 @@ Now you can use guava to improve your commands using *guava* inside.
 
 <br/>
 
-## Create a Java Project <a name="java"></a>
+## Build a Java Project <a name="java"></a>
 
 Jeka bundles Java project build capabilities. Of course, you can use your favorite build tool (Maven, Gradle, ...) 
 beside Jeka in your project and let Jeka delegate builds to these tools, but you might prefer to let Jeka build 
@@ -114,7 +114,7 @@ Now your project is ready to code. You will find many project examples at https:
 
 <br/>
 
-## Create a Springboot Project <a name="springboot"></a>
+## Build a Springboot Project <a name="springboot"></a>
 
 Jeka offers a plugin mechanism to let 3rd parties extend the product. An external plugin for Springboot 
 exists and is tightly integrated in Intellij Plugin.
