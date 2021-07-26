@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 /**
  * Set of plugin instances loaded in a {@link JkClass}.
  */
-public final class JkClassPlugins {
+public final class JkClassPlugins extends JkClass {
 
     private final JkClass holder;
 
