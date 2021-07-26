@@ -12,6 +12,8 @@ Here, you will :
 * Install plugin directly from [here](https://plugins.jetbrains.com/plugin/13489-jeka)
 or search _jeka_ in Intellij Marketplace.
 
+As this plugin embbeds its own version of _Jeka_, that's all you need to install on your machine.
+
 ## Hello World ! <a name="helloworld"></a>
 
 The below example showcases how to write tasks executable both from IDE and command line. 
