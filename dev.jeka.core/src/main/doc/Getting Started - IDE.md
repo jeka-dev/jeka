@@ -1,13 +1,20 @@
-# Create simple automation projects with Jeka
+# Getting started with Jeka
 
-The below example showcases how to write tasks executable both from IDE and command line. 
+Here, you will :
+* [Intall Intellij Jeka plugin](#install)
+* [Create a basic automation project](#helloworld)
+* [Use 3rd party dependencies inside your build logic](#import)
+* [Build a Java project with Jeka](#java)
+* [Build a Springboot project with Jeka](#springboot)
 
-## Install Intellij Plugin
+## Install Intellij Plugin <a name="install"></a>
 
 * Install plugin directly from [here](https://plugins.jetbrains.com/plugin/13489-jeka)
 or search _jeka_ in Intellij Marketplace.
 
-## Hello World !
+## Hello World ! <a name="helloworld"></a>
+
+The below example showcases how to write tasks executable both from IDE and command line. 
 
 * Create a basic Java module in Intellij : _New_ > _Module ..._ > _Java_ > _Next_ > _Finish_
 
@@ -53,7 +60,7 @@ To run `doSomething` method on a specific class named `here.is.MyJekaCommands`, 
 
 
 
-## Import 3rd Party libraries
+## Import 3rd Party libraries <a name="import"></a>
 
 Your Jeka classes can also use any third party libraries available on your file system or in a bynary repository.
 
@@ -69,7 +76,7 @@ Now you can use guava to improve your commands using *guava* inside.
 
 <br/>
 
-# Create a Java Project
+## Create a Java Project <a name="java"></a>
 
 Jeka bundles Java project build capabilities. Of course, you can use your favorite build tool (Maven, Gradle, ...) 
 beside Jeka in your project and let Jeka delegate builds to these tools, but you might prefer to let Jeka build 
@@ -107,7 +114,7 @@ Now your project is ready to code. You will find many project examples at https:
 
 <br/>
 
-# Create a Springboot Project
+## Create a Springboot Project <a name="springboot"></a>
 
 Jeka offers a plugin mechanism to let 3rd parties extend the product. An external plugin for Springboot 
 exists and is tightly integrated in Intellij Plugin.
