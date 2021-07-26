@@ -90,11 +90,12 @@ Jeka now uses these features to release itself.
 
 # Roadmap/Ideas
  
-* Stabilise api from user feedback. API is quite workable now but may be improved.
-* Provides a graphical plugin for better integration with Eclipse
+* Improve landing page and provide tutorials based on Intellij plugin for easy1/fast starting. 
+* Stabilise api from user feedbacks. API is quite workable now but may be improved.
 * Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
-* Provide a plugin for Android
 * Integrate Kotlin as a first citizen language for both building Kotlin projects and write Jeka command classes.
+* Provide a plugin for Android
+* Provides a graphical plugin for better integration with Eclipse
 
 Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
