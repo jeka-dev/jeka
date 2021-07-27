@@ -60,7 +60,7 @@ The first Jeka class found is the default Jeka class (sorted by name/package).
 
 To run `doSomething` method on a specific class named `here.is.MyJekaCommands`, execute `./jekaw -JKC=MyJekaCommands doSomething`.
 
-
+[Learn more about Jeka command line](Reference%20Guide/1.1.%20Jeka%20Runtime.md)
 
 ## Import 3rd Party libraries <a name="import"></a>
 
@@ -114,6 +114,9 @@ Invoke `cleanPack` to build project from scratch.
 <br/><br/>
 Now your project is ready to code. You will find many project examples at https://github.com/jerkar/working-examples
 
+[Learn more about Java project builds](Reference%20Guide/2.4.%20Java.md)
+
+[Learn more about dependency management](Reference%20Guide/2.3.%20Dependency%20management.md)
 <br/>
 
 ## Build a Springboot Project <a name="springboot"></a>
