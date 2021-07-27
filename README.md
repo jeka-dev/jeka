@@ -114,7 +114,7 @@ concepts and navigate in source code.
 That said, documentation is needed for a starting point.
 
 Visit following pages according your expectation :
-* [Getting Started](dev.jeka.core/src/main/doc/Getting%20Started.md)
+* [Getting Started](dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
 * [Reference Guide](dev.jeka.core/src/main/doc/Reference%20Guide)
 * [Frequently Asked Questions](dev.jeka.core/src/main/doc/FAQ.md)
 * [Javadoc](https://jeka.dev/docs/javadoc)
