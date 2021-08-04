@@ -29,7 +29,7 @@ The below example showcases how to write tasks executable both from IDE and comm
 
 ![plot](images/create-jeka-files.png)
 
-* Leave defaults and click _OK_
+* Select *SIMPLE* and click _OK_
 
 _You get the following..._
 ![plot](images/scaffolded-1.png)
