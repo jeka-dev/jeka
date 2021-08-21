@@ -20,10 +20,13 @@ import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -170,10 +173,43 @@ public class CoreBuild extends JkClass {
             testSamples();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
-        distrib.zipTo(distribFile);
+        //distrib.zipTo(distribFile);
+        zipDistrib(distrib.getRoot(), distribFile);
         JkLog.info("Distribution zipped in " + distribFile);
         JkLog.endTask();
     }
+
+    // see example here https://www.tabnine.com/code/java/methods/org.apache.commons.compress.archivers.zip.ZipArchiveEntry/setUnixMode
+    private static void zipDistrib(Path distribDir, Path zipFile)  {
+        try {
+            ZipArchiveOutputStream out = new ZipArchiveOutputStream(zipFile);
+            appendRecursively(distribDir, "", out);
+            out.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static void appendRecursively(final Path file, String relativeFile, final ZipArchiveOutputStream out) throws IOException {
+        if (Files.isDirectory(file)) {
+            relativeFile += '/';
+        }
+        final ZipArchiveEntry entry = new ZipArchiveEntry(file, relativeFile);
+        if (!Files.isDirectory(file) && Files.isExecutable(file)) {
+            entry.setUnixMode(0777);  // necessary to mark it as executable inside the archive
+        }
+        out.putArchiveEntry(entry);
+        if (!entry.isDirectory()) {
+            Files.copy(file, out);
+        }
+        out.closeArchiveEntry();
+        if (entry.isDirectory()) {
+            for (final String filename : file.toFile().list()) {
+                appendRecursively(file.resolve(filename), relativeFile.concat(filename), out);
+            }
+        }
+    }
+
 
     private void makeDocs() {
         JkLog.startTask("Make documentation");
@@ -256,15 +292,6 @@ public class CoreBuild extends JkClass {
 
     public void cleanPack() {
         clean(); java.pack();
-    }
-
-    public void playWithLog() {
-        JkLog.info("Hello");
-        JkLog.startTask("starting a task");
-        System.out.println("uuuuuuuuuuuuuuuuu");
-        JkLog.warn("hello2");
-        JkLog.endTask();
-        JkLog.error("finish");
     }
 
     public static void main(String[] args) {
