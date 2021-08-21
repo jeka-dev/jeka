@@ -1,46 +1,68 @@
-# How to use Jeka to create simple automation projects
+# Getting started with Jeka
 
-The below example will show simple functions that can executed both in IDE and command line.
+Here, you will :
+* [Intall Intellij Jeka plugin](#install)
+* [Create a basic automation project](#helloworld)
+* [Use 3rd party dependencies inside your build logic](#import)
+* [Build a Java project with Jeka](#java)
+* [Build a Springboot project with Jeka](#springboot)
 
-### Install Intellij Plugin
+## Install Intellij Plugin <a name="install"></a>
 
-Install plugin directly from [here](https://plugins.jetbrains.com/plugin/13489-jeka)
+* Install plugin directly from [here](https://plugins.jetbrains.com/plugin/13489-jeka)
 or search _jeka_ in Intellij Marketplace.
 
-### Hello World !
+As this plugin embbeds its own version of _Jeka_, that's all you need to install on your machine.
 
-Right-click on a module, then _Jeka_ > _Generate Jeka files and folders..._
+## Hello World ! <a name="helloworld"></a>
+
+The below example showcases how to write tasks executable both from IDE and command line. 
+
+* Create a basic Java module in Intellij : _New_ > _Module ..._ > _Java_ > _Next_ > _Finish_
+
+
+* Right-click on the module, then _Jeka_ > _Generate Jeka files and folders..._
 
 ![plot](images/generate-jeka-files.png)
 <br/><br/>
-Dialog box will be open with default selection and click _OK_. 
-
+* Dialog box will be open with default setting
 
 ![plot](images/create-jeka-files.png)
+
+* Select *SIMPLE* and click _OK_
+
+_You get the following..._
+![plot](images/scaffolded-1.png)
 
 
 The _Jeka_ folder structure will be generated with an empty _Jeka_ class.
 
-On the right side of the IDE, nodes can be expanded to navigate on Jeka commands. These commands either come from the `JkClass` or plugin in classpath.
+On the right side of the IDE, nodes can be expanded to navigate on Jeka commands. These commands either come from the `Commands` class or plugins present in classpath.
 
-Click _Commands_ > _help_ to trigger the `help` method coming from `JkClass`.
+* Click _Commands_ > _help_ to trigger the `help` method coming from `Commands` class.
 This will display a contextual help from a list of all available commands and options.
-The `help` command can be also invoked by using command line `./jekaw help`
-
-You can now add your own commands just by declaring a public no-arg method returning `void`.
-
-For adding options, just declare a public field as shown below.
-
-The `helloWorld` command is invokable both from the IDE (run/debug) and from the command line using `./jekaw helloWorld -name=Joe`
-
-You can write as many commands as you want in your Jeka classes, and your project can also contain many Jeka classes. 
-The first Jeka class found is the default Jeka class (sorted by name/package). To run `doSomething` method on 
-a class named `here.is.MyJekaCommands`, execute `./jekaw -JKC=MyJekaCommands doSomething`.
-
-![plot](images/scaffolded-1.png)
+  
+  
+* Open a terminal and execute `./jekaw help`. This will execute the same but from the command line. For this, 
+  `jekaw` compiles your `Commands` classes behind the scene and execute a Java program which invokes the method.
 
 
-## Import 3rd Party libraries
+Now, you can now add your own commands (like `printHello` in above example) just by declaring a public no-arg method returning `void`.
+Your new method should appear instantaneously in Jeka window tool on the right.
+
+* For adding options, just declare a public field as shown below.
+
+
+* Execute `./jekaw helloWorld -name=Joe` in terminal for invoking method while injecting option value.
+
+You can write as many commands as you want, of any complexity. Also, your project can contain several Jeka classes.
+The first Jeka class found is the default Jeka class (sorted by name/package).
+
+To run `doSomething` method on a specific class named `here.is.MyJekaCommands`, execute `./jekaw -JKC=MyJekaCommands doSomething`.
+
+[Learn more about Jeka command line](Reference%20Guide/1.1.%20Jeka%20Runtime.md)
+
+## Import 3rd Party libraries <a name="import"></a>
 
 Your Jeka classes can also use any third party libraries available on your file system or in a bynary repository.
 
@@ -49,22 +71,26 @@ make it available on IDE classpath.
 
 ![plot](images/import-guava.png)
 
-<br/><br/>
+<br/>
 Now you can use guava to improve your commands using *guava* inside.
 
 ![plot](images/run-guava.png)
 
-<br/><br/>
+<br/>
 
-# Create a Java Project
+## Build a Java Project <a name="java"></a>
 
 Jeka bundles Java project build capabilities. Of course, you can use your favorite build tool (Maven, Gradle, ...) 
 beside Jeka in your project and let Jeka delegate builds to these tools, but you might prefer to let Jeka build 
 your project by itself. Let's see how to do it.
 
-Right click on folder or module > Jeka > Generate Jeka files and folders...
+* Create a basic Java module in Intellij 
 
-This opens a dialog box. Select *JAVA* and press OK.
+
+* Right-click on the module then _Jeka_ > _Generate Jeka files and folders..._
+
+
+* This opens a dialog box. Select *JAVA* and press OK.
 
 The box *'delegate Jeka Wrapper to'* means that the module *tutorial-2* will reuse the same Jeka wrapper 
 (and therefore the same Jeka version) than *tutorial-1*. That way, we can force all Java modules from a same Intellij 
@@ -88,16 +114,23 @@ Invoke `cleanPack` to build project from scratch.
 <br/><br/>
 Now your project is ready to code. You will find many project examples at https://github.com/jerkar/working-examples
 
-<br/><br/>
+[Learn more about Java project builds](Reference%20Guide/2.4.%20Java.md)
 
-# Create a Springboot Project
+[Learn more about dependency management](Reference%20Guide/2.3.%20Dependency%20management.md)
+<br/>
+
+## Build a Springboot Project <a name="springboot"></a>
 
 Jeka offers a plugin mechanism to let 3rd parties extend the product. An external plugin for Springboot 
 exists and is tightly integrated in Intellij Plugin.
 
-Right click oo a module then _Jeka_ > _Generate Jeka files and folders..._
+* Create a new module in IntelliJ
 
-This opens a dialog box. Select *Springboot* and press OK.
+
+* Right-click on a module then _Jeka_ > _Generate Jeka files and folders..._
+
+
+* This opens a dialog box. Select *Springboot* and press OK.
 
 This generates a sample project along its build class based on the last *Springboot* version.
 
@@ -108,6 +141,11 @@ to run the application from the built jar.
 <br/><br/>
 
 The plugin proposes popular _Spring_ modules as constant to help pickup dependencies.
+
+You can also switch Springboot version easily by changing `#springbootVersion` argument.
+
+**Do not forget to trigger 'Jeka Synchronize Module' available in context menues, each time you modify dependencies or change springboot version.
+It let Intellij synchronize its iml file with dependencies declared in Jeka.**
 
 ![plot](images/scaffolded-springboot-2.png)
 

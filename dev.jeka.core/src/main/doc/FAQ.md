@@ -1,7 +1,7 @@
 # General
 
 ### Can def classes be hosted in separate project than the code to build ?
-Of course yes. If you prefer that your Jeka code lies in a distinct project, create a Jeka project in a sibling 
+Yes. If you prefer that your Jeka code lies in a distinct project, create a Jeka project in a sibling 
 folder and mention where is located the project to build.
 
 ```java
@@ -13,7 +13,7 @@ protected void setup() {  // project to build lies in a sibling folder.
       ...
 ```
 
-### My commandSet class does not compile so I can't invoke any Jeka method as 'help' or 'scaffold#run'. What can I do ?
+### My JkClass does not compile so I can't invoke any Jeka method as 'help' or 'scaffold#run'. What can I do ?
 
 You can specify a built-in commandSet class to run. This way, compilation won't occur.
 For example `jeka -JKC` or `jeka -JKC scaffold#run java#"`.
@@ -23,7 +23,7 @@ For example `jeka -JKC` or `jeka -JKC scaffold#run java#"`.
 ### How can I choose the JDK used to compile ?
 
 Jeka uses the JDK it is running on to compile production or test code. 
-If code must be build on a another JDK version, you can specify JDK path for different version.
+If code must be compiled on a another JDK version, you can specify JDK path for different version.
 Just mention it as option, for example in your _[JEKA HOME]/options.properties_ file.
 
 ```
@@ -31,7 +31,7 @@ jdk.9=/software/jdk9
 ...
 ```
 
-This way, if one of your project source code is declared to be in a specific Java version, the relevant JDK version will be used automatically to compile it.
+This way, if one of your project source code is declared to be in a specific Java version, the relevant JDK version will be picked up automatically.
 
 ### How can I use Eclipse compiler in Jeka ?
 
@@ -49,7 +49,7 @@ public class Build extends JkClass{
 
 ### How can I generate Eclipse/Intellij without using Java plugin (JkPluginJava) ?
 
-Just make your commandSet class implements `dev.jeka.core.api.java.project.JkJavaIdeSupport.JkSupplier`.
+Just make your `JkClass class implements` implements `dev.jeka.core.api.java.project.JkJavaIdeSupport`.
 
 
 

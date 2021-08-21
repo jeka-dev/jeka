@@ -67,7 +67,7 @@ class Build extends JkClass {
 Thanks to wrapper and [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 
 You only need a JDK 8 or higher.
 
-Getting started in 5 minutes : [Here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
+Getting started in 10 minutes : [Here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
 
 # News 
 
@@ -90,11 +90,12 @@ Jeka now uses these features to release itself.
 
 # Roadmap/Ideas
  
-* Stabilise api from user feedback. API is quite workable now but may be improved.
-* Provides a graphical plugin for better integration with Eclipse
+* Improve landing page and provide tutorials based on Intellij plugin for easy1/fast starting. 
+* Stabilise api from user feedbacks. API is quite workable now but may be improved.
 * Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
-* Provide a plugin for Android
 * Integrate Kotlin as a first citizen language for both building Kotlin projects and write Jeka command classes.
+* Provide a plugin for Android
+* Provides a graphical plugin for better integration with Eclipse
 
 Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
@@ -113,7 +114,7 @@ concepts and navigate in source code.
 That said, documentation is needed for a starting point.
 
 Visit following pages according your expectation :
-* [Getting Started](dev.jeka.core/src/main/doc/Getting%20Started.md)
+* [Getting Started](dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
 * [Reference Guide](dev.jeka.core/src/main/doc/Reference%20Guide)
 * [Frequently Asked Questions](dev.jeka.core/src/main/doc/FAQ.md)
 * [Javadoc](https://jeka.dev/docs/javadoc)
