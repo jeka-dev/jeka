@@ -1,6 +1,6 @@
 # Getting started with Jeka
 
-Here, you will :
+Here, you will learn how to :
 * [Intall Intellij Jeka plugin](#install)
 * [Create a basic automation project](#helloworld)
 * [Use 3rd party dependencies inside your build logic](#import)
