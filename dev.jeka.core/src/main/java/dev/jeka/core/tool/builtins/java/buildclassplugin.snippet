@@ -1,0 +1,49 @@
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkPlugin;
+import dev.jeka.core.tool.builtins.java.JkPluginJava;
+
+class Build extends JkClass {
+
+    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+
+    @Override
+    protected void setup() {
+        javaPlugin.getProject().simpleFacade()
+            .setJavaVersion(JkJavaVersion.V8)
+            .setCompileDependencies(deps -> deps
+                .andFiles(JkLocator.getJekaJarPath())
+            );
+        javaPlugin.getProject()
+            .getConstruction()
+                .getManifest()
+
+                    // Set the lowest JEKA compatible version (optional)
+                    .addMainAttribute(JkPlugin.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, "0.9.11.RELEASE")
+
+                    // Set a url where are mentioned breaking changes (optional)
+                    .addMainAttribute(JkPlugin.MANIFEST_BREAKING_CHANGE_URL_ENTRY,
+                        "https://raw.githubusercontent.com/...../master/breaking_versions.txt")
+                    .__.__
+
+                // This section is necessary to publish on a public repository
+            .getPublication()
+                .getMaven()
+                    .setModuleId("your.org:plugin-name")
+                    .setVersion("0.0.1-SNAPSHOT")
+                    .getPomMetadata()
+                        .addApache2License()
+                        .getProjectInfo()
+                            .setName("Jeka plugin for ....")
+                            .setDescription("A Jeka plugin for ...")
+                            .setUrl("https://.....").__
+                        .getScm()
+                            .setUrl("https://....");
+    }
+
+    public void cleanPack() {
+        clean(); javaPlugin.pack();
+    }
+
+}

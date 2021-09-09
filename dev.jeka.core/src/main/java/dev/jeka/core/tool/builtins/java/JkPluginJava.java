@@ -55,8 +55,8 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
     public String compilerExtraArgs;
 
-    @JkDoc("Scaffolded code won't use the simple facade over JkJavaProject")
-    public boolean noFacade;
+    @JkDoc("The template used for scaffolding the build class")
+    public ScaffoldTemplate scaffoldTemplate = ScaffoldTemplate.SIMPLE_FACADE;
 
     @JkDoc("The output file for the xml dependency description.")
     public Path output;
@@ -149,7 +149,14 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void setupScaffolder() {
-        String snippet = noFacade ? "buildclass.snippet" : "buildclassfacade.snippet";
+        final String snippet;
+        if (scaffoldTemplate == ScaffoldTemplate.NORMAL) {
+            snippet = "buildclass.snippet";
+        } else if (scaffoldTemplate == ScaffoldTemplate.PLUGIN) {
+            snippet = "buildclassplugin.snippet";
+        } else {
+            snippet = "buildclassfacade.snippet";
+        }
         String template = JkUtilsIO.read(JkPluginJava.class.getResource(snippet));
         String baseDirName = getJkClass().getBaseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
@@ -343,6 +350,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         /** Argument passed to the JVM if tests are withForking. Example : -Xms2G -Xmx2G */
         @JkDoc("Argument passed to the JVM if tests are withForking. E.g. -Xms2G -Xmx2G.")
         public String jvmOptions;
+
+    }
+
+    public enum ScaffoldTemplate {
+
+        NORMAL, SIMPLE_FACADE, PLUGIN
 
     }
 }

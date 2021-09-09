@@ -1,6 +1,5 @@
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
 class Build extends JkClass {
@@ -29,10 +28,6 @@ class Build extends JkClass {
 
     public void cleanPack() {
         clean(); java.pack();
-    }
-
-    public static void main(String[] args) {
-        JkInit.instanceOf(Build.class, args).cleanPack();
     }
 
 }
