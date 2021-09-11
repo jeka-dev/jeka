@@ -2,7 +2,7 @@
 
 Jeka offers flexible and powerful mechanisms to reuse build logic, as : 
 - Simply add Java dependencies to your *def* classpapath.
-- Import builds from another module (see example [here](https://github.com/jerkar/working-examples/tree/master/springboot-multi-modules))
+- Import build code from another module (see example [here](https://github.com/jerkar/working-examples/tree/master/springboot-multi-modules))
 - Use *plugins*
 
 ## Add dependencies to *def* classes
