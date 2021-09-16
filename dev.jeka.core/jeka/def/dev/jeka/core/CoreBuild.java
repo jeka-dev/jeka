@@ -294,6 +294,7 @@ public class CoreBuild extends JkClass {
         clean(); java.pack();
     }
 
+    // This method has to be run in dev.jeka.core (this module root) working directory
     public static void main(String[] args) {
         JkInit.instanceOf(CoreBuild.class, args).cleanPack();
     }

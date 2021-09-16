@@ -1,6 +1,7 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkRunnables;
@@ -9,6 +10,8 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
+import org.apache.ivy.ant.IvyMakePom;
+import org.apache.ivy.plugins.resolver.DependencyResolver;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -30,17 +33,27 @@ public final class JkScaffolder {
 
     private String wrapperJekaVersion;
 
+    private JkDependencyResolver dependencyResolver;
+
     private final JkRunnables extraActions = JkRunnables.of();
+
+    private String cachedJekaVersion;
 
     JkScaffolder(Path baseDir) {
         super();
         this.jkClassCode = "";
         this.baseDir= baseDir;
+        dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
     }
 
 
     public JkScaffolder setWrapperJekaVersion(String wrapperJekaVersion) {
         this.wrapperJekaVersion = wrapperJekaVersion;
+        return this;
+    }
+
+    public JkScaffolder setDependencyResolver(JkDependencyResolver jkDependencyResolver) {
+        this.dependencyResolver = jkDependencyResolver;
         return this;
     }
 
@@ -53,7 +66,12 @@ public final class JkScaffolder {
         JkLog.info("Create " + def);
         final Path buildClass = def.resolve(classFilename);
         JkLog.info("Create " + buildClass);
-        JkUtilsPath.write(buildClass, jkClassCode.getBytes(Charset.forName("UTF-8")));
+        String finalCode = jkClassCode;
+        if (jkClassCode.contains("${version}")) {
+            final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
+            finalCode = jkClassCode.replace("${version}", version);
+        }
+        JkUtilsPath.write(buildClass, finalCode.getBytes(Charset.forName("UTF-8")));
         extraActions.run();
     }
 
@@ -81,7 +99,7 @@ public final class JkScaffolder {
                 libSources.resolve(jarSourceName), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    public void wrap(JkDependencyResolver dependencyResolver) {
+    public void wrap() {
         JkLog.info("Create shell files.");
         final Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
         JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
@@ -97,8 +115,7 @@ public final class JkScaffolder {
         final Path target = wrapperFolder.resolve(jekaWrapperJar.getFileName());
         JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
-        final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion(dependencyResolver)
-                : wrapperJekaVersion;
+        final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
         Path tempProps = JkUtilsPath.createTempFile("jeka-", ".properties");
         Path jekaPropertiesPath = wrapperFolder.resolve("jeka.properties");
         if (!Files.exists(jekaPropertiesPath)) {
@@ -143,7 +160,10 @@ public final class JkScaffolder {
         return extraActions;
     }
 
-    private String jekaVersion(JkDependencyResolver dependencyResolver) {
+    private String jekaVersion() {
+        if (cachedJekaVersion != null) {
+            return cachedJekaVersion;
+        }
         List<String> allVersions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID));
         final List<String> versions = allVersions.stream()
                 .filter(version -> version.endsWith(".RELEASE"))
@@ -153,6 +173,7 @@ public final class JkScaffolder {
             JkLog.warn("Will use current one : " + JkInfo.getJekaVersion());
             return JkInfo.getJekaVersion();
         }
-        return versions.get(versions.size() -1);
+        cachedJekaVersion = versions.get(versions.size() -1);
+        return cachedJekaVersion;
     }
 }

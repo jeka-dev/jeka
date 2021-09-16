@@ -26,6 +26,10 @@ public class JkPluginScaffold extends JkPlugin {
         super(jkClass);
         this.scaffolder = new JkScaffolder(jkClass.getBaseDir());
         this.scaffolder.setJekaClassCode(JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));
+        final JkPluginRepo repoPlugin = this.getJkClass().getPlugin(JkPluginRepo.class);
+        final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
+                .addRepos(repoPlugin.downloadRepository().toSet());
+        this.scaffolder.setDependencyResolver(dependencyResolver);
     }
 
     public JkScaffolder getScaffolder() {
@@ -45,9 +49,7 @@ public class JkPluginScaffold extends JkPlugin {
     @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
     public void wrap() {
         if (JkUtilsString.isBlank(this.wrapDelegatePath)) {
-            final JkPluginRepo repoPlugin = this.getJkClass().getPlugin(JkPluginRepo.class);
-            final JkDependencyResolver dependencyResolver = JkDependencyResolver.ofParent(repoPlugin.downloadRepository().toSet());
-            scaffolder.wrap(dependencyResolver);
+            scaffolder.wrap();
         } else {
             scaffolder.wrapDelegate(this.wrapDelegatePath);
         }
