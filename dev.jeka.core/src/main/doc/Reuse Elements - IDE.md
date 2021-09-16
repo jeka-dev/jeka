@@ -1,16 +1,16 @@
 # Reuse build logic (Work in progress)
 
 Jeka offers flexible and powerful mechanisms to reuse build logic, as : 
-- Simply add Java dependencies to your *def* classpapath.
-- Import builds from another module (see example [here](https://github.com/jerkar/working-examples/tree/master/springboot-multi-modules))
-- Use *plugins*
+- Adding Java dependencies to *def* classpath.
+- Importing build code from another module (see example [here](https://github.com/jerkar/working-examples/tree/master/springboot-multi-modules))
+- Using *plugins*
 
-## Add dependencies to *def* classes
+## Add dependencies to *def* classpath
 
-This simple mechanism is powerful. It let your *def* classes depends on other Java code just as you would de
-for your test/production code. It means that you can make your *def* classes depend on :
+This simple mechanism is powerful. It let *def* classes depend on other Java code just as it would be
+for test/production code. It means that *def* classes can depend on :
 - code lying in a different module from the same multi-module project
-- compiled code lying somewhere on your filesystem
+- compiled code lying somewhere on filesystem
 - jars located in a binary repository (i.e. Maven modules)
 
 This tutorial will give some simple examples on how you can factor out parts of your builds. 
