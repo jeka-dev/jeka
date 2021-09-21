@@ -20,7 +20,7 @@ class Build extends JkClass {
                 .getManifest()
 
                     // Set the lowest JEKA compatible version (optional)
-                    .addMainAttribute(JkPlugin.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, "${version}")
+                    .addMainAttribute(JkPlugin.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, "${jekaVersion}")
 
                     // Set a url where are mentioned breaking changes (optional)
                     .addMainAttribute(JkPlugin.MANIFEST_BREAKING_CHANGE_URL_ENTRY,

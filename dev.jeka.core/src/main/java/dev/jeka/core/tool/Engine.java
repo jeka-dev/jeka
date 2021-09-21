@@ -19,6 +19,8 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -252,6 +254,11 @@ final class Engine {
             classLoader.addEntries(kotlinCompiler.getStdLib());
         }
         final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath);
+        if (!javaCompileSpec.getSourceFiles().isEmpty() && ToolProvider.getSystemJavaCompiler() == null) {
+            throw new JkException("The running Java platform (" +  System.getProperty("java.home") +
+                    ") does not provide compiler (javac). Please provide a JDK java platform by pointing JAVA_HOME" +
+                    " or JEKA_JDK environment variable to a JDK directory.");
+        }
         wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec));
         JkPathTree.of(this.resolver.defSourceDir)
                 .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")

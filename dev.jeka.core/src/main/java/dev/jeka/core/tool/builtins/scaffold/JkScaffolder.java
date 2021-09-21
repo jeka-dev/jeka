@@ -67,9 +67,9 @@ public final class JkScaffolder {
         final Path buildClass = def.resolve(classFilename);
         JkLog.info("Create " + buildClass);
         String finalCode = jkClassCode;
-        if (jkClassCode.contains("${version}")) {
+        if (jkClassCode.contains("${jekaVersion}")) {
             final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
-            finalCode = jkClassCode.replace("${version}", version);
+            finalCode = jkClassCode.replace("${jekaVersion}", version);
         }
         JkUtilsPath.write(buildClass, finalCode.getBytes(Charset.forName("UTF-8")));
         extraActions.run();

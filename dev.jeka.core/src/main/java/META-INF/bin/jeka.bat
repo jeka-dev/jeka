@@ -7,8 +7,21 @@
 chcp 65001 > nul
 
 if not "%JEKA_JDK%" == "" set "JAVA_HOME=%JEKA_JDK%"
-if "%JAVA_HOME%" == "" set "JAVA_CMD=java"
-if not "%JAVA_HOME%" == "" set "JAVA_CMD=%JAVA_HOME%\bin\java"
+if "%JAVA_HOME%" == "" (
+    set "JAVA_CMD=java"
+) else (
+    set "JAVA_CMD=%JAVA_HOME%\bin\java"
+    if not exist "%JAVA_CMD%.exe" (
+        echo %JAVA_CMD% not found
+        if not "%JEKA_JDK%" == "" (
+            echo JEKA_JDK environment variable is pointing to invalid JDK directory %JEKA_JDK%
+        ) else (
+            echo JAVA_HOME environment variable is pointing to invalid JDK directory %JAVA_HOME%
+            echo Please set JAVA_HOME or JEKA_JDK environment variable to point on a valid JDK directory.
+        )
+        exit /b 1
+    )
+)
 
 if exist "%cd%\jeka\boot" set "LOCAL_BUILD_DIR=.\jeka\boot\*;"
 if "%JEKA_HOME%" == "" set "JEKA_HOME=%~dp0"
