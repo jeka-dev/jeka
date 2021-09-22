@@ -1,3 +1,7 @@
+# 0.9.12.RELEASE
+* Improve error message on Windows when JDK is not found
+* Add a Java scaffold template for creating Jeka plugins
+
 # 0.9.11.RELEASE
 * Fix dependency issue when importing module via command-line '@'
 * Fix running explicit Build class
