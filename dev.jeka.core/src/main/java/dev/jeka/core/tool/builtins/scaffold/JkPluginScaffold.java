@@ -25,7 +25,8 @@ public class JkPluginScaffold extends JkPlugin {
     protected JkPluginScaffold(JkClass jkClass) {
         super(jkClass);
         this.scaffolder = new JkScaffolder(jkClass.getBaseDir());
-        this.scaffolder.setJekaClassCode(JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));
+        this.scaffolder.setJekaClassCodeProvider(
+                () -> JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));
         final JkPluginRepo repoPlugin = this.getJkClass().getPlugin(JkPluginRepo.class);
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                 .addRepos(repoPlugin.downloadRepository().toSet());

@@ -1,3 +1,6 @@
+# 0.9.13.RELEASE
+* Modify Scaffold API. Use functional programming for late invoking. 
+
 # 0.9.12.RELEASE
 * Improve error message on Windows when JDK is not found
 * Add a Java scaffold template for creating Jeka plugins

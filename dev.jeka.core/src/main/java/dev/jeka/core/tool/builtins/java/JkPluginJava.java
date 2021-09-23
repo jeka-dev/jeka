@@ -149,26 +149,30 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void setupScaffolder() {
-        final String snippet;
-        if (scaffoldTemplate == ScaffoldTemplate.NORMAL) {
-            snippet = "buildclass.snippet";
-        } else if (scaffoldTemplate == ScaffoldTemplate.PLUGIN) {
-            snippet = "buildclassplugin.snippet";
-        } else {
-            snippet = "buildclassfacade.snippet";
-        }
-        String template = JkUtilsIO.read(JkPluginJava.class.getResource(snippet));
-        String baseDirName = getJkClass().getBaseDir().getFileName().toString();
-        String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
-        JkLog.info("Create source directories.");
-        JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
-        prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
-        testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        scaffoldPlugin.getScaffolder().setJekaClassCode(code);
+        scaffoldPlugin.getScaffolder().setJekaClassCodeProvider( () -> {
+            final String snippet;
+            if (scaffoldTemplate == ScaffoldTemplate.NORMAL) {
+                snippet = "buildclass.snippet";
+            } else if (scaffoldTemplate == ScaffoldTemplate.PLUGIN) {
+                snippet = "buildclassplugin.snippet";
+            } else {
+                snippet = "buildclassfacade.snippet";
+            }
+            String template = JkUtilsIO.read(JkPluginJava.class.getResource(snippet));
+            String baseDirName = getJkClass().getBaseDir().getFileName().toString();
+            return template.replace("${group}", baseDirName).replace("${name}", baseDirName);
+        });
         scaffoldPlugin.getScaffolder().setClassFilename("Build.java");
+        scaffoldPlugin.getScaffolder().getExtraActions().append( () -> {
+            JkLog.info("Create source directories.");
+            JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
+            prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
+            prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+            JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
+            testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
+            testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+        });
+
     }
 
     // ------------------------------ Accessors -----------------------------------------

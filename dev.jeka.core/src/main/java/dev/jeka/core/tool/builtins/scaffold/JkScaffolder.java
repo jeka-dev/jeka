@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +28,7 @@ public final class JkScaffolder {
 
     private final Path baseDir;
 
-    private String jkClassCode;
+    private Supplier<String> jkClassCodeProvider;
 
     private String classFilename = "Commands.java";
 
@@ -41,7 +42,7 @@ public final class JkScaffolder {
 
     JkScaffolder(Path baseDir) {
         super();
-        this.jkClassCode = "";
+        this.jkClassCodeProvider = () -> "";
         this.baseDir= baseDir;
         dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
     }
@@ -66,12 +67,12 @@ public final class JkScaffolder {
         JkLog.info("Create " + def);
         final Path buildClass = def.resolve(classFilename);
         JkLog.info("Create " + buildClass);
-        String finalCode = jkClassCode;
-        if (jkClassCode.contains("${jekaVersion}")) {
+        String code = jkClassCodeProvider.get();
+        if (code.contains("${jekaVersion}")) {
             final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
-            finalCode = jkClassCode.replace("${jekaVersion}", version);
+            code = code.replace("${jekaVersion}", version);
         }
-        JkUtilsPath.write(buildClass, finalCode.getBytes(Charset.forName("UTF-8")));
+        JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
         extraActions.run();
     }
 
@@ -148,8 +149,8 @@ public final class JkScaffolder {
         }
     }
 
-    public void setJekaClassCode(String code) {
-        this.jkClassCode = code;
+    public void setJekaClassCodeProvider(Supplier<String> codeProvider) {
+        this.jkClassCodeProvider = codeProvider;
     }
 
     public void setClassFilename(String classFilename) {
