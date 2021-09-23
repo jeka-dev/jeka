@@ -1,3 +1,7 @@
+# 0.9.14.RELEASE (ONGOING)
+* Fix distribution zip archive
+* Enhance Windows jeka.bat script
+
 # 0.9.13.RELEASE
 * Modify Scaffold API. Use functional programming for late invoking. 
 
