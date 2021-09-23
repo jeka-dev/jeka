@@ -23,7 +23,7 @@
 	<target name="bootstrap" depends="init" description="Creates an executable instance of Jeka from this source">
 		<delete dir="${bin}" />
 		<mkdir dir="${bin}" />
-		<javac destdir="${bin}">
+		<javac destdir="${bin}" encoding="UTF-8">
 			<src path="dev.jeka.core/src/main/java" />
 			<classpath>
 				<fileset refid="libs" />
