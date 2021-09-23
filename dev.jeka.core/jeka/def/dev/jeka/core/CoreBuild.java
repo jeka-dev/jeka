@@ -191,21 +191,23 @@ public class CoreBuild extends JkClass {
     }
 
     private static void appendRecursively(final Path file, String relativeFile, final ZipArchiveOutputStream out) throws IOException {
-        if (Files.isDirectory(file)) {
-            relativeFile += '/';
-        }
+        boolean isDirectory = Files.isDirectory(file);
         final ZipArchiveEntry entry = new ZipArchiveEntry(file, relativeFile);
-        if (!Files.isDirectory(file) && Files.isExecutable(file)) {
+        if (!isDirectory && Files.isExecutable(file)) {
             entry.setUnixMode(0777);  // necessary to mark it as executable inside the archive
         }
-        out.putArchiveEntry(entry);
-        if (!entry.isDirectory()) {
-            Files.copy(file, out);
+        boolean isRoot = isDirectory && relativeFile.isEmpty();
+        if (!isRoot) {
+            out.putArchiveEntry(entry);
+            if (!isDirectory) {
+                Files.copy(file, out);
+            }
+            out.closeArchiveEntry();
         }
-        out.closeArchiveEntry();
         if (entry.isDirectory()) {
+            String prefix = relativeFile.isEmpty() ? "" : relativeFile + "/";
             for (final String filename : file.toFile().list()) {
-                appendRecursively(file.resolve(filename), relativeFile.concat(filename), out);
+                appendRecursively(file.resolve(filename), prefix + filename, out);
             }
         }
     }

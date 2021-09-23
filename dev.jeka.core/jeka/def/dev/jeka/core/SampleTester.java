@@ -136,7 +136,7 @@ class SampleTester {
     private void testScaffoldWithExternalPlugin() {
         JkLog.info("Test scaffold with springboot plugin");
         Path dir = JkUtilsPath.createTempDirectory("jeka-test");
-        JkProcess.of("jeka").withWorkingDir(dir)
+        JkProcess.ofWinOrUx("jeka.bat", "jeka").withWorkingDir(dir)
                 .andParams("-LB", "-LRI", "-LSU", "-LV=false", "-JKC=",
                         "scaffold#run", "@dev.jeka:springboot-plugin:+", "springboot#")
                 .withFailOnError(true).runSync();

@@ -6,11 +6,13 @@
 @rem set terminal encoding to utf-8
 chcp 65001 > nul
 
+set "JAVA_CMD=java"
 if not "%JEKA_JDK%" == "" set "JAVA_HOME=%JEKA_JDK%"
-if "%JAVA_HOME%" == "" (
-    set "JAVA_CMD=java"
-) else (
-    set "JAVA_CMD=%JAVA_HOME%\bin\java"
+if not "%JAVA_HOME%" == "" (
+    set JAVA_CMD=%JAVA_HOME%\bin\java
+    echo javahome = %JAVA_HOME%
+    echo javacmd = %AVA_CMD%
+    echo javacmd = %JAVA_HOME%\bin\java
     if not exist "%JAVA_CMD%.exe" (
         echo %JAVA_CMD% not found
         if not "%JEKA_JDK%" == "" (
