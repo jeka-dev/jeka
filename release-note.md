@@ -1,4 +1,4 @@
-# 0.9.14.RELEASE (ONGOING)
+# 0.9.14.RELEASE 
 * Fix distribution zip archive
 * Enhance Windows jeka.bat script
 
