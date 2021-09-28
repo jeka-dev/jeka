@@ -60,6 +60,8 @@ public final class JkPopularModules {
 
     public static final JkModuleId JUNIT_5_API = JkModuleId.of("org.junit.jupiter:junit-jupiter-api");
 
+    public static final JkModuleId JUNIT_5_PLATFORM_LAUNCHER = JkModuleId.of("org.junit.platform:junit-platform-launcher");
+
     public static final JkModuleId GUAVA = JkModuleId.of("com.google.guava", "guava");
 
     public static final JkModuleId GUICE = JkModuleId.of("com.google.inject", "guice");

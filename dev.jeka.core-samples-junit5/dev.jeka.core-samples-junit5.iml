@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compileRunner-output="false">
+    <output url="file://$MODULE_DIR$/.idea/output/production" />
+    <output-test url="file://$MODULE_DIR$/.idea/output/test" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jdom/jdom2/jars/jdom2-2.0.6.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jdom/jdom2/jars/jdom2-2.0.6-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jdom/jdom2/jars/jdom2-2.0.6-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.8.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.8.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.8.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.8.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-launcher/jars/junit-platform-launcher-1.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-launcher/jars/junit-platform-launcher-1.8.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-launcher/jars/junit-platform-launcher-1.8.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.8.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.8.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+  </component>
+</module>
