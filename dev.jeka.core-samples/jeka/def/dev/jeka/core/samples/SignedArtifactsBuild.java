@@ -13,8 +13,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import java.nio.file.Path;
 import java.util.function.UnaryOperator;
 
-import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
-import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
+import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 /**
  * When publishing on a public repository as Maven central, you need to provide extra metadata information, checksum
@@ -60,7 +59,7 @@ public class SignedArtifactsBuild extends JkClass {
                 .and(GUAVA.version("18.0"))
             )
             .setTestDependencies(deps -> deps
-                .and(JUNIT.version("4.13"))
+                .and(JavaPluginBuild.JUNIT5_API)
             )
             .getProject()
             .getPublication()

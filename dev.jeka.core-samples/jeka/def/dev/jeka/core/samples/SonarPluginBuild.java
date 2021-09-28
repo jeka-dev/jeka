@@ -9,8 +9,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.sonar.JkPluginSonar;
 import dev.jeka.core.tool.builtins.sonar.JkSonar;
 
-import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
-import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
+import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 /**
  * This build illustrate how to use SonarQube Plugin. <p>
@@ -54,7 +53,7 @@ public class SonarPluginBuild extends JkClass {
             .setCompileDependencies(deps -> deps
                 .and(GUAVA.version("18.0")))
             .setTestDependencies(deps -> deps
-                .and(JUNIT.version("4.13")))
+                .and(JavaPluginBuild.JUNIT5_API))
             .setPublishedMavenVersion(git.getWrapper()::getVersionFromTag)
             .setPublishedMavenModuleId("org.jerkar:samples");
     }

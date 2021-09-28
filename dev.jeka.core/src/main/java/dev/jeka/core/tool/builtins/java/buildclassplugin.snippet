@@ -14,7 +14,8 @@ class Build extends JkClass {
             .setJavaVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
-            );
+            )
+            ;
         javaPlugin.getProject()
             .getConstruction()
                 .getManifest()
@@ -24,7 +25,7 @@ class Build extends JkClass {
 
                     // Set a url where are mentioned breaking changes (optional)
                     .addMainAttribute(JkPlugin.MANIFEST_BREAKING_CHANGE_URL_ENTRY,
-                        "https://raw.githubusercontent.com/...../master/breaking_versions.txt")
+                        "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt")
                     .__.__
 
                 // This section is necessary to publish on a public repository
@@ -37,9 +38,9 @@ class Build extends JkClass {
                         .getProjectInfo()
                             .setName("Jeka plugin for ....")
                             .setDescription("A Jeka plugin for ...")
-                            .setUrl("https://.....").__
+                            .setUrl("https://github.com/your_org/your_repo").__
                         .getScm()
-                            .setUrl("https://....");
+                            .setUrl("https://github.com/your_org/your_repo");
     }
 
     public void cleanPack() {

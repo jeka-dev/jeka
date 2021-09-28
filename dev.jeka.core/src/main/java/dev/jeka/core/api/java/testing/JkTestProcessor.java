@@ -53,15 +53,15 @@ public final class JkTestProcessor<T> {
 
     private static final String OPENTEST4J_CLASS_NAME = "org.opentest4j.ValueWrapper";
 
-    private static final String JUNIT_PLATFORM_LAUNCHER_JAR_NAME = "junit-platform-launcher-1.6.0.jar";
+    private static final String JUNIT_PLATFORM_LAUNCHER_JAR_NAME = "junit-platform-launcher-1.8.1.jar";
 
-    private static final String JUNIT_PLATFORM_REPORTING_JAR_NAME = "junit-platform-reporting-1.6.0.jar";
+    private static final String JUNIT_PLATFORM_REPORTING_JAR_NAME = "junit-platform-reporting-1.8.1.jar";
 
-    private static final String JUNIT_PLATFORM_ENGINE_JAR_NAME = "junit-platform-engine-1.6.0.jar";
+    private static final String JUNIT_PLATFORM_ENGINE_JAR_NAME = "junit-platform-engine-1.8.1.jar";
 
-    private static final String JUNIT_PLATFORM_COMMON_JAR_NAME = "junit-platform-commons-1.6.0.jar";
+    private static final String JUNIT_PLATFORM_COMMON_JAR_NAME = "junit-platform-commons-1.8.1.jar";
 
-    private static final String JUNIT_VINTAGE_ENGINE_JAR_NAME = "junit-vintage-engine-5.6.0.jar";
+    private static final String JUNIT_VINTAGE_ENGINE_JAR_NAME = "junit-vintage-engine-5.8.1.jar";
 
     private static final String JUNIT_4_JAR_NAME = "junit-4.13.jar";
 

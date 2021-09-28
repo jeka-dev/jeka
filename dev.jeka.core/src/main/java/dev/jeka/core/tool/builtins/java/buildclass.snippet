@@ -27,7 +27,7 @@ class Build extends JkClass {
                 // If default is ok for you, you can remove it.
                 .getTesting()
                     .getCompilation().setDependencies(deps -> deps
-                        .and("org.junit.jupiter:junit-jupiter:5.6.2")).__
+                        .and("org.junit.jupiter:junit-jupiter-api:5.8.1")).__
                     .getTestSelection()
                         .addIncludeStandardPatterns()
                         .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__

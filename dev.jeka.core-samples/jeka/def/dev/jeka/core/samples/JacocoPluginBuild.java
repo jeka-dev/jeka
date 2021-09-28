@@ -5,8 +5,7 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
-import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
-import static dev.jeka.core.api.depmanagement.JkPopularModules.JUNIT;
+import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
 /**
  * This build illustrates how to use Jacoco Plugin. <p>
@@ -37,7 +36,7 @@ public class JacocoPluginBuild extends JkClass {
                     .and(GUAVA.version("18.0"))
                 )
                 .setTestDependencies(deps -> deps
-                    .and(JUNIT.version("4.13"))
+                    .and(JavaPluginBuild.JUNIT5_API)
                 );
     }
 

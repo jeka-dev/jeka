@@ -1,7 +1,9 @@
 package dev.jeka.core.samples;
 
+import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
+import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
@@ -23,19 +25,20 @@ import dev.jeka.core.tool.builtins.maven.JkPluginPom;
 public class JavaPluginBuild extends JkClass {
 
     public final JkPluginJava java = getPlugin(JkPluginJava.class);
+
+    static final String JUNIT5_API = "org.junit.jupiter:junit-jupiter-api:5.8.1";
     
     @Override
     protected void setup() {
        java.getProject().simpleFacade()
                .setCompileDependencies(deps -> deps
                        .and("com.google.guava:guava:21.0")
-                       .and("com.sun.jersey:jersey-server:1.19.4")
-                       .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
+                       .and("com.sun.jersey:jersey-server:1.19.4"))
                .setRuntimeDependencies(deps -> deps
                        .minus("org.junit.jupiter:junit-jupiter-engine")
                        .and("com.github.djeang:vincer-dom:1.2.0"))
                .setTestDependencies(deps -> deps
-                       .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
+                       .and(JUNIT5_API))
                .addTestExcludeFilterSuffixedBy("IT", false)
                .setJavaVersion(JkJavaVersion.V8)
                .setPublishedMavenModuleId("dev.jeka:sample-javaplugin")

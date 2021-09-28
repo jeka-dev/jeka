@@ -41,7 +41,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
     JkDependencySet prodDependencies = JkDependencySet.of()
             .and("org.hibernate:hibernate-entitymanager:5.4.2.Final");
     JkDependencySet testDependencies = JkDependencySet.of()
-            .and("junit:junit:4.13");
+            .and(JavaPluginBuild.JUNIT5_API);
     List<Path> depFiles = getBaseTree().andMatching(true,"libs/**/*.jar").getFiles();
     JkPathSequence prodClasspath = resolver.resolve(prodDependencies).getFiles();
     JkPathSequence testClasspath = resolver.resolve(testDependencies.and(prodDependencies)).getFiles();

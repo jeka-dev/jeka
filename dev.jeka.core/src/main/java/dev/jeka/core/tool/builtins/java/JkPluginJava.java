@@ -14,6 +14,7 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
@@ -29,6 +30,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
@@ -171,6 +173,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
             testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
             testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+            if (this.scaffoldTemplate == ScaffoldTemplate.PLUGIN) {
+                Path breakinkChangeFile = this.getProject().getBaseDir().resolve("breaking_versions.txt");
+                String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
+                        "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
+                JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
+            }
         });
 
     }

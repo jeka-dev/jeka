@@ -16,7 +16,7 @@ public class PureApiBuild extends JkClass {
         clean();
         JkJavaProject javaProject = JkJavaProject.of().setBaseDir(this.getBaseDir());
         javaProject.setOutputDir("jeka/output/alt-output");
-        JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT.version("4.12"));
+        JkDependencySet deps = JkDependencySet.of().and(JavaPluginBuild.JUNIT5_API);
         javaProject.getConstruction().getTesting().getCompilation().setDependencies(dep -> deps);
         javaProject.getPublication().getArtifactProducer().makeAllArtifacts();
     }

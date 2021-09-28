@@ -25,6 +25,8 @@ class SampleTester {
 
     private final JkPathTree sampleDependerBaseDir;
 
+    private final JkPathTree sampleJunit5BaseDir;
+
     private final JkPathTree output;
 
     private String jekaScript;
@@ -35,17 +37,21 @@ class SampleTester {
         super();
         this.sampleBaseDir = buildDir.goTo("../dev.jeka.core-samples");
         this.sampleDependerBaseDir = buildDir.goTo("../dev.jeka.core-samples-dependers");
+        this.sampleJunit5BaseDir = buildDir.goTo("../dev.jeka.core-samples-junit5");
         this.output = sampleBaseDir.goTo(JkConstants.OUTPUT_PATH);
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jekaw";
         jekaScript = sampleBaseDir.get(scriptName).toString();
     }
 
     void doTest() throws IOException {
+
         testScaffoldWithExternalPlugin();
+
+        testJunit5("JUnit5Build");
+
         testSampleWith("JavaPluginBuild", "cleanPackPublish");
         testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
         testSampleWith("ThirdPartyPoweredBuild", "cleanPack");
-        testSampleWith("Junit5Build", "cleanPack");
         testSampleWithJavaPlugin("JacocoPluginBuild");
         testSampleWith("SonarPluginBuild", "cleanPackSonar");
         testSampleWith("AntStyleBuild", "cleanPackPublish");
@@ -62,7 +68,7 @@ class SampleTester {
             Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
             copyClasspath = true;
         }
-        testSampleWithJavaPlugin("", "eclipse#all");
+        testSampleWithJavaPlugin("", "-JKC=JavaPluginBuild", "eclipse#files");
         if (restoreEclipseClasspathFile && copyClasspath) {
             Files.move(classpathFile2, classpathFile, StandardCopyOption.REPLACE_EXISTING);
         } else {
@@ -71,6 +77,7 @@ class SampleTester {
         JkLog.endTask();
 
         testDepender("NormalJarBuild");
+
         testFork();
 
     }
@@ -79,7 +86,7 @@ class SampleTester {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
-                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LB", "-LV=false")
+                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LB", "-LRI", "-LSU", "-LV=false")
                 .andParams(args)
                 .withFailOnError(true).runSync();
     }
@@ -96,6 +103,15 @@ class SampleTester {
     private void testDepender(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(jekaScript).withWorkingDir(this.sampleDependerBaseDir.getRoot())
+                .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
+                .withParams("clean", "java#pack", "-LB", "-LRI", "-LSU")
+                .andParams(args)
+                .withFailOnError(true).runSync();
+    }
+
+    private void testJunit5(String className, String... args) {
+        JkLog.info("Test " + className + " " + Arrays.toString(args));
+        JkProcess.of(jekaScript).withWorkingDir(this.sampleJunit5BaseDir.getRoot())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
                 .withParams("clean", "java#pack", "-LB", "-LRI", "-LSU")
                 .andParams(args)
@@ -129,7 +145,7 @@ class SampleTester {
     }
 
     private void testFork() {
-        testSampleWithJavaPlugin("", "-java#tests.fork");
+        testSampleWithJavaPlugin("JavaPluginBuild", "-java#tests.fork");
         JkUtilsAssert.state(output.goTo("test-report").exists(), "No test report generated in test fork mode.");
     }
 
