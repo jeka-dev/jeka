@@ -1,6 +1,7 @@
 # 0.9.15.RELEASE (ongoing)
 * Upgrade JUNIT PLATFORM to 1.8.1  
 * Improve scaffolding for Jeka plugins
+* Refactor JkProcess
 
 # 0.9.14.RELEASE
 * Fix distribution zip archive
