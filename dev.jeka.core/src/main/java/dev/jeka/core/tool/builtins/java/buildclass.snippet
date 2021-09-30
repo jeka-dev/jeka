@@ -21,20 +21,27 @@ class Build extends JkClass {
                 .getCompilation()
                     .setDependencies(deps -> deps
                         .and("com.google.guava:guava:21.0")
-                    ).__
+                    )
+                .__
 
                 // this testing setup is almost default setting, this is here for illustration purpose
                 // If default is ok for you, you can remove it.
                 .getTesting()
                     .getCompilation().setDependencies(deps -> deps
-                        .and("org.junit.jupiter:junit-jupiter:5.8.1")).__
+                        .and("org.junit.jupiter:junit-jupiter:5.8.1"))
+                    .__
                     .getTestSelection()
                         .addIncludeStandardPatterns()
-                        .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN).__
+                        .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN)
+                    .__
                     .getTestProcessor()
                         .setForkingProcess(true)
                         .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE).__.__.__.__
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE)
+                        .__
+                    .__
+                .__
+            .__
 
             // Publication is only necessary if your project is being deployed on a binary repository.
             // Many projects as jee war jar, springboot application, tools, Graphical application

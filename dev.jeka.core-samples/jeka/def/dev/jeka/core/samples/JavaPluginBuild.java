@@ -46,7 +46,8 @@ public class JavaPluginBuild extends JkClass {
        .getProject()
            .getConstruction()
                .getCompiler()
-                    .setCompileProcess(JkProcess.of("javac")).__
+                    .setForkedWithDefaultProcess()
+               .__
                .getDependencyResolver()
                     .getParams()
                         .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT)

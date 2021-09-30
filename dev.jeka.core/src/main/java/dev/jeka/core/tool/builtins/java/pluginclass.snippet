@@ -8,7 +8,7 @@ import dev.jeka.core.tool.JkPlugin;
     "No need to list methods or options here has you are supposed to annotate them directly.")
 public class JkPluginXxxxxxx extends JkPlugin {
 
-    @JkDoc("All public fields will be exposed as plugin option. This one will be documented with this comment.")
+    @JkDoc("All public fields will be exposed as plugin option. Rewrite this comment to document it.")
     public String yourParam = "aDefaultValue;
 
     protected JkPluginXxxxxxx(JkClass jkClass) {
@@ -25,7 +25,7 @@ public class JkPluginXxxxxxx extends JkPlugin {
     }
 
     @JkDoc("All public no-args methods returning void will be exposed as plugin method. \n"
-      + "This one will be documented with this comment.")
+      + "Rewrite this comment to document it.")
     public void yourMethod() {
 
     }

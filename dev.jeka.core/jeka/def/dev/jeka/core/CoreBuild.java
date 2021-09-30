@@ -81,7 +81,7 @@ public class CoreBuild extends JkClass {
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
                 .getCompiler()
-                    .setForkParams()
+                    .setForkedWithDefaultProcess()
                 .__
                 .setJavaVersion(JkJavaVersion.V8)
                 .getCompilation()

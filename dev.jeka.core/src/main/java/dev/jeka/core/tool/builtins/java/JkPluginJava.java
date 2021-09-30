@@ -14,7 +14,6 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
@@ -95,7 +94,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     protected void beforeSetup() {
         JkJavaProjectConstruction construction = project.getConstruction();
         JkJavaCompiler compiler = construction.getCompiler();
-        compiler.setJdkHomeProps(JkOptions.getAllStartingWith("jdk."));
+        compiler.setJdkHomesWithProperties(JkOptions.getAllStartingWith("jdk."));
         project.getPublication().getMaven().setRepos(repoPlugin.publishRepository().toSet());
         project.getPublication().getIvy().setRepos(repoPlugin.publishRepository().toSet());
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
