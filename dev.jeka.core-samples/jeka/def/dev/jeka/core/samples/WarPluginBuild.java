@@ -55,9 +55,8 @@ public class WarPluginBuild extends JkClass {
         artifactProducer.makeMissingArtifacts();
         JkPluginRepo repo = getPlugin(JkPluginRepo.class);
         Path jettyRunner = repo.downloadRepository().toSet().get("org.eclipse.jetty:jetty-runner:" + jettyRunnerVersion);
-        JkJavaProcess.of()
-                .runJarSync(jettyRunner, artifactProducer.getMainArtifactPath().toString(), "--port",
-                        Integer.toString(port));
+        JkJavaProcess.ofJavaJar(jettyRunner, null)
+                .exec(artifactProducer.getMainArtifactPath().toString(), "--port", Integer.toString(port));
     }
     
     public static void main(String[] args) {

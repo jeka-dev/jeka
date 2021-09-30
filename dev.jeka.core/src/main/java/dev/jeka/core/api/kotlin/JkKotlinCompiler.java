@@ -111,9 +111,9 @@ public final class JkKotlinCompiler {
                 sourcePaths.add(file.toAbsolutePath().toString());
             }
         }
-        final JkProcess jkProcess = this.process.andParams(compileSpec.getOptions()).andParams(sourcePaths);
+        final JkProcess jkProcess = this.process.addParams(compileSpec.getOptions()).addParams(sourcePaths);
         JkLog.info("" + sourcePaths.size() + " files to compile.");
-        final int result = jkProcess.runSync();
+        final int result = jkProcess.exec();
         return (result == 0);
     }
 

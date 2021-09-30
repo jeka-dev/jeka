@@ -3,7 +3,7 @@ package dev.jeka.core.api.java.project;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.JkGitWrapper;
+import dev.jeka.core.api.tooling.JkGitProcess;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -112,18 +112,18 @@ public class JkJavaProjectSimpleFacade {
 
     /**
      * The published version will be computed according the current git tag.
-     * @see JkGitWrapper#getVersionFromTag()
+     * @see JkGitProcess#getVersionFromTag()
      */
     public JkJavaProjectSimpleFacade setPublishedMavenVersionFromGitTag() {
-        return setPublishedMavenVersion(() -> JkGitWrapper.of(getProject().getBaseDir()).getVersionFromTag());
+        return setPublishedMavenVersion(() -> JkGitProcess.of(getProject().getBaseDir()).getVersionFromTag());
     }
 
     /**
      * The published version will be computed according the git last commit message.
-     * @see JkGitWrapper#getVersionFromCommitMessage(String)
+     * @see JkGitProcess#getVersionFromCommitMessage(String)
      */
     public JkJavaProjectSimpleFacade setPublishedVersionFromGitTagCommitMessage(String suffixKeyword) {
-        return setPublishedMavenVersion(() -> JkGitWrapper.of(getProject().getBaseDir())
+        return setPublishedMavenVersion(() -> JkGitProcess.of(getProject().getBaseDir())
                 .getVersionFromCommitMessage(suffixKeyword));
     }
 

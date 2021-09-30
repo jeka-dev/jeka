@@ -36,18 +36,18 @@ class GithubReleaseContentEditor {
         String data = getpPostData(version, body);
         String request = requestEdit();
         JkProcess.of("curl", "--data", data, request)
-                .withFailOnError(true)
-                .withLogCommand(true)
-                .withLogOutput(true)
+                .setFailOnError(true)
+                .setLogCommand(true)
+                .setLogOutput(true)
                 .run();
     }
 
     void listRelease() {
         String request = requestList();
         JkProcess.of("curl", request)
-                .withFailOnError(true)
-                .withLogCommand(true)
-                .withLogOutput(true)
+                .setFailOnError(true)
+                .setLogCommand(true)
+                .setLogOutput(true)
                 .run();
     }
 

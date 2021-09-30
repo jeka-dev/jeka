@@ -23,7 +23,7 @@ public class JkProcessTest {
 
             Assert.assertTrue(Files.exists(parent));
             //new ProcessBuilder().command("explorer", parent.getAbsolutePath()).start().waitFor();
-            JkProcess.of("find", "a string", totoWithSpaces.toAbsolutePath().toString()).runSync();
+            JkProcess.of("find", "a string", totoWithSpaces.toAbsolutePath().toString()).exec();
         }
     }
 

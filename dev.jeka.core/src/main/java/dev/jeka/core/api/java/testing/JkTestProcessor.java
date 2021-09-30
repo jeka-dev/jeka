@@ -67,7 +67,7 @@ public final class JkTestProcessor<T> {
 
     private static final String OPENTEST4J_JAR_NAME = "opentest4j-1.2.0.jar";
 
-    private JkJavaProcess forkingProcess = JkJavaProcess.of();  // Tests are forked by default
+    private JkJavaProcess forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName());  // Tests are forked by default
 
     private JkEngineBehavior<T> engineBehavior;
 
@@ -120,7 +120,7 @@ public final class JkTestProcessor<T> {
             if (forkingProcess != null) {
                 return this;
             }
-            this.forkingProcess = JkJavaProcess.of();
+            this.forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName());
         } else {
             forkingProcess = null;
         }
@@ -194,11 +194,14 @@ public final class JkTestProcessor<T> {
         Path serializedArgPath = JkUtilsPath.createTempFile("testArgs-", ".ser");
         JkUtilsIO.serialize(args, serializedArgPath);
         String arg = serializedArgPath.toAbsolutePath().toString();
-        JkJavaProcess process = forkingProcess
-            .withPrintCommand(false)
-            .andClasspath(JkClassLoader.ofCurrent().getClasspath().
-                    and(computeClasspath(testClasspath)).withoutDuplicates().getEntries());
-        process.runClassSync(JkTestProcessor.class.getName(), new String[] {arg});
+        List<Path> classapth = JkClassLoader.ofCurrent().getClasspath()
+                .and(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
+        forkingProcess.clone()
+                .setLogCommand(false)
+                .setFailOnError(true)
+                .setClasspath(classapth)
+                .addParams(arg)
+                .exec();
         JkUtilsPath.deleteFile(serializedArgPath);
         JkTestResult result = JkUtilsIO.deserialize(serializedResultPath);
         JkUtilsPath.deleteFile(serializedResultPath);

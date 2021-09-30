@@ -138,13 +138,13 @@ public final class JkJavadocProcessor<T> {
             return;
         }
         JkProcess process = JkProcess.of(javadocExe.toString())
-                .andParams(computeOptions(classpath, srcDirs, outputDir))
-                .andParams(computePackages(srcDirs))
-                .withLogOutput(verbose)
-                .withLogCommand(verbose)
-                .withFailOnError(true);
+                .addParams(computeOptions(classpath, srcDirs, outputDir))
+                .addParams(computePackages(srcDirs))
+                .setLogOutput(verbose)
+                .setLogCommand(verbose)
+                .setFailOnError(true);
         try {
-            process.runSync();
+            process.exec();
         } catch (IllegalStateException e) {
             JkLog.warn("An error occurred when generating Javadoc. Maybe there is no public class to document." +
                     " Please relaunch the process with -LV option to see details");

@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.git;
 
 import dev.jeka.core.api.system.JkPrompt;
-import dev.jeka.core.api.tooling.JkGitWrapper;
+import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
@@ -9,16 +9,16 @@ import dev.jeka.core.tool.JkPlugin;
 @JkDoc("Plugin providing common Git scripts/commands out of the box.")
 public class JkPluginGit extends JkPlugin {
 
-    private final JkGitWrapper git;
+    private final JkGitProcess git;
 
     protected JkPluginGit(JkClass jkClass) {
         super(jkClass);
-        git = JkGitWrapper.of(jkClass.getBaseDir());
+        git = JkGitProcess.of(jkClass.getBaseDir());
     }
 
     @JkDoc("Perform a dirty check first then put a tag at the HEAD and push it to remote.")
     public void tagRemote() {
-        if (!git.withLogOutput(false).withLogCommand(true).isRemoteEqual()) {
+        if (!git.setLogOutput(false).setLogCommand(true).isRemoteEqual()) {
             System.out.println("The current tracking branch is not aligned with the remote. Please update/push and retry.");
             return;
         }
@@ -27,13 +27,13 @@ public class JkPluginGit extends JkPlugin {
             //return;
         }
         System.out.println("Existing tags on origin :");
-        git.exec("ls-remote", "--tag", "--sort=creatordate", "origin");
+        git.addParams("ls-remote", "--tag", "--sort=creatordate", "origin").exec();
         System.out.println("You are about to tag commit : " + git.getCurrentCommit());
         final String newTag = JkPrompt.ask("Enter new tag : ");
-        git.withLogCommand(true).tagAndPush(newTag);
+        git.setLogCommand(true).tagAndPush(newTag);
     }
 
-    public JkGitWrapper getWrapper() {
+    public JkGitProcess getWrapper() {
         return git;
     }
 

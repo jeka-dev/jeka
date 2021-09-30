@@ -12,7 +12,7 @@ import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.JkGitWrapper;
+import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkConstants;
@@ -48,7 +48,7 @@ public class CoreBuild extends JkClass {
 
     final JkPluginGpg gpg = getPlugin(JkPluginGpg.class);
 
-    private final JkGitWrapper git;
+    private final JkGitProcess git;
 
     private String taggedReleaseVersion;
 
@@ -65,7 +65,7 @@ public class CoreBuild extends JkClass {
 
 
     protected CoreBuild() {
-        git = JkGitWrapper.of(this.getBaseDir());
+        git = JkGitProcess.of(this.getBaseDir());
     }
 
     @Override
@@ -296,16 +296,16 @@ public class CoreBuild extends JkClass {
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
-        git.withLogCommand(false).exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
+        git.setLogCommand(false).exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
                 tempRepo.toString());
         project.getDocumentation().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
         makeDocs();
         JkPathTree.of(distribFolder().resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
-        JkGitWrapper gitTemp = JkGitWrapper.of(tempRepo).withLogCommand(true).withFailOnError(true);
+        JkGitProcess gitTemp = JkGitProcess.of(tempRepo).setLogCommand(true).setFailOnError(true);
         gitTemp.exec("add", "*");
-        gitTemp.withFailOnError(false).exec("commit", "-am", "Doc");
+        gitTemp.setFailOnError(false).exec("commit", "-am", "Doc");
         gitTemp.exec("push");
     }
 

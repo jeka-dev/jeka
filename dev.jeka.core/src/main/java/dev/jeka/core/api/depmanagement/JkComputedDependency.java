@@ -54,7 +54,7 @@ public class JkComputedDependency implements JkFileDependency {
 
             @Override
             public void run() {
-                process.runSync();
+                process.exec();
             }
 
             @Override
@@ -76,13 +76,12 @@ public class JkComputedDependency implements JkFileDependency {
     }
 
     /**
-     * Same as {@link #of(Path, JkJavaProcess, String, String...)} but you must specify a set of files
+     * Same as {@link #of(Path, JkJavaProcess)} but you must specify a set of files
      * instead of a single one.
      */
-    public static JkComputedDependency of(Iterable<Path> files, final JkJavaProcess process,
-            final String className, final String... args) {
+    public static JkComputedDependency of(Iterable<Path> files, final JkJavaProcess process) {
         final List<Path> fileSet = JkUtilsIterable.listWithoutDuplicateOf(JkUtilsPath.disambiguate(files));
-        final Runnable runnable = () -> process.runClassSync(className, args);
+        final Runnable runnable = () -> process.exec();
         return new JkComputedDependency(runnable, null, fileSet);
     }
 
@@ -90,9 +89,8 @@ public class JkComputedDependency implements JkFileDependency {
      * Creates a computed dependency to the specified file and the specified java program to run for
      * generating them.
      */
-    public static JkComputedDependency of(Path file, final JkJavaProcess process,
-            final String className, final String... args) {
-        return of(JkUtilsIterable.setOf(file), process, className, args);
+    public static JkComputedDependency of(Path file, final JkJavaProcess process) {
+        return of(JkUtilsIterable.setOf(file), process);
     }
 
 

@@ -58,7 +58,7 @@ public final class JkMvn implements Runnable {
         if (MVN_CMD == null) {
             throw new IllegalStateException("Maven not installed on this machine");
         }
-        final JkProcess jkProcess = JkProcess.of(MVN_CMD, args).withWorkingDir(workingDir);
+        final JkProcess jkProcess = JkProcess.of(MVN_CMD, args).setWorkingDir(workingDir);
         return new JkMvn(jkProcess);
     }
 
@@ -75,7 +75,7 @@ public final class JkMvn implements Runnable {
      * withCommand("deleteArtifacts", "install", "-U").
      */
     public final JkMvn commands(String... args) {
-        return new JkMvn(jkProcess.withParams(args));
+        return new JkMvn(jkProcess.addParams(args));
     }
 
     /**
@@ -108,9 +108,9 @@ public final class JkMvn implements Runnable {
      */
     public final JkMvn withForceUpdate(boolean flag) {
         if (flag) {
-            return new JkMvn(this.jkProcess.andParams("-U"));
+            return new JkMvn(this.jkProcess.addParams("-U"));
         }
-        return new JkMvn(this.jkProcess.minusParam("-U"));
+        return new JkMvn(this.jkProcess.removeParam("-U"));
     }
 
     /**
@@ -118,9 +118,9 @@ public final class JkMvn implements Runnable {
      */
     public final JkMvn withVerbose(boolean flag) {
         if (flag) {
-            return new JkMvn(this.jkProcess.andParams("-X"));
+            return new JkMvn(this.jkProcess.addParams("-X"));
         }
-        return new JkMvn(this.jkProcess.minusParam("-X"));
+        return new JkMvn(this.jkProcess.removeParam("-X"));
     }
 
     /**
@@ -132,7 +132,7 @@ public final class JkMvn implements Runnable {
 
     @Override
     public void run() {
-        jkProcess.runSync();
+        jkProcess.exec();
     }
 
     /**

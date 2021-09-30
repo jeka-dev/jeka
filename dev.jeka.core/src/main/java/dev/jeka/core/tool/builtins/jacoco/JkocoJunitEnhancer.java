@@ -87,8 +87,9 @@ public final class JkocoJunitEnhancer {
             return;
         }
         testProcessor.getPreActions().append(() -> {
-            JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(), JkJavaProcess.of());
-            process = process.andAgent(agent, agentOptions());
+            JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
+                    JkJavaProcess.ofJava(JkTestProcessor.class.getName()));
+            process.addAgent(agent, agentOptions());
             testProcessor.setForkingProcess(process);
             testProcessor.getPostActions().append(new Reporter());
         });
@@ -134,7 +135,9 @@ public final class JkocoJunitEnhancer {
                     args.add("utf-8");
                     args.addAll(reportOptions);
                     JkLog.info("Generate Jacoco report using " + args);
-                    JkJavaProcess.of().withPrintCommand(false).runJarSync(cliJarFile, args.toArray(new String[0]));
+                    JkJavaProcess.ofJavaJar(cliJarFile, null)
+                            .setLogCommand(false)
+                            .exec();
                 }
 
             }

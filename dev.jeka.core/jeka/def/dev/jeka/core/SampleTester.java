@@ -29,7 +29,9 @@ class SampleTester {
 
     private final JkPathTree output;
 
-    private String jekaScript;
+    private String jekaCmd;
+
+    private String junit5JekaCmd;
     
     boolean restoreEclipseClasspathFile;
 
@@ -40,16 +42,17 @@ class SampleTester {
         this.sampleJunit5BaseDir = buildDir.goTo("../dev.jeka.core-samples-junit5");
         this.output = sampleBaseDir.goTo(JkConstants.OUTPUT_PATH);
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jekaw";
-        jekaScript = sampleBaseDir.get(scriptName).toString();
+        jekaCmd = sampleBaseDir.get(scriptName).toString();
+        junit5JekaCmd = sampleJunit5BaseDir.get(scriptName).toString();
     }
 
     void doTest() throws IOException {
 
+        testJunit5("Junit5Build");
+
         testSampleWithJavaPlugin("JacocoPluginBuild");
 
         testScaffoldWithExternalPlugin();
-
-        testJunit5("JUnit5Build");
 
         testSampleWith("JavaPluginBuild", "cleanPackPublish");
         testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
@@ -86,64 +89,67 @@ class SampleTester {
 
     private void testSampleWithJavaPlugin(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
-                .andParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LB", "-LRI", "-LSU", "-LV=false")
-                .andParams(args)
-                .withFailOnError(true).runSync();
+        JkProcess.of(jekaCmd).setWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
+                .addParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
+                .addParams("clean", "java#pack", "java#publish", "-java#publish.localOnly", "-LB", "-LRI", "-LSU", "-LV=false")
+                .addParams(args)
+                .setFailOnError(true).exec();
     }
 
     private void testSampleWith(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(jekaScript).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
-                .andParams("-LB", "-LRI", "-LSU", "-LV=false")
-                .andParams(args)
-                .withFailOnError(true).runSync();
+        JkProcess.of(jekaCmd).setWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
+                .addParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
+                .addParams("-LB", "-LRI", "-LSU", "-LV=false")
+                .addParams(args)
+                .setFailOnError(true)
+                .exec();
     }
 
     private void testDepender(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(jekaScript).withWorkingDir(this.sampleDependerBaseDir.getRoot())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
-                .withParams("clean", "java#pack", "-LB", "-LRI", "-LSU")
-                .andParams(args)
-                .withFailOnError(true).runSync();
+        JkProcess.of(jekaCmd).setWorkingDir(this.sampleDependerBaseDir.getRoot())
+                .addParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
+                .addParams("clean", "java#pack", "-LB", "-LRI", "-LSU")
+                .addParams(args)
+                .setFailOnError(true).exec();
     }
 
     private void testJunit5(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(jekaScript).withWorkingDir(this.sampleJunit5BaseDir.getRoot())
-                .withParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
-                .withParams("clean", "java#pack", "-LB", "-LRI", "-LSU")
-                .andParams(args)
-                .withFailOnError(true).runSync();
+        JkProcess.of(junit5JekaCmd)
+                .setWorkingDir(this.sampleJunit5BaseDir.getRoot())
+                .addParamsIf(!JkUtilsString.isBlank(className), "-JKC=" + className)
+                .addParams("clean", "java#pack", "-LB", "-LRI", "-LSU")
+                .addParams(args)
+                .setFailOnError(true)
+                .exec();
     }
 
     // => pb when used with wrapper as the jeka location is mentioned relative to original sample dir
     private void testScaffoldJava() {
         JkLog.info("Test scaffold Java");
         Path root = JkUtilsPath.createTempDirectory("jeka");
-        process().withWorkingDir(root).andParams("scaffold#run", "java#", "intellij#").runSync();
-        process().withWorkingDir(root).andParams("java#pack").runSync();
+        process().setWorkingDir(root).addParams("scaffold#run", "java#", "intellij#").exec();
+        process().setWorkingDir(root).addParams("java#pack").exec();
         JkPathTree.of(root).deleteRoot();
     }
 
     private void scaffoldAndEclipse() {
         Path scafoldedProject = output.getRoot().resolve("scaffolded");
-        JkProcess scaffoldProcess = process().withWorkingDir(scafoldedProject);
+        JkProcess scaffoldProcess = process().setWorkingDir(scafoldedProject);
         JkUtilsPath.createDirectories(scafoldedProject);
-        scaffoldProcess.withParams("scaffold").runSync(); // scaffold
+        scaffoldProcess.clone().addParams("scaffold").exec(); // scaffold
         // project
-        scaffoldProcess.runSync(); // Build the scaffolded project
+        scaffoldProcess.exec(); // Build the scaffolded project
         JkLog.info("Test eclipse generation and compile            ");
-        scaffoldProcess.withParams("eclipse#all").runSync();
-        scaffoldProcess.withParams("eclipse#").runSync(); // build using the .classpath for resolving classpath
-        scaffoldProcess.withParams("idea#generateIml", "idea#generateModulesXml").runSync();
+        scaffoldProcess.clone().addParams("eclipse#all").exec();
+        scaffoldProcess.clone().addParams("eclipse#").exec(); // build using the .classpath for resolving classpath
+        scaffoldProcess.clone().addParams("idea#generateIml", "idea#generateModulesXml").exec();
     }
 
     private JkProcess process() {
-        return JkProcess.of(jekaScript).withFailOnError(true);
+        return JkProcess.of(jekaCmd).setFailOnError(true);
     }
 
     private void testFork() {
@@ -154,10 +160,10 @@ class SampleTester {
     private void testScaffoldWithExternalPlugin() {
         JkLog.info("Test scaffold with springboot plugin");
         Path dir = JkUtilsPath.createTempDirectory("jeka-test");
-        JkProcess.ofWinOrUx("jeka.bat", "jeka").withWorkingDir(dir)
-                .andParams("-LB", "-LRI", "-LSU", "-LV=false", "-JKC=",
+        JkProcess.ofWinOrUx("jeka.bat", "jeka").setWorkingDir(dir)
+                .addParams("-LB", "-LRI", "-LSU", "-LV=false", "-JKC=",
                         "scaffold#run", "@dev.jeka:springboot-plugin:+", "springboot#")
-                .withFailOnError(true).runSync();
+                .setFailOnError(true).exec();
         JkPathTree.of(dir).deleteRoot();
     }
 

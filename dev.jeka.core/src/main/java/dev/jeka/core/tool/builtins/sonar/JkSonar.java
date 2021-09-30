@@ -95,9 +95,9 @@ public final class JkSonar {
         }
         JkLog.startTask("Launch Sonar analysis");
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            javaProcess().runClassSync("org.sonar.runner.Main", "-e", "-X");
+            javaProcess().exec( "-e", "-X");
         } else {
-            javaProcess().runClassSync("org.sonar.runner.Main", "-e");
+            javaProcess().exec("-e");
         }
         JkLog.endTask();
     }
@@ -109,7 +109,7 @@ public final class JkSonar {
     private JkJavaProcess javaProcess() {
         URL embeddedUrl = JkSonar.class.getResource(RUNNER_JAR_NAME_24);
         Path cachedUrl = JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalClassloader.URL_CACHE_DIR);
-        return JkJavaProcess.of().withClasspath(cachedUrl).andOptions(toProperties());
+        return JkJavaProcess.ofJava("org.sonar.runner.Main").setClasspath(cachedUrl).addJavaOptions(toProperties());
     }
 
     private List<String> toProperties() {

@@ -73,9 +73,10 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
 
     public void run() {
         jar();
-        JkJavaProcess.of().withWorkingDir(jarFile.getParent())
-            .andClasspath(prodClasspath)
-            .runJarSync(jarFile);
+        JkJavaProcess.ofJavaJar(jarFile, null)
+                .setWorkingDir(jarFile.getParent())
+                .setClasspath(prodClasspath)
+                .exec();
     }
 
     public void cleanPackPublish() {

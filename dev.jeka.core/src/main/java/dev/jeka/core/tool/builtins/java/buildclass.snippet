@@ -1,7 +1,7 @@
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.JkGitWrapper;
+import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
@@ -48,7 +48,7 @@ class Build extends JkClass {
             // does not need this section at all.  In this case you can remove it.
             .getPublication().getMaven()
                 .setModuleId("your.group:your.project")
-                .setVersion(JkGitWrapper.of(getBaseDir()).getVersionFromTag());  // Version inferred from Git
+                .setVersion(JkGitProcess.of(getBaseDir()).getVersionFromTag());  // Version inferred from Git
     }
 
     public void cleanPack() {

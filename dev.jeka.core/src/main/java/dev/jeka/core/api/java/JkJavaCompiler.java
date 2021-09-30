@@ -224,7 +224,7 @@ public final class JkJavaCompiler<T> {
         }
         JkProcess process = resolveCompileProcessFromJdksForVersion(compileSpec.getSourceVersion());
         if (process != null) {
-            return runOnProcess(compileSpec, process.andParams(forkOptions()));
+            return runOnProcess(compileSpec, process.addParams(forkOptions()));
         }
         if (canCompile(runningJdkCompilerTool, compileSpec.getSourceVersion())) {
             return runOnTool(compileSpec, runningJdkCompilerTool, toolParams);
@@ -258,9 +258,10 @@ public final class JkJavaCompiler<T> {
                 sourcePaths.add(file.toAbsolutePath().toString());
             }
         }
-        final JkProcess jkProcess = process.andParams(compileSpec.getOptions()).andParams(sourcePaths);
+        process.addParams(compileSpec.getOptions())
+                .addParams(sourcePaths);
         JkLog.info("" + sourcePaths.size() + " files to compile.");
-        final int result = jkProcess.runSync();
+        final int result = process.exec();
         return (result == 0);
     }
 
