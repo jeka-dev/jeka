@@ -261,6 +261,10 @@ public class JkCompileLayout<T> {
         return classDir;
     }
 
+    public Path getClassDirPath() {
+        return getOutputDir().resolve(classDir);
+    }
+
     /**
      * Returns the class dir directory resolved against the current base dir.
      */

@@ -71,6 +71,8 @@ public final class JkTestProcessor<T> {
 
     private JkEngineBehavior<T> engineBehavior;
 
+    private final JkRunnables preActions = JkRunnables.of();
+
     private final JkRunnables postActions = JkRunnables.of();
 
     /**
@@ -98,6 +100,10 @@ public final class JkTestProcessor<T> {
 
     public JkEngineBehavior<T> getEngineBehavior() {
         return engineBehavior;
+    }
+
+    public JkRunnables getPreActions() {
+        return preActions;
     }
 
     public JkRunnables getPostActions() {
@@ -160,6 +166,7 @@ public final class JkTestProcessor<T> {
      */
     public JkTestResult launch(JkPathSequence extraTestClasspath, JkTestSelection testSelection) {
         final JkTestResult result;
+        preActions.run();
         if (forkingProcess == null) {
             JkLog.startTask("Executing tests");
             result = launchInClassloader(extraTestClasspath, testSelection);

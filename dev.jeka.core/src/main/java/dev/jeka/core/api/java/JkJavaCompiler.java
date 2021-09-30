@@ -223,6 +223,7 @@ public final class JkJavaCompiler<T> {
     }
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
+        JkLog.info("Compile using command " + process.getCommand());
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> paths = compileSpec.getSourceFiles();
         for (final Path file : paths) {

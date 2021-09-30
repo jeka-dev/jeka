@@ -36,7 +36,7 @@ public class JacocoPluginBuild extends JkClass {
                     .and(GUAVA.version("18.0"))
                 )
                 .setTestDependencies(deps -> deps
-                    .and(JavaPluginBuild.JUNIT5_API)
+                    .and(JavaPluginBuild.JUNIT5)
                 );
     }
 

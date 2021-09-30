@@ -1,0 +1,33 @@
+package your.basepackage;
+
+import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkPlugin;
+
+@JkDoc("Explain here what your plugin is doing.\n" +
+    "No need to list methods or options here has you are supposed to annotate them directly.")
+public class JkPluginXxxxxxx extends JkPlugin {
+
+    @JkDoc("All public fields will be exposed as plugin option. This one will be documented with this comment.")
+    public String yourParam = "aDefaultValue;
+
+    protected JkPluginXxxxxxx(JkClass jkClass) {
+        super(jkClass);
+    }
+
+    /*
+     * Use this method if you want to modify/configure other plugins.
+     */
+    @Override
+    protected void afterSetup() throws Exception {
+        // JkPluginJava javaPlugin = getJkClass().getPlugin(JkPluginJava.class);
+        // javaPlugin ...
+    }
+
+    @JkDoc("All public no-args methods returning void will be exposed as plugin method. \n"
+      + "This one will be documented with this comment.")
+    public void yourMethod() {
+
+    }
+
+}

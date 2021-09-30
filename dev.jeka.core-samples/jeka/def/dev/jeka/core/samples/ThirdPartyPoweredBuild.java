@@ -34,7 +34,7 @@ public class ThirdPartyPoweredBuild extends JkClass {
             .setRuntimeDependencies(compileDeps -> compileDeps
                 .minus(JAVAX_SERVLET_API))
             .setTestDependencies(deps -> deps
-                .and(JavaPluginBuild.JUNIT5_API)
+                .and(JavaPluginBuild.JUNIT5)
                 .and(MOCKITO_ALL.version("1.10.19")));
     }
 

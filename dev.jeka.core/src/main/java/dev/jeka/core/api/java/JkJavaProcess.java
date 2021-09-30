@@ -34,11 +34,13 @@ public final class JkJavaProcess {
 
     private final boolean printCommand;
 
+    private final boolean logOutput;
+
     private final Map<String, String> environment;
 
     private JkJavaProcess(Path javaDir, Map<String, String> systemProperties, JkPathSequence classpath,
             List<AgentLibAndOption> agents, Collection<String> options, Path workingDir,
-            Map<String, String> environment, boolean printCommand) {
+            Map<String, String> environment, boolean printCommand, boolean logOutput) {
         super();
         this.javaDir = javaDir;
         this.systemProperties = systemProperties;
@@ -48,6 +50,7 @@ public final class JkJavaProcess {
         this.workingDir = workingDir;
         this.environment = environment;
         this.printCommand = printCommand;
+        this.logOutput = logOutput;
     }
 
     /**
@@ -65,7 +68,8 @@ public final class JkJavaProcess {
     @SuppressWarnings("unchecked")
     public static JkJavaProcess ofJavaHome(Path javaDir) {
         return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkPathSequence.of(),
-                Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP, true);
+                Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP,
+                true, true);
     }
 
     /**
@@ -86,7 +90,7 @@ public final class JkJavaProcess {
                 this.agents);
         list.add(new AgentLibAndOption(agentLib.toAbsolutePath().toString(), agentOption));
         return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, list,
-                this.options, this.workingDir, this.environment, this.printCommand);
+                this.options, this.workingDir, this.environment, this.printCommand, this.logOutput);
     }
 
     /**
@@ -105,7 +109,7 @@ public final class JkJavaProcess {
         final List<String> list = new ArrayList<>(this.options);
         list.addAll(options);
         return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, this.agents,
-                list, this.workingDir, this.environment, this.printCommand);
+                list, this.workingDir, this.environment, this.printCommand, this.logOutput);
     }
 
     /**
@@ -143,7 +147,7 @@ public final class JkJavaProcess {
      */
     public JkJavaProcess withWorkingDir(Path workingDir) {
         return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, this.agents,
-                this.options, workingDir, this.environment, this.printCommand);
+                this.options, workingDir, this.environment, this.printCommand, this.logOutput);
     }
 
     /**
@@ -159,7 +163,7 @@ public final class JkJavaProcess {
         }
         final JkPathSequence jkClasspath = JkPathSequence.of(JkUtilsPath.disambiguate(paths));
         return new JkJavaProcess(this.javaDir, this.systemProperties, jkClasspath, this.agents,
-                this.options, this.workingDir, this.environment, this.printCommand);
+                this.options, this.workingDir, this.environment, this.printCommand, this.logOutput);
     }
 
     /**
@@ -168,7 +172,16 @@ public final class JkJavaProcess {
      */
     public JkJavaProcess withPrintCommand(boolean printCommand) {
         return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, this.agents,
-                this.options, this.workingDir, this.environment, printCommand);
+                this.options, this.workingDir, this.environment, printCommand, this.logOutput);
+    }
+
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one specifying if the underlyong command should be output
+     * in the console
+     */
+    public JkJavaProcess withLogOutput(boolean logOutput) {
+        return new JkJavaProcess(this.javaDir, this.systemProperties, this.classpath, this.agents,
+                this.options, this.workingDir, this.environment, this.printCommand, logOutput);
     }
 
     /**
@@ -235,7 +248,7 @@ public final class JkJavaProcess {
         }
         args.addAll(Arrays.asList(arguments));
         return JkProcess.of(getRunningJavaCommand(), args.toArray(new String[0]))
-                .withLogCommand(printCommand);
+                .withLogCommand(printCommand).withLogOutput(this.logOutput);
     }
 
     private void runClassOrJarSync(String mainClassName, Path jar, String... arguments) {

@@ -178,6 +178,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
                 String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
                         "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
                 JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
+                Path sourceDir =
+                        project.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
+                String pluginCode = JkUtilsIO.read(JkPluginJava.class.getResource("pluginclass.snippet"));
+                JkPathFile.of(sourceDir.resolve("your/basepackage/JkPluginXxxxxxx.java"))
+                        .createIfNotExist()
+                        .write(pluginCode.getBytes(StandardCharsets.UTF_8));
             }
         });
 

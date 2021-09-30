@@ -81,35 +81,50 @@ public class CoreBuild extends JkClass {
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
                 .getCompiler()
-                    .setForkParams().__
+                    .setForkParams()
+                .__
                 .setJavaVersion(JkJavaVersion.V8)
                 .getCompilation()
                     .getPreGenerateActions()
-                        .append(this::tagIfReleaseMentionedInCurrentCommit).__
+                        .append(this::tagIfReleaseMentionedInCurrentCommit)
+                    .__
                     .getLayout()
-                        .mixResourcesAndSources().__
-                    .addOptions("-Xlint:none","-g").__
+                        .mixResourcesAndSources()
+                    .__
+                    .addOptions("-Xlint:none","-g")
+                .__
                 .getTesting()
                     .getCompilation()
                         .getLayout()
-                            .mixResourcesAndSources().__.__
+                            .mixResourcesAndSources()
+                        .__
+                    .__
                     .getTestProcessor()
                         .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE).__.__
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE)
+                        .__
+                    .__
                     .getTestSelection()
                         .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
-                        .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN).__.__.__
+                        .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)
+                    .__
+                .__
+            .__
             .getDocumentation()
                 .getJavadocProcessor()
                     .setDisplayOutput(false)
-                    .addOptions("-notimestamp").__.__
+                    .addOptions("-notimestamp")
+                .__
+            .__
             .getPublication()
                 .getPreActions()
-                    .append(this::pushTagIfReleaseMentionedInCurrentCommit).__
+                    .append(this::pushTagIfReleaseMentionedInCurrentCommit)
+                .__
                 .getArtifactProducer()
                     .putMainArtifact(this::doPackWithEmbedded)
                     .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
-                    .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper).__
+                    .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper)
+                .__
                 .getMaven()
                     .setModuleId("dev.jeka:jeka-core")
                     .setVersion(git::getVersionFromTag)
@@ -118,9 +133,11 @@ public class CoreBuild extends JkClass {
                         .getProjectInfo()
                             .setName("jeka")
                             .setUrl("https://jeka.dev")
-                            .setDescription("Automate with plain Java code and nothing else.").__
+                            .setDescription("Automate with plain Java code and nothing else.")
+                        .__
                         .getScm()
-                            .setUrl("https://github.com/jerkar/jeka.git").__
+                            .setUrl("https://github.com/jerkar/jeka.git")
+                        .__
                         .addApache2License()
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
         }

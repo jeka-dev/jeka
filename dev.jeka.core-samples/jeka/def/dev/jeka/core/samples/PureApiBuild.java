@@ -1,7 +1,6 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.tool.JkClass;
@@ -16,7 +15,7 @@ public class PureApiBuild extends JkClass {
         clean();
         JkJavaProject javaProject = JkJavaProject.of().setBaseDir(this.getBaseDir());
         javaProject.setOutputDir("jeka/output/alt-output");
-        JkDependencySet deps = JkDependencySet.of().and(JavaPluginBuild.JUNIT5_API);
+        JkDependencySet deps = JkDependencySet.of().and(JavaPluginBuild.JUNIT5);
         javaProject.getConstruction().getTesting().getCompilation().setDependencies(dep -> deps);
         javaProject.getPublication().getArtifactProducer().makeAllArtifacts();
     }

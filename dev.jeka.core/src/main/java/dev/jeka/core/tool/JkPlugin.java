@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
@@ -91,6 +92,19 @@ public abstract class JkPlugin {
     @Override
     public String toString() {
         return this.getClass().getName();
+    }
+
+    /**
+     * Convenient method to set a Jeka Plugin compatibility range with Jeka versions.
+     * @param lowestVersion Can be null
+     * @param breakingChangeUrl Can be null
+     * @see JkPlugin#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
+     * @See JkPlugin#MANIFEST_BREAKING_CHANGE_URL_ENTRY
+     */
+    public static void setJekaPluginCompatibilityRange(JkManifest manifest, String lowestVersion, String breakingChangeUrl) {
+        manifest
+                .addMainAttribute(JkPlugin.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, lowestVersion)
+                .addMainAttribute(JkPlugin.MANIFEST_BREAKING_CHANGE_URL_ENTRY, breakingChangeUrl);
     }
 
 

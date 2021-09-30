@@ -45,6 +45,8 @@ class SampleTester {
 
     void doTest() throws IOException {
 
+        testSampleWithJavaPlugin("JacocoPluginBuild");
+
         testScaffoldWithExternalPlugin();
 
         testJunit5("JUnit5Build");
@@ -52,7 +54,7 @@ class SampleTester {
         testSampleWith("JavaPluginBuild", "cleanPackPublish");
         testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
         testSampleWith("ThirdPartyPoweredBuild", "cleanPack");
-        testSampleWithJavaPlugin("JacocoPluginBuild");
+
         testSampleWith("SonarPluginBuild", "cleanPackSonar");
         testSampleWith("AntStyleBuild", "cleanPackPublish");
         testSampleWith("PureApiBuild", "cleanBuild");

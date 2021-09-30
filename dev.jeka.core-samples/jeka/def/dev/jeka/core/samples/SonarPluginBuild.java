@@ -53,7 +53,7 @@ public class SonarPluginBuild extends JkClass {
             .setCompileDependencies(deps -> deps
                 .and(GUAVA.version("18.0")))
             .setTestDependencies(deps -> deps
-                .and(JavaPluginBuild.JUNIT5_API))
+                .and(JavaPluginBuild.JUNIT5))
             .setPublishedMavenVersion(git.getWrapper()::getVersionFromTag)
             .setPublishedMavenModuleId("org.jerkar:samples");
     }
