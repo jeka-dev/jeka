@@ -2,6 +2,7 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
@@ -60,10 +61,6 @@ public class JkJavaProjectCompilation<T> {
     private String purpose;
 
     private Supplier<JkJavaCompileSpec> compileSpecSupplier;
-
-
-
-
 
     private JkJavaProjectCompilation(JkJavaProjectConstruction construction, String purpose, T parent) {
         __ = parent;
@@ -236,7 +233,7 @@ public class JkJavaProjectCompilation<T> {
             .setSourceAndTargetVersion(construction.getJavaVersion())
             .setEncoding(construction.getSourceEncoding())
             .setClasspath(resolveDependencies().getFiles())
-            .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
+            .addSources(layout.resolveSources().and(JkPathTree.of(layout.resolveGeneratedSourceDir())))
             .addOptions(compileOptions)
             .setOutputDir(layout.resolveClassDir());
     }

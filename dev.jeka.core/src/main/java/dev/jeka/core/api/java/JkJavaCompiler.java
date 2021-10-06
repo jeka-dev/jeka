@@ -4,7 +4,6 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -143,17 +142,17 @@ public final class JkJavaCompiler<T> {
         if (outputDir == null) {
             throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
         }
-        if (compileSpec.getSourceFiles().isEmpty()) {
+        List<Path> sourceFiles = compileSpec.computeJavacSourceArguments();
+        if (sourceFiles.isEmpty()) {
             JkLog.info("No sources file or directory specified.");
             return true;
         }
-        List<File> files = toFiles(compileSpec.getSourceFiles());
-        if (files.isEmpty()) {
-            JkLog.info("No Java source files found.");
+        if (compileSpec.getSources().count(1, false) == 0) {
+            JkLog.info("No Java source files found in " + compileSpec.getSources());
             return true;
         }
         JkUtilsPath.createDirectories(outputDir);
-        String message = "Compile " + computeCompileMessage(compileSpec.getSourceFiles()) + " to " + outputDir;
+        String message = "Compile " + computeCompileMessage(sourceFiles) + " to " + outputDir;
         if (JkLog.verbosity().isVerbose()) {
             message = message + " using options : " + String.join(" ", options);
         }
@@ -164,36 +163,15 @@ public final class JkJavaCompiler<T> {
     }
 
     private static String computeCompileMessage(List<Path> paths) {
-        List<String> folders = new LinkedList<>();
-        List<String> files = new LinkedList<>();
-        for (Path path : paths) {
-            Path relPath = JkUtilsPath.relativizeFromWorkingDir(path);
-            if (Files.isDirectory(path)) {
-                folders.add(relPath.toString());
-            } else {
-                files.add(relPath.toString());
-            }
+        if (paths.size() == 1 && Files.isDirectory(paths.get(0))) {
+            return paths.get(0).toString();
         }
-        if (paths.size() < 4) {
-            List<String> all = JkUtilsIterable.concatLists(folders, files);
-            return String.join(", ", all);
-        }
-        else {
-            return JkUtilsString.plurialize(folders.size(), "folder") + " and " +
-                    JkUtilsString.plurialize(files.size(), "file");
-        }
+        int count = paths.size();
+        return JkUtilsString.plurialize(count, "file");
     }
 
     private static List<File> toFiles(Collection<Path> paths) {
-        List<File> result = new LinkedList<>();
-        for (Path path : paths) {
-            if (Files.isDirectory(path)) {
-                JkPathTree.of(path).andMatching(true, "**/*.java").stream().forEach(pat -> result.add(pat.toFile()));
-            } else {
-                result.add(path.toFile());
-            }
-        }
-        return result;
+        return JkUtilsPath.toFiles(paths);
     }
 
     private boolean runCompiler(JkJavaCompileSpec compileSpec) {
@@ -236,7 +214,7 @@ public final class JkJavaCompiler<T> {
 
     private static boolean runOnTool(JkJavaCompileSpec compileSpec, JavaCompiler compiler, String[] toolOptions) {
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        List<File> files = toFiles(compileSpec.getSourceFiles());
+        List<File> files = JkUtilsPath.toFiles(compileSpec.getSources().getFiles());
         Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
         List<String> options = new LinkedList<>();
         options.addAll(Arrays.asList(toolOptions));
@@ -249,7 +227,7 @@ public final class JkJavaCompiler<T> {
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
         JkLog.info("Compile using command " + process.getCommand());
         final List<String> sourcePaths = new LinkedList<>();
-        List<Path> paths = compileSpec.getSourceFiles();
+        List<Path> paths = compileSpec.computeJavacSourceArguments();
         for (final Path file : paths) {
             if (Files.isDirectory(file)) {
                 JkPathTree.of(file).andMatching(true, "**/*.java").stream()
@@ -295,7 +273,7 @@ public final class JkJavaCompiler<T> {
     private static boolean canCompile(JavaCompiler compilerTool, JkJavaVersion version) {
         return compilerTool.getSourceVersions().stream()
                 .map(sourceVersion -> JkUtilsString.substringAfterFirst(sourceVersion.name(), "RELEASE_"))
-                .map(versionNum -> JkJavaVersion.of(versionNum))
+                .map(JkJavaVersion::of)
                 .findAny().isPresent();
     }
 

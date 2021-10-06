@@ -2,7 +2,10 @@ package dev.jeka.core.api.utils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Utility class for dealing with strings.
@@ -11,11 +14,7 @@ import java.util.*;
  */
 public final class JkUtilsString {
 
-    /**
-     * Same as {@link #join(String[], String)} but expecting an {@link Iterable}
-     * instead of an array
-     */
-    public static String join(Iterable<?> items, String separator) {
+    static String join(Iterable<?> items, String separator) {
         final StringBuilder builder = new StringBuilder();
         final Iterator<?> it = items.iterator();
         while (it.hasNext()) {

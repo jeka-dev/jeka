@@ -146,11 +146,15 @@ public class JkJavaProjectTest {
         final JkJavaProject coreProject = JkJavaProject.of()
                 .setBaseDir(core)
                 .getConstruction()
-                .getCompilation()
-                .setDependencies(deps -> deps.and(baseProject.toDependency())).__
-                .getCompilation()
-                .getLayout()
-                .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__.__;
+                    .getCompilation()
+                        .setDependencies(deps -> deps
+                            .and(baseProject.toDependency())
+                        )
+                        .getLayout()
+                            .setSourceSimpleStyle(JkCompileLayout.Concern.PROD)
+                        .__
+                    .__
+                .__;
         //Desktop.getDesktop().open(core.toFile());
         coreProject.getPublication().getArtifactProducer().makeAllArtifacts();
 

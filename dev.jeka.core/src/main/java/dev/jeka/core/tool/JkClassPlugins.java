@@ -32,6 +32,13 @@ public final class JkClassPlugins {
         return getOrCreate(pluginClass);
     }
 
+    public <T extends JkPlugin> T getIfLoaded(Class<T> pluginClass) {
+        return (T) loadedPlugins.stream()
+                .filter(jkPlugin -> jkPlugin.getClass().equals(pluginClass))
+                .findFirst()
+                .orElse(null);
+    }
+
     /**
      * Returns the plugin instance of the specified name loaded in the holding JkClass instance. If it does not hold
      * a plugin of the specified name at call time, the plugin is loaded then returned.<br/>

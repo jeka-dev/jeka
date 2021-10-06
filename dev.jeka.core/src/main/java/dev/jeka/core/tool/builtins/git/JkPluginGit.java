@@ -18,22 +18,23 @@ public class JkPluginGit extends JkPlugin {
 
     @JkDoc("Perform a dirty check first then put a tag at the HEAD and push it to remote.")
     public void tagRemote() {
-        if (!git.setLogOutput(false).setLogCommand(true).isRemoteEqual()) {
+        JkGitProcess aGit = git.clone().setLogCommand(false).setLogOutput(false);
+        System.out.println("Existing tags on origin :");
+        aGit.clone().setLogOutput(true).exec("ls-remote", "--tag", "--sort=creatordate", "origin");
+        if (aGit.isWorkspaceDirty()) {
+            System.out.println("Git workspace is dirty. Please clean your Git workspace and retry");
+            return;
+        }
+        if (!aGit.isRemoteEqual()) {
             System.out.println("The current tracking branch is not aligned with the remote. Please update/push and retry.");
             return;
         }
-        if (git.isWorkspaceDirty()) {
-           System.out.println("Git workspace is dirty. Please clean your Git workspace and retry");
-            //return;
-        }
-        System.out.println("Existing tags on origin :");
-        git.addParams("ls-remote", "--tag", "--sort=creatordate", "origin").exec();
         System.out.println("You are about to tag commit : " + git.getCurrentCommit());
         final String newTag = JkPrompt.ask("Enter new tag : ");
-        git.setLogCommand(true).tagAndPush(newTag);
+        aGit.setLogCommand(true).tagAndPush(newTag);
     }
 
-    public JkGitProcess getWrapper() {
+    public JkGitProcess getGitProcess() {
         return git;
     }
 

@@ -1,11 +1,11 @@
 package dev.jeka.core.api.tooling;
 
+import org.junit.Test;
+
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.junit.Test;
 
 @SuppressWarnings("javadoc")
 public class EffectivePomTest {

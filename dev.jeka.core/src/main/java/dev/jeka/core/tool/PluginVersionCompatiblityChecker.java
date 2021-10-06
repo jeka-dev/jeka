@@ -21,6 +21,8 @@ import java.util.Map;
 
 class PluginCompatibilityBreakChecker {
 
+    private PluginCompatibilityBreakChecker() {}
+
     static void checkCompatibility(Class pluginClass) {
         JkManifest manifest = JkManifest.of().loadFromClass(pluginClass);
         String breakingChangeUrl = manifest.getMainAttribute(JkPlugin.MANIFEST_BREAKING_CHANGE_URL_ENTRY);
@@ -85,9 +87,9 @@ class PluginCompatibilityBreakChecker {
 
         private final Path cachePath;
 
-        CompatibilityCache(Class<JkPlugin> plugiinClass) {
+        CompatibilityCache(Class<JkPlugin> pluginClass) {
             cachePath = JkLocator.getJekaHomeDir().resolve("plugins-compatibility")
-                    .resolve(plugiinClass.getName() + "-compatibility.txt");
+                    .resolve(pluginClass.getName() + "-compatibility.txt");
         }
 
         boolean exist() {
@@ -109,8 +111,8 @@ class PluginCompatibilityBreakChecker {
 
                 // found in cache
                 if (cachedBreakingVersion.equals(effectiveVersions)) {
-                    if (items.length > 2) {
-                        return new PluginAndJekaVersion(items[3].trim(), items[4].trim());
+                    if (items.length > 3) {
+                        return new PluginAndJekaVersion(items[2].trim(), items[3].trim());
                     }
                     return PluginAndJekaVersion.EMPTY; // already searched and that was ok
                 }
@@ -170,9 +172,7 @@ class PluginCompatibilityBreakChecker {
                 if (effectiveVersions.jekaVersion.compareTo(entry.getValue()) < 0) {
                     continue;
                 }
-                if (result == null) {
-                    result = entry;
-                } else if (entry.getValue().compareTo(result.getValue()) < 0) {
+                if (result == null || entry.getValue().compareTo(result.getValue()) < 0) {
                     result = entry;
                 }
             }

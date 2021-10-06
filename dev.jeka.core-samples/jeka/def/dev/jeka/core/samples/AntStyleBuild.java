@@ -47,13 +47,14 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
     JkPathSequence testClasspath = resolver.resolve(testDependencies.and(prodDependencies)).getFiles();
 
     public void compile() {
+        JkPathTree javaSources = JkPathTree.of(src).andMatching(false, "**/*.java");
         JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(classDir)
                 .setClasspath(prodClasspath)
                 .setSourceAndTargetVersion(JkJavaVersion.V8)
-                .addSources(src));
-        JkPathTree.of(src).andMatching(false, "**/*.java")
-                .copyTo(classDir);
+                .addSources(javaSources));
+        JkPathTree resources =   JkPathTree.of(src).andMatching(false, "**/*.java");
+        resources.copyTo(classDir);
     }
 
     public void jarSources() {

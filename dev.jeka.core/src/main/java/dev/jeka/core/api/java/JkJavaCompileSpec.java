@@ -3,10 +3,7 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -31,7 +28,7 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
 
     private List<String> options = new LinkedList<>();
 
-    private List<Path> sourceFiles = new LinkedList<>();
+    private JkPathTreeSet sources = JkPathTreeSet.ofEmpty();
 
     /**
      * Owner for parent chaining
@@ -47,14 +44,13 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
     }
 
     public static <T> JkJavaCompileSpec<T> ofParent(T o) {
-        return new JkJavaCompileSpec<T>(o);
+        return new JkJavaCompileSpec<>(o);
     }
 
     public JkJavaCompileSpec<T> clone() {
         try {
             JkJavaCompileSpec<T> clone = (JkJavaCompileSpec<T>) super.clone();
             clone.options = new LinkedList(options);
-            clone.sourceFiles = new LinkedList(sourceFiles);
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
@@ -148,45 +144,38 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
 
     /**
      * Adds specified source files to the set of java sources to compile.
-     *
-     **/
-    public JkJavaCompileSpec<T> addSources(Iterable<Path> paths) {
-        List<Path> files = JkUtilsPath.disambiguate(paths);
-        for (final Path file : files) {
-            if (Files.isDirectory(file)) {
-                this.sourceFiles.add(file);
-            } else if (file.getFileName().toString().toLowerCase().endsWith(".java")) {
-                this.sourceFiles.add(file);
-            }
-        }
-        return this;
-    }
-
+     */
     public JkJavaCompileSpec<T> addSources(JkPathTree tree) {
-        if (!tree.isDefineMatcher()) {
-            return addSources(tree.getRoot());
-        }
-        return addSources(tree.getFiles());
+        return addSources(JkPathTreeSet.of(tree));
     }
 
     public JkJavaCompileSpec<T> addSources(JkPathTreeSet treeSet) {
-        treeSet.toList().forEach(this::addSources);
+        this.sources = this.sources.and(treeSet);
         return this;
     }
 
-    /**
-     * @see #addSources(Iterable)
-     */
-    public JkJavaCompileSpec<T> addSources(Path path1, Path path2, Path... files) {
-        return addSources(JkUtilsIterable.listOf2orMore(path1, path2, files));
+    public List<Path> computeJavacSourceArguments() {
+        List<JkPathTree> nonEmptyTrees = new LinkedList<>();
+        for (JkPathTree tree : this.sources.toList()) {
+            if (tree.count(1, false) > 0) {
+                nonEmptyTrees.add(tree);
+            }
+        }
+        if (nonEmptyTrees.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (nonEmptyTrees.size() == 1) {
+            JkPathTree singleTree = nonEmptyTrees.get(0);
+            return singleTree.hasFilter() ? singleTree.getFiles() : Collections.singletonList(singleTree.getRoot());
+        }
+        return sources.getFiles();
     }
 
-    /**
-     * Returns all source files to be compiled.
-     */
-    public List<Path> getSourceFiles() {
-        return Collections.unmodifiableList(this.sourceFiles);
+    public JkPathTreeSet getSources() {
+        return sources;
     }
+
+
 
     // ------------------ classpath --------------------------------
 

@@ -1,7 +1,10 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsThrowable;
+import dev.jeka.core.api.utils.JkUtilsXml;
 import dev.jeka.core.tool.PluginDictionary.PluginDescription;
 import dev.jeka.core.tool.ProjectDef.RunClassDef;
 import org.w3c.dom.Document;

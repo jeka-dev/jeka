@@ -2,8 +2,8 @@ package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependency;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;

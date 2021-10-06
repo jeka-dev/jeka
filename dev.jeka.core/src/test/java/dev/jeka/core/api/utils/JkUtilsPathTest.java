@@ -1,14 +1,14 @@
 package dev.jeka.core.api.utils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import dev.jeka.core.api.file.JkPathMatcher;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.*;
 
-import dev.jeka.core.api.file.JkPathMatcher;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 @SuppressWarnings("javadoc")

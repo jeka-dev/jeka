@@ -2,7 +2,7 @@ package dev.jeka.core.api.java;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class JkJavaCompilerTest {
 

@@ -7,8 +7,6 @@ import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
-import java.nio.file.Path;
-
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
 @JkDocPluginDeps(JkPluginJava.class)
 public class JkPluginJacoco extends JkPlugin {

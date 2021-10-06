@@ -1,8 +1,8 @@
 package dev.jeka.core.tool;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("javadoc")
 public class CommandLineTest {

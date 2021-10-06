@@ -1,13 +1,13 @@
 package dev.jeka.core.tool.builtins.templates.javabuild;
 
-import static org.junit.Assert.assertEquals;
+import dev.jeka.core.api.java.JkClasspath;
+import org.junit.Test;
 
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import dev.jeka.core.api.java.JkClasspath;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("javadoc")
 public class JkClasspathTest {

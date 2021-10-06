@@ -10,6 +10,8 @@ import java.util.function.Predicate;
  */
 public final class JkPathMatcher implements PathMatcher {
 
+    private static final String ALL_LABEL_PREFIX = "all && ";
+
     // --------------------- Factory methods ------------------------------------------------
 
     /**
@@ -80,7 +82,7 @@ public final class JkPathMatcher implements PathMatcher {
             }
         }
         String name = positive ? "in" : "out";
-        return new JkPathMatcher(result, name + ":" + globPatterns);
+        return new JkPathMatcher(result, name + globPatterns);
     }
 
     // ---------------------------- fields and constructors
@@ -96,6 +98,9 @@ public final class JkPathMatcher implements PathMatcher {
 
     @Override
     public String toString() {
+        if (label.startsWith(ALL_LABEL_PREFIX)) {
+            return label.substring(ALL_LABEL_PREFIX.length());
+        }
         return label;
     }
 
@@ -174,8 +179,8 @@ public final class JkPathMatcher implements PathMatcher {
     // ------------------------------------- Other
 
     public JkPathMatcher reversed() {
-        PathMatcher matcher = path -> !this.matcher.matches(path);
-        return new JkPathMatcher(matcher, "Reverse of " + this.label);
+        PathMatcher reversedMatcher = path -> !this.matcher.matches(path);
+        return new JkPathMatcher(reversedMatcher, "Reverse of " + this.label);
     }
 
 }

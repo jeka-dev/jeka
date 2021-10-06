@@ -1,8 +1,6 @@
 package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependency;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;

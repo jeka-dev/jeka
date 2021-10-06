@@ -1,10 +1,10 @@
 package dev.jeka.core.tool;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("javadoc")
 public class FieldInjectorTest {

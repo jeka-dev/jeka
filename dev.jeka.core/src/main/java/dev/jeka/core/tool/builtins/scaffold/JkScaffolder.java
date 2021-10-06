@@ -10,8 +10,6 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
-import org.apache.ivy.ant.IvyMakePom;
-import org.apache.ivy.plugins.resolver.DependencyResolver;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;

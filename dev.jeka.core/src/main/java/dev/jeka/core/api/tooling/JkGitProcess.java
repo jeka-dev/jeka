@@ -7,6 +7,7 @@ import dev.jeka.core.api.system.JkProcess;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper for Git command line interface. This class assumes Git is installed on the host machine.
@@ -22,7 +23,7 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
     }
 
     public static JkGitProcess of(String dir) {
-        return of(Paths.get(""));
+        return of(Paths.get(dir));
     }
 
     public static JkGitProcess of() {
@@ -125,16 +126,25 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
         }
     }
 
+    /**
+     * @see #getVersionFromTag(String)
+     */
+    public String getVersionFromTag() {
+        return getVersionFromTag("");
+    }
+
 
     /**
      * If the current commit is tagged then the version is the tag name (last in alphabetical order). Otherwise
      * the version is [branch]-SNAPSHOT
      */
-    public String getVersionFromTag() {
+    public String getVersionFromTag(String prefix) {
         List<String> tags;
         String branch;
         try {
-            tags = getTagsOfCurrentCommit();
+            tags = getTagsOfCurrentCommit().stream()
+                    .filter(tag -> tag.startsWith(prefix))
+                    .collect(Collectors.toList());
             branch = getCurrentBranch();
         } catch (IllegalStateException e) {
             JkLog.warn(e.getMessage());
@@ -153,5 +163,7 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
     public JkVersion getJkVersionFromTag() {
         return JkVersion.of(getVersionFromTag());
     }
+
+
 
 }

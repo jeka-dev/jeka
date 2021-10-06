@@ -1,9 +1,9 @@
 package dev.jeka.core.tool;
 
-import java.util.Set;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Set;
 
 @SuppressWarnings("javadoc")
 public class JkPluginsTest {

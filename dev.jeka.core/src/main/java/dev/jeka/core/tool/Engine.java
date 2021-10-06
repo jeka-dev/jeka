@@ -1,6 +1,9 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkModuleDependency;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
@@ -19,7 +22,6 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
-import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -254,7 +256,7 @@ final class Engine {
             classLoader.addEntries(kotlinCompiler.getStdLib());
         }
         final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath);
-        if (!javaCompileSpec.getSourceFiles().isEmpty() && ToolProvider.getSystemJavaCompiler() == null) {
+        if (!javaCompileSpec.computeJavacSourceArguments().isEmpty() && ToolProvider.getSystemJavaCompiler() == null) {
             throw new JkException("The running Java platform (" +  System.getProperty("java.home") +
                     ") does not provide compiler (javac). Please provide a JDK java platform by pointing JAVA_HOME" +
                     " or JEKA_JDK environment variable to a JDK directory.");
@@ -298,7 +300,7 @@ final class Engine {
         return JkJavaCompileSpec.of()
                 .setClasspath(classpath.and(resolver.defClassDir))
                 .setOutputDir(resolver.defClassDir)
-                .addSources(defSource.getFiles())
+                .addSources(defSource)
                 .addOptions(this.compileOptions);
     }
 

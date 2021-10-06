@@ -1,9 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.tooling.JkMvn;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import dev.jeka.core.api.tooling.JkMvn;
 
 @SuppressWarnings("javadoc")
 public class JkProjectDependencyRunner {

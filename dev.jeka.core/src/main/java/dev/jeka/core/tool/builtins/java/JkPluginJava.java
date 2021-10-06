@@ -209,6 +209,11 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     // ------------------------------- command line methods -----------------------------
 
+    @JkDoc("Perform declared pre compilation task as generating sources.")
+    public void preCompile() {
+        project.getConstruction().getCompilation().getPreCompileActions().run();
+    }
+
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
         project.getConstruction().getCompilation().run();

@@ -1,7 +1,6 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
@@ -19,6 +18,7 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
 import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -48,9 +48,7 @@ public class CoreBuild extends JkClass {
 
     final JkPluginGpg gpg = getPlugin(JkPluginGpg.class);
 
-    private final JkGitProcess git;
-
-    private String taggedReleaseVersion;
+    final JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
 
     public boolean runIT;
 
@@ -63,17 +61,9 @@ public class CoreBuild extends JkClass {
     @JkEnv("GH_TOKEN")
     public String githubToken;
 
-
-    protected CoreBuild() {
-        git = JkGitProcess.of(this.getBaseDir());
-    }
-
     @Override
     protected void setup()  {
-
-        // Module version is driven by git repository info
-        String jekaVersion = git.getVersionFromTag();
-        if (!JkVersion.of(jekaVersion).isSnapshot()) {
+        if (!versionFromGit.version().isSnapshot()) {
             java.pack.javadoc = true;
         }
         java.getProject()
@@ -85,9 +75,6 @@ public class CoreBuild extends JkClass {
                 .__
                 .setJavaVersion(JkJavaVersion.V8)
                 .getCompilation()
-                    .getPreGenerateActions()
-                        .append(this::tagIfReleaseMentionedInCurrentCommit)
-                    .__
                     .getLayout()
                         .mixResourcesAndSources()
                     .__
@@ -117,9 +104,6 @@ public class CoreBuild extends JkClass {
                 .__
             .__
             .getPublication()
-                .getPreActions()
-                    .append(this::pushTagIfReleaseMentionedInCurrentCommit)
-                .__
                 .getArtifactProducer()
                     .putMainArtifact(this::doPackWithEmbedded)
                     .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
@@ -127,7 +111,6 @@ public class CoreBuild extends JkClass {
                 .__
                 .getMaven()
                     .setModuleId("dev.jeka:jeka-core")
-                    .setVersion(git::getVersionFromTag)
                     .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner("")))
                     .getPomMetadata()
                         .getProjectInfo()
@@ -140,24 +123,9 @@ public class CoreBuild extends JkClass {
                         .__
                         .addApache2License()
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
-        }
-
-    private void tagIfReleaseMentionedInCurrentCommit() {
-        if (git.isWorkspaceDirty()) {
-            return;
-        }
-        taggedReleaseVersion = git.extractSuffixFromLastCommitMessage("Release:");
-        if (taggedReleaseVersion != null) {
-            JkLog.info("Tagging with " + taggedReleaseVersion + " for release.");
-            git.tag(taggedReleaseVersion);
-        }
     }
 
-    private void pushTagIfReleaseMentionedInCurrentCommit() {
-        if (taggedReleaseVersion != null) {
-            git.exec("push", "origin", taggedReleaseVersion);
-        }
-    }
+
 
     private Path distribFolder() {
         return java.getProject().getOutputDir().resolve("distrib");
@@ -229,7 +197,6 @@ public class CoreBuild extends JkClass {
         }
     }
 
-
     private void makeDocs() {
         JkLog.startTask("Make documentation");
         String version = java.getProject().getPublication().getMaven().getVersion();
@@ -296,8 +263,8 @@ public class CoreBuild extends JkClass {
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
-        git.setLogCommand(false).exec("clone", "--depth=1", "https://" + userPrefix + "github.com/jerkar/jeka-dev-site.git",
-                tempRepo.toString());
+        versionFromGit.git().setLogCommand(false).exec("clone", "--depth=1", "https://"
+                + userPrefix + "github.com/jerkar/jeka-dev-site.git", tempRepo.toString());
         project.getDocumentation().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
         JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);

@@ -204,23 +204,25 @@ public final class JkImlGenerator {
 
         // Write production sources
         if (ideSupport.getProdLayout() != null) {
-            for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveSources().toList()) {
-                if (fileTree.exists()) {
-                    writer.writeCharacters(T3);
-                    writer.writeEmptyElement("sourceFolder");
-                    final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
-                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                    writer.writeAttribute("isTestSource", "false");
-                    writer.writeCharacters("\n");
-                }
+            JkPathTreeSet sourceTrees = ideSupport.getProdLayout().resolveSources().and(
+                    ideSupport.getProdLayout().resolveGeneratedSourceDir());
+            for (final JkPathTree fileTree : sourceTrees.toList()) {
+                writer.writeCharacters(T3);
+                writer.writeEmptyElement("sourceFolder");
+                final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
+                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                writer.writeAttribute("isTestSource", "false");
+                writer.writeCharacters("\n");
             }
 
-            // Write production test resources
+            // Write production resources
             for (final JkPathTree fileTree : ideSupport.getProdLayout().resolveResources().toList()) {
-                if (fileTree.exists() && !contains(ideSupport.getProdLayout().resolveSources(), fileTree.getRootDirOrZipFile())) {
+                Path resourceDir = fileTree.getRoot();
+                if (Files.exists(resourceDir) &&
+                        !contains(ideSupport.getProdLayout().resolveSources(), resourceDir)) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
-                    final String path = projectDir.relativize(fileTree.getRoot()).normalize().toString().replace('\\', '/');
+                    final String path = projectDir.relativize(resourceDir).normalize().toString().replace('\\', '/');
                     writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                     writer.writeAttribute("type", "java-resource");
                     writer.writeCharacters("\n");
@@ -283,7 +285,6 @@ public final class JkImlGenerator {
                 final List<LibPath> paths = toLibPath(node.getModuleInfo(), repos, ideScope);
                 for (final LibPath libPath : paths) {
                     if (!processedPaths.contains(libPath.bin)) {
-                        processedPaths.contains(libPath.bin);
                         writeOrderEntryForLib(libPath, forJeka);
                         processedPaths.add(libPath.bin);
                     }

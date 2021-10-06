@@ -22,10 +22,13 @@ public class FatJarBuild extends JkClass {
         java.getProject()
             .getPublication()
                 .getArtifactProducer()
-                    .putMainArtifact(java.getProject().getConstruction()::createFatJar).__.__
+                    .putMainArtifact(java.getProject().getConstruction()::createFatJar)
+                .__
+            .__
             .simpleFacade()
                 .setCompileDependencies(deps -> deps
-                    .and(sampleBuild.java.getProject().toDependency()));
+                        .and("com.google.guava:guava:22.0")
+                        .and(sampleBuild.java.getProject().toDependency()));
     }
    
 }

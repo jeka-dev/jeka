@@ -21,17 +21,26 @@
     <orderEntry type="module" module-name="dev.jeka.core-samples" exported="" />
     <orderEntry type="module" module-name="dev.jeka.core" />
     <orderEntry type="module-library" exported="" scope="TEST">
-          <library>
-            <CLASSES>
-              <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13.jar!/" />
-            </CLASSES>
-            <JAVADOC>
-              <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-javadoc.jar!/" />
-            </JAVADOC>
-            <SOURCES>
-              <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-sources.jar!/" />
-            </SOURCES>
-          </library>
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-22.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
     </orderEntry>
   </component>
 </module>
