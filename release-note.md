@@ -4,7 +4,7 @@
 * Refactor JkProcess
 * Fix bug when compiling generated sources
 * API polish
-* Add new builtin plugin to infer project version from Git.
+* Add new builtin plugin to infer project version from Git. 
 
 # 0.9.14.RELEASE
 * Fix distribution zip archive
