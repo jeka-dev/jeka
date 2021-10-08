@@ -6,7 +6,7 @@
 * API polish
 * Add new builtin plugin to infer project versions from Git. 
 * Remove Jacoco and Sonar builtin plugins in favor of external plugins
-
+ 
 # 0.9.14.RELEASE
 * Fix distribution zip archive
 * Enhance Windows jeka.bat script   
