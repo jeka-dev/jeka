@@ -128,6 +128,8 @@ when building a project. This includes plugins for IDE metadata generation (Inte
 Nevertheless, Jeka is extensible and other plugins exist outside the main distib among :
 * [Springboot Plugin](https://github.com/jerkar/springboot-plugin)
 * [Protobuf Plugin](https://github.com/jerkar/protobuf-plugin)
+* [Sonarqube Plugin](https://github.com/jerkar/sonarqube-plugin)
+* [Jacoco Plugin](https://github.com/jerkar/jacoco-plugin)
 
 # Community
 

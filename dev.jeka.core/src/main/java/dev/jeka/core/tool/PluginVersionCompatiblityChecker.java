@@ -10,6 +10,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -60,7 +61,13 @@ class PluginCompatibilityBreakChecker {
 
         // -- Not in cache, read from url then put in cache
         if (cachedBreakingVersion == null) {
-            CompatibilityBreak compatibilityBreak = CompatibilityBreak.of(breakingChangeUrl);
+            CompatibilityBreak compatibilityBreak;
+            try {
+                compatibilityBreak = CompatibilityBreak.of(breakingChangeUrl);
+            } catch (UncheckedIOException e) {
+                JkLog.warn("Unable to access " + breakingChangeUrl + ". No version compatibility won't be checked.");
+                return;
+            }
             PluginAndJekaVersion remoteBreakingVersion
                     = compatibilityBreak.getBreakingJekaVersion(effectiveVersions);
             if (remoteBreakingVersion != null) {
@@ -144,7 +151,7 @@ class PluginCompatibilityBreakChecker {
             try (InputStream is = JkUtilsIO.inputStream(new URL(url))){
                 return of(is);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
 
