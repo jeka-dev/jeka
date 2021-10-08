@@ -71,7 +71,7 @@ Getting started in 10 minutes : [Here](https://github.com/jerkar/jeka/blob/maste
 
 # News 
 
-* Jeka built-in plugins Jacoco and Sonar will be removed from the main distribution in favor of up-to-date external plugins :
+* Jeka built-in plugins Jacoco and Sonar are removed from the main distribution in favor of up-to-date external plugins :
   * [Sonarqube Plugin](https://github.com/jerkar/sonarqube-plugin)
   * [Jacoco Plugin](https://github.com/jerkar/jacoco-plugin)
 
