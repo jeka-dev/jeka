@@ -4,7 +4,8 @@
 * Refactor JkProcess
 * Fix bug when compiling generated sources
 * API polish
-* Add new builtin plugin to infer project version from Git. 
+* Add new builtin plugin to infer project versions from Git. 
+* Remove Jacoco and Sonar builtin plugins in favor of external plugins
 
 # 0.9.14.RELEASE
 * Fix distribution zip archive

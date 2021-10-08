@@ -71,6 +71,12 @@ Getting started in 10 minutes : [Here](https://github.com/jerkar/jeka/blob/maste
 
 # News 
 
+* Jeka built-in plugins Jacoco and Sonar will be removed from the main distribution in favor of up-to-date external plugins :
+  * [Sonarqube Plugin](https://github.com/jerkar/sonarqube-plugin)
+  * [Jacoco Plugin](https://github.com/jerkar/jacoco-plugin)
+
+* Support for Windows has been improved
+
 * Jeka 0.9.x serie is out. 0.9.x aims at providing intermediate API polishes and improvements
   prior to go to 1.0.0.alpha. It will also provide necessary features to interact with a first class Intellij plugin.
      
