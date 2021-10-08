@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.intellij;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
@@ -15,6 +16,7 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +43,8 @@ public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("Override JEKA_HOME environment variable")
     public Path jekaHome;
+
+    private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
     protected JkPluginIntellij(JkClass run) {
         super(run);
@@ -82,6 +86,14 @@ public final class JkPluginIntellij extends JkPlugin {
             jkClass.getPlugins().get(JkPluginJava.class);
             generator.setForceJdkVersion(forceJdkVersion);
         }
+        Path def = getJkClass().getBaseDir().resolve(JkConstants.DEF_DIR);
+
+        // Add Kotlin runtime lib if any kotlin source file found in def directory
+        if (JkPathTree.of(def).andMatching("**.kt", "*.kt").count(1, false) > 0) {
+            generator.addProjectLibrary(JkImlGenerator.KOTLIN_JAVA_RUNTIME_LIB);
+        }
+
+        this.projectLibraries.forEach(libraryName -> generator.addProjectLibrary(libraryName));
         final String xml = generator.generate();
         final Path imlFile = findIml(basePath);
         JkUtilsPath.deleteIfExists(imlFile);
@@ -155,6 +167,11 @@ public final class JkPluginIntellij extends JkPlugin {
             }
             JkLog.endTask();
         }
+    }
+
+    public JkPluginIntellij addProjectLibrary(String xml) {
+        this.projectLibraries.add(xml);
+        return this;
     }
 
     @JkDoc("Shorthand for intellij#allIml + intellij#modulesXml.")

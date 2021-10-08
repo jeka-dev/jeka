@@ -339,6 +339,10 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
         return this.command;
     }
 
+    public List<String> getParams() {
+        return Collections.unmodifiableList(parameters);
+    }
+
     /**
      * Returns <code>true</code> if this process must throw an execption if the underlying process returns
      * code different than 0.

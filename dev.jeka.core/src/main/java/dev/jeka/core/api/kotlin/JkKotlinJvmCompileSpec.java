@@ -21,7 +21,7 @@ public final class JkKotlinJvmCompileSpec {
 
     public static final String SOURCE_OPTS = "-source";
 
-    public static final String TARGET_OPTS = "-target";
+    public static final String TARGET_OPTS = "-jvm-target";
 
     public static final String PROCESSOR_OPTS = "-processor";
 

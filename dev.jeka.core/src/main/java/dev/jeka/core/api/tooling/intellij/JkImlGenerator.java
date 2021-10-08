@@ -32,6 +32,8 @@ public final class JkImlGenerator {
 
     private static final String FOR_JEKA_ATTRIBUTE = "forJeka";
 
+    public static final String KOTLIN_JAVA_RUNTIME_LIB = "KotlinJavaRuntime";
+
     private static final String ENCODING = "UTF-8";
 
     private static final String T1 = "  ";
@@ -71,6 +73,8 @@ public final class JkImlGenerator {
 
     private Path explicitJekaHome;
 
+    private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
+
     private JkImlGenerator(JkJavaIdeSupport ideSupport) {
         this.ideSupport = ideSupport;
     }
@@ -108,6 +112,7 @@ public final class JkImlGenerator {
             writeDependencies(resolveResult, this.defDependencyResolver.getRepos(), processedPaths, true);
         }
         writeExtraJekaModules(this.extraJekaModules);
+        writeProjectLibraries();
         writeFoot();
         writer.close();
         return fos.toString(ENCODING);
@@ -134,6 +139,17 @@ public final class JkImlGenerator {
         writer.writeAttribute("name", "NewModuleRootManager");
         writer.writeAttribute("inherit-compileRunner-output", "false");
         writer.writeCharacters("\n");
+    }
+
+    public void writeProjectLibraries() throws XMLStreamException {
+        for (String libraryName : this.projectLibraries) {
+            writer.writeCharacters(T2);
+            writer.writeEmptyElement("orderEntry");
+            writer.writeAttribute("type", "library");
+            writer.writeAttribute("name", libraryName);
+            writer.writeAttribute("level", "project");
+            writer.writeCharacters("\n");
+        }
     }
 
     private void writeFoot() throws XMLStreamException {
@@ -364,6 +380,19 @@ public final class JkImlGenerator {
             writer.writeAttribute("jdkType", "JavaSDK");
         } else {
             writer.writeAttribute("type", "inheritedJdk");
+        }
+        writer.writeCharacters("\n");
+    }
+
+    private void writeOrderEntry(String type, String name, String level) throws XMLStreamException {
+        writer.writeCharacters(T2);
+        writer.writeEmptyElement("orderEntry");
+        writer.writeAttribute("type", type);
+        if (name != null) {
+            writer.writeAttribute("name", name);
+        }
+        if (level != null) {
+            writer.writeAttribute("level", level);
         }
         writer.writeCharacters("\n");
     }
@@ -602,6 +631,11 @@ public final class JkImlGenerator {
 
     public JkImlGenerator setExplicitJekaHome(Path jekaHome) {
         this.explicitJekaHome = jekaHome;
+        return this;
+    }
+
+    public JkImlGenerator addProjectLibrary(String libraryName) {
+        this.projectLibraries.add(libraryName);
         return this;
     }
 

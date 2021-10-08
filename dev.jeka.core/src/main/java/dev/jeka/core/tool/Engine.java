@@ -61,7 +61,7 @@ final class Engine {
 
     private List<String> compileOptions = new LinkedList<>();
 
-    private final JkClassResolver resolver;
+    private final ClassResolver resolver;
 
     /**
      * Constructs an engine for the specified base directory.
@@ -71,7 +71,7 @@ final class Engine {
         this.projectBaseDir = baseDir.normalize();
         defRepos = repos();
         this.defDependencies = JkDependencySet.of();
-        this.resolver = new JkClassResolver(baseDir);
+        this.resolver = new ClassResolver(baseDir);
     }
 
     <T extends JkClass> T getJkClass(Class<T> baseClass, boolean initialise) {
@@ -250,7 +250,7 @@ final class Engine {
         JkPathTree.of(resolver.defClassDir).deleteContent();
         if (hasKotlin()) {
             final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(defClasspath);
-            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofKotlinHome();
+            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofKotlinHome().addOption("-nowarn");
             wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec));
             JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
             classLoader.addEntries(kotlinCompiler.getStdLib());

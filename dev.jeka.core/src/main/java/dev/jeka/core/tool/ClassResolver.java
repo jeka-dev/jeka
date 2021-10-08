@@ -16,7 +16,7 @@ import java.nio.file.Path;
  *
  * @author Jerome Angibaud
  */
-final class JkClassResolver {
+final class ClassResolver {
 
     private final Path baseDir;
 
@@ -24,7 +24,7 @@ final class JkClassResolver {
 
     final Path defClassDir;
 
-    JkClassResolver(Path baseDir) {
+    ClassResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
         this.defSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
@@ -63,7 +63,7 @@ final class JkClassResolver {
             return false;
         }
         return JkPathTree.of(defSourceDir).andMatching(true,
-                "**.java", "*.java").count(0, false) > 0;
+                "**.java", "*.java", "**.kt", "*.kt").count(0, false) > 0;
     }
 
     boolean needCompile() {
@@ -117,7 +117,7 @@ final class JkClassResolver {
             return run;
         }
 
-        // If there is a command file
+        // If there is def files
         if (this.hasDefSource()) {
             final JkPathTree dir = JkPathTree.of(defSourceDir);
             for (final Path path : dir.getRelativeFiles()) {

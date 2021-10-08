@@ -5,11 +5,14 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,14 +24,14 @@ public final class JkKotlinCompiler {
 
     private static final String KOTLIN_HOME = "KOTLIN_HOME";
 
-    private final boolean failOnError;
+    private boolean failOnError = true;
 
     private final JkProcess process;
 
-    private JkKotlinCompiler(boolean failOnError,
-                             JkProcess process) {
+    private final List<String> options = new LinkedList<>();
+
+    private JkKotlinCompiler(JkProcess process) {
         super();
-        this.failOnError = failOnError;
         this.process = process;
     }
 
@@ -37,14 +40,17 @@ public final class JkKotlinCompiler {
      */
     public static JkKotlinCompiler ofDefault() {
         JkProcess process = JkProcess.of("kotlinc");
-        return new JkKotlinCompiler(true, process);
+        return new JkKotlinCompiler(process);
     }
 
     public static JkKotlinCompiler ofKotlinHome() {
         String value = System.getenv("KOTLIN_HOME");
-        JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
-        String command = value + "/bin/kotlinc-jvm";
-        return new JkKotlinCompiler(true, JkProcess.of(command));
+        JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined. Please define this environment variable in order to compile Kotlin sources.");
+        String command = value + File.separator + "bin" + File.separator + "kotlinc-jvm";
+        if (JkUtilsSystem.IS_WINDOWS) {
+            command = command + ".bat";
+        }
+        return new JkKotlinCompiler(JkProcess.of(command));
 
     }
 
@@ -54,13 +60,14 @@ public final class JkKotlinCompiler {
         return Paths.get(value).resolve("libexec/lib/kotlin-stdlib.jar");
     }
 
-    /**
-     * Creates a copy of this {@link JkKotlinCompiler} but with the specified
-     * failed-on-error parameter. If <code>true</code> then
-     * a compilation error will throw a {@link IllegalStateException}.
-     */
-    public JkKotlinCompiler withFailOnError(boolean fail) {
-        return new JkKotlinCompiler(fail, process);
+    public JkKotlinCompiler setFailOnError(boolean fail) {
+        this.failOnError = fail;
+        return this;
+    }
+
+    public JkKotlinCompiler addOption(String option) {
+        this.options.add(option);
+        return this;
     }
 
     /**
@@ -90,31 +97,48 @@ public final class JkKotlinCompiler {
             return true;
         }
         JkLog.info("Use kotlin compiler : " + process.getCommand());
-        final boolean result = run(compileSpec);
+        final Result result = run(compileSpec);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        if (!result) {
+        if (!result.success) {
             if (failOnError) {
-                throw new IllegalStateException("Compilation failed with options " + options);
+                throw new IllegalStateException("Kotlin compiler failed " + result.params);
             }
             return false;
         }
         return true;
     }
 
-    private boolean run(JkKotlinJvmCompileSpec compileSpec) {
+    private Result run(JkKotlinJvmCompileSpec compileSpec) {
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSourceFiles()) {
             if (Files.isDirectory(file)) {
-                JkPathTree.of(file).andMatching(true, "**/*.kt").stream()
+                JkPathTree.of(file).andMatching(true, "**/*.kt", "*.kt").stream()
                         .forEach(path -> sourcePaths.add(path.toString()));
             } else {
                 sourcePaths.add(file.toAbsolutePath().toString());
             }
         }
-        final JkProcess jkProcess = this.process.addParams(compileSpec.getOptions()).addParams(sourcePaths);
+        if (sourcePaths.isEmpty()) {
+            JkLog.warn("No Kotlin source found in " + compileSpec.getSourceFiles());
+            return new Result(true, Collections.emptyList());
+        }
+        final JkProcess jkProcess = this.process.clone()
+                .addParams(compileSpec.getOptions())
+                .addParams(sourcePaths)
+                        .addParams(options);
         JkLog.info("" + sourcePaths.size() + " files to compile.");
         final int result = jkProcess.exec();
-        return (result == 0);
+        return new Result(result == 0, process.getParams());
+    }
+
+    private static class Result {
+        final boolean success;
+        final List<String> params;
+
+        public Result(boolean success, List<String> params) {
+            this.success = success;
+            this.params = params;
+        }
     }
 
 }
