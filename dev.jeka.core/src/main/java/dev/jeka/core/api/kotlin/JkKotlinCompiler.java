@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Stand for a compilation setting and process. Use this class to perform java
@@ -112,8 +113,9 @@ public final class JkKotlinCompiler {
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSourceFiles()) {
             if (Files.isDirectory(file)) {
+                Path workingdir = Optional.ofNullable(process.getWorkingDir()).orElse(Paths.get(""));
                 JkPathTree.of(file).andMatching(true, "**/*.kt", "*.kt").stream()
-                        .forEach(path -> sourcePaths.add(path.toString()));
+                        .forEach(path -> sourcePaths.add(workingdir.toAbsolutePath().relativize(path).toString()));
             } else {
                 sourcePaths.add(file.toAbsolutePath().toString());
             }
@@ -124,11 +126,11 @@ public final class JkKotlinCompiler {
         }
         final JkProcess jkProcess = this.process.clone()
                 .addParams(compileSpec.getOptions())
-                .addParams(sourcePaths)
-                        .addParams(options);
+                .addParams(options)
+                .addParams(sourcePaths);
         JkLog.info("" + sourcePaths.size() + " files to compile.");
         final int result = jkProcess.exec();
-        return new Result(result == 0, process.getParams());
+        return new Result(result == 0, jkProcess.getParams());
     }
 
     private static class Result {

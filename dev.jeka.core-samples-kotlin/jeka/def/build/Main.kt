@@ -1,3 +1,5 @@
+package build
+
 import dev.jeka.core.tool.JkInit
 
 fun main(args: Array<String>){

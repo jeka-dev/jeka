@@ -85,6 +85,10 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         return new JkPathSequence(files);
     }
 
+    public JkPathSequence normalized() {
+        return JkPathSequence.of(entries.stream().map(path -> path.normalize()).collect(Collectors.toList()));
+    }
+
     // -------------------------- iterate -----------------------------------------
 
     /**

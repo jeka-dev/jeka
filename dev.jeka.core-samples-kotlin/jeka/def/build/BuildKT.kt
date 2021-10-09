@@ -1,3 +1,5 @@
+package build
+
 import dev.jeka.core.api.java.JkJavaVersion
 import dev.jeka.core.api.kotlin.JkKotlinCompiler
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec
@@ -14,6 +16,8 @@ class BuildKT : JkClass() {
 
     val intellij = getPlugin(JkPluginIntellij::class.java)
 
+    val __o = 1;
+
     override fun setup() {
         java.project.simpleFacade()
                 .setJavaVersion(JkJavaVersion.V8)
@@ -23,7 +27,7 @@ class BuildKT : JkClass() {
                 .setTestDependencies {deps -> deps
                         .and("org.junit.jupiter:junit-jupiter:5.8.1")
                 }
-        java.project.construction.compilation.preCompileActions.append(this::compileKotlin)
+        java.project.construction.compilation.preCompileActions.append(this::compileKotlin);
     }
 
     fun compileKotlin() {

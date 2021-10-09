@@ -7,6 +7,7 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -159,7 +160,10 @@ public final class JkKotlinJvmCompileSpec {
      * classpath.
      */
     public JkKotlinJvmCompileSpec setClasspath(Iterable<Path> files) {
-        final String classpath = JkPathSequence.of(files).toString();
+        String classpath = JkPathSequence.of(files).normalized().toString();
+        if (JkUtilsSystem.IS_WINDOWS) {
+            classpath = '"' + classpath + '"';
+        }
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
 

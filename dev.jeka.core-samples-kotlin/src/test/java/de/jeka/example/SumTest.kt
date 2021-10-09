@@ -1,6 +1,5 @@
 package de.jeka.example
 
-import org.junit.jupiter.api.Assertions.*
 import kotlin.test.assertEquals
 
 internal class SumTest {
