@@ -1,45 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager">
-    <output url="file://$MODULE_DIR$/../org.jerkar.samples-dependee/.idea/output/production" />
-    <output-test url="file://$MODULE_DIR$/../org.jerkar.samples-dependee/.idea/output/test" />
-    <exclude-output />
+  <component name="NewModuleRootManager" inherit-compileRunner-output="false">
+    <output url="file://$MODULE_DIR$/.idea/output/production"/>
+    <output-test url="file://$MODULE_DIR$/.idea/output/test"/>
+    <exclude-output/>
+    <orderEntry type="inheritedJdk"/>
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/../dev.jeka.core.depender-samples/jerkar/def" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
-      <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
-      <excludeFolder url="file://$MODULE_DIR$/../dev.jeka.core.depender-samples/.idea/output" />
-      <excludeFolder url="file://$MODULE_DIR$/../dev.jeka.core.depender-samples/jerkar/output" />
+      <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true"/>
+          <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false"/>
+      <sourceFolder url="file://$MODULE_DIR$/jeka/output/generated_sources/java" isTestSource="false"/>
+      <excludeFolder url="file://$MODULE_DIR$/jeka/output"/>
+      <excludeFolder url="file://$MODULE_DIR$/jeka/.work"/>
+      <excludeFolder url="file://$MODULE_DIR$/.idea/output"/>
     </content>
-    <orderEntry type="inheritedJdk" />
-    <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="dev.jeka.core-samples" exported="" />
-    <orderEntry type="module" module-name="dev.jeka.core" />
-    <orderEntry type="module-library" exported="" scope="TEST">
+    <orderEntry type="sourceFolder" forTests="false"/>
+    <orderEntry type="module-library" scope="COMPILE" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-22.0.jar!/"/>
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-javadoc.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-22.0-javadoc.jar!/"/>
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/junit/junit/jars/junit-4.13-sources.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-22.0-sources.jar!/"/>
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" exported="">
+    <orderEntry type="module-library" scope="COMPILE" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-22.0.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-1.3.9.jar!/"/>
         </CLASSES>
-        <JAVADOC />
-        <SOURCES />
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="COMPILE" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18.jar!/"/>
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18-javadoc.jar!/"/>
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18-sources.jar!/"/>
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="COMPILE" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1.jar!/"/>
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1-javadoc.jar!/"/>
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1-sources.jar!/"/>
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="COMPILE" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14.jar!/"/>
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14-javadoc.jar!/"/>
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14-sources.jar!/"/>
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module" scope="COMPILE" module-name="dev.jeka.core-samples" exported=""/>
+    <orderEntry type="module-library" scope="TEST" exported="" forJeka="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES>
+          <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/"/>
+        </SOURCES>
       </library>
     </orderEntry>
   </component>

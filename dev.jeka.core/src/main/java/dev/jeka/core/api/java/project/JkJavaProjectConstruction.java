@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
- * Responsible to produce jar files. It involves compilation and unit testing.
+ * Responsible to produce jar files. It  compilation and unit testing.
  * Compilation and tests can be run independently without creating jars.
  * <p>
  * Java Project Jar Production has common characteristics :

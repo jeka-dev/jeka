@@ -4,9 +4,11 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Stands for a compilation settings as source and target version, encoding, annotation processing
@@ -183,8 +185,27 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
      * Set the compiler classpath with the specified files
      */
     public JkJavaCompileSpec<T> setClasspath(Iterable<Path> files) {
-        final String classpath = JkPathSequence.of(files).toString();
+        final String classpath = JkPathSequence.of(files).toPath();
         return this.setOption(CLASSPATH_OPTS, classpath);
+    }
+
+    public JkPathSequence getClasspath() {
+        Iterator<String> it = options.iterator();
+        String value = null;
+        while (it.hasNext() && value == null) {
+            String option = it.next();
+            if (option.equals(CLASSPATH_OPTS)) {
+                if (it.hasNext()) {
+                    value = it.next();
+                }
+            }
+        }
+        if (value == null) {
+            return JkPathSequence.of();
+        }
+        return JkPathSequence.of(Arrays.asList(value.split(File.separator)).stream()
+                .map(Paths::get)
+                .collect(Collectors.toList()));
     }
 
 

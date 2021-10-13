@@ -1,8 +1,7 @@
 package dev.jeka.core.samples.dependee;
 
-import dev.jeka.core.samples.Foo;
-
 import com.google.common.collect.ImmutableList;
+import dev.jeka.core.samples.Foo;
 
 public class FooConsumer {
 	

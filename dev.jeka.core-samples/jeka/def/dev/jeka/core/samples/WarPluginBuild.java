@@ -32,7 +32,7 @@ public class WarPluginBuild extends JkClass {
     protected void setup() {
        java.getProject().simpleFacade()
                .setCompileDependencies(deps -> deps
-                       .and("com.google.guava:guava:21.0")
+                       .and("com.google.guava:guava:30.0-jre")
                        .and("javax.servlet:javax.servlet-api:4.0.1"))
                .setRuntimeDependencies(compileDeps -> compileDeps
                        .minus("javax.servlet:javax.servlet-api"))

@@ -433,16 +433,14 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-21.0.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-30.0-jre.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-21.0-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-21.0-sources.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

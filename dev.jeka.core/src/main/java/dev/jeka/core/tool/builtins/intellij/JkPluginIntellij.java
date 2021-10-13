@@ -4,6 +4,8 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.kotlin.JkKotlinCompiler;
+import dev.jeka.core.api.kotlin.JkKotlinModules;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
@@ -69,6 +71,18 @@ public final class JkPluginIntellij extends JkPlugin {
             defDependencies = defDependencies
                     .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath().getFileName()));
         }
+
+        // Add Kotlin runtime lib if any kotlin source file found in def directory
+        Path def = getJkClass().getBaseDir().resolve(JkConstants.DEF_DIR);
+        if (JkPathTree.of(def).andMatching("**.kt", "*.kt").count(1, false) > 0) {
+            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(jkClass.getDefDependencyResolver().getRepos());
+            if (kotlinCompiler.isProvidedCompiler()) {
+                defDependencies = defDependencies.andFiles(kotlinCompiler.getStdLib());
+            } else {
+                defDependencies = defDependencies.and(JkKotlinModules.STDLIB_JDK8 + ":" + kotlinCompiler.getVersion());
+            }
+        }
+
         generator.setDefDependencies(defDependencies);
         generator.setDefDependencyResolver(jkClass.getDefDependencyResolver());
         List<String> jkClassModuleDeps = new LinkedList<>();
@@ -86,12 +100,7 @@ public final class JkPluginIntellij extends JkPlugin {
             jkClass.getPlugins().get(JkPluginJava.class);
             generator.setForceJdkVersion(forceJdkVersion);
         }
-        Path def = getJkClass().getBaseDir().resolve(JkConstants.DEF_DIR);
 
-        // Add Kotlin runtime lib if any kotlin source file found in def directory
-        if (JkPathTree.of(def).andMatching("**.kt", "*.kt").count(1, false) > 0) {
-            generator.addProjectLibrary(JkImlGenerator.KOTLIN_JAVA_RUNTIME_LIB);
-        }
 
         this.projectLibraries.forEach(libraryName -> generator.addProjectLibrary(libraryName));
         final String xml = generator.generate();

@@ -1,4 +1,4 @@
-package de.jeka.example
+package dev.jeka.example
 
 class Sum(val a:Int, val b:Int) {
 

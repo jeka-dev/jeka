@@ -90,7 +90,11 @@ public final class JkKotlinJvmCompileSpec {
         if (version == null) {
             return this;
         }
-        return setOption(TARGET_OPTS, version.get());
+        String versionString = version.get();
+        if (versionString.equals("8")) {
+            versionString = "1.8";
+        }
+        return setOption(TARGET_OPTS, versionString);
     }
 
     public String getEncoding() {
@@ -120,7 +124,8 @@ public final class JkKotlinJvmCompileSpec {
         for (final Path file : files) {
             if (Files.isDirectory(file)) {
                 this.sourceFiles.add(file);
-            } else if (file.getFileName().toString().toLowerCase().endsWith(".kt")) {
+            } else if (file.getFileName().toString().toLowerCase().endsWith(".kt")
+                    || file.getFileName().toString().toLowerCase().endsWith("*.java")) {
                 this.sourceFiles.add(file);
             }
         }
@@ -160,7 +165,7 @@ public final class JkKotlinJvmCompileSpec {
      * classpath.
      */
     public JkKotlinJvmCompileSpec setClasspath(Iterable<Path> files) {
-        String classpath = JkPathSequence.of(files).normalized().toString();
+        String classpath = JkPathSequence.of(files).normalized().toPath();
         if (JkUtilsSystem.IS_WINDOWS) {
             classpath = '"' + classpath + '"';
         }

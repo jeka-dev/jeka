@@ -1,4 +1,4 @@
-package de.jeka.example
+package dev.jeka.example
 
 import kotlin.test.assertEquals
 

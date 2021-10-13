@@ -30,7 +30,7 @@ public class ThirdPartyPoweredBuild extends JkClass {
         javaPlugin.getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and(JAVAX_SERVLET_API.version("3.1.0"))
-                .and(GUAVA.version("21.0")))
+                .and(GUAVA.version("30.0-jre")))
             .setRuntimeDependencies(compileDeps -> compileDeps
                 .minus(JAVAX_SERVLET_API))
             .setTestDependencies(deps -> deps

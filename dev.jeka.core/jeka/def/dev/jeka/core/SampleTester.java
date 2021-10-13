@@ -53,7 +53,6 @@ class SampleTester {
         testSampleWith("SignedArtifactsBuild", "cleanPackPublish");
         testSampleWith("ThirdPartyPoweredBuild", "cleanPack");
         testSampleWith("AntStyleBuild", "cleanPackPublish");
-        testSampleWith("PureApiBuild", "cleanBuild");
 
         testDepender("FatJarBuild");
 

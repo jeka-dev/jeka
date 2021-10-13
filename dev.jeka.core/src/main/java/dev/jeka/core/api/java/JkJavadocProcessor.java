@@ -170,7 +170,7 @@ public final class JkJavadocProcessor<T> {
         }
         if (!contains("-sourcepath")) {
             options.add("-sourcepath");
-            options.add(JkPathSequence.of(srcDirs.getRootDirsOrZipFiles()).toString());
+            options.add(JkPathSequence.of(srcDirs.getRootDirsOrZipFiles()).toPath());
         }
         if (!contains("-d")) {
             options.add("-d");

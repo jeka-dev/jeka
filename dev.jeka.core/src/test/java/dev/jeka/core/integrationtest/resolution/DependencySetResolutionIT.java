@@ -71,7 +71,7 @@ public class DependencySetResolutionIT {
                 .and(JkModuleDependency.of(SPRINGBOOT_TEST_AND_VERSION));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
-        System.out.println(resolveResult.getFiles().toString());
+        System.out.println(resolveResult.getFiles());
         assertTrue(resolveResult.contains(JkModuleId.of(SPRINGBOOT_TEST)));
         assertTrue(resolveResult.contains(JkModuleId.of(COMMONS_LOGIN)));
     }

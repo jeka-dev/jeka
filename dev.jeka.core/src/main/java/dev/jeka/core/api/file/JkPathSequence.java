@@ -67,7 +67,6 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         return JkPathSequence.of(JkUtilsIterable.listOf2orMore(path1, path2, others));
     }
 
-
     // --------------------------- cleaning ----------------------------------------
 
     /**
@@ -163,39 +162,20 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
                 .collect(Collectors.toList()));
     }
 
-    // --------------- Canonical methods ------------------------------------------
-
     /**
      * Returns the file names concatenated with ';' on Windows and ':' on unix.
      */
     public String toPath() {
-        final StringBuilder builder = new StringBuilder();
-        for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
-            builder.append(it.next().toAbsolutePath().toString());
-            if (it.hasNext()) {
-                builder.append(File.pathSeparator);
-            }
-        }
-        return builder.toString();
+        return String.join(File.pathSeparator, entries.stream().map(Path::toString).collect(Collectors.toList()));
     }
 
     public Set<Path> toSet() {
         return new LinkedHashSet<>(this.entries);
     }
 
-    /**
-     * Returns the file names concatenated with ';'.
-     */
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
-            builder.append(it.next().toString());
-            if (it.hasNext()) {
-                builder.append(File.pathSeparator);
-            }
-        }
-        return builder.toString();
+        return toPath();
     }
 
     @Override
@@ -206,9 +186,7 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         final JkPathSequence paths = (JkPathSequence) o;
-
         return entries.equals(paths.entries);
     }
 
@@ -222,11 +200,11 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         oos.writeObject(files);
     }
 
-
     private  void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         List<File> files = (List<File>) ois.readObject();
         List<Path> paths = JkUtilsPath.toPaths(files);
         Field field = JkUtilsReflect.getField(JkPathSequence.class, "entries");
         JkUtilsReflect.setFieldValue(this, field, paths);
     }
+
 }

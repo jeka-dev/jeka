@@ -30,7 +30,7 @@ public class JavaPluginBuild extends JkClass {
     protected void setup() {
        java.getProject().simpleFacade()
                .setCompileDependencies(deps -> deps
-                   .and("com.google.guava:guava:21.0")
+                   .and("com.google.guava:guava:30.0-jre")
                    .and("com.sun.jersey:jersey-server:1.19.4")
                )
                .setRuntimeDependencies(deps -> deps

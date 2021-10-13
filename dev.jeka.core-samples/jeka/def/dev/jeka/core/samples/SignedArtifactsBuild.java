@@ -56,7 +56,7 @@ public class SignedArtifactsBuild extends JkClass {
     protected void setup() {
         javaPlugin.getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
-                .and(GUAVA.version("18.0"))
+                .and(GUAVA.version("30.0-jre"))
             )
             .setTestDependencies(deps -> deps
                 .and(JavaPluginBuild.JUNIT5)

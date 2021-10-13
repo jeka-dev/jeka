@@ -28,7 +28,7 @@ class Environment {
     static void initialize(String[] commandLineArgs) {
 
         // Parse command line
-        Map<String, String> presets = preset();
+        Map<String, String> presets = projectCmdProperties();
         String[] extras = JkUtilsString.translateCommandline(presets.get("_append"));
         String[] actualCommandLineArgs = Stream.concat(Arrays.stream(commandLineArgs), Arrays.stream(extras))
                 .toArray(String[]::new);
@@ -42,6 +42,7 @@ class Environment {
 
         final Map<String, String> optionMap = new HashMap<>();
         optionMap.putAll(JkOptions.readSystemAndUserOptions());
+        optionMap.putAll(projectOptionsProperties());
         optionMap.putAll(commandLine.getCommandOptions());
         JkOptions.init(optionMap);
 
@@ -151,8 +152,16 @@ class Environment {
         }
     }
 
-    private static Map<String, String> preset() {
+    private static Map<String, String> projectCmdProperties() {
         Path presetCommandsFile = Paths.get("jeka/cmd.properties");
+        if (Files.exists(presetCommandsFile)) {
+            return JkUtilsFile.readPropertyFileAsMap(presetCommandsFile);
+        }
+        return Collections.emptyMap();
+    }
+
+    private static Map<String, String> projectOptionsProperties() {
+        Path presetCommandsFile = Paths.get("jeka/options.properties");
         if (Files.exists(presetCommandsFile)) {
             return JkUtilsFile.readPropertyFileAsMap(presetCommandsFile);
         }
