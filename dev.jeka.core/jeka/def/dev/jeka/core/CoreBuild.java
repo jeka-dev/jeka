@@ -78,7 +78,7 @@ public class CoreBuild extends JkClass {
                     .getLayout()
                         .mixResourcesAndSources()
                     .__
-                    .addOptions("-Xlint:none","-g")
+                    .addJavaCompilerOptions("-Xlint:none","-g")
                 .__
                 .getTesting()
                     .getCompilation()

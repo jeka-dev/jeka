@@ -4,13 +4,11 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkResourceProcessor;
-import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.system.JkLog;
 
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -25,6 +23,10 @@ import java.util.function.Supplier;
  */
 public class JkJavaProjectCompilation<T> {
 
+    public static final String RESOURCES_PROCESS_ACTION = "resources-process";
+
+    public static final String JAVA_SOURCES_COMPILE_ACTION = "java-sources-compile";
+
     private static final String PRODUCTION_PURPOSE = "production";
 
     private static final String TEST_PURPOSE = "test";
@@ -36,13 +38,9 @@ public class JkJavaProjectCompilation<T> {
 
     private final JkJavaProjectConstruction construction;
 
-    private final JkRunnables<JkJavaProjectCompilation<T>> preGenerateActions;
-
     private final JkRunnables<JkJavaProjectCompilation<T>> preCompileActions;
 
-    private final JkConsumers<Path, JkJavaProjectCompilation<T>> sourceGenerator;
-
-    private final JkConsumers<Path, JkJavaProjectCompilation<T>> resourceGenerator;
+    private final JkRunnables<JkJavaProjectCompilation<T>> compileActions;
 
     private final JkRunnables<JkJavaProjectCompilation<T>> postCompileActions;
 
@@ -54,10 +52,11 @@ public class JkJavaProjectCompilation<T> {
 
     private Supplier<JkDependencySet> dependencyBootSupplier = () -> JkDependencySet.of();
 
-    private final LinkedList<String> compileOptions = new LinkedList<>();
+    private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
 
     private boolean done;
 
+    // label to mention the purpose of the compilation (production, test, ...)
     private String purpose;
 
     private Supplier<JkJavaCompileSpec> compileSpecSupplier;
@@ -66,12 +65,13 @@ public class JkJavaProjectCompilation<T> {
         __ = parent;
         this.purpose = purpose;
         this.construction = construction;
-        preGenerateActions = JkRunnables.ofParent(this);
-        sourceGenerator = JkConsumers.ofParent(this);
-        resourceGenerator = JkConsumers.ofParent(this);
-        preCompileActions = JkRunnables.ofParent(this);
-        postCompileActions = JkRunnables.ofParent(this);
         resourceProcessor = JkResourceProcessor.ofParent(this);
+        preCompileActions = JkRunnables.ofParent(this)
+                .append(RESOURCES_PROCESS_ACTION, this::processResources);
+        compileActions = JkRunnables.ofParent(this)
+                .append(JAVA_SOURCES_COMPILE_ACTION, this::compileJava);
+        postCompileActions = JkRunnables.ofParent(this);
+
         layout = JkCompileLayout.ofParent(this)
                 .setBaseDirSupplier(construction.getProject()::getBaseDir)
                 .setOutputDirSupplier(construction.getProject()::getOutputDir);
@@ -115,13 +115,9 @@ public class JkJavaProjectCompilation<T> {
      * </ul>
      */
     public void run() {
-        JkLog.startTask("Make " + purpose);
-        preGenerateActions.run();
-        sourceGenerator.accept(this.layout.resolveGeneratedSourceDir());
-        resourceGenerator.accept(this.layout.resolveGeneratedResourceDir());
-        processResources();
+        JkLog.startTask("Run whole compilation process for " + purpose);
         preCompileActions.run();
-        runCompile();
+        compileActions.run();
         postCompileActions.run();
         JkLog.endTask();
     }
@@ -139,61 +135,41 @@ public class JkJavaProjectCompilation<T> {
     }
 
     /**
-     * Returns the runnables to run prior source and resource generation. User can chain its own runnable
-     * to customise the process. Empty by default.
-     */
-    public JkRunnables<JkJavaProjectCompilation<T>> getPreGenerateActions() {
-        return preGenerateActions;
-    }
-
-    /**
-     * Returns the runnables to run after source and resource generation. User can chain its own runnable
-     * to customise the process. Empty by default.
+     * Returns the {@link JkRunnables} to run after source and resource generation. User can chain its own runnable
+     * to customise the process. Contains {@link JkJavaProjectCompilation#RESOURCES_PROCESS_ACTION} by default
      */
     public JkRunnables<JkJavaProjectCompilation<T>> getPreCompileActions() {
         return preCompileActions;
     }
 
     /**
-     * Returns the consumers generating sources. User can chain its own consumer
-     * to customise the process. Empty by default. The object passed as parameter of the consumers
-     * is the base directory where sources must be generated.
+     * Returns the {@link JkRunnables} to be run for compilation.
+     * Contains {@link JkJavaProjectCompilation#JAVA_SOURCES_COMPILE_ACTION} by default.
      */
-    public JkConsumers<Path, JkJavaProjectCompilation<T>> getSourceGenerator() {
-        return sourceGenerator;
+    public JkRunnables getCompileActions() {
+        return postCompileActions;
     }
 
     /**
-     * Returns the consumers generating resources. User can chain its own consumer
-     * to customise the process. Empty by default. The object passed as parameter of the consumers
-     * is the base directory where resources must be generated.
-     */
-    public JkConsumers<Path, JkJavaProjectCompilation<T>> getResourceGenerator() {
-        return resourceGenerator;
-    }
-
-    /**
-     * Returns the runnables to be run after compilation. User can chain its own runnable
+     * Returns the {@link JkRunnables} to be run after compilation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
     public JkRunnables getPostCompileActions() {
         return postCompileActions;
     }
 
-
-
     /**
      * Returns extra compile options passed to the compiler
      */
-    public List<String> getCompileOptions() {
-        return Collections.unmodifiableList(compileOptions);
+    public List<String> getExtraJavaCompilerOptions() {
+        return Collections.unmodifiableList(extraJavaCompilerOptions);
     }
 
     /**
      * Adds options to be passed to Java compiler
      */
-    public JkJavaProjectCompilation<T> addOptions(String ... options) {
-        this.compileOptions.addAll(Arrays.asList(options));
+    public JkJavaProjectCompilation<T> addJavaCompilerOptions(String ... options) {
+        this.extraJavaCompilerOptions.addAll(Arrays.asList(options));
         return this;
     }
 
@@ -221,7 +197,7 @@ public class JkJavaProjectCompilation<T> {
         this.getResourceProcessor().generate(layout.resolveResources(), layout.resolveClassDir());
     }
 
-    private void runCompile() {
+    private void compileJava() {
         boolean success = construction.getCompiler().compile(compileSpecSupplier.get());
         if (!success) {
             throw new IllegalStateException("Compilation of Java sources failed.");
@@ -234,7 +210,7 @@ public class JkJavaProjectCompilation<T> {
             .setEncoding(construction.getSourceEncoding())
             .setClasspath(resolveDependencies().getFiles())
             .addSources(layout.resolveSources().and(JkPathTree.of(layout.resolveGeneratedSourceDir())))
-            .addOptions(compileOptions)
+            .addOptions(extraJavaCompilerOptions)
             .setOutputDir(layout.resolveClassDir());
     }
 
@@ -246,7 +222,7 @@ public class JkJavaProjectCompilation<T> {
                 .setClasspath(construction.getDependencyResolver().resolve(dependencies).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
                 .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
-                .addOptions(compileOptions)
+                .addOptions(extraJavaCompilerOptions)
                 .setOutputDir(layout.resolveClassDir());
     }
 

@@ -28,8 +28,6 @@ public class JkJavaProjectTesting {
 
     private final JkJavaProjectCompilation<JkJavaProjectTesting> compilation;
 
-    public final JkRunnables afterTest;
-
     private JkTestProcessor testProcessor;
 
     private JkTestSelection testSelection;
@@ -52,7 +50,6 @@ public class JkJavaProjectTesting {
         this.construction = construction;
         this.__ = construction;
         compilation = JkJavaProjectCompilation.ofTest(construction, this);
-        afterTest = JkRunnables.ofParent(this);
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
     }
@@ -150,7 +147,6 @@ public class JkJavaProjectTesting {
         this.construction.getCompilation().runIfNecessary();
         this.compilation.run();
         executeWithTestProcessor();
-        afterTest.run();
         JkLog.endTask();
     }
 

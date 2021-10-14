@@ -360,19 +360,6 @@
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
           <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apache.httpcomponents/httpclient/jars/httpclient-4.5.6.jar!/" />
         </CLASSES>
         <JAVADOC>
@@ -444,5 +431,6 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="dev.jeka.core" scope="TEST" />
   </component>
 </module>

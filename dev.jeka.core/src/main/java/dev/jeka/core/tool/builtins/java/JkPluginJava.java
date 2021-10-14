@@ -146,7 +146,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             project.getConstruction().getTesting().setSkipped(test.skip);
         }
         if (this.compilerExtraArgs != null) {
-            project.getConstruction().getCompilation().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+            project.getConstruction().getCompilation().addJavaCompilerOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
     }
 

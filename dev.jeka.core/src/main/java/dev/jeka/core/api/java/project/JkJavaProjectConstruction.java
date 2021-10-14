@@ -5,8 +5,8 @@ import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.java.JkJavaCompiler;
@@ -170,7 +170,7 @@ public class JkJavaProjectConstruction {
     public void createFatJar(Path target) {
         compilation.runIfNecessary();
         testing.runIfNecessary();
-        Iterable<Path> classpath = fetchRuntimeDependencies();
+        Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
         addManifestDefaults();
         JkJarPacker.of(compilation.getLayout().resolveClassDir())
                 .withManifest(manifest)
@@ -208,9 +208,9 @@ public class JkJavaProjectConstruction {
         return dependencySetModifier.apply(compilation.getDependencies());
     }
 
-    public JkPathSequence fetchRuntimeDependencies() {
+    public JkResolveResult resolveRuntimeDependencies() {
         return dependencyResolver.resolve(getRuntimeDependencies()
-                .normalised(project.getDuplicateConflictStrategy())).getFiles();
+                .normalised(project.getDuplicateConflictStrategy()));
     }
 
 

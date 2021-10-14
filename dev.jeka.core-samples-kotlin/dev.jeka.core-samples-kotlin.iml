@@ -1,338 +1,338 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compileRunner-output="false">
-    <output url="file://$MODULE_DIR$/.idea/output/production"/>
-    <output-test url="file://$MODULE_DIR$/.idea/output/test"/>
-    <exclude-output/>
-    <orderEntry type="inheritedJdk"/>
+    <output url="file://$MODULE_DIR$/.idea/output/production" />
+    <output-test url="file://$MODULE_DIR$/.idea/output/test" />
+    <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true"/>
-      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true"/>
-      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource"/>
-      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false"/>
-      <sourceFolder url="file://$MODULE_DIR$/jeka/output/generated_sources/java" isTestSource="false"/>
-      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource"/>
-      <excludeFolder url="file://$MODULE_DIR$/jeka/output"/>
-      <excludeFolder url="file://$MODULE_DIR$/jeka/.work"/>
-      <excludeFolder url="file://$MODULE_DIR$/.idea/output"/>
+      <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/jeka/output/generated_sources/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
     </content>
-    <orderEntry type="sourceFolder" forTests="false"/>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-30.0-jre.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-30.0-jre.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/bundles/failureaccess-1.0.1.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/bundles/failureaccess-1.0.1.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/jars/failureaccess-1.0.1-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/jars/failureaccess-1.0.1-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/jars/failureaccess-1.0.1-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/jars/failureaccess-1.0.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/listenablefuture/jars/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/listenablefuture/jars/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar!/" />
         </CLASSES>
-        <JAVADOC/>
-        <SOURCES/>
+        <JAVADOC />
+        <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk8/jars/kotlin-stdlib-jdk8-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk8/jars/kotlin-stdlib-jdk8-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk8/jars/kotlin-stdlib-jdk8-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk8/jars/kotlin-stdlib-jdk8-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk8/jars/kotlin-stdlib-jdk8-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk8/jars/kotlin-stdlib-jdk8-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib/jars/kotlin-stdlib-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib/jars/kotlin-stdlib-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib/jars/kotlin-stdlib-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib/jars/kotlin-stdlib-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib/jars/kotlin-stdlib-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib/jars/kotlin-stdlib-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains/annotations/jars/annotations-13.0.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains/annotations/jars/annotations-13.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains/annotations/jars/annotations-13.0-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains/annotations/jars/annotations-13.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains/annotations/jars/annotations-13.0-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains/annotations/jars/annotations-13.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-common/jars/kotlin-stdlib-common-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-common/jars/kotlin-stdlib-common-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-common/jars/kotlin-stdlib-common-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-common/jars/kotlin-stdlib-common-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-common/jars/kotlin-stdlib-common-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-common/jars/kotlin-stdlib-common-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk7/jars/kotlin-stdlib-jdk7-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk7/jars/kotlin-stdlib-jdk7-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk7/jars/kotlin-stdlib-jdk7-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk7/jars/kotlin-stdlib-jdk7-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk7/jars/kotlin-stdlib-jdk7-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-stdlib-jdk7/jars/kotlin-stdlib-jdk7-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="COMPILE" exported="">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-reflect/jars/kotlin-reflect-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-reflect/jars/kotlin-reflect-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-reflect/jars/kotlin-reflect-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-reflect/jars/kotlin-reflect-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-reflect/jars/kotlin-reflect-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-reflect/jars/kotlin-reflect-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test-junit5/jars/kotlin-test-junit5-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test-junit5/jars/kotlin-test-junit5-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test-junit5/jars/kotlin-test-junit5-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test-junit5/jars/kotlin-test-junit5-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test-junit5/jars/kotlin-test-junit5-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test-junit5/jars/kotlin-test-junit5-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test/jars/kotlin-test-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test/jars/kotlin-test-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test/jars/kotlin-test-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test/jars/kotlin-test-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test/jars/kotlin-test-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-test/jars/kotlin-test-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.6.0.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.6.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.6.0-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.6.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.6.0-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.6.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.0.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.0-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.0-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.6.0.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.6.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.6.0-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.6.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.6.0-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.6.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.6.0.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.6.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.6.0-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.6.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.6.0-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.6.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.6.0.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.6.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.6.0-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.6.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.6.0-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.6.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="" forJeka="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/"/>
+          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/" />
         </CLASSES>
-        <JAVADOC/>
+        <JAVADOC />
         <SOURCES>
-          <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/"/>
+          <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="" forJeka="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-compiler/jars/kotlin-compiler-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-compiler/jars/kotlin-compiler-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-compiler/jars/kotlin-compiler-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-compiler/jars/kotlin-compiler-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-compiler/jars/kotlin-compiler-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-compiler/jars/kotlin-compiler-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="" forJeka="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-script-runtime/jars/kotlin-script-runtime-1.5.31.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-script-runtime/jars/kotlin-script-runtime-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-script-runtime/jars/kotlin-script-runtime-1.5.31-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-script-runtime/jars/kotlin-script-runtime-1.5.31-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-script-runtime/jars/kotlin-script-runtime-1.5.31-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-script-runtime/jars/kotlin-script-runtime-1.5.31-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST" exported="" forJeka="">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.intellij.deps/trove4j/jars/trove4j-1.0.20181211.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.intellij.deps/trove4j/jars/trove4j-1.0.20181211.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.intellij.deps/trove4j/jars/trove4j-1.0.20181211-javadoc.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.intellij.deps/trove4j/jars/trove4j-1.0.20181211-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.intellij.deps/trove4j/jars/trove4j-1.0.20181211-sources.jar!/"/>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.intellij.deps/trove4j/jars/trove4j-1.0.20181211-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
