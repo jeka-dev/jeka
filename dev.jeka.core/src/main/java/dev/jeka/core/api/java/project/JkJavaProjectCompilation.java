@@ -107,12 +107,7 @@ public class JkJavaProjectCompilation<T> {
     }
 
     /**
-     * Performs entire compilation phase, including : <ul>
-     * <li>Generating resources</li>
-     * <li>Generating sources</li>
-     * <li>Processing resources (interpolation)</li>
-     * <li>Compiling sources</li>
-     * </ul>
+     * Performs entire compilation phase.
      */
     public void run() {
         JkLog.startTask("Run whole compilation process for " + purpose);
@@ -146,7 +141,7 @@ public class JkJavaProjectCompilation<T> {
      * Returns the {@link JkRunnables} to be run for compilation.
      * Contains {@link JkJavaProjectCompilation#JAVA_SOURCES_COMPILE_ACTION} by default.
      */
-    public JkRunnables getCompileActions() {
+    public JkRunnables<JkJavaProjectCompilation<T>> getCompileActions() {
         return postCompileActions;
     }
 
@@ -154,7 +149,7 @@ public class JkJavaProjectCompilation<T> {
      * Returns the {@link JkRunnables} to be run after compilation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables getPostCompileActions() {
+    public JkRunnables<JkJavaProjectCompilation<T>> getPostCompileActions() {
         return postCompileActions;
     }
 

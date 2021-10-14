@@ -15,6 +15,8 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 @JkDefClasspath("org.jetbrains.kotlin:kotlin-compiler:1.5.31")
 public class JkPluginKotlin extends JkPlugin {
 
+    public static final String KOTLIN_SOURCES_COMPILE_ACTION = "kotlin-sources-compile";
+
     public final JkPluginJava java;
 
     public final JkJavaProject getProject() {
@@ -60,8 +62,10 @@ public class JkPluginKotlin extends JkPlugin {
         java.getProject()
                 .getConstruction()
                     .getCompilation()
-                        .getPreCompileActions()
-                            .append(this::compileKotlin)
+                        .getCompileActions()
+                            .appendBefore(KOTLIN_SOURCES_COMPILE_ACTION,
+                                    JkJavaProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
+                                    this::compileKotlin)
                         .__
                     .__
                     .getTesting()
@@ -112,4 +116,5 @@ public class JkPluginKotlin extends JkPlugin {
                 .putArtifact(JkArtifactId.of("all-deps", "jar"),
                         path -> getProject().getConstruction().createFatJar(path));
     }
+
 }
