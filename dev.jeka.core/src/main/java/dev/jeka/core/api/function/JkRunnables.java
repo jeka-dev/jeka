@@ -1,7 +1,10 @@
 package dev.jeka.core.api.function;
 
-import java.util.LinkedList;
-import java.util.List;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import javafx.collections.transformation.SortedList;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A mutable container for {@link Runnable}. From this object you can replace the underlying {@link Runnable} or
@@ -9,28 +12,12 @@ import java.util.List;
  */
 public class JkRunnables<T> implements Runnable {
 
-    private List<Runnable> runnables;
+    private final LinkedList<Entry> entries = new LinkedList<>();
 
     /**
      * For parent chaining
      */
     public final T __;
-
-    /**
-     * Creates a {@link JkRunnables} delegating to the single specified {@link Runnable}.
-     */
-    public static JkRunnables<Void> of(Runnable runnable) {
-        return of(null, runnable);
-    }
-
-    /**
-     * Same as {@link #of(Runnable)} but providing a parent chaining.
-     */
-    public static <T> JkRunnables<T> of(T parent, Runnable runnable) {
-        List<Runnable> runnables = new LinkedList<>();
-        runnables.add(runnable);
-        return new JkRunnables(parent, runnables);
-    }
 
     /**
      * Creates a {@link JkRunnables} delegating to a no-op runnable.
@@ -43,44 +30,155 @@ public class JkRunnables<T> implements Runnable {
      * Same as {@link #of()} but providing parent chaining
      */
     public static <T> JkRunnables<T> ofParent(T parent) {
-        return new JkRunnables<T>(parent, new LinkedList<>());
+        return new JkRunnables<T>(parent);
     }
 
-    private JkRunnables(T parent, List<Runnable> runnables) {
-        this.runnables = runnables;
+    private JkRunnables(T parent) {
         this.__ = parent;
     }
 
-    /**
-     * Set the specified {@link Runnable} as the unique underlying {@link Runnable} for this container.
-     */
-    public JkRunnables<T> set(Runnable runnable) {
-        List<Runnable> runnables = new LinkedList<>();
-        runnables.add(runnable);
+    private JkRunnables<T> append(String name, Runnable runnable, Entry.RelativePlace relativePlace) {
+        JkUtilsAssert.argument(!this.contains(name), "runnable container contains already an entry named '"
+                + name + "'");
+        Entry entry = new Entry(name, runnable, relativePlace);
+        entries.add(entry);
+        Collections.sort(entries);
         return this;
+    }
+
+    public JkRunnables<T> append(String name, Runnable runnable) {
+        return append(name, runnable, null);
     }
 
     /**
      * Chains this underlying {@link Runnable} with the specified one. The specified runnable will
      * be executed at the end.
      */
-    public JkRunnables<T> append(Runnable chainedRunnable) {
-        this.runnables.add(chainedRunnable);
+    public JkRunnables<T> append(Runnable runnable) {
+        return append(runnable.toString(), runnable);
+    }
+
+
+    public JkRunnables<T> appendBefore(String name, String beforeRunnableName, Runnable runnable) {
+        return append(name, runnable, new Entry.RelativePlace(beforeRunnableName, Entry.Where.BEFORE));
+    }
+
+    public JkRunnables<T> appendAfter(String name, String afterRunnableName, Runnable runnable) {
+        return append(name, runnable, new Entry.RelativePlace(afterRunnableName, Entry.Where.AFTER));
+    }
+
+    public List<String> getRunnableNames() {
+        return entries.stream().map(entry -> entry.name).collect(Collectors.toList());
+    }
+
+    public JkRunnables<T> remove(String runnableName) {
+        for (Iterator<Entry> it = entries.iterator(); it.hasNext();) {
+            if (it.next().name.equals(runnableName)) {
+                it.remove();
+            }
+        }
         return this;
     }
 
-    /**
-     * Chains this specified {@link Runnable} with the underlying one. The specified runnable will
-     * be executed first.
-     */
-    public JkRunnables<T> prepend(Runnable chainedRunnable) {
-        this.runnables.add(0, chainedRunnable);
-        return this;
+    public boolean contains(String runnableName) {
+        return entries.stream().anyMatch(entry -> entry.name.equals(runnableName));
     }
 
     @Override
     public void run() {
-        runnables.forEach(Runnable::run);
+        entries.forEach(entry -> entry.runnable.run());
+    }
+
+    private static class Entry implements Comparable<Entry> {
+
+        final String name;
+
+        final Runnable runnable;
+
+        // Nullable
+        final RelativePlace relativePlace;
+
+        @Override
+        public int compareTo(Entry other) {
+            if (!hasRelationWith(other)) {
+                return 0;
+            }
+            if (hasRelationConflictWith(other)) {
+                throw new IllegalStateException("Entries " + this + " and " + other
+                        + " have relative position in conflict with each other.");
+            }
+            if (isRelativeTo(other.name)) {
+                return relativePlace.where == Where.BEFORE ? -1 : 1;
+            }
+            return other.relativePlace.where == Where.BEFORE ? 1 : -1;
+        }
+
+        enum Where {
+            BEFORE, AFTER;
+        }
+
+        Entry(String name, Runnable runnable, RelativePlace relativePlace) {
+            JkUtilsAssert.argument(name != null, "runnable name cannot be null");
+            JkUtilsAssert.argument(runnable != null, "runnable cannot be null");
+            this.name = name;
+            this.runnable = runnable;
+            this.relativePlace = relativePlace;
+        }
+
+        Entry(Runnable runnable) {
+            this(runnable.toString(), runnable, null);
+        }
+
+        boolean isRelativeTo(String entryName) {
+            return relativePlace!= null && relativePlace.relativeEntryName.equals(entryName);
+        }
+
+        boolean hasRelationWith(Entry other) {
+            return isRelativeTo(other.name) || other.isRelativeTo(name);
+        }
+
+        boolean hasRelationConflictWith(Entry other) {
+            return isRelativeTo(other.name) && other.isRelativeTo(name)
+                    && relativePlace.where.equals(other.relativePlace.where);
+        }
+
+        @Override
+        public String toString() {
+            return name + (relativePlace == null ? "" : " (" + relativePlace + ")");
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Entry entry = (Entry) o;
+            return name.equals(entry.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
+        }
+
+        static class RelativePlace {
+
+            public RelativePlace(String name, Where where) {
+                JkUtilsAssert.argument(name != null, "relative runnable name cannot be null");
+                JkUtilsAssert.argument(where != null, "where position cannot be null");
+                this.relativeEntryName = name;
+                this.where = where;
+            }
+
+            final String relativeEntryName;
+
+            final Where where;
+
+            @Override
+            public String toString() {
+                return where + " " + relativeEntryName;
+            }
+        }
+
     }
 
 }
