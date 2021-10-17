@@ -67,10 +67,13 @@ public class JkJavaProjectCompilation<T> {
         this.construction = construction;
         resourceProcessor = JkResourceProcessor.ofParent(this);
         preCompileActions = JkRunnables.ofParent(this)
+                .setLogRunnableName(true)
                 .append(RESOURCES_PROCESS_ACTION, this::processResources);
         compileActions = JkRunnables.ofParent(this)
+                .setLogRunnableName(true)
                 .append(JAVA_SOURCES_COMPILE_ACTION, this::compileJava);
-        postCompileActions = JkRunnables.ofParent(this);
+        postCompileActions = JkRunnables.ofParent(this)
+                .setLogRunnableName(true);
 
         layout = JkCompileLayout.ofParent(this)
                 .setBaseDirSupplier(construction.getProject()::getBaseDir)
@@ -201,7 +204,7 @@ public class JkJavaProjectCompilation<T> {
 
     private JkJavaCompileSpec computeProdCompileSpec() {
         return JkJavaCompileSpec.of()
-            .setSourceAndTargetVersion(construction.getJavaVersion())
+            .setSourceAndTargetVersion(construction.getJvmTargetVersion())
             .setEncoding(construction.getSourceEncoding())
             .setClasspath(resolveDependencies().getFiles())
             .addSources(layout.resolveSources().and(JkPathTree.of(layout.resolveGeneratedSourceDir())))
@@ -212,7 +215,7 @@ public class JkJavaProjectCompilation<T> {
     private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
         JkDependencySet dependencies = getDependencies();
         return JkJavaCompileSpec.of()
-                .setSourceAndTargetVersion(construction.getJavaVersion())
+                .setSourceAndTargetVersion(construction.getJvmTargetVersion())
                 .setEncoding(construction.getSourceEncoding())
                 .setClasspath(construction.getDependencyResolver().resolve(dependencies).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))

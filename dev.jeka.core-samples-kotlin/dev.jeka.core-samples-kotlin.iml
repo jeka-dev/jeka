@@ -20,87 +20,26 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-30.0-jre.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-serialization/jars/ktor-serialization-1.6.1.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-javadoc.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-serialization/jars/ktor-serialization-1.6.1-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-sources.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-serialization/jars/ktor-serialization-1.6.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/bundles/failureaccess-1.0.1.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-core/jars/ktor-server-core-1.6.1.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/jars/failureaccess-1.0.1-javadoc.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-core/jars/ktor-server-core-1.6.1-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/failureaccess/jars/failureaccess-1.0.1-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/listenablefuture/jars/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3-sources.jar!/" />
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-core/jars/ktor-server-core-1.6.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -179,6 +118,574 @@
         </JAVADOC>
         <SOURCES>
           <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-reflect/jars/kotlin-reflect-1.5.31-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.slf4j/slf4j-api/jars/slf4j-api-1.7.30.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.slf4j/slf4j-api/jars/slf4j-api-1.7.30-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.slf4j/slf4j-api/jars/slf4j-api-1.7.30-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/jars/kotlinx-coroutines-jdk8-1.5.0-native-mt.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/jars/kotlinx-coroutines-jdk8-1.5.0-native-mt-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/jars/kotlinx-coroutines-jdk8-1.5.0-native-mt-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-utils-jvm/jars/ktor-utils-jvm-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-utils-jvm/jars/ktor-utils-jvm-1.6.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-utils-jvm/jars/ktor-utils-jvm-1.6.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-io-jvm/jars/ktor-io-jvm-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-io-jvm/jars/ktor-io-jvm-1.6.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-io-jvm/jars/ktor-io-jvm-1.6.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-http-jvm/jars/ktor-http-jvm-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-http-jvm/jars/ktor-http-jvm-1.6.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-http-jvm/jars/ktor-http-jvm-1.6.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.typesafe/config/bundles/config-1.3.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.typesafe/config/jars/config-1.3.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.typesafe/config/jars/config-1.3.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/jars/kotlinx-serialization-json-jvm-1.2.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/jars/kotlinx-serialization-json-jvm-1.2.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/jars/kotlinx-serialization-json-jvm-1.2.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/jars/kotlinx-serialization-core-jvm-1.2.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/jars/kotlinx-serialization-core-jvm-1.2.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/jars/kotlinx-serialization-core-jvm-1.2.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-netty/jars/ktor-server-netty-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-netty/jars/ktor-server-netty-1.6.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-netty/jars/ktor-server-netty-1.6.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-host-common/jars/ktor-server-host-common-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-host-common/jars/ktor-server-host-common-1.6.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-server-host-common/jars/ktor-server-host-common-1.6.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-http-cio-jvm/jars/ktor-http-cio-jvm-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-http-cio-jvm/jars/ktor-http-cio-jvm-1.6.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-http-cio-jvm/jars/ktor-http-cio-jvm-1.6.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-network-jvm/jars/ktor-network-jvm-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-network-jvm/jars/ktor-network-jvm-1.6.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.ktor/ktor-network-jvm/jars/ktor-network-jvm-1.6.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec-http2/jars/netty-codec-http2-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec-http2/jars/netty-codec-http2-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec-http2/jars/netty-codec-http2-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-common/jars/netty-common-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-common/jars/netty-common-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-common/jars/netty-common-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-buffer/jars/netty-buffer-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-buffer/jars/netty-buffer-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-buffer/jars/netty-buffer-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport/jars/netty-transport-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport/jars/netty-transport-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport/jars/netty-transport-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-resolver/jars/netty-resolver-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-resolver/jars/netty-resolver-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-resolver/jars/netty-resolver-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec/jars/netty-codec-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec/jars/netty-codec-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec/jars/netty-codec-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-handler/jars/netty-handler-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-handler/jars/netty-handler-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-handler/jars/netty-handler-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec-http/jars/netty-codec-http-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec-http/jars/netty-codec-http-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-codec-http/jars/netty-codec-http-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.eclipse.jetty.alpn/alpn-api/jars/alpn-api-1.1.3.v20160715.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.eclipse.jetty.alpn/alpn-api/jars/alpn-api-1.1.3.v20160715-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.eclipse.jetty.alpn/alpn-api/jars/alpn-api-1.1.3.v20160715-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-kqueue/jars/netty-transport-native-kqueue-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-kqueue/jars/netty-transport-native-kqueue-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-kqueue/jars/netty-transport-native-kqueue-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-unix-common/jars/netty-transport-native-unix-common-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-unix-common/jars/netty-transport-native-unix-common-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-unix-common/jars/netty-transport-native-unix-common-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-epoll/jars/netty-transport-native-epoll-4.1.63.Final.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-epoll/jars/netty-transport-native-epoll-4.1.63.Final-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.netty/netty-transport-native-epoll/jars/netty-transport-native-epoll-4.1.63.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/ch.qos.logback/logback-classic/jars/logback-classic-1.2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/ch.qos.logback/logback-classic/jars/logback-classic-1.2.3-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/ch.qos.logback/logback-classic/jars/logback-classic-1.2.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/ch.qos.logback/logback-core/jars/logback-core-1.2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/ch.qos.logback/logback-core/jars/logback-core-1.2.3-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/ch.qos.logback/logback-core/jars/logback-core-1.2.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-coroutine-serialization/jars/kmongo-coroutine-serialization-4.2.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-coroutine-serialization/jars/kmongo-coroutine-serialization-4.2.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-coroutine-core/jars/kmongo-coroutine-core-4.2.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-coroutine-core/jars/kmongo-coroutine-core-4.2.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-coroutine-core/jars/kmongo-coroutine-core-4.2.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-async-shared/jars/kmongo-async-shared-4.2.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-async-shared/jars/kmongo-async-shared-4.2.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-async-shared/jars/kmongo-async-shared-4.2.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-property/jars/kmongo-property-4.2.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-property/jars/kmongo-property-4.2.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-property/jars/kmongo-property-4.2.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-shared/jars/kmongo-shared-4.2.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-shared/jars/kmongo-shared-4.2.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-shared/jars/kmongo-shared-4.2.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-id/jars/kmongo-id-4.2.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-id/jars/kmongo-id-4.2.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-id/jars/kmongo-id-4.2.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-data/jars/kmongo-data-4.2.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-data/jars/kmongo-data-4.2.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-data/jars/kmongo-data-4.2.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote/kreflect/jars/kreflect-1.0.0.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote/kreflect/jars/kreflect-1.0.0-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote/kreflect/jars/kreflect-1.0.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/mongodb-driver-reactivestreams/jars/mongodb-driver-reactivestreams-4.2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/mongodb-driver-reactivestreams/jars/mongodb-driver-reactivestreams-4.2.3-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/mongodb-driver-reactivestreams/jars/mongodb-driver-reactivestreams-4.2.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/bson/jars/bson-4.2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/bson/jars/bson-4.2.3-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/bson/jars/bson-4.2.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/mongodb-driver-core/jars/mongodb-driver-core-4.2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/mongodb-driver-core/jars/mongodb-driver-core-4.2.3-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.mongodb/mongodb-driver-core/jars/mongodb-driver-core-4.2.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.reactivestreams/reactive-streams/jars/reactive-streams-1.0.3.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.reactivestreams/reactive-streams/jars/reactive-streams-1.0.3-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.reactivestreams/reactive-streams/jars/reactive-streams-1.0.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.projectreactor/reactor-core/jars/reactor-core-3.4.5.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.projectreactor/reactor-core/jars/reactor-core-3.4.5-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/io.projectreactor/reactor-core/jars/reactor-core-3.4.5-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-core/jars/kotlinx-coroutines-core-1.5.0-RC.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-core/jars/kotlinx-coroutines-core-1.5.0-RC-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/jars/kotlinx-coroutines-core-jvm-1.5.0-RC.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/jars/kotlinx-coroutines-core-jvm-1.5.0-RC-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/jars/kotlinx-coroutines-core-jvm-1.5.0-RC-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-reactive/jars/kotlinx-coroutines-reactive-1.5.0-RC.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-reactive/jars/kotlinx-coroutines-reactive-1.5.0-RC-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlinx/kotlinx-coroutines-reactive/jars/kotlinx-coroutines-reactive-1.5.0-RC-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-serialization-mapping/jars/kmongo-serialization-mapping-4.2.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-serialization-mapping/jars/kmongo-serialization-mapping-4.2.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.litote.kmongo/kmongo-serialization-mapping/jars/kmongo-serialization-mapping-4.2.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.github.jershell/kbson/jars/kbson-0.4.4.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.github.jershell/kbson/jars/kbson-0.4.4-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.github.jershell/kbson/jars/kbson-0.4.4-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -289,17 +796,6 @@
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
           <root url="jar://$JEKA_USER_HOME$/cache/repo/org.jetbrains.kotlin/kotlin-compiler/jars/kotlin-compiler-1.5.31.jar!/" />
         </CLASSES>
         <JAVADOC>
@@ -336,5 +832,6 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="dev.jeka.core" />
   </component>
 </module>

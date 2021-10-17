@@ -42,7 +42,7 @@ public final class JkTestProcessor<T> {
 
     private static final String PLATFORM_LAUNCHER_CLASS_NAME = "org.junit.platform.launcher.Launcher";
 
-    private static final String PLATFORM_COMMONS_CLASS_NAME = "org.junit.platform.commons.JUnitException";
+    private static final String PLATFORM_COMMONS_CLASS_NAME = "org.junit.platform.commons.util.ClassNamePatternFilterUtils";
 
     // This class is absent from platform-engine 1.5.2,
     // so if 1.5.2 is present inh the classpath, we need to add 1.6 as well.

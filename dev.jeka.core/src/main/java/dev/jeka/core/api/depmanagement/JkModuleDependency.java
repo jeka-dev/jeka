@@ -37,6 +37,7 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
                                Set<JkArtifactSpecification> artifactSpecifications, Path ideProjectDir) {
         JkUtilsAssert.argument(moduleId != null, "module cannot be null.");
         JkUtilsAssert.argument(version != null, moduleId + " version cannot be null.");
+        JkUtilsAssert.argument(artifactSpecifications != null, moduleId + " artifactSpecifications cannot be null.");
         JkUtilsAssert.argument(exclusions != null, moduleId + " module dependency can't be instantiated with null excludes, use empty list instead");
         this.moduleId = moduleId;
         this.version = version;
@@ -296,30 +297,6 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
 
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JkModuleDependency that = (JkModuleDependency) o;
-        if (!moduleId.equals(that.moduleId)) return false;
-        if (version != null ? !version.equals(that.version) : that.version != null) return false;
-        if (transitivity != that.transitivity) return false;
-        if (!exclusions.equals(that.exclusions)) return false;
-        if (!artifactSpecifications.equals(that.artifactSpecifications)) return false;
-        return ideProjectDir != null ? ideProjectDir.equals(that.ideProjectDir) : that.ideProjectDir == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = moduleId.hashCode();
-        result = 31 * result + (version != null ? version.hashCode() : 0);
-        result = 31 * result + (transitivity != null ? transitivity.hashCode() : 0);
-        result = 31 * result + exclusions.hashCode();
-        result = 31 * result + artifactSpecifications.hashCode();
-        result = 31 * result + (ideProjectDir != null ? ideProjectDir.hashCode() : 0);
-        return result;
-    }
-
     private static boolean equalsOrOneIsNull(Object first, Object second) {
         if (first == null || second == null) {
             return true;
@@ -367,6 +344,22 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
         public String getType() {
             return type;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            JkArtifactSpecification that = (JkArtifactSpecification) o;
+            if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
+            return type != null ? type.equals(that.type) : that.type == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = classifier != null ? classifier.hashCode() : 0;
+            result = 31 * result + (type != null ? type.hashCode() : 0);
+            return result;
+        }
     }
 
     @Override
@@ -376,5 +369,31 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
             return this.moduleId.equals(moduleDependency.moduleId);
         }
         return false;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JkModuleDependency that = (JkModuleDependency) o;
+        if (!moduleId.equals(that.moduleId)) return false;
+        if (!version.equals(that.version)) return false;
+        if (transitivity != null ? !transitivity.equals(that.transitivity) : that.transitivity != null) return false;
+        if (!exclusions.equals(that.exclusions)) return false;
+        if (!artifactSpecifications.equals(that.artifactSpecifications)) return false;
+        return ideProjectDir != null ? ideProjectDir.equals(that.ideProjectDir) : that.ideProjectDir == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = moduleId.hashCode();
+        result = 31 * result + version.hashCode();
+        result = 31 * result + (transitivity != null ? transitivity.hashCode() : 0);
+        result = 31 * result + exclusions.hashCode();
+        result = 31 * result + artifactSpecifications.hashCode();
+        result = 31 * result + (ideProjectDir != null ? ideProjectDir.hashCode() : 0);
+        return result;
     }
 }

@@ -13,7 +13,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import java.nio.file.Path;
 import java.util.function.UnaryOperator;
 
-import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
+import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
 
 /**
  * When publishing on a public repository as Maven central, you need to provide extra metadata information, checksum

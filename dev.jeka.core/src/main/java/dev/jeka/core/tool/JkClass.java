@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -122,6 +123,8 @@ public class JkClass {
 
         // Inject options & environment variables
         JkOptions.populateFields(jkCkass, JkOptions.readSystemAndUserOptions());
+        JkOptions.populateFields(jkCkass, JkOptions.readFromProjectOptionsProperties(
+                Optional.ofNullable(BASE_DIR_CONTEXT.get()).orElse(Paths.get(""))));
         FieldInjector.injectEnv(jkCkass);
         Set<String> unusedCmdOptions = JkOptions.populateFields(jkCkass, Environment.commandLine.getCommandOptions());
         unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key
@@ -230,9 +233,11 @@ public class JkClass {
      */
     @JkDoc("Cleans the output directory.")
     public void clean() {
-        JkLog.info("Clean output directory " + getOutputDir());
-        if (Files.exists(getOutputDir())) {
-            JkPathTree.of(getOutputDir()).deleteContent();
+        Path path = getOutputDir();
+        Path relPath = path.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(path) : path;
+        JkLog.info("Clean output directory " + relPath);
+        if (Files.exists(path)) {
+            JkPathTree.of(path).deleteContent();
         }
     }
 

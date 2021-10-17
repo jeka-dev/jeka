@@ -73,7 +73,7 @@ public class CoreBuild extends JkClass {
                 .getCompiler()
                     .setForkedWithDefaultProcess()
                 .__
-                .setJavaVersion(JkJavaVersion.V8)
+                .setJvmTargetVersion(JkJavaVersion.V8)
                 .getCompilation()
                     .getLayout()
                         .mixResourcesAndSources()
@@ -239,7 +239,7 @@ public class CoreBuild extends JkClass {
         String checksum = JkPathFile.of(embeddedJar).getChecksum("MD5");
         String embeddedFinalName = "jeka-embedded-" + checksum + ".jar";
 
-        // Copy embbeded jar into temp folder and remove embedded part code from jeka classes
+        // Copy embedded jar into temp folder and remove embedded part code from jeka classes
         jarTree.goTo("META-INF").importFile(embeddedJar, embeddedFinalName);
         Path embeddedNaneFile = jarTree.get("META-INF/jeka-embedded-name");
         JkUtilsPath.deleteIfExists(embeddedNaneFile);

@@ -9,14 +9,19 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.JkOptions;
 
-import java.io.*;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +51,8 @@ public final class JkKotlinCompiler {
     private final String command;
 
     private final JarsVersionAndTarget jarsVersionAndTarget;
+
+    private String cachedVersion;  // for commandline compiler
 
     private JkKotlinCompiler(String command, JarsVersionAndTarget jarsVersionAndTarget) {
         super();
@@ -122,7 +129,13 @@ public final class JkKotlinCompiler {
         if (jarsVersionAndTarget != null) {
             return jarsVersionAndTarget.version;
         }
-        return null;
+        if (cachedVersion != null) {
+            return cachedVersion;
+        }
+        List<String> lines = JkProcess.of(command, "-version").execAndReturnOutput();
+        String line = lines.get(0);
+        cachedVersion=  line.split(" ")[2].trim();
+        return cachedVersion;
     }
 
     /**
@@ -130,8 +143,10 @@ public final class JkKotlinCompiler {
      * @throws IllegalStateException This compiler is not the one from JEKA_HOME
      */
     public Path getStdLib() {
-        JkUtilsAssert.state(isProvidedCompiler(), "This method is only relevant for host provided compiler. " +
-                "This one (version " + jarsVersionAndTarget.version + ") is managed by Jeka");
+        if (!isProvidedCompiler()) {
+            throw new IllegalStateException("This method is only relevant for host provided compiler. " +
+                   "This one (version " + jarsVersionAndTarget.version + ") is managed by Jeka");
+        }
         String value = System.getenv("KOTLIN_HOME");
         JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
         return Paths.get(value).resolve("lib/kotlin-stdlib.jar");
@@ -181,7 +196,7 @@ public final class JkKotlinCompiler {
             throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + effectiveOptions);
         }
         JkUtilsPath.createDirectories(outputDir);
-        String message = "Compiling Kotlin " + compileSpec.getSourceFiles() + " source files";
+        String message = "Compiling Kotlin " + compileSpec.getSourceFilesRelativePath() + " source files";
         if (JkLog.verbosity().isVerbose()) {
             message = message + " to " + outputDir + " using options : " + String.join(" ", effectiveOptions);
         }

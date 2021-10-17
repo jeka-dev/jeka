@@ -42,7 +42,7 @@ class Environment {
 
         final Map<String, String> optionMap = new HashMap<>();
         optionMap.putAll(JkOptions.readSystemAndUserOptions());
-        optionMap.putAll(projectOptionsProperties());
+        optionMap.putAll(JkOptions.readFromProjectOptionsProperties(Paths.get("")));
         optionMap.putAll(commandLine.getCommandOptions());
         JkOptions.init(optionMap);
 
@@ -160,12 +160,6 @@ class Environment {
         return Collections.emptyMap();
     }
 
-    private static Map<String, String> projectOptionsProperties() {
-        Path presetCommandsFile = Paths.get("jeka/options.properties");
-        if (Files.exists(presetCommandsFile)) {
-            return JkUtilsFile.readPropertyFileAsMap(presetCommandsFile);
-        }
-        return Collections.emptyMap();
-    }
+
 
 }

@@ -284,6 +284,23 @@ public class JkQualifiedDependencySet {
         return this;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        JkQualifiedDependencySet that = (JkQualifiedDependencySet) o;
 
+        if (!entries.equals(that.entries)) return false;
+        if (!globalExclusions.equals(that.globalExclusions)) return false;
+        return versionProvider.equals(that.versionProvider);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = entries.hashCode();
+        result = 31 * result + globalExclusions.hashCode();
+        result = 31 * result + versionProvider.hashCode();
+        return result;
+    }
 }

@@ -565,5 +565,24 @@ public class JkDependencySet {
             return new Hint(dependency, condition, false);
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Hint hint = (Hint) o;
+
+            if (condition != hint.condition) return false;
+            if (first != hint.first) return false;
+            return before != null ? before.equals(hint.before) : hint.before == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = before != null ? before.hashCode() : 0;
+            result = 31 * result + (condition ? 1 : 0);
+            result = 31 * result + (first ? 1 : 0);
+            return result;
+        }
     }
 }

@@ -1,7 +1,7 @@
 package dev.jeka.core.api.function;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import javafx.collections.transformation.SortedList;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 public class JkRunnables<T> implements Runnable {
 
     private final LinkedList<Entry> entries = new LinkedList<>();
+
+    private boolean log;
 
     /**
      * For parent chaining
@@ -86,7 +88,15 @@ public class JkRunnables<T> implements Runnable {
 
     @Override
     public void run() {
-        entries.forEach(entry -> entry.runnable.run());
+        entries.forEach(entry -> {
+            if (log) {
+                JkLog.startTask("running " + entry.name);
+            }
+            entry.runnable.run();
+            if (log) {
+                JkLog.endTask();
+            }
+        });
     }
 
     private static class Entry implements Comparable<Entry> {
@@ -179,6 +189,11 @@ public class JkRunnables<T> implements Runnable {
             }
         }
 
+    }
+
+    public JkRunnables<T> setLogRunnableName(boolean log) {
+        this.log = log;
+        return this;
     }
 
 }

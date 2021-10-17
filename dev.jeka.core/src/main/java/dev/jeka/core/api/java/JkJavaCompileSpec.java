@@ -3,6 +3,7 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -175,6 +176,13 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
 
     public JkPathTreeSet getSources() {
         return sources;
+    }
+
+    public List<Path> getSourceDirs() {
+        return sources.toList().stream()
+                .map(tree -> tree.getRoot())
+                .map(JkUtilsPath::relativizeFromWorkingDir)
+                .collect(Collectors.toList());
     }
 
 

@@ -5,7 +5,6 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
-import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;

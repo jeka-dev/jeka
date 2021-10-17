@@ -28,6 +28,11 @@ public final class JkInit {
      */
     public static <T extends JkClass> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
+        if (!Files.isDirectory(Paths.get("jeka")) ) {
+            throw new IllegalStateException("The current directory " + Paths.get("").toAbsolutePath()
+                    + " does not seem to be a Jeka project as " +
+                    "it does not contain a 'jeka' folder.");
+        }
         JkLog.setConsumer(Environment.standardOptions.logStyle);
         JkLog.Verbosity verbosity = JkLog.verbosity();
         if (Environment.standardOptions.logRuntimeInformation != null) {

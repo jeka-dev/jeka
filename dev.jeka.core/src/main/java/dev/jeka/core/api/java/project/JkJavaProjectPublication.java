@@ -98,6 +98,20 @@ public class JkJavaProjectPublication {
         postActions.run();
     }
 
+    /**
+     * Specifies if Javadoc and sources jars should be included in pack/publish. Default is true;
+     */
+    public JkJavaProjectPublication includeJavadocAndSources(boolean include) {
+        if (include) {
+            artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, project.getDocumentation()::createJavadocJar);
+            artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
+        } else {
+            artifactProducer.removeArtifact(JAVADOC_ARTIFACT_ID);
+            artifactProducer.removeArtifact(SOURCES_ARTIFACT_ID);
+        }
+        return this;
+    }
+
     private void registerArtifacts() {
         artifactProducer.putMainArtifact(project.getConstruction()::createBinJar);
         artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
@@ -110,5 +124,12 @@ public class JkJavaProjectPublication {
 
     public String getVersion() {
         return Optional.ofNullable(maven.getVersion()).orElse(ivy.getVersion());
+    }
+
+    /**
+     * Short hand to build all missing artifacts for publication.
+     */
+    public void pack() {
+        artifactProducer.makeAllMissingArtifacts();
     }
 }

@@ -1,10 +1,7 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
-import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.file.JkPathTree;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,6 +52,20 @@ public class JkJavaProjectTest {
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
         Assert.assertEquals("org.mockito:mockito-core", testDependencies.getModuleDependencies().get(0)
                 .getModuleId().toString());
+    }
+
+    @Test
+    public void addVersionProviderOnCompile_testAndRuntimeHaveVersionProvider() {
+        JkVersionProvider versionProvider = JkVersionProvider.of()
+                .and("javax.servlet:javax.servlet-api", "4.0.1");
+        JkJavaProject project = JkJavaProject.of().simpleFacade()
+                .setCompileDependencies(deps -> deps
+                        .andVersionProvider(versionProvider)
+                        .and("javax.servlet:javax.servlet-api")
+                ).getProject();
+        JkDependencySet testDeps = project.getConstruction().getTesting().getCompilation().getDependencies();
+        Assert.assertEquals("4.0.1",
+                testDeps.getVersionProvider().getVersionOf("javax.servlet:javax.servlet-api"));
     }
 
     @Test

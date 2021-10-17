@@ -24,7 +24,7 @@ public class JkJavaProjectSimpleFacade {
     }
 
     public JkJavaProjectSimpleFacade setJavaVersion(JkJavaVersion version) {
-        project.getConstruction().setJavaVersion(version);
+        project.getConstruction().setJvmTargetVersion(version);
         return this;
     }
 

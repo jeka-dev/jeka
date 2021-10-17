@@ -126,7 +126,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
             .append("Production sources : " + construction.getCompilation().getLayout().getInfo()).append("\n")
             .append("Test sources : " + construction.getTesting().getCompilation().getLayout().getInfo()).append("\n")
-            .append("Java Source Version : " + construction.getJavaVersion() + "\n")
+            .append("Java Source Version : " + construction.getJvmTargetVersion() + "\n")
             .append("Source Encoding : " + construction.getSourceEncoding() + "\n")
             .append("Source file count : " + construction.getCompilation().getLayout().resolveSources()
                     .count(Integer.MAX_VALUE, false) + "\n")
@@ -168,7 +168,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
                 construction.getTesting().getCompilation().getDependencies(),
                 JkVersionedModule.ConflictStrategy.TAKE_FIRST);
         return JkJavaIdeSupport.of(baseDir)
-            .setSourceVersion(construction.getJavaVersion())
+            .setSourceVersion(construction.getJvmTargetVersion())
             .setProdLayout(construction.getCompilation().getLayout())
             .setTestLayout(construction.getTesting().getCompilation().getLayout())
             .setDependencies(qualifiedDependencies)

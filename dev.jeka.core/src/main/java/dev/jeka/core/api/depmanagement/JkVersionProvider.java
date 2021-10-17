@@ -69,6 +69,13 @@ public final class JkVersionProvider {
         return this.map.get(moduleId);
     }
 
+    /**
+     * Returns the version to use with specified module.
+     */
+    public String getVersionOf(String moduleId) {
+        return getVersionOf(JkModuleId.of(moduleId)).getValue();
+    }
+
     public JkDependency version(JkDependency dependency) {
         if (! (dependency instanceof JkModuleDependency)) {
             return dependency;
@@ -161,4 +168,17 @@ public final class JkVersionProvider {
         return builder.toString();
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JkVersionProvider that = (JkVersionProvider) o;
+        return map.equals(that.map);
+    }
+
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
 }

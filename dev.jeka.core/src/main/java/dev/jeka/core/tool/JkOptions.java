@@ -116,4 +116,12 @@ public final class JkOptions {
         return result;
     }
 
+    static Map<String, String> readFromProjectOptionsProperties(Path projectBaseDir) {
+        Path presetCommandsFile = projectBaseDir.resolve("jeka/options.properties");
+        if (Files.exists(presetCommandsFile)) {
+            return JkUtilsFile.readPropertyFileAsMap(presetCommandsFile);
+        }
+        return Collections.emptyMap();
+    }
+
 }

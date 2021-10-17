@@ -1,9 +1,7 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
@@ -84,18 +82,17 @@ public class JkJavaProjectTesting {
 
     /**
      * Returns the classpath to run the test. It consists in test classes + prod classes +
-     * dependencies involved in TEST scope.
+     * dependencies defined in testing/compile.
      */
     public JkPathSequence getTestClasspath() {
         JkDependencyResolver resolver = construction.getDependencyResolver();
         JkJavaProjectCompilation prodCompilation = construction.getCompilation();
-        JkDependencySet dependencies = prodCompilation.getDependencies()
-                .and(compilation.getDependencies())
-                .and(construction.getRuntimeDependencies())
-                .normalised(construction.getProject().getDuplicateConflictStrategy());
-        return JkPathSequence.of(compilation.getLayout().resolveClassDir())
+        return JkPathSequence.of()
+                .and(compilation.getLayout().resolveClassDir())
+                .and(compilation.resolveDependencies().getFiles())
                 .and(prodCompilation.getLayout().resolveClassDir())
-                .and(resolver.resolve(dependencies.normalised(construction.getProject().getDuplicateConflictStrategy())).getFiles());
+                .and(construction.resolveRuntimeDependencies().getFiles())
+                .withoutDuplicates();
     }
 
     /**

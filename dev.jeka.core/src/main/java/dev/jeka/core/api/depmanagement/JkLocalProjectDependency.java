@@ -94,4 +94,24 @@ public class JkLocalProjectDependency extends JkComputedDependency
     public String toString() {
         return "Project : " + this.getIdeProjectDir();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        JkLocalProjectDependency that = (JkLocalProjectDependency) o;
+
+        if (!exportedDependencies.equals(that.exportedDependencies)) return false;
+        return transitivity != null ? transitivity.equals(that.transitivity) : that.transitivity == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + exportedDependencies.hashCode();
+        result = 31 * result + (transitivity != null ? transitivity.hashCode() : 0);
+        return result;
+    }
 }

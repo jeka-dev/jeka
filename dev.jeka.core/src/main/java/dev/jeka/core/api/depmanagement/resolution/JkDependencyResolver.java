@@ -5,7 +5,9 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.utils.JkUtilsString.plurialize;
@@ -23,6 +25,10 @@ public final class JkDependencyResolver<T> {
     private JkVersionedModule moduleHolder;
 
     private JkRepoSet repos = JkRepoSet.of();
+
+    private final Map<JkQualifiedDependencySet, JkResolveResult> cachedResults = new HashMap<>();
+
+    private boolean useCache;
 
     /**
      * For parent chaining
@@ -58,6 +64,7 @@ public final class JkDependencyResolver<T> {
     public JkDependencyResolver<T> setRepos(JkRepoSet repos) {
         JkUtilsAssert.argument(repos != null, "repos cannot be null");
         this.repos = repos;
+        this.cachedResults.clear();
         return this;
     }
 
@@ -67,6 +74,20 @@ public final class JkDependencyResolver<T> {
 
     public JkDependencyResolver<T> addRepos(JkRepo... repos) {
         return addRepos(JkRepoSet.of(Arrays.asList(repos)));
+    }
+
+    public JkDependencyResolver<T> setUseCache(boolean useCache) {
+        this.useCache = useCache;
+        return this;
+    }
+
+    public boolean isUseCache(boolean useCache) {
+        return this.useCache;
+    }
+
+    public JkDependencyResolver<T> cleanCache() {
+        this.cachedResults.clear();
+        return this;
     }
 
     /**
@@ -105,6 +126,12 @@ public final class JkDependencyResolver<T> {
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
     public JkResolveResult resolve(JkQualifiedDependencySet qualifiedDependencies) {
+        if (useCache) {
+            JkResolveResult result = cachedResults.get(qualifiedDependencies);
+            if (result != null) {
+                return result;
+            }
+        }
         List<JkDependency> allDependencies = qualifiedDependencies.getDependencies();
         JkQualifiedDependencySet moduleQualifiedDependencies = qualifiedDependencies.withModuleDependenciesOnly()
                 .replaceUnspecifiedVersionsWithProvider().assertNoUnspecifiedVersion();
@@ -113,8 +140,7 @@ public final class JkDependencyResolver<T> {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
         JkInternalDependencyResolver internalDepResolver = JkInternalDependencyResolver.of(this.repos);
-        JkLog.trace("Preparing to resolve dependencies");
-        JkLog.startTask("Resolve dependencies");
+        JkLog.startTask("Resolve dependencies (" + qualifiedDependencies.getEntries().size() + " declared dependencies).");
         JkResolveResult resolveResult;
         if (hasModule) {
             JkUtilsAssert.state(!repos.getRepos().isEmpty(), "Cannot resolve module dependency cause no " +
@@ -142,6 +168,9 @@ public final class JkDependencyResolver<T> {
             JkLog.warn(report.toString());
         }
         JkLog.endTask();
+        if (useCache) {
+            this.cachedResults.put(qualifiedDependencies, resolveResult);
+        }
         return resolveResult;
     }
 

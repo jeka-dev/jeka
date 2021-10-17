@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Stands for a compilation settings as source and target version, encoding, annotation processing
@@ -156,6 +157,12 @@ public final class JkKotlinJvmCompileSpec {
      */
     public List<Path> getSourceFiles() {
         return Collections.unmodifiableList(this.sourceFiles);
+    }
+
+    public List<Path> getSourceFilesRelativePath() {
+        return getSourceFiles().stream()
+                .map(path -> path.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(path) : path)
+                .collect(Collectors.toList());
     }
 
     // ------------------ classpath --------------------------------

@@ -43,7 +43,7 @@ public class JkJavaProjectConstruction {
 
     private final JkJavaCompiler<JkJavaProjectConstruction> compiler;
 
-    private JkJavaVersion javaVersion = DEFAULT_JAVA_VERSION;
+    private JkJavaVersion jvmTargetVersion = DEFAULT_JAVA_VERSION;
 
     private String sourceEncoding = DEFAULT_ENCODING;
 
@@ -69,7 +69,9 @@ public class JkJavaProjectConstruction {
     JkJavaProjectConstruction(JkJavaProject project) {
         this.project = project;
         this.__ = project;
-        dependencyResolver = JkDependencyResolver.ofParent(this).addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
+        dependencyResolver = JkDependencyResolver.ofParent(this)
+                .addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral())
+                .setUseCache(true);
         compiler = JkJavaCompiler.ofParent(this);
         compilation = JkJavaProjectCompilation.ofProd(this);
         testing = new JkJavaProjectTesting(this);
@@ -96,16 +98,16 @@ public class JkJavaProjectConstruction {
     /**
      * Sets the Java version used for both source and target.
      */
-    public JkJavaProjectConstruction setJavaVersion(JkJavaVersion javaVersion) {
-        this.javaVersion = javaVersion;
+    public JkJavaProjectConstruction setJvmTargetVersion(JkJavaVersion jvmTargetVersion) {
+        this.jvmTargetVersion = jvmTargetVersion;
         return this;
     }
 
     /**
      * Gets the Java version used as source and target version
      */
-    public JkJavaVersion getJavaVersion() {
-        return javaVersion != null ? javaVersion : DEFAULT_JAVA_VERSION;
+    public JkJavaVersion getJvmTargetVersion() {
+        return jvmTargetVersion != null ? jvmTargetVersion : DEFAULT_JAVA_VERSION;
     }
 
     /**

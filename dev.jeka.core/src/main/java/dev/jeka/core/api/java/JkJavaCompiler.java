@@ -143,16 +143,13 @@ public final class JkJavaCompiler<T> {
             throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
         }
         List<Path> sourceFiles = compileSpec.computeJavacSourceArguments();
-        if (sourceFiles.isEmpty()) {
-            JkLog.info("No sources file or directory specified.");
-            return true;
-        }
-        if (compileSpec.getSources().count(1, false) == 0) {
-            JkLog.info("No Java source files found in " + compileSpec.getSources());
+        if (sourceFiles.isEmpty() || compileSpec.getSources().count(1, false) == 0) {
+            JkLog.info("No source files found in " + compileSpec.getSourceDirs());
             return true;
         }
         JkUtilsPath.createDirectories(outputDir);
-        String message = "Compile " + computeCompileMessage(sourceFiles) + " to " + outputDir;
+        String message = "Compile " + computeCompileMessage(sourceFiles) + " to "
+                + JkUtilsPath.relativizeFromWorkingDir(outputDir);
         if (JkLog.verbosity().isVerbose()) {
             message = message + " using options : " + String.join(" ", options);
         }
@@ -164,7 +161,7 @@ public final class JkJavaCompiler<T> {
 
     private static String computeCompileMessage(List<Path> paths) {
         if (paths.size() == 1 && Files.isDirectory(paths.get(0))) {
-            return paths.get(0).toString();
+            return JkUtilsPath.relativizeFromWorkingDir(paths.get(0)).toString();
         }
         int count = paths.size();
         return JkUtilsString.plurialize(count, "file");
