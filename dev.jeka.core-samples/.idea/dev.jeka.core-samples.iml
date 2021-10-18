@@ -431,6 +431,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="dev.jeka.core" scope="TEST" />
+    <orderEntry type="module" module-name="dev.jeka.core" exported="" scope="TEST" />
   </component>
 </module>

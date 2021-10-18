@@ -39,7 +39,7 @@ public class JavaPluginBuild extends JkClass {
                    .and(JUNIT5)
                )
                .addTestExcludeFilterSuffixedBy("IT", false)
-               .setJavaVersion(JkJavaVersion.V8)
+               .setJvmTargetVersion(JkJavaVersion.V8)
                .setPublishedMavenModuleId("dev.jeka:sample-javaplugin")
                .setPublishedMavenVersion("1.0-SNAPSHOT")
        .getProject()

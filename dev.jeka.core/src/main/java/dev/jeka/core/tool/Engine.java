@@ -250,7 +250,9 @@ final class Engine {
         JkPathTree.of(resolver.defClassDir).deleteContent();
         if (hasKotlin()) {
             final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(defClasspath);
-            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(defRepos).addOption("-nowarn");
+            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(defRepos)
+                    .setLogOutput(JkLog.isVerbose())
+                    .addOption("-nowarn");
             wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec));
             JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
             if (kotlinCompiler.isProvidedCompiler()) {

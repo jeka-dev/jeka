@@ -9,6 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -179,6 +180,30 @@ public final class JkKotlinJvmCompileSpec {
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
 
+    public JkPathSequence getClasspath() {
+        Iterator<String> it = options.iterator();
+        String value = null;
+        while (it.hasNext() && value == null) {
+            String option = it.next();
+            if (option.equals(CLASSPATH_OPTS)) {
+                if (it.hasNext()) {
+                    value = it.next();
+                }
+            }
+        }
+        if (value == null) {
+            return JkPathSequence.of();
+        }
+        if (value.startsWith("\"")) {
+            value = value.substring(1);
+        }
+        if (value.endsWith("\"")) {
+            value = value.substring(0, value.length()-1);
+        }
+        return JkPathSequence.of(Arrays.asList(value.split(File.pathSeparator)).stream()
+                .map(Paths::get)
+                .collect(Collectors.toList()));
+    }
 
     // ------------------ generic options -------------------------
 
@@ -264,6 +289,13 @@ public final class JkKotlinJvmCompileSpec {
         }
         options.add(optionName);
         options.add(value);
+    }
+
+    public JkKotlinJvmCompileSpec clone() {
+        JkKotlinJvmCompileSpec result = new JkKotlinJvmCompileSpec();
+        result.options.addAll(this.options);
+        result.sourceFiles.addAll(this.sourceFiles);
+        return result;
     }
 
 }

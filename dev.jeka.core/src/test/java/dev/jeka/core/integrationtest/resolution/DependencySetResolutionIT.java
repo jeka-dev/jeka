@@ -251,7 +251,7 @@ public class DependencySetResolutionIT {
     @Test
     public void resolve_usingSeveralClassifierOnSingleLine_ok() {
         JkJavaProject project = JkJavaProject.of().simpleFacade()
-                .setJavaVersion(JkJavaVersion.V11)
+                .setJvmTargetVersion(JkJavaVersion.V11)
                 .setCompileDependencies(deps -> deps
                         .and("org.openjfx:javafx-controls:win,linux,mac:11.0.2", JkTransitivity.NONE))
                 .getProject();
@@ -265,7 +265,7 @@ public class DependencySetResolutionIT {
     @Test
     public void resolve_usingSeveralClassifiersIncludingDefaultOne_ok() {
         JkJavaProject project = JkJavaProject.of().simpleFacade()
-                .setJavaVersion(JkJavaVersion.V11)
+                .setJvmTargetVersion(JkJavaVersion.V11)
                 .setCompileDependencies(deps -> deps
                         .and("org.openjfx:javafx-controls:win,:11.0.2", JkTransitivity.NONE))
                 .getProject();

@@ -13,7 +13,7 @@ class Build extends JkClass {
     @Override
     protected void setup() {
         java.getProject().simpleFacade()
-            .setJavaVersion(JkJavaVersion.V8)
+            .setJvmTargetVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps
                 .and("com.google.guava:guava:21.0")
             )

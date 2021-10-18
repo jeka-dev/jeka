@@ -136,6 +136,10 @@ public final class JkRepoSet {
         return get(JkModuleDependency.of(moduleGroupVersion));
     }
 
+    public Path get(JkVersionedModule versionedModule) {
+        return get(JkModuleDependency.of(versionedModule));
+    }
+
     public JkRepoSet withDefaultSigner(UnaryOperator<Path> signer) {
         List<JkRepo> reposCopy = repos.stream()
                 .map(repo -> {

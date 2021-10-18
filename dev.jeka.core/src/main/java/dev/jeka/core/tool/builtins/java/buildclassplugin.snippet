@@ -13,7 +13,7 @@ class Build extends JkClass {
     protected void setup() {
         JkJavaProject javaProject = javaPlugin.getProject();
         javaProject.simpleFacade()
-            .setJavaVersion(JkJavaVersion.V8)
+            .setJvmTargetVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
             );

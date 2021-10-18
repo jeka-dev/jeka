@@ -36,7 +36,7 @@ public class WarPluginBuild extends JkClass {
                        .and("javax.servlet:javax.servlet-api:4.0.1"))
                .setRuntimeDependencies(compileDeps -> compileDeps
                        .minus("javax.servlet:javax.servlet-api"))
-               .setJavaVersion(JkJavaVersion.V8)
+               .setJvmTargetVersion(JkJavaVersion.V8)
                .getProject()
                     .getConstruction()
                         .getCompilation()

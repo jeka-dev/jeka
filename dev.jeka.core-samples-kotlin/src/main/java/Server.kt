@@ -1,5 +1,3 @@
-package todolist
-
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -12,8 +10,13 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.*
-import org.litote.kmongo.reactivestreams.KMongo
-import com.mongodb.ConnectionString
+
+
+val shoppingList = mutableListOf(
+    ShoppingListItem("Cucumbers 🥒", 1),
+    ShoppingListItem("Tomatoes 🍅", 2),
+    ShoppingListItem("Orange Juice 🍊", 3)
+)
 
 fun main() {
     embeddedServer(Netty, 9090) {
@@ -30,8 +33,19 @@ fun main() {
             gzip()
         }
         routing {
-            get("/hello") {
-                call.respondText("Hello, API!")
+            route(ShoppingListItem.path) {
+                get {
+                    call.respond(shoppingList)
+                }
+                post {
+                    shoppingList += call.receive<ShoppingListItem>()
+                    call.respond(HttpStatusCode.OK)
+                }
+                delete("/{id}") {
+                    val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
+                    shoppingList.removeIf { it.id == id }
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }.start(wait = true)

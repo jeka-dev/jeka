@@ -211,7 +211,13 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
         if (value == null) {
             return JkPathSequence.of();
         }
-        return JkPathSequence.of(Arrays.asList(value.split(File.separator)).stream()
+        if (value.startsWith("\"")) {
+            value = value.substring(1);
+        }
+        if (value.endsWith("\"")) {
+            value = value.substring(0, value.length()-1);
+        }
+        return JkPathSequence.of(Arrays.asList(value.split(File.pathSeparator)).stream()
                 .map(Paths::get)
                 .collect(Collectors.toList()));
     }

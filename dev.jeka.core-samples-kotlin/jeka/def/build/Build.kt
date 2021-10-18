@@ -1,10 +1,10 @@
 package build
 
-import dev.jeka.core.api.depmanagement.JkPopularModules
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactId
+import dev.jeka.core.api.depmanagement.JkDependencySet
 import dev.jeka.core.api.java.JkJavaProcess
 import dev.jeka.core.api.java.JkJavaVersion
 import dev.jeka.core.api.kotlin.JkKotlinModules
+import dev.jeka.core.api.kotlin.JkKotlinModules.COMPILER_PLUGIN_KOTLINX_SERIALIZATION
 import dev.jeka.core.tool.JkClass
 import dev.jeka.core.tool.JkInit
 import dev.jeka.core.tool.builtins.java.JkPluginJava
@@ -20,8 +20,9 @@ class Build : JkClass() {
     val reactWrappersVersion = "17.0.2-pre.214-kotlin-1.5.20"
 
     override fun setup() {
-        kotlin.jvmProject().simpleFacade()
-                .setJavaVersion(JkJavaVersion.V8)
+        val jvmProject = kotlin.jvm().project
+        jvmProject.simpleFacade()
+                .setJvmTargetVersion(JkJavaVersion.V8)
                 .setCompileDependencies { deps -> deps
                     .and("io.ktor:ktor-serialization:$ktorVersion")
                     .and("io.ktor:ktor-server-core:$ktorVersion")
@@ -30,20 +31,34 @@ class Build : JkClass() {
                     .and("org.litote.kmongo:kmongo-coroutine-serialization:$kmongoVersion")
                 }
                 .setTestDependencies {deps -> deps
-                    //.and(JkPopularModules.JUNIT_5.version("5.8.1"))
                     .and(JkKotlinModules.TEST_JUNIT5)
                 }
-        kotlin.jvmProject().construction.manifest.addMainClass("dev.jeka.example.MainKt")
-        kotlin.jvmProject().publication.includeJavadocAndSources(false);
-        kotlin.generateFatJar();
+        jvmProject.construction.manifest.addMainClass("ServerKt")
+        jvmProject.publication.includeJavadocAndSources(false);
+        kotlin.jvm()
+            .useFatJarForMainArtifact()
+            .kotlinCompiler
+                .addPlugin("$COMPILER_PLUGIN_KOTLINX_SERIALIZATION:${kotlin.kotlinVersion}")
+        kotlin.common()
+            .setTestDir(null)
+            .setCompileDependencies(JkDependencySet.of()
+                .and("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+                .and("io.ktor:ktor-client-core:$ktorVersion")
+            )
     }
 
+    fun cleanPack() {
+        clean(); kotlin.jvm().project.publication.pack();
+    }
+
+    fun run() {;
+        val jar = kotlin.jvm().project.publication.artifactProducer.mainArtifactPath
+        JkJavaProcess.ofJavaJar(jar, null).exec()
+    }
 
     object CleanPack {
         @JvmStatic fun main(args: Array<String>) {
-            val build = JkInit.instanceOf(Build::class.java, *args)
-            build.clean();
-            build.kotlin.jvmProject().publication.pack();
+            JkInit.instanceOf(Build::class.java, *args).cleanPack();
         }
     }
 
@@ -55,17 +70,14 @@ class Build : JkClass() {
 
     object RunJar {
         @JvmStatic fun main(args: Array<String>) {
-            val build = JkInit.instanceOf(Build::class.java, *args)
-            val allDepsArtifactId = JkArtifactId.of("all-deps", "jar");
-            val jar = build.kotlin.jvmProject().publication.artifactProducer.getArtifactPath(allDepsArtifactId)
-            JkJavaProcess.ofJavaJar(jar, null).exec("1", "2" , "3", "4")
+            JkInit.instanceOf(Build::class.java, *args).run()
         }
     }
 
     object CleanCompile {
         @JvmStatic fun main(args: Array<String>) {
             val build = JkInit.instanceOf(Build::class.java, *args);
-            build.kotlin.jvmProject().construction.compilation.run();
+            build.kotlin.jvm().project.construction.compilation.run();
         }
     }
 
