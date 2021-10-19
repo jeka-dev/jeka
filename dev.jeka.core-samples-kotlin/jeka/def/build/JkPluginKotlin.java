@@ -12,6 +12,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class JkPluginKotlin extends JkPlugin {
 
     public final JkJvm jvm() {
         if (jvm == null) {
-            jvm = setupKotlinJvm();
+            jvm = new JkJvm();
         }
         return jvm;
     }
@@ -61,70 +62,6 @@ public class JkPluginKotlin extends JkPlugin {
         }
     }
 
-    @Override
-    protected void afterSetup() throws Exception {
-        if (common != null) {
-            common.setupJvmProject(jvm());
-        }
-    }
-
-    private JkJvm setupKotlinJvm() {
-        JkPluginJava javaPlugin = this.getJkClass().getPlugin(JkPluginJava.class);
-        JkJavaProject javaProject = javaPlugin.getProject();
-        final JkKotlinCompiler kotlinCompiler;
-        if (JkUtilsString.isBlank(kotlinVersion)) {
-            kotlinCompiler = JkKotlinCompiler.ofKotlinHomeCommand("kotlinc");
-            JkLog.warn("No version of kotlin has been specified, will use the version installed on KOTLIN_HOME : "
-                    + kotlinCompiler.getVersion());
-        } else {
-            kotlinCompiler = JkKotlinCompiler.ofJvm(javaProject.getConstruction().getDependencyResolver().getRepos(),
-                    kotlinVersion);
-        }
-        kotlinCompiler.setLogOutput(true);
-        String effectiveVersion = kotlinCompiler.getVersion();
-        JkJavaProjectCompilation<?> prodCompile = javaProject.getConstruction().getCompilation();
-        JkJavaProjectCompilation<?> testCompile = javaProject.getConstruction().getTesting().getCompilation();
-        prodCompile.getPreCompileActions().appendBefore(KOTLIN_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                () -> compileKotlin(kotlinCompiler, javaProject));
-        testCompile.getPreCompileActions().appendBefore(KOTLIN_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                () -> compileTestKotlin(kotlinCompiler, javaProject));
-        JkVersionProvider versionProvider = JkKotlinModules.versionProvider(effectiveVersion);
-        prodCompile.setDependencies(deps -> deps.andVersionProvider(versionProvider));
-
-        if (addStdlib) {
-            if (kotlinCompiler.isProvidedCompiler()) {
-                prodCompile.setDependencies(deps -> deps.andFiles(kotlinCompiler.getStdLib()));
-            } else {
-                prodCompile.setDependencies(deps -> deps
-                        .and(JkKotlinModules.STDLIB_JDK8)
-                        .and(JkKotlinModules.REFLECT));
-                testCompile.setDependencies(deps -> deps.and(JkKotlinModules.TEST));
-            }
-        }
-        return new JkJvm(javaProject, kotlinCompiler);
-    }
-
-    private void compileKotlin(JkKotlinCompiler kotlinCompiler, JkJavaProject javaProject) {
-        JkJavaProjectCompilation compilation = javaProject.getConstruction().getCompilation();
-        JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
-                .setClasspath(compilation.resolveDependencies().getFiles())
-                .setOutputDir(compilation.getLayout().getOutputDir().resolve("classes"))
-                .setTargetVersion(javaProject.getConstruction().getJvmTargetVersion())
-                .addSources(compilation.getLayout().resolveSources());
-        kotlinCompiler.compile(compileSpec);
-    }
-
-    private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkJavaProject javaProject) {
-        JkJavaProjectCompilation compilation = javaProject.getConstruction().getTesting().getCompilation();
-        JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
-                .setClasspath(compilation.resolveDependencies().getFiles()
-                        .and(javaProject.getConstruction().getCompilation().getLayout().getClassDirPath()))
-                .setOutputDir(compilation.getLayout().getOutputDir().resolve("test-classes"))
-                .setTargetVersion(javaProject.getConstruction().getJvmTargetVersion())
-                .addSources(compilation.getLayout().resolveSources());
-        kotlinCompiler.compile(compileSpec);
-    }
-
     public JkArtifactId addFatJar(String classifier) {
         JkArtifactId artifactId = JkArtifactId.of(classifier, "jar");
         this.jvm.project.getPublication().getArtifactProducer()
@@ -133,26 +70,49 @@ public class JkPluginKotlin extends JkPlugin {
         return artifactId;
     }
 
-    public static class JkJvm {
+    @Override
+    protected void afterSetup() throws Exception {
+        if (common != null) {
+            common.setupJvmProject(jvm());
+        }
+    }
 
-        private final JkJavaProject project;
+    public class JkJvm {
 
-        private final JkKotlinCompiler kotlinCompiler;
+        private JkJavaProject project;
+
+        private JkKotlinCompiler kotlinCompiler;
 
         private String kotlinSourceDir = "src/main/kotlin-jvm";
 
         private String kotlinTestSourceDir = "src/test/kotlin-jvm";
 
-        public JkJvm(JkJavaProject project, JkKotlinCompiler kotlinCompiler) {
-            this.project = project;
-            this.kotlinCompiler = kotlinCompiler;
+        private boolean keepJavaSourceDir;
+
+        private JkJvm() {
         }
 
         public JkJavaProject getProject() {
+            if (project != null) {
+                return project;
+            }
+            project = createJavaProject();
             return project;
         }
 
         public JkKotlinCompiler getKotlinCompiler() {
+            if (kotlinCompiler != null) {
+                return kotlinCompiler;
+            }
+            if (JkUtilsString.isBlank(kotlinVersion)) {
+                kotlinCompiler = JkKotlinCompiler.ofKotlinHomeCommand("kotlinc");
+                JkLog.warn("No version of kotlin has been specified, will use the version installed on KOTLIN_HOME : "
+                        + kotlinCompiler.getVersion());
+            } else {
+                JkPluginRepo pluginRepo = JkPluginKotlin.this.getJkClass().getPlugin(JkPluginRepo.class);
+                kotlinCompiler = JkKotlinCompiler.ofJvm(pluginRepo.downloadRepository().toSet(), kotlinVersion);
+            }
+            kotlinCompiler.setLogOutput(true);
             return kotlinCompiler;
         }
 
@@ -163,9 +123,67 @@ public class JkPluginKotlin extends JkPlugin {
             return this;
         }
 
+        private JkJavaProject createJavaProject() {
+            JkPluginJava javaPlugin = JkPluginKotlin.this.getJkClass().getPlugin(JkPluginJava.class);
+            JkJavaProject javaProject = javaPlugin.getProject();
+            JkKotlinCompiler kompiler = getKotlinCompiler();
+            String effectiveVersion = kompiler.getVersion();
+            JkJavaProjectCompilation<?> prodCompile = javaProject.getConstruction().getCompilation();
+            JkJavaProjectCompilation<?> testCompile = javaProject.getConstruction().getTesting().getCompilation();
+            JkVersionProvider versionProvider = JkKotlinModules.versionProvider(effectiveVersion);
+            prodCompile
+                    .getPreCompileActions()
+                    .appendBefore(KOTLIN_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
+                            () -> compileKotlin(kompiler, javaProject))
+                    .__
+                    .setDependencies(deps -> deps.andVersionProvider(versionProvider));
+            testCompile
+                    .getPreCompileActions()
+                    .appendBefore(KOTLIN_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
+                            () -> compileTestKotlin(kompiler, javaProject))
+                    .__
+                    .getLayout()
+                        .addSource(jvm.kotlinTestSourceDir);
+            if (keepJavaSourceDir) {
+                prodCompile.getLayout().addSource(kotlinSourceDir);
+                testCompile.getLayout().addSource(kotlinTestSourceDir);
+            } else {
+                prodCompile.getLayout().setSources(kotlinSourceDir);
+                testCompile.getLayout().setSources(kotlinTestSourceDir);
+            }
+            if (addStdlib) {
+                if (kompiler.isProvidedCompiler()) {
+                    prodCompile.setDependencies(deps -> deps.andFiles(kompiler.getStdLib()));
+                } else {
+                    prodCompile.setDependencies(deps -> deps
+                            .and(JkKotlinModules.STDLIB_JDK8)
+                            .and(JkKotlinModules.REFLECT));
+                    testCompile.setDependencies(deps -> deps.and(JkKotlinModules.TEST));
+                }
+            }
+            return javaProject;
+        }
 
+        private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkJavaProject javaProject) {
+            JkJavaProjectCompilation compilation = javaProject.getConstruction().getTesting().getCompilation();
+            JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
+                    .setClasspath(compilation.resolveDependencies().getFiles()
+                            .and(javaProject.getConstruction().getCompilation().getLayout().getClassDirPath()))
+                    .setOutputDir(compilation.getLayout().getOutputDir().resolve("test-classes"))
+                    .setTargetVersion(javaProject.getConstruction().getJvmTargetVersion())
+                    .addSources(compilation.getLayout().resolveSources());
+            kotlinCompiler.compile(compileSpec);
+        }
 
-
+        private void compileKotlin(JkKotlinCompiler kotlinCompiler, JkJavaProject javaProject) {
+            JkJavaProjectCompilation compilation = javaProject.getConstruction().getCompilation();
+            JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
+                    .setClasspath(compilation.resolveDependencies().getFiles())
+                    .setOutputDir(compilation.getLayout().getOutputDir().resolve("classes"))
+                    .setTargetVersion(javaProject.getConstruction().getJvmTargetVersion())
+                    .addSources(compilation.getLayout().resolveSources());
+            kotlinCompiler.compile(compileSpec);
+        }
     }
 
 

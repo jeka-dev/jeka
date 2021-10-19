@@ -148,6 +148,10 @@ public class JkCompileLayout<T> {
         return setSources(sources.and(source));
     }
 
+    public JkCompileLayout<T> setSources(String dir) {
+        return setSources(JkPathTreeSet.of(Paths.get(dir)));
+    }
+
     public JkCompileLayout<T> addSource(Path dir) {
         return addSource(JkPathTree.of(dir).andMatcher(JAVA_SOURCE_MATCHER));
     }

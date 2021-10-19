@@ -122,6 +122,8 @@ public final class JkUtilsPath {
      * Delegates to Files{@link #isSameFile(Path, Path)}
      */
     public static boolean isSameFile(Path path1, Path path2) {
+        JkUtilsAssert.argument(Files.exists(path1), "path1 does not exist");
+        JkUtilsAssert.argument(Files.exists(path2), "path2 does not exist");
         try {
             return Files.isSameFile(path1, path2);
         } catch (final IOException e) {

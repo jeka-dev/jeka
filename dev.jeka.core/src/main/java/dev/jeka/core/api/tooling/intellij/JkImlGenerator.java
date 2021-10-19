@@ -265,6 +265,9 @@ public final class JkImlGenerator {
 
     private static boolean contains(JkPathTreeSet treeSet, Path path) {
         for (JkPathTree tree : treeSet.toList()) {
+            if (!Files.exists(tree.getRoot())) {
+                return false;
+            }
             if (JkUtilsPath.isSameFile(tree.getRoot(), path)) {
                 return true;
             }
