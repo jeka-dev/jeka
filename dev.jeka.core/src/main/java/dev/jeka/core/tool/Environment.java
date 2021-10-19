@@ -106,6 +106,8 @@ class Environment {
 
         private String jkClassName;
 
+        private boolean forceCompile;
+
         private final Set<String> names = new HashSet<>();
 
         StandardOptions (Map<String, String> map) {
@@ -117,6 +119,7 @@ class Environment {
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
             this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
             this.jkClassName = valueOf(String.class, map, null, "JekaClass", "JKC");
+            this.forceCompile = valueOf(Boolean.class, map, false, "ForceCompile", "FC");
         }
 
         Set<String> names() {
@@ -128,6 +131,10 @@ class Environment {
                 return JkConstants.DEFAULT_JEKA_CLASS.getName();
             }
             return jkClassName;
+        }
+
+        boolean forceCompile() {
+            return forceCompile;
         }
 
         @Override

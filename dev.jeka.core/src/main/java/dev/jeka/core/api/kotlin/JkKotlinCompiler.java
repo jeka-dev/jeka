@@ -259,6 +259,20 @@ public final class JkKotlinCompiler {
                 .collect(Collectors.toList());
     }
 
+    public List<String> getPluginOptions() {
+        List<String> options = new LinkedList<>();
+        for (Iterator<String> it = options.iterator(); it.hasNext();) {
+            String option = it.next();
+            if (option.equals("-P")) {
+                if (it.hasNext()) {
+                    options.add(option);
+                    options.add(it.next());
+                }
+            }
+        }
+        return Collections.unmodifiableList(options);
+    }
+
     private Result run(JkKotlinJvmCompileSpec compileSpec) {
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSourceFiles()) {
@@ -301,7 +315,6 @@ public final class JkKotlinCompiler {
                     .setFailOnError(this.failOnError)
                     .setLogCommand(this.logCommand)
                     .setLogOutput(this.logOutput);
-
         final int result = kotlincProcess.exec();
         return new Result(result == 0, kotlincProcess.getParams());
     }
@@ -376,7 +389,6 @@ public final class JkKotlinCompiler {
         private String toOption() {
             return "-Xplugin=" + getJar();
         }
-
 
     }
 

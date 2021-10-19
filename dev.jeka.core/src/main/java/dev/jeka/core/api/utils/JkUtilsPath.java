@@ -1,5 +1,7 @@
 package dev.jeka.core.api.utils;
 
+import dev.jeka.core.api.system.JkLog;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -10,10 +12,7 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipError;
@@ -426,6 +425,16 @@ public final class JkUtilsPath {
                 return FileVisitResult.TERMINATE;
             }
             return FileVisitResult.CONTINUE;
+        }
+    }
+
+    public static Optional<Long> getLastModifiedTime(Path path, LinkOption ...options) {
+        JkUtilsAssert.argument(Files.exists(path), "File " + path + " not found.");
+        try {
+            return Optional.of(Files.getLastModifiedTime(path, options).toMillis());
+        } catch (IOException e) {
+            JkLog.warn("Cannot get last modified time of file " + path + ".");
+            return Optional.empty();
         }
     }
 

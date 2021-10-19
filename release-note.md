@@ -1,8 +1,8 @@
 # 0.9.16.RELEASE (ongoing)
 * Kotlin support for writing def classes
-* Kotlin support with plugin to build Kotlin projects (jvm, js,mixed)
-* Faster builds by caching dependency resolution
-* Polish console output
+* Kotlin support with plugin to build multiplatform Kotlin projects (jvm, js,mixed)
+* Faster builds by caching dependency resolution and compiled def classes
+* Polish on console output
 
 # 0.9.15.RELEASE
 * Upgrade JUNIT PLATFORM to 1.8.1  

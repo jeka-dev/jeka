@@ -6,6 +6,7 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
@@ -23,7 +24,9 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import javax.tools.ToolProvider;
+import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -50,6 +53,8 @@ final class Engine {
 
     private final JkPathMatcher KOTLIN_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.kt")
            .and(false, "**/_*", "_*");
+
+    private final static String LAST_UPDATE_FILE_NAME = "def-last-update-time.txt";
 
     private final Path projectBaseDir;
 
@@ -103,7 +108,7 @@ final class Engine {
             jkClass = getJkClassInstance(jkClassHint, JkPathSequence.of());
         }
 
-        // No Jkclass has been foud
+        // No JkClass has been foud
         if (jkClass == null) {
             path = resolveAndCompile(true);
             jkClass = getJkClassInstance(jkClassHint, path);
@@ -168,8 +173,15 @@ final class Engine {
         JkPathSequence dependencyPath = dependenciesPath().andPrepend(path).withoutDuplicates();
         JkPathSequence projectDependenciesPath =
                 resolveAndCompileDependentProjects(yetCompiledProjects, dependencyPath, compileSources);
+        long defLastUptateTime = lastModifiedAccordingFileAttributes();
         if (compileSources) {
-            compileDef(dependencyPath.and(projectDependenciesPath));
+            if (Environment.standardOptions.forceCompile() || isWorkOutdated(defLastUptateTime)) {
+                compileDef(dependencyPath.and(projectDependenciesPath));
+                writeLastUpdateFile(defLastUptateTime);
+            } else {
+                JkLog.trace("Last def classes are up-to-date : No need to compile.");
+            }
+
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         return dependencyPath.and(projectDependenciesPath).and(this.resolver.defClassDir).withoutDuplicates();
@@ -251,8 +263,12 @@ final class Engine {
         if (hasKotlin()) {
             final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(defClasspath);
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(defRepos)
-                    .setLogOutput(JkLog.isVerbose())
                     .addOption("-nowarn");
+            if (JkLog.isVerbose()) {
+                kotlinCompiler
+                        .setLogOutput(true)
+                        .addOption("-verbose");
+            }
             wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec));
             JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
             if (kotlinCompiler.isProvidedCompiler()) {
@@ -375,6 +391,50 @@ final class Engine {
         }
         return result;
     }
+
+    private boolean isWorkOutdated(long lastModifiedAccordingFileAttributes) {
+        long workFlagTs = lastModifiedAccordingFlag();
+        return workFlagTs < lastModifiedAccordingFileAttributes;
+    }
+
+    private long lastModifiedAccordingFileAttributes() {
+        Path def = projectBaseDir.resolve(JkConstants.DEF_DIR);
+        return JkPathTree.of(def).stream()
+                .map(path -> JkUtilsPath.getLastModifiedTime(path))
+                .map(optional -> optional.orElse(System.currentTimeMillis()))
+                .reduce(0L, Math::max);
+    }
+
+    private void writeLastUpdateFile(long lastModifiedAccordingFileAttributes) {
+        Path work = projectBaseDir.resolve(JkConstants.WORK_PATH);
+        if (!Files.exists(work)) {
+            return;
+        }
+        JkPathFile.of(work.resolve(LAST_UPDATE_FILE_NAME))
+                .deleteIfExist()
+                .createIfNotExist()
+                .write(Long.valueOf(lastModifiedAccordingFileAttributes).toString().getBytes(StandardCharsets.UTF_8));
+    }
+
+    private long lastModifiedAccordingFlag() {
+        Path work = projectBaseDir.resolve(JkConstants.WORK_PATH);
+        if (!Files.exists(work)) {
+            return 0L;
+        }
+        Path lastUpdateFile = work.resolve(LAST_UPDATE_FILE_NAME);
+        if (!Files.exists(lastUpdateFile)) {
+            return 0;
+        }
+        try {
+            String content = JkUtilsPath.readAllLines(lastUpdateFile).get(0);
+            return Long.parseLong(content);
+        } catch (RuntimeException e) {
+            JkLog.warn("Error caught when reading file content of " + lastUpdateFile + ". " + e.getMessage() );
+            return 0;
+        }
+    }
+
+
 
     @Override
     public String toString() {

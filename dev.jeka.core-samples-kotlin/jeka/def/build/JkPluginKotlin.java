@@ -13,6 +13,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import static dev.jeka.core.api.java.project.JkJavaProjectCompilation.JAVA_SOURCES_COMPILE_ACTION;
@@ -51,15 +52,12 @@ public class JkPluginKotlin extends JkPlugin {
     }
 
     @JkDoc("Displays loaded compiler plugins and options")
-    public void showPlugins() {
+    public void showPluginOptions() {
         if (jvm != null) {
             JkLog.info("Options for declared external plugins in Kotlin-jvm compiler :");
-            List<String> options = jvm.kotlinCompiler.getPlugins();
-            if (options.isEmpty()) {
-                JkLog.info("No compiler plugin or option defined.");
-            } else {
-                options.forEach(option -> JkLog.info(option));
-            }
+            List<String> options = new LinkedList<>(jvm.kotlinCompiler.getPlugins());
+            options.addAll(jvm.kotlinCompiler.getPluginOptions());
+            JkLog.info(String.join(" ", options));
         }
     }
 
@@ -92,6 +90,7 @@ public class JkPluginKotlin extends JkPlugin {
                 () -> compileTestKotlin(kotlinCompiler, javaProject));
         JkVersionProvider versionProvider = JkKotlinModules.versionProvider(effectiveVersion);
         prodCompile.setDependencies(deps -> deps.andVersionProvider(versionProvider));
+
         if (addStdlib) {
             if (kotlinCompiler.isProvidedCompiler()) {
                 prodCompile.setDependencies(deps -> deps.andFiles(kotlinCompiler.getStdLib()));
@@ -140,6 +139,10 @@ public class JkPluginKotlin extends JkPlugin {
 
         private final JkKotlinCompiler kotlinCompiler;
 
+        private String kotlinSourceDir = "src/main/kotlin-jvm";
+
+        private String kotlinTestSourceDir = "src/test/kotlin-jvm";
+
         public JkJvm(JkJavaProject project, JkKotlinCompiler kotlinCompiler) {
             this.project = project;
             this.kotlinCompiler = kotlinCompiler;
@@ -159,6 +162,10 @@ public class JkPluginKotlin extends JkPlugin {
                             path -> project.getConstruction().createFatJar(path));
             return this;
         }
+
+
+
+
     }
 
 
