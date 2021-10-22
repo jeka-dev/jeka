@@ -223,14 +223,16 @@ public final class JkJavaCompiler<T> {
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
         JkLog.info("Compile using command " + process.getCommand());
+        Path workingDir = Optional.ofNullable(process.getWorkingDir()).orElse(Paths.get(""));
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> paths = compileSpec.computeJavacSourceArguments();
         for (final Path file : paths) {
-            if (Files.isDirectory(file)) {
-                JkPathTree.of(file).andMatching(true, "**/*.java").stream()
+            Path relativizedPath = JkUtilsPath.relativizeFromDirIfAbsolute(workingDir, file);
+            if (Files.isDirectory(relativizedPath)) {
+                JkPathTree.of(relativizedPath).andMatching(true, "**/*.java").stream()
                         .forEach(path -> sourcePaths.add(path.toString()));
             } else {
-                sourcePaths.add(file.toAbsolutePath().toString());
+                sourcePaths.add(relativizedPath.toString());
             }
         }
         process.addParams(compileSpec.getOptions())

@@ -191,6 +191,7 @@ public class JkJavaProjectConstruction {
     /**
      * File trees specified here will be added to the fat jar.
      */
+    // TODO : change it customizeFatJar(JkPathTreeSet -> JkPathTreeSet)
     public JkJavaProjectConstruction setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;

@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Provides fluent API to define and launch external process.
@@ -256,7 +257,7 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
                 throw new UncheckedIOException(e);
             }
             OutputStream consoleOutputStream = logOutput ? JkLog.getOutputStream() : JkUtilsIO.nopOuputStream();
-            OutputStream consoleErrStream = logOutput ? JkLog.getErrorStream() : JkUtilsIO.nopOuputStream();
+            OutputStream consoleErrStream = logOutput ? JkLog.getDecoratedErr() : JkUtilsIO.nopOuputStream();
             final JkUtilsIO.JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
                         process.getInputStream(), consoleOutputStream, collectOs);
                 final JkUtilsIO.JkStreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
@@ -269,7 +270,8 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
             outputStreamGobbler.join();
             errorStreamGobbler.join();
             if (exitCode.get() != 0 && failOnError) {
-                throw new IllegalStateException("Process " + commands + " has returned with error code " + exitCode);
+                throw new IllegalStateException("Process " + String.join(" ",elipsed(commands))
+                        + "\nhas returned with error code " + exitCode);
             }
         };
         if (logCommand) {
@@ -284,6 +286,15 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
         out.exitCode = exitCode.get();
         out.output = collectOutput ? new String(byteArrayOutputStream.toByteArray()) : null;
         return out;
+    }
+
+    private static List<String> elipsed(List<String> options) {
+        if (JkLog.isVerbose()) {
+            return options;
+        }
+        return options.stream()
+                .map(option -> JkUtilsString.elipse(option, 120))
+                .collect(Collectors.toList());
     }
 
     private static class Result {

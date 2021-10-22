@@ -1,8 +1,9 @@
-package build;
+package build.common;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectCompilation;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
@@ -14,9 +15,11 @@ import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
+import static dev.jeka.core.api.java.project.JkCompileLayout.JAVA_SOURCE_MATCHER;
 import static dev.jeka.core.api.java.project.JkJavaProjectCompilation.JAVA_SOURCES_COMPILE_ACTION;
 
 @JkDefClasspath("org.jetbrains.kotlin:kotlin-compiler:1.5.31")
@@ -144,12 +147,14 @@ public class JkPluginKotlin extends JkPlugin {
                     .__
                     .getLayout()
                         .addSource(jvm.kotlinTestSourceDir);
+            JkPathTree javaInKotlinTree = JkPathTree.of(Paths.get(kotlinSourceDir)).andMatcher(JAVA_SOURCE_MATCHER);
+            JkPathTree javaInKotlinTestTree = JkPathTree.of(Paths.get(kotlinTestSourceDir)).andMatcher(JAVA_SOURCE_MATCHER);
             if (keepJavaSourceDir) {
-                prodCompile.getLayout().addSource(kotlinSourceDir);
-                testCompile.getLayout().addSource(kotlinTestSourceDir);
+                prodCompile.getLayout().addSource(javaInKotlinTree);
+                testCompile.getLayout().addSource(javaInKotlinTestTree);
             } else {
-                prodCompile.getLayout().setSources(kotlinSourceDir);
-                testCompile.getLayout().setSources(kotlinTestSourceDir);
+                prodCompile.getLayout().setSources(javaInKotlinTree.toSet());
+                testCompile.getLayout().setSources(javaInKotlinTestTree.toSet());
             }
             if (addStdlib) {
                 if (kompiler.isProvidedCompiler()) {
@@ -191,6 +196,8 @@ public class JkPluginKotlin extends JkPlugin {
 
         private String srcDir = "src/main/kotlin-common";
 
+        private JkPathTree resources = JkPathTree.of(Paths.get("src/main/resources-common"));
+
         private String testDir = "src/test/kotlin-dir";
 
         private JkDependencySet compileDependencies = JkDependencySet.of();
@@ -216,6 +223,7 @@ public class JkPluginKotlin extends JkPlugin {
             }
             prodCompile.setDependencies(deps -> deps.and(compileDependencies));
             testCompile.setDependencies(deps -> deps.and(testDependencies));
+            prodCompile.getLayout().addResource(resources);
         }
 
         public String getSrcDir() {

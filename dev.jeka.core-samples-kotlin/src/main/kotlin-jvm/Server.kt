@@ -8,8 +8,6 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import org.litote.kmongo.*
-import org.litote.kmongo.coroutine.*
 
 
 val shoppingList = mutableListOf(
@@ -33,6 +31,15 @@ fun main() {
             gzip()
         }
         routing {
+            get("/") {
+                call.respondText(
+                    this::class.java.classLoader.getResource("index.html")!!.readText(),
+                    ContentType.Text.Html
+                )
+            }
+            static("/") {
+                resources("")
+            }
             route(ShoppingListItem.path) {
                 get {
                     call.respond(shoppingList)
@@ -48,5 +55,6 @@ fun main() {
                 }
             }
         }
+
     }.start(wait = true)
 }

@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -38,35 +39,39 @@ public final class Main {
         try {
             Environment.initialize(args);
             JkLog.setConsumer(Environment.standardOptions.logStyle);
-            final JkLog.Verbosity verbosity = JkLog.verbosity();
             if (Environment.standardOptions.logBanner) {
                 displayIntro();
             }
             if (Environment.standardOptions.logRuntimeInformation != null) {
                 JkInit.displayRuntimeInfo();
             }
-            if (!Environment.standardOptions.logSetup) {
-                JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
+            if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
+                JkMemoryBufferLogDecorator.activateOnJkLog();
             }
             final Path workingDir = Paths.get("").toAbsolutePath();
             final Engine engine = new Engine(workingDir);
-            engine.execute(Environment.commandLine, verbosity);
+            engine.execute(Environment.commandLine);   // log in memory are inactivated inside this method if it goes ok
             if (Environment.standardOptions.logBanner) {
                 displayOutro(start);
             }
             System.exit(0); // Triggers shutdown hooks
         } catch (final RuntimeException e) {
-            JkLog.JkEventLogConsumer consumer = JkLog.getConsumer();
-            if (consumer != null) {
-                consumer.restore();
+            if (JkMemoryBufferLogDecorator.isActive()) {
+                JkMemoryBufferLogDecorator.flush();
+                JkMemoryBufferLogDecorator.inactivateOnJkLog();
             }
+            JkLog.restoreToInitialState();
+
             if (e instanceof JkException) {
                 System.err.println();
                 System.err.println(e.getMessage());
             } else {
-                System.err.println("An error occurred during def class execution : " + e.getMessage());
-                System.err.println("This is mostly due to an error in user settings or scripts.");
-                System.err.println("You can investigate using the stacktrace below or relaunching the command with option -LS=DEBUG.");
+                System.err.println("An error occurred during def class execution.");
+                System.err.println("It may come from user code/setting or a bug in Jeka.");
+                System.err.println("You can investigate using the stacktrace below or by relaunching the command using option -LS=DEBUG.");
+                if (!JkLog.isVerbose()) {
+                    System.err.println("You can also increase log verbosity using option -LV.");
+                }
                 System.err.println("If error reveals to coming from Jeka engine, please report to " +
                         ": https://github.com/jerkar/jeka/issues");
                 System.err.println();
@@ -97,11 +102,10 @@ public final class Main {
         }
         final Engine engine = new Engine(projectDir);
         Environment.initialize(args);
-        final JkLog.Verbosity verbosity = JkLog.verbosity();
         if (!Environment.standardOptions.logSetup) {
-            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
+            JkMemoryBufferLogDecorator.activateOnJkLog();
         }
-        engine.execute(Environment.commandLine, verbosity);
+        engine.execute(Environment.commandLine);
     }
 
     private static int printAscii(boolean error, String fileName) {

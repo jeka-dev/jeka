@@ -2,7 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkSquareConsoleLogConsumer;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -53,7 +52,6 @@ class Environment {
         if (standardOptions.logQuiteVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
-        JkSquareConsoleLogConsumer.setMaxLength(standardOptions.logMaxLength);
         Environment.systemProps = sysProps;
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;

@@ -29,6 +29,8 @@ public final class JkUtilsSystem {
      */
     public static final boolean IS_WINDOWS = isWindows();
 
+    public static final boolean IS_MACOS = isMacos();
+
     private static final Class UNSAFE_CLASS = JkClassLoader.ofCurrent().loadIfExist("sun.misc.Unsafe");
 
     private static boolean isWindows() {
@@ -37,6 +39,14 @@ public final class JkUtilsSystem {
             return false;
         }
         return osName.startsWith("Windows");
+    }
+
+    private static boolean isMacos() {
+        final String osName = System.getProperty("os.name");
+        if (osName == null) {
+            return false;
+        }
+        return osName.startsWith("Mac OS X");
     }
 
     /**

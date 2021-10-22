@@ -18,13 +18,13 @@ import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import javax.tools.ToolProvider;
-import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -89,7 +89,7 @@ final class Engine {
     /**
      * Pre-compile and compile Jeka classes (if needed) then execute methods mentioned in command line
      */
-    void execute(CommandLine commandLine, JkLog.Verbosity verbosityToRestore) {
+    void execute(CommandLine commandLine) {
         final long start = System.nanoTime();
         JkLog.startTask("Compile def and initialise Jeka classes");
         List<JkModuleDependency> commandLineDependencies = commandLine.getDefDependencies();
@@ -125,7 +125,9 @@ final class Engine {
         jkClass.getImportedJkClasses().setImportedRunRoots(this.rootsOfImportedJekaClasses);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         JkLog.info("Jeka classes are ready to be executed.");
-        JkLog.setVerbosity(verbosityToRestore);
+        if (JkMemoryBufferLogDecorator.isActive()) {
+            JkMemoryBufferLogDecorator.inactivateOnJkLog();
+        }
         if (Environment.standardOptions.logRuntimeInformation != null) {
             JkLog.info("Jeka Classpath : ");
             path.iterator().forEachRemaining(item -> JkLog.info("    " + item));
@@ -263,11 +265,10 @@ final class Engine {
         if (hasKotlin()) {
             final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(defClasspath);
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(defRepos)
+                    .setLogOutput(true)
                     .addOption("-nowarn");
             if (JkLog.isVerbose()) {
-                kotlinCompiler
-                        .setLogOutput(true)
-                        .addOption("-verbose");
+                kotlinCompiler.addOption("-verbose");
             }
             wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec));
             JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
@@ -329,7 +330,7 @@ final class Engine {
         return JkKotlinJvmCompileSpec.of()
                 .setClasspath(defClasspath)
                 .addSources(resolver.defSourceDir)
-                .setOutputDir(resolver.defClassDir);
+                .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(resolver.defClassDir));
     }
 
     private JkDependencyResolver getDefDependencyResolver() {

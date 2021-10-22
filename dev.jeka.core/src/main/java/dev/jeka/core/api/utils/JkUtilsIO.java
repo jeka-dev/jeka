@@ -232,12 +232,19 @@ public final class JkUtilsIO {
      * Copies the content of the given url to the specified file.
      */
     public static void copyUrlToFile(URL url, Path file) {
+        if (!Files.exists(file)) {
+            JkUtilsPath.createFile(file);
+        }
         try (OutputStream fileOutputStream = Files.newOutputStream(file);
                 final InputStream inputStream = url.openStream()){
             copy(inputStream, fileOutputStream);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public static void copyUrlToFile(String url, Path file) {
+        copyUrlToFile(JkUtilsIO.toUrl(url), file);
     }
 
     /**
@@ -252,6 +259,14 @@ public final class JkUtilsIO {
                 out.write(buf, 0, len);
             }
         } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static void write(OutputStream outputStream, byte[] bytes) {
+        try {
+            outputStream.write(bytes);
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }

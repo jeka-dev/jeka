@@ -2,16 +2,18 @@ package dev.jeka.core.api.system;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-public final class JkBraceConsoleLogConsumer implements JkLog.JkEventLogConsumer, Serializable {
+import static dev.jeka.core.api.system.JkIndentLogDecorator.LINE_SEPARATOR;
+import static dev.jeka.core.api.system.JkIndentLogDecorator.MARGIN_UNIT;
 
-    private static final Charset UTF8 = Charset.forName("UTF-8");
+/**
+ * This decorator add curly brace around task to delimit task. It also add an indication of
+ * processing task for each task.
+ */
+public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
-    private static final byte LINE_SEPARATOR = 10;
-
-    private static final byte[] MARGIN_UNIT = ("   ").getBytes(UTF8);
-
-    private static final int MARGIN_UNIT_LENGTH = new String(MARGIN_UNIT, UTF8).length();
+    private static final int MARGIN_UNIT_LENGTH = new String(MARGIN_UNIT, StandardCharsets.UTF_8).length();
 
     private static int maxLength = -1;
 
@@ -19,32 +21,15 @@ public final class JkBraceConsoleLogConsumer implements JkLog.JkEventLogConsumer
 
     private transient MarginStream marginErr;
 
-    private transient PrintStream formerOut;
-
-    private transient PrintStream formerErr;
-
     private transient PrintStream out;
 
     private transient PrintStream err;
 
-    public void init() {
-        formerOut = System.out;
-        formerErr = System.err;
-        marginOut = new MarginStream(formerOut);
-        marginErr = new MarginStream(formerErr);
+    public void init(PrintStream targetOut, PrintStream targetErr) {
+        marginOut = new MarginStream(targetOut);
+        marginErr = new MarginStream(targetErr);
         out = new PrintStream(marginOut);
         err = new PrintStream(marginErr);
-        System.setOut(out);
-        System.setErr(err);
-    }
-
-    public void restore() {
-        if (formerOut != null && (out == System.out)) {
-            System.setOut(formerOut);
-        }
-        if (formerErr != null && (err == System.err)) {
-            System.setErr(formerErr);
-        }
     }
 
     private void readObject(ObjectInputStream objectInputStream) {
@@ -53,17 +38,24 @@ public final class JkBraceConsoleLogConsumer implements JkLog.JkEventLogConsumer
     }
 
     public static void setMaxLength(int maxLength) {
-        JkBraceConsoleLogConsumer.maxLength = maxLength;
+        JkBraceLogDecorator.maxLength = maxLength;
     }
 
-    @Override
-    public void accept(JkLog.JkLogEvent event) {
+    public PrintStream getOut() {
+        return out;
+    }
+
+    public PrintStream getErr() {
+        return err;
+    }
+
+    public void handle(JkLog.JkLogEvent event) {
         final MarginStream marginStream = (event.getType() == JkLog.Type.ERROR) ? marginErr : marginOut;
-        PrintStream stream = System.out;
+        PrintStream stream = out;
         String message = event.getMessage();
         if (event.getType() == JkLog.Type.ERROR || event.getType() == JkLog.Type.WARN) {
-            stream.flush();
-            stream = System.err;
+            out.flush();
+            stream = err;
         }
         if (event.getType() == JkLog.Type.END_TASK) {
             marginStream.closingBrace = true;
@@ -85,16 +77,6 @@ public final class JkBraceConsoleLogConsumer implements JkLog.JkEventLogConsumer
         }  else {
             stream.println(message);
         }
-    }
-
-    @Override
-    public OutputStream getOutStream() {
-        return System.out;
-    }
-
-    @Override
-    public OutputStream getErrorStream() {
-        return System.err;
     }
 
     private static class MarginStream extends OutputStream {

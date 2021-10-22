@@ -276,11 +276,12 @@ public final class JkKotlinCompiler {
     private Result run(JkKotlinJvmCompileSpec compileSpec) {
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSourceFiles()) {
-            if (Files.isDirectory(file)) {
-                JkPathTree.of(file).andMatching(true, "**/*.kt", "*.kt", "**/*.java", "*.java").stream()
+            Path relativeFile = JkUtilsPath.relativizeFromWorkingDir(file);
+            if (Files.isDirectory(relativeFile)) {
+                JkPathTree.of(relativeFile).andMatching(true, "**/*.kt", "*.kt", "**/*.java", "*.java").stream()
                         .forEach(path -> sourcePaths.add(path.toString()));
             } else {
-                sourcePaths.add(file.toAbsolutePath().toString());
+                sourcePaths.add(relativeFile.toString());
             }
         }
         if (sourcePaths.isEmpty()) {

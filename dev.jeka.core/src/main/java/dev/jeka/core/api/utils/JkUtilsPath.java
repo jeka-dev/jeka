@@ -342,6 +342,15 @@ public final class JkUtilsPath {
         return path.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(path) : path;
     }
 
+    /**
+     * Returns the relative path to working dir of the specified path. Returns the specified path itself,
+     * if this one is already relative.
+     */
+    public static Path relativizeFromDirIfAbsolute(Path referent, Path pathToRelativize) {
+        return pathToRelativize.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(pathToRelativize)
+                : pathToRelativize;
+    }
+
     private static class CopyDirVisitor extends SimpleFileVisitor<Path> {
 
         CopyDirVisitor(Path fromDir, Path toDir, PathMatcher pathMatcher, CopyOption ... options) {
