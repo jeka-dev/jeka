@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 public class JkJavaCompilerRunner {
 
     public static void main(String[] args) {
-        JkLog.setConsumer(JkLog.Style.INDENT);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(Paths.get("jeka/output/bin"))

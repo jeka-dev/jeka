@@ -15,7 +15,7 @@ public class JkJavadocMakerRunner {
                 .resolve("../../../src/main/java").normalize();
         JkPathTreeSet sources = JkPathTreeSet.of(srcDir);
         Path out = Files.createTempDirectory("jekatest");
-        JkLog.setConsumer(JkLog.Style.INDENT);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         Iterable<Path> classpath = JkPathTree.of(srcDir.resolve("jeka/libs/compile+po").normalize()).getFiles();
         JkJavadocProcessor.of()

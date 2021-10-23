@@ -12,6 +12,7 @@ import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -172,12 +173,14 @@ public class JkJavaProjectConstruction {
     public void createFatJar(Path target) {
         compilation.runIfNecessary();
         testing.runIfNecessary();
+        JkLog.startTask("Packing fat jar...");
         Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
         addManifestDefaults();
         JkJarPacker.of(compilation.getLayout().resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeFatJar(target, classpath, this.fatJarFilter);
+        JkLog.endTask();
     }
 
     public void createFatJar() {

@@ -44,12 +44,12 @@ final class IvyMessageLogger extends AbstractMessageLogger {
 
     @Override
     public void doProgress() {
-        new PrintStream(JkLog.getOutputStream()).print(".");
+        new PrintStream(JkLog.getOutPrintStream()).print(".");
     }
 
     @Override
     public void doEndProgress(String msg) {
-        new PrintStream(JkLog.getOutputStream()).print(msg);
+        new PrintStream(JkLog.getOutPrintStream()).print(msg);
     }
 
 }

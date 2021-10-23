@@ -33,7 +33,7 @@ public final class JkInit {
                     + " does not seem to be a Jeka project as " +
                     "it does not contain a 'jeka' folder.");
         }
-        JkLog.setConsumer(Environment.standardOptions.logStyle);
+        JkLog.setDecorator(Environment.standardOptions.logStyle);
         JkLog.Verbosity verbosity = JkLog.verbosity();
         if (Environment.standardOptions.logRuntimeInformation != null) {
             displayRuntimeInfo();

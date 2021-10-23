@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectCompilation;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
@@ -171,9 +172,14 @@ public class JkPluginKotlin extends JkPlugin {
 
         private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkJavaProject javaProject) {
             JkJavaProjectCompilation compilation = javaProject.getConstruction().getTesting().getCompilation();
+            JkPathTreeSet sources = compilation.getLayout().resolveSources();
+            if (sources.count(1, false) == 0) {
+                JkLog.info("No source to compile in " + sources);
+                return;
+            }
             JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
                     .setClasspath(compilation.resolveDependencies().getFiles()
-                            .and(javaProject.getConstruction().getCompilation().getLayout().getClassDirPath()))
+                            .and(compilation.getLayout().getClassDirPath()))
                     .setOutputDir(compilation.getLayout().getOutputDir().resolve("test-classes"))
                     .setTargetVersion(javaProject.getConstruction().getJvmTargetVersion())
                     .addSources(compilation.getLayout().resolveSources());
@@ -182,11 +188,16 @@ public class JkPluginKotlin extends JkPlugin {
 
         private void compileKotlin(JkKotlinCompiler kotlinCompiler, JkJavaProject javaProject) {
             JkJavaProjectCompilation compilation = javaProject.getConstruction().getCompilation();
+            JkPathTreeSet sources = compilation.getLayout().resolveSources();
+            if (sources.count(1, false) == 0) {
+                JkLog.info("No source to compile in " + sources);
+                return;
+            }
             JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
                     .setClasspath(compilation.resolveDependencies().getFiles())
                     .setOutputDir(compilation.getLayout().getOutputDir().resolve("classes"))
                     .setTargetVersion(javaProject.getConstruction().getJvmTargetVersion())
-                    .addSources(compilation.getLayout().resolveSources());
+                    .addSources(sources);
             kotlinCompiler.compile(compileSpec);
         }
     }

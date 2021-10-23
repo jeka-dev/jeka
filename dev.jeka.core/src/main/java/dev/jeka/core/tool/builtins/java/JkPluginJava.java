@@ -264,7 +264,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         Writer out;
         if (output == null) {
-            out = new PrintWriter(JkLog.getOutputStream());
+            out = new PrintWriter(JkLog.getOutPrintStream());
         } else {
             try {
                 JkPathFile.of(output).createIfNotExist();

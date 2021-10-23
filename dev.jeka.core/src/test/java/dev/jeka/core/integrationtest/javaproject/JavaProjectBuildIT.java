@@ -65,7 +65,7 @@ public class JavaProjectBuildIT {
                 .setPublishedMavenModuleId("my:project").setPublishedMavenVersion("MyVersion-snapshot")
                 .setPublishedMavenVersion("1-SNAPSHOT")
                 .getProject();
-        JkLog.setConsumer(JkLog.Style.INDENT);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         project.getPublication().getArtifactProducer().makeAllArtifacts();
         project.getPublication().getMaven().publishLocal();
         System.out.println(project.getInfo());
@@ -92,7 +92,7 @@ public class JavaProjectBuildIT {
         project.getPublication().getIvy()
                 .setModuleId("my:module")
                 .setVersion("0.1");
-        JkLog.setConsumer(JkLog.Style.INDENT);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         project.getPublication().getArtifactProducer().makeAllArtifacts();
         project.getPublication().getIvy().publishLocal();
         System.out.println(project.getInfo());

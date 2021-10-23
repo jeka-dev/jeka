@@ -165,7 +165,7 @@ public final class JkPluginIntellij extends JkPlugin {
             } catch (Exception e) {
                 JkLog.warn("Generating Iml failed : Try to generate it using -CC=JkClass option. Failure cause : ");
                 JkLog.warn(e.getMessage());
-                PrintWriter printWriter = new PrintWriter(JkLog.getDecoratedErr());
+                PrintWriter printWriter = new PrintWriter(JkLog.getErrPrintStream());
                 e.printStackTrace(printWriter);
                 printWriter.flush();
                 try {

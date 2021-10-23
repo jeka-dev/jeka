@@ -102,4 +102,20 @@ public final class JkUtilsSystem {
         }
     }
 
+    public static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void join(Thread thread) {
+        try {
+            thread.join();;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

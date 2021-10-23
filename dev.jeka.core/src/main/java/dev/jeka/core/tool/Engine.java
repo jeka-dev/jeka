@@ -16,6 +16,7 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
+import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
@@ -126,6 +127,7 @@ final class Engine {
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         JkLog.info("Jeka classes are ready to be executed.");
         if (JkMemoryBufferLogDecorator.isActive()) {
+            JkBusyIndicator.stop();
             JkMemoryBufferLogDecorator.inactivateOnJkLog();
         }
         if (Environment.standardOptions.logRuntimeInformation != null) {
@@ -263,10 +265,12 @@ final class Engine {
     private void compileDef(JkPathSequence defClasspath) {
         JkPathTree.of(resolver.defClassDir).deleteContent();
         if (hasKotlin()) {
-            final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(defClasspath);
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(defRepos)
                     .setLogOutput(true)
                     .addOption("-nowarn");
+            JkPathSequence kotlinClasspath = defClasspath.and(kotlinCompiler.getStdJdk8Lib());
+            final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(kotlinClasspath);
+
             if (JkLog.isVerbose()) {
                 kotlinCompiler.addOption("-verbose");
             }

@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -38,7 +39,7 @@ public final class Main {
         JkUtilsSystem.disableUnsafeWarning();
         try {
             Environment.initialize(args);
-            JkLog.setConsumer(Environment.standardOptions.logStyle);
+            JkLog.setDecorator(Environment.standardOptions.logStyle);
             if (Environment.standardOptions.logBanner) {
                 displayIntro();
             }
@@ -46,7 +47,9 @@ public final class Main {
                 JkInit.displayRuntimeInfo();
             }
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
+                JkBusyIndicator.start("Preparing Jeka classes and instance (Use -LSU option for details)");
                 JkMemoryBufferLogDecorator.activateOnJkLog();
+                JkLog.info("");   // To have a br prior the memory log is flushed
             }
             final Path workingDir = Paths.get("").toAbsolutePath();
             final Engine engine = new Engine(workingDir);
@@ -56,9 +59,11 @@ public final class Main {
             }
             System.exit(0); // Triggers shutdown hooks
         } catch (final RuntimeException e) {
+            if (!Environment.standardOptions.logSetup) {
+                JkBusyIndicator.stop();
+            }
             if (JkMemoryBufferLogDecorator.isActive()) {
                 JkMemoryBufferLogDecorator.flush();
-                JkMemoryBufferLogDecorator.inactivateOnJkLog();
             }
             JkLog.restoreToInitialState();
 
@@ -103,6 +108,7 @@ public final class Main {
         final Engine engine = new Engine(projectDir);
         Environment.initialize(args);
         if (!Environment.standardOptions.logSetup) {
+            JkBusyIndicator.start("Preparing Jeka classes and instance (Use -LSU option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }
         engine.execute(Environment.commandLine);

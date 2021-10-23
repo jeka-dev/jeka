@@ -256,8 +256,8 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            OutputStream consoleOutputStream = logOutput ? JkLog.getOutputStream() : JkUtilsIO.nopOuputStream();
-            OutputStream consoleErrStream = logOutput ? JkLog.getDecoratedErr() : JkUtilsIO.nopOuputStream();
+            OutputStream consoleOutputStream = logOutput ? JkLog.getOutPrintStream() : JkUtilsIO.nopOuputStream();
+            OutputStream consoleErrStream = logOutput ? JkLog.getErrPrintStream() : JkUtilsIO.nopOuputStream();
             final JkUtilsIO.JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
                         process.getInputStream(), consoleOutputStream, collectOs);
                 final JkUtilsIO.JkStreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(

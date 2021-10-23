@@ -1,14 +1,12 @@
 package dev.jeka.core.api.system;
 
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.*;
 
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -51,9 +49,9 @@ public final class JkLog implements Serializable {
 
     private static final PrintStream NO_OP_STREAM = JkUtilsIO.nopPrintStream();
 
-    private static final PrintStream INITIAL_OUT = System.out;
+    static final PrintStream INITIAL_OUT = System.out;
 
-    private static final PrintStream INITIAL_ERR = System.err;
+    static final PrintStream INITIAL_ERR = System.err;
 
     private static JkLogDecorator decorator = NO_OP_DECORATOR;
 
@@ -75,7 +73,7 @@ public final class JkLog implements Serializable {
     /**
      * By default, events are not consumed, meaning nothing appends when {@link #info(String, Object...)} (String)},
      * {@link #error(String)}, {@link #warn(String)} or {@link #trace(String)} are invoked.
-     * Therefore, users have to set explicitly a consumer using this method or {@link #setConsumer(Style)} ()}.
+     * Therefore, users have to set explicitly a consumer using this method or {@link #setDecorator(Style)} ()}.
      */
     public static void setDecorator(JkLogDecorator newDecorator) {
         newDecorator.doInit(INITIAL_OUT, INITIAL_ERR);
@@ -87,7 +85,7 @@ public final class JkLog implements Serializable {
     /**
      * This set the default consumer. This consumer displays logs in the console in a hierarchical style.
      */
-    public static void setConsumer(Style style) {
+    public static void setDecorator(Style style) {
         setDecorator(style.decorator);
     }
 
@@ -107,10 +105,6 @@ public final class JkLog implements Serializable {
         }
     }
 
-    public static void restoreOutput() {
-        redirect(INITIAL_OUT, INITIAL_ERR);
-    }
-
     public static void setVerbosity(Verbosity verbosityArg) {
         JkUtilsAssert.argument(verbosityArg != null, "Verbosity can noot be set to null.");
         verbosity = verbosityArg;
@@ -120,14 +114,14 @@ public final class JkLog implements Serializable {
         return currentNestedTaskLevel.get();
     }
 
-    public static OutputStream getOutputStream() {
+    public static PrintStream getOutPrintStream() {
         if (Verbosity.MUTE == verbosity()) {
             return NO_OP_STREAM;
         }
         return decorator.getOut();
     }
 
-    public static PrintStream getDecoratedErr() {
+    public static PrintStream getErrPrintStream() {
         if (Verbosity.MUTE == verbosity()) {
             return NO_OP_STREAM;
         }
@@ -361,7 +355,6 @@ public final class JkLog implements Serializable {
             JkLog.verbosity = verbosity;
             JkLog.currentNestedTaskLevel = currentNestedTaskLevel;
         }
-
     }
 
 }

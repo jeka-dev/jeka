@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,7 +64,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     }
 
     public JkJavaProject setBaseDir(Path baseDir) {
-        this.baseDir = baseDir;
+        this.baseDir = JkUtilsPath.relativizeFromWorkingDir(baseDir);
         return this;
     }
 

@@ -142,17 +142,30 @@ public final class JkKotlinCompiler {
     }
 
     /**
-     * Returns path of stdlib located in JEKA_HOME.
-     * @throws IllegalStateException This compiler is not the one from JEKA_HOME
+     * Returns path of stdlib located in JEKA_HOME (if the compiler is provided by the platform) of from
+     * a repo (if the comiler is managed by Jeka, meaning the version is specified)
      */
     public Path getStdLib() {
-        if (!isProvidedCompiler()) {
-            throw new IllegalStateException("This method is only relevant for host provided compiler. " +
-                   "This one (version " + jarsVersionAndTarget.version + ") is managed by Jeka");
+        if (isProvidedCompiler()) {
+            String value = System.getenv("KOTLIN_HOME");
+            JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
+            return Paths.get(value).resolve("lib/kotlin-stdlib.jar");
         }
-        String value = System.getenv("KOTLIN_HOME");
-        JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
-        return Paths.get(value).resolve("lib/kotlin-stdlib.jar");
+        return repos.get(JkKotlinModules.STDLIB);
+    }
+
+    public JkPathSequence getStdJdk8Lib() {
+        if (isProvidedCompiler()) {
+            String value = System.getenv("KOTLIN_HOME");
+            JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
+            Path kotlinDir = Paths.get(value);
+            return JkPathSequence.of()
+                    .and(kotlinDir.resolve("lib/kotlin-stdlib.jar"))
+                    .and(kotlinDir.resolve("lib/kotlin-stdlib-jdk7.jar"))
+                    .and(kotlinDir.resolve("lib/kotlin-stdlib-jdk8.jar"));
+        }
+        return JkDependencyResolver.of().addRepos(repos).resolve(JkDependencySet.of(JkKotlinModules.STDLIB_JDK8 + ":"
+                        + getVersion())).getFiles();
     }
 
     public JkKotlinCompiler setFailOnError(boolean fail) {

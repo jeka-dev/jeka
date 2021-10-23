@@ -144,12 +144,11 @@ public final class JkJavaCompiler<T> {
         }
         List<Path> sourceFiles = compileSpec.computeJavacSourceArguments();
         if (sourceFiles.isEmpty() || compileSpec.getSources().count(1, false) == 0) {
-            JkLog.info("No source files found in " + compileSpec.getSourceDirs());
+            JkLog.info("No source files found in " + compileSpec.getSources());
             return true;
         }
         JkUtilsPath.createDirectories(outputDir);
-        String message = "Compile " + computeCompileMessage(sourceFiles) + " to "
-                + JkUtilsPath.relativizeFromWorkingDir(outputDir);
+        String message = "Compile " + computeCompileMessage(sourceFiles) + " to " + outputDir;
         if (JkLog.verbosity().isVerbose()) {
             message = message + " using options : " + String.join(" ", options);
         }
@@ -216,7 +215,7 @@ public final class JkJavaCompiler<T> {
         List<String> options = new LinkedList<>();
         options.addAll(Arrays.asList(toolOptions));
         options.addAll(compileSpec.getOptions());
-        CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutputStream()),
+        CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutPrintStream()),
                 null, new JkDiagnosticListener(), options, null, javaFileObjects);
         return task.call();
     }
