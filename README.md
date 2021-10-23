@@ -185,6 +185,10 @@ Note that it exists a now an IntelliJ plugin to integrate Jeka to get rid of the
 
 To build the project without running whole integration test suite, run `dev.jeka.core.CoreBuild` class main method.
 
+For debuging the project, you have to setup Intellij in order to workaround witj an Intellij issue :
+Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
+[See here](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu)
+
 ## How to Release ?
 
 Release is done automatically by Github action on PUSH on *master*.
