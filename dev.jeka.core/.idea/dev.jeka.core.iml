@@ -123,7 +123,9 @@
           <root url="jar://$MODULE_DIR$/jeka/libs/compile/junit-platform-launcher-1.8.1.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.ideaLibSources/junit-platform-launcher-1.8.1-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="" scope="PROVIDED">

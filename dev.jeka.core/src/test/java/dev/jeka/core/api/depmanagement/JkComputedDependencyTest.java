@@ -18,7 +18,7 @@ public class JkComputedDependencyTest {
             .setBaseDir(root);
         JkDependencySet dependencies = JkDependencySet.of().and(javaProject.toDependency());
         JkComputedDependency computedDependency = (JkComputedDependency) dependencies.getEntries().get(0);
-        Assert.assertEquals(root, computedDependency.getIdeProjectDir());
+        Assert.assertEquals(root, computedDependency.getIdeProjectDir().toAbsolutePath().normalize());
     }
 
 }

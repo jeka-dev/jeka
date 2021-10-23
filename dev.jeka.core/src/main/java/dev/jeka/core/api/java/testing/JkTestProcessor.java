@@ -33,7 +33,7 @@ public final class JkTestProcessor<T> {
      * Style of progress mark to display on console while the tests are running.
      */
     public enum JkProgressOutputStyle implements Serializable {
-        FULL, TREE, ONE_LINE, SILENT
+        FULL, TREE, ONE_LINE, SILENT, DYNAMIC
     }
 
     private static final String JAR_LOCATION = "META-INF/junitplatform/";

@@ -88,7 +88,7 @@ public class CoreBuild extends JkClass {
                     .__
                     .getTestProcessor()
                         .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE)
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.DYNAMIC)
                         .__
                     .__
                     .getTestSelection()
