@@ -12,6 +12,8 @@ public final class JkPathMatcher implements PathMatcher {
 
     private static final String ALL_LABEL_PREFIX = "all && ";
 
+    static final JkPathMatcher ACCEPT_ALL = JkPathMatcher.of();
+
     // --------------------- Factory methods ------------------------------------------------
 
     /**
@@ -121,11 +123,27 @@ public final class JkPathMatcher implements PathMatcher {
     // ---------------------------- adders ---------------------------------------
 
     public JkPathMatcher and(PathMatcher other) {
+        /*
+        if (this == ACCEPT_ALL) {
+            if (other == ACCEPT_ALL) {
+                return ACCEPT_ALL;
+            }
+            return new JkPathMatcher(this.matcher, other.toString());
+        }
+        if (other == ACCEPT_ALL) {
+            return this;
+        }
+        */
         return new JkPathMatcher(new AndMatcher(this.matcher, other),
                 this.label + " && " + other.toString());
     }
 
     public JkPathMatcher or(PathMatcher other) {
+        /*
+        if (this == ACCEPT_ALL || other == ACCEPT_ALL) {
+            return ACCEPT_ALL;
+        }
+         */
         return new JkPathMatcher(new OrMatcher(this.matcher, other),
                 this.label + " || " + other.toString());
     }

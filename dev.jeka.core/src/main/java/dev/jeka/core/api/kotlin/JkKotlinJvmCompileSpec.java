@@ -5,15 +5,13 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -36,20 +34,13 @@ public final class JkKotlinJvmCompileSpec {
 
     private final List<String> options = new LinkedList<>();
 
-    private final List<Path> sourceFiles = new LinkedList<>();
+    private JkPathTreeSet sources = JkPathTreeSet.ofEmpty();
 
     private JkKotlinJvmCompileSpec() {
     }
 
     public static JkKotlinJvmCompileSpec of() {
         return new JkKotlinJvmCompileSpec();
-    }
-
-    public JkKotlinJvmCompileSpec copy() {
-        JkKotlinJvmCompileSpec result = new JkKotlinJvmCompileSpec();
-        result.options.addAll(options);
-        result.sourceFiles.addAll(sourceFiles);
-        return result;
     }
 
     /**
@@ -117,54 +108,22 @@ public final class JkKotlinJvmCompileSpec {
 
     // ----------------- source files -----------------------------------------
 
-    /**
-     * Adds specified source files to the set of java sources to compile.
-     *
-     **/
-    public JkKotlinJvmCompileSpec addSources(Iterable<Path> paths) {
-        List<Path> files = JkUtilsPath.disambiguate(paths);
-        for (final Path file : files) {
-            if (Files.isDirectory(file)) {
-                this.sourceFiles.add(file);
-            } else if (file.getFileName().toString().toLowerCase().endsWith(".kt")
-                    || file.getFileName().toString().toLowerCase().endsWith("*.java")) {
-                this.sourceFiles.add(file);
-            }
-        }
+    public JkKotlinJvmCompileSpec setSources(Function<JkPathTreeSet, JkPathTreeSet> modifier) {
+        return setSources(modifier.apply(this.sources));
+    }
+
+    public JkKotlinJvmCompileSpec setSources(JkPathTreeSet sources) {
+        this.sources = sources.mergeDuplicateRoots();
         return this;
-    }
-
-    public JkKotlinJvmCompileSpec addSources(JkPathTree tree) {
-        if (!tree.isDefineMatcher()) {
-            return addSources(tree.getRoot());
-        }
-        return addSources(tree.getFiles());
-    }
-
-    public JkKotlinJvmCompileSpec addSources(JkPathTreeSet treeSet) {
-        treeSet.toList().forEach(this::addSources);
-        return this;
-    }
-
-    /**
-     * @see #addSources(Iterable)
-     */
-    public JkKotlinJvmCompileSpec addSources(Path path1, Path path2, Path... files) {
-        return addSources(JkUtilsIterable.listOf2orMore(path1, path2, files));
     }
 
     /**
      * Returns all source files to be compiled.
      */
-    public List<Path> getSourceFiles() {
-        return Collections.unmodifiableList(this.sourceFiles);
+    public JkPathTreeSet getSources() {
+        return sources;
     }
 
-    public List<Path> getSourceFilesRelativePath() {
-        return getSourceFiles().stream()
-                .map(path -> path.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(path) : path)
-                .collect(Collectors.toList());
-    }
 
     // ------------------ classpath --------------------------------
 
@@ -294,7 +253,7 @@ public final class JkKotlinJvmCompileSpec {
     public JkKotlinJvmCompileSpec clone() {
         JkKotlinJvmCompileSpec result = new JkKotlinJvmCompileSpec();
         result.options.addAll(this.options);
-        result.sourceFiles.addAll(this.sourceFiles);
+        result.sources = this.sources;
         return result;
     }
 

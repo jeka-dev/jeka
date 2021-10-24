@@ -257,6 +257,12 @@ public final class JkPathTreeSet {
         return result;
     }
 
+    public boolean containFiles() {
+        return count(1, false) > 0;
+    }
+
+
+
     public JkPathTreeSet resolve(Path path) {
         List<JkPathTree> list = new LinkedList<>();
         for (JkPathTree tree : pathTrees) {
@@ -265,6 +271,31 @@ public final class JkPathTreeSet {
         return new JkPathTreeSet(list);
     }
 
+    /**
+     * Merges trees having same root by compining their respective matcher.
+     */
+    public JkPathTreeSet mergeDuplicateRoots() {
+        List<JkPathTree> result = new ArrayList<>();
+        for (JkPathTree tree : pathTrees) {
+            Path root = tree.getRoot();
+            boolean found = false;
+            for (int i = 0; i < result.size(); i++) {
+                JkPathTree resultTree = result.get(i);
+                if (root.equals(resultTree.getRoot())) {
+                    result.remove(i);
+                    found = true;
+                    JkPathMatcher pathMatcher = resultTree.getMatcher().or(tree.getMatcher());
+                    resultTree = resultTree.withMatcher(pathMatcher);
+                    result.add(i, resultTree);
+                    break;
+                }
+            }
+            if (!found) {
+                result.add(tree);
+            }
+        }
+        return JkPathTreeSet.of(result);
+    }
 
     @Override
     public String toString() {

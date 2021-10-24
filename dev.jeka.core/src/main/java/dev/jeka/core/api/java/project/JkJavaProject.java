@@ -9,6 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * A Java project consists in 3 parts : <ul>
@@ -37,6 +38,8 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     private final JkJavaProjectConstruction construction;
 
     private final JkJavaProjectPublication publication;
+
+    public Function<JkJavaIdeSupport, JkJavaIdeSupport> ideSupportModifier = x -> x;
 
     private JkJavaProject() {
         documentation = new JkJavaProjectDocumentation( this);
@@ -168,12 +171,17 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
                 construction.getRuntimeDependencies(),
                 construction.getTesting().getCompilation().getDependencies(),
                 JkVersionedModule.ConflictStrategy.TAKE_FIRST);
-        return JkJavaIdeSupport.of(baseDir)
+        JkJavaIdeSupport ideSupport = JkJavaIdeSupport.of(baseDir)
             .setSourceVersion(construction.getJvmTargetVersion())
             .setProdLayout(construction.getCompilation().getLayout())
             .setTestLayout(construction.getTesting().getCompilation().getLayout())
             .setDependencies(qualifiedDependencies)
             .setDependencyResolver(construction.getDependencyResolver());
+        return ideSupportModifier.apply(ideSupport);
+    }
+
+    public void setJavaIdeSupport(Function<JkJavaIdeSupport, JkJavaIdeSupport> ideSupport) {
+        this.ideSupportModifier = ideSupportModifier.andThen(ideSupport);
     }
 
     public JkLocalProjectDependency toDependency() {

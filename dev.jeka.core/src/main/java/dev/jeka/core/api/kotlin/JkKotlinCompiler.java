@@ -6,8 +6,10 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -32,6 +34,8 @@ public final class JkKotlinCompiler {
     }
 
     public static final String KOTLIN_VERSION_OPTION = "jeka.kotlin.version";
+
+    public static final JkPathMatcher KOTLIN_SOURCE_MATCHER = JkPathMatcher.of("**/*.kt", "*.kt");
 
     private static final String KOTLIN_HOME = "KOTLIN_HOME";
 
@@ -237,6 +241,10 @@ public final class JkKotlinCompiler {
      */
     @SuppressWarnings("unchecked")
     public boolean compile(JkKotlinJvmCompileSpec compileSpec) {
+        if (compileSpec.getSources().count(1, false) == 0) {
+            JkLog.warn("No source to compile in " + compileSpec.getSources());
+            return true;
+        }
         final Path outputDir = compileSpec.getOutputDir();
         List<String> effectiveOptions = compileSpec.getOptions();
         effectiveOptions.addAll(0, this.options);
@@ -244,17 +252,13 @@ public final class JkKotlinCompiler {
             throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + effectiveOptions);
         }
         JkUtilsPath.createDirectories(outputDir);
-        String message = "Compiling Kotlin " + compileSpec.getSourceFilesRelativePath() + " source files";
+        String message = "Compiling Kotlin sources " + compileSpec.getSources();
         if (JkLog.verbosity().isVerbose()) {
             message = message + " to " + outputDir + " using options : " + String.join(" ", effectiveOptions);
         }
         long start = System.nanoTime();
         JkLog.startTask(message);
-        if (compileSpec.getSourceFiles().isEmpty()) {
-            JkLog.warn("No source to compile");
-            JkLog.endTask("");
-            return true;
-        }
+
         final Result result = run(compileSpec);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         if (!result.success) {
@@ -287,18 +291,14 @@ public final class JkKotlinCompiler {
     }
 
     private Result run(JkKotlinJvmCompileSpec compileSpec) {
+        JkPathMatcher filter = KOTLIN_SOURCE_MATCHER.or(JkJavaCompiler.JAVA_SOURCE_MATCHER);
         final List<String> sourcePaths = new LinkedList<>();
-        for (final Path file : compileSpec.getSourceFiles()) {
-            Path relativeFile = JkUtilsPath.relativizeFromWorkingDir(file);
-            if (Files.isDirectory(relativeFile)) {
-                JkPathTree.of(relativeFile).andMatching(true, "**/*.kt", "*.kt", "**/*.java", "*.java").stream()
-                        .forEach(path -> sourcePaths.add(path.toString()));
-            } else {
-                sourcePaths.add(relativeFile.toString());
-            }
+        for (final Path file : compileSpec.getSources().andMatcher(filter).getFiles()) {
+            sourcePaths.add(file.toString());
+
         }
         if (sourcePaths.isEmpty()) {
-            JkLog.warn("No Kotlin source found in " + compileSpec.getSourceFiles());
+            JkLog.warn("No Kotlin source found in " + compileSpec.getSources());
             return new Result(true, Collections.emptyList());
         }
         JkLog.info("" + sourcePaths.size() + " files to compile.");

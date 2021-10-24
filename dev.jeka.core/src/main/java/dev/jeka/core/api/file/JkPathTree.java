@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  */
 public final class JkPathTree implements Closeable {
 
-    private static final JkPathMatcher ACCEPT_ALL = JkPathMatcher.of();
+
 
     /**
      * Creates a {@link JkPathTree} having the specified root directory.
@@ -50,7 +50,7 @@ public final class JkPathTree implements Closeable {
     private final JkPathMatcher matcher;
 
     private static JkPathTree of(Path rootDir, boolean zip) {
-        return of(rootDir, ACCEPT_ALL, zip);
+        return of(rootDir, JkPathMatcher.ACCEPT_ALL, zip);
     }
 
     private static JkPathTree of(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
@@ -87,14 +87,14 @@ public final class JkPathTree implements Closeable {
     }
 
     public boolean hasFilter() {
-        return matcher == ACCEPT_ALL;
+        return matcher == JkPathMatcher.ACCEPT_ALL;
     }
 
     /**
      * Returns true if a matcher has explicitly been defined on this tree.
      */
     public boolean isDefineMatcher() {
-        return this.matcher == ACCEPT_ALL;
+        return this.matcher == JkPathMatcher.ACCEPT_ALL;
     }
 
     // ------------------------------- functional ---------------------------------
@@ -415,6 +415,10 @@ public final class JkPathTree implements Closeable {
         return JkUtilsPath.childrenCount(getRoot(), max, includeDirectories, this.matcher);
     }
 
+    public boolean containFiles() {
+        return count(1, false) > 0;
+    }
+
     /**
      * If the root of this tree is absolute then this method returns this tree.
      * If the root of this tree is relative then this method returns a tree having a getRoot
@@ -435,7 +439,7 @@ public final class JkPathTree implements Closeable {
 
     @Override
     public String toString() {
-        return rootHolder + ":" + matcher;
+        return this.hasFilter() ? rootHolder + ":" + matcher : rootHolder.toString();
     }
 
     /**

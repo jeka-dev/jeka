@@ -15,7 +15,6 @@ import dev.jeka.core.tool.JkDoc
 import dev.jeka.core.tool.JkInit
 import dev.jeka.core.tool.builtins.java.JkPluginJava
 import java.awt.Desktop
-import kotlin.io.path.Path
 
 class Build : JkClass() {
 
@@ -53,7 +52,7 @@ class Build : JkClass() {
             .kotlinCompiler
                 .addPlugin("$COMPILER_PLUGIN_KOTLINX_SERIALIZATION:${kotlin.kotlinVersion}")
         kotlin.common()
-            .setTestDir(null)
+            .setTestSrcDir(null)
             .setCompileDependencies(JkDependencySet.of()
                 .and("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 .and("io.ktor:ktor-client-core:$ktorVersion")

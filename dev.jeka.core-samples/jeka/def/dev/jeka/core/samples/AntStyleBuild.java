@@ -52,7 +52,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
                 .setOutputDir(classDir)
                 .setClasspath(prodClasspath)
                 .setSourceAndTargetVersion(JkJavaVersion.V8)
-                .addSources(javaSources));
+                .setSources(javaSources.toSet()));
         JkPathTree resources =   JkPathTree.of(src).andMatching(false, "**/*.java");
         resources.copyTo(classDir);
     }

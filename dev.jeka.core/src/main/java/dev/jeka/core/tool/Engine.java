@@ -6,10 +6,7 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.*;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
@@ -281,7 +278,7 @@ final class Engine {
             }
         }
         final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath);
-        if (!javaCompileSpec.computeJavacSourceArguments().isEmpty() && ToolProvider.getSystemJavaCompiler() == null) {
+        if (javaCompileSpec.getSources().containFiles() && ToolProvider.getSystemJavaCompiler() == null) {
             throw new JkException("The running Java platform (" +  System.getProperty("java.home") +
                     ") does not provide compiler (javac). Please provide a JDK java platform by pointing JAVA_HOME" +
                     " or JEKA_JDK environment variable to a JDK directory.");
@@ -325,7 +322,7 @@ final class Engine {
         return JkJavaCompileSpec.of()
                 .setClasspath(classpath.and(resolver.defClassDir))
                 .setOutputDir(resolver.defClassDir)
-                .addSources(defSource)
+                .setSources(defSource.toSet())
                 .addOptions(this.compileOptions);
     }
 
@@ -333,7 +330,7 @@ final class Engine {
         JkUtilsPath.createDirectories(resolver.defClassDir);
         return JkKotlinJvmCompileSpec.of()
                 .setClasspath(defClasspath)
-                .addSources(resolver.defSourceDir)
+                .setSources(JkPathTreeSet.of(resolver.defSourceDir))
                 .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(resolver.defClassDir));
     }
 

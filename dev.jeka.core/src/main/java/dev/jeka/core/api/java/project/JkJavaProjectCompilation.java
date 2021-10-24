@@ -207,7 +207,7 @@ public class JkJavaProjectCompilation<T> {
             .setSourceAndTargetVersion(construction.getJvmTargetVersion())
             .setEncoding(construction.getSourceEncoding())
             .setClasspath(resolveDependencies().getFiles())
-            .addSources(layout.resolveSources().and(JkPathTree.of(layout.resolveGeneratedSourceDir())))
+            .setSources(layout.resolveSources().and(JkPathTree.of(layout.resolveGeneratedSourceDir())))
             .addOptions(extraJavaCompilerOptions)
             .setOutputDir(layout.resolveClassDir());
     }
@@ -219,7 +219,7 @@ public class JkJavaProjectCompilation<T> {
                 .setEncoding(construction.getSourceEncoding())
                 .setClasspath(construction.getDependencyResolver().resolve(dependencies).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
-                .addSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
+                .setSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
                 .addOptions(extraJavaCompilerOptions)
                 .setOutputDir(layout.resolveClassDir());
     }

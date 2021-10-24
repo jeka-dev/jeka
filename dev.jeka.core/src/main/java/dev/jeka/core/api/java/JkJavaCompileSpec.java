@@ -9,6 +9,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -148,30 +149,13 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
     /**
      * Adds specified source files to the set of java sources to compile.
      */
-    public JkJavaCompileSpec<T> addSources(JkPathTree tree) {
-        return addSources(JkPathTreeSet.of(tree));
+    public JkJavaCompileSpec<T> setSources(Function<JkPathTreeSet, JkPathTreeSet> modifier) {
+        return setSources(modifier.apply(this.sources));
     }
 
-    public JkJavaCompileSpec<T> addSources(JkPathTreeSet treeSet) {
-        this.sources = this.sources.and(treeSet);
+    public JkJavaCompileSpec<T> setSources(JkPathTreeSet sources) {
+        this.sources = sources.mergeDuplicateRoots();
         return this;
-    }
-
-    public List<Path> computeJavacSourceArguments() {
-        List<JkPathTree> nonEmptyTrees = new LinkedList<>();
-        for (JkPathTree tree : this.sources.toList()) {
-            if (tree.count(1, false) > 0) {
-                nonEmptyTrees.add(tree);
-            }
-        }
-        if (nonEmptyTrees.isEmpty()) {
-            return Collections.emptyList();
-        }
-        if (nonEmptyTrees.size() == 1) {
-            JkPathTree singleTree = nonEmptyTrees.get(0);
-            return singleTree.hasFilter() ? singleTree.getFiles() : Collections.singletonList(singleTree.getRoot());
-        }
-        return sources.getFiles();
     }
 
     public JkPathTreeSet getSources() {
@@ -184,8 +168,6 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
                 .map(JkUtilsPath::relativizeFromWorkingDir)
                 .collect(Collectors.toList());
     }
-
-
 
     // ------------------ classpath --------------------------------
 
