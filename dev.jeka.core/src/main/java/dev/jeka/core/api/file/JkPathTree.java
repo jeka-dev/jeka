@@ -86,15 +86,8 @@ public final class JkPathTree implements Closeable {
         return matcher;
     }
 
-    public boolean hasFilter() {
-        return matcher == JkPathMatcher.ACCEPT_ALL;
-    }
-
-    /**
-     * Returns true if a matcher has explicitly been defined on this tree.
-     */
-    public boolean isDefineMatcher() {
-        return this.matcher == JkPathMatcher.ACCEPT_ALL;
+    public boolean  hasFilter() {
+        return matcher != JkPathMatcher.ACCEPT_ALL;
     }
 
     // ------------------------------- functional ---------------------------------

@@ -1,9 +1,6 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.*;
@@ -90,7 +87,7 @@ final class Engine {
     void execute(CommandLine commandLine) {
         final long start = System.nanoTime();
         JkLog.startTask("Compile def and initialise Jeka classes");
-        List<JkModuleDependency> commandLineDependencies = commandLine.getDefDependencies();
+        List<JkDependency> commandLineDependencies = commandLine.getDefDependencies();
         JkLog.trace("Add following dependencies to Jeka classpath : " + commandLineDependencies);
         defDependencies = defDependencies
                 .and(commandLineDependencies)

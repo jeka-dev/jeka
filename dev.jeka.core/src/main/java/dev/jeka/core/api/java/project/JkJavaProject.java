@@ -108,7 +108,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     }
 
     public String getArtifactBaseName() {
-        return artifactBaseName != null ? artifactBaseName : baseDir.getFileName().toString();
+        return artifactBaseName != null ? artifactBaseName : baseDir.toAbsolutePath().getFileName().toString();
     }
 
     public JkJavaProject setArtifactBaseName(String artifactBaseName) {

@@ -1,19 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry including="**/*" kind="src" path="jeka/def"/>
+	<classpathentry kind="src" including="**/*" path="jeka/def"/>
 	<classpathentry kind="src" path="src/test/java"/>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/com.google.guava/guava/bundles/guava-21.0.jar" sourcepath="JEKA_USER_HOME/cache/repo/com.google.guava/guava/jars/guava-21.0-sources.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/com.sun.jersey/jersey-server/jars/jersey-server-1.19.jar" sourcepath="JEKA_USER_HOME/cache/repo/com.sun.jersey/jersey-server/jars/jersey-server-1.19-sources.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/junit/junit/jars/junit-4.11.jar" sourcepath="JEKA_USER_HOME/cache/repo/junit/junit/jars/junit-4.11-sources.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar" sourcepath="JEKA_USER_HOME/cache/repo/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3-sources.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/org.eclipse.jdt.core.compiler/ecj/jars/ecj-4.6.1.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpclient/jars/httpclient-4.5.6.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpcore/jars/httpcore-4.4.10.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/commons-logging/commons-logging/jars/commons-logging-1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/commons-codec/commons-codec/jars/commons-codec-1.10.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_USER_HOME/cache/repo/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar"/>
-	<classpathentry exported="true" kind="var" path="JEKA_HOME/dev.jeka.jeka-core.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="C:/Dev/ideaProjects/jeka/dev.jeka.core-samples/src/main/java"/>
+	<classpathentry kind="src" path="C:/Dev/ideaProjects/jeka/dev.jeka.core-samples/src/main/resources"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.guava/guava/bundles/guava-30.0-jre.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.guava/failureaccess/bundles/failureaccess-1.0.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.google.guava/failureaccess/jars/failureaccess-1.0.1-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.guava/listenablefuture/jars/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar" exported="true"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-3.0.2-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.checkerframework/checker-qual/jars/checker-qual-3.5.0-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.3.4-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.3-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.sun.jersey/jersey-server/jars/jersey-server-1.19.4.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.sun.jersey/jersey-server/jars/jersey-server-1.19.4-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.sun.jersey/jersey-core/jars/jersey-core-1.19.4.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.sun.jersey/jersey-core/jars/jersey-core-1.19.4-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/javax.ws.rs/jsr311-api/jars/jsr311-api-1.1.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/javax.ws.rs/jsr311-api/jars/jsr311-api-1.1.1-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.github.djeang/vincer-dom/jars/vincer-dom-1.2.0.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.github.djeang/vincer-dom/jars/vincer-dom-1.2.0-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter/jars/junit-jupiter-5.8.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter/jars/junit-jupiter-5.8.1-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.8.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.8.1-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.8.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.8.1-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter-params/jars/junit-jupiter-params-5.8.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter-params/jars/junit-jupiter-params-5.8.1-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.8.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.8.1-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.8.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.8.1-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="C:/Dev/ideaProjects/jeka/dev.jeka.core-samples/jeka/wrapper/dev.jeka.jeka-core-wrapper.jar" exported="true"/>
+	<classpathentry kind="var" path="JEKA_HOME/dev.jeka.jeka-core.jar" exported="true" sourcepath="JEKA_HOME/libs-sources/dev.jeka.jeka-core-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpclient/jars/httpclient-4.5.6.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpclient/jars/httpclient-4.5.6-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpcore/jars/httpcore-4.4.10.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpcore/jars/httpcore-4.4.10-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/commons-logging/commons-logging/jars/commons-logging-1.2.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/commons-logging/commons-logging/jars/commons-logging-1.2-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/commons-codec/commons-codec/jars/commons-codec-1.10.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/commons-codec/commons-codec/jars/commons-codec-1.10-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1-sources.jar"/>
+	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.guava/guava/bundles/guava-21.0.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.google.guava/guava/jars/guava-21.0-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

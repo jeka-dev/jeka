@@ -1,9 +1,15 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependency;
+import dev.jeka.core.api.depmanagement.JkFileDependency;
+import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /*
@@ -17,7 +23,7 @@ final class CommandLine {
 
     private static final char PLUGIN_SYMBOL_CHAR = '#';
 
-    private static final String MODULE_SYMBOL_CHAR = "@";
+    private static final String AT_SYMBOL_CHAR = "@";
 
     static CommandLine parse(String[] words) {
         final CommandLine result = new CommandLine();
@@ -41,7 +47,7 @@ final class CommandLine {
 
     private List<PluginOptions> pluginOptions;
 
-    private List<JkModuleDependency> defDependencies;
+    private List<JkDependency> defDependencies;
 
     private String[] rawArgs;
 
@@ -49,12 +55,24 @@ final class CommandLine {
         super();
     }
 
-    private static List<JkModuleDependency> dependencies(String[] words) {
-        final List<JkModuleDependency> result = new LinkedList<>();
+    private static List<JkDependency> dependencies(String[] words) {
+        final List<JkDependency> result = new LinkedList<>();
         for (final String word : words) {
-            if (word.startsWith(MODULE_SYMBOL_CHAR)) {
+            if (word.startsWith(AT_SYMBOL_CHAR)) {
                 final String dependencyDef = word.substring(1);
-                result.add(JkModuleDependency.of(dependencyDef));
+                if (JkModuleDependency.isModuleDependencyDescription(dependencyDef)
+                        && !JkModuleDependency.of(dependencyDef).hasUnspecifiedVersion()) {
+                    result.add(JkModuleDependency.of(dependencyDef));
+                } else {
+                    Path candidatePath = Paths.get(dependencyDef);
+                    if (Files.exists(candidatePath)) {
+                        result.add(JkFileSystemDependency.of(candidatePath));
+                    } else {
+                        throw new JkException("Command line argument "
+                                + word + " cannot be recognized as module coordinate of file name.");
+                    }
+                }
+
             }
         }
         return result;
@@ -236,7 +254,7 @@ final class CommandLine {
         return pluginOptions;
     }
 
-    List<JkModuleDependency> getDefDependencies() {
+    List<JkDependency> getDefDependencies() {
         return this.defDependencies;
     }
 

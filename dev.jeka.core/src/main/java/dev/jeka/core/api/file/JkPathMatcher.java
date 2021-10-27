@@ -1,5 +1,7 @@
 package dev.jeka.core.api.file;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+
 import java.nio.file.*;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -123,27 +125,24 @@ public final class JkPathMatcher implements PathMatcher {
     // ---------------------------- adders ---------------------------------------
 
     public JkPathMatcher and(PathMatcher other) {
-        /*
         if (this == ACCEPT_ALL) {
-            if (other == ACCEPT_ALL) {
+            if (other == ACCEPT_ALL.matcher || other == ACCEPT_ALL) {
                 return ACCEPT_ALL;
             }
-            return new JkPathMatcher(this.matcher, other.toString());
+            return new JkPathMatcher(other, other.toString());
         }
-        if (other == ACCEPT_ALL) {
+        if (other == ACCEPT_ALL.matcher || other ==ACCEPT_ALL) {
             return this;
         }
-        */
         return new JkPathMatcher(new AndMatcher(this.matcher, other),
                 this.label + " && " + other.toString());
     }
 
     public JkPathMatcher or(PathMatcher other) {
-        /*
-        if (this == ACCEPT_ALL || other == ACCEPT_ALL) {
+        JkUtilsAssert.argument(other != null, "Combined path matcher cannot be null");
+        if (this == ACCEPT_ALL || other == ACCEPT_ALL || other == ACCEPT_ALL.matcher) {
             return ACCEPT_ALL;
         }
-         */
         return new JkPathMatcher(new OrMatcher(this.matcher, other),
                 this.label + " || " + other.toString());
     }

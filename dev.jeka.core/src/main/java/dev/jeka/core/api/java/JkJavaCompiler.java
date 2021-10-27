@@ -208,7 +208,7 @@ public final class JkJavaCompiler<T> {
 
     private static boolean runOnTool(JkJavaCompileSpec compileSpec, JavaCompiler compiler, String[] toolOptions) {
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        List<File> files = JkUtilsPath.toFiles(compileSpec.getSources().getFiles());
+        List<File> files = JkUtilsPath.toFiles(compileSpec.getSources().withMatcher(JAVA_SOURCE_MATCHER).getFiles());
         Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
         List<String> options = new LinkedList<>();
         options.addAll(Arrays.asList(toolOptions));

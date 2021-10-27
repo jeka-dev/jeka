@@ -146,10 +146,8 @@ public class JkPluginKotlin extends JkPlugin {
                     .__
                     .getLayout()
                         .addSource(jvm.kotlinTestSourceDir);
-            JkPathTree javaInKotlinDir = JkPathTree.of(javaProject.getBaseDir().resolve(kotlinSourceDir))
-                    .andMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
-            JkPathTree javaInKotlinTestDir = JkPathTree.of(javaProject.getBaseDir().resolve(kotlinTestSourceDir))
-                    .andMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+            JkPathTree javaInKotlinDir = JkPathTree.of(javaProject.getBaseDir().resolve(kotlinSourceDir));
+            JkPathTree javaInKotlinTestDir = JkPathTree.of(javaProject.getBaseDir().resolve(kotlinTestSourceDir));
             prodCompile.getLayout().setSources(javaInKotlinDir);
             testCompile.getLayout().setSources(javaInKotlinTestDir);
             if (addStdlib) {

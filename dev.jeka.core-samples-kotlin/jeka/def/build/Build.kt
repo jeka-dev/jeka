@@ -46,7 +46,7 @@ class Build : JkClass() {
                     .and(JkKotlinModules.TEST_JUNIT5)
                 }
         jvmProject.construction.manifest.addMainClass("ServerKt")
-        jvmProject.publication.includeJavadocAndSources(false);
+        jvmProject.publication.includeJavadocAndSources(false)
         kotlin.jvm()
             .useFatJarForMainArtifact()
             .kotlinCompiler
@@ -58,6 +58,8 @@ class Build : JkClass() {
                 .and("io.ktor:ktor-client-core:$ktorVersion")
             )
     }
+
+    // -------------------------- End of build description --------------------------------------------------------
 
     fun cleanPack() {
         clean(); kotlin.jvm().project.publication.pack();

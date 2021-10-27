@@ -96,10 +96,10 @@ public class JkCompileLayout<T> {
      */
     public JkCompileLayout<T> setSourceMavenStyle(Concern concern) {
         if (concern == Concern.PROD) {
-            sources = JkPathTreeSet.of(Paths.get("src/main/java")).andMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+            sources = JkPathTreeSet.of(Paths.get("src/main/java"));
             resources = JkPathTreeSet.of(Paths.get("src/main/resources"));
         } else {
-            sources = JkPathTreeSet.of(Paths.get("src/test/java")).andMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+            sources = JkPathTreeSet.of(Paths.get("src/test/java"));
             resources = JkPathTreeSet.of(Paths.get("src/test/resources"));
         }
         return this;
@@ -114,10 +114,10 @@ public class JkCompileLayout<T> {
      */
     public JkCompileLayout<T> setSourceSimpleStyle(Concern concern) {
         if (concern == Concern.PROD) {
-            sources = JkPathTreeSet.of(Paths.get("src")).andMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+            sources = JkPathTreeSet.of(Paths.get("src"));
             resources = JkPathTreeSet.of(Paths.get("src")).andMatcher(JAVA_RESOURCE_MATCHER);
         } else {
-            this.sources = JkPathTreeSet.of(Paths.get("test")).andMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+            this.sources = JkPathTreeSet.of(Paths.get("test"));
             this.resources = JkPathTreeSet.of(Paths.get("test")).andMatcher(JAVA_RESOURCE_MATCHER);
         }
         return this;
@@ -163,7 +163,7 @@ public class JkCompileLayout<T> {
     }
 
     public JkCompileLayout<T> addSource(Path dir) {
-        return addSource(JkPathTree.of(dir).andMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER));
+        return addSource(JkPathTree.of(dir));
     }
 
     public JkCompileLayout<T> addSource(String path) {

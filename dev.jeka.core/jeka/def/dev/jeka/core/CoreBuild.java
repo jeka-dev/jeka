@@ -88,7 +88,7 @@ public class CoreBuild extends JkClass {
                     .__
                     .getTestProcessor()
                         .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.DYNAMIC)
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.BAR)
                         .__
                     .__
                     .getTestSelection()
@@ -141,7 +141,7 @@ public class CoreBuild extends JkClass {
         final List<Path> ivySourceLibs = getBaseTree().goTo("jeka/libs-sources")
                 .andMatching(true, "ivy-*.jar").getFiles();
         distrib
-            .importFiles(getBaseDir().getParent().resolve("LICENSE"))
+            .importFiles(getBaseDir().toAbsolutePath().getParent().resolve("LICENSE"))
             .importDir(getBaseDir().resolve("src/main/dist"))
             .importDir(getBaseDir().resolve("src/main/java/META-INF/bin"))
             .importFiles(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()))

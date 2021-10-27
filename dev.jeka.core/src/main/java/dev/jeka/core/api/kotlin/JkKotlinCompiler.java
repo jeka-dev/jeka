@@ -302,6 +302,7 @@ public final class JkKotlinCompiler {
             return new Result(true, Collections.emptyList());
         }
         JkLog.info("" + sourcePaths.size() + " files to compile.");
+        JkLog.info("Kotlin version : " + getVersion() + ", Target JVM : " + compileSpec.getTargetVersion() );
         JkProcess kotlincProcess;
         List<String> loggedOptions = new LinkedList<>(this.options);
         JkKotlinJvmCompileSpec effectiveSpec = compileSpec.clone();
@@ -316,7 +317,7 @@ public final class JkKotlinCompiler {
                             .map(JkKotlinCompiler::toJavaOption)
                             .collect(Collectors.toList()));
         } else {
-            JkLog.info("Use kotlin compiler version " + jarsVersionAndTarget.version + " with options " + loggedOptions);
+            JkLog.info("Use kotlin compiler with options " + loggedOptions);
             kotlincProcess = JkJavaProcess.ofJava("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
                     .setClasspath(jarsVersionAndTarget.jars)
                     .addJavaOptions(this.jvmOptions)

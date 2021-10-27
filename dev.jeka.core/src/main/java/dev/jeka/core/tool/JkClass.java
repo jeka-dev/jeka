@@ -4,10 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsObject;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsThrowable;
+import dev.jeka.core.api.utils.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,9 +27,8 @@ public class JkClass {
         if (baseDir == null) {
             BASE_DIR_CONTEXT.set(null);
         } else {
-            JkUtilsAssert.argument(baseDir.isAbsolute(), baseDir + " is not absolute");
             JkUtilsAssert.argument(Files.isDirectory(baseDir), baseDir + " is not a directory.");
-            BASE_DIR_CONTEXT.set(baseDir.toAbsolutePath().normalize());
+            BASE_DIR_CONTEXT.set(baseDir);
         }
     }
 
@@ -116,7 +112,7 @@ public class JkClass {
 
     static <T extends JkClass> T ofUninitialized(Class<T> jkClass) {
         if (BASE_DIR_CONTEXT.get() == null) {
-            baseDirContext(Paths.get("").toAbsolutePath());
+            baseDirContext(Paths.get(""));
         }
         final T jkCkass = JkUtilsReflect.newInstance(jkClass);
         final JkClass jkClassInstance = jkCkass;

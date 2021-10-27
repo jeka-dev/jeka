@@ -10,8 +10,6 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
 import java.io.PrintStream;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 class ProgressListeners {
 
@@ -20,7 +18,7 @@ class ProgressListeners {
             return null;
         }
         switch (progressDisplayer) {
-            case DYNAMIC: return new ProgressListeners.DynamicProgressExecutionListener();
+            case BAR: return new ProgressBarExecutionListener();
             case TREE: return new ProgressListeners.TreeProgressExecutionListener();
             case FULL: return new ProgressListeners.ConsoleProgressExecutionListener();
             case ONE_LINE: return new ProgressListeners.OneLineProgressExecutionListener();
@@ -133,7 +131,7 @@ class ProgressListeners {
         }
     }
 
-    static class DynamicProgressExecutionListener implements TestExecutionListener {
+    static class ProgressBarExecutionListener implements TestExecutionListener {
 
         private static final int BAR_LENGTH = 50;
 
@@ -145,8 +143,11 @@ class ProgressListeners {
 
         private long testCount;
 
+        private TestPlan testPlan;
+
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
+            this.testPlan = testPlan;
             testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isTest());
             System.out.println("Launch " + testCount + " tests ");
             System.out.flush();
@@ -154,29 +155,39 @@ class ProgressListeners {
 
         @Override
         public void testPlanExecutionFinished(TestPlan testPlan) {
-            // Do nothing
+            silencer.silent(false);
+            System.out.println();
+            System.out.flush();
+        }
+
+        @Override
+        public void executionSkipped(TestIdentifier testIdentifier, String reason) {
+            if (testIdentifier.isTest()) {
+                index ++;
+            } else {
+                int children = testPlan.getDescendants(testIdentifier).size();
+                index += children;
+            }
         }
 
         @Override
         public void executionStarted(TestIdentifier testIdentifier) {
             if(testIdentifier.getType().isTest()) {
                 index++;
-                String line = line(testIdentifier);
-                charCount = line.length();
-                System.out.print(line);
-                System.out.flush();
-                silencer.silent(true);
-            }
-        }
 
-        @Override
-        public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-            if(testIdentifier.getType().isTest()) {
+                // Delete current line
                 silencer.silent(false);
                 System.out.print(StringUtils.repeat("\b", charCount));
                 System.out.print(StringUtils.repeat(" ", charCount));
                 System.out.print(StringUtils.repeat("\b", charCount));
                 System.out.flush();
+
+                // Print new line
+                String line = line(testIdentifier);
+                charCount = line.length();
+                System.out.print(line);
+                System.out.flush();
+                silencer.silent(true);
             }
         }
 
@@ -186,11 +197,13 @@ class ProgressListeners {
                     JkUtilsString.padStart(Integer.toString(index), digitLenght, '0'),
                     JkUtilsString.padStart(Long.toString(testCount), digitLenght, '0'),
                     bar(),
-                    testIdentifier.getParentId().orElse("") + "." + testIdentifier.getDisplayName());
+                    testIdentifier.getParentId().orElse("") + "."
+                            + JkUtilsString.elipse(testIdentifier.getDisplayName(), 50));
         }
 
         private String bar() {
             int count = (int) ((BAR_LENGTH * index) / testCount);
+            count = Math.min(BAR_LENGTH, count);
             int spaceCount = BAR_LENGTH - count;
             return "[" + JkUtilsString.repeat("=", count) + JkUtilsString.repeat(" ", spaceCount) + "]";
         }
