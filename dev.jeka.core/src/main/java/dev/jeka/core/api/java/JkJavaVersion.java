@@ -16,6 +16,10 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
         return new JkJavaVersion(value);
     }
 
+    public static JkJavaVersion ofCurrent() {
+        return JkJavaVersion.of(System.getProperty("java.version"));
+    }
+
     /** Stands for Java version 8 */
     public static final JkJavaVersion V8 = JkJavaVersion.of("8");
 
@@ -42,6 +46,15 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
 
     /** Stands for Java Version  16 */
     public static final JkJavaVersion V16 = JkJavaVersion.of("16");
+
+    /** Stands for Java Version  17 */
+    public static final JkJavaVersion V17 = JkJavaVersion.of("17");
+
+    /** Stands for Java Version  18 */
+    public static final JkJavaVersion V18 = JkJavaVersion.of("18");
+
+    /** Stands for Java Version  19 */
+    public static final JkJavaVersion V19 = JkJavaVersion.of("19");
 
     private final String value;
 

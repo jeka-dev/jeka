@@ -93,7 +93,7 @@ public final class JkClassPlugins {
         }
         final T plugin;
         try {
-            PluginCompatibilityBreakChecker.checkCompatibility(pluginClass);
+            PluginCompatibilityBreakChecker.checkCompatibility(pluginClass, this.holder.getDefDependencyResolver());
             plugin = JkUtilsReflect.newInstance(pluginClass, JkClass.class, this.holder);
         } catch (Throwable t) {  // Catch LinkageError
             if (t instanceof LinkageError) {

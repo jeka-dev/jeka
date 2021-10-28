@@ -117,6 +117,7 @@ final class Engine {
         } else {
             path = resolveAndCompile(false);
         }
+        jkClass.setDefDependencyResolver(this.defDependencies, getDefDependencyResolver());
         jkClass.getImportedJkClasses().setImportedRunRoots(this.rootsOfImportedJekaClasses);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         JkLog.info("Jeka classes are ready to be executed.");
@@ -203,7 +204,6 @@ final class Engine {
             return null;
         }
         try {
-            jkClass.setDefDependencyResolver(this.defDependencies, getDefDependencyResolver());
             return jkClass;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");

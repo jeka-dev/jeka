@@ -1,6 +1,9 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
@@ -19,12 +22,13 @@ import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 class PluginCompatibilityBreakChecker {
 
     private PluginCompatibilityBreakChecker() {}
 
-    static void checkCompatibility(Class pluginClass) {
+    static void checkCompatibility(Class pluginClass, JkDependencyResolver resolver) {
         JkManifest manifest = JkManifest.of().loadFromClass(pluginClass);
         String breakingChangeUrl = manifest.getMainAttribute(JkPlugin.MANIFEST_BREAKING_CHANGE_URL_ENTRY);
         String lowestJekaCompatibleVersion = manifest.getMainAttribute(
@@ -40,6 +44,7 @@ class PluginCompatibilityBreakChecker {
             } else if (jekaVersion.compareTo(minVersion) < 0) {
                 JkLog.warn("You are running Jeka version " + jekaVersion + " but " + pluginClass
                         + " plugin is supposed to work with " + minVersion + " or higher. It may not work properly.");
+                printUpperJekaVersion(resolver, minVersion);
             }
         }
 
@@ -228,6 +233,16 @@ class PluginCompatibilityBreakChecker {
                     ", jekaVersion=" + jekaVersion +
                     '}';
         }
+    }
+
+    private static void printUpperJekaVersion(JkDependencyResolver dependencyResolver, JkVersion minVersion) {
+        JkLog.warn("Jeka version upper or equals to " + minVersion + " are ; ");
+        List<String> versions = dependencyResolver.searchVersions(JkModuleId.of("dev.jeka:jeka-core"));
+        versions.stream()
+                .map(version -> JkVersion.of(version))
+                .filter(version -> version.compareTo(minVersion) >= 0)
+                .map(Objects::toString)
+                .forEach(JkLog::warn);
     }
 
 }
