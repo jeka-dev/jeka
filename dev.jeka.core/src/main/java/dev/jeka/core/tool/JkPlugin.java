@@ -7,7 +7,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  * Plugin instances are owned by a <code>JkClass</code> instance. The relationship is bidirectional :
  * <code>JkClass</code> instances can invoke plugin methods and vice-versa.<p>
  *
- * Therefore plugins can interact with (or load) other plugins from the owning <code>JkClass</code> instance
+ * Therefore, plugins can interact with (or load) other plugins from the owning <code>JkClass</code> instance
  * (which is a quite common pattern).
  */
 public abstract class JkPlugin {

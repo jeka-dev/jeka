@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.intellij;
+package dev.jeka.core.tool.builtins.ide;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
@@ -57,7 +57,7 @@ public final class JkPluginIntellij extends JkPlugin {
     public void iml() {
         final JkImlGenerator generator;
         JkClass jkClass = getJkClass();
-        JkJavaIdeSupport projectIde = JkPluginJava.getProjectIde(jkClass);
+        JkJavaIdeSupport projectIde = IdeSupport.getProjectIde(jkClass);
         if (projectIde != null) {
             generator = JkImlGenerator.of(projectIde);
         } else {
@@ -146,9 +146,9 @@ public final class JkPluginIntellij extends JkPlugin {
     public void modulesXml() {
         final Path current = getJkClass().getBaseTree().getRoot();
         final Iterable<Path> imls = getJkClass().getBaseTree().andMatching(true,"**.iml").getFiles();
-        final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
-        modulesXmlGenerator.generate();
-        JkLog.info("File generated at : " + modulesXmlGenerator.outputFile());
+        final IntellijModulesXmlGenerator intellijModulesXmlGenerator = new IntellijModulesXmlGenerator(current, imls);
+        intellijModulesXmlGenerator.generate();
+        JkLog.info("File generated at : " + intellijModulesXmlGenerator.outputFile());
     }
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")

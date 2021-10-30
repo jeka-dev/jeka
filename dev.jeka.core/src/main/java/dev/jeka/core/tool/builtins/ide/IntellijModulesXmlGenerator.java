@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.intellij;
+package dev.jeka.core.tool.builtins.ide;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-class ModulesXmlGenerator {
+class IntellijModulesXmlGenerator {
 
     private static final String ENCODING = "UTF-8";
 
@@ -29,7 +29,7 @@ class ModulesXmlGenerator {
 
     private final Path outputFile;
 
-    public ModulesXmlGenerator(Path projectDir, Iterable<Path> imlFiles) {
+    public IntellijModulesXmlGenerator(Path projectDir, Iterable<Path> imlFiles) {
         this.imlFiles = imlFiles;
         this.projectDir = projectDir;
         this.outputFile = projectDir.resolve(".idea/modules.xml");

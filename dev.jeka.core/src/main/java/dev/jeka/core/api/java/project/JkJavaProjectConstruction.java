@@ -2,10 +2,12 @@ package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkProjectDependencies;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJarPacker;
@@ -13,7 +15,12 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.tool.JkConstants;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
@@ -61,6 +68,8 @@ public class JkJavaProjectConstruction {
     private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 
     private UnaryOperator<JkDependencySet> dependencySetModifier = x -> x;
+
+    private boolean textAndLocalDependenciesAdded;
     
     /**
      * For Parent chaining
@@ -210,6 +219,10 @@ public class JkJavaProjectConstruction {
         return this;
     }
 
+    public JkJavaProjectConstruction addLocalLibs() {
+        return null; //TODO
+    }
+
     public JkDependencySet getRuntimeDependencies() {
         return dependencySetModifier.apply(compilation.getDependencies());
     }
@@ -219,5 +232,43 @@ public class JkJavaProjectConstruction {
                 .normalised(project.getDuplicateConflictStrategy()));
     }
 
+    public void addTextAndLocalDependencies() {
+        if (textAndLocalDependenciesAdded) {
+            return;
+        }
+        Path baseDir = project.getBaseDir();
+        JkProjectDependencies localDeps = JkProjectDependencies.ofLocal(
+                baseDir.resolve(JkConstants.JEKA_DIR + "/libs"));
+        JkProjectDependencies textDeps = JkProjectDependencies.ofTextDescriptionIfExist(
+                baseDir.resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"));
+        JkProjectDependencies extraDeps = localDeps.and(textDeps);
+        getCompilation().setDependencies(deps -> deps.and(extraDeps.getCompile()));
+        setRuntimeDependencies(deps -> deps.and(extraDeps.getRuntime()));
+        getTesting().getCompilation().setDependencies(deps -> extraDeps.getTest().and(deps));
+        textAndLocalDependenciesAdded = true;
+    }
+
+    public Document getDependenciesAsXml()  {
+        Document document;
+        try {
+            document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+        Element root = document.createElement("dependencies");
+        document.appendChild(root);
+        root.appendChild(xmlDeps(document, "compile", getCompilation().getDependencies()));
+        root.appendChild(xmlDeps(document, "runtime", getRuntimeDependencies()));
+        root.appendChild(xmlDeps(document, "test", getTesting().getCompilation().getDependencies()));
+        return document;
+    }
+
+    private Element xmlDeps(Document document, String purpose, JkDependencySet deps) {
+        JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolve(deps);
+        JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        Element element = tree.toDomElement(document, true);
+        element.setAttribute("purpose", purpose);
+        return element;
+    }
 
 }

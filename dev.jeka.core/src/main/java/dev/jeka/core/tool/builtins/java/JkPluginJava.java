@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkProjectDependencies;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
@@ -21,17 +22,13 @@ import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -74,42 +71,38 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         super(jkClass);
         this.scaffoldPlugin = jkClass.getPlugins().get(JkPluginScaffold.class);
         this.repoPlugin = jkClass.getPlugins().get(JkPluginRepo.class);
-
-        // Pre-configure JkJavaProject instance
-        this.project = JkJavaProject.of().setBaseDir(this.getJkClass().getBaseDir());
-
-        // Get dependencies located locally or declared in text file
-        CommonDependencies localDeps = CommonDependencies.ofLocal(
-                jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs"));
-        CommonDependencies textDeps = CommonDependencies.ofTextDescriptionIfExist(
-                jkClass.getBaseDir().resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"));
-        CommonDependencies extraDeps = localDeps.and(textDeps);
-        this.project.getConstruction().getCompilation().setDependencies(deps -> deps.and(extraDeps.getCompile()));
-        this.project.getConstruction().setRuntimeDependencies(deps -> deps.and(extraDeps.getRuntime()));
-        this.project.getConstruction().getTesting().getCompilation().setDependencies(
-                deps -> extraDeps.getTest().and(deps));
     }
 
     @Override
     protected void beforeSetup() {
-        JkJavaProjectConstruction construction = project.getConstruction();
-        JkJavaCompiler compiler = construction.getCompiler();
+        Path baseDir = getJkClass().getBaseDir();
+        this.project = JkJavaProject.of().setBaseDir(this.getJkClass().getBaseDir());
+        project.getConstruction().addTextAndLocalDependencies();
+
+        JkJavaCompiler compiler = project.getConstruction().getCompiler();
         compiler.setJdkHomesWithProperties(JkOptions.getAllStartingWith("jdk."));
         project.getPublication().getMaven().setRepos(repoPlugin.publishRepository().toSet());
         project.getPublication().getIvy().setRepos(repoPlugin.publishRepository().toSet());
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
-        JkDependencyResolver resolver = construction.getDependencyResolver();
+        JkDependencyResolver resolver = project.getConstruction().getDependencyResolver();
         if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
             resolver.addRepos(downloadRepo);
         }
-        JkPluginGpg pgpPlugin = this.getJkClass().getPlugins().get(JkPluginGpg.class);
+        applyGpg(project);
+    }
 
-        // Use signer from GPG plugin as default
+    public void applyGpg(JkJavaProject project) {
+        JkPluginGpg pgpPlugin = this.getJkClass().getPlugins().get(JkPluginGpg.class);
         JkGpg gpg = pgpPlugin.get();
-        UnaryOperator<Path> signer  = gpg.getSigner(pgpPlugin.keyName);
+        applyGpg(gpg, pgpPlugin.keyName, project);
+    }
+
+    public static void applyGpg(JkGpg gpg, String keyName, JkJavaProject project) {
+        UnaryOperator<Path> signer  = gpg.getSigner(keyName);
         project.getPublication().getMaven().setDefaultSigner(signer);
         project.getPublication().getIvy().setDefaultSigner(signer);
     }
+
 
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
     @Override  
@@ -273,7 +266,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
                 throw new UncheckedIOException(e);
             }
         }
-        Document document = depsAsXml();
+        Document document = project.getConstruction().getDependenciesAsXml();
         try {
             transformer.transform(new DOMSource(document), new StreamResult(out));
         } catch (TransformerException e) {
@@ -301,44 +294,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
         return project.getJavaIdeSupport();
-    }
-
-    private Document depsAsXml()  {
-        Document document;
-        try {
-             document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-        Element root = document.createElement("dependencies");
-        document.appendChild(root);
-        root.appendChild(xmlDeps(document, "compile", project.getConstruction().getCompilation().getDependencies()));
-        root.appendChild(xmlDeps(document, "runtime", project.getConstruction().getRuntimeDependencies()));
-        root.appendChild(xmlDeps(document, "test", project.getConstruction()
-                .getTesting().getCompilation().getDependencies()));
-        return document;
-    }
-
-    private Element xmlDeps(Document document, String purpose, JkDependencySet deps) {
-        JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolve(deps);
-        JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
-        Element element = tree.toDomElement(document, true);
-        element.setAttribute("purpose", purpose);
-        return element;
-    }
-
-    public static JkJavaIdeSupport getProjectIde(JkClass jkClass) {
-        if (jkClass instanceof JkJavaIdeSupport.JkSupplier) {
-            JkJavaIdeSupport.JkSupplier supplier = (JkJavaIdeSupport.JkSupplier) jkClass;
-            return supplier.getJavaIdeSupport();
-        }
-        List<JkJavaIdeSupport.JkSupplier> suppliers = jkClass.getPlugins().getLoadedPluginInstanceOf(
-                JkJavaIdeSupport.JkSupplier.class);
-        return suppliers.stream()
-                .filter(supplier -> supplier != null)
-                .map(supplier -> supplier.getJavaIdeSupport())
-                .filter(projectIde -> projectIde != null)
-                .findFirst().orElse(null);
     }
 
 

@@ -6,8 +6,10 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.tool.JkClass;
 
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Minimal information necessary to generate metadata project file for IDE.

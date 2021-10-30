@@ -1,7 +1,5 @@
-package dev.jeka.core.tool.builtins.java;
+package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -16,7 +14,7 @@ import java.util.List;
 /**
  * A set of dependencies commonly used in Java projects.
  */
-class CommonDependencies {
+public class JkProjectDependencies {
 
     private static final String COMPILE_AND_RUNTIME = "compile+runtime";
 
@@ -39,17 +37,17 @@ class CommonDependencies {
     // Only additional dependencies for testing
     private final JkDependencySet test;
 
-    private CommonDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
+    private JkProjectDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
         this.compile = compile;
         this.runtime = runtime;
         this.test = test;
     }
 
-    public static CommonDependencies of(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
-        return new CommonDependencies(compile, runtime, test);
+    static JkProjectDependencies of(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
+        return new JkProjectDependencies(compile, runtime, test);
     }
 
-    public static CommonDependencies of() {
+    static JkProjectDependencies of() {
         return of(JkDependencySet.of(), JkDependencySet.of(), JkDependencySet.of());
     }
 
@@ -59,10 +57,10 @@ class CommonDependencies {
      * So jars needed for compilation are supposed to be in <code>baseDir/compile</code>, jar needed for
      * test are supposed to be in <code>baseDir/test</code> and so on.
      */
-    public static CommonDependencies ofLocal(Path baseDir) {
+    public static JkProjectDependencies ofLocal(Path baseDir) {
         final JkPathTree libDir = JkPathTree.of(baseDir);
         if (!libDir.exists()) {
-            return CommonDependencies.of();
+            return JkProjectDependencies.of();
         }
         JkDependencySet compile = JkDependencySet.of()
                 .andFiles(libDir.andMatching(true, "*.jar", COMPILE + "/*.jar").getFiles())
@@ -78,16 +76,16 @@ class CommonDependencies {
     /**
      * @see #ofTextDescription(String)
      */
-    public static CommonDependencies ofTextDescription(Path path) {
+    public static JkProjectDependencies ofTextDescription(Path path) {
         return ofTextDescription(JkUtilsPath.toUrl(path));
     }
 
     /**
      * @see #ofTextDescription(String)
      */
-    public static CommonDependencies ofTextDescriptionIfExist(Path path) {
+    public static JkProjectDependencies ofTextDescriptionIfExist(Path path) {
         if (Files.notExists(path)) {
-            return CommonDependencies.of();
+            return JkProjectDependencies.of();
         }
         return ofTextDescription(JkUtilsPath.toUrl(path));
     }
@@ -95,12 +93,12 @@ class CommonDependencies {
     /**
      * @see #ofTextDescription(String)
      */
-    public static CommonDependencies ofTextDescription(URL url) {
+    public static JkProjectDependencies ofTextDescription(URL url) {
         return ofTextDescription(JkUtilsIO.read(url));
     }
 
     /**
-     * Creates a {@link CommonDependencies} from a flat file formatted as :
+     * Creates a {@link JkProjectDependencies} from a flat file formatted as :
      * <pre>
      * - COMPILE+RUNTIME
      * org.springframework.boot:spring-boot-starter-thymeleaf
@@ -121,7 +119,7 @@ class CommonDependencies {
      * org.fluentlenium:fluentlenium-junit:3.2.0
      * </pre>
      */
-    public static CommonDependencies ofTextDescription(String description) {
+    public static JkProjectDependencies ofTextDescription(String description) {
         final String[] lines = description.split(System.lineSeparator());
         JkDependencySet compile = JkDependencySet.of();
         JkDependencySet runtime = JkDependencySet.of();
@@ -146,7 +144,7 @@ class CommonDependencies {
                 test = test.and(dependency);
             }
         }
-        return CommonDependencies.of(compile, runtime, test);
+        return JkProjectDependencies.of(compile, runtime, test);
     }
 
     private static String readQualifier(String line) {
@@ -170,7 +168,7 @@ class CommonDependencies {
         return test;
     }
 
-    public CommonDependencies and(CommonDependencies other) {
+    public JkProjectDependencies and(JkProjectDependencies other) {
         return of(compile.and(other.compile), runtime.and(other.runtime), test.and(other.test));
     }
 
