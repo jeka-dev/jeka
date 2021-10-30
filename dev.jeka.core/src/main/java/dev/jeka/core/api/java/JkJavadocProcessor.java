@@ -147,7 +147,7 @@ public final class JkJavadocProcessor<T> {
             process.exec();
         } catch (IllegalStateException e) {
             JkLog.warn("An error occurred when generating Javadoc. Maybe there is no public class to document." +
-                    " Please relaunch the process with -LV option to see details");
+                    " Relaunch the process with -LV option to see details");
         }
     }
 

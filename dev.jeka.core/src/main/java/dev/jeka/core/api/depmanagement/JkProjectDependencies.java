@@ -43,7 +43,7 @@ public class JkProjectDependencies {
         this.test = test;
     }
 
-    static JkProjectDependencies of(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
+    public static JkProjectDependencies of(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
         return new JkProjectDependencies(compile, runtime, test);
     }
 
@@ -171,6 +171,5 @@ public class JkProjectDependencies {
     public JkProjectDependencies and(JkProjectDependencies other) {
         return of(compile.and(other.compile), runtime.and(other.runtime), test.and(other.test));
     }
-
 
 }

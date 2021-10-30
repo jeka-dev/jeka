@@ -1,14 +1,12 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkProjectDependencies;
-import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.java.JkJavaCompiler;
@@ -24,6 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
@@ -139,6 +138,11 @@ public class JkJavaProjectConstruction {
         return compilation;
     }
 
+    public JkProjectDependencies getProjectDependencies() {
+        return JkProjectDependencies.of(compilation.getDependencies(), getRuntimeDependencies(),
+                testing.getCompilation().getDependencies());
+    }
+
     public JkJavaProjectTesting getTesting() {
         return testing;
     }
@@ -201,11 +205,10 @@ public class JkJavaProjectConstruction {
     }
 
     /**
-     * File trees specified here will be added to the fat jar.
+     * Allows customizing thz content of produced fat jar.
      */
-    // TODO : change it customizeFatJar(JkPathTreeSet -> JkPathTreeSet)
-    public JkJavaProjectConstruction setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
-        this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
+    public JkJavaProjectConstruction customizeFatJar(Function<JkPathTreeSet, JkPathTreeSet> customizer) {
+        this.extraFilesToIncludeInFatJar = customizer.apply(extraFilesToIncludeInFatJar);
         return this;
     }
 
@@ -217,10 +220,6 @@ public class JkJavaProjectConstruction {
     public JkJavaProjectConstruction setRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
         this.dependencySetModifier = modifier;
         return this;
-    }
-
-    public JkJavaProjectConstruction addLocalLibs() {
-        return null; //TODO
     }
 
     public JkDependencySet getRuntimeDependencies() {

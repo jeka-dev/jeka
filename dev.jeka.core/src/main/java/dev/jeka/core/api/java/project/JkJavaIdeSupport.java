@@ -1,9 +1,6 @@
 package dev.jeka.core.api.java.project;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
@@ -78,13 +75,13 @@ public class JkJavaIdeSupport {
         return this;
     }
 
-    public JkJavaIdeSupport setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test,
+    public JkJavaIdeSupport setDependencies(JkProjectDependencies projectDependencies,
                                             JkVersionedModule.ConflictStrategy conflictStrategy) {
-        return setDependencies(JkQualifiedDependencySet.computeIdeDependencies(compile, runtime, test, conflictStrategy));
+        return setDependencies(JkQualifiedDependencySet.computeIdeDependencies(projectDependencies, conflictStrategy));
     }
 
-    public JkJavaIdeSupport setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
-        return setDependencies(compile, runtime, test, JkVersionedModule.ConflictStrategy.FAIL);
+    public JkJavaIdeSupport setDependencies(JkProjectDependencies projectDependencies) {
+        return setDependencies(projectDependencies, JkVersionedModule.ConflictStrategy.FAIL);
     }
 
     public JkJavaIdeSupport setSourceVersion(JkJavaVersion sourceVersion) {

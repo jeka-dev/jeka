@@ -167,9 +167,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     @Override
     public JkJavaIdeSupport getJavaIdeSupport() {
         JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
-                construction.getCompilation().getDependencies(),
-                construction.getRuntimeDependencies(),
-                construction.getTesting().getCompilation().getDependencies(),
+                construction.getProjectDependencies(),
                 JkVersionedModule.ConflictStrategy.TAKE_FIRST);
         JkJavaIdeSupport ideSupport = JkJavaIdeSupport.of(baseDir)
             .setSourceVersion(construction.getJvmTargetVersion())

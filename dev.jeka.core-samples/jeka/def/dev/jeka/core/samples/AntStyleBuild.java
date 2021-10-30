@@ -2,6 +2,7 @@ package dev.jeka.core.samples;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkProjectDependencies;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
@@ -107,7 +108,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
         JkIvyPublication.of()
                 .setModuleId(versionedModule.getModuleId().toString())
                 .setVersion(versionedModule.getVersion().getValue())
-                .setDependencies(prodDependencies, prodDependencies, testDependencies)
+                .setDependencies(JkProjectDependencies.of(prodDependencies, prodDependencies, testDependencies))
                 .addArtifacts(artifactProducer)
                 .addRepos(ivyRepo)
                 .publish();
@@ -118,7 +119,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
         return JkJavaIdeSupport.of(getBaseDir())
             .getProdLayout()
                 .emptySources().addSource(src).__
-            .setDependencies(prodDependencies, prodDependencies, testDependencies)
+            .setDependencies(JkProjectDependencies.of(prodDependencies, prodDependencies, testDependencies))
             .setDependencyResolver(resolver);
     }
 

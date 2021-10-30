@@ -105,14 +105,14 @@ public final class JkIvyPublication<T> {
         return setDependencies(deps-> configuredDependencies);
     }
 
-    public JkIvyPublication<T> setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test,
+    public JkIvyPublication<T> setDependencies(JkProjectDependencies projectDependencies,
                                                JkVersionedModule.ConflictStrategy conflictStrategy) {
-        return setDependencies(JkQualifiedDependencySet.computeIvyPublishDependencies(compile, runtime, test,
+        return setDependencies(JkQualifiedDependencySet.computeIvyPublishDependencies(projectDependencies,
                 conflictStrategy));
     }
 
-    public JkIvyPublication<T> setDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
-        return setDependencies(compile, runtime, test, JkVersionedModule.ConflictStrategy.FAIL);
+    public JkIvyPublication<T> setDependencies(JkProjectDependencies projectDependencies) {
+        return setDependencies(projectDependencies, JkVersionedModule.ConflictStrategy.FAIL);
     }
 
     public JkQualifiedDependencySet getDependencies() {

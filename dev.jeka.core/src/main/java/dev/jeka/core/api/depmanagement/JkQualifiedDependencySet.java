@@ -190,12 +190,10 @@ public class JkQualifiedDependencySet {
 
 
 
-    public static JkQualifiedDependencySet computeIdeDependencies(JkDependencySet allCompileDeps,
-                                                                  JkDependencySet allRuntimeDeps,
-                                                                  JkDependencySet allTestDeps,
+    public static JkQualifiedDependencySet computeIdeDependencies(JkProjectDependencies projectDependencies,
                                                                   JkVersionedModule.ConflictStrategy strategy) {
-        JkDependencySetMerge prodMerge = allCompileDeps.merge(allRuntimeDeps);
-        JkDependencySetMerge testMerge = prodMerge.getResult().merge(allTestDeps);
+        JkDependencySetMerge prodMerge = projectDependencies.getCompile().merge(projectDependencies.getRuntime());
+        JkDependencySetMerge testMerge = prodMerge.getResult().merge(projectDependencies.getTest());
         List<JkQualifiedDependency> result = new LinkedList<>();
         List<JkDependency> dependencies = testMerge.getResult().normalised(strategy)
                 .assertNoUnspecifiedVersion().getEntries();
@@ -220,18 +218,14 @@ public class JkQualifiedDependencySet {
                 testMerge.getResult().getVersionProvider());
     }
 
-    public static JkQualifiedDependencySet computeIdeDependencies(JkDependencySet compileDeps,
-                                                                  JkDependencySet runtimeDeps,
-                                                                  JkDependencySet testDeps) {
-        return computeIdeDependencies(compileDeps, runtimeDeps, testDeps, JkVersionedModule.ConflictStrategy.FAIL);
+    public static JkQualifiedDependencySet computeIdeDependencies(JkProjectDependencies projectDependencies) {
+        return computeIdeDependencies(projectDependencies, JkVersionedModule.ConflictStrategy.FAIL);
     }
 
-    public static JkQualifiedDependencySet computeIvyPublishDependencies(JkDependencySet compileDeps,
-                                                                         JkDependencySet runtimeDeps,
-                                                                         JkDependencySet testDeps,
+    public static JkQualifiedDependencySet computeIvyPublishDependencies(JkProjectDependencies projectDependencies,
                                                                          JkVersionedModule.ConflictStrategy strategy) {
-        JkDependencySetMerge mergeWithProd = compileDeps.merge(runtimeDeps);
-        JkDependencySetMerge mergeWithTest = mergeWithProd.getResult().merge(testDeps);
+        JkDependencySetMerge mergeWithProd = projectDependencies.getCompile().merge(projectDependencies.getRuntime());
+        JkDependencySetMerge mergeWithTest = mergeWithProd.getResult().merge(projectDependencies.getTest());
         List<JkQualifiedDependency> result = new LinkedList<>();
         for (JkModuleDependency dependency : mergeWithTest.getResult().normalised(strategy)
                 .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
