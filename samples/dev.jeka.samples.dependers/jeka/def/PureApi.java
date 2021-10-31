@@ -8,7 +8,7 @@ public class PureApi {
 
         // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
         JkJavaProject coreProject = JkJavaProject.of().simpleFacade()
-                .setBaseDir("../dev.jeka.core-samples")
+                .setBaseDir("../dev.jeka.samples.basic")
                 .setTestDependencies(deps -> deps
                     .and("junit:junit:4.13")).getProject();
 

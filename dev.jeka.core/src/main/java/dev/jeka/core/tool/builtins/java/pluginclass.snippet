@@ -15,19 +15,20 @@ public class JkPluginXxxxxxx extends JkPlugin {
         super(jkClass);
     }
 
-    /*
-     * Use this method if you want to modify/configure other plugins.
-     */
+    // This method will be called before JkClass#setup
+    @Override
+    protected void beforeSetup() throws Exception {
+    }
+
+
+    // This method will be called after JkClass#setup
     @Override
     protected void afterSetup() throws Exception {
-        // JkPluginJava javaPlugin = getJkClass().getPlugin(JkPluginJava.class);
-        // javaPlugin ...
     }
 
     @JkDoc("All public no-args methods returning void will be exposed as plugin method. \n"
       + "Rewrite this comment to document it.")
     public void yourMethod() {
-
     }
 
 }

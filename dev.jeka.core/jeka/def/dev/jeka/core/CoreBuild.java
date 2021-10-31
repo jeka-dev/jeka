@@ -206,7 +206,7 @@ public class CoreBuild extends JkClass {
 
     void testSamples()  {
         JkLog.startTask("Launch integration tests on samples");
-        SampleTester sampleTester = new SampleTester(this.getBaseTree());
+        SampleTester sampleTester = new SampleTester(this.getBaseTree().get("../samples"));
         sampleTester.restoreEclipseClasspathFile = true;
         try {
             sampleTester.doTest();

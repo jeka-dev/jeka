@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" including="**/*" path="jeka/def"/>
 	<classpathentry kind="src" path="src/test/java"/>
-	<classpathentry kind="src" path="C:/Dev/ideaProjects/jeka/dev.jeka.core-samples/src/main/java"/>
-	<classpathentry kind="src" path="C:/Dev/ideaProjects/jeka/dev.jeka.core-samples/src/main/resources"/>
+	<classpathentry kind="src" path="C:/Dev/ideaProjects/jeka/samples/dev.jeka.core-samples/src/main/java"/>
+	<classpathentry kind="src" path="C:/Dev/ideaProjects/jeka/samples/dev.jeka.core-samples/src/main/resources"/>
 	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.guava/guava/bundles/guava-30.0-jre.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.google.guava/guava/jars/guava-30.0-jre-sources.jar"/>
 	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.guava/failureaccess/bundles/failureaccess-1.0.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/com.google.guava/failureaccess/jars/failureaccess-1.0.1-sources.jar"/>
 	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/com.google.guava/listenablefuture/jars/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar" exported="true"/>
@@ -24,7 +24,7 @@
 	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.8.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.8.1-sources.jar"/>
 	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.8.1.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.8.1-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="C:/Dev/ideaProjects/jeka/dev.jeka.core-samples/jeka/wrapper/dev.jeka.jeka-core-wrapper.jar" exported="true"/>
+	<classpathentry kind="lib" path="C:/Dev/ideaProjects/jeka/samples/dev.jeka.core-samples/jeka/wrapper/dev.jeka.jeka-core-wrapper.jar" exported="true"/>
 	<classpathentry kind="var" path="JEKA_HOME/dev.jeka.jeka-core.jar" exported="true" sourcepath="JEKA_HOME/libs-sources/dev.jeka.jeka-core-sources.jar"/>
 	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpclient/jars/httpclient-4.5.6.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpclient/jars/httpclient-4.5.6-sources.jar"/>
 	<classpathentry kind="var" path="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpcore/jars/httpcore-4.4.10.jar" exported="true" sourcepath="JEKA_USER_HOME/cache/repo/org.apache.httpcomponents/httpcore/jars/httpcore-4.4.10-sources.jar"/>

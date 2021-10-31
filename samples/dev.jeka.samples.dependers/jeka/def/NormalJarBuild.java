@@ -27,7 +27,7 @@ public class NormalJarBuild extends JkClass {
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
-    @JkDefImport("../dev.jeka.core-samples")
+    @JkDefImport("../dev.jeka.samples.basic")
     private JavaPluginBuild sampleBuild;
 
 

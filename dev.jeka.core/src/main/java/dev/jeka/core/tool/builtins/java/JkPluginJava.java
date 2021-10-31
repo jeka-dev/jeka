@@ -76,11 +76,22 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @Override
     protected void beforeSetup() {
         Path baseDir = getJkClass().getBaseDir();
-        this.project = JkJavaProject.of().setBaseDir(this.getJkClass().getBaseDir());
+        project = JkJavaProject.of().setBaseDir(this.getJkClass().getBaseDir());
         project.getConstruction().addTextAndLocalDependencies();
 
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
         compiler.setJdkHomesWithProperties(JkOptions.getAllStartingWith("jdk."));
+        applyRepo(project);
+        applyGpg(project);
+    }
+
+    private void applyGpg(JkJavaProject project) {
+        JkPluginGpg pgpPlugin = this.getJkClass().getPlugins().get(JkPluginGpg.class);
+        JkGpg gpg = pgpPlugin.get();
+        applyGpg(gpg, pgpPlugin.keyName, project);
+    }
+
+    private void applyRepo(JkJavaProject project) {
         project.getPublication().getMaven().setRepos(repoPlugin.publishRepository().toSet());
         project.getPublication().getIvy().setRepos(repoPlugin.publishRepository().toSet());
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
@@ -88,13 +99,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
             resolver.addRepos(downloadRepo);
         }
-        applyGpg(project);
-    }
-
-    public void applyGpg(JkJavaProject project) {
-        JkPluginGpg pgpPlugin = this.getJkClass().getPlugins().get(JkPluginGpg.class);
-        JkGpg gpg = pgpPlugin.get();
-        applyGpg(gpg, pgpPlugin.keyName, project);
     }
 
     public static void applyGpg(JkGpg gpg, String keyName, JkJavaProject project) {
@@ -107,27 +111,27 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
     @Override  
     protected void afterSetup() {
-        this.applyPostSetupOptions();
+        this.applyPostSetupOptions(project);
         this.setupScaffolder();
     }
 
-    private void applyPostSetupOptions() {
-        final JkStandardFileArtifactProducer artifactProducer = project.getPublication().getArtifactProducer();
+    private void applyPostSetupOptions(JkJavaProject aProject) {
+        final JkStandardFileArtifactProducer artifactProducer = aProject.getPublication().getArtifactProducer();
         JkArtifactId sources = JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
         if (pack.sources != null && !pack.sources) {
             artifactProducer.removeArtifact(sources);
         } else if (pack.sources != null && pack.sources && !artifactProducer.getArtifactIds().contains(sources)) {
-            Consumer<Path> sourceJar = project.getDocumentation()::createSourceJar;
+            Consumer<Path> sourceJar = aProject.getDocumentation()::createSourceJar;
             artifactProducer.putArtifact(sources, sourceJar);
         }
         JkArtifactId javadoc = JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
         if (pack.javadoc != null && !pack.javadoc) {
             artifactProducer.removeArtifact(javadoc);
         } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
-            Consumer<Path> javadocJar = project.getDocumentation()::createJavadocJar;
+            Consumer<Path> javadocJar = aProject.getDocumentation()::createJavadocJar;
             artifactProducer.putArtifact(javadoc, javadocJar);
         }
-        JkTestProcessor testProcessor = project.getConstruction().getTesting().getTestProcessor();
+        JkTestProcessor testProcessor = aProject.getConstruction().getTesting().getTestProcessor();
         if (test.fork != null && test.fork && testProcessor.getForkingProcess() == null) {
             final JkJavaProcess javaProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName())
                     .addJavaOptions(this.test.jvmOptions);
@@ -136,10 +140,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             testProcessor.setForkingProcess(false);
         }
         if (test.skip != null) {
-            project.getConstruction().getTesting().setSkipped(test.skip);
+            aProject.getConstruction().getTesting().setSkipped(test.skip);
         }
         if (this.compilerExtraArgs != null) {
-            project.getConstruction().getCompilation().addJavaCompilerOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+            aProject.getConstruction().getCompilation().addJavaCompilerOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
     }
 
@@ -186,10 +190,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     public JkJavaProject getProject() {
         return project;
-    }
-
-    public void setProject(JkJavaProject javaProject) {
-        this.project = javaProject;
     }
 
     public JkPluginRepo getRepoPlugin() {
