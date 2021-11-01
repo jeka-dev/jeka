@@ -15,6 +15,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,15 +86,22 @@ public final class JkUtilsXml {
      * Creates a document from the specified xml string.
      */
     public static Document documentFrom(String xml) {
+        return documentFrom(new StringReader(xml));
+    }
+
+    /**
+     * Creates a document from the specified xml string.
+     */
+    public static Document documentFrom(Reader reader) {
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
             final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc;
-            doc = dBuilder.parse(new InputSource(new StringReader(xml)));
+            doc = dBuilder.parse(new InputSource(reader));
             doc.getDocumentElement().normalize();
             return doc;
         } catch (final Exception e) {
-            throw new RuntimeException("Error while parsing xml \n" + xml, e);
+            throw new RuntimeException("Error while parsing xml", e);
         }
     }
 

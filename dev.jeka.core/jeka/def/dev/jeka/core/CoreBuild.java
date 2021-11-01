@@ -20,6 +20,7 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
 import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
+import dev.jeka.core.tool.builtins.repos.JkPluginNexus;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
@@ -47,6 +48,8 @@ public class CoreBuild extends JkClass {
     final JkPluginJava java = getPlugin(JkPluginJava.class);
 
     final JkPluginGpg gpg = getPlugin(JkPluginGpg.class);
+
+    final JkPluginNexus nexus = getPlugin(JkPluginNexus.class);
 
     final JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
 

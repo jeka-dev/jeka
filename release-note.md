@@ -1,9 +1,10 @@
 # 0.9.16.RELEASE (ongoing)
 * Kotlin support for writing def classes
-* Kotlin support with plugin to build multiplatform Kotlin projects (jvm, js,mixed)
+* Experimental Kotlin support JVM projects
+* Auto close and release when publishing on Nexus repositories 
 * Faster builds by caching dependency resolution and compiled def classes
 * Polished console output (progress bars)
-* Possibility to add Filesystem dependency from the command line (@/path/to/lib.jar)
+* Possibility to add Filesystem dependencies from the command line (@/path/to/lib.jar)
 
 # 0.9.15.RELEASE
 * Upgrade JUNIT PLATFORM to 1.8.1  

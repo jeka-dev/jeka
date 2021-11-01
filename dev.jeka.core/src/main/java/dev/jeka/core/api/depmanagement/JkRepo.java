@@ -55,7 +55,7 @@ public final class JkRepo {
 
     private JkPublishConfig publishConfig = new JkPublishConfig(this);
 
-    public final boolean ivyRepo; // true if this reposotory is an Ivy one, false if it is a Maven one.
+    public final boolean ivyRepo; // true if this repository is an Ivy one, false if it is a Maven one.
 
     private JkRepo(URL url, boolean ivyRepo) {
         this.url = url;
@@ -156,6 +156,10 @@ public final class JkRepo {
 
     public boolean isIvyRepo() {
         return this.ivyRepo;
+    }
+
+    public boolean isLocal() {
+        return url.getProtocol().equals("file");
     }
 
     /**
