@@ -31,10 +31,11 @@ You can use directly `JkJacoco` in build code to perform lower level actions.
 
 You can invoke Jacoco plugin from command line on a Jeka project that does declare this plugin in its build class.
 
-`jeka @dev.jeka.plugins:jacoco jacoco# java#pack`
+`jeka @dev.jeka:jacoco-plugin jacoco# java#pack`
 
 To get help and options :
 `jeka jacoco#help`
+`jeka @dev.jeka:jacoco-plugin jacoco#help`
 
 ### Example
 
