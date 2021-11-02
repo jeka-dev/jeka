@@ -54,8 +54,7 @@ public class JkNexusRepos {
     public void closeAndReleaseOpenRepositories(String ...profileNames) {
         JkLog.startTask("Closing and releasing staged repositories");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
-        JkLog.info("Found " + JkUtilsString.plurialize(stagingRepos.size(), "staging repository",
-                "staging repositories"));
+        JkLog.info("Found staging repositories : ");
         stagingRepos.forEach(repo -> JkLog.info(repo.toString()));
         List<String> openRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNames))
@@ -76,24 +75,28 @@ public class JkNexusRepos {
     public void closeAndRelease(String ...profileNames) {
         JkLog.startTask("Closing and releasing staged repository");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
-        JkLog.info("Found repositories : " + stagingRepos);
+        JkLog.info("Found staging repositories : ");
+        stagingRepos.forEach(repo -> JkLog.info(repo.toString()));
         List<String> openRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNames))
                 .filter(repo -> JkStagingRepo.Status.OPEN == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
+        JkLog.info("Repositories to close : " + openRepoIds);
         close(openRepoIds);
         List<String> closingRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNames))
                 .filter(repo -> JkStagingRepo.Status.CLOSING == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
+        JkLog.info("Repositories to wait for been closed : " + closingRepoIds);
         closingRepoIds.forEach(this::waitForClosing);
         List<String> closedRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNames))
                 .filter(repo -> JkStagingRepo.Status.CLOSED == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
+        JkLog.info("Repositories to release : " + closedRepoIds);
         release(closedRepoIds);
         JkLog.endTask();
     }

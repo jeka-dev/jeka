@@ -9,6 +9,8 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
+import java.util.Arrays;
+
 public class JkPluginNexus extends JkPlugin {
 
     private static final String TASK_NAME = "Closing and releasing repositories";
@@ -34,7 +36,10 @@ public class JkPluginNexus extends JkPlugin {
         pluginJava.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
             JkRepo repo = getFirst(pluginJava.getProject());
             if (repo != null) {
-                JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease(profileNames);
+                if (profileNames.length != 0) {
+                    JkLog.info("Taking in account repositories with profile name in " + Arrays.asList(profileNames));
+                }
+                JkNexusRepos.ofUrlAndCredentials(repo).closeAndReleaseOpenRepositories(profileNames);
             } else {
                 JkLog.warn("No remote repository configured for publishing");
             }
