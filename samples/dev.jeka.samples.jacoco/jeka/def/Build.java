@@ -24,6 +24,7 @@ public class Build extends JkClass {
         );
     }
 
+    // For local testing
     public void checkReportGenerated() {
         Path report = getOutputDir().resolve("jacoco/jacoco.xml");
         JkUtilsAssert.state(Files.exists(report), "Report file " + report + " not found.");
