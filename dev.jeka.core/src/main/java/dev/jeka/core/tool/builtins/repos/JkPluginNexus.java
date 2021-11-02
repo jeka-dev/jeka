@@ -9,9 +9,9 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
-import java.util.Optional;
-
 public class JkPluginNexus extends JkPlugin {
+
+    private static final String TASK_NAME = "Closing and releasing repositories";
 
     @JkDoc("Close and Release automatically repository after publish.")
     public boolean closeAndRelease = true;
@@ -26,9 +26,33 @@ public class JkPluginNexus extends JkPlugin {
     @Override
     protected void afterSetup() throws Exception {
         JkPluginJava pluginJava = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
+        if (pluginJava == null) {
+            JkLog.warn("No project plugin configured here.");
+            return;
+        }
         String[] profileNames = profileNamesFilter.split(",");
-        if (pluginJava != null) {
-            configureForFirstRemoteRepo(pluginJava.getProject(), profileNames);
+        pluginJava.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
+            JkRepo repo = getFirst(pluginJava.getProject());
+            if (repo != null) {
+                JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease(profileNames);
+            } else {
+                JkLog.warn("No remote repository configured for publishing");
+            }
+        });
+    }
+
+    public void closeAndOrRelease() {
+        JkPluginJava pluginJava = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
+        if (pluginJava == null) {
+            JkLog.warn("No project plugin configured here.");
+            return;
+        }
+        String[] profileNames = profileNamesFilter.split(",");
+        JkRepo repo = getFirst(pluginJava.getProject());
+        if (repo != null) {
+            JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease(profileNames);
+        } else {
+            JkLog.warn("No remote repository configured for publishing");
         }
     }
 
@@ -39,9 +63,7 @@ public class JkPluginNexus extends JkPlugin {
     }
 
     public static void configureForFirstRemoteRepo(JkJavaProject project, String ...profileNames) {
-        JkRepo repo = project.getPublication().getMaven().getRepos().getRepos().stream()
-                .filter(repo1 -> !repo1.isLocal())
-                .findFirst().orElse(null);
+        JkRepo repo = getFirst(project);
         configureForRepo(project, repo, profileNames);
     }
 
@@ -55,8 +77,18 @@ public class JkPluginNexus extends JkPlugin {
     }
 
     public static void configureForRepo(JkJavaProject project, JkNexusRepos nexusRepos, String ...profileNames) {
-        project.getPublication().getPostActions().append("Closing and releasing repositories",
-                () -> nexusRepos.closeAndRelease(profileNames));
+        project.getPublication().getPostActions().append(TASK_NAME,
+                () -> nexusRepos.closeAndReleaseOpenRepositories(profileNames));
+    }
+
+    private static JkRepo getFirst(JkJavaProject project) {
+        JkRepo repo = project.getPublication().getMaven().getRepos().getRepos().stream()
+                .filter(repo1 -> !repo1.isLocal())
+                .findFirst().orElse(null);
+        if (repo != null && repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
+            JkLog.warn("No credentials found on repo " + repo);
+        }
+        return repo;
     }
 
 }

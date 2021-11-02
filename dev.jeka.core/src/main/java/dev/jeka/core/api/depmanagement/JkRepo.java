@@ -275,6 +275,11 @@ public final class JkRepo {
         public String getPassword() {
             return password;
         }
+
+        public boolean isEmpty() {
+            return userName == null && password == null;
+        }
+
     }
 
     /**

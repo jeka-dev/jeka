@@ -2,6 +2,7 @@ package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -50,14 +51,18 @@ public class JkNexusRepos {
      * Repositories not in OPEN status at time of invoking this method won't be released.
      * @param profileNames a filter to take in account only repositories having specified profile names. If empty, no filter applies.
      */
-    public void closeAndRelease(String ...profileNames) {
-        JkLog.startTask("Closing and promoting staged repository");
+    public void closeAndReleaseOpenRepositories(String ...profileNames) {
+        JkLog.startTask("Closing and releasing staged repositories");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
+        JkLog.info("Found " + JkUtilsString.plurialize(stagingRepos.size(), "staging repository",
+                "staging repositories"));
+        stagingRepos.forEach(repo -> JkLog.info(repo.toString()));
         List<String> openRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNames))
                 .filter(repo -> JkStagingRepo.Status.OPEN == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
+        JkLog.info("Repositories to close and release : " + openRepoIds);
         close(openRepoIds);
         openRepoIds.forEach(this::waitForClosing);
         release(openRepoIds);
@@ -68,9 +73,10 @@ public class JkNexusRepos {
      * Closes repositories in OPEN Status, waits for all repos are closed then releases all repositories.
      * @param profileNames a filter to take in account only repositories having specified profile names. If empty, no filter applies.
      */
-    public void closeAndOrRelease(String ...profileNames) {
-        JkLog.startTask("Closing and promoting staged repository");
+    public void closeAndRelease(String ...profileNames) {
+        JkLog.startTask("Closing and releasing staged repository");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
+        JkLog.info("Found repositories : " + stagingRepos);
         List<String> openRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNames))
                 .filter(repo -> JkStagingRepo.Status.OPEN == repo.getStatus())
@@ -155,7 +161,8 @@ public class JkNexusRepos {
 
     private void doClose(List<String> repositoryIds) throws IOException {
         if (repositoryIds.isEmpty()) {
-            JkLog.info("No staging repo to close.");
+            JkLog.info("No staging repository to close.");
+            return;
         }
         JkLog.startTask("Closing repositories " + repositoryIds);
         URL url = new URL(baseUrl + "/service/local/staging/bulk/close");
@@ -223,8 +230,12 @@ public class JkNexusRepos {
     private void assertResponseOk(HttpURLConnection con, String body) throws IOException {
         int code = con.getResponseCode();
         if (code >= 400) {
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getErrorStream(), "utf-8"))) {
+            InputStream inputStream = con.getErrorStream();
+            if (inputStream == null) {
+                throw new IllegalStateException("Request " + con.getURL() + " failed with status code " + code + "\n"
+                        + "Request body : " + body);
+            }
+            try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getErrorStream(), "utf-8"))) {
                 StringBuilder response = new StringBuilder();
                 String responseLine = null;
                 while ((responseLine = br.readLine()) != null) {
@@ -310,6 +321,18 @@ public class JkNexusRepos {
 
         public String getProfileName() {
             return profileName;
+        }
+
+        @Override
+        public String toString() {
+            return "JkStagingRepo{" +
+                    "id='" + id + '\'' +
+                    ", updatedTimestamp=" + updatedTimestamp +
+                    ", url='" + url + '\'' +
+                    ", type='" + type + '\'' +
+                    ", transitioning=" + transitioning +
+                    ", profileName='" + profileName + '\'' +
+                    '}';
         }
     }
 
