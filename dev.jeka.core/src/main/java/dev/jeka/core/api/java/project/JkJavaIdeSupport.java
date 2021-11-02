@@ -31,7 +31,10 @@ public class JkJavaIdeSupport {
 
     private JkJavaIdeSupport(Path baseDir) {
         this.prodLayout = JkCompileLayout.ofParent(this).setBaseDir(baseDir);
-        this.testLayout = JkCompileLayout.ofParent(this).setBaseDir(baseDir);
+        this.testLayout = JkCompileLayout.ofParent(this)
+                .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
+                .setStandardOuputDirs(JkCompileLayout.Concern.TEST)
+                .setBaseDir(baseDir);
         this.dependencies = JkQualifiedDependencySet.of();
         this.sourceVersion = JkJavaVersion.V8;
         this.dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());;
