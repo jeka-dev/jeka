@@ -61,6 +61,9 @@ public class JkNexusRepos {
                 .filter(repo -> JkStagingRepo.Status.OPEN == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
+        if (profileNames.length != 0) {
+            JkLog.info("Taking in account repositories with profile name in " + Arrays.asList(profileNames));
+        }
         JkLog.info("Repositories to close and release : " + openRepoIds);
         close(openRepoIds);
         openRepoIds.forEach(this::waitForClosing);
@@ -82,6 +85,9 @@ public class JkNexusRepos {
                 .filter(repo -> JkStagingRepo.Status.OPEN == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
+        if (profileNames.length != 0) {
+            JkLog.info("Taking in account repositories with profile name in " + Arrays.asList(profileNames));
+        }
         JkLog.info("Repositories to close : " + openRepoIds);
         close(openRepoIds);
         List<String> closingRepoIds = stagingRepos.stream()

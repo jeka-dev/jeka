@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
@@ -32,13 +33,11 @@ public class JkPluginNexus extends JkPlugin {
             JkLog.warn("No project plugin configured here.");
             return;
         }
-        String[] profileNames = profileNamesFilter.split(",");
+        String[] profileNames = JkUtilsString.isBlank(profileNamesFilter) ? new String[0]
+                : profileNamesFilter.split(",");
         pluginJava.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
             JkRepo repo = getFirst(pluginJava.getProject());
             if (repo != null) {
-                if (profileNames.length != 0) {
-                    JkLog.info("Taking in account repositories with profile name in " + Arrays.asList(profileNames));
-                }
                 JkNexusRepos.ofUrlAndCredentials(repo).closeAndReleaseOpenRepositories(profileNames);
             } else {
                 JkLog.warn("No remote repository configured for publishing");
