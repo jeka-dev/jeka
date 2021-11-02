@@ -35,11 +35,13 @@ import java.util.List;
 public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
+    Path test = getBaseDir().resolve("src/test/java");
     Path srcJar = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + "-sources.jar");
     Path classDir = getOutputDir().resolve("classes");
     Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
     JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     JkDependencySet prodDependencies = JkDependencySet.of()
+            .and("com.google.guava:guava:30.0-jre")
             .and("org.hibernate:hibernate-entitymanager:5.4.2.Final");
     JkDependencySet testDependencies = JkDependencySet.of()
             .and(JavaPluginBuild.JUNIT5);
@@ -118,7 +120,13 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
     public JkJavaIdeSupport getJavaIdeSupport() {
         return JkJavaIdeSupport.of(getBaseDir())
             .getProdLayout()
-                .emptySources().addSource(src).__
+                .emptySources()
+                .addSource(src)
+            .__
+            .getTestLayout()
+                .emptySources()
+                .addSource(test)
+            .__
             .setDependencies(JkProjectDependencies.of(prodDependencies, prodDependencies, testDependencies))
             .setDependencyResolver(resolver);
     }

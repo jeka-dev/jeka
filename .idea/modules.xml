@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" filepath="$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.basic/.idea/dev.jeka.samples.basic.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.basic/.idea/dev.jeka.samples.basic.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.dependers/.idea/dev.jeka.samples.dependers.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.dependers/.idea/dev.jeka.samples.dependers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.basic/dev.jeka.samples.basic.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.basic/dev.jeka.samples.basic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.dependers/dev.jeka.samples.dependers.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.dependers/dev.jeka.samples.dependers.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.junit5/dev.jeka.samples.junit5.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.junit5/dev.jeka.samples.junit5.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.kotlin-multiplatform/dev.jeka.samples.kotlin-multiplatform.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.kotlin-multiplatform/dev.jeka.samples.kotlin-multiplatform.iml" />
     </modules>

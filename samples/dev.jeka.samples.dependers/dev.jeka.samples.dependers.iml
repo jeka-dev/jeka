@@ -75,13 +75,15 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" scope="COMPILE" module-name="dev.jeka.core-samples" exported=""/>
+    <orderEntry type="module" scope="COMPILE" module-name="dev.jeka.samples.basic" exported=""/>
     <orderEntry type="module-library" scope="TEST" exported="" forJeka="">
       <library>
         <CLASSES>
           <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core.jar!/"/>
         </CLASSES>
-        <JAVADOC/>
+        <JAVADOC>
+          <root url="jar://$JEKA_HOME$/dev.jeka.jeka-core-javadoc.jar!/"/>
+        </JAVADOC>
         <SOURCES>
           <root url="jar://$JEKA_HOME$/libs-sources/dev.jeka.jeka-core-sources.jar!/"/>
         </SOURCES>
