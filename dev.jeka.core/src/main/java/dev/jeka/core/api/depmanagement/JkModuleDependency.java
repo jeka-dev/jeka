@@ -175,6 +175,13 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
         return new JkModuleDependency(moduleId, version, transitivity, exclusions, artifactSpecifications, ideProjectDir);
     }
 
+    public JkModuleDependency withVersion(String version) {
+        if (version == null) {
+            return this;
+        }
+        return withVersion(JkVersion.of(version));
+    }
+
     /**
      * @see #withClassifiersAndType(String, String)
      */

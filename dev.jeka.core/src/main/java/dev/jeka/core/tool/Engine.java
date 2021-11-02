@@ -169,7 +169,7 @@ final class Engine {
         final String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         final long start = System.nanoTime();
         JkLog.startTask(msg);
-        JkPathSequence dependencyPath = dependenciesPath().andPrepend(path).withoutDuplicates();
+        JkPathSequence dependencyPath = dependenciesPath().andPrepend(path).andPrepend(bootLibs()).withoutDuplicates();
         JkPathSequence projectDependenciesPath =
                 resolveAndCompileDependentProjects(yetCompiledProjects, dependencyPath, compileSources);
         long defLastUptateTime = lastModifiedAccordingFileAttributes();
