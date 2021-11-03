@@ -20,8 +20,6 @@ public abstract class JekaCommandLineExecutor {
 
     private final Path jekaDir;
 
-    boolean restoreEclipseClasspathFile;
-
     protected JekaCommandLineExecutor(Path samplesRootDir, Path jekaDistrib) {
         super();
         this.samplesRootDir = samplesRootDir;
@@ -44,11 +42,15 @@ public abstract class JekaCommandLineExecutor {
         runjeka(false, projectDir, cmdLine);
     }
 
-    private void runjeka(boolean useWrapper, String projectDir, String cmdLine) {
+    protected void runjeka(boolean useWrapper, String projectDir, String cmdLine) {
         Path dir = this.samplesRootDir.resolve(projectDir);
         process(dir, useWrapper)
                 .addParams(JkUtilsString.translateCommandline(cmdLine))
                 .run();
+    }
+
+    protected Path getJekaDir() {
+        return jekaDir.toAbsolutePath().normalize();
     }
 
     private static String jekawCmd(Path dir) {

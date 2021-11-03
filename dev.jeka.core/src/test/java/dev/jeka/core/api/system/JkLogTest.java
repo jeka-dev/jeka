@@ -3,7 +3,7 @@ package dev.jeka.core.api.system;
 public class JkLogTest {
 
     //@Test
-    public void testMultithread() throws Exception {
+    public void testMultiThread() throws Exception {
         JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.info("toto");
         Runnable runnable = () -> {

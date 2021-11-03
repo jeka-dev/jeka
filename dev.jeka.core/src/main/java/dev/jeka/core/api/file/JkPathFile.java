@@ -1,5 +1,6 @@
 package dev.jeka.core.api.file;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -193,7 +194,7 @@ public final class JkPathFile {
             if (other) perms.add(PosixFilePermission.OTHERS_EXECUTE);
             Files.setPosixFilePermissions(this.path, perms);
         } catch (UnsupportedOperationException e) {
-            // Windows system
+            JkLog.warn("Can not set exec permission to file " + this.path);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

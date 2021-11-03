@@ -158,7 +158,7 @@ public class CoreBuild extends JkClass {
         }
         makeDocs();
         if (runIT) {
-            testSamples();
+            testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
         //distrib.zipTo(distribFile);
@@ -207,15 +207,9 @@ public class CoreBuild extends JkClass {
         JkLog.endTask();
     }
 
-    void testSamples()  {
-        JkLog.startTask("Launch integration tests on samples");
-        SampleTester sampleTester = new SampleTester(this.getBaseTree().get("../samples"));
-        sampleTester.restoreEclipseClasspathFile = true;
-        try {
-            sampleTester.doTest();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    void testScaffolding()  {
+        JkLog.startTask("Run scaffold tests");
+        new ScaffoldTester().run();
         JkLog.endTask();
     }
 
@@ -288,4 +282,11 @@ public class CoreBuild extends JkClass {
         JkInit.instanceOf(CoreBuild.class, args).cleanPack();
     }
 
+    public static class RunBuildAndIT {
+
+        public static void main(String[] args) {
+            CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args, "-runIT");
+            coreBuild.java.pack();
+        }
+    }
 }

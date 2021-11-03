@@ -1,15 +1,21 @@
 import dev.jeka.core.CoreBuild;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.java.project.JkJavaProjectPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
 import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
+
+import java.nio.file.Paths;
 
 class MasterBuild extends JkClass {
 
@@ -24,6 +30,16 @@ class MasterBuild extends JkClass {
     @Override
     protected void setup() throws Exception {
         versionFromGit.autoConfigureProject = false;
+        coreBuild.runIT = true;
+        coreBuild.getPlugin(JkPluginJava.class).pack.javadoc = true;
+        getImportedJkClasses().getDirects().forEach(build -> {
+            if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for release
+                JkPluginJava pluginJava = build.getPlugins().getIfLoaded(JkPluginJava.class);
+                if (pluginJava != null) {
+                    pluginJava.pack.javadoc = true;
+                }
+            }
+        });
     }
 
     public void make() {
@@ -35,6 +51,7 @@ class MasterBuild extends JkClass {
             project.getPublication().pack();
             JkLog.endTask();
         });
+        setPosixPermissions();
         runSamples();
         JkGitProcess git = JkGitProcess.of(this.getBaseDir());
         String branch = git.getCurrentBranch();
@@ -43,6 +60,14 @@ class MasterBuild extends JkClass {
             JkNexusRepos.ofUrlAndCredentials(coreBuild.getPlugin(JkPluginJava.class).getProject()
                     .getPublication().findFirstRepo());
         }
+    }
+
+    public void setPosixPermissions() {
+        if (JkUtilsSystem.IS_WINDOWS) {
+            return;
+        }
+        JkPathTree.of("samples").andMatching("**/jekaw").stream().forEach(path -> JkPathFile.of(path)
+                .addExecPerm(true, true, true));
     }
 
     public void buildCore() {

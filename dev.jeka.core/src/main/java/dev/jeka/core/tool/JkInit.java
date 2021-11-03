@@ -49,6 +49,16 @@ public final class JkInit {
         return jkClass;
     }
 
+    /**
+     * Convenient method to let the user add extra arguments.
+     * @see #instanceOf(Class, String...)
+     */
+    public static <T extends JkClass> T instanceOf(Class<T> clazz, String[] args, String extraArg, String ...extraArgs) {
+        String[] allExtraArgs = JkUtilsIterable.concat(new String[] {extraArg}, extraArgs);
+        String[] effectiveArgs = JkUtilsIterable.concat(allExtraArgs, args);
+        return instanceOf(clazz, effectiveArgs);
+    }
+
     static void displayRuntimeInfo() {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
