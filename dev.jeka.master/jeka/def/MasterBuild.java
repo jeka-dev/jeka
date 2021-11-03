@@ -65,7 +65,7 @@ class MasterBuild extends JkClass {
         if (JkUtilsSystem.IS_WINDOWS) {
             return;
         }
-        JkPathTree.of("samples").andMatching("**/jekaw").stream().forEach(path -> JkPathFile.of(path).addExecPerm());
+        JkPathTree.of("../samples").andMatching("**/jekaw").stream().forEach(path -> JkPathFile.of(path).addExecPerm());
     }
 
     public void buildCore() {
