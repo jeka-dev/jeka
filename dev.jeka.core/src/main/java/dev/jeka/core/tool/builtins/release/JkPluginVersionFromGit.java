@@ -24,13 +24,19 @@ import java.util.Optional;
 @JkDocPluginDeps(JkPluginJava.class)
 public class JkPluginVersionFromGit extends JkPlugin {
 
+    public static final String TAG_TASK_NAME = "version-from-git-tag";
+
     @JkDoc("The prefix to use in commit message to specify a version.")
     public String commentVersionPrefix = "Release:";
 
     @JkDoc("Tags with following prefix. This may help to distinguish tags for versioning from others.")
     public String tagPrefixForVersion = "";
 
-    @JkDoc("If true, tag git with version specified in commit message. The tag is set and pushed after project.publication.publish() succeed.")
+    @JkDoc("If true and a JkPluginJava project is bound to the build instance, the project will be configured for " +
+            "publishing with the inferred version.")
+    public boolean autoConfigureProject = true;
+
+    @JkDoc("If true and autoConfigureProject, project will be configured to push tag after project.publication.publish() succeed.")
     public boolean tagAfterPublish = true;
 
     private JkGitProcess git;
@@ -43,20 +49,29 @@ public class JkPluginVersionFromGit extends JkPlugin {
 
     @Override
     protected void afterSetup() {
-        JkPluginJava java = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
-        if (java == null) {
-            return;
+        if (autoConfigureProject) {
+            JkPluginJava java = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
+            if (java == null) {
+                return;
+            }
+            configure(java.getProject(), tagAfterPublish);
         }
-        JkVersion version = version();
-        JkJavaProject project = java.getProject();
+    }
+
+    /**
+     * Configure the specified project to use git version for publishing and tagging the repository.
+     * @param tag If true, the repository will be tagged right after the project.pubmication.publish()
+     */
+    public void configure(JkJavaProject project, boolean tag) {
+        String  version = version().toString();
         project.getPublication()
                 .getMaven()
-                    .setVersion(version.toString())
+                    .setVersion(version)
                 .__
                 .getIvy()
-                    .setVersion(version.toString());
-        if (tagAfterPublish) {
-            project.getPublication().getPostActions().append(this::tagIfDiffers);
+                    .setVersion(version);
+        if (tag) {
+            project.getPublication().getPostActions().append(TAG_TASK_NAME, this::tagIfDiffers);
         }
     }
 

@@ -9,9 +9,9 @@ name: Java Build and Publish
 
 on:
   push:
-    branches: [ master ]
+    branches: [ * ]
   workflow_dispatch:
-    branches: [ master ]
+    branches: [ * ]
 
 jobs:
   build:

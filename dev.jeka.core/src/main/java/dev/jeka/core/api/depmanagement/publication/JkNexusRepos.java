@@ -2,7 +2,6 @@ package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -34,16 +33,20 @@ public class JkNexusRepos {
         this.basicCredential = basicCredential;
     }
 
+    private static JkNexusRepos ofBasicCredentials(String baseUrl, String userName, String password) {
+        byte[] basicCredential = Base64.getEncoder().encode((userName + ":"
+                + password).getBytes(StandardCharsets.UTF_8));
+        return new JkNexusRepos(baseUrl, baseUrl);
+    }
+
     /**
      * Creates a {@link JkNexusRepos} from information contained in the specified repo, meaning baseUrl and credentials.
      */
     public static JkNexusRepos ofUrlAndCredentials(JkRepo repo) {
         JkRepo.JkRepoCredentials repoCredentials = repo.getCredentials();
-        byte[] basicCredential = Base64.getEncoder().encode((repoCredentials.getUserName() + ":"
-                + repoCredentials.getPassword()).getBytes(StandardCharsets.UTF_8));
         URL url = repo.getUrl();
         String baseUrl = url.getProtocol() + "://" + url.getHost();
-        return new JkNexusRepos(baseUrl, new String(basicCredential));
+        return JkNexusRepos.ofBasicCredentials(baseUrl, repoCredentials.getUserName(), repoCredentials.getPassword());
     }
 
     /**
