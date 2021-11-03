@@ -7,11 +7,7 @@
 
 name: Java Build and Publish
 
-on:
-  push:
-    branches: [ * ]
-  workflow_dispatch:
-    branches: [ * ]
+on: [push, pull_request]
 
 jobs:
   build:
