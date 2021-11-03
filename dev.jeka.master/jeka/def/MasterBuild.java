@@ -42,6 +42,7 @@ class MasterBuild extends JkClass {
     }
 
     public void make() {
+        JkLog.startTask("Building core and plugins");
         getImportedJkClasses().getDirects().forEach(build -> {
             JkLog.startTask("Building " + build);
             JkJavaProject project = build.getPlugin(JkPluginJava.class).getProject();
@@ -50,8 +51,12 @@ class MasterBuild extends JkClass {
             project.getPublication().pack();
             JkLog.endTask();
         });
+        JkLog.endTask();
+        JkLog.startTask("Running samples");
         setPosixPermissions();
         runSamples();
+        JkLog.endTask();
+        JkLog.startTask("Publishing");
         JkGitProcess git = JkGitProcess.of(this.getBaseDir());
         String branch = git.getCurrentBranch();
         if (branch.equals("master") && !versionFromGit.version().isSnapshot()) {
@@ -59,13 +64,14 @@ class MasterBuild extends JkClass {
             JkNexusRepos.ofUrlAndCredentials(coreBuild.getPlugin(JkPluginJava.class).getProject()
                     .getPublication().findFirstRepo());
         }
+        JkLog.endTask();
     }
 
     public void setPosixPermissions() {
         if (JkUtilsSystem.IS_WINDOWS) {
             return;
         }
-        JkPathTree.of("../samples").andMatching("**/jekaw").stream().forEach(path -> JkPathFile.of(path).addExecPerm());
+        JkPathTree.of("../samples").andMatching("*/jekaw", "**/jekaw").stream().forEach(path -> JkPathFile.of(path).addExecPerm());
     }
 
     public void buildCore() {
