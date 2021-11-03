@@ -31,7 +31,6 @@ class MasterBuild extends JkClass {
     protected void setup() throws Exception {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
-        coreBuild.getPlugin(JkPluginJava.class).pack.javadoc = true;
         getImportedJkClasses().getDirects().forEach(build -> {
             if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for release
                 JkPluginJava pluginJava = build.getPlugins().getIfLoaded(JkPluginJava.class);
@@ -66,8 +65,7 @@ class MasterBuild extends JkClass {
         if (JkUtilsSystem.IS_WINDOWS) {
             return;
         }
-        JkPathTree.of("samples").andMatching("**/jekaw").stream().forEach(path -> JkPathFile.of(path)
-                .addExecPerm(true, true, true));
+        JkPathTree.of("samples").andMatching("**/jekaw").stream().forEach(path -> JkPathFile.of(path).addExecPerm());
     }
 
     public void buildCore() {

@@ -55,18 +55,19 @@ public abstract class JekaCommandLineExecutor {
 
     private static String jekawCmd(Path dir) {
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jekaw";
-        return JkUtilsPath.relativizeFromWorkingDir(dir.resolve(scriptName)).toAbsolutePath().toString();
+        return JkUtilsPath.relativizeFromWorkingDir(dir.resolve(scriptName)).toAbsolutePath().normalize().toString();
     }
 
     private String jekaCmd() {
-        String scriptName = JkUtilsSystem.IS_WINDOWS ? "jeka.bat" : "jekaw";
-        return JkUtilsPath.relativizeFromWorkingDir(this.jekaDir).normalize().resolve(scriptName).toAbsolutePath().toString();
+        String scriptName = JkUtilsSystem.IS_WINDOWS ? "jeka.bat" : "jeka";
+        return JkUtilsPath.relativizeFromWorkingDir(this.jekaDir).resolve(scriptName).toAbsolutePath().normalize().toString();
     }
 
-    private JkProcess process(Path dir, boolean useWrapper) {
-        String cmd = useWrapper ? jekawCmd(dir) : jekaCmd();
+    private JkProcess process(Path workingDir, boolean useWrapper) {
+        String cmd = useWrapper ? jekawCmd(workingDir) : jekaCmd();
         return JkProcess.of(cmd)
-                .setWorkingDir(dir)
+                .setWorkingDir(workingDir)
+                .setLogCommand(true)
                 .setLogOutput(true)
                 .addParams("-LB", "-LRI", "-LSU", "-LV=false")
                 .setFailOnError(true);

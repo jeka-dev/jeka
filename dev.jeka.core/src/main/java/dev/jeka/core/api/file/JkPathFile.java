@@ -201,6 +201,10 @@ public final class JkPathFile {
         return this;
     }
 
+    public JkPathFile addExecPerm() {
+        return addExecPerm(true, true, true);
+    }
+
     private static String interpolated(String original, Map<String, String> tokenValues) {
         boolean changed = false;
         String result = original;
