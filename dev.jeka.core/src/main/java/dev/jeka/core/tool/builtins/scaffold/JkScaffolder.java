@@ -107,7 +107,7 @@ public final class JkScaffolder {
         Path jekawPath = baseDir.resolve("jekaw");
         JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("wrapper/jekaw"), jekawPath,
                 StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-        JkPathFile.of(jekawPath).addExecPerm(true, true, true);
+        JkPathFile.of(jekawPath).setPosixExecPermissions(true, true, true);
         final Path jekaWrapperJar = JkLocator.getJekaJarPath().getParent().resolve("dev.jeka.jeka-core-wrapper.jar");
         final Path wrapperFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/wrapper");
         JkUtilsPath.createDirectories(wrapperFolder);
@@ -143,7 +143,7 @@ public final class JkScaffolder {
         } else {
             String content ="#!/bin/sh\n\n" + delegateFolder.replace('\\', '/') + "/jekaw $@";
             newShellFile.deleteIfExist().createIfNotExist().write(content.getBytes(Charset.forName("utf8")))
-                    .addExecPerm(true, true, true);
+                    .setPosixExecPermissions(true, true, true);
         }
     }
 

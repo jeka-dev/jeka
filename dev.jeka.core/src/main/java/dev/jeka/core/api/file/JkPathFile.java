@@ -184,7 +184,7 @@ public final class JkPathFile {
     /**
      * Adds execute permition on this files. No effect on windows system.
      */
-    public JkPathFile addExecPerm(boolean owner, boolean group, boolean other) {
+    public JkPathFile setPosixExecPermissions(boolean owner, boolean group, boolean other) {
         assertExist();
         Set<PosixFilePermission> perms = null;
         try {
@@ -201,8 +201,8 @@ public final class JkPathFile {
         return this;
     }
 
-    public JkPathFile addExecPerm() {
-        return addExecPerm(true, true, true);
+    public JkPathFile setPosixExecPermissions() {
+        return setPosixExecPermissions(true, true, true);
     }
 
     private static String interpolated(String original, Map<String, String> tokenValues) {

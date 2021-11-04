@@ -156,7 +156,7 @@ public class CoreBuild extends JkClass {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.importFiles(artifactProducer.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
-        JkPathFile.of(distrib.get("jeka")).addExecPerm();
+        JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         makeDocs();
         if (runIT) {
             testScaffolding();

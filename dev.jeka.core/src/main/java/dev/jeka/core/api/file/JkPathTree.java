@@ -148,9 +148,12 @@ public final class JkPathTree implements Closeable {
      * Same as {@link #getFiles()} but returning paths relative to this tree root.
      */
     public List<Path> getRelativeFiles() {
+        /*
         try(Stream<Path> stream = stream()) {
             return stream.filter(JkPathMatcher.ofNoDirectory().toPredicate()).map(relativePathFunction()).collect(Collectors.toList());
         }
+         */
+        return getFiles();
     }
 
     /**

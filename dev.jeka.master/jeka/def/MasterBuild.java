@@ -3,19 +3,14 @@ import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
-import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
-
-import java.nio.file.Paths;
 
 class MasterBuild extends JkClass {
 
@@ -68,10 +63,9 @@ class MasterBuild extends JkClass {
     }
 
     public void setPosixPermissions() {
-        if (JkUtilsSystem.IS_WINDOWS) {
-            return;
-        }
-        JkPathTree.of("../samples").andMatching("*/jekaw", "**/jekaw").stream().forEach(path -> JkPathFile.of(path).addExecPerm());
+        JkPathTree.of("..").andMatching("*/jekaw", "**/jekaw").getFiles().forEach(path -> {
+            JkLog.info("");
+        });
     }
 
     public void buildCore() {
