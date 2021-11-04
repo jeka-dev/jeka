@@ -1,12 +1,14 @@
 package dev.jeka.core.api.java.project;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.system.JkLog;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -131,5 +133,18 @@ public class JkJavaProjectPublication {
      */
     public void pack() {
         artifactProducer.makeAllMissingArtifacts();
+    }
+
+    /**
+     * Shorthand to get the first declared publication repository.
+     */
+    public JkRepo findFirstRepo() {
+        return getMaven().getRepos().getRepos().stream()
+                .filter(repo1 -> !repo1.isLocal())
+                .findFirst().orElse(
+                        getIvy().getRepos().getRepos().stream()
+                                .filter(repo1 -> !repo1.isLocal())
+                                .findFirst().orElse(null)
+                );
     }
 }

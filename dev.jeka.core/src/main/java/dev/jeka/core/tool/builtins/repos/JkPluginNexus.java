@@ -86,9 +86,7 @@ public class JkPluginNexus extends JkPlugin {
     }
 
     private static JkRepo getFirst(JkJavaProject project) {
-        JkRepo repo = project.getPublication().getMaven().getRepos().getRepos().stream()
-                .filter(repo1 -> !repo1.isLocal())
-                .findFirst().orElse(null);
+        JkRepo repo = project.getPublication().findFirstRepo();
         if (repo != null && repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
             JkLog.warn("No credentials found on repo " + repo);
         }

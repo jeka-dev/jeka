@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -142,16 +143,16 @@ public final class JkJavadocProcessor<T> {
                 .addParams(computePackages(srcDirs))
                 .setLogOutput(verbose)
                 .setLogCommand(verbose)
-                .setFailOnError(true);
-        try {
-            process.exec();
-        } catch (IllegalStateException e) {
-            JkLog.warn("An error occurred when generating Javadoc. Maybe there is no public class to document." +
+                .setFailOnError(false);
+        int code = process.exec();
+        if (code != 0) {
+            JkLog.warn("An error occurred when generating Javadoc (staus error = " + code + "). Maybe there is no public class to document." +
                     " Relaunch the process with -LV option to see details");
         }
     }
 
     private LinkedHashSet<String> computePackages(JkPathTreeSet srcDirs) {
+        srcDirs = srcDirs.withMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
         LinkedHashSet<String> result = new LinkedHashSet<>();
         for (Path relFile: srcDirs.getRelativeFiles()) {
             Path packageDir = relFile.getParent();

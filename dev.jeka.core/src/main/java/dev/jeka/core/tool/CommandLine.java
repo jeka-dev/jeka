@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkFileDependency;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -60,6 +61,20 @@ final class CommandLine {
         for (final String word : words) {
             if (word.startsWith(AT_SYMBOL_CHAR)) {
                 final String dependencyDef = word.substring(1);
+                boolean isModuleDep = JkModuleDependency.isModuleDependencyDescription(dependencyDef);
+                if (isModuleDep) {
+                    JkModuleDependency moduleDependency = JkModuleDependency.of(dependencyDef);
+                    boolean specifiedVersion = !moduleDependency.hasUnspecifiedVersion();
+                    if (specifiedVersion) {
+                        result.add(moduleDependency);
+                    } else if (moduleDependency.getModuleId().getGroup().equals("dev.jeka")) {
+                        result.add(moduleDependency.withVersion(JkInfo.getJekaVersion()));
+                    } else {
+                        throw new JkException("Command line argument "
+                                + word + " does not mention a version. " +
+                                " Use description as groupId:artefactId:version. Version can be '+' for taking the latest.");
+                    }
+                }
                 if (JkModuleDependency.isModuleDependencyDescription(dependencyDef)
                         && !JkModuleDependency.of(dependencyDef).hasUnspecifiedVersion()) {
                     result.add(JkModuleDependency.of(dependencyDef));
@@ -69,7 +84,8 @@ final class CommandLine {
                         result.add(JkFileSystemDependency.of(candidatePath));
                     } else {
                         throw new JkException("Command line argument "
-                                + word + " cannot be recognized as module coordinate of file name.");
+                                + word + " cannot be recognized as a file. " +
+                                " Is " + candidatePath.toAbsolutePath() + " an existing file ?");
                     }
                 }
 

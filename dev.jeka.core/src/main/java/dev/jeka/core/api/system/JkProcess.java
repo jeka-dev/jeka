@@ -1,9 +1,6 @@
 package dev.jeka.core.api.system;
 
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -71,6 +68,16 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
     public static JkProcess<JkProcess> of(String command, String... parameters) {
         return new JkProcess(command, parameters);
     }
+
+    public static JkProcess<JkProcess> ofCmdLine(String commandLine) {
+        String[] items = JkUtilsString.translateCommandline(commandLine);
+        JkUtilsAssert.argument(items.length > 0, "Cannot accept empty command line.");
+        String cmd = items[0];
+        List<String> args = new LinkedList<>(Arrays.asList(items));
+        args.remove(0);
+        return new JkProcess(cmd, args.toArray(new String[0]));
+    }
+
 
     /**
      * Defines a <code>JkProcess</code> using the specified command and
@@ -226,6 +233,9 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
      * current output.
      */
     public int exec(String ... extraParams) {
+        if (extraParams.length == 1) {
+            extraParams = JkUtilsString.translateCommandline(extraParams[0]);
+        }
         return exec(false, extraParams).exitCode;
     }
 
@@ -238,54 +248,58 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
     }
 
     private Result exec(boolean collectOutput, String ... extraParams) {
+        JkUtilsAssert.state(!JkUtilsString.isBlank(command), "No command has been specified");
         final List<String> commands = new LinkedList<>();
         commands.add(this.command);
         commands.addAll(parameters);
         commands.addAll(Arrays.asList(extraParams));
-        final AtomicInteger exitCode = new AtomicInteger();
+        commands.removeAll(Collections.singleton(null));
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOuputStream();
-        final Runnable runnable = () -> {
-            final ProcessBuilder processBuilder = processBuilder(commands);
-            if (workingDir != null) {
-                processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
-            }
-            final Process process;
-            try {
-                process = processBuilder.start();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            OutputStream consoleOutputStream = logOutput ? JkLog.getOutPrintStream() : JkUtilsIO.nopOuputStream();
-            OutputStream consoleErrStream = logOutput ? JkLog.getErrPrintStream() : JkUtilsIO.nopOuputStream();
-            final JkUtilsIO.JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getInputStream(), consoleOutputStream, collectOs);
-                final JkUtilsIO.JkStreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getErrorStream(), consoleErrStream, collectOs);
-            try {
-                exitCode.set(process.waitFor());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            outputStreamGobbler.join();
-            errorStreamGobbler.join();
-            if (exitCode.get() != 0 && failOnError) {
-                throw new IllegalStateException("Process " + String.join(" ",elipsed(commands))
-                        + "\nhas returned with error code " + exitCode);
-            }
-        };
         if (logCommand) {
-            String workingDirName = this.workingDir == null ? "" : this.workingDir.toString() +  ">";
+            String workingDirName = this.workingDir == null ? "" : this.workingDir.toString() + ">";
             JkLog.startTask("Start program : " + workingDirName + commands.toString());
-            runnable.run();
+        }
+        int exitCode = runProcess(commands, collectOs);
+        if (logCommand) {
             JkLog.endTask();
-        } else {
-            runnable.run();
         }
         Result out = new Result();
-        out.exitCode = exitCode.get();
+        out.exitCode = exitCode;
         out.output = collectOutput ? new String(byteArrayOutputStream.toByteArray()) : null;
         return out;
+    }
+
+    private int runProcess(List<String> commands, OutputStream collectOs) {
+        final ProcessBuilder processBuilder = processBuilder(commands);
+        if (workingDir != null) {
+            processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
+        }
+        final Process process;
+        try {
+            process = processBuilder.start();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        OutputStream consoleOutputStream = logOutput ? JkLog.getOutPrintStream() : JkUtilsIO.nopOuputStream();
+        OutputStream consoleErrStream = logOutput ? JkLog.getErrPrintStream() : JkUtilsIO.nopOuputStream();
+        final JkUtilsIO.JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+                process.getInputStream(), consoleOutputStream, collectOs);
+        final JkUtilsIO.JkStreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
+                process.getErrorStream(), consoleErrStream, collectOs);
+        int exitCode;
+        try {
+            exitCode = process.waitFor();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        outputStreamGobbler.join();
+        errorStreamGobbler.join();
+        if (exitCode != 0 && failOnError) {
+            throw new IllegalStateException("Process " + String.join(" ",elipsed(commands))
+                    + "\nhas returned with error code " + exitCode);
+        }
+        return exitCode;
     }
 
     private static List<String> elipsed(List<String> options) {

@@ -1,10 +1,15 @@
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * This build class illustrates how to use directly JUnit5 Platform API.
@@ -71,6 +76,11 @@ class Junit5Build extends JkClass {
 
     public void cleanPack() {
         clean(); java.pack();
+    }
+
+    public void checkReportGenerated() {
+        Path report = getOutputDir().resolve("test-report");
+        JkUtilsAssert.state(Files.exists(report), "Report file " + report + " not found.");
     }
 
     public static void main(String[] args) {

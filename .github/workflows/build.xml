@@ -35,8 +35,8 @@
 	</target>
 
 	<target name="run" depends="bootstrap">
-		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.core" fork="true" failonerror="true">
-			<arg line="java#pack java#publish -java#test.fork=true -LB" />
+		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.master" fork="true" failonerror="true">
+			<arg line="make -LRI -LSU -LB" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

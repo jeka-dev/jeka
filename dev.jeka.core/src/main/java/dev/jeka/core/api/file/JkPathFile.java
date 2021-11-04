@@ -1,5 +1,6 @@
 package dev.jeka.core.api.file;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -183,7 +184,7 @@ public final class JkPathFile {
     /**
      * Adds execute permition on this files. No effect on windows system.
      */
-    public JkPathFile addExecPerm(boolean owner, boolean group, boolean other) {
+    public JkPathFile setPosixExecPermissions(boolean owner, boolean group, boolean other) {
         assertExist();
         Set<PosixFilePermission> perms = null;
         try {
@@ -193,11 +194,15 @@ public final class JkPathFile {
             if (other) perms.add(PosixFilePermission.OTHERS_EXECUTE);
             Files.setPosixFilePermissions(this.path, perms);
         } catch (UnsupportedOperationException e) {
-            // Windows system
+            JkLog.warn("Can not set exec permission to file " + this.path);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         return this;
+    }
+
+    public JkPathFile setPosixExecPermissions() {
+        return setPosixExecPermissions(true, true, true);
     }
 
     private static String interpolated(String original, Map<String, String> tokenValues) {

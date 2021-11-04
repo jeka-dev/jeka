@@ -24,16 +24,24 @@ import java.util.Optional;
 @JkDocPluginDeps(JkPluginJava.class)
 public class JkPluginVersionFromGit extends JkPlugin {
 
+    public static final String TAG_TASK_NAME = "version-from-git-tag";
+
     @JkDoc("The prefix to use in commit message to specify a version.")
     public String commentVersionPrefix = "Release:";
 
     @JkDoc("Tags with following prefix. This may help to distinguish tags for versioning from others.")
     public String tagPrefixForVersion = "";
 
-    @JkDoc("If true, tag git with version specified in commit message. The tag is set and pushed after project.publication.publish() succeed.")
+    @JkDoc("If true and a JkPluginJava project is bound to the build instance, the project will be configured for " +
+            "publishing with the inferred version.")
+    public boolean autoConfigureProject = true;
+
+    @JkDoc("If true and autoConfigureProject, project will be configured to push tag after project.publication.publish() succeed.")
     public boolean tagAfterPublish = true;
 
     private JkGitProcess git;
+
+    private transient JkVersion cachedVersion;
 
     protected JkPluginVersionFromGit(JkClass jkClass) {
         super(jkClass);
@@ -43,20 +51,28 @@ public class JkPluginVersionFromGit extends JkPlugin {
 
     @Override
     protected void afterSetup() {
-        JkPluginJava java = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
-        if (java == null) {
-            return;
+        if (autoConfigureProject) {
+            JkPluginJava java = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
+            if (java == null) {
+                return;
+            }
+            configure(java.getProject(), tagAfterPublish);
         }
-        JkVersion version = version();
-        JkJavaProject project = java.getProject();
+    }
+
+    /**
+     * Configure the specified project to use git version for publishing and tagging the repository.
+     * @param tag If true, the repository will be tagged right after the project.pubmication.publish()
+     */
+    public void configure(JkJavaProject project, boolean tag) {
         project.getPublication()
                 .getMaven()
-                    .setVersion(version.toString())
+                    .setVersion(() -> version().toString())
                 .__
                 .getIvy()
-                    .setVersion(version.toString());
-        if (tagAfterPublish) {
-            project.getPublication().getPostActions().append(this::tagIfDiffers);
+                    .setVersion(() -> version().toString());
+        if (tag) {
+            project.getPublication().getPostActions().append(TAG_TASK_NAME, this::tagIfDiffers);
         }
     }
 
@@ -68,9 +84,13 @@ public class JkPluginVersionFromGit extends JkPlugin {
      * Gets the current version either from commit message if specified nor from git tag.
      */
     public JkVersion version() {
+        if (cachedVersion != null) {
+            return cachedVersion;
+        }
         String currentTagVersion = git.getVersionFromTag(tagPrefixForVersion);
         String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentVersionPrefix);
-        return JkVersion.of(Optional.ofNullable(commitCommentVersion).orElse(currentTagVersion));
+        cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion).orElse(currentTagVersion));
+        return cachedVersion;
     }
 
     /**
@@ -89,6 +109,14 @@ public class JkPluginVersionFromGit extends JkPlugin {
             return true;
         }
         return false;
+    }
+
+    /**
+     * {@link #version()} return is cached to avoid too many git call. Invoke this method to clear version cache.
+     */
+    public JkPluginVersionFromGit refresh() {
+        cachedVersion = null;
+        return this;
     }
 
     @JkDoc("Display inferred version on console.")

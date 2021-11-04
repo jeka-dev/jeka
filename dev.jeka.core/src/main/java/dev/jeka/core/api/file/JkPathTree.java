@@ -39,6 +39,13 @@ public final class JkPathTree implements Closeable {
     }
 
     /**
+     * @see #of(Path)
+     */
+    public static JkPathTree of(String rootDir) {
+        return JkPathTree.of(Paths.get(rootDir), false);
+    }
+
+    /**
      * Creates a {@link JkPathTree} having the specified root directory.
      */
     public static JkPathTree ofZip(Path zipFile) {
