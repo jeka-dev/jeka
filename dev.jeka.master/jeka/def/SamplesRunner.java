@@ -32,12 +32,9 @@ class SamplesRunner extends JekaCommandLineExecutor {
 
     private void testScaffoldWithExternalPlugin() {
         JkLog.info("Test scaffold with springboot plugin");
-        Path dir = JkUtilsPath.createTempDirectory("jeka-test");
-        JkProcess.ofWinOrUx("jeka.bat", "jeka").setWorkingDir(dir)
-                .addParams("-LB", "-LRI", "-LSU", "-LV=false", "-JKC=",
-                        "scaffold#run", "@dev.jeka:springboot-plugin:+", "springboot#")
-                .setFailOnError(true).exec();
-        JkPathTree.of(dir).deleteRoot();
+        String dir = JkUtilsPath.createTempDirectory("jeka-test").toString();
+        runjeka(dir, "scaffold#run @dev.jeka:springboot-plugin:+ springboot#");
+        runjeka(dir, "clean java#pack");
     }
 
     public static void main(String[] args) throws IOException {
