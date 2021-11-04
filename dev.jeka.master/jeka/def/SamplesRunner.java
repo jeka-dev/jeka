@@ -18,6 +18,7 @@ class SamplesRunner extends JekaCommandLineExecutor {
     }
 
     void run() {
+        runjeka("dev.jeka.samples.sonarqube", "@../../plugins/dev.jeka.plugins.sonarqube clean java#pack");
         runjekaw("dev.jeka.samples.basic", "-JKC=JavaPluginBuild cleanPackPublish");
         runjekaw("dev.jeka.samples.basic", "-JKC=SignedArtifactsBuild cleanPackPublish");
         runjekaw("dev.jeka.samples.basic", "-JKC=ThirdPartyPoweredBuild cleanPack");
@@ -27,7 +28,8 @@ class SamplesRunner extends JekaCommandLineExecutor {
         runjekaw("dev.jeka.samples.junit5", "clean java#pack");
         runjekaw("dev.jeka.samples.junit5", "clean java#pack checkReportGenerated -java#tests.fork");
         runjeka("dev.jeka.samples.jacoco", "@../../plugins/dev.jeka.plugins.jacoco clean java#pack checkReportGenerated");
-        testScaffoldWithExternalPlugin();
+        runjeka("dev.jeka.samples.sonarqube", "@../../plugins/dev.jeka.plugins.sonarqube clean java#pack");
+        //testScaffoldWithExternalPlugin();
     }
 
     private void testScaffoldWithExternalPlugin() {

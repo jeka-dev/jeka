@@ -69,7 +69,7 @@ public abstract class JekaCommandLineExecutor {
                 .setWorkingDir(workingDir)
                 .setLogCommand(true)
                 .setLogOutput(true)
-                .addParams("-LB", "-LRI", "-LSU", "-LV=false")
+                .addParams("-LRI", "-LSU", "-LV=false")
                 .setFailOnError(true);
     }
 

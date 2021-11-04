@@ -21,6 +21,9 @@ class MasterBuild extends JkClass {
     @JkDefImport("../plugins/dev.jeka.plugins.jacoco")
     JacocoPluginBuild jacocoBuild;
 
+    @JkDefImport("../plugins/dev.jeka.plugins.sonarqube")
+    JkClass sonarqubeBuild;
+
     JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
 
     @Override
