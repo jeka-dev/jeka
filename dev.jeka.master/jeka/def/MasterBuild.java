@@ -4,6 +4,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkClass;
@@ -63,8 +64,9 @@ class MasterBuild extends JkClass {
     }
 
     public void setPosixPermissions() {
-        JkPathTree.of("..").andMatching("*/jekaw", "**/jekaw").getFiles().forEach(path -> {
-            JkLog.info("");
+        JkPathTree.of("../samples").andMatching("*/jekaw", "**/jekaw").getFiles().forEach(path -> {
+            JkLog.info("Setting exec permission on git for file " + path);
+            JkProcess.ofCmdLine("git update-index --chmod=+x " + path).run();
         });
     }
 

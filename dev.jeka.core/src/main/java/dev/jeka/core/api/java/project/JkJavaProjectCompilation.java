@@ -125,7 +125,7 @@ public class JkJavaProjectCompilation<T> {
      */
     public void runIfNecessary() {
         if (done) {
-            JkLog.trace("Compilation task already done. Won't perform again.");
+            JkLog.trace(JAVA_SOURCES_COMPILE_ACTION + " already done. Won't perform again.");
         } else {
             run();
             done = true;

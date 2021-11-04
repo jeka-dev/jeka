@@ -58,10 +58,8 @@ public final class Main {
                 displayOutro(start);
             }
             System.exit(0); // Triggers shutdown hooks
-        } catch (final RuntimeException e) {
-            if (!Environment.standardOptions.logSetup) {
-                JkBusyIndicator.stop();
-            }
+        } catch (final Throwable e) {
+            JkBusyIndicator.stop();
             if (JkMemoryBufferLogDecorator.isActive()) {
                 JkMemoryBufferLogDecorator.flush();
             }

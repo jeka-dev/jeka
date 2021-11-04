@@ -41,6 +41,8 @@ public class JkPluginVersionFromGit extends JkPlugin {
 
     private JkGitProcess git;
 
+    private transient JkVersion cachedVersion;
+
     protected JkPluginVersionFromGit(JkClass jkClass) {
         super(jkClass);
         JkPluginGit gitPlugin = jkClass.getPlugins().getIfLoaded(JkPluginGit.class);
@@ -63,13 +65,12 @@ public class JkPluginVersionFromGit extends JkPlugin {
      * @param tag If true, the repository will be tagged right after the project.pubmication.publish()
      */
     public void configure(JkJavaProject project, boolean tag) {
-        String  version = version().toString();
         project.getPublication()
                 .getMaven()
-                    .setVersion(version)
+                    .setVersion(() -> version().toString())
                 .__
                 .getIvy()
-                    .setVersion(version);
+                    .setVersion(() -> version().toString());
         if (tag) {
             project.getPublication().getPostActions().append(TAG_TASK_NAME, this::tagIfDiffers);
         }
@@ -83,9 +84,13 @@ public class JkPluginVersionFromGit extends JkPlugin {
      * Gets the current version either from commit message if specified nor from git tag.
      */
     public JkVersion version() {
+        if (cachedVersion != null) {
+            return cachedVersion;
+        }
         String currentTagVersion = git.getVersionFromTag(tagPrefixForVersion);
         String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentVersionPrefix);
-        return JkVersion.of(Optional.ofNullable(commitCommentVersion).orElse(currentTagVersion));
+        cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion).orElse(currentTagVersion));
+        return cachedVersion;
     }
 
     /**
@@ -104,6 +109,14 @@ public class JkPluginVersionFromGit extends JkPlugin {
             return true;
         }
         return false;
+    }
+
+    /**
+     * {@link #version()} return is cached to avoid too many git call. Invoke this method to clear version cache.
+     */
+    public JkPluginVersionFromGit refresh() {
+        cachedVersion = null;
+        return this;
     }
 
     @JkDoc("Display inferred version on console.")
