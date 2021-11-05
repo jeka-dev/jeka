@@ -26,12 +26,31 @@ class Environment {
 
     static void initialize(String[] commandLineArgs) {
 
-        // Parse command line
+
+        List<String> effectiveCommandLineArgs = new LinkedList<>(Arrays.asList(commandLineArgs));
+
+        // Add arguments contained in cmd.properties '_append'
         Map<String, String> presets = projectCmdProperties();
-        String[] extras = JkUtilsString.translateCommandline(presets.get("_append"));
-        String[] actualCommandLineArgs = Stream.concat(Arrays.stream(commandLineArgs), Arrays.stream(extras))
-                .toArray(String[]::new);
-        final CommandLine commandLine = CommandLine.parse(actualCommandLineArgs);
+        List<String> appendedArgs = Arrays.asList(JkUtilsString.translateCommandline(presets.get("_append")));
+        effectiveCommandLineArgs.addAll(appendedArgs);
+
+        // Interpolate arguments passed as $key to respective value
+        for (ListIterator<String> it = effectiveCommandLineArgs.listIterator(); it.hasNext(); ) {
+            String word = it.next();
+            if (word.startsWith("$")) {
+                String presetValue = presets.get(word.substring(1));
+                if (presetValue != null) {
+                    String[] replacingItems = JkUtilsString.translateCommandline(presetValue);
+                    it.remove();
+                    Arrays.stream(replacingItems).forEach(item -> it.add(item));
+                }
+            }
+        }
+        JkLog.trace("Effective command line : " + effectiveCommandLineArgs);
+
+        // Parse command line
+        final CommandLine commandLine = CommandLine.parse(effectiveCommandLineArgs.toArray(new String[0]));
+
 
         // Take all defined system properties (command line, ofSystem.properties files) and
         // inject them in the system.

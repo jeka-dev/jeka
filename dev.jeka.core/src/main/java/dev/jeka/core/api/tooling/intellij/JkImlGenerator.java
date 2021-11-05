@@ -566,9 +566,7 @@ public final class JkImlGenerator {
         final String sourceName = nameWithoutExt + "-sources." + ext;
         final List<Path> folders = JkUtilsIterable.listOf(
                 binary.resolve(".."),
-                binary.resolve("../../../libs-sources"),
-                binary.resolve("../../libs-sources"),
-                binary.resolve("../libs-sources"));
+                binary.resolve("../sources"));
         final List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-sources.zip");
         return lookFileHere(folders, names);
     }

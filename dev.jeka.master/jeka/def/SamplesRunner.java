@@ -4,7 +4,9 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
+import java.awt.*;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 
 /**
@@ -32,6 +34,16 @@ class SamplesRunner extends JekaCommandLineExecutor {
         //testScaffoldWithExternalPlugin();
     }
 
+    public void launchManually(String cmdLine) {
+        Path dir = JkUtilsPath.createTempDirectory("jeka-sample-generated");
+        runjeka(dir.toString(), cmdLine);
+        try {
+            Desktop.getDesktop().open(dir.toFile());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     private void testScaffoldWithExternalPlugin() {
         JkLog.info("Test scaffold with springboot plugin");
         String dir = JkUtilsPath.createTempDirectory("jeka-test").toString();
@@ -42,5 +54,12 @@ class SamplesRunner extends JekaCommandLineExecutor {
     public static void main(String[] args) throws IOException {
         new SamplesRunner().run();
     }
+
+    public static class ExtraLauncher {
+        public static void main(String[] args) {
+            new SamplesRunner().launchManually("scaffold#run java#");
+        }
+    }
+
 
 }

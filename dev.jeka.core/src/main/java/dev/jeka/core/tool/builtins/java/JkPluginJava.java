@@ -2,7 +2,6 @@ package dev.jeka.core.tool.builtins.java;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkProjectDependencies;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
@@ -16,6 +15,7 @@ import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
@@ -163,6 +163,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         });
         scaffoldPlugin.getScaffolder().setClassFilename("Build.java");
         scaffoldPlugin.getScaffolder().getExtraActions().append( () -> {
+
             JkLog.info("Create source directories.");
             JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
             prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
@@ -170,6 +171,21 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
             testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
             testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+
+            // Create specific files and folders
+            JkPathFile.of(project.getBaseDir().resolve("jeka/dependency.txt"))
+                    .fetchContentFrom(JkPluginJava.class.getResource("dependencies.txt"));
+            Path libs = project.getBaseDir().resolve("jeka/libs");
+            JkPathFile.of(libs.resolve("readme.txt"))
+                    .fetchContentFrom(JkPluginJava.class.getResource("libs-readme.txt"));
+            JkUtilsPath.createDirectories(libs.resolve("compile+runtime"));
+            JkUtilsPath.createDirectories(libs.resolve("compile"));
+            JkUtilsPath.createDirectories(libs.resolve("runtime"));
+            JkUtilsPath.createDirectories(libs.resolve("test"));
+            JkUtilsPath.createDirectories(libs.resolve("sources"));
+
+
+            // This is special scaffolding for project pretending to be plugins for Jeka
             if (this.scaffoldTemplate == ScaffoldTemplate.PLUGIN) {
                 Path breakinkChangeFile = this.getProject().getBaseDir().resolve("breaking_versions.txt");
                 String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +

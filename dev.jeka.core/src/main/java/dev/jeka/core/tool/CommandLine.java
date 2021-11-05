@@ -65,19 +65,14 @@ final class CommandLine {
                 if (isModuleDep) {
                     JkModuleDependency moduleDependency = JkModuleDependency.of(dependencyDef);
                     boolean specifiedVersion = !moduleDependency.hasUnspecifiedVersion();
-                    if (specifiedVersion) {
-                        result.add(moduleDependency);
-                    } else if (moduleDependency.getModuleId().getGroup().equals("dev.jeka")) {
-                        result.add(moduleDependency.withVersion(JkInfo.getJekaVersion()));
+                    if (!specifiedVersion && moduleDependency.getModuleId().getGroup().equals("dev.jeka")) {
+                        moduleDependency = moduleDependency.withVersion(JkInfo.getJekaVersion());
                     } else {
                         throw new JkException("Command line argument "
                                 + word + " does not mention a version. " +
                                 " Use description as groupId:artefactId:version. Version can be '+' for taking the latest.");
                     }
-                }
-                if (JkModuleDependency.isModuleDependencyDescription(dependencyDef)
-                        && !JkModuleDependency.of(dependencyDef).hasUnspecifiedVersion()) {
-                    result.add(JkModuleDependency.of(dependencyDef));
+                    result.add(moduleDependency);
                 } else {
                     Path candidatePath = Paths.get(dependencyDef);
                     if (Files.exists(candidatePath)) {
@@ -88,7 +83,6 @@ final class CommandLine {
                                 " Is " + candidatePath.toAbsolutePath() + " an existing file ?");
                     }
                 }
-
             }
         }
         return result;

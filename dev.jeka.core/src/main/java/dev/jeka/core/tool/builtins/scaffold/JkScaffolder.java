@@ -71,6 +71,14 @@ public final class JkScaffolder {
             code = code.replace("${jekaVersion}", version);
         }
         JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
+        JkPathFile.of(baseDir.resolve("jeka/options.properties"))
+                .fetchContentFrom(JkScaffolder.class.getResource("options.properties"));
+        JkPathFile.of(baseDir.resolve("jeka/cmd.properties"))
+                .fetchContentFrom(JkScaffolder.class.getResource("cmd.properties"));
+        JkPathFile.of(baseDir.resolve("jeka/welcome.md"))
+                .fetchContentFrom(JkScaffolder.class.getResource("welcome.md"));
+        JkUtilsPath.createDirectories(baseDir.resolve(JkConstants.JEKA_DIR).resolve("boot"));
+
         extraActions.run();
     }
 
@@ -119,7 +127,7 @@ public final class JkScaffolder {
         Path jekaPropertiesPath = wrapperFolder.resolve("jeka.properties");
         if (!Files.exists(jekaPropertiesPath)) {
             JkPathFile.of(tempProps)
-                    .replaceContentBy(JkScaffolder.class.getResource("jeka.properties"))
+                    .fetchContentFrom(JkScaffolder.class.getResource("jeka.properties"))
                     .copyReplacingTokens(jekaPropertiesPath,
                             JkUtilsIterable.mapOf("${version}", version), Charset.forName("utf-8"))
                     .deleteIfExist();
