@@ -233,7 +233,7 @@ public final class JkJavaCompiler<T> {
     private static JavaCompiler getDefaultOrFail() {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         JkUtilsAssert.state(compiler != null, "This platform does not provide compileRunner. " +
-                "Try another JDK or use JkJavaCompiler.andCompiler(JavaCompiler)");
+                "Try another JDK or specify option jdk.[version]=/path/to/jdk");
         return compiler;
     }
 

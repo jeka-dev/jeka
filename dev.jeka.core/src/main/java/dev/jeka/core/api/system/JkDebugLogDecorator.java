@@ -43,6 +43,9 @@ public final class JkDebugLogDecorator extends JkLog.JkLogDecorator {
             stream = err;
         }
         String message = event.getMessage();
+        if (event.getType().isTraceWarnOrError()) {
+            message = "[" + event.getType() + "] " + message;
+        }
         if (logType == JkLog.Type.END_TASK) {
         } else if (logType== JkLog.Type.START_TASK) {
             stream.print(message);

@@ -7,6 +7,7 @@ import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,32 +61,35 @@ final class CommandLine {
         final List<JkDependency> result = new LinkedList<>();
         for (final String word : words) {
             if (word.startsWith(AT_SYMBOL_CHAR)) {
-                final String dependencyDef = word.substring(1);
-                boolean isModuleDep = JkModuleDependency.isModuleDependencyDescription(dependencyDef);
-                if (isModuleDep) {
-                    JkModuleDependency moduleDependency = JkModuleDependency.of(dependencyDef);
-                    boolean specifiedVersion = !moduleDependency.hasUnspecifiedVersion();
-                    if (!specifiedVersion && moduleDependency.getModuleId().getGroup().equals("dev.jeka")) {
-                        moduleDependency = moduleDependency.withVersion(JkInfo.getJekaVersion());
-                    } else {
-                        throw new JkException("Command line argument "
-                                + word + " does not mention a version. " +
-                                " Use description as groupId:artefactId:version. Version can be '+' for taking the latest.");
-                    }
-                    result.add(moduleDependency);
-                } else {
-                    Path candidatePath = Paths.get(dependencyDef);
-                    if (Files.exists(candidatePath)) {
-                        result.add(JkFileSystemDependency.of(candidatePath));
-                    } else {
-                        throw new JkException("Command line argument "
-                                + word + " cannot be recognized as a file. " +
-                                " Is " + candidatePath.toAbsolutePath() + " an existing file ?");
-                    }
-                }
+                    result.add(toModuleDependency(word.substring(1)));
             }
         }
         return result;
+    }
+
+    private static JkDependency toModuleDependency(String depDescription) {
+        boolean hasDoubleDotes = JkModuleDependency.isModuleDependencyDescription(depDescription);
+        if (!hasDoubleDotes || (JkUtilsSystem.IS_WINDOWS && depDescription.substring(1).startsWith(":\\"))) {
+            Path candidatePath = Paths.get(depDescription);
+            if (Files.exists(candidatePath)) {
+                return JkFileSystemDependency.of(candidatePath);
+            } else {
+                throw new JkException("Command line argument "
+                        + depDescription + " cannot be recognized as a file. " +
+                        "Is " + candidatePath.toAbsolutePath() + " an existing file ?");
+            }
+        } else {
+            JkModuleDependency moduleDependency = JkModuleDependency.of(depDescription);
+            boolean specifiedVersion = !moduleDependency.hasUnspecifiedVersion();
+            if (!specifiedVersion && moduleDependency.getModuleId().getGroup().equals("dev.jeka")) {
+                moduleDependency = moduleDependency.withVersion(JkInfo.getJekaVersion());
+                return moduleDependency;
+            } else {
+                throw new JkException("Command line argument "
+                        + depDescription + " does not mention a version. " +
+                        "Use description as groupId:artefactId:version. Version can be '+' for taking the latest.");
+            }
+        }
     }
 
     private static List<MethodInvocation> extractMethods(String[] words, boolean master) {

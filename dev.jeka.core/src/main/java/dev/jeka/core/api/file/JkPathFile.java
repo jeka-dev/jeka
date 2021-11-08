@@ -194,7 +194,7 @@ public final class JkPathFile {
             if (other) perms.add(PosixFilePermission.OTHERS_EXECUTE);
             Files.setPosixFilePermissions(this.path, perms);
         } catch (UnsupportedOperationException e) {
-            JkLog.warn("Can not set exec permission to file " + this.path);
+            JkLog.warn("Can not set POSIX permissions to file " + this.path);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

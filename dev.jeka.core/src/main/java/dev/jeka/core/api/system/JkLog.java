@@ -22,7 +22,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class JkLog implements Serializable {
 
     public enum Type {
-        INFO, WARN, ERROR, TRACE, PROGRESS, TASK, START_TASK, END_TASK
+        INFO, WARN, ERROR, TRACE, PROGRESS, TASK, START_TASK, END_TASK;
+
+        public boolean isTraceWarnOrError() {
+            return this == TRACE || this == WARN || this == ERROR;
+        }
     }
 
     public enum Verbosity {
@@ -61,6 +65,8 @@ public final class JkLog implements Serializable {
 
     private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();
 
+    private static Style decoratorStyle;
+
     private static LinkedList<Long> getStartTimes() {
         LinkedList<Long> result = START_TIMES.get();
         if (result == null) {
@@ -87,6 +93,7 @@ public final class JkLog implements Serializable {
      */
     public static void setDecorator(Style style) {
         setDecorator(style.decorator);
+        decoratorStyle = style;
     }
 
     /**
@@ -108,6 +115,10 @@ public final class JkLog implements Serializable {
     public static void setVerbosity(Verbosity verbosityArg) {
         JkUtilsAssert.argument(verbosityArg != null, "Verbosity can noot be set to null.");
         verbosity = verbosityArg;
+    }
+
+    static Style getDecoratorStyle() {
+        return decoratorStyle;
     }
 
     public static int getCurrentNestedLevel() {
@@ -254,7 +265,7 @@ public final class JkLog implements Serializable {
         }
 
         public long getDurationMs() {
-            return duration;
+            return Math.max(duration, 0);
         }
     }
 

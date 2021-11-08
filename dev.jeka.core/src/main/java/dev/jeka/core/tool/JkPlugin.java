@@ -85,7 +85,7 @@ public abstract class JkPlugin {
         return JkUtilsString.uncapitalize(suffix);
     }
 
-    protected JkClass getJkClass() {
+    public JkClass getJkClass() {
         return jkClass;
     }
 

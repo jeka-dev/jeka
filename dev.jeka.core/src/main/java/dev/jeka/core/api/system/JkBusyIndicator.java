@@ -67,7 +67,6 @@ public class JkBusyIndicator {
             printStream.print('\b');
             printStream.flush();
         }
-        //printStream.println("Busy stopped. text lenght = " + instance.text.length());
         printStream.print(' ');  // On some consoles, '\b' does only a cursor left move without deleting the content
         printStream.print('\b');
         for (int i = 0; i <= instance.text.length(); i++) {

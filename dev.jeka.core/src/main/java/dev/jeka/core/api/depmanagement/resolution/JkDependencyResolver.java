@@ -108,6 +108,10 @@ public final class JkDependencyResolver<T> {
         return this;
     }
 
+    public JkResolveResult resolve(JkModuleDependency moduleDependency) {
+        return resolve(JkDependencySet.of(moduleDependency));
+    }
+
     public JkResolveResult resolve(JkDependencySet dependencies) {
         return resolve(JkQualifiedDependencySet.of(
                 dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)

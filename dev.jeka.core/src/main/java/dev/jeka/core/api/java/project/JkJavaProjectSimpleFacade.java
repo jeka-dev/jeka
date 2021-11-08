@@ -83,6 +83,11 @@ public class JkJavaProjectSimpleFacade {
         return this;
     }
 
+    public JkJavaProjectSimpleFacade setTestSkipped(boolean skipped) {
+        project.getConstruction().getTesting().setSkipped(skipped);
+        return this;
+    }
+
     /**
      * Add specified dependencies at head of preset dependencies.
      */

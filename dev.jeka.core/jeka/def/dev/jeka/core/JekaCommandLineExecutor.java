@@ -1,6 +1,8 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -46,6 +48,8 @@ public abstract class JekaCommandLineExecutor {
         Path dir = this.samplesRootDir.resolve(projectDir);
         process(dir, useWrapper)
                 .addParams(JkUtilsString.translateCommandline(cmdLine))
+                .inheritJkLogStyle()
+                .setEnv("JEKA_JDK", JkJavaProcess.CURRENT_JAVA_DIR.resolve("../..").normalize().toString())
                 .run();
     }
 
@@ -69,7 +73,7 @@ public abstract class JekaCommandLineExecutor {
                 .setWorkingDir(workingDir)
                 .setLogCommand(true)
                 .setLogOutput(true)
-                .addParams("-LRI", "-LSU", "-LV=false")
+                //.addParams("-LRI", "-LSU")
                 .setFailOnError(true);
     }
 

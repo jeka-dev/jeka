@@ -9,9 +9,9 @@ import java.nio.file.Path;
  * End-to-end tests about scaffolding.
  * Supposed to be run in dev.jeka.core working dir.
  */
-class ScaffoldTester extends JekaCommandLineExecutor {
+class CoreScaffoldTester extends JekaCommandLineExecutor {
 
-    ScaffoldTester() {
+    CoreScaffoldTester() {
         super("..");
     }
 
@@ -34,7 +34,7 @@ class ScaffoldTester extends JekaCommandLineExecutor {
 
     public static void main(String[] args) throws Exception {
         JkLog.setDecorator(JkLog.Style.INDENT);
-        new ScaffoldTester().run();
+        new CoreScaffoldTester().run();
     }
 
 }

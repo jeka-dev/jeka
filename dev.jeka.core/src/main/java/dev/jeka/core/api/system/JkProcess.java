@@ -182,8 +182,9 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
         return (T) this;
     }
 
-    public void setEnv(String name, String value) {
+    public T setEnv(String name, String value) {
         this.env.put(name, value);
+        return (T) this;
     }
 
     /**
@@ -215,6 +216,19 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
      */
     public  T setLogOutput(boolean logOutput) {
         this.logOutput = logOutput;
+        return (T) this;
+    }
+
+    /**
+     * Adds a param -LV=[DecoratorStyle] matching the current one.
+     */
+    public T inheritJkLogStyle() {
+        if (JkLog.getDecoratorStyle() != null) {
+            addParams("-LS=" + JkLog.getDecoratorStyle().name());
+        }
+        if (JkLog.isVerbose()) {
+            addParams("-LV");
+        }
         return (T) this;
     }
 

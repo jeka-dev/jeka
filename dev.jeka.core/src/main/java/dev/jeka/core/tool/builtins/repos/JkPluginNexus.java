@@ -10,7 +10,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 
-import java.util.Arrays;
+import java.util.Optional;
 
 public class JkPluginNexus extends JkPlugin {
 
@@ -28,7 +28,7 @@ public class JkPluginNexus extends JkPlugin {
 
     @Override
     protected void afterSetup() throws Exception {
-        JkPluginJava pluginJava = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
+        JkPluginJava pluginJava = getJkClass().getPlugins().getOptional(JkPluginJava.class).orElse(null);
         if (pluginJava == null) {
             JkLog.warn("No project plugin configured here.");
             return;
@@ -46,13 +46,13 @@ public class JkPluginNexus extends JkPlugin {
     }
 
     public void closeAndOrRelease() {
-        JkPluginJava pluginJava = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
-        if (pluginJava == null) {
+        Optional<JkPluginJava> pluginJava = getJkClass().getPlugins().getOptional(JkPluginJava.class);
+        if (!pluginJava.isPresent()) {
             JkLog.warn("No project plugin configured here.");
             return;
         }
         String[] profileNames = profileNamesFilter.split(",");
-        JkRepo repo = getFirst(pluginJava.getProject());
+        JkRepo repo = getFirst(pluginJava.get().getProject());
         if (repo != null) {
             JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease(profileNames);
         } else {

@@ -119,8 +119,6 @@ class Environment {
 
         String logRuntimeInformation;
 
-        int logMaxLength = -1;
-
         private String jkClassName;
 
         private boolean forceCompile;
@@ -134,7 +132,6 @@ class Environment {
             this.logSetup = valueOf(Boolean.class, map, false,"LogSetup", "LSU");
             this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
-            this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
             this.jkClassName = valueOf(String.class, map, null, "JekaClass", "JKC");
             this.forceCompile = valueOf(Boolean.class, map, false, "ForceCompile", "FC");
         }
@@ -157,7 +154,7 @@ class Environment {
         @Override
         public String toString() {
             return "JkClass=" + JkUtilsObject.toString(jkClassName) + ", LogVerbose=" + logVerbose
-                    + ", LogHeaders=" + logBanner + ", LogMaxLength=" + logMaxLength;
+                    + ", LogHeaders=" + logBanner;
         }
 
         private <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... optionNames) {

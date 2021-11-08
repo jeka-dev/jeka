@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.Field;
@@ -7,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A Jeka class can import one or several Jeka classes. It is an important mechanism to reuse Jeka across projects.
@@ -39,6 +41,14 @@ public final class JkImportedJkClasses {
      */
     public List<JkClass> getDirects() {
         return Collections.unmodifiableList(directImportedJkClasses);
+    }
+
+    public <T extends JkPlugin> List<T> getDirectPlugins(Class<T> pluginClass) {
+        return directImportedJkClasses.stream()
+                .map(build -> build.getPlugins().getOptional(pluginClass))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -89,6 +99,7 @@ public final class JkImportedJkClasses {
     private static List<JkClass> getDirectImportedJkClasses(JkClass masterJkClass) {
         final List<JkClass> result = new LinkedList<>();
         final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterJkClass.getClass(), JkDefImport.class);
+        JkLog.trace("Projects imported by " + masterJkClass + " : " + fields);
         for (final Field field : fields) {
             final JkDefImport jkProject = field.getAnnotation(JkDefImport.class);
             final JkClass importedJkClass = createImportedJkClass(

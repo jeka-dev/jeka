@@ -105,8 +105,9 @@ public class JkJavaProjectTesting {
     /**
      * Specifies if the tests should be skipped.
      */
-    public void setSkipped(boolean skipped) {
+    public JkJavaProjectTesting setSkipped(boolean skipped) {
         this.skipped = skipped;
+        return this;
     }
 
     /**

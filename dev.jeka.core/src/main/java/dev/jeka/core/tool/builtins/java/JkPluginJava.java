@@ -19,7 +19,6 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
-import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 import org.w3c.dom.Document;
 
@@ -29,6 +28,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -37,7 +37,7 @@ import java.util.function.UnaryOperator;
  * and a decoration for scaffolding.
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
-@JkDocPluginDeps({JkPluginRepo.class, JkPluginScaffold.class})
+@JkDocPluginDeps({JkPluginScaffold.class})
 public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplier {
 
     /**
@@ -61,8 +61,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     // ----------------------------------------------------------------------------------
 
-    private final JkPluginRepo repoPlugin;
-
     private final JkPluginScaffold scaffoldPlugin;
 
     private JkJavaProject project;
@@ -70,7 +68,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     protected JkPluginJava(JkClass jkClass) {
         super(jkClass);
         this.scaffoldPlugin = jkClass.getPlugins().get(JkPluginScaffold.class);
-        this.repoPlugin = jkClass.getPlugins().get(JkPluginRepo.class);
     }
 
     @Override
@@ -92,9 +89,12 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     }
 
     private void applyRepo(JkJavaProject project) {
-        project.getPublication().getMaven().setRepos(repoPlugin.publishRepository().toSet());
-        project.getPublication().getIvy().setRepos(repoPlugin.publishRepository().toSet());
-        final JkRepo downloadRepo = repoPlugin.downloadRepository();
+        project.getPublication().getMaven().setRepos(
+                Optional.ofNullable(JkRepoFromOptions.getPublishRepository())
+                        .orElse(JkRepo.ofLocal())
+                .toSet());
+        project.getPublication().getIvy().setRepos(JkRepoFromOptions.getPublishRepository().toSet());
+        final JkRepo downloadRepo = JkRepoFromOptions.getDownloadRepo();
         JkDependencyResolver resolver = project.getConstruction().getDependencyResolver();
         if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
             resolver.addRepos(downloadRepo);
@@ -206,10 +206,6 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     public JkJavaProject getProject() {
         return project;
-    }
-
-    public JkPluginRepo getRepoPlugin() {
-        return repoPlugin;
     }
 
     public  JkPluginScaffold getScaffoldPlugin() {

@@ -45,14 +45,14 @@ public class JkPluginVersionFromGit extends JkPlugin {
 
     protected JkPluginVersionFromGit(JkClass jkClass) {
         super(jkClass);
-        JkPluginGit gitPlugin = jkClass.getPlugins().getIfLoaded(JkPluginGit.class);
+        JkPluginGit gitPlugin = jkClass.getPlugins().getOptional(JkPluginGit.class).orElse(null);
         git = gitPlugin != null ? gitPlugin.getGitProcess() : JkGitProcess.of(jkClass.getBaseDir());
     }
 
     @Override
     protected void afterSetup() {
         if (autoConfigureProject) {
-            JkPluginJava java = getJkClass().getPlugins().getIfLoaded(JkPluginJava.class);
+            JkPluginJava java = getJkClass().getPlugins().getOptional(JkPluginJava.class).orElse(null);
             if (java == null) {
                 return;
             }
