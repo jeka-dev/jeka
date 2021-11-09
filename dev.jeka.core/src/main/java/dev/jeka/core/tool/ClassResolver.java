@@ -89,7 +89,7 @@ final class ClassResolver {
                 if (clazz == null) {
                     return true;
                 } else {
-                    JkLog.trace("Def class " + clazz + " already present in classpath.");
+                    JkLog.trace("Def " + clazz + " already present in classpath.");
                 }
             }
         }

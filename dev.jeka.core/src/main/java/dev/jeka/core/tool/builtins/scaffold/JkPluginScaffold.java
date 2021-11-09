@@ -6,7 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
+import dev.jeka.core.tool.JkRepoFromOptions;
 
 /**
  * Provides method to generate a project skeleton (folder structure, configuration files, ....)
@@ -27,9 +27,8 @@ public class JkPluginScaffold extends JkPlugin {
         this.scaffolder = new JkScaffolder(jkClass.getBaseDir());
         this.scaffolder.setJekaClassCodeProvider(
                 () -> JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));
-        final JkPluginRepo repoPlugin = this.getJkClass().getPlugin(JkPluginRepo.class);
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                .addRepos(repoPlugin.downloadRepository().toSet());
+                .addRepos(JkRepoFromOptions.getDownloadRepo().toSet());
         this.scaffolder.setDependencyResolver(dependencyResolver);
     }
 

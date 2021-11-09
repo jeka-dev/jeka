@@ -2,6 +2,7 @@ package dev.jeka.core.api.system;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This decorator adds indentation for logs nested within a task.
@@ -41,14 +42,21 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
         if (logType == JkLog.Type.ERROR || logType == JkLog.Type.WARN) {
             out.flush();
             stream = err;
+        } else {
+            err.flush();
         }
         String message = event.getMessage();
+        if (event.getType().isTraceWarnOrError()) {
+            message = "[" + event.getType() + "] " + message;
+        }
         if (logType == JkLog.Type.END_TASK) {
             // do nothing
         } else if (logType== JkLog.Type.START_TASK) {
-            stream.print(message);
+            marginErr.flush();
+            stream.println(message);
             marginOut.notifyStart();
             marginErr.notifyStart();
+            marginErr.mustPrintMargin = true;
         } else {
             stream.println(message);
         }
@@ -68,15 +76,10 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
         private final PrintStream delegate;
 
-        private int lastByte = LINE_SEPARATOR;  // Display margin at first use (relevant for ofSystem.err)
-
-        private boolean pendingStart;
-
-        private boolean endTask;
+        private volatile boolean mustPrintMargin;
 
         private void notifyStart() {
             flush();
-            pendingStart = true;
         }
 
         public MarginStream(PrintStream delegate) {
@@ -86,20 +89,18 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
         @Override
         public void write(int aByte) throws IOException {
-            if (pendingStart & !endTask) {
-                delegate.write(LINE_SEPARATOR);
-                lastByte = LINE_SEPARATOR;
-                pendingStart = false;
-            }
-            if (lastByte == LINE_SEPARATOR) {
-                Integer level = JkLog.getCurrentNestedLevel();
-                if (endTask) level++;
-                for (int j = 0; j < level; j++) {
-                    delegate.write(MARGIN_UNIT);
-                }
+            if (mustPrintMargin) {
+                printMargin();
             }
             delegate.write(aByte);
-            lastByte = aByte;
+            mustPrintMargin = (aByte == LINE_SEPARATOR);
+        }
+
+        void printMargin() throws IOException {
+            Integer level = JkLog.getCurrentNestedLevel();
+            for (int j = 0; j < level; j++) {
+                delegate.write(MARGIN_UNIT);
+            }
         }
 
         @Override

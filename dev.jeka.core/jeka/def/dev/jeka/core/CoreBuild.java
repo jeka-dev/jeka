@@ -8,6 +8,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.java.project.JkJavaProjectTesting;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
@@ -136,8 +137,12 @@ public class CoreBuild extends JkClass {
 
     private void doDistrib(Path distribFile) {
         final JkArtifactProducer artifactProducer = java.getProject().getPublication().getArtifactProducer();
-        artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
-                SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
+        if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
+            artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
+                    SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
+        } else {
+            artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), WRAPPER_ARTIFACT_ID);
+        }
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
@@ -148,17 +153,20 @@ public class CoreBuild extends JkClass {
             .importDir(getBaseDir().resolve("src/main/dist"))
             .importDir(getBaseDir().resolve("src/main/java/META-INF/bin"))
             .importFiles(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()))
-            .importFiles(artifactProducer.getArtifactPath(WRAPPER_ARTIFACT_ID))
-            .goTo("libs-sources")
-                .importFiles(ivySourceLibs)
-                .importFiles(artifactProducer.getArtifactPath(SOURCES_ARTIFACT_ID));
-        if (java.pack.javadoc == null || java.pack.javadoc) {
+            .importFiles(artifactProducer.getArtifactPath(WRAPPER_ARTIFACT_ID));
+        if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
+            distrib.goTo("libs-sources")
+                    .importFiles(ivySourceLibs)
+                    .importFiles(artifactProducer.getArtifactPath(SOURCES_ARTIFACT_ID));
+        }
+
+        if (artifactProducer.getArtifactIds().contains(JAVADOC_ARTIFACT_ID)) {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.importFiles(artifactProducer.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         makeDocs();
-        if (runIT) {
+        if (!java.getProject().getConstruction().getTesting().isSkipped() && runIT) {
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
@@ -210,7 +218,7 @@ public class CoreBuild extends JkClass {
 
     void testScaffolding()  {
         JkLog.startTask("Run scaffold tests");
-        new ScaffoldTester().run();
+        new CoreScaffoldTester().run();
         JkLog.endTask();
     }
 
@@ -284,10 +292,23 @@ public class CoreBuild extends JkClass {
     }
 
     public static class RunBuildAndIT {
-
         public static void main(String[] args) {
             CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args, "-runIT");
             coreBuild.java.pack();
+        }
+    }
+
+    public static class DebugLogIndent {
+        public static void main(String[] args) {
+            JkLog.setDecorator(JkLog.Style.BRACE);
+            JkLog.startTask("task 1");
+                JkLog.info("an info after task1");
+                JkLog.warn("a warning after 'an info after task 1 start'");
+                JkLog.startTask("task 2 after warning" );
+                JkLog.endTask("end task 2");
+                JkLog.info("an info after task 2");
+            JkLog.endTask("end task 1");
+            JkLog.info("an info to finish");
         }
     }
 }

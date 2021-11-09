@@ -116,7 +116,7 @@ public final class JkPathFile {
     /**
      * Copies the content of the specified url into this files, replacing the previous content.
      */
-    public JkPathFile replaceContentBy(URL url) {
+    public JkPathFile fetchContentFrom(URL url) {
         createIfNotExist();
         JkUtilsIO.copyUrlToFile(url, this.path);
         return this;
@@ -194,7 +194,7 @@ public final class JkPathFile {
             if (other) perms.add(PosixFilePermission.OTHERS_EXECUTE);
             Files.setPosixFilePermissions(this.path, perms);
         } catch (UnsupportedOperationException e) {
-            JkLog.warn("Can not set exec permission to file " + this.path);
+            JkLog.warn("Can not set POSIX permissions to file " + this.path);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

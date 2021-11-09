@@ -5,11 +5,15 @@
       <module fileurl="file://$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" filepath="$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" />
       <module fileurl="file://$PROJECT_DIR$/dev.jeka.master/dev.jeka.master.iml" filepath="$PROJECT_DIR$/dev.jeka.master/dev.jeka.master.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.jacoco/dev.jeka.plugins.jacoco.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.jacoco/dev.jeka.plugins.jacoco.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.sonarqube/dev.jeka.plugins.sonarqube.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.sonarqube/dev.jeka.plugins.sonarqube.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.springboot/dev.jeka.plugins.springboot.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.springboot/dev.jeka.plugins.springboot.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.basic/dev.jeka.samples.basic.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.basic/dev.jeka.samples.basic.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.dependers/dev.jeka.samples.dependers.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.dependers/dev.jeka.samples.dependers.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.jacoco/dev.jeka.samples.jacoco.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.jacoco/dev.jeka.samples.jacoco.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.junit5/dev.jeka.samples.junit5.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.junit5/dev.jeka.samples.junit5.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.kotlin-multiplatform/dev.jeka.samples.kotlin-multiplatform.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.kotlin-multiplatform/dev.jeka.samples.kotlin-multiplatform.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.sonarqube/dev.jeka.samples.sonarqube.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.sonarqube/dev.jeka.samples.sonarqube.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.springboot/dev.jeka.samples.springboot.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.springboot/dev.jeka.samples.springboot.iml" />
     </modules>
   </component>
 </project>

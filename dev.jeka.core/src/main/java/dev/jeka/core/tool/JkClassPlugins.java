@@ -32,11 +32,10 @@ public final class JkClassPlugins {
         return getOrCreate(pluginClass);
     }
 
-    public <T extends JkPlugin> T getIfLoaded(Class<T> pluginClass) {
-        return (T) loadedPlugins.stream()
+    public <T extends JkPlugin> Optional<T> getOptional(Class<T> pluginClass) {
+        return (Optional<T>) loadedPlugins.stream()
                 .filter(jkPlugin -> jkPlugin.getClass().equals(pluginClass))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 
     /**

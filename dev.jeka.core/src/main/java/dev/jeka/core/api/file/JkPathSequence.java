@@ -97,6 +97,11 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         return entries;
     }
 
+    public Path getEntry(int index) {
+        return entries.get(index);
+
+    }
+
     @Override
     public Iterator<Path> iterator() {
         return entries.iterator();

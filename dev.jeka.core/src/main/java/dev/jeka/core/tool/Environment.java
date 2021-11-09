@@ -26,12 +26,31 @@ class Environment {
 
     static void initialize(String[] commandLineArgs) {
 
-        // Parse command line
+
+        List<String> effectiveCommandLineArgs = new LinkedList<>(Arrays.asList(commandLineArgs));
+
+        // Add arguments contained in cmd.properties '_append'
         Map<String, String> presets = projectCmdProperties();
-        String[] extras = JkUtilsString.translateCommandline(presets.get("_append"));
-        String[] actualCommandLineArgs = Stream.concat(Arrays.stream(commandLineArgs), Arrays.stream(extras))
-                .toArray(String[]::new);
-        final CommandLine commandLine = CommandLine.parse(actualCommandLineArgs);
+        List<String> appendedArgs = Arrays.asList(JkUtilsString.translateCommandline(presets.get("_append")));
+        effectiveCommandLineArgs.addAll(appendedArgs);
+
+        // Interpolate arguments passed as $key to respective value
+        for (ListIterator<String> it = effectiveCommandLineArgs.listIterator(); it.hasNext(); ) {
+            String word = it.next();
+            if (word.startsWith("$")) {
+                String presetValue = presets.get(word.substring(1));
+                if (presetValue != null) {
+                    String[] replacingItems = JkUtilsString.translateCommandline(presetValue);
+                    it.remove();
+                    Arrays.stream(replacingItems).forEach(item -> it.add(item));
+                }
+            }
+        }
+        JkLog.trace("Effective command line : " + effectiveCommandLineArgs);
+
+        // Parse command line
+        final CommandLine commandLine = CommandLine.parse(effectiveCommandLineArgs.toArray(new String[0]));
+
 
         // Take all defined system properties (command line, ofSystem.properties files) and
         // inject them in the system.
@@ -100,8 +119,6 @@ class Environment {
 
         String logRuntimeInformation;
 
-        int logMaxLength = -1;
-
         private String jkClassName;
 
         private boolean forceCompile;
@@ -115,7 +132,6 @@ class Environment {
             this.logSetup = valueOf(Boolean.class, map, false,"LogSetup", "LSU");
             this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
-            this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
             this.jkClassName = valueOf(String.class, map, null, "JekaClass", "JKC");
             this.forceCompile = valueOf(Boolean.class, map, false, "ForceCompile", "FC");
         }
@@ -138,7 +154,7 @@ class Environment {
         @Override
         public String toString() {
             return "JkClass=" + JkUtilsObject.toString(jkClassName) + ", LogVerbose=" + logVerbose
-                    + ", LogHeaders=" + logBanner + ", LogMaxLength=" + logMaxLength;
+                    + ", LogHeaders=" + logBanner;
         }
 
         private <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... optionNames) {

@@ -2,9 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
-import dev.jeka.core.api.system.JkInfo;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -34,19 +32,29 @@ public final class JkInit {
                     "it does not contain a 'jeka' folder.");
         }
         JkLog.setDecorator(Environment.standardOptions.logStyle);
-        JkLog.Verbosity verbosity = JkLog.verbosity();
         if (Environment.standardOptions.logRuntimeInformation != null) {
             displayRuntimeInfo();
             JkLog.info("Jeka Classpath : ");
             JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.info("    " + item));
         }
-        if (!Environment.standardOptions.logBanner) {
-            JkLog.setVerbosity(JkLog.Verbosity.WARN_AND_ERRORS);
+        boolean memoryBufferLogActivated = false;
+        if (!Environment.standardOptions.logSetup && !JkMemoryBufferLogDecorator.isActive()) {  // log in memory and flush in console only on error
+            JkMemoryBufferLogDecorator.activateOnJkLog();
+            JkLog.info("");   // To have a br prior the memory log is flushed
+            memoryBufferLogActivated = true;
         }
-        final T jkClass = JkClass.of(clazz);
-        JkLog.info("Jeka methods are ready to be executed.");
-        JkLog.setVerbosity(verbosity);
-        return jkClass;
+        try {
+            final T jkClass = JkClass.of(clazz);
+            JkLog.info(jkClass.toString() + " is ready to run.");
+            if (memoryBufferLogActivated) {
+                JkMemoryBufferLogDecorator.inactivateOnJkLog();
+            }
+            return jkClass;
+        } catch (RuntimeException e) {
+            JkMemoryBufferLogDecorator.flush();
+            throw e;
+        }
+
     }
 
     /**

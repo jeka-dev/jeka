@@ -1,8 +1,8 @@
 package dev.jeka.core.api.system;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static dev.jeka.core.api.system.JkIndentLogDecorator.LINE_SEPARATOR;
 import static dev.jeka.core.api.system.JkIndentLogDecorator.MARGIN_UNIT;
@@ -25,16 +25,18 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
     private transient PrintStream err;
 
+    private AtomicBoolean pendingStart = new AtomicBoolean(false);
+
     public void init(PrintStream targetOut, PrintStream targetErr) {
-        marginOut = new MarginStream(targetOut);
-        marginErr = new MarginStream(targetErr);
+        marginOut = new MarginStream(targetOut, pendingStart);
+        marginErr = new MarginStream(targetOut, pendingStart);   // Cause erratic output if logged on separate streams
         out = new PrintStream(marginOut);
         err = new PrintStream(marginErr);
     }
 
     private void readObject(ObjectInputStream objectInputStream) {
-        marginOut = new MarginStream(System.out);
-        marginErr = new MarginStream(System.err);
+        marginOut = new MarginStream(System.out, pendingStart);
+        marginErr = new MarginStream(System.out, pendingStart);
     }
 
     public static void setMaxLength(int maxLength) {
@@ -57,24 +59,24 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
             out.flush();
             stream = err;
         }
-        if (event.getType() == JkLog.Type.END_TASK) {
-            marginStream.closingBrace = true;
-            stream.print("}");
-            if (event.getDurationMs() >= 0) {
-                stream.print(" Done in ");
-                stream.print(event.getDurationMs());
-                stream.println(" milliseconds.");
-            }
-            stream.print(" ");
-            stream.println(message);
-            marginStream.closingBrace = false;
-            marginStream.pendingStart = false;
-        } else if (event.getType() == JkLog.Type.START_TASK) {
+        if (event.getType().isTraceWarnOrError()) {
+            message = "[" + event.getType() + "] " + message;
+        }
+        if (event.getType() == JkLog.Type.START_TASK) {
             stream.print(message);
             stream.print(" {");
             marginOut.notifyStart();
             marginErr.notifyStart();
-        }  else {
+        } else if (event.getType() == JkLog.Type.END_TASK) {
+            marginStream.closingBrace = true;
+            stream.print("}");
+            stream.print(" Done in ");
+            stream.print(event.getDurationMs());
+            stream.print(" milliseconds. ");
+            stream.println(message);
+            marginStream.closingBrace = false;
+            pendingStart.set(false);
+        } else {
             stream.println(message);
         }
     }
@@ -85,26 +87,26 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
         private int lastByte = LINE_SEPARATOR;  // Display margin at first use (relevant for ofSystem.err)
 
-        private boolean pendingStart;
+        private final AtomicBoolean pendingStart;
 
         private boolean closingBrace;
 
         private void notifyStart() {
             flush();
-            pendingStart = true;
+            pendingStart.set(true);
         }
-
-        public MarginStream(PrintStream delegate) {
+        public MarginStream(PrintStream delegate, AtomicBoolean pendingStart) {
             super();
             this.delegate = delegate;
+            this.pendingStart = pendingStart;
         }
 
         @Override
         public void write(int aByte) throws IOException {
-            if (pendingStart & !closingBrace) {
+            if (pendingStart.get() & !closingBrace) {
                 delegate.write(LINE_SEPARATOR);
                 lastByte = LINE_SEPARATOR;
-                pendingStart = false;
+                pendingStart.set(false);
             }
             if (lastByte == LINE_SEPARATOR) {
                 Integer level = JkLog.getCurrentNestedLevel();

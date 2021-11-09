@@ -13,7 +13,6 @@ import dev.jeka.core.api.kotlin.JkKotlinModules;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -105,8 +104,7 @@ public class JkPluginKotlin extends JkPlugin {
                 JkLog.warn("No version of kotlin has been specified, will use the version installed on KOTLIN_HOME : "
                         + kotlinCompiler.getVersion());
             } else {
-                JkPluginRepo pluginRepo = JkPluginKotlin.this.getJkClass().getPlugin(JkPluginRepo.class);
-                kotlinCompiler = JkKotlinCompiler.ofJvm(pluginRepo.downloadRepository().toSet(), kotlinVersion);
+                kotlinCompiler = JkKotlinCompiler.ofJvm(JkRepoFromOptions.getDownloadRepo().toSet(), kotlinVersion);
             }
             kotlinCompiler.setLogOutput(true);
             return kotlinCompiler;

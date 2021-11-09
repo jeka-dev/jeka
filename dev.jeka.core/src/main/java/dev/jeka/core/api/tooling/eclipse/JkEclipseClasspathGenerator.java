@@ -297,10 +297,7 @@ public final class JkEclipseClasspathGenerator {
         final String name = JkUtilsString.substringBeforeLast(file.getFileName().toString(), ".jar");
         Path source = file.resolveSibling(name + "-sources.jar");
         if (!Files.exists(source)) {
-            source = file.resolveSibling("../../libs-sources/" + name + "-sources.jar");
-        }
-        if (!Files.exists(source)) {
-            source = file.resolveSibling("libs-sources/" + name + "-sources.jar");
+            source = file.resolveSibling("../sources/" + name + "-sources.jar");
         }
         Path javadoc = file.resolveSibling(name + "-javadoc.jar");
         if (!Files.exists(javadoc)) {

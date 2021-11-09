@@ -1,17 +1,18 @@
 import dev.jeka.core.CoreBuild;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
+
+import java.util.Optional;
 
 class MasterBuild extends JkClass {
 
@@ -21,6 +22,12 @@ class MasterBuild extends JkClass {
     @JkDefImport("../plugins/dev.jeka.plugins.jacoco")
     JacocoPluginBuild jacocoBuild;
 
+    @JkDefImport("../plugins/dev.jeka.plugins.sonarqube")
+    JkClass sonarqubeBuild;
+
+    @JkDefImport("../plugins/dev.jeka.plugins.springboot")
+    JkClass springbootBuild;
+
     JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
 
     @Override
@@ -29,14 +36,12 @@ class MasterBuild extends JkClass {
         coreBuild.runIT = true;
         getImportedJkClasses().getDirects().forEach(build -> {
             if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for release
-                JkPluginJava pluginJava = build.getPlugins().getIfLoaded(JkPluginJava.class);
-                if (pluginJava != null) {
-                    pluginJava.pack.javadoc = true;
-                }
+                build.getPlugins().getOptional(JkPluginJava.class).ifPresent(plugin -> plugin.pack.javadoc = true);
             }
         });
     }
 
+    @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() {
         JkLog.startTask("Building core and plugins");
         getImportedJkClasses().getDirects().forEach(build -> {
@@ -49,8 +54,8 @@ class MasterBuild extends JkClass {
         });
         JkLog.endTask();
         JkLog.startTask("Running samples");
-        setPosixPermissions();
         runSamples();
+        runScaffoldsWithPlugins();
         JkLog.endTask();
         JkLog.startTask("Publishing");
         JkGitProcess git = JkGitProcess.of(this.getBaseDir());
@@ -63,6 +68,7 @@ class MasterBuild extends JkClass {
         JkLog.endTask();
     }
 
+    @JkDoc("Convenient method to set Posix permission for all jekaw files on git.")
     public void setPosixPermissions() {
         JkPathTree.of("../samples").andMatching("*/jekaw", "**/jekaw").getFiles().forEach(path -> {
             JkLog.info("Setting exec permission on git for file " + path);
@@ -70,20 +76,36 @@ class MasterBuild extends JkClass {
         });
     }
 
+    @JkDoc("Clean build of core + plugins bypassing tests.")
+    public void buildFast() {
+        getImportedJkClasses().getDirectPlugins(JkPluginJava.class).forEach(plugin -> {
+            plugin.getProject().simpleFacade().setTestSkipped(true);
+            plugin.getProject().getPublication().includeJavadocAndSources(false);
+            plugin.getJkClass().clean();
+            plugin.getProject().getPublication().pack();
+        });
+    }
+
     public void buildCore() {
         coreBuild.cleanPack();
     }
 
-    public void buildPlugins() {
-        jacocoBuild.cleanPack();
+    public void runSamples()  {
+        new SamplesTester().run();
     }
 
-    public void runSamples()  {
-        new SamplesRunner().run();
+    public void runScaffoldsWithPlugins() {
+        new PluginScaffoldTester().run();
     }
 
     public static void main(String[] args) {
         JkInit.instanceOf(MasterBuild.class, args).make();
+    }
+
+    static class BuildFast {
+        public static void main(String[] args) {
+            JkInit.instanceOf(MasterBuild.class, args).buildFast();
+        }
     }
 
 }

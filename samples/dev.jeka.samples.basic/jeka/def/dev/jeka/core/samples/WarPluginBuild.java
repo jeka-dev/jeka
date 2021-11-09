@@ -5,9 +5,9 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkRepoFromOptions;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.java.JkPluginWar;
-import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
 import java.nio.file.Path;
 
@@ -53,8 +53,8 @@ public class WarPluginBuild extends JkClass {
     public void runWarWithJetty() {
         JkArtifactProducer artifactProducer = java.getProject().getPublication().getArtifactProducer();
         artifactProducer.makeMissingArtifacts();
-        JkPluginRepo repo = getPlugin(JkPluginRepo.class);
-        Path jettyRunner = repo.downloadRepository().toSet().get("org.eclipse.jetty:jetty-runner:" + jettyRunnerVersion);
+        Path jettyRunner = JkRepoFromOptions.getDownloadRepo().toSet().get("org.eclipse.jetty:jetty-runner:"
+                + jettyRunnerVersion);
         JkJavaProcess.ofJavaJar(jettyRunner, null)
                 .exec(artifactProducer.getMainArtifactPath().toString(), "--port", Integer.toString(port));
     }

@@ -72,7 +72,8 @@ public class JkClass {
      * and plugin activation.
      */
     public static <T extends JkClass> T of(Class<T> jkClass) {
-        JkLog.startTask("Instantiating Jeka class " + jkClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        String currentPath = BASE_DIR_CONTEXT.get() != null ? BASE_DIR_CONTEXT.get().toString() : ".";
+        JkLog.startTask("Instantiating Jeka class " + jkClass.getName() + " at " + currentPath);
         final T jkClassInstance = ofUninitialized(jkClass);
         try {
             jkClassInstance.initialise();
@@ -253,7 +254,8 @@ public class JkClass {
 
     @Override
     public String toString() {
-        return this.getClass().getName() + " at " + this.baseDir.toString();
+        String path = this.baseDir.toString().isEmpty() ? "." : this.baseDir.toString();
+        return this.getClass().getName() + " (" + path + ")";
     }
 
 }

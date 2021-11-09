@@ -14,16 +14,6 @@ public class JacocoPluginBuild extends JkClass {
 
     private final JkPluginJava java = getPlugin(JkPluginJava.class);
 
-    @JkEnv("OSSRH_USER")
-    public String ossrhUser;
-
-    @JkEnv("OSSRH_PWD")
-    public String ossrhPwd;
-
-    final JkPluginGpg gpgPlugin = getPlugin(JkPluginGpg.class);
-
-    final JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
-
     @Override
     protected void setup() {
         JkPlugin.setJekaPluginCompatibilityRange(java.getProject().getConstruction().getManifest(),
@@ -39,15 +29,13 @@ public class JacocoPluginBuild extends JkClass {
 
         java.getProject().getPublication().getMaven()
                 .setModuleId("dev.jeka:jacoco-plugin")
-                .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd,
-                        gpgPlugin.get().getSigner("")))
                 .getPomMetadata()
                     .getProjectInfo()
                         .setName("Jeka plugin for Jacoco")
                         .setDescription("A Jeka plugin for Jacoco coverage tool")
-                        .setUrl("https://github.com/jerkar/jacoco-plugin").__
+                        .setUrl("https://github.com/jerkar/jeka").__
                     .getScm()
-                        .setUrl("https://github.com/jerkar/jacoco-plugin").__
+                        .setUrl("https://github.com/jerkar/jeka").__
                     .addApache2License()
                     .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
 

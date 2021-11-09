@@ -257,6 +257,7 @@ public final class JkUtilsIO {
         try {
             while ((len = in.read(buf)) > 0) {
                 out.write(buf, 0, len);
+                out.flush();
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

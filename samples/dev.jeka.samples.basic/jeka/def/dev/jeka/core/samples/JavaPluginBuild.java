@@ -72,7 +72,7 @@ public class JavaPluginBuild extends JkClass {
     }
 
     public void cleanPackPublish() {
-        clean(); java.pack(); java.publish();
+        clean(); java.pack(); java.publishLocal();
     }
 
     // For debugging purpose
