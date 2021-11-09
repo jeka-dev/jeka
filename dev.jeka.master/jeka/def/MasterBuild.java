@@ -75,8 +75,8 @@ class MasterBuild extends JkClass {
         if (branch.equals("master") && !versionFromGit.version().isSnapshot()) {
             JkLog.startTask("Publishing");
             getImportedJkClasses().getDirectPlugins(JkPluginJava.class).forEach(plugin -> plugin.publish());
-            JkNexusRepos.ofUrlAndCredentials(coreBuild.getPlugin(JkPluginJava.class).getProject()
-                    .getPublication().findFirstRepo());
+            JkNexusRepos.ofUrlAndCredentials(this.publishRepos.getRepos().get(0))
+                            .closeAndRelease();
             JkLog.endTask();
         }
     }
