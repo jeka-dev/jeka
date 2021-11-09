@@ -1,7 +1,7 @@
 package dev.jeka.plugins.jacoco;
 
 import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
@@ -45,7 +45,7 @@ public class JkPluginJacoco extends JkPlugin {
             return;
         }
         JkPluginProject projectPlugin = getJkClass().getPlugins().get(JkPluginProject.class);
-        final JkJavaProject project = projectPlugin.getProject();
+        final JkProject project = projectPlugin.getProject();
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {
             jacoco = JkJacoco.ofEmbedded();

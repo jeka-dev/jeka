@@ -6,7 +6,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Test;
@@ -250,7 +250,7 @@ public class DependencySetResolutionIT {
 
     @Test
     public void resolve_usingSeveralClassifierOnSingleLine_ok() {
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V11)
                 .setCompileDependencies(deps -> deps
                         .and("org.openjfx:javafx-controls:win,linux,mac:11.0.2", JkTransitivity.NONE))
@@ -264,7 +264,7 @@ public class DependencySetResolutionIT {
 
     @Test
     public void resolve_usingSeveralClassifiersIncludingDefaultOne_ok() {
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V11)
                 .setCompileDependencies(deps -> deps
                         .and("org.openjfx:javafx-controls:win,:11.0.2", JkTransitivity.NONE))

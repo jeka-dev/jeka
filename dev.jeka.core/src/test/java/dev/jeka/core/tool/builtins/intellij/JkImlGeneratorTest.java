@@ -2,8 +2,8 @@ package dev.jeka.core.tool.builtins.intellij;
 
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.project.JkJavaIdeSupport;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkIdeSupport;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import org.junit.Test;
 
@@ -15,14 +15,14 @@ public class JkImlGeneratorTest {
 
     @Test
     public void withoutJavaProject() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of(JkJavaIdeSupport.of(Paths.get("")));
+        JkImlGenerator imlGenerator = JkImlGenerator.of(JkIdeSupport.of(Paths.get("")));
         String result = imlGenerator.generate();
         System.out.println(result);
     }
 
     @Test
     public void withJavaProject() {
-        JkJavaProject project = JkJavaProject.of();
+        JkProject project = JkProject.of();
         project.getConstruction().getCompilation().setDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of(project.getJavaIdeSupport());
         String result = imlGenerator.generate();

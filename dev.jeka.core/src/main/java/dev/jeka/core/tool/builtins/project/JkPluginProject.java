@@ -33,12 +33,12 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
- * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
+ * Plugin for building Java projects. It comes with a {@link JkProject} pre-configured with {@link JkOptions}.
  * and a decoration for scaffolding.
  */
-@JkDoc("Build of a Java project through a JkJavaProject instance.")
+@JkDoc("Build of a Java project through a JkProject instance.")
 @JkDocPluginDeps({JkPluginScaffold.class})
-public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupplier {
+public class JkPluginProject extends JkPlugin implements JkIdeSupport.JkSupplier {
 
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
@@ -63,7 +63,7 @@ public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupp
 
     private final JkPluginScaffold scaffoldPlugin;
 
-    private JkJavaProject project;
+    private JkProject project;
 
     protected JkPluginProject(JkClass jkClass) {
         super(jkClass);
@@ -73,7 +73,7 @@ public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupp
     @Override
     protected void beforeSetup() {
         Path baseDir = getJkClass().getBaseDir();
-        project = JkJavaProject.of().setBaseDir(this.getJkClass().getBaseDir());
+        project = JkProject.of().setBaseDir(this.getJkClass().getBaseDir());
         project.getConstruction().addTextAndLocalDependencies();
 
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
@@ -82,13 +82,13 @@ public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupp
         applyGpg(project);
     }
 
-    private void applyGpg(JkJavaProject project) {
+    private void applyGpg(JkProject project) {
         JkPluginGpg pgpPlugin = this.getJkClass().getPlugins().get(JkPluginGpg.class);
         JkGpg gpg = pgpPlugin.get();
         applyGpg(gpg, pgpPlugin.keyName, project);
     }
 
-    private void applyRepo(JkJavaProject project) {
+    private void applyRepo(JkProject project) {
         project.getPublication().getMaven().setRepos(
                 Optional.ofNullable(JkRepoFromOptions.getPublishRepository())
                         .orElse(JkRepo.ofLocal())
@@ -101,7 +101,7 @@ public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupp
         }
     }
 
-    public static void applyGpg(JkGpg gpg, String keyName, JkJavaProject project) {
+    public static void applyGpg(JkGpg gpg, String keyName, JkProject project) {
         UnaryOperator<Path> signer  = gpg.getSigner(keyName);
         project.getPublication().getMaven().setDefaultSigner(signer);
         project.getPublication().getIvy().setDefaultSigner(signer);
@@ -115,16 +115,16 @@ public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupp
         this.setupScaffolder();
     }
 
-    private void applyPostSetupOptions(JkJavaProject aProject) {
+    private void applyPostSetupOptions(JkProject aProject) {
         final JkStandardFileArtifactProducer artifactProducer = aProject.getPublication().getArtifactProducer();
-        JkArtifactId sources = JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
+        JkArtifactId sources = JkProjectPublication.SOURCES_ARTIFACT_ID;
         if (pack.sources != null && !pack.sources) {
             artifactProducer.removeArtifact(sources);
         } else if (pack.sources != null && pack.sources && !artifactProducer.getArtifactIds().contains(sources)) {
             Consumer<Path> sourceJar = aProject.getDocumentation()::createSourceJar;
             artifactProducer.putArtifact(sources, sourceJar);
         }
-        JkArtifactId javadoc = JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
+        JkArtifactId javadoc = JkProjectPublication.JAVADOC_ARTIFACT_ID;
         if (pack.javadoc != null && !pack.javadoc) {
             artifactProducer.removeArtifact(javadoc);
         } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
@@ -204,7 +204,7 @@ public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupp
 
     // ------------------------------ Accessors -----------------------------------------
 
-    public JkJavaProject getProject() {
+    public JkProject getProject() {
         return project;
     }
 
@@ -241,7 +241,7 @@ public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupp
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        JkJavaProjectConstruction construction = project.getConstruction();
+        JkProjectConstruction construction = project.getConstruction();
         showDependencies("compile", construction.getCompilation().getDependencies());
         showDependencies("runtime", construction.getRuntimeDependencies());
         showDependencies("test", construction.getTesting().getCompilation().getDependencies());
@@ -304,7 +304,7 @@ public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupp
 
 
     @Override
-    public JkJavaIdeSupport getJavaIdeSupport() {
+    public JkIdeSupport getJavaIdeSupport() {
         return project.getJavaIdeSupport();
     }
 

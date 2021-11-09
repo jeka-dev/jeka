@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,12 +20,12 @@ public class JavaProjectBuildIT {
     public void resolve_dependencyOfTypeProject_resultWithProjectIdeDir() throws Exception {
         Path root = unzipToDir("sample-multiproject.zip");
 
-        JkJavaProject baseProject = JkJavaProject.of().simpleFacade()
+        JkProject baseProject = JkProject.of().simpleFacade()
                 .setBaseDir(root.resolve("base"))
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")).getProject();
 
-        JkJavaProject coreProject = JkJavaProject.of().simpleFacade()
+        JkProject coreProject = JkProject.of().simpleFacade()
                 .setBaseDir(root.resolve("core"))
                 .setCompileDependencies(deps -> deps.and(baseProject.toDependency())).getProject();
 
@@ -49,7 +49,7 @@ public class JavaProjectBuildIT {
     @Test
     public void publish_maven_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setBaseDir(root.resolve("base"))
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")
@@ -75,7 +75,7 @@ public class JavaProjectBuildIT {
     @Test
     public void publish_ivy_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setBaseDir(root.resolve("base"))
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")

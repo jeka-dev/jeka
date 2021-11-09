@@ -4,9 +4,9 @@ import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.project.JkJavaProject;
-import dev.jeka.core.api.project.JkJavaProjectConstruction;
-import dev.jeka.core.api.project.JkJavaProjectPublication;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectConstruction;
+import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkClass;
@@ -42,14 +42,14 @@ public class JkPluginWar extends JkPlugin {
     @Override
     protected void beforeSetup() {
         this.artifactProducer
-            .removeArtifact(JkJavaProjectPublication.JAVADOC_ARTIFACT_ID)
-            .removeArtifact(JkJavaProjectPublication.SOURCES_ARTIFACT_ID)
+            .removeArtifact(JkProjectPublication.JAVADOC_ARTIFACT_ID)
+            .removeArtifact(JkProjectPublication.SOURCES_ARTIFACT_ID)
             .setMainArtifactExt("war")
             .putMainArtifact(path -> doWarFile((Path) path));
     }
 
-    private static void generateWarDir(JkJavaProject project, Path dest, Path staticResourceDir) {
-        JkJavaProjectConstruction construction = project.getConstruction();
+    private static void generateWarDir(JkProject project, Path dest, Path staticResourceDir) {
+        JkProjectConstruction construction = project.getConstruction();
         construction.getCompilation().runIfNecessary();
         JkPathTree root = JkPathTree.of(dest);
         JkPathTree webinf = JkPathTree.of(project.getBaseDir().resolve("src/main/webapp/WEB-INF"));
@@ -78,7 +78,7 @@ public class JkPluginWar extends JkPlugin {
 
     private void doWarFile(Path file) {
         JkPluginProject projectPlugin = this.getJkClass().getPlugin(JkPluginProject.class);
-        JkJavaProject project = projectPlugin.getProject();
+        JkProject project = projectPlugin.getProject();
         staticResourceComputation.run();
         Path temp = JkUtilsPath.createTempDirectory("jeka-war");
         generateWarDir(project, temp, staticResourceDir);

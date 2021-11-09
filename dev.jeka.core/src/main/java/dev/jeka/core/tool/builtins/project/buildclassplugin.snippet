@@ -1,5 +1,5 @@
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkPlugin;
@@ -11,7 +11,7 @@ class Build extends JkClass {
 
     @Override
     protected void setup() {
-        JkJavaProject javaProject = projectPlugin.getProject();
+        JkProject javaProject = projectPlugin.getProject();
         javaProject.simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps

@@ -3,7 +3,7 @@ package dev.jeka.core.tool.builtins.ide;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
 import dev.jeka.core.api.system.JkLocator;
@@ -30,7 +30,7 @@ public final class JkPluginIntellij extends JkPlugin {
     public boolean useVarPath = true;
 
     @JkDoc("By default, generated iml files specify a JDK inherited from the project setup. " +
-            "Set this option to 'true' for  forcing the JDK version to the one defined in JkJavaProject.")
+            "Set this option to 'true' for  forcing the JDK version to the one defined in JkProject.")
     public boolean forceJdkVersion = false;
 
     @JkDoc("If true, the iml generation fails when a dependency can not be resolved. If false, it will be ignored " +
@@ -57,11 +57,11 @@ public final class JkPluginIntellij extends JkPlugin {
     public void iml() {
         final JkImlGenerator generator;
         JkClass jkClass = getJkClass();
-        JkJavaIdeSupport projectIde = IdeSupport.getProjectIde(jkClass);
+        JkIdeSupport projectIde = IdeSupport.getProjectIde(jkClass);
         if (projectIde != null) {
             generator = JkImlGenerator.of(projectIde);
         } else {
-            generator = JkImlGenerator.of(JkJavaIdeSupport.of(jkClass.getBaseDir()));
+            generator = JkImlGenerator.of(JkIdeSupport.of(jkClass.getBaseDir()));
         }
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
         generator.setUseVarPath(useVarPath);

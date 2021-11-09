@@ -1,15 +1,11 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -48,7 +44,8 @@ public abstract class JekaCommandLineExecutor {
         Path dir = this.samplesRootDir.resolve(projectDir);
         process(dir, useWrapper)
                 .addParams(JkUtilsString.translateCommandline(cmdLine))
-                .inheritJkLogStyle()
+                .inheritJkLogOptions()
+                .addParams("-FC")
                 .setEnv("JEKA_JDK", JkJavaProcess.CURRENT_JAVA_DIR.resolve("../..").normalize().toString())
                 .run();
     }

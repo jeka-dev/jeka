@@ -12,11 +12,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class JkJavaProjectTest {
+public class JkProjectTest {
 
     @Test
     public void getTestDependencies_containsCompileDependencies() {
-        JkJavaProject javaProject = JkJavaProject.of()
+        JkProject javaProject = JkProject.of()
                 .simpleFacade()
                 .setCompileDependencies(deps -> deps.and("a:a"))
                 .setTestDependencies(deps -> deps.and("b:b"))
@@ -34,7 +34,7 @@ public class JkJavaProjectTest {
 
     @Test
     public void getTestDependencies_usingSetTestDependency_ok() {
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
@@ -59,7 +59,7 @@ public class JkJavaProjectTest {
     public void addVersionProviderOnCompile_testAndRuntimeHaveVersionProvider() {
         JkVersionProvider versionProvider = JkVersionProvider.of()
                 .and("javax.servlet:javax.servlet-api", "4.0.1");
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setCompileDependencies(deps -> deps
                         .andVersionProvider(versionProvider)
                         .and("javax.servlet:javax.servlet-api")
@@ -71,7 +71,7 @@ public class JkJavaProjectTest {
 
     @Test
     public void getTestDependencies_usingAddTestDependency_ok() {
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
@@ -97,7 +97,7 @@ public class JkJavaProjectTest {
 
     @Test
     public void getPublishMavenDependencies_ok() {
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
@@ -119,7 +119,7 @@ public class JkJavaProjectTest {
 
     @Test
     public void getPublishIvyDependencies_ok() {
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
@@ -144,7 +144,7 @@ public class JkJavaProjectTest {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
 
         Path base = top.resolve("base");
-        JkJavaProject baseProject = JkJavaProject.of().simpleFacade()
+        JkProject baseProject = JkProject.of().simpleFacade()
                 .setBaseDir(base)
                 .setCompileDependencies(deps -> deps.and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6")))
                 .getProject().getConstruction()
@@ -155,7 +155,7 @@ public class JkJavaProjectTest {
         baseProject.getPublication().getArtifactProducer().makeAllArtifacts();
 
         final Path core = top.resolve("core");
-        final JkJavaProject coreProject = JkJavaProject.of()
+        final JkProject coreProject = JkProject.of()
                 .setBaseDir(core)
                 .getConstruction()
                     .getCompilation()
@@ -171,7 +171,7 @@ public class JkJavaProjectTest {
         coreProject.getPublication().getArtifactProducer().makeAllArtifacts();
 
         final Path desktop = top.resolve("desktop");
-        final JkJavaProject desktopProject = JkJavaProject.of()
+        final JkProject desktopProject = JkProject.of()
                 .setBaseDir(desktop)
                 .getConstruction()
                 .getCompilation()
@@ -188,8 +188,8 @@ public class JkJavaProjectTest {
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
-        final Path dest = Files.createTempDirectory(JkJavaProjectTest.class.getName());
-        final Path zip = Paths.get(JkJavaProjectTest.class.getResource(zipName).toURI());
+        final Path dest = Files.createTempDirectory(JkProjectTest.class.getName());
+        final Path zip = Paths.get(JkProjectTest.class.getResource(zipName).toURI());
         JkPathTree.ofZip(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;

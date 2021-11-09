@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.release;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkClass;
@@ -64,7 +64,7 @@ public class JkPluginVersionFromGit extends JkPlugin {
      * Configure the specified project to use git version for publishing and tagging the repository.
      * @param tag If true, the repository will be tagged right after the project.pubmication.publish()
      */
-    public void configure(JkJavaProject project, boolean tag) {
+    public void configure(JkProject project, boolean tag) {
         project.getPublication()
                 .getMaven()
                     .setVersion(() -> version().toString())

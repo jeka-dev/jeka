@@ -37,27 +37,27 @@ import java.util.function.UnaryOperator;
  *     <li>Part of the sources/resources may be generated</li>
  *     <li>By default, passing test suite is required to produce Jars.</li>
  * </ul>
- * Integration tests are outside of {@link JkJavaProjectConstruction} scope.
+ * Integration tests are outside of {@link JkProjectConstruction} scope.
  */
-public class JkJavaProjectConstruction {
+public class JkProjectConstruction {
 
     private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V8;
 
     private static final String DEFAULT_ENCODING = "UTF-8";
 
-    private final JkJavaProject project;
+    private final JkProject project;
 
-    private final JkJavaCompiler<JkJavaProjectConstruction> compiler;
+    private final JkJavaCompiler<JkProjectConstruction> compiler;
 
     private JkJavaVersion jvmTargetVersion = DEFAULT_JAVA_VERSION;
 
     private String sourceEncoding = DEFAULT_ENCODING;
 
-    private final JkDependencyResolver<JkJavaProjectConstruction> dependencyResolver;
+    private final JkDependencyResolver<JkProjectConstruction> dependencyResolver;
 
-    private final JkJavaProjectCompilation<JkJavaProjectConstruction> compilation;
+    private final JkProjectCompilation<JkProjectConstruction> compilation;
 
-    private final JkJavaProjectTesting testing;
+    private final JkProjectTesting testing;
 
     private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
@@ -72,26 +72,26 @@ public class JkJavaProjectConstruction {
     /**
      * For Parent chaining
      */
-    public JkJavaProject __;
+    public JkProject __;
 
-    JkJavaProjectConstruction(JkJavaProject project) {
+    JkProjectConstruction(JkProject project) {
         this.project = project;
         this.__ = project;
         dependencyResolver = JkDependencyResolver.ofParent(this)
                 .addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral())
                 .setUseCache(true);
         compiler = JkJavaCompiler.ofParent(this);
-        compilation = JkJavaProjectCompilation.ofProd(this);
-        testing = new JkJavaProjectTesting(this);
+        compilation = JkProjectCompilation.ofProd(this);
+        testing = new JkProjectTesting(this);
         manifest = JkManifest.ofParent(this);
     }
 
-    public JkJavaProjectConstruction apply(Consumer<JkJavaProjectConstruction> consumer) {
+    public JkProjectConstruction apply(Consumer<JkProjectConstruction> consumer) {
         consumer.accept(this);
         return this;
     }
 
-    public JkDependencyResolver<JkJavaProjectConstruction> getDependencyResolver() {
+    public JkDependencyResolver<JkProjectConstruction> getDependencyResolver() {
         return dependencyResolver;
     }
 
@@ -99,14 +99,14 @@ public class JkJavaProjectConstruction {
      * Returns the compiler compiling Java sources for this project. The returned instance is mutable
      * so users can modify it from this method return.
      */
-    public JkJavaCompiler<JkJavaProjectConstruction> getCompiler() {
+    public JkJavaCompiler<JkProjectConstruction> getCompiler() {
         return compiler;
     }
 
     /**
      * Sets the Java version used for both source and target.
      */
-    public JkJavaProjectConstruction setJvmTargetVersion(JkJavaVersion jvmTargetVersion) {
+    public JkProjectConstruction setJvmTargetVersion(JkJavaVersion jvmTargetVersion) {
         this.jvmTargetVersion = jvmTargetVersion;
         return this;
     }
@@ -128,12 +128,12 @@ public class JkJavaProjectConstruction {
     /**
      * Set the encoding to use to read Java source files
      */
-    public JkJavaProjectConstruction setSourceEncoding(String sourceEncoding) {
+    public JkProjectConstruction setSourceEncoding(String sourceEncoding) {
         this.sourceEncoding = sourceEncoding;
         return this;
     }
 
-    public JkJavaProjectCompilation<JkJavaProjectConstruction> getCompilation() {
+    public JkProjectCompilation<JkProjectConstruction> getCompilation() {
         return compilation;
     }
 
@@ -142,15 +142,15 @@ public class JkJavaProjectConstruction {
                 testing.getCompilation().getDependencies());
     }
 
-    public JkJavaProjectTesting getTesting() {
+    public JkProjectTesting getTesting() {
         return testing;
     }
 
-    public JkManifest<JkJavaProjectConstruction> getManifest() {
+    public JkManifest<JkProjectConstruction> getManifest() {
         return manifest;
     }
 
-    JkJavaProject getProject() {
+    JkProject getProject() {
         return project;
     }
 
@@ -206,7 +206,7 @@ public class JkJavaProjectConstruction {
     /**
      * Allows customizing thz content of produced fat jar.
      */
-    public JkJavaProjectConstruction customizeFatJar(Function<JkPathTreeSet, JkPathTreeSet> customizer) {
+    public JkProjectConstruction customizeFatJar(Function<JkPathTreeSet, JkPathTreeSet> customizer) {
         this.extraFilesToIncludeInFatJar = customizer.apply(extraFilesToIncludeInFatJar);
         return this;
     }
@@ -216,7 +216,7 @@ public class JkJavaProjectConstruction {
      * get the runtime dependencies.
      * @param modifier An function that define the runtime dependencies from the compilation ones.
      */
-    public JkJavaProjectConstruction setRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
+    public JkProjectConstruction setRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
         this.dependencySetModifier = modifier;
         return this;
     }

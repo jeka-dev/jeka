@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.ide;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
@@ -62,7 +62,7 @@ public final class JkPluginEclipse extends JkPlugin {
             "dependencies and source layout.")
     public void files() {
         final Path dotProject = getJkClass().getBaseDir().resolve(".project");
-        JkJavaIdeSupport projectIde = IdeSupport.getProjectIde(getJkClass());
+        JkIdeSupport projectIde = IdeSupport.getProjectIde(getJkClass());
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
             for (final JkClass depRun : getJkClass().getImportedJkClasses().getDirects()) {

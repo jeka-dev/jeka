@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,7 +14,7 @@ public class JkComputedDependencyTest {
     @Test
     public void onProject() throws IOException {
         Path root = Files.createTempDirectory("jekatestproject");
-        JkJavaProject javaProject = JkJavaProject.of()
+        JkProject javaProject = JkProject.of()
             .setBaseDir(root);
         JkDependencySet dependencies = JkDependencySet.of().and(javaProject.toDependency());
         JkComputedDependency computedDependency = (JkComputedDependency) dependencies.getEntries().get(0);

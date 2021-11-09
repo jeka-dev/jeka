@@ -14,8 +14,8 @@ import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.project.JkJavaProject;
-import dev.jeka.core.api.project.JkJavaProjectConstruction;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -118,7 +118,7 @@ public final class JkPluginSpringboot extends JkPlugin {
     }
 
 
-    private void configure(JkJavaProject project) {
+    private void configure(JkProject project) {
 
         // Add spring snapshot or milestone repos if necessary
         JkDependencyResolver dependencyResolver = project.getConstruction().getDependencyResolver();
@@ -180,7 +180,7 @@ public final class JkPluginSpringboot extends JkPlugin {
      * Creates the bootable jar at the specified location.
      */
     public void createBootJar(Path target) {
-        JkJavaProjectConstruction construction = projectPlugin.getProject().getConstruction();
+        JkProjectConstruction construction = projectPlugin.getProject().getConstruction();
         JkStandardFileArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
         JkDependencyResolver dependencyResolver = construction.getDependencyResolver();
         JkVersionProvider versionProvider = getSpringbootPom(dependencyResolver, springbootVersion).getVersionProvider();

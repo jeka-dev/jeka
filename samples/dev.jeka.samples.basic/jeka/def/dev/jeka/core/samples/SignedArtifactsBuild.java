@@ -4,7 +4,7 @@ import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.project.JkJavaProjectPublication;
+import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
@@ -77,13 +77,13 @@ public class SignedArtifactsBuild extends JkClass {
                         .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
     }
 
-    private void configForOssrh(JkJavaProjectPublication publication) {
+    private void configForOssrh(JkProjectPublication publication) {
         UnaryOperator<Path> signer = JkGpg.ofSecretRing(secringPath, secringPassword).getSigner("");
         publication.getMaven()
                 .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
     }
 
-    private void configForLocalRepo(JkJavaProjectPublication publication) {
+    private void configForLocalRepo(JkProjectPublication publication) {
         JkRepo repo = JkRepo.of(dummyRepoPath)
             .getPublishConfig()
                 .setChecksumAlgos("sha1", "md5")

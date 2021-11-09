@@ -1,6 +1,6 @@
 package dev.jeka.core.integrationtest.javaproject;
 
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import org.junit.Test;
 
@@ -11,7 +11,7 @@ public class ImlGeneratorTest {
     @Test
     public void generateIml_springbootProject_ok() {
 
-        JkJavaProject project = JkJavaProject.of().simpleFacade()
+        JkProject project = JkProject.of().simpleFacade()
                 .setCompileDependencies(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-web:" + VERSION)
                 )

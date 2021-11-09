@@ -7,7 +7,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
@@ -46,7 +46,7 @@ public final class JkImlGenerator {
 
     private static final String T5 = T4 + T1;
 
-    private final JkJavaIdeSupport ideSupport;
+    private final JkIdeSupport ideSupport;
 
     /** Dependency resolver to fetch module dependencies for build classes */
     private JkDependencyResolver defDependencyResolver;
@@ -75,11 +75,11 @@ public final class JkImlGenerator {
 
     private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
-    private JkImlGenerator(JkJavaIdeSupport ideSupport) {
+    private JkImlGenerator(JkIdeSupport ideSupport) {
         this.ideSupport = ideSupport;
     }
 
-    public static JkImlGenerator of(JkJavaIdeSupport ideSupport) {
+    public static JkImlGenerator of(JkIdeSupport ideSupport) {
         return new JkImlGenerator(ideSupport);
     }
 

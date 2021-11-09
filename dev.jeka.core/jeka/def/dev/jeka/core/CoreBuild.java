@@ -6,7 +6,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
@@ -27,8 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static dev.jeka.core.api.project.JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
-import static dev.jeka.core.api.project.JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
+import static dev.jeka.core.api.project.JkProjectPublication.JAVADOC_ARTIFACT_ID;
+import static dev.jeka.core.api.project.JkProjectPublication.SOURCES_ARTIFACT_ID;
 
 /**
  * Build class for Jeka. Run main method to create full distrib.
@@ -193,7 +193,7 @@ public class CoreBuild extends JkClass {
     private void doPackWithEmbedded(Path targetJar) {
 
         // Main jar
-        JkJavaProject project = this.projectPlugin.getProject();
+        JkProject project = this.projectPlugin.getProject();
         project.getConstruction().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
@@ -233,7 +233,7 @@ public class CoreBuild extends JkClass {
 
     public void publishDocsOnGithubPage(String githubToken) {
         clean();
-        JkJavaProject project = this.projectPlugin.getProject();
+        JkProject project = this.projectPlugin.getProject();
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";

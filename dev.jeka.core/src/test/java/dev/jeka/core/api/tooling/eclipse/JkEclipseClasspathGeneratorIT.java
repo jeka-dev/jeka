@@ -3,7 +3,7 @@ package dev.jeka.core.api.tooling.eclipse;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class JkEclipseClasspathGeneratorIT {
     public void generate() throws Exception {
         final Path top = unzipToDir(ZIP_NAME);
 
-        final JkJavaProject baseProject = JkJavaProject.of()
+        final JkProject baseProject = JkProject.of()
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("base"))
@@ -36,7 +36,7 @@ public class JkEclipseClasspathGeneratorIT {
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);
 
-        final JkJavaProject coreProject = JkJavaProject.of()
+        final JkProject coreProject = JkProject.of()
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
             .getConstruction()
@@ -55,7 +55,7 @@ public class JkEclipseClasspathGeneratorIT {
         System.out.println("\ncore .classpath");
         System.out.println(coreClasspath);
 
-        final JkJavaProject desktopProject = JkJavaProject.of()
+        final JkProject desktopProject = JkProject.of()
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
@@ -70,7 +70,7 @@ public class JkEclipseClasspathGeneratorIT {
         System.out.println(result2);
     }
 
-    private void configureCompileLayout(JkJavaProject javaProject) {
+    private void configureCompileLayout(JkProject javaProject) {
         javaProject
             .getConstruction()
                 .getCompilation()
@@ -79,7 +79,7 @@ public class JkEclipseClasspathGeneratorIT {
                         .emptyResources().addResource("res");
     }
 
-    private void configureTestCompileLayout(JkJavaProject javaProject) {
+    private void configureTestCompileLayout(JkProject javaProject) {
         javaProject
             .getConstruction()
                 .getTesting()

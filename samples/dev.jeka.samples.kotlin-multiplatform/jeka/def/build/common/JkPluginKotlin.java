@@ -5,8 +5,8 @@ import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.project.JkJavaProject;
-import dev.jeka.core.api.project.JkJavaProjectCompilation;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectCompilation;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import static dev.jeka.core.api.project.JkJavaProjectCompilation.JAVA_SOURCES_COMPILE_ACTION;
+import static dev.jeka.core.api.project.JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION;
 
 @JkDefClasspath("org.jetbrains.kotlin:kotlin-compiler:1.5.31")
 public class JkPluginKotlin extends JkPlugin {
@@ -80,7 +80,7 @@ public class JkPluginKotlin extends JkPlugin {
 
     public class JkKotlinJvmProject {
 
-        private JkJavaProject project;
+        private JkProject project;
 
         private JkKotlinCompiler kotlinCompiler;
 
@@ -91,7 +91,7 @@ public class JkPluginKotlin extends JkPlugin {
         private JkKotlinJvmProject() {
         }
 
-        public JkJavaProject getProject() {
+        public JkProject getProject() {
             return project;
         }
 
@@ -117,11 +117,11 @@ public class JkPluginKotlin extends JkPlugin {
             return this;
         }
 
-        private void createJavaProject(JkJavaProject project) {
+        private void createJavaProject(JkProject project) {
             JkKotlinCompiler kompiler = getKotlinCompiler();
             String effectiveVersion = kompiler.getVersion();
-            JkJavaProjectCompilation<?> prodCompile = project.getConstruction().getCompilation();
-            JkJavaProjectCompilation<?> testCompile = project.getConstruction().getTesting().getCompilation();
+            JkProjectCompilation<?> prodCompile = project.getConstruction().getCompilation();
+            JkProjectCompilation<?> testCompile = project.getConstruction().getTesting().getCompilation();
             JkVersionProvider versionProvider = JkKotlinModules.versionProvider(effectiveVersion);
             prodCompile
                     .getPreCompileActions()
@@ -159,8 +159,8 @@ public class JkPluginKotlin extends JkPlugin {
             });
         }
 
-        private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkJavaProject javaProject) {
-            JkJavaProjectCompilation compilation = javaProject.getConstruction().getTesting().getCompilation();
+        private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
+            JkProjectCompilation compilation = javaProject.getConstruction().getTesting().getCompilation();
             JkPathTreeSet sources = compilation.getLayout().resolveSources();
             if (kotlinTestSourceDir == null) {
                 sources = sources.and(javaProject.getBaseDir().resolve(kotlinTestSourceDir));
@@ -181,8 +181,8 @@ public class JkPluginKotlin extends JkPlugin {
             kotlinCompiler.compile(compileSpec);
         }
 
-        private void compileKotlin(JkKotlinCompiler kotlinCompiler, JkJavaProject javaProject) {
-            JkJavaProjectCompilation compilation = javaProject.getConstruction().getCompilation();
+        private void compileKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
+            JkProjectCompilation compilation = javaProject.getConstruction().getCompilation();
             JkPathTreeSet sources = compilation.getLayout().resolveSources()
                     .and(javaProject.getBaseDir().resolve(kotlinSourceDir));
             if (common != null && !JkUtilsString.isBlank(common.srcDir)) {
@@ -219,8 +219,8 @@ public class JkPluginKotlin extends JkPlugin {
         private JKCommon() {}
 
         private void setupJvmProject(JkKotlinJvmProject jvm) {
-            JkJavaProjectCompilation<?> prodCompile = jvm.project.getConstruction().getCompilation();
-            JkJavaProjectCompilation<?> testCompile = jvm.project.getConstruction().getTesting().getCompilation();
+            JkProjectCompilation<?> prodCompile = jvm.project.getConstruction().getCompilation();
+            JkProjectCompilation<?> testCompile = jvm.project.getConstruction().getTesting().getCompilation();
             if (testSrcDir != null) {
                 testCompile.getLayout().addSource(testSrcDir);
                 if (addCommonStdLibs) {

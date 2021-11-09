@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.repos;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
-import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
@@ -60,18 +60,18 @@ public class JkPluginNexus extends JkPlugin {
         }
     }
 
-    public static void configureForOSSRHRepo(JkJavaProject project, String ...profileNames) {
+    public static void configureForOSSRHRepo(JkProject project, String ...profileNames) {
         JkRepo repo = project.getPublication().getMaven().getRepos()
                 .getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
         configureForRepo(project, repo, profileNames);
     }
 
-    public static void configureForFirstRemoteRepo(JkJavaProject project, String ...profileNames) {
+    public static void configureForFirstRemoteRepo(JkProject project, String ...profileNames) {
         JkRepo repo = getFirst(project);
         configureForRepo(project, repo, profileNames);
     }
 
-    public static void configureForRepo(JkJavaProject project, JkRepo repo, String ...profileNames) {
+    public static void configureForRepo(JkProject project, JkRepo repo, String ...profileNames) {
         if (repo == null) {
             JkLog.warn("No Nexus OSSRH repo found.");
             return;
@@ -80,12 +80,12 @@ public class JkPluginNexus extends JkPlugin {
         configureForRepo(project, nexusRepos, profileNames);
     }
 
-    public static void configureForRepo(JkJavaProject project, JkNexusRepos nexusRepos, String ...profileNames) {
+    public static void configureForRepo(JkProject project, JkNexusRepos nexusRepos, String ...profileNames) {
         project.getPublication().getPostActions().append(TASK_NAME,
                 () -> nexusRepos.closeAndReleaseOpenRepositories(profileNames));
     }
 
-    private static JkRepo getFirst(JkJavaProject project) {
+    private static JkRepo getFirst(JkProject project) {
         JkRepo repo = project.getPublication().findFirstRepo();
         if (repo != null && repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
             JkLog.warn("No credentials found on repo " + repo);
