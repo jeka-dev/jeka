@@ -31,7 +31,7 @@ import java.nio.file.Path;
 @JkDefClasspath("org.junit.platform:junit-platform-launcher:1.8.1")
 class Junit5Build extends JkClass {
 
-    final JkPluginProject java = getPlugin(JkPluginProject.class);
+    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
@@ -39,7 +39,7 @@ class Junit5Build extends JkClass {
      */
     @Override
     protected void setup() {
-        java.getProject()
+        projectPlugin.getProject()
             .getConstruction()
                 .getTesting()
                     .getCompilation()
@@ -74,7 +74,7 @@ class Junit5Build extends JkClass {
     }
 
     public void cleanPack() {
-        clean(); java.pack();
+        clean(); projectPlugin.pack();
     }
 
     public void checkReportGenerated() {

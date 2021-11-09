@@ -33,7 +33,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
  */
 public class SignedArtifactsBuild extends JkClass {
 
-    JkPluginProject javaPlugin = getPlugin(JkPluginProject.class);
+    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     @JkEnv("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
@@ -54,7 +54,7 @@ public class SignedArtifactsBuild extends JkClass {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().simpleFacade()
+        projectPlugin.getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and(GUAVA.version("30.0-jre"))
             )
@@ -93,7 +93,7 @@ public class SignedArtifactsBuild extends JkClass {
 
     public void cleanPackPublish() {
         JkPathTree.of(dummyRepoPath).createIfNotExist().deleteRoot();  // start from an empty repo
-        clean(); javaPlugin.pack(); javaPlugin.getProject().getPublication().publish();
+        clean(); projectPlugin.pack(); projectPlugin.getProject().getPublication().publish();
     }
 
     public static void main(String[] args) {

@@ -24,13 +24,13 @@ public class WarPluginBuild extends JkClass {
 
     public String jettyRunnerVersion = "9.4.28.v20200408";
 
-    JkPluginProject java = getPlugin(JkPluginProject.class);
+    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     JkPluginWar war = getPlugin(JkPluginWar.class);
 
     @Override
     protected void setup() {
-       java.getProject().simpleFacade()
+       projectPlugin.getProject().simpleFacade()
                .setCompileDependencies(deps -> deps
                        .and("com.google.guava:guava:30.0-jre")
                        .and("javax.servlet:javax.servlet-api:4.0.1"))
@@ -47,11 +47,11 @@ public class WarPluginBuild extends JkClass {
     }
 
     public void cleanPackRun() {
-        clean(); java.pack(); runWarWithJetty();
+        clean(); projectPlugin.pack(); runWarWithJetty();
     }
 
     public void runWarWithJetty() {
-        JkArtifactProducer artifactProducer = java.getProject().getPublication().getArtifactProducer();
+        JkArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
         artifactProducer.makeMissingArtifacts();
         Path jettyRunner = JkRepoFromOptions.getDownloadRepo().toSet().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);

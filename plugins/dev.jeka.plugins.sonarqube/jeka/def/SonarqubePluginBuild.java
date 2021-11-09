@@ -5,11 +5,11 @@ import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 class SonarqubePluginBuild extends JkClass {
 
-    private final JkPluginProject java = getPlugin(JkPluginProject.class);
+    private final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     @Override
     protected void setup() {
-        java.getProject().simpleFacade()
+        projectPlugin.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .mixResourcesAndSources()
                 .setSimpleLayout()
@@ -17,7 +17,7 @@ class SonarqubePluginBuild extends JkClass {
                         .andFiles(JkLocator.getJekaJarPath())
                 );
 
-        java.getProject().getPublication().getMaven()
+        projectPlugin.getProject().getPublication().getMaven()
                 .setModuleId("dev.jeka:sonarqube-plugin")
                 .getPomMetadata()
                         .setProjectName("Jeka plugin for Sonarqube")
@@ -26,7 +26,7 @@ class SonarqubePluginBuild extends JkClass {
     }
 
     public void cleanPack() {
-        clean(); java.pack();
+        clean(); projectPlugin.pack();
     }
 
 

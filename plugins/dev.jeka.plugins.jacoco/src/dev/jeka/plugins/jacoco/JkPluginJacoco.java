@@ -44,8 +44,8 @@ public class JkPluginJacoco extends JkPlugin {
         if (!enabled) {
             return;
         }
-        JkPluginProject pluginJava = getJkClass().getPlugins().get(JkPluginProject.class);
-        final JkJavaProject project = pluginJava.getProject();
+        JkPluginProject projectPlugin = getJkClass().getPlugins().get(JkPluginProject.class);
+        final JkJavaProject project = projectPlugin.getProject();
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {
             jacoco = JkJacoco.ofEmbedded();

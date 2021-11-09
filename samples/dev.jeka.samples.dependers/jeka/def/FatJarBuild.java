@@ -12,23 +12,23 @@ import dev.jeka.core.tool.builtins.project.JkPluginProject;
  */
 public class FatJarBuild extends JkClass {
 
-    JkPluginProject java = getPlugin(JkPluginProject.class);
+    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
     
     @JkDefImport("../dev.jeka.samples.basic")
     private JavaPluginBuild sampleBuild;
 
     @Override
     protected void setup() {
-        java.getProject()
+        projectPlugin.getProject()
             .getPublication()
                 .getArtifactProducer()
-                    .putMainArtifact(java.getProject().getConstruction()::createFatJar)
+                    .putMainArtifact(projectPlugin.getProject().getConstruction()::createFatJar)
                 .__
             .__
             .simpleFacade()
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:22.0")
-                        .and(sampleBuild.java.getProject().toDependency()));
+                        .and(sampleBuild.projectPlugin.getProject().toDependency()));
     }
    
 }

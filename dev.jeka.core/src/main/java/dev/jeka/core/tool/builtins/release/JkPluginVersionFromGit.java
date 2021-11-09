@@ -52,11 +52,11 @@ public class JkPluginVersionFromGit extends JkPlugin {
     @Override
     protected void afterSetup() {
         if (autoConfigureProject) {
-            JkPluginProject java = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
-            if (java == null) {
+            JkPluginProject projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
+            if (projectPlugin == null) {
                 return;
             }
-            configure(java.getProject(), tagAfterPublish);
+            configure(projectPlugin.getProject(), tagAfterPublish);
         }
     }
 

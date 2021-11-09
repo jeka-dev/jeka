@@ -6,11 +6,11 @@ import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 public class JacocoPluginBuild extends JkClass {
 
-    private final JkPluginProject java = getPlugin(JkPluginProject.class);
+    private final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     @Override
     protected void setup() {
-        java.getProject().simpleFacade()
+        projectPlugin.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .mixResourcesAndSources()
                 .setSimpleLayout()
@@ -18,7 +18,7 @@ public class JacocoPluginBuild extends JkClass {
                         .andFiles(JkLocator.getJekaJarPath())
                 );
 
-        java.getProject().getPublication().getMaven()
+        projectPlugin.getProject().getPublication().getMaven()
                 .setModuleId("dev.jeka:jacoco-plugin")
                 .getPomMetadata()
                         .setProjectName("Jeka plugin for Jacoco")
@@ -27,7 +27,7 @@ public class JacocoPluginBuild extends JkClass {
     }
 
     public void cleanPack() {
-        clean(); java.pack();
+        clean(); projectPlugin.pack();
     }
 
     public static void main(String[] args) {

@@ -40,13 +40,13 @@ public class CoreBuild extends JkClass {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final JkPluginProject java = getPlugin(JkPluginProject.class);
+    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     public boolean runIT;
 
     @Override
     protected void setup()  {
-        java.getProject()
+        projectPlugin.getProject()
             .getConstruction()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
@@ -100,11 +100,11 @@ public class CoreBuild extends JkClass {
 
 
     private Path distribFolder() {
-        return java.getProject().getOutputDir().resolve("distrib");
+        return projectPlugin.getProject().getOutputDir().resolve("distrib");
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = java.getProject().getPublication().getArtifactProducer();
+        final JkArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
         if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
                     SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
@@ -134,7 +134,7 @@ public class CoreBuild extends JkClass {
         }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         makeDocs();
-        if (!java.getProject().getConstruction().getTesting().isSkipped() && runIT) {
+        if (!projectPlugin.getProject().getConstruction().getTesting().isSkipped() && runIT) {
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
@@ -179,7 +179,7 @@ public class CoreBuild extends JkClass {
 
     private void makeDocs() {
         JkLog.startTask("Make documentation");
-        String version = java.getProject().getPublication().getMaven().getVersion();
+        String version = projectPlugin.getProject().getPublication().getMaven().getVersion();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }
@@ -193,7 +193,7 @@ public class CoreBuild extends JkClass {
     private void doPackWithEmbedded(Path targetJar) {
 
         // Main jar
-        JkJavaProject project = java.getProject();
+        JkJavaProject project = this.projectPlugin.getProject();
         project.getConstruction().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
@@ -226,14 +226,14 @@ public class CoreBuild extends JkClass {
     }
 
     private void doWrapper(Path wrapperJar) {
-        java.getProject().getConstruction().getCompilation().runIfNecessary();
-        JkPathTree.of(java.getProject().getConstruction().getCompilation().getLayout()
+        projectPlugin.getProject().getConstruction().getCompilation().runIfNecessary();
+        JkPathTree.of(projectPlugin.getProject().getConstruction().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void publishDocsOnGithubPage(String githubToken) {
         clean();
-        JkJavaProject project = java.getProject();
+        JkJavaProject project = this.projectPlugin.getProject();
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
@@ -251,7 +251,7 @@ public class CoreBuild extends JkClass {
     }
 
     public void cleanPack() {
-        clean(); java.pack();
+        clean(); projectPlugin.pack();
     }
 
     // This method has to be run in dev.jeka.core (this module root) working directory
@@ -262,7 +262,7 @@ public class CoreBuild extends JkClass {
     public static class RunBuildAndIT {
         public static void main(String[] args) {
             CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args, "-runIT");
-            coreBuild.java.pack();
+            coreBuild.projectPlugin.pack();
         }
     }
 

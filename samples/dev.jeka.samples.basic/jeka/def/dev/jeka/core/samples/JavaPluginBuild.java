@@ -21,13 +21,13 @@ import dev.jeka.core.tool.builtins.maven.JkPluginPom;
  */
 public class JavaPluginBuild extends JkClass {
 
-    public final JkPluginProject java = getPlugin(JkPluginProject.class);
+    public final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
     
     @Override
     protected void setup() {
-       java.getProject().simpleFacade()
+       projectPlugin.getProject().simpleFacade()
                .setCompileDependencies(deps -> deps
                    .and("com.google.guava:guava:30.0-jre")
                    .and("com.sun.jersey:jersey-server:1.19.4")
@@ -72,12 +72,12 @@ public class JavaPluginBuild extends JkClass {
     }
 
     public void cleanPackPublish() {
-        clean(); java.pack(); java.publishLocal();
+        clean(); projectPlugin.pack(); projectPlugin.publishLocal();
     }
 
     // For debugging purpose
     public void printIml() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of(this.java.getJavaIdeSupport());
+        JkImlGenerator imlGenerator = JkImlGenerator.of(this.projectPlugin.getJavaIdeSupport());
         String iml = imlGenerator.generate();
         System.out.println(iml);
     }
@@ -88,7 +88,7 @@ public class JavaPluginBuild extends JkClass {
     }
 
     public void showDependencies() {
-        java.showDependenciesXml();
+        projectPlugin.showDependenciesXml();
     }
     
     public static void main(String[] args) {

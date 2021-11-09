@@ -23,11 +23,11 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 @JkDefClasspath("com.google.guava:guava:21.0")
 public class ThirdPartyPoweredBuild extends JkClass {
 
-    JkPluginProject javaPlugin = getPlugin(JkPluginProject.class);
+    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
     
     @Override
     protected void setup() {
-        javaPlugin.getProject().simpleFacade()
+        projectPlugin.getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and(JAVAX_SERVLET_API.version("3.1.0"))
                 .and(GUAVA.version("30.0-jre")))
@@ -49,7 +49,7 @@ public class ThirdPartyPoweredBuild extends JkClass {
 
     public void cleanPack() {
         clean();
-        javaPlugin.pack();
+        projectPlugin.pack();
     }
 
     public static void main(String[] args) {

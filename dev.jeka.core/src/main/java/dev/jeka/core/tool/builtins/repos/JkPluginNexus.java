@@ -28,15 +28,15 @@ public class JkPluginNexus extends JkPlugin {
 
     @Override
     protected void afterSetup() throws Exception {
-        JkPluginProject pluginJava = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
-        if (pluginJava == null) {
+        JkPluginProject projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
+        if (projectPlugin == null) {
             JkLog.warn("No project plugin configured here.");
             return;
         }
         String[] profileNames = JkUtilsString.isBlank(profileNamesFilter) ? new String[0]
                 : profileNamesFilter.split(",");
-        pluginJava.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
-            JkRepo repo = getFirst(pluginJava.getProject());
+        projectPlugin.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
+            JkRepo repo = getFirst(projectPlugin.getProject());
             if (repo != null) {
                 JkNexusRepos.ofUrlAndCredentials(repo).closeAndReleaseOpenRepositories(profileNames);
             } else {
@@ -46,13 +46,13 @@ public class JkPluginNexus extends JkPlugin {
     }
 
     public void closeAndOrRelease() {
-        Optional<JkPluginProject> pluginJava = getJkClass().getPlugins().getOptional(JkPluginProject.class);
-        if (!pluginJava.isPresent()) {
+        Optional<JkPluginProject> projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class);
+        if (!projectPlugin.isPresent()) {
             JkLog.warn("No project plugin configured here.");
             return;
         }
         String[] profileNames = profileNamesFilter.split(",");
-        JkRepo repo = getFirst(pluginJava.get().getProject());
+        JkRepo repo = getFirst(projectPlugin.get().getProject());
         if (repo != null) {
             JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease(profileNames);
         } else {

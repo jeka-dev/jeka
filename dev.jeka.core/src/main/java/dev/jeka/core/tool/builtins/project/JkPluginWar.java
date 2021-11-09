@@ -77,8 +77,8 @@ public class JkPluginWar extends JkPlugin {
     }
 
     private void doWarFile(Path file) {
-        JkPluginProject pluginJava = this.getJkClass().getPlugin(JkPluginProject.class);
-        JkJavaProject project = pluginJava.getProject();
+        JkPluginProject projectPlugin = this.getJkClass().getPlugin(JkPluginProject.class);
+        JkJavaProject project = projectPlugin.getProject();
         staticResourceComputation.run();
         Path temp = JkUtilsPath.createTempDirectory("jeka-war");
         generateWarDir(project, temp, staticResourceDir);

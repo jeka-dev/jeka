@@ -23,14 +23,14 @@ import static dev.jeka.core.plugins.springboot.JkSpringModules.Boot;
 @JkImport("dev.jeka:springboot-plugin")
 class Build extends JkClass {
 
-    private final JkPluginProject javaPlugin = getPlugin(JkPluginProject.class);
+    private final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     private final JkPluginSpringboot springbootPlugin = getPlugin(JkPluginSpringboot.class); // Load springboot plugin.
 
     @Override
     protected void setup() {
         springbootPlugin.springbootVersion = "2.0.3.RELEASE";
-        javaPlugin.getProject().addDependencies(JkDependencySet.of()
+        projectPlugin.getProject().addDependencies(JkDependencySet.of()
                 .and(Boot.STARTER_WEB)
                 .and(Boot.STARTER_TEST, JkJavaDepScopes.TEST)
         );

@@ -101,12 +101,12 @@ class MasterBuild extends JkClass {
         });
     }
 
-    private void configureSlave(JkPluginProject javaPlugin) {
-        versionFromGit.configure(javaPlugin.getProject(), false);
+    private void configureSlave(JkPluginProject projectPlugin) {
+        versionFromGit.configure(projectPlugin.getProject(), false);
         if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for releasej
-            javaPlugin.pack.javadoc = true;
+            projectPlugin.pack.javadoc = true;
         }
-        javaPlugin.getProject().getPublication().getMaven()
+        projectPlugin.getProject().getPublication().getMaven()
                 .setVersion(versionFromGit.version())
                 .setRepos(this.publishRepos)
                 .getPomMetadata()
