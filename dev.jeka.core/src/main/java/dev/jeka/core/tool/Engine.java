@@ -4,10 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.*;
-import dev.jeka.core.api.java.JkClasspath;
-import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkBusyIndicator;
@@ -176,7 +173,7 @@ final class Engine {
         if (compileSources) {
             if (Environment.standardOptions.forceCompile() || isWorkOutdated(defLastUptateTime)) {
                 compileDef(dependencyPath.and(projectDependenciesPath));
-                writeLastUpdateFile(defLastUptateTime);
+                writeLastUpdateFile(defLastUptateTime, JkJavaVersion.ofCurrent());
             } else {
                 JkLog.trace("Last def classes are up-to-date : No need to compile.");
             }
@@ -392,8 +389,9 @@ final class Engine {
     }
 
     private boolean isWorkOutdated(long lastModifiedAccordingFileAttributes) {
-        long workFlagTs = lastModifiedAccordingFlag();
-        return workFlagTs < lastModifiedAccordingFileAttributes;
+        TimestampAndJavaVersion timestampAndJavaVersion = lastModifiedAccordingFlag();
+        return timestampAndJavaVersion.timestamp < lastModifiedAccordingFileAttributes
+                || !JkJavaVersion.ofCurrent().equals(timestampAndJavaVersion.javaVersion);
     }
 
     private long lastModifiedAccordingFileAttributes() {
@@ -404,32 +402,46 @@ final class Engine {
                 .reduce(0L, Math::max);
     }
 
-    private void writeLastUpdateFile(long lastModifiedAccordingFileAttributes) {
+    private void writeLastUpdateFile(long lastModifiedAccordingFileAttributes, JkJavaVersion javaVersion) {
         Path work = projectBaseDir.resolve(JkConstants.WORK_PATH);
         if (!Files.exists(work)) {
             return;
         }
+        String infoString = Long.toString(lastModifiedAccordingFileAttributes) + ";" + javaVersion;
         JkPathFile.of(work.resolve(LAST_UPDATE_FILE_NAME))
                 .deleteIfExist()
                 .createIfNotExist()
-                .write(Long.valueOf(lastModifiedAccordingFileAttributes).toString().getBytes(StandardCharsets.UTF_8));
+                .write(infoString.getBytes(StandardCharsets.UTF_8));
     }
 
-    private long lastModifiedAccordingFlag() {
+    private TimestampAndJavaVersion lastModifiedAccordingFlag() {
         Path work = projectBaseDir.resolve(JkConstants.WORK_PATH);
         if (!Files.exists(work)) {
-            return 0L;
+            return new TimestampAndJavaVersion(0L, JkJavaVersion.ofCurrent());
         }
         Path lastUpdateFile = work.resolve(LAST_UPDATE_FILE_NAME);
         if (!Files.exists(lastUpdateFile)) {
-            return 0;
+            return new TimestampAndJavaVersion(0L, JkJavaVersion.ofCurrent());
         }
         try {
             String content = JkUtilsPath.readAllLines(lastUpdateFile).get(0);
-            return Long.parseLong(content);
+            String[] items = content.split(";");
+            return new TimestampAndJavaVersion(Long.parseLong(items[0]), JkJavaVersion.of(items[1]));
         } catch (RuntimeException e) {
             JkLog.warn("Error caught when reading file content of " + lastUpdateFile + ". " + e.getMessage() );
-            return 0;
+            return new TimestampAndJavaVersion(0L, JkJavaVersion.ofCurrent());
+        }
+    }
+
+    private static class TimestampAndJavaVersion {
+
+        final long timestamp;
+
+        final JkJavaVersion javaVersion;
+
+        public TimestampAndJavaVersion(long timestamp, JkJavaVersion javaVersion) {
+            this.timestamp = timestamp;
+            this.javaVersion = javaVersion;
         }
     }
 
