@@ -13,7 +13,7 @@ Just declare the plugin in your build class.
 @JkDefClasspath("dev.jeka:jacoco-plugin")
 public class Build extends JkClass {
     
-    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    JkPluginProject projectlugin = getPlugin(JkPluginProject.class);
     
     JkPluginJacoco jacoco = getPlugin(JkPluginJacoco.class);
 

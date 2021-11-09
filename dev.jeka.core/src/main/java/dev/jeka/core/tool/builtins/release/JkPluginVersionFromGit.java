@@ -13,7 +13,7 @@ import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.util.Optional;
 
-@JkDoc({"Manage versioning of project from JkPluginJava by using Git.",
+@JkDoc({"Manage versioning of project from JkPluginProject by using Git.",
         "The version is inferred from git : ",
         "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
         "  - If last commit contains a message containing [comment_version_prefix]xxxxx, version values xxxxx",
@@ -32,7 +32,7 @@ public class JkPluginVersionFromGit extends JkPlugin {
     @JkDoc("Tags with following prefix. This may help to distinguish tags for versioning from others.")
     public String tagPrefixForVersion = "";
 
-    @JkDoc("If true and a JkPluginJava project is bound to the build instance, the project will be configured for " +
+    @JkDoc("If true and a JkPluginProject project is bound to the build instance, the project will be configured for " +
             "publishing with the inferred version.")
     public boolean autoConfigureProject = true;
 

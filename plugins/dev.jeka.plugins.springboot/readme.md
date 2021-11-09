@@ -49,7 +49,7 @@ Running the main method or executing `jeka java#pack` performs :
 * Generation of the original binary jar along its sources jar
 * Generation of the executable jar
 
-This plugin reads the Springboot pom/bom for the specified version and enrich the java plugin with dependency version provider according the pom. It also instructs java plugin to produce a workable springboot jar instead of the vanilla jar. 
+This plugin reads the Springboot pom/bom for the specified version and enrich the _project_ plugin with dependency version provider according the pom. It also instructs java plugin to produce a workable springboot jar instead of the vanilla jar. 
 
 Utility methods are provided if you want to construct your own springboot jar and dependency version provider without embracing the plugin mechanism.
 

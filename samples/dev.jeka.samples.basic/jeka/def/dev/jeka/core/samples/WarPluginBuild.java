@@ -12,7 +12,7 @@ import dev.jeka.core.tool.builtins.project.JkPluginWar;
 import java.nio.file.Path;
 
 /**
- * This builds a Java library and publish it on a maven repo using Java plugin. A Java library means a jar that
+ * This builds a Java library and publish it on a maven repo using Project plugin. A Java library means a jar that
  * is not meant to be consumed by end-user but as a dependency of other Java projects.<p>
  *
  * @author Jerome Angibaud

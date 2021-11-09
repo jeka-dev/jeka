@@ -34,7 +34,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
-@JkDoc("Provides enhancement to Java plugin in order to produce a startable Springboot jar for your application.\n" +
+@JkDoc("Provides enhancement to Project plugin in order to produce a startable Springboot jar for your application.\n" +
         "The main produced artifact is the springboot one (embedding all dependencies) while the artifact classified as 'original' stands for the vanilla jar.\n" +
         "Dependency versions are resolved against BOM provided by Spring Boot team according Spring Boot version you use.")
 @JkDocPluginDeps(JkPluginProject.class)
@@ -86,7 +86,7 @@ public final class JkPluginSpringboot extends JkPlugin {
     }
 
     @Override
-    @JkDoc("Modifies the Java project from Java plugin in such this project produces a SpringBoot jar as the main artifact.")
+    @JkDoc("Modifies the Java project from Project plugin in such this project produces a SpringBoot jar as the main artifact.")
     protected void afterSetup() {
         configure(projectPlugin.getProject());
     }

@@ -21,7 +21,7 @@ import java.nio.file.Path;
  * Plugin for building WAR file (Jee Web Archive).
  */
 @JkDoc("Basic plugin for building war file artifact (Java Web archive). \n" +
-        "When initialized, it modifies the Java project hold by the Java plugin in order to \n" +
+        "When initialized, it modifies the Java project hold by the Project plugin in order to \n" +
         "generate the web.xml file and build an extra artifact (war).")
 @JkDocPluginDeps({JkPluginProject.class})
 public class JkPluginWar extends JkPlugin {

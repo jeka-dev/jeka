@@ -71,7 +71,7 @@ Now you can create some Java or Kotlin classes in the _def_ directory.
 * Create another public field, and annotate id with `@JkEnv` mentioning the name of an environment variable. 
 * You can now use this environment variable cast to the desired type in your build classes (of course, you can also document it using `@JkDoc`).
 * For more details about accepted types, see `dev.jeka.core.tool.FieldInjector#parse` method.
-* For example about composite objects, see example in `dev.jeka.core.tool.builtins.java.JkPluginJava#pack` field.
+* For example about composite objects, see example in `dev.jeka.core.tool.builtins.project.JkPluginProject#pack` field.
 
 #### Using 3rd party dependencies in your builds
 
