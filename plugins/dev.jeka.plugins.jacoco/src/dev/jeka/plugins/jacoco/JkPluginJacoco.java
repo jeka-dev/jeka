@@ -1,7 +1,7 @@
 package dev.jeka.plugins.jacoco;
 
 import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;

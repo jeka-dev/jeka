@@ -1,14 +1,12 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectTesting;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
@@ -16,12 +14,8 @@ import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
-import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
-import dev.jeka.core.tool.builtins.repos.JkPluginNexus;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
@@ -33,8 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static dev.jeka.core.api.java.project.JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
-import static dev.jeka.core.api.java.project.JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
+import static dev.jeka.core.api.project.JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
+import static dev.jeka.core.api.project.JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
 
 /**
  * Build class for Jeka. Run main method to create full distrib.

@@ -2,7 +2,7 @@ package dev.jeka.core.integrationtest.tooling.intellij;
 
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorIT;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import org.junit.Test;

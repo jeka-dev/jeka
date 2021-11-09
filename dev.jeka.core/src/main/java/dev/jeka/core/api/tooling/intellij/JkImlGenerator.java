@@ -7,7 +7,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkJavaIdeSupport;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;

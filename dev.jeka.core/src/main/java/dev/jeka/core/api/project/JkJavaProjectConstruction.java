@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
@@ -6,7 +6,6 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.java.JkJavaCompiler;

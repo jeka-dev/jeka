@@ -4,7 +4,7 @@ import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.project.JkJavaProjectPublication;
+import dev.jeka.core.api.project.JkJavaProjectPublication;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;

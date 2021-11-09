@@ -2,8 +2,8 @@ package dev.jeka.core.tool.builtins.intellij;
 
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import org.junit.Test;
 

@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.release;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkClass;

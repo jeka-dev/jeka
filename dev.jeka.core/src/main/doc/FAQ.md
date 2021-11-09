@@ -49,7 +49,7 @@ public class Build extends JkClass{
 
 ### How can I generate Eclipse/Intellij without using Java plugin (JkPluginJava) ?
 
-Just make your `JkClass class implements` implements `dev.jeka.core.api.java.project.JkJavaIdeSupport`.
+Just make your `JkClass class implements` implements `JkJavaIdeSupport`.
 
 
 

@@ -3,7 +3,7 @@ package dev.jeka.core.api.tooling.eclipse;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import org.junit.Test;
 
 import java.io.IOException;

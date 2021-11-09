@@ -5,8 +5,8 @@ import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectCompilation;
+import dev.jeka.core.api.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProjectCompilation;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import static dev.jeka.core.api.java.project.JkJavaProjectCompilation.JAVA_SOURCES_COMPILE_ACTION;
+import static dev.jeka.core.api.project.JkJavaProjectCompilation.JAVA_SOURCES_COMPILE_ACTION;
 
 @JkDefClasspath("org.jetbrains.kotlin:kotlin-compiler:1.5.31")
 public class JkPluginKotlin extends JkPlugin {

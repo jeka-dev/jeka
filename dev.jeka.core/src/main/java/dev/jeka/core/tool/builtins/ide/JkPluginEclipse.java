@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.ide;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkJavaIdeSupport;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;

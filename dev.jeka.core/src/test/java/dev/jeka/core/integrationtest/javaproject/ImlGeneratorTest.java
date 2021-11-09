@@ -1,6 +1,6 @@
 package dev.jeka.core.integrationtest.javaproject;
 
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import org.junit.Test;
 

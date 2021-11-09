@@ -3,7 +3,7 @@ package dev.jeka.core.tool.builtins.ide;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkJavaIdeSupport;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
 import dev.jeka.core.api.system.JkLocator;

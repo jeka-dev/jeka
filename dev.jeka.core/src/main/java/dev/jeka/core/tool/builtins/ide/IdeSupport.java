@@ -1,6 +1,6 @@
 package dev.jeka.core.tool.builtins.ide;
 
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkJavaIdeSupport;
 import dev.jeka.core.tool.JkClass;
 
 import java.util.List;

@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.repos;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;

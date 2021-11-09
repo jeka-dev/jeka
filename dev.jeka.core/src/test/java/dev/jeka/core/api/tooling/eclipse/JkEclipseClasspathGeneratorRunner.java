@@ -2,7 +2,7 @@ package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;

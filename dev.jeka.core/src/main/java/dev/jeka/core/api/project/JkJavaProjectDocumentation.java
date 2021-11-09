@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;

@@ -1,9 +1,8 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.JkJavaCompiler;
 
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;

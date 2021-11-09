@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import org.junit.Assert;
 import org.junit.Test;
 

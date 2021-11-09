@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;

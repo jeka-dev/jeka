@@ -6,7 +6,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import org.junit.Assert;
 import org.junit.Test;

@@ -1,4 +1,4 @@
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 
 public class PureApi {

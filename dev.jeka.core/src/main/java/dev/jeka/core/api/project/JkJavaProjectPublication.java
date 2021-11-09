@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepo;
@@ -8,7 +8,6 @@ import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.system.JkLog;
 
 import java.util.Optional;
 import java.util.function.Consumer;
