@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.java;
+package dev.jeka.core.tool.builtins.project;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
@@ -38,7 +38,7 @@ import java.util.function.UnaryOperator;
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
 @JkDocPluginDeps({JkPluginScaffold.class})
-public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplier {
+public class JkPluginProject extends JkPlugin implements JkJavaIdeSupport.JkSupplier {
 
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
@@ -65,7 +65,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     private JkJavaProject project;
 
-    protected JkPluginJava(JkClass jkClass) {
+    protected JkPluginProject(JkClass jkClass) {
         super(jkClass);
         this.scaffoldPlugin = jkClass.getPlugins().get(JkPluginScaffold.class);
     }
@@ -157,7 +157,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             } else {
                 snippet = "buildclassfacade.snippet";
             }
-            String template = JkUtilsIO.read(JkPluginJava.class.getResource(snippet));
+            String template = JkUtilsIO.read(JkPluginProject.class.getResource(snippet));
             String baseDirName = getJkClass().getBaseDir().getFileName().toString();
             return template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         });
@@ -174,10 +174,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
             // Create specific files and folders
             JkPathFile.of(project.getBaseDir().resolve("jeka/dependency.txt"))
-                    .fetchContentFrom(JkPluginJava.class.getResource("dependencies.txt"));
+                    .fetchContentFrom(JkPluginProject.class.getResource("dependencies.txt"));
             Path libs = project.getBaseDir().resolve("jeka/libs");
             JkPathFile.of(libs.resolve("readme.txt"))
-                    .fetchContentFrom(JkPluginJava.class.getResource("libs-readme.txt"));
+                    .fetchContentFrom(JkPluginProject.class.getResource("libs-readme.txt"));
             JkUtilsPath.createDirectories(libs.resolve("compile+runtime"));
             JkUtilsPath.createDirectories(libs.resolve("compile"));
             JkUtilsPath.createDirectories(libs.resolve("runtime"));
@@ -193,7 +193,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
                 JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
                 Path sourceDir =
                         project.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
-                String pluginCode = JkUtilsIO.read(JkPluginJava.class.getResource("pluginclass.snippet"));
+                String pluginCode = JkUtilsIO.read(JkPluginProject.class.getResource("pluginclass.snippet"));
                 JkPathFile.of(sourceDir.resolve("your/basepackage/JkPluginXxxxxxx.java"))
                         .createIfNotExist()
                         .write(pluginCode.getBytes(StandardCharsets.UTF_8));

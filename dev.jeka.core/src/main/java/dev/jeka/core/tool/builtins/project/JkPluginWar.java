@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.java;
+package dev.jeka.core.tool.builtins.project;
 
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
@@ -23,7 +23,7 @@ import java.nio.file.Path;
 @JkDoc("Basic plugin for building war file artifact (Java Web archive). \n" +
         "When initialized, it modifies the Java project hold by the Java plugin in order to \n" +
         "generate the web.xml file and build an extra artifact (war).")
-@JkDocPluginDeps({JkPluginJava.class})
+@JkDocPluginDeps({JkPluginProject.class})
 public class JkPluginWar extends JkPlugin {
 
     private Path staticResourceDir;
@@ -35,7 +35,7 @@ public class JkPluginWar extends JkPlugin {
     public JkPluginWar(JkClass jkClass) {
         super(jkClass);
         this.staticResourceDir = jkClass.getBaseDir().resolve("src/main/webapp/static");
-        this.artifactProducer = jkClass.getPlugin(JkPluginJava.class).getProject().getPublication().getArtifactProducer();
+        this.artifactProducer = jkClass.getPlugin(JkPluginProject.class).getProject().getPublication().getArtifactProducer();
 
     }
 
@@ -77,7 +77,7 @@ public class JkPluginWar extends JkPlugin {
     }
 
     private void doWarFile(Path file) {
-        JkPluginJava pluginJava = this.getJkClass().getPlugin(JkPluginJava.class);
+        JkPluginProject pluginJava = this.getJkClass().getPlugin(JkPluginProject.class);
         JkJavaProject project = pluginJava.getProject();
         staticResourceComputation.run();
         Path temp = JkUtilsPath.createTempDirectory("jeka-war");

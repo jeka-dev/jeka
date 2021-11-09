@@ -12,7 +12,7 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -96,8 +96,8 @@ public final class JkPluginIntellij extends JkPlugin {
                 .forEach(jkClassModuleDeps::add);
         generator.setExtraJekaModules(jkClassModuleDeps);
         Path basePath = jkClass.getBaseDir();
-        if (jkClass.getPlugins().hasLoaded(JkPluginJava.class)) {
-            jkClass.getPlugins().get(JkPluginJava.class);
+        if (jkClass.getPlugins().hasLoaded(JkPluginProject.class)) {
+            jkClass.getPlugins().get(JkPluginProject.class);
             generator.setForceJdkVersion(forceJdkVersion);
         }
 

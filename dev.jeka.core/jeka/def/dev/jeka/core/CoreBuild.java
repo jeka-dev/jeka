@@ -15,7 +15,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
@@ -40,7 +40,7 @@ public class CoreBuild extends JkClass {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final JkPluginJava java = getPlugin(JkPluginJava.class);
+    final JkPluginProject java = getPlugin(JkPluginProject.class);
 
     public boolean runIT;
 

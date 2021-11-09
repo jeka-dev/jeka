@@ -9,7 +9,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.git.JkPluginGit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.util.Optional;
 
@@ -21,7 +21,7 @@ import java.util.Optional;
         "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
         "After, If last commit message specifies a version and this version differs from tag, " +
                 "last commit is tagged with specified version."})
-@JkDocPluginDeps(JkPluginJava.class)
+@JkDocPluginDeps(JkPluginProject.class)
 public class JkPluginVersionFromGit extends JkPlugin {
 
     public static final String TAG_TASK_NAME = "version-from-git-tag";
@@ -52,7 +52,7 @@ public class JkPluginVersionFromGit extends JkPlugin {
     @Override
     protected void afterSetup() {
         if (autoConfigureProject) {
-            JkPluginJava java = getJkClass().getPlugins().getOptional(JkPluginJava.class).orElse(null);
+            JkPluginProject java = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
             if (java == null) {
                 return;
             }

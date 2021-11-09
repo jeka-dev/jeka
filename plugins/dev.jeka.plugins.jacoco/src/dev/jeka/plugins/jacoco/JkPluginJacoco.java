@@ -7,10 +7,10 @@ import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
-@JkDocPluginDeps(JkPluginJava.class)
+@JkDocPluginDeps(JkPluginProject.class)
 public class JkPluginJacoco extends JkPlugin {
 
     /**
@@ -44,7 +44,7 @@ public class JkPluginJacoco extends JkPlugin {
         if (!enabled) {
             return;
         }
-        JkPluginJava pluginJava = getJkClass().getPlugins().get(JkPluginJava.class);
+        JkPluginProject pluginJava = getJkClass().getPlugins().get(JkPluginProject.class);
         final JkJavaProject project = pluginJava.getProject();
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {

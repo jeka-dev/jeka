@@ -18,17 +18,17 @@ class SamplesTester extends JekaCommandLineExecutor {
     }
 
     void run() {
-        runjeka("dev.jeka.samples.springboot", "@../../plugins/dev.jeka.plugins.springboot clean java#pack");
+        runjeka("dev.jeka.samples.springboot", "@../../plugins/dev.jeka.plugins.springboot clean project#pack");
         runjekaw("dev.jeka.samples.basic", "-JKC=JavaPluginBuild cleanPackPublish");
         runjekaw("dev.jeka.samples.basic", "-JKC=SignedArtifactsBuild cleanPackPublish");
         runjekaw("dev.jeka.samples.basic", "-JKC=ThirdPartyPoweredBuild cleanPack");
         runjekaw("dev.jeka.samples.basic", "-JKC=AntStyleBuild cleanPackPublish");
-        runjekaw("dev.jeka.samples.dependers", "-JKC=FatJarBuild clean java#pack");
-        runjekaw("dev.jeka.samples.dependers", "-JKC=NormalJarBuild clean java#pack");
-        runjekaw("dev.jeka.samples.junit5", "clean java#pack");
-        runjekaw("dev.jeka.samples.junit5", "clean java#pack checkReportGenerated -java#tests.fork");
-        runjeka("dev.jeka.samples.jacoco", "@../../plugins/dev.jeka.plugins.jacoco clean java#pack checkReportGenerated");
-        runjeka("dev.jeka.samples.sonarqube", "@../../plugins/dev.jeka.plugins.sonarqube clean java#pack");
+        runjekaw("dev.jeka.samples.dependers", "-JKC=FatJarBuild clean project#pack");
+        runjekaw("dev.jeka.samples.dependers", "-JKC=NormalJarBuild clean project#pack");
+        runjekaw("dev.jeka.samples.junit5", "clean project#pack");
+        runjekaw("dev.jeka.samples.junit5", "clean project#pack checkReportGenerated -project#tests.fork");
+        runjeka("dev.jeka.samples.jacoco", "@../../plugins/dev.jeka.plugins.jacoco clean project#pack checkReportGenerated");
+        runjeka("dev.jeka.samples.sonarqube", "@../../plugins/dev.jeka.plugins.sonarqube clean project#pack");
     }
 
     public void launchManually(String cmdLine) {
@@ -48,7 +48,7 @@ class SamplesTester extends JekaCommandLineExecutor {
 
     public static class ExtraLauncher {
         public static void main(String[] args) {
-            new SamplesTester().launchManually("scaffold#run java#");
+            new SamplesTester().launchManually("scaffold#run project#");
         }
     }
 

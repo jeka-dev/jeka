@@ -8,7 +8,7 @@ import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.nio.charset.Charset;
@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @JkDoc("Generation of Eclipse files (.project and .classpath) from actual project structure andPrepending dependencies.")
-@JkDocPluginDeps({JkPluginJava.class})
+@JkDocPluginDeps({JkPluginProject.class})
 public final class JkPluginEclipse extends JkPlugin {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")

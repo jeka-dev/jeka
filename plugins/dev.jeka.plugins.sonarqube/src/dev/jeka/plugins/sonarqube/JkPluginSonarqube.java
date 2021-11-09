@@ -9,7 +9,7 @@ import dev.jeka.core.api.project.JkJavaProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @JkDoc("Run SonarQube analysis.")
-@JkDocPluginDeps(JkPluginJava.class)
+@JkDocPluginDeps(JkPluginProject.class)
 public class JkPluginSonarqube extends JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
@@ -105,7 +105,7 @@ public class JkPluginSonarqube extends JkPlugin {
             JkLog.info("Sonarqube analysis has been disabled. No analysis will be performed.");
             return;
         }
-        JkJavaProject project = getJkClass().getPlugins().get(JkPluginJava.class).getProject();
+        JkJavaProject project = getJkClass().getPlugins().get(JkPluginProject.class).getProject();
         JkSonarqube sonarqube = createConfiguredSonarqube(project);
         sonarqubeConfigurer.accept(sonarqube);
         sonarqube.run();

@@ -16,14 +16,14 @@ import dev.jeka.core.plugins.springboot.JkPluginSpringboot;
 import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import static dev.jeka.core.plugins.springboot.JkSpringModules.Boot;
 
 @JkImport("dev.jeka:springboot-plugin")
 class Build extends JkClass {
 
-    private final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    private final JkPluginProject javaPlugin = getPlugin(JkPluginProject.class);
 
     private final JkPluginSpringboot springbootPlugin = getPlugin(JkPluginSpringboot.class); // Load springboot plugin.
 

@@ -53,7 +53,7 @@ class Build extends JkClass {
 
     public void cleanPack() {
         clean();
-        springboot.javaPlugin().pack();
+        springboot.projectPlugin().pack();
     }
 
 }

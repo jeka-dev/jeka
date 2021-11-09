@@ -8,7 +8,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.util.Optional;
 
@@ -28,7 +28,7 @@ public class JkPluginNexus extends JkPlugin {
 
     @Override
     protected void afterSetup() throws Exception {
-        JkPluginJava pluginJava = getJkClass().getPlugins().getOptional(JkPluginJava.class).orElse(null);
+        JkPluginProject pluginJava = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
         if (pluginJava == null) {
             JkLog.warn("No project plugin configured here.");
             return;
@@ -46,7 +46,7 @@ public class JkPluginNexus extends JkPlugin {
     }
 
     public void closeAndOrRelease() {
-        Optional<JkPluginJava> pluginJava = getJkClass().getPlugins().getOptional(JkPluginJava.class);
+        Optional<JkPluginProject> pluginJava = getJkClass().getPlugins().getOptional(JkPluginProject.class);
         if (!pluginJava.isPresent()) {
             JkLog.warn("No project plugin configured here.");
             return;

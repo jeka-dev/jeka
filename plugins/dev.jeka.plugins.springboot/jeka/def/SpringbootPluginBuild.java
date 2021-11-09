@@ -3,12 +3,11 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 class SpringbootPluginBuild extends JkClass {
 
-    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    final JkPluginProject javaPlugin = getPlugin(JkPluginProject.class);
 
     @Override
     protected void setup() {

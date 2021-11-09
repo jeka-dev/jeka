@@ -13,7 +13,7 @@ import dev.jeka.core.api.utils.JkUtilsString
 import dev.jeka.core.tool.JkClass
 import dev.jeka.core.tool.JkDoc
 import dev.jeka.core.tool.JkInit
-import dev.jeka.core.tool.builtins.java.JkPluginJava
+import dev.jeka.core.tool.builtins.project.JkPluginProject
 import java.awt.Desktop
 
 class Build : JkClass() {
@@ -100,7 +100,7 @@ class Build : JkClass() {
 
     object PrintDeps  {
         @JvmStatic fun main(args: Array<String>){
-            JkInit.instanceOf(Build::class.java, *args).getPlugin(JkPluginJava::class.java).showDependencies()
+            JkInit.instanceOf(Build::class.java, *args).getPlugin(JkPluginProject::class.java).showDependencies()
         }
     }
 

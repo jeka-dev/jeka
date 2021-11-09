@@ -5,7 +5,7 @@ import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 import dev.jeka.plugins.sonarqube.JkPluginSonarqube;
 import dev.jeka.plugins.sonarqube.JkSonarqube;
 
@@ -17,13 +17,13 @@ import dev.jeka.plugins.sonarqube.JkSonarqube;
 @JkDefClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
 class SonarqubeSampleBuild extends JkClass {
 
-    private final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    private final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     private final JkPluginSonarqube sonarqubePlugin = getPlugin(JkPluginSonarqube.class);
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().simpleFacade()
+        projectPlugin.getProject().simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps
                 .and("com.github.djeang:vincer-dom:1.4.0")
@@ -42,13 +42,13 @@ class SonarqubeSampleBuild extends JkClass {
     }
 
     public void cleanPack() {
-        clean(); javaPlugin.pack();
+        clean(); projectPlugin.pack();
     }
 
     @JkDoc("Cleans, tests and creates bootable jar.")
     public void cleanSonar() {
         clean();
-        javaPlugin.test();
+        projectPlugin.test();
         sonarqubePlugin.run();
     }
 

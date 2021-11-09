@@ -8,7 +8,7 @@ import dev.jeka.core.api.project.JkJavaProjectPublication;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.nio.file.Path;
 import java.util.function.UnaryOperator;
@@ -33,7 +33,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
  */
 public class SignedArtifactsBuild extends JkClass {
 
-    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    JkPluginProject javaPlugin = getPlugin(JkPluginProject.class);
 
     @JkEnv("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
