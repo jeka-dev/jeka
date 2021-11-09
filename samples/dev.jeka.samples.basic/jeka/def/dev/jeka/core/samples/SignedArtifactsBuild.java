@@ -69,12 +69,10 @@ public class SignedArtifactsBuild extends JkClass {
                     .setModuleId("dev.jeka.core:samples-signedArtifacts")
                     .setVersion("1.3.1")
                     .getPomMetadata()
-                        .getProjectInfo()
-                            .setName("my project")
-                            .setDescription("My description")
-                            .setUrl("https://github.com/jerkar/jeka/samples").__
-                        .getScm()
-                            .setConnection("https://github.com/jerkar/sample.git").__
+                        .setProjectName("my project")
+                        .setProjectDescription("My description")
+                        .setProjectUrl("https://github.com/jerkar/jeka/samples")
+                        .setScmConnection("https://github.com/jerkar/sample.git")
                         .addApache2License()
                         .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
     }

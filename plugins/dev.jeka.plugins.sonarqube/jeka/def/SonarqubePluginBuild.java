@@ -15,9 +15,6 @@ class SonarqubePluginBuild extends JkClass {
 
     @Override
     protected void setup() {
-        JkPlugin.setJekaPluginCompatibilityRange(java.getProject().getConstruction().getManifest(),
-                "0.9.15.M2",
-                "https://raw.githubusercontent.com/jerkar/sonarqube-plugin/master/breaking_versions.txt");
         java.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .mixResourcesAndSources()
@@ -29,20 +26,9 @@ class SonarqubePluginBuild extends JkClass {
         java.getProject().getPublication().getMaven()
                 .setModuleId("dev.jeka:sonarqube-plugin")
                 .getPomMetadata()
-                    .getProjectInfo()
-                        .setName("Jeka plugin for Sonarqube")
-                        .setDescription("A Jeka plugin for Jacoco coverage tool")
-                        .setUrl("https://github.com/jerkar/sonarqube-plugin")
-                    .__
-                    .getScm()
-                        .setUrl("https://github.com/jerkar/sonarqube-plugin").__
-                        .addApache2License()
+                        .setProjectName("Jeka plugin for Sonarqube")
+                        .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
-
-        // Make javadoc only for releases
-        if (!JkVersion.of(java.getProject().getPublication().getVersion()).isSnapshot()) {
-            java.pack.javadoc = true;
-        }
     }
 
     public void cleanPack() {

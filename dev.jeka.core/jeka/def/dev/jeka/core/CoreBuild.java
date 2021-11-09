@@ -48,28 +48,10 @@ public class CoreBuild extends JkClass {
 
     final JkPluginJava java = getPlugin(JkPluginJava.class);
 
-    final JkPluginGpg gpg = getPlugin(JkPluginGpg.class);
-
-    final JkPluginNexus nexus = getPlugin(JkPluginNexus.class);
-
-    final JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
-
     public boolean runIT;
-
-    @JkEnv("OSSRH_USER")
-    public String ossrhUser;
-
-    @JkEnv("OSSRH_PWD")
-    public String ossrhPwd;
-
-    @JkEnv("GH_TOKEN")
-    public String githubToken;
 
     @Override
     protected void setup()  {
-        if (!versionFromGit.version().isSnapshot()) {
-            java.pack.javadoc = true;
-        }
         java.getProject()
             .getConstruction()
                 .getManifest()
@@ -115,17 +97,9 @@ public class CoreBuild extends JkClass {
                 .__
                 .getMaven()
                     .setModuleId("dev.jeka:jeka-core")
-                    .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner("")))
                     .getPomMetadata()
-                        .getProjectInfo()
-                            .setName("jeka")
-                            .setUrl("https://jeka.dev")
-                            .setDescription("Automate with plain Java code and nothing else.")
-                        .__
-                        .getScm()
-                            .setUrl("https://github.com/jerkar/jeka.git")
-                        .__
-                        .addApache2License()
+                        .setProjectName("jeka")
+                        .setProjectDescription("Automate with plain Java code and nothing else.")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
@@ -263,13 +237,13 @@ public class CoreBuild extends JkClass {
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
-    public void publishDocsOnGithubPage() {
+    public void publishDocsOnGithubPage(String githubToken) {
         clean();
         JkJavaProject project = java.getProject();
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
-        versionFromGit.git().setLogCommand(false).exec("clone", "--depth=1", "https://"
+        JkGitProcess.of().setLogCommand(false).exec("clone", "--depth=1", "https://"
                 + userPrefix + "github.com/jerkar/jeka-dev-site.git", tempRepo.toString());
         project.getDocumentation().runIfNecessary();
         Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));

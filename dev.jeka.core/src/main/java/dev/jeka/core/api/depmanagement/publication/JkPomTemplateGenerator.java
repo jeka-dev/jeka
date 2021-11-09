@@ -2,8 +2,6 @@ package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkDeveloperInfo;
 import dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkLicenseInfo;
-import dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkProjectInfo;
-import dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkScmInfo;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -45,12 +43,9 @@ public final class JkPomTemplateGenerator {
         final StringWriter stringWriter = new StringWriter();
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(
                 stringWriter);
-        final JkProjectInfo projectInfo = publicationInfo.getProjectInfo();
-        if (projectInfo != null) {
-            writeElement("  ", writer, "name", projectInfo.getName());
-            writeElement("  ", writer, "description", projectInfo.getDescription());
-            writeElement("  ", writer, "url", projectInfo.getUrl());
-        }
+        writeElement("  ", writer, "name", publicationInfo.getProjectName());
+        writeElement("  ", writer, "description", publicationInfo.getProjectDescription());
+        writeElement("  ", writer, "url", publicationInfo.getProjectUrl());
         final List<JkLicenseInfo> licenses = publicationInfo.getLicenses();
         if (!licenses.isEmpty()) {
             writer.writeCharacters("\n");
@@ -87,17 +82,14 @@ public final class JkPomTemplateGenerator {
             writer.writeCharacters("\n  ");
             writer.writeEndElement();
         }
-        final JkScmInfo scm = publicationInfo.getScm();
-        if (scm != null) {
-            writer.writeCharacters("\n\n  ");
-            writer.writeStartElement("scm");
-            writer.writeCharacters("\n");
-            writeElement("    ", writer, "connection", scm.getConnection());
-            writeElement("    ", writer, "developerConnection", scm.getDeveloperConnection());
-            writeElement("    ", writer, "url", scm.getUrl());
-            writer.writeCharacters("  ");
-            writer.writeEndElement();
-        }
+        writer.writeCharacters("\n\n  ");
+        writer.writeStartElement("scm");
+        writer.writeCharacters("\n");
+        writeElement("    ", writer, "connection", publicationInfo.getScmConnection());
+        writeElement("    ", writer, "developerConnection", publicationInfo.getScmDeveloperConnection());
+        writeElement("    ", writer, "url", publicationInfo.getProjectUrl());
+        writer.writeCharacters("  ");
+        writer.writeEndElement();
 
         writer.flush();
         writer.close();
