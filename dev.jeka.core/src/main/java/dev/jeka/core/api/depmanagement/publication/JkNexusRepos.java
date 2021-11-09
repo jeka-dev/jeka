@@ -34,9 +34,9 @@ public class JkNexusRepos {
     }
 
     private static JkNexusRepos ofBasicCredentials(String baseUrl, String userName, String password) {
-        byte[] basicCredential = Base64.getEncoder().encode((userName + ":"
-                + password).getBytes(StandardCharsets.UTF_8));
-        return new JkNexusRepos(baseUrl, baseUrl);
+        byte[] basicCredential = Base64.getEncoder().encode((userName + ":" + password)
+                .getBytes(StandardCharsets.UTF_8));
+        return new JkNexusRepos(baseUrl, new String(basicCredential));
     }
 
     /**
@@ -102,7 +102,7 @@ public class JkNexusRepos {
         closingRepoIds.forEach(this::waitForClosing);
         List<String> closedRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNames))
-                .filter(repo -> JkStagingRepo.Status.CLOSED == repo.getStatus())
+                .filter(repo -> JkStagingRepo.Status.CLOSED == repo.getStatus() || JkStagingRepo.Status.CLOSING == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
         JkLog.info("Repositories to release : " + closedRepoIds);
@@ -244,8 +244,8 @@ public class JkNexusRepos {
         if (code >= 400) {
             InputStream inputStream = con.getErrorStream();
             if (inputStream == null) {
-                throw new IllegalStateException("Request " + con.getURL() + " failed with status code " + code + "\n"
-                        + "Request body : " + body);
+                throw new IllegalStateException("Request " + con.getRequestMethod() + " " +  con.getURL()
+                        + " failed with status code " + code + "\nRequest body : " + body);
             }
             try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getErrorStream(), "utf-8"))) {
                 StringBuilder response = new StringBuilder();

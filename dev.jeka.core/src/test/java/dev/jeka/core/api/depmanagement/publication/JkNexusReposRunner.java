@@ -8,7 +8,7 @@ public class JkNexusReposRunner {
     public static void main(String[] args) {
         JkLog.setDecorator(JkLog.Style.BRACE);
         JkRepo repo = JkRepo.ofMavenOssrhDeployRelease("djeang", System.getenv("jiraPwd"), null);
-        JkNexusRepos.ofUrlAndCredentials(repo).closeAndReleaseOpenRepositories();
+        JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease();
     }
 
 }

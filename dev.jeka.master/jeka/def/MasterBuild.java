@@ -1,4 +1,5 @@
 import dev.jeka.core.CoreBuild;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
@@ -75,7 +76,7 @@ class MasterBuild extends JkClass {
         if (branch.equals("master") && !versionFromGit.version().isSnapshot()) {
             JkLog.startTask("Publishing");
             getImportedJkClasses().getDirectPlugins(JkPluginJava.class).forEach(plugin -> plugin.publish());
-            JkNexusRepos.ofUrlAndCredentials(this.publishRepos.getRepos().get(0))
+            JkNexusRepos.ofUrlAndCredentials(publishRepos.getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE))
                             .closeAndRelease();
             JkLog.endTask();
         }
@@ -87,6 +88,14 @@ class MasterBuild extends JkClass {
             JkLog.info("Setting exec permission on git for file " + path);
             JkProcess.ofCmdLine("git update-index --chmod=+x " + path).run();
         });
+    }
+
+    @JkDoc("Closes and releases staging Nexus repositories (typically, after a publish).")
+    public void closeAndReleaseRepo() {
+        JkRepo repo = publishRepos.getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
+        System.out.println(repo.getCredentials().getUserName());
+        System.out.println(repo.getCredentials().getPassword());
+        JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease();
     }
 
     @JkDoc("Clean build of core + plugins bypassing tests.")
