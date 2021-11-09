@@ -19,22 +19,79 @@ public final class JkPomMetadata<T> implements Serializable {
      */
     public final T __;
 
-    /** Info relative to project */
-    private final JkProjectInfo<JkPomMetadata<T>> projectInfo;
+    private String projectName;
 
-    /** Info relative to source control management */
-    private final JkScmInfo<JkPomMetadata<T>> scm;
+    private String projectDescription;
 
-    /** Developer list involved in the project */
+    private String projectUrl;  // Landing page url
+
+    private String scmConnection;  // Read only scm uri
+
+    private String scmDeveloperConnection;  // Read-Write scm uri
+
+    private String scmUrl;
+
     private final List<JkDeveloperInfo> developers;
 
     /** License list for the project, generaly there is a single license */
     private final List<JkLicenseInfo> licenses;
 
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public String getProjectUrl() {
+        return projectUrl;
+    }
+
+    public JkPomMetadata<T> setProjectName(String name) {
+        this.projectName = name;
+        return this;
+    }
+
+    public JkPomMetadata<T> setProjectDescription(String description) {
+        this.projectDescription = description;
+        return this;
+    }
+
+    public JkPomMetadata<T> setProjectUrl(String projectUrl) {
+        this.projectUrl = projectUrl;
+        return this;
+    }
+
+    public JkPomMetadata<T> setScmConnection(String scmConnection) {
+        this.scmConnection = scmConnection;
+        return this;
+    }
+
+    public JkPomMetadata<T> setScmDeveloperConnection(String scmDeveloperConnection) {
+        this.scmDeveloperConnection = scmDeveloperConnection;
+        return this;
+    }
+
+    public JkPomMetadata<T> setScmUrl(String scmUrl) {
+        this.scmUrl = scmUrl;
+        return this;
+    }
+
+    public String getScmConnection() {
+        return scmConnection;
+    }
+
+    public String getScmDeveloperConnection() {
+        return scmDeveloperConnection;
+    }
+
+    public String getScmUrl() {
+        return scmUrl;
+    }
+
     private JkPomMetadata(T parent) {
         this.__ = parent;
-        this.projectInfo = new JkProjectInfo(this);
-        this.scm = new JkScmInfo(this);
         this.developers = new LinkedList<>();
         this.licenses = new LinkedList<>();
     }
@@ -77,14 +134,6 @@ public final class JkPomMetadata<T> implements Serializable {
     }
 
     /**
-     * Returns the {@link JkScmInfo} for this publication
-     */
-    public JkScmInfo<JkPomMetadata<T>> getScm() {
-        return scm;
-
-    }
-
-    /**
      * Adds license information about this publication
      */
     public JkPomMetadata<T> addLicense(JkLicenseInfo licenseInfo) {
@@ -121,10 +170,6 @@ public final class JkPomMetadata<T> implements Serializable {
         return addLicense("MIT License", "http://opensource.org/licenses/MIT");
     }
 
-    public JkProjectInfo<JkPomMetadata<T>> getProjectInfo() {
-        return projectInfo;
-    }
-
     public List<JkDeveloperInfo> getDevelopers() {
         return Collections.unmodifiableList(developers);
     }
@@ -133,60 +178,6 @@ public final class JkPomMetadata<T> implements Serializable {
         return Collections.unmodifiableList(licenses);
     }
 
-    /**
-     * Information about source control ofSystem managing the project sources.
-     */
-    public static final class JkScmInfo<T> implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        public final T __;
-
-        private String connection;
-
-        private String developerConnection;
-
-        private String url;
-
-        /**
-         * Constructs a {@link JkScmInfo} specifying its connection, developerConnection and url.
-         */
-        JkScmInfo(T parent) {
-            this.__ = parent;
-        }
-
-        /** Read-only connection string to project sources */
-        public JkScmInfo<T> setConnection(String connection) {
-            this.connection = connection;
-            return this;
-        }
-
-        public String getConnection() {
-            return connection;
-        }
-
-        public String getDeveloperConnection() {
-            return developerConnection;
-        }
-
-        /** Read-write connection string to project sources */
-        public JkScmInfo<T> setDeveloperConnection(String developerConnection) {
-            this.developerConnection = developerConnection;
-            return this;
-        }
-
-        /** Read-write connection string to project sources */
-        public String getUrl() {
-            return url;
-        }
-
-        /** Publicly browsable repository url */
-        public JkScmInfo<T> setUrl(String url) {
-            this.url = url;
-            return this;
-        }
-
-    }
 
     /**
      * Information about a developer.
@@ -269,63 +260,6 @@ public final class JkPomMetadata<T> implements Serializable {
 
         public String getUrl() {
             return url;
-        }
-    }
-
-    /**
-     * Information about a project.
-     */
-    public static final class JkProjectInfo<T> {
-
-        public final T __;
-
-        /**
-         * Public name of the project.
-         */
-        private String name;
-
-        /**
-         * Description for the project.
-         */
-        private String description;
-
-        /**
-         * Url site of the project.
-         */
-        private String url;
-
-        /**
-         * Constructs a {@link JkProjectInfo} specifying its name, description and url.
-         */
-        private JkProjectInfo(T __) {
-            this.__ = __;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public JkProjectInfo<T> setName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public JkProjectInfo<T> setDescription(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public JkProjectInfo<T> setUrl(String url) {
-            this.url = url;
-            return this;
         }
     }
 

@@ -72,6 +72,10 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
+    public JkMavenPublication<T> setVersion(JkVersion version) {
+        return setVersion(version.getValue());
+    }
+
     public JkMavenPublication<T> setVersion(String version) {
         this.versionSupplier = () -> version;
         return this;

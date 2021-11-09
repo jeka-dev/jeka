@@ -24,15 +24,8 @@ class SpringbootPluginBuild extends JkClass {
             .getMaven()
                 .setModuleId("dev.jeka:springboot-plugin")
                 .getPomMetadata()
-                    .addApache2License()
-                    .getProjectInfo()
-                        .setName("Jeka plugin for Spring Boot")
-                        .setDescription("A Jeka plugin for Spring boot application")
-                        .setUrl("https://github.com/jerkar/jeka")
-                    .__
-                    .getScm()
-                        .setUrl("https://github.com/jerkar/jeka")
-                    .__
+                    .setProjectName("Jeka plugin for Spring Boot")
+                    .setProjectDescription("A Jeka plugin for Spring boot application")
                     .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 

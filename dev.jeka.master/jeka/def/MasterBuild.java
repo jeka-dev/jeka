@@ -1,20 +1,37 @@
 import dev.jeka.core.CoreBuild;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.project.JkJavaProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkDefImport;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
 import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
+import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
+import dev.jeka.core.tool.builtins.repos.JkPluginNexus;
 
 import java.util.Optional;
 
 class MasterBuild extends JkClass {
+
+    @JkEnv("OSSRH_USER")
+    public String ossrhUser;
+
+    @JkEnv("OSSRH_PWD")
+    public String ossrhPwd;
+
+    @JkEnv("GH_TOKEN")
+    public String githubToken;
+
+    final JkPluginGpg gpg = getPlugin(JkPluginGpg.class);
+
+    final JkPluginNexus nexus = getPlugin(JkPluginNexus.class);
+
+    final JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
+
+    // ------ Slave projects
 
     @JkDefImport("../dev.jeka.core")
     CoreBuild coreBuild;
@@ -28,28 +45,24 @@ class MasterBuild extends JkClass {
     @JkDefImport("../plugins/dev.jeka.plugins.springboot")
     JkClass springbootBuild;
 
-    JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
+    private JkRepoSet publishRepos;
+
 
     @Override
     protected void setup() throws Exception {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
-        getImportedJkClasses().getDirects().forEach(build -> {
-            if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for release
-                build.getPlugins().getOptional(JkPluginJava.class).ifPresent(plugin -> plugin.pack.javadoc = true);
-            }
-        });
+        publishRepos = JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner(""));
+        getImportedJkClasses().getDirectPlugins(JkPluginJava.class).forEach(this::configureSlave);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() {
         JkLog.startTask("Building core and plugins");
-        getImportedJkClasses().getDirects().forEach(build -> {
-            JkLog.startTask("Building " + build);
-            JkJavaProject project = build.getPlugin(JkPluginJava.class).getProject();
-            versionFromGit.configure(project, false);
-            build.clean();
-            project.getPublication().pack();
+        getImportedJkClasses().getDirectPlugins(JkPluginJava.class).forEach(projectPlugin -> {
+            JkLog.startTask("Building " + projectPlugin.getJkClass());
+            projectPlugin.getJkClass().clean();
+            projectPlugin.pack();
             JkLog.endTask();
         });
         JkLog.endTask();
@@ -57,15 +70,15 @@ class MasterBuild extends JkClass {
         runSamples();
         runScaffoldsWithPlugins();
         JkLog.endTask();
-        JkLog.startTask("Publishing");
         JkGitProcess git = JkGitProcess.of(this.getBaseDir());
         String branch = git.getCurrentBranch();
         if (branch.equals("master") && !versionFromGit.version().isSnapshot()) {
-            getImportedJkClasses().getDirects().forEach(build -> build.getPlugin(JkPluginJava.class).publish());
+            JkLog.startTask("Publishing");
+            getImportedJkClasses().getDirectPlugins(JkPluginJava.class).forEach(plugin -> plugin.publish());
             JkNexusRepos.ofUrlAndCredentials(coreBuild.getPlugin(JkPluginJava.class).getProject()
                     .getPublication().findFirstRepo());
+            JkLog.endTask();
         }
-        JkLog.endTask();
     }
 
     @JkDoc("Convenient method to set Posix permission for all jekaw files on git.")
@@ -86,6 +99,21 @@ class MasterBuild extends JkClass {
         });
     }
 
+    private void configureSlave(JkPluginJava javaPlugin) {
+        versionFromGit.configure(javaPlugin.getProject(), false);
+        if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for releasej
+            javaPlugin.pack.javadoc = true;
+        }
+        javaPlugin.getProject().getPublication().getMaven()
+                .setVersion(versionFromGit.version())
+                .setRepos(this.publishRepos)
+                .getPomMetadata()
+                    .setProjectUrl("https://jeka.dev")
+                    .setScmUrl("https://github.com/jerkar/jeka.git")
+                    .addApache2License();
+
+    }
+
     public void buildCore() {
         coreBuild.cleanPack();
     }
@@ -98,6 +126,10 @@ class MasterBuild extends JkClass {
         new PluginScaffoldTester().run();
     }
 
+    public void publishLocal() {
+        getImportedJkClasses().getDirectPlugins(JkPluginJava.class).forEach(pluginJava -> pluginJava.publishLocal());
+    }
+
     public static void main(String[] args) {
         JkInit.instanceOf(MasterBuild.class, args).make();
     }
@@ -107,5 +139,7 @@ class MasterBuild extends JkClass {
             JkInit.instanceOf(MasterBuild.class, args).buildFast();
         }
     }
+
+
 
 }

@@ -16,9 +16,6 @@ public class JacocoPluginBuild extends JkClass {
 
     @Override
     protected void setup() {
-        JkPlugin.setJekaPluginCompatibilityRange(java.getProject().getConstruction().getManifest(),
-                "0.9.15.M2",
-                "https://raw.githubusercontent.com/jerkar/jacoco-plugin/master/breaking_versions.txt");
         java.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .mixResourcesAndSources()
@@ -30,20 +27,9 @@ public class JacocoPluginBuild extends JkClass {
         java.getProject().getPublication().getMaven()
                 .setModuleId("dev.jeka:jacoco-plugin")
                 .getPomMetadata()
-                    .getProjectInfo()
-                        .setName("Jeka plugin for Jacoco")
-                        .setDescription("A Jeka plugin for Jacoco coverage tool")
-                        .setUrl("https://github.com/jerkar/jeka").__
-                    .getScm()
-                        .setUrl("https://github.com/jerkar/jeka").__
-                    .addApache2License()
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
-
-        // Make javadoc only for releases
-        if (!JkVersion.of(java.getProject().getPublication().getVersion()).isSnapshot()) {
-            java.pack.javadoc = true;
-        }
-
+                        .setProjectName("Jeka plugin for Jacoco")
+                        .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
+                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
     public void cleanPack() {
