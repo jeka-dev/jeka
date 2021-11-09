@@ -43,7 +43,7 @@ public final class JkImportedJkClasses {
         return Collections.unmodifiableList(directImportedJkClasses);
     }
 
-    public <T extends JkPlugin> List<T> getDirectPlugins(Class<T> pluginClass) {
+    public <T extends JkPlugin> List<T> getDirect(Class<T> pluginClass) {
         return directImportedJkClasses.stream()
                 .map(build -> build.getPlugins().getOptional(pluginClass))
                 .filter(Optional::isPresent)
