@@ -7,6 +7,7 @@
 * Possibility to add Filesystem dependencies from the command line (@/path/to/lib.jar)
 * Nee mono-repo organisation allowing better tested product and version matching between Jeka and its plugins
 * Add Nexus support for auto-releasing staged repos.
+* Rename JkPluginJava to JkPluginProject
 
 # 0.9.15.RELEASE
 * Upgrade JUNIT PLATFORM to 1.8.1  
