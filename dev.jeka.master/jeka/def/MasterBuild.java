@@ -9,7 +9,7 @@ import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.JkPluginProject;
 import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
-import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
+import dev.jeka.core.tool.builtins.crypto.JkPluginGpg;
 import dev.jeka.core.tool.builtins.repos.JkPluginNexus;
 
 class MasterBuild extends JkClass {

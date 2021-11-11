@@ -7,7 +7,7 @@ import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkRepoFromOptions;
 import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.core.tool.builtins.project.JkPluginWar;
+import dev.jeka.core.tool.builtins.project.JkWarArchiver;
 
 import java.nio.file.Path;
 
@@ -26,7 +26,7 @@ public class WarPluginBuild extends JkClass {
 
     JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
-    JkPluginWar war = getPlugin(JkPluginWar.class);
+    JkWarArchiver war = getPlugin(JkWarArchiver.class);
 
     @Override
     protected void setup() {

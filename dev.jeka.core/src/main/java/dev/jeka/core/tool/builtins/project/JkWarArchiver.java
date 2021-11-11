@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.project;
 
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.project.JkProject;
@@ -16,6 +17,8 @@ import dev.jeka.core.tool.JkPlugin;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Plugin for building WAR file (Jee Web Archive).
@@ -24,48 +27,46 @@ import java.nio.file.Path;
         "When initialized, it modifies the Java project hold by the Project plugin in order to \n" +
         "generate the web.xml file and build an extra artifact (war).")
 @JkDocPluginDeps({JkPluginProject.class})
-public class JkPluginWar extends JkPlugin {
+public class JkWarArchiver {
 
     private Path staticResourceDir;
 
     private JkRunnables staticResourceComputation = JkRunnables.of();
 
-    private final JkStandardFileArtifactProducer artifactProducer;
+    private JkStandardFileArtifactProducer artifactProducer;
 
-    public JkPluginWar(JkClass jkClass) {
-        super(jkClass);
-        this.staticResourceDir = jkClass.getBaseDir().resolve("src/main/webapp/static");
-        this.artifactProducer = jkClass.getPlugin(JkPluginProject.class).getProject().getPublication().getArtifactProducer();
+    public void init(JkProject project) {
+        this.staticResourceDir = project.getBaseDir().resolve("src/main/webapp/static");
+        this.artifactProducer = project.getPublication().getArtifactProducer();
 
     }
 
-    @Override
-    protected void beforeSetup() {
+
+    protected void beforeSetup(JkProject project) {
         this.artifactProducer
             .removeArtifact(JkProjectPublication.JAVADOC_ARTIFACT_ID)
             .removeArtifact(JkProjectPublication.SOURCES_ARTIFACT_ID)
             .setMainArtifactExt("war")
-            .putMainArtifact(path -> doWarFile((Path) path));
+            .putMainArtifact(path -> doWarFile(project, (Path) path));
     }
 
-    private static void generateWarDir(JkProject project, Path dest, Path staticResourceDir) {
-        JkProjectConstruction construction = project.getConstruction();
-        construction.getCompilation().runIfNecessary();
-        JkPathTree root = JkPathTree.of(dest);
-        JkPathTree webinf = JkPathTree.of(project.getBaseDir().resolve("src/main/webapp/WEB-INF"));
-        if (!webinf.exists() || webinf.count(1, false) == 0) {
-            JkLog.warn(webinf.getRoot().toString() + " is empty or does not exists.");
+
+
+    private static void generateWarDir(Path destDir, Optional<Path> webInfSrcDir, Path classDir, List<Path> libs,
+                                       Optional<Path> staticResourceDir) {
+        JkPathTree webInf = webInfSrcDir.isPresent() ? JkPathTree.of(webInfSrcDir.get()) : null;
+        if (webInf == null || !webInf.exists() || !webInf.containFiles()) {
+            JkLog.warn(webInf.getRoot().toString() + " is empty or does not exists.");
         } else {
-            webinf.copyTo(root.get("WEB-INF"));
+            webInf.copyTo(destDir.resolve("WEB-INF"));
         }
-        if (Files.exists(staticResourceDir)) {
-            JkPathTree.of(staticResourceDir).copyTo(root.getRoot());
+        if (staticResourceDir.isPresent() && Files.exists(staticResourceDir.get())) {
+            JkPathTree.of(staticResourceDir.get()).copyTo(destDir);
         }
-        JkPathTree.of(construction.getCompilation().getLayout().resolveClassDir()).copyTo(root.get("WEB-INF/classes"));
-        JkResolveResult resolveResult = construction.getDependencyResolver()
-                .resolve(construction.getRuntimeDependencies());
-        JkPathTree lib = root.goTo("lib");
-        resolveResult.getFiles().withoutDuplicates().getEntries().forEach(path ->  lib.importFiles(path));
+        JkPathTree.of(classDir).copyTo(destDir.resolve("WEB-INF/classes"));
+        Path libDir = destDir.resolve("lib");
+        JkPathTree.of(libDir).deleteContent();
+        libs.forEach(path -> JkPathFile.of(path).copyToDir(libDir));
     }
 
     public void setStaticResourceDir(Path staticResourceDir) {
@@ -76,9 +77,7 @@ public class JkPluginWar extends JkPlugin {
         return staticResourceComputation;
     }
 
-    private void doWarFile(Path file) {
-        JkPluginProject projectPlugin = this.getJkClass().getPlugin(JkPluginProject.class);
-        JkProject project = projectPlugin.getProject();
+    private void doWarFile(JkProject project, Path file) {
         staticResourceComputation.run();
         Path temp = JkUtilsPath.createTempDirectory("jeka-war");
         generateWarDir(project, temp, staticResourceDir);

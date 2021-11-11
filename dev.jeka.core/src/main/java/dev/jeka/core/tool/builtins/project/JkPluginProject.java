@@ -18,7 +18,7 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
+import dev.jeka.core.tool.builtins.crypto.JkPluginGpg;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 import org.w3c.dom.Document;
 
@@ -33,10 +33,10 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
- * Plugin for building Java projects. It comes with a {@link JkProject} pre-configured with {@link JkOptions}.
+ * Plugin for building JVM language based projects. It comes with a {@link JkProject} pre-configured with {@link JkOptions}.
  * and a decoration for scaffolding.
  */
-@JkDoc("Build of a Java project through a JkProject instance.")
+@JkDoc("Build of a JVM project through a JkProject instance.")
 @JkDocPluginDeps({JkPluginScaffold.class})
 public class JkPluginProject extends JkPlugin implements JkIdeSupport.JkSupplier {
 
