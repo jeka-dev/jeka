@@ -2,6 +2,8 @@ import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
+import dev.jeka.core.tool.JkPlugin;
+import dev.jeka.core.tool.builtins.ide.JkPluginIntellij;
 import dev.jeka.core.tool.builtins.project.JkPluginProject;
 import dev.jeka.plugins.jacoco.JkPluginJacoco;
 
@@ -9,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @JkDefClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
-public class Build extends JkClass {
+public class JacocoSampleBuild extends JkClass {
 
     final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
@@ -30,4 +32,6 @@ public class Build extends JkClass {
         Path report = getOutputDir().resolve("jacoco/jacoco.xml");
         JkUtilsAssert.state(Files.exists(report), "Report file " + report + " not found.");
     }
+
+
 }
