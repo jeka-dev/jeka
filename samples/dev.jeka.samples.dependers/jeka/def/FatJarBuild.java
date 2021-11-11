@@ -1,7 +1,7 @@
 import dev.jeka.core.samples.JavaPluginBuild;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 /**
  * Simple build demonstrating of how Jeka can handle multi-project build.
@@ -12,23 +12,23 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
  */
 public class FatJarBuild extends JkClass {
 
-    JkPluginJava java = getPlugin(JkPluginJava.class);
+    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
     
     @JkDefImport("../dev.jeka.samples.basic")
     private JavaPluginBuild sampleBuild;
 
     @Override
     protected void setup() {
-        java.getProject()
+        projectPlugin.getProject()
             .getPublication()
                 .getArtifactProducer()
-                    .putMainArtifact(java.getProject().getConstruction()::createFatJar)
+                    .putMainArtifact(projectPlugin.getProject().getConstruction()::createFatJar)
                 .__
             .__
             .simpleFacade()
                 .setCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:22.0")
-                        .and(sampleBuild.java.getProject().toDependency()));
+                        .and(sampleBuild.projectPlugin.getProject().toDependency()));
     }
    
 }

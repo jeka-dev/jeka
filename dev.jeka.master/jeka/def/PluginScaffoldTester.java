@@ -21,7 +21,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
     void run() {
         Path dir = scaffold("scaffold#run springboot#  -springboot#scaffoldDefClasspath="
                         + sprinbootBluginJar + " @" + sprinbootBluginJar,
-                "java#pack", false);
+                "project#pack", false);
     }
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {

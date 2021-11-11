@@ -12,7 +12,7 @@ class Build extends JkClass {
     @Override
     protected void setup() {
         springboot.setSpringbootVersion("${springbootVersion}");
-        springboot.javaPlugin().getProject().simpleFacade()
+        springboot.projectPlugin().getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and("org.springframework.boot:spring-boot-starter-web")
             )
@@ -24,7 +24,7 @@ class Build extends JkClass {
 
     @JkDoc("Cleans, tests and creates bootable jar.")
     public void cleanPack() {
-        clean(); springboot.javaPlugin().pack();
+        clean(); springboot.projectPlugin().pack();
     }
 
     // Clean, compile, test and generate springboot application jar

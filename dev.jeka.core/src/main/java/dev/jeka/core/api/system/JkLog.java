@@ -196,7 +196,7 @@ public final class JkLog implements Serializable {
 
             }
             Long durationMillis = JkUtilsTime.durationInMillis(startTime);
-            consume(JkLogEvent.ofRegular(Type.END_TASK, String.format(message, durationMillis)));
+            consume(JkLogEvent.ofEndTask(Type.END_TASK, message, durationMillis));
         }
     }
 
@@ -204,7 +204,7 @@ public final class JkLog implements Serializable {
      * Same as {@link #endTask(String)} but using the standard message.
      */
     public static void endTask() {
-        endTask("Done in %d milliseconds.");
+        endTask("");
     }
 
     public static boolean isVerbose() {
@@ -250,6 +250,10 @@ public final class JkLog implements Serializable {
             return new JkLogEvent(type, message,  -1);
         }
 
+        static JkLogEvent ofEndTask(Type type, String message, long duration) {
+            return new JkLogEvent(type, message,  duration);
+        }
+
         private final Type type;
 
         private final String message;
@@ -265,7 +269,7 @@ public final class JkLog implements Serializable {
         }
 
         public long getDurationMs() {
-            return Math.max(duration, 0);
+            return duration;
         }
     }
 

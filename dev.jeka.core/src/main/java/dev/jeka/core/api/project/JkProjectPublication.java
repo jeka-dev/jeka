@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepo;
@@ -8,7 +8,6 @@ import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.system.JkLog;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -19,30 +18,30 @@ import java.util.function.Consumer;
  * From here, you can control what to publish and the transitive dependencies, depending on the repo system the project
  * is published. Note that a project can be be published on many repositories of different systems.
  */
-public class JkJavaProjectPublication {
+public class JkProjectPublication {
 
     public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
 
     public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
 
-    private final JkJavaProject project;
+    private final JkProject project;
 
-    private final JkStandardFileArtifactProducer<JkJavaProjectPublication> artifactProducer;
+    private final JkStandardFileArtifactProducer<JkProjectPublication> artifactProducer;
 
-    private final JkMavenPublication<JkJavaProjectPublication> maven;
+    private final JkMavenPublication<JkProjectPublication> maven;
 
-    private final JkIvyPublication<JkJavaProjectPublication> ivy;
+    private final JkIvyPublication<JkProjectPublication> ivy;
 
-    private final JkRunnables<JkJavaProjectPublication> preActions;
+    private final JkRunnables<JkProjectPublication> preActions;
 
-    private final JkRunnables<JkJavaProjectPublication> postActions;
+    private final JkRunnables<JkProjectPublication> postActions;
 
     /**
      * For parent chaining
      */
-    public final JkJavaProject __;
+    public final JkProject __;
 
-    JkJavaProjectPublication(JkJavaProject project) {
+    JkProjectPublication(JkProject project) {
         this.project = project;
         this.__ = project;
         artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
@@ -64,28 +63,28 @@ public class JkJavaProjectPublication {
         this.postActions = JkRunnables.ofParent(this);
     }
 
-    public JkJavaProjectPublication apply(Consumer<JkJavaProjectPublication> consumer) {
+    public JkProjectPublication apply(Consumer<JkProjectPublication> consumer) {
         consumer.accept(this);
         return this;
     }
 
-    public JkRunnables<JkJavaProjectPublication> getPreActions() {
+    public JkRunnables<JkProjectPublication> getPreActions() {
         return preActions;
     }
 
-    public JkRunnables<JkJavaProjectPublication> getPostActions() {
+    public JkRunnables<JkProjectPublication> getPostActions() {
         return postActions;
     }
 
-    public JkMavenPublication<JkJavaProjectPublication> getMaven() {
+    public JkMavenPublication<JkProjectPublication> getMaven() {
         return maven;
     }
 
-    public JkIvyPublication<JkJavaProjectPublication> getIvy() {
+    public JkIvyPublication<JkProjectPublication> getIvy() {
         return ivy;
     }
 
-    public JkStandardFileArtifactProducer<JkJavaProjectPublication> getArtifactProducer() {
+    public JkStandardFileArtifactProducer<JkProjectPublication> getArtifactProducer() {
         return artifactProducer;
     }
 
@@ -103,12 +102,15 @@ public class JkJavaProjectPublication {
     /**
      * Specifies if Javadoc and sources jars should be included in pack/publish. Default is true;
      */
-    public JkJavaProjectPublication includeJavadocAndSources(boolean include) {
-        if (include) {
+    public JkProjectPublication includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
+        if (includeJavaDoc) {
             artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, project.getDocumentation()::createJavadocJar);
-            artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
         } else {
             artifactProducer.removeArtifact(JAVADOC_ARTIFACT_ID);
+        }
+        if (includeSources) {
+            artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
+        } else {
             artifactProducer.removeArtifact(SOURCES_ARTIFACT_ID);
         }
         return this;

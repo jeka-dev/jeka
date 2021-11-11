@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * Handles project compilation step. Users can configure inner phases by chaining runnables.
  * They also can modify {@link JkJavaCompiler} and {@link JkJavaCompileSpec} to use.
  */
-public class JkJavaProjectCompilation<T> {
+public class JkProjectCompilation<T> {
 
     public static final String RESOURCES_PROCESS_ACTION = "resources-process";
 
@@ -36,17 +36,17 @@ public class JkJavaProjectCompilation<T> {
      */
     public final T __;
 
-    private final JkJavaProjectConstruction construction;
+    private final JkProjectConstruction construction;
 
-    private final JkRunnables<JkJavaProjectCompilation<T>> preCompileActions;
+    private final JkRunnables<JkProjectCompilation<T>> preCompileActions;
 
-    private final JkRunnables<JkJavaProjectCompilation<T>> compileActions;
+    private final JkRunnables<JkProjectCompilation<T>> compileActions;
 
-    private final JkRunnables<JkJavaProjectCompilation<T>> postCompileActions;
+    private final JkRunnables<JkProjectCompilation<T>> postCompileActions;
 
-    private final JkResourceProcessor<JkJavaProjectCompilation<T>> resourceProcessor;
+    private final JkResourceProcessor<JkProjectCompilation<T>> resourceProcessor;
 
-    private final JkCompileLayout<JkJavaProjectCompilation<T>> layout;
+    private final JkCompileLayout<JkProjectCompilation<T>> layout;
 
     private Function<JkDependencySet, JkDependencySet> dependenciesModifier = deps -> deps;
 
@@ -61,7 +61,7 @@ public class JkJavaProjectCompilation<T> {
 
     private Supplier<JkJavaCompileSpec> compileSpecSupplier;
 
-    private JkJavaProjectCompilation(JkJavaProjectConstruction construction, String purpose, T parent) {
+    private JkProjectCompilation(JkProjectConstruction construction, String purpose, T parent) {
         __ = parent;
         this.purpose = purpose;
         this.construction = construction;
@@ -80,17 +80,17 @@ public class JkJavaProjectCompilation<T> {
                 .setOutputDirSupplier(construction.getProject()::getOutputDir);
     }
 
-    static JkJavaProjectCompilation<JkJavaProjectConstruction> ofProd(JkJavaProjectConstruction projectProduction) {
-        JkJavaProjectCompilation result =
-                new JkJavaProjectCompilation(projectProduction, PRODUCTION_PURPOSE, projectProduction);
+    static JkProjectCompilation<JkProjectConstruction> ofProd(JkProjectConstruction projectProduction) {
+        JkProjectCompilation result =
+                new JkProjectCompilation(projectProduction, PRODUCTION_PURPOSE, projectProduction);
         result.compileSpecSupplier = () -> result.computeProdCompileSpec();
         return result;
     }
 
-    static JkJavaProjectCompilation<JkJavaProjectTesting> ofTest(JkJavaProjectConstruction construction,
-                                                                 JkJavaProjectTesting parent) {
-        JkJavaProjectCompilation result =
-                new JkJavaProjectCompilation(construction, TEST_PURPOSE, parent);
+    static JkProjectCompilation<JkProjectTesting> ofTest(JkProjectConstruction construction,
+                                                         JkProjectTesting parent) {
+        JkProjectCompilation result =
+                new JkProjectCompilation(construction, TEST_PURPOSE, parent);
         result.dependencyBootSupplier = () -> construction.getRuntimeDependencies().merge(construction
             .getCompilation().getDependencies()).getResult();
         result.compileSpecSupplier = () -> result.computeTestCompileSpec(construction.getCompilation());
@@ -100,12 +100,12 @@ public class JkJavaProjectCompilation<T> {
         return result;
     }
 
-    public JkJavaProjectCompilation apply(Consumer<JkJavaProjectCompilation> consumer) {
+    public JkProjectCompilation apply(Consumer<JkProjectCompilation> consumer) {
         consumer.accept(this);
         return this;
     }
 
-    public JkCompileLayout<JkJavaProjectCompilation<T>> getLayout() {
+    public JkCompileLayout<JkProjectCompilation<T>> getLayout() {
         return layout;
     }
 
@@ -123,7 +123,7 @@ public class JkJavaProjectCompilation<T> {
     /**
      * As #run but perform only if not already done.
      */
-    public void runIfNecessary() {
+    public void runIfNeeded() {
         if (done) {
             JkLog.trace(JAVA_SOURCES_COMPILE_ACTION + " already done. Won't perform again.");
         } else {
@@ -134,17 +134,17 @@ public class JkJavaProjectCompilation<T> {
 
     /**
      * Returns the {@link JkRunnables} to run after source and resource generation. User can chain its own runnable
-     * to customise the process. Contains {@link JkJavaProjectCompilation#RESOURCES_PROCESS_ACTION} by default
+     * to customise the process. Contains {@link JkProjectCompilation#RESOURCES_PROCESS_ACTION} by default
      */
-    public JkRunnables<JkJavaProjectCompilation<T>> getPreCompileActions() {
+    public JkRunnables<JkProjectCompilation<T>> getPreCompileActions() {
         return preCompileActions;
     }
 
     /**
      * Returns the {@link JkRunnables} to be run for compilation.
-     * Contains {@link JkJavaProjectCompilation#JAVA_SOURCES_COMPILE_ACTION} by default.
+     * Contains {@link JkProjectCompilation#JAVA_SOURCES_COMPILE_ACTION} by default.
      */
-    public JkRunnables<JkJavaProjectCompilation<T>> getCompileActions() {
+    public JkRunnables<JkProjectCompilation<T>> getCompileActions() {
         return postCompileActions;
     }
 
@@ -152,7 +152,7 @@ public class JkJavaProjectCompilation<T> {
      * Returns the {@link JkRunnables} to be run after compilation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public JkRunnables<JkJavaProjectCompilation<T>> getPostCompileActions() {
+    public JkRunnables<JkProjectCompilation<T>> getPostCompileActions() {
         return postCompileActions;
     }
 
@@ -166,7 +166,7 @@ public class JkJavaProjectCompilation<T> {
     /**
      * Adds options to be passed to Java compiler
      */
-    public JkJavaProjectCompilation<T> addJavaCompilerOptions(String ... options) {
+    public JkProjectCompilation<T> addJavaCompilerOptions(String ... options) {
         this.extraJavaCompilerOptions.addAll(Arrays.asList(options));
         return this;
     }
@@ -174,11 +174,11 @@ public class JkJavaProjectCompilation<T> {
     /**
      * Returns the resource processor.
      */
-    public JkResourceProcessor<JkJavaProjectCompilation<T>> getResourceProcessor() {
+    public JkResourceProcessor<JkProjectCompilation<T>> getResourceProcessor() {
         return resourceProcessor;
     }
 
-    public JkJavaProjectCompilation<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectCompilation<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
     }
@@ -212,7 +212,7 @@ public class JkJavaProjectCompilation<T> {
             .setOutputDir(layout.resolveClassDir());
     }
 
-    private JkJavaCompileSpec computeTestCompileSpec(JkJavaProjectCompilation prodStep) {
+    private JkJavaCompileSpec computeTestCompileSpec(JkProjectCompilation prodStep) {
         JkDependencySet dependencies = getDependencies();
         return JkJavaCompileSpec.of()
                 .setSourceAndTargetVersion(construction.getJvmTargetVersion())

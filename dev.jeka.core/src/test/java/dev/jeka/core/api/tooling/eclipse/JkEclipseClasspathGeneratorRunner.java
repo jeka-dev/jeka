@@ -2,7 +2,7 @@ package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -14,7 +14,7 @@ public class JkEclipseClasspathGeneratorRunner {
         final Path zip = Paths.get(JkEclipseClasspathGeneratorIT.class.getResource(JkEclipseClasspathGeneratorIT.ZIP_NAME).toURI());
         JkModuleDependency moduleDependency = JkModuleDependency.of("junit:junit:4.11");
         JkFileSystemDependency fileDep = JkFileSystemDependency.of(zip);
-        JkJavaProject project = JkJavaProject.of().getConstruction()
+        JkProject project = JkProject.of().getConstruction()
                 .getCompilation()
                     .setDependencies(deps -> deps
                             .and(fileDep)

@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
@@ -13,17 +13,17 @@ import java.util.function.Function;
 
 /**
  * A Java project consists in 3 parts : <ul>
- *    <li>{@link JkJavaProjectConstruction} : responsible to compile, tests and make jars</li>
- *    <li>{@link JkJavaProjectDocumentation} : responsible to creates javadoc, sources jar and others</li>
- *    <li>{@link JkJavaProjectPublication} : responsible to publish the artifacts on binary repositories (Maven or Ivy)</li>
+ *    <li>{@link JkProjectConstruction} : responsible to compile, tests and make jars</li>
+ *    <li>{@link JkProjectDocumentation} : responsible to creates javadoc, sources jar and others</li>
+ *    <li>{@link JkProjectPublication} : responsible to publish the artifacts on binary repositories (Maven or Ivy)</li>
  * </ul>
  * Each of these parts are optional. This mean that you don't have to set the publication part if the project is not
  * supposed to be published. Or you don't have to set the <i>production</i> part if the project publishes artifacts
  * that are created by other means than the <i>production<i/> part.
  * <p>
- * {@link JkJavaProject} defines <i>base</i> and <i>output</i> directories as they are shared with the 3 parts.
+ * {@link JkProject} defines <i>base</i> and <i>output</i> directories as they are shared with the 3 parts.
  */
-public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
+public class JkProject implements JkIdeSupport.JkSupplier {
 
     private Path baseDir = Paths.get(".");
 
@@ -33,31 +33,31 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
 
     private JkVersionedModule.ConflictStrategy duplicateConflictStrategy = JkVersionedModule.ConflictStrategy.FAIL;
 
-    private final JkJavaProjectDocumentation documentation;
+    private final JkProjectDocumentation documentation;
 
-    private final JkJavaProjectConstruction construction;
+    private final JkProjectConstruction construction;
 
-    private final JkJavaProjectPublication publication;
+    private final JkProjectPublication publication;
 
-    public Function<JkJavaIdeSupport, JkJavaIdeSupport> ideSupportModifier = x -> x;
+    public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
 
-    private JkJavaProject() {
-        documentation = new JkJavaProjectDocumentation( this);
-        construction = new JkJavaProjectConstruction(this);
-        publication = new JkJavaProjectPublication(this);
+    private JkProject() {
+        documentation = new JkProjectDocumentation( this);
+        construction = new JkProjectConstruction(this);
+        publication = new JkProjectPublication(this);
     }
 
-    public static JkJavaProject of() {
-        return new JkJavaProject();
+    public static JkProject of() {
+        return new JkProject();
     }
 
-    public JkJavaProject apply(Consumer<JkJavaProject> projectConsumer) {
+    public JkProject apply(Consumer<JkProject> projectConsumer) {
         projectConsumer.accept(this);
         return this;
     }
 
-    public JkJavaProjectSimpleFacade simpleFacade() {
-        return new JkJavaProjectSimpleFacade(this);
+    public JkProjectSimpleFacade simpleFacade() {
+        return new JkProjectSimpleFacade(this);
     }
 
     // ---------------------------- Getters / setters --------------------------------------------
@@ -66,7 +66,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return this.baseDir;
     }
 
-    public JkJavaProject setBaseDir(Path baseDir) {
+    public JkProject setBaseDir(Path baseDir) {
         this.baseDir = JkUtilsPath.relativizeFromWorkingDir(baseDir);
         return this;
     }
@@ -81,7 +81,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     /**
      * Sets the output path dir relative to base dir.
      */
-    public JkJavaProject setOutputDir(String relativePath) {
+    public JkProject setOutputDir(String relativePath) {
         this.outputDir = relativePath;
         return this;
     }
@@ -90,20 +90,20 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return duplicateConflictStrategy;
     }
 
-    public JkJavaProject setDuplicateConflictStrategy(JkVersionedModule.ConflictStrategy duplicateConflictStrategy) {
+    public JkProject setDuplicateConflictStrategy(JkVersionedModule.ConflictStrategy duplicateConflictStrategy) {
         this.duplicateConflictStrategy = duplicateConflictStrategy;
         return this;
     }
 
-    public JkJavaProjectConstruction getConstruction() {
+    public JkProjectConstruction getConstruction() {
         return construction;
     }
 
-    public JkJavaProjectPublication getPublication() {
+    public JkProjectPublication getPublication() {
         return publication;
     }
 
-    public JkJavaProjectDocumentation getDocumentation() {
+    public JkProjectDocumentation getDocumentation() {
         return documentation;
     }
 
@@ -111,7 +111,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return artifactBaseName != null ? artifactBaseName : baseDir.toAbsolutePath().getFileName().toString();
     }
 
-    public JkJavaProject setArtifactBaseName(String artifactBaseName) {
+    public JkProject setArtifactBaseName(String artifactBaseName) {
         this.artifactBaseName = artifactBaseName;
         return this;
     }
@@ -165,11 +165,11 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
     }
 
     @Override
-    public JkJavaIdeSupport getJavaIdeSupport() {
+    public JkIdeSupport getJavaIdeSupport() {
         JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
                 construction.getProjectDependencies(),
                 JkVersionedModule.ConflictStrategy.TAKE_FIRST);
-        JkJavaIdeSupport ideSupport = JkJavaIdeSupport.of(baseDir)
+        JkIdeSupport ideSupport = JkIdeSupport.of(baseDir)
             .setSourceVersion(construction.getJvmTargetVersion())
             .setProdLayout(construction.getCompilation().getLayout())
             .setTestLayout(construction.getTesting().getCompilation().getLayout())
@@ -178,7 +178,7 @@ public class JkJavaProject implements JkJavaIdeSupport.JkSupplier {
         return ideSupportModifier.apply(ideSupport);
     }
 
-    public void setJavaIdeSupport(Function<JkJavaIdeSupport, JkJavaIdeSupport> ideSupport) {
+    public void setJavaIdeSupport(Function<JkIdeSupport, JkIdeSupport> ideSupport) {
         this.ideSupportModifier = ideSupportModifier.andThen(ideSupport);
     }
 

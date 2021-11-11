@@ -1,14 +1,12 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectTesting;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
@@ -16,12 +14,8 @@ import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
-import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
-import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
-import dev.jeka.core.tool.builtins.repos.JkPluginNexus;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
@@ -33,8 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static dev.jeka.core.api.java.project.JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
-import static dev.jeka.core.api.java.project.JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
+import static dev.jeka.core.api.project.JkProjectPublication.JAVADOC_ARTIFACT_ID;
+import static dev.jeka.core.api.project.JkProjectPublication.SOURCES_ARTIFACT_ID;
 
 /**
  * Build class for Jeka. Run main method to create full distrib.
@@ -46,13 +40,13 @@ public class CoreBuild extends JkClass {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final JkPluginJava java = getPlugin(JkPluginJava.class);
+    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     public boolean runIT;
 
     @Override
     protected void setup()  {
-        java.getProject()
+        projectPlugin.getProject()
             .getConstruction()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
@@ -106,11 +100,11 @@ public class CoreBuild extends JkClass {
 
 
     private Path distribFolder() {
-        return java.getProject().getOutputDir().resolve("distrib");
+        return projectPlugin.getProject().getOutputDir().resolve("distrib");
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = java.getProject().getPublication().getArtifactProducer();
+        final JkArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
         if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
                     SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
@@ -140,7 +134,7 @@ public class CoreBuild extends JkClass {
         }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         makeDocs();
-        if (!java.getProject().getConstruction().getTesting().isSkipped() && runIT) {
+        if (!projectPlugin.getProject().getConstruction().getTesting().isSkipped() && runIT) {
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
@@ -185,7 +179,7 @@ public class CoreBuild extends JkClass {
 
     private void makeDocs() {
         JkLog.startTask("Make documentation");
-        String version = java.getProject().getPublication().getMaven().getVersion();
+        String version = projectPlugin.getProject().getPublication().getMaven().getVersion();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }
@@ -199,7 +193,7 @@ public class CoreBuild extends JkClass {
     private void doPackWithEmbedded(Path targetJar) {
 
         // Main jar
-        JkJavaProject project = java.getProject();
+        JkProject project = this.projectPlugin.getProject();
         project.getConstruction().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
@@ -232,14 +226,14 @@ public class CoreBuild extends JkClass {
     }
 
     private void doWrapper(Path wrapperJar) {
-        java.getProject().getConstruction().getCompilation().runIfNecessary();
-        JkPathTree.of(java.getProject().getConstruction().getCompilation().getLayout()
+        projectPlugin.getProject().getConstruction().getCompilation().runIfNeeded();
+        JkPathTree.of(projectPlugin.getProject().getConstruction().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void publishDocsOnGithubPage(String githubToken) {
         clean();
-        JkJavaProject project = java.getProject();
+        JkProject project = this.projectPlugin.getProject();
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
@@ -257,7 +251,7 @@ public class CoreBuild extends JkClass {
     }
 
     public void cleanPack() {
-        clean(); java.pack();
+        clean(); projectPlugin.pack();
     }
 
     // This method has to be run in dev.jeka.core (this module root) working directory
@@ -268,7 +262,7 @@ public class CoreBuild extends JkClass {
     public static class RunBuildAndIT {
         public static void main(String[] args) {
             CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args, "-runIT");
-            coreBuild.java.pack();
+            coreBuild.projectPlugin.pack();
         }
     }
 

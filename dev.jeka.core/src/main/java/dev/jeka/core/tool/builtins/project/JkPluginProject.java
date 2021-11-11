@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.java;
+package dev.jeka.core.tool.builtins.project;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
@@ -11,14 +11,14 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.project.*;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.project.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.repos.JkPluginGpg;
+import dev.jeka.core.tool.builtins.crypto.JkPluginGpg;
 import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
 import org.w3c.dom.Document;
 
@@ -33,12 +33,12 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
- * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
+ * Plugin for building JVM language based projects. It comes with a {@link JkProject} pre-configured with {@link JkOptions}.
  * and a decoration for scaffolding.
  */
-@JkDoc("Build of a Java project through a JkJavaProject instance.")
+@JkDoc("Build of a JVM project through a JkProject instance.")
 @JkDocPluginDeps({JkPluginScaffold.class})
-public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplier {
+public class JkPluginProject extends JkPlugin implements JkIdeSupport.JkSupplier {
 
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
@@ -63,9 +63,9 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     private final JkPluginScaffold scaffoldPlugin;
 
-    private JkJavaProject project;
+    private JkProject project;
 
-    protected JkPluginJava(JkClass jkClass) {
+    protected JkPluginProject(JkClass jkClass) {
         super(jkClass);
         this.scaffoldPlugin = jkClass.getPlugins().get(JkPluginScaffold.class);
     }
@@ -73,7 +73,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
     @Override
     protected void beforeSetup() {
         Path baseDir = getJkClass().getBaseDir();
-        project = JkJavaProject.of().setBaseDir(this.getJkClass().getBaseDir());
+        project = JkProject.of().setBaseDir(this.getJkClass().getBaseDir());
         project.getConstruction().addTextAndLocalDependencies();
 
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
@@ -82,13 +82,13 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         applyGpg(project);
     }
 
-    private void applyGpg(JkJavaProject project) {
+    private void applyGpg(JkProject project) {
         JkPluginGpg pgpPlugin = this.getJkClass().getPlugins().get(JkPluginGpg.class);
         JkGpg gpg = pgpPlugin.get();
         applyGpg(gpg, pgpPlugin.keyName, project);
     }
 
-    private void applyRepo(JkJavaProject project) {
+    private void applyRepo(JkProject project) {
         project.getPublication().getMaven().setRepos(
                 Optional.ofNullable(JkRepoFromOptions.getPublishRepository())
                         .orElse(JkRepo.ofLocal())
@@ -101,7 +101,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         }
     }
 
-    public static void applyGpg(JkGpg gpg, String keyName, JkJavaProject project) {
+    public static void applyGpg(JkGpg gpg, String keyName, JkProject project) {
         UnaryOperator<Path> signer  = gpg.getSigner(keyName);
         project.getPublication().getMaven().setDefaultSigner(signer);
         project.getPublication().getIvy().setDefaultSigner(signer);
@@ -115,16 +115,16 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
         this.setupScaffolder();
     }
 
-    private void applyPostSetupOptions(JkJavaProject aProject) {
+    private void applyPostSetupOptions(JkProject aProject) {
         final JkStandardFileArtifactProducer artifactProducer = aProject.getPublication().getArtifactProducer();
-        JkArtifactId sources = JkJavaProjectPublication.SOURCES_ARTIFACT_ID;
+        JkArtifactId sources = JkProjectPublication.SOURCES_ARTIFACT_ID;
         if (pack.sources != null && !pack.sources) {
             artifactProducer.removeArtifact(sources);
         } else if (pack.sources != null && pack.sources && !artifactProducer.getArtifactIds().contains(sources)) {
             Consumer<Path> sourceJar = aProject.getDocumentation()::createSourceJar;
             artifactProducer.putArtifact(sources, sourceJar);
         }
-        JkArtifactId javadoc = JkJavaProjectPublication.JAVADOC_ARTIFACT_ID;
+        JkArtifactId javadoc = JkProjectPublication.JAVADOC_ARTIFACT_ID;
         if (pack.javadoc != null && !pack.javadoc) {
             artifactProducer.removeArtifact(javadoc);
         } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
@@ -157,7 +157,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
             } else {
                 snippet = "buildclassfacade.snippet";
             }
-            String template = JkUtilsIO.read(JkPluginJava.class.getResource(snippet));
+            String template = JkUtilsIO.read(JkPluginProject.class.getResource(snippet));
             String baseDirName = getJkClass().getBaseDir().getFileName().toString();
             return template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         });
@@ -174,10 +174,10 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
             // Create specific files and folders
             JkPathFile.of(project.getBaseDir().resolve("jeka/dependency.txt"))
-                    .fetchContentFrom(JkPluginJava.class.getResource("dependencies.txt"));
+                    .fetchContentFrom(JkPluginProject.class.getResource("dependencies.txt"));
             Path libs = project.getBaseDir().resolve("jeka/libs");
             JkPathFile.of(libs.resolve("readme.txt"))
-                    .fetchContentFrom(JkPluginJava.class.getResource("libs-readme.txt"));
+                    .fetchContentFrom(JkPluginProject.class.getResource("libs-readme.txt"));
             JkUtilsPath.createDirectories(libs.resolve("compile+runtime"));
             JkUtilsPath.createDirectories(libs.resolve("compile"));
             JkUtilsPath.createDirectories(libs.resolve("runtime"));
@@ -193,7 +193,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
                 JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
                 Path sourceDir =
                         project.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
-                String pluginCode = JkUtilsIO.read(JkPluginJava.class.getResource("pluginclass.snippet"));
+                String pluginCode = JkUtilsIO.read(JkPluginProject.class.getResource("pluginclass.snippet"));
                 JkPathFile.of(sourceDir.resolve("your/basepackage/JkPluginXxxxxxx.java"))
                         .createIfNotExist()
                         .write(pluginCode.getBytes(StandardCharsets.UTF_8));
@@ -204,7 +204,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
     // ------------------------------ Accessors -----------------------------------------
 
-    public JkJavaProject getProject() {
+    public JkProject getProject() {
         return project;
     }
 
@@ -241,7 +241,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        JkJavaProjectConstruction construction = project.getConstruction();
+        JkProjectConstruction construction = project.getConstruction();
         showDependencies("compile", construction.getCompilation().getDependencies());
         showDependencies("runtime", construction.getRuntimeDependencies());
         showDependencies("test", construction.getTesting().getCompilation().getDependencies());
@@ -304,7 +304,7 @@ public class JkPluginJava extends JkPlugin implements JkJavaIdeSupport.JkSupplie
 
 
     @Override
-    public JkJavaIdeSupport getJavaIdeSupport() {
+    public JkIdeSupport getJavaIdeSupport() {
         return project.getJavaIdeSupport();
     }
 

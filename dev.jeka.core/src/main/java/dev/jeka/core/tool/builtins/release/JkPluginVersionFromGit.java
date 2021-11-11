@@ -1,7 +1,7 @@
 package dev.jeka.core.tool.builtins.release;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkClass;
@@ -9,11 +9,11 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.git.JkPluginGit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.util.Optional;
 
-@JkDoc({"Manage versioning of project from JkPluginJava by using Git.",
+@JkDoc({"Manage versioning of project from JkPluginProject by using Git.",
         "The version is inferred from git : ",
         "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
         "  - If last commit contains a message containing [comment_version_prefix]xxxxx, version values xxxxx",
@@ -21,7 +21,7 @@ import java.util.Optional;
         "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
         "After, If last commit message specifies a version and this version differs from tag, " +
                 "last commit is tagged with specified version."})
-@JkDocPluginDeps(JkPluginJava.class)
+@JkDocPluginDeps(JkPluginProject.class)
 public class JkPluginVersionFromGit extends JkPlugin {
 
     public static final String TAG_TASK_NAME = "version-from-git-tag";
@@ -32,7 +32,7 @@ public class JkPluginVersionFromGit extends JkPlugin {
     @JkDoc("Tags with following prefix. This may help to distinguish tags for versioning from others.")
     public String tagPrefixForVersion = "";
 
-    @JkDoc("If true and a JkPluginJava project is bound to the build instance, the project will be configured for " +
+    @JkDoc("If true and a JkPluginProject project is bound to the build instance, the project will be configured for " +
             "publishing with the inferred version.")
     public boolean autoConfigureProject = true;
 
@@ -52,11 +52,11 @@ public class JkPluginVersionFromGit extends JkPlugin {
     @Override
     protected void afterSetup() {
         if (autoConfigureProject) {
-            JkPluginJava java = getJkClass().getPlugins().getOptional(JkPluginJava.class).orElse(null);
-            if (java == null) {
+            JkPluginProject projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
+            if (projectPlugin == null) {
                 return;
             }
-            configure(java.getProject(), tagAfterPublish);
+            configure(projectPlugin.getProject(), tagAfterPublish);
         }
     }
 
@@ -64,7 +64,7 @@ public class JkPluginVersionFromGit extends JkPlugin {
      * Configure the specified project to use git version for publishing and tagging the repository.
      * @param tag If true, the repository will be tagged right after the project.pubmication.publish()
      */
-    public void configure(JkJavaProject project, boolean tag) {
+    public void configure(JkProject project, boolean tag) {
         project.getPublication()
                 .getMaven()
                     .setVersion(() -> version().toString())

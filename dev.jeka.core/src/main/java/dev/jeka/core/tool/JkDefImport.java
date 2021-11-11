@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  * <pre><code>
  * public class FatJarBuild extends JkClass {
  *
- *     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+ *     JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
  *
  *     @JkDefImport("../anotherJekaProject")
  *     private AClassicBuild sampleBuild;

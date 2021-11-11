@@ -2,13 +2,13 @@ package dev.jeka.core.tool.builtins.repos;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.util.Optional;
 
@@ -28,15 +28,15 @@ public class JkPluginNexus extends JkPlugin {
 
     @Override
     protected void afterSetup() throws Exception {
-        JkPluginJava pluginJava = getJkClass().getPlugins().getOptional(JkPluginJava.class).orElse(null);
-        if (pluginJava == null) {
+        JkPluginProject projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
+        if (projectPlugin == null) {
             JkLog.warn("No project plugin configured here.");
             return;
         }
         String[] profileNames = JkUtilsString.isBlank(profileNamesFilter) ? new String[0]
                 : profileNamesFilter.split(",");
-        pluginJava.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
-            JkRepo repo = getFirst(pluginJava.getProject());
+        projectPlugin.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
+            JkRepo repo = getFirst(projectPlugin.getProject());
             if (repo != null) {
                 JkNexusRepos.ofUrlAndCredentials(repo).closeAndReleaseOpenRepositories(profileNames);
             } else {
@@ -46,13 +46,13 @@ public class JkPluginNexus extends JkPlugin {
     }
 
     public void closeAndOrRelease() {
-        Optional<JkPluginJava> pluginJava = getJkClass().getPlugins().getOptional(JkPluginJava.class);
-        if (!pluginJava.isPresent()) {
+        Optional<JkPluginProject> projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class);
+        if (!projectPlugin.isPresent()) {
             JkLog.warn("No project plugin configured here.");
             return;
         }
         String[] profileNames = profileNamesFilter.split(",");
-        JkRepo repo = getFirst(pluginJava.get().getProject());
+        JkRepo repo = getFirst(projectPlugin.get().getProject());
         if (repo != null) {
             JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease(profileNames);
         } else {
@@ -60,18 +60,18 @@ public class JkPluginNexus extends JkPlugin {
         }
     }
 
-    public static void configureForOSSRHRepo(JkJavaProject project, String ...profileNames) {
+    public static void configureForOSSRHRepo(JkProject project, String ...profileNames) {
         JkRepo repo = project.getPublication().getMaven().getRepos()
                 .getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
         configureForRepo(project, repo, profileNames);
     }
 
-    public static void configureForFirstRemoteRepo(JkJavaProject project, String ...profileNames) {
+    public static void configureForFirstRemoteRepo(JkProject project, String ...profileNames) {
         JkRepo repo = getFirst(project);
         configureForRepo(project, repo, profileNames);
     }
 
-    public static void configureForRepo(JkJavaProject project, JkRepo repo, String ...profileNames) {
+    public static void configureForRepo(JkProject project, JkRepo repo, String ...profileNames) {
         if (repo == null) {
             JkLog.warn("No Nexus OSSRH repo found.");
             return;
@@ -80,12 +80,12 @@ public class JkPluginNexus extends JkPlugin {
         configureForRepo(project, nexusRepos, profileNames);
     }
 
-    public static void configureForRepo(JkJavaProject project, JkNexusRepos nexusRepos, String ...profileNames) {
+    public static void configureForRepo(JkProject project, JkNexusRepos nexusRepos, String ...profileNames) {
         project.getPublication().getPostActions().append(TASK_NAME,
                 () -> nexusRepos.closeAndReleaseOpenRepositories(profileNames));
     }
 
-    private static JkRepo getFirst(JkJavaProject project) {
+    private static JkRepo getFirst(JkProject project) {
         JkRepo repo = project.getPublication().findFirstRepo();
         if (repo != null && repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
             JkLog.warn("No credentials found on repo " + repo);

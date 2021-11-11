@@ -115,7 +115,7 @@
 
 # 0.8.14
 * Fix JDK version recognition for version 9 and greater
-* Let generate Eclipse/Intellij metadata without using JkPluginJava
+* Let generate Eclipse/Intellij metadata without using JkPluginProject
 * Fix warning on standard option usage
 * Use private field with public setter to inject options in command classes
 * Fix JkPathMatcher#or

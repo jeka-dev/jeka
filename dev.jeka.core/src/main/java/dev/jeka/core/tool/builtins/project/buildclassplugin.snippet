@@ -1,17 +1,17 @@
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 class Build extends JkClass {
 
-    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     @Override
     protected void setup() {
-        JkJavaProject javaProject = javaPlugin.getProject();
+        JkProject javaProject = projectPlugin.getProject();
         javaProject.simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps
@@ -28,17 +28,14 @@ class Build extends JkClass {
                     .setVersion("0.0.1-SNAPSHOT")
                     .getPomMetadata()
                         .addApache2License()
-                        .getProjectInfo()
-                            .setName("Jeka plugin for ....")
-                            .setDescription("A Jeka plugin for ...")
-                            .setUrl("https://github.com/your_org/your_repo")
-                        .__
-                        .getScm()
-                            .setUrl("https://github.com/your_org/your_repo");
+                        .setProjectName("Jeka plugin for ....")
+                        .setProjectDescription("A Jeka plugin for ...")
+                        .setProjectUrl("https://github.com/your_org/your_repo")
+                        .setScmUrl("https://github.com/your_org/your_repo");
     }
 
     public void cleanPack() {
-        clean(); javaPlugin.pack();
+        clean(); projectPlugin.pack();
     }
 
 }

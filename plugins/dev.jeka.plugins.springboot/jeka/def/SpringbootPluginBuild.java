@@ -3,16 +3,15 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 class SpringbootPluginBuild extends JkClass {
 
-    final JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().simpleFacade()
+        projectPlugin.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .setCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
@@ -20,7 +19,7 @@ class SpringbootPluginBuild extends JkClass {
                 .setRuntimeDependencies(deps -> deps
                         .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
                 );
-        javaPlugin.getProject().getPublication()
+        projectPlugin.getProject().getPublication()
             .getMaven()
                 .setModuleId("dev.jeka:springboot-plugin")
                 .getPomMetadata()
@@ -30,7 +29,7 @@ class SpringbootPluginBuild extends JkClass {
     }
 
     public void cleanPack() {
-        clean(); javaPlugin.pack();
+        clean(); projectPlugin.pack();
     }
 
     public static void main(String[] args) {

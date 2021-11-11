@@ -2,7 +2,7 @@ package dev.jeka.core.integrationtest.tooling.intellij;
 
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorIT;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class JkImlGeneratorIT {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
 
         final Path base = top.resolve("base");
-        final JkJavaProject baseProject = JkJavaProject.of()
+        final JkProject baseProject = JkProject.of()
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
@@ -37,7 +37,7 @@ public class JkImlGeneratorIT {
         System.out.println(result0);
 
         final Path core = top.resolve("core");
-        final JkJavaProject coreProject = JkJavaProject.of()
+        final JkProject coreProject = JkProject.of()
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
                 .getConstruction()
@@ -56,7 +56,7 @@ public class JkImlGeneratorIT {
         System.out.println(result1);
 
         final Path desktop = top.resolve("desktop");
-        final JkJavaProject desktopProject = JkJavaProject.of()
+        final JkProject desktopProject = JkProject.of()
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
@@ -73,7 +73,7 @@ public class JkImlGeneratorIT {
         JkPathTree.of(top).deleteContent();
     }
 
-    private void configureCompileLayout(JkJavaProject javaProject) {
+    private void configureCompileLayout(JkProject javaProject) {
         javaProject
             .getConstruction()
                 .getCompilation()
@@ -82,7 +82,7 @@ public class JkImlGeneratorIT {
                         .emptyResources().addResource("res");
     }
 
-    private void configureEmptyTestCompileLayout(JkJavaProject javaProject) {
+    private void configureEmptyTestCompileLayout(JkProject javaProject) {
         javaProject
             .getConstruction()
                 .getTesting()

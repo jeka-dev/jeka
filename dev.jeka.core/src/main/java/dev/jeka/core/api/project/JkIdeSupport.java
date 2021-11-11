@@ -1,27 +1,25 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.tool.JkClass;
 
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * Minimal information necessary to generate metadata project file for IDE.
  */
-public class JkJavaIdeSupport {
+public class JkIdeSupport {
 
     public interface JkSupplier {
 
-        JkJavaIdeSupport getJavaIdeSupport();
+        JkIdeSupport getJavaIdeSupport();
 
     }
 
-    private JkCompileLayout<JkJavaIdeSupport> prodLayout;
+    private JkCompileLayout<JkIdeSupport> prodLayout;
 
-    private JkCompileLayout<JkJavaIdeSupport>  testLayout;
+    private JkCompileLayout<JkIdeSupport>  testLayout;
 
     private JkQualifiedDependencySet dependencies;
 
@@ -29,7 +27,7 @@ public class JkJavaIdeSupport {
 
     private JkDependencyResolver dependencyResolver;
 
-    private JkJavaIdeSupport(Path baseDir) {
+    private JkIdeSupport(Path baseDir) {
         this.prodLayout = JkCompileLayout.ofParent(this).setBaseDir(baseDir);
         this.testLayout = JkCompileLayout.ofParent(this)
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
@@ -40,15 +38,15 @@ public class JkJavaIdeSupport {
         this.dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());;
     }
 
-    public static JkJavaIdeSupport of(Path baseDir) {
-        return new JkJavaIdeSupport(baseDir);
+    public static JkIdeSupport of(Path baseDir) {
+        return new JkIdeSupport(baseDir);
     }
 
-    public JkCompileLayout<JkJavaIdeSupport> getProdLayout() {
+    public JkCompileLayout<JkIdeSupport> getProdLayout() {
         return prodLayout;
     }
 
-    public JkCompileLayout<JkJavaIdeSupport> getTestLayout() {
+    public JkCompileLayout<JkIdeSupport> getTestLayout() {
         return testLayout;
     }
 
@@ -64,36 +62,36 @@ public class JkJavaIdeSupport {
         return dependencyResolver;
     }
 
-    public JkJavaIdeSupport setProdLayout(JkCompileLayout prodLayout) {
+    public JkIdeSupport setProdLayout(JkCompileLayout prodLayout) {
         this.prodLayout = prodLayout;
         return this;
     }
 
-    public JkJavaIdeSupport setTestLayout(JkCompileLayout testLayout) {
+    public JkIdeSupport setTestLayout(JkCompileLayout testLayout) {
         this.testLayout = testLayout;
         return this;
     }
 
-    public JkJavaIdeSupport setDependencies(JkQualifiedDependencySet dependencies) {
+    public JkIdeSupport setDependencies(JkQualifiedDependencySet dependencies) {
         this.dependencies = dependencies;
         return this;
     }
 
-    public JkJavaIdeSupport setDependencies(JkProjectDependencies projectDependencies,
-                                            JkVersionedModule.ConflictStrategy conflictStrategy) {
+    public JkIdeSupport setDependencies(JkProjectDependencies projectDependencies,
+                                        JkVersionedModule.ConflictStrategy conflictStrategy) {
         return setDependencies(JkQualifiedDependencySet.computeIdeDependencies(projectDependencies, conflictStrategy));
     }
 
-    public JkJavaIdeSupport setDependencies(JkProjectDependencies projectDependencies) {
+    public JkIdeSupport setDependencies(JkProjectDependencies projectDependencies) {
         return setDependencies(projectDependencies, JkVersionedModule.ConflictStrategy.FAIL);
     }
 
-    public JkJavaIdeSupport setSourceVersion(JkJavaVersion sourceVersion) {
+    public JkIdeSupport setSourceVersion(JkJavaVersion sourceVersion) {
         this.sourceVersion = sourceVersion;
         return this;
     }
 
-    public JkJavaIdeSupport setDependencyResolver(JkDependencyResolver dependencyResolver) {
+    public JkIdeSupport setDependencyResolver(JkDependencyResolver dependencyResolver) {
         this.dependencyResolver = dependencyResolver;
         return this;
     }

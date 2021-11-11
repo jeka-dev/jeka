@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.repos;
+package dev.jeka.core.tool.builtins.crypto;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.system.JkLog;

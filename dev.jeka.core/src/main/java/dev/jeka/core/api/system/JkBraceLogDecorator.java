@@ -25,18 +25,16 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
     private transient PrintStream err;
 
-    private AtomicBoolean pendingStart = new AtomicBoolean(false);
-
     public void init(PrintStream targetOut, PrintStream targetErr) {
-        marginOut = new MarginStream(targetOut, pendingStart);
-        marginErr = new MarginStream(targetOut, pendingStart);   // Cause erratic output if logged on separate streams
+        marginOut = new MarginStream(targetOut);
+        marginErr = new MarginStream(targetErr);   // Cause erratic output if logged on separate streams
         out = new PrintStream(marginOut);
         err = new PrintStream(marginErr);
     }
 
     private void readObject(ObjectInputStream objectInputStream) {
-        marginOut = new MarginStream(System.out, pendingStart);
-        marginErr = new MarginStream(System.out, pendingStart);
+        marginOut = new MarginStream(System.out);
+        marginErr = new MarginStream(System.err);
     }
 
     public static void setMaxLength(int maxLength) {
@@ -52,32 +50,33 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
     }
 
     public void handle(JkLog.JkLogEvent event) {
-        final MarginStream marginStream = (event.getType() == JkLog.Type.ERROR) ? marginErr : marginOut;
-        PrintStream stream = out;
         String message = event.getMessage();
-        if (event.getType() == JkLog.Type.ERROR || event.getType() == JkLog.Type.WARN) {
-            out.flush();
-            stream = err;
-        }
-        if (event.getType().isTraceWarnOrError()) {
-            message = "[" + event.getType() + "] " + message;
-        }
         if (event.getType() == JkLog.Type.START_TASK) {
-            stream.print(message);
-            stream.print(" {");
+            out.print(message);
+            out.print(" {");
             marginOut.notifyStart();
             marginErr.notifyStart();
         } else if (event.getType() == JkLog.Type.END_TASK) {
-            marginStream.closingBrace = true;
-            stream.print("}");
-            stream.print(" Done in ");
-            stream.print(event.getDurationMs());
-            stream.print(" milliseconds. ");
-            stream.println(message);
-            marginStream.closingBrace = false;
-            pendingStart.set(false);
+            marginOut.closingBrace = true;
+            out.print("}");
+            out.print(String.format(" Done in %d milliseconds. ", event.getDurationMs()));
+            out.println(message);
+            marginOut.closingBrace = false;
+            marginOut.pendingStart = false;
+            marginErr.pendingStart = false;
         } else {
-            stream.println(message);
+            if (event.getType().isTraceWarnOrError()) {
+                message = "[" + event.getType() + "] " + message;
+            }
+            if (event.getType() == JkLog.Type.ERROR || event.getType() == JkLog.Type.WARN) {
+                out.flush();
+                err.println(message);
+                marginOut.pendingStart = false;
+            } else {
+                err.flush();
+                out.println(message);
+                marginErr.pendingStart = false;
+            }
         }
     }
 
@@ -87,15 +86,16 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
         private int lastByte = LINE_SEPARATOR;  // Display margin at first use (relevant for ofSystem.err)
 
-        private final AtomicBoolean pendingStart;
+        private volatile boolean pendingStart;
 
         private boolean closingBrace;
 
+
         private void notifyStart() {
             flush();
-            pendingStart.set(true);
+            pendingStart = true;
         }
-        public MarginStream(PrintStream delegate, AtomicBoolean pendingStart) {
+        public MarginStream(PrintStream delegate) {
             super();
             this.delegate = delegate;
             this.pendingStart = pendingStart;
@@ -103,10 +103,10 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
         @Override
         public void write(int aByte) throws IOException {
-            if (pendingStart.get() & !closingBrace) {
+            if (pendingStart & !closingBrace) {
                 delegate.write(LINE_SEPARATOR);
                 lastByte = LINE_SEPARATOR;
-                pendingStart.set(false);
+                pendingStart = false;
             }
             if (lastByte == LINE_SEPARATOR) {
                 Integer level = JkLog.getCurrentNestedLevel();

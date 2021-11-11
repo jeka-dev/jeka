@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.project;
+package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
@@ -12,11 +12,11 @@ import java.util.function.Consumer;
 /**
  * Responsible to create Javadoc and Source jar.
  */
-public class JkJavaProjectDocumentation {
+public class JkProjectDocumentation {
 
-    private final JkJavaProject project;
+    private final JkProject project;
 
-    private final JkJavadocProcessor<JkJavaProjectDocumentation> javadocProcessor;
+    private final JkJavadocProcessor<JkProjectDocumentation> javadocProcessor;
 
     private boolean done;
 
@@ -26,20 +26,20 @@ public class JkJavaProjectDocumentation {
     /**
      * For parent chaining
      */
-    public final JkJavaProject __;
+    public final JkProject __;
 
-     JkJavaProjectDocumentation(JkJavaProject project) {
+     JkProjectDocumentation(JkProject project) {
         this.project = project;
         this.__ = project;
         javadocProcessor = JkJavadocProcessor.ofParent(this);
     }
 
-    public JkJavaProjectDocumentation apply(Consumer<JkJavaProjectDocumentation> consumer) {
+    public JkProjectDocumentation apply(Consumer<JkProjectDocumentation> consumer) {
          consumer.accept(this);
          return this;
     }
 
-    public JkJavadocProcessor<JkJavaProjectDocumentation> getJavadocProcessor() {
+    public JkJavadocProcessor<JkProjectDocumentation> getJavadocProcessor() {
         return javadocProcessor;
     }
 
@@ -47,8 +47,8 @@ public class JkJavaProjectDocumentation {
      * Generates javadoc files (files + zip)
      */
     public void run() {
-        JkJavaProjectConstruction construction = project.getConstruction();
-        JkJavaProjectCompilation compilation = construction.getCompilation();
+        JkProjectConstruction construction = project.getConstruction();
+        JkProjectCompilation compilation = construction.getCompilation();
         Iterable<Path> classpath = construction.getDependencyResolver()
                 .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
@@ -69,7 +69,7 @@ public class JkJavaProjectDocumentation {
         return project.getOutputDir().resolve(javadocDir);
     }
 
-    public JkJavaProjectDocumentation setJavadocDir(String javadocDir) {
+    public JkProjectDocumentation setJavadocDir(String javadocDir) {
         this.javadocDir = javadocDir;
         return this;
     }
@@ -86,17 +86,17 @@ public class JkJavaProjectDocumentation {
     }
 
     public void createJavadocJar() {
-        createJavadocJar(project.getArtifactPath(JkJavaProjectPublication.JAVADOC_ARTIFACT_ID));
+        createJavadocJar(project.getArtifactPath(JkProjectPublication.JAVADOC_ARTIFACT_ID));
     }
 
     public void createSourceJar(Path target) {
-        JkJavaProjectCompilation compilation = project.getConstruction().getCompilation();
+        JkProjectCompilation compilation = project.getConstruction().getCompilation();
         compilation.getLayout().resolveSources().and(compilation
                 .getLayout().resolveGeneratedSourceDir()).zipTo(target);
     }
 
     public void createSourceJar() {
-        createSourceJar(project.getArtifactPath(JkJavaProjectPublication.SOURCES_ARTIFACT_ID));
+        createSourceJar(project.getArtifactPath(JkProjectPublication.SOURCES_ARTIFACT_ID));
     }
 
     void reset() {

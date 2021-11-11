@@ -1,16 +1,16 @@
 package dev.jeka.plugins.jacoco;
 
 import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.java.project.JkJavaProject;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
-@JkDocPluginDeps(JkPluginJava.class)
+@JkDocPluginDeps(JkPluginProject.class)
 public class JkPluginJacoco extends JkPlugin {
 
     /**
@@ -44,8 +44,8 @@ public class JkPluginJacoco extends JkPlugin {
         if (!enabled) {
             return;
         }
-        JkPluginJava pluginJava = getJkClass().getPlugins().get(JkPluginJava.class);
-        final JkJavaProject project = pluginJava.getProject();
+        JkPluginProject projectPlugin = getJkClass().getPlugins().get(JkPluginProject.class);
+        final JkProject project = projectPlugin.getProject();
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {
             jacoco = JkJacoco.ofEmbedded();

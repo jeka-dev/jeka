@@ -6,8 +6,8 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.project.JkCompileLayout;
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
+import dev.jeka.core.api.project.JkCompileLayout;
+import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -41,7 +41,7 @@ public final class JkEclipseClasspathGenerator {
 
     // --------------------- content --------------------------------
 
-    private final JkJavaIdeSupport ideSupport;
+    private final JkIdeSupport ideSupport;
 
     // content for build class only
     private JkDependencyResolver defDependencyResolver;
@@ -69,14 +69,14 @@ public final class JkEclipseClasspathGenerator {
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    private JkEclipseClasspathGenerator(JkJavaIdeSupport ideSupport) {
+    private JkEclipseClasspathGenerator(JkIdeSupport ideSupport) {
         this.ideSupport = ideSupport;
     }
 
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    public static JkEclipseClasspathGenerator of(JkJavaIdeSupport ideSupport) {
+    public static JkEclipseClasspathGenerator of(JkIdeSupport ideSupport) {
         return new JkEclipseClasspathGenerator(ideSupport);
 
     }

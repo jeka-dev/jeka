@@ -4,11 +4,11 @@ import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.project.JkJavaProjectPublication;
+import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkEnv;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.nio.file.Path;
 import java.util.function.UnaryOperator;
@@ -33,7 +33,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
  */
 public class SignedArtifactsBuild extends JkClass {
 
-    JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
+    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     @JkEnv("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
@@ -54,7 +54,7 @@ public class SignedArtifactsBuild extends JkClass {
 
     @Override
     protected void setup() {
-        javaPlugin.getProject().simpleFacade()
+        projectPlugin.getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and(GUAVA.version("30.0-jre"))
             )
@@ -77,13 +77,13 @@ public class SignedArtifactsBuild extends JkClass {
                         .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
     }
 
-    private void configForOssrh(JkJavaProjectPublication publication) {
+    private void configForOssrh(JkProjectPublication publication) {
         UnaryOperator<Path> signer = JkGpg.ofSecretRing(secringPath, secringPassword).getSigner("");
         publication.getMaven()
                 .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
     }
 
-    private void configForLocalRepo(JkJavaProjectPublication publication) {
+    private void configForLocalRepo(JkProjectPublication publication) {
         JkRepo repo = JkRepo.of(dummyRepoPath)
             .getPublishConfig()
                 .setChecksumAlgos("sha1", "md5")
@@ -93,7 +93,7 @@ public class SignedArtifactsBuild extends JkClass {
 
     public void cleanPackPublish() {
         JkPathTree.of(dummyRepoPath).createIfNotExist().deleteRoot();  // start from an empty repo
-        clean(); javaPlugin.pack(); javaPlugin.getProject().getPublication().publish();
+        clean(); projectPlugin.pack(); projectPlugin.getProject().getPublication().publish();
     }
 
     public static void main(String[] args) {

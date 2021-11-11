@@ -4,7 +4,7 @@ import dev.jeka.core.samples.JavaPluginBuild;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 /**
  * Simple build demonstrating how Jeka can handle multi-project build.
@@ -20,7 +20,7 @@ import dev.jeka.core.tool.builtins.java.JkPluginJava;
  */
 public class NormalJarBuild extends JkClass {
 
-    JkPluginJava java = getPlugin(JkPluginJava.class);
+    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.
@@ -33,23 +33,23 @@ public class NormalJarBuild extends JkClass {
 
     @Override
     protected void setup() {
-        java.getProject()
+        projectPlugin.getProject()
             .getPublication()
                 .getArtifactProducer()
-                    .putMainArtifact(java.getProject().getConstruction()::createFatJar).__.__
+                    .putMainArtifact(projectPlugin.getProject().getConstruction()::createFatJar).__.__
             .simpleFacade()
                 .setCompileDependencies(deps -> deps
-                        .and(sampleBuild.java.getProject().toDependency()));
+                        .and(sampleBuild.projectPlugin.getProject().toDependency()));
     }
 
     public void cleanPack() {
         clean();
-        java.pack();
+        projectPlugin.pack();
     }
 
     public void printIml() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of(java.getJavaIdeSupport())
-                .setDefDependencies(JkDependencySet.of(sampleBuild.java.getProject().toDependency()))
+        JkImlGenerator imlGenerator = JkImlGenerator.of(projectPlugin.getJavaIdeSupport())
+                .setDefDependencies(JkDependencySet.of(sampleBuild.projectPlugin.getProject().toDependency()))
                 .setDefDependencyResolver(this.getDefDependencyResolver());
         System.out.println(imlGenerator.generate());
     }

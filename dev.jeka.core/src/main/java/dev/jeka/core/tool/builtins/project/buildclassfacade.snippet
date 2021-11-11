@@ -1,10 +1,10 @@
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 class Build extends JkClass {
 
-    final JkPluginJava java = getPlugin(JkPluginJava.class);
+    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
@@ -12,7 +12,7 @@ class Build extends JkClass {
      */
     @Override
     protected void setup() {
-        java.getProject().simpleFacade()
+        projectPlugin.getProject().simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps
                 .and("com.google.guava:guava:21.0")
@@ -27,7 +27,7 @@ class Build extends JkClass {
     }
 
     public void cleanPack() {
-        clean(); java.pack();
+        clean(); projectPlugin.pack();
     }
 
 }

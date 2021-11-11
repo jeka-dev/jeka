@@ -576,7 +576,7 @@ There's many option to handle it in Jeka :
 
 * Use low level API (similar to ANT tasks)
 * Use high level _JkJavaProject_ API
-* Use Jeka Java Plugin
+* Use Jeka Project Plugin
 
 The one you choose is a matter of taste, flexibility, verbosity, re-usability and integration with existing tools.
 
@@ -723,9 +723,9 @@ dependerProject.getPublication().getArtifactProducer().makeAllArtifacts();
 dependerProject.getPublication().publish();       
 ```
 
-## Build Java project using Jeka Java plugin.
+## Build Java project using Jeka Project plugin.
 
-The java plugin consists in holding a `JkJavaProject` instance with predefined methods that you can directly call from the command line.
+The Project plugin consists in holding a `JkJavaProject` instance with predefined methods that you can directly call from the command line.
 It can also alter other loaded plugin instances in order they take in account of Java nature of the project.
 
 Let's create a new project from scratch to illustrate it :
@@ -759,11 +759,12 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.publication.JkScope;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkPluginJava;
+import dev.jeka.core.tool.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 class Build extends JkClass {
 
-    final JkPluginJava java = getPlugin(JkPluginJava.class);
+    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     /*
      * Configures plugins to be bound to this Jeka class. When this method is called, option
@@ -771,18 +772,18 @@ class Build extends JkClass {
      */
     @Override
     protected void setup() {
-        java.getProject()
-            .getJarProduction()
+        projectPlugin.getProject()
+                .getJarProduction()
                 .getDependencyManagement()
-                    .addDependencies(JkDependencySet.of()
+                .addDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
                         .and("junit:junit:4.13", JkScope.TEST));
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(Build.class, args).javaPlugin.clean().pack();
+        JkInit.instanceOf(Build.class, args).projectPlugin.clean().pack();
     }
-    
+
 }
 ```
 Execute `jeka java#info` to see an abstract of the project setup. 
@@ -798,7 +799,7 @@ If you want to create jar along javadoc and sources without testing :
 just execute `jeka clean java#pack -java#test`.
 
 Explanation '-' prefix means that you want to set an option value. For example `-java#pack.sources=false` means that 
-`JkPluginJava.pack.sources` will be injected the `false` value.
+`JkPluginProject.pack.sources` will be injected the `false` value.
 
 You can also set it by default in the build class constructor :
 

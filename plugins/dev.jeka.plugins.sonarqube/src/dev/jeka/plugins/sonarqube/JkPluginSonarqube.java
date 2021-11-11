@@ -3,14 +3,13 @@ package dev.jeka.plugins.sonarqube;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.function.JkConsumers;
-import dev.jeka.core.api.java.project.JkCompileLayout;
-import dev.jeka.core.api.java.project.JkJavaProject;
-import dev.jeka.core.api.java.project.JkJavaProjectConstruction;
+import dev.jeka.core.api.project.JkCompileLayout;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @JkDoc("Run SonarQube analysis.")
-@JkDocPluginDeps(JkPluginJava.class)
+@JkDocPluginDeps(JkPluginProject.class)
 public class JkPluginSonarqube extends JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
@@ -45,12 +44,12 @@ public class JkPluginSonarqube extends JkPlugin {
         super(jkClass);
     }
 
-    private JkSonarqube createConfiguredSonarqube(JkJavaProject project) {
+    private JkSonarqube createConfiguredSonarqube(JkProject project) {
         final JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
         final JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
         final Path baseDir = project.getBaseDir();
         JkPathSequence libs = JkPathSequence.of();
-        JkJavaProjectConstruction construction = project.getConstruction();
+        JkProjectConstruction construction = project.getConstruction();
         if (provideProductionLibs) {
             JkDependencySet deps = construction.getCompilation().getDependencies()
                     .merge(construction.getRuntimeDependencies()).getResult();
@@ -106,7 +105,7 @@ public class JkPluginSonarqube extends JkPlugin {
             JkLog.info("Sonarqube analysis has been disabled. No analysis will be performed.");
             return;
         }
-        JkJavaProject project = getJkClass().getPlugins().get(JkPluginJava.class).getProject();
+        JkProject project = getJkClass().getPlugins().get(JkPluginProject.class).getProject();
         JkSonarqube sonarqube = createConfiguredSonarqube(project);
         sonarqubeConfigurer.accept(sonarqube);
         sonarqube.run();

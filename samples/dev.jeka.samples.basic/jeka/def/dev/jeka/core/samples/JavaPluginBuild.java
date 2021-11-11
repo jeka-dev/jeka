@@ -8,12 +8,12 @@ import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.java.JkPluginJava;
+import dev.jeka.core.tool.builtins.project.JkPluginProject;
 import dev.jeka.core.tool.builtins.maven.JkPluginPom;
 
 
 /**
- * This builds a Java library and publish it on a maven repo using Java plugin. A Java library means a jar that
+ * This builds a Java library and publish it on a maven repo using Project plugin. A Java library means a jar that
  * is not meant to be consumed by end-user but as a dependency of other Java projects.<p>
  *
  * @author Jerome Angibaud
@@ -21,13 +21,13 @@ import dev.jeka.core.tool.builtins.maven.JkPluginPom;
  */
 public class JavaPluginBuild extends JkClass {
 
-    public final JkPluginJava java = getPlugin(JkPluginJava.class);
+    public final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
     
     @Override
     protected void setup() {
-       java.getProject().simpleFacade()
+       projectPlugin.getProject().simpleFacade()
                .setCompileDependencies(deps -> deps
                    .and("com.google.guava:guava:30.0-jre")
                    .and("com.sun.jersey:jersey-server:1.19.4")
@@ -72,12 +72,12 @@ public class JavaPluginBuild extends JkClass {
     }
 
     public void cleanPackPublish() {
-        clean(); java.pack(); java.publishLocal();
+        clean(); projectPlugin.pack(); projectPlugin.publishLocal();
     }
 
     // For debugging purpose
     public void printIml() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of(this.java.getJavaIdeSupport());
+        JkImlGenerator imlGenerator = JkImlGenerator.of(this.projectPlugin.getJavaIdeSupport());
         String iml = imlGenerator.generate();
         System.out.println(iml);
     }
@@ -88,7 +88,7 @@ public class JavaPluginBuild extends JkClass {
     }
 
     public void showDependencies() {
-        java.showDependenciesXml();
+        projectPlugin.showDependenciesXml();
     }
     
     public static void main(String[] args) {

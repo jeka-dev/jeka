@@ -14,8 +14,8 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.java.project.JkJavaIdeSupport;
-import dev.jeka.core.api.java.project.JkJavaProjectPublication;
+import dev.jeka.core.api.project.JkIdeSupport;
+import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
@@ -32,7 +32,7 @@ import java.util.List;
  * @author Jerome Angibaud
  */
 @JkDefClasspath("org.apache.httpcomponents:httpclient:4.5.6")
-public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplier {
+public class AntStyleBuild extends JkClass implements JkIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
     Path test = getBaseDir().resolve("src/test/java");
@@ -98,7 +98,7 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
         JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.2-SNAPSHOT");
         JkArtifactProducer artifactProducer = JkSuppliedFileArtifactProducer.of()
                 .putMainArtifact(jarFile, this::jar)
-                .putArtifact(JkJavaProjectPublication.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
+                .putArtifact(JkProjectPublication.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
         artifactProducer.makeAllMissingArtifacts();
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)
@@ -117,8 +117,8 @@ public class AntStyleBuild extends JkClass implements JkJavaIdeSupport.JkSupplie
     }
 
     @Override
-    public JkJavaIdeSupport getJavaIdeSupport() {
-        return JkJavaIdeSupport.of(getBaseDir())
+    public JkIdeSupport getJavaIdeSupport() {
+        return JkIdeSupport.of(getBaseDir())
             .getProdLayout()
                 .emptySources()
                 .addSource(src)
