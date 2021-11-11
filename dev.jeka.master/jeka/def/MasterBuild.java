@@ -95,7 +95,7 @@ class MasterBuild extends JkClass {
     public void buildFast() {
         getImportedJkClasses().getDirect(JkPluginProject.class).forEach(plugin -> {
             plugin.getProject().simpleFacade().setTestSkipped(true);
-            plugin.getProject().getPublication().includeJavadocAndSources(false);
+            plugin.getProject().getPublication().includeJavadocAndSources(false, false);
             plugin.getJkClass().clean();
             plugin.getProject().getPublication().pack();
         });

@@ -78,6 +78,11 @@ public class JkProjectSimpleFacade {
         return this;
     }
 
+    public JkProjectSimpleFacade includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
+        project.getPublication().includeJavadocAndSources(includeJavaDoc, includeSources);
+        return this;
+    }
+
     public JkProjectSimpleFacade setTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         project.getConstruction().getTesting().getCompilation().setDependencies(modifier);
         return this;

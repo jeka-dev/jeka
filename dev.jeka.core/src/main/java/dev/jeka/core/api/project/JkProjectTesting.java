@@ -142,7 +142,7 @@ public class JkProjectTesting {
      */
     public void run() {
         JkLog.startTask("Process tests");
-        this.construction.getCompilation().runIfNecessary();
+        this.construction.getCompilation().runIfNeeded();
         this.compilation.run();
         executeWithTestProcessor();
         JkLog.endTask();
@@ -151,7 +151,7 @@ public class JkProjectTesting {
     /**
      * As #run but perfom only if not already done.
      */
-    public void runIfNecessary() {
+    public void runIfNeeded() {
         if (done) {
             JkLog.trace("Tests has already been performed. Won't do it again.");
         } else if (skipped) {

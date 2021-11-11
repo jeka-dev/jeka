@@ -71,8 +71,7 @@ public final class JkPathTree implements Closeable {
     }
 
     /**
-     * Returns the root directory. In case of zip archive it returns a directory entry
-     * within the zip archive.
+     * Returns the root directory. In case of zip archive it returns a directory entry within the zip archive.
      */
     public Path getRoot() {
         return rootHolder.get();

@@ -7,7 +7,7 @@ import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkRepoFromOptions;
 import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.core.tool.builtins.project.JkWarArchiver;
+import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 
 import java.nio.file.Path;
 
@@ -20,13 +20,11 @@ import java.nio.file.Path;
  */
 public class WarPluginBuild extends JkClass {
 
-    public int port = 8080;
+    public String port = "8080";
 
     public String jettyRunnerVersion = "9.4.28.v20200408";
 
     JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
-
-    JkWarArchiver war = getPlugin(JkWarArchiver.class);
 
     @Override
     protected void setup() {
@@ -34,9 +32,12 @@ public class WarPluginBuild extends JkClass {
                .setCompileDependencies(deps -> deps
                        .and("com.google.guava:guava:30.0-jre")
                        .and("javax.servlet:javax.servlet-api:4.0.1"))
+               .setPublishedMavenModuleId("dev.jeka.samples:war-project")
+               .setPublishedMavenVersion("1.0-SNAPSHOT")
                .setRuntimeDependencies(compileDeps -> compileDeps
                        .minus("javax.servlet:javax.servlet-api"))
                .setJvmTargetVersion(JkJavaVersion.V8)
+               .includeJavadocAndSources(false, false)
                .getProject()
                     .getConstruction()
                         .getCompilation()
@@ -44,10 +45,16 @@ public class WarPluginBuild extends JkClass {
                                 .emptySources().addSource("src/main/javaweb").__.__
                .getTesting()
                    .setSkipped(true);
+       JkJ2eWarProjectAdapter.of()
+               .configure(projectPlugin.getProject());
     }
 
     public void cleanPackRun() {
-        clean(); projectPlugin.pack(); runWarWithJetty();
+        clean(); projectPlugin.pack(); projectPlugin.publishLocal();
+    }
+
+    public void check() {
+        runWarWithJetty();
     }
 
     public void runWarWithJetty() {
@@ -56,11 +63,11 @@ public class WarPluginBuild extends JkClass {
         Path jettyRunner = JkRepoFromOptions.getDownloadRepo().toSet().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);
         JkJavaProcess.ofJavaJar(jettyRunner, null)
-                .exec(artifactProducer.getMainArtifactPath().toString(), "--port", Integer.toString(port));
+                .exec(artifactProducer.getMainArtifactPath().toString(), "--port", port);
     }
     
     public static void main(String[] args) {
-	    JkInit.instanceOf(WarPluginBuild.class, args).cleanPackRun();
+	    JkInit.instanceOf(WarPluginBuild.class, args, "-LS=DEBUG").cleanPackRun();
     }
 
 

@@ -53,7 +53,7 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
             // do nothing
         } else if (logType== JkLog.Type.START_TASK) {
             marginErr.flush();
-            stream.println(message);
+            out.println(message);
             marginOut.notifyStart();
             marginErr.notifyStart();
             marginErr.mustPrintMargin = true;

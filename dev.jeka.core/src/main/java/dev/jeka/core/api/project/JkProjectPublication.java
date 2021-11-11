@@ -102,12 +102,15 @@ public class JkProjectPublication {
     /**
      * Specifies if Javadoc and sources jars should be included in pack/publish. Default is true;
      */
-    public JkProjectPublication includeJavadocAndSources(boolean include) {
-        if (include) {
+    public JkProjectPublication includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
+        if (includeJavaDoc) {
             artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, project.getDocumentation()::createJavadocJar);
-            artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
         } else {
             artifactProducer.removeArtifact(JAVADOC_ARTIFACT_ID);
+        }
+        if (includeSources) {
+            artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
+        } else {
             artifactProducer.removeArtifact(SOURCES_ARTIFACT_ID);
         }
         return this;

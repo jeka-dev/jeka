@@ -123,7 +123,7 @@ public class JkProjectCompilation<T> {
     /**
      * As #run but perform only if not already done.
      */
-    public void runIfNecessary() {
+    public void runIfNeeded() {
         if (done) {
             JkLog.trace(JAVA_SOURCES_COMPILE_ACTION + " already done. Won't perform again.");
         } else {

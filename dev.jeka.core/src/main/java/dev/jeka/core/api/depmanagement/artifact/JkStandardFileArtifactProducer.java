@@ -85,6 +85,10 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
         return this;
     }
 
+    public JkStandardFileArtifactProducer<T> putArtifact(String name, String ext, Consumer<Path> artifactFileMaker) {
+        return putArtifact(JkArtifactId.of(name, ext), artifactFileMaker);
+    }
+
     public JkStandardFileArtifactProducer<T> putMainArtifact(Consumer<Path> artifactFileMaker) {
         return putArtifact(getMainArtifactId(), artifactFileMaker);
     }
@@ -93,6 +97,10 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
     public JkStandardFileArtifactProducer<T> removeArtifact(JkArtifactId artifactId) {
         consumers.remove(artifactId);
         return this;
+    }
+
+    public JkStandardFileArtifactProducer<T> removeArtifact(String name, String ext) {
+        return removeArtifact(JkArtifactId.of(name, ext));
     }
 
     @Override

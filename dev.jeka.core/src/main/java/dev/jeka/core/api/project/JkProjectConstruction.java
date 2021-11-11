@@ -169,8 +169,8 @@ public class JkProjectConstruction {
     }
 
     public void createBinJar(Path target) {
-        compilation.runIfNecessary();
-        testing.runIfNecessary();
+        compilation.runIfNeeded();
+        testing.runIfNeeded();
         addManifestDefaults();
         JkJarPacker.of(compilation.getLayout().resolveClassDir())
                 .withManifest(manifest)
@@ -183,8 +183,8 @@ public class JkProjectConstruction {
     }
 
     public void createFatJar(Path target) {
-        compilation.runIfNecessary();
-        testing.runIfNecessary();
+        compilation.runIfNeeded();
+        testing.runIfNeeded();
         JkLog.startTask("Packing fat jar...");
         Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
         addManifestDefaults();

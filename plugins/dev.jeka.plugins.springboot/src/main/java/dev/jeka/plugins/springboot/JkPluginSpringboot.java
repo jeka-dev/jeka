@@ -132,7 +132,7 @@ public final class JkPluginSpringboot extends JkPlugin {
         project.getConstruction().getTesting().getTestProcessor().setForkingProcess(true);
 
         // Do not publish javadoc and sources
-        project.getPublication().includeJavadocAndSources(false);
+        project.getPublication().includeJavadocAndSources(false, false);
 
         // Add springboot version to Manifest
         project.getConstruction().getManifest().addMainAttribute(SPRING_BOOT_VERSION_MANIFEST_ENTRY,
