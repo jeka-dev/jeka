@@ -15,7 +15,7 @@ final class IdeSupport {
             JkIdeSupport.JkSupplier supplier = (JkIdeSupport.JkSupplier) jkClass;
             return supplier.getJavaIdeSupport();
         }
-        List<JkIdeSupport.JkSupplier> suppliers = jkClass.getPlugins().getLoadedPluginInstanceOf(
+        List<JkIdeSupport.JkSupplier> suppliers = jkClass.getJkBeanRegistry().getLoadedPluginInstanceOf(
                 JkIdeSupport.JkSupplier.class);
         return suppliers.stream()
                 .filter(supplier -> supplier != null)

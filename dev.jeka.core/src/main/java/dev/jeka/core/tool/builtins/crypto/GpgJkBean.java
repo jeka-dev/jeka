@@ -12,7 +12,7 @@ import java.nio.file.Path;
         "- Path mentioned in this plugin options 'publicRingPath' 'secretRingPath'.",
         "- If none, project local path [root]/jeka/pgp/pub[sec]ring.gpg",
         "- If none,  standard location ([USER HOME]/AppData/Roaming/gnupg/pub[sec]ring.gpg on Windows and [USER_HOME]/.gnupg/pub[sec]ring.gpg on *nix"})
-public class JkPluginGpg extends JkPlugin {
+public class GpgJkBean extends JkBean {
 
     @JkDoc("Path for the public key ring.")
     @JkEnv("GPG_PUBLIC_RING")
@@ -31,7 +31,7 @@ public class JkPluginGpg extends JkPlugin {
 
     private JkGpg gpg;
 
-    protected JkPluginGpg(JkClass jkClass) {
+    protected GpgJkBean(JkClass jkClass) {
         super(jkClass);
     }
 

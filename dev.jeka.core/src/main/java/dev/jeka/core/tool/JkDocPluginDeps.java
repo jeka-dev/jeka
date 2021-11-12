@@ -15,6 +15,6 @@ public @interface JkDocPluginDeps {
     /**
      * Plugins classes this plugin relies on.
      */
-    Class<? extends JkPlugin>[] value();
+    Class<? extends JkBean>[] value();
 
 }

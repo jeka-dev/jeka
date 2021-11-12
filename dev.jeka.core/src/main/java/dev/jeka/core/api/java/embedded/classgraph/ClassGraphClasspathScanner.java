@@ -63,11 +63,11 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     }
 
     @Override
-    public List<String> findClassesHavingMainMethod(ClassLoader classloader) {
+    public List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader) {
         final ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
                 .enableMethodInfo()
-                .overrideClassLoaders(classloader)
+                .overrideClassLoaders(extraClassLoader)
                 .ignoreParentClassLoaders();
         final ScanResult scanResult = classGraph.scan();
         final List<String> result = new LinkedList<>();

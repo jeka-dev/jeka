@@ -6,7 +6,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkRepoFromOptions;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 
 import java.nio.file.Path;
@@ -24,7 +24,7 @@ public class WarPluginBuild extends JkClass {
 
     public String jettyRunnerVersion = "9.4.28.v20200408";
 
-    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
     @Override
     protected void setup() {

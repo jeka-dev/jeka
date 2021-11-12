@@ -4,14 +4,14 @@ import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkPlugin;
+import dev.jeka.core.tool.JkBean;
 
 @JkDoc("Plugin providing common Git scripts/commands out of the box.")
-public class JkPluginGit extends JkPlugin {
+public class GitJkBean extends JkBean {
 
     private final JkGitProcess git;
 
-    protected JkPluginGit(JkClass jkClass) {
+    protected GitJkBean(JkClass jkClass) {
         super(jkClass);
         git = JkGitProcess.of(jkClass.getBaseDir());
     }

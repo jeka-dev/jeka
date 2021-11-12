@@ -5,7 +5,6 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import dev.jeka.core.api.utils.JkUtilsXml;
-import dev.jeka.core.tool.PluginDictionary.PluginDescription;
 import dev.jeka.core.tool.ProjectDef.RunClassDef;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -34,8 +33,8 @@ final class HelpDisplayer {
                 .append(RunClassDef.of(jkClass).description());
 
         // List plugins
-        final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
-        List<String> names = pluginDescriptions.stream().map(pluginDescription -> pluginDescription.shortName()).collect(Collectors.toList());
+        final Set<KBeanDictionary.KBeanDescription> KBeanDescriptions = new KBeanDictionary().getAll();
+        List<String> names = KBeanDescriptions.stream().map(KBeanDescription -> KBeanDescription.shortName()).collect(Collectors.toList());
         sb.append("\nAvailable plugins in classpath : ").append(String.join(", ", names))
                 .append(".\n");
 
@@ -79,26 +78,26 @@ final class HelpDisplayer {
         JkLog.info(helpPluginsDescription(jkClass));
     }
 
-    static void helpPlugin(JkPlugin plugin) {
-        final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
-        for (PluginDescription pluginDescription : pluginDescriptions) {
-            if (pluginDescription.shortName().equals(plugin.name())) {
-                JkLog.info(helpPluginDescription(plugin.getJkClass(), pluginDescription));
+    static void helpPlugin(JkBean plugin) {
+        final Set<KBeanDictionary.KBeanDescription> KBeanDescriptions = new KBeanDictionary().getAll();
+        for (KBeanDictionary.KBeanDescription KBeanDescription : KBeanDescriptions) {
+            if (KBeanDescription.shortName().equals(plugin.shortName())) {
+                JkLog.info(helpPluginDescription(plugin.getJkClass(), KBeanDescription));
                 return;
             }
         }
     }
 
     private static String helpPluginsDescription(JkClass jkClass) {
-        final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
+        final Set<KBeanDictionary.KBeanDescription> KBeanDescriptions = new KBeanDictionary().getAll();
         StringBuilder sb = new StringBuilder();
-        for (final PluginDescription description : pluginDescriptions) {
+        for (final KBeanDictionary.KBeanDescription description : KBeanDescriptions) {
             sb.append(helpPluginDescription(jkClass, description));
         }
         return sb.toString();
     }
 
-    private static String helpPluginDescription(JkClass jkClass, PluginDescription description) {
+    private static String helpPluginDescription(JkClass jkClass, KBeanDictionary.KBeanDescription description) {
         StringBuilder sb = new StringBuilder();
         sb.append("\nPlugin Class : " + description.fullName());
         sb.append("\nPlugin Name : " + description.shortName());
@@ -122,9 +121,9 @@ final class HelpDisplayer {
         } else {
             sb.append("\nActivation Effect : Not documented.");
         }
-        final JkPlugin plugin;
-        if (jkClass.getPlugins().hasLoaded(description.pluginClass())) {
-            plugin = jkClass.getPlugin(description.pluginClass());
+        final JkBean plugin;
+        if (jkClass.getJkBeanRegistry().hasLoaded(description.pluginClass())) {
+            plugin = jkClass.getJkBean(description.pluginClass());
         } else {
             plugin = JkUtilsReflect.newInstance(description.pluginClass(), JkClass.class, jkClass);
         }

@@ -1,7 +1,6 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkManifest;
@@ -30,9 +29,9 @@ final class PluginCompatibilityBreakChecker {
 
     static void checkCompatibility(Class pluginClass, JkDependencyResolver resolver) {
         JkManifest manifest = JkManifest.of().loadFromClass(pluginClass);
-        String breakingChangeUrl = manifest.getMainAttribute(JkPlugin.MANIFEST_BREAKING_CHANGE_URL_ENTRY);
+        String breakingChangeUrl = manifest.getMainAttribute(JkBean.MANIFEST_BREAKING_CHANGE_URL_ENTRY);
         String lowestJekaCompatibleVersion = manifest.getMainAttribute(
-                JkPlugin.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY);
+                JkBean.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY);
 
         // Check Jeka version is not too low
         JkVersion jekaVersion = JkVersion.of(JkInfo.getJekaVersion());
@@ -99,7 +98,7 @@ final class PluginCompatibilityBreakChecker {
 
         private final Path cachePath;
 
-        CompatibilityCache(Class<JkPlugin> pluginClass) {
+        CompatibilityCache(Class<JkBean> pluginClass) {
             cachePath = JkLocator.getJekaHomeDir().resolve("plugins-compatibility")
                     .resolve(pluginClass.getName() + "-compatibility.txt");
         }

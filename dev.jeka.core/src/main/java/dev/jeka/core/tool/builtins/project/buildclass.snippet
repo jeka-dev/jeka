@@ -3,11 +3,11 @@ import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-class Build extends JkClass {
+    class Build extends JkClass {
 
-    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    final ProjectJkBean projectKBean = getJkBean(ProjectJkBean.class);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
@@ -15,7 +15,7 @@ class Build extends JkClass {
      */
     @Override
     protected void setup() {
-        projectPlugin.getProject()
+        projectKBean.getProject()
             .getConstruction()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .getCompilation()

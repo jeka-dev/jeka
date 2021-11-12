@@ -13,12 +13,12 @@ import dev.jeka.core.api.utils.JkUtilsString
 import dev.jeka.core.tool.JkClass
 import dev.jeka.core.tool.JkDoc
 import dev.jeka.core.tool.JkInit
-import dev.jeka.core.tool.builtins.project.JkPluginProject
+import dev.jeka.core.tool.builtins.project.ProjectJkBean
 import java.awt.Desktop
 
 class Build : JkClass() {
 
-    val kotlin = getPlugin(JkPluginKotlin::class.java)
+    val kotlin = getJkBean(JkPluginKotlin::class.java)
 
     val serializationVersion = "1.2.1"
     val ktorVersion = "1.6.1"
@@ -46,7 +46,7 @@ class Build : JkClass() {
                     .and(JkKotlinModules.TEST_JUNIT5)
                 }
         jvmProject.construction.manifest.addMainClass("ServerKt")
-        jvmProject.publication.includeJavadocAndSources(false)
+        jvmProject.publication.includeJavadocAndSources(false, false)
         kotlin.jvm()
             .useFatJarForMainArtifact()
             .kotlinCompiler
@@ -100,7 +100,7 @@ class Build : JkClass() {
 
     object PrintDeps  {
         @JvmStatic fun main(args: Array<String>){
-            JkInit.instanceOf(Build::class.java, *args).getPlugin(JkPluginProject::class.java).showDependencies()
+            JkInit.instanceOf(Build::class.java, *args).getJkBean(ProjectJkBean::class.java).showDependencies()
         }
     }
 

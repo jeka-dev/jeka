@@ -2,11 +2,11 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class JacocoPluginBuild extends JkClass {
 
-    private final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    private final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
     @Override
     protected void setup() {

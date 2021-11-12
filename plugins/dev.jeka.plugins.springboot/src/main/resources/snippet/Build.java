@@ -2,12 +2,12 @@ import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.plugins.springboot.JkPluginSpringboot;
+import dev.jeka.plugins.springboot.SpringbootJkBean;
 
 @JkDefClasspath("${dependencyDescription}")
 class Build extends JkClass {
 
-    private final JkPluginSpringboot springboot = getPlugin(JkPluginSpringboot.class);
+    private final SpringbootJkBean springboot = getJkBean(SpringbootJkBean.class);
 
     @Override
     protected void setup() {

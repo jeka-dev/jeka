@@ -34,7 +34,7 @@ public class JkClass {
 
     private final Path baseDir;
 
-    private JkClassPlugins plugins;
+    private JkBeanRegistry jkBeanRegistry;
 
     private JkDependencyResolver defDependencyResolver;
 
@@ -64,7 +64,7 @@ public class JkClass {
         this.importedJkClasses = JkImportedJkClasses.of(this);
 
         // Instantiate plugins
-        this.plugins = new JkClassPlugins(this, Environment.commandLine.getPluginOptions());
+        this.jkBeanRegistry = new JkBeanRegistry(this, Environment.commandLine.getPluginOptions());
     }
 
     /**
@@ -93,14 +93,14 @@ public class JkClass {
             jkClass.initialise();
         }
 
-        for (JkPlugin plugin : new LinkedList<>(plugins.getLoadedPlugins())) {
+        for (JkBean plugin : new LinkedList<>(jkBeanRegistry.getRegisteredJkBean())) {
             List<ProjectDef.JkClassOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
-            JkLog.startTask("Activating Plugin " + plugin.name() + " with options "
+            JkLog.startTask("Activating Plugin " + plugin.shortName() + " with options "
                     + HelpDisplayer.optionValues(defs));
             try {
                 plugin.afterSetup();
             } catch (RuntimeException e) {
-                JkLog.error("Plugin " + plugin.name() + " has caused build instantiation failure.");
+                JkLog.error("Plugin " + plugin.shortName() + " has caused build instantiation failure.");
                 throw e;
             }
             JkLog.endTask();
@@ -128,11 +128,11 @@ public class JkClass {
                 + "' from command line does not match with any field of class " + jkCkass.getClass().getName()));
 
         // Load plugins declared in command line and inject options
-        jkClassInstance.plugins.loadCommandLinePlugins();
-        List<JkPlugin> plugins = jkClassInstance.getPlugins().getLoadedPlugins();
-        for (JkPlugin plugin : plugins) {
-            if (!jkClassInstance.plugins.getLoadedPlugins().contains(plugin)) {
-                jkClassInstance.plugins.injectOptions(plugin);
+        jkClassInstance.jkBeanRegistry.loadCommandLinePlugins();
+        List<JkBean> plugins = jkClassInstance.getJkBeanRegistry().getRegisteredJkBean();
+        for (JkBean plugin : plugins) {
+            if (!jkClassInstance.jkBeanRegistry.getRegisteredJkBean().contains(plugin)) {
+                jkClassInstance.jkBeanRegistry.injectOptions(plugin);
             }
         }
         return jkCkass;
@@ -140,14 +140,14 @@ public class JkClass {
 
     /**
      * Configure your build and plugins here.
-     * At this point, option values has been injected and {@link JkPlugin#beforeSetup()} method invoked on all plugins.
+     * At this point, option values has been injected and {@link JkBean#beforeSetup()} method invoked on all plugins.
      */
     protected void setup() throws Exception {
         // Do nothing by default
     }
 
     /**
-     * This method is called once {@link JkPlugin#afterSetup()} method has been invoked on all plugins.
+     * This method is called once {@link JkBean#afterSetup()} method has been invoked on all plugins.
      * It gives a chance to the Jeka class to override some plugin settings.
      */
     protected void postSetup() throws Exception {
@@ -181,8 +181,8 @@ public class JkClass {
     /**
      * Returns the container of loaded plugins for this instance.
      */
-    public JkClassPlugins getPlugins() {
-        return this.plugins;
+    public JkBeanRegistry getJkBeanRegistry() {
+        return this.jkBeanRegistry;
     }
 
     /**
@@ -190,8 +190,8 @@ public class JkClass {
      * Returns the plugin instance of the specified class loaded in the holding JkClass instance. If it does not hold
      * a plugin of the specified class at call time, the plugin is loaded then returned.
      */
-    public <T extends JkPlugin> T getPlugin(Class<T> pluginClass) {
-        return getPlugins().get(pluginClass);
+    public <T extends JkBean> T getJkBean(Class<T> pluginClass) {
+        return getJkBeanRegistry().get(pluginClass);
     }
 
 

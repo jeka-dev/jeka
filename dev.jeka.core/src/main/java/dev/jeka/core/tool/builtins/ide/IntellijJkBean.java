@@ -12,7 +12,7 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @JkDoc("Generation of Idea Intellij metadata files (*.iml and modules.xml).")
-public final class JkPluginIntellij extends JkPlugin {
+public final class IntellijJkBean extends JkBean {
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")
     public boolean useVarPath = true;
@@ -48,7 +48,7 @@ public final class JkPluginIntellij extends JkPlugin {
 
     private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
-    protected JkPluginIntellij(JkClass run) {
+    protected IntellijJkBean(JkClass run) {
         super(run);
     }
 
@@ -96,8 +96,8 @@ public final class JkPluginIntellij extends JkPlugin {
                 .forEach(jkClassModuleDeps::add);
         generator.setExtraJekaModules(jkClassModuleDeps);
         Path basePath = jkClass.getBaseDir();
-        if (jkClass.getPlugins().hasLoaded(JkPluginProject.class)) {
-            jkClass.getPlugins().get(JkPluginProject.class);
+        if (jkClass.getJkBeanRegistry().hasLoaded(ProjectJkBean.class)) {
+            jkClass.getJkBeanRegistry().get(ProjectJkBean.class);
             generator.setForceJdkVersion(forceJdkVersion);
         }
 
@@ -178,7 +178,7 @@ public final class JkPluginIntellij extends JkPlugin {
         }
     }
 
-    public JkPluginIntellij addProjectLibrary(String xml) {
+    public IntellijJkBean addProjectLibrary(String xml) {
         this.projectLibraries.add(xml);
         return this;
     }

@@ -10,7 +10,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
  * Therefore, plugins can interact with (or load) other plugins from the owning <code>JkClass</code> instance
  * (which is a quite common pattern).
  */
-public abstract class JkPlugin {
+public abstract class JkBean {
 
     /**
      * When publishing a plugin, authors can not guess which future version of Jeka will break compatibility.
@@ -37,7 +37,7 @@ public abstract class JkPlugin {
      */
     public static final String MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY = "Jeka-Lowest-Compatible-Version";
 
-    private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
+    private static final String CLASS_SUFIX = JkBean.class.getSimpleName();
 
     private final JkClass jkClass;
 
@@ -47,7 +47,7 @@ public abstract class JkPlugin {
      * If a plugin needs to initialize state before options are injected, you have to do it in the
      * constructor.
      */
-    protected JkPlugin(JkClass jkClass) {
+    protected JkBean(JkClass jkClass) {
         this.jkClass = jkClass;
     }
 
@@ -75,14 +75,18 @@ public abstract class JkPlugin {
     protected void afterSetup() throws Exception {
     }
 
-    public final String name() {
-        final String className = this.getClass().getSimpleName();
-        if (! className.startsWith(CLASS_PREFIX) || className.equals(CLASS_PREFIX)) {
-            throw new IllegalStateException(String.format("Plugin class not properly named. Name should be formatted as " +
-                    "'%sXxxx' where xxxx is the name of the plugin (uncapitalized). Was %s.", CLASS_PREFIX, className));
+    final String shortName() {
+        return shortName(this.getClass());
+    }
+
+    static String shortName(Class<?> jkBeanClass) {
+        final String className = jkBeanClass.getSimpleName();
+        if (! className.endsWith(CLASS_SUFIX) || className.equals(CLASS_SUFIX)) {
+            throw new IllegalStateException(String.format("Plugin class " + className + " not properly named. Name should be formatted as " +
+                    "'Xxxx%s' where xxxx is the name of the KBean (uncapitalized).", CLASS_SUFIX, className));
         }
-        final String suffix = className.substring(CLASS_PREFIX.length());
-        return JkUtilsString.uncapitalize(suffix);
+        final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFIX);
+        return JkUtilsString.uncapitalize(prefix);
     }
 
     public JkClass getJkClass() {
@@ -98,13 +102,13 @@ public abstract class JkPlugin {
      * Convenient method to set a Jeka Plugin compatibility range with Jeka versions.
      * @param lowestVersion Can be null
      * @param breakingChangeUrl Can be null
-     * @see JkPlugin#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
-     * @See JkPlugin#MANIFEST_BREAKING_CHANGE_URL_ENTRY
+     * @see JkBean#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
+     * @See JkBean#MANIFEST_BREAKING_CHANGE_URL_ENTRY
      */
     public static void setJekaPluginCompatibilityRange(JkManifest manifest, String lowestVersion, String breakingChangeUrl) {
         manifest
-                .addMainAttribute(JkPlugin.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, lowestVersion)
-                .addMainAttribute(JkPlugin.MANIFEST_BREAKING_CHANGE_URL_ENTRY, breakingChangeUrl);
+                .addMainAttribute(JkBean.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, lowestVersion)
+                .addMainAttribute(JkBean.MANIFEST_BREAKING_CHANGE_URL_ENTRY, breakingChangeUrl);
     }
 
 

@@ -2,7 +2,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
@@ -31,7 +31,7 @@ import java.nio.file.Path;
 @JkDefClasspath("org.junit.platform:junit-platform-launcher:1.8.1")
 class Junit5Build extends JkClass {
 
-    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option

@@ -21,7 +21,7 @@ import java.util.List;
 import static dev.jeka.core.api.project.JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION;
 
 @JkDefClasspath("org.jetbrains.kotlin:kotlin-compiler:1.5.31")
-public class JkPluginKotlin extends JkPlugin {
+public class JkPluginKotlin extends JkBean {
 
     public static final String KOTLIN_JVM_SOURCES_COMPILE_ACTION = "kotlin-jvm-sources-compile";
 

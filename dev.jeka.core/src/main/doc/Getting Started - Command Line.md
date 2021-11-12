@@ -760,11 +760,11 @@ import dev.jeka.core.api.depmanagement.publication.JkScope;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkPluginProject;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class Build extends JkClass {
 
-    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
     /*
      * Configures plugins to be bound to this Jeka class. When this method is called, option

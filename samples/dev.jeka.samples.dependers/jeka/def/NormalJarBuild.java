@@ -4,7 +4,7 @@ import dev.jeka.core.samples.JavaPluginBuild;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 /**
  * Simple build demonstrating how Jeka can handle multi-project build.
@@ -20,7 +20,7 @@ import dev.jeka.core.tool.builtins.project.JkPluginProject;
  */
 public class NormalJarBuild extends JkClass {
 
-    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.

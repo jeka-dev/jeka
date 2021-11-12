@@ -83,27 +83,29 @@ final class Engine {
      */
     void execute(CommandLine commandLine) {
         final long start = System.nanoTime();
-        JkLog.startTask("Compile def and initialise Jeka classes");
+        JkLog.startTask("Compile def and initialise KBeans");
         List<JkDependency> commandLineDependencies = commandLine.getDefDependencies();
-        JkLog.trace("Add following dependencies to Jeka classpath : " + commandLineDependencies);
+        JkLog.trace("Add following dependencies to def classpath : " + commandLineDependencies);
         defDependencies = defDependencies
                 .and(commandLineDependencies)
                 .and(dependenciesOnJeka());
         JkClass jkClass = null;
-        JkPathSequence path;
+        JkBean jkBean = null;
+        JkPathSequence computedClasspath;
         String jkClassHint = Environment.standardOptions.jkClassName();
         preCompile();  // Need to pre-compile to get the declared def dependencies
 
-        // First try to instantiate class without compiling and resolving if a jeka class
-        // has been specified and no extra dependencies defined in command line.
+        // First try to instantiate class with classes found on current classloader
         if (!JkUtilsString.isBlank(jkClassHint) && Environment.commandLine.getDefDependencies().isEmpty()) {  // First find a class in the existing classpath without compiling
             jkClass = getJkClassInstance(jkClassHint, JkPathSequence.of());
         }
 
-        // No JkClass has been foud
+
+
+        // No JkClass has been found
         if (jkClass == null) {
-            path = resolveAndCompile(true);
-            jkClass = getJkClassInstance(jkClassHint, path);
+            computedClasspath = resolveAndCompile(true);
+            jkClass = getJkClassInstance(jkClassHint, computedClasspath);
             if (jkClass == null) {
                 String hint = JkUtilsString.isBlank(jkClassHint) ? "" : " named " + jkClassHint;
                 String prompt = !JkUtilsString.isBlank(jkClassHint) ? ""
@@ -112,8 +114,14 @@ final class Engine {
                         hint, this.projectBaseDir, prompt);
             }
         } else {
-            path = resolveAndCompile(false);
+            computedClasspath = resolveAndCompile(false);
         }
+
+        // Get default JkBean
+        jkBean = resolver.resolveDefaultJkBean();
+
+        JkRuntime.setDependenciesAndResolver(defDependencies, getDefDependencyResolver());
+        JkRuntime.setImportedProjectDirs(this.rootsOfImportedJekaClasses);
         jkClass.setDefDependencyResolver(this.defDependencies, getDefDependencyResolver());
         jkClass.getImportedJkClasses().setImportedRunRoots(this.rootsOfImportedJekaClasses);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -124,10 +132,11 @@ final class Engine {
         }
         if (Environment.standardOptions.logRuntimeInformation != null) {
             JkLog.info("Jeka Classpath : ");
-            path.iterator().forEachRemaining(item -> JkLog.info("    " + item));
+            computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
         }
         try {
-            this.launch(jkClass, commandLine);
+            JkRuntime.setInstance(jkClass);
+            this.launch(jkClass, jkBean, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -206,6 +215,14 @@ final class Engine {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
         }
+    }
+
+    private JkBean findDefaultJkBeanInstance(JkPathSequence runtimePath) {
+        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
+        classLoader.addEntries(runtimePath);
+        JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
+        final JkBean jkBean = resolver.resolveDefaultJkBean();
+        return jkBean;
     }
 
     private JkDependencySet dependenciesOnJeka() {
@@ -291,18 +308,12 @@ final class Engine {
         }
     }
 
-    private void launch(JkClass jkClass, CommandLine commandLine) {
-        if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkClass importedJkClass : jkClass.getImportedJkClasses().getAll()) {
-                runProject(importedJkClass, commandLine.getSubProjectMethods());
-            }
-            runProject(jkClass, commandLine.getSubProjectMethods());
-        }
+    private void launch(JkClass jkClass, JkBean jkBean, CommandLine commandLine) {
         List<CommandLine.MethodInvocation> methods = commandLine.getMasterMethods();
         if (methods.isEmpty() && Environment.standardOptions.logRuntimeInformation == null) {
             methods = Collections.singletonList(CommandLine.MethodInvocation.normal(JkConstants.DEFAULT_METHOD));
         }
-        runProject(jkClass, methods);
+        runProject(jkClass, jkBean, methods);
     }
 
     private boolean hasKotlin() {
@@ -332,38 +343,40 @@ final class Engine {
         return JkDependencyResolver.of().addRepos(this.defRepos);
     }
 
-    private static void runProject(JkClass jkClass, List<CommandLine.MethodInvocation> invokes) {
+    private static void runProject(JkClass jkClass, JkBean jkBean, List<CommandLine.MethodInvocation> invokes) {
         for (final CommandLine.MethodInvocation methodInvocation : invokes) {
-            invokeMethodOnCommandSetOrPlugin(jkClass, methodInvocation);
+            invokeMethodOnCommandSetOrPlugin(jkClass, jkBean, methodInvocation);
         }
     }
 
-    private static void invokeMethodOnCommandSetOrPlugin(JkClass jkClass,
+    private static void invokeMethodOnCommandSetOrPlugin(JkClass jkClass, JkBean defaultJkBean,
                                                          CommandLine.MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
-            final JkPlugin plugin = jkClass.getPlugins().get(methodInvocation.pluginName);
-            invokeMethodOnCommandsOrPlugin(plugin, methodInvocation.methodName);
+            final JkBean jkBean = jkClass.getJkBeanRegistry().get(methodInvocation.pluginName);
+            invokeMethodOnJkBean(jkBean, methodInvocation.methodName);
+        } else if (JkClass.class.equals(jkClass)){
+            invokeMethodOnJkBean(defaultJkBean, methodInvocation.methodName);
         } else {
-            invokeMethodOnCommandsOrPlugin(jkClass, methodInvocation.methodName);
+            invokeMethodOnJkBean(jkClass, methodInvocation.methodName);
         }
     }
 
     /**
-     * Invokes the specified method in this run.
+     * Invokes the specified method on the specified KBean.
      */
-    private static void invokeMethodOnCommandsOrPlugin(Object run, String methodName) {
+    private static void invokeMethodOnJkBean(Object jkBean, String methodName) {
         final Method method;
         try {
-            method = run.getClass().getMethod(methodName);
+            method = jkBean.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
-            throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + run.getClass());
+            throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + jkBean.getClass());
         }
-        String fullMethodName = run.getClass().getName() + "#" + methodName;
+        String fullMethodName = jkBean.getClass().getName() + "#" + methodName;
         if (Environment.standardOptions.logSetup) {
             JkLog.startTask("\nExecute method : " + fullMethodName);
         }
         try {
-            JkUtilsReflect.invoke(run, method);
+            JkUtilsReflect.invoke(jkBean, method);
             if (Environment.standardOptions.logSetup) {
                 JkLog.endTask("Method " + fullMethodName + " succeeded in %d milliseconds.");
             }

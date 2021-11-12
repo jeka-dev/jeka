@@ -43,9 +43,9 @@ public final class JkImportedJkClasses {
         return Collections.unmodifiableList(directImportedJkClasses);
     }
 
-    public <T extends JkPlugin> List<T> getDirect(Class<T> pluginClass) {
+    public <T extends JkBean> List<T> getDirect(Class<T> pluginClass) {
         return directImportedJkClasses.stream()
-                .map(build -> build.getPlugins().getOptional(pluginClass))
+                .map(build -> build.getJkBeanRegistry().getOptional(pluginClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());

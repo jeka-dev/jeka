@@ -1,7 +1,7 @@
 import dev.jeka.core.samples.JavaPluginBuild;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefImport;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 /**
  * Simple build demonstrating of how Jeka can handle multi-project build.
@@ -12,7 +12,7 @@ import dev.jeka.core.tool.builtins.project.JkPluginProject;
  */
 public class FatJarBuild extends JkClass {
 
-    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
     
     @JkDefImport("../dev.jeka.samples.basic")
     private JavaPluginBuild sampleBuild;

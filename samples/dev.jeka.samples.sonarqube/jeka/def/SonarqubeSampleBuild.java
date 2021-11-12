@@ -5,8 +5,8 @@ import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.plugins.sonarqube.JkPluginSonarqube;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
 import dev.jeka.plugins.sonarqube.JkSonarqube;
 
 /**
@@ -17,9 +17,9 @@ import dev.jeka.plugins.sonarqube.JkSonarqube;
 @JkDefClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
 class SonarqubeSampleBuild extends JkClass {
 
-    private final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    private final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
-    private final JkPluginSonarqube sonarqubePlugin = getPlugin(JkPluginSonarqube.class);
+    private final SonarqubeJkBean sonarqubePlugin = getJkBean(SonarqubeJkBean.class);
 
     @Override
     protected void setup() {

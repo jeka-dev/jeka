@@ -18,39 +18,39 @@ import java.util.stream.Collectors;
  * to a given class and that respect a certain naming convention.<br/>
  * <p>
  * The naming convention is as follow : The class simple name should be prefixed
- * with 'JkPlugin'.<br/>
+ * with 'JkBean'.<br/>
  * For example, 'my.package.JkPluginXxxxx' will be discovered as a plugin named Xxxxx.
  *
  * @author Jerome Angibaud
  * 
- * @see {@link PluginDescription}
+ * @see {@link KBeanDescription}
  */
-final class PluginDictionary {
+final class KBeanDictionary {
 
-    private static final Map<String, PluginDescription> SHORTNAME_CACHE = new LinkedHashMap<>();
+    private static final Map<String, KBeanDescription> SHORTNAME_CACHE = new LinkedHashMap<>();
 
-    private Set<PluginDescription> plugins;
+    private Set<KBeanDescription> jkBeans;
 
     /**
      * Returns all the plugins present in classpath for this template class.
      */
-    Set<PluginDescription> getAll() {
-        if (plugins == null) {
+    Set<KBeanDescription> getAll() {
+        if (jkBeans == null) {
             synchronized (this) {
-                final Set<PluginDescription> result = loadAllPlugins();
-                this.plugins = Collections.unmodifiableSet(result);
+                final Set<KBeanDescription> result = loadAllPlugins();
+                this.jkBeans = Collections.unmodifiableSet(result);
             }
         }
-        return this.plugins;
+        return this.jkBeans;
     }
 
     /**
      * Returns the plugin having the specified name.
      * If the specified name can be a short name (like 'myPlugin') or a full class name
      */
-    static PluginDescription loadByName(String name) {
+    static KBeanDescription loadByName(String name) {
         if (isShortName(name)) {
-            final PluginDescription result = loadPluginHavingShortName(name);
+            final KBeanDescription result = loadPluginHavingShortName(name);
             if (result != null) {
                 return result;
             }
@@ -59,39 +59,40 @@ final class PluginDictionary {
     }
 
     private static String simpleClassName(String pluginName) {
-        return JkPlugin.class.getSimpleName() + JkUtilsString.capitalize(pluginName);
+        return JkUtilsString.capitalize(pluginName) + JkBean.class.getSimpleName();
     }
 
     private static boolean isShortName(String name) {
-        return !name.contains(".") && !name.startsWith(JkPlugin.class.getSimpleName());
+        return !name.contains(".") && !name.endsWith(JkBean.class.getSimpleName());
     }
 
     @Override
     public String toString() {
-        if (this.plugins == null) {
+        if (this.jkBeans == null) {
             return "Not loaded.";
         }
-        return this.plugins.toString();
+        return this.jkBeans.toString();
     }
 
-    private static <T> Set<PluginDescription> loadAllPlugins() {
-        final String nameSuffix = JkPlugin.class.getSimpleName();
-        Set<PluginDescription> result = toPluginDescriptions(JkInternalClasspathScanner.INSTANCE
-                .loadClassesHavingSimpleNameMatching(name -> name.startsWith(nameSuffix)));
-        for(PluginDescription pluginDescription : result) {
-            SHORTNAME_CACHE.put(pluginDescription.shortName, pluginDescription);
+    private static <T> Set<KBeanDescription> loadAllPlugins() {
+        final String nameSuffix = JkBean.class.getSimpleName();
+        Set<Class<?>> candidates = JkInternalClasspathScanner.INSTANCE
+                .loadClassesHavingSimpleNameMatching(name -> name.endsWith(nameSuffix));
+        Set<KBeanDescription> result = toJkBeanDescriptions(candidates);
+        for(KBeanDescription KBeanDescription : result) {
+            SHORTNAME_CACHE.put(KBeanDescription.shortName, KBeanDescription);
         }
         return result;
     }
 
-    private static PluginDescription loadPluginHavingShortName(String shortName) {
-        PluginDescription result = SHORTNAME_CACHE.get(shortName);
+    private static KBeanDescription loadPluginHavingShortName(String shortName) {
+        KBeanDescription result = SHORTNAME_CACHE.get(shortName);
         if (result != null) {
             return result;
         }
         final String simpleName = simpleClassName(shortName);
         Set<Class<?>> classes = JkInternalClasspathScanner.INSTANCE.loadClassesHavingSimpleName(simpleName );
-        final Set<PluginDescription> set = toPluginDescriptions(classes);
+        final Set<KBeanDescription> set = toJkBeanDescriptions(classes);
         if (set.size() > 1) {
             throw new JkException("Several plugin have the same short name : '" + shortName
                     + "'. Please disambiguate with using plugin long name (full class value)."
@@ -105,42 +106,37 @@ final class PluginDictionary {
         return result;
     }
 
-    private static PluginDescription loadPluginsHavingLongName(String longName) {
-        final Class<? extends JkPlugin> pluginClass = JkClassLoader.ofCurrent().loadIfExist(longName);
+    private static KBeanDescription loadPluginsHavingLongName(String longName) {
+        final Class<? extends JkBean> pluginClass = JkClassLoader.ofCurrent().loadIfExist(longName);
         if (pluginClass == null) {
             return null;
         }
-        return new PluginDescription(pluginClass);
+        return new KBeanDescription(pluginClass);
     }
 
-    private static Set<PluginDescription> toPluginDescriptions(Set<Class<?>> matchingClasses) {
-        return toPluginSet(matchingClasses.stream()
-                .filter(clazz -> JkPlugin.class.isAssignableFrom(clazz))
+    private static Set<KBeanDescription> toJkBeanDescriptions(Set<Class<?>> matchingClasses) {
+        Set<Class<?>> jkBeanClasses = matchingClasses.stream()
+                .filter(clazz -> JkBean.class.isAssignableFrom(clazz))
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toSet());
+        return toPluginSet(jkBeanClasses);
     }
 
     @SuppressWarnings("unchecked")
-    private static Set<PluginDescription> toPluginSet(Iterable<Class<?>> classes) {
-        final Set<PluginDescription> result = new TreeSet<>();
+    private static Set<KBeanDescription> toPluginSet(Iterable<Class<?>> classes) {
+        final Set<KBeanDescription> result = new TreeSet<>();
         for (final Class<?> clazz : classes) {
-            result.add(new PluginDescription((Class<? extends JkPlugin>) clazz));
+            result.add(new KBeanDescription((Class<? extends JkBean>) clazz));
         }
         return result;
     }
 
     /**
-     * Give the description of a plugin class as its name, its purpose and its
-     * base class.
+     * Gives the description of a KBean : its name, its purpose and its base class.
      * 
      * @author Jerome Angibaud
      */
-    static class PluginDescription implements Comparable<PluginDescription> {
-
-        private static String shortName(Class<?> clazz) {
-            return JkUtilsString.uncapitalize(JkUtilsString.substringAfterFirst(clazz.getSimpleName(),
-                    JkPlugin.class.getSimpleName()));
-        }
+    static class KBeanDescription implements Comparable<KBeanDescription> {
 
         private static String longName(Class<?> clazz) {
             return clazz.getName();
@@ -150,11 +146,11 @@ final class PluginDictionary {
 
         private final String fullName;
 
-        private final Class<? extends JkPlugin> clazz;
+        private final Class<? extends JkBean> clazz;
 
-        PluginDescription(Class<? extends JkPlugin> clazz) {
+        KBeanDescription(Class<? extends JkBean> clazz) {
             super();
-            this.shortName = shortName(clazz);
+            this.shortName = JkBean.shortName(clazz);
             this.fullName = longName(clazz);
             this.clazz = clazz;
         }
@@ -179,7 +175,7 @@ final class PluginDictionary {
             return this.fullName;
         }
 
-        public Class<? extends JkPlugin> pluginClass() {
+        public Class<? extends JkBean> pluginClass() {
             return clazz;
         }
 
@@ -197,7 +193,7 @@ final class PluginDictionary {
 
         boolean isDecorateRunDefined() {
             Method decorateRun = JkUtilsReflect.findMethodMethodDeclaration(clazz, "activate");
-            return  decorateRun != null && !decorateRun.getDeclaringClass().equals(JkPlugin.class);
+            return  decorateRun != null && !decorateRun.getDeclaringClass().equals(JkBean.class);
         }
 
         @Override
@@ -206,7 +202,7 @@ final class PluginDictionary {
         }
 
         @Override
-        public int compareTo(PluginDescription o) {
+        public int compareTo(KBeanDescription o) {
             return this.shortName.compareTo(o.shortName);
         }
     }

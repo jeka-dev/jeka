@@ -8,8 +8,8 @@ import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.core.tool.builtins.maven.JkPluginPom;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.builtins.maven.PomJkBean;
 
 
 /**
@@ -21,7 +21,7 @@ import dev.jeka.core.tool.builtins.maven.JkPluginPom;
  */
 public class JavaPluginBuild extends JkClass {
 
-    public final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    public final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
     
@@ -83,7 +83,7 @@ public class JavaPluginBuild extends JkClass {
     }
 
     public void printMvn() {
-        JkPluginPom pluginPom = getPlugin(JkPluginPom.class);
+        PomJkBean pluginPom = getJkBean(PomJkBean.class);
         pluginPom.dependencyCode();
     }
 

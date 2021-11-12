@@ -7,13 +7,13 @@ import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
-import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.git.JkPluginGit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.builtins.git.GitJkBean;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;
 
-@JkDoc({"Manage versioning of project from JkPluginProject by using Git.",
+@JkDoc({"Manage versioning of project from ProjectJkBean by using Git.",
         "The version is inferred from git : ",
         "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
         "  - If last commit contains a message containing [comment_version_prefix]xxxxx, version values xxxxx",
@@ -21,8 +21,8 @@ import java.util.Optional;
         "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
         "After, If last commit message specifies a version and this version differs from tag, " +
                 "last commit is tagged with specified version."})
-@JkDocPluginDeps(JkPluginProject.class)
-public class JkPluginVersionFromGit extends JkPlugin {
+@JkDocPluginDeps(ProjectJkBean.class)
+public class VersionFromGitJkBean extends JkBean {
 
     public static final String TAG_TASK_NAME = "version-from-git-tag";
 
@@ -32,7 +32,7 @@ public class JkPluginVersionFromGit extends JkPlugin {
     @JkDoc("Tags with following prefix. This may help to distinguish tags for versioning from others.")
     public String tagPrefixForVersion = "";
 
-    @JkDoc("If true and a JkPluginProject project is bound to the build instance, the project will be configured for " +
+    @JkDoc("If true and a ProjectJkBean project is bound to the build instance, the project will be configured for " +
             "publishing with the inferred version.")
     public boolean autoConfigureProject = true;
 
@@ -43,16 +43,16 @@ public class JkPluginVersionFromGit extends JkPlugin {
 
     private transient JkVersion cachedVersion;
 
-    protected JkPluginVersionFromGit(JkClass jkClass) {
+    protected VersionFromGitJkBean(JkClass jkClass) {
         super(jkClass);
-        JkPluginGit gitPlugin = jkClass.getPlugins().getOptional(JkPluginGit.class).orElse(null);
+        GitJkBean gitPlugin = jkClass.getJkBeanRegistry().getOptional(GitJkBean.class).orElse(null);
         git = gitPlugin != null ? gitPlugin.getGitProcess() : JkGitProcess.of(jkClass.getBaseDir());
     }
 
     @Override
     protected void afterSetup() {
         if (autoConfigureProject) {
-            JkPluginProject projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
+            ProjectJkBean projectPlugin = getJkClass().getJkBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
             if (projectPlugin == null) {
                 return;
             }
@@ -114,7 +114,7 @@ public class JkPluginVersionFromGit extends JkPlugin {
     /**
      * {@link #version()} return is cached to avoid too many git call. Invoke this method to clear version cache.
      */
-    public JkPluginVersionFromGit refresh() {
+    public VersionFromGitJkBean refresh() {
         cachedVersion = null;
         return this;
     }

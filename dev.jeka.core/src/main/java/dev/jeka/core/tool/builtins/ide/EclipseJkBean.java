@@ -8,8 +8,8 @@ import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -18,8 +18,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @JkDoc("Generation of Eclipse files (.project and .classpath) from actual project structure andPrepending dependencies.")
-@JkDocPluginDeps({JkPluginProject.class})
-public final class JkPluginEclipse extends JkPlugin {
+@JkDocPluginDeps({ProjectJkBean.class})
+public final class EclipseJkBean extends JkBean {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")
     boolean javadoc = false;
@@ -36,11 +36,11 @@ public final class JkPluginEclipse extends JkPlugin {
 
     private final Map<JkDependency, Properties> accessRules = new HashMap<>();
 
-    private final JkPluginScaffold scaffold;
+    private final ScaffoldJkBean scaffold;
 
-    protected JkPluginEclipse(JkClass run) {
+    protected EclipseJkBean(JkClass run) {
         super(run);
-        this.scaffold = run.getPlugins().get(JkPluginScaffold.class);
+        this.scaffold = run.getJkBeanRegistry().get(ScaffoldJkBean.class);
     }
 
     // ------------------------- setters ----------------------------
@@ -126,7 +126,7 @@ public final class JkPluginEclipse extends JkPlugin {
      *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
      *                   is relevant.
      */
-    public JkPluginEclipse addAttribute(JkDependency dependency, String name, String value) {
+    public EclipseJkBean addAttribute(JkDependency dependency, String name, String value) {
         this.attributes.putIfAbsent(dependency, new Properties());
         this.attributes.get(dependency).put(name, value);
         return this;
@@ -140,7 +140,7 @@ public final class JkPluginEclipse extends JkPlugin {
      *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
      *                   is relevant.
      */
-    public JkPluginEclipse addAccessRule(JkDependency dependency, String kind, String pattern) {
+    public EclipseJkBean addAccessRule(JkDependency dependency, String kind, String pattern) {
         this.accessRules.putIfAbsent(dependency, new Properties());
         this.accessRules.get(dependency).put(kind, pattern);
         return this;

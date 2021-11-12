@@ -25,7 +25,7 @@ public interface JkInternalClasspathScanner {
 
     Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate);
 
-    List<String> findClassesHavingMainMethod(ClassLoader extraCclassLoader);
+    List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);
 
     <T> Class<T> loadClassesHavingNameOrSimpleName(String name, Class<T> superClass);
 

@@ -175,7 +175,7 @@ final class ProjectDef {
         private List<Class<? extends JkClass>> runClassHierarchy() {
             List<Class<? extends JkClass>> result = new ArrayList<>();
             Class<?> current = this.runOrPlugin.getClass();
-            while (JkClass.class.isAssignableFrom(current) || JkPlugin.class.isAssignableFrom(current)) {
+            while (JkClass.class.isAssignableFrom(current) || JkBean.class.isAssignableFrom(current)) {
                 result.add((Class<? extends JkClass>) current);
                 current = current.getSuperclass();
             }

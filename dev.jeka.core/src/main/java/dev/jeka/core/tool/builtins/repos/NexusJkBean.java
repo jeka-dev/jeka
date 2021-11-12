@@ -7,12 +7,12 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;
 
-public class JkPluginNexus extends JkPlugin {
+public class NexusJkBean extends JkBean {
 
     private static final String TASK_NAME = "Closing and releasing repositories";
 
@@ -22,13 +22,13 @@ public class JkPluginNexus extends JkPlugin {
     @JkDoc("Comma separated filters for taking in account only specified repositories with specified profile name.")
     public String profileNamesFilter = "";
 
-    protected JkPluginNexus(JkClass jkClass) {
+    protected NexusJkBean(JkClass jkClass) {
         super(jkClass);
     }
 
     @Override
     protected void afterSetup() throws Exception {
-        JkPluginProject projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class).orElse(null);
+        ProjectJkBean projectPlugin = getJkClass().getJkBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
         if (projectPlugin == null) {
             JkLog.warn("No project plugin configured here.");
             return;
@@ -46,7 +46,7 @@ public class JkPluginNexus extends JkPlugin {
     }
 
     public void closeAndOrRelease() {
-        Optional<JkPluginProject> projectPlugin = getJkClass().getPlugins().getOptional(JkPluginProject.class);
+        Optional<ProjectJkBean> projectPlugin = getJkClass().getJkBeanRegistry().getOptional(ProjectJkBean.class);
         if (!projectPlugin.isPresent()) {
             JkLog.warn("No project plugin configured here.");
             return;

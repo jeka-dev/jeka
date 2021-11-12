@@ -7,10 +7,10 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.core.tool.builtins.release.JkPluginVersionFromGit;
-import dev.jeka.core.tool.builtins.crypto.JkPluginGpg;
-import dev.jeka.core.tool.builtins.repos.JkPluginNexus;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.builtins.release.VersionFromGitJkBean;
+import dev.jeka.core.tool.builtins.crypto.GpgJkBean;
+import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 
 class MasterBuild extends JkClass {
 
@@ -23,11 +23,11 @@ class MasterBuild extends JkClass {
     @JkEnv("GH_TOKEN")
     public String githubToken;
 
-    final JkPluginGpg gpg = getPlugin(JkPluginGpg.class);
+    final GpgJkBean gpg = getJkBean(GpgJkBean.class);
 
-    final JkPluginNexus nexus = getPlugin(JkPluginNexus.class);
+    final NexusJkBean nexus = getJkBean(NexusJkBean.class);
 
-    final JkPluginVersionFromGit versionFromGit = getPlugin(JkPluginVersionFromGit.class);
+    final VersionFromGitJkBean versionFromGit = getJkBean(VersionFromGitJkBean.class);
 
     // ------ Slave projects
 
@@ -51,13 +51,13 @@ class MasterBuild extends JkClass {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
         publishRepos = JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner(""));
-        getImportedJkClasses().getDirect(JkPluginProject.class).forEach(this::configureSlave);
+        getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(this::configureSlave);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() {
         JkLog.startTask("Building core and plugins");
-        getImportedJkClasses().getDirect(JkPluginProject.class).forEach(projectPlugin -> {
+        getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(projectPlugin -> {
             JkLog.startTask("Building " + projectPlugin.getJkClass());
             projectPlugin.getJkClass().clean();
             projectPlugin.pack();
@@ -71,7 +71,7 @@ class MasterBuild extends JkClass {
         String branch = JkGitProcess.of().getCurrentBranch();
         if (branch.equals("master") && !versionFromGit.version().isSnapshot()) {
             JkLog.startTask("Publishing");
-            getImportedJkClasses().getDirect(JkPluginProject.class).forEach(plugin -> plugin.publish());
+            getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(plugin -> plugin.publish());
             closeAndReleaseRepo();
             JkLog.endTask();
         }
@@ -93,7 +93,7 @@ class MasterBuild extends JkClass {
 
     @JkDoc("Clean build of core + plugins bypassing tests.")
     public void buildFast() {
-        getImportedJkClasses().getDirect(JkPluginProject.class).forEach(plugin -> {
+        getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(plugin -> {
             plugin.getProject().simpleFacade().setTestSkipped(true);
             plugin.getProject().getPublication().includeJavadocAndSources(false, false);
             plugin.getJkClass().clean();
@@ -101,7 +101,7 @@ class MasterBuild extends JkClass {
         });
     }
 
-    private void configureSlave(JkPluginProject projectPlugin) {
+    private void configureSlave(ProjectJkBean projectPlugin) {
         versionFromGit.configure(projectPlugin.getProject(), false);
         if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for releasej
             projectPlugin.pack.javadoc = true;
@@ -129,7 +129,7 @@ class MasterBuild extends JkClass {
     }
 
     public void publishLocal() {
-        getImportedJkClasses().getDirect(JkPluginProject.class).forEach(pluginJava -> pluginJava.publishLocal());
+        getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(pluginJava -> pluginJava.publishLocal());
     }
 
     public static void main(String[] args) {

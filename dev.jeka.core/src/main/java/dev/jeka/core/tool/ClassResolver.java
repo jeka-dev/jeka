@@ -4,6 +4,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
@@ -36,6 +37,10 @@ final class ClassResolver {
      */
     JkClass resolve(String classNameHint) {
         return resolve(classNameHint, JkClass.class, true);
+    }
+
+    JkBean resolveDefaultJkBean() {
+        return resolveJkBean(true);
     }
 
     JkClass resolveQuietly(String classNameHint) {
@@ -148,6 +153,36 @@ final class ClassResolver {
             JkClass.baseDirContext(null);
         }
         return result;
+    }
+
+    private JkBean resolveJkBean(boolean initialize) {
+
+        // If there is def files
+        JkClass.baseDirContext(baseDir);
+        JkClass jkClass;
+        try {
+            jkClass = initialize ? JkClass.of(JkClass.class) : JkClass.ofUninitialized(JkClass.class);
+        } finally {
+            JkClass.baseDirContext(null);
+        }
+
+        Class<? extends JkBean> jkBeanClass = null;
+        if (this.hasDefSource()) {
+            final JkPathTree dir = JkPathTree.of(defSourceDir);
+            for (final Path path : dir.getRelativeFiles()) {
+                if (path.toString().endsWith(".java") || path.toString().endsWith(".kt")) {
+                    final Class<? extends JkBean> clazz =
+                            JkClassLoader.ofCurrent().loadGivenClassSourcePath(path.toString());
+                    if (JkBean.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
+                        jkBeanClass = clazz;
+                    }
+                }
+            }
+        }
+        if (jkBeanClass == null) {
+            jkBeanClass = DefaultJkBean.class;
+        }
+        return JkUtilsReflect.newInstance(jkBeanClass, JkClass.class, jkClass);
     }
 
 }

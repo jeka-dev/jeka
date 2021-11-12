@@ -5,7 +5,7 @@ import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 
@@ -23,7 +23,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 @JkDefClasspath("com.google.guava:guava:21.0")
 public class ThirdPartyPoweredBuild extends JkClass {
 
-    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
     
     @Override
     protected void setup() {

@@ -1,7 +1,6 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.depmanagement.JkFileDependency;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.system.JkInfo;
@@ -21,7 +20,7 @@ final class CommandLine {
 
     private static final String ALL_RUN_SYMBOL = "*";
 
-    private static final String PLUGIN_SYMBOL = "#";
+    private static final String KBEAN_SYMBOL = "#";
 
     private static final char PLUGIN_SYMBOL_CHAR = '#';
 
@@ -33,7 +32,7 @@ final class CommandLine {
         result.systemProperties = extractSystemProperties(words);
         result.masterMethods = extractMethods(words, true);
         result.subProjectMethods = extractMethods(words, false);
-        result.pluginOptions = extractPluginOptions(words);
+        result.jkBeanOptions = extractPluginOptions(words);
         result.defDependencies = dependencies(words);
         result.rawArgs = words;
         return result;
@@ -47,7 +46,7 @@ final class CommandLine {
 
     private List<MethodInvocation> subProjectMethods;
 
-    private List<PluginOptions> pluginOptions;
+    private List<JkBeanOptions> jkBeanOptions;
 
     private List<JkDependency> defDependencies;
 
@@ -95,8 +94,8 @@ final class CommandLine {
     private static List<MethodInvocation> extractMethods(String[] words, boolean master) {
         final List<MethodInvocation> result = new LinkedList<>();
         for (final String word : words) {
-            if (!word.startsWith("-") && !word.startsWith("@") && !word.endsWith(PLUGIN_SYMBOL)
-                    && !word.endsWith(PLUGIN_SYMBOL + ALL_RUN_SYMBOL)) {
+            if (!word.startsWith("-") && !word.startsWith("@") && !word.endsWith(KBEAN_SYMBOL)
+                    && !word.endsWith(KBEAN_SYMBOL + ALL_RUN_SYMBOL)) {
                 if (word.endsWith(ALL_RUN_SYMBOL)) {
                     final String trunc = JkUtilsString.substringBeforeLast(word, ALL_RUN_SYMBOL);
                     result.add(MethodInvocation.parse(trunc));
@@ -118,12 +117,12 @@ final class CommandLine {
                 final int equalIndex = word.indexOf("=");
                 if (equalIndex <= -1) { // no '=' so we just associate the key with a null value
                     final String key = word.substring(1);
-                    if (!key.contains(PLUGIN_SYMBOL)) { // if '#' is present
+                    if (!key.contains(KBEAN_SYMBOL)) { // if '#' is present
                         result.put(key, null);
                     }
                 } else {
                     final String key = word.substring(1, equalIndex);
-                    if (!key.contains(PLUGIN_SYMBOL)) {
+                    if (!key.contains(KBEAN_SYMBOL)) {
                         final String value = word.substring(equalIndex + 1);
                         result.put(key, value);
                     }
@@ -150,33 +149,33 @@ final class CommandLine {
         return Collections.unmodifiableMap(result);
     }
 
-    private static List<PluginOptions> extractPluginOptions(String[] words) {
-        final Map<String, PluginOptions> setups = new LinkedHashMap<>();
+    private static List<JkBeanOptions> extractPluginOptions(String[] words) {
+        final Map<String, JkBeanOptions> setups = new LinkedHashMap<>();
         for (final String word : words) {
             if (MethodInvocation.isPluginMethodInvokation(word)) {
-                final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL);
+                final String pluginName = JkUtilsString.substringBeforeFirst(word, KBEAN_SYMBOL);
                 if (!setups.containsKey(pluginName)) {
-                    setups.put(pluginName, PluginOptions.of(pluginName));
+                    setups.put(pluginName, JkBeanOptions.of(pluginName));
                 }
             } else if (MethodInvocation.isPluginActivation(word)) {
-                final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL);
-                final PluginOptions setup = setups.get(pluginName);
+                final String pluginName = JkUtilsString.substringBeforeFirst(word, KBEAN_SYMBOL);
+                final JkBeanOptions setup = setups.get(pluginName);
                 if (setup == null) {
-                    setups.put(pluginName, PluginOptions.of(pluginName));
+                    setups.put(pluginName, JkBeanOptions.of(pluginName));
                 } else {
                     setups.put(pluginName, setup);
                 }
             } else if (isPluginOption(word)) {
-                final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL)
+                final String pluginName = JkUtilsString.substringBeforeFirst(word, KBEAN_SYMBOL)
                         .substring(1);
-                final PluginOptions setup = setups.computeIfAbsent(pluginName, n -> PluginOptions.of(n));
+                final JkBeanOptions setup = setups.computeIfAbsent(pluginName, n -> JkBeanOptions.of(n));
                 final int equalIndex = word.indexOf("=");
                 if (equalIndex <= -1) {
-                    final String key = JkUtilsString.substringAfterFirst(word, PLUGIN_SYMBOL);
+                    final String key = JkUtilsString.substringAfterFirst(word, KBEAN_SYMBOL);
                     setups.put(pluginName, setup.with(key, null));
                 } else {
                     final String key = JkUtilsString.substringBeforeFirst(
-                            JkUtilsString.substringAfterFirst(word, PLUGIN_SYMBOL), "=");
+                            JkUtilsString.substringAfterFirst(word, KBEAN_SYMBOL), "=");
                     final String value = word.substring(equalIndex + 1);
                     setups.put(pluginName, setup.with(key, value));
                 }
@@ -186,15 +185,15 @@ final class CommandLine {
     }
 
     private static boolean isPluginOption(String word) {
-        return word.startsWith("-") && word.indexOf(PLUGIN_SYMBOL) > 2;
+        return word.startsWith("-") && word.indexOf(KBEAN_SYMBOL) > 2;
     }
 
     static final class MethodInvocation {
 
         static MethodInvocation parse(String word) {
             if (isPluginMethodInvokation(word)) {
-                return pluginMethod(JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL),
-                        JkUtilsString.substringAfterLast(word, PLUGIN_SYMBOL));
+                return pluginMethod(JkUtilsString.substringBeforeFirst(word, KBEAN_SYMBOL),
+                        JkUtilsString.substringAfterLast(word, KBEAN_SYMBOL));
             }
             return normal(word);
         }
@@ -226,12 +225,12 @@ final class CommandLine {
                 return false;
             }
             return JkUtilsString.countOccurrence(word, PLUGIN_SYMBOL_CHAR) == 1
-                    && !word.startsWith(PLUGIN_SYMBOL) && !word.endsWith(PLUGIN_SYMBOL);
+                    && !word.startsWith(KBEAN_SYMBOL) && !word.endsWith(KBEAN_SYMBOL);
         }
 
         private static boolean isPluginActivation(String word) {
             return JkUtilsString.countOccurrence(word, PLUGIN_SYMBOL_CHAR) == 1
-                    && !word.startsWith(PLUGIN_SYMBOL) && word.endsWith(PLUGIN_SYMBOL);
+                    && !word.startsWith(KBEAN_SYMBOL) && word.endsWith(KBEAN_SYMBOL);
         }
 
         public boolean isMethodPlugin() {
@@ -264,8 +263,8 @@ final class CommandLine {
         return subProjectMethods;
     }
 
-    List<PluginOptions> getPluginOptions() {
-        return pluginOptions;
+    List<JkBeanOptions> getPluginOptions() {
+        return jkBeanOptions;
     }
 
     List<JkDependency> getDefDependencies() {

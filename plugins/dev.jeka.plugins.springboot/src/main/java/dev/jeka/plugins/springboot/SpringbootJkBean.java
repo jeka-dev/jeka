@@ -21,12 +21,12 @@ import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
-import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.core.tool.builtins.scaffold.JkPluginScaffold;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -37,8 +37,8 @@ import java.util.function.Consumer;
 @JkDoc("Provides enhancement to Project plugin in order to produce a startable Springboot jar for your application.\n" +
         "The main produced artifact is the springboot one (embedding all dependencies) while the artifact classified as 'original' stands for the vanilla jar.\n" +
         "Dependency versions are resolved against BOM provided by Spring Boot team according Spring Boot version you use.")
-@JkDocPluginDeps(JkPluginProject.class)
-public final class JkPluginSpringboot extends JkPlugin {
+@JkDocPluginDeps(ProjectJkBean.class)
+public final class SpringbootJkBean extends JkBean {
 
     private static String DEFAULT_SPRINGBOOT_VERSION = "2.5.6";
 
@@ -67,7 +67,7 @@ public final class JkPluginSpringboot extends JkPlugin {
     @JkDoc("For internal test purpose. If not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
     public String scaffoldDefClasspath;
 
-    private final JkPluginProject projectPlugin;
+    private final ProjectJkBean projectPlugin;
 
     private JkPom cachedSpringbootBom;
 
@@ -76,9 +76,9 @@ public final class JkPluginSpringboot extends JkPlugin {
      * Therefore, every plugin members that are likely to be configured by the owning build must be
      * initialized in the constructor.
      */
-    protected JkPluginSpringboot(JkClass jkClass) {
+    protected SpringbootJkBean(JkClass jkClass) {
         super(jkClass);
-        projectPlugin = jkClass.getPlugins().get(JkPluginProject.class);
+        projectPlugin = jkClass.getJkBeanRegistry().get(ProjectJkBean.class);
     }
 
     public void setSpringbootVersion(String springbootVersion) {
@@ -155,9 +155,9 @@ public final class JkPluginSpringboot extends JkPlugin {
         }
 
         // Add template build class to scaffold
-        if (this.getJkClass().getPlugins().hasLoaded(JkPluginScaffold.class)) {
-            JkPluginScaffold scaffold = this.getJkClass().getPlugins().get(JkPluginScaffold.class);
-            String code = JkUtilsIO.read(JkPluginSpringboot.class.getClassLoader().getResource("snippet/Build.java"));
+        if (this.getJkClass().getJkBeanRegistry().hasLoaded(ScaffoldJkBean.class)) {
+            ScaffoldJkBean scaffold = this.getJkClass().getJkBeanRegistry().get(ScaffoldJkBean.class);
+            String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/Build.java"));
             String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
             code = code.replace("${dependencyDescription}", defClasspath);
             code = code.replace("${springbootVersion}", latestSpringbootVersion());
@@ -199,7 +199,7 @@ public final class JkPluginSpringboot extends JkPlugin {
                 artifactProducer.getMainArtifactPath(), springbootVersion);
     }
 
-    public JkPluginProject projectPlugin() {
+    public ProjectJkBean projectPlugin() {
         return projectPlugin;
     }
 
@@ -247,19 +247,19 @@ public final class JkPluginSpringboot extends JkPlugin {
         Path sourceDir = projectPlugin.getProject().getConstruction().getCompilation().getLayout()
                 .getSources().getRootDirsOrZipFiles().get(0);
         Path pack = sourceDir.resolve(basePackage);
-        URL url = JkPluginSpringboot.class.getClassLoader().getResource("snippet/Application.java");
+        URL url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Application.java");
         JkPathFile.of(pack.resolve("Application.java")).createIfNotExist().fetchContentFrom(url);
-        url = JkPluginSpringboot.class.getClassLoader().getResource("snippet/Controller.java");
+        url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Controller.java");
         JkPathFile.of(pack.resolve("Controller.java")).createIfNotExist().fetchContentFrom(url);
         Path testSourceDir = projectPlugin.getProject().getConstruction().getTesting().getCompilation().getLayout()
                 .getSources().getRootDirsOrZipFiles().get(0);
         pack = testSourceDir.resolve(basePackage);
-        url = JkPluginSpringboot.class.getClassLoader().getResource("snippet/ControllerIT.java");
+        url = SpringbootJkBean.class.getClassLoader().getResource("snippet/ControllerIT.java");
         JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
     }
 
     private String pluginVersion() {
-        return JkManifest.of().loadFromClass(JkPluginSpringboot.class)
+        return JkManifest.of().loadFromClass(SpringbootJkBean.class)
                 .getMainAttribute(JkManifest.IMPLEMENTATION_VERSION);
     }
 

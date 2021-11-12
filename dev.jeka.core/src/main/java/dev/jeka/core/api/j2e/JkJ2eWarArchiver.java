@@ -1,21 +1,13 @@
 package dev.jeka.core.api.j2e;
 
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkDocPluginDeps;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 public class JkJ2eWarArchiver {
 

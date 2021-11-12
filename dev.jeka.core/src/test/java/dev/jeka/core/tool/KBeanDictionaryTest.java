@@ -6,14 +6,14 @@ import org.junit.Test;
 import java.util.Set;
 
 @SuppressWarnings("javadoc")
-public class JkPluginsTest {
+public class KBeanDictionaryTest {
 
     @Test
     public void testPluginsLoading() {
-        final PluginDictionary plugins = new PluginDictionary();
-        final Set<PluginDictionary.PluginDescription> pluginSet = plugins.getAll();
+        final KBeanDictionary dictionary = new KBeanDictionary();
+        final Set<KBeanDictionary.KBeanDescription> kBeans = dictionary.getAll();
 
-        Assert.assertTrue(pluginSet.toString(), pluginSet.size() > 6);
+        Assert.assertTrue(kBeans.toString(), kBeans.size() > 6);
     }
 
     interface PluginBase {

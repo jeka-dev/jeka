@@ -15,7 +15,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
@@ -40,7 +40,7 @@ public class CoreBuild extends JkClass {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
     public boolean runIT;
 
@@ -91,12 +91,12 @@ public class CoreBuild extends JkClass {
                 .__
                 .getMaven()
                     .setModuleId("dev.jeka:jeka-core")
+                    .setVersion(JkGitProcess.of()::getVersionFromTag)
                     .getPomMetadata()
                         .setProjectName("jeka")
                         .setProjectDescription("Automate with plain Java code and nothing else.")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
-
 
 
     private Path distribFolder() {
@@ -266,17 +266,4 @@ public class CoreBuild extends JkClass {
         }
     }
 
-    public static class DebugLogIndent {
-        public static void main(String[] args) {
-            JkLog.setDecorator(JkLog.Style.BRACE);
-            JkLog.startTask("task 1");
-                JkLog.info("an info after task1");
-                JkLog.warn("a warning after 'an info after task 1 start'");
-                JkLog.startTask("task 2 after warning" );
-                JkLog.endTask("end task 2");
-                JkLog.info("an info after task 2");
-            JkLog.endTask("end task 1");
-            JkLog.info("an info to finish");
-        }
-    }
 }

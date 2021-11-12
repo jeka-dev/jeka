@@ -51,7 +51,10 @@ public final class JkInit {
             }
             return jkClass;
         } catch (RuntimeException e) {
-            JkMemoryBufferLogDecorator.flush();
+            if (memoryBufferLogActivated) {
+                JkMemoryBufferLogDecorator.flush();
+                JkMemoryBufferLogDecorator.inactivateOnJkLog();
+            }
             throw e;
         }
 
@@ -137,7 +140,7 @@ public final class JkInit {
         try {
             for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {
                 if (methodInvocation.isMethodPlugin()) {
-                    JkPlugin plugin = instance.getPlugins().get(methodInvocation.pluginName);
+                    JkBean plugin = instance.getJkBeanRegistry().get(methodInvocation.pluginName);
                     JkUtilsReflect.invoke(plugin, methodInvocation.methodName);
                 } else {
                     JkUtilsReflect.invoke(instance, methodInvocation.methodName);
