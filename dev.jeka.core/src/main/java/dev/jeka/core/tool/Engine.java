@@ -354,7 +354,7 @@ final class Engine {
         if (methodInvocation.pluginName != null) {
             final JkBean jkBean = jkClass.getJkBeanRegistry().get(methodInvocation.pluginName);
             invokeMethodOnJkBean(jkBean, methodInvocation.methodName);
-        } else if (JkClass.class.equals(jkClass)){
+        } else if (JkClass.class.equals(jkClass.getClass())){
             invokeMethodOnJkBean(defaultJkBean, methodInvocation.methodName);
         } else {
             invokeMethodOnJkBean(jkClass, methodInvocation.methodName);
