@@ -5,7 +5,7 @@ import dev.jeka.core.tool.JkClass;
 
 class DefaultJkBean extends JkBean {
 
-    protected DefaultJkBean(JkClass jkClass) {
-        super(jkClass);
+    protected DefaultJkBean() {
+        super();
     }
 }

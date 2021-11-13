@@ -4,10 +4,7 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkDocPluginDeps;
-import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.git.GitJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
@@ -43,16 +40,15 @@ public class VersionFromGitJkBean extends JkBean {
 
     private transient JkVersion cachedVersion;
 
-    protected VersionFromGitJkBean(JkClass jkClass) {
-        super(jkClass);
-        GitJkBean gitPlugin = jkClass.getJkBeanRegistry().getOptional(GitJkBean.class).orElse(null);
-        git = gitPlugin != null ? gitPlugin.getGitProcess() : JkGitProcess.of(jkClass.getBaseDir());
+    protected VersionFromGitJkBean() {
+        GitJkBean gitPlugin = getRuntime().getBeanRegistry().getOptional(GitJkBean.class).orElse(null);
+        git = gitPlugin != null ? gitPlugin.getGitProcess() : JkGitProcess.of(getBaseDir());
     }
 
     @Override
-    protected void afterSetup() {
+    protected void postInit() {
         if (autoConfigureProject) {
-            ProjectJkBean projectPlugin = getJkClass().getJkBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
+            ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
             if (projectPlugin == null) {
                 return;
             }

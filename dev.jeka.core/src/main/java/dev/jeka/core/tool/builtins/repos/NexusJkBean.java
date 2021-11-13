@@ -5,9 +5,9 @@ import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkRuntime;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;
@@ -22,13 +22,9 @@ public class NexusJkBean extends JkBean {
     @JkDoc("Comma separated filters for taking in account only specified repositories with specified profile name.")
     public String profileNamesFilter = "";
 
-    protected NexusJkBean(JkClass jkClass) {
-        super(jkClass);
-    }
-
     @Override
-    protected void afterSetup() throws Exception {
-        ProjectJkBean projectPlugin = getJkClass().getJkBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
+    protected void postInit() throws Exception {
+        ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
         if (projectPlugin == null) {
             JkLog.warn("No project plugin configured here.");
             return;
@@ -46,7 +42,7 @@ public class NexusJkBean extends JkBean {
     }
 
     public void closeAndOrRelease() {
-        Optional<ProjectJkBean> projectPlugin = getJkClass().getJkBeanRegistry().getOptional(ProjectJkBean.class);
+        Optional<ProjectJkBean> projectPlugin = getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class);
         if (!projectPlugin.isPresent()) {
             JkLog.warn("No project plugin configured here.");
             return;

@@ -24,7 +24,7 @@ public final class JkInit {
     /**
      * Creates an instance of the specified Jeka class and displays information about this class andPrepending environment.
      */
-    public static <T extends JkClass> T instanceOf(Class<T> clazz, String... args) {
+    public static <T extends JkBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
         if (!Files.isDirectory(Paths.get("jeka")) ) {
             throw new IllegalStateException("The current directory " + Paths.get("").toAbsolutePath()
@@ -44,12 +44,12 @@ public final class JkInit {
             memoryBufferLogActivated = true;
         }
         try {
-            final T jkClass = JkClass.of(clazz);
-            JkLog.info(jkClass.toString() + " is ready to run.");
+            final T jkBean = JkRuntime.get().of(clazz);
+            JkLog.info(jkBean.toString() + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();
             }
-            return jkClass;
+            return jkBean;
         } catch (RuntimeException e) {
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.flush();
@@ -64,7 +64,7 @@ public final class JkInit {
      * Convenient method to let the user add extra arguments.
      * @see #instanceOf(Class, String...)
      */
-    public static <T extends JkClass> T instanceOf(Class<T> clazz, String[] args, String extraArg, String ...extraArgs) {
+    public static <T extends JkBean> T instanceOf(Class<T> clazz, String[] args, String extraArg, String ...extraArgs) {
         String[] allExtraArgs = JkUtilsIterable.concat(new String[] {extraArg}, extraArgs);
         String[] effectiveArgs = JkUtilsIterable.concat(allExtraArgs, args);
         return instanceOf(clazz, effectiveArgs);
@@ -130,20 +130,20 @@ public final class JkInit {
         }
         JkUtilsAssert.argument(jkClassName != null,
                 "No argument starting with '-CC=' can be found. Cannot determine Jeka Class");
-        Class<JkClass> clazz = JkInternalClasspathScanner.INSTANCE
-                .loadClassesHavingNameOrSimpleName(jkClassName, JkClass.class);
+        Class<JkBean> clazz = JkInternalClasspathScanner.INSTANCE
+                .loadClassesHavingNameOrSimpleName(jkClassName, JkBean.class);
         JkUtilsAssert.argument(clazz != null,
                 "Jeka class having name '" + jkClassName + "' cannot be found.");
         String[] argsToPass = actualArgs.toArray(new String[0]);
-        JkClass instance = JkInit.instanceOf(clazz, argsToPass);
+        JkBean jkBean = JkInit.instanceOf(clazz, argsToPass);
         CommandLine commandLine = CommandLine.parse(argsToPass);
         try {
             for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {
                 if (methodInvocation.isMethodPlugin()) {
-                    JkBean plugin = instance.getJkBeanRegistry().get(methodInvocation.pluginName);
+                    JkBean plugin = jkBean.getRuntime().getBeanRegistry().get(methodInvocation.pluginName);
                     JkUtilsReflect.invoke(plugin, methodInvocation.methodName);
                 } else {
-                    JkUtilsReflect.invoke(instance, methodInvocation.methodName);
+                    JkUtilsReflect.invoke(jkBean, methodInvocation.methodName);
                 }
             }
             System.exit(0); // Triggers shutdown hooks

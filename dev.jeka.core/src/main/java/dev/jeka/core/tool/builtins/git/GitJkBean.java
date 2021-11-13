@@ -11,9 +11,8 @@ public class GitJkBean extends JkBean {
 
     private final JkGitProcess git;
 
-    protected GitJkBean(JkClass jkClass) {
-        super(jkClass);
-        git = JkGitProcess.of(jkClass.getBaseDir());
+    protected GitJkBean() {
+        git = JkGitProcess.of(getBaseDir());
     }
 
     @JkDoc("Perform a dirty check first then put a tag at the HEAD and push it to remote.")

@@ -12,15 +12,12 @@ import java.util.stream.Collectors;
  */
 public final class JkBeanRegistry {
 
-    private final JkClass holder;
-
     private final List<JkBean> registeredJkBean = new LinkedList<>();
 
     private final List<JkBeanOptions> jkBeanOptionsList;
 
-    JkBeanRegistry(JkClass holder, List<JkBeanOptions> jkBeanOptionsList) {
+    JkBeanRegistry(List<JkBeanOptions> jkBeanOptionsList) {
         super();
-        this.holder = holder;
         this.jkBeanOptionsList = Collections.unmodifiableList(new ArrayList<>(jkBeanOptionsList));
     }
 
@@ -68,7 +65,7 @@ public final class JkBeanRegistry {
     /**
      * Returns a list of all loaded plugins in the holding JkClass instance.
      */
-    public List<JkBean> getRegisteredJkBean() {
+    public List<JkBean> getAll() {
         return Collections.unmodifiableList(registeredJkBean);
     }
 
@@ -83,33 +80,32 @@ public final class JkBeanRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends JkBean> T getOrCreate(Class<T> pluginClass) {
+    private <T extends JkBean> T getOrCreate(Class<T> jkBeanClass) {
         final Optional<T> optPlugin = (Optional<T>) this.registeredJkBean.stream()
-                .filter(item -> item.getClass().equals(pluginClass))
+                .filter(item -> item.getClass().equals(jkBeanClass))
                 .findFirst();
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }
-        final T plugin;
+        final T jkBean;
         try {
-            PluginCompatibilityBreakChecker.checkCompatibility(pluginClass, this.holder.getDefDependencyResolver());
-            plugin = JkUtilsReflect.newInstance(pluginClass, JkClass.class, this.holder);
+            jkBean = JkUtilsReflect.newInstance(jkBeanClass, JkClass.class, null);
         } catch (Throwable t) {  // Catch LinkageError
             if (t instanceof LinkageError) {
-                throw new RuntimeException("Plugin class " + pluginClass
+                throw new RuntimeException("Plugin class " + jkBeanClass
                         + " seems not compatible with this Jeka version as this plugin reference an unknown class " +
                         "from Jeka", t);
             }
-            throw new RuntimeException("Error while instantiating KBean class " + pluginClass, t);
+            throw new RuntimeException("Error while instantiating KBean class " + jkBeanClass, t);
         }
-        injectOptions(plugin);
+        injectOptions(jkBean);
         try {
-            plugin.beforeSetup();
+            jkBean.init();
         } catch (Exception e) {
-            throw JkUtilsThrowable.unchecked(e, "Error while initializing KBean " + plugin);
+            throw JkUtilsThrowable.unchecked(e, "Error while initializing KBean " + jkBean);
         }
-        registeredJkBean.add(plugin);
-        return plugin;
+        registeredJkBean.add(jkBean);
+        return jkBean;
     }
 
     void injectOptions(JkBean jkBean) {

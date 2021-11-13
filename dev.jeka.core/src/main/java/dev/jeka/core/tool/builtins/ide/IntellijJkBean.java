@@ -48,34 +48,29 @@ public final class IntellijJkBean extends JkBean {
 
     private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
-    protected IntellijJkBean(JkClass run) {
-        super(run);
-    }
-
     /** Generates Idea [my-module].iml file */
     @JkDoc("Generates Idea [my-module].iml file.")
     public void iml() {
         final JkImlGenerator generator;
-        JkClass jkClass = getJkClass();
-        JkIdeSupport projectIde = IdeSupport.getProjectIde(jkClass);
+        JkIdeSupport projectIde = IdeSupport.getProjectIde(this);
         if (projectIde != null) {
             generator = JkImlGenerator.of(projectIde);
         } else {
-            generator = JkImlGenerator.of(JkIdeSupport.of(jkClass.getBaseDir()));
+            generator = JkImlGenerator.of(JkIdeSupport.of(getBaseDir()));
         }
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
         generator.setUseVarPath(useVarPath);
         generator.setExplicitJekaHome(jekaHome);
-        JkDependencySet defDependencies = jkClass.getDefDependencies();
+        JkDependencySet defDependencies = getRuntime().getDependencies();
         if (imlSkipJeka) {
             defDependencies = defDependencies
                     .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath().getFileName()));
         }
 
         // Add Kotlin runtime lib if any kotlin source file found in def directory
-        Path def = getJkClass().getBaseDir().resolve(JkConstants.DEF_DIR);
+        Path def = getBaseDir().resolve(JkConstants.DEF_DIR);
         if (JkPathTree.of(def).andMatching("**.kt", "*.kt").count(1, false) > 0) {
-            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(jkClass.getDefDependencyResolver().getRepos());
+            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(getRuntime().getDependencyResolver().getRepos());
             if (kotlinCompiler.isProvidedCompiler()) {
                 defDependencies = defDependencies.andFiles(kotlinCompiler.getStdLib());
             } else {
@@ -84,20 +79,20 @@ public final class IntellijJkBean extends JkBean {
         }
 
         generator.setDefDependencies(defDependencies);
-        generator.setDefDependencyResolver(jkClass.getDefDependencyResolver());
+        generator.setDefDependencyResolver(getRuntime().getDependencyResolver());
         List<String> jkClassModuleDeps = new LinkedList<>();
         if (!JkUtilsString.isBlank(this.imlJekaExtraModules)) {
             for (String module : JkUtilsString.splitTrimmed(this.imlJekaExtraModules, ",")) {
                 jkClassModuleDeps.add(module);
             }
         }
-        jkClass.getImportedJkClasses().getImportedJkClassRoots().stream()
+        getImportedJkBeans().getImportedJkClassRoots().stream()
                 .map(path -> path.getFileName().toString())
                 .forEach(jkClassModuleDeps::add);
         generator.setExtraJekaModules(jkClassModuleDeps);
-        Path basePath = jkClass.getBaseDir();
-        if (jkClass.getJkBeanRegistry().hasLoaded(ProjectJkBean.class)) {
-            jkClass.getJkBeanRegistry().get(ProjectJkBean.class);
+        Path basePath = getBaseDir();
+        if (getRuntime().getBeanRegistry().hasLoaded(ProjectJkBean.class)) {
+            getRuntime().getBeanRegistry().get(ProjectJkBean.class);
             generator.setForceJdkVersion(forceJdkVersion);
         }
 
@@ -144,8 +139,8 @@ public final class IntellijJkBean extends JkBean {
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file.")
     public void modulesXml() {
-        final Path current = getJkClass().getBaseTree().getRoot();
-        final Iterable<Path> imls = getJkClass().getBaseTree().andMatching(true,"**.iml").getFiles();
+        final Path current = getBaseDir();
+        final Iterable<Path> imls = JkPathTree.of(getBaseDir()).andMatching(true,"**.iml").getFiles();
         final IntellijModulesXmlGenerator intellijModulesXmlGenerator = new IntellijModulesXmlGenerator(current, imls);
         intellijModulesXmlGenerator.generate();
         JkLog.info("File generated at : " + intellijModulesXmlGenerator.outputFile());
@@ -153,7 +148,7 @@ public final class IntellijJkBean extends JkBean {
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void allIml() {
-        final Iterable<Path> folders = getJkClass().getBaseTree()
+        final Iterable<Path> folders = JkPathTree.of(getBaseDir())
                 .andMatching(true, "**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andMatching(false, "**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());

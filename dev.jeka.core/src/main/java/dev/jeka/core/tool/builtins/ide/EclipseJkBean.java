@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.ide;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
@@ -38,9 +39,8 @@ public final class EclipseJkBean extends JkBean {
 
     private final ScaffoldJkBean scaffold;
 
-    protected EclipseJkBean(JkClass run) {
-        super(run);
-        this.scaffold = run.getJkBeanRegistry().get(ScaffoldJkBean.class);
+    protected EclipseJkBean() {
+        this.scaffold = getRuntime().getBeanRegistry().get(ScaffoldJkBean.class);
     }
 
     // ------------------------- setters ----------------------------
@@ -53,25 +53,23 @@ public final class EclipseJkBean extends JkBean {
     // ------------------------ plugin methods ----------------------
 
     @Override
-    @JkDoc("Adds .classpath and .project generation to scaffolding.")
-    protected void afterSetup() {
+    protected void postIinit() {
         scaffold.getScaffolder().getExtraActions().append(this::files);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 
     @JkDoc("Generates Eclipse files (.classpath and .project) in the current directory. The files reflect project " +
             "dependencies and source layout.")
     public void files() {
-        final Path dotProject = getJkClass().getBaseDir().resolve(".project");
-        JkIdeSupport projectIde = IdeSupport.getProjectIde(getJkClass());
+        final Path dotProject = getBaseDir().resolve(".project");
+        JkIdeSupport projectIde = IdeSupport.getProjectIde(this);
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
-            for (final JkClass depRun : getJkClass().getImportedJkClasses().getDirects()) {
-                importedRunProjects.add(depRun.getBaseTree().getRoot());
+            for (final JkBean importedJkBean : getImportedJkBeans().get(false)) {
+                importedRunProjects.add(importedJkBean.getBaseDir());
             }
             final JkEclipseClasspathGenerator classpathGenerator =
                     JkEclipseClasspathGenerator.of(projectIde);
-            classpathGenerator.setDefDependencies(getJkClass().getDefDependencyResolver(),
-                    getJkClass().getDefDependencies());
+            classpathGenerator.setDefDependencies(getRuntime().getDependencyResolver(), getRuntime().getDependencies());
             classpathGenerator.setIncludeJavadoc(this.javadoc);
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedProjects(importedRunProjects);
@@ -83,18 +81,18 @@ public final class EclipseJkBean extends JkBean {
                 classpathGenerator.addAccessRules(entry.getKey(), entry.getValue());
             });
             final String result = classpathGenerator.generate();
-            final Path dotClasspath = getJkClass().getBaseDir().resolve(".classpath");
+            final Path dotClasspath = getBaseDir().resolve(".classpath");
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
             JkLog.info("File " + dotClasspath + " generated.");
 
             if (!Files.exists(dotProject)) {
-                JkEclipseProjectGenerator.ofJavaNature(getJkClass().getBaseTree().getRoot().getFileName().toString())
+                JkEclipseProjectGenerator.ofJavaNature(getBaseDir().getFileName().toString())
                         .writeTo(dotProject);
                 JkLog.info("File " + dotProject + " generated.");
             }
         } else {
             if (!Files.exists(dotProject)) {
-                JkEclipseProjectGenerator.ofSimpleNature(getJkClass().getBaseTree().getRoot().getFileName().toString())
+                JkEclipseProjectGenerator.ofSimpleNature(getBaseDir().getFileName().toString())
                         .writeTo(dotProject);
                 JkLog.info("File " + dotProject + " generated.");
             }
@@ -103,7 +101,7 @@ public final class EclipseJkBean extends JkBean {
 
     @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jeka/def directory are taken in account. See eclipse#files.")
     public void all() {
-        final Iterable<Path> folders = getJkClass().getBaseTree()
+        final Iterable<Path> folders = JkPathTree.of(getBaseDir())
                 .andMatching(true,"**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andMatching(false,"**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());

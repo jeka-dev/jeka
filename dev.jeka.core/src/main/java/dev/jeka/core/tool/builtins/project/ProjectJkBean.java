@@ -65,15 +65,15 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     private JkProject project;
 
-    protected ProjectJkBean(JkClass jkClass) {
-        super(jkClass);
-        this.scaffoldPlugin = jkClass.getJkBeanRegistry().get(ScaffoldJkBean.class);
+    protected ProjectJkBean() {
+        super();
+        this.scaffoldPlugin = getRuntime().getBeanRegistry().get(ScaffoldJkBean.class);
     }
 
     @Override
-    protected void beforeSetup() {
-        Path baseDir = getJkClass().getBaseDir();
-        project = JkProject.of().setBaseDir(this.getJkClass().getBaseDir());
+    protected void init() {
+        Path baseDir = getBaseDir();
+        project = JkProject.of().setBaseDir(getBaseDir());
         project.getConstruction().addTextAndLocalDependencies();
 
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
@@ -83,7 +83,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     private void applyGpg(JkProject project) {
-        GpgJkBean pgpPlugin = this.getJkClass().getJkBeanRegistry().get(GpgJkBean.class);
+        GpgJkBean pgpPlugin = getRuntime().getBeanRegistry().get(GpgJkBean.class);
         JkGpg gpg = pgpPlugin.get();
         applyGpg(gpg, pgpPlugin.keyName, project);
     }
@@ -110,7 +110,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
     @Override  
-    protected void afterSetup() {
+    protected void postInit() {
         this.applyPostSetupOptions(project);
         this.setupScaffolder();
     }
@@ -158,7 +158,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 snippet = "buildclassfacade.snippet";
             }
             String template = JkUtilsIO.read(ProjectJkBean.class.getResource(snippet));
-            String baseDirName = getJkClass().getBaseDir().getFileName().toString();
+            String baseDirName = getBaseDir().getFileName().toString();
             return template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         });
         scaffoldPlugin.getScaffolder().setClassFilename("Build.java");

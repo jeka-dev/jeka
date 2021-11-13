@@ -22,9 +22,8 @@ public class ScaffoldJkBean extends JkBean {
     @JkDoc("Set the Jeka version to fetch for the wrapper. If null, it will use the same Jeka version than the running one.")
     public String wrapperJekaVersion;
 
-    protected ScaffoldJkBean(JkClass jkClass) {
-        super(jkClass);
-        this.scaffolder = new JkScaffolder(jkClass.getBaseDir());
+    protected ScaffoldJkBean() {
+        this.scaffolder = new JkScaffolder(getBaseDir());
         this.scaffolder.setJekaClassCodeProvider(
                 () -> JkUtilsIO.read(ScaffoldJkBean.class.getResource("buildclass.snippet")));
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()

@@ -13,7 +13,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import javax.tools.ToolProvider;
@@ -28,11 +27,11 @@ import java.util.function.Supplier;
 import static dev.jeka.core.api.depmanagement.JkDependencySet.Hint.lastAndIf;
 
 /**
- * Engine having responsibility of compiling def classes, instantiate Jeka class, plugins and run it.<br/>
- * Jeka class sources are expected to lie in [project base dir]/jeka/def <br/>
- * Classes having simple name starting with '_' are ignored.
+ * Engine having responsibility of compile def classes, instantiate KBeans and run.<br/>
+ * Sources are expected to lie in [project base dir]/jeka/def <br/>
+ * Def classes having simple name starting with '_' are ignored.
  *
- * Jeka classes can have dependencies on jars : <ul>
+ * Def classes can have dependencies on jars : <ul>
  *     <li>located in [base dir]/jeka/boot directory</li>
  *     <li>declared in {@link JkDefClasspath} annotation</li>
  *     <li>declared in command-line, using '@'</li>
@@ -52,8 +51,6 @@ final class Engine {
 
     private JkDependencySet defDependencies;
 
-    private JkRepoSet defRepos;
-
     private LinkedHashSet<Path> rootsOfImportedJekaClasses = new LinkedHashSet<>();
 
     private List<String> compileOptions = new LinkedList<>();
@@ -66,16 +63,16 @@ final class Engine {
     Engine(Path baseDir) {
         super();
         this.projectBaseDir = baseDir.normalize();
-        defRepos = repos();
         this.defDependencies = JkDependencySet.of();
         this.resolver = new ClassResolver(baseDir);
     }
 
-    <T extends JkClass> T getJkClass(Class<T> baseClass, boolean initialise) {
+    // Used by JkImportedJkBeans for resolving transitive import
+    <T extends JkBean> T getJkBean(Class<T> baseClass, boolean initialise) {
         if (resolver.needCompile()) {
-            this.resolveAndCompile(true);
+            this.resolveDependenciesAndCompile(true);
         }
-        return resolver.resolve(baseClass, initialise);
+        return (T) resolver.resolveDefaultJkBean();
     }
 
     /**
@@ -89,43 +86,17 @@ final class Engine {
         defDependencies = defDependencies
                 .and(commandLineDependencies)
                 .and(dependenciesOnJeka());
-        JkClass jkClass = null;
-        JkBean jkBean = null;
-        JkPathSequence computedClasspath;
         String jkClassHint = Environment.standardOptions.jkClassName();
         preCompile();  // Need to pre-compile to get the declared def dependencies
-
-        // First try to instantiate class with classes found on current classloader
-        if (!JkUtilsString.isBlank(jkClassHint) && Environment.commandLine.getDefDependencies().isEmpty()) {  // First find a class in the existing classpath without compiling
-            jkClass = getJkClassInstance(jkClassHint, JkPathSequence.of());
-        }
-
-
-
-        // No JkClass has been found
-        if (jkClass == null) {
-            computedClasspath = resolveAndCompile(true);
-            jkClass = getJkClassInstance(jkClassHint, computedClasspath);
-            if (jkClass == null) {
-                String hint = JkUtilsString.isBlank(jkClassHint) ? "" : " named " + jkClassHint;
-                String prompt = !JkUtilsString.isBlank(jkClassHint) ? ""
-                        : "\nAre you sure this directory is a Jeka project ?";
-                throw new JkException("Can't find or guess any Jeka class%s in project %s.%s",
-                        hint, this.projectBaseDir, prompt);
-            }
-        } else {
-            computedClasspath = resolveAndCompile(false);
-        }
-
-        // Get default JkBean
-        jkBean = resolver.resolveDefaultJkBean();
-
-        JkRuntime.setDependenciesAndResolver(defDependencies, getDefDependencyResolver());
-        JkRuntime.setImportedProjectDirs(this.rootsOfImportedJekaClasses);
-        jkClass.setDefDependencyResolver(this.defDependencies, getDefDependencyResolver());
-        jkClass.getImportedJkClasses().setImportedRunRoots(this.rootsOfImportedJekaClasses);
+        JkPathSequence computedClasspath = resolveDependenciesAndCompile(true);
+        JkRuntime.BASE_DIR_CONTEXT.set(projectBaseDir);
+        JkRuntime runtime = JkRuntime.get();
+        runtime.setDependenciesAndResolver(defDependencies, getDefDependencyResolver());
+        runtime.setImportedProjectDirs(this.rootsOfImportedJekaClasses);
+        JkBean jkBean = resolver.resolveDefaultJkBean();
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         JkLog.info("Jeka classes are ready to be executed.");
+
         if (JkMemoryBufferLogDecorator.isActive()) {
             JkBusyIndicator.stop();
             JkMemoryBufferLogDecorator.inactivateOnJkLog();
@@ -135,8 +106,7 @@ final class Engine {
             computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
         }
         try {
-            JkRuntime.setInstance(jkClass);
-            this.launch(jkClass, jkBean, commandLine);
+            this.launch(jkBean, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -149,7 +119,6 @@ final class Engine {
         JkLog.trace("Parse source code of " + sourceFiles);
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.defDependencies = this.defDependencies.and(parser.dependencies());
-        this.defRepos = parser.importRepos().and(defRepos);
         this.rootsOfImportedJekaClasses = parser.projects();
         this.compileOptions = parser.compileOptions();
     }
@@ -158,11 +127,11 @@ final class Engine {
      * Resolves dependencies and compiles and sources classes contained in jeka/def.
      * It returns a path sequence containing the resolved dependencies and result of compilation.
      */
-    private JkPathSequence resolveAndCompile(boolean compileSources) {
-        return resolveAndCompile(new HashSet<>(), JkPathSequence.of(), compileSources);
+    private JkPathSequence resolveDependenciesAndCompile(boolean compileSources) {
+        return resolveDependenciesAndCompile(new HashSet<>(), JkPathSequence.of(), compileSources);
     }
 
-    private JkPathSequence resolveAndCompile(Set<Path> yetCompiledProjects, JkPathSequence path, boolean compileSources) {
+    private JkPathSequence resolveDependenciesAndCompile(Set<Path> yetCompiledProjects, JkPathSequence path, boolean compileSources) {
         if (!this.resolver.hasDefSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
             if (Environment.commandLine.getDefDependencies().isEmpty()) {
                 return JkPathSequence.of();
@@ -260,7 +229,7 @@ final class Engine {
         JkPathSequence result = JkPathSequence.of();
         for (final Path file : this.rootsOfImportedJekaClasses) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
-            JkPathSequence resultPath = engine.resolveAndCompile(yetCompiledProjects, inputPath, compileSources);
+            JkPathSequence resultPath = engine.resolveDependenciesAndCompile(yetCompiledProjects, inputPath, compileSources);
             inputPath = inputPath.and(resultPath);
             result = result.and(resultPath);
         }
@@ -273,7 +242,7 @@ final class Engine {
     private void compileDef(JkPathSequence defClasspath) {
         JkPathTree.of(resolver.defClassDir).deleteContent();
         if (hasKotlin()) {
-            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(defRepos)
+            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(getDefDependencyResolver().getRepos())
                     .setLogOutput(true)
                     .addOption("-nowarn");
             JkPathSequence kotlinClasspath = defClasspath.and(kotlinCompiler.getStdJdk8Lib());
@@ -308,12 +277,12 @@ final class Engine {
         }
     }
 
-    private void launch(JkClass jkClass, JkBean jkBean, CommandLine commandLine) {
+    private void launch(JkBean jkBean, CommandLine commandLine) {
         List<CommandLine.MethodInvocation> methods = commandLine.getMasterMethods();
         if (methods.isEmpty() && Environment.standardOptions.logRuntimeInformation == null) {
             methods = Collections.singletonList(CommandLine.MethodInvocation.normal(JkConstants.DEFAULT_METHOD));
         }
-        runProject(jkClass, jkBean, methods);
+        runProject(jkBean, methods);
     }
 
     private boolean hasKotlin() {
@@ -340,24 +309,21 @@ final class Engine {
     }
 
     private JkDependencyResolver getDefDependencyResolver() {
-        return JkDependencyResolver.of().addRepos(this.defRepos);
+        return JkDependencyResolver.of().addRepos(JkRepoFromOptions.getDownloadRepo(), JkRepo.ofLocal());
     }
 
-    private static void runProject(JkClass jkClass, JkBean jkBean, List<CommandLine.MethodInvocation> invokes) {
+    private static void runProject(JkBean jkBean, List<CommandLine.MethodInvocation> invokes) {
         for (final CommandLine.MethodInvocation methodInvocation : invokes) {
-            invokeMethodOnCommandSetOrPlugin(jkClass, jkBean, methodInvocation);
+            invokeMethodOnCommandSetOrPlugin(jkBean, methodInvocation);
         }
     }
 
-    private static void invokeMethodOnCommandSetOrPlugin(JkClass jkClass, JkBean defaultJkBean,
-                                                         CommandLine.MethodInvocation methodInvocation) {
+    private static void invokeMethodOnCommandSetOrPlugin(JkBean jkBean, CommandLine.MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
-            final JkBean jkBean = jkClass.getJkBeanRegistry().get(methodInvocation.pluginName);
+            final JkBean invokedJkBean = jkBean.getRuntime().getBeanRegistry().get(methodInvocation.pluginName);
             invokeMethodOnJkBean(jkBean, methodInvocation.methodName);
-        } else if (JkClass.class.equals(jkClass.getClass())){
-            invokeMethodOnJkBean(defaultJkBean, methodInvocation.methodName);
         } else {
-            invokeMethodOnJkBean(jkClass, methodInvocation.methodName);
+            invokeMethodOnJkBean(jkBean, methodInvocation.methodName);
         }
     }
 

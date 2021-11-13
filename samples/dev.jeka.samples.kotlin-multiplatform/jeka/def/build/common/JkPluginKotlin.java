@@ -72,7 +72,7 @@ public class JkPluginKotlin extends JkBean {
     }
 
     @Override
-    protected void afterSetup() throws Exception {
+    protected void postInit() throws Exception {
         if (common != null) {
             common.setupJvmProject(jvm());
         }

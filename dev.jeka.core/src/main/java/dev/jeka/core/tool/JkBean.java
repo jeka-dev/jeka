@@ -1,7 +1,11 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Plugin instances are owned by a <code>JkClass</code> instance. The relationship is bidirectional :
@@ -12,34 +16,11 @@ import dev.jeka.core.api.utils.JkUtilsString;
  */
 public abstract class JkBean {
 
-    /**
-     * When publishing a plugin, authors can not guess which future version of Jeka will break compatibility.
-     * To keep track of breaking change, a registry can be maintained to be accessible at the specified url.
-     * <p>
-     * The register is expected to be a simple flat file.
-     * Each row is structured as <code>pluginVersion : jekaVersion</code>.
-     * <p>
-     * The example below means that :<ul>
-     *     <li>Every plugin version equal or lower than 1.2.1.RELEASE is incompatible with any version of jeka equals or greater than 0.9.1.RELEASE</li>
-     *     <li>Every plugin version equal or lower than 1.3.0.RELEASE is incompatible with any version of jeka equals or greater than 0.9.5.M1</li>
-     * </ul>
-     *
-     * <pre><code>
-     *     1.2.1.RELEASE : 0.9.1.RELEASE
-     *     1.3.0.RELEASE : 0.9.5.M1
-     * </code></pre>
-     */
-    public static final String MANIFEST_BREAKING_CHANGE_URL_ENTRY = "Jeka-Breaking-Change-Url";
-
-    /**
-     * Manifest entry containing the lowest Jeka version which is compatible with a plugin. If value not <code>null</code>  and
-     * running Jeka version is lower then a warning log will be emitted.
-     */
-    public static final String MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY = "Jeka-Lowest-Compatible-Version";
-
     private static final String CLASS_SUFIX = JkBean.class.getSimpleName();
 
-    private final JkClass jkClass;
+    private JkRuntime runtime;
+
+    private final JkImportedJkBeans importedJkBeans;
 
     /*
      * Plugin instances are likely to be configured by the owning <code>JkClass</code> instance, before options
@@ -47,8 +28,13 @@ public abstract class JkBean {
      * If a plugin needs to initialize state before options are injected, you have to do it in the
      * constructor.
      */
-    protected JkBean(JkClass jkClass) {
-        this.jkClass = jkClass;
+    JkBean(JkRuntime runtime) {
+        this.runtime = runtime;
+        this.importedJkBeans = new JkImportedJkBeans(this);
+    }
+
+    protected JkBean() {
+        this(JkRuntime.get());
     }
 
     @JkDoc("Displays help about this plugin.")
@@ -56,41 +42,29 @@ public abstract class JkBean {
         HelpDisplayer.helpPlugin(this);
     }
 
-    /**
-     * Override this method to initialize the plugin.
-     * This method is invoked right after plugin option fields has been injected and prior
-     * {@link JkClass#setup()} is invoked.
-     */
-    protected void beforeSetup() throws Exception {
+    public Path getBaseDir() {
+        return runtime.getProjectBaseDir();
     }
 
     /**
-     * Override this method to perform some actions, once the plugin has been setup by
-     * {@link JkClass#setup()} method.<p>
-     * Typically, some plugins have to configure other ones (For instance, <i>java</i> plugin configures
-     * <i>scaffold</i> plugin to instruct what to use as a template build class). Those kind of
-     * configuration is better done here as the setup made in {@link JkClass} is likely
-     * to impact the result of the configuration.
+     * Returns the output directory where all the final and intermediate artifacts are generated.
      */
-    protected void afterSetup() throws Exception {
+    public Path getOutputDir() {
+        return getBaseDir().resolve(JkConstants.OUTPUT_PATH);
+    }
+
+    /**
+     * This method is invoked once field values have been injected.
+     * Configuration of other KBean is supposed to be implemented here.
+     */
+    protected void init() throws Exception {
+    }
+
+    protected void postInit() throws Exception {
     }
 
     final String shortName() {
-        return shortName(this.getClass());
-    }
-
-    static String shortName(Class<?> jkBeanClass) {
-        final String className = jkBeanClass.getSimpleName();
-        if (! className.endsWith(CLASS_SUFIX) || className.equals(CLASS_SUFIX)) {
-            throw new IllegalStateException(String.format("Plugin class " + className + " not properly named. Name should be formatted as " +
-                    "'Xxxx%s' where xxxx is the name of the KBean (uncapitalized).", CLASS_SUFIX, className));
-        }
-        final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFIX);
-        return JkUtilsString.uncapitalize(prefix);
-    }
-
-    public JkClass getJkClass() {
-        return jkClass;
+        return computeShortName(this.getClass());
     }
 
     @Override
@@ -99,18 +73,33 @@ public abstract class JkBean {
     }
 
     /**
-     * Convenient method to set a Jeka Plugin compatibility range with Jeka versions.
-     * @param lowestVersion Can be null
-     * @param breakingChangeUrl Can be null
-     * @see JkBean#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
-     * @See JkBean#MANIFEST_BREAKING_CHANGE_URL_ENTRY
+     * Cleans the output directory.
      */
-    public static void setJekaPluginCompatibilityRange(JkManifest manifest, String lowestVersion, String breakingChangeUrl) {
-        manifest
-                .addMainAttribute(JkBean.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, lowestVersion)
-                .addMainAttribute(JkBean.MANIFEST_BREAKING_CHANGE_URL_ENTRY, breakingChangeUrl);
+    @JkDoc("Cleans the output directory.")
+    public void clean() {
+        Path output = getOutputDir();
+        JkLog.info("Clean output directory " + output);
+        if (Files.exists(output)) {
+            JkPathTree.of(output).deleteContent();
+        }
     }
 
+    public JkImportedJkBeans getImportedJkBeans() {
+        return importedJkBeans;
+    }
 
+    public JkRuntime getRuntime() {
+        return runtime;
+    }
+
+    static String computeShortName(Class<?> jkBeanClass) {
+        final String className = jkBeanClass.getSimpleName();
+        if (! className.endsWith(CLASS_SUFIX) || className.equals(CLASS_SUFIX)) {
+            throw new IllegalStateException(String.format("Plugin class " + className + " not properly named. Name should be formatted as " +
+                    "'Xxxx%s' where xxxx is the name of the KBean (uncapitalized).", CLASS_SUFIX, className));
+        }
+        final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFIX);
+        return JkUtilsString.uncapitalize(prefix);
+    }
 
 }

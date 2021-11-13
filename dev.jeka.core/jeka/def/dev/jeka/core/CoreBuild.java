@@ -12,7 +12,7 @@ import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -31,21 +31,21 @@ import static dev.jeka.core.api.project.JkProjectPublication.JAVADOC_ARTIFACT_ID
 import static dev.jeka.core.api.project.JkProjectPublication.SOURCES_ARTIFACT_ID;
 
 /**
- * Build class for Jeka. Run main method to create full distrib.
+ * Run main method to create full distrib.
  * For publishing in OSSRH the following options must be set : -ossrhPwd=Xxxxxx -pgp#secretKeyPassword=Xxxxxxx
  */
-public class CoreBuild extends JkClass {
+public class CoreBuild extends JkBean {
 
     private static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
+    final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
     public boolean runIT;
 
     @Override
-    protected void setup()  {
+    protected void init()  {
         projectPlugin.getProject()
             .getConstruction()
                 .getManifest()
@@ -114,7 +114,7 @@ public class CoreBuild extends JkClass {
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
-        final List<Path> ivySourceLibs = getBaseTree().goTo("jeka/libs-sources")
+        final List<Path> ivySourceLibs = JkPathTree.of(getBaseDir()).goTo("jeka/libs-sources")
                 .andMatching(true, "ivy-*.jar").getFiles();
         distrib
             .importFiles(getBaseDir().toAbsolutePath().getParent().resolve("LICENSE"))

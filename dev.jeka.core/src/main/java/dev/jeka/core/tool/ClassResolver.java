@@ -112,12 +112,12 @@ final class ClassResolver {
             if (clazz == null) {
                 return null;
             }
-            JkClass.baseDirContext(baseDir);
+            //JkBean.setBaseDirContext(baseDir);
             final JkClass run;
             try {
                 run = initialize ? JkClass.of(clazz) : JkClass.ofUninitialized(clazz);
             } finally {
-                JkClass.baseDirContext(null);
+            //    JkBean.setBaseDirContext(null);
             }
             return run;
         }
@@ -158,14 +158,7 @@ final class ClassResolver {
     private JkBean resolveJkBean(boolean initialize) {
 
         // If there is def files
-        JkClass.baseDirContext(baseDir);
         JkClass jkClass;
-        try {
-            jkClass = initialize ? JkClass.of(JkClass.class) : JkClass.ofUninitialized(JkClass.class);
-        } finally {
-            JkClass.baseDirContext(null);
-        }
-
         Class<? extends JkBean> jkBeanClass = null;
         if (this.hasDefSource()) {
             final JkPathTree dir = JkPathTree.of(defSourceDir);
@@ -182,7 +175,7 @@ final class ClassResolver {
         if (jkBeanClass == null) {
             jkBeanClass = DefaultJkBean.class;
         }
-        return JkUtilsReflect.newInstance(jkBeanClass, JkClass.class, jkClass);
+        return JkUtilsReflect.newInstance(jkBeanClass);
     }
 
 }

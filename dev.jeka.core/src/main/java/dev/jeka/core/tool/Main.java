@@ -28,11 +28,10 @@ public final class Main {
      */
     public static void main(String[] args) {
         if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
-            final URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {},
-                    Thread.currentThread().getContextClassLoader());
+            final URLClassLoader urlClassLoader = new RelaxedUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);
-            final Object[] argArray = new Object[] {args};
-            JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main", "main" , argArray);
+            JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, Main.class.getName(),
+                    "main" , args);
             return;
         }
         final long start = System.nanoTime();

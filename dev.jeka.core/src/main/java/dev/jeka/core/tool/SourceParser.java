@@ -28,8 +28,7 @@ final class SourceParser {
     }
 
     public static SourceParser of(Path baseDir, Iterable<Path>  files) {
-        SourceParser result = new SourceParser(JkDependencySet.of(), JkRepoSet.of(),
-                new LinkedHashSet<>(), new LinkedList<>());
+        SourceParser result = new SourceParser(JkDependencySet.of(), new LinkedHashSet<>(), new LinkedList<>());
         for (final Path code : files) {
             result = result.and(of(baseDir, code));
         }
@@ -38,11 +37,11 @@ final class SourceParser {
 
     static SourceParser of(Path baseDir, URL codeUrl) {
         try (final InputStream inputStream = JkUtilsIO.inputStream(codeUrl)) {
-            final String uncomentedCode = removeComments(inputStream);
-            final JkDependencySet deps = dependencies(uncomentedCode, baseDir, codeUrl);
-            final LinkedHashSet<Path> projects = projects(uncomentedCode, baseDir, codeUrl);
-            final List<String> compileOptions = compileOptions(uncomentedCode, codeUrl);
-            return new SourceParser(deps, repos(uncomentedCode, codeUrl), projects, compileOptions);
+            final String unco4mmentedCode = removeComments(inputStream);
+            final JkDependencySet deps = dependencies(unco4mmentedCode, baseDir, codeUrl);
+            final LinkedHashSet<Path> projects = projects(unco4mmentedCode, baseDir, codeUrl);
+            final List<String> compileOptions = compileOptions(unco4mmentedCode, codeUrl);
+            return new SourceParser(deps, projects, compileOptions);
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
@@ -50,17 +49,14 @@ final class SourceParser {
 
     private final JkDependencySet dependencies;
 
-    private final JkRepoSet importRepos;
-
     private final LinkedHashSet<Path> dependencyProjects;
 
     private final List<String> compileOptions;
 
-    private SourceParser(JkDependencySet deps, JkRepoSet repos, LinkedHashSet<Path>  dependencyProjects,
+    private SourceParser(JkDependencySet deps, LinkedHashSet<Path>  dependencyProjects,
                          List<String> compileOptions) {
         super();
         this.dependencies = deps;
-        this.importRepos = repos;
         this.dependencyProjects = dependencyProjects;
         this.compileOptions = compileOptions;
     }
@@ -70,7 +66,6 @@ final class SourceParser {
         LinkedHashSet<Path> allDependencyProjects = new LinkedHashSet<>(this.dependencyProjects);
         allDependencyProjects.addAll(other.dependencyProjects);
         return new SourceParser(this.dependencies.and(other.dependencies),
-                this.importRepos.and(other.importRepos),
                 allDependencyProjects,
                 JkUtilsIterable.concatLists(this.compileOptions, other.compileOptions));
     }
@@ -79,9 +74,7 @@ final class SourceParser {
         return this.dependencies;
     }
 
-    JkRepoSet importRepos() {
-        return this.importRepos;
-    }
+
 
     LinkedHashSet<Path>  projects() {
         return this.dependencyProjects;
@@ -94,11 +87,6 @@ final class SourceParser {
     private static JkDependencySet dependencies(String code, Path baseDir, URL url) {
         final List<String> deps = stringsInJkImport(code, url);
         return dependenciesFromImports(baseDir, deps);
-    }
-
-    private static JkRepoSet repos(String code, URL url) {
-        final List<String> repoUrls = stringsInAnnotation(code, JkDefRepo.class, url);
-        return JkRepoSet.of(repoUrls.toArray(new String[0]));
     }
 
     private static LinkedHashSet<Path>  projects(String code, Path baseDir, URL url) {

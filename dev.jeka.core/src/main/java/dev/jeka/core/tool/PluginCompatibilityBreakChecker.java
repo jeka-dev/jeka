@@ -25,13 +25,37 @@ import java.util.Objects;
 
 final class PluginCompatibilityBreakChecker {
 
+    /**
+     * When publishing a plugin, authors can not guess which future version of Jeka will break compatibility.
+     * To keep track of breaking change, a registry can be maintained to be accessible at the specified url.
+     * <p>
+     * The register is expected to be a simple flat file.
+     * Each row is structured as <code>pluginVersion : jekaVersion</code>.
+     * <p>
+     * The example below means that :<ul>
+     *     <li>Every plugin version equal or lower than 1.2.1.RELEASE is incompatible with any version of jeka equals or greater than 0.9.1.RELEASE</li>
+     *     <li>Every plugin version equal or lower than 1.3.0.RELEASE is incompatible with any version of jeka equals or greater than 0.9.5.M1</li>
+     * </ul>
+     *
+     * <pre><code>
+     *     1.2.1.RELEASE : 0.9.1.RELEASE
+     *     1.3.0.RELEASE : 0.9.5.M1
+     * </code></pre>
+     */
+    public static final String MANIFEST_BREAKING_CHANGE_URL_ENTRY = "Jeka-Breaking-Change-Url";
+    /**
+     * Manifest entry containing the lowest Jeka version which is compatible with a plugin. If value not <code>null</code>  and
+     * running Jeka version is lower then a warning log will be emitted.
+     */
+    public static final String MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY = "Jeka-Lowest-Compatible-Version";
+
     private PluginCompatibilityBreakChecker() {}
 
     static void checkCompatibility(Class pluginClass, JkDependencyResolver resolver) {
         JkManifest manifest = JkManifest.of().loadFromClass(pluginClass);
-        String breakingChangeUrl = manifest.getMainAttribute(JkBean.MANIFEST_BREAKING_CHANGE_URL_ENTRY);
+        String breakingChangeUrl = manifest.getMainAttribute(MANIFEST_BREAKING_CHANGE_URL_ENTRY);
         String lowestJekaCompatibleVersion = manifest.getMainAttribute(
-                JkBean.MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY);
+                MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY);
 
         // Check Jeka version is not too low
         JkVersion jekaVersion = JkVersion.of(JkInfo.getJekaVersion());
@@ -92,6 +116,19 @@ final class PluginCompatibilityBreakChecker {
                 + " does not work with jeka version " + breakingVersion.jekaVersion + " or higher.");
         JkLog.error("Please use a Jeka version lower than " + breakingVersion.jekaVersion + " or a plugin version higher than "
                 + breakingVersion.pluginVersion);
+    }
+
+    /**
+     * Convenient method to set a Jeka Plugin compatibility range with Jeka versions.
+     * @param lowestVersion Can be null
+     * @param breakingChangeUrl Can be null
+     * @see PluginCompatibilityBreakChecker#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
+     * @See JkBean#MANIFEST_BREAKING_CHANGE_URL_ENTRY
+     */
+    public static void setJekaPluginCompatibilityRange(JkManifest manifest, String lowestVersion, String breakingChangeUrl) {
+        manifest
+                .addMainAttribute(MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, lowestVersion)
+                .addMainAttribute(MANIFEST_BREAKING_CHANGE_URL_ENTRY, breakingChangeUrl);
     }
 
     private static class CompatibilityCache {

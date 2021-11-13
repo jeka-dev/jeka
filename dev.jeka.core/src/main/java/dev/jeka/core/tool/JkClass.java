@@ -34,13 +34,11 @@ public class JkClass {
 
     private final Path baseDir;
 
-    private JkBeanRegistry jkBeanRegistry;
-
     private JkDependencyResolver defDependencyResolver;
 
     private JkDependencySet defDependencies;
 
-    private final JkImportedJkClasses importedJkClasses;
+    private JkImportedJkBeans importedJkClasses;
 
     // ------------------ options --------------------------------------------------------
 
@@ -61,10 +59,9 @@ public class JkClass {
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
         // Instantiating imported runs
-        this.importedJkClasses = JkImportedJkClasses.of(this);
+        //this.importedJkClasses = JkImportedJkBeans.of(this);
 
-        // Instantiate plugins
-        this.jkBeanRegistry = new JkBeanRegistry(this, Environment.commandLine.getPluginOptions());
+
     }
 
     /**
@@ -89,18 +86,21 @@ public class JkClass {
 
         // initialise imported projects after setup to let a chance master Jeka class
         // to modify imported Jeka classes in the setup method.
+        /*
         for (JkClass jkClass : importedJkClasses.getDirects()) {
             jkClass.initialise();
         }
+        */
 
-        for (JkBean plugin : new LinkedList<>(jkBeanRegistry.getRegisteredJkBean())) {
-            List<ProjectDef.JkClassOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
-            JkLog.startTask("Activating Plugin " + plugin.shortName() + " with options "
+
+        for (JkBean jkBean : new LinkedList<>(JkRuntime.getBeanRegistry().getAll())) {
+            List<ProjectDef.JkClassOptionDef> defs = ProjectDef.RunClassDef.of(jkBean).optionDefs();
+            JkLog.startTask("Activating Plugin " + jkBean.shortName() + " with options "
                     + HelpDisplayer.optionValues(defs));
             try {
-                plugin.afterSetup();
+                jkBean.postInit();
             } catch (RuntimeException e) {
-                JkLog.error("Plugin " + plugin.shortName() + " has caused build instantiation failure.");
+                JkLog.error("Plugin " + jkBean.shortName() + " has caused build instantiation failure.");
                 throw e;
             }
             JkLog.endTask();
@@ -128,11 +128,11 @@ public class JkClass {
                 + "' from command line does not match with any field of class " + jkCkass.getClass().getName()));
 
         // Load plugins declared in command line and inject options
-        jkClassInstance.jkBeanRegistry.loadCommandLinePlugins();
-        List<JkBean> plugins = jkClassInstance.getJkBeanRegistry().getRegisteredJkBean();
+        JkRuntime.getBeanRegistry().loadCommandLinePlugins();
+        List<JkBean> plugins = JkRuntime.getBeanRegistry().getAll();
         for (JkBean plugin : plugins) {
-            if (!jkClassInstance.jkBeanRegistry.getRegisteredJkBean().contains(plugin)) {
-                jkClassInstance.jkBeanRegistry.injectOptions(plugin);
+            if (!JkRuntime.getBeanRegistry().getAll().contains(plugin)) {
+                JkRuntime.getBeanRegistry().injectOptions(plugin);
             }
         }
         return jkCkass;
@@ -140,14 +140,14 @@ public class JkClass {
 
     /**
      * Configure your build and plugins here.
-     * At this point, option values has been injected and {@link JkBean#beforeSetup()} method invoked on all plugins.
+     * At this point, option values has been injected and {@link JkBean#init()} method invoked on all plugins.
      */
     protected void setup() throws Exception {
         // Do nothing by default
     }
 
     /**
-     * This method is called once {@link JkBean#afterSetup()} method has been invoked on all plugins.
+     * This method is called once {@link JkBean#postInit()} method has been invoked on all plugins.
      * It gives a chance to the Jeka class to override some plugin settings.
      */
     protected void postSetup() throws Exception {
@@ -179,19 +179,12 @@ public class JkClass {
     }
 
     /**
-     * Returns the container of loaded plugins for this instance.
-     */
-    public JkBeanRegistry getJkBeanRegistry() {
-        return this.jkBeanRegistry;
-    }
-
-    /**
      * Shorthand to <code>getPlugins().get(<Pluginclass>)</code>.
      * Returns the plugin instance of the specified class loaded in the holding JkClass instance. If it does not hold
      * a plugin of the specified class at call time, the plugin is loaded then returned.
      */
     public <T extends JkBean> T getJkBean(Class<T> pluginClass) {
-        return getJkBeanRegistry().get(pluginClass);
+        return JkRuntime.getBeanRegistry().get(pluginClass);
     }
 
 
@@ -219,7 +212,7 @@ public class JkClass {
     /**
      * Returns imported runs with plugins applied on.
      */
-    public final JkImportedJkClasses getImportedJkClasses() {
+    public final JkImportedJkBeans getImportedJkClasses() {
         return importedJkClasses;
     }
 

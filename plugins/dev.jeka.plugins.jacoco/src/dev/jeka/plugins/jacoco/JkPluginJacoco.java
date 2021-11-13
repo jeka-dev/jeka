@@ -11,7 +11,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
 @JkDocPluginDeps(ProjectJkBean.class)
-public class JacocoJkBean extends JkBean {
+public class JkPluginJacoco extends JkBean {
 
     /**
      * Relative location to the output folder of the generated jacoco report file
@@ -20,7 +20,7 @@ public class JacocoJkBean extends JkBean {
 
     public static final String OUTPUT_XML_RELATIVE_PATH = "jacoco/jacoco.xml";
 
-    protected JacocoJkBean(JkClass run) {
+    protected JkPluginJacoco(JkClass run) {
         super(run);
     }
 
@@ -40,7 +40,7 @@ public class JacocoJkBean extends JkBean {
     public String jacocoVersion = "0.8.7";
 
     @Override
-    protected void afterSetup() {
+    protected void postInit() {
         if (!enabled) {
             return;
         }

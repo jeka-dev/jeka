@@ -2,7 +2,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.PluginCompatibilityBreakChecker;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
     class Build extends JkClass {
@@ -17,7 +17,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
             .setCompileDependencies(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
             );
-        JkBean.setJekaPluginCompatibilityRange(javaProject.getConstruction().getManifest(),
+        PluginCompatibilityBreakChecker.setJekaPluginCompatibilityRange(javaProject.getConstruction().getManifest(),
                 "${jekaVersion}",
                 "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
 

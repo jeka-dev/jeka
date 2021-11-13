@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 @JkDoc("Run SonarQube analysis.")
 @JkDocPluginDeps(ProjectJkBean.class)
-public class SonarqubeJkBean extends JkBean {
+public class JkPluginSonarqube extends JkBean {
 
     private final Map<String, String> properties = new HashMap<>();
 
@@ -40,7 +40,7 @@ public class SonarqubeJkBean extends JkBean {
 
     private Consumer<JkSonarqube> sonarqubeConfigurer = sonarqube -> {};
 
-    protected SonarqubeJkBean(JkClass jkClass) {
+    protected JkPluginSonarqube(JkClass jkClass) {
         super(jkClass);
     }
 

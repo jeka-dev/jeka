@@ -31,17 +31,13 @@ public class GpgJkBean extends JkBean {
 
     private JkGpg gpg;
 
-    protected GpgJkBean(JkClass jkClass) {
-        super(jkClass);
-    }
-
-    protected void beforeSetup() {
-        Path localPub = getJkClass().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
+    protected void init() {
+        Path localPub = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
         Path pub = JkUtilsPath.firstExisting(publicRingPath, localPub, JkGpg.getDefaultPubring());
         if (pub == null) {
             pub = JkGpg.getDefaultPubring();
         }
-        Path localSec = getJkClass().getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
+        Path localSec = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
         Path sec = JkUtilsPath.firstExisting(secretRingPath, localSec, JkGpg.getDefaultSecring());
         if (sec == null) {
             sec = JkGpg.getDefaultSecring();

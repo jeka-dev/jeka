@@ -150,7 +150,7 @@ final class KBeanDictionary {
 
         KBeanDescription(Class<? extends JkBean> clazz) {
             super();
-            this.shortName = JkBean.shortName(clazz);
+            this.shortName = JkBean.computeShortName(clazz);
             this.fullName = longName(clazz);
             this.clazz = clazz;
         }

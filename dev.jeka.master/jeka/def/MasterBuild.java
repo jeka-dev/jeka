@@ -12,7 +12,7 @@ import dev.jeka.core.tool.builtins.release.VersionFromGitJkBean;
 import dev.jeka.core.tool.builtins.crypto.GpgJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 
-class MasterBuild extends JkClass {
+class MasterBuild extends JkBean {
 
     @JkEnv("OSSRH_USER")
     public String ossrhUser;
@@ -23,11 +23,11 @@ class MasterBuild extends JkClass {
     @JkEnv("GH_TOKEN")
     public String githubToken;
 
-    final GpgJkBean gpg = getJkBean(GpgJkBean.class);
+    final GpgJkBean gpg = getRuntime().getBeanRegistry().get(GpgJkBean.class);
 
-    final NexusJkBean nexus = getJkBean(NexusJkBean.class);
+    final NexusJkBean nexus = getRuntime().getBeanRegistry().get(NexusJkBean.class);
 
-    final VersionFromGitJkBean versionFromGit = getJkBean(VersionFromGitJkBean.class);
+    final VersionFromGitJkBean versionFromGit = getRuntime().getBeanRegistry().get(VersionFromGitJkBean.class);
 
     // ------ Slave projects
 
@@ -35,32 +35,32 @@ class MasterBuild extends JkClass {
     CoreBuild coreBuild;
 
     @JkDefImport("../plugins/dev.jeka.plugins.jacoco")
-    JacocoPluginBuild jacocoBuild;
+    JkBean jacocoBuild;
 
     @JkDefImport("../plugins/dev.jeka.plugins.sonarqube")
-    JkClass sonarqubeBuild;
+    JkBean sonarqubeBuild;
 
     @JkDefImport("../plugins/dev.jeka.plugins.springboot")
-    JkClass springbootBuild;
+    JkBean springbootBuild;
 
     private JkRepoSet publishRepos;
 
 
     @Override
-    protected void setup() throws Exception {
+    protected void init() throws Exception {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
         publishRepos = JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner(""));
-        getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(this::configureSlave);
+        getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::configureSlave);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() {
         JkLog.startTask("Building core and plugins");
-        getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(projectPlugin -> {
-            JkLog.startTask("Building " + projectPlugin.getJkClass());
-            projectPlugin.getJkClass().clean();
-            projectPlugin.pack();
+        getImportedJkBeans().get(ProjectJkBean.class, false).forEach(bean -> {
+            JkLog.startTask("Building " + bean);
+            bean.clean();
+            bean.pack();
             JkLog.endTask();
         });
         JkLog.endTask();
@@ -71,7 +71,7 @@ class MasterBuild extends JkClass {
         String branch = JkGitProcess.of().getCurrentBranch();
         if (branch.equals("master") && !versionFromGit.version().isSnapshot()) {
             JkLog.startTask("Publishing");
-            getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(plugin -> plugin.publish());
+            getImportedJkBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publish);
             closeAndReleaseRepo();
             JkLog.endTask();
         }
@@ -93,11 +93,11 @@ class MasterBuild extends JkClass {
 
     @JkDoc("Clean build of core + plugins bypassing tests.")
     public void buildFast() {
-        getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(plugin -> {
-            plugin.getProject().simpleFacade().setTestSkipped(true);
-            plugin.getProject().getPublication().includeJavadocAndSources(false, false);
-            plugin.getJkClass().clean();
-            plugin.getProject().getPublication().pack();
+        getImportedJkBeans().get(ProjectJkBean.class, false).forEach(bean -> {
+            bean.getProject().simpleFacade().setTestSkipped(true);
+            bean.getProject().getPublication().includeJavadocAndSources(false, false);
+            bean.clean();
+            bean.getProject().getPublication().pack();
         });
     }
 
@@ -129,7 +129,7 @@ class MasterBuild extends JkClass {
     }
 
     public void publishLocal() {
-        getImportedJkClasses().getDirect(ProjectJkBean.class).forEach(pluginJava -> pluginJava.publishLocal());
+        getImportedJkBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publishLocal);
     }
 
     public static void main(String[] args) {

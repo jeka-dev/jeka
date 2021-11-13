@@ -3,7 +3,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
-import dev.jeka.plugins.jacoco.JacocoJkBean;
+import dev.jeka.plugins.jacoco.JkPluginJacoco;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,7 +13,7 @@ public class JacocoSampleBuild extends JkClass {
 
     final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
 
-    final JacocoJkBean jacoco = getJkBean(JacocoJkBean.class);
+    final JkPluginJacoco jacoco = getJkBean(JkPluginJacoco.class);
 
     @Override
     protected void setup() {
