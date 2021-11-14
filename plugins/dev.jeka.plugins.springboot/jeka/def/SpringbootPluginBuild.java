@@ -1,16 +1,16 @@
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-class SpringbootPluginBuild extends JkClass {
+class SpringbootPluginBuild extends JkBean {
 
-    final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
+    final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
     @Override
-    protected void setup() {
+    protected void init() {
         projectPlugin.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .setCompileDependencies(deps -> deps

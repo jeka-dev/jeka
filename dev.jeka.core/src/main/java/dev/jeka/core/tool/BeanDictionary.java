@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud
  * 
- * @see {@link KBeanDescription}
+ * @see {@link BeanDescription}
  */
-final class KBeanDictionary {
+final class BeanDictionary {
 
     private static final Map<String, KBeanDescription> SHORTNAME_CACHE = new LinkedHashMap<>();
 
@@ -175,7 +175,7 @@ final class KBeanDictionary {
             return this.fullName;
         }
 
-        public Class<? extends JkBean> pluginClass() {
+        public Class<? extends JkBean> beanClass() {
             return clazz;
         }
 

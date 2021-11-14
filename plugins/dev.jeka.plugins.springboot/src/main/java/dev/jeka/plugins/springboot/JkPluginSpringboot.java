@@ -22,7 +22,6 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -76,9 +75,8 @@ public final class JkPluginSpringboot extends JkBean {
      * Therefore, every plugin members that are likely to be configured by the owning build must be
      * initialized in the constructor.
      */
-    protected JkPluginSpringboot(JkClass jkClass) {
-        super(jkClass);
-        projectPlugin = jkClass.getJkBeanRegistry().get(ProjectJkBean.class);
+    protected JkPluginSpringboot() {
+        projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
     }
 
     public void setSpringbootVersion(String springbootVersion) {
@@ -155,8 +153,8 @@ public final class JkPluginSpringboot extends JkBean {
         }
 
         // Add template build class to scaffold
-        if (this.getJkClass().getJkBeanRegistry().hasLoaded(ScaffoldJkBean.class)) {
-            ScaffoldJkBean scaffold = this.getJkClass().getJkBeanRegistry().get(ScaffoldJkBean.class);
+        if (getRuntime().getBeanRegistry().hasLoaded(ScaffoldJkBean.class)) {
+            ScaffoldJkBean scaffold = getRuntime().getBeanRegistry().get(ScaffoldJkBean.class);
             String code = JkUtilsIO.read(JkPluginSpringboot.class.getClassLoader().getResource("snippet/Build.java"));
             String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
             code = code.replace("${dependencyDescription}", defClasspath);

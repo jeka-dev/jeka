@@ -18,7 +18,7 @@ public class CommandLineTest {
         assertEquals(false, tested.getMasterMethods().get(0).isMethodPlugin());
         assertEquals(true, tested.getMasterMethods().get(2).isMethodPlugin());
         assertEquals("done", tested.getMasterMethods().get(2).methodName);
-        assertEquals("sonar", tested.getMasterMethods().get(2).pluginName);
+        assertEquals("sonar", tested.getMasterMethods().get(2).beanName);
 
     }
 

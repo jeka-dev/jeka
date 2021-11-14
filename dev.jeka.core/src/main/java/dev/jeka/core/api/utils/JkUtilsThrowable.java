@@ -1,7 +1,6 @@
 package dev.jeka.core.api.utils;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Utility class to deal with {@link Throwable}

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-final class PluginCompatibilityBreakChecker {
+final class JkJekaVersionCompatibilityChecker {
 
     /**
      * When publishing a plugin, authors can not guess which future version of Jeka will break compatibility.
@@ -49,7 +49,7 @@ final class PluginCompatibilityBreakChecker {
      */
     public static final String MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY = "Jeka-Lowest-Compatible-Version";
 
-    private PluginCompatibilityBreakChecker() {}
+    private JkJekaVersionCompatibilityChecker() {}
 
     static void checkCompatibility(Class pluginClass, JkDependencyResolver resolver) {
         JkManifest manifest = JkManifest.of().loadFromClass(pluginClass);
@@ -122,7 +122,7 @@ final class PluginCompatibilityBreakChecker {
      * Convenient method to set a Jeka Plugin compatibility range with Jeka versions.
      * @param lowestVersion Can be null
      * @param breakingChangeUrl Can be null
-     * @see PluginCompatibilityBreakChecker#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
+     * @see JkJekaVersionCompatibilityChecker#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
      * @See JkBean#MANIFEST_BREAKING_CHANGE_URL_ENTRY
      */
     public static void setJekaPluginCompatibilityRange(JkManifest manifest, String lowestVersion, String breakingChangeUrl) {

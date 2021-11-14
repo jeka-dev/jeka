@@ -1,5 +1,5 @@
 import dev.jeka.core.samples.JavaPluginBuild;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDefImport;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
@@ -10,15 +10,15 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  * 
  * @formatter:off
  */
-public class FatJarBuild extends JkClass {
+public class FatJarBuild extends JkBean {
 
-    ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
     
     @JkDefImport("../dev.jeka.samples.basic")
     private JavaPluginBuild sampleBuild;
 
     @Override
-    protected void setup() {
+    protected void init() {
         projectPlugin.getProject()
             .getPublication()
                 .getArtifactProducer()

@@ -16,11 +16,13 @@ import java.nio.file.Path;
  */
 public abstract class JkBean {
 
+    private static final String JKBEAN_CLASS_SIMPLE_NAME = JkBean.class.getSimpleName();
+
     private static final String CLASS_SUFIX = JkBean.class.getSimpleName();
 
     private JkRuntime runtime;
 
-    private final JkImportedJkBeans importedJkBeans;
+    private final JkImportedJkBeans importedJkBeans;  // KBeans from other projects
 
     /*
      * Plugin instances are likely to be configured by the owning <code>JkClass</code> instance, before options
@@ -34,7 +36,7 @@ public abstract class JkBean {
     }
 
     protected JkBean() {
-        this(JkRuntime.get());
+        this(JkRuntime.ofContextBaseDir());
     }
 
     @JkDoc("Displays help about this plugin.")
@@ -100,6 +102,29 @@ public abstract class JkBean {
         }
         final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFIX);
         return JkUtilsString.uncapitalize(prefix);
+    }
+
+    static boolean nickNameMatches(Class<? extends JkBean> beanClass, String nickNameCandidate) {
+        if (nickNameCandidate.equals(beanClass.getName())) {
+            return true;
+        }
+        String uncapitalizedClassSimpleName = JkUtilsString.uncapitalize(beanClass.getSimpleName());
+        if (JkUtilsString.uncapitalize(nickNameCandidate).equals(uncapitalizedClassSimpleName)) {
+            return true;
+        }
+        if (beanClass.getName().endsWith(JKBEAN_CLASS_SIMPLE_NAME)) {
+            return uncapitalizedClassSimpleName.equals(nickNameCandidate + JkBean.class.getSimpleName());
+        }
+        return false;
+    }
+
+    static String nickName(Class<? extends JkBean> beanClass) {
+        String uncapitalizedClassSimpleName = JkUtilsString.uncapitalize(beanClass.getSimpleName());
+        if (uncapitalizedClassSimpleName.endsWith(JKBEAN_CLASS_SIMPLE_NAME)
+                && !beanClass.getSimpleName().equals(JKBEAN_CLASS_SIMPLE_NAME)) {
+            return JkUtilsString.substringBeforeLast(uncapitalizedClassSimpleName, JKBEAN_CLASS_SIMPLE_NAME);
+        }
+        return uncapitalizedClassSimpleName;
     }
 
 }

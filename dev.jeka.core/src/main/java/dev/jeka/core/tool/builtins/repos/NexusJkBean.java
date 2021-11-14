@@ -5,9 +5,8 @@ import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkRuntime;
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;

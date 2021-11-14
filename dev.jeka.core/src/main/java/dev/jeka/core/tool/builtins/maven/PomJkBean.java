@@ -5,7 +5,6 @@ import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 
 import java.nio.file.Files;

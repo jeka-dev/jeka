@@ -1,15 +1,15 @@
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-public class JacocoPluginBuild extends JkClass {
+public class JacocoPluginBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
+    private final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
     @Override
-    protected void setup() {
+    protected void init() {
         projectPlugin.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .mixResourcesAndSources()

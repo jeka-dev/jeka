@@ -24,7 +24,7 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     }
 
     @Override
-    public <T> Class<T> loadClassesHavingNameOrSimpleName(String name, Class<T> superClass) {
+    public <T> Class<T> loadFirstFoundClassHavingNameOrSimpleName(String name, Class<T> superClass) {
         for (Class<?> clazz : loadClassesMatching(classInfo -> classInfo.getName().equals(name), true)) {
             if (superClass.isAssignableFrom(clazz)) {
                 return (Class<T>) clazz;

@@ -4,7 +4,9 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.builtins.git.GitJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 

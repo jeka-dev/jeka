@@ -28,7 +28,7 @@ public final class Main {
      */
     public static void main(String[] args) {
         if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
-            final URLClassLoader urlClassLoader = new RelaxedUrlClassloader();
+            final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, Main.class.getName(),
                     "main" , args);

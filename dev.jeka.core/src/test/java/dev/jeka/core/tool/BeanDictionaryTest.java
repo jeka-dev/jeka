@@ -6,12 +6,12 @@ import org.junit.Test;
 import java.util.Set;
 
 @SuppressWarnings("javadoc")
-public class KBeanDictionaryTest {
+public class BeanDictionaryTest {
 
     @Test
     public void testPluginsLoading() {
-        final KBeanDictionary dictionary = new KBeanDictionary();
-        final Set<KBeanDictionary.KBeanDescription> kBeans = dictionary.getAll();
+        final BeanDictionary dictionary = new BeanDictionary();
+        final Set<BeanDictionary.KBeanDescription> kBeans = dictionary.getAll();
 
         Assert.assertTrue(kBeans.toString(), kBeans.size() > 6);
     }

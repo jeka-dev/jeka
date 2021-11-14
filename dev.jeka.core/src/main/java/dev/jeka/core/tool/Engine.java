@@ -1,10 +1,16 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.file.*;
-import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.java.JkClasspath;
+import dev.jeka.core.api.java.JkJavaCompileSpec;
+import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkBusyIndicator;
@@ -13,18 +19,16 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsTime;
 
 import javax.tools.ToolProvider;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static dev.jeka.core.api.depmanagement.JkDependencySet.Hint.lastAndIf;
+import static dev.jeka.core.tool.JkRepoFromOptions.getDownloadRepo;
 
 /**
  * Engine having responsibility of compile def classes, instantiate KBeans and run.<br/>
@@ -39,64 +43,42 @@ import static dev.jeka.core.api.depmanagement.JkDependencySet.Hint.lastAndIf;
  */
 final class Engine {
 
-    private final JkPathMatcher JAVA_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.java")
+    private static final JkPathMatcher JAVA_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.java")
             .and(false, "**/_*", "_*");
 
-    private final JkPathMatcher KOTLIN_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.kt")
+    private static final JkPathMatcher KOTLIN_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.kt")
            .and(false, "**/_*", "_*");
 
-    private final static String LAST_UPDATE_FILE_NAME = "def-last-update-time.txt";
+    static final JkPathMatcher JAVA_OR_KOTLIN_SOURCE_MATCHER = JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER);
+
 
     private final Path projectBaseDir;
 
-    private JkDependencySet defDependencies;
+    private final JkDependencyResolver dependencyResolver;
 
-    private LinkedHashSet<Path> rootsOfImportedJekaClasses = new LinkedHashSet<>();
+    private final EngineBeanClassResolver beanClassResolver;
 
-    private List<String> compileOptions = new LinkedList<>();
-
-    private final ClassResolver resolver;
-
-    /**
-     * Constructs an engine for the specified base directory.
-     */
     Engine(Path baseDir) {
         super();
         this.projectBaseDir = baseDir.normalize();
-        this.defDependencies = JkDependencySet.of();
-        this.resolver = new ClassResolver(baseDir);
-    }
-
-    // Used by JkImportedJkBeans for resolving transitive import
-    <T extends JkBean> T getJkBean(Class<T> baseClass, boolean initialise) {
-        if (resolver.needCompile()) {
-            this.resolveDependenciesAndCompile(true);
-        }
-        return (T) resolver.resolveDefaultJkBean();
+        this.beanClassResolver = new EngineBeanClassResolver(baseDir);
+        this.dependencyResolver = JkDependencyResolver.of().addRepos(getDownloadRepo(), JkRepo.ofLocal());
     }
 
     /**
-     * Pre-compile and compile Jeka classes (if needed) then execute methods mentioned in command line
+     * Execute the specified command line in Jeka engine.
      */
     void execute(CommandLine commandLine) {
-        final long start = System.nanoTime();
         JkLog.startTask("Compile def and initialise KBeans");
-        List<JkDependency> commandLineDependencies = commandLine.getDefDependencies();
+        JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getDefDependencies());
         JkLog.trace("Add following dependencies to def classpath : " + commandLineDependencies);
-        defDependencies = defDependencies
-                .and(commandLineDependencies)
-                .and(dependenciesOnJeka());
-        String jkClassHint = Environment.standardOptions.jkClassName();
-        preCompile();  // Need to pre-compile to get the declared def dependencies
-        JkPathSequence computedClasspath = resolveDependenciesAndCompile(true);
+        JkPathSequence computedClasspath = resolveAndCompile( new HashSet<>(), true);
+        JkUrlClassLoader.ofCurrent().addEntries(computedClasspath);
         JkRuntime.BASE_DIR_CONTEXT.set(projectBaseDir);
-        JkRuntime runtime = JkRuntime.get();
-        runtime.setDependenciesAndResolver(defDependencies, getDefDependencyResolver());
-        runtime.setImportedProjectDirs(this.rootsOfImportedJekaClasses);
-        JkBean jkBean = resolver.resolveDefaultJkBean();
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        JkLog.info("Jeka classes are ready to be executed.");
-
+        JkRuntime runtime = JkRuntime.ofContextBaseDir();
+        runtime.setDependencyResolver(dependencyResolver);
+        JkLog.endTask();
+        JkLog.info("KBeans are ready to be executed.");
         if (JkMemoryBufferLogDecorator.isActive()) {
             JkBusyIndicator.stop();
             JkMemoryBufferLogDecorator.inactivateOnJkLog();
@@ -106,148 +88,69 @@ final class Engine {
             computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
         }
         try {
-            this.launch(jkBean, commandLine);
+            Optional<String> defaultBeanHint = Optional.ofNullable(Environment.standardOptions.jkClassName());
+            Class<? extends JkBean> defaultJkBeanClass = beanClassResolver.resolveDefaultJkBeanClass(defaultBeanHint);
+            JkBean bean = runtime.of(defaultJkBeanClass);
+            this.launch(bean, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
         }
     }
 
-    private void preCompile() {
-        final List<Path> sourceFiles = JkPathTree.of(resolver.defSourceDir)
-                .andMatcher(JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER)).getFiles();
+    private CompilationContext preCompile() {
+        final List<Path> sourceFiles = JkPathTree.of(beanClassResolver.defSourceDir)
+                .andMatcher(JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
         JkLog.trace("Parse source code of " + sourceFiles);
-        final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
-        this.defDependencies = this.defDependencies.and(parser.dependencies());
-        this.rootsOfImportedJekaClasses = parser.projects();
-        this.compileOptions = parser.compileOptions();
+        final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
+        return new CompilationContext(
+                jekaClasspath().and(dependencyResolver.resolve(parser.dependencies()).getFiles()),
+                new LinkedList<>(parser.projects()),
+                parser.compileOptions()
+        );
     }
 
     /*
      * Resolves dependencies and compiles and sources classes contained in jeka/def.
      * It returns a path sequence containing the resolved dependencies and result of compilation.
      */
-    private JkPathSequence resolveDependenciesAndCompile(boolean compileSources) {
-        return resolveDependenciesAndCompile(new HashSet<>(), JkPathSequence.of(), compileSources);
-    }
-
-    private JkPathSequence resolveDependenciesAndCompile(Set<Path> yetCompiledProjects, JkPathSequence path, boolean compileSources) {
-        if (!this.resolver.hasDefSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
-            if (Environment.commandLine.getDefDependencies().isEmpty()) {
-                return JkPathSequence.of();
-            } else {
-                return dependenciesPath();
-            }
+    private JkPathSequence resolveAndCompile(Set<Path> yetCompiledProjects, boolean compileSources) {
+        if (yetCompiledProjects.contains(this.projectBaseDir)) {
+            return JkPathSequence.of();
         }
         yetCompiledProjects.add(this.projectBaseDir);
-        preCompile(); // This enrich dependencies
+        CompilationContext compilationContext = preCompile();
         final String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         final long start = System.nanoTime();
         JkLog.startTask(msg);
-        JkPathSequence dependencyPath = dependenciesPath().andPrepend(path).andPrepend(bootLibs()).withoutDuplicates();
-        JkPathSequence projectDependenciesPath =
-                resolveAndCompileDependentProjects(yetCompiledProjects, dependencyPath, compileSources);
-        long defLastUptateTime = lastModifiedAccordingFileAttributes();
+        List<Path> importedProjectClasspath = new LinkedList<>();
+        compilationContext.importedProjectDirs.forEach(importedProjectDir -> {
+            Engine importedProjectEngine = new Engine(importedProjectDir);
+            importedProjectClasspath.addAll(resolveAndCompile(yetCompiledProjects, compileSources).getEntries());
+        });
+        JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
+        EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
         if (compileSources) {
-            if (Environment.standardOptions.forceCompile() || isWorkOutdated(defLastUptateTime)) {
-                compileDef(dependencyPath.and(projectDependenciesPath));
-                writeLastUpdateFile(defLastUptateTime, JkJavaVersion.ofCurrent());
+            if (Environment.standardOptions.forceCompile() || compilationTracker.isOutdated()) {
+                compileDef(classpath, compilationContext.compileOptions);
+                compilationTracker.updateCompileFlag();
             } else {
                 JkLog.trace("Last def classes are up-to-date : No need to compile.");
             }
-
         }
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        return dependencyPath.and(projectDependenciesPath).and(this.resolver.defClassDir).withoutDuplicates();
+        JkLog.endTask();
+        return classpath.andPrepend(beanClassResolver.defClassDir);
     }
 
-    private JkPathSequence dependenciesPath() {
-        final JkDependencyResolver defDependencyResolver = getDefDependencyResolver();
-        final JkResolveResult resolveResult = defDependencyResolver.resolve(this.defDependencies);
-        if (resolveResult.getErrorReport().hasErrors()) {
-            JkLog.warn(resolveResult.getErrorReport().toString());
-        }
-        return resolveResult.getFiles().withoutDuplicates();
-    }
-
-    private JkClass getJkClassInstance(String jkClassHint, JkPathSequence runtimePath) {
-        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
-        classLoader.addEntries(runtimePath);
-        JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
-        final JkClass jkClass = resolver.resolve(jkClassHint);
-        if (jkClass == null) {
-            return null;
-        }
-        try {
-            return jkClass;
-        } catch (final RuntimeException e) {
-            JkLog.error("Engine " + projectBaseDir + " failed");
-            throw e;
-        }
-    }
-
-    private JkBean findDefaultJkBeanInstance(JkPathSequence runtimePath) {
-        final JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
-        classLoader.addEntries(runtimePath);
-        JkLog.trace("Setting def execution classpath to : " + classLoader.getDirectClasspath());
-        final JkBean jkBean = resolver.resolveDefaultJkBean();
-        return jkBean;
-    }
-
-    private JkDependencySet dependenciesOnJeka() {
-
-        // If true, we assume Jeka is provided by IDE (development mode)
-        final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
-        return defDependencies
-                .andFiles(bootLibs())
-                .andFiles(lastAndIf(!devMode), JkClasspath.ofCurrentRuntime())
-                .andFiles(lastAndIf(devMode), JkLocator.getJekaJarPath());
-    }
-
-    private JkPathSequence bootLibs() {
-        final List<Path>  extraLibs = new LinkedList<>();
-        final Path bootDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
-        if (Files.exists(bootDir)) {
-            extraLibs.addAll(JkPathTree.of(bootDir).andMatching(true,"**.jar").getFiles());
-        }
-        return JkPathSequence.of(extraLibs).withoutDuplicates();
-    }
-
-    /*
-     * Resolves dependencies and compiles project that this one depends on.
-     * It returns a path resulting of the dependency resolution and compilation output.
-     */
-    private JkPathSequence resolveAndCompileDependentProjects(Set<Path> yetCompiledProjects,
-                                                              JkPathSequence compilePath,
-                                                              boolean compileSources) {
-        boolean compileImports = !this.rootsOfImportedJekaClasses.isEmpty();
-        if (compileImports) {
-            JkLog.startTask("Compile Jeka classes of dependent projects : "
-                    + toRelativePaths(this.projectBaseDir, this.rootsOfImportedJekaClasses));
-        }
-        JkPathSequence inputPath = compilePath;
-        JkPathSequence result = JkPathSequence.of();
-        for (final Path file : this.rootsOfImportedJekaClasses) {
-            final Engine engine = new Engine(file.toAbsolutePath().normalize());
-            JkPathSequence resultPath = engine.resolveDependenciesAndCompile(yetCompiledProjects, inputPath, compileSources);
-            inputPath = inputPath.and(resultPath);
-            result = result.and(resultPath);
-        }
-        if (compileImports) {
-            JkLog.endTask();
-        }
-        return result.withoutDuplicates();
-    }
-
-    private void compileDef(JkPathSequence defClasspath) {
-        JkPathTree.of(resolver.defClassDir).deleteContent();
+    private void compileDef(JkPathSequence defClasspath, List<String> compileOptions) {
+        JkPathTree.of(beanClassResolver.defClassDir).deleteContent();
         if (hasKotlin()) {
-            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(getDefDependencyResolver().getRepos())
+            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos())
                     .setLogOutput(true)
                     .addOption("-nowarn");
+            compileOptions.forEach(option -> kotlinCompiler.addOption(option));
             JkPathSequence kotlinClasspath = defClasspath.and(kotlinCompiler.getStdJdk8Lib());
             final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(kotlinClasspath);
-
             if (JkLog.isVerbose()) {
                 kotlinCompiler.addOption("-verbose");
             }
@@ -257,16 +160,37 @@ final class Engine {
                 classLoader.addEntries(kotlinCompiler.getStdLib());
             }
         }
-        final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath);
+        final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath, compileOptions);
         if (javaCompileSpec.getSources().containFiles() && ToolProvider.getSystemJavaCompiler() == null) {
             throw new JkException("The running Java platform (" +  System.getProperty("java.home") +
                     ") does not provide compiler (javac). Please provide a JDK java platform by pointing JAVA_HOME" +
                     " or JEKA_JDK environment variable to a JDK directory.");
         }
         wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec));
-        JkPathTree.of(this.resolver.defSourceDir)
+        JkPathTree.of(this.beanClassResolver.defSourceDir)
                 .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")
-                .copyTo(this.resolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
+                .copyTo(this.beanClassResolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private JkPathSequence jekaClasspath() {
+
+        // If true, we assume Jeka is provided in IDE classpath (development mode)
+        final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
+        JkPathSequence result = JkPathSequence.of(bootLibs());
+        if (devMode) {
+            result = result.and(JkClasspath.ofCurrentRuntime());
+            result = result.and(JkLocator.getJekaJarPath());
+        }
+        return result.withoutDuplicates();
+    }
+
+    private JkPathSequence bootLibs() {
+        final List<Path>  extraLibs = new LinkedList<>();
+        final Path bootDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
+        if (Files.exists(bootDir)) {
+            extraLibs.addAll(JkPathTree.of(bootDir).andMatching(true,"**.jar").getFiles());
+        }
+        return JkPathSequence.of(extraLibs);
     }
 
     private void wrapCompile(Supplier<Boolean> compileTask) {
@@ -286,30 +210,26 @@ final class Engine {
     }
 
     private boolean hasKotlin() {
-        return JkPathTree.of(resolver.defSourceDir).andMatcher(KOTLIN_DEF_SOURCE_MATCHER)
+        return JkPathTree.of(beanClassResolver.defSourceDir).andMatcher(KOTLIN_DEF_SOURCE_MATCHER)
                 .count(1, false) > 0;
     }
 
-    private JkJavaCompileSpec defJavaCompileSpec(JkPathSequence classpath) {
-        final JkPathTree defSource = JkPathTree.of(resolver.defSourceDir).andMatcher(JAVA_DEF_SOURCE_MATCHER);
-        JkUtilsPath.createDirectories(resolver.defClassDir);
+    private JkJavaCompileSpec defJavaCompileSpec(JkPathSequence classpath, List<String> options) {
+        final JkPathTree defSource = JkPathTree.of(beanClassResolver.defSourceDir).andMatcher(JAVA_DEF_SOURCE_MATCHER);
+        JkUtilsPath.createDirectories(beanClassResolver.defClassDir);
         return JkJavaCompileSpec.of()
-                .setClasspath(classpath.and(resolver.defClassDir))
-                .setOutputDir(resolver.defClassDir)
+                .setClasspath(classpath.and(beanClassResolver.defClassDir))
+                .setOutputDir(beanClassResolver.defClassDir)
                 .setSources(defSource.toSet())
-                .addOptions(this.compileOptions);
+                .addOptions(options);
     }
 
     private JkKotlinJvmCompileSpec defKotlinCompileSpec(JkPathSequence defClasspath) {
-        JkUtilsPath.createDirectories(resolver.defClassDir);
+        JkUtilsPath.createDirectories(beanClassResolver.defClassDir);
         return JkKotlinJvmCompileSpec.of()
                 .setClasspath(defClasspath)
-                .setSources(JkPathTreeSet.of(resolver.defSourceDir))
-                .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(resolver.defClassDir));
-    }
-
-    private JkDependencyResolver getDefDependencyResolver() {
-        return JkDependencyResolver.of().addRepos(JkRepoFromOptions.getDownloadRepo(), JkRepo.ofLocal());
+                .setSources(JkPathTreeSet.of(beanClassResolver.defSourceDir))
+                .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(beanClassResolver.defClassDir));
     }
 
     private static void runProject(JkBean jkBean, List<CommandLine.MethodInvocation> invokes) {
@@ -319,8 +239,8 @@ final class Engine {
     }
 
     private static void invokeMethodOnCommandSetOrPlugin(JkBean jkBean, CommandLine.MethodInvocation methodInvocation) {
-        if (methodInvocation.pluginName != null) {
-            final JkBean invokedJkBean = jkBean.getRuntime().getBeanRegistry().get(methodInvocation.pluginName);
+        if (methodInvocation.beanName != null) {
+            final JkBean invokedJkBean = jkBean.getRuntime().getBeanRegistry().get(methodInvocation.beanName);
             invokeMethodOnJkBean(jkBean, methodInvocation.methodName);
         } else {
             invokeMethodOnJkBean(jkBean, methodInvocation.methodName);
@@ -354,81 +274,25 @@ final class Engine {
         }
     }
 
-    static JkRepoSet repos() {
-        return JkRepoSet.of(JkRepoFromOptions.getDownloadRepo(), JkRepo.ofLocal());
-    }
-
-    private static List<String> toRelativePaths(Path from, LinkedHashSet<Path>  files) {
-        final List<String> result = new LinkedList<>();
-        for (final Path file : files) {
-            final String relPath = from.relativize(file).toString();
-            result.add(relPath);
-        }
-        return result;
-    }
-
-    private boolean isWorkOutdated(long lastModifiedAccordingFileAttributes) {
-        TimestampAndJavaVersion timestampAndJavaVersion = lastModifiedAccordingFlag();
-        return timestampAndJavaVersion.timestamp < lastModifiedAccordingFileAttributes
-                || !JkJavaVersion.ofCurrent().equals(timestampAndJavaVersion.javaVersion);
-    }
-
-    private long lastModifiedAccordingFileAttributes() {
-        Path def = projectBaseDir.resolve(JkConstants.DEF_DIR);
-        return JkPathTree.of(def).stream()
-                .map(path -> JkUtilsPath.getLastModifiedTime(path))
-                .map(optional -> optional.orElse(System.currentTimeMillis()))
-                .reduce(0L, Math::max);
-    }
-
-    private void writeLastUpdateFile(long lastModifiedAccordingFileAttributes, JkJavaVersion javaVersion) {
-        Path work = projectBaseDir.resolve(JkConstants.WORK_PATH);
-        if (!Files.exists(work)) {
-            return;
-        }
-        String infoString = Long.toString(lastModifiedAccordingFileAttributes) + ";" + javaVersion;
-        JkPathFile.of(work.resolve(LAST_UPDATE_FILE_NAME))
-                .deleteIfExist()
-                .createIfNotExist()
-                .write(infoString.getBytes(StandardCharsets.UTF_8));
-    }
-
-    private TimestampAndJavaVersion lastModifiedAccordingFlag() {
-        Path work = projectBaseDir.resolve(JkConstants.WORK_PATH);
-        if (!Files.exists(work)) {
-            return new TimestampAndJavaVersion(0L, JkJavaVersion.ofCurrent());
-        }
-        Path lastUpdateFile = work.resolve(LAST_UPDATE_FILE_NAME);
-        if (!Files.exists(lastUpdateFile)) {
-            return new TimestampAndJavaVersion(0L, JkJavaVersion.ofCurrent());
-        }
-        try {
-            String content = JkUtilsPath.readAllLines(lastUpdateFile).get(0);
-            String[] items = content.split(";");
-            return new TimestampAndJavaVersion(Long.parseLong(items[0]), JkJavaVersion.of(items[1]));
-        } catch (RuntimeException e) {
-            JkLog.warn("Error caught when reading file content of " + lastUpdateFile + ". " + e.getMessage() );
-            return new TimestampAndJavaVersion(0L, JkJavaVersion.ofCurrent());
-        }
-    }
-
-    private static class TimestampAndJavaVersion {
-
-        final long timestamp;
-
-        final JkJavaVersion javaVersion;
-
-        public TimestampAndJavaVersion(long timestamp, JkJavaVersion javaVersion) {
-            this.timestamp = timestamp;
-            this.javaVersion = javaVersion;
-        }
-    }
-
-
-
     @Override
     public String toString() {
         return this.projectBaseDir.getFileName().toString();
+    }
+
+    private static class CompilationContext {
+
+        private final JkPathSequence classpath;
+
+        private final List<Path> importedProjectDirs;
+
+        private final List<String> compileOptions;
+
+        CompilationContext(JkPathSequence classpath, List<Path> importedProjectDirs,
+                           List<String> compileOptions) {
+            this.classpath = classpath;
+            this.importedProjectDirs = Collections.unmodifiableList(importedProjectDirs);
+            this.compileOptions = Collections.unmodifiableList(compileOptions);
+        }
     }
 
 }

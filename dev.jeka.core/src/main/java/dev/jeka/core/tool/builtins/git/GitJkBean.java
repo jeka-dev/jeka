@@ -2,9 +2,8 @@ package dev.jeka.core.tool.builtins.git;
 
 import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkDoc;
 
 @JkDoc("Plugin providing common Git scripts/commands out of the box.")
 public class GitJkBean extends JkBean {

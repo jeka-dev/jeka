@@ -2,7 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
@@ -21,27 +20,27 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-final class SourceParser {
+final class EngineSourceParser {
 
-    private static SourceParser of(Path baseDir, Path code) {
+    private static EngineSourceParser of(Path baseDir, Path code) {
         return of(baseDir, JkUtilsPath.toUrl(code));
     }
 
-    public static SourceParser of(Path baseDir, Iterable<Path>  files) {
-        SourceParser result = new SourceParser(JkDependencySet.of(), new LinkedHashSet<>(), new LinkedList<>());
+    public static EngineSourceParser of(Path baseDir, Iterable<Path>  files) {
+        EngineSourceParser result = new EngineSourceParser(JkDependencySet.of(), new LinkedHashSet<>(), new LinkedList<>());
         for (final Path code : files) {
             result = result.and(of(baseDir, code));
         }
         return result;
     }
 
-    static SourceParser of(Path baseDir, URL codeUrl) {
+    static EngineSourceParser of(Path baseDir, URL codeUrl) {
         try (final InputStream inputStream = JkUtilsIO.inputStream(codeUrl)) {
             final String unco4mmentedCode = removeComments(inputStream);
             final JkDependencySet deps = dependencies(unco4mmentedCode, baseDir, codeUrl);
             final LinkedHashSet<Path> projects = projects(unco4mmentedCode, baseDir, codeUrl);
             final List<String> compileOptions = compileOptions(unco4mmentedCode, codeUrl);
-            return new SourceParser(deps, projects, compileOptions);
+            return new EngineSourceParser(deps, projects, compileOptions);
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
@@ -53,8 +52,8 @@ final class SourceParser {
 
     private final List<String> compileOptions;
 
-    private SourceParser(JkDependencySet deps, LinkedHashSet<Path>  dependencyProjects,
-                         List<String> compileOptions) {
+    private EngineSourceParser(JkDependencySet deps, LinkedHashSet<Path>  dependencyProjects,
+                               List<String> compileOptions) {
         super();
         this.dependencies = deps;
         this.dependencyProjects = dependencyProjects;
@@ -62,10 +61,10 @@ final class SourceParser {
     }
 
     @SuppressWarnings("unchecked")
-    private SourceParser and(SourceParser other) {
+    private EngineSourceParser and(EngineSourceParser other) {
         LinkedHashSet<Path> allDependencyProjects = new LinkedHashSet<>(this.dependencyProjects);
         allDependencyProjects.addAll(other.dependencyProjects);
-        return new SourceParser(this.dependencies.and(other.dependencies),
+        return new EngineSourceParser(this.dependencies.and(other.dependencies),
                 allDependencyProjects,
                 JkUtilsIterable.concatLists(this.compileOptions, other.compileOptions));
     }

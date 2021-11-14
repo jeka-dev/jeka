@@ -3,9 +3,9 @@ package dev.jeka.core.tool;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-class RelaxedUrlClassloader extends URLClassLoader {
+class AppendableUrlClassloader extends URLClassLoader {
 
-    RelaxedUrlClassloader() {
+    AppendableUrlClassloader() {
         super(new URL[] {}, Thread.currentThread().getContextClassLoader());
     }
 

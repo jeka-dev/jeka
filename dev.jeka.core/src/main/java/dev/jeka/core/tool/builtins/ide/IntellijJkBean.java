@@ -3,15 +3,18 @@ package dev.jeka.core.tool.builtins.ide;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
+import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.Main;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.io.PrintWriter;
@@ -61,7 +64,7 @@ public final class IntellijJkBean extends JkBean {
         generator.setFailOnDepsResolutionError(failOnDepsResolutionError);
         generator.setUseVarPath(useVarPath);
         generator.setExplicitJekaHome(jekaHome);
-        JkDependencySet defDependencies = getRuntime().getDependencies();
+        JkDependencySet defDependencies = IdeSupport.classpathAsDependencySet();
         if (imlSkipJeka) {
             defDependencies = defDependencies
                     .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath().getFileName()));
@@ -80,16 +83,18 @@ public final class IntellijJkBean extends JkBean {
 
         generator.setDefDependencies(defDependencies);
         generator.setDefDependencyResolver(getRuntime().getDependencyResolver());
-        List<String> jkClassModuleDeps = new LinkedList<>();
+        List<String> importedProjectModuleDeps = new LinkedList<>();
         if (!JkUtilsString.isBlank(this.imlJekaExtraModules)) {
             for (String module : JkUtilsString.splitTrimmed(this.imlJekaExtraModules, ",")) {
-                jkClassModuleDeps.add(module);
+                importedProjectModuleDeps.add(module);
             }
         }
-        getImportedJkBeans().getImportedJkClassRoots().stream()
+        getImportedJkBeans().get(false).stream()
+                .map(JkBean::getBaseDir)
+                .distinct()
                 .map(path -> path.getFileName().toString())
-                .forEach(jkClassModuleDeps::add);
-        generator.setExtraJekaModules(jkClassModuleDeps);
+                .forEach(importedProjectModuleDeps::add);
+        generator.setExtraJekaModules(importedProjectModuleDeps);
         Path basePath = getBaseDir();
         if (getRuntime().getBeanRegistry().hasLoaded(ProjectJkBean.class)) {
             getRuntime().getBeanRegistry().get(ProjectJkBean.class);

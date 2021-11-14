@@ -40,10 +40,6 @@ public class JkPluginSonarqube extends JkBean {
 
     private Consumer<JkSonarqube> sonarqubeConfigurer = sonarqube -> {};
 
-    protected JkPluginSonarqube(JkClass jkClass) {
-        super(jkClass);
-    }
-
     private JkSonarqube createConfiguredSonarqube(JkProject project) {
         final JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
         final JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
@@ -105,7 +101,7 @@ public class JkPluginSonarqube extends JkBean {
             JkLog.info("Sonarqube analysis has been disabled. No analysis will be performed.");
             return;
         }
-        JkProject project = getJkClass().getJkBeanRegistry().get(ProjectJkBean.class).getProject();
+        JkProject project = getRuntime().getBeanRegistry().get(ProjectJkBean.class).getProject();
         JkSonarqube sonarqube = createConfiguredSonarqube(project);
         sonarqubeConfigurer.accept(sonarqube);
         sonarqube.run();

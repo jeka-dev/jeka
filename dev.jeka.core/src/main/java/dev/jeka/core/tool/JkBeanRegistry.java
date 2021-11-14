@@ -47,11 +47,11 @@ public final class JkBeanRegistry {
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }
-        final KBeanDictionary.KBeanDescription KBeanDescription = KBeanDictionary.loadByName(jkBeanName);
+        final BeanDictionary.KBeanDescription KBeanDescription = BeanDictionary.loadByName(jkBeanName);
         if (KBeanDescription == null) {
             return null;
         }
-        return get(KBeanDescription.pluginClass());
+        return get(KBeanDescription.beanClass());
     }
 
     /**
@@ -89,10 +89,10 @@ public final class JkBeanRegistry {
         }
         final T jkBean;
         try {
-            jkBean = JkUtilsReflect.newInstance(jkBeanClass, JkClass.class, null);
+            jkBean = JkUtilsReflect.newInstance(jkBeanClass, JkBean.class, null);
         } catch (Throwable t) {  // Catch LinkageError
             if (t instanceof LinkageError) {
-                throw new RuntimeException("Plugin class " + jkBeanClass
+                throw new RuntimeException("KBean class " + jkBeanClass
                         + " seems not compatible with this Jeka version as this plugin reference an unknown class " +
                         "from Jeka", t);
             }
@@ -119,11 +119,11 @@ public final class JkBeanRegistry {
     void loadCommandLinePlugins() {
         final Iterable<JkBeanOptions> pluginOptionsList = Environment.commandLine.getPluginOptions();
         for (final JkBeanOptions jkBeanOptions : pluginOptionsList){
-            final KBeanDictionary.KBeanDescription KBeanDescription = KBeanDictionary.loadByName(jkBeanOptions.pluginName);
+            final BeanDictionary.KBeanDescription KBeanDescription = BeanDictionary.loadByName(jkBeanOptions.pluginName);
             if (KBeanDescription == null) {
                 throw new JkException("No plugin found with name '" + jkBeanOptions.pluginName + "'.");
             }
-            getOrCreate(KBeanDescription.pluginClass());
+            getOrCreate(KBeanDescription.beanClass());
         }
     }
 

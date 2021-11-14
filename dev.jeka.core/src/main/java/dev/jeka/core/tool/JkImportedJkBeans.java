@@ -11,14 +11,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A KBean can import one or several KBean from external projects.
- * This class holds imported KBean by KBean instance.
+ * A KBean can import one or several KBeans from external projects.
+ * This class holds imported KBean by a given KBean instance.
  *
  * @author Jerome Angibaud
  */
 public final class JkImportedJkBeans {
 
-    private static final ThreadLocal<Map<ImportedJkClassRef, JkBean>> IMPORTED_JKBEANS_CONTEXT = new ThreadLocal<>();
+    private static final ThreadLocal<Map<ImportedBeanRef, JkBean>> IMPORTED_JKBEANS_CONTEXT = new ThreadLocal<>();
 
     private final JkBean holder;
 
@@ -109,36 +109,35 @@ public final class JkImportedJkBeans {
     }
 
     /*
-     * Creates an instance of <code>JkClass</code> for the given project and
+     * Creates an instance of <code>JkBean</code> for the given project and
      * Jeka class. The instance field annotated with <code>JkOption</code> are
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    private static <T extends JkBean> T createImportedJkBean(Class<T> importedJkBean, String relativePath, Path masterRunPath) {
-        final Path projectDir = masterRunPath.resolve(relativePath).normalize();
-        final ImportedJkClassRef jkClassRef = new ImportedJkClassRef(projectDir, importedJkBean);
-        Map<ImportedJkClassRef, JkBean> map = IMPORTED_JKBEANS_CONTEXT.get();
+    private static <T extends JkBean> T createImportedJkBean(Class<T> importedBeanClass, String relativePath, Path holderBaseDir) {
+        final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
+        final ImportedBeanRef beanRef = new ImportedBeanRef(importedProjectDir, importedBeanClass);
+        Map<ImportedBeanRef, JkBean> map = IMPORTED_JKBEANS_CONTEXT.get();
         if (map == null) {
             map = new HashMap<>();
             IMPORTED_JKBEANS_CONTEXT.set(map);
         }
-        final T cachedResult = (T) IMPORTED_JKBEANS_CONTEXT.get().get(jkClassRef);
+        final T cachedResult = (T) IMPORTED_JKBEANS_CONTEXT.get().get(beanRef);
         if (cachedResult != null) {
             return cachedResult;
         }
-        final Engine engine = new Engine(projectDir);
-        final T result = engine.getJkBean(importedJkBean, false);
-        IMPORTED_JKBEANS_CONTEXT.get().put(jkClassRef, result);
+        final T result = JkRuntime.of(importedProjectDir).getBeanRegistry().get(importedBeanClass);
+        IMPORTED_JKBEANS_CONTEXT.get().put(beanRef, result);
         return result;
     }
 
-    private static class ImportedJkClassRef {
+    private static class ImportedBeanRef {
 
         final String canonicalFileName;
 
         final Class<?> clazz;
 
-        ImportedJkClassRef(Path projectDir, Class<?> clazz) {
+        ImportedBeanRef(Path projectDir, Class<?> clazz) {
             super();
             this.canonicalFileName = projectDir.normalize().toAbsolutePath().toString();
             this.clazz = clazz;
@@ -153,7 +152,7 @@ public final class JkImportedJkBeans {
                 return false;
             }
 
-            final ImportedJkClassRef that = (ImportedJkClassRef) o;
+            final ImportedBeanRef that = (ImportedBeanRef) o;
 
             if (!canonicalFileName.equals(that.canonicalFileName)) {
                 return false;

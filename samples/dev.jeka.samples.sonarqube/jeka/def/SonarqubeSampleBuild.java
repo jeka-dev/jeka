@@ -1,7 +1,7 @@
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDefClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
@@ -15,14 +15,14 @@ import dev.jeka.plugins.sonarqube.JkSonarqube;
  * By default, sonar
  */
 @JkDefClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
-class SonarqubeSampleBuild extends JkClass {
+class SonarqubeSampleBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
+    private final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
-    private final JkPluginSonarqube sonarqubePlugin = getJkBean(JkPluginSonarqube.class);
+    private final JkPluginSonarqube sonarqubePlugin = getRuntime().getBeanRegistry().get(JkPluginSonarqube.class);
 
     @Override
-    protected void setup() {
+    protected void init() {
         projectPlugin.getProject().simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps

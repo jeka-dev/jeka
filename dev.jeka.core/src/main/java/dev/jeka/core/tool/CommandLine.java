@@ -16,27 +16,14 @@ import java.util.*;
 /*
  * Holds information carried by the command line.
  */
+// TODO suppress 'option' concept in favor of System properties and KBean properties
 final class CommandLine {
-
-    private static final String ALL_RUN_SYMBOL = "*";
 
     private static final String KBEAN_SYMBOL = "#";
 
-    private static final char PLUGIN_SYMBOL_CHAR = '#';
+    private static final char KBEAN_SYMBOL_CHAR =  KBEAN_SYMBOL.charAt(0);
 
     private static final String AT_SYMBOL_CHAR = "@";
-
-    static CommandLine parse(String[] words) {
-        final CommandLine result = new CommandLine();
-        result.commandOptions = extractOptions(words);
-        result.systemProperties = extractSystemProperties(words);
-        result.masterMethods = extractMethods(words, true);
-        result.subProjectMethods = extractMethods(words, false);
-        result.jkBeanOptions = extractPluginOptions(words);
-        result.defDependencies = dependencies(words);
-        result.rawArgs = words;
-        return result;
-    }
 
     private Map<String, String> commandOptions;
 
@@ -55,6 +42,19 @@ final class CommandLine {
     private CommandLine() {
         super();
     }
+
+    static CommandLine parse(String[] words) {
+        final CommandLine result = new CommandLine();
+        result.commandOptions = extractOptions(words);
+        result.systemProperties = extractSystemProperties(words);
+        result.masterMethods = extractMethods(words, true);
+        result.subProjectMethods = extractMethods(words, false);
+        result.jkBeanOptions = extractPluginOptions(words);
+        result.defDependencies = dependencies(words);
+        result.rawArgs = words;
+        return result;
+    }
+
 
     private static List<JkDependency> dependencies(String[] words) {
         final List<JkDependency> result = new LinkedList<>();
@@ -94,18 +94,9 @@ final class CommandLine {
     private static List<MethodInvocation> extractMethods(String[] words, boolean master) {
         final List<MethodInvocation> result = new LinkedList<>();
         for (final String word : words) {
-            if (!word.startsWith("-") && !word.startsWith("@") && !word.endsWith(KBEAN_SYMBOL)
-                    && !word.endsWith(KBEAN_SYMBOL + ALL_RUN_SYMBOL)) {
-                if (word.endsWith(ALL_RUN_SYMBOL)) {
-                    final String trunc = JkUtilsString.substringBeforeLast(word, ALL_RUN_SYMBOL);
-                    result.add(MethodInvocation.parse(trunc));
-                } else if (master) {
-                    result.add(MethodInvocation.parse(word));
-                }
+            if (!word.startsWith("-") && !word.startsWith("@") && !word.endsWith(KBEAN_SYMBOL)) {
+                result.add(MethodInvocation.parse(word));
             }
-        }
-        if (result.isEmpty() && master) {
-            //result.add(MethodInvocation.normal(JkConstants.DEFAULT_METHOD));
         }
         return result;
     }
@@ -190,6 +181,18 @@ final class CommandLine {
 
     static final class MethodInvocation {
 
+        public final String methodName;
+
+        public final String beanName;
+
+        private MethodInvocation(String methodName, String beanName) {
+            super();
+            JkUtilsAssert.argument(methodName != null && !methodName.isEmpty(),
+                    "PluginName can' t be null or empty");
+            this.methodName = methodName;
+            this.beanName = beanName;
+        }
+
         static MethodInvocation parse(String word) {
             if (isPluginMethodInvokation(word)) {
                 return pluginMethod(JkUtilsString.substringBeforeFirst(word, KBEAN_SYMBOL),
@@ -208,41 +211,29 @@ final class CommandLine {
             return new MethodInvocation(methodName, pluginName);
         }
 
-        public final String methodName;
-
-        public final String pluginName;
-
-        private MethodInvocation(String methodName, String pluginName) {
-            super();
-            JkUtilsAssert.argument(methodName != null && !methodName.isEmpty(),
-                    "PluginName can' t be null or empty");
-            this.methodName = methodName;
-            this.pluginName = pluginName;
-        }
-
         private static boolean isPluginMethodInvokation(String word) {
             if (word.startsWith("-")) {
                 return false;
             }
-            return JkUtilsString.countOccurrence(word, PLUGIN_SYMBOL_CHAR) == 1
+            return JkUtilsString.countOccurrence(word, KBEAN_SYMBOL_CHAR) == 1
                     && !word.startsWith(KBEAN_SYMBOL) && !word.endsWith(KBEAN_SYMBOL);
         }
 
         private static boolean isPluginActivation(String word) {
-            return JkUtilsString.countOccurrence(word, PLUGIN_SYMBOL_CHAR) == 1
+            return JkUtilsString.countOccurrence(word, KBEAN_SYMBOL_CHAR) == 1
                     && !word.startsWith(KBEAN_SYMBOL) && word.endsWith(KBEAN_SYMBOL);
         }
 
         public boolean isMethodPlugin() {
-            return pluginName != null;
+            return beanName != null;
         }
 
         @Override
         public String toString() {
-            if (pluginName == null) {
+            if (beanName == null) {
                 return methodName;
             }
-            return pluginName + "#" + methodName;
+            return beanName + "#" + methodName;
         }
 
     }

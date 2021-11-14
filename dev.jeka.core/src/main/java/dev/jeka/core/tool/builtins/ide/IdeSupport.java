@@ -1,9 +1,15 @@
 package dev.jeka.core.tool.builtins.ide;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkClasspath;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkRuntime;
 
+import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.List;
 
 final class IdeSupport {
@@ -23,5 +29,20 @@ final class IdeSupport {
                 .map(supplier -> supplier.getJavaIdeSupport())
                 .filter(projectIde -> projectIde != null)
                 .findFirst().orElse(null);
+    }
+
+    static JkDependencySet classpathAsDependencySet() {
+        JkClassLoader classLoader = JkClassLoader.ofCurrent();
+        final JkClasspath classpath;
+        if (classLoader.get() instanceof URLClassLoader) {
+            classpath = JkUrlClassLoader.ofCurrent().getDirectClasspath();
+        } else {
+            classpath = JkClasspath.ofCurrentRuntime();
+        }
+        JkDependencySet dependencySet = JkDependencySet.of();
+        for (Path entry : classpath) {
+            dependencySet = dependencySet.andFiles(entry);
+        }
+        return dependencySet;
     }
 }

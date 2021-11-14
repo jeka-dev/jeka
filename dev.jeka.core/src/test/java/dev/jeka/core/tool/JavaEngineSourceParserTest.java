@@ -13,44 +13,42 @@ import java.util.LinkedList;
 import java.util.List;
 
 @SuppressWarnings("javadoc")
-public class JavaSourceParserTest {
+public class JavaEngineSourceParserTest {
 
     @Test
     public void withOneImport() {
-        final URL resource = JavaSourceParserTest.class.getResource("with1import.javasource");
-        final JkDependencySet dependencies = SourceParser.of(Paths.get(""), resource).dependencies();
+        final URL resource = JavaEngineSourceParserTest.class.getResource("with1import.javasource");
+        final JkDependencySet dependencies = EngineSourceParser.of(Paths.get(""), resource).dependencies();
         Assert.assertEquals(1, JkUtilsIterable.listOf(dependencies).size());
     }
 
     @Test
     public void with3Imports() {
-        SourceParser parser = SourceParser.of(Paths.get(""),
-                JavaSourceParserTest.class.getResource("with3Imports.javasource"));
+        EngineSourceParser parser = EngineSourceParser.of(Paths.get(""),
+                JavaEngineSourceParserTest.class.getResource("with3Imports.javasource"));
         final JkDependencySet dependencies = parser.dependencies();
         Assert.assertEquals(3, dependencies.getEntries().size());
-        Assert.assertEquals(1, parser.importRepos().getRepos().size());
     }
 
     @Test
     public void with3MultiAnnoImports() {
-        SourceParser parser = SourceParser.of(Paths.get(""),
-                JavaSourceParserTest.class.getResource("with3MultiImports.javasource"));
+        EngineSourceParser parser = EngineSourceParser.of(Paths.get(""),
+                JavaEngineSourceParserTest.class.getResource("with3MultiImports.javasource"));
         final JkDependencySet dependencies = parser.dependencies();
         Assert.assertEquals(3, dependencies.getEntries().size());
-        Assert.assertEquals(2, parser.importRepos().getRepos().size());
     }
 
     @Test
     public void withoutImport() {
-        final JkDependencySet dependencies = SourceParser.of(Paths.get(""),
-                JavaSourceParserTest.class.getResource("withoutImport.javasource")).dependencies();
+        final JkDependencySet dependencies = EngineSourceParser.of(Paths.get(""),
+                JavaEngineSourceParserTest.class.getResource("withoutImport.javasource")).dependencies();
         Assert.assertEquals(0, dependencies.getEntries().size());
     }
 
     @Test
     public void with2ProjectImports() {
-        final LinkedHashSet<Path> projects = SourceParser.of(Paths.get(""),
-                JavaSourceParserTest.class.getResource("with2projectImports.javasource"))
+        final LinkedHashSet<Path> projects = EngineSourceParser.of(Paths.get(""),
+                JavaEngineSourceParserTest.class.getResource("with2projectImports.javasource"))
                 .projects();
         List<Path> projectList = new LinkedList<>(projects);
         Assert.assertEquals(2, projects.size());

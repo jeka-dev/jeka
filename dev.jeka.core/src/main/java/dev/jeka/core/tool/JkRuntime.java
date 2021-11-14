@@ -5,7 +5,6 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 
@@ -13,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Consumer;
 
 public final class JkRuntime {
 
@@ -23,8 +21,6 @@ public final class JkRuntime {
 
     private final Path projectBaseDir;
 
-    private JkDependencySet dependencies;
-
     private JkDependencyResolver dependencyResolver;
 
     private JkBeanRegistry jkBeanRegistry = new JkBeanRegistry(Environment.commandLine.getPluginOptions());
@@ -33,12 +29,12 @@ public final class JkRuntime {
         this.projectBaseDir = projectBaseDir;
     }
 
-    static JkRuntime getRuntime(Path projectBaseDir) {
+    static JkRuntime of(Path projectBaseDir) {
         return RUNTIMES.computeIfAbsent(projectBaseDir, path -> new JkRuntime(path));
     }
 
-    static JkRuntime get() {
-        return getRuntime(getBaseDirContext());
+    static JkRuntime ofContextBaseDir() {
+        return of(getBaseDirContext());
     }
 
     static void setBaseDirContext(Path baseDir) {
@@ -65,17 +61,8 @@ public final class JkRuntime {
         return dependencyResolver.getRepos();
     }
 
-    void setDependenciesAndResolver(JkDependencySet dependenciesArg, JkDependencyResolver resolverArg) {
-        dependencies = dependenciesArg;
+    void setDependencyResolver(JkDependencyResolver resolverArg) {
         dependencyResolver = resolverArg;
-    }
-
-    public void setImportedProjectDirs(Set<Path> importedProjectDirs) {
-        importedProjectDirs = Collections.unmodifiableSet(importedProjectDirs);
-    }
-
-    public JkDependencySet getDependencies() {
-        return dependencies;
     }
 
     public JkDependencyResolver getDependencyResolver() {
@@ -110,14 +97,14 @@ public final class JkRuntime {
             initialise(importedJkBean);
         }
 
-        for (JkBean registeredJkBean : getBeanRegistry().getAll()) {
-            List<ProjectDef.JkClassOptionDef> defs = ProjectDef.RunClassDef.of(registeredJkBean).optionDefs();
-            JkLog.startTask("Activating Plugin " + registeredJkBean.shortName() + " with options "
+        for (JkBean registeredBean : getBeanRegistry().getAll()) {
+            List<BeanDescription.BeanField> defs = BeanDescription.of(registeredBean.getClass()).beanFields();
+            JkLog.startTask("Activating KBean " + registeredBean.shortName() + " with options "
                     + HelpDisplayer.optionValues(defs));
             try {
-                registeredJkBean.postInit();
+                registeredBean.postInit();
             } catch (RuntimeException e) {
-                JkLog.error("Plugin " + registeredJkBean.shortName() + " has caused build instantiation failure.");
+                JkLog.error("KBean " + registeredBean.shortName() + " has caused build instantiation failure.");
                 throw e;
             }
             JkLog.endTask();

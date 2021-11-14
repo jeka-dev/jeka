@@ -2,7 +2,10 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
-import dev.jeka.core.api.system.*;
+import dev.jeka.core.api.system.JkInfo;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -44,7 +47,7 @@ public final class JkInit {
             memoryBufferLogActivated = true;
         }
         try {
-            final T jkBean = JkRuntime.get().of(clazz);
+            final T jkBean = JkRuntime.ofContextBaseDir().of(clazz);
             JkLog.info(jkBean.toString() + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();
@@ -85,7 +88,7 @@ public final class JkInit {
             sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
-        sb.append("\nJeka Def Repositories : " + Engine.repos());
+        sb.append("\nJeka diowload Repositories : " + JkRepoFromOptions.getDownloadRepo());
         sb.append("\nJeka Repository Cache : " + JkLocator.getJekaRepositoryCache());
         JkLog.info(sb.toString());
     }
@@ -131,7 +134,7 @@ public final class JkInit {
         JkUtilsAssert.argument(jkClassName != null,
                 "No argument starting with '-CC=' can be found. Cannot determine Jeka Class");
         Class<JkBean> clazz = JkInternalClasspathScanner.INSTANCE
-                .loadClassesHavingNameOrSimpleName(jkClassName, JkBean.class);
+                .loadFirstFoundClassHavingNameOrSimpleName(jkClassName, JkBean.class);
         JkUtilsAssert.argument(clazz != null,
                 "Jeka class having name '" + jkClassName + "' cannot be found.");
         String[] argsToPass = actualArgs.toArray(new String[0]);
@@ -140,7 +143,7 @@ public final class JkInit {
         try {
             for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {
                 if (methodInvocation.isMethodPlugin()) {
-                    JkBean plugin = jkBean.getRuntime().getBeanRegistry().get(methodInvocation.pluginName);
+                    JkBean plugin = jkBean.getRuntime().getBeanRegistry().get(methodInvocation.beanName);
                     JkUtilsReflect.invoke(plugin, methodInvocation.methodName);
                 } else {
                     JkUtilsReflect.invoke(jkBean, methodInvocation.methodName);

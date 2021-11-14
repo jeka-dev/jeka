@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.ide;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLog;
@@ -53,7 +54,7 @@ public final class EclipseJkBean extends JkBean {
     // ------------------------ plugin methods ----------------------
 
     @Override
-    protected void postIinit() {
+    protected void postInit() {
         scaffold.getScaffolder().getExtraActions().append(this::files);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 
@@ -69,7 +70,8 @@ public final class EclipseJkBean extends JkBean {
             }
             final JkEclipseClasspathGenerator classpathGenerator =
                     JkEclipseClasspathGenerator.of(projectIde);
-            classpathGenerator.setDefDependencies(getRuntime().getDependencyResolver(), getRuntime().getDependencies());
+
+            classpathGenerator.setDefDependencies(getRuntime().getDependencyResolver(), IdeSupport.classpathAsDependencySet());
             classpathGenerator.setIncludeJavadoc(this.javadoc);
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedProjects(importedRunProjects);

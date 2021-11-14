@@ -4,7 +4,6 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkClass;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -19,10 +18,6 @@ public class JkPluginJacoco extends JkBean {
     public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
 
     public static final String OUTPUT_XML_RELATIVE_PATH = "jacoco/jacoco.xml";
-
-    protected JkPluginJacoco(JkClass run) {
-        super(run);
-    }
 
     @JkDoc("If false, tests will be run without Jacoco.")
     public boolean enabled = true;
@@ -44,7 +39,7 @@ public class JkPluginJacoco extends JkBean {
         if (!enabled) {
             return;
         }
-        ProjectJkBean projectPlugin = getJkClass().getJkBeanRegistry().get(ProjectJkBean.class);
+        ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
         final JkProject project = projectPlugin.getProject();
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {

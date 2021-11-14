@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 

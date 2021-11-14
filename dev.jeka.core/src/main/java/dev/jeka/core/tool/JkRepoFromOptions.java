@@ -1,14 +1,10 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsObject;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 
 /**

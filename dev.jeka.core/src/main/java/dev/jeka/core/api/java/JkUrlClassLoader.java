@@ -261,12 +261,6 @@ public final class JkUrlClassLoader {
         return toJkClassLoader().toString();
     }
 
-    /**
-     *
-     * @param paths As {@link Path} class implements { @link Iterable<Path> } the argument can be a single {@link Path}
-     * instance, if so it will be interpreted as a list containing a single element which is this argument.
-     */
-    @Deprecated
     public void addEntries(Iterable<Path> paths) {
         final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL",
                 URL.class);

@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
 class Environment {
 
@@ -119,7 +118,7 @@ class Environment {
 
         String logRuntimeInformation;
 
-        private String jkClassName;
+        private String jkBeanName;
 
         private boolean forceCompile;
 
@@ -132,7 +131,7 @@ class Environment {
             this.logSetup = valueOf(Boolean.class, map, false,"LogSetup", "LSU");
             this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
-            this.jkClassName = valueOf(String.class, map, null, "JekaClass", "JKC");
+            this.jkBeanName = valueOf(String.class, map, null, "JekaClass", "JKC");
             this.forceCompile = valueOf(Boolean.class, map, false, "ForceCompile", "FC");
         }
 
@@ -141,10 +140,7 @@ class Environment {
         }
 
         String jkClassName() {
-            if ("".equals(jkClassName)) {
-                return JkConstants.DEFAULT_JEKA_CLASS.getName();
-            }
-            return jkClassName;
+            return jkBeanName;
         }
 
         boolean forceCompile() {
@@ -153,7 +149,7 @@ class Environment {
 
         @Override
         public String toString() {
-            return "JkClass=" + JkUtilsObject.toString(jkClassName) + ", LogVerbose=" + logVerbose
+            return "JkBean" + JkUtilsObject.toString(jkBeanName) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logBanner;
         }
 

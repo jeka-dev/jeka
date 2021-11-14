@@ -5,7 +5,6 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import dev.jeka.core.api.utils.JkUtilsXml;
-import dev.jeka.core.tool.ProjectDef.RunClassDef;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -28,12 +27,10 @@ final class HelpDisplayer {
                 .append("Usage: \n\njeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
                 .append("Executes the specified methods defined in Jeka class or plugins using the specified options and system properties.\n\n")
                 .append("Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
-                .append(standardOptions())
-                .append("\nAvailable methods and options :\n")
-                .append(RunClassDef.of(runtime).description());
+                .append(standardOptions());
 
         // List plugins
-        final Set<KBeanDictionary.KBeanDescription> KBeanDescriptions = new KBeanDictionary().getAll();
+        final Set<BeanDictionary.KBeanDescription> KBeanDescriptions = new BeanDictionary().getAll();
         List<String> names = KBeanDescriptions.stream().map(KBeanDescription -> KBeanDescription.shortName()).collect(Collectors.toList());
         sb.append("\nAvailable plugins in classpath : ").append(String.join(", ", names))
                 .append(".\n");
@@ -57,9 +54,9 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    static void help(JkClass run, Path xmlFile) {
+    static void help(Class<? extends JkBean> beanClass, Path xmlFile) {
         final Document document = JkUtilsXml.createDocument();
-        final Element runEl = RunClassDef.of(run).toElement(document);
+        final Element runEl = BeanDescription.of(beanClass).toElement(document);
         document.appendChild(runEl);
         if (xmlFile == null) {
             JkUtilsXml.output(document, System.out);
@@ -79,8 +76,8 @@ final class HelpDisplayer {
     }
 
     static void helpPlugin(JkBean jkBean) {
-        final Set<KBeanDictionary.KBeanDescription> KBeanDescriptions = new KBeanDictionary().getAll();
-        for (KBeanDictionary.KBeanDescription beanDescription : KBeanDescriptions) {
+        final Set<BeanDictionary.KBeanDescription> KBeanDescriptions = new BeanDictionary().getAll();
+        for (BeanDictionary.KBeanDescription beanDescription : KBeanDescriptions) {
             if (beanDescription.shortName().equals(jkBean.shortName())) {
                 JkLog.info(helpPluginDescription(beanDescription, jkBean.getRuntime()));
                 return;
@@ -89,15 +86,15 @@ final class HelpDisplayer {
     }
 
     private static String helpPluginsDescription(JkRuntime runtime) {
-        final Set<KBeanDictionary.KBeanDescription> KBeanDescriptions = new KBeanDictionary().getAll();
+        final Set<BeanDictionary.KBeanDescription> KBeanDescriptions = new BeanDictionary().getAll();
         StringBuilder sb = new StringBuilder();
-        for (final KBeanDictionary.KBeanDescription description : KBeanDescriptions) {
+        for (final BeanDictionary.KBeanDescription description : KBeanDescriptions) {
             sb.append(helpPluginDescription(description, runtime));
         }
         return sb.toString();
     }
 
-    private static String helpPluginDescription(KBeanDictionary.KBeanDescription description, JkRuntime runtime) {
+    private static String helpPluginDescription(BeanDictionary.KBeanDescription description, JkRuntime runtime) {
         StringBuilder sb = new StringBuilder();
         sb.append("\nPlugin Class : " + description.fullName());
         sb.append("\nPlugin Name : " + description.shortName());
@@ -122,17 +119,17 @@ final class HelpDisplayer {
             sb.append("\nActivation Effect : Not documented.");
         }
         final JkBean bean;
-        if (runtime.getBeanRegistry().hasLoaded(description.pluginClass())) {
-            bean = runtime.getBeanRegistry().get(description.pluginClass());
+        if (runtime.getBeanRegistry().hasLoaded(description.beanClass())) {
+            bean = runtime.getBeanRegistry().get(description.beanClass());
         } else {
-            bean = JkUtilsReflect.newInstance(description.pluginClass());
+            bean = JkUtilsReflect.newInstance(description.beanClass());
         }
         sb.append("\n");
-        sb.append(RunClassDef.of(bean).flatDescription(description.shortName() + "#"));
+        sb.append(BeanDescription.of(description.beanClass()).flatDescription(description.shortName() + "#"));
         return sb.toString();
     }
 
-    static List<String> optionValues(List<ProjectDef.JkClassOptionDef> optionDefs) {
+    static List<String> optionValues(List<BeanDescription.BeanField> optionDefs) {
         return optionDefs.stream().map(optionDef -> optionDef.shortDescription()).collect(Collectors.toList());
     }
 

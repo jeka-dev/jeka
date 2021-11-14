@@ -27,7 +27,7 @@ public interface JkInternalClasspathScanner {
 
     List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);
 
-    <T> Class<T> loadClassesHavingNameOrSimpleName(String name, Class<T> superClass);
+    <T> Class<T> loadFirstFoundClassHavingNameOrSimpleName(String name, Class<T> superClass);
 
     default Set<Class<?>> loadClassesHavingSimpleName(String simpleName) {
         return loadClassesHavingSimpleNameMatching( name -> name.equals(simpleName));

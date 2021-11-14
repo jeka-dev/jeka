@@ -1,8 +1,10 @@
 package dev.jeka.core.api.system;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static dev.jeka.core.api.system.JkIndentLogDecorator.LINE_SEPARATOR;
 import static dev.jeka.core.api.system.JkIndentLogDecorator.MARGIN_UNIT;
