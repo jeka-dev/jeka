@@ -18,10 +18,8 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import javax.tools.ToolProvider;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -56,12 +54,12 @@ final class Engine {
 
     private final JkDependencyResolver dependencyResolver;
 
-    private final EngineBeanClassResolver beanClassResolver;
+    private final EngineCommandResolver commandsResolver;
 
     Engine(Path baseDir) {
         super();
         this.projectBaseDir = baseDir.normalize();
-        this.beanClassResolver = new EngineBeanClassResolver(baseDir);
+        this.commandsResolver = new EngineCommandResolver(baseDir);
         this.dependencyResolver = JkDependencyResolver.of().addRepos(getDownloadRepo(), JkRepo.ofLocal());
     }
 
@@ -75,10 +73,8 @@ final class Engine {
         JkPathSequence computedClasspath = resolveAndCompile( new HashSet<>(), true);
         JkUrlClassLoader.ofCurrent().addEntries(computedClasspath);
         JkRuntime.BASE_DIR_CONTEXT.set(projectBaseDir);
-        JkRuntime runtime = JkRuntime.ofContextBaseDir();
+        JkRuntime runtime = JkRuntime.of(projectBaseDir);
         runtime.setDependencyResolver(dependencyResolver);
-        JkLog.endTask();
-        JkLog.info("KBeans are ready to be executed.");
         if (JkMemoryBufferLogDecorator.isActive()) {
             JkBusyIndicator.stop();
             JkMemoryBufferLogDecorator.inactivateOnJkLog();
@@ -87,19 +83,19 @@ final class Engine {
             JkLog.info("Jeka Classpath : ");
             computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
         }
-        try {
-            Optional<String> defaultBeanHint = Optional.ofNullable(Environment.standardOptions.jkClassName());
-            Class<? extends JkBean> defaultJkBeanClass = beanClassResolver.resolveDefaultJkBeanClass(defaultBeanHint);
-            JkBean bean = runtime.of(defaultJkBeanClass);
-            this.launch(bean, commandLine);
-        } catch (final RuntimeException e) {
-            JkLog.error("Engine " + projectBaseDir + " failed");
-            throw e;
+        List<EngineCommand> resolvedCommands = commandsResolver.resolve(commandLine,
+                Environment.standardOptions.jkCBeanName());
+        runtime.init(resolvedCommands);
+        JkLog.endTask();
+        JkLog.info("KBeans are ready to run.");
+        if (JkMemoryBufferLogDecorator.isActive()) {
+            JkMemoryBufferLogDecorator.inactivateOnJkLog();
         }
+        runtime.run(resolvedCommands);
     }
 
     private CompilationContext preCompile() {
-        final List<Path> sourceFiles = JkPathTree.of(beanClassResolver.defSourceDir)
+        final List<Path> sourceFiles = JkPathTree.of(commandsResolver.defSourceDir)
                 .andMatcher(JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
         JkLog.trace("Parse source code of " + sourceFiles);
         final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
@@ -139,11 +135,11 @@ final class Engine {
             }
         }
         JkLog.endTask();
-        return classpath.andPrepend(beanClassResolver.defClassDir);
+        return classpath.andPrepend(commandsResolver.defClassDir);
     }
 
     private void compileDef(JkPathSequence defClasspath, List<String> compileOptions) {
-        JkPathTree.of(beanClassResolver.defClassDir).deleteContent();
+        JkPathTree.of(commandsResolver.defClassDir).deleteContent();
         if (hasKotlin()) {
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos())
                     .setLogOutput(true)
@@ -167,9 +163,9 @@ final class Engine {
                     " or JEKA_JDK environment variable to a JDK directory.");
         }
         wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec));
-        JkPathTree.of(this.beanClassResolver.defSourceDir)
+        JkPathTree.of(this.commandsResolver.defSourceDir)
                 .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")
-                .copyTo(this.beanClassResolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
+                .copyTo(this.commandsResolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
     }
 
     private JkPathSequence jekaClasspath() {
@@ -201,77 +197,27 @@ final class Engine {
         }
     }
 
-    private void launch(JkBean jkBean, CommandLine commandLine) {
-        List<CommandLine.MethodInvocation> methods = commandLine.getMasterMethods();
-        if (methods.isEmpty() && Environment.standardOptions.logRuntimeInformation == null) {
-            methods = Collections.singletonList(CommandLine.MethodInvocation.normal(JkConstants.DEFAULT_METHOD));
-        }
-        runProject(jkBean, methods);
-    }
-
     private boolean hasKotlin() {
-        return JkPathTree.of(beanClassResolver.defSourceDir).andMatcher(KOTLIN_DEF_SOURCE_MATCHER)
+        return JkPathTree.of(commandsResolver.defSourceDir).andMatcher(KOTLIN_DEF_SOURCE_MATCHER)
                 .count(1, false) > 0;
     }
 
     private JkJavaCompileSpec defJavaCompileSpec(JkPathSequence classpath, List<String> options) {
-        final JkPathTree defSource = JkPathTree.of(beanClassResolver.defSourceDir).andMatcher(JAVA_DEF_SOURCE_MATCHER);
-        JkUtilsPath.createDirectories(beanClassResolver.defClassDir);
+        final JkPathTree defSource = JkPathTree.of(commandsResolver.defSourceDir).andMatcher(JAVA_DEF_SOURCE_MATCHER);
+        JkUtilsPath.createDirectories(commandsResolver.defClassDir);
         return JkJavaCompileSpec.of()
-                .setClasspath(classpath.and(beanClassResolver.defClassDir))
-                .setOutputDir(beanClassResolver.defClassDir)
+                .setClasspath(classpath.and(commandsResolver.defClassDir))
+                .setOutputDir(commandsResolver.defClassDir)
                 .setSources(defSource.toSet())
                 .addOptions(options);
     }
 
     private JkKotlinJvmCompileSpec defKotlinCompileSpec(JkPathSequence defClasspath) {
-        JkUtilsPath.createDirectories(beanClassResolver.defClassDir);
+        JkUtilsPath.createDirectories(commandsResolver.defClassDir);
         return JkKotlinJvmCompileSpec.of()
                 .setClasspath(defClasspath)
-                .setSources(JkPathTreeSet.of(beanClassResolver.defSourceDir))
-                .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(beanClassResolver.defClassDir));
-    }
-
-    private static void runProject(JkBean jkBean, List<CommandLine.MethodInvocation> invokes) {
-        for (final CommandLine.MethodInvocation methodInvocation : invokes) {
-            invokeMethodOnCommandSetOrPlugin(jkBean, methodInvocation);
-        }
-    }
-
-    private static void invokeMethodOnCommandSetOrPlugin(JkBean jkBean, CommandLine.MethodInvocation methodInvocation) {
-        if (methodInvocation.beanName != null) {
-            final JkBean invokedJkBean = jkBean.getRuntime().getBeanRegistry().get(methodInvocation.beanName);
-            invokeMethodOnJkBean(jkBean, methodInvocation.methodName);
-        } else {
-            invokeMethodOnJkBean(jkBean, methodInvocation.methodName);
-        }
-    }
-
-    /**
-     * Invokes the specified method on the specified KBean.
-     */
-    private static void invokeMethodOnJkBean(Object jkBean, String methodName) {
-        final Method method;
-        try {
-            method = jkBean.getClass().getMethod(methodName);
-        } catch (final NoSuchMethodException e) {
-            throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + jkBean.getClass());
-        }
-        String fullMethodName = jkBean.getClass().getName() + "#" + methodName;
-        if (Environment.standardOptions.logSetup) {
-            JkLog.startTask("\nExecute method : " + fullMethodName);
-        }
-        try {
-            JkUtilsReflect.invoke(jkBean, method);
-            if (Environment.standardOptions.logSetup) {
-                JkLog.endTask("Method " + fullMethodName + " succeeded in %d milliseconds.");
-            }
-        } catch (final RuntimeException e) {
-            if (Environment.standardOptions.logSetup) {
-                JkLog.endTask("Method " + fullMethodName + " failed in %d milliseconds.");
-            }
-            throw e;
-        }
+                .setSources(JkPathTreeSet.of(commandsResolver.defSourceDir))
+                .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(commandsResolver.defClassDir));
     }
 
     @Override

@@ -11,6 +11,7 @@ import dev.jeka.core.tool.JkBean;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
 final class IdeSupport {
 
@@ -22,8 +23,10 @@ final class IdeSupport {
             JkIdeSupport.JkSupplier supplier = (JkIdeSupport.JkSupplier) jkBean;
             return supplier.getJavaIdeSupport();
         }
-        List<JkIdeSupport.JkSupplier> suppliers = jkBean.getRuntime().getBeanRegistry().getLoadedPluginInstanceOf(
-                JkIdeSupport.JkSupplier.class);
+        List<JkIdeSupport.JkSupplier> suppliers = jkBean.getRuntime().getBeanRegistry().getAll().stream()
+                .filter(JkIdeSupport.JkSupplier.class::isInstance)
+                .map(JkIdeSupport.JkSupplier.class::cast)
+                .collect(Collectors.toList());
         return suppliers.stream()
                 .filter(supplier -> supplier != null)
                 .map(supplier -> supplier.getJavaIdeSupport())

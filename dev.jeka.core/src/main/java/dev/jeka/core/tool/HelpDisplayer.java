@@ -119,7 +119,7 @@ final class HelpDisplayer {
             sb.append("\nActivation Effect : Not documented.");
         }
         final JkBean bean;
-        if (runtime.getBeanRegistry().hasLoaded(description.beanClass())) {
+        if (runtime.getBeanRegistry().getOptional(description.beanClass()).isPresent()) {
             bean = runtime.getBeanRegistry().get(description.beanClass());
         } else {
             bean = JkUtilsReflect.newInstance(description.beanClass());

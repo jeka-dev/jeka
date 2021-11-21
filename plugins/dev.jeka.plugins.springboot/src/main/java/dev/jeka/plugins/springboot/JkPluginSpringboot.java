@@ -153,7 +153,7 @@ public final class JkPluginSpringboot extends JkBean {
         }
 
         // Add template build class to scaffold
-        if (getRuntime().getBeanRegistry().hasLoaded(ScaffoldJkBean.class)) {
+        if (getRuntime().getBeanRegistry().getOptional(ScaffoldJkBean.class).isPresent()) {
             ScaffoldJkBean scaffold = getRuntime().getBeanRegistry().get(ScaffoldJkBean.class);
             String code = JkUtilsIO.read(JkPluginSpringboot.class.getClassLoader().getResource("snippet/Build.java"));
             String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";

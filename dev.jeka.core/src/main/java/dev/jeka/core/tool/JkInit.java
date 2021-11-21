@@ -47,7 +47,7 @@ public final class JkInit {
             memoryBufferLogActivated = true;
         }
         try {
-            final T jkBean = JkRuntime.ofContextBaseDir().of(clazz);
+            final T jkBean = JkRuntime.of(Paths.get("")).getBeanRegistry().get(clazz);
             JkLog.info(jkBean.toString() + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();
@@ -117,43 +117,6 @@ public final class JkInit {
         return Paths.get(JkConstants.BOOT_DIR);
     }
 
-    /**
-     * This main method is meant to be use by external tools as IDE plugin. From here, all def classes
-     * are supposed to be already present in the current classloader.
-     */
-    public static void main(String[] args) {
-        List<String> actualArgs = new LinkedList<>();
-        String jkClassName = null;
-        for (String arg : args) {
-            if (arg.startsWith("-CC=")) {
-                jkClassName = arg.substring(4);
-            } else {
-                actualArgs.add(arg);
-            }
-        }
-        JkUtilsAssert.argument(jkClassName != null,
-                "No argument starting with '-CC=' can be found. Cannot determine Jeka Class");
-        Class<JkBean> clazz = JkInternalClasspathScanner.INSTANCE
-                .loadFirstFoundClassHavingNameOrSimpleName(jkClassName, JkBean.class);
-        JkUtilsAssert.argument(clazz != null,
-                "Jeka class having name '" + jkClassName + "' cannot be found.");
-        String[] argsToPass = actualArgs.toArray(new String[0]);
-        JkBean jkBean = JkInit.instanceOf(clazz, argsToPass);
-        CommandLine commandLine = CommandLine.parse(argsToPass);
-        try {
-            for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {
-                if (methodInvocation.isMethodPlugin()) {
-                    JkBean plugin = jkBean.getRuntime().getBeanRegistry().get(methodInvocation.beanName);
-                    JkUtilsReflect.invoke(plugin, methodInvocation.methodName);
-                } else {
-                    JkUtilsReflect.invoke(jkBean, methodInvocation.methodName);
-                }
-            }
-            System.exit(0); // Triggers shutdown hooks
-        } catch (Throwable t) {
-            System.exit(1); // Triggers shutdown hooks
-        }
 
-     }
 
 }

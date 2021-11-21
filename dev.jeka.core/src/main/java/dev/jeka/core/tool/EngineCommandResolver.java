@@ -9,8 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud
  */
-final class EngineBeanClassResolver {
+final class EngineCommandResolver {
 
     private final Path baseDir;
 
@@ -26,16 +25,59 @@ final class EngineBeanClassResolver {
 
     final Path defClassDir;
 
-    EngineBeanClassResolver(Path baseDir) {
+    EngineCommandResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
         this.defSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
         this.defClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
     }
 
-    Class<? extends JkBean> resolveDefaultJkBeanClass(Optional<String> nickName) {
+    List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanNickname) {
+        Map<String, Class<? extends JkBean>> beanClasses = new HashMap<>();
+        if (commandLine.containsDefaultBean()) {
+            Class<? extends JkBean> clazz = resolveDefaultJkBeanClass(defaultBeanNickname);
+            if (clazz == null) {
+                if (defaultBeanNickname == null) {
+                    throw new JkException("Cannot find any KBean in jeka/def dir. Use -JKB=[beanName] to precise a " +
+                            "bean present in classpath or add a class extending JkBean into jeka/def dir.");
+                } else {
+                    throw new JkException("Can not resolve KBean for name '" + defaultBeanNickname
+                            + "'. The name can be the fully qualified class name of the KBean, its uncapitalized simple class name " +
+                            "or its uncapitalized simple class name without the 'JkBean' suffix.");
+                }
+            }
+            beanClasses.put(null, clazz);
+        }
+        for (String beanName : commandLine.involvedBeanNames()) {
+            Class<? extends JkBean> clazz = findBeanClassInClassloader(beanName);
+            if (clazz == null) {
+                throw new JkException("Cannot find KBean for name '" + beanName + "'. Available KBeans are :"
+                        + String.join("\n", this.getDefBeanClasses().stream()
+                            .map(Class::getName).collect(Collectors.toList())));
+            }
+            if (beanClasses.containsKey(beanName) && !clazz.equals(beanClasses.get(beanName))) {
+                throw new JkException("KBean name '" + beanName
+                        + "' is ambiguous to reference KBEAN as it stands both for " + clazz
+                        + " and " + beanClasses.get(beanName));
+            } else {
+                beanClasses.put(JkBean.computeShortName(clazz), clazz);
+            }
+        }
+        return commandLine.getBeanActions().stream()
+                .map(action -> toEngineCommand(action, beanClasses)).collect(Collectors.toList());
+    }
+
+    private static EngineCommand toEngineCommand(CommandLine.JkBeanAction action,
+                                                 Map<String, Class<? extends JkBean>> beanClasses) {
+        Class<? extends JkBean> beanClass = beanClasses.get(action.member);
+        return new EngineCommand(action.action, beanClass, action.member, action.value);
+    }
+
+
+
+    private Class<? extends JkBean> resolveDefaultJkBeanClass(String nickName) {
         List<Class<? extends JkBean>> candidates = getDefBeanClasses();
-        if (nickName.isPresent()) {
+        if (nickName != null) {
             if (candidates.isEmpty()) {
                 return null;
             }
@@ -49,9 +91,9 @@ final class EngineBeanClassResolver {
             throw new JkException(message.toString());
         }
         candidates = candidates.stream()
-                .filter(beanClass -> JkBean.nickNameMatches(beanClass, nickName.get()))
+                .filter(beanClass -> JkBean.nickNameMatches(beanClass.getName(), nickName))
                 .collect(Collectors.toList());
-        return findBeanClassInClassloader(nickName.get());
+        return findBeanClassInClassloader(nickName);
     }
 
     private List<Class<? extends JkBean>> getDefBeanClasses() {
@@ -94,12 +136,27 @@ final class EngineBeanClassResolver {
         return JkPathTree.of(this.defSourceDir).withMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
     }
 
-    boolean hasDefSource() {
+    private boolean hasDefSource() {
         if (!Files.exists(defSourceDir)) {
             return false;
         }
         return JkPathTree.of(defSourceDir).andMatching(true,
                 "**.java", "*.java", "**.kt", "*.kt").count(0, false) > 0;
+    }
+
+    private List<Class<? extends JkBean>> loadBeanClassesAnnotatedWithJkDoc(Set<String> beanNicknames) {
+        JkClassLoader classLoader = JkClassLoader.ofCurrent();
+        List<String> candidteClassNames = classLoader.findClassesMatchingAnnotations(
+                annotations -> annotations.contains(JkDoc.class.getSimpleName()));
+        List result = candidteClassNames.stream()
+                .filter(className -> matchAnyBeanNickname(className, beanNicknames))
+                .map(classname -> classLoader.load(classname))
+                .collect(Collectors.toList());
+        return result;
+    }
+
+    private static boolean matchAnyBeanNickname(String className, Set<String> nicknames) {
+        return nicknames.stream().anyMatch(nickname -> JkBean.nickNameMatches(className, nickname));
     }
 
 }

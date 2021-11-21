@@ -16,4 +16,8 @@ final class JkException extends RuntimeException {
         super(String.format(message, args));
     }
 
+    public JkException(Exception cause, String message, Object ...args) {
+        super(String.format(message, args), cause);
+    }
+
 }

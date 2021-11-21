@@ -31,7 +31,7 @@ public final class Main {
             final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, Main.class.getName(),
-                    "main" , args);
+                    "main" , (Object[]) args);
             return;
         }
         final long start = System.nanoTime();

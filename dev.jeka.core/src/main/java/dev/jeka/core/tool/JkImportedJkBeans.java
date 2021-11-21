@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
  */
 public final class JkImportedJkBeans {
 
-    private static final ThreadLocal<Map<ImportedBeanRef, JkBean>> IMPORTED_JKBEANS_CONTEXT = new ThreadLocal<>();
-
     private final JkBean holder;
 
     private List<JkBean> directs;
@@ -31,6 +29,7 @@ public final class JkImportedJkBeans {
 
     JkImportedJkBeans(JkBean holder) {
         this.holder = holder;
+        this.directs = computeDirects(holder);
     }
 
     /**
@@ -39,7 +38,7 @@ public final class JkImportedJkBeans {
     public List<JkBean> get(boolean includeTransitives) {
         return includeTransitives
                 ? Optional.ofNullable(transitives).orElseGet(() -> (transitives = computeTransitives(new HashSet<>())))
-                : Optional.ofNullable(directs).orElseGet(() -> (directs = computeDirects()));
+                : Optional.ofNullable(directs).orElseGet(() -> (directs = computeDirects(holder)));
     }
 
     /**
@@ -72,18 +71,18 @@ public final class JkImportedJkBeans {
     }
 
     @SuppressWarnings("unchecked")
-    private List<JkBean> computeDirects() {
+    private static List<JkBean> computeDirects(JkBean masterBean) {
         final List<JkBean> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(holder.getClass(), JkDefImport.class);
-        JkLog.trace("Projects imported by " + holder + " : " + fields);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBean.getClass(), JkDefImport.class);
+        JkLog.trace("Projects imported by " + masterBean + " : " + fields);
         for (final Field field : fields) {
             final JkDefImport jkProject = field.getAnnotation(JkDefImport.class);
             final JkBean importedJkClass = createImportedJkBean(
-                    (Class<? extends JkBean>) field.getType(), jkProject.value(), holder.getBaseDir());
+                    (Class<? extends JkBean>) field.getType(), jkProject.value(), masterBean.getBaseDir());
             try {
-                JkUtilsReflect.setFieldValue(holder, field, importedJkClass);
+                JkUtilsReflect.setFieldValue(masterBean, field, importedJkClass);
             } catch (final RuntimeException e) {
-                Path currentClassBaseDir = Paths.get(holder.getClass().getProtectionDomain()
+                Path currentClassBaseDir = Paths.get(masterBean.getClass().getProtectionDomain()
                         .getCodeSource().getLocation().getPath());
                 while (!Files.exists(currentClassBaseDir.resolve(JkConstants.DEF_DIR)) && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParent();
@@ -92,13 +91,13 @@ public final class JkImportedJkBeans {
                     throw new IllegalStateException("Can't inject imported run instance of type "
                             + importedJkClass.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
-                            + "#" + field.getName() + " from directory " + holder.getBaseDir()
+                            + "#" + field.getName() + " from directory " + masterBean.getBaseDir()
                             + " while working dir is " + Paths.get("").toAbsolutePath());
                 }
                 throw new IllegalStateException("Can't inject imported run instance of type "
                         + importedJkClass.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
-                        + "#" + field.getName() + " from directory " + holder.getBaseDir()
+                        + "#" + field.getName() + " from directory " + masterBean.getBaseDir()
                         + "\nJeka class is located in " + currentClassBaseDir
                         + " while working dir is " + Paths.get("").toAbsolutePath()
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);
@@ -116,56 +115,9 @@ public final class JkImportedJkBeans {
     @SuppressWarnings("unchecked")
     private static <T extends JkBean> T createImportedJkBean(Class<T> importedBeanClass, String relativePath, Path holderBaseDir) {
         final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
-        final ImportedBeanRef beanRef = new ImportedBeanRef(importedProjectDir, importedBeanClass);
-        Map<ImportedBeanRef, JkBean> map = IMPORTED_JKBEANS_CONTEXT.get();
-        if (map == null) {
-            map = new HashMap<>();
-            IMPORTED_JKBEANS_CONTEXT.set(map);
-        }
-        final T cachedResult = (T) IMPORTED_JKBEANS_CONTEXT.get().get(beanRef);
-        if (cachedResult != null) {
-            return cachedResult;
-        }
+        JkRuntime runtime = JkRuntime.of(importedProjectDir);
         final T result = JkRuntime.of(importedProjectDir).getBeanRegistry().get(importedBeanClass);
-        IMPORTED_JKBEANS_CONTEXT.get().put(beanRef, result);
         return result;
-    }
-
-    private static class ImportedBeanRef {
-
-        final String canonicalFileName;
-
-        final Class<?> clazz;
-
-        ImportedBeanRef(Path projectDir, Class<?> clazz) {
-            super();
-            this.canonicalFileName = projectDir.normalize().toAbsolutePath().toString();
-            this.clazz = clazz;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            final ImportedBeanRef that = (ImportedBeanRef) o;
-
-            if (!canonicalFileName.equals(that.canonicalFileName)) {
-                return false;
-            }
-            return clazz.equals(that.clazz);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = canonicalFileName.hashCode();
-            result = 31 * result + clazz.hashCode();
-            return result;
-        }
     }
 
 }

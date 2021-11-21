@@ -10,6 +10,6 @@ public class EnvironmentTest {
     public void initialize() {
         Environment.initialize(new String[] {"-LV=true", "-JKC=HttpClientTaskBuild", "clean", "java#pack", "java#publish"
                 , "-java#publish.localOnly", "-LB"});
-        assertEquals("HttpClientTaskBuild", Environment.standardOptions.jkClassName());
+        assertEquals("HttpClientTaskBuild", Environment.standardOptions.jkCBeanName());
     }
 }

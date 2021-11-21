@@ -15,6 +15,6 @@ public class JkJavaRunner {
                 + " manifest does not contains Main-Class attribute.");
         Class<?> mainClass = JkUrlClassLoader.of(jar, ClassLoader.getSystemClassLoader()).toJkClassLoader()
                 .load(className);
-        JkUtilsReflect.invokeStaticMethod(mainClass, "main", args);
+        JkUtilsReflect.invokeStaticMethod(mainClass, "main", (Object[]) args);
     }
 }

@@ -60,7 +60,7 @@ class Environment {
         final Map<String, String> optionMap = new HashMap<>();
         optionMap.putAll(JkOptions.readSystemAndUserOptions());
         optionMap.putAll(JkOptions.readFromProjectOptionsProperties(Paths.get("")));
-        optionMap.putAll(commandLine.getCommandOptions());
+        optionMap.putAll(commandLine.getStandardOptions());
         JkOptions.init(optionMap);
 
         final StandardOptions standardOptions = new StandardOptions(optionMap);
@@ -139,7 +139,7 @@ class Environment {
             return names;
         }
 
-        String jkClassName() {
+        String jkCBeanName() {
             return jkBeanName;
         }
 

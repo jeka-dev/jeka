@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.system.JkLog;
@@ -8,6 +7,8 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +24,7 @@ public final class JkRuntime {
 
     private JkDependencyResolver dependencyResolver;
 
-    private JkBeanRegistry jkBeanRegistry = new JkBeanRegistry(Environment.commandLine.getPluginOptions());
+    private JkBeanRegistry beanRegistry = new JkBeanRegistry();
 
     private JkRuntime(Path projectBaseDir) {
         this.projectBaseDir = projectBaseDir;
@@ -54,7 +55,7 @@ public final class JkRuntime {
     }
 
     public JkBeanRegistry getBeanRegistry() {
-        return jkBeanRegistry;
+        return beanRegistry;
     }
 
     public JkRepoSet getDownloadRepos() {
@@ -69,14 +70,54 @@ public final class JkRuntime {
         return dependencyResolver;
     }
 
-    void init() {
-        for (JkBean bean : getBeanRegistry().getAll()) {
-            try {
-                bean.init();
-            } catch (Exception e) {
-                throw JkUtilsThrowable.unchecked(e);
+    void init(List<EngineCommand> commands) {
+
+        // inject field values
+        Map<Class<? extends JkBean>, JkBean> fieldInjectedBeans = new LinkedHashMap<>();
+        for (EngineCommand engineCommand : commands) {
+            if (engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT) {
+                Class<? extends JkBean> beanClass = engineCommand.getBeanClass();
+                JkBean bean = fieldInjectedBeans.computeIfAbsent(beanClass, JkUtilsReflect::newInstance);
+                Field field;
+                try {
+                    field = bean.getClass().getField(engineCommand.getMember());
+                } catch (NoSuchFieldException e) {
+                    throw new JkException("No public field '" + engineCommand.getMember() + "' found on KBean class "
+                            + bean.getClass());
+                }
+                JkUtilsReflect.setFieldValue(bean, field, engineCommand.getValue());
             }
         }
+
+        // register beans
+        commands.stream()
+                .map(EngineCommand::getBeanClass)
+                .distinct()
+                .map(beanClass -> fieldInjectedBeans.computeIfAbsent(beanClass, JkUtilsReflect::newInstance))
+                .forEach(bean -> beanRegistry.register(bean));
+
+
+        // postInit registered beans
+        RUNTIMES.values().forEach(JkRuntime::postInitBeans);
+    }
+
+    void run(List<EngineCommand> commands) {
+        for (EngineCommand engineCommand : commands) {
+            JkBean bean = beanRegistry.get(engineCommand.getBeanClass());
+            if (engineCommand.getAction() == EngineCommand.Action.METHOD_INVOKE) {
+                Method method;
+                try {
+                    method = bean.getClass().getMethod(engineCommand.getMember());
+                } catch (NoSuchMethodException e) {
+                    throw new JkException("No public no-args method '" + engineCommand.getMember() + "' found on KBean class "
+                            + bean.getClass());
+                }
+                JkUtilsReflect.invoke(bean, method);
+            }
+        }
+    }
+
+    private void postInitBeans() {
         List<JkBean> beans = getBeanRegistry().getAll();
         Collections.reverse(beans);
         for (JkBean bean : beans) {
@@ -88,70 +129,4 @@ public final class JkRuntime {
         }
     }
 
-    void initialise(JkBean jkBean) throws Exception {
-        jkBean.init();
-
-        // initialise imported projects after setup to let a chance master Jeka class
-        // to modify imported Jeka classes in the setup method.
-        for (JkBean importedJkBean : jkBean.getImportedJkBeans().get(false)) {
-            initialise(importedJkBean);
-        }
-
-        for (JkBean registeredBean : getBeanRegistry().getAll()) {
-            List<BeanDescription.BeanField> defs = BeanDescription.of(registeredBean.getClass()).beanFields();
-            JkLog.startTask("Activating KBean " + registeredBean.shortName() + " with options "
-                    + HelpDisplayer.optionValues(defs));
-            try {
-                registeredBean.postInit();
-            } catch (RuntimeException e) {
-                JkLog.error("KBean " + registeredBean.shortName() + " has caused build instantiation failure.");
-                throw e;
-            }
-            JkLog.endTask();
-        }
-        JkRuntime.setBaseDirContext(null);
-    }
-
-
-
-
-    <T extends JkBean> T ofUninitialized(Class<T> JkBeanClass) {
-        final T jkBean = JkUtilsReflect.newInstance(JkBeanClass);
-        //final JkClass jkClassInstance = jkBean;
-
-        // Inject options & environment variables
-        JkOptions.populateFields(jkBean, JkOptions.readSystemAndUserOptions());
-        JkOptions.populateFields(jkBean, JkOptions.readFromProjectOptionsProperties(jkBean.getBaseDir()));
-        FieldInjector.injectEnv(jkBean);
-        Set<String> unusedCmdOptions = JkOptions.populateFields(jkBean, Environment.commandLine.getCommandOptions());
-        unusedCmdOptions.forEach(key -> JkLog.warn("Option '" + key
-                + "' from command line does not match with any field of class " + jkBean.getClass().getName()));
-
-        // Load plugins declared in command line and inject options
-        getBeanRegistry().loadCommandLinePlugins();
-        List<JkBean> plugins = getBeanRegistry().getAll();
-        for (JkBean plugin : plugins) {
-            if (!getBeanRegistry().getAll().contains(plugin)) {
-                getBeanRegistry().injectOptions(plugin);
-            }
-        }
-        return jkBean;
-    }
-
-    /**
-     * Creates a instance of the specified Jeka class (extending JkClass), including option injection, plugin loading
-     * and plugin activation.
-     */
-    <T extends JkBean> T of(Class<T> jkClass) {
-        String currentPath = getBaseDirContext().equals(Paths.get("")) ? "." : getBaseDirContext().toString();
-        JkLog.startTask("Instantiating Jeka class " + jkClass.getName() + " at " + currentPath);
-        final T jkBean = ofUninitialized(jkClass);
-        try {
-            initialise(jkBean);
-        } catch (Exception e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-        JkLog.endTask();
-        return jkBean;
-    }
 }
