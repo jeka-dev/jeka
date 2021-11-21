@@ -131,7 +131,7 @@ class Environment {
             this.logSetup = valueOf(Boolean.class, map, false,"LogSetup", "LSU");
             this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
-            this.jkBeanName = valueOf(String.class, map, null, "JekaClass", "JKC");
+            this.jkBeanName = valueOf(String.class, map, null, "KBean", "KB");
             this.forceCompile = valueOf(Boolean.class, map, false, "ForceCompile", "FC");
         }
 

@@ -3,7 +3,7 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-class SonarqubePluginBuild extends JkBean {
+class SonarqubeBuild extends JkBean {
 
     private final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 

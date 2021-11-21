@@ -104,18 +104,18 @@ public abstract class JkBean {
         return JkUtilsString.uncapitalize(prefix);
     }
 
-    static boolean nickNameMatches(String className, String nickNameCandidate) {
-        if (nickNameCandidate.equals(className)) {
+    static boolean nameMatches(String className, String nameCandidate) {
+        if (nameCandidate.equals(className)) {
             return true;
         }
         String classSimpleName = className.contains(".") ? JkUtilsString.substringBeforeLast(className, ".")
                 : className;
         String uncapitalizedClassSimpleName = JkUtilsString.uncapitalize(classSimpleName);
-        if (JkUtilsString.uncapitalize(nickNameCandidate).equals(uncapitalizedClassSimpleName)) {
+        if (JkUtilsString.uncapitalize(nameCandidate).equals(uncapitalizedClassSimpleName)) {
             return true;
         }
         if (className.endsWith(JKBEAN_CLASS_SIMPLE_NAME)) {
-            return uncapitalizedClassSimpleName.equals(nickNameCandidate + JkBean.class.getSimpleName());
+            return uncapitalizedClassSimpleName.equals(nameCandidate + JkBean.class.getSimpleName());
         }
         return false;
     }

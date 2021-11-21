@@ -14,7 +14,10 @@ public final class JkBeanRegistry {
 
     private final Map<Class<? extends JkBean>, JkBean> beans = new LinkedHashMap<>();
 
-    JkBeanRegistry() {
+    private final JkRuntime holder;
+
+    JkBeanRegistry(JkRuntime runtime) {
+        this.holder = runtime;
     }
 
     void register(JkBean bean) {
@@ -33,7 +36,7 @@ public final class JkBeanRegistry {
     public <T extends JkBean> T get(Class<T> jkBeanClass) {
         return getOptional(jkBeanClass)
                 .orElseGet(() -> {
-                    JkBean bean = JkUtilsReflect.newInstance(jkBeanClass);
+                    JkBean bean = holder.instantiate(jkBeanClass);
                     register(bean);
                     return (T) bean;
                 });

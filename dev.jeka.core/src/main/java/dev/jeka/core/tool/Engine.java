@@ -75,6 +75,11 @@ final class Engine {
         JkRuntime.BASE_DIR_CONTEXT.set(projectBaseDir);
         JkRuntime runtime = JkRuntime.of(projectBaseDir);
         runtime.setDependencyResolver(dependencyResolver);
+        List<EngineCommand> resolvedCommands = commandsResolver.resolve(commandLine,
+                Environment.standardOptions.jkCBeanName());
+        runtime.init(resolvedCommands);
+        JkLog.info("KBeans are ready to run.");
+        JkLog.endTask();
         if (JkMemoryBufferLogDecorator.isActive()) {
             JkBusyIndicator.stop();
             JkMemoryBufferLogDecorator.inactivateOnJkLog();
@@ -82,14 +87,6 @@ final class Engine {
         if (Environment.standardOptions.logRuntimeInformation != null) {
             JkLog.info("Jeka Classpath : ");
             computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
-        }
-        List<EngineCommand> resolvedCommands = commandsResolver.resolve(commandLine,
-                Environment.standardOptions.jkCBeanName());
-        runtime.init(resolvedCommands);
-        JkLog.endTask();
-        JkLog.info("KBeans are ready to run.");
-        if (JkMemoryBufferLogDecorator.isActive()) {
-            JkMemoryBufferLogDecorator.inactivateOnJkLog();
         }
         runtime.run(resolvedCommands);
     }
@@ -122,7 +119,8 @@ final class Engine {
         List<Path> importedProjectClasspath = new LinkedList<>();
         compilationContext.importedProjectDirs.forEach(importedProjectDir -> {
             Engine importedProjectEngine = new Engine(importedProjectDir);
-            importedProjectClasspath.addAll(resolveAndCompile(yetCompiledProjects, compileSources).getEntries());
+            importedProjectClasspath.addAll(
+                    importedProjectEngine.resolveAndCompile(yetCompiledProjects, compileSources).getEntries());
         });
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
@@ -192,7 +190,7 @@ final class Engine {
     private void wrapCompile(Supplier<Boolean> compileTask) {
         boolean success = compileTask.get();
         if (!success) {
-            throw new JkException("Compilation of Jeka files failed. You can run jeka -JKC= to use default JkClass " +
+            throw new JkException("Compilation of Jeka files failed. You can run jeka -KB= to use default KBean " +
                     " instead of the ones defined in 'def'.");
         }
     }

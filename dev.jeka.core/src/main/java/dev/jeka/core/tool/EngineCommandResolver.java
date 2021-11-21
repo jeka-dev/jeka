@@ -33,12 +33,13 @@ final class EngineCommandResolver {
     }
 
     List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanNickname) {
+        JkLog.startTask("Resolve KBean classes");
         Map<String, Class<? extends JkBean>> beanClasses = new HashMap<>();
         if (commandLine.containsDefaultBean()) {
             Class<? extends JkBean> clazz = resolveDefaultJkBeanClass(defaultBeanNickname);
             if (clazz == null) {
                 if (defaultBeanNickname == null) {
-                    throw new JkException("Cannot find any KBean in jeka/def dir. Use -JKB=[beanName] to precise a " +
+                    throw new JkException("Cannot find any KBean in jeka/def dir. Use -KB=[beanName] to precise a " +
                             "bean present in classpath or add a class extending JkBean into jeka/def dir.");
                 } else {
                     throw new JkException("Can not resolve KBean for name '" + defaultBeanNickname
@@ -63,21 +64,20 @@ final class EngineCommandResolver {
                 beanClasses.put(JkBean.computeShortName(clazz), clazz);
             }
         }
+        JkLog.endTask();
         return commandLine.getBeanActions().stream()
                 .map(action -> toEngineCommand(action, beanClasses)).collect(Collectors.toList());
     }
 
     private static EngineCommand toEngineCommand(CommandLine.JkBeanAction action,
                                                  Map<String, Class<? extends JkBean>> beanClasses) {
-        Class<? extends JkBean> beanClass = beanClasses.get(action.member);
+        Class<? extends JkBean> beanClass = beanClasses.get(action.beanName);
         return new EngineCommand(action.action, beanClass, action.member, action.value);
     }
 
-
-
     private Class<? extends JkBean> resolveDefaultJkBeanClass(String nickName) {
         List<Class<? extends JkBean>> candidates = getDefBeanClasses();
-        if (nickName != null) {
+        if (nickName == null) {
             if (candidates.isEmpty()) {
                 return null;
             }
@@ -86,12 +86,12 @@ final class EngineCommandResolver {
             }
             StringBuilder message = new StringBuilder()
                     .append("Found more than 1 KBean in def sources : " + candidates + ".\n")
-                    .append("Specify default bean using -JKB=beanName or qualified method/field " +
+                    .append("Specify default bean using -KB=beanName or qualified method/field " +
                             "as 'beanName#doSomething'.");
             throw new JkException(message.toString());
         }
         candidates = candidates.stream()
-                .filter(beanClass -> JkBean.nickNameMatches(beanClass.getName(), nickName))
+                .filter(beanClass -> JkBean.nameMatches(beanClass.getName(), nickName))
                 .collect(Collectors.toList());
         return findBeanClassInClassloader(nickName);
     }
@@ -103,7 +103,6 @@ final class EngineCommandResolver {
                 .map(path -> classLoader.loadGivenClassSourcePath(path.toString()))
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
                 .filter(clazz -> JkBean.class.isAssignableFrom(clazz))
-                .map(clazz -> clazz.cast(JkBean.class))
                 .collect(Collectors.toList());
         return classes;
     }
@@ -156,7 +155,7 @@ final class EngineCommandResolver {
     }
 
     private static boolean matchAnyBeanNickname(String className, Set<String> nicknames) {
-        return nicknames.stream().anyMatch(nickname -> JkBean.nickNameMatches(className, nickname));
+        return nicknames.stream().anyMatch(nickname -> JkBean.nameMatches(className, nickname));
     }
 
 }

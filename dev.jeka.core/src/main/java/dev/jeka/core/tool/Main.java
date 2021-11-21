@@ -31,7 +31,7 @@ public final class Main {
             final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, Main.class.getName(),
-                    "main" , (Object[]) args);
+                    "main" , args);
             return;
         }
         final long start = System.nanoTime();
@@ -50,7 +50,7 @@ public final class Main {
                 JkMemoryBufferLogDecorator.activateOnJkLog();
                 JkLog.info("");   // To have a br prior the memory log is flushed
             }
-            final Path workingDir = Paths.get("").toAbsolutePath();
+            final Path workingDir = Paths.get("");
             final Engine engine = new Engine(workingDir);
             engine.execute(Environment.commandLine);   // log in memory are inactivated inside this method if it goes ok
             if (Environment.standardOptions.logBanner) {
@@ -67,6 +67,9 @@ public final class Main {
             if (e instanceof JkException) {
                 System.err.println();
                 System.err.println(e.getMessage());
+                if (e.getCause() != null) {
+                    e.getCause().printStackTrace(System.err);
+                }
             } else {
                 System.err.println("An error occurred during def class execution.");
                 System.err.println("It may come from user code/setting or a bug in Jeka.");

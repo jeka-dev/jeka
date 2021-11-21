@@ -8,7 +8,7 @@ public class EnvironmentTest {
 
     @Test
     public void initialize() {
-        Environment.initialize(new String[] {"-LV=true", "-JKC=HttpClientTaskBuild", "clean", "java#pack", "java#publish"
+        Environment.initialize(new String[] {"-LV=true", "-KB=HttpClientTaskBuild", "clean", "java#pack", "java#publish"
                 , "-java#publish.localOnly", "-LB"});
         assertEquals("HttpClientTaskBuild", Environment.standardOptions.jkCBeanName());
     }

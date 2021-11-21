@@ -49,7 +49,7 @@ final class HelpDisplayer {
         sb.append("  -LogBanner (shorthand -LB) : logs intro and outro banners.\n");
         sb.append("  -LogSetup (shorthand -LSU) : logs Jeka classes setup process.\n");
         sb.append("  -LogStyle (shorthand -LS) : choose the display log style : INDENT(default), BRACE, SQUARE or DEBUG.\n");
-        sb.append("  -JekaClass (shorthand -JKC) : Force to use the specified class as the Jeka class to invoke. It can be the short name of the class (without package prefix).\n");
+        sb.append("  -KBean (shorthand -KB) : Specify the default KBean in command line . It can be the short name of the class (without package prefix).\n");
         sb.append("  -ForceCompile (shorthand -FC) : Force Jeka to compile def files, even id def compiled classes are marked up-to-date.\n");
         return sb.toString();
     }

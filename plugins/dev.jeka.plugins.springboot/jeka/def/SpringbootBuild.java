@@ -5,7 +5,7 @@ import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-class SpringbootPluginBuild extends JkBean {
+public class SpringbootBuild extends JkBean {
 
     final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
@@ -33,7 +33,7 @@ class SpringbootPluginBuild extends JkBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(SpringbootPluginBuild.class, args).cleanPack();
+        JkInit.instanceOf(SpringbootBuild.class, args).cleanPack();
     }
 
 }

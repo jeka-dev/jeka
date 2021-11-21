@@ -130,6 +130,9 @@ public final class JkDependencyResolver<T> {
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
     public JkResolveResult resolve(JkQualifiedDependencySet qualifiedDependencies) {
+        if (qualifiedDependencies.getEntries().isEmpty()) {
+            return JkResolveResult.ofRoot(moduleHolder);
+        }
         if (useCache) {
             JkResolveResult result = cachedResults.get(qualifiedDependencies);
             if (result != null) {

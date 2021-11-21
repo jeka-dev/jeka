@@ -9,6 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsThrowable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +25,7 @@ public final class JkRuntime {
 
     private JkDependencyResolver dependencyResolver;
 
-    private JkBeanRegistry beanRegistry = new JkBeanRegistry();
+    private JkBeanRegistry beanRegistry = new JkBeanRegistry(this);
 
     private JkRuntime(Path projectBaseDir) {
         this.projectBaseDir = projectBaseDir;
@@ -77,7 +78,7 @@ public final class JkRuntime {
         for (EngineCommand engineCommand : commands) {
             if (engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT) {
                 Class<? extends JkBean> beanClass = engineCommand.getBeanClass();
-                JkBean bean = fieldInjectedBeans.computeIfAbsent(beanClass, JkUtilsReflect::newInstance);
+                JkBean bean = fieldInjectedBeans.computeIfAbsent(beanClass, this::instantiate);
                 Field field;
                 try {
                     field = bean.getClass().getField(engineCommand.getMember());
@@ -93,9 +94,8 @@ public final class JkRuntime {
         commands.stream()
                 .map(EngineCommand::getBeanClass)
                 .distinct()
-                .map(beanClass -> fieldInjectedBeans.computeIfAbsent(beanClass, JkUtilsReflect::newInstance))
+                .map(beanClass -> fieldInjectedBeans.computeIfAbsent(beanClass, this::instantiate))
                 .forEach(bean -> beanRegistry.register(bean));
-
 
         // postInit registered beans
         RUNTIMES.values().forEach(JkRuntime::postInitBeans);
@@ -126,6 +126,18 @@ public final class JkRuntime {
             } catch (Exception e) {
                 throw JkUtilsThrowable.unchecked(e);
             }
+        }
+    }
+
+    JkBean instantiate(Class<? extends JkBean> beanClass) {
+        if (Modifier.isAbstract(beanClass.getModifiers())) {
+            throw new JkException("KBean class " + beanClass + " in " + this.projectBaseDir
+                    + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
+        }
+        try {
+            return JkUtilsReflect.newInstance(beanClass);
+        } catch (RuntimeException e) {
+            throw new JkException(e, "Error while calling constructor of %s in project %s", beanClass, projectBaseDir);
         }
     }
 

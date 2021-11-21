@@ -13,6 +13,6 @@
     <orderEntry type="module" module-name="dev.jeka.core" />
     <orderEntry type="module" module-name="dev.jeka.plugins.jacoco" scope="TEST" />
     <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" />
-    <orderEntry type="module" module-name="dev.jeka.samples.springboot" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.springboot" />
   </component>
 </module>

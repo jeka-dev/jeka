@@ -35,13 +35,13 @@ class MasterBuild extends JkBean {
     CoreBuild coreBuild;
 
     @JkDefImport("../plugins/dev.jeka.plugins.jacoco")
-    JkBean jacocoBuild;
+    JacocoBuild jacocoBuild;
 
     @JkDefImport("../plugins/dev.jeka.plugins.sonarqube")
-    JkBean sonarqubeBuild;
+    SonarqubeBuild sonarqubeBuild;
 
     @JkDefImport("../plugins/dev.jeka.plugins.springboot")
-    JkBean springbootBuild;
+    SpringbootBuild springbootBuild;
 
     private JkRepoSet publishRepos;
 
