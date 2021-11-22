@@ -1,22 +1,17 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,7 +42,7 @@ public final class JkInit {
             memoryBufferLogActivated = true;
         }
         try {
-            final T jkBean = JkRuntime.of(Paths.get("")).getBeanRegistry().get(clazz);
+            final T jkBean = JkRuntime.get(Paths.get("")).getBeanRegistry().get(clazz);
             JkLog.info(jkBean.toString() + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();

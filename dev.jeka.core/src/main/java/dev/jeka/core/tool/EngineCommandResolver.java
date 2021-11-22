@@ -54,7 +54,9 @@ final class EngineCommandResolver {
             if (clazz == null) {
                 throw new JkException("Cannot find KBean for name '" + beanName + "'. Available KBeans are :"
                         + String.join("\n", this.getDefBeanClasses().stream()
-                            .map(Class::getName).collect(Collectors.toList())));
+                            .map(Class::getName).collect(Collectors.toList()))
+                        + "\nClassloader : " + JkClassLoader.ofCurrent().toString()
+                );
             }
             if (beanClasses.containsKey(beanName) && !clazz.equals(beanClasses.get(beanName))) {
                 throw new JkException("KBean name '" + beanName
@@ -107,26 +109,26 @@ final class EngineCommandResolver {
         return classes;
     }
 
-    private static Class<? extends JkBean> findBeanClassInClassloader(String nickName) {
+    private static Class<? extends JkBean> findBeanClassInClassloader(String beanBame) {
         JkClassLoader classLoader = JkClassLoader.ofCurrent();
-        Class<? extends JkBean> beanClass = classLoader.loadIfExist(nickName);
+        Class<? extends JkBean> beanClass = classLoader.loadIfExist(beanBame);
         if (beanClass != null && !JkBean.class.isAssignableFrom(beanClass)) {
-            throw new JkException("Class name '" + nickName + "' does not refers to a JkBean class.");
+            throw new JkException("Class name '" + beanBame + "' does not refers to a JkBean class.");
         }
         if (beanClass != null) {
             return beanClass;
         }
-        if (nickName.contains(".")) {  // nickname was a fully qualified class name and no class found
+        if (beanBame.contains(".")) {  // nickname was a fully qualified class name and no class found
             return null;
         }
-        String capitalizedNickName = JkUtilsString.capitalize(nickName);
-        String simpleClassName = nickName.equals(capitalizedNickName) ?
-                nickName : capitalizedNickName + JkBean.class.getSimpleName();
+        String capitalizedName = JkUtilsString.capitalize(beanBame);
+        String simpleClassName = beanBame.equals(capitalizedName) ?
+                beanBame : capitalizedName + JkBean.class.getSimpleName();
 
         // Note : There is may be more than 1 class in classloader matching this nick name.
         // However, we take the first class found to avoid full classpath scanning
-        JkLog.startTask("Finding KBean class having nick name " + nickName);
-        beanClass = JkInternalClasspathScanner.INSTANCE.loadFirstFoundClassHavingNameOrSimpleName(nickName, JkBean.class);
+        JkLog.startTask("Finding KBean class for " + beanBame + " (" + simpleClassName + ")");
+        beanClass = JkInternalClasspathScanner.INSTANCE.loadFirstFoundClassHavingNameOrSimpleName(beanBame, JkBean.class);
         JkLog.endTask();
         return beanClass;
     }

@@ -72,8 +72,7 @@ final class Engine {
         JkLog.trace("Add following dependencies to def classpath : " + commandLineDependencies);
         JkPathSequence computedClasspath = resolveAndCompile( new HashSet<>(), true);
         JkUrlClassLoader.ofCurrent().addEntries(computedClasspath);
-        JkRuntime.BASE_DIR_CONTEXT.set(projectBaseDir);
-        JkRuntime runtime = JkRuntime.of(projectBaseDir);
+        JkRuntime runtime = JkRuntime.get(projectBaseDir);
         runtime.setDependencyResolver(dependencyResolver);
         List<EngineCommand> resolvedCommands = commandsResolver.resolve(commandLine,
                 Environment.standardOptions.jkCBeanName());
@@ -124,7 +123,7 @@ final class Engine {
         });
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
-        if (compileSources) {
+        if (compileSources && Files.exists(this.commandsResolver.defClassDir)) {
             if (Environment.standardOptions.forceCompile() || compilationTracker.isOutdated()) {
                 compileDef(classpath, compilationContext.compileOptions);
                 compilationTracker.updateCompileFlag();

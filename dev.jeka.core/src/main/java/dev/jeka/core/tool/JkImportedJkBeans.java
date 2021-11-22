@@ -32,6 +32,11 @@ public final class JkImportedJkBeans {
         this.directs = computeDirects(holder);
     }
 
+    JkImportedJkBeans() {
+        this.holder = null;
+        this.directs = Collections.emptyList();
+    }
+
     /**
      * Returns imported KBeans.
      */
@@ -115,8 +120,10 @@ public final class JkImportedJkBeans {
     @SuppressWarnings("unchecked")
     private static <T extends JkBean> T createImportedJkBean(Class<T> importedBeanClass, String relativePath, Path holderBaseDir) {
         final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
-        JkRuntime runtime = JkRuntime.of(importedProjectDir);
-        final T result = JkRuntime.of(importedProjectDir).getBeanRegistry().get(importedBeanClass);
+        JkRuntime runtime = JkRuntime.get(importedProjectDir);
+        JkRuntime.setBaseDirContext(importedProjectDir);
+        final T result = JkRuntime.get(importedProjectDir).getBeanRegistry().get(importedBeanClass);
+        JkRuntime.setBaseDirContext(Paths.get(""));
         return result;
     }
 

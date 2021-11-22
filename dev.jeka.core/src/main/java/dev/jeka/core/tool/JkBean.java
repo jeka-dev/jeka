@@ -36,7 +36,7 @@ public abstract class JkBean {
     }
 
     protected JkBean() {
-        this(JkRuntime.ofContextBaseDir());
+        this(JkRuntime.getCurrentContextBaseDir());
     }
 
     @JkDoc("Displays help about this plugin.")

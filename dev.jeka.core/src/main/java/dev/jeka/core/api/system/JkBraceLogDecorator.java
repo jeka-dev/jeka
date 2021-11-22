@@ -29,14 +29,14 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
     public void init(PrintStream targetOut, PrintStream targetErr) {
         marginOut = new MarginStream(targetOut);
-        marginErr = new MarginStream(targetErr);   // Cause erratic output if logged on separate streams
+        marginErr = marginOut;   // Cause erratic output if logged on separate streams
         out = new PrintStream(marginOut);
-        err = new PrintStream(marginErr);
+        err = out;
     }
 
     private void readObject(ObjectInputStream objectInputStream) {
         marginOut = new MarginStream(System.out);
-        marginErr = new MarginStream(System.err);
+        marginErr = marginOut;
     }
 
     public static void setMaxLength(int maxLength) {

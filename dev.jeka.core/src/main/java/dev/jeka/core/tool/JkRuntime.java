@@ -31,12 +31,12 @@ public final class JkRuntime {
         this.projectBaseDir = projectBaseDir;
     }
 
-    static JkRuntime of(Path projectBaseDir) {
+    static JkRuntime get(Path projectBaseDir) {
         return RUNTIMES.computeIfAbsent(projectBaseDir, path -> new JkRuntime(path));
     }
 
-    static JkRuntime ofContextBaseDir() {
-        return of(getBaseDirContext());
+    static JkRuntime getCurrentContextBaseDir() {
+        return get(getBaseDirContext());
     }
 
     static void setBaseDirContext(Path baseDir) {
