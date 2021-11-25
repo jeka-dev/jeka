@@ -5,7 +5,7 @@ import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 
-@JkDoc("Plugin providing common Git scripts/commands out of the box.")
+@JkDoc("Provides common Git scripts/commands out of the box.")
 public class GitJkBean extends JkBean {
 
     private final JkGitProcess git;

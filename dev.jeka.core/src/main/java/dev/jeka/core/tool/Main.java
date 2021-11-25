@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
@@ -30,8 +31,9 @@ public final class Main {
         if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
             final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);
+            final Object[] argArray = new Object[] {args};
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, Main.class.getName(),
-                    "main" , args);
+                    "main" , argArray);
             return;
         }
         final long start = System.nanoTime();
@@ -105,12 +107,11 @@ public final class Main {
                     "exec" , projectDir, args);
             return;
         }
-        final Engine engine = new Engine(projectDir);
-        Environment.initialize(args);
         if (!Environment.standardOptions.logSetup) {
             JkBusyIndicator.start("Preparing Jeka classes and instance (Use -LSU option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }
+        final Engine engine = new Engine(projectDir);
         engine.execute(Environment.commandLine);
     }
 

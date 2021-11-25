@@ -5,11 +5,11 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkDocPluginDeps;
+import dev.jeka.core.tool.JkDocJkBeanDeps;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
-@JkDocPluginDeps(ProjectJkBean.class)
+@JkDocJkBeanDeps(ProjectJkBean.class)
 public class JkPluginJacoco extends JkBean {
 
     /**

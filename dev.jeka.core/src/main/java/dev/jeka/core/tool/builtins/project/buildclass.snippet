@@ -2,18 +2,19 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.java.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-    class Build extends JkClass {
+class Build extends JkBean {
 
-    final ProjectJkBean projectKBean = getJkBean(ProjectJkBean.class);
+    final ProjectJkBean projectKBean = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
      * fields have already been injected from command line.
      */
     @Override
-    protected void setup() {
+    protected void init() {
         projectKBean.getProject()
             .getConstruction()
                 .setJvmTargetVersion(JkJavaVersion.V8)
@@ -51,7 +52,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        clean(); projectKBean.pack();
     }
 
 }

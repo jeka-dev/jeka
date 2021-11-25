@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @JkDoc("Run SonarQube analysis.")
-@JkDocPluginDeps(ProjectJkBean.class)
+@JkDocJkBeanDeps(ProjectJkBean.class)
 public class JkPluginSonarqube extends JkBean {
 
     private final Map<String, String> properties = new HashMap<>();

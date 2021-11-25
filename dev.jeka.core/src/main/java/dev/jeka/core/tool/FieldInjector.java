@@ -22,7 +22,7 @@ final class FieldInjector {
 
     private static Set<String> inject(Object target, Map<String, String> props, String fieldPrefix) {
         Set<String> usedProperties = new HashSet<>();
-        for (final Field field : getOptionFields(target.getClass())) {
+        for (final Field field : getPropertyFields(target.getClass())) {
             Set<String> matchedKeys = inject(target, field, props, fieldPrefix);
             usedProperties.addAll(matchedKeys);
         }
@@ -30,8 +30,8 @@ final class FieldInjector {
     }
 
     static void injectEnv(Object target) {
-        for (final Field field : getOptionFields(target.getClass())) {
-            final JkEnv env = field.getAnnotation(JkEnv.class);
+        for (final Field field : getPropertyFields(target.getClass())) {
+            final JkInjectProperty env = field.getAnnotation(JkInjectProperty.class);
             if (env != null) {
                 final String stringValue = System.getenv(env.value());
                 if (stringValue != null) {
@@ -49,7 +49,7 @@ final class FieldInjector {
         }
     }
 
-    static List<Field> getOptionFields(Class<?> clazz) {
+    static List<Field> getPropertyFields(Class<?> clazz) {
         return JkUtilsReflect.getAllDeclaredFields(clazz,true).stream()
                 .filter(FieldInjector::isOptionField)
                 .collect(Collectors.toList());

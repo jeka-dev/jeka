@@ -26,8 +26,8 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
-        runjeka(path.toString(), scaffoldCmdLine);
-        runjeka(checkWithWrapper, path.toString(), checkCommandLine);
+        runJeka(path.toString(), scaffoldCmdLine);
+        runJeka(checkWithWrapper, path.toString(), checkCommandLine);
         return path;
     }
 

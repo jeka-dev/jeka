@@ -1,10 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsThrowable;
-import dev.jeka.core.api.utils.JkUtilsXml;
+import dev.jeka.core.api.utils.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -12,45 +9,71 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 final class HelpDisplayer {
 
-    static void help(JkRuntime runtime) {
-        if (JkOptions.containsKey("Plugins")) {
-            helpPlugins(runtime);
-            return;
-        }
-        StringBuilder sb = new StringBuilder()
-                .append("Usage: \n\njeka (method | pluginName#method) [-optionName=<value>] [-pluginName#optionName=<value>] [-DsystemPropName=value]\n\n")
-                .append("Executes the specified methods defined in Jeka class or plugins using the specified options and system properties.\n\n")
-                .append("Ex: jeka clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
+    static void help(List<Class<? extends JkBean>> localBeanClasses, List<Class> classpathBeanClasses,
+                     boolean compilationFailed) {
+        final StringBuilder introSb = new StringBuilder()
+                .append("Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n")
+                .append("USAGE\n")
+                .append("  jeka (method | kbean#method ...) [property=<value> | kbean#property=<value> ...] ")
+                .append("[-option | -option=<value> ...] [@<module coordinates> ...] [@<path> ...] ")
+                .append("[-DsystemPropertyName=<value> ...]\n\n")
+                .append("EXAMPLE\n")
+                .append("  jeka clean project#pack project#pack.sources=true -ls=DEBUG -Dmy.prop=aValue @org.example:a-plugin:1.1.0\n\n")
                 .append(standardOptions());
+        System.out.println(introSb.toString());
 
-        // List plugins
-        final Set<BeanDictionary.KBeanDescription> KBeanDescriptions = new BeanDictionary().getAll();
-        List<String> names = KBeanDescriptions.stream().map(KBeanDescription -> KBeanDescription.shortName()).collect(Collectors.toList());
-        sb.append("\nAvailable plugins in classpath : ").append(String.join(", ", names))
-                .append(".\n");
+        final StringBuilder sb = new StringBuilder().append("LOCAL KBEANS\n");
+        if (compilationFailed) {
+            sb.append("  [WARN] Compilation of jeka/def failed. Cannot provide information about KBean defined locally.\n");
+        } else {
+            for (int i = 0; i < localBeanClasses.size(); i++) {
+                sb.append(beanDescription(localBeanClasses.get(i), i== 0));
+            }
+        }
 
-        sb.append("\nType 'jeka [pluginName]#help' to get help on a particular plugin (ex : 'jeka java#help'). ");
-        sb.append("\nType 'jeka help -Plugins' to get help on all available plugins in the classpath.\n");
-        JkLog.info(sb.toString());
+        // Global KBeans
+        sb.append("\nGLOBAL KBEANS\n");
+        classpathBeanClasses.stream()
+                .sorted(Comparator.comparing(Class::getSimpleName))
+                .forEach(aClass -> sb.append(beanDescription(aClass, false)));
+        sb.append("\nType 'jeka [kbean]#help' to get help on a particular KBean (ex : 'jeka project#help'). ");
+        System.out.println(sb.toString());
+    }
+
+    private static String beanDescription(Class beanClass, boolean isDefault) {
+        String shortName = JkBean.computeShortName(beanClass);
+        if (isDefault) {
+            shortName = shortName + " (default)";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("  " + JkUtilsString.padEnd(shortName, 25, ' ') + ": ");
+        String beanDescription = new BeanHelp(beanClass).shortDescription();
+        if (beanDescription != null) {
+            sb.append(beanDescription).append(" ");
+        }
+        sb.append("[" + beanClass.getName() + "]");
+        sb.append("\n");
+        return sb.toString();
     }
 
     private static String standardOptions() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Built-in options (these options are not specific to a plugin or a Jeka class) :\n");
-        sb.append("  -LogVerbose (shorthand -LV) : logs 'trace' level.\n");
-        sb.append("  -LogQuiteVerbose (shorthand -LQV) : logs 'trace' level + Ivy trace level.\n");
-        sb.append("  -LogRuntimeInfo (shorthand -LRI) : logs Jeka runtime information.\n");
-        sb.append("  -LogBanner (shorthand -LB) : logs intro and outro banners.\n");
-        sb.append("  -LogSetup (shorthand -LSU) : logs Jeka classes setup process.\n");
-        sb.append("  -LogStyle (shorthand -LS) : choose the display log style : INDENT(default), BRACE, SQUARE or DEBUG.\n");
-        sb.append("  -KBean (shorthand -KB) : Specify the default KBean in command line . It can be the short name of the class (without package prefix).\n");
-        sb.append("  -ForceCompile (shorthand -FC) : Force Jeka to compile def files, even id def compiled classes are marked up-to-date.\n");
+        sb.append("OPTIONS\n");
+        sb.append("  -help (shorthand -h) : displays this message.\n");
+        sb.append("  -log.verbose (shorthand -lv) : logs 'trace' level.\n");
+        sb.append("  -log.ivy.verbose (shorthand -liv) : logs 'trace' level + Ivy trace level.\n");
+        sb.append("  -log.runtime.info (shorthand -lri) : logs Jeka runtime information as Jeka version, JDK version, working dir, classpath ....\n");
+        sb.append("  -log.banner (shorthand -lb) : logs intro and outro banners.\n");
+        sb.append("  -log.setup (shorthand -lsu) : logs KBean setup process.\n");
+        sb.append("  -log.style (shorthand -ls) : choose the display log style : INDENT(default), BRACE or DEBUG.\n");
+        sb.append("  -kbean (shorthand -kb) : Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name.\n");
+        sb.append("  -def.compile.force (shorthand -dcf) : Force Jeka to compile def files, even if def compiled classes are marked up-to-date.\n");
         return sb.toString();
     }
 
@@ -71,52 +94,30 @@ final class HelpDisplayer {
         }
     }
 
-    private static void helpPlugins(JkRuntime runtime) {
-        JkLog.info(helpPluginsDescription(runtime));
+    static void helpJkBean(JkBean jkBean) {
+        BeanHelp beanDescription = new BeanHelp(jkBean.getClass());
+        JkLog.info(helpBeanDescription(beanDescription, jkBean.getRuntime()));
     }
 
-    static void helpPlugin(JkBean jkBean) {
-        final Set<BeanDictionary.KBeanDescription> KBeanDescriptions = new BeanDictionary().getAll();
-        for (BeanDictionary.KBeanDescription beanDescription : KBeanDescriptions) {
-            if (beanDescription.shortName().equals(jkBean.shortName())) {
-                JkLog.info(helpPluginDescription(beanDescription, jkBean.getRuntime()));
-                return;
-            }
-        }
-    }
-
-    private static String helpPluginsDescription(JkRuntime runtime) {
-        final Set<BeanDictionary.KBeanDescription> KBeanDescriptions = new BeanDictionary().getAll();
+    private static String helpBeanDescription(BeanHelp description, JkRuntime runtime) {
         StringBuilder sb = new StringBuilder();
-        for (final BeanDictionary.KBeanDescription description : KBeanDescriptions) {
-            sb.append(helpPluginDescription(description, runtime));
-        }
-        return sb.toString();
-    }
-
-    private static String helpPluginDescription(BeanDictionary.KBeanDescription description, JkRuntime runtime) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\nPlugin Class : " + description.fullName());
-        sb.append("\nPlugin Name : " + description.shortName());
+        sb.append("CLASS\n  " + description.fullName());
+        sb.append("\nNAME\n  " + description.shortName());
         List<String> deps = description.pluginDependencies();
         if (!deps.isEmpty()) {
-            sb.append("\nDepends on plugins : " + String.join(", ", deps));
+            sb.append("\nDEPENDENCIES ON OTHER KBEANS\n  " + String.join(", ", deps));
         }
-        final List<String> explanations = description.explanation();
+        final List<String> explanations = description.description();
         if (!explanations.isEmpty()) {
-            sb.append("\nPurpose : " + description.explanation().get(0));
-            description.explanation().subList(1, description.explanation().size()).forEach(
+            sb.append("\nPURPOSE\n  " + description.description().get(0));
+            description.description().subList(1, description.description().size()).forEach(
                     line -> sb.append("\n          " + line));
         }
         final List<String> activationEffects = description.activationEffect();
         if (!activationEffects.isEmpty()) {
             sb.append("\nActivation Effects : " + description.activationEffect().get(0));
-            description.explanation().subList(1, description.activationEffect().size()).forEach(
+            description.description().subList(1, description.activationEffect().size()).forEach(
                     line -> sb.append("\n                      " + line));
-        } else if (!description.isDecorateRunDefined()){
-            sb.append("\nActivation Effect : None.");
-        } else {
-            sb.append("\nActivation Effect : Not documented.");
         }
         final JkBean bean;
         if (runtime.getBeanRegistry().getOptional(description.beanClass()).isPresent()) {
@@ -129,8 +130,8 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    static List<String> optionValues(List<BeanDescription.BeanField> optionDefs) {
-        return optionDefs.stream().map(optionDef -> optionDef.shortDescription()).collect(Collectors.toList());
+    static List<String> propertyValues(List<BeanDescription.BeanField> propertyDescriptions) {
+        return propertyDescriptions.stream().map(optionDef -> optionDef.shortDescription()).collect(Collectors.toList());
     }
 
 }

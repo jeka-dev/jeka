@@ -6,13 +6,13 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkDocPluginDeps;
+import dev.jeka.core.tool.JkDocJkBeanDeps;
 import dev.jeka.core.tool.builtins.git.GitJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;
 
-@JkDoc({"Manage versioning of project from ProjectJkBean by using Git.",
+@JkDoc({"Manages versioning of projects by extracting Git information.",
         "The version is inferred from git : ",
         "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
         "  - If last commit contains a message containing [comment_version_prefix]xxxxx, version values xxxxx",
@@ -20,7 +20,7 @@ import java.util.Optional;
         "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
         "After, If last commit message specifies a version and this version differs from tag, " +
                 "last commit is tagged with specified version."})
-@JkDocPluginDeps(ProjectJkBean.class)
+@JkDocJkBeanDeps(ProjectJkBean.class)
 public class VersionFromGitJkBean extends JkBean {
 
     public static final String TAG_TASK_NAME = "version-from-git-tag";

@@ -14,13 +14,13 @@ import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 
 class MasterBuild extends JkBean {
 
-    @JkEnv("OSSRH_USER")
+    @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;
 
-    @JkEnv("OSSRH_PWD")
+    @JkInjectProperty("OSSRH_PWD")
     public String ossrhPwd;
 
-    @JkEnv("GH_TOKEN")
+    @JkInjectProperty("GH_TOKEN")
     public String githubToken;
 
     final GpgJkBean gpg = getRuntime().getBeanRegistry().get(GpgJkBean.class);
@@ -31,16 +31,16 @@ class MasterBuild extends JkBean {
 
     // ------ Slave projects
 
-    @JkDefImport("../dev.jeka.core")
+    @JkInjectProject("../dev.jeka.core")
     CoreBuild coreBuild;
 
-    @JkDefImport("../plugins/dev.jeka.plugins.jacoco")
+    @JkInjectProject("../plugins/dev.jeka.plugins.jacoco")
     JacocoBuild jacocoBuild;
 
-    @JkDefImport("../plugins/dev.jeka.plugins.sonarqube")
+    @JkInjectProject("../plugins/dev.jeka.plugins.sonarqube")
     SonarqubeBuild sonarqubeBuild;
 
-    @JkDefImport("../plugins/dev.jeka.plugins.springboot")
+    @JkInjectProject("../plugins/dev.jeka.plugins.springboot")
     SpringbootBuild springbootBuild;
 
     private JkRepoSet publishRepos;

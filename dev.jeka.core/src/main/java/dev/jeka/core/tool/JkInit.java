@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,7 +43,12 @@ public final class JkInit {
             memoryBufferLogActivated = true;
         }
         try {
-            final T jkBean = JkRuntime.get(Paths.get("")).getBeanRegistry().get(clazz);
+            EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get(""));
+            List<EngineCommand> commands = engineBeanClassResolver
+                    .resolve(Environment.commandLine, JkBean.computeShortName(clazz));
+            JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
+            jkRuntime.init(commands);
+            final T jkBean = jkRuntime.getBeanRegistry().get(clazz);
             JkLog.info(jkBean.toString() + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();

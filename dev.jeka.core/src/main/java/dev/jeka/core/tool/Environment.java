@@ -125,14 +125,14 @@ class Environment {
         private final Set<String> names = new HashSet<>();
 
         StandardOptions (Map<String, String> map) {
-            this.logVerbose = valueOf(Boolean.class, map, false, "LogVerbose", "LV");
-            this.logQuiteVerbose = valueOf(Boolean.class, map, false, "LogQuiteVerbose", "LQV");
-            this.logBanner = valueOf(Boolean.class, map, false,"LogBanner", "LB");
-            this.logSetup = valueOf(Boolean.class, map, false,"LogSetup", "LSU");
-            this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
-            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
-            this.jkBeanName = valueOf(String.class, map, null, "KBean", "KB");
-            this.forceCompile = valueOf(Boolean.class, map, false, "ForceCompile", "FC");
+            this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "lv");
+            this.logQuiteVerbose = valueOf(Boolean.class, map, false, "log.ivy.verbose", "lqv");
+            this.logBanner = valueOf(Boolean.class, map, false,"log.banner", "lb");
+            this.logSetup = valueOf(Boolean.class, map, false,"log.setup", "lsu");
+            this.logRuntimeInformation = valueOf(String.class, map, null, "log.runtime.info", "lri");
+            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
+            this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");
+            this.forceCompile = valueOf(Boolean.class, map, false, "def.compile.force", "dcf");
         }
 
         Set<String> names() {

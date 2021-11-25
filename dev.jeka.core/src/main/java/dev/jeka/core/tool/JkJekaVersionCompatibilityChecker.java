@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-final class JkJekaVersionCompatibilityChecker {
+public final class JkJekaVersionCompatibilityChecker {
 
     /**
      * When publishing a plugin, authors can not guess which future version of Jeka will break compatibility.

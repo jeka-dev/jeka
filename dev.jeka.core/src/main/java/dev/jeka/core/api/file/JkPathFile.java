@@ -66,7 +66,9 @@ public final class JkPathFile {
      */
     public JkPathFile createIfNotExist() {
         if (!Files.exists(path)) {
-            JkUtilsPath.createDirectories(path.getParent());
+            if (path.getParent() != null) {
+                JkUtilsPath.createDirectories(path.getParent());
+            }
             JkUtilsPath.createFile(path);
         }
         return this;

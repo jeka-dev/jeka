@@ -28,7 +28,7 @@ public final class JkScaffolder {
 
     private Supplier<String> jkClassCodeProvider;
 
-    private String classFilename = "Commands.java";
+    private String classFilename = "Build.java";
 
     private String wrapperJekaVersion;
 

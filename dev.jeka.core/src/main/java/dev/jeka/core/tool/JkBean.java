@@ -41,7 +41,7 @@ public abstract class JkBean {
 
     @JkDoc("Displays help about this plugin.")
     public void help() {
-        HelpDisplayer.helpPlugin(this);
+        HelpDisplayer.helpJkBean(this);
     }
 
     public Path getBaseDir() {
@@ -96,9 +96,8 @@ public abstract class JkBean {
 
     static String computeShortName(Class<?> jkBeanClass) {
         final String className = jkBeanClass.getSimpleName();
-        if (! className.endsWith(CLASS_SUFIX) || className.equals(CLASS_SUFIX)) {
-            throw new IllegalStateException(String.format("Plugin class " + className + " not properly named. Name should be formatted as " +
-                    "'Xxxx%s' where xxxx is the name of the KBean (uncapitalized).", CLASS_SUFIX, className));
+        if (!className.endsWith(CLASS_SUFIX) || className.equals(CLASS_SUFIX)) {
+            return JkUtilsString.uncapitalize(className);
         }
         final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFIX);
         return JkUtilsString.uncapitalize(prefix);

@@ -1,10 +1,11 @@
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 
-class Commands extends JkClass {
+class Build extends JkBean {
 
     public static void main(String[] args) throws Exception {
-        Commands commands = JkInit.instanceOf(Commands.class, args);
-        commands.clean();
+        Build build = JkInit.instanceOf(Build.class, args);
+        build.clean();
     }
 
 }

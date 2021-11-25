@@ -26,11 +26,11 @@ public final class JkDebugLogDecorator extends JkLog.JkLogDecorator {
 
     private transient PrintStream err;
 
-    protected void init(PrintStream targetOut, PrintStream tergetErr) {
+    protected void init(PrintStream targetOut, PrintStream targetErr) {
         marginOut = new MarginStream(targetOut);
-        marginErr = new MarginStream(tergetErr);
+        marginErr = marginOut;
         out = new PrintStream(marginOut);
-        err = new PrintStream(marginErr);
+        err = out;
     }
 
     private void readObject(ObjectInputStream objectInputStream) {

@@ -6,7 +6,7 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkEnv;
+import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
@@ -35,10 +35,10 @@ public class SignedArtifactsBuild extends JkBean {
 
     ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
-    @JkEnv("OSSRH_USER")
+    @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
 
-    @JkEnv("OSSRH_PWD")
+    @JkInjectProperty("OSSRH_PWD")
     public String ossrhPwd;
 
     // A dummy local repository for repeatable run purpose

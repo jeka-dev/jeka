@@ -7,10 +7,7 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.JkClasspath;
-import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkBusyIndicator;
@@ -25,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static dev.jeka.core.tool.JkRepoFromOptions.getDownloadRepo;
 
@@ -54,12 +52,12 @@ final class Engine {
 
     private final JkDependencyResolver dependencyResolver;
 
-    private final EngineCommandResolver commandsResolver;
+    private final EngineBeanClassResolver beanClassesResolver;
 
     Engine(Path baseDir) {
         super();
         this.projectBaseDir = baseDir.normalize();
-        this.commandsResolver = new EngineCommandResolver(baseDir);
+        this.beanClassesResolver = new EngineBeanClassResolver(baseDir);
         this.dependencyResolver = JkDependencyResolver.of().addRepos(getDownloadRepo(), JkRepo.ofLocal());
     }
 
@@ -71,18 +69,21 @@ final class Engine {
         JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getDefDependencies());
         JkLog.trace("Add following dependencies to def classpath : " + commandLineDependencies);
         JkPathSequence computedClasspath = resolveAndCompile( new HashSet<>(), true);
-        JkUrlClassLoader.ofCurrent().addEntries(computedClasspath);
+        AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
         JkRuntime runtime = JkRuntime.get(projectBaseDir);
         runtime.setDependencyResolver(dependencyResolver);
-        List<EngineCommand> resolvedCommands = commandsResolver.resolve(commandLine,
+        if (commandLine.isHelp()) {
+            JkLog.endTask();
+            stopBusyIndicator();
+            help();
+            return;
+        }
+        List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
                 Environment.standardOptions.jkCBeanName());
         runtime.init(resolvedCommands);
         JkLog.info("KBeans are ready to run.");
         JkLog.endTask();
-        if (JkMemoryBufferLogDecorator.isActive()) {
-            JkBusyIndicator.stop();
-            JkMemoryBufferLogDecorator.inactivateOnJkLog();
-        }
+        stopBusyIndicator();
         if (Environment.standardOptions.logRuntimeInformation != null) {
             JkLog.info("Jeka Classpath : ");
             computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
@@ -90,8 +91,8 @@ final class Engine {
         runtime.run(resolvedCommands);
     }
 
-    private CompilationContext preCompile() {
-        final List<Path> sourceFiles = JkPathTree.of(commandsResolver.defSourceDir)
+    private CompilationContext  preCompile() {
+        final List<Path> sourceFiles = JkPathTree.of(beanClassesResolver.defSourceDir)
                 .andMatcher(JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
         JkLog.trace("Parse source code of " + sourceFiles);
         final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
@@ -112,8 +113,7 @@ final class Engine {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         CompilationContext compilationContext = preCompile();
-        final String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
-        final long start = System.nanoTime();
+        String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         JkLog.startTask(msg);
         List<Path> importedProjectClasspath = new LinkedList<>();
         compilationContext.importedProjectDirs.forEach(importedProjectDir -> {
@@ -123,8 +123,9 @@ final class Engine {
         });
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
-        if (compileSources && Files.exists(this.commandsResolver.defClassDir)) {
+        if (compileSources && this.beanClassesResolver.hasDefSource()) {
             if (Environment.standardOptions.forceCompile() || compilationTracker.isOutdated()) {
+                JkLog.trace("Compile classpath : " + classpath);
                 compileDef(classpath, compilationContext.compileOptions);
                 compilationTracker.updateCompileFlag();
             } else {
@@ -132,11 +133,11 @@ final class Engine {
             }
         }
         JkLog.endTask();
-        return classpath.andPrepend(commandsResolver.defClassDir);
+        return classpath.andPrepend(beanClassesResolver.defClassDir);
     }
 
     private void compileDef(JkPathSequence defClasspath, List<String> compileOptions) {
-        JkPathTree.of(commandsResolver.defClassDir).deleteContent();
+        JkPathTree.of(beanClassesResolver.defClassDir).deleteContent();
         if (hasKotlin()) {
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos())
                     .setLogOutput(true)
@@ -148,9 +149,8 @@ final class Engine {
                 kotlinCompiler.addOption("-verbose");
             }
             wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec));
-            JkUrlClassLoader classLoader = JkUrlClassLoader.ofCurrent();
             if (kotlinCompiler.isProvidedCompiler()) {
-                classLoader.addEntries(kotlinCompiler.getStdLib());
+                AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompiler.getStdLib());
             }
         }
         final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath, compileOptions);
@@ -160,9 +160,9 @@ final class Engine {
                     " or JEKA_JDK environment variable to a JDK directory.");
         }
         wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec));
-        JkPathTree.of(this.commandsResolver.defSourceDir)
+        JkPathTree.of(this.beanClassesResolver.defSourceDir)
                 .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")
-                .copyTo(this.commandsResolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
+                .copyTo(this.beanClassesResolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
     }
 
     private JkPathSequence jekaClasspath() {
@@ -172,6 +172,7 @@ final class Engine {
         JkPathSequence result = JkPathSequence.of(bootLibs());
         if (devMode) {
             result = result.and(JkClasspath.ofCurrentRuntime());
+        } else {
             result = result.and(JkLocator.getJekaJarPath());
         }
         return result.withoutDuplicates();
@@ -195,26 +196,26 @@ final class Engine {
     }
 
     private boolean hasKotlin() {
-        return JkPathTree.of(commandsResolver.defSourceDir).andMatcher(KOTLIN_DEF_SOURCE_MATCHER)
+        return JkPathTree.of(beanClassesResolver.defSourceDir).andMatcher(KOTLIN_DEF_SOURCE_MATCHER)
                 .count(1, false) > 0;
     }
 
     private JkJavaCompileSpec defJavaCompileSpec(JkPathSequence classpath, List<String> options) {
-        final JkPathTree defSource = JkPathTree.of(commandsResolver.defSourceDir).andMatcher(JAVA_DEF_SOURCE_MATCHER);
-        JkUtilsPath.createDirectories(commandsResolver.defClassDir);
+        final JkPathTree defSource = JkPathTree.of(beanClassesResolver.defSourceDir).andMatcher(JAVA_DEF_SOURCE_MATCHER);
+        JkUtilsPath.createDirectories(beanClassesResolver.defClassDir);
         return JkJavaCompileSpec.of()
-                .setClasspath(classpath.and(commandsResolver.defClassDir))
-                .setOutputDir(commandsResolver.defClassDir)
+                .setClasspath(classpath.and(beanClassesResolver.defClassDir))
+                .setOutputDir(beanClassesResolver.defClassDir)
                 .setSources(defSource.toSet())
                 .addOptions(options);
     }
 
     private JkKotlinJvmCompileSpec defKotlinCompileSpec(JkPathSequence defClasspath) {
-        JkUtilsPath.createDirectories(commandsResolver.defClassDir);
+        JkUtilsPath.createDirectories(beanClassesResolver.defClassDir);
         return JkKotlinJvmCompileSpec.of()
                 .setClasspath(defClasspath)
-                .setSources(JkPathTreeSet.of(commandsResolver.defSourceDir))
-                .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(commandsResolver.defClassDir));
+                .setSources(JkPathTreeSet.of(beanClassesResolver.defSourceDir))
+                .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(beanClassesResolver.defClassDir));
     }
 
     @Override
@@ -236,6 +237,22 @@ final class Engine {
             this.importedProjectDirs = Collections.unmodifiableList(importedProjectDirs);
             this.compileOptions = Collections.unmodifiableList(compileOptions);
         }
+    }
+
+    private static void stopBusyIndicator() {
+        if (JkMemoryBufferLogDecorator.isActive()) {
+            JkBusyIndicator.stop();
+            JkMemoryBufferLogDecorator.inactivateOnJkLog();
+        }
+    }
+
+    private void help() {
+        List<Class<? extends JkBean>> localBeanClasses = beanClassesResolver.getDefBeanClasses();
+        List<Class> globalBeanClasses = EngineBeanClassResolver.beanClasses().stream()
+                .map(className -> JkClassLoader.ofCurrent().load(className))
+                .filter(beanClass -> !localBeanClasses.contains(beanClass))
+                .collect(Collectors.toList());
+        HelpDisplayer.help(localBeanClasses, globalBeanClasses, false);
     }
 
 }

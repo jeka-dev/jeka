@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@JkDoc("Generation of Idea Intellij metadata files (*.iml and modules.xml).")
+@JkDoc("Generates Idea Intellij metadata files (*.iml and modules.xml).")
 public final class IntellijJkBean extends JkBean {
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")

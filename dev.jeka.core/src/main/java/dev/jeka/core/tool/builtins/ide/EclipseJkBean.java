@@ -2,7 +2,6 @@ package dev.jeka.core.tool.builtins.ide;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLog;
@@ -19,8 +18,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@JkDoc("Generation of Eclipse files (.project and .classpath) from actual project structure andPrepending dependencies.")
-@JkDocPluginDeps({ProjectJkBean.class})
+@JkDoc("Generates Eclipse files (.project and .classpath).")
+@JkDocJkBeanDeps({ProjectJkBean.class})
 public final class EclipseJkBean extends JkBean {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")

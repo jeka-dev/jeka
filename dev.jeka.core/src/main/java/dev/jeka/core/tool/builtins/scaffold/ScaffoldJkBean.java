@@ -10,7 +10,7 @@ import dev.jeka.core.tool.JkRepoFromOptions;
 /**
  * Provides method to generate a project skeleton (folder structure, configuration files, ....)
  */
-@JkDoc("Provides method to generate a project skeleton (folder structure and basic build files).")
+@JkDoc("Generates project skeletons (folder structure and basic build files).")
 public class ScaffoldJkBean extends JkBean {
 
     private final JkScaffolder scaffolder;

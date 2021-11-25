@@ -85,6 +85,13 @@ final class CommandLine {
         return beanActions.stream().anyMatch(beanAction -> beanAction.beanName == null);
     }
 
+    boolean isHelp() {
+        if (!beanActions.isEmpty()) {
+            return false;
+        }
+        return  standardOptions.isEmpty() || standardOptions.containsKey("help") || standardOptions.containsKey("h");
+    }
+
     List<String> involvedBeanNames() {
         return beanActions.stream()
                 .filter(beanAction -> beanAction.beanName != null)
@@ -144,13 +151,19 @@ final class CommandLine {
             } else if (beanExpression.contains("=")) {
                 this.action = EngineCommand.Action.PROPERTY_INJECT;
                 this.member = JkUtilsString.substringBeforeFirst(beanExpression, "=");
-                JkUtilsAssert.argument(!this.member.isEmpty(), "Illega expression " + expression);
+                JkUtilsAssert.argument(!this.member.isEmpty(), "Illegal expression " + expression);
                 this.value = JkUtilsString.substringAfterFirst(beanExpression, "=");
             } else {
                 this.action = EngineCommand.Action.METHOD_INVOKE;
                 this.member = beanExpression;
                 this.value = null;
             }
+        }
+
+        @Override
+        public String toString() {
+            return "action=" + action + ", beanName='" + beanName + '\'' + ", member='" + member + '\'' +
+                    ", value='" + value + '\'';
         }
     }
 

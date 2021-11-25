@@ -6,7 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkEnv;
+import dev.jeka.core.tool.JkInjectProperty;
 
 import java.nio.file.Path;
 
@@ -18,15 +18,15 @@ import java.nio.file.Path;
 public class GpgJkBean extends JkBean {
 
     @JkDoc("Path for the public key ring.")
-    @JkEnv("GPG_PUBLIC_RING")
+    @JkInjectProperty("GPG_PUBLIC_RING")
     public Path publicRingPath;
 
     @JkDoc("Path for the secret key ring.")
-    @JkEnv("GPG_SECRET_RING")
+    @JkInjectProperty("GPG_SECRET_RING")
     public Path secretRingPath;
 
     @JkDoc("Secret password for decoding secret key ring.")
-    @JkEnv("GPG_PASSPHRASE")
+    @JkInjectProperty("GPG_PASSPHRASE")
     public String secretKeyPassword;
 
     @JkDoc("Key name to sign and verify.")

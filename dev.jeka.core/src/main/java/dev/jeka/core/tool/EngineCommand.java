@@ -12,9 +12,9 @@ class EngineCommand {
 
     private String member;
 
-    private Object value;  // for properties only
+    private String value;  // for properties only
 
-    EngineCommand(Action action, Class<? extends JkBean> beanClass, String valueOrMethod, Object value) {
+    EngineCommand(Action action, Class<? extends JkBean> beanClass, String valueOrMethod, String value) {
         this.action = action;
         this.beanClass = beanClass;
         this.member = valueOrMethod;
@@ -33,7 +33,7 @@ class EngineCommand {
         return member;
     }
 
-    public Object getValue() {
+    public String getValue() {
         return value;
     }
 

@@ -186,7 +186,7 @@ final class EngineSourceParser {
     }
 
     private static List<String> jkImportRun(String code, URL url) {
-        return stringsInAnnotation(code, JkDefImport.class, url);
+        return stringsInAnnotation(code, JkInjectProject.class, url);
     }
 
     @SuppressWarnings("unchecked")

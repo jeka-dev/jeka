@@ -32,20 +32,20 @@ public abstract class JekaCommandLineExecutor {
         this(Paths.get(projectRootDir));
     }
 
-    protected void runjekaw(String projectDir, String cmdLine) {
-        runjeka(true, projectDir, cmdLine);
+    protected void runJekaw(String projectDir, String cmdLine) {
+        runJeka(true, projectDir, cmdLine);
     }
 
-    protected void runjeka(String projectDir, String cmdLine) {
-        runjeka(false, projectDir, cmdLine);
+    protected void runJeka(String projectDir, String cmdLine) {
+        runJeka(false, projectDir, cmdLine);
     }
 
-    protected void runjeka(boolean useWrapper, String projectDir, String cmdLine) {
+    protected void runJeka(boolean useWrapper, String projectDir, String cmdLine) {
         Path dir = this.samplesRootDir.resolve(projectDir);
         process(dir, useWrapper)
                 .addParams(JkUtilsString.translateCommandline(cmdLine))
                 .inheritJkLogOptions()
-                .addParams("-FC")
+                .addParams("-dcf")
                 .setEnv("JEKA_JDK", JkJavaProcess.CURRENT_JAVA_DIR.resolve("../..").normalize().toString())
                 .run();
     }
@@ -70,7 +70,6 @@ public abstract class JekaCommandLineExecutor {
                 .setWorkingDir(workingDir)
                 .setLogCommand(true)
                 .setLogOutput(true)
-                //.addParams("-LRI", "-LSU")
                 .setFailOnError(true);
     }
 

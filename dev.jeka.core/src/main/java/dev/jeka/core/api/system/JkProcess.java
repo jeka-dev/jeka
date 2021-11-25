@@ -223,10 +223,10 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
      */
     public T inheritJkLogOptions() {
         if (JkLog.getDecoratorStyle() != null) {
-            addParams("-LS=" + JkLog.getDecoratorStyle().name());
+            addParams("-ls=" + JkLog.getDecoratorStyle().name());
         }
         if (JkLog.isVerbose()) {
-            addParams("-LV");
+            addParams("-lv");
         }
         return (T) this;
     }

@@ -1,21 +1,23 @@
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.JkJekaVersionCompatibilityChecker;
 
-    class Build extends JkClass {
+class Build extends JkBean {
 
-    final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
     @Override
-    protected void setup() {
-        JkProject javaProject = projectPlugin.getProject();
+    protected void init() {
+        JkProject javaProject = projectBean.getProject();
         javaProject.simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setCompileDependencies(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
             );
-        PluginCompatibilityBreakChecker.setJekaPluginCompatibilityRange(javaProject.getConstruction().getManifest(),
+        JkJekaVersionCompatibilityChecker.setJekaPluginCompatibilityRange(javaProject.getConstruction().getManifest(),
                 "${jekaVersion}",
                 "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
 
@@ -24,7 +26,6 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
                 .getMaven()
                     .setModuleId("your.org:plugin-name")
                     .setVersion("0.0.1-SNAPSHOT")
-                    .getPomMetadata()
                         .addApache2License()
                         .setProjectName("Jeka plugin for ....")
                         .setProjectDescription("A Jeka plugin for ...")
@@ -33,7 +34,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        clean(); projectBean.pack();
     }
 
 }

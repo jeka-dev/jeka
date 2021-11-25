@@ -72,7 +72,7 @@ final class BeanDescription {
 
     private static List<NameAndField> fields(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
         final List<NameAndField> result = new LinkedList<>();
-        for (final Field field : FieldInjector.getOptionFields(clazz)) {
+        for (final Field field : FieldInjector.getPropertyFields(clazz)) {
             final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
             if (!hasSubOption(field)) {
                 result.add(new NameAndField(prefix + field.getName(), field, rootClass));
@@ -101,22 +101,29 @@ final class BeanDescription {
         return description(beanClass, prefix, false, true);
     }
 
-    private String description(Class<?> runClass, String prefix, boolean withHeader, boolean includeHierarchy) {
-        List<BeanMethod> methods = includeHierarchy ? this.beanMethods : this.methodsOf(runClass);
-        List<BeanField> options = includeHierarchy ? this.beanFields : this.optionsOf(runClass);
-        if (methods.isEmpty() && options.isEmpty()) {
+    private String description(Class<?> beanClass, String prefix, boolean withHeader, boolean includeHierarchy) {
+        List<BeanMethod> methods = includeHierarchy ? this.beanMethods : this.methodsOf(beanClass);
+        List<BeanField> properties = includeHierarchy ? this.beanFields : this.optionsOf(beanClass);
+        if (methods.isEmpty() && properties.isEmpty()) {
             return "";
         }
-        String classWord = JkBean.class.isAssignableFrom(runClass) ? "class" : "plugin";
         StringBuilder stringBuilder = new StringBuilder();
         if (withHeader) {
-            stringBuilder.append("\nFrom " + classWord + " " + runClass.getName() + " :\n");
+            stringBuilder.append("\nFrom " + beanClass.getName() + " :\n");
         }
         String margin = withHeader ? "  " : "";
         if (!methods.isEmpty()) {
-            stringBuilder.append(margin + "Methods :\n");
+            stringBuilder.append(margin + "METHODS\n");
+            int maxSize = 0;
+            for (BeanMethod method : methods) {
+                final String displayedMethodName = prefix + method.name;
+                if (displayedMethodName.length() > maxSize) {
+                    maxSize = displayedMethodName.length();
+                }
+            }
             for (BeanMethod methodDef : methods) {
-                final String displayedMethodName = prefix + methodDef.name;
+                final String displayedMethodName =
+                        JkUtilsString.padEnd(prefix + methodDef.name, maxSize + 1, ' ');
                 if (methodDef.description == null) {
                     stringBuilder.append( margin + "  " + displayedMethodName + " : No description available.\n");
                 } else {
@@ -126,10 +133,19 @@ final class BeanDescription {
                 }
             }
         }
-        if (!options.isEmpty()) {
-            stringBuilder.append(margin + "Options :\n");
-            for (BeanField optionDef : options) {
-                stringBuilder.append(optionDef.description(prefix, margin));
+        if (!properties.isEmpty()) {
+            stringBuilder.append(margin + "PROPERTIES\n");
+            int maxSize = 0;
+            for (BeanField property : properties) {
+                final String displayName = prefix + property.name ;
+                if (displayName.length() > maxSize) {
+                    maxSize = displayName.length();
+                }
+            }
+            for (BeanField property : properties) {
+                String displayName =
+                        JkUtilsString.padEnd(prefix + property.name + "=", maxSize + 1, ' ');
+                stringBuilder.append(property.description(displayName, margin));
             }
         }
         return stringBuilder.toString();
@@ -219,6 +235,8 @@ final class BeanDescription {
             return 1;
         }
 
+
+
         Element toXmlElement(Document document) {
             final Element methodEl = document.createElement("method");
             final Element nameEl = document.createElement("name");
@@ -249,7 +267,7 @@ final class BeanDescription {
 
         private final String description;
 
-        private final Object run;
+        private final Object bean;
 
         private final Object defaultValue;
 
@@ -259,12 +277,12 @@ final class BeanDescription {
 
         private final String envVarName;
 
-        private BeanField(String name, String description, Object jkRun, Object defaultValue,
+        private BeanField(String name, String description, Object bean, Object defaultValue,
                           Class<?> type, Class<?> declaringClass, String envVarName) {
             super();
             this.name = name;
             this.description = description;
-            this.run = jkRun;
+            this.bean = bean;
             this.defaultValue = defaultValue;
             this.type = type;
             this.rootDeclaringClass = declaringClass;
@@ -277,7 +295,7 @@ final class BeanDescription {
             final Class<?> type = field.getType();
             Object instance = JkUtilsReflect.newInstance(beanClass);
             final Object defaultValue = value(instance, name);
-            final JkEnv env = field.getAnnotation(JkEnv.class);
+            final JkInjectProperty env = field.getAnnotation(JkInjectProperty.class);
             final String envVarName = env != null ? env.value() : null;
             return new BeanField(name, descr, instance, defaultValue, type, rootDeclaringClass, envVarName);
         }
@@ -298,10 +316,10 @@ final class BeanDescription {
 
         @Override
         public int compareTo(BeanField other) {
-            if (this.run.getClass().equals(other.run.getClass())) {
+            if (this.bean.getClass().equals(other.bean.getClass())) {
                 return this.name.compareTo(other.name);
             }
-            if (this.run.getClass().isAssignableFrom(other.run.getClass())) {
+            if (this.bean.getClass().isAssignableFrom(other.bean.getClass())) {
                 return -1;
             }
             return 1;
@@ -311,12 +329,12 @@ final class BeanDescription {
             return name + " = " + defaultValue;
         }
 
-        String description(String prefix, String margin) {
+        String description(String displayName, String margin) {
             String desc = description != null ? description : "No description available.";
             String oneLineDesc = desc.replace("\n", " ");
             String envPart = envVarName == null ? "" : ", env : " + envVarName;
-            return String.format("%s -%s%s (%s, default : %s%s) : %s\n",
-                    margin, prefix, name, type(), defaultValue, envPart, oneLineDesc);
+            return String.format("%s  %s  : %s (%s, default : %s%s)\n",
+                    margin, displayName, oneLineDesc, type(), defaultValue, envPart);
         }
 
         private String type() {

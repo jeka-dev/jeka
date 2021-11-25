@@ -73,20 +73,24 @@ public final class JkRuntime {
 
     void init(List<EngineCommand> commands) {
 
-        // inject field values
         Map<Class<? extends JkBean>, JkBean> fieldInjectedBeans = new LinkedHashMap<>();
-        for (EngineCommand engineCommand : commands) {
-            if (engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT) {
-                Class<? extends JkBean> beanClass = engineCommand.getBeanClass();
-                JkBean bean = fieldInjectedBeans.computeIfAbsent(beanClass, this::instantiate);
-                Field field;
-                try {
-                    field = bean.getClass().getField(engineCommand.getMember());
-                } catch (NoSuchFieldException e) {
-                    throw new JkException("No public field '" + engineCommand.getMember() + "' found on KBean class "
-                            + bean.getClass());
-                }
-                JkUtilsReflect.setFieldValue(bean, field, engineCommand.getValue());
+
+        // inject field values
+        Map<Class<? extends JkBean>, Map<String, String>> injectedValues = new HashMap<>();
+        commands.stream()
+                    .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
+                    .forEach(engineCommand -> {
+                        injectedValues.putIfAbsent(engineCommand.getBeanClass(), new HashMap<>());
+                        injectedValues.get(engineCommand.getBeanClass()).put(engineCommand.getMember(),
+                                engineCommand.getValue());
+                    });
+        for (Map.Entry<Class<? extends JkBean>, Map<String, String>> entry : injectedValues.entrySet()) {
+            JkBean bean = fieldInjectedBeans.computeIfAbsent(entry.getKey(), this::instantiate);
+            Set<String> usedProperties = FieldInjector.inject(bean, entry.getValue());
+            Set<String> unusedProperties = new HashSet<>(entry.getValue().keySet());
+            unusedProperties.removeAll(usedProperties);
+            if (!unusedProperties.isEmpty()) {
+                throw new JkException("fields %s do not exist in KBean %s", unusedProperties, entry.getKey());
             }
         }
 
@@ -109,7 +113,7 @@ public final class JkRuntime {
                 try {
                     method = bean.getClass().getMethod(engineCommand.getMember());
                 } catch (NoSuchMethodException e) {
-                    throw new JkException("No public no-args method '" + engineCommand.getMember() + "' found on KBean class "
+                    throw new JkException("No public no-args method '" + engineCommand.getMember() + "' found on KBean "
                             + bean.getClass());
                 }
                 JkUtilsReflect.invoke(bean, method);

@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
-public @interface JkDefImport {
+public @interface JkInjectProject {
 
     /** Dependee project relative path */
     String value();

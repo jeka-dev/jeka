@@ -2,7 +2,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.samples.JavaPluginBuild;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkDefImport;
+import dev.jeka.core.tool.JkInjectProject;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
@@ -27,7 +27,7 @@ public class NormalJarBuild extends JkBean {
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
-    @JkDefImport("../dev.jeka.samples.basic")
+    @JkInjectProject("../dev.jeka.samples.basic")
     private JavaPluginBuild sampleBuild;
 
 

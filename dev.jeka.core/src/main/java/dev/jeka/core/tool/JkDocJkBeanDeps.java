@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Inherited
-public @interface JkDocPluginDeps {
+public @interface JkDocJkBeanDeps {
 
     /**
      * Plugins classes this plugin relies on.

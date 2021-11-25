@@ -36,8 +36,8 @@ import java.util.function.UnaryOperator;
  * Plugin for building JVM language based projects. It comes with a {@link JkProject} pre-configured with {@link JkOptions}.
  * and a decoration for scaffolding.
  */
-@JkDoc("Build of a JVM project through a JkProject instance.")
-@JkDocPluginDeps({ScaffoldJkBean.class})
+@JkDoc("Provides a configured JkProject instance for building JVM based projects.")
+@JkDocJkBeanDeps({ScaffoldJkBean.class})
 public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     /**
@@ -334,11 +334,11 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         public Boolean skip;
 
         /** Turn it on to run tests in a withForking process. */
-        @JkDoc("If true, tests will be executed in a withForking process.")
+        @JkDoc("If true, tests will be executed in a forked process.")
         public Boolean fork;
 
         /** Argument passed to the JVM if tests are withForking. Example : -Xms2G -Xmx2G */
-        @JkDoc("Argument passed to the JVM if tests are withForking. E.g. -Xms2G -Xmx2G.")
+        @JkDoc("Argument passed to the JVM if tests are executed in a forked process. E.g. -Xms2G -Xmx2G.")
         public String jvmOptions;
 
     }
