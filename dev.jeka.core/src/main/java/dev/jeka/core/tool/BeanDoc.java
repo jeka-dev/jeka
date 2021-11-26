@@ -2,11 +2,13 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Gives the description of a KBean : its name, its purpose and its base class.
@@ -14,7 +16,7 @@ import java.util.List;
  * @author Jerome Angibaud
  */
 // TODO maybe to merge with BeanDescription
-class BeanHelp implements Comparable<BeanHelp> {
+class BeanDoc implements Comparable<BeanDoc> {
 
     private static String longName(Class<?> clazz) {
         return clazz.getName();
@@ -26,7 +28,7 @@ class BeanHelp implements Comparable<BeanHelp> {
 
     private final Class<? extends JkBean> clazz;
 
-    BeanHelp(Class<? extends JkBean> clazz) {
+    BeanDoc(Class<? extends JkBean> clazz) {
         super();
         this.shortName = JkBean.computeShortName(clazz);
         this.fullName = longName(clazz);
@@ -34,15 +36,11 @@ class BeanHelp implements Comparable<BeanHelp> {
     }
 
     public List<String> pluginDependencies() {
-        List<String> result = new LinkedList<>();
-        JkDocJkBeanDeps pluginDeps = clazz.getAnnotation(JkDocJkBeanDeps.class);
-        if (pluginDeps == null) {
-            return Collections.emptyList();
-        }
-        for (Class<?> depClass : pluginDeps.value()) {
-            result.add(depClass.getName());
-        }
-        return result;
+        return JkUtilsReflect.getAllDeclaredFields(clazz, false).stream()
+                .filter(field -> JkBean.class.isAssignableFrom(field.getType()))
+                .map(Field::getType)
+                .map(Class::getName)
+                .collect(Collectors.toList());
     }
 
     public String shortName() {
@@ -85,7 +83,7 @@ class BeanHelp implements Comparable<BeanHelp> {
     }
 
     @Override
-    public int compareTo(BeanHelp o) {
+    public int compareTo(BeanDoc o) {
         return this.shortName.compareTo(o.shortName);
     }
 }

@@ -6,7 +6,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkDocJkBeanDeps;
 import dev.jeka.core.tool.builtins.git.GitJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
@@ -20,7 +19,6 @@ import java.util.Optional;
         "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
         "After, If last commit message specifies a version and this version differs from tag, " +
                 "last commit is tagged with specified version."})
-@JkDocJkBeanDeps(ProjectJkBean.class)
 public class VersionFromGitJkBean extends JkBean {
 
     public static final String TAG_TASK_NAME = "version-from-git-tag";

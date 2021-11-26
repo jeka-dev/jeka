@@ -113,12 +113,21 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
     @Override
     public List<String> findClassedExtending(ClassLoader classLoader, Class<?> baseClass,
-                                             Predicate<String> classpathElementFilter, boolean ignoreVisibility) {
+                                             Predicate<String> classpathElementFilter, boolean ignoreVisibility,
+                                             boolean ignoreParentClassLoaders) {
+       // System.out.println(JkClassLoader.ofCurrent());
         ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
-                .filterClasspathElements(classpathElementPath -> classpathElementFilter.test(classpathElementPath))
-                .ignoreParentClassLoaders()
-                .overrideClassLoaders(classLoader);
+                .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
+                        "org.commonmark", "io.github.classgraph")
+                .disableNestedJarScanning()
+                .disableModuleScanning()
+                .filterClasspathElements(classpathElementPath -> classpathElementFilter.test(classpathElementPath));
+        if (ignoreParentClassLoaders) {
+            classGraph
+            .ignoreParentClassLoaders()
+            .overrideClassLoaders(classLoader);
+        }
         if (ignoreVisibility) {
             classGraph = classGraph.ignoreClassVisibility();
         }

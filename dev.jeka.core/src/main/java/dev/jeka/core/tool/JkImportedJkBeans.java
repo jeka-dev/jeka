@@ -79,7 +79,9 @@ public final class JkImportedJkBeans {
     private static List<JkBean> computeDirects(JkBean masterBean) {
         final List<JkBean> result = new LinkedList<>();
         final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBean.getClass(), JkInjectProject.class);
-        JkLog.trace("Projects imported by " + masterBean + " : " + fields);
+        if (!fields.isEmpty()) {
+            JkLog.trace("Projects imported by " + masterBean + " : " + fields);
+        }
         for (final Field field : fields) {
             final JkInjectProject jkProject = field.getAnnotation(JkInjectProject.class);
             final JkBean importedJkClass = createImportedJkBean(
@@ -120,10 +122,12 @@ public final class JkImportedJkBeans {
     @SuppressWarnings("unchecked")
     private static <T extends JkBean> T createImportedJkBean(Class<T> importedBeanClass, String relativePath, Path holderBaseDir) {
         final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
+        JkLog.startTask("Import bean " + importedBeanClass + " from " + importedProjectDir);
         JkRuntime runtime = JkRuntime.get(importedProjectDir);
         JkRuntime.setBaseDirContext(importedProjectDir);
         final T result = JkRuntime.get(importedProjectDir).getBeanRegistry().get(importedBeanClass);
         JkRuntime.setBaseDirContext(Paths.get(""));
+        JkLog.endTask();
         return result;
     }
 

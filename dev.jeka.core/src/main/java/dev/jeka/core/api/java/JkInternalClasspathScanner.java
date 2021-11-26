@@ -29,7 +29,8 @@ public interface JkInternalClasspathScanner {
     List<String> findClassesMatchingAnnotations(ClassLoader classloader, Predicate<List<String>> annotationPredicate);
 
     List<String> findClassedExtending(ClassLoader classLoader, Class<?> baseClass,
-                                      Predicate<String> classpathElementFilter, boolean ignoreVisibility);
+                                      Predicate<String> classpathElementFilter, boolean ignoreVisibility,
+                                      boolean ignoreParentClassloaders);
 
     Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate);
 

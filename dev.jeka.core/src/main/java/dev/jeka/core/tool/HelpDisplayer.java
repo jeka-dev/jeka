@@ -53,7 +53,7 @@ final class HelpDisplayer {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("  " + JkUtilsString.padEnd(shortName, 25, ' ') + ": ");
-        String beanDescription = new BeanHelp(beanClass).shortDescription();
+        String beanDescription = new BeanDoc(beanClass).shortDescription();
         if (beanDescription != null) {
             sb.append(beanDescription).append(" ");
         }
@@ -95,11 +95,11 @@ final class HelpDisplayer {
     }
 
     static void helpJkBean(JkBean jkBean) {
-        BeanHelp beanDescription = new BeanHelp(jkBean.getClass());
+        BeanDoc beanDescription = new BeanDoc(jkBean.getClass());
         JkLog.info(helpBeanDescription(beanDescription, jkBean.getRuntime()));
     }
 
-    private static String helpBeanDescription(BeanHelp description, JkRuntime runtime) {
+    private static String helpBeanDescription(BeanDoc description, JkRuntime runtime) {
         StringBuilder sb = new StringBuilder();
         sb.append("CLASS\n  " + description.fullName());
         sb.append("\nNAME\n  " + description.shortName());

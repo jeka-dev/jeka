@@ -23,7 +23,9 @@ public final class JkBeanRegistry {
     void register(JkBean bean) {
         beans.put(bean.getClass(), bean);
         try {
+            JkLog.startTask("Init KBean " + bean);
             bean.init();
+            JkLog.endTask();
         } catch (Exception e) {
             throw new JkException(e, "An exception has been raised while initializing KBean " + bean);
         }

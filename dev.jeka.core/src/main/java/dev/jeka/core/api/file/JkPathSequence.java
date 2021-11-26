@@ -6,6 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -176,6 +177,11 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
 
     public Set<Path> toSet() {
         return new LinkedHashSet<>(this.entries);
+    }
+
+    public URL[] toUrls() {
+        List<URL> urls = entries.stream().map(JkUtilsPath::toUrl).collect(Collectors.toList());
+        return urls.toArray(new URL[0]);
     }
 
     @Override

@@ -37,7 +37,6 @@ import java.util.function.UnaryOperator;
  * and a decoration for scaffolding.
  */
 @JkDoc("Provides a configured JkProject instance for building JVM based projects.")
-@JkDocJkBeanDeps({ScaffoldJkBean.class})
 public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     /**

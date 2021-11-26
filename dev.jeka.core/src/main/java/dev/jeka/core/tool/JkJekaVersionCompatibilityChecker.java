@@ -23,6 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * A utility class to check if the Jeka related classes imported in Jeka classpath are compatible with
+ * the running Jeka version.
+ *
+ * @author Jerome Angibaud
+ */
 public final class JkJekaVersionCompatibilityChecker {
 
     /**

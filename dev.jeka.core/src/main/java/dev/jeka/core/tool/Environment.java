@@ -177,6 +177,4 @@ class Environment {
         return Collections.emptyMap();
     }
 
-
-
 }

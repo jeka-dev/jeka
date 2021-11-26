@@ -70,17 +70,22 @@ final class Engine {
         JkLog.trace("Add following dependencies to def classpath : " + commandLineDependencies);
         JkPathSequence computedClasspath = resolveAndCompile( new HashSet<>(), true);
         AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
-        JkRuntime runtime = JkRuntime.get(projectBaseDir);
-        runtime.setDependencyResolver(dependencyResolver);
+        beanClassesResolver.setClasspath(computedClasspath);
         if (commandLine.isHelp()) {
             JkLog.endTask();
             stopBusyIndicator();
             help();
             return;
         }
+        JkLog.startTask("Setting up runtime");
+        JkRuntime runtime = JkRuntime.get(projectBaseDir);
+        runtime.setDependencyResolver(dependencyResolver);
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
                 Environment.standardOptions.jkCBeanName());
+        JkLog.startTask("Init runtime");
         runtime.init(resolvedCommands);
+        JkLog.endTask();
+        JkLog.endTask();
         JkLog.info("KBeans are ready to run.");
         JkLog.endTask();
         stopBusyIndicator();
@@ -112,9 +117,9 @@ final class Engine {
             return JkPathSequence.of();
         }
         yetCompiledProjects.add(this.projectBaseDir);
-        CompilationContext compilationContext = preCompile();
-        String msg = "Compiling def classes for project " + this.projectBaseDir.getFileName().toString();
+        String msg = "Scanning sources and compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         JkLog.startTask(msg);
+        CompilationContext compilationContext = preCompile();
         List<Path> importedProjectClasspath = new LinkedList<>();
         compilationContext.importedProjectDirs.forEach(importedProjectDir -> {
             Engine importedProjectEngine = new Engine(importedProjectDir);
@@ -175,6 +180,7 @@ final class Engine {
         } else {
             result = result.and(JkLocator.getJekaJarPath());
         }
+        JkLog.trace("Use Jeka " + result + " for compilation.");
         return result.withoutDuplicates();
     }
 
@@ -247,8 +253,8 @@ final class Engine {
     }
 
     private void help() {
-        List<Class<? extends JkBean>> localBeanClasses = beanClassesResolver.getDefBeanClasses();
-        List<Class> globalBeanClasses = EngineBeanClassResolver.beanClasses().stream()
+        List<Class<? extends JkBean>> localBeanClasses = beanClassesResolver.defBeanClasses();
+        List<Class> globalBeanClasses = beanClassesResolver.globalBeanClassNames().stream()
                 .map(className -> JkClassLoader.ofCurrent().load(className))
                 .filter(beanClass -> !localBeanClasses.contains(beanClass))
                 .collect(Collectors.toList());

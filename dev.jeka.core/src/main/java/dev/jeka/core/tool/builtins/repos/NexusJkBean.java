@@ -23,15 +23,15 @@ public class NexusJkBean extends JkBean {
 
     @Override
     protected void postInit() throws Exception {
-        ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
-        if (projectPlugin == null) {
+        ProjectJkBean projectBean = getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
+        if (projectBean == null) {
             JkLog.warn("No project plugin configured here.");
             return;
         }
         String[] profileNames = JkUtilsString.isBlank(profileNamesFilter) ? new String[0]
                 : profileNamesFilter.split(",");
-        projectPlugin.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
-            JkRepo repo = getFirst(projectPlugin.getProject());
+        projectBean.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
+            JkRepo repo = getFirst(projectBean.getProject());
             if (repo != null) {
                 JkNexusRepos.ofUrlAndCredentials(repo).closeAndReleaseOpenRepositories(profileNames);
             } else {

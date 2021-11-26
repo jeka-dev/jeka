@@ -8,7 +8,7 @@ import java.util.Map;
 
 
 /**
- * Provides static methods for creating repositories from standard options.
+ * Provides static methods for creating repositories from standard properties.
  * <p>
  * Basic configuration can be achieved by setting below options.
  * <pre>

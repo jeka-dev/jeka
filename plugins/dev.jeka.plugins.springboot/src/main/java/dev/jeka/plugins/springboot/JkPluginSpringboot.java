@@ -23,7 +23,6 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkDocJkBeanDeps;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 
@@ -36,7 +35,6 @@ import java.util.function.Consumer;
 @JkDoc("Provides enhancement to Project plugin in order to produce a startable Springboot jar for your application.\n" +
         "The main produced artifact is the springboot one (embedding all dependencies) while the artifact classified as 'original' stands for the vanilla jar.\n" +
         "Dependency versions are resolved against BOM provided by Spring Boot team according Spring Boot version you use.")
-@JkDocJkBeanDeps(ProjectJkBean.class)
 public final class JkPluginSpringboot extends JkBean {
 
     private static String DEFAULT_SPRINGBOOT_VERSION = "2.5.6";

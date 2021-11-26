@@ -16,7 +16,7 @@ public class PomJkBean extends JkBean {
     @JkDoc("Margin to print dependency code.")
     public int margin = 4;
 
-    @JkDoc("Displays Java code for declaring dependencies on console based on pom.xml. The pom.xml file is supposed to be in root directory.")
+    @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
     public void dependencyCode() {
         Path pomPath = getBaseDir().resolve("pom.xml");
         JkUtilsAssert.state(Files.exists(pomPath), "No pom file found at " + pomPath);

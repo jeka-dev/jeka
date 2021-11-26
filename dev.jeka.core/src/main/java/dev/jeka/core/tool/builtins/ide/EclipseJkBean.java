@@ -19,7 +19,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @JkDoc("Generates Eclipse files (.project and .classpath).")
-@JkDocJkBeanDeps({ProjectJkBean.class})
 public final class EclipseJkBean extends JkBean {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")

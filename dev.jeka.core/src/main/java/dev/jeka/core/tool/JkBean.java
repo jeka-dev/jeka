@@ -69,11 +69,6 @@ public abstract class JkBean {
         return computeShortName(this.getClass());
     }
 
-    @Override
-    public String toString() {
-        return this.getClass().getName();
-    }
-
     /**
      * Cleans the output directory.
      */
@@ -107,7 +102,7 @@ public abstract class JkBean {
         if (nameCandidate.equals(className)) {
             return true;
         }
-        String classSimpleName = className.contains(".") ? JkUtilsString.substringBeforeLast(className, ".")
+        String classSimpleName = className.contains(".") ? JkUtilsString.substringAfterLast(className, ".")
                 : className;
         String uncapitalizedClassSimpleName = JkUtilsString.uncapitalize(classSimpleName);
         if (JkUtilsString.uncapitalize(nameCandidate).equals(uncapitalizedClassSimpleName)) {

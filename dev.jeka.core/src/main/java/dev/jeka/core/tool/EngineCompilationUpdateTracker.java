@@ -16,13 +16,21 @@ class EngineCompilationUpdateTracker {
 
     private final Path projectBaseDir;
 
+    // When a subproject is outdated then all projects are considered outdated as well
+    private static boolean globallyOutdated;
+
     EngineCompilationUpdateTracker(Path projectBaseDir) {
         this.projectBaseDir = projectBaseDir;
     }
 
     boolean isOutdated() {
+        if (globallyOutdated) {
+            return true;
+        }
         long defLastUptateTime = lastModifiedAccordingFileAttributes();
-        return isWorkOutdated(defLastUptateTime);
+        boolean result = isWorkOutdated(defLastUptateTime);
+        globallyOutdated = result;
+        return result;
     }
 
     void updateCompileFlag() {

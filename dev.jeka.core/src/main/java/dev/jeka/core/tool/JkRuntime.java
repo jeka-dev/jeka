@@ -95,6 +95,7 @@ public final class JkRuntime {
         }
 
         // register beans
+        JkLog.startTask("Register KBeans");
         commands.stream()
                 .map(EngineCommand::getBeanClass)
                 .distinct()
@@ -103,6 +104,7 @@ public final class JkRuntime {
 
         // postInit registered beans
         RUNTIMES.values().forEach(JkRuntime::postInitBeans);
+        JkLog.endTask();
     }
 
     void run(List<EngineCommand> commands) {
@@ -126,7 +128,9 @@ public final class JkRuntime {
         Collections.reverse(beans);
         for (JkBean bean : beans) {
             try {
+                JkLog.startTask("PostInit KBean " + bean);
                 bean.postInit();
+                JkLog.endTask();
             } catch (Exception e) {
                 throw JkUtilsThrowable.unchecked(e);
             }
