@@ -38,17 +38,17 @@ import java.util.Map;
  * If  <i>download</i> or <i>publish</i> repo is defined to use a named repo (as jeka.repos.download.name=aRepoName),
  * this takes precedence over basic configuration.
  */
-public class JkRepoFromOptions {
+public class JkRepoFromProperties {
 
     /**
      * Returns repository where are published artifacts. Returns <code>null</code> if no download publish repo is defined.
      */
     public static JkRepo getPublishRepository() {
-        String repoName = JkOptions.get("jeka.repos.publish.name");
+        String repoName = JkProperties.get("jeka.repos.publish.name");
         if (repoName != null) {
             return getNamedRepo(repoName);
         }
-        if (JkOptions.get("jeka.repos.publish.url") != null) {
+        if (JkProperties.get("jeka.repos.publish.url") != null) {
             return ofPrefix("jeka.repos.publish");
         }
         return JkRepo.ofMavenCentral();
@@ -58,11 +58,11 @@ public class JkRepoFromOptions {
      * Returns repo from where are downloaded dependencies. Returns Maven central repo if no download repository is defined.
      */
     public static JkRepo getDownloadRepo() {
-        String repoName = JkOptions.get("jeka.repos.download.name");
+        String repoName = JkProperties.get("jeka.repos.download.name");
         if (repoName != null) {
             return getNamedRepo(repoName);
         }
-        if (JkOptions.get("jeka.repos.download.url") != null) {
+        if (JkProperties.get("jeka.repos.download.url") != null) {
             return ofPrefix("jeka.repos.download");
         }
         return JkRepo.ofMavenCentral();
@@ -81,21 +81,21 @@ public class JkRepoFromOptions {
     }
 
     private static JkRepo ofPrefix(String prefix) {
-        String url = JkOptions.get(prefix + ".url");
+        String url = JkProperties.get(prefix + ".url");
         JkUtilsAssert.argument(url != null, "No option defined for " + prefix + ".url");
-        String username = JkOptions.get(prefix + ".username");
-        String password = JkOptions.get(prefix + "."+ ".password");
+        String username = JkProperties.get(prefix + ".username");
+        String password = JkProperties.get(prefix + "."+ ".password");
         return JkRepo.of(url.trim()).setCredentials(username, password);
     }
 
     public static Map<String, String> allRepositoryOptions() {
         Map<String, String> result = new HashMap<>();
-        JkOptions.getAll().forEach((key, value) -> {
+        JkProperties.getAll().forEach((key, value) -> {
             if (key.startsWith("jeka.repos.")) {
                 result.put(key, value);
             }
         });
-        return JkOptions.toDisplayedMap(result);
+        return JkProperties.toDisplayedMap(result);
     }
 
 }

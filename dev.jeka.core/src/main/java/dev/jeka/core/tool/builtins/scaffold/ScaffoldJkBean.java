@@ -5,7 +5,7 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkRepoFromOptions;
+import dev.jeka.core.tool.JkRepoFromProperties;
 
 /**
  * Provides method to generate a project skeleton (folder structure, configuration files, ....)
@@ -26,7 +26,7 @@ public class ScaffoldJkBean extends JkBean {
         this.scaffolder.setJekaClassCodeProvider(
                 () -> JkUtilsIO.read(ScaffoldJkBean.class.getResource("buildclass.snippet")));
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                .addRepos(JkRepoFromOptions.getDownloadRepo().toSet());
+                .addRepos(JkRepoFromProperties.getDownloadRepo().toSet());
         this.scaffolder.setDependencyResolver(dependencyResolver);
     }
 

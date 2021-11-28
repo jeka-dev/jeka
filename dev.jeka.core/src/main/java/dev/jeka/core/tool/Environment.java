@@ -17,8 +17,6 @@ class Environment {
         // Can't be instantiated
     }
 
-    static Map<String, String> systemProps = new HashMap<>();
-
     static CommandLine commandLine = CommandLine.parse(new String[0]);
 
     static StandardOptions standardOptions = new StandardOptions(Collections.emptyMap());
@@ -49,56 +47,19 @@ class Environment {
 
         // Parse command line
         final CommandLine commandLine = CommandLine.parse(effectiveCommandLineArgs.toArray(new String[0]));
+        for (final Map.Entry<String, String> entry : commandLine.getSystemProperties().entrySet()) {
+            System.setProperty(entry.getKey(), entry.getValue());
+        }
 
-
-        // Take all defined system properties (command line, ofSystem.properties files) and
-        // inject them in the system.
-        final Map<String, String> sysProps = getSpecifiedSystemProps();
-        sysProps.putAll(commandLine.getSystemProperties());
-        setSystemProperties(sysProps);
-
-        final Map<String, String> optionMap = new HashMap<>();
-        optionMap.putAll(JkOptions.readSystemAndUserOptions());
-        optionMap.putAll(JkOptions.readFromProjectOptionsProperties(Paths.get("")));
-        optionMap.putAll(commandLine.getStandardOptions());
-        JkOptions.init(optionMap);
-
-        final StandardOptions standardOptions = new StandardOptions(optionMap);
+        final StandardOptions standardOptions = new StandardOptions(commandLine.getStandardOptions());
         if (standardOptions.logVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
         if (standardOptions.logQuiteVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
-        Environment.systemProps = sysProps;
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;
-    }
-
-    private static Map<String, String> userSystemProperties() {
-        final Map<String, String> result = new HashMap<>();
-        final Path userPropFile = JkLocator.getJekaUserHomeDir().resolve("ofSystem.properties");
-        if (Files.exists(userPropFile)) {
-            result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
-        }
-        return result;
-    }
-
-
-    private static Map<String, String> getSpecifiedSystemProps() {
-        final Map<String, String> result = new TreeMap<>();
-        final Path propFile = JkLocator.getJekaHomeDir().resolve("ofSystem.properties");
-        if (Files.exists(propFile)) {
-            result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
-        }
-        result.putAll(userSystemProperties());
-        return result;
-    }
-
-    private static void setSystemProperties(Map<String, String> props) {
-        for (final Map.Entry<String, String> entry : props.entrySet()) {
-            System.setProperty(entry.getKey(), entry.getValue());
-        }
     }
 
     /**

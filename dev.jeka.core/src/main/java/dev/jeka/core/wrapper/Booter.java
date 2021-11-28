@@ -40,8 +40,7 @@ class Booter {
                 System.out.println("Unzip distribution to " + dir + " ...");
                 Files.createDirectories(dir);
                 unzip(zip, dir);
-                Files.deleteIfExists(dir.resolve("options.properties"));
-                Files.deleteIfExists(dir.resolve("system.properties"));
+                Files.deleteIfExists(dir.resolve("global.properties"));
                 Files.deleteIfExists(dir.resolve("jeka.bat"));
                 Files.deleteIfExists(dir.resolve("jeka"));
                 System.out.println("Jeka " + version + " installed in " + dir);
@@ -204,11 +203,11 @@ class Booter {
 
     private static String repoOptions() {
         Properties properties = new Properties();
-        Path optionFile = getJekaUserHomeDir().resolve("options.properties");
-        if (!Files.exists(optionFile)) {
+        Path globalPropertyFile = getJekaUserHomeDir().resolve("global.properties");
+        if (!Files.exists(globalPropertyFile)) {
             return null;
         }
-        try (InputStream inputStream = Files.newInputStream(optionFile)) {
+        try (InputStream inputStream = Files.newInputStream(globalPropertyFile)) {
             properties.load(inputStream);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

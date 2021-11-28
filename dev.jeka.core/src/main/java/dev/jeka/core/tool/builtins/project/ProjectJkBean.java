@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
- * Plugin for building JVM language based projects. It comes with a {@link JkProject} pre-configured with {@link JkOptions}.
+ * Plugin for building JVM language based projects. It comes with a {@link JkProject} pre-configured with {@link JkProperties}.
  * and a decoration for scaffolding.
  */
 @JkDoc("Provides a configured JkProject instance for building JVM based projects.")
@@ -76,7 +76,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         project.getConstruction().addTextAndLocalDependencies();
 
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
-        compiler.setJdkHomesWithProperties(JkOptions.getAllStartingWith("jdk."));
+        compiler.setJdkHomesWithProperties(JkProperties.getAllStartingWith("jdk."));
         applyRepo(project);
         applyGpg(project);
     }
@@ -89,11 +89,11 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     private void applyRepo(JkProject project) {
         project.getPublication().getMaven().setRepos(
-                Optional.ofNullable(JkRepoFromOptions.getPublishRepository())
+                Optional.ofNullable(JkRepoFromProperties.getPublishRepository())
                         .orElse(JkRepo.ofLocal())
                 .toSet());
-        project.getPublication().getIvy().setRepos(JkRepoFromOptions.getPublishRepository().toSet());
-        final JkRepo downloadRepo = JkRepoFromOptions.getDownloadRepo();
+        project.getPublication().getIvy().setRepos(JkRepoFromProperties.getPublishRepository().toSet());
+        final JkRepo downloadRepo = JkRepoFromProperties.getDownloadRepo();
         JkDependencyResolver resolver = project.getConstruction().getDependencyResolver();
         if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
             resolver.addRepos(downloadRepo);

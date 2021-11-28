@@ -7,11 +7,11 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class SpringbootBuild extends JkBean {
 
-    final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
 
     @Override
     protected void init() {
-        projectPlugin.getProject().simpleFacade()
+        projectBean.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .setCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
@@ -19,7 +19,7 @@ public class SpringbootBuild extends JkBean {
                 .setRuntimeDependencies(deps -> deps
                         .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
                 );
-        projectPlugin.getProject().getPublication()
+        projectBean.getProject().getPublication()
             .getMaven()
                 .setModuleId("dev.jeka:springboot-plugin")
                 .getPomMetadata()
@@ -29,7 +29,7 @@ public class SpringbootBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        clean(); projectBean.pack();
     }
 
     public static void main(String[] args) {

@@ -78,8 +78,7 @@ public final class JkInit {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
         sb.append("\nCommand Line : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
-        sb.append(propsAsString("Specified System Properties", Environment.systemProps));
-        sb.append(propsAsString("Specified Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
+        sb.append(propsAsString("Specified properties", JkProperties.toDisplayedMap(JkProperties.getAll())));
         sb.append("\nJava Home : " + System.getProperty("java.home"));
         sb.append("\nJava Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         sb.append("\nJeka Version : " + JkInfo.getJekaVersion());
@@ -89,7 +88,7 @@ public final class JkInit {
             sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
-        sb.append("\nJeka diowload Repositories : " + JkRepoFromOptions.getDownloadRepo());
+        sb.append("\nJeka diowload Repositories : " + JkRepoFromProperties.getDownloadRepo());
         sb.append("\nJeka Repository Cache : " + JkLocator.getJekaRepositoryCache());
         JkLog.info(sb.toString());
     }

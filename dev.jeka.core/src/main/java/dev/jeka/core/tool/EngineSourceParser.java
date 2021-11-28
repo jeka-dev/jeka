@@ -73,8 +73,6 @@ final class EngineSourceParser {
         return this.dependencies;
     }
 
-
-
     LinkedHashSet<Path>  projects() {
         return this.dependencyProjects;
     }
@@ -125,7 +123,6 @@ final class EngineSourceParser {
         return result;
     }
 
-
     /**
      * Returns <code>true</code> if the candidate string is a valid module dependency description.
      */
@@ -175,7 +172,6 @@ final class EngineSourceParser {
         }
         return result;
     }
-
 
     private static boolean containsOnly(String stringToMatch, String... candidates) {
         String left = stringToMatch;
