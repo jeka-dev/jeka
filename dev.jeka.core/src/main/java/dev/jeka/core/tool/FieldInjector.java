@@ -31,16 +31,16 @@ final class FieldInjector {
 
     static void injectEnv(Object target) {
         for (final Field field : getPropertyFields(target.getClass())) {
-            final JkInjectProperty env = field.getAnnotation(JkInjectProperty.class);
-            if (env != null) {
-                final String stringValue = System.getenv(env.value());
+            final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
+            if (injectProperty != null) {
+                final String stringValue = JkProperties.get(injectProperty.value());
                 if (stringValue != null) {
                     final Class<?> type = field.getType();
                     Object value;
                     try {
                         value = parse(type, stringValue);
                     } catch (final IllegalArgumentException e) {
-                        throw new JkException("Option " + env.value() + " has been set with improper value '"
+                        throw new JkException("Option " + injectProperty.value() + " has been set with improper value '"
                                 + stringValue + "'");
                     }
                     JkUtilsReflect.setFieldValue(target, field, value);

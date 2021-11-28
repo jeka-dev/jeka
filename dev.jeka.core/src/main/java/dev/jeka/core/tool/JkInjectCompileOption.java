@@ -16,8 +16,8 @@ import java.lang.annotation.*;
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-@Repeatable(JkCompileOption.JkCompileOptions.class)
-public @interface JkCompileOption {
+@Repeatable(JkInjectCompileOption.JkCompileOptions.class)
+public @interface JkInjectCompileOption {
 
     /**
      * The dependency to import. It can be a module dependency (as "com.google.guava:guava:18.0")
@@ -31,7 +31,7 @@ public @interface JkCompileOption {
      */
     @Target(ElementType.TYPE)
     @interface JkCompileOptions {
-        JkCompileOption[] value();
+        JkInjectCompileOption[] value();
     }
 
 }

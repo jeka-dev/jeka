@@ -275,10 +275,10 @@ final class BeanDescription {
 
         private final Class<?> type;
 
-        private final String envVarName;
+        private final String injectedPropertyName;
 
         private BeanField(String name, String description, Object bean, Object defaultValue,
-                          Class<?> type, Class<?> declaringClass, String envVarName) {
+                          Class<?> type, Class<?> declaringClass, String injectedPropertyName) {
             super();
             this.name = name;
             this.description = description;
@@ -286,7 +286,7 @@ final class BeanDescription {
             this.defaultValue = defaultValue;
             this.type = type;
             this.rootDeclaringClass = declaringClass;
-            this.envVarName = envVarName;
+            this.injectedPropertyName = injectedPropertyName;
         }
 
         static BeanField of(Class<? extends JkBean> beanClass, Field field, String name, Class<?> rootDeclaringClass) {
@@ -295,9 +295,9 @@ final class BeanDescription {
             final Class<?> type = field.getType();
             Object instance = JkUtilsReflect.newInstance(beanClass);
             final Object defaultValue = value(instance, name);
-            final JkInjectProperty env = field.getAnnotation(JkInjectProperty.class);
-            final String envVarName = env != null ? env.value() : null;
-            return new BeanField(name, descr, instance, defaultValue, type, rootDeclaringClass, envVarName);
+            final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
+            final String propertyName = injectProperty != null ? injectProperty.value() : null;
+            return new BeanField(name, descr, instance, defaultValue, type, rootDeclaringClass, propertyName);
         }
 
         private static Object value(Object runInstance, String optName) {
@@ -332,7 +332,7 @@ final class BeanDescription {
         String description(String displayName, String margin) {
             String desc = description != null ? description : "No description available.";
             String oneLineDesc = desc.replace("\n", " ");
-            String envPart = envVarName == null ? "" : ", env : " + envVarName;
+            String envPart = injectedPropertyName == null ? "" : ", env : " + injectedPropertyName;
             return String.format("%s  %s  : %s (%s, default : %s%s)\n",
                     margin, displayName, oneLineDesc, type(), defaultValue, envPart);
         }

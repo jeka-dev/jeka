@@ -92,7 +92,7 @@ final class EngineSourceParser {
     }
 
     private static List<String>  compileOptions(String code, URL url) {
-        return stringsInAnnotation(code, JkCompileOption.class, url);
+        return stringsInAnnotation(code, JkInjectCompileOption.class, url);
     }
 
     private static JkDependencySet dependenciesFromImports(Path baseDir, List<String> deps) {
@@ -114,7 +114,7 @@ final class EngineSourceParser {
                         depFile = relativeFile.normalize();
                     } else {
                         JkLog.warn("File '" + dependency
-                                + "' mentionned in @JkDefClasspath does not exist.");
+                                + "' mentionned in @JkInjectClasspath does not exist.");
                     }
                 }
                 result = result.andFiles(depFile);
@@ -144,7 +144,7 @@ final class EngineSourceParser {
     }
 
     private static List<String> stringsInJkImport(String code, URL url) {
-        return stringsInAnnotation(code, JkDefClasspath.class, url);
+        return stringsInAnnotation(code, JkInjectClasspath.class, url);
     }
 
     @SuppressWarnings("unchecked")

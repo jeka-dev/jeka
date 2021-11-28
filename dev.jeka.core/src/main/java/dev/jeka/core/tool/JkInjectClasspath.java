@@ -11,8 +11,8 @@ import java.lang.annotation.*;
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-@Repeatable(JkDefClasspath.JkImports.class)
-public @interface JkDefClasspath {
+@Repeatable(JkInjectClasspath.JkImports.class)
+public @interface JkInjectClasspath {
 
     /**
      * The dependency to import. It can be a module dependency (as "com.google.guava:guava:18.0")
@@ -25,7 +25,7 @@ public @interface JkDefClasspath {
      */
     @Target(ElementType.TYPE)
     @interface JkImports {
-        JkDefClasspath[] value();
+        JkInjectClasspath[] value();
     }
 
 }

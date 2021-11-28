@@ -5,8 +5,7 @@ import dev.jeka.core.java.testing.junit.JkUnit;
 /**
  * Blalalala.
  */
-@JkDefRepo("http://maven.central.repo")
-@JkDefClasspath({
+@JkInjectClasspath({
 	"com.google:guava:18.0",
 	"toto:titi:12",
 	"foo:bar:6"

@@ -1,14 +1,14 @@
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkDefClasspath;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.plugins.jacoco.JkPluginJacoco;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@JkDefClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
 public class JacocoSampleBuild extends JkBean {
 
     final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);

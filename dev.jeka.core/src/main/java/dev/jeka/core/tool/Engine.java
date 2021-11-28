@@ -33,7 +33,7 @@ import static dev.jeka.core.tool.JkRepoFromProperties.getDownloadRepo;
  *
  * Def classes can have dependencies on jars : <ul>
  *     <li>located in [base dir]/jeka/boot directory</li>
- *     <li>declared in {@link JkDefClasspath} annotation</li>
+ *     <li>declared in {@link JkInjectClasspath} annotation</li>
  *     <li>declared in command-line, using '@'</li>
  * </ul>
  */

@@ -2,7 +2,7 @@ import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkDefClasspath;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -14,7 +14,7 @@ import dev.jeka.plugins.sonarqube.JkSonarqube;
  * User has to run or use an existing server.
  * By default, sonar
  */
-@JkDefClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
 class SonarqubeSampleBuild extends JkBean {
 
     private final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);

@@ -17,7 +17,7 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkDefClasspath;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
 
 import java.nio.file.Path;
@@ -31,7 +31,7 @@ import java.util.List;
  * 
  * @author Jerome Angibaud
  */
-@JkDefClasspath("org.apache.httpcomponents:httpclient:4.5.6")
+@JkInjectClasspath("org.apache.httpcomponents:httpclient:4.5.6")
 public class AntStyleBuild extends JkBean implements JkIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
