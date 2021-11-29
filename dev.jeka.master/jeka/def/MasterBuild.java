@@ -23,11 +23,11 @@ class MasterBuild extends JkBean {
     @JkInjectProperty("GH_TOKEN")
     public String githubToken;
 
-    final GpgJkBean gpg = getRuntime().getBeanRegistry().get(GpgJkBean.class);
+    final GpgJkBean gpg = getRuntime().getBean(GpgJkBean.class);
 
-    final NexusJkBean nexus = getRuntime().getBeanRegistry().get(NexusJkBean.class);
+    final NexusJkBean nexus = getRuntime().getBean(NexusJkBean.class);
 
-    final VersionFromGitJkBean versionFromGit = getRuntime().getBeanRegistry().get(VersionFromGitJkBean.class);
+    final VersionFromGitJkBean versionFromGit = getRuntime().getBean(VersionFromGitJkBean.class);
 
     // ------ Slave projects
 
@@ -58,7 +58,7 @@ class MasterBuild extends JkBean {
     public void make() {
         JkLog.startTask("Building core and plugins");
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(bean -> {
-            JkLog.startTask("Building " + bean);
+            JkLog.startTask("Running KBean " + bean);
             bean.clean();
             bean.pack();
             JkLog.endTask();

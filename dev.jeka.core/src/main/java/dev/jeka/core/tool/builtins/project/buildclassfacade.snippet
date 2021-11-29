@@ -4,7 +4,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class Build extends JkBean {
 
-    final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option

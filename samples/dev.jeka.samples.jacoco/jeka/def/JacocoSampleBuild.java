@@ -11,9 +11,9 @@ import java.nio.file.Path;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
 public class JacocoSampleBuild extends JkBean {
 
-    final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
-    final JkPluginJacoco jacoco = getRuntime().getBeanRegistry().get(JkPluginJacoco.class);
+    final JkPluginJacoco jacoco = getRuntime().getBean(JkPluginJacoco.class);
 
     @Override
     protected void init() {

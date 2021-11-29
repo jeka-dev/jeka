@@ -41,14 +41,14 @@ public class VersionFromGitJkBean extends JkBean {
     private transient JkVersion cachedVersion;
 
     protected VersionFromGitJkBean() {
-        GitJkBean gitPlugin = getRuntime().getBeanRegistry().getOptional(GitJkBean.class).orElse(null);
+        GitJkBean gitPlugin = getRuntime().getBeanOptional(GitJkBean.class).orElse(null);
         git = gitPlugin != null ? gitPlugin.getGitProcess() : JkGitProcess.of(getBaseDir());
     }
 
     @Override
     protected void postInit() {
         if (autoConfigureProject) {
-            ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
+            ProjectJkBean projectPlugin = getRuntime().getBeanOptional(ProjectJkBean.class).orElse(null);
             if (projectPlugin == null) {
                 return;
             }

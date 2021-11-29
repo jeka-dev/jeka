@@ -56,7 +56,7 @@ final class Engine {
 
     Engine(Path baseDir) {
         super();
-        this.projectBaseDir = baseDir.normalize();
+        this.projectBaseDir = baseDir;
         this.beanClassesResolver = new EngineBeanClassResolver(baseDir);
         this.dependencyResolver = JkDependencyResolver.of().addRepos(getDownloadRepo(), JkRepo.ofLocal());
     }

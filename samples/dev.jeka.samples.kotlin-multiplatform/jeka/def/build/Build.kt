@@ -17,7 +17,7 @@ import java.awt.Desktop
 
 class Build : JkBean() {
 
-    val kotlin = getRuntime().getBeanRegistry().get(KotlinJkBean::class.java)
+    val kotlin = getRuntime().getBean(KotlinJkBean::class.java)
 
     val serializationVersion = "1.2.1"
     val ktorVersion = "1.6.1"

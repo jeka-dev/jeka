@@ -33,7 +33,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
  */
 public class SignedArtifactsBuild extends JkBean {
 
-    ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables

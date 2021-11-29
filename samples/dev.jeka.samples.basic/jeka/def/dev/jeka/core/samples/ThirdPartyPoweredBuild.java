@@ -23,7 +23,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 @JkInjectClasspath("com.google.guava:guava:21.0")
 public class ThirdPartyPoweredBuild extends JkBean {
 
-    ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
     
     @Override
     protected void init() {

@@ -52,7 +52,7 @@ public final class JkImportedJkBeans {
     public <T extends JkBean> List<T> get(Class<T> jkBeanClass, boolean includeTransitives) {
         return get(includeTransitives).stream()
                 .map(JkBean::getRuntime)
-                .map(runtime -> runtime.getBeanRegistry().getOptional(jkBeanClass))
+                .map(runtime -> runtime.getBeanOptional(jkBeanClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -125,8 +125,8 @@ public final class JkImportedJkBeans {
         JkLog.startTask("Import bean " + importedBeanClass + " from " + importedProjectDir);
         JkRuntime runtime = JkRuntime.get(importedProjectDir);
         JkRuntime.setBaseDirContext(importedProjectDir);
-        final T result = JkRuntime.get(importedProjectDir).getBeanRegistry().get(importedBeanClass);
-        JkRuntime.setBaseDirContext(Paths.get(""));
+        final T result = JkRuntime.get(importedProjectDir).getBean(importedBeanClass);
+        JkRuntime.setBaseDirContext(Paths.get("."));
         JkLog.endTask();
         return result;
     }

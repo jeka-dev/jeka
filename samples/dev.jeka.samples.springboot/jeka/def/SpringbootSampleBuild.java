@@ -8,7 +8,7 @@ import dev.jeka.plugins.springboot.JkSpringModules.Boot;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
 class SpringbootSampleBuild extends JkBean {
 
-    private final JkPluginSpringboot springboot = getRuntime().getBeanRegistry().get(JkPluginSpringboot.class);
+    private final JkPluginSpringboot springboot = getRuntime().getBean(JkPluginSpringboot.class);
 
     @Override
     protected void init() {

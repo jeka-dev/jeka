@@ -21,7 +21,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class JavaPluginBuild extends JkBean {
 
-    public final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    public final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
     
@@ -83,7 +83,7 @@ public class JavaPluginBuild extends JkBean {
     }
 
     public void printMvn() {
-        PomJkBean pluginPom = getRuntime().getBeanRegistry().get(PomJkBean.class);
+        PomJkBean pluginPom = getRuntime().getBean(PomJkBean.class);
         pluginPom.dependencyCode();
     }
 

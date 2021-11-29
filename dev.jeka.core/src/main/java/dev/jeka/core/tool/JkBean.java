@@ -8,17 +8,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Plugin instances are owned by a <code>JkClass</code> instance. The relationship is bidirectional :
- * <code>JkClass</code> instances can invoke plugin methods and vice-versa.<p>
- *
- * Therefore, plugins can interact with (or load) other plugins from the owning <code>JkClass</code> instance
- * (which is a quite common pattern).
+ * Base class for KBean. User code is not supposed to instantiate KBeans using 'new' but usinng
+ * {@link JkRuntime#getBean(Class)}.
  */
 public abstract class JkBean {
 
     private static final String JKBEAN_CLASS_SIMPLE_NAME = JkBean.class.getSimpleName();
 
-    private static final String CLASS_SUFIX = JkBean.class.getSimpleName();
+    private static final String CLASS_SUFFIX = JkBean.class.getSimpleName();
 
     private JkRuntime runtime;
 
@@ -30,7 +27,7 @@ public abstract class JkBean {
      * If a plugin needs to initialize state before options are injected, you have to do it in the
      * constructor.
      */
-    JkBean(JkRuntime runtime) {
+    private JkBean(JkRuntime runtime) {
         this.runtime = runtime;
         this.importedJkBeans = new JkImportedJkBeans(this);
     }
@@ -66,7 +63,7 @@ public abstract class JkBean {
     }
 
     final String shortName() {
-        return computeShortName(this.getClass());
+        return name(this.getClass());
     }
 
     /**
@@ -89,12 +86,12 @@ public abstract class JkBean {
         return runtime;
     }
 
-    static String computeShortName(Class<?> jkBeanClass) {
+    static String name(Class<?> jkBeanClass) {
         final String className = jkBeanClass.getSimpleName();
-        if (!className.endsWith(CLASS_SUFIX) || className.equals(CLASS_SUFIX)) {
+        if (!className.endsWith(CLASS_SUFFIX) || className.equals(CLASS_SUFFIX)) {
             return JkUtilsString.uncapitalize(className);
         }
-        final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFIX);
+        final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFFIX);
         return JkUtilsString.uncapitalize(prefix);
     }
 
@@ -114,13 +111,9 @@ public abstract class JkBean {
         return false;
     }
 
-    static String nickName(Class<? extends JkBean> beanClass) {
-        String uncapitalizedClassSimpleName = JkUtilsString.uncapitalize(beanClass.getSimpleName());
-        if (uncapitalizedClassSimpleName.endsWith(JKBEAN_CLASS_SIMPLE_NAME)
-                && !beanClass.getSimpleName().equals(JKBEAN_CLASS_SIMPLE_NAME)) {
-            return JkUtilsString.substringBeforeLast(uncapitalizedClassSimpleName, JKBEAN_CLASS_SIMPLE_NAME);
-        }
-        return uncapitalizedClassSimpleName;
+    @Override
+    public String toString() {
+        return shortName() + " in " + this.runtime.getProjectBaseDir();
     }
-
 }
+

@@ -74,7 +74,7 @@ public final class JkPluginSpringboot extends JkBean {
      * initialized in the constructor.
      */
     protected JkPluginSpringboot() {
-        projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+        projectPlugin = getRuntime().getBean(ProjectJkBean.class);
     }
 
     public void setSpringbootVersion(String springbootVersion) {
@@ -151,8 +151,8 @@ public final class JkPluginSpringboot extends JkBean {
         }
 
         // Add template build class to scaffold
-        if (getRuntime().getBeanRegistry().getOptional(ScaffoldJkBean.class).isPresent()) {
-            ScaffoldJkBean scaffold = getRuntime().getBeanRegistry().get(ScaffoldJkBean.class);
+        if (getRuntime().getBeanOptional(ScaffoldJkBean.class).isPresent()) {
+            ScaffoldJkBean scaffold = getRuntime().getBean(ScaffoldJkBean.class);
             String code = JkUtilsIO.read(JkPluginSpringboot.class.getClassLoader().getResource("snippet/Build.java"));
             String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
             code = code.replace("${dependencyDescription}", defClasspath);

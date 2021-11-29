@@ -66,7 +66,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     protected ProjectJkBean() {
         super();
-        this.scaffoldPlugin = getRuntime().getBeanRegistry().get(ScaffoldJkBean.class);
+        this.scaffoldPlugin = getRuntime().getBean(ScaffoldJkBean.class);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     private void applyGpg(JkProject project) {
-        GpgJkBean pgpPlugin = getRuntime().getBeanRegistry().get(GpgJkBean.class);
+        GpgJkBean pgpPlugin = getRuntime().getBean(GpgJkBean.class);
         JkGpg gpg = pgpPlugin.get();
         applyGpg(gpg, pgpPlugin.keyName, project);
     }

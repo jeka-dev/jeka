@@ -45,10 +45,10 @@ public final class JkInit {
         try {
             EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get(""));
             List<EngineCommand> commands = engineBeanClassResolver
-                    .resolve(Environment.commandLine, JkBean.computeShortName(clazz));
+                    .resolve(Environment.commandLine, JkBean.name(clazz));
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.init(commands);
-            final T jkBean = jkRuntime.getBeanRegistry().get(clazz);
+            final T jkBean = jkRuntime.getBean(clazz);
             JkLog.info(jkBean.toString() + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();

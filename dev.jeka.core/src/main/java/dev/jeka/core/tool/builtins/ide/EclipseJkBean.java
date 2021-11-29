@@ -9,7 +9,6 @@ import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 
 import java.nio.charset.Charset;
@@ -39,7 +38,7 @@ public final class EclipseJkBean extends JkBean {
     private final ScaffoldJkBean scaffold;
 
     protected EclipseJkBean() {
-        this.scaffold = getRuntime().getBeanRegistry().get(ScaffoldJkBean.class);
+        this.scaffold = getRuntime().getBean(ScaffoldJkBean.class);
     }
 
     // ------------------------- setters ----------------------------

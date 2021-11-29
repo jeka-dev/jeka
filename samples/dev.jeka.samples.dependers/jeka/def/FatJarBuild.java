@@ -12,7 +12,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class FatJarBuild extends JkBean {
 
-    ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
     
     @JkInjectProject("../dev.jeka.samples.basic")
     private JavaPluginBuild sampleBuild;

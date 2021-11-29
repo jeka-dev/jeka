@@ -90,7 +90,7 @@ Concrete real-life cases, as building projects, will be documented in specific s
 #### Create Project Structure
 
 * Create the root dir of the project or use the _template wrapper project_ mentioned above. 
-* At project root, execute `jekaw scaffold#run` (or `jeka scaffold#run scaffold#wrap` if not using the template wrapper project).
+* At project root, execute `jeka scaffold#run scaffold#wrap` (or just `jekaw scaffold#run` if using the template wrapper project).
 * Execute `jeka intellij#iml` or `jeka eclipse#files` in order to generate IDE configuration file. 
 * The project with a _Jeka_ structure and a basic build class is ready to work within your IDE
 
@@ -107,7 +107,7 @@ _KBean_ is the central concept of execution engine. It consists in classes shari
 * They are supposed to be instantiated by the execution engine and not from user code. 
  .
 
-_KBeans_ can be declared in _def_ directory as source file or just be present in build classpath (see later).
+_KBeans_ can be declared in _def_ directory as source file or just be present as classes in classpath (see later).
 
 * KBean methods can be invoked from command line as`jeka [kbeanName]#methoName [kbeanName]#[propertyName]=xxx` or 
 from the IDE using a basic `main` method (see later).
@@ -118,6 +118,9 @@ In a given project, there can only be one _KBean_ instance per _KBean_ class, bu
 build there can be several in classpath (one per project).
 
 Generally _KBeans_ interact with each other inside their `init` method. They access each other using `getRuntime().getRegistry().get(MyBean.class)`.
+
+When a _KBean_ depends on another one, it's good to declare it as an instance property of the first bean as this 
+dependency will be mentioned in the quto-generated documentation.
 
 #### Create a Basic KBean
 
@@ -193,7 +196,7 @@ Be careful to launch the _main_ method using _module dir_ as _working dir_. On _
 
 To change _intelliJ_ defaults, follow : *Edit Configurations | Edit configuration templates... |  Application | Working Directory : $MODULE_DIR$*.
 
-##### ... Or Configure an IDE Launcher 
+##### Configure an IDE Launcher 
 
 Sometimes, you may need to mimic closer the command line behavior, for debugging purpose or to pass '@' arguments.
 
@@ -201,14 +204,37 @@ Sometimes, you may need to mimic closer the command line behavior, for debugging
 * Set `dev.jeka.tool.Main` as Java main class.
 * Set the same command line arguments as you would do for invoking from command line (Do not include _jeka_ command).
 
-### KBean details
--TODO-
+### More about KBeans
+
+When executing, Jeka will first determine the _default KBean_ to instantiate it. The _default KBean_ is 
+determined as follows :
+1. The _KBean_ mentioned in command line `-kb=` option.
+2. The first _KBean_ found in _def_ dir according the fully qualified class name alphabetical order.
+
+The _KBean instantiation_ consists in :
+1. Call the constructor
+2. Inject properties in _KBean_ fields
+3. Call its `init`method.
+
+The `init` method of the _default KBean_ can, in turn, inkove oth
+
+### Properties
+
+Properties are pairs of String  _key-value_ that are used across Jeka system. It typically carries urls, local paths,
+tool versions or credentials. They can be globally accessed using `JkProperties#get*` static method.
+
+Properties can be defined at different level, in order of precedence :
+* System properties : Properties can be defined using system properties as `-DpropertyName=value`. System properties can
+  be injected from Jeka command line.
+* OS environment variables : Properties can also be defined as OS environment variable.
+* Project : Defined in _[Project Root]/jeka/project.properties_. Used typically for storing tool version (e.g. `jeka.kotlin.version=1.5.21`).
+* Global : Defined in _[User Home]/.jeka/global.properties_ file. Used typically to define urls, local paths and credentials.
 
 ### Useful commands 
 
 _Jeka_ comes with predefined methods coming either from `JkClass` or built-in plugins. 
 
-* `jeka help` : Displays on console methods and options invokable from command line, along plugins available in the classpath.
+* `jeka` : Displays on console methods and options invokable from command line, along plugins available in the classpath.
 * `jeka [pugin-name]#help` : Displays on consoles all methods and option invokable for the specified plugin (e.g. `jeka scaffold#help`).
 * `jeka intellij#iml` : Generates iml file for Intellij. It is generated according the dependencies declared for this project.
 * `jeka intellij#iml -JKC=` : If the above fails cause your def classes do not compile, using `-JKC=` avoids def compilation phase.
@@ -221,16 +247,16 @@ _Jeka_ comes with predefined methods coming either from `JkClass` or built-in pl
 
 You can add these options to you command line.
 
-* `-JKC=[ClassName]` : By default, Jeka instantiates the first class found under _def_ directory to execute methods on. 
+* `-kb=[KBeanName]` : By default, Jeka instantiates the first _KBean_ found under _def_ directory to execute methods on. 
   You can force to instantiate a specific class by passing its long or short name. 
   If the class is already in classpath, then no _def_ compilation occurs.
   Using simply `-JKC=` is equivalent to `-JKC=JkClass` which is the base class bundled in Jeka.
-* `-LRI` : Displays runtime info. This will display on console meaningfull information about current Jeka version, Java version, base directory, download repository, classpath, ...
-* `-LSU` : Shows logs about jeka setup (compilation of def classes, plugin loading, ...).These informations are not logged by default.
-* `-LS=BRACE` : Alters console output by delimiting tasks with braces and mentioning the processing time for each.
-* `-LS=DEBUG` : Alters console output by showing the class name and line number from where the log has been emitted.
-* `-LV` : Alters console output by displaying trace logs (emitted by `JkLog#trace`)
-* `-FC` : Force compilation of _def_ classes, even if they are marked as up-to-date.
+* `-lri` : Displays runtime info. This will display on console meaningfull information about current Jeka version, Java version, base directory, download repository, classpath, ...
+* `-lsu` : Shows logs about jeka setup (compilation of def classes, plugin loading, ...).These informations are not logged by default.
+* `-ls=BRACE` : Alters console output by delimiting tasks with braces and mentioning the processing time for each.
+* `-ls=DEBUG` : Alters console output by showing the class name and line number from where the log has been emitted.
+* `-lv` : Alters console output by displaying trace logs (emitted by `JkLog#trace`)
+* `-dcf` : Force compilation of _def_ classes, even if they are marked as up-to-date.
 
 ### How to change the JDK that will run _Jeka_
 
@@ -249,22 +275,10 @@ We recommend storing this value in your [USER DIR]/.jeka/options.properties file
 
 For more details, see `JkRepoFromOptions` javadoc.
 
-### How to pass options
-
-Options are pairs of String  _key-value_ that are used accros Jeka system. It typically carries log behavior, repository definition, 
-tool location or version. You can define your own where using field is less appropriate.
-
-Options can be defined at 3 different level, each taking precedence on the former one : 
-* User level : Defined in [User Home]/.jeka/options.properties file. It is typically used to define repository locations 
-and JDK paths.
-* Project level : Defined in [Project Root]/jeka/options.properties. Store here, tool versions as `jeka.kotlin.version=1.5.21`.
-* Execution level : Defined in the command line as `-optionName=value`. Generally used to specify log setting or override 
-  options defined above.
-
-The option values can be retrieved programmatically using `JkOptions#get*` static methods.
 
 
-### Bundled Utilities
+
+## Build Library
 
 TODO
 

@@ -7,7 +7,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class SpringbootBuild extends JkBean {
 
-    final ProjectJkBean projectBean = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class);
 
     @Override
     protected void init() {

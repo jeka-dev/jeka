@@ -100,7 +100,7 @@ public class JkPluginSonarqube extends JkBean {
             JkLog.info("Sonarqube analysis has been disabled. No analysis will be performed.");
             return;
         }
-        JkProject project = getRuntime().getBeanRegistry().get(ProjectJkBean.class).getProject();
+        JkProject project = getRuntime().getBean(ProjectJkBean.class).getProject();
         JkSonarqube sonarqube = createConfiguredSonarqube(project);
         sonarqubeConfigurer.accept(sonarqube);
         sonarqube.run();

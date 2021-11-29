@@ -30,6 +30,7 @@ class Booter {
     public static void main(String[] args) throws Exception {
         final Path jekawDir = Paths.get(args[0]);
         Properties props = props(jekawDir);
+        props.putAll(props(args));
         Path jekaBinPath = location(props);  // First try to get it from explicit location
         if (jekaBinPath == null) {
             final String version = version(props);
@@ -232,6 +233,17 @@ class Booter {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static Properties props(String[] args) {
+        Properties props = new Properties();
+        Arrays.stream(args)
+                .filter(arg -> arg.startsWith("-D"))
+                .map(arg -> arg.substring(2))
+                .filter(arg -> arg.contains("="))
+                .map(arg -> arg.split("="))
+                .forEach(items -> props.put(items[0], items[1]));
+        return props;
     }
 
 }

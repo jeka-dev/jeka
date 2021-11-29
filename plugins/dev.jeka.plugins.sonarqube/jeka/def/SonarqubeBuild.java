@@ -5,7 +5,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class SonarqubeBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    private final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     @Override
     protected void init() {

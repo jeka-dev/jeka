@@ -42,8 +42,9 @@ public abstract class JekaCommandLineExecutor {
 
     protected void runJeka(boolean useWrapper, String projectDir, String cmdLine) {
         Path dir = this.samplesRootDir.resolve(projectDir);
+        String command = useWrapper ? cmdLine + " -Djeka.distrib.location=" + jekaDir.toAbsolutePath().normalize() : cmdLine;
         process(dir, useWrapper)
-                .addParams(JkUtilsString.translateCommandline(cmdLine))
+                .addParams(JkUtilsString.translateCommandline(command))
                 .inheritJkLogOptions()
                 .addParams("-dcf")
                 .setEnv("JEKA_JDK", JkJavaProcess.CURRENT_JAVA_DIR.resolve("../..").normalize().toString())

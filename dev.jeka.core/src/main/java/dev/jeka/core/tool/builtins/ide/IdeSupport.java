@@ -1,7 +1,6 @@
 package dev.jeka.core.tool.builtins.ide;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkUrlClassLoader;
@@ -23,7 +22,7 @@ final class IdeSupport {
             JkIdeSupport.JkSupplier supplier = (JkIdeSupport.JkSupplier) jkBean;
             return supplier.getJavaIdeSupport();
         }
-        List<JkIdeSupport.JkSupplier> suppliers = jkBean.getRuntime().getBeanRegistry().getAll().stream()
+        List<JkIdeSupport.JkSupplier> suppliers = jkBean.getRuntime().getBeans().stream()
                 .filter(JkIdeSupport.JkSupplier.class::isInstance)
                 .map(JkIdeSupport.JkSupplier.class::cast)
                 .collect(Collectors.toList());

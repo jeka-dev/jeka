@@ -47,7 +47,7 @@ final class HelpDisplayer {
     }
 
     private static String beanDescription(Class beanClass, boolean isDefault) {
-        String shortName = JkBean.computeShortName(beanClass);
+        String shortName = JkBean.name(beanClass);
         if (isDefault) {
             shortName = shortName + " (default)";
         }
@@ -120,8 +120,8 @@ final class HelpDisplayer {
                     line -> sb.append("\n                      " + line));
         }
         final JkBean bean;
-        if (runtime.getBeanRegistry().getOptional(description.beanClass()).isPresent()) {
-            bean = runtime.getBeanRegistry().get(description.beanClass());
+        if (runtime.getBeanOptional(description.beanClass()).isPresent()) {
+            bean = runtime.getBean(description.beanClass());
         } else {
             bean = JkUtilsReflect.newInstance(description.beanClass());
         }

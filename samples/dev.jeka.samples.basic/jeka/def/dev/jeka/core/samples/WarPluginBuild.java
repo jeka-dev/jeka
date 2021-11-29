@@ -24,7 +24,7 @@ public class WarPluginBuild extends JkBean {
 
     public String jettyRunnerVersion = "9.4.28.v20200408";
 
-    ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     @Override
     protected void init() {

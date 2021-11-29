@@ -37,7 +37,7 @@ public class JkPluginJacoco extends JkBean {
         if (!enabled) {
             return;
         }
-        ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+        ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
         final JkProject project = projectPlugin.getProject();
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {

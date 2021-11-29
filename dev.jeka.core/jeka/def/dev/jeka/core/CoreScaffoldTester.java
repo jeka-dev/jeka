@@ -19,11 +19,9 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
     void run() {
         scaffold("scaffold#run", "help", false);
         Path projectDir = scaffold("scaffold#run scaffold#wrap", "help", false);
-        Path jekaDir = JkLocator.getJekaHomeDir();
-        scaffold("scaffold#run scaffold#wrap scaffold#wrapDelegatePath="
-                + jekaDir, "help", true);
+        scaffold("scaffold#run scaffold#wrap", "help", true);
         projectDir = scaffold("scaffold#run project#", "clean project#pack", false);
-        runJeka(projectDir.toString(), "eclipse#files eclipse#all");
+        runJeka(projectDir.toString(), "eclipse#files");
         runJeka(projectDir.toString(), "intellij#iml intellij#modulesXml");
     }
 
@@ -35,7 +33,7 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
     }
 
     public static void main(String[] args) throws Exception {
-        JkLog.setDecorator(JkLog.Style.DEBUG);
+        JkLog.setDecorator(JkLog.Style.BRACE);
         new CoreScaffoldTester().run();
     }
 

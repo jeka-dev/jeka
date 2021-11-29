@@ -6,7 +6,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class JacocoBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    private final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     @Override
     protected void init() {

@@ -96,8 +96,8 @@ public final class IntellijJkBean extends JkBean {
                 .forEach(importedProjectModuleDeps::add);
         generator.setExtraJekaModules(importedProjectModuleDeps);
         Path basePath = getBaseDir();
-        if (getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class).isPresent()) {
-            getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+        if (getRuntime().getBeanOptional(ProjectJkBean.class).isPresent()) {
+            getRuntime().getBean(ProjectJkBean.class);
             generator.setForceJdkVersion(forceJdkVersion);
         }
 

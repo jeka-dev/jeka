@@ -7,7 +7,6 @@ import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
-import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,7 +67,7 @@ final class EngineBeanClassResolver {
         for (String beanName : commandLine.involvedBeanNames()) {
             List<String> matchingClassNames = findClassesMatchingName(globalBeanClassNames(), beanName);
             Class<? extends JkBean> selected = loadUniqueClassOrFail(matchingClassNames, beanName);
-            beanClasses.put(JkBean.computeShortName(selected), selected);
+            beanClasses.put(JkBean.name(selected), selected);
         }
         JkLog.endTask();
         return commandLine.getBeanActions().stream()

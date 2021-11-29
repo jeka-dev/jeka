@@ -17,9 +17,9 @@ import dev.jeka.plugins.sonarqube.JkSonarqube;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
 class SonarqubeSampleBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    private final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
-    private final JkPluginSonarqube sonarqubePlugin = getRuntime().getBeanRegistry().get(JkPluginSonarqube.class);
+    private final JkPluginSonarqube sonarqubePlugin = getRuntime().getBean(JkPluginSonarqube.class);
 
     @Override
     protected void init() {

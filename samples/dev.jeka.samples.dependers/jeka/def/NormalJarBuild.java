@@ -20,7 +20,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class NormalJarBuild extends JkBean {
 
-    ProjectJkBean projectPlugin = getRuntime().getBeanRegistry().get(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.

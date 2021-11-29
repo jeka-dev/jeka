@@ -23,7 +23,7 @@ public class NexusJkBean extends JkBean {
 
     @Override
     protected void postInit() throws Exception {
-        ProjectJkBean projectBean = getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class).orElse(null);
+        ProjectJkBean projectBean = getRuntime().getBeanOptional(ProjectJkBean.class).orElse(null);
         if (projectBean == null) {
             JkLog.warn("No project plugin configured here.");
             return;
@@ -41,7 +41,7 @@ public class NexusJkBean extends JkBean {
     }
 
     public void closeAndOrRelease() {
-        Optional<ProjectJkBean> projectPlugin = getRuntime().getBeanRegistry().getOptional(ProjectJkBean.class);
+        Optional<ProjectJkBean> projectPlugin = getRuntime().getBeanOptional(ProjectJkBean.class);
         if (!projectPlugin.isPresent()) {
             JkLog.warn("No project plugin configured here.");
             return;

@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ class BeanDoc implements Comparable<BeanDoc> {
 
     BeanDoc(Class<? extends JkBean> clazz) {
         super();
-        this.shortName = JkBean.computeShortName(clazz);
+        this.shortName = JkBean.name(clazz);
         this.fullName = longName(clazz);
         this.clazz = clazz;
     }
