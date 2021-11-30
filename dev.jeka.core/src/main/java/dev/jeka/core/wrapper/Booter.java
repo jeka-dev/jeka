@@ -223,7 +223,7 @@ class Booter {
     private static Properties props(Path jekawDir) {
         final Path propFile = getWrapperPropsFile(jekawDir);
         if (!Files.exists(propFile)) {
-            System.out.println("No file found at " + propFile + ". Please rerun 'jeka scaffold#wrap");
+            System.out.println("No file found at " + propFile + ". Please re-run 'jeka scaffold#wrap");
             System.exit(1);
         }
         final Properties props = new Properties();

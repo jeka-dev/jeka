@@ -63,6 +63,11 @@ final class EngineBeanClassResolver {
                 Class<? extends JkBean> selected = loadUniqueClassOrFail(matchingclassNames, defaultBeanName);
                 beanClasses.put(null, selected);
             }
+        } else {
+            List<Class<? extends JkBean>> defaultBeanClasses = defBeanClasses();
+            if (!defaultBeanClasses.isEmpty()) {
+                beanClasses.put(null, defaultBeanClasses.get(0));
+            }
         }
         for (String beanName : commandLine.involvedBeanNames()) {
             List<String> matchingClassNames = findClassesMatchingName(globalBeanClassNames(), beanName);
@@ -113,6 +118,7 @@ final class EngineBeanClassResolver {
 
     List<Class<? extends JkBean>> defBeanClasses() {
         List result = defBeanClassNames().stream()
+                .sorted()
                 .map(className -> JkClassLoader.ofCurrent().load(className))
                 .collect(Collectors.toList());
         return result;

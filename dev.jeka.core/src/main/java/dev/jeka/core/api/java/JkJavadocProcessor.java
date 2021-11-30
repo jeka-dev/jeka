@@ -128,7 +128,7 @@ public final class JkJavadocProcessor<T> {
         String exeName = JkUtilsSystem.IS_WINDOWS ? "javadoc.exe" : "javadoc";
         Path javadocExe = JkUtilsJdk.javaHome().resolve("bin/" + exeName);
         if (!Files.exists(javadocExe)) {
-            javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
+            javadocExe = JkUtilsJdk.javaHome().resolve("src/main/shell/" + exeName).normalize();
         }
         boolean verbose = JkUtilsObject.firstNonNull(displayOutput, JkLog.isVerbose());
         JkLog.trace(javadocExe.toString());

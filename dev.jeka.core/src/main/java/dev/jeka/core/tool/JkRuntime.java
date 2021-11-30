@@ -67,7 +67,12 @@ public final class JkRuntime {
      * a plugin of the specified class at call time, the plugin is loaded then returned.
      */
     public <T extends JkBean> T getBean(Class<T> jkBeanClass) {
-        return (T) beans.computeIfAbsent(jkBeanClass, this::instantiate);
+        JkBean result = beans.get(jkBeanClass);
+        if (result == null) {
+            result = this.instantiate(jkBeanClass);
+            beans.put(jkBeanClass, result);
+        }
+        return (T) result;
     }
 
     public <T extends JkBean> Optional<T> getBeanOptional(Class<T> jkBeanClass) {
@@ -107,7 +112,6 @@ public final class JkRuntime {
             runtime.beans.values().forEach(this::postInit);
             JkLog.endTask();
         }
-
         JkLog.endTask();
     }
 
@@ -174,7 +178,7 @@ public final class JkRuntime {
                     Set<String> injectedProp =
                             FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(), action.getValue()));
                     if (injectedProp.isEmpty()) {
-                        throw new JkException("field %s does not exist in KBean %s", injectedProp, bean);
+                        throw new JkException("Field %s does not exist in KBean %s", injectedProp, bean);
                     }
                 });
         init(bean);
@@ -188,4 +192,5 @@ public final class JkRuntime {
                 ", beans=" + beans.keySet() +
                 '}';
     }
+
 }

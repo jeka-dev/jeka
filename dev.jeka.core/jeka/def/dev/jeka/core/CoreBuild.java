@@ -40,13 +40,13 @@ public class CoreBuild extends JkBean {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class);
 
     public boolean runIT;
 
     @Override
     protected void init()  {
-        projectPlugin.getProject()
+        projectBean.getProject()
             .getConstruction()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
@@ -100,11 +100,11 @@ public class CoreBuild extends JkBean {
 
 
     private Path distribFolder() {
-        return projectPlugin.getProject().getOutputDir().resolve("distrib");
+        return projectBean.getProject().getOutputDir().resolve("distrib");
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
+        final JkArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
         if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
                     SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
@@ -117,9 +117,9 @@ public class CoreBuild extends JkBean {
         final List<Path> ivySourceLibs = JkPathTree.of(getBaseDir()).goTo("jeka/libs-sources")
                 .andMatching(true, "ivy-*.jar").getFiles();
         distrib
-            .importFiles(getBaseDir().toAbsolutePath().getParent().resolve("LICENSE"))
+            .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"))
             .importDir(getBaseDir().resolve("src/main/dist"))
-            .importDir(getBaseDir().resolve("src/main/java/META-INF/bin"))
+            .importDir(getBaseDir().resolve("src/main/shell"))
             .importFiles(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()))
             .importFiles(artifactProducer.getArtifactPath(WRAPPER_ARTIFACT_ID));
         if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
@@ -133,8 +133,9 @@ public class CoreBuild extends JkBean {
             distrib.importFiles(artifactProducer.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
+        JkPathFile.of(distrib.get("wrapper/jekaw")).setPosixExecPermissions();
         makeDocs();
-        if (!projectPlugin.getProject().getConstruction().getTesting().isSkipped() && runIT) {
+        if (!projectBean.getProject().getConstruction().getTesting().isSkipped() && runIT) {
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
@@ -179,7 +180,7 @@ public class CoreBuild extends JkBean {
 
     private void makeDocs() {
         JkLog.startTask("Make documentation");
-        String version = projectPlugin.getProject().getPublication().getMaven().getVersion();
+        String version = projectBean.getProject().getPublication().getMaven().getVersion();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }
@@ -193,7 +194,7 @@ public class CoreBuild extends JkBean {
     private void doPackWithEmbedded(Path targetJar) {
 
         // Main jar
-        JkProject project = this.projectPlugin.getProject();
+        JkProject project = this.projectBean.getProject();
         project.getConstruction().createBinJar(targetJar);
         JkPathTree jarTree = JkPathTree.ofZip(targetJar);
 
@@ -226,14 +227,14 @@ public class CoreBuild extends JkBean {
     }
 
     private void doWrapper(Path wrapperJar) {
-        projectPlugin.getProject().getConstruction().getCompilation().runIfNeeded();
-        JkPathTree.of(projectPlugin.getProject().getConstruction().getCompilation().getLayout()
+        projectBean.getProject().getConstruction().getCompilation().runIfNeeded();
+        JkPathTree.of(projectBean.getProject().getConstruction().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void publishDocsOnGithubPage(String githubToken) {
         clean();
-        JkProject project = this.projectPlugin.getProject();
+        JkProject project = this.projectBean.getProject();
         Path javadocSourceDir = project.getDocumentation().getJavadocDir();
         Path tempRepo = getOutputDir().resolve("pagesGitRepo");
         String userPrefix = githubToken == null ? "" : githubToken + "@";
@@ -251,7 +252,7 @@ public class CoreBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        clean(); projectBean.pack();
     }
 
     // This method has to be run in dev.jeka.core (this module root) working directory
@@ -262,7 +263,7 @@ public class CoreBuild extends JkBean {
     public static class RunBuildAndIT {
         public static void main(String[] args) {
             CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args, "-runIT");
-            coreBuild.projectPlugin.pack();
+            coreBuild.projectBean.pack();
         }
     }
 
