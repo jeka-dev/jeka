@@ -78,7 +78,7 @@ public final class JkLocator {
     }
 
     public static Path getCacheDir() {
-        return ensureCreated(getJekaHomeDir().resolve("cache"));
+        return ensureCreated(getJekaUserHomeDir().resolve("cache"));
     }
 
     public static Path getCachedUrlContentDir() {

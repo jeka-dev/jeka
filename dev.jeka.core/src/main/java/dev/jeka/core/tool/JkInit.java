@@ -44,11 +44,11 @@ public final class JkInit {
             memoryBufferLogActivated = true;
         }
         try {
-            EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get("."));
+            EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get(""));
             List<EngineCommand> commands = new LinkedList<>();
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_REGISTRATION, clazz, null, null));
             commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, JkBean.name(clazz)));
-            JkRuntime jkRuntime = JkRuntime.get(Paths.get("."));
+            JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.init(commands);
             final T jkBean = jkRuntime.getBean(clazz);
             JkLog.info(jkBean.toString() + " is ready to run.");

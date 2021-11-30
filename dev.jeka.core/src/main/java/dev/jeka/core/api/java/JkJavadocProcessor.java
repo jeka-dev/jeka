@@ -128,7 +128,7 @@ public final class JkJavadocProcessor<T> {
         String exeName = JkUtilsSystem.IS_WINDOWS ? "javadoc.exe" : "javadoc";
         Path javadocExe = JkUtilsJdk.javaHome().resolve("bin/" + exeName);
         if (!Files.exists(javadocExe)) {
-            javadocExe = JkUtilsJdk.javaHome().resolve("src/main/shell/" + exeName).normalize();
+            javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
         }
         boolean verbose = JkUtilsObject.firstNonNull(displayOutput, JkLog.isVerbose());
         JkLog.trace(javadocExe.toString());
@@ -146,7 +146,7 @@ public final class JkJavadocProcessor<T> {
         int code = process.exec();
         if (code != 0) {
             JkLog.warn("An error occurred when generating Javadoc (staus error = " + code + "). Maybe there is no public class to document." +
-                    " Relaunch the process with -LV option to see details");
+                    " Relaunch the process with -lv option to see details");
         }
     }
 

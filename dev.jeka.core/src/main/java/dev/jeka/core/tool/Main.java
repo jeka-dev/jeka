@@ -48,11 +48,11 @@ public final class Main {
                 JkInit.displayRuntimeInfo();
             }
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
-                JkBusyIndicator.start("Preparing Jeka classes and instance (Use -LSU option for details)");
+                JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
                 JkMemoryBufferLogDecorator.activateOnJkLog();
                 JkLog.info("");   // To have a br prior the memory log is flushed
             }
-            final Path workingDir = Paths.get(".");
+            final Path workingDir = Paths.get("");
             final Engine engine = new Engine(workingDir);
             engine.execute(Environment.commandLine);   // log in memory are inactivated inside this method if it goes ok
             if (Environment.standardOptions.logBanner) {
@@ -75,9 +75,9 @@ public final class Main {
             } else {
                 System.err.println("An error occurred during def class execution.");
                 System.err.println("It may come from user code/setting or a bug in Jeka.");
-                System.err.println("You can investigate using the stacktrace below or by relaunching the command using option -LS=DEBUG.");
+                System.err.println("You can investigate using the stacktrace below or by relaunching the command using option -ls=DEBUG.");
                 if (!JkLog.isVerbose()) {
-                    System.err.println("You can also increase log verbosity using option -LV.");
+                    System.err.println("You can also increase log verbosity using option -lv.");
                 }
                 System.err.println("If error reveals to coming from Jeka engine, please report to " +
                         ": https://github.com/jerkar/jeka/issues");
@@ -108,7 +108,7 @@ public final class Main {
             return;
         }
         if (!Environment.standardOptions.logSetup) {
-            JkBusyIndicator.start("Preparing Jeka classes and instance (Use -LSU option for details)");
+            JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }
         final Engine engine = new Engine(projectDir);

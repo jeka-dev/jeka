@@ -106,7 +106,7 @@ public final class IntellijJkBean extends JkBean {
         final String xml = generator.generate();
         final Path imlFile = findIml(basePath);
         JkUtilsPath.deleteIfExists(imlFile);
-        JkUtilsPath.createDirectories(imlFile.getParent());
+        JkUtilsPath.createDirectories(imlFile.toAbsolutePath().normalize().getParent());
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));
         JkLog.info("Iml file generated at " + imlFile);
     }

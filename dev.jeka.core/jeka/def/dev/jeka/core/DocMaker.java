@@ -84,7 +84,7 @@ class DocMaker {
     }
 
     public static void main(String[] args) {
-        new DocMaker(Paths.get("."), Paths.get(JkConstants.OUTPUT_PATH + "/distrib"), "unspecified")
+        new DocMaker(Paths.get(""), Paths.get(JkConstants.OUTPUT_PATH + "/distrib"), "unspecified")
         .assembleAllDoc();
     }
 

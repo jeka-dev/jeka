@@ -219,7 +219,7 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
     }
 
     /**
-     * Adds a param -LV=[DecoratorStyle] matching the current one.
+     * Adds a param -lv=[DecoratorStyle] matching the current one.
      */
     public T inheritJkLogOptions() {
         if (JkLog.getDecoratorStyle() != null) {

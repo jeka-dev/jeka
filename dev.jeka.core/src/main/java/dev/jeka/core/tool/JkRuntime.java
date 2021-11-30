@@ -49,7 +49,7 @@ public final class JkRuntime {
 
     private static Path getBaseDirContext() {
         return Optional.ofNullable(BASE_DIR_CONTEXT.get()).orElseGet(() -> {
-            setBaseDirContext(Paths.get("."));
+            setBaseDirContext(Paths.get(""));
             return BASE_DIR_CONTEXT.get();
         });
     }

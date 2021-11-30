@@ -126,7 +126,7 @@ public final class JkImportedJkBeans {
         JkRuntime runtime = JkRuntime.get(importedProjectDir);
         JkRuntime.setBaseDirContext(importedProjectDir);
         final T result = JkRuntime.get(importedProjectDir).getBean(importedBeanClass);
-        JkRuntime.setBaseDirContext(Paths.get("."));
+        JkRuntime.setBaseDirContext(Paths.get(""));
         JkLog.endTask();
         return result;
     }
