@@ -81,6 +81,7 @@ public final class JkRepo {
      * Creates a Maven repository having the specified file location.
      */
     public static JkRepo of(Path dir) {
+        dir = dir.isAbsolute() ? dir : dir.toAbsolutePath().normalize();
         return JkRepo.of(dir.toString());
     }
 
