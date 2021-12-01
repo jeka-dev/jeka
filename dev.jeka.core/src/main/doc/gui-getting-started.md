@@ -23,16 +23,16 @@ The below example showcases how to write tasks executable both from IDE and comm
 
 * Right-click on the module, then _Jeka_ > _Generate Jeka files and folders..._
 
-![plot](images/generate-jeka-files.png)
+![plot](images/gui/generate-jeka-files.png)
 <br/><br/>
 * Dialog box will be open with default setting
 
-![plot](images/create-jeka-files.png)
+![plot](images/gui/create-jeka-files.png)
 
 * Select *SIMPLE* and click _OK_
 
 _You get the following..._
-![plot](images/scaffolded-1.png)
+![plot](images/gui/scaffolded-1.png)
 
 
 The _Jeka_ folder structure will be generated with an empty _Jeka_ class.
@@ -69,12 +69,12 @@ Your Jeka classes can also use any third party libraries available on your file 
 Let's add *guava* to our Commands class : just add the `@JkDefClasspath` annotation and refresh ide module to 
 make it available on IDE classpath.
 
-![plot](images/import-guava.png)
+![plot](images/gui/import-guava.png)
 
 <br/>
 Now you can use guava to improve your commands using *guava* inside.
 
-![plot](images/run-guava.png)
+![plot](images/gui/run-guava.png)
 
 <br/>
 
@@ -96,7 +96,7 @@ The box *'delegate Jeka Wrapper to'* means that the module *tutorial-2* will reu
 (and therefore the same Jeka version) than *tutorial-1*. That way, we can force all Java modules from a same Intellij 
 project, to use the same Jeka Version, defined in one place.
 
-![plot](images/create-jeka-files-java.png)
+![plot](images/gui/create-jeka-files-java.png)
 <br/><br/>
 
 This generates a Build template class in `jeka/def` along source folders.
@@ -104,13 +104,13 @@ This generates a Build template class in `jeka/def` along source folders.
 You can launch directly any method declared on this class or navigate in Jeka right tool to discover methods available 
 on this class or available plugin.
 
-![plot](images/scaffolded-java.png)
+![plot](images/gui/scaffolded-java.png)
 
 <br/><br/>
 After modifying your dependencies, do not forget to refresh module in order intellij take it in account.
 Invoke `cleanPack` to build project from scratch.
 
-![plot](images/refresh.png)
+![plot](images/gui/refresh.png)
 <br/><br/>
 Now your project is ready to code. You will find many project examples at https://github.com/jerkar/working-examples
 
@@ -137,7 +137,7 @@ This generates a sample project along its build class based on the last *Springb
 You can invoke regular commands as *clean*,*pack*, ... The plugin offers additional commands 
 to run the application from the built jar.
 
-![plot](images/scaffolded-springboot-1.png)
+![plot](images/gui/scaffolded-springboot-1.png)
 <br/><br/>
 
 The plugin proposes popular _Spring_ modules as constant to help pickup dependencies.
@@ -147,5 +147,5 @@ You can also switch Springboot version easily by changing `#springbootVersion` a
 **Do not forget to trigger 'Jeka Synchronize Module' available in context menues, each time you modify dependencies or change springboot version.
 It let Intellij synchronize its iml file with dependencies declared in Jeka.**
 
-![plot](images/scaffolded-springboot-2.png)
+![plot](images/gui/scaffolded-springboot-2.png)
 
