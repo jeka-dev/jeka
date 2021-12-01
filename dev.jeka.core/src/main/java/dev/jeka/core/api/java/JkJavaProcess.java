@@ -18,10 +18,12 @@ import java.util.Collection;
  */
 public class JkJavaProcess extends JkProcess<JkJavaProcess> {
 
-    public static final Path CURRENT_JAVA_DIR = Paths.get(System.getProperty("java.home")).resolve("bin");
+    public static final Path CURRENT_JAVA_HOME = Paths.get(System.getProperty("java.home"));
+
+    public static final Path CURRENT_JAVA_EXEC_DIR = CURRENT_JAVA_HOME.resolve("bin");
 
     protected JkJavaProcess() {
-        super(CURRENT_JAVA_DIR.resolve("java").toString());
+        super(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
     }
 
     /**

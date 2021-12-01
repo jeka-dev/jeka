@@ -262,10 +262,13 @@ public final class JkUrlClassLoader {
     }
 
     public void addEntries(Iterable<Path> paths) {
-        final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL",
-                URL.class);
-        for (final Path path : JkUtilsPath.disambiguate(paths)) {
-            JkUtilsReflect.invoke(this.delegate, method, JkUtilsPath.toUrl(path));
+        try {
+            final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
+            for (final Path path : JkUtilsPath.disambiguate(paths)) {
+                JkUtilsReflect.invoke(this.delegate, method, JkUtilsPath.toUrl(path));
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error while adding urls on classloader " + this, e);
         }
     }
 

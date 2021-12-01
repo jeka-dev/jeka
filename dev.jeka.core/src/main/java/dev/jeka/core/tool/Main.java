@@ -28,7 +28,7 @@ public final class Main {
      * Entry point for Jeka application when launched from command-line
      */
     public static void main(String[] args) {
-        if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader)) {
+        if (!(Thread.currentThread().getContextClassLoader() instanceof AppendableUrlClassloader)) {
             final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);
             final Object[] argArray = new Object[] {args};

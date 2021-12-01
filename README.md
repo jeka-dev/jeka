@@ -174,16 +174,13 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 
 ## Build Jeka from IntelliJ
 
-Note that it exists a now an IntelliJ plugin to integrate Jeka to get rid of the following setup.
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
 * Add the `JEKA_USER_HOME` variable pointing on [USER_HOME]/.jeka 
 * Make sure the project is configured with a JDK8 or higher.
-* Run `dev.jeka.core.CoreBuildAndIT` class main method. This class is located in *jeka/def* folder, inside *dev.jeka.core* module.
-  Make sure to run it using `$MODULE_WORKING_DIR$` as working directory.
-* This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder  and run full Integration test suite.
+* Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
+* Run 'CoreBuild - skip tests' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
 
-To build the project without running whole integration test suite, run `dev.jeka.core.CoreBuild` class main method.
 
 For debuging the project, you have to setup Intellij in order to workaround witj an Intellij issue :
 Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
