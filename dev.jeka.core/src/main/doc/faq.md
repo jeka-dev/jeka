@@ -27,8 +27,7 @@ If code must be compiled on a another JDK version, you can specify JDK path for 
 Just mention it as option, for example in your _[JEKA HOME]/options.properties_ file.
 
 ```
-jdk.9=/software/jdk9
-...
+jeka.jdk.9=/software/jdk9
 ```
 
 This way, if one of your project source code is declared to be in a specific Java version, the relevant JDK version will be picked up automatically.
@@ -40,10 +39,14 @@ Jeka can use any JSR199 Java compiler to compile your Java code. Just set the co
 ```java
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
-@JkDefClasspath("org.eclipse.jdt.core.compiler:ecj:4.6.1")
-public class Build extends JkClass{
-    java.getProject().getConstruction().getCompilation()
-             .getCompiler().setCompilerTool(new EclipseCompiler());
+@JkInjectClasspath("org.eclipse.jdt.core.compiler:ecj:4.6.1")
+public class Build extends JkBean {
+    
+    ...
+    project.getConstruction()
+            .getCompilation()
+                .getCompiler()
+                    .setCompilerTool(new EclipseCompiler());
 }
 ```
 

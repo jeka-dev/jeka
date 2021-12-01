@@ -813,80 +813,8 @@ JkProject.of().simpleFacade()
 If facade is not sufficient for setting up project build, it's still possible to complete through the main API.
 `JkProject` instances are highly configurable.
 
-Here is a pretty complete example inspired from the Jeka build itself.
+Here is a pretty complete example inspired from the [Jeka Build Class](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/jeka/def/dev/jeka/core/CoreBuild.java) .
 
-```Java
-project
-    .getConstruction()
-        .getManifest()
-            .addMainClass("dev.jeka.core.tool.Main").__
-        .getCompiler()
-            .setForkParams()
-        .__
-        .setJavaVersion(JkJavaVersion.V8)
-        .getCompilation()
-            .setDependencies(deps -> deps
-                   .and("com.google.guava:guava:21.0")
-                   .and("com.sun.jersey:jersey-server:1.19.4")
-                   .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
-            .getPreGenerateActions()
-                .append(this::tagIfReleaseMentionedInCurrentCommit)
-            .__
-            .getLayout()
-                .mixResourcesAndSources()
-            .__
-            .addOptions("-Xlint:none","-g")
-        .__
-        .getTesting()
-            .getCompilation()
-                .setDependencies(deps -> deps
-                   .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
-                .getLayout()
-                    .mixResourcesAndSources()
-                .__
-            .__
-            .getTestProcessor()
-                .getEngineBehavior()
-                    .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE)
-                .__
-            .__
-            .getTestSelection()
-                .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
-                .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)
-            .__
-        .__
-    .__
-    .getDocumentation()
-        .getJavadocProcessor()
-            .setDisplayOutput(false)
-            .addOptions("-notimestamp")
-        .__
-    .__
-    .getPublication()
-        .getPreActions()
-            .append(this::pushTagIfReleaseMentionedInCurrentCommit)
-        .__
-        .getArtifactProducer()
-            .putMainArtifact(this::doPackWithEmbedded)
-            .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
-            .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper)
-        .__
-        .getMaven()
-            .setModuleId("dev.jeka:jeka-core")
-            .setVersion(git::getVersionFromTag)
-            .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner("")))
-            .getPomMetadata()
-                .getProjectInfo()
-                    .setName("jeka")
-                    .setUrl("https://jeka.dev")
-                    .setDescription("Automate with plain Java code and nothing else.")
-                .__
-                .getScm()
-                    .setUrl("https://github.com/jerkar/jeka.git")
-                .__
-                .addApache2License()
-                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
-```
 
 ### Third Party Tool Integration
 

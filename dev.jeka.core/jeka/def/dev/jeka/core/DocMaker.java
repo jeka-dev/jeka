@@ -33,7 +33,7 @@ class DocMaker {
     DocMaker(Path baseDir, Path distribPath, String version) {
         docSource = JkPathTree.of(baseDir.resolve("src/main/doc"));
         docDist = distribPath.resolve("doc");
-        htmlTemplates = baseDir.resolve("jeka/doc-templates").toAbsolutePath().normalize();
+        htmlTemplates = docSource.getRoot().resolve("templates").toAbsolutePath().normalize();
         this.version = version;
     }
 
@@ -52,21 +52,6 @@ class DocMaker {
             final String name = path.getFileName().toString().replace(".md", ".html");
             JkUtilsPath.write(targetFolder.resolve(name), html.getBytes(UTF8));
         });
-        final String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
-        JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
-        JkPathTree.of(htmlTemplates).andMatching("**/*.css", "**/*.jpg", "**/*.svg", "**/*.js")
-            .copyTo(docDist.resolve("style"));
-    }
-
-    private String createSingleReferenceMdPage() {
-        final StringBuilder sb = new StringBuilder();
-        final List<Path> paths = docSource.goTo("Reference Guide").getFiles();
-        paths.sort(Path::compareTo);
-        for(final Path path : paths) {
-            final String content = new String(JkUtilsPath.readAllBytes(path), Charset.forName("UTF8"));
-            sb.append(content);
-        }
-        return sb.toString();
     }
 
     private String mdToHtml(String mdContent, String title) {

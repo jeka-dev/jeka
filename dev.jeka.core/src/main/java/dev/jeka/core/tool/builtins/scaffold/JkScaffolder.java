@@ -76,10 +76,11 @@ public final class JkScaffolder {
                 .fetchContentFrom(JkScaffolder.class.getResource(JkProperties.PROJECT_PROPERTY_FILE_NAME));
         JkPathFile.of(baseDir.resolve("jeka/cmd.properties"))
                 .fetchContentFrom(JkScaffolder.class.getResource("cmd.properties"));
-        JkPathFile.of(baseDir.resolve("jeka/welcome.md"))
-                .fetchContentFrom(JkScaffolder.class.getResource("welcome.md"));
+        Path manualHtml = JkLocator.getJekaHomeDir().resolve("doc/manual.html");
+        if (Files.exists(manualHtml)) {
+            JkPathFile.of(manualHtml).copyToDir(baseDir.resolve("jeka"));
+        }
         JkUtilsPath.createDirectories(baseDir.resolve(JkConstants.JEKA_DIR).resolve("boot"));
-
         extraActions.run();
     }
 
