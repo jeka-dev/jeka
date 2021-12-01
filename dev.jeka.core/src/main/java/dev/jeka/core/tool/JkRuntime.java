@@ -92,6 +92,7 @@ public final class JkRuntime {
     }
 
     void init(List<EngineCommand> commands) {
+        JkLog.trace("Initialize JkRuntime with " + commands);
         this.fieldInjections = commands.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
                 .collect(Collectors.toList());

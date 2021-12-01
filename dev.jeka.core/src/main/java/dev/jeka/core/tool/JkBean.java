@@ -113,7 +113,7 @@ public abstract class JkBean {
 
     @Override
     public String toString() {
-        return shortName() + " in " + this.runtime.getProjectBaseDir();
+        return shortName() + " in project '" + this.runtime.getProjectBaseDir() + "'";
     }
 }
 

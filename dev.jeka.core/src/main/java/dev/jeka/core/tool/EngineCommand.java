@@ -37,4 +37,13 @@ class EngineCommand {
         return value;
     }
 
+    @Override
+    public String toString() {
+        return "EngineCommand{" +
+                "action=" + action +
+                ", beanClass=" + beanClass +
+                ", member='" + member + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
 }

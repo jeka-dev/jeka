@@ -113,8 +113,8 @@ final class EngineSourceParser {
                     if (Files.exists(relativeFile)) {
                         depFile = relativeFile.normalize();
                     } else {
-                        JkLog.warn("File '" + dependency
-                                + "' mentionned in @JkInjectClasspath does not exist.");
+                        throw new JkException("In project '" + baseDir + "', file '" + dependency
+                                + "' mentioned in @" + JkInjectClasspath.class.getSimpleName() + " does not exist.");
                     }
                 }
                 result = result.andFiles(depFile);

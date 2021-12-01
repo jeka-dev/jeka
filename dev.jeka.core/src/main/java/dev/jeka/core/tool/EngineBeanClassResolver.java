@@ -4,6 +4,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
+import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
@@ -47,40 +48,44 @@ final class EngineBeanClassResolver {
     List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanName) {
         JkLog.startTask("Resolve KBean classes");
         Map<String, Class<? extends JkBean>> beanClasses = new HashMap<>();
-        if (commandLine.containsDefaultBean()) {
-            if (defaultBeanName == null) {
-                if (defBeanClassNames().isEmpty()) {
-                    throw new JkException("Cannot find any KBean in jeka/def dir. Use -KB=[beanName] to precise a " +
-                            "bean present in classpath or create a class extending JkBean into jeka/def dir.");
-                }
-                Class<? extends JkBean> defaultBeanClass = defBeanClasses().get(0);
-                beanClasses.put(null, defaultBeanClass);
-            } else {
-                List<String> matchingclassNames = findClassesMatchingName(defBeanClassNames(), defaultBeanName);
-                if (matchingclassNames.isEmpty()) {
-                    matchingclassNames = findClassesMatchingName(globalBeanClassNames(), defaultBeanName);
-                }
-                Class<? extends JkBean> selected = loadUniqueClassOrFail(matchingclassNames, defaultBeanName);
-                beanClasses.put(null, selected);
-            }
-        } else {
-            List<Class<? extends JkBean>> defaultBeanClasses = defBeanClasses();
-            if (!defaultBeanClasses.isEmpty()) {
-                beanClasses.put(null, defaultBeanClasses.get(0));
-            }
-        }
         for (String beanName : commandLine.involvedBeanNames()) {
             List<String> matchingClassNames = findClassesMatchingName(globalBeanClassNames(), beanName);
             Class<? extends JkBean> selected = loadUniqueClassOrFail(matchingClassNames, beanName);
             beanClasses.put(JkBean.name(selected), selected);
         }
+        Class<? extends JkBean> defaultBeanClass = defaultBeanClass(defaultBeanName);
+        List<EngineCommand> result = new LinkedList<>();
+        if (defaultBeanClass == null && commandLine.containsDefaultBean()) {
+            throw new JkException("Cannot find any KBean in jeka/def dir. Use -kb=[beanName] to precise a " +
+                    "bean present in classpath or create a class extending JkBean into jeka/def dir.");
+        }
+        beanClasses.put(null, defaultBeanClass);
+        if (defaultBeanClass != null) {
+            result.add(new EngineCommand(EngineCommand.Action.BEAN_REGISTRATION, defaultBeanClass,
+                    null, null));
+        }
+        commandLine.getBeanActions().stream()
+                .map(action -> toEngineCommand(action, beanClasses)).forEach(result::add);
         JkLog.endTask();
-        return commandLine.getBeanActions().stream()
-                .map(action -> toEngineCommand(action, beanClasses)).collect(Collectors.toList());
+        return Collections.unmodifiableList(result);
     }
 
     void setClasspath(JkPathSequence classpath) {
         this.classpath = classpath;
+    }
+
+    private Class<? extends JkBean> defaultBeanClass(String defaultBeanName) {
+        if (defaultBeanName == null) {
+            if (defBeanClassNames().isEmpty()) {
+                return null;
+            }
+            return defBeanClasses().get(0);
+        }
+        List<String> matchingclassNames = findClassesMatchingName(defBeanClassNames(), defaultBeanName);
+        if (matchingclassNames.isEmpty()) {
+            matchingclassNames = findClassesMatchingName(globalBeanClassNames(), defaultBeanName);
+        }
+        return loadUniqueClassOrFail(matchingclassNames, defaultBeanName);
     }
 
     private static Class<? extends JkBean> loadUniqueClassOrFail(List<String> matchingBeanClasses, String beanName) {
@@ -111,7 +116,10 @@ final class EngineBeanClassResolver {
             }
             cachedGlobalBeanClassName = JkInternalClasspathScanner.INSTANCE
                     .findClassedExtending(classLoader, JkBean.class, path -> true, true, false);
-            JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+            if (JkLog.isVerbose()) {
+                JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+                cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
+            }
         }
         return cachedGlobalBeanClassName;
     }
@@ -145,7 +153,10 @@ final class EngineBeanClassResolver {
             }
             cachedDefBeanClassNames = JkInternalClasspathScanner.INSTANCE.findClassedExtending(classLoader,
                     JkBean.class, EngineBeanClassResolver::scan, true, ignoreParent);
-            JkLog.trace("Def JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+            if (JkLog.isVerbose()) {
+                JkLog.trace("Def JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+                cachedDefBeanClassNames.forEach(className -> JkLog.trace("  " + className ));
+            }
         }
         return cachedDefBeanClassNames;
     }

@@ -1,18 +1,18 @@
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.plugins.springboot.SpringbootJkBean;
 
 @JkInjectClasspath("${dependencyDescription}")
-class Build extends JkClass {
+class Build extends JkBean {
 
-    private final SpringbootJkBean springboot = getJkBean(SpringbootJkBean.class);
+    private final SpringbootJkBean springboot = getRuntime().getBean(SpringbootJkBean.class);
 
     @Override
-    protected void setup() {
+    protected void init() {
         springboot.setSpringbootVersion("${springbootVersion}");
-        springboot.projectPlugin().getProject().simpleFacade()
+        springboot.projectBean().getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and("org.springframework.boot:spring-boot-starter-web")
             )
@@ -24,7 +24,7 @@ class Build extends JkClass {
 
     @JkDoc("Cleans, tests and creates bootable jar.")
     public void cleanPack() {
-        clean(); springboot.projectPlugin().pack();
+        clean(); springboot.projectBean().pack();
     }
 
     // Clean, compile, test and generate springboot application jar

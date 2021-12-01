@@ -58,7 +58,11 @@ final class Engine {
         super();
         this.projectBaseDir = baseDir;
         this.beanClassesResolver = new EngineBeanClassResolver(baseDir);
-        this.dependencyResolver = JkDependencyResolver.of().addRepos(getDownloadRepo(), JkRepo.ofLocal());
+        this.dependencyResolver = JkDependencyResolver.of()
+                .getParams()
+                    .setFailOnDependencyResolutionError(true)  // TODO set params at root of Dependency resolver
+                .__
+                .addRepos(getDownloadRepo(), JkRepo.ofLocal());
     }
 
     /**
@@ -67,8 +71,9 @@ final class Engine {
     void execute(CommandLine commandLine) {
         JkLog.startTask("Compile def and initialise KBeans");
         JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getDefDependencies());
-        JkLog.trace("Add following dependencies to def classpath : " + commandLineDependencies);
-        JkPathSequence computedClasspath = resolveAndCompile( new HashSet<>(), true);
+        JkLog.trace("Inject classpath from command line : " + commandLineDependencies);
+        JkPathSequence computedClasspath = resolveAndCompile( new HashSet<>(), true)
+            .andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
         AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
         beanClassesResolver.setClasspath(computedClasspath);
         if (commandLine.isHelp()) {
@@ -196,7 +201,7 @@ final class Engine {
     private void wrapCompile(Supplier<Boolean> compileTask) {
         boolean success = compileTask.get();
         if (!success) {
-            throw new JkException("Compilation of Jeka files failed. You can run jeka -KB= to use default KBean " +
+            throw new JkException("Compilation of Jeka files failed. You can run jeka -kb= to use default KBean " +
                     " instead of the ones defined in 'def'.");
         }
     }

@@ -64,7 +64,7 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("For internal test purpose. If not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
     public String scaffoldDefClasspath;
 
-    private final ProjectJkBean projectPlugin;
+    private final ProjectJkBean projectBean;
 
     private JkPom cachedSpringbootBom;
 
@@ -74,7 +74,7 @@ public final class SpringbootJkBean extends JkBean {
      * initialized in the constructor.
      */
     protected SpringbootJkBean() {
-        projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+        projectBean = getRuntime().getBean(ProjectJkBean.class);
     }
 
     public void setSpringbootVersion(String springbootVersion) {
@@ -84,12 +84,12 @@ public final class SpringbootJkBean extends JkBean {
     @Override
     @JkDoc("Modifies the Java project from Project plugin in such this project produces a SpringBoot jar as the main artifact.")
     protected void postInit() {
-        configure(projectPlugin.getProject());
+        configure(projectBean.getProject());
     }
 
     @JkDoc("Run Springboot application from the generated jar")
     public void run() {
-        JkArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
+        JkArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
         JkArtifactId mainArtifactId = artifactProducer.getMainArtifactId();
         artifactProducer.makeMissingArtifacts(mainArtifactId);
         Path mainArtifactFile = artifactProducer.getMainArtifactPath();
@@ -102,7 +102,7 @@ public final class SpringbootJkBean extends JkBean {
 
     @JkDoc("Run Springboot application from the generated jar")
     public void runAsync() {
-        JkArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
+        JkArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
         JkArtifactId mainArtifactId = artifactProducer.getMainArtifactId();
         artifactProducer.makeMissingArtifacts(mainArtifactId);
         Path mainArtifactFile = artifactProducer.getMainArtifactPath();
@@ -168,7 +168,7 @@ public final class SpringbootJkBean extends JkBean {
      * Creates the bootable jar at the standard location.
      */
     public void createBootJar() {
-        JkStandardFileArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
+        JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
         createBootJar(artifactProducer.getMainArtifactPath());
     }
 
@@ -176,8 +176,8 @@ public final class SpringbootJkBean extends JkBean {
      * Creates the bootable jar at the specified location.
      */
     public void createBootJar(Path target) {
-        JkProjectConstruction construction = projectPlugin.getProject().getConstruction();
-        JkStandardFileArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
+        JkProjectConstruction construction = projectBean.getProject().getConstruction();
+        JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
         JkDependencyResolver dependencyResolver = construction.getDependencyResolver();
         JkVersionProvider versionProvider = getSpringbootPom(dependencyResolver, springbootVersion).getVersionProvider();
         JkVersion loaderVersion = versionProvider.getVersionOf(JkSpringModules.Boot.LOADER);
@@ -185,9 +185,9 @@ public final class SpringbootJkBean extends JkBean {
                 JkModuleDependency.of(JkSpringModules.Boot.LOADER.withVersion(loaderVersion.getValue()));
         Path bootloader = dependencyResolver.resolve(bootloaderDep).getFiles().getEntry(0);
         final JkPathSequence embeddedJars = construction.getDependencyResolver().resolve(
-                construction.getRuntimeDependencies().normalised(projectPlugin.getProject().getDuplicateConflictStrategy()))
+                construction.getRuntimeDependencies().normalised(projectBean.getProject().getDuplicateConflictStrategy()))
                 .getFiles();
-        Path originalJarPath = projectPlugin.getProject().getPublication().getArtifactProducer().getArtifactPath(ORIGINAL_ARTIFACT);
+        Path originalJarPath = projectBean.getProject().getPublication().getArtifactProducer().getArtifactPath(ORIGINAL_ARTIFACT);
         if (!Files.exists(originalJarPath)) {
             construction.createBinJar(originalJarPath);
         }
@@ -195,8 +195,8 @@ public final class SpringbootJkBean extends JkBean {
                 artifactProducer.getMainArtifactPath(), springbootVersion);
     }
 
-    public ProjectJkBean projectPlugin() {
-        return projectPlugin;
+    public ProjectJkBean projectBean() {
+        return projectBean;
     }
 
     private JkPom getSpringbootPom(JkDependencyResolver dependencyResolver, String springbootVersion) {
@@ -240,14 +240,14 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("Scaffold a basic example application in package org.example")
     public void scaffoldSample() {
         String basePackage = "your/basepackage";
-        Path sourceDir = projectPlugin.getProject().getConstruction().getCompilation().getLayout()
+        Path sourceDir = projectBean.getProject().getConstruction().getCompilation().getLayout()
                 .getSources().getRootDirsOrZipFiles().get(0);
         Path pack = sourceDir.resolve(basePackage);
         URL url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Application.java");
         JkPathFile.of(pack.resolve("Application.java")).createIfNotExist().fetchContentFrom(url);
         url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Controller.java");
         JkPathFile.of(pack.resolve("Controller.java")).createIfNotExist().fetchContentFrom(url);
-        Path testSourceDir = projectPlugin.getProject().getConstruction().getTesting().getCompilation().getLayout()
+        Path testSourceDir = projectBean.getProject().getConstruction().getTesting().getCompilation().getLayout()
                 .getSources().getRootDirsOrZipFiles().get(0);
         pack = testSourceDir.resolve(basePackage);
         url = SpringbootJkBean.class.getClassLoader().getResource("snippet/ControllerIT.java");
@@ -261,7 +261,7 @@ public final class SpringbootJkBean extends JkBean {
 
     private String latestSpringbootVersion() {
         try {
-            List<String> springbootVersions = projectPlugin.getProject().getConstruction().getDependencyResolver()
+            List<String> springbootVersions = projectBean.getProject().getConstruction().getDependencyResolver()
                     .searchVersions(JkSpringModules.Boot.STARTER_PARENT);
             return springbootVersions.stream()
                     .sorted(JkVersion.VERSION_COMPARATOR.reversed())

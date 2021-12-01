@@ -13,7 +13,7 @@ class SpringbootSampleBuild extends JkBean {
     @Override
     protected void init() {
         springboot.setSpringbootVersion("2.5.5");
-        springboot.projectPlugin().getProject().simpleFacade()
+        springboot.projectBean().getProject().simpleFacade()
                 .setCompileDependencies(deps -> deps
                     .and(Boot.STARTER_WEB)  // Same as .and("org.springframework.boot:spring-boot-starter-web")
                     .and(Boot.STARTER_DATA_JPA)

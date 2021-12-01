@@ -12,25 +12,25 @@ Just declare the plugin in your Jeka class (in _[project Dir]/jeka/def_ ) as abo
 ```java
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.plugins.springboot.JkPluginSpringboot;
-import dev.jeka.core.tool.JkImport;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.plugins.springboot.SpringbootJkBean;
 
 import static dev.jeka.core.plugins.springboot.JkSpringModules.Boot;
 
-@JkImport("dev.jeka:springboot-plugin")
-class Build extends JkClass {
+@JkInjectClasspath("dev.jeka:springboot-plugin")
+class Build extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getJkBean(ProjectJkBean.class);
+    private final ProjectJkBean projectBean = getRuntime().getJkBean(ProjectJkBean.class);
 
-    private final JkPluginSpringboot springbootPlugin = getJkBean(JkPluginSpringboot.class); // Load springboot plugin.
+    private final springbootJkBean springbootBean = getRuntime().getJkBean(SpringbootJkBean.class); // Load springboot plugin.
 
     @Override
     protected void setup() {
-        springbootPlugin.springbootVersion = "2.0.3.RELEASE";
-        projectPlugin.getProject().addDependencies(JkDependencySet.of()
+        springbootBean.springbootVersion = "2.5.5";
+        springbootBean.getProject().addDependencies(JkDependencySet.of()
                 .and(Boot.STARTER_WEB)
                 .and(Boot.STARTER_TEST, JkJavaDepScopes.TEST)
         );
@@ -60,7 +60,7 @@ It adds great comfort when picking some Spring dependencies.
  
 ```java
     ...
-    javaPlugin.getProject().addDependencies(JkDependencySet.of()
+    projectBean.getProject().addDependencies(JkDependencySet.of()
             .and(Boot.STARTER_WEB)
             .and(Boot.STARTER_TEST, JkJavaDepScopes.TEST)
             .and(Fwk.JDBC)
