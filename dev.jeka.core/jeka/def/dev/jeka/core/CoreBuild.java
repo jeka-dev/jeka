@@ -118,7 +118,6 @@ public class CoreBuild extends JkBean {
                 .andMatching(true, "ivy-*.jar").getFiles();
         distrib
             .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"))
-            .importDir(getBaseDir().resolve("src/main/dist"))
             .importDir(getBaseDir().resolve("src/main/shell"))
             .importFiles(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()))
             .importFiles(artifactProducer.getArtifactPath(WRAPPER_ARTIFACT_ID));
