@@ -11,9 +11,9 @@ _Jeka_ automation code can be run indifferently from IDE (via classic `main` met
 to a bundled lean and fast execution engine. This engine comes with a small set of concepts promoting simplicity,
 flexibility and re-usability.
 
-## Execution engine
+# Execution engine
 
-### Jeka directory content 
+## Jeka directory content 
 
 By convention, every project automated or built by Jeka contains a _jeka_ directory at its root (_[Project Root]/jeka_). 
 This directory contains everything _Jeka_ needs to automate or build the project.
@@ -34,7 +34,7 @@ Besides, project root may also contains _jekaw_ and _jekaw.bat_ shell scripts to
 For the following, when we refer to the command `jeka`, you can use `./jekaw` indifferently.
 All command lines are supposed to be launched from the root of the project (and not from _[Project Root]/jeka_).
 
-### What is Jeka wrapper
+## What is Jeka wrapper
 
 Jeka wrapper consists in shell scripts, a thin booting jar and a configuration file in order _Jeka_ can be executed on a specified 
 version without being installed on the host machine. This is the recommended way of using _Jeka_ as it makes  builds 
@@ -45,7 +45,7 @@ portable from one machine to another.
   version on the host machine prior to launch _Jeka_
 * __jeka/wrapper/wrapper.properties__ specifies the _Jeka_ version to use.
 
-### What is inside _[User Home]/.jeka_
+## What is inside _[User Home]/.jeka_
 
 _Jeka_ automatically creates a directory  _[User Home]/.jeka_ when running for the first time. This directory may contain
 * __options.properties__ (file - optional) : Properties defined at global level (see later section).
@@ -55,7 +55,7 @@ _Jeka_ automatically creates a directory  _[User Home]/.jeka_ when running for t
 
 In the contrary of Maven, _Jeka_ does not publish locally on the same repository where are downloaded dependency artifacts.
 
-### Setup _Jeka_
+## Setup _Jeka_
 
 __Note :__ _Jeka_ organization provides a [plugin](https://plugins.jetbrains.com/plugin/13489-jeka/) to make the following
 tasks smoother or transparent. Here, we'll focus only on how to do it using command line.
@@ -65,29 +65,29 @@ found in your _PATH_ environment variable. See later sections for changing this 
 
 There is two ways of using _jeka_ : by installing _Jeka_ itself of by using a template project containing the _Jeka_ wrapper.
 
-#### Install _Jeka_
+### Install _Jeka_
 
 * Download the latest release from [here](https://search.maven.org/search?q=g:%22dev.jeka%22%20AND%20a:%22jeka-core%22)
   and unpack the _distrib.zip_ wherever you want on your machine. We'll refer to this directory as [JEKA HOME].
 * Add [JEKA HOME] to your _PATH_ environment variable.
 * Now, you can now use `jeka` command from everywhere.
 
-#### Or use a Template Wrapper Project
+### Or use a Template Wrapper Project
 
 * Clone template blank project from https://github.com/jerkar/blank-template-project.git
 * Now, you can use `jekaw` command from your local directory.
 
-#### Setup IDE
+### Setup IDE
 
 * Add an IDE _path variable_ ***JEKA_USER_HOME*** pointing on _[USER HOME]/.jeka_. In _Intellij_ :  **Settings... | Appearance & Behavior | Path Variables**
 * If you use `jeka` instead of `jekaw`, add an IDE _path variable_ ***JEKA_HOME*** pointing on [JEKA HOME].
 
-### Basic Project 
+## Basic Project 
 
 In first instance, we'll focus on how execution engine works. For simplicity's sake, we'll use trivial examples.
 Concrete real-life cases, as building projects, will be documented in specific sections.
 
-#### Create Project Structure
+### Create Project Structure
 
 * Create the root dir of the project or use the _template wrapper project_ mentioned above. 
 * At project root, execute `jeka scaffold#run scaffold#wrap` (or just `jekaw scaffold#run` if using the template wrapper project).
@@ -96,7 +96,7 @@ Concrete real-life cases, as building projects, will be documented in specific s
 
 Execute `jeka -h` (or simply `jeka`) to display a contextual help on the console.
 
-### KBeans
+## KBeans
 
 _KBean_ is the central concept of execution engine. It consists in classes sharing characteristics :
 * Extending `JkBean`
@@ -122,7 +122,7 @@ Generally _KBeans_ interact with each other inside their `init` method. They acc
 When a _KBean_ depends on another one, it's good to declare it as an instance property of the first bean as this 
 dependency will be mentioned in the quto-generated documentation.
 
-#### Create a Basic KBean
+### Create a Basic KBean
 
 * Create a class extending `JKBean` in _def_ source dir.
 * Declare a public field of a simple type (String, boolean, int, float, enum, date, composite objects of simple types).
@@ -138,7 +138,7 @@ ___Extras___
 * For more details about accepted field injected types, see `dev.jeka.core.tool.FieldInjector#parse` method.
 * _KBean_ properties can also been nested composite objects, see example in `dev.jeka.core.tool.builtins.project.ProjectJkBean#pack` field.
 
-#### 3rd party dependencies
+### 3rd party dependencies
 
 Jeka embeds a bunch of utilities to perform build related tasks (file/zip manipulation, git, launching processes, compilation, testing, dependency management, crypto, ...) 
 nevertheless, you may want rightfully to use some 3rd-party dependencies.
@@ -154,7 +154,7 @@ nevertheless, you may want rightfully to use some 3rd-party dependencies.
   * Be aware that a dependencies imported via `@JkInjectClasspath` annotation is imported for all build classes and not only for annotated class.
 * The last way is to add it at execution time by mentioning either a module coordinate or a file path in the command line using '@' as in `@my.org:a-jeka-plugin:1.0.0`.
 
-#### Import _KBean_ from other Projects
+### Import _KBean_ from other Projects
 
 In multi-project build, it's quite common that a _KBean_ accesses to a _KBean_ instance coming from another project. 
 You can achieve it in a statically typed way.
@@ -167,11 +167,11 @@ You can achieve it in a statically typed way.
 * See example [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.master/jeka/def/MasterBuild.java).
 * Be careful that the imported _KBean_ deals with file paths using `JkClass#getBaseDir` in order it can be safely executed from any working directory.
 
-#### Launch and Debug from the IDE
+### Launch and Debug from the IDE
 
 There's 2 ways of launching or debugging _Jeka_ builds from IDE. We don't mention here, usage of [Intellij plugin](https://github.com/jerkar/jeka-ide-intellij).
 
-##### Create a `main` Method inside your _def_ Classes
+#### Create a `main` Method inside your _def_ Classes
 
 Create one or many main methods as :
 ```
@@ -195,7 +195,7 @@ Be careful to launch the _main_ method using _module dir_ as _working dir_. On _
 
 To change _intelliJ_ defaults, follow : *Edit Configurations | Edit configuration templates... |  Application | Working Directory : $MODULE_DIR$*.
 
-##### Configure an IDE Launcher 
+#### Configure an IDE Launcher 
 
 Sometimes, you may need to mimic closer the command line behavior, for debugging purpose or to pass '@' arguments.
 
@@ -203,7 +203,7 @@ Sometimes, you may need to mimic closer the command line behavior, for debugging
 * Set `dev.jeka.tool.Main` as Java main class.
 * Set the same command line arguments as you would do for invoking from command line (Do not include _jeka_ command).
 
-### More about KBeans
+## More about KBeans
 
 When executing, Jeka will first determine the _default KBean_ to instantiate it. The _default KBean_ is 
 determined as follows :
@@ -217,7 +217,7 @@ The _KBean instantiation_ consists in :
 
 The `init` method of the _default KBean_ can, in turn, inkove oth
 
-### Properties
+## Properties
 
 Properties are pairs of String  _key-value_ that are used across Jeka system. It typically carries urls, local paths,
 tool versions or credentials. They can be globally accessed using `JkProperties#get*` static method.
@@ -235,7 +235,7 @@ Standard properties :
 * `jeka.repos.download.url` : Base url of the repository used to download dependencies (see later)
 * `jeka.kotlin.version` : Version of Kotlin used for compiling both _def_ and project Koltlin sources.
 
-### Useful commands 
+## Useful commands 
 
 _Jeka_ comes with predefined methods coming either from `JkClass` or built-in plugins. 
 
@@ -248,7 +248,7 @@ _Jeka_ comes with predefined methods coming either from `JkClass` or built-in pl
 * `jeka scaffold#wrap` : Generates wrapper files (jekaw/jekaw.bat and bootstrap jar)
 * `jeka scaffold#run java#` : Generate files for creating a Jeka project for building a JVM language project
 
-### Useful standard options
+## Useful standard options
 
 You can add these options to you command line.
 
@@ -263,7 +263,7 @@ You can add these options to you command line.
 * `-lv` : Alters console output by displaying trace logs (emitted by `JkLog#trace`)
 * `-dcf` : Force compilation of _def_ classes, even if they are marked as up-to-date.
 
-### How to change the JDK that will run _Jeka_
+## How to change the JDK that will run _Jeka_
 
 To determine the JDK to run upon, _jeka_ looks in priority order at :
 * _JEKA_JDK_ environment variable ([_JEKA_JDK_]/bin/java must point on _java_ executable)
@@ -271,7 +271,7 @@ To determine the JDK to run upon, _jeka_ looks in priority order at :
 
 If none of these variables are present, _jeka_ will run upon the _java_ executable accessible from your _PATH_ environment.
 
-### How to change the repository _Jeka_ uses to fetch dependencies 
+## How to change the repository _Jeka_ uses to fetch dependencies 
 
 By default, _jeka_ fetch dependencies from maven central (https://repo.maven.apache.org/maven2).
 
@@ -281,12 +281,12 @@ We recommend storing this value in your [USER DIR]/.jeka/options.properties file
 For more details, see `JkRepoFromOptions` javadoc.
 
 
-## The Build Library
+# The Build Library
 
 Jeka contains a library for all regular things you need to build/test/publish projects..
 The library does not depend on the execution engine and has zero dependency. 
 
-### API Style
+## API Style
 
 _Jeka_ tries to stick with a consistent API design style.
 
@@ -306,7 +306,7 @@ Both provide a fluent interface when possible.
   * Methods starting with `add` to add a value to a collection property.
   Those methods return the object itself for chaining.
 
-### Domains Covered by the API
+## Domains Covered by the API
 
 The previous example demonstrates how the Java/project API can be used to build and publish Java projects. This API
 relies on other lower level ones provided by _Jeka_. In a glance these are the domains covered by the _Jeka_ APIs :
@@ -322,7 +322,7 @@ relies on other lower level ones provided by _Jeka_. In a glance these are the d
 * __Support :__ Set of utility class with static methods to handle low-level concerns
 
 
-### Files
+## Files
 
 File manipulation is a central part for building software.
 Jeka embraces JDK7 *java.nio.file* API by adding some concepts around, to provide a powerful fluent style API performing
@@ -359,7 +359,7 @@ JkPathTree.of("build/classes").zipTo(Paths.get("mylib.jar"));
 
 ```
 
-### System
+## System
 
 The `dev.jeka.core.api.system` package provides system level functions :
 
@@ -374,13 +374,13 @@ The `dev.jeka.core.api.system` package provides system level functions :
 
 * `JkPrompt` One-liner to ask user input.
 
-### Dependency Management
+## Dependency Management
 
 Dependency management API let define, fetch and publish dependencies. Api classes belong to `dev.jeka.core.api.depmanagement` [package](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement)
 
-#### Concepts
+### Concepts
 
-##### Dependency
+#### Dependency
 
 For Jeka, a _dependency_ is something that can be resolved to a set of files by a `JkDependencyResolver`.
 Generally a dependency resolves to 1 file (or folder) but it can be 0 or many.
@@ -397,7 +397,7 @@ For the last, Jeka is using _Ivy 2.5.0_ under the hood.
 Jeka jar embeds Ivy and executes it in a dedicated classloader to be hidden for client code.
 
 ![image](images/manual/JkDependency.png)
- ###### JkModuleDependencies (dependency on module through coordinates)
+ ##### JkModuleDependencies (dependency on module through coordinates)
 
 This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository. Basically you instantiate a `JkModuleDepency` from it's group, name and version.
 
@@ -414,7 +414,7 @@ Note that :
 * As Jeka relies on Ivy under the hood, it accepts dynamic versions as mentioned [here](http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html).
 * Dependency files are downloaded in _[USER HOME]_/.jeka/cache/repo
 
-###### JkFileSystemSependency (dependency on local files)
+##### JkFileSystemSependency (dependency on local files)
 
 Just mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
 
@@ -422,7 +422,7 @@ Just mention the path of one or several files. If one of the files does not exis
     JkDependencySet.of().andFiles("libs/my.jar", "libs/my.testingtool.jar");
 ``` 
 
-###### JkComputedDependenciy (dependency on files produced by computation)
+##### JkComputedDependenciy (dependency on files produced by computation)
 
 It is typically used for _multi-modules_ or _multi-techno_ projects.
 
@@ -449,7 +449,7 @@ JkDependencySet deps = JkDependencySet.of()
     .and(externalProject);
 ```
 
-##### DependencySet 
+#### DependencySet 
 
 A _dependencySet_ (`JkDependencySet`) is an ordered bunch of dependencies used for a given purpose (compilation,
 war packaging, testing, ...). It can contain any kind of `JkDependency`. See [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java)
@@ -508,7 +508,7 @@ org.projectlombok:lombok:1.16.16
 </details>
 
 
-##### Transiitivity
+#### Transiitivity
 
 Mainstream build tools use a single concept ('scope' or 'configuration') to determine both :
 1. Which part of the build needs the dependency
@@ -574,7 +574,7 @@ The API allows to redefine the transitivity declared in a upper dependency set.
 Note that transitivity can only apply to `JkModuleDependency` (like <i>com.google.guava:guava:23.0</i>)
 and `JkLocalProjectDependency`.
 
-#### Resolve Dependencies
+### Resolve Dependencies
 
 The `JkDependencyResolver` class is responsible JkDependencyResolver.of(JkRepo.ofMavenCentral());to resolve dependencies by returning `JkResolveResult` from a
 `JkdependencySet`.
@@ -605,13 +605,13 @@ JkPathSequence sequence = result.getFiles();
 sequence.forEach(System.out::println); // print each files part of the dependency resolution
 ```
 
-#### Publication
+### Publication
 
 Jeka is able to publish on both Maven and Ivy repository. This includes repositories as [Sonatype Nexus](http://www.sonatype.org/nexus/).
 
 Maven and Ivy have different publication model, so Jeka proposes specific APIs according you want to publish on a Maven or Ivy repository.
 
-##### Publish to a Maven repository
+#### Publish to a Maven repository
 
 Jeka proposes a complete API to pubish on Maven repository. POM files will be generated by Jeka according
 provided elements.
@@ -662,7 +662,7 @@ Notice that Jeka allows to :
 
 To sign with PGP, no need to have PGP installed on Jeka machine. Jeka uses <a href="https://www.bouncycastle.org/">Bouncy Castle</a> internally to sign artifacts.
 
-##### Publish to a Ivy repository
+#### Publish to a Ivy repository
 
 Publishing on Ivy repo is pretty similar than on Maven though there is specific options to Ivy.
 
@@ -682,11 +682,11 @@ Publishing on Ivy repo is pretty similar than on Maven though there is specific 
             Instant.now(), JkVersionProvider.of());
 ```
 
-## Project Building
+# Project Building
 
 Jeka features high-level and low-level classes to deal with Java builds and JVM concepts.
 
-### Java Tool Base API
+## Java Tool Base API
 
 Base classes are used as foundation for implementing Jeka high-level build API but they can be used directly in a low level build description.
 These classes belong to `dev.jeka.core.api.java` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java).
@@ -703,7 +703,7 @@ These classes belong to `dev.jeka.core.api.java` [package](https://github.com/je
 
 * `JkManifest` Stands for the manifest file to include in jar files.
 
-### Testing API
+## Testing API
 
 Jeka features a simple yet powerful API to launch tests. It relies entirely on JUnit5. This means that any test framework supported by Junit5 platform.
 
@@ -720,7 +720,7 @@ The API classes all belongs to `dev.jeka.core.api.java.testing` [package](https:
   also possible to code against *JUnit Platform*
 
 
-### Project API
+## Project API
 
 This is the Jeka high-level API to build Java/JVM projects. API classes belong to  `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
 
@@ -823,25 +823,25 @@ If facade is not sufficient for setting up project build, it's still possible to
 Here is a pretty complete example inspired from the [Jeka Build Class](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/jeka/def/dev/jeka/core/CoreBuild.java) .
 
 
-### Third Party Tool Integration
+## Third Party Tool Integration
 
 The `dev.jeka.core.api.tooling` package provides integration with tools developers generally deal with.
 
-#### Eclipse
+### Eclipse
 
 `JkEclipseClasspathGenerator` and `JkEclipseProjectGenerator` provides method to generate a proper .classpath and .project file respectively.
 
 `JkEclipseClasspathApplier` reads information from a .classpath file.
 
-#### Intellij
+### Intellij
 
 `JkIntellijImlGenerator` generates proper .iml files.
 
-#### Git
+### Git
 
 `JkGitWrapper` wraps common Git commands in a lean API.
 
-#### Maven
+### Maven
 
 `JkMvn` wraps Maven command line in a lean API
 
