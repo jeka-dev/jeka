@@ -397,8 +397,59 @@ For the last, Jeka is using _Ivy 2.5.0_ under the hood.
 Jeka jar embeds Ivy and executes it in a dedicated classloader to be hidden for client code.
 
 ![image](images/manual/JkDependency.png)
+ ###### JkModuleDependencies (dependency on module through coordinates)
 
-##### Dependency Set
+This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository. Basically you instantiate a `JkModuleDepency` from it's group, name and version.
+
+```Java
+    JkDependencySet.of()
+        .and(JkPopularModule.GUAVA, "18.0")
+        .and("com.orientechnologies:orientdb-client:[2.0.8, 2.1.0[")
+        .and("mygroup:mymodule:myclassifier:0.2-SNAPSHOT");
+```
+There is many way to indicate a module dependency, see Javadoc for browsing possibilities.
+
+Note that :
+* A version ending by `-SNAPSHOT` has a special meaning : Jeka will consider it _"changing"_. This means that it won't cache it locally and will download the latest version from repository.
+* As Jeka relies on Ivy under the hood, it accepts dynamic versions as mentioned [here](http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html).
+* Dependency files are downloaded in _[USER HOME]_/.jeka/cache/repo
+
+###### JkFileSystemSependency (dependency on local files)
+
+Just mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
+
+```Java
+    JkDependencySet.of().andFiles("libs/my.jar", "libs/my.testingtool.jar");
+``` 
+
+###### JkComputedDependenciy (dependency on files produced by computation)
+
+It is typically used for _multi-modules_ or _multi-techno_ projects.
+
+The principle is that if the specified files are not present, the computation is run in order to generate the missing files.
+If some files still missing after the computation has run, the build fails.
+
+This mechanism is quite simple yet powerful as it addresses following use cases :
+
+* Dependencies on files produced by an artifact producer (`JkArtifactProducer`). A `JkProject` is an artifact producer.
+* Dependencies on files produced by external build tool (Ant, Maven, Gradle, SBT, Android SDK, Make, npm ...).
+* ... In other words, files produced by any means.
+
+The generic way is to construct this kind of dependency using a `java.lang.Runnable`.
+
+The following snippet constructs a set of dependencies on two external projects : one is built with Maven, the other with
+_Jeka_.
+```Java
+Path mavenProject = Paths.get("../a-maven-project");
+JkProcess mavenBuild = JkProcess.of("mvn", "clean", "install").withWorkingDir(mavenProject);
+Path mavenProjectJar = mavenProject.resolve("target/maven-project.jar");
+JkJavaProject externalProject = JkJavaProject.ofSimple(Paths.get("../a-jeka-project")); 
+JkDependencySet deps = JkDependencySet.of()
+    .and(JkComputedDependency.of(mavenBuild, mavenProjectJar))
+    .and(externalProject);
+```
+
+##### DependencySet 
 
 A _dependencySet_ (`JkDependencySet`) is an ordered bunch of dependencies used for a given purpose (compilation,
 war packaging, testing, ...). It can contain any kind of `JkDependency`. See [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java)
@@ -409,9 +460,55 @@ _dependencySet_ also defines :
 
 It is designed as an immutable object where we can apply set theory operations for adding, removing or
 merging with other dependencies and _dependencySet_.
+ 
+<details>
+ <summary>Example of dependency set</summary>
 
 
-##### Transitivity
+```Java
+JkDependencySet deps = JkDependencySet.of()
+    .and("com.google.guava") 
+    .and("org.slf4j:slf4j-simple")
+    .and("com.orientechnologies:orientdb-client:2.0.8")
+    .andFile("../libs.myjar")
+    .withVersionProvider(myVersionProvider);
+```
+ </details>
+
+Note that :
+
+* Module version and scopes can be omitted when declaring dependencies. Versions can be provided by a `JkVersionProvider`.
+* Instances of `JkDependencySet` can be combined together in order to construct large _dependencySet_ from smaller ones.
+* `JkDependencySet#ofTextDescription` provides a mean to instantiate a dependency set from a simple text.
+
+ <details>
+ <summary>Example of text describing dependencies</summary>
+
+```
+- COMPILE+RUNTIME
+org.springframework.boot:spring-boot-starter-thymeleaf
+org.springframework.boot:spring-boot-starter-data-jpa
+
+- RUNTIME
+com.h2database:h2
+org.liquibase:liquibase-core
+com.oracle:ojdbc6:12.1.0
+
+- TEST
+org.springframework.boot:spring-boot-starter-test
+org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
+org.fluentlenium:fluentlenium-assertj:3.2.0
+org.fluentlenium:fluentlenium-junit:3.2.0
+
+- COMPILE
+org.projectlombok:lombok:1.16.16
+```
+ </details>
+ 
+</details>
+
+
+##### Transiitivity
 
 Mainstream build tools use a single concept ('scope' or 'configuration') to determine both :
 1. Which part of the build needs the dependency
@@ -458,9 +555,11 @@ It results in :
 Declared Compile Dependencies : 2 elements.
   com.google.guava:guava:23.0 transitivity:NONE
   javax.servlet:javax.servlet-api:4.0.1
+  
 Declared Runtime Dependencies : 2 elements.
   com.google.guava:guava:23.0 transitivity:RUNTIME
   org.postgresql:postgresql:42.2.19
+  
 Declared Test Dependencies : 4 elements.
   org.mockito:mockito-core:2.10.0
   com.google.guava:guava:23.0 transitivity:RUNTIME
@@ -474,102 +573,6 @@ The API allows to redefine the transitivity declared in a upper dependency set.
 
 Note that transitivity can only apply to `JkModuleDependency` (like <i>com.google.guava:guava:23.0</i>)
 and `JkLocalProjectDependency`.
-
-
-##### Define a _dependencySet_
-
-Here is an example of `JkDependencySet` instantiation.
-
-```Java
-import static dev.jeka.core.api.depmanagement.JkScopes.*;
-...
-JkDependencySet deps = JkDependencySet.of()
-    .and("com.google.guava") 
-    .and("org.slf4j:slf4j-simple")
-    .and("com.orientechnologies:orientdb-client:2.0.8")
-    .andFile("../libs.myjar")
-    .withVersionProvider(myVersionProvider);
-```
-
-Note that :
-
-* Module version and scopes can be omitted when declaring dependencies. Versions can be provided by a `JkVersionProvider`.
-* Instances of `JkDependencySet` can be combined together in order to construct large _dependencySet_ from smaller ones.
-* `JkDependencySet#ofTextDescription` provides a mean to instantiate a dependency set from a simple text as :
-
-
-```
-- COMPILE+RUNTIME
-org.springframework.boot:spring-boot-starter-thymeleaf
-org.springframework.boot:spring-boot-starter-data-jpa
-
-- RUNTIME
-com.h2database:h2
-org.liquibase:liquibase-core
-com.oracle:ojdbc6:12.1.0
-
-- TEST
-org.springframework.boot:spring-boot-starter-test
-org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
-org.fluentlenium:fluentlenium-assertj:3.2.0
-org.fluentlenium:fluentlenium-junit:3.2.0
-
-- COMPILE
-org.projectlombok:lombok:1.16.16
-```
-
-
-##### Dependencies on Module
-
-This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository. Basically you instantiate a `JkModuleDepency` from it's group, name and version.
-
-```Java
-    JkDependencySet.of()
-        .and(JkPopularModule.GUAVA, "18.0")
-        .and("com.orientechnologies:orientdb-client:[2.0.8, 2.1.0[")
-        .and("mygroup:mymodule:myclassifier:0.2-SNAPSHOT");
-```
-There is many way to indicate a module dependency, see Javadoc for browsing possibilities.
-
-Note that :
-* A version ending by `-SNAPSHOT` has a special meaning : Jeka will consider it _"changing"_. This means that it won't cache it locally and will download the latest version from repository.
-* As Jeka relies on Ivy under the hood, it accepts dynamic versions as mentioned [here](http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html).
-* Dependency files are downloaded in _[USER HOME]_/.jeka/cache/repo
-
-#### Dependencies on local files
-
-Just hmention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
-
-```Java
-    JkDependencySet.of().andFiles("libs/my.jar", "libs/my.testingtool.jar");
-``` 
-
-##### Dependencies on files produced by computation
-
-It is typically used for _multi-modules_ or _multi-techno_ projects.
-
-The principle is that if the specified files are not present, the computation is run in order to generate the missing files.
-If some files still missing after the computation has run, the build fails.
-
-This mechanism is quite simple yet powerful as it addresses following use cases :
-
-* Dependencies on files produced by an artifact producer (`JkArtifactProducer`). A `JkProject` is an artifact producer.
-* Dependencies on files produced by external build tool (Ant, Maven, Gradle, SBT, Android SDK, Make, npm ...).
-* ... In other words, files produced by any means.
-
-The generic way is to construct this kind of dependency using a `java.lang.Runnable`.
-
-The following snippet constructs a set of dependencies on two external projects : one is built with Maven, the other with
-_Jeka_.
-```Java
-Path mavenProject = Paths.get("../a-maven-project");
-JkProcess mavenBuild = JkProcess.of("mvn", "clean", "install").withWorkingDir(mavenProject);
-Path mavenProjectJar = mavenProject.resolve("target/maven-project.jar");
-JkJavaProject externalProject = JkJavaProject.ofSimple(Paths.get("../a-jeka-project")); 
-JkDependencySet deps = JkDependencySet.of()
-    .and(JkComputedDependency.of(mavenBuild, mavenProjectJar))
-    .and(externalProject);
-```
 
 #### Resolve Dependencies
 
@@ -726,6 +729,9 @@ It introduces the concept of `JkProject` from where is performed compilation, te
 
 The API contains a lot of extension points to add specific behaviors.
 
+<details>
+ <summary>Project API structure</summary>
+
 ```
 project
 +- baseDir
@@ -787,6 +793,7 @@ project
 |  +- methods : pack(), publish(), getVersion(), getModuleId()
 + methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport()
 ```
+ </details>
 
 For simplicity’s sake, `JkProject` provides a facade in order to setup common settings friendly,
 without navigating deep into the structure. From facade, you can
