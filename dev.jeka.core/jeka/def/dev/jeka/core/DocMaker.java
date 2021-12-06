@@ -128,7 +128,7 @@ class DocMaker {
         }
     }
 
-    static class MenuItem {
+    private static class MenuItem {
 
         final String title;
 
