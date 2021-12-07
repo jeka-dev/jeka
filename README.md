@@ -26,38 +26,40 @@ Jeka offers an execution engine, a build API and a powerful plugin architecture 
 
 ```java
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.plugins.springboot.SpringbootJkBean;
 
-@JkDefClasspath("dev.jeka:springboot-plugin")
-class Build extends JkClass {
+@JkInjectClasspath("dev.jeka:springboot-plugin")
+class Build extends JkBean {
 
-  private final SpringbootJkBean springboot = getRuntime().getBean(SpringbootJkBean.class);
+    private final SpringbootJkBean springboot = getRuntime().getBean(SpringbootJkBean.class);
 
-  public boolean runIT = true;
+    public boolean runIT = true;
 
-  @Override
-  protected void setup() {
-    springboot.setSpringbootVersion("2.2.6.RELEASE");
-    JkProject project = springboot.projectBean().getProject();
-    project.simpleFacade()
-            .setCompileDependencies(deps -> deps
-                    .and("org.springframework.boot:spring-boot-starter-web")
-                    .and("org.projectlombok:lombok:1.18.20")
-            )
-            .setRuntimeDependencies(deps -> deps
-                    .minus("org.projectlombok:lombok")
-            )
-            .setTestDependencies(deps -> deps
-                    .and("org.springframework.boot:spring-boot-starter-test")
-                    .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
-            )
-            .addTestExcludeFilterSuffixedBy("IT", !runIT);
-  }
+    @Override
+    protected void setup() {
+        springboot.setSpringbootVersion("2.2.6.RELEASE");
+        JkProject project = springboot.projectBean().getProject();
+        project.simpleFacade()
+                .setCompileDependencies(deps -> deps
+                        .and("org.springframework.boot:spring-boot-starter-web")
+                        .and("org.projectlombok:lombok:1.18.20")
+                )
+                .setRuntimeDependencies(deps -> deps
+                        .minus("org.projectlombok:lombok")
+                )
+                .setTestDependencies(deps -> deps
+                        .and("org.springframework.boot:spring-boot-starter-test")
+                        .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
+                )
+                .addTestExcludeFilterSuffixedBy("IT", !runIT);
+    }
 
-  public void cleanPack() {
-    clean();
-    springboot.projectPlugin().pack();
-  }
+    public void cleanPack() {
+        clean();
+        springboot.projectBean().pack();
+    }
 
 }
 ```
