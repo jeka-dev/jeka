@@ -22,6 +22,51 @@ Jeka offers an execution engine, a build API and a powerful plugin architecture 
 - Simply use Java libraries for building Java projects programmatically.
 
 <br/>
+<sub>This is an example for building a simple Java Project.</sub>
+
+```java
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.plugins.springboot.SpringbootJkBean;
+
+class Build extends JkBean {
+
+    private JkProject project;
+
+    @Override
+    protected void init() {
+        project = JkProject.of().simpleFacade()
+                .setBaseDir(".")
+                .includeJavadocAndSources(true, true)
+                .setSimpleLayout()  // sources and resources in ./src, tests and test resources in ./tests
+                .mixResourcesAndSources()
+                .setCompileDependencies(deps -> deps
+                        .and("com.google.guava:guava:31.0.1-jre")
+                        .and("com.fasterxml.jackson.core:jackson-core:2.13.0")
+                )
+                .setTestDependencies(deps -> deps
+                        .and("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+                )
+                .setPublishedMavenVersion(JkGitProcess.of().getVersionFromTag())
+                .setPublishedMavenModuleId("my.org:my-module");
+    }
+
+    public void cleanPack() {
+        clean();
+        project.pack();  // package all artifacts of the project (jar, source jar and javadoc)
+    }
+
+}
+```
+<sub>To build the project, execute ´cleanPack´ from your IDE or execute the following command line.</sub>
+```
+/home/me/myproject>./jekaw cleanPack
+```
+
+<br/>
 <sub>This is an example of a build class for a simple Springboot project.</sub>
 
 ```java
@@ -38,7 +83,7 @@ class Build extends JkBean {
     public boolean runIT = true;
 
     @Override
-    protected void setup() {
+    protected void init() {
         springboot.setSpringbootVersion("2.2.6.RELEASE");
         JkProject project = springboot.projectBean().getProject();
         project.simpleFacade()
