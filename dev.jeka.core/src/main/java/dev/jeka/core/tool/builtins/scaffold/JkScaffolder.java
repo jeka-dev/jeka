@@ -76,7 +76,7 @@ public final class JkScaffolder {
                 .fetchContentFrom(JkScaffolder.class.getResource(JkProperties.PROJECT_PROPERTY_FILE_NAME));
         JkPathFile.of(baseDir.resolve("jeka/cmd.properties"))
                 .fetchContentFrom(JkScaffolder.class.getResource("cmd.properties"));
-        Path manualHtml = JkLocator.getJekaHomeDir().resolve("doc/manual.html");
+        Path manualHtml = JkLocator.getJekaHomeDir().resolve("doc/reference-guide.html");
         if (Files.exists(manualHtml)) {
             JkPathFile.of(manualHtml).copyToDir(baseDir.resolve("jeka"));
         }

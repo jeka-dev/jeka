@@ -1,13 +1,14 @@
-# 0.9.16.RELEASE (ongoing)
+# 0.9.20.RELEASE (ongoing)
+* Completely reworked execution engine
+* Cleaner clommand-line syntax and help
 * Kotlin support for writing def classes
 * Experimental Kotlin support JVM projects
 * Auto close and release when publishing on Nexus repositories 
 * Faster builds by caching dependency resolution and compiled def classes
 * Polished console output (progress bars)
 * Possibility to add Filesystem dependencies from the command line (@/path/to/lib.jar)
-* Nee mono-repo organisation allowing better tested product and version matching between Jeka and its plugins
+* New mono-repo organisation allowing better tested product and version matching between Jeka and its plugins
 * Add Nexus support for auto-releasing staged repos.
-* Rename JkPluginJava to JkPluginProject
 
 # 0.9.15.RELEASE
 * Upgrade JUNIT PLATFORM to 1.8.1  

@@ -122,11 +122,13 @@ class DocMaker {
             link.setDestination("#" + menuItem.anchorId);
             final HtmlInline indent = new HtmlInline();
             final String cssClass = "menuItem" + menuItem.level;
-            indent.setLiteral("<a href=\"#" + menuItem.anchorId + "\" class=\"" + cssClass + "\">" + menuItem.title + "</a>");
+            String prefix = JkUtilsString.repeat("&nbsp;", menuItem.level * 6);
+            indent.setLiteral(prefix + "<a href=\"#" + menuItem.anchorId + "\" class=\"" + cssClass + "\">" + menuItem.title + "</a>");
             document.prependChild(indent);
             document.prependChild(new HardLineBreak());
         }
     }
+
 
     private static class MenuItem {
 

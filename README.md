@@ -20,41 +20,44 @@ Jeka offers an execution engine, a build API and a powerful plugin architecture 
 
 - Run Java methods from both IDE and command line indifferently.
 - Simply use Java libraries for building Java projects programmatically.
-- Use standard plugins to implement/custom common tasks.
 
 <br/>
 <sub>This is an example of a build class for a simple Springboot project.</sub>
 
 ```java
-@JkDefClasspath("dev.jeka:springboot-plugin:3.0.0.RC7")
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.plugins.springboot.SpringbootJkBean;
+
+@JkDefClasspath("dev.jeka:springboot-plugin")
 class Build extends JkClass {
 
-    private final JkPluginSpringboot springboot = getPlugin(JkPluginSpringboot.class);
+  private final SpringbootJkBean springboot = getRuntime().getBean(SpringbootJkBean.class);
 
-    public boolean runIT = true;
+  public boolean runIT = true;
 
-    @Override
-    protected void setup() {
-        springboot.setSpringbootVersion("2.2.6.RELEASE");
-        springboot.javaPlugin().getProject().simpleFacade()
+  @Override
+  protected void setup() {
+    springboot.setSpringbootVersion("2.2.6.RELEASE");
+    JkProject project = springboot.projectBean().getProject();
+    project.simpleFacade()
             .setCompileDependencies(deps -> deps
-                .and("org.springframework.boot:spring-boot-starter-web")
-                .and("org.projectlombok:lombok:1.18.20")
+                    .and("org.springframework.boot:spring-boot-starter-web")
+                    .and("org.projectlombok:lombok:1.18.20")
             )
             .setRuntimeDependencies(deps -> deps
-                .minus("org.projectlombok:lombok")
+                    .minus("org.projectlombok:lombok")
             )
             .setTestDependencies(deps -> deps
-                .and("org.springframework.boot:spring-boot-starter-test")
+                    .and("org.springframework.boot:spring-boot-starter-test")
                     .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
             )
             .addTestExcludeFilterSuffixedBy("IT", !runIT);
-    }
+  }
 
-    public void cleanPack() {
-        clean();
-        springboot.projectPlugin().pack();
-    }
+  public void cleanPack() {
+    clean();
+    springboot.projectPlugin().pack();
+  }
 
 }
 ```
@@ -63,43 +66,33 @@ class Build extends JkClass {
 /home/me/myproject>./jekaw cleanPack -runIT=false
 ```
 
+Explore Jeka possibilities from command line `jekaw -h`.</sub>
+
 # User friendly
 Thanks to wrapper and [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 
 You only need a JDK 8 or higher.
 
 Getting started in 10 minutes : [Here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
 
+> Current version of Jeka is no more compatible with Jeka Plugin for Intellij. Stick with Jeka version _0.9.15.RELEASE_ 
+> if you still want to use the IDE plugin. 
+> 
+> This plugin will be upgraded later to use the latest Jeka version. 
+
 # News 
 
-* Jeka built-in plugins Jacoco and Sonar are removed from the main distribution in favor of up-to-date external plugins :
-  * [Sonarqube Plugin](https://github.com/jerkar/sonarqube-plugin)
-  * [Jacoco Plugin](https://github.com/jerkar/jacoco-plugin)
-
-* Support for Windows has been improved
-
-* Jeka 0.9.x serie is out. 0.9.x aims at providing intermediate API polishes and improvements
-  prior to go to 1.0.0.alpha. It will also provide necessary features to interact with a first class Intellij plugin.
-     
-* Jeka has joined OW2 organisation on january 2020 : https://projects.ow2.org/view/jeka/
-
-Last major additions :
-
-* Reworked [dependency management](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/doc/Reference%20Guide/2.3.%20Dependency%20management.md)
-* Completely renewed API, now embracing widely *Parent Chaining*.
-* Test engine now relies on Junit 5 (still compatible with Junit 3&4)
-* Release of a [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
-* Upgraded to Ivy 2.5.0
-* Wrapper to run Jeka independently of the Jeka version installed on the host machine
-* Jdk9+ compatibility
-* Deploying on Maven central though a modern release process (version numbering based on Git instead of being hardcoded).
-Jeka now uses these features to release itself.
+* Completely reworked execution engine. `JkClass` and `JkPlugin` have been merged in the unified `JkBean` concept.
+* Enhanced performance with faster startup and support for Java 11 & 17.
+* Reworked command-line syntax.
+* Improved help and documentation.
+* Experimental support for Kotlin, both for writting build code and build Kotlin projects.
+* Jeka project is now organized in a mono-repo leading in a better integrated/tested components.
 
 # Roadmap/Ideas
  
-* Improve landing page and provide tutorials based on Intellij plugin for easy1/fast starting. 
+* Improve landing page and provide tutorials based on Intellij plugin for easy/fast starting. 
 * Stabilise api from user feedbacks. API is quite workable now but may be improved.
 * Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
-* Integrate Kotlin as a first citizen language for both building Kotlin projects and write Jeka command classes.
 * Provide a plugin for Android
 * Provides a graphical plugin for better integration with Eclipse
 
@@ -120,11 +113,12 @@ concepts and navigate in source code.
 That said, documentation is needed for a starting point.
 
 Visit following pages according your expectation :
-* [Getting Started](dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md)
-* [Reference Guide](dev.jeka.core/src/main/doc/Reference%20Guide)
+
+* [Reference Guide](dev.jeka.core/src/main/doc/reference-guide)
 * [Frequently Asked Questions](dev.jeka.core/src/main/doc/FAQ.md)
 * [Javadoc](https://jeka.dev/docs/javadoc)
 * [Working examples](https://github.com/jerkar/working-examples)
+* [Getting Started (Needs Intellij Plugin)](dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md) 
 
 # External plugins
 
