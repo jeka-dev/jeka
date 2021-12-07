@@ -1,6 +1,6 @@
 # 0.9.20.RELEASE (ongoing)
 * Completely reworked execution engine
-* Cleaner clommand-line syntax and help
+* Cleaner command-line syntax and help
 * Kotlin support for writing def classes
 * Experimental Kotlin support JVM projects
 * Auto close and release when publishing on Nexus repositories 
