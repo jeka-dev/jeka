@@ -2,6 +2,7 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.tool.JkBean;
 
 import java.util.List;
 import java.util.Set;
@@ -23,19 +24,22 @@ public interface JkInternalClasspathScanner {
         return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
     }
 
+    List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);
+
+    List<String> findClassesMatchingAnnotations(ClassLoader classloader, Predicate<List<String>> annotationPredicate);
+
+    List<String> findClassedExtending(ClassLoader classLoader, Class<?> baseClass,
+                                      Predicate<String> classpathElementFilter, boolean ignoreVisibility,
+                                      boolean ignoreParentClassloaders);
+
     Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate);
 
-    List<String> findClassesHavingMainMethod(ClassLoader extraCclassLoader);
-
-    <T> Class<T> loadClassesHavingNameOrSimpleName(String name, Class<T> superClass);
+    <T> Class<T> loadFirstFoundClassHavingNameOrSimpleName(String name, Class<T> superClass);
 
     default Set<Class<?>> loadClassesHavingSimpleName(String simpleName) {
         return loadClassesHavingSimpleNameMatching( name -> name.equals(simpleName));
     }
 
-
-    List<String> findClassesMatchingAnnotations(ClassLoader classloader,
-                                                Predicate<List<String>> annotationPredicate);
-
     JkPathSequence getClasspath(ClassLoader classLoader);
+
 }

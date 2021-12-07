@@ -10,15 +10,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
 class Environment {
 
     private Environment() {
         // Can't be instantiated
     }
-
-    static Map<String, String> systemProps = new HashMap<>();
 
     static CommandLine commandLine = CommandLine.parse(new String[0]);
 
@@ -50,56 +47,19 @@ class Environment {
 
         // Parse command line
         final CommandLine commandLine = CommandLine.parse(effectiveCommandLineArgs.toArray(new String[0]));
+        for (final Map.Entry<String, String> entry : commandLine.getSystemProperties().entrySet()) {
+            System.setProperty(entry.getKey(), entry.getValue());
+        }
 
-
-        // Take all defined system properties (command line, ofSystem.properties files) and
-        // inject them in the system.
-        final Map<String, String> sysProps = getSpecifiedSystemProps();
-        sysProps.putAll(commandLine.getSystemProperties());
-        setSystemProperties(sysProps);
-
-        final Map<String, String> optionMap = new HashMap<>();
-        optionMap.putAll(JkOptions.readSystemAndUserOptions());
-        optionMap.putAll(JkOptions.readFromProjectOptionsProperties(Paths.get("")));
-        optionMap.putAll(commandLine.getCommandOptions());
-        JkOptions.init(optionMap);
-
-        final StandardOptions standardOptions = new StandardOptions(optionMap);
+        final StandardOptions standardOptions = new StandardOptions(commandLine.getStandardOptions());
         if (standardOptions.logVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
         if (standardOptions.logQuiteVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
-        Environment.systemProps = sysProps;
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;
-    }
-
-    private static Map<String, String> userSystemProperties() {
-        final Map<String, String> result = new HashMap<>();
-        final Path userPropFile = JkLocator.getJekaUserHomeDir().resolve("ofSystem.properties");
-        if (Files.exists(userPropFile)) {
-            result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
-        }
-        return result;
-    }
-
-
-    private static Map<String, String> getSpecifiedSystemProps() {
-        final Map<String, String> result = new TreeMap<>();
-        final Path propFile = JkLocator.getJekaHomeDir().resolve("ofSystem.properties");
-        if (Files.exists(propFile)) {
-            result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
-        }
-        result.putAll(userSystemProperties());
-        return result;
-    }
-
-    private static void setSystemProperties(Map<String, String> props) {
-        for (final Map.Entry<String, String> entry : props.entrySet()) {
-            System.setProperty(entry.getKey(), entry.getValue());
-        }
     }
 
     /**
@@ -119,32 +79,29 @@ class Environment {
 
         String logRuntimeInformation;
 
-        private String jkClassName;
+        private String jkBeanName;
 
         private boolean forceCompile;
 
         private final Set<String> names = new HashSet<>();
 
         StandardOptions (Map<String, String> map) {
-            this.logVerbose = valueOf(Boolean.class, map, false, "LogVerbose", "LV");
-            this.logQuiteVerbose = valueOf(Boolean.class, map, false, "LogQuiteVerbose", "LQV");
-            this.logBanner = valueOf(Boolean.class, map, false,"LogBanner", "LB");
-            this.logSetup = valueOf(Boolean.class, map, false,"LogSetup", "LSU");
-            this.logRuntimeInformation = valueOf(String.class, map, null, "LogRuntimeInformation", "LRI");
-            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "LogStyle", "LS");
-            this.jkClassName = valueOf(String.class, map, null, "JekaClass", "JKC");
-            this.forceCompile = valueOf(Boolean.class, map, false, "ForceCompile", "FC");
+            this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "lv");
+            this.logQuiteVerbose = valueOf(Boolean.class, map, false, "log.ivy.verbose", "lqv");
+            this.logBanner = valueOf(Boolean.class, map, false,"log.banner", "lb");
+            this.logSetup = valueOf(Boolean.class, map, false,"log.setup", "lsu");
+            this.logRuntimeInformation = valueOf(String.class, map, null, "log.runtime.info", "lri");
+            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
+            this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");
+            this.forceCompile = valueOf(Boolean.class, map, false, "def.compile.force", "dcf");
         }
 
         Set<String> names() {
             return names;
         }
 
-        String jkClassName() {
-            if ("".equals(jkClassName)) {
-                return JkConstants.DEFAULT_JEKA_CLASS.getName();
-            }
-            return jkClassName;
+        String jkCBeanName() {
+            return jkBeanName;
         }
 
         boolean forceCompile() {
@@ -153,7 +110,7 @@ class Environment {
 
         @Override
         public String toString() {
-            return "JkClass=" + JkUtilsObject.toString(jkClassName) + ", LogVerbose=" + logVerbose
+            return "JkBean" + JkUtilsObject.toString(jkBeanName) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logBanner;
         }
 
@@ -180,7 +137,5 @@ class Environment {
         }
         return Collections.emptyMap();
     }
-
-
 
 }

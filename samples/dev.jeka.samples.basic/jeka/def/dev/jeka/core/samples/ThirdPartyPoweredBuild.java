@@ -1,11 +1,11 @@
 package dev.jeka.core.samples;
 
 import com.google.common.base.MoreObjects;
-import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkDefClasspath;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 
@@ -19,14 +19,14 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
  * @author Jerome Angibaud
  * @formatter:off
  */
-@JkDefClasspath("commons-httpclient:commons-httpclient:3.1")
-@JkDefClasspath("com.google.guava:guava:21.0")
-public class ThirdPartyPoweredBuild extends JkClass {
+@JkInjectClasspath("commons-httpclient:commons-httpclient:3.1")
+@JkInjectClasspath("com.google.guava:guava:21.0")
+public class ThirdPartyPoweredBuild extends JkBean {
 
-    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
     
     @Override
-    protected void setup() {
+    protected void init() {
         projectPlugin.getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and(JAVAX_SERVLET_API.version("3.1.0"))

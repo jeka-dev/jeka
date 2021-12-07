@@ -1,12 +1,12 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkInternalClasspathScanner;
-import dev.jeka.core.api.system.*;
-import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.system.JkInfo;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,7 +24,7 @@ public final class JkInit {
     /**
      * Creates an instance of the specified Jeka class and displays information about this class andPrepending environment.
      */
-    public static <T extends JkClass> T instanceOf(Class<T> clazz, String... args) {
+    public static <T extends JkBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
         if (!Files.isDirectory(Paths.get("jeka")) ) {
             throw new IllegalStateException("The current directory " + Paths.get("").toAbsolutePath()
@@ -44,14 +44,23 @@ public final class JkInit {
             memoryBufferLogActivated = true;
         }
         try {
-            final T jkClass = JkClass.of(clazz);
-            JkLog.info(jkClass.toString() + " is ready to run.");
+            EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get(""));
+            List<EngineCommand> commands = new LinkedList<>();
+            commands.add(new EngineCommand(EngineCommand.Action.BEAN_REGISTRATION, clazz, null, null));
+            commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, JkBean.name(clazz)));
+            JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
+            jkRuntime.init(commands);
+            final T jkBean = jkRuntime.getBean(clazz);
+            JkLog.info(jkBean.toString() + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();
             }
-            return jkClass;
+            return jkBean;
         } catch (RuntimeException e) {
-            JkMemoryBufferLogDecorator.flush();
+            if (memoryBufferLogActivated) {
+                JkMemoryBufferLogDecorator.flush();
+                JkMemoryBufferLogDecorator.inactivateOnJkLog();
+            }
             throw e;
         }
 
@@ -61,7 +70,7 @@ public final class JkInit {
      * Convenient method to let the user add extra arguments.
      * @see #instanceOf(Class, String...)
      */
-    public static <T extends JkClass> T instanceOf(Class<T> clazz, String[] args, String extraArg, String ...extraArgs) {
+    public static <T extends JkBean> T instanceOf(Class<T> clazz, String[] args, String extraArg, String ...extraArgs) {
         String[] allExtraArgs = JkUtilsIterable.concat(new String[] {extraArg}, extraArgs);
         String[] effectiveArgs = JkUtilsIterable.concat(allExtraArgs, args);
         return instanceOf(clazz, effectiveArgs);
@@ -71,8 +80,7 @@ public final class JkInit {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
         sb.append("\nCommand Line : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
-        sb.append(propsAsString("Specified System Properties", Environment.systemProps));
-        sb.append(propsAsString("Specified Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
+        sb.append(propsAsString("Specified properties", JkProperties.toDisplayedMap(JkProperties.getAll())));
         sb.append("\nJava Home : " + System.getProperty("java.home"));
         sb.append("\nJava Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         sb.append("\nJeka Version : " + JkInfo.getJekaVersion());
@@ -82,7 +90,7 @@ public final class JkInit {
             sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
-        sb.append("\nJeka Def Repositories : " + Engine.repos());
+        sb.append("\nJeka diowload Repositories : " + JkRepoFromProperties.getDownloadRepo());
         sb.append("\nJeka Repository Cache : " + JkLocator.getJekaRepositoryCache());
         JkLog.info(sb.toString());
     }
@@ -111,43 +119,6 @@ public final class JkInit {
         return Paths.get(JkConstants.BOOT_DIR);
     }
 
-    /**
-     * This main method is meant to be use by external tools as IDE plugin. From here, all def classes
-     * are supposed to be already present in the current classloader.
-     */
-    public static void main(String[] args) {
-        List<String> actualArgs = new LinkedList<>();
-        String jkClassName = null;
-        for (String arg : args) {
-            if (arg.startsWith("-CC=")) {
-                jkClassName = arg.substring(4);
-            } else {
-                actualArgs.add(arg);
-            }
-        }
-        JkUtilsAssert.argument(jkClassName != null,
-                "No argument starting with '-CC=' can be found. Cannot determine Jeka Class");
-        Class<JkClass> clazz = JkInternalClasspathScanner.INSTANCE
-                .loadClassesHavingNameOrSimpleName(jkClassName, JkClass.class);
-        JkUtilsAssert.argument(clazz != null,
-                "Jeka class having name '" + jkClassName + "' cannot be found.");
-        String[] argsToPass = actualArgs.toArray(new String[0]);
-        JkClass instance = JkInit.instanceOf(clazz, argsToPass);
-        CommandLine commandLine = CommandLine.parse(argsToPass);
-        try {
-            for (CommandLine.MethodInvocation methodInvocation : commandLine.getMasterMethods()) {
-                if (methodInvocation.isMethodPlugin()) {
-                    JkPlugin plugin = instance.getPlugins().get(methodInvocation.pluginName);
-                    JkUtilsReflect.invoke(plugin, methodInvocation.methodName);
-                } else {
-                    JkUtilsReflect.invoke(instance, methodInvocation.methodName);
-                }
-            }
-            System.exit(0); // Triggers shutdown hooks
-        } catch (Throwable t) {
-            System.exit(1); // Triggers shutdown hooks
-        }
 
-     }
 
 }

@@ -1,17 +1,19 @@
-import dev.jeka.core.tool.*;
-import dev.jeka.plugins.springboot.JkPluginSpringboot;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkInit;
+import dev.jeka.plugins.springboot.SpringbootJkBean;
 import dev.jeka.plugins.springboot.JkSpringModules.Boot;
 
 
-@JkDefClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
-class SpringbootSampleBuild extends JkClass {
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
+class SpringbootSampleBuild extends JkBean {
 
-    private final JkPluginSpringboot springboot = getPlugin(JkPluginSpringboot.class);
+    private final SpringbootJkBean springboot = getRuntime().getBean(SpringbootJkBean.class);
 
     @Override
-    protected void setup() {
+    protected void init() {
         springboot.setSpringbootVersion("2.5.5");
-        springboot.projectPlugin().getProject().simpleFacade()
+        springboot.projectBean().getProject().simpleFacade()
                 .setCompileDependencies(deps -> deps
                     .and(Boot.STARTER_WEB)  // Same as .and("org.springframework.boot:spring-boot-starter-web")
                     .and(Boot.STARTER_DATA_JPA)

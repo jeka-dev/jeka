@@ -5,10 +5,10 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProjectPublication;
-import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkEnv;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.nio.file.Path;
 import java.util.function.UnaryOperator;
@@ -31,14 +31,14 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
  *
  * @author Jerome Angibaud
  */
-public class SignedArtifactsBuild extends JkClass {
+public class SignedArtifactsBuild extends JkBean {
 
-    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
-    @JkEnv("OSSRH_USER")
+    @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
 
-    @JkEnv("OSSRH_PWD")
+    @JkInjectProperty("OSSRH_PWD")
     public String ossrhPwd;
 
     // A dummy local repository for repeatable run purpose
@@ -53,7 +53,7 @@ public class SignedArtifactsBuild extends JkClass {
     public String secringPassword = "jeka-pwd";  // Normally injected from command line
 
     @Override
-    protected void setup() {
+    protected void init() {
         projectPlugin.getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
                 .and(GUAVA.version("30.0-jre"))

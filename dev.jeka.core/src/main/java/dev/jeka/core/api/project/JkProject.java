@@ -25,7 +25,7 @@ import java.util.function.Function;
  */
 public class JkProject implements JkIdeSupport.JkSupplier {
 
-    private Path baseDir = Paths.get(".");
+    private Path baseDir = Paths.get("");
 
     private String outputDir = "jeka/output";
 

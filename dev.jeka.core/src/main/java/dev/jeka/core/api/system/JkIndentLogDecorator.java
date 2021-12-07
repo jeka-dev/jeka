@@ -1,8 +1,10 @@
 package dev.jeka.core.api.system;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This decorator adds indentation for logs nested within a task.

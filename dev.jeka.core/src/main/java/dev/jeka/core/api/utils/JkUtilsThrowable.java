@@ -1,5 +1,7 @@
 package dev.jeka.core.api.utils;
 
+import java.util.function.Consumer;
+
 /**
  * Utility class to deal with {@link Throwable}
  */
@@ -59,6 +61,20 @@ public final class JkUtilsThrowable {
             return false;
         }
         return isInCause(cause, causeClass);
+    }
+
+    public interface ThrowingConsumer<T, E extends Throwable> {
+        void accept(T t) throws E;
+
+        static <T, E extends Throwable> Consumer<T> unchecked(ThrowingConsumer<T, E> consumer) {
+            return (t) -> {
+                try {
+                    consumer.accept(t);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }
     }
 
 }

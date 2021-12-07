@@ -55,7 +55,7 @@ public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
     }
 
     public static void inactivateOnJkLog() {
-        JkUtilsAssert.state(jkLogInstance != null, "This decoratorcis not currently activated.");
+        JkUtilsAssert.state(jkLogInstance != null, "This decorator is not currently activated.");
         JkLog.JkLogDecorator delegate = jkLogInstance.delegate;
         delegate.init(jkLogInstance.originalTargetOut, jkLogInstance.originalTargetErr);
         jkLogInstance = null;

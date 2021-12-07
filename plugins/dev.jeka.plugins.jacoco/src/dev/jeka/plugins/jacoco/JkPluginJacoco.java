@@ -3,15 +3,12 @@ package dev.jeka.plugins.jacoco;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkDocPluginDeps;
-import dev.jeka.core.tool.JkPlugin;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
-@JkDocPluginDeps(JkPluginProject.class)
-public class JkPluginJacoco extends JkPlugin {
+public class JkPluginJacoco extends JkBean {
 
     /**
      * Relative location to the output folder of the generated jacoco report file
@@ -19,10 +16,6 @@ public class JkPluginJacoco extends JkPlugin {
     public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
 
     public static final String OUTPUT_XML_RELATIVE_PATH = "jacoco/jacoco.xml";
-
-    protected JkPluginJacoco(JkClass run) {
-        super(run);
-    }
 
     @JkDoc("If false, tests will be run without Jacoco.")
     public boolean enabled = true;
@@ -40,11 +33,11 @@ public class JkPluginJacoco extends JkPlugin {
     public String jacocoVersion = "0.8.7";
 
     @Override
-    protected void afterSetup() {
+    protected void postInit() {
         if (!enabled) {
             return;
         }
-        JkPluginProject projectPlugin = getJkClass().getPlugins().get(JkPluginProject.class);
+        ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
         final JkProject project = projectPlugin.getProject();
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {

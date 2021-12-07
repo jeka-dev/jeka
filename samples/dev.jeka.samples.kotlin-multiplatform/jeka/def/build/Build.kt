@@ -1,7 +1,7 @@
 package build
 
 import build.common.JkNodeJs
-import build.common.JkPluginKotlin
+import build.common.KotlinJkBean
 import dev.jeka.core.api.depmanagement.JkDependencySet
 import dev.jeka.core.api.java.JkJavaRunner
 import dev.jeka.core.api.java.JkJavaVersion
@@ -10,15 +10,14 @@ import dev.jeka.core.api.kotlin.JkKotlinModules.COMPILER_PLUGIN_KOTLINX_SERIALIZ
 import dev.jeka.core.api.utils.JkUtilsIO
 import dev.jeka.core.api.utils.JkUtilsPath
 import dev.jeka.core.api.utils.JkUtilsString
-import dev.jeka.core.tool.JkClass
+import dev.jeka.core.tool.JkBean
 import dev.jeka.core.tool.JkDoc
 import dev.jeka.core.tool.JkInit
-import dev.jeka.core.tool.builtins.project.JkPluginProject
 import java.awt.Desktop
 
-class Build : JkClass() {
+class Build : JkBean() {
 
-    val kotlin = getPlugin(JkPluginKotlin::class.java)
+    val kotlin = getRuntime().getBean(KotlinJkBean::class.java)
 
     val serializationVersion = "1.2.1"
     val ktorVersion = "1.6.1"
@@ -31,7 +30,7 @@ class Build : JkClass() {
 
     var nodejsArgs = ""
 
-    override fun setup() {
+    override fun init() {
         val jvmProject = kotlin.jvm().project
         jvmProject.simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
@@ -46,7 +45,7 @@ class Build : JkClass() {
                     .and(JkKotlinModules.TEST_JUNIT5)
                 }
         jvmProject.construction.manifest.addMainClass("ServerKt")
-        jvmProject.publication.includeJavadocAndSources(false)
+        jvmProject.publication.includeJavadocAndSources(false, false)
         kotlin.jvm()
             .useFatJarForMainArtifact()
             .kotlinCompiler
@@ -95,12 +94,6 @@ class Build : JkClass() {
     object CleanPack {
         @JvmStatic fun main(args: Array<String>) {
             JkInit.instanceOf(Build::class.java, *args).cleanPack();
-        }
-    }
-
-    object PrintDeps  {
-        @JvmStatic fun main(args: Array<String>){
-            JkInit.instanceOf(Build::class.java, *args).getPlugin(JkPluginProject::class.java).showDependencies()
         }
     }
 

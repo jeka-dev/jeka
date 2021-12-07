@@ -1,8 +1,10 @@
 package dev.jeka.core.api.system;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static dev.jeka.core.api.system.JkIndentLogDecorator.LINE_SEPARATOR;
 import static dev.jeka.core.api.system.JkIndentLogDecorator.MARGIN_UNIT;
@@ -27,14 +29,14 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
     public void init(PrintStream targetOut, PrintStream targetErr) {
         marginOut = new MarginStream(targetOut);
-        marginErr = new MarginStream(targetErr);   // Cause erratic output if logged on separate streams
+        marginErr = marginOut;   // Cause erratic output if logged on separate streams
         out = new PrintStream(marginOut);
-        err = new PrintStream(marginErr);
+        err = out;
     }
 
     private void readObject(ObjectInputStream objectInputStream) {
         marginOut = new MarginStream(System.out);
-        marginErr = new MarginStream(System.err);
+        marginErr = marginOut;
     }
 
     public static void setMaxLength(int maxLength) {

@@ -1,13 +1,13 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
+import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkRepoFromOptions;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
+import dev.jeka.core.tool.JkRepoFromProperties;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.nio.file.Path;
 
@@ -18,16 +18,16 @@ import java.nio.file.Path;
  * @author Jerome Angibaud
  * @formatter:off
  */
-public class WarPluginBuild extends JkClass {
+public class WarPluginBuild extends JkBean {
 
     public String port = "8080";
 
     public String jettyRunnerVersion = "9.4.28.v20200408";
 
-    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     @Override
-    protected void setup() {
+    protected void init() {
        projectPlugin.getProject().simpleFacade()
                .setCompileDependencies(deps -> deps
                        .and("com.google.guava:guava:30.0-jre")
@@ -60,7 +60,7 @@ public class WarPluginBuild extends JkClass {
     public void runWarWithJetty() {
         JkArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
         artifactProducer.makeMissingArtifacts();
-        Path jettyRunner = JkRepoFromOptions.getDownloadRepo().toSet().get("org.eclipse.jetty:jetty-runner:"
+        Path jettyRunner = JkRepoFromProperties.getDownloadRepo().toSet().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);
         JkJavaProcess.ofJavaJar(jettyRunner, null)
                 .exec(artifactProducer.getMainArtifactPath().toString(), "--port", port);

@@ -1,5 +1,6 @@
 package dev.jeka.core;
 
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
@@ -17,23 +18,22 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
 
     void run() {
         scaffold("scaffold#run", "help", false);
-        Path dir = scaffold("scaffold#run scaffold#wrap", "help", false);
-        scaffold("scaffold#run scaffold#wrap -scaffold#wrapDelegatePath="
-                + dir, "help", true);
-        dir = scaffold("scaffold#run project#", "clean project#pack", false);
-        runjeka(dir.toString(), "eclipse#files eclipse#all");
-        runjeka(dir.toString(), "intellij#iml intellij#modulesXml");
+        Path projectDir = scaffold("scaffold#run scaffold#wrap", "help", false);
+        scaffold("scaffold#run scaffold#wrap", "help", true);
+        projectDir = scaffold("scaffold#run project#", "clean project#pack", false);
+        runJeka(projectDir.toString(), "eclipse#files");
+        runJeka(projectDir.toString(), "intellij#iml intellij#modulesXml");
     }
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
-        runjeka(path.toString(), scaffoldCmdLine);
-        runjeka(checkWithWrapper, path.toString(), checkCommandLine);
+        runJeka(path.toString(), scaffoldCmdLine);
+        runJeka(checkWithWrapper, path.toString(), checkCommandLine);
         return path;
     }
 
     public static void main(String[] args) throws Exception {
-        JkLog.setDecorator(JkLog.Style.INDENT);
+        JkLog.setDecorator(JkLog.Style.BRACE);
         new CoreScaffoldTester().run();
     }
 

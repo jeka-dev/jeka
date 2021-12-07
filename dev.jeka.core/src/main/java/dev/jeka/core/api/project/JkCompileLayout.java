@@ -63,7 +63,7 @@ public class JkCompileLayout<T> {
 
     private JkCompileLayout(T parent) {
         this.__ = parent;
-        baseDirSupplier = () -> Paths.get(".");
+        baseDirSupplier = () -> Paths.get("");
         outputDirSupplier = () -> baseDirSupplier.get().resolve("jeka/output");
         setSourceMavenStyle(Concern.PROD);
         setStandardOuputDirs(Concern.PROD);

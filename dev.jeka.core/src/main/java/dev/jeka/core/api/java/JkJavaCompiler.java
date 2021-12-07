@@ -1,7 +1,6 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;

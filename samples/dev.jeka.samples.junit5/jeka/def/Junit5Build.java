@@ -1,8 +1,8 @@
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkDefClasspath;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
@@ -28,17 +28,17 @@ import java.nio.file.Path;
  * {@link org.junit.platform.launcher.core.LauncherConfig} and
  * {@link org.junit.platform.launcher.LauncherDiscoveryRequest}.
  */
-@JkDefClasspath("org.junit.platform:junit-platform-launcher:1.8.1")
-class Junit5Build extends JkClass {
+@JkInjectClasspath("org.junit.platform:junit-platform-launcher:1.8.1")
+class Junit5Build extends JkBean {
 
-    final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
      * fields have already been injected from command line.
      */
     @Override
-    protected void setup() {
+    protected void init() {
         projectPlugin.getProject()
             .getConstruction()
                 .getTesting()

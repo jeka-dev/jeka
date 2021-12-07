@@ -30,6 +30,7 @@ class Booter {
     public static void main(String[] args) throws Exception {
         final Path jekawDir = Paths.get(args[0]);
         Properties props = props(jekawDir);
+        props.putAll(props(args));
         Path jekaBinPath = location(props);  // First try to get it from explicit location
         if (jekaBinPath == null) {
             final String version = version(props);
@@ -40,8 +41,7 @@ class Booter {
                 System.out.println("Unzip distribution to " + dir + " ...");
                 Files.createDirectories(dir);
                 unzip(zip, dir);
-                Files.deleteIfExists(dir.resolve("options.properties"));
-                Files.deleteIfExists(dir.resolve("system.properties"));
+                Files.deleteIfExists(dir.resolve("global.properties"));
                 Files.deleteIfExists(dir.resolve("jeka.bat"));
                 Files.deleteIfExists(dir.resolve("jeka"));
                 System.out.println("Jeka " + version + " installed in " + dir);
@@ -204,11 +204,11 @@ class Booter {
 
     private static String repoOptions() {
         Properties properties = new Properties();
-        Path optionFile = getJekaUserHomeDir().resolve("options.properties");
-        if (!Files.exists(optionFile)) {
+        Path globalPropertyFile = getJekaUserHomeDir().resolve("global.properties");
+        if (!Files.exists(globalPropertyFile)) {
             return null;
         }
-        try (InputStream inputStream = Files.newInputStream(optionFile)) {
+        try (InputStream inputStream = Files.newInputStream(globalPropertyFile)) {
             properties.load(inputStream);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -223,7 +223,7 @@ class Booter {
     private static Properties props(Path jekawDir) {
         final Path propFile = getWrapperPropsFile(jekawDir);
         if (!Files.exists(propFile)) {
-            System.out.println("No file found at " + propFile + ". Please rerun 'jeka scaffold#wrap");
+            System.out.println("No file found at " + propFile + ". Please re-run 'jeka scaffold#wrap");
             System.exit(1);
         }
         final Properties props = new Properties();
@@ -233,6 +233,17 @@ class Booter {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static Properties props(String[] args) {
+        Properties props = new Properties();
+        Arrays.stream(args)
+                .filter(arg -> arg.startsWith("-D"))
+                .map(arg -> arg.substring(2))
+                .filter(arg -> arg.contains("="))
+                .map(arg -> arg.split("="))
+                .forEach(items -> props.put(items[0], items[1]));
+        return props;
     }
 
 }

@@ -1,7 +1,6 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -147,7 +146,7 @@ public final class JkJavadocProcessor<T> {
         int code = process.exec();
         if (code != 0) {
             JkLog.warn("An error occurred when generating Javadoc (staus error = " + code + "). Maybe there is no public class to document." +
-                    " Relaunch the process with -LV option to see details");
+                    " Relaunch the process with -lv option to see details");
         }
     }
 

@@ -6,10 +6,10 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
-import dev.jeka.core.tool.JkClass;
+import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
-import dev.jeka.core.tool.builtins.maven.JkPluginPom;
+import dev.jeka.core.tool.builtins.maven.PomJkBean;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 
 /**
@@ -19,14 +19,14 @@ import dev.jeka.core.tool.builtins.maven.JkPluginPom;
  * @author Jerome Angibaud
  * @formatter:off
  */
-public class JavaPluginBuild extends JkClass {
+public class JavaPluginBuild extends JkBean {
 
-    public final JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    public final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
     
     @Override
-    protected void setup() {
+    protected void init() {
        projectPlugin.getProject().simpleFacade()
                .setCompileDependencies(deps -> deps
                    .and("com.google.guava:guava:30.0-jre")
@@ -83,7 +83,7 @@ public class JavaPluginBuild extends JkClass {
     }
 
     public void printMvn() {
-        JkPluginPom pluginPom = getPlugin(JkPluginPom.class);
+        PomJkBean pluginPom = getRuntime().getBean(PomJkBean.class);
         pluginPom.dependencyCode();
     }
 

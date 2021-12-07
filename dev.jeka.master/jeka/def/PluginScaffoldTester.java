@@ -19,20 +19,21 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
     }
 
     void run() {
-        Path dir = scaffold("scaffold#run springboot#  -springboot#scaffoldDefClasspath="
+        Path dir = scaffold("-lsu scaffold#run springboot#  springboot#scaffoldDefClasspath="
                         + sprinbootBluginJar + " @" + sprinbootBluginJar,
-                "project#pack", false);
+                "project#pack -lsu", false);
     }
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
-        runjeka(path.toString(), scaffoldCmdLine);
-        runjeka(checkWithWrapper, path.toString(), checkCommandLine);
+        runJeka(path.toString(), scaffoldCmdLine);
+        runJeka(checkWithWrapper, path.toString(), checkCommandLine);
         return path;
     }
 
     public static void main(String[] args) throws Exception {
         JkLog.setDecorator(JkLog.Style.INDENT);
+        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         new PluginScaffoldTester().run();
     }
 

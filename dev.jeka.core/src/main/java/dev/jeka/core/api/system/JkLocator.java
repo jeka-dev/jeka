@@ -67,26 +67,33 @@ public final class JkLocator {
         } else {
             result = Paths.get(System.getProperty("user.home")).resolve(".jeka");
         }
-        if (Files.exists(result) && Files.isRegularFile(result)) {
-            JkUtilsPath.deleteFile(result);
-        }
-        JkUtilsPath.createDirectories(result);
-        return result;
+        return ensureCreated(result);
     }
 
     /**
      * Returns the location of the artifact repository cache.
      */
     public static Path getJekaRepositoryCache() {
-        final String jekaCacheOption = System.getenv(JK_REPOSITORY_CACHE_ENV_NAME);
-        final Path result;
-        if (!JkUtilsString.isBlank(jekaCacheOption)) {
-            result = Paths.get(jekaCacheOption);
-        } else {
-            result = getJekaUserHomeDir().resolve("cache/repo");
+        return ensureCreated(getCacheDir().resolve("repo"));
+    }
+
+    public static Path getCacheDir() {
+        return ensureCreated(getJekaUserHomeDir().resolve("cache"));
+    }
+
+    public static Path getCachedUrlContentDir() {
+        return ensureCreated(getCacheDir().resolve("url-content"));
+
+    }
+
+    private static Path ensureCreated(Path path) {
+        if (!Files.exists(path)) {
+            JkUtilsPath.createDirectories(path);
+        } else if (Files.isRegularFile(path)) {
+            JkUtilsPath.deleteFile(path);
+            JkUtilsPath.createDirectories(path);
         }
-        JkUtilsPath.createDirectories(result);
-        return result;
+        return path;
     }
 
 

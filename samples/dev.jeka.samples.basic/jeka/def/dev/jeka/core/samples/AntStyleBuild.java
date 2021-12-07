@@ -16,8 +16,8 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProjectPublication;
-import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkDefClasspath;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
 
 import java.nio.file.Path;
@@ -31,21 +31,22 @@ import java.util.List;
  * 
  * @author Jerome Angibaud
  */
-@JkDefClasspath("org.apache.httpcomponents:httpclient:4.5.6")
-public class AntStyleBuild extends JkClass implements JkIdeSupport.JkSupplier {
+@JkInjectClasspath("org.apache.httpcomponents:httpclient:4.5.6")
+public class AntStyleBuild extends JkBean implements JkIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
     Path test = getBaseDir().resolve("src/test/java");
-    Path srcJar = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + "-sources.jar");
+    JkPathTree baseTree = JkPathTree.of(getBaseDir());
+    Path srcJar = getOutputDir().resolve("jar/" + baseTree.getRoot().getFileName() + "-sources.jar");
     Path classDir = getOutputDir().resolve("classes");
-    Path jarFile = getOutputDir().resolve("jar/" + getBaseTree().getRoot().getFileName() + ".jar");
+    Path jarFile = getOutputDir().resolve("jar/" + baseTree.getRoot().getFileName() + ".jar");
     JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     JkDependencySet prodDependencies = JkDependencySet.of()
             .and("com.google.guava:guava:30.0-jre")
             .and("org.hibernate:hibernate-entitymanager:5.4.2.Final");
     JkDependencySet testDependencies = JkDependencySet.of()
             .and(JavaPluginBuild.JUNIT5);
-    List<Path> depFiles = getBaseTree().andMatching(true,"libs/**/*.jar").getFiles();
+    List<Path> depFiles = baseTree.andMatching(true,"libs/**/*.jar").getFiles();
     JkPathSequence prodClasspath = resolver.resolve(prodDependencies).getFiles();
     JkPathSequence testClasspath = resolver.resolve(testDependencies.and(prodDependencies)).getFiles();
 

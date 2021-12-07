@@ -22,6 +22,7 @@ import java.util.zip.ZipFile;
  *
  * @author Jerome Angibaud
  */
+// TODO remove in favor of JkPathSequence
 public final class JkClasspath implements Iterable<Path> {
 
     private static final long serialVersionUID = 1L;

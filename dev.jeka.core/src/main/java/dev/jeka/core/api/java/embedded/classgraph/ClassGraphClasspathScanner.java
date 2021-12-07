@@ -1,8 +1,10 @@
 package dev.jeka.core.api.java.embedded.classgraph;
 
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkBean;
 import io.github.classgraph.*;
 
 import java.io.File;
@@ -11,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
@@ -24,7 +27,7 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     }
 
     @Override
-    public <T> Class<T> loadClassesHavingNameOrSimpleName(String name, Class<T> superClass) {
+    public <T> Class<T> loadFirstFoundClassHavingNameOrSimpleName(String name, Class<T> superClass) {
         for (Class<?> clazz : loadClassesMatching(classInfo -> classInfo.getName().equals(name), true)) {
             if (superClass.isAssignableFrom(clazz)) {
                 return (Class<T>) clazz;
@@ -63,11 +66,11 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     }
 
     @Override
-    public List<String> findClassesHavingMainMethod(ClassLoader classloader) {
+    public List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader) {
         final ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
                 .enableMethodInfo()
-                .overrideClassLoaders(classloader)
+                .overrideClassLoaders(extraClassLoader)
                 .ignoreParentClassLoaders();
         final ScanResult scanResult = classGraph.scan();
         final List<String> result = new LinkedList<>();
@@ -106,6 +109,34 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<String> findClassedExtending(ClassLoader classLoader, Class<?> baseClass,
+                                             Predicate<String> classpathElementFilter, boolean ignoreVisibility,
+                                             boolean ignoreParentClassLoaders) {
+       // System.out.println(JkClassLoader.ofCurrent());
+        ClassGraph classGraph = new ClassGraph()
+                .enableClassInfo()
+                .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
+                        "org.commonmark", "io.github.classgraph")
+                .disableNestedJarScanning()
+                .disableModuleScanning()
+                .filterClasspathElements(classpathElementPath -> classpathElementFilter.test(classpathElementPath));
+        if (ignoreParentClassLoaders) {
+            classGraph
+            .ignoreParentClassLoaders()
+            .overrideClassLoaders(classLoader);
+        }
+        if (ignoreVisibility) {
+            classGraph = classGraph.ignoreClassVisibility();
+        }
+        final ScanResult scanResult = classGraph.scan();
+        return scanResult.getAllClasses().stream()
+                .filter(classInfo -> !classInfo.isAbstract())
+                .filter(classInfo -> classInfo.extendsSuperclass(baseClass.getName()))
+                .map(classInfo -> classInfo.getName())
+                .collect(Collectors.toList());
     }
 
     public JkPathSequence getClasspath(ClassLoader classLoader) {

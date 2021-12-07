@@ -1,7 +1,7 @@
 import dev.jeka.core.samples.JavaPluginBuild;
-import dev.jeka.core.tool.JkClass;
-import dev.jeka.core.tool.JkDefImport;
-import dev.jeka.core.tool.builtins.project.JkPluginProject;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInjectProject;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 /**
  * Simple build demonstrating of how Jeka can handle multi-project build.
@@ -10,15 +10,15 @@ import dev.jeka.core.tool.builtins.project.JkPluginProject;
  * 
  * @formatter:off
  */
-public class FatJarBuild extends JkClass {
+public class FatJarBuild extends JkBean {
 
-    JkPluginProject projectPlugin = getPlugin(JkPluginProject.class);
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
     
-    @JkDefImport("../dev.jeka.samples.basic")
+    @JkInjectProject("../dev.jeka.samples.basic")
     private JavaPluginBuild sampleBuild;
 
     @Override
-    protected void setup() {
+    protected void init() {
         projectPlugin.getProject()
             .getPublication()
                 .getArtifactProducer()

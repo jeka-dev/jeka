@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -220,14 +219,14 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
     }
 
     /**
-     * Adds a param -LV=[DecoratorStyle] matching the current one.
+     * Adds a param -lv=[DecoratorStyle] matching the current one.
      */
     public T inheritJkLogOptions() {
         if (JkLog.getDecoratorStyle() != null) {
-            addParams("-LS=" + JkLog.getDecoratorStyle().name());
+            addParams("-ls=" + JkLog.getDecoratorStyle().name());
         }
         if (JkLog.isVerbose()) {
-            addParams("-LV");
+            addParams("-lv");
         }
         return (T) this;
     }

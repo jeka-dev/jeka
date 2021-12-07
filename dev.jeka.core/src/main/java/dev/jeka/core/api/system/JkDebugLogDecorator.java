@@ -2,7 +2,10 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,11 +26,11 @@ public final class JkDebugLogDecorator extends JkLog.JkLogDecorator {
 
     private transient PrintStream err;
 
-    protected void init(PrintStream targetOut, PrintStream tergetErr) {
+    protected void init(PrintStream targetOut, PrintStream targetErr) {
         marginOut = new MarginStream(targetOut);
-        marginErr = new MarginStream(tergetErr);
+        marginErr = marginOut;
         out = new PrintStream(marginOut);
-        err = new PrintStream(marginErr);
+        err = out;
     }
 
     private void readObject(ObjectInputStream objectInputStream) {
