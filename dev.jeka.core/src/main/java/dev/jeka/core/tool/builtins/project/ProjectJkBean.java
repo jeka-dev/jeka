@@ -293,6 +293,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
+        JkLog.info("Publish " + getProject() + " ...");
         project.getPublication().publish();
     }
 
