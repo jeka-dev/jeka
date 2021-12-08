@@ -135,22 +135,25 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
 
 
     /**
-     * If the current commit is tagged then the version is the tag name (last in alphabetical order). Otherwise
-     * the version is [branch]-SNAPSHOT
+     * If the current commit is tagged and the workspace is not dirty, then the version is the tag name
+     * (last in alphabetical order).
+     * Otherwise, the version is [branch]-SNAPSHOT.
      */
     public String getVersionFromTag(String prefix) {
         List<String> tags;
         String branch;
+        boolean dirty;
         try {
             tags = getTagsOfCurrentCommit().stream()
                     .filter(tag -> tag.startsWith(prefix))
                     .collect(Collectors.toList());
             branch = getCurrentBranch();
+            dirty = isWorkspaceDirty();
         } catch (IllegalStateException e) {
             JkLog.warn(e.getMessage());
             return JkVersion.UNSPECIFIED.getValue();
         }
-        if (tags.isEmpty()) {
+        if (tags.isEmpty() || dirty) {
             return branch + "-SNAPSHOT";
         } else {
             return tags.get(tags.size() - 1);

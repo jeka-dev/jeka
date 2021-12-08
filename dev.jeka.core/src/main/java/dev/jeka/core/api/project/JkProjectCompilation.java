@@ -178,7 +178,7 @@ public class JkProjectCompilation<T> {
         return resourceProcessor;
     }
 
-    public JkProjectCompilation<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectCompilation<T> configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
     }

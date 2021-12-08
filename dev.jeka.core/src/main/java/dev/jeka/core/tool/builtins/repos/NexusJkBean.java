@@ -11,6 +11,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;
 
+@JkDoc("Provides features to release Nexus repos (as OSSRH) after publication.")
 public class NexusJkBean extends JkBean {
 
     private static final String TASK_NAME = "Closing and releasing repositories";

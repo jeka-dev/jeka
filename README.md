@@ -25,13 +25,6 @@ Jeka offers an execution engine, a build API and a powerful plugin architecture 
 <sub>This is an example for building a simple Java Project.</sub>
 
 ```java
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
-import dev.jeka.plugins.springboot.SpringbootJkBean;
-
 class Build extends JkBean {
 
     private JkProject project;
@@ -41,17 +34,17 @@ class Build extends JkBean {
         project = JkProject.of().simpleFacade()
             .setBaseDir(".")
             .includeJavadocAndSources(true, true)
-            .setSimpleLayout()  // sources and resources in ./src, tests and test resources in ./tests
+            .useSimpleLayout()  // sources and resources in ./src, tests and test resources in ./tests
             .mixResourcesAndSources()
-            .setCompileDependencies(deps -> deps
+            .configureCompileDeps(deps -> deps
                 .and("com.google.guava:guava:31.0.1-jre")
                 .and("com.fasterxml.jackson.core:jackson-core:2.13.0")
             )
-            .setTestDependencies(deps -> deps
+            .configureTestDeps(deps -> deps
                 .and("org.junit.jupiter:junit-jupiter-engine:5.8.2")
             )
-            .setPublishedMavenVersion(JkGitProcess.of().getVersionFromTag())
-            .setPublishedMavenModuleId("my.org:my-module");
+            .setPublishedModuleId("my.org:my-module")
+            .setPublishedVersion(JkGitProcess.of().getVersionFromTag());
     }
 
     public void cleanPack() {
@@ -87,14 +80,14 @@ class Build extends JkBean {
         springboot.setSpringbootVersion("2.2.6.RELEASE");
         JkProject project = springboot.projectBean().getProject();
         project.simpleFacade()
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-web")
                         .and("org.projectlombok:lombok:1.18.20")
                 )
-                .setRuntimeDependencies(deps -> deps
+                .configureRuntimeDeps(deps -> deps
                         .minus("org.projectlombok:lombok")
                 )
-                .setTestDependencies(deps -> deps
+                .configureTestDeps(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-test")
                         .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
                 )
@@ -108,7 +101,7 @@ class Build extends JkBean {
 
 }
 ```
-<details>
+</details>
 
 Explore Jeka possibilities from command line `jekaw -h`.</sub>
 

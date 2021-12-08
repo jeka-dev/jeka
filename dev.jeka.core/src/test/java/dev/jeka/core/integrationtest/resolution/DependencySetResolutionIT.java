@@ -252,7 +252,7 @@ public class DependencySetResolutionIT {
     public void resolve_usingSeveralClassifierOnSingleLine_ok() {
         JkProject project = JkProject.of().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V11)
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .and("org.openjfx:javafx-controls:win,linux,mac:11.0.2", JkTransitivity.NONE))
                 .getProject();
         JkResolveResult resolveResult = project.getConstruction().getCompilation().resolveDependencies();
@@ -266,7 +266,7 @@ public class DependencySetResolutionIT {
     public void resolve_usingSeveralClassifiersIncludingDefaultOne_ok() {
         JkProject project = JkProject.of().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V11)
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .and("org.openjfx:javafx-controls:win,:11.0.2", JkTransitivity.NONE))
                 .getProject();
         JkResolveResult resolveResult = project.getConstruction().getCompilation().resolveDependencies();

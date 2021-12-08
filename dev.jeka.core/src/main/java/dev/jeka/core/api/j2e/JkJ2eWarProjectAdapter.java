@@ -51,7 +51,7 @@ public class JkJ2eWarProjectAdapter {
         JkUtilsAssert.argument(publishedAsMainArtifact || keepJar,
                 "Both publishedAsMainArtifact and keepJar cannot be false.");
         Path staticResourceDir = project.getBaseDir().resolve("src/main/webapp/static");
-        JkStandardFileArtifactProducer artifactProducer = project.getPublication().getArtifactProducer();
+        JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
         Consumer<Path> originalJarMaker = path -> artifactProducer.makeMainArtifact();
         Consumer<Path> warMaker = path -> generateWar(path, project);
         if (publishedAsMainArtifact) {

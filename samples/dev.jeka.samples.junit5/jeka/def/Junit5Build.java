@@ -43,10 +43,10 @@ class Junit5Build extends JkBean {
             .getConstruction()
                 .getTesting()
                     .getCompilation()
-                        .setDependencies(deps -> deps
+                        .configureDependencies(deps -> deps
                             .and("org.jdom:jdom2:2.0.6")
                         )
-                        .setDependencies(deps -> deps
+                        .configureDependencies(deps -> deps
                             .and("org.junit.jupiter:junit-jupiter-api:5.0.0")
                         ).__
                     .getTestProcessor()

@@ -25,7 +25,7 @@ public final class JkIvyPublication<T> {
 
     public final T __;
 
-    private JkModuleId moduleId;
+    private Supplier<String> moduleIdSupplier;
 
     private Supplier<String> versionSupplier = () -> null;
 
@@ -54,7 +54,12 @@ public final class JkIvyPublication<T> {
     }
 
     public JkIvyPublication<T> setModuleId(String moduleId) {
-        this.moduleId = JkModuleId.of(moduleId);
+        this.moduleIdSupplier = () -> moduleId;
+        return this;
+    }
+
+    public JkIvyPublication<T> setModuleId(Supplier<String> moduleIdSupplier) {
+        this.moduleIdSupplier = moduleIdSupplier;
         return this;
     }
 
@@ -69,7 +74,7 @@ public final class JkIvyPublication<T> {
     }
 
     public JkModuleId getModuleId() {
-        return moduleId;
+        return JkModuleId.of(moduleIdSupplier.get());
     }
 
     public String getVersion() {
@@ -221,10 +226,12 @@ public final class JkIvyPublication<T> {
     }
 
     private void publish(JkRepoSet repos) {
-        JkUtilsAssert.state(moduleId != null, "moduleIId cannot be null.");
+        JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
-        JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos.withDefaultSigner(defaultSigner), null);
-        internalPublisher.publishIvy(moduleId.withVersion(versionSupplier.get()), getAllArtifacts(), getDependencies());
+        JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos.withDefaultSigner(defaultSigner),
+                null);
+        internalPublisher.publishIvy(getModuleId().withVersion(versionSupplier.get()), getAllArtifacts(),
+                getDependencies());
     }
 
     private static JkPublishedArtifact toPublishedArtifact(String artifactName, Path artifactFile, String type,

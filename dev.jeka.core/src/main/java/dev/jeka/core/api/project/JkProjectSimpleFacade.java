@@ -57,7 +57,7 @@ public class JkProjectSimpleFacade {
      * Sets product Java source files and resources in "src".
      * Sets test Java source files and resources in "test".
      */
-    public JkProjectSimpleFacade setSimpleLayout() {
+    public JkProjectSimpleFacade useSimpleLayout() {
         project.getConstruction().getCompilation().getLayout().setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
         project.getConstruction().getTesting().getCompilation().getLayout()
                 .setSourceSimpleStyle(JkCompileLayout.Concern.TEST);
@@ -73,22 +73,22 @@ public class JkProjectSimpleFacade {
         return this;
     }
 
-    public JkProjectSimpleFacade setCompileDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.getConstruction().getCompilation().setDependencies(modifier);
+    public JkProjectSimpleFacade configureCompileDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.getConstruction().getCompilation().configureDependencies(modifier);
         return this;
     }
 
     public JkProjectSimpleFacade includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
-        project.getPublication().includeJavadocAndSources(includeJavaDoc, includeSources);
+        project.includeJavadocAndSources(includeJavaDoc, includeSources);
         return this;
     }
 
-    public JkProjectSimpleFacade setTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.getConstruction().getTesting().getCompilation().setDependencies(modifier);
+    public JkProjectSimpleFacade configureTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.getConstruction().getTesting().getCompilation().configureDependencies(modifier);
         return this;
     }
 
-    public JkProjectSimpleFacade setTestSkipped(boolean skipped) {
+    public JkProjectSimpleFacade skipTests(boolean skipped) {
         project.getConstruction().getTesting().setSkipped(skipped);
         return this;
     }
@@ -97,7 +97,7 @@ public class JkProjectSimpleFacade {
      * Add specified dependencies at head of preset dependencies.
      */
     public JkProjectSimpleFacade addTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        return setTestDependencies(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
+        return configureTestDeps(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
     }
 
     /**
@@ -105,27 +105,27 @@ public class JkProjectSimpleFacade {
      * get the runtime dependencies.
      * @param modifier An function that define the runtime dependencies from the compilation ones.
      */
-    public JkProjectSimpleFacade setRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
-        project.getConstruction().setRuntimeDependencies(modifier);
+    public JkProjectSimpleFacade configureRuntimeDeps(UnaryOperator<JkDependencySet> modifier) {
+        project.getConstruction().configureRuntimeDependencies(modifier);
         return this;
     }
 
 
-    public JkProjectSimpleFacade setPublishedMavenVersion(Supplier<String> versionSupplier) {
+    public JkProjectSimpleFacade setPublishedVersion(Supplier<String> versionSupplier) {
         project.getPublication().getMaven().setVersion(versionSupplier);
         return this;
     }
 
-    public JkProjectSimpleFacade setPublishedMavenVersion(String version) {
-        return setPublishedMavenVersion(() -> version);
+    public JkProjectSimpleFacade setPublishedVersion(String version) {
+        return setPublishedVersion(() -> version);
     }
 
     /**
      * The published version will be computed according the current git tag.
      * @see JkGitProcess#getVersionFromTag()
      */
-    public JkProjectSimpleFacade setPublishedMavenVersionFromGitTag() {
-        return setPublishedMavenVersion(() -> JkGitProcess.of(getProject().getBaseDir()).getVersionFromTag());
+    public JkProjectSimpleFacade setPublishedVersionFromGitTag() {
+        return setPublishedVersion(() -> JkGitProcess.of(getProject().getBaseDir()).getVersionFromTag());
     }
 
     /**
@@ -133,7 +133,7 @@ public class JkProjectSimpleFacade {
      * @see JkGitProcess#getVersionFromCommitMessage(String)
      */
     public JkProjectSimpleFacade setPublishedVersionFromGitTagCommitMessage(String suffixKeyword) {
-        return setPublishedMavenVersion(() -> JkGitProcess.of(getProject().getBaseDir())
+        return setPublishedVersion(() -> JkGitProcess.of(getProject().getBaseDir())
                 .getVersionFromCommitMessage(suffixKeyword));
     }
 
@@ -141,7 +141,7 @@ public class JkProjectSimpleFacade {
      * @param moduleId group + artifactId to use when publishing on a binary repository.
      *                 Must be formatted as 'group:artifactId'
      */
-    public JkProjectSimpleFacade setPublishedMavenModuleId(String moduleId) {
+    public JkProjectSimpleFacade setPublishedModuleId(String moduleId) {
         project.getPublication().getMaven().setModuleId(moduleId);
         return this;
     }

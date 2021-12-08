@@ -34,11 +34,10 @@ public class NormalJarBuild extends JkBean {
     @Override
     protected void init() {
         projectPlugin.getProject()
-            .getPublication()
-                .getArtifactProducer()
-                    .putMainArtifact(projectPlugin.getProject().getConstruction()::createFatJar).__.__
+            .getArtifactProducer()
+                    .putMainArtifact(projectPlugin.getProject().getConstruction()::createFatJar).__
             .simpleFacade()
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .and(sampleBuild.projectPlugin.getProject().toDependency()));
     }
 

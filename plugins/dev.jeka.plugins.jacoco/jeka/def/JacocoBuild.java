@@ -13,8 +13,8 @@ public class JacocoBuild extends JkBean {
         projectPlugin.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .mixResourcesAndSources()
-                .setSimpleLayout()
-                .setCompileDependencies(deps -> deps
+                .useSimpleLayout()
+                .configureCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
 

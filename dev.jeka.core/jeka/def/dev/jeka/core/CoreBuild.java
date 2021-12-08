@@ -27,8 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static dev.jeka.core.api.project.JkProjectPublication.JAVADOC_ARTIFACT_ID;
-import static dev.jeka.core.api.project.JkProjectPublication.SOURCES_ARTIFACT_ID;
+import static dev.jeka.core.api.project.JkProject.JAVADOC_ARTIFACT_ID;
+import static dev.jeka.core.api.project.JkProject.SOURCES_ARTIFACT_ID;
 
 /**
  * Run main method to create full distrib.
@@ -47,6 +47,11 @@ public class CoreBuild extends JkBean {
     @Override
     protected void init()  {
         projectBean.getProject()
+            .getArtifactProducer()
+                .putMainArtifact(this::doPackWithEmbedded)
+                .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
+                .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper)
+            .__
             .getConstruction()
                 .getManifest()
                     .addMainClass("dev.jeka.core.tool.Main").__
@@ -84,16 +89,12 @@ public class CoreBuild extends JkBean {
                 .__
             .__
             .getPublication()
-                .getArtifactProducer()
-                    .putMainArtifact(this::doPackWithEmbedded)
-                    .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
-                    .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper)
-                .__
+                .setModuleId("dev.jeka:jeka-core")
+                .setVersion(JkGitProcess.of()::getVersionFromTag)
                 .getMaven()
-                    .setModuleId("dev.jeka:jeka-core")
-                    .setVersion(JkGitProcess.of()::getVersionFromTag)
                     .getPomMetadata()
                         .setProjectName("jeka")
+                        .addApache2License()
                         .setProjectDescription("Automate with plain Java code and nothing else.")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
@@ -104,7 +105,7 @@ public class CoreBuild extends JkBean {
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
+        final JkArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
         if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
                     SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);

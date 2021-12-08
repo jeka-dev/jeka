@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -34,9 +35,10 @@ final class FieldInjector {
         for (final Field field : getPropertyFields(target.getClass())) {
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             if (injectProperty != null) {
-                String propertyName = JkProperties.get(injectProperty.value());
-                JkUtilsAssert.state(JkProperties.isDefined(propertyName),
-                        "No property '%s' defined for injecting in field %s.", propertyName, field);
+                String propertyName = injectProperty.value();
+                if (!JkProperties.isDefined(propertyName)) {
+                    JkLog.warn("No property '%s' defined for injecting in field %s.", propertyName, field);
+                }
                 String propertyValue = JkProperties.get(propertyName);
                 final Class<?> type = field.getType();
                 Object value;

@@ -27,7 +27,7 @@ public final class JkMavenPublication<T> {
 
     private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
-    private JkModuleId moduleId;
+    private Supplier<String> moduleIdSupplier;
 
     private Supplier<String> versionSupplier = () -> null;
 
@@ -63,7 +63,12 @@ public final class JkMavenPublication<T> {
     }
 
     public JkMavenPublication<T> setModuleId(String moduleId) {
-        this.moduleId = JkModuleId.of(moduleId);
+        this.moduleIdSupplier = () -> moduleId;
+        return this;
+    }
+
+    public JkMavenPublication<T> setModuleId(Supplier<String> moduleIdSupplier) {
+        this.moduleIdSupplier = moduleIdSupplier;
         return this;
     }
 
@@ -82,7 +87,7 @@ public final class JkMavenPublication<T> {
     }
 
     public JkModuleId getModuleId() {
-        return moduleId;
+        return JkModuleId.of(moduleIdSupplier.get());
     }
 
     public String getVersion() {
@@ -144,12 +149,12 @@ public final class JkMavenPublication<T> {
 
     private JkMavenPublication publish(JkRepoSet repos) {
         JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
-        JkUtilsAssert.state(moduleId != null, "moduleId cannot be null.");
+        JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        JkVersionedModule versionedModule = moduleId.withVersion(versionSupplier.get());
+        JkVersionedModule versionedModule = getModuleId().withVersion(versionSupplier.get());
         internalPublisher.publishMaven(versionedModule, getArtifactLocator(), pomMetadata, getDependencies());
         return this;
     }

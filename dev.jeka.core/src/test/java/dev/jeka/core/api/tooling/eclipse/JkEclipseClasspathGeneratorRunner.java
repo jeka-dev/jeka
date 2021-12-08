@@ -16,7 +16,7 @@ public class JkEclipseClasspathGeneratorRunner {
         JkFileSystemDependency fileDep = JkFileSystemDependency.of(zip);
         JkProject project = JkProject.of().getConstruction()
                 .getCompilation()
-                    .setDependencies(deps -> deps
+                    .configureDependencies(deps -> deps
                             .and(fileDep)
                             .and(moduleDependency)).__.__;
         JkEclipseClasspathGenerator generator = JkEclipseClasspathGenerator.of(project.getJavaIdeSupport());

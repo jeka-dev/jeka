@@ -4,13 +4,16 @@ import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.function.JkRunnables;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Responsible to publish artifacts on the repository. If the project does not publish anything, this part can be
@@ -20,21 +23,23 @@ import java.util.function.Consumer;
  */
 public class JkProjectPublication {
 
-    public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
-
-    public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
-
     private final JkProject project;
 
-    private final JkStandardFileArtifactProducer<JkProjectPublication> artifactProducer;
+    private Supplier<String> moduleIdSupplier = () -> null;
 
-    private final JkMavenPublication<JkProjectPublication> maven;
+    private Supplier<String> versionSupplier = () -> null;
 
-    private final JkIvyPublication<JkProjectPublication> ivy;
+    private JkMavenPublication<JkProjectPublication> maven;
+
+    private JkIvyPublication<JkProjectPublication> ivy;
 
     private final JkRunnables<JkProjectPublication> preActions;
 
     private final JkRunnables<JkProjectPublication> postActions;
+
+    private boolean publishMaven = true;
+
+    private boolean publishIvy = false;
 
     /**
      * For parent chaining
@@ -44,21 +49,8 @@ public class JkProjectPublication {
     JkProjectPublication(JkProject project) {
         this.project = project;
         this.__ = project;
-        artifactProducer = JkStandardFileArtifactProducer.ofParent(this)
-                .setArtifactFilenameComputation(project::getArtifactPath);
-        registerArtifacts();
         JkVersionedModule.ConflictStrategy conflictStrategy = project.getDuplicateConflictStrategy();
-        this.maven = JkMavenPublication.of(this)
-            .setArtifactLocatorSupplier(() -> artifactProducer)
-            .setDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                    project.getConstruction().getCompilation().getDependencies(),
-                    project.getConstruction().getRuntimeDependencies(),
-                    conflictStrategy));
-        this.ivy = JkIvyPublication.of(this)
-            .addArtifacts(() -> artifactProducer)
-            .setDependencies(deps -> JkIvyPublication.getPublishDependencies(
-                    project.getConstruction().getCompilation().getDependencies(),
-                    project.getConstruction().getRuntimeDependencies(), conflictStrategy));
+        JkArtifactLocator artifactLocator = project.getArtifactProducer();
         this.preActions = JkRunnables.ofParent(this);
         this.postActions = JkRunnables.ofParent(this);
     }
@@ -77,64 +69,105 @@ public class JkProjectPublication {
     }
 
     public JkMavenPublication<JkProjectPublication> getMaven() {
+        if (maven != null) {
+            return maven;
+        }
+        maven = JkMavenPublication.of(this)
+                .setArtifactLocatorSupplier(() -> project.getArtifactProducer())
+                .setVersion(this.versionSupplier)
+                .setModuleId(this.moduleIdSupplier)
+                .setDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
+                        project.getConstruction().getCompilation().getDependencies(),
+                        project.getConstruction().getRuntimeDependencies(),
+                        project.getDuplicateConflictStrategy()));
         return maven;
     }
 
     public JkIvyPublication<JkProjectPublication> getIvy() {
+        if (ivy != null) {
+            return ivy;
+        }
+        ivy = JkIvyPublication.of(this)
+                .addArtifacts(() -> project.getArtifactProducer())
+                .setVersion(this.versionSupplier)
+                .setModuleId(this.moduleIdSupplier)
+                .setDependencies(deps -> JkIvyPublication.getPublishDependencies(
+                        project.getConstruction().getCompilation().getDependencies(),
+                        project.getConstruction().getRuntimeDependencies(), project.getDuplicateConflictStrategy()));
         return ivy;
     }
 
-    public JkStandardFileArtifactProducer<JkProjectPublication> getArtifactProducer() {
-        return artifactProducer;
-    }
 
     public void publish() {
         preActions.run();
-        if (maven.getModuleId() != null) {
+        if (publishMaven) {
             maven.publish();
         }
-        if (ivy.getModuleId() != null) {
+        if (publishIvy) {
             ivy.publish();
         }
         postActions.run();
     }
 
-    /**
-     * Specifies if Javadoc and sources jars should be included in pack/publish. Default is true;
-     */
-    public JkProjectPublication includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
-        if (includeJavaDoc) {
-            artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, project.getDocumentation()::createJavadocJar);
-        } else {
-            artifactProducer.removeArtifact(JAVADOC_ARTIFACT_ID);
-        }
-        if (includeSources) {
-            artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
-        } else {
-            artifactProducer.removeArtifact(SOURCES_ARTIFACT_ID);
-        }
+
+    public boolean isPublishMaven() {
+        return publishMaven;
+    }
+
+    public JkProjectPublication setPublishMaven(boolean publishMaven) {
+        this.publishMaven = publishMaven;
         return this;
     }
 
-    private void registerArtifacts() {
-        artifactProducer.putMainArtifact(project.getConstruction()::createBinJar);
-        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, project.getDocumentation()::createSourceJar);
-        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, project.getDocumentation()::createJavadocJar);
+    public boolean isPublishIvy() {
+        return publishIvy;
+    }
+
+    public JkProjectPublication setPublishIvy(boolean publishIvy) {
+        this.publishIvy = publishIvy;
+        return this;
     }
 
     public JkModuleId getModuleId() {
-        return Optional.ofNullable(maven.getModuleId()).orElse(ivy.getModuleId());
+        if (moduleIdSupplier.get() != null) {
+            return JkModuleId.of(moduleIdSupplier.get());
+        }
+        if (maven != null && maven.getModuleId() != null) {
+            return maven.getModuleId();
+        } else if (ivy != null && ivy.getModuleId() != null) {
+            return ivy.getModuleId();
+        }
+        return null;
     }
 
     public String getVersion() {
-        return Optional.ofNullable(maven.getVersion()).orElse(ivy.getVersion());
+        if (versionSupplier != null && versionSupplier.get() != null) {
+            return versionSupplier.get();
+        }
+        if (maven != null && maven.getVersion() != null) {
+            return maven.getVersion();
+        } else if (ivy != null && ivy.getVersion() != null) {
+            return ivy.getVersion();
+        }
+        return null;
     }
 
-    /**
-     * Short hand to build all missing artifacts for publication.
-     */
-    public void pack() {
-        artifactProducer.makeAllMissingArtifacts();
+    public JkProjectPublication setModuleId(Supplier<String> moduleIdSupplier) {
+        this.moduleIdSupplier = moduleIdSupplier;
+        return this;
+    }
+
+    public JkProjectPublication setModuleId(String moduleId) {
+        return setModuleId(() -> moduleId);
+    }
+
+    public JkProjectPublication setVersion(String version) {
+        return setVersion(() -> version);
+    }
+
+    public JkProjectPublication setVersion(Supplier<String> versionSupplier) {
+        this.versionSupplier = versionSupplier;
+        return this;
     }
 
     /**

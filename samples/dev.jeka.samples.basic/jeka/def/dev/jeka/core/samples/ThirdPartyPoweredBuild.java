@@ -28,12 +28,12 @@ public class ThirdPartyPoweredBuild extends JkBean {
     @Override
     protected void init() {
         projectPlugin.getProject().simpleFacade()
-            .setCompileDependencies(deps -> deps
+            .configureCompileDeps(deps -> deps
                 .and(JAVAX_SERVLET_API.version("3.1.0"))
                 .and(GUAVA.version("30.0-jre")))
-            .setRuntimeDependencies(compileDeps -> compileDeps
+            .configureRuntimeDeps(compileDeps -> compileDeps
                 .minus(JAVAX_SERVLET_API))
-            .setTestDependencies(deps -> deps
+            .configureTestDeps(deps -> deps
                 .and(JavaPluginBuild.JUNIT5)
                 .and(MOCKITO_ALL.version("1.10.19")));
     }

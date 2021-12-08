@@ -14,16 +14,16 @@ class SpringbootSampleBuild extends JkBean {
     protected void init() {
         springboot.setSpringbootVersion("2.5.5");
         springboot.projectBean().getProject().simpleFacade()
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                     .and(Boot.STARTER_WEB)  // Same as .and("org.springframework.boot:spring-boot-starter-web")
                     .and(Boot.STARTER_DATA_JPA)
                     .and(Boot.STARTER_DATA_REST)
                     .and("com.google.guava:guava:30.0-jre")
                 )
-                .setRuntimeDependencies(deps -> deps
+                .configureRuntimeDeps(deps -> deps
                     .and("com.h2database:h2:1.4.200")
                 )
-                .setTestDependencies(deps -> deps
+                .configureTestDeps(deps -> deps
                     .and(Boot.STARTER_TEST)
                 );
     }

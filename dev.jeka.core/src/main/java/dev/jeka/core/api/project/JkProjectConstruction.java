@@ -66,7 +66,7 @@ public class JkProjectConstruction {
 
     private final JkManifest manifest;
 
-    private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
+    private JkPathTreeSet fatJarContentCustomizer = JkPathTreeSet.ofEmpty();
 
     private UnaryOperator<JkDependencySet> dependencySetModifier = x -> x;
 
@@ -182,7 +182,7 @@ public class JkProjectConstruction {
     }
 
     public void createBinJar() {
-        createBinJar(project.getArtifactPath(JkArtifactId.ofMainArtifact("jar")));
+        createBinJar(project.getArtifactProducer().getArtifactPath(JkArtifactId.ofMainArtifact("jar")));
     }
 
     public void createFatJar(Path target) {
@@ -199,18 +199,18 @@ public class JkProjectConstruction {
     }
 
     public void createFatJar() {
-        createFatJar(project.getArtifactPath(JkArtifactId.of("fat", "jar")));
+        createFatJar(project.getArtifactProducer().getArtifactPath(JkArtifactId.of("fat", "jar")));
     }
 
     public JkPathTreeSet getExtraFilesToIncludeInJar() {
-        return this.extraFilesToIncludeInFatJar;
+        return this.fatJarContentCustomizer;
     }
 
     /**
      * Allows customizing thz content of produced fat jar.
      */
-    public JkProjectConstruction customizeFatJar(Function<JkPathTreeSet, JkPathTreeSet> customizer) {
-        this.extraFilesToIncludeInFatJar = customizer.apply(extraFilesToIncludeInFatJar);
+    public JkProjectConstruction customizeFatJarContent(Function<JkPathTreeSet, JkPathTreeSet> customizer) {
+        this.fatJarContentCustomizer = customizer.apply(fatJarContentCustomizer);
         return this;
     }
 
@@ -219,7 +219,7 @@ public class JkProjectConstruction {
      * get the runtime dependencies.
      * @param modifier An function that define the runtime dependencies from the compilation ones.
      */
-    public JkProjectConstruction setRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
+    public JkProjectConstruction configureRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
         this.dependencySetModifier = modifier;
         return this;
     }
@@ -243,9 +243,9 @@ public class JkProjectConstruction {
         JkProjectDependencies textDeps = JkProjectDependencies.ofTextDescriptionIfExist(
                 baseDir.resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"));
         JkProjectDependencies extraDeps = localDeps.and(textDeps);
-        getCompilation().setDependencies(deps -> deps.and(extraDeps.getCompile()));
-        setRuntimeDependencies(deps -> deps.and(extraDeps.getRuntime()));
-        getTesting().getCompilation().setDependencies(deps -> extraDeps.getTest().and(deps));
+        getCompilation().configureDependencies(deps -> deps.and(extraDeps.getCompile()));
+        configureRuntimeDependencies(deps -> deps.and(extraDeps.getRuntime()));
+        getTesting().getCompilation().configureDependencies(deps -> extraDeps.getTest().and(deps));
         textAndLocalDependenciesAdded = true;
     }
 

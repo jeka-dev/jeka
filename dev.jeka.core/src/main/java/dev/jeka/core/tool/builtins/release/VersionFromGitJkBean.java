@@ -58,15 +58,10 @@ public class VersionFromGitJkBean extends JkBean {
 
     /**
      * Configure the specified project to use git version for publishing and tagging the repository.
-     * @param tag If true, the repository will be tagged right after the project.pubmication.publish()
+     * @param tag If true, the repository will be tagged right after the project.publication.publish()
      */
     public void configure(JkProject project, boolean tag) {
-        project.getPublication()
-                .getMaven()
-                    .setVersion(() -> version().toString())
-                .__
-                .getIvy()
-                    .setVersion(() -> version().toString());
+        project.getPublication().setVersion(() -> version().toString());
         if (tag) {
             project.getPublication().getPostActions().append(TAG_TASK_NAME, this::tagIfDiffers);
         }
@@ -85,7 +80,11 @@ public class VersionFromGitJkBean extends JkBean {
         }
         String currentTagVersion = git.getVersionFromTag(tagPrefixForVersion);
         String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentVersionPrefix);
-        cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion).orElse(currentTagVersion));
+        cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion)
+                .orElseGet(() -> git.getVersionFromTag(tagPrefixForVersion)));
+        if (!cachedVersion.isSnapshot() && git.isWorkspaceDirty()) {
+            cachedVersion = cachedVersion.toSnapshot();
+        }
         return cachedVersion;
     }
 

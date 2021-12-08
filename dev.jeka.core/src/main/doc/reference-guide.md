@@ -736,7 +736,7 @@ The API contains a lot of extension points to add specific behaviors.
 project
 +- baseDir
 +- outputDir
-+- artifactBaseName
++- artifactProducer (define artifacts to be produce by the build as map of artifactName -> Consumer<Path> producing the artifact)
 +- duplicateDependencyConflictStrategy
 +- construction  (Produce packaged binaries from sources. This includes test checking)
 |  +- jvmTargetVersion
@@ -777,21 +777,18 @@ project
 |  +- javadocConfiguration
 |  +- methods : createJavadocJar(), createSourceJar(), run()
 +- publication (define information about module and artifacts to be published)
-|  +- artifactProducer (define artifacts to be produce by the build as map of artifactName -> Consumer<Path> producing the artifact)
+|  +- moduleId (group:name)
+|  +- version
 |  +- maven (maven specific information to be published in a Maven Repositoty)
-|  |  +- moduleId (group:name)
-|  |  +- version
 |  |  +- dependencyCustomizer (customize the dependencies to be published)
 |  |  +- mavenSpecificInfo
 |  |  +- methods : publish
 |  +- ivy (Ivy specific information to be published in a Ivy Repositoty)
-|  |  +- moduleId (group:name)
-|  |  +- version
 |  |  +- dependencyCustomizer (customize the dependencies to be published)
 |  |  +- ivySpecifictInfo
 |  |  +- method : publish()
-|  +- methods : pack(), publish(), getVersion(), getModuleId()
-+ methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport()
+|  +- methods : publish(), getVersion(), getModuleId()
++ methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport(), pack()
 ```
  </details>
 
@@ -801,19 +798,19 @@ setup dependencies, java version, project layout, test behavior, test selection 
 
 ```Java
 JkProject.of().simpleFacade()
-   .setCompileDependencies(deps -> deps
+   .configureCompileDeps(deps -> deps
            .and("com.google.guava:guava:21.0")
            .and("com.sun.jersey:jersey-server:1.19.4")
            .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
-   .setRuntimeDependencies(deps -> deps
+   .configureRuntimeDeps(deps -> deps
            .minus("org.junit.jupiter:junit-jupiter-engine")
            .and("com.github.djeang:vincer-dom:1.2.0"))
-   .setTestDependencies(deps -> deps
+   .configureTestDeps(deps -> deps
            .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
    .addTestExcludeFilterSuffixedBy("IT", false)
    .setJavaVersion(JkJavaVersion.V8)
-   .setPublishedMavenModuleId("dev.jeka:sample-javaplugin")
-   .setPublishedMavenVersion("1.0-SNAPSHOT");
+   .setPublishedModuleId("dev.jeka:sample-javaplugin")
+   .setPublishedVersion("1.0-SNAPSHOT");
 
 ```
 

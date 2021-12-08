@@ -20,7 +20,7 @@ public class JacocoSampleBuild extends JkBean {
         jacoco.enabled = true;
         jacoco.xmlReport = true;
         jacoco.jacocoVersion = "0.8.7";
-        projectPlugin.getProject().simpleFacade().setTestDependencies(deps -> deps
+        projectPlugin.getProject().simpleFacade().configureTestDeps(deps -> deps
                         .and(JkPopularModules.JUNIT_5 + ":5.8.1")
         );
     }

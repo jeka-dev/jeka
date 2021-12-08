@@ -55,17 +55,17 @@ public class SignedArtifactsBuild extends JkBean {
     @Override
     protected void init() {
         projectPlugin.getProject().simpleFacade()
-            .setCompileDependencies(deps -> deps
+            .configureCompileDeps(deps -> deps
                 .and(GUAVA.version("30.0-jre"))
             )
-            .setTestDependencies(deps -> deps
+            .configureTestDeps(deps -> deps
                 .and(JavaPluginBuild.JUNIT5)
             )
             .getProject()
             .getPublication()
                 .apply(this::configForLocalRepo)
                 .getMaven()
-                .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
+                    .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
                     .setModuleId("dev.jeka.core:samples-signedArtifacts")
                     .setVersion("1.3.1")
                     .getPomMetadata()

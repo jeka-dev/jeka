@@ -25,10 +25,10 @@ class SonarqubeSampleBuild extends JkBean {
     protected void init() {
         projectPlugin.getProject().simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
-            .setCompileDependencies(deps -> deps
+            .configureCompileDeps(deps -> deps
                 .and("com.github.djeang:vincer-dom:1.4.0")
             )
-            .setTestDependencies(deps -> deps
+            .configureTestDeps(deps -> deps
                 .and(JkPopularModules.JUNIT_5 + ":+")
             );
         sonarqubePlugin.provideTestLibs = true;

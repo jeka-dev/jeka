@@ -14,7 +14,7 @@ class Build extends JkBean {
         JkProject javaProject = projectBean.getProject();
         javaProject.simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
-            .setCompileDependencies(deps -> deps
+            .configureCompileDeps(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
             );
         JkJekaVersionCompatibilityChecker.setJekaPluginCompatibilityRange(javaProject.getConstruction().getManifest(),

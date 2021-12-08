@@ -89,7 +89,7 @@ public final class SpringbootJkBean extends JkBean {
 
     @JkDoc("Run Springboot application from the generated jar")
     public void run() {
-        JkArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
+        JkArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
         JkArtifactId mainArtifactId = artifactProducer.getMainArtifactId();
         artifactProducer.makeMissingArtifacts(mainArtifactId);
         Path mainArtifactFile = artifactProducer.getMainArtifactPath();
@@ -102,7 +102,7 @@ public final class SpringbootJkBean extends JkBean {
 
     @JkDoc("Run Springboot application from the generated jar")
     public void runAsync() {
-        JkArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
+        JkArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
         JkArtifactId mainArtifactId = artifactProducer.getMainArtifactId();
         artifactProducer.makeMissingArtifacts(mainArtifactId);
         Path mainArtifactFile = artifactProducer.getMainArtifactPath();
@@ -128,7 +128,7 @@ public final class SpringbootJkBean extends JkBean {
         project.getConstruction().getTesting().getTestProcessor().setForkingProcess(true);
 
         // Do not publish javadoc and sources
-        project.getPublication().includeJavadocAndSources(false, false);
+        project.includeJavadocAndSources(false, false);
 
         // Add springboot version to Manifest
         project.getConstruction().getManifest().addMainAttribute(SPRING_BOOT_VERSION_MANIFEST_ENTRY,
@@ -136,11 +136,11 @@ public final class SpringbootJkBean extends JkBean {
 
         // resolve dependency versions upon springboot provided ones
         JkVersionProvider versionProvider = getSpringbootPom(dependencyResolver, springbootVersion).getVersionProvider();
-        project.getConstruction().getCompilation().setDependencies(deps -> deps
+        project.getConstruction().getCompilation().configureDependencies(deps -> deps
             .andVersionProvider(versionProvider));
 
         // define bootable jar as main artifact
-        JkStandardFileArtifactProducer artifactProducer = project.getPublication().getArtifactProducer();
+        JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
         Consumer<Path> bootJar = this::createBootJar;
         artifactProducer.putMainArtifact(bootJar);
 
@@ -168,7 +168,7 @@ public final class SpringbootJkBean extends JkBean {
      * Creates the bootable jar at the standard location.
      */
     public void createBootJar() {
-        JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
+        JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
         createBootJar(artifactProducer.getMainArtifactPath());
     }
 
@@ -177,7 +177,7 @@ public final class SpringbootJkBean extends JkBean {
      */
     public void createBootJar(Path target) {
         JkProjectConstruction construction = projectBean.getProject().getConstruction();
-        JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getPublication().getArtifactProducer();
+        JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
         JkDependencyResolver dependencyResolver = construction.getDependencyResolver();
         JkVersionProvider versionProvider = getSpringbootPom(dependencyResolver, springbootVersion).getVersionProvider();
         JkVersion loaderVersion = versionProvider.getVersionOf(JkSpringModules.Boot.LOADER);
@@ -187,7 +187,7 @@ public final class SpringbootJkBean extends JkBean {
         final JkPathSequence embeddedJars = construction.getDependencyResolver().resolve(
                 construction.getRuntimeDependencies().normalised(projectBean.getProject().getDuplicateConflictStrategy()))
                 .getFiles();
-        Path originalJarPath = projectBean.getProject().getPublication().getArtifactProducer().getArtifactPath(ORIGINAL_ARTIFACT);
+        Path originalJarPath = projectBean.getProject().getArtifactProducer().getArtifactPath(ORIGINAL_ARTIFACT);
         if (!Files.exists(originalJarPath)) {
             construction.createBinJar(originalJarPath);
         }

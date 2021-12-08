@@ -94,10 +94,10 @@ class MasterBuild extends JkBean {
     @JkDoc("Clean build of core + plugins bypassing tests.")
     public void buildFast() {
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(bean -> {
-            bean.getProject().simpleFacade().setTestSkipped(true);
-            bean.getProject().getPublication().includeJavadocAndSources(false, false);
+            bean.getProject().simpleFacade().skipTests(true);
+            bean.getProject().includeJavadocAndSources(false, false);
             bean.clean();
-            bean.getProject().getPublication().pack();
+            bean.getProject().pack();
         });
     }
 

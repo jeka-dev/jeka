@@ -28,20 +28,20 @@ public class JavaPluginBuild extends JkBean {
     @Override
     protected void init() {
        projectPlugin.getProject().simpleFacade()
-               .setCompileDependencies(deps -> deps
+               .configureCompileDeps(deps -> deps
                    .and("com.google.guava:guava:30.0-jre")
                    .and("com.sun.jersey:jersey-server:1.19.4")
                )
-               .setRuntimeDependencies(deps -> deps
+               .configureRuntimeDeps(deps -> deps
                    .and("com.github.djeang:vincer-dom:1.2.0")
                )
-               .setTestDependencies(deps -> deps
+               .configureTestDeps(deps -> deps
                    .and(JUNIT5)
                )
                .addTestExcludeFilterSuffixedBy("IT", false)
                .setJvmTargetVersion(JkJavaVersion.V8)
-               .setPublishedMavenModuleId("dev.jeka:sample-javaplugin")
-               .setPublishedMavenVersion("1.0-SNAPSHOT")
+               .setPublishedModuleId("dev.jeka:sample-javaplugin")
+               .setPublishedVersion("1.0-SNAPSHOT")
        .getProject()
            .getConstruction()
                .getCompiler()

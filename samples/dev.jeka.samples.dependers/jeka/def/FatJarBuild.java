@@ -20,13 +20,11 @@ public class FatJarBuild extends JkBean {
     @Override
     protected void init() {
         projectPlugin.getProject()
-            .getPublication()
-                .getArtifactProducer()
-                    .putMainArtifact(projectPlugin.getProject().getConstruction()::createFatJar)
-                .__
+            .getArtifactProducer()
+                .putMainArtifact(projectPlugin.getProject().getConstruction()::createFatJar)
             .__
             .simpleFacade()
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .and("com.google.guava:guava:22.0")
                         .and(sampleBuild.projectPlugin.getProject().toDependency()));
     }

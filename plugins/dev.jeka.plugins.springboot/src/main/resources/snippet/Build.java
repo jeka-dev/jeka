@@ -13,10 +13,10 @@ class Build extends JkBean {
     protected void init() {
         springboot.setSpringbootVersion("${springbootVersion}");
         springboot.projectBean().getProject().simpleFacade()
-            .setCompileDependencies(deps -> deps
+            .configureCompileDeps(deps -> deps
                 .and("org.springframework.boot:spring-boot-starter-web")
             )
-            .setTestDependencies(deps -> deps
+            .configureTestDeps(deps -> deps
                 .and("org.springframework.boot:spring-boot-starter-test")
                     .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
             );

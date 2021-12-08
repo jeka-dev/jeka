@@ -19,7 +19,7 @@ class Build extends JkBean {
             .getConstruction()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .getCompilation()
-                    .setDependencies(deps -> deps
+                    .configureDependencies(deps -> deps
                         .and("com.google.guava:guava:21.0")
                     )
                 .__
@@ -27,7 +27,7 @@ class Build extends JkBean {
                 // this testing setup is almost default setting, this is here for illustration purpose
                 // If default is ok for you, you can remove it.
                 .getTesting()
-                    .getCompilation().setDependencies(deps -> deps
+                    .getCompilation().configureDependencies(deps -> deps
                         .and("org.junit.jupiter:junit-jupiter:5.8.1"))
                     .__
                     .getTestSelection()

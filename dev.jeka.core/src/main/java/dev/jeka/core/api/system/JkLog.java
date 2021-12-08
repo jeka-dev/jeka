@@ -144,8 +144,8 @@ public final class JkLog implements Serializable {
         consume(JkLogEvent.ofRegular(Type.INFO, String.format(message, params)));
     }
 
-    public static void warn(String message) {
-        consume(JkLogEvent.ofRegular(Type.WARN, message));
+    public static void warn(String message, Object ... params) {
+        consume(JkLogEvent.ofRegular(Type.WARN, String.format(message, params)));
     }
 
     public static void trace(String message) {

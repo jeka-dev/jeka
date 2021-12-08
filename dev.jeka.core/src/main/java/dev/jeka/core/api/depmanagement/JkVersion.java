@@ -51,6 +51,13 @@ public final class JkVersion implements Comparable<JkVersion> {
         return this.value.toLowerCase().endsWith("-snapshot");
     }
 
+    public JkVersion toSnapshot() {
+        if (this.isSnapshot()) {
+            return this;
+        }
+        return JkVersion.of(this.value + "-SNAPSHOT");
+    }
+
     @Override
     public int compareTo(JkVersion other) {
         if (this.isUnspecified()) {

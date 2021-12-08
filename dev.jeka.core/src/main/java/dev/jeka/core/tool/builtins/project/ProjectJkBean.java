@@ -115,15 +115,15 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     private void applyPostSetupOptions(JkProject aProject) {
-        final JkStandardFileArtifactProducer artifactProducer = aProject.getPublication().getArtifactProducer();
-        JkArtifactId sources = JkProjectPublication.SOURCES_ARTIFACT_ID;
+        final JkStandardFileArtifactProducer artifactProducer = aProject.getArtifactProducer();
+        JkArtifactId sources = JkProject.SOURCES_ARTIFACT_ID;
         if (pack.sources != null && !pack.sources) {
             artifactProducer.removeArtifact(sources);
         } else if (pack.sources != null && pack.sources && !artifactProducer.getArtifactIds().contains(sources)) {
             Consumer<Path> sourceJar = aProject.getDocumentation()::createSourceJar;
             artifactProducer.putArtifact(sources, sourceJar);
         }
-        JkArtifactId javadoc = JkProjectPublication.JAVADOC_ARTIFACT_ID;
+        JkArtifactId javadoc = JkProject.JAVADOC_ARTIFACT_ID;
         if (pack.javadoc != null && !pack.javadoc) {
             artifactProducer.removeArtifact(javadoc);
         } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
@@ -232,7 +232,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             "\nDoes not re-generate artifacts already generated : " +
             "execute 'clean java#pack' to re-generate artifacts.")
     public void pack() {
-        project.getPublication().getArtifactProducer().makeAllMissingArtifacts();
+        project.getArtifactProducer().makeAllMissingArtifacts();
     }
 
     /**

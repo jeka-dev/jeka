@@ -22,12 +22,12 @@ public class JavaProjectBuildIT {
 
         JkProject baseProject = JkProject.of().simpleFacade()
                 .setBaseDir(root.resolve("base"))
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0")).getProject();
 
         JkProject coreProject = JkProject.of().simpleFacade()
                 .setBaseDir(root.resolve("core"))
-                .setCompileDependencies(deps -> deps.and(baseProject.toDependency())).getProject();
+                .configureCompileDeps(deps -> deps.and(baseProject.toDependency())).getProject();
 
         JkResolveResult resolveResult = coreProject.getConstruction().getCompilation().resolveDependencies();
 
@@ -51,20 +51,20 @@ public class JavaProjectBuildIT {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().simpleFacade()
                 .setBaseDir(root.resolve("base"))
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .setRuntimeDependencies(deps -> deps
+                .configureRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .setTestDependencies(deps -> deps
+                .configureTestDeps(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 )
-                .setPublishedMavenModuleId("my:project").setPublishedMavenVersion("MyVersion-snapshot")
-                .setPublishedMavenVersion("1-SNAPSHOT")
+                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion-snapshot")
+                .setPublishedVersion("1-SNAPSHOT")
                 .getProject();
-        project.getPublication().getArtifactProducer().makeAllArtifacts();
+        project.getArtifactProducer().makeAllArtifacts();
         project.getPublication().getMaven().publishLocal();
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.COMPILE, project.getPublication().getMaven().getDependencies()
@@ -77,20 +77,20 @@ public class JavaProjectBuildIT {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().simpleFacade()
                 .setBaseDir(root.resolve("base"))
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .setRuntimeDependencies(deps -> deps
+                .configureRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .setTestDependencies(deps -> deps
+                .configureTestDeps(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 ).getProject();
         project.getPublication().getIvy()
                 .setModuleId("my:module")
                 .setVersion("0.1");
-        project.getPublication().getArtifactProducer().makeAllArtifacts();
+        project.getArtifactProducer().makeAllArtifacts();
         project.getPublication().getIvy().publishLocal();
         System.out.println(project.getInfo());
 

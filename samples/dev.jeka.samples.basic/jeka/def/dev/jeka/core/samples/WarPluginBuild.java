@@ -29,12 +29,12 @@ public class WarPluginBuild extends JkBean {
     @Override
     protected void init() {
        projectPlugin.getProject().simpleFacade()
-               .setCompileDependencies(deps -> deps
+               .configureCompileDeps(deps -> deps
                        .and("com.google.guava:guava:30.0-jre")
                        .and("javax.servlet:javax.servlet-api:4.0.1"))
-               .setPublishedMavenModuleId("dev.jeka.samples:war-project")
-               .setPublishedMavenVersion("1.0-SNAPSHOT")
-               .setRuntimeDependencies(compileDeps -> compileDeps
+               .setPublishedModuleId("dev.jeka.samples:war-project")
+               .setPublishedVersion("1.0-SNAPSHOT")
+               .configureRuntimeDeps(compileDeps -> compileDeps
                        .minus("javax.servlet:javax.servlet-api"))
                .setJvmTargetVersion(JkJavaVersion.V8)
                .includeJavadocAndSources(false, false)
@@ -58,7 +58,7 @@ public class WarPluginBuild extends JkBean {
     }
 
     public void runWarWithJetty() {
-        JkArtifactProducer artifactProducer = projectPlugin.getProject().getPublication().getArtifactProducer();
+        JkArtifactProducer artifactProducer = projectPlugin.getProject().getArtifactProducer();
         artifactProducer.makeMissingArtifacts();
         Path jettyRunner = JkRepoFromProperties.getDownloadRepo().toSet().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);

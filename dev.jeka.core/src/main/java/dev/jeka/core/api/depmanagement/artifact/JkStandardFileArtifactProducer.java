@@ -36,7 +36,11 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
     }
 
     public static <T> JkStandardFileArtifactProducer<T> ofParent(T __) {
-        return new JkStandardFileArtifactProducer<>( __);
+        return new JkStandardFileArtifactProducer<>(__);
+    }
+
+    public static JkStandardFileArtifactProducer<Void> of() {
+        return new JkStandardFileArtifactProducer<>(null);
     }
 
     public static JkStandardFileArtifactProducer<Void> of(Function<JkArtifactId, Path> artifactPathFunction) {

@@ -13,10 +13,10 @@ public class SpringbootBuild extends JkBean {
     protected void init() {
         projectBean.getProject().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
-                .setCompileDependencies(deps -> deps
+                .configureCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 )
-                .setRuntimeDependencies(deps -> deps
+                .configureRuntimeDeps(deps -> deps
                         .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
                 );
         projectBean.getProject().getPublication()

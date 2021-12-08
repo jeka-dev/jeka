@@ -23,7 +23,7 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProject() {
         JkProject project = JkProject.of();
-        project.getConstruction().getCompilation().setDependencies(deps -> dependencies());
+        project.getConstruction().getCompilation().configureDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of(project.getJavaIdeSupport());
         String result = imlGenerator.generate();
         System.out.println(result);

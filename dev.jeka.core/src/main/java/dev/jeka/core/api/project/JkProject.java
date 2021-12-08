@@ -2,6 +2,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -25,11 +26,16 @@ import java.util.function.Function;
  */
 public class JkProject implements JkIdeSupport.JkSupplier {
 
+    public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
+
+    public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
+
     private Path baseDir = Paths.get("");
 
     private String outputDir = "jeka/output";
 
-    private String artifactBaseName;  // artifact files will be named as artifactBaseName-classifier.ext
+    private final JkStandardFileArtifactProducer<JkProject> artifactProducer =
+            JkStandardFileArtifactProducer.ofParent(this).setArtifactFilenameComputation(this::getArtifactPath);
 
     private JkVersionedModule.ConflictStrategy duplicateConflictStrategy = JkVersionedModule.ConflictStrategy.FAIL;
 
@@ -44,6 +50,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     private JkProject() {
         documentation = new JkProjectDocumentation( this);
         construction = new JkProjectConstruction(this);
+        registerArtifacts();
         publication = new JkProjectPublication(this);
     }
 
@@ -107,13 +114,8 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return documentation;
     }
 
-    public String getArtifactBaseName() {
-        return artifactBaseName != null ? artifactBaseName : baseDir.toAbsolutePath().getFileName().toString();
-    }
-
-    public JkProject setArtifactBaseName(String artifactBaseName) {
-        this.artifactBaseName = artifactBaseName;
-        return this;
+    public JkStandardFileArtifactProducer<JkProject> getArtifactProducer() {
+        return artifactProducer;
     }
 
     // -------------------------- Other -------------------------
@@ -142,7 +144,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
         builder.append("Declared Test Dependencies : " + testDependencies.getEntries().size() + " elements.\n");
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
-        builder.append("Defined Artifacts : " + publication.getArtifactProducer().getArtifactIds());
+        builder.append("Defined Artifacts : " + artifactProducer.getArtifactIds());
         JkMavenPublication mavenPublication = publication.getMaven();
         if (mavenPublication.getModuleId() != null) {
             builder
@@ -183,26 +185,57 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     }
 
     public JkLocalProjectDependency toDependency() {
-        return toDependency(publication.getArtifactProducer().getMainArtifactId(), null);
+        return toDependency(artifactProducer.getMainArtifactId(), null);
     }
 
     public JkLocalProjectDependency toDependency(JkTransitivity transitivity) {
-        return toDependency(publication.getArtifactProducer().getMainArtifactId(), transitivity);
+        return toDependency(artifactProducer.getMainArtifactId(), transitivity);
     }
 
     public JkLocalProjectDependency toDependency(JkArtifactId artifactId, JkTransitivity transitivity) {
-       Runnable maker = () -> publication.getArtifactProducer().makeArtifact(artifactId);
-       Path artifactPath = publication.getArtifactProducer().getArtifactPath(artifactId);
+       Runnable maker = () -> artifactProducer.makeArtifact(artifactId);
+       Path artifactPath = artifactProducer.getArtifactPath(artifactId);
        JkDependencySet exportedDependencies = construction.getCompilation().getDependencies()
                .merge(construction.getRuntimeDependencies()).getResult();
         return JkLocalProjectDependency.of(maker, artifactPath, this.baseDir, exportedDependencies)
                 .withTransitivity(transitivity);
     }
 
-    Path getArtifactPath(JkArtifactId artifactId) {
+    private Path getArtifactPath(JkArtifactId artifactId) {
         JkModuleId moduleId = publication.getModuleId();
-        String fileBaseName = moduleId != null ? moduleId.getDotedName() : this.getArtifactBaseName();
+        String fileBaseName = moduleId != null ? moduleId.getDotedName()
+                : baseDir.toAbsolutePath().getFileName().toString();
         return baseDir.resolve(outputDir).resolve(artifactId.toFileName(fileBaseName));
+    }
+
+    /**
+     * Short hand to build all missing artifacts for publication.
+     */
+    public void pack() {
+        artifactProducer.makeAllMissingArtifacts();
+    }
+
+    private void registerArtifacts() {
+        artifactProducer.putMainArtifact(construction::createBinJar);
+        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, documentation::createSourceJar);
+        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, documentation::createJavadocJar);
+    }
+
+    /**
+     * Specifies if Javadoc and sources jars should be included in pack/publish. Default is true;
+     */
+    public JkProject includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
+        if (includeJavaDoc) {
+            artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, documentation::createJavadocJar);
+        } else {
+            artifactProducer.removeArtifact(JAVADOC_ARTIFACT_ID);
+        }
+        if (includeSources) {
+            artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, documentation::createSourceJar);
+        } else {
+            artifactProducer.removeArtifact(SOURCES_ARTIFACT_ID);
+        }
+        return this;
     }
 
 }

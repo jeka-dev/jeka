@@ -64,7 +64,7 @@ public class KotlinJkBean extends JkBean {
 
     public JkArtifactId addFatJar(String classifier) {
         JkArtifactId artifactId = JkArtifactId.of(classifier, "jar");
-        this.jvm.project.getPublication().getArtifactProducer()
+        this.jvm.project.getArtifactProducer()
                 .putArtifact(artifactId,
                         path -> jvm.project.getConstruction().createFatJar(path));
         return artifactId;
@@ -110,7 +110,7 @@ public class KotlinJkBean extends JkBean {
         }
 
         public JkKotlinJvmProject useFatJarForMainArtifact() {
-            project.getPublication().getArtifactProducer()
+            project.getArtifactProducer()
                     .putArtifact(JkArtifactId.ofMainArtifact("jar"),
                             path -> project.getConstruction().createFatJar(path));
             return this;
@@ -127,7 +127,7 @@ public class KotlinJkBean extends JkBean {
                     .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
                             () -> compileKotlin(kompiler, project))
                     .__
-                    .setDependencies(deps -> deps.andVersionProvider(versionProvider));
+                    .configureDependencies(deps -> deps.andVersionProvider(versionProvider));
             testCompile
                     .getPreCompileActions()
                     .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
@@ -141,12 +141,12 @@ public class KotlinJkBean extends JkBean {
             testCompile.getLayout().setSources(javaInKotlinTestDir);
             if (addStdlib) {
                 if (kompiler.isProvidedCompiler()) {
-                    prodCompile.setDependencies(deps -> deps.andFiles(kompiler.getStdLib()));
+                    prodCompile.configureDependencies(deps -> deps.andFiles(kompiler.getStdLib()));
                 } else {
-                    prodCompile.setDependencies(deps -> deps
+                    prodCompile.configureDependencies(deps -> deps
                             .and(JkKotlinModules.STDLIB_JDK8)
                             .and(JkKotlinModules.REFLECT));
-                    testCompile.setDependencies(deps -> deps.and(JkKotlinModules.TEST));
+                    testCompile.configureDependencies(deps -> deps.and(JkKotlinModules.TEST));
                 }
             }
             project.setJavaIdeSupport(ideSupport -> {
@@ -223,14 +223,14 @@ public class KotlinJkBean extends JkBean {
             if (testSrcDir != null) {
                 testCompile.getLayout().addSource(testSrcDir);
                 if (addCommonStdLibs) {
-                    testCompile.setDependencies(deps -> deps
+                    testCompile.configureDependencies(deps -> deps
                             .and(JkKotlinModules.TEST_COMMON)
                             .and(JkKotlinModules.TEST_ANNOTATIONS_COMMON)
                     );
                 }
             }
-            prodCompile.setDependencies(deps -> deps.and(compileDependencies));
-            testCompile.setDependencies(deps -> deps.and(testDependencies));
+            prodCompile.configureDependencies(deps -> deps.and(compileDependencies));
+            testCompile.configureDependencies(deps -> deps.and(testDependencies));
             jvm.project.setJavaIdeSupport(ideSupport -> {
                 ideSupport.getProdLayout().addSource(srcDir);
                 if (!JkUtilsString.isBlank(testSrcDir)) {
