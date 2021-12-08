@@ -57,6 +57,13 @@ public final class JkProperties {
         return value;
     }
 
+    public static boolean isDefined(String key) {
+        if (System.getProperties().containsKey(key)) {
+            return true;
+        }
+        return INSTANCE.props.containsKey(key);
+    }
+
     /**
      * Returns the complete store.
      */

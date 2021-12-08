@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -29,33 +30,34 @@ final class FieldInjector {
         return usedProperties;
     }
 
-    static void injectEnv(Object target) {
+    static void injectAnnotatedProperties(Object target) {
         for (final Field field : getPropertyFields(target.getClass())) {
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             if (injectProperty != null) {
-                final String stringValue = JkProperties.get(injectProperty.value());
-                if (stringValue != null) {
-                    final Class<?> type = field.getType();
-                    Object value;
-                    try {
-                        value = parse(type, stringValue);
-                    } catch (final IllegalArgumentException e) {
-                        throw new JkException("Option " + injectProperty.value() + " has been set with improper value '"
-                                + stringValue + "'");
-                    }
-                    JkUtilsReflect.setFieldValue(target, field, value);
+                String propertyName = JkProperties.get(injectProperty.value());
+                JkUtilsAssert.state(JkProperties.isDefined(propertyName),
+                        "No property '%s' defined for injecting in field %s.", propertyName, field);
+                String propertyValue = JkProperties.get(propertyName);
+                final Class<?> type = field.getType();
+                Object value;
+                try {
+                    value = parse(type, propertyValue);
+                } catch (final IllegalArgumentException e) {
+                    throw new JkException("Property " + injectProperty.value() + " has been set with improper value '"
+                            + propertyValue + "'");
                 }
+                JkUtilsReflect.setFieldValue(target, field, value);
             }
         }
     }
 
     static List<Field> getPropertyFields(Class<?> clazz) {
         return JkUtilsReflect.getAllDeclaredFields(clazz,true).stream()
-                .filter(FieldInjector::isOptionField)
+                .filter(FieldInjector::isPropertyField)
                 .collect(Collectors.toList());
     }
 
-    private static boolean isOptionField(Field field) {
+    private static boolean isPropertyField(Field field) {
         if (Modifier.isStatic(field.getModifiers())) {
             return false;
         }

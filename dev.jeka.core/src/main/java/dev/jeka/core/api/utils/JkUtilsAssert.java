@@ -5,15 +5,15 @@ package dev.jeka.core.api.utils;
  */
 public final class JkUtilsAssert {
 
-    public static void argument(boolean condition, String message) {
+    public static void argument(boolean condition, String message, Object... args) {
         if (!condition) {
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException(String.format(message, args));
         }
     }
 
-    public static void state(boolean condition, String message) {
+    public static void state(boolean condition, String message, Object... args) {
         if (!condition) {
-            throw new IllegalStateException(message);
+            throw new IllegalStateException(String.format(message, args));
         }
     }
 

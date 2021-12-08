@@ -39,19 +39,19 @@ class Build extends JkBean {
     @Override
     protected void init() {
         project = JkProject.of().simpleFacade()
-                .setBaseDir(".")
-                .includeJavadocAndSources(true, true)
-                .setSimpleLayout()  // sources and resources in ./src, tests and test resources in ./tests
-                .mixResourcesAndSources()
-                .setCompileDependencies(deps -> deps
-                        .and("com.google.guava:guava:31.0.1-jre")
-                        .and("com.fasterxml.jackson.core:jackson-core:2.13.0")
-                )
-                .setTestDependencies(deps -> deps
-                        .and("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-                )
-                .setPublishedMavenVersion(JkGitProcess.of().getVersionFromTag())
-                .setPublishedMavenModuleId("my.org:my-module");
+            .setBaseDir(".")
+            .includeJavadocAndSources(true, true)
+            .setSimpleLayout()  // sources and resources in ./src, tests and test resources in ./tests
+            .mixResourcesAndSources()
+            .setCompileDependencies(deps -> deps
+                .and("com.google.guava:guava:31.0.1-jre")
+                .and("com.fasterxml.jackson.core:jackson-core:2.13.0")
+            )
+            .setTestDependencies(deps -> deps
+                .and("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+            )
+            .setPublishedMavenVersion(JkGitProcess.of().getVersionFromTag())
+            .setPublishedMavenModuleId("my.org:my-module");
     }
 
     public void cleanPack() {
@@ -66,8 +66,8 @@ class Build extends JkBean {
 /home/me/myproject>./jekaw cleanPack
 ```
 
-<br/>
-<sub>This is an example of a build class for a simple Springboot project.</sub>
+<details>
+<summary>Example of Springboot project.</summary>
 
 ```java
 import dev.jeka.core.api.project.JkProject;
@@ -108,10 +108,7 @@ class Build extends JkBean {
 
 }
 ```
-<sub>To build the project, execute ´cleanPack´ from your IDE or execute the following command line.</sub>
-```
-/home/me/myproject>./jekaw cleanPack -runIT=false
-```
+<details>
 
 Explore Jeka possibilities from command line `jekaw -h`.</sub>
 

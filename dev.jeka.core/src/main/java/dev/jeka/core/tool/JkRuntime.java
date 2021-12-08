@@ -182,6 +182,7 @@ public final class JkRuntime {
                         throw new JkException("Field %s does not exist in KBean %s", injectedProp, bean);
                     }
                 });
+        FieldInjector.injectAnnotatedProperties(bean);
         init(bean);
         return bean;
     }
