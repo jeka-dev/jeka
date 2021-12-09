@@ -85,7 +85,7 @@ public final class Main {
                 e.printStackTrace(System.err);
             }
             if (Environment.standardOptions.logBanner) {
-                final int length = printAscii(true, "failed.ascii");
+                final int length = printAscii(true, "text-failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");
             } else {
@@ -133,12 +133,12 @@ public final class Main {
     }
 
     private static void displayIntro() {
-        final int length = printAscii(false, "jeka.ascii");
+        final int length = printAscii(false, "text-jeka.ascii");
         JkLog.info(JkUtilsString.repeat(" ", length) + "The 100%% Java Build Tool.\n");
     }
 
     private static void displayOutro(long startTs) {
-        final int length = printAscii(false, "success.ascii");
+        final int length = printAscii(false, "text-success.ascii");
         System.out.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
                 + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
     }
