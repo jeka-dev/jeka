@@ -67,7 +67,7 @@ public class JavaPluginBuild extends JkBean {
 
                    // Published dependencies can be modified here from the ones declared in dependency management.
                    // Here jersey-server is not supposed to be part of the API but only needed at runtime.
-                   .setDependencies(deps -> deps
+                   .configureDependencies(deps -> deps
                        .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME));
     }
 

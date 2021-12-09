@@ -180,7 +180,7 @@ public class CoreBuild extends JkBean {
 
     private void makeDocs() {
         JkLog.startTask("Make documentation");
-        String version = projectBean.getProject().getPublication().getMaven().getVersion();
+        String version = projectBean.getProject().getPublication().getMaven().getVersion().getValue();
         new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
         JkLog.endTask();
     }

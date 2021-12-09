@@ -106,13 +106,14 @@ class MasterBuild extends JkBean {
         if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for releasej
             projectPlugin.pack.javadoc = true;
         }
-        projectPlugin.getProject().getPublication().getMaven()
-                .setVersion(versionFromGit.version())
+        projectPlugin.getProject().getPublication()
+                .setVersion(versionFromGit::versionAsText)
                 .setRepos(this.publishRepos)
-                .getPomMetadata()
-                    .setProjectUrl("https://jeka.dev")
-                    .setScmUrl("https://github.com/jerkar/jeka.git")
-                    .addApache2License();
+                .getMaven()
+                    .getPomMetadata()
+                        .setProjectUrl("https://jeka.dev")
+                        .setScmUrl("https://github.com/jerkar/jeka.git")
+                        .addApache2License();
 
     }
 

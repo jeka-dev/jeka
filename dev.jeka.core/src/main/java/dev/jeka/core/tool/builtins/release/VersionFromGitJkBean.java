@@ -88,6 +88,10 @@ public class VersionFromGitJkBean extends JkBean {
         return cachedVersion;
     }
 
+    public String versionAsText() {
+        return version().getValue();
+    }
+
     /**
      * Tags git repository and push with the version specified in last git comment.
      * If no version is specified or the specified version is equals to the current tag, no tag will be set.

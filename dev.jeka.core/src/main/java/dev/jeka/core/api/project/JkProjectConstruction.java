@@ -159,7 +159,7 @@ public class JkProjectConstruction {
 
     private void addManifestDefaults() {
         JkModuleId moduleId = project.getPublication().getModuleId();
-        String version = project.getPublication().getVersion();
+        String version = project.getPublication().getVersion().getValue();
         if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && moduleId != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
         }

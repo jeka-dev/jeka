@@ -23,9 +23,10 @@ class Build extends JkBean {
 
         // This section is necessary to publish on a public repository
         javaProject.getPublication()
+                .setModuleId("your.org:plugin-name")
+                .setVersion("0.0.1-SNAPSHOT")
                 .getMaven()
-                    .setModuleId("your.org:plugin-name")
-                    .setVersion("0.0.1-SNAPSHOT")
+                    .getPomMetadata()
                         .addApache2License()
                         .setProjectName("Jeka plugin for ....")
                         .setProjectDescription("A Jeka plugin for ...")

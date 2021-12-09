@@ -82,7 +82,7 @@ public class NexusJkBean extends JkBean {
     }
 
     private static JkRepo getFirst(JkProject project) {
-        JkRepo repo = project.getPublication().findFirstRepo();
+        JkRepo repo = project.getPublication().findFirstNonLocalRepo();
         if (repo != null && repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
             JkLog.warn("No credentials found on repo " + repo);
         }

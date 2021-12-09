@@ -112,7 +112,7 @@ public class JkProjectSimpleFacade {
 
 
     public JkProjectSimpleFacade setPublishedVersion(Supplier<String> versionSupplier) {
-        project.getPublication().getMaven().setVersion(versionSupplier);
+        project.getPublication().setVersion(versionSupplier);
         return this;
     }
 
@@ -142,18 +142,21 @@ public class JkProjectSimpleFacade {
      *                 Must be formatted as 'group:artifactId'
      */
     public JkProjectSimpleFacade setPublishedModuleId(String moduleId) {
-        project.getPublication().getMaven().setModuleId(moduleId);
-        return this;
-    }
-
-    public JkProjectSimpleFacade setPublishedDependencies(
-            Function<JkDependencySet, JkDependencySet> dependencyModifier) {
-        project.getPublication().getMaven().setDependencies(dependencyModifier);
+        project.getPublication().setModuleId(moduleId);
         return this;
     }
 
     /**
-     * By default, every classes in test folder are run. If you add a exclude filter,
+     * Configures the dependencies to be published in a Maven repository.
+     */
+    public JkProjectSimpleFacade configurePublishedDependencies(
+            Function<JkDependencySet, JkDependencySet> dependencyModifier) {
+        project.getPublication().getMaven().configureDependencies(dependencyModifier);
+        return this;
+    }
+
+    /**
+     * By default, every class in test folder are run. If you add a exclude filter,
      * tests accepting this filter won't be run.
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */

@@ -27,15 +27,15 @@ public final class JkMavenPublication<T> {
 
     private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
-    private Supplier<String> moduleIdSupplier;
+    private Supplier<JkModuleId> moduleIdSupplier = () -> null;
 
-    private Supplier<String> versionSupplier = () -> null;
+    private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
     private Supplier<JkArtifactLocator> artifactLocatorSupplier;
 
     private JkRepoSet repos = JkRepoSet.ofLocal();
 
-    private UnaryOperator<Path> defaultSigner;  // Can be null
+    private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
 
     private JkMavenPublication(T parent) {
         this.__ = parent;
@@ -53,7 +53,7 @@ public final class JkMavenPublication<T> {
         return this.pomMetadata;
     }
 
-    public JkMavenPublication<T> setDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkMavenPublication<T> configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependencies = dependencies.andThen(modifier);
         return this;
     }
@@ -63,34 +63,30 @@ public final class JkMavenPublication<T> {
     }
 
     public JkMavenPublication<T> setModuleId(String moduleId) {
-        this.moduleIdSupplier = () -> moduleId;
+        this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
         return this;
     }
 
     public JkMavenPublication<T> setModuleId(Supplier<String> moduleIdSupplier) {
-        this.moduleIdSupplier = moduleIdSupplier;
+        this.moduleIdSupplier = () -> JkModuleId.of(moduleIdSupplier.get());
         return this;
-    }
-
-    public JkMavenPublication<T> setVersion(Supplier<String> version) {
-        this.versionSupplier = version;
-        return this;
-    }
-
-    public JkMavenPublication<T> setVersion(JkVersion version) {
-        return setVersion(version.getValue());
     }
 
     public JkMavenPublication<T> setVersion(String version) {
-        this.versionSupplier = () -> version;
+        this.versionSupplier = () -> JkVersion.of(version);
+        return this;
+    }
+
+    public JkMavenPublication<T> setVersion(Supplier<String> versionSupplier) {
+        this.versionSupplier = () -> JkVersion.of(versionSupplier.get());
         return this;
     }
 
     public JkModuleId getModuleId() {
-        return JkModuleId.of(moduleIdSupplier.get());
+        return moduleIdSupplier.get();
     }
 
-    public String getVersion() {
+    public JkVersion getVersion() {
         return versionSupplier.get();
     }
 
@@ -98,8 +94,8 @@ public final class JkMavenPublication<T> {
         return defaultSigner;
     }
 
-    public JkMavenPublication<T> setDefaultSigner(UnaryOperator<Path> signer) {
-        this.defaultSigner = signer;
+    public JkMavenPublication<T> setDefaultSigner(UnaryOperator<Path> defaultSigner) {
+        this.defaultSigner = defaultSigner;
         return this;
     }
 

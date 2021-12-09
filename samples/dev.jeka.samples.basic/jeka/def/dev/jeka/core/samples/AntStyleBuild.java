@@ -16,7 +16,6 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
@@ -104,7 +103,7 @@ public class AntStyleBuild extends JkBean implements JkIdeSupport.JkSupplier {
         artifactProducer.makeAllMissingArtifacts();
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)
-                .setDependencies(deps -> prodDependencies)
+                .configureDependencies(deps -> prodDependencies)
                 .setModuleId(versionedModule.getModuleId().toString())
                 .setVersion(versionedModule.getVersion().getValue())
                 .addRepos(mavenRepo.getPublishConfig().setSigner(pgp.getSigner("")).__)

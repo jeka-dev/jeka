@@ -25,13 +25,13 @@ public final class JkIvyPublication<T> {
 
     public final T __;
 
-    private Supplier<String> moduleIdSupplier;
+    private Supplier<JkModuleId> moduleIdSupplier = () -> null;
 
-    private Supplier<String> versionSupplier = () -> null;
+    private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
     private JkRepoSet repos = JkRepoSet.of();
 
-    private UnaryOperator<Path> defaultSigner;  // Can be null
+    private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
 
     private Function<JkQualifiedDependencySet, JkQualifiedDependencySet> dependencies = UnaryOperator.identity();
 
@@ -54,30 +54,29 @@ public final class JkIvyPublication<T> {
     }
 
     public JkIvyPublication<T> setModuleId(String moduleId) {
-        this.moduleIdSupplier = () -> moduleId;
+        this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
         return this;
     }
 
     public JkIvyPublication<T> setModuleId(Supplier<String> moduleIdSupplier) {
-        this.moduleIdSupplier = moduleIdSupplier;
+        this.moduleIdSupplier = () -> JkModuleId.of(moduleIdSupplier.get());
         return this;
     }
 
-    public JkIvyPublication<T> setVersion(Supplier<String> version) {
-        this.versionSupplier = version;
+    public JkIvyPublication<T> setVersion(Supplier<String> versionSupplier) {
+        this.versionSupplier = () -> JkVersion.of(versionSupplier.get());
         return this;
     }
 
     public JkIvyPublication<T> setVersion(String version) {
-        this.versionSupplier = () -> version;
-        return this;
+        return setVersion(() -> version);
     }
 
     public JkModuleId getModuleId() {
-        return JkModuleId.of(moduleIdSupplier.get());
+        return moduleIdSupplier.get();
     }
 
-    public String getVersion() {
+    public JkVersion getVersion() {
         return versionSupplier.get();
     }
 
@@ -100,14 +99,14 @@ public final class JkIvyPublication<T> {
         return this;
     }
 
-    public JkIvyPublication<T> setDependencies(UnaryOperator<JkQualifiedDependencySet> modifier) {
+    public JkIvyPublication<T> configureDependencies(UnaryOperator<JkQualifiedDependencySet> modifier) {
         JkUtilsAssert.argument(modifier != null, "Dependency modifier cannot be null.");
         this.dependencies = dependencies.andThen(modifier);
         return this;
     }
 
     public JkIvyPublication<T> setDependencies(JkQualifiedDependencySet configuredDependencies) {
-        return setDependencies(deps-> configuredDependencies);
+        return configureDependencies(deps-> configuredDependencies);
     }
 
     public JkIvyPublication<T> setDependencies(JkProjectDependencies projectDependencies,

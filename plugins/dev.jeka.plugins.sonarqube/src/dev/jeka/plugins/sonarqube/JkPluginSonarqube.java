@@ -56,7 +56,7 @@ public class JkPluginSonarqube extends JkBean {
             String baseDirName = baseDir.getFileName().toString();
             moduleId = JkModuleId.of(baseDirName, baseDirName);
         }
-        final String version = project.getPublication().getVersion();
+        final String version = project.getPublication().getVersion().getValue();
         final String fullName = moduleId.getDotedName();
         final String name = moduleId.getName();
         final JkSonarqube sonarqube;

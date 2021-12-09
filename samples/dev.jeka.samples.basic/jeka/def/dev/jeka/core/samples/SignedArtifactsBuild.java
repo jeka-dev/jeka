@@ -64,10 +64,10 @@ public class SignedArtifactsBuild extends JkBean {
             .getProject()
             .getPublication()
                 .apply(this::configForLocalRepo)
+                .setModuleId("dev.jeka.core:samples-signedArtifacts")
+                .setVersion("1.3.1")
+                .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
                 .getMaven()
-                    .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
-                    .setModuleId("dev.jeka.core:samples-signedArtifacts")
-                    .setVersion("1.3.1")
                     .getPomMetadata()
                         .setProjectName("my project")
                         .setProjectDescription("My description")
@@ -79,8 +79,7 @@ public class SignedArtifactsBuild extends JkBean {
 
     private void configForOssrh(JkProjectPublication publication) {
         UnaryOperator<Path> signer = JkGpg.ofSecretRing(secringPath, secringPassword).getSigner("");
-        publication.getMaven()
-                .setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
+        publication.setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
     }
 
     private void configForLocalRepo(JkProjectPublication publication) {
@@ -88,7 +87,7 @@ public class SignedArtifactsBuild extends JkBean {
             .getPublishConfig()
                 .setChecksumAlgos("sha1", "md5")
                 .setSignatureRequired(true).__;
-        publication.getMaven().setRepos(repo.toSet());
+        publication.setRepos(repo.toSet());
     }
 
     public void cleanPackPublish() {

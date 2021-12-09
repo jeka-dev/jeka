@@ -92,7 +92,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 Optional.ofNullable(JkRepoFromProperties.getPublishRepository())
                         .orElse(JkRepo.ofLocal())
                 .toSet());
-        project.getPublication().getIvy().setRepos(JkRepoFromProperties.getPublishRepository().toSet());
+        project.getPublication().getIvy().setRepos(
+                Optional.ofNullable(JkRepoFromProperties.getPublishRepository())
+                        .orElse(JkRepo.ofLocalIvy())
+                        .toSet());
         final JkRepo downloadRepo = JkRepoFromProperties.getDownloadRepo();
         JkDependencyResolver resolver = project.getConstruction().getDependencyResolver();
         if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
@@ -102,8 +105,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     public static void applyGpg(JkGpg gpg, String keyName, JkProject project) {
         UnaryOperator<Path> signer  = gpg.getSigner(keyName);
-        project.getPublication().getMaven().setDefaultSigner(signer);
-        project.getPublication().getIvy().setDefaultSigner(signer);
+        project.getPublication().setDefaultSigner(signer);
     }
 
 
@@ -299,7 +301,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @JkDoc("Publishes produced artifacts to local repository.")
     public void publishLocal() {
-        project.getPublication().getMaven().publishLocal();
+        project.getPublication().publishLocal();
     }
 
 

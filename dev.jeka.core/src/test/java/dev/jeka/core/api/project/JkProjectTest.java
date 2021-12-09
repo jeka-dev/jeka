@@ -110,7 +110,7 @@ public class JkProjectTest {
                         .and("io.rest-assured:rest-assured:4.3.3")
                 )
                 .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
-                .setPublishedDependencies(deps -> deps.minus("org.postgresql:postgresql"))
+                .configurePublishedDependencies(deps -> deps.minus("org.postgresql:postgresql"))
                 .getProject();
         JkDependencySet publishDeps = project.getPublication().getMaven().getDependencies();
         publishDeps.getEntries().forEach(System.out::println);

@@ -36,9 +36,6 @@ public final class JkModuleId {
      * name.
      */
     public static JkModuleId of(String groupAndName) {
-        if (groupAndName == null) {
-            return null;
-        }
         if (groupAndName.contains(":")) {
             final String group = JkUtilsString.substringBeforeLast(groupAndName, ":").trim();
             final String name = JkUtilsString.substringAfterLast(groupAndName, ":").trim();
