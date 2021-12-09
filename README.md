@@ -151,8 +151,8 @@ That said, documentation is needed for a starting point.
 
 Visit following pages according your expectation :
 
-* [Reference Guide](dev.jeka.core/src/main/doc/reference-guide)
-* [Frequently Asked Questions](dev.jeka.core/src/main/doc/FAQ.md)
+* [Reference Guide](dev.jeka.core/src/main/doc/reference-guide.md)
+* [Frequently Asked Questions](dev.jeka.core/src/main/doc/faq.md)
 * [Javadoc](https://jeka.dev/docs/javadoc)
 * [Working examples](https://github.com/jerkar/working-examples)
 * [Getting Started (Needs Intellij Plugin)](dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md) 
@@ -163,10 +163,10 @@ Jeka comes with plugins out of the box. These plugins covers the most common poi
 when building a project. This includes plugins for IDE metadata generation (IntelliJ, Eclipse), dependency management, git, , java project building, testing, PGP signing, binary repositories, Maven interaction, scaffolding, sonarQube and web archives.
 
 Nevertheless, Jeka is extensible and other plugins exist outside the main distib among :
-* [Springboot Plugin](https://github.com/jerkar/springboot-plugin)
+* [Springboot Plugin](pluginsdev.jeka.plugins.springboot)
 * [Protobuf Plugin](https://github.com/jerkar/protobuf-plugin)
-* [Sonarqube Plugin](https://github.com/jerkar/sonarqube-plugin)
-* [Jacoco Plugin](https://github.com/jerkar/jacoco-plugin)
+* [Sonarqube Plugin](plugins/dev.jeka.plugins.sonarqube)
+* [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
 
 # Community
 
