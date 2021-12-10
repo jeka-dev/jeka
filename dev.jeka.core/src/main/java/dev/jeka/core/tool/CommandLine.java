@@ -102,7 +102,8 @@ final class CommandLine {
 
     static JkDependency toDependency(String depDescription) {
         boolean hasDoubleDotes = JkModuleDependency.isModuleDependencyDescription(depDescription);
-        if (!hasDoubleDotes || (JkUtilsSystem.IS_WINDOWS && depDescription.substring(1).startsWith(":\\"))) {
+        if (!hasDoubleDotes || (JkUtilsSystem.IS_WINDOWS &&
+                (depDescription.substring(1).startsWith(":\\")) || depDescription.substring(1).startsWith(":/") )) {
             Path candidatePath = Paths.get(depDescription);
             if (Files.exists(candidatePath)) {
                 return JkFileSystemDependency.of(candidatePath);
@@ -114,7 +115,9 @@ final class CommandLine {
         } else {
             JkModuleDependency moduleDependency = JkModuleDependency.of(depDescription);
             boolean specifiedVersion = !moduleDependency.hasUnspecifiedVersion();
-            if (!specifiedVersion && moduleDependency.getModuleId().getGroup().equals("dev.jeka")) {
+            if (specifiedVersion) {
+                return moduleDependency;
+            } else if (moduleDependency.getModuleId().getGroup().equals("dev.jeka")) {
                 moduleDependency = moduleDependency.withVersion(JkInfo.getJekaVersion());
                 return moduleDependency;
             } else {

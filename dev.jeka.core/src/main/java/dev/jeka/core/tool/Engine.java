@@ -168,6 +168,7 @@ final class Engine {
         if (hasKotlin()) {
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos())
                     .setLogOutput(true)
+                    .setFailOnError(failOnCompileError)
                     .addOption("-nowarn");
             compileOptions.forEach(option -> kotlinCompiler.addOption(option));
             JkPathSequence kotlinClasspath = defClasspath.and(kotlinCompiler.getStdJdk8Lib());

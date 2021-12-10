@@ -18,15 +18,15 @@ import java.nio.file.Path;
 public class GpgJkBean extends JkBean {
 
     @JkDoc("Path for the public key ring.")
-    @JkInjectProperty("GPG_PUBLIC_RING")
+    @JkInjectProperty("jeka.gpg.public-ring")
     public Path publicRingPath;
 
     @JkDoc("Path for the secret key ring.")
-    @JkInjectProperty("GPG_SECRET_RING")
+    @JkInjectProperty("jeka.gpg.secret-ring")
     public Path secretRingPath;
 
     @JkDoc("Secret password for decoding secret key ring.")
-    @JkInjectProperty("GPG_PASSPHRASE")
+    @JkInjectProperty("jeka.gpg.passphrase")
     public String secretKeyPassword;
 
     @JkDoc("Key name to sign and verify.")

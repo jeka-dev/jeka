@@ -126,10 +126,10 @@ public final class JkScaffolder {
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
         final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
         Path tempProps = JkUtilsPath.createTempFile("jeka-", ".properties");
-        Path jekaPropertiesPath = wrapperFolder.resolve("jeka.properties");
+        Path jekaPropertiesPath = wrapperFolder.resolve("wrapper.properties");
         if (!Files.exists(jekaPropertiesPath)) {
             JkPathFile.of(tempProps)
-                    .fetchContentFrom(JkScaffolder.class.getResource("jeka.properties"))
+                    .fetchContentFrom(JkScaffolder.class.getResource("wrapper.properties"))
                     .copyReplacingTokens(jekaPropertiesPath,
                             JkUtilsIterable.mapOf("${version}", version), Charset.forName("utf-8"))
                     .deleteIfExist();

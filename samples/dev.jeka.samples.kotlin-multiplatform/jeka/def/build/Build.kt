@@ -34,18 +34,18 @@ class Build : JkBean() {
         val jvmProject = kotlin.jvm().project
         jvmProject.simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
-                .setCompileDependencies { deps -> deps
+                .configureCompileDeps { deps -> deps
                     .and("io.ktor:ktor-serialization:$ktorVersion")
                     .and("io.ktor:ktor-server-core:$ktorVersion")
                     .and("io.ktor:ktor-server-netty:$ktorVersion")
                     .and("ch.qos.logback:logback-classic:$logbackVersion")
                     .and("org.litote.kmongo:kmongo-coroutine-serialization:$kmongoVersion")
                 }
-                .setTestDependencies {deps -> deps
+                .configureTestDeps {deps -> deps
                     .and(JkKotlinModules.TEST_JUNIT5)
                 }
         jvmProject.construction.manifest.addMainClass("ServerKt")
-        jvmProject.publication.includeJavadocAndSources(false, false)
+        jvmProject.includeJavadocAndSources(false, false)
         kotlin.jvm()
             .useFatJarForMainArtifact()
             .kotlinCompiler
@@ -61,11 +61,11 @@ class Build : JkBean() {
     // -------------------------- End of build description --------------------------------------------------------
 
     fun cleanPack() {
-        clean(); kotlin.jvm().project.publication.pack();
+        clean(); kotlin.jvm().project.pack();
     }
 
-    fun run() {;
-        val jar = kotlin.jvm().project.publication.artifactProducer.mainArtifactPath
+    fun run() {
+        val jar = kotlin.jvm().project.artifactProducer.mainArtifactPath
         JkJavaRunner.runInSeparateClassloader(jar);
         //JkJavaProcess.ofJavaJar(jar, null).exec()
     }

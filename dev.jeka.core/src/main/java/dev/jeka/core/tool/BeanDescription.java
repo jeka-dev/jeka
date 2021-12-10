@@ -332,8 +332,8 @@ final class BeanDescription {
         String description(String displayName, String margin) {
             String desc = description != null ? description : "No description available.";
             String oneLineDesc = desc.replace("\n", " ");
-            String envPart = injectedPropertyName == null ? "" : ", env : " + injectedPropertyName;
-            return String.format("%s  %s  : %s (%s, default : %s%s)\n",
+            String envPart = injectedPropertyName == null ? "" : ", property: " + injectedPropertyName;
+            return String.format("%s  %s  : %s (type: %s, default: %s%s)\n",
                     margin, displayName, oneLineDesc, type(), defaultValue, envPart);
         }
 

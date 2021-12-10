@@ -99,7 +99,7 @@ class Booter {
                 readableByteChannel = Channels.newChannel(url.openStream());
             } catch (final FileNotFoundException e) {
                 System.out.println(urlString + " not found. Please check that version " + version + " exists in repo " + repo);
-                System.out.println("Jeka version to download is defined in ./jeka/wrapper/jeka.properties file.");
+                System.out.println("Jeka version to download is defined in ./jeka/wrapper/wrapper.properties file.");
                 System.exit(1);
             }
             final Path temp = Files.createTempFile("jeka-wrapper", ".zip");
@@ -184,13 +184,13 @@ class Booter {
     }
 
     private static Path getWrapperPropsFile(Path jekawDir) {
-        return jekawDir.resolve("jeka/wrapper/jeka.properties");
+        return jekawDir.resolve("jeka/wrapper/wrapper.properties");
     }
 
     private static String version(Properties props) {
         final String result = props.getProperty("jeka.version");
         if (result == null || result.trim().isEmpty()) {
-            System.out.println("Please, specify a jeka.version property in file ./jeka/wrapper/jeka.properties");
+            System.out.println("Please, specify a jeka.version property in file ./jeka/wrapper/wrapper.properties");
             System.exit(1);
         }
         return  result.trim();

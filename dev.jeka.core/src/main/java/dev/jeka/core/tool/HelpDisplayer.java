@@ -18,7 +18,8 @@ final class HelpDisplayer {
     static void help(List<Class<? extends JkBean>> localBeanClasses, List<Class> classpathBeanClasses,
                      boolean compilationFailed) {
         final StringBuilder introSb = new StringBuilder()
-                .append("Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n")
+                .append("PURPOSE\n")
+                .append("  Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n")
                 .append("USAGE\n")
                 .append("  jeka (method | kbean#method ...) [property=<value> | kbean#property=<value> ...] ")
                 .append("[-option | -option=<value> ...] [@<module coordinates> ...] [@<path> ...] ")
