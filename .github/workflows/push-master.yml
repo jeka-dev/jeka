@@ -23,5 +23,5 @@ jobs:
       env:
         OSSRH_USER: ${{ secrets.OSSRH_USER }}
         OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
-        jeka.gpg.passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        jekagpgpassphrase: ${{ secrets.GPG_PASSPHRASE }}
       run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
