@@ -76,7 +76,12 @@ public final class JkRuntime {
     public <T extends JkBean> T getBean(Class<T> jkBeanClass) {
         JkBean result = beans.get(jkBeanClass);
         if (result == null) {
+            JkLog.startTask("Instantiate KBean " + jkBeanClass + " in project '" + projectBaseDir + "'");
+            Path previousProject = BASE_DIR_CONTEXT.get();
+            BASE_DIR_CONTEXT.set(projectBaseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiate(jkBeanClass);
+            BASE_DIR_CONTEXT.set(previousProject);
+            JkLog.endTask();
             beans.put(jkBeanClass, result);
         }
         return (T) result;
@@ -125,9 +130,7 @@ public final class JkRuntime {
 
     private void init(JkBean bean) {
         try {
-            JkLog.startTask("Init KBean " + bean);
             bean.init();
-            JkLog.endTask();
         } catch (Exception e) {
             throw new JkException(e, "An exception has been raised while initializing KBean " + bean);
         }

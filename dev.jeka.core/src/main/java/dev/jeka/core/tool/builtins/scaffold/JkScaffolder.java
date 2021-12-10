@@ -84,31 +84,7 @@ public final class JkScaffolder {
         extraActions.run();
     }
 
-    /**
-     * Copies script an Jeka jar inside the project in order to be executable in embedded mode.
-     */
-    public void embed() {
-        JkLog.info("Create shell files.");
-        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.bat");
-        JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
-                "to shell scripts");
-        JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
-        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), baseDir.resolve("jekaw"),
-                StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-        final Path jekaJar = JkLocator.getJekaJarPath();
-        final Path bootFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/boot");
-        JkUtilsPath.createDirectories(bootFolder);
-        final Path target = bootFolder.resolve(jekaJar.getFileName());
-        JkLog.info("Copy jeka jar to " + baseDir.relativize(target));
-        JkUtilsPath.copy(jekaJar, target, StandardCopyOption.REPLACE_EXISTING);
-        final String jarSourceName = "dev.jeka.jeka-core-sources.jar";
-        final Path libSources = baseDir.resolve(JkConstants.JEKA_DIR + "/libs-sources");
-        JkUtilsPath.createDirectories(libSources);
-        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("libs-sources/" + jarSourceName),
-                libSources.resolve(jarSourceName), StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    public void wrap() {
+    public void wrapper() {
         JkLog.info("Create shell files.");
         final Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
         JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
@@ -136,7 +112,7 @@ public final class JkScaffolder {
         }
     }
 
-    public void wrapDelegate(String delegateFolder) {
+    public void wrapperWithDelegate(String delegateFolder) {
         JkPathFile newBatFile = JkPathFile.of(baseDir.resolve("jekaw.bat"));
         JkPathFile newShellFile = JkPathFile.of(baseDir.resolve("jekaw"));
         Path batDelegate = baseDir.resolve(delegateFolder).resolve("jekaw.bat");

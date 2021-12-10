@@ -39,17 +39,12 @@ public class ScaffoldJkBean extends JkBean {
         scaffolder.run();
     }
 
-    @JkDoc("Copies Jeka executables inside the project in order to be run in embedded mode.")
-    public void embed() {
-        scaffolder.embed();
-    }
-
     @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
-    public void wrap() {
+    public void wrapper() {
         if (JkUtilsString.isBlank(this.wrapDelegatePath)) {
-            scaffolder.wrap();
+            scaffolder.wrapper();
         } else {
-            scaffolder.wrapDelegate(this.wrapDelegatePath);
+            scaffolder.wrapperWithDelegate(this.wrapDelegatePath);
         }
     }
 

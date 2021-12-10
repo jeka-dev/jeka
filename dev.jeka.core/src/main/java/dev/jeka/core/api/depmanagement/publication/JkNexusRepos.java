@@ -217,7 +217,7 @@ public class JkNexusRepos {
             }
             JkUtilsSystem.sleep(CLOSE_WAIT_INTERVAL_MILLIS);
             JkStagingRepo repo = doGetRepository(repositoryId);
-            if ("closed".equals(repo.type)) {
+            if ("closed".equals(repo.type) && !repo.transitioning) {
                 break;
             }
         }
@@ -307,7 +307,7 @@ public class JkNexusRepos {
         public Status getStatus() {
             if ("open".equals(type)) {
                 return transitioning ? Status.CLOSING : Status.OPEN;
-            }
+            } else
             return Status.CLOSED;
         }
 

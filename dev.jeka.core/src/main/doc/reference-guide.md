@@ -90,7 +90,7 @@ Concrete real-life cases, as building projects, will be documented in specific s
 ### Create Project Structure
 
 * Create the root dir of the project or use the _template wrapper project_ mentioned above. 
-* At project root, execute `jeka scaffold#run scaffold#wrap` (or just `jekaw scaffold#run` if using the template wrapper project).
+* At project root, execute `jeka scaffold#run scaffold#wrapper` (or just `jekaw scaffold#run` if using the template wrapper project).
 * Execute `jeka intellij#iml` or `jeka eclipse#files` in order to generate IDE configuration file. 
 * The project with a _Jeka_ structure and a basic build class is ready to work within your IDE
 
@@ -245,7 +245,7 @@ _Jeka_ comes with predefined methods coming either from `JkClass` or built-in pl
 * `jeka intellij#iml -JKC=` : If the above fails cause your def classes do not compile, using `-JKC=` avoids def compilation phase.
 * `jeka eclipse#files` : Same purpose as above to generate metadata files for Eclipse.
 * `jeka scaffold#run` : Generates files for creating a basic Jeka project from scratch.
-* `jeka scaffold#wrap` : Generates wrapper files (jekaw/jekaw.bat and bootstrap jar)
+* `jeka scaffold#wrapper` : Generates wrapper files (jekaw/jekaw.bat and bootstrap jar)
 * `jeka scaffold#run java#` : Generate files for creating a Jeka project for building a JVM language project
 
 ## Useful standard options

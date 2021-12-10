@@ -72,7 +72,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     @Override
     protected void init() {
         Path baseDir = getBaseDir();
-        project = JkProject.of().setBaseDir(getBaseDir());
+        project = JkProject.of().setBaseDir(baseDir);
         project.getConstruction().addTextAndLocalDependencies();
 
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
