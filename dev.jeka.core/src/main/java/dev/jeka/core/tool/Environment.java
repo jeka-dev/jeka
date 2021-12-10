@@ -79,6 +79,8 @@ class Environment {
 
         String logRuntimeInformation;
 
+        boolean ignoreCompileFail;
+
         private String jkBeanName;
 
         private boolean forceCompile;
@@ -93,6 +95,7 @@ class Environment {
             this.logRuntimeInformation = valueOf(String.class, map, null, "log.runtime.info", "lri");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
             this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");
+            this.ignoreCompileFail = valueOf(Boolean.class, map, false, "def.compile.ignore-failure", "dci");
             this.forceCompile = valueOf(Boolean.class, map, false, "def.compile.force", "dcf");
         }
 

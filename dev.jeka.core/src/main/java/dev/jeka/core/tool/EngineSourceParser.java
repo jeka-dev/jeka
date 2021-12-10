@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.file.JkPathTree;
@@ -97,28 +98,9 @@ final class EngineSourceParser {
 
     private static JkDependencySet dependenciesFromImports(Path baseDir, List<String> deps) {
         JkDependencySet result = JkDependencySet.of();
-        for (final String dependency : deps) {
-            if (isModuleDependencyDescription(dependency)) {
-                result = result.and(JkModuleDependency.of(dependency));
-            } else  if (dependency.contains("*")) {
-                if (dependency.contains("*")) {
-                    for (Path path : JkPathTree.of(baseDir).andMatching(true, dependency).getFiles()) {
-                        result = result.andFiles(path);
-                    }
-                }
-            } else {
-                Path depFile = Paths.get(dependency);
-                if (!Files.exists(depFile)) {
-                    final Path relativeFile = baseDir.resolve(dependency);
-                    if (Files.exists(relativeFile)) {
-                        depFile = relativeFile.normalize();
-                    } else {
-                        throw new JkException("In project '" + baseDir + "', file '" + dependency
-                                + "' mentioned in @" + JkInjectClasspath.class.getSimpleName() + " does not exist.");
-                    }
-                }
-                result = result.andFiles(depFile);
-            }
+        for (final String dependencyDescription : deps) {
+                JkDependency dep = CommandLine.toDependency(dependencyDescription);
+                result = result.and(dep);
         }
         return result;
     }
@@ -127,8 +109,11 @@ final class EngineSourceParser {
      * Returns <code>true</code> if the candidate string is a valid module dependency description.
      */
     private static boolean isModuleDependencyDescription(String candidate) {
+        if (candidate.contains("/") || candidate.contains("\\")) {
+            return false;
+        }
         final int colonCount = JkUtilsString.countOccurrence(candidate, ':');
-        return colonCount == 2 || colonCount == 3;
+        return colonCount >= 1;
     }
 
     private static LinkedHashSet<Path>  projectDependencies(Path baseDir, List<String> deps) {

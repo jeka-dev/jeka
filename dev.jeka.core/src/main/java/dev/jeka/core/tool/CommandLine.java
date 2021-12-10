@@ -51,7 +51,7 @@ final class CommandLine {
                 result.standardOptions.put(keyValue.key, keyValue.value);
                 continue;
             } else if (word.startsWith("@")) {
-                result.defDependencies.add(toModuleDependency(word.substring(1)));
+                result.defDependencies.add(toDependency(word.substring(1)));
                 continue;
             } else {
                 result.beanActions.add(new JkBeanAction(word));
@@ -100,7 +100,7 @@ final class CommandLine {
                 .collect(Collectors.toList());
     }
 
-    private static JkDependency toModuleDependency(String depDescription) {
+    static JkDependency toDependency(String depDescription) {
         boolean hasDoubleDotes = JkModuleDependency.isModuleDependencyDescription(depDescription);
         if (!hasDoubleDotes || (JkUtilsSystem.IS_WINDOWS && depDescription.substring(1).startsWith(":\\"))) {
             Path candidatePath = Paths.get(depDescription);

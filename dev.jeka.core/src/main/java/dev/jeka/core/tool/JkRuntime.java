@@ -16,6 +16,10 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Container where is registered the KBeans for a given project.
+ * In multi-project builds, there is one <code>JkRuntime</code> per project.
+ */
 public final class JkRuntime {
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
@@ -54,10 +58,13 @@ public final class JkRuntime {
         });
     }
 
-    public Path getProjectBaseDir() {
+    Path getProjectBaseDir() {
         return projectBaseDir;
     }
 
+    /**
+     * Returns the dependency resolver used to fetch 3rd party build dependencies.
+     */
     public JkDependencyResolver getDependencyResolver() {
         return dependencyResolver;
     }

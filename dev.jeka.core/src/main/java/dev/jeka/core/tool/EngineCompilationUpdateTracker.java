@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -38,6 +39,10 @@ class EngineCompilationUpdateTracker {
         writeLastUpdateFile(defLastUptateTime, JkJavaVersion.ofCurrent());
     }
 
+    void deleteCompileFlag() {
+        flagFile().deleteIfExist();
+    }
+
     private boolean isWorkOutdated(long lastModifiedAccordingFileAttributes) {
         TimestampAndJavaVersion timestampAndJavaVersion = lastModifiedAccordingFlag();
         return timestampAndJavaVersion.timestamp < lastModifiedAccordingFileAttributes
@@ -58,10 +63,14 @@ class EngineCompilationUpdateTracker {
             return;
         }
         String infoString = Long.toString(lastModifiedAccordingFileAttributes) + ";" + javaVersion;
-        JkPathFile.of(work.resolve(LAST_UPDATE_FILE_NAME))
+        flagFile()
                 .deleteIfExist()
                 .createIfNotExist()
                 .write(infoString.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private JkPathFile flagFile() {
+        return JkPathFile.of(projectBaseDir.resolve(JkConstants.WORK_PATH).resolve(LAST_UPDATE_FILE_NAME));
     }
 
     private TimestampAndJavaVersion lastModifiedAccordingFlag() {

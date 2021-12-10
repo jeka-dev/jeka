@@ -74,6 +74,7 @@ final class HelpDisplayer {
         sb.append("  -log.style (shorthand -ls) : choose the display log style : INDENT(default), BRACE or DEBUG.\n");
         sb.append("  -kbean (shorthand -kb) : Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name.\n");
         sb.append("  -def.compile.force (shorthand -dcf) : Force Jeka to compile def files, even if def compiled classes are marked up-to-date.\n");
+        sb.append("  -def.compile.ignore-failure (shorthand -dci) : Try to compile def classes. If fail, ignore failure and continue.\n");
         return sb.toString();
     }
 

@@ -149,7 +149,7 @@ public class JkProjectSimpleFacade {
     /**
      * Configures the dependencies to be published in a Maven repository.
      */
-    public JkProjectSimpleFacade configurePublishedDependencies(
+    public JkProjectSimpleFacade configurePublishedDeps(
             Function<JkDependencySet, JkDependencySet> dependencyModifier) {
         project.getPublication().getMaven().configureDependencies(dependencyModifier);
         return this;

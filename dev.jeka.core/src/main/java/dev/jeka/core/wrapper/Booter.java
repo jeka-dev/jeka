@@ -46,6 +46,9 @@ class Booter {
                 Files.deleteIfExists(dir.resolve("jeka"));
                 System.out.println("Jeka " + version + " installed in " + dir);
             }
+        } else if (!Files.exists(jekaBinPath)) {
+            System.out.println("File " + jekaBinPath + " mentioned in property file not found");
+            System.exit(1);
         }
         List<URL> classpath = new LinkedList<>();
         classpath.addAll(getBootLibs());
@@ -198,8 +201,7 @@ class Booter {
         if (result == null || result.trim().isEmpty()) {
             return null;
         }
-
-        return  Paths.get(result.trim()).resolve(BIN_NAME);
+        return Paths.get(result.trim()).resolve(BIN_NAME);
     }
 
     private static String repoOptions() {

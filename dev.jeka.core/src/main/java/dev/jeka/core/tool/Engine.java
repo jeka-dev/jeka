@@ -72,7 +72,9 @@ final class Engine {
         JkLog.startTask("Compile def and initialise KBeans");
         JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getDefDependencies());
         JkLog.trace("Inject classpath from command line : " + commandLineDependencies);
-        JkPathSequence computedClasspath = resolveAndCompile( new HashSet<>(), true)
+        CompilationResult result = resolveAndCompile( new HashSet<>(), true,
+                !Environment.standardOptions.ignoreCompileFail);
+        JkPathSequence computedClasspath = result.classpath
             .andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
         AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
         beanClassesResolver.setClasspath(computedClasspath);
@@ -94,6 +96,11 @@ final class Engine {
         JkLog.info("KBeans are ready to run.");
         JkLog.endTask();
         stopBusyIndicator();
+        if (!result.compileFailedProjects.getEntries().isEmpty()) {
+            JkLog.warn("Def compilation failed on projects " + result.compileFailedProjects.getEntries()
+                    .stream().map(path -> "'" + path + "'").collect(Collectors.toList()));
+            JkLog.warn("As -dci option is on, the failure will be ignored.");
+        }
         if (Environment.standardOptions.logRuntimeInformation != null) {
             JkLog.info("Jeka Classpath : ");
             computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
@@ -117,36 +124,46 @@ final class Engine {
      * Resolves dependencies and compiles and sources classes contained in jeka/def.
      * It returns a path sequence containing the resolved dependencies and result of compilation.
      */
-    private JkPathSequence resolveAndCompile(Set<Path> yetCompiledProjects, boolean compileSources) {
+    private CompilationResult resolveAndCompile(Set<Path> yetCompiledProjects, boolean compileSources,
+                                             boolean failOnCompileError) {
         if (yetCompiledProjects.contains(this.projectBaseDir)) {
-            return JkPathSequence.of();
+            return new CompilationResult(JkPathSequence.of(), JkPathSequence.of());
         }
         yetCompiledProjects.add(this.projectBaseDir);
         String msg = "Scanning sources and compiling def classes for project " + this.projectBaseDir.getFileName().toString();
         JkLog.startTask(msg);
         CompilationContext compilationContext = preCompile();
         List<Path> importedProjectClasspath = new LinkedList<>();
-        compilationContext.importedProjectDirs.forEach(importedProjectDir -> {
+        List<Path> failedProjects = new LinkedList<>();
+        for (Path importedProjectDir : compilationContext.importedProjectDirs) {
             Engine importedProjectEngine = new Engine(importedProjectDir);
-            importedProjectClasspath.addAll(
-                    importedProjectEngine.resolveAndCompile(yetCompiledProjects, compileSources).getEntries());
-        });
+            CompilationResult compilationResult = importedProjectEngine.resolveAndCompile(yetCompiledProjects,
+                    compileSources, failOnCompileError);
+            importedProjectClasspath.addAll(compilationResult.classpath.getEntries());
+            failedProjects.addAll(compilationResult.compileFailedProjects.getEntries());
+        }
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
         if (compileSources && this.beanClassesResolver.hasDefSource()) {
             if (Environment.standardOptions.forceCompile() || compilationTracker.isOutdated()) {
                 JkLog.trace("Compile classpath : " + classpath);
-                compileDef(classpath, compilationContext.compileOptions);
-                compilationTracker.updateCompileFlag();
+                boolean success = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
+                if (!success) {
+                    failedProjects.add(projectBaseDir);
+                    compilationTracker.deleteCompileFlag();
+                } else {
+                    compilationTracker.updateCompileFlag();
+                }
             } else {
                 JkLog.trace("Last def classes are up-to-date : No need to compile.");
             }
         }
         JkLog.endTask();
-        return classpath.andPrepend(beanClassesResolver.defClassDir);
+        JkPathSequence resultClasspath = classpath.andPrepend(beanClassesResolver.defClassDir);
+        return new CompilationResult(JkPathSequence.of().and(failedProjects).withoutDuplicates(), resultClasspath);
     }
 
-    private void compileDef(JkPathSequence defClasspath, List<String> compileOptions) {
+    private boolean compileDef(JkPathSequence defClasspath, List<String> compileOptions, boolean failOnCompileError) {
         JkPathTree.of(beanClassesResolver.defClassDir).deleteContent();
         if (hasKotlin()) {
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos())
@@ -158,7 +175,10 @@ final class Engine {
             if (JkLog.isVerbose()) {
                 kotlinCompiler.addOption("-verbose");
             }
-            wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec));
+            boolean success = wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec), failOnCompileError);
+            if (!failOnCompileError && !success) {
+                return false;
+            }
             if (kotlinCompiler.isProvidedCompiler()) {
                 AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompiler.getStdLib());
             }
@@ -169,10 +189,14 @@ final class Engine {
                     ") does not provide compiler (javac). Please provide a JDK java platform by pointing JAVA_HOME" +
                     " or JEKA_JDK environment variable to a JDK directory.");
         }
-        wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec));
+        boolean success = wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec), failOnCompileError);
+        if (!success) {
+            return false;
+        }
         JkPathTree.of(this.beanClassesResolver.defSourceDir)
                 .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")
                 .copyTo(this.beanClassesResolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
+        return true;
     }
 
     private JkPathSequence jekaClasspath() {
@@ -198,12 +222,12 @@ final class Engine {
         return JkPathSequence.of(extraLibs);
     }
 
-    private void wrapCompile(Supplier<Boolean> compileTask) {
+    private boolean wrapCompile(Supplier<Boolean> compileTask, boolean failOnError) {
         boolean success = compileTask.get();
-        if (!success) {
-            throw new JkException("Compilation of Jeka files failed. You can run jeka -kb= to use default KBean " +
-                    " instead of the ones defined in 'def'.");
+        if (!success && failOnError) {
+            throw new JkException("Compilation of Jeka files failed. Run jeka with '-dci' option to ignore compilation failure.");
         }
+        return success;
     }
 
     private boolean hasKotlin() {
@@ -264,6 +288,18 @@ final class Engine {
                 .filter(beanClass -> !localBeanClasses.contains(beanClass))
                 .collect(Collectors.toList());
         HelpDisplayer.help(localBeanClasses, globalBeanClasses, false);
+    }
+
+    private static class CompilationResult {
+
+        JkPathSequence compileFailedProjects;
+
+        JkPathSequence classpath;
+
+        CompilationResult(JkPathSequence compileFailedProjects, JkPathSequence pathSequence) {
+            this.compileFailedProjects = compileFailedProjects;
+            this.classpath = pathSequence;
+        }
     }
 
 }
