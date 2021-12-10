@@ -36,7 +36,7 @@
 
 	<target name="run" depends="bootstrap">
 		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.master" fork="true" failonerror="true">
-			<arg line="make -lri -lsu -lb -ls=BRACE" />
+			<arg line="make -Djeka.gpg.passphrase=${env.GPG_PASSPHRASE} -lri -lsu -lb -ls=BRACE" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
