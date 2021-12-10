@@ -17,8 +17,6 @@
 	</fileset>
 
 	<target name="init">
-		<echoproperties prefix="env"/>
-		<fail/>
 		<mkdir dir="${bin}" />
 	</target>
 
