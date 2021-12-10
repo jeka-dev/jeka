@@ -35,8 +35,10 @@
 	</target>
 
 	<target name="run" depends="bootstrap">
+		<property environment="env"/>
 		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.master" fork="true" failonerror="true">
-			<arg line="make -Djeka.gpg.passphrase=${env.GPG_PASSPHRASE} -lri -lsu -lb -ls=BRACE" />
+			<arg line="make -lri -lsu -lb -ls=BRACE" />
+			<env key="jeka.gpg.passphrase" value="${env.GPG_PASSPHRASE}"/>
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
