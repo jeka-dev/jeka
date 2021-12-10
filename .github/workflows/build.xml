@@ -18,6 +18,7 @@
 
 	<target name="init">
 		<echoproperties/>
+		<fail/>
 		<mkdir dir="${bin}" />
 	</target>
 
