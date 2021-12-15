@@ -31,7 +31,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
  *
  * @author Jerome Angibaud
  */
-public class SignedArtifactsBuild extends JkBean {
+public class SignedArtifactsJkBean extends JkBean {
 
     ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
@@ -59,7 +59,7 @@ public class SignedArtifactsBuild extends JkBean {
                 .and(GUAVA.version("30.0-jre"))
             )
             .configureTestDeps(deps -> deps
-                .and(JavaPluginBuild.JUNIT5)
+                .and(SimpleProjectJkBean.JUNIT5)
             )
             .getProject()
             .getPublication()
@@ -96,7 +96,7 @@ public class SignedArtifactsBuild extends JkBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(SignedArtifactsBuild.class, args).cleanPackPublish();
+        JkInit.instanceOf(SignedArtifactsJkBean.class, args).cleanPackPublish();
     }
    
 }

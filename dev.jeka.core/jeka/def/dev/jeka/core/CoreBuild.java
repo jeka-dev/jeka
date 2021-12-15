@@ -115,7 +115,7 @@ public class CoreBuild extends JkBean {
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
-        final List<Path> ivySourceLibs = JkPathTree.of(getBaseDir()).goTo("jeka/libs-sources")
+        final List<Path> ivySourceLibs = JkPathTree.of(getBaseDir()).goTo("jeka/sources")
                 .andMatching(true, "ivy-*.jar").getFiles();
         distrib
             .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"))
@@ -123,7 +123,7 @@ public class CoreBuild extends JkBean {
             .importFiles(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()))
             .importFiles(artifactProducer.getArtifactPath(WRAPPER_ARTIFACT_ID));
         if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
-            distrib.goTo("libs-sources")
+            distrib.goTo("sources")
                     .importFiles(ivySourceLibs)
                     .importFiles(artifactProducer.getArtifactPath(SOURCES_ARTIFACT_ID));
         }

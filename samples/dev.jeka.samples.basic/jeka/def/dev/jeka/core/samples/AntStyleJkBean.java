@@ -32,7 +32,7 @@ import java.util.List;
  * @author Jerome Angibaud
  */
 @JkInjectClasspath("org.apache.httpcomponents:httpclient:4.5.6")
-public class AntStyleBuild extends JkBean implements JkIdeSupport.JkSupplier {
+public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     Path src = getBaseDir().resolve("src/main/java");
     Path test = getBaseDir().resolve("src/test/java");
@@ -45,7 +45,7 @@ public class AntStyleBuild extends JkBean implements JkIdeSupport.JkSupplier {
             .and("com.google.guava:guava:30.0-jre")
             .and("org.hibernate:hibernate-entitymanager:5.4.2.Final");
     JkDependencySet testDependencies = JkDependencySet.of()
-            .and(JavaPluginBuild.JUNIT5);
+            .and(SimpleProjectJkBean.JUNIT5);
     List<Path> depFiles = baseTree.andMatching(true,"libs/**/*.jar").getFiles();
     JkPathSequence prodClasspath = resolver.resolve(prodDependencies).getFiles();
     JkPathSequence testClasspath = resolver.resolve(testDependencies.and(prodDependencies)).getFiles();
@@ -133,7 +133,7 @@ public class AntStyleBuild extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(AntStyleBuild.class, args).cleanPackPublish();
+        JkInit.instanceOf(AntStyleJkBean.class, args).cleanPackPublish();
     }
 
 }

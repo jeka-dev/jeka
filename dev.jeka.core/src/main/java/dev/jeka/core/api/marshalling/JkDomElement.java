@@ -1,5 +1,6 @@
 package dev.jeka.core.api.marshalling;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -22,20 +23,20 @@ import java.util.function.Predicate;
  *
  * @author Jerome Angibaud
  */
-public final class JkDomElement<P> {
+public final class JkDomElement {
 
-    public final P __;
+    public final JkDomElement __;
 
     private Element w3cElement;
 
     private ElementProxy proxyElement;  // only used for non-existing element, so we can create it afterward.
 
-    private JkDomElement(P parent, Element element) {
+    private JkDomElement(JkDomElement parent, Element element) {
         this.__ = parent;
         this.w3cElement = element;
     }
 
-    private JkDomElement(P __, JkDomElement parent, String name) {
+    private JkDomElement(JkDomElement __, JkDomElement parent, String name) {
         this.__ = __;
         this.proxyElement = ElementProxy.of(parent, name);
     }
@@ -43,14 +44,14 @@ public final class JkDomElement<P> {
     /**
      * Creates a VElement wrapping the specified element.
      */
-    public static JkDomElement<Void> of(Element element) {
+    public static JkDomElement of(Element element) {
         return new JkDomElement(null, element);
     }
 
     /**
      * Creates a VElement wrapping the specified parent and element.
      */
-    public static <P> JkDomElement of(P parent, Element element) {
+    public static <P> JkDomElement of(JkDomElement parent, Element element) {
         return new JkDomElement(parent, element);
     }
 
@@ -65,7 +66,10 @@ public final class JkDomElement<P> {
      * Adds the specified attribute name/value on the underlying element.
      * @throws IllegalStateException if the underlying element does not exist.
      */
-    public JkDomElement<P> attr(String name, String value) {
+    public JkDomElement attr(String name, String value) {
+        if (value == null) {
+            return this;
+        }
         assertExist();
         w3cElement.setAttribute(name, value);
         return this;
@@ -83,7 +87,7 @@ public final class JkDomElement<P> {
      * Removes the specified attribute of the specified name from the underlying element.
      * @throws IllegalStateException if the underlying element does not exist.
      */
-    public JkDomElement<P> removeAttr(String name) {
+    public JkDomElement removeAttr(String name) {
         assertExist();
         w3cElement.removeAttribute(name);
         return this;
@@ -93,7 +97,7 @@ public final class JkDomElement<P> {
      * Sets the specified text on the underlying element.
      * @throws IllegalStateException if the underlying element does not exist.
      */
-    public JkDomElement<P> text(String text) {
+    public JkDomElement text(String text) {
         assertExist();
         w3cElement.setTextContent(text);
         return this;
@@ -110,22 +114,22 @@ public final class JkDomElement<P> {
     }
 
     /**
-     * Adds a child element of the specified name on the underlying element. This methods returns the
+     * Adds a child element of the specified name on the underlying element. This method returns the
      * newly created element.
      * @throws IllegalStateException if the underlying element does not exist.
      */
-    public JkDomElement<JkDomElement<P>> add(String name) {
+    public JkDomElement add(String name) {
         assertExist();
         Element newElement = w3cElement.getOwnerDocument().createElement(name);
         w3cElement.appendChild(newElement);
-        return new JkDomElement<>(this, newElement);
+        return new JkDomElement(this, newElement);
     }
 
     /**
      * Returns the first child element of the underlying element having the specified name. <p>
      * If no such element exist, this method returns a proxy element that let creation possible afterward.
      */
-    public JkDomElement<JkDomElement<P>> get(String name) {
+    public JkDomElement get(String name) {
         if (!exist()) {
             return ElementProxy.of(this, name).create();
         }
@@ -133,7 +137,7 @@ public final class JkDomElement<P> {
         if (nodeList.getLength() > 0) {
             return new JkDomElement(this, (Element) nodeList.item(0));
         }
-        return new JkDomElement<>(this, this, name);
+        return new JkDomElement(this, this, name);
     }
 
     /**
@@ -144,7 +148,7 @@ public final class JkDomElement<P> {
         if (!exist()) {
             return Collections.emptyList();
         }
-        List<JkDomElement<JkDomElement<P>>> result = new LinkedList<>();
+        List<JkDomElement> result = new LinkedList<>();
         NodeList nodeList = w3cElement.getElementsByTagName(name);
         for (int i = 0; i < nodeList.getLength(); i++) {
             JkDomElement el = new JkDomElement(this, (Element) nodeList.item(i));
@@ -193,7 +197,7 @@ public final class JkDomElement<P> {
      * Returns an unmodifiable list of elements matching the specified xPath expression.
      */
     public List<JkDomElement> xPath(XPathExpression xPathExpression) {
-        List<JkDomElement<JkDomElement<P>>> result = new LinkedList<>();
+        List<JkDomElement> result = new LinkedList<>();
         final NodeList nodeList;
         try {
             nodeList = (NodeList) xPathExpression.evaluate(w3cElement, XPathConstants.NODESET);
@@ -221,7 +225,7 @@ public final class JkDomElement<P> {
      * Adds a sibling element of the specified name just before this one. This method returns the newly
      * created element.
      */
-    public JkDomElement<P> addSibling(String name) {
+    public JkDomElement addSibling(String name) {
         assertExist();
         Element newElement = w3cElement.getOwnerDocument().createElement(name);
         w3cElement.getParentNode().insertBefore(newElement, w3cElement);
@@ -231,7 +235,7 @@ public final class JkDomElement<P> {
     /**
      * Removes the underlying element from its parent children.
      */
-    public JkDomElement<P> remove() {
+    public JkDomElement remove() {
         assertExist();
         this.w3cElement.getParentNode().removeChild(w3cElement);
         return this;
@@ -240,7 +244,19 @@ public final class JkDomElement<P> {
     /**
      * Runs the specified consumer with this element as argument.
      */
-    public JkDomElement<P> apply(Consumer<JkDomElement<?>> consumer) {
+    public JkDomElement apply(Consumer<JkDomElement> consumer) {
+        assertExist();
+        consumer.accept(this);
+        return this;
+    }
+
+    /**
+     * Runs the specified consumer with this element as argument.
+     */
+    public JkDomElement applyIf(boolean condition, Consumer<JkDomElement> consumer) {
+        if (!condition) {
+            return this;
+        }
         assertExist();
         consumer.accept(this);
         return this;
@@ -257,7 +273,7 @@ public final class JkDomElement<P> {
      * Creates the underlying element and its non-existing parents.
      * Does nothing if the underlying element already exists.
      */
-    public JkDomElement<P> make() {
+    public JkDomElement make() {
         if (!exist()) {
             this.w3cElement = proxyElement.create().w3cElement;
             this.proxyElement = null;

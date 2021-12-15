@@ -19,7 +19,7 @@ import static dev.jeka.core.api.utils.JkUtilsString.plurialize;
  */
 public final class JkDependencyResolver<T> {
 
-    private final JkResolutionParameters<JkDependencyResolver<T> > parameters;
+    private final JkResolutionParameters<JkDependencyResolver<T> > defaultParameters;
 
     // Not necessary but helps Ivy to hide data efficiently.
     private JkVersionedModule moduleHolder;
@@ -37,7 +37,7 @@ public final class JkDependencyResolver<T> {
 
     private JkDependencyResolver(T parent) {
         __ = parent;
-        parameters = JkResolutionParameters.ofParent(this);
+        defaultParameters = JkResolutionParameters.ofParent(this);
     }
 
     /**
@@ -93,8 +93,8 @@ public final class JkDependencyResolver<T> {
     /**
      * Returns the parameters of this dependency resolver.
      */
-    public JkResolutionParameters<JkDependencyResolver<T> > getParams() {
-        return this.parameters;
+    public JkResolutionParameters<JkDependencyResolver<T> > getDefaultParams() {
+        return this.defaultParameters;
     }
 
     /**
@@ -109,18 +109,21 @@ public final class JkDependencyResolver<T> {
     }
 
     public JkResolveResult resolve(JkModuleDependency moduleDependency) {
-        return resolve(JkDependencySet.of(moduleDependency));
+        return resolve(moduleDependency, defaultParameters);
+    }
+
+    public JkResolveResult resolve(JkModuleDependency moduleDependency, JkResolutionParameters params) {
+        return resolve(JkDependencySet.of(moduleDependency), params);
     }
 
     public JkResolveResult resolve(JkDependencySet dependencies) {
-        return resolve(JkQualifiedDependencySet.of(
-                dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)
-                            .mergeLocalProjectExportedDependencies()));
+        return resolve(dependencies, defaultParameters);
     }
 
-    public JkResolveResult resolveWithoutLocalProjectTransitiveDependencies(JkDependencySet dependencies) {
+    public JkResolveResult resolve(JkDependencySet dependencies, JkResolutionParameters params) {
         return resolve(JkQualifiedDependencySet.of(
-                dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)));
+                dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)
+                            .mergeLocalProjectExportedDependencies()), params);
     }
 
     /**
@@ -129,7 +132,7 @@ public final class JkDependencyResolver<T> {
      * @param qualifiedDependencies the dependencies to resolve.
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
-    public JkResolveResult resolve(JkQualifiedDependencySet qualifiedDependencies) {
+    public JkResolveResult resolve(JkQualifiedDependencySet qualifiedDependencies, JkResolutionParameters params) {
         if (qualifiedDependencies.getEntries().isEmpty()) {
             return JkResolveResult.ofRoot(moduleHolder);
         }
@@ -152,7 +155,7 @@ public final class JkDependencyResolver<T> {
         if (hasModule) {
             JkUtilsAssert.state(!repos.getRepos().isEmpty(), "Cannot resolve module dependency cause no " +
                     "repos has defined on resolver " + this);
-            resolveResult = internalDepResolver.resolve(moduleHolder, moduleQualifiedDependencies, parameters);
+            resolveResult = internalDepResolver.resolve(moduleHolder, moduleQualifiedDependencies, params);
         } else {
             resolveResult = JkResolveResult.ofRoot(moduleHolder);
         }
@@ -169,7 +172,7 @@ public final class JkDependencyResolver<T> {
         }
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {
-            if (parameters.isFailOnDependencyResolutionError()) {
+            if (params.isFailOnDependencyResolutionError()) {
                 throw new IllegalStateException(report.toString());
             }
             JkLog.warn(report.toString());

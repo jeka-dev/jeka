@@ -11,7 +11,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -219,7 +218,7 @@ public final class JkSonarqube {
                 .withTransitivity(JkTransitivity.NONE);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                 .addRepos(repos)
-                .getParams()
+                .getDefaultParams()
                     .setFailOnDependencyResolutionError(false)
                 .__;
         JkResolveResult resolveResult = dependencyResolver.resolve(JkDependencySet.of().and(moduleDep));

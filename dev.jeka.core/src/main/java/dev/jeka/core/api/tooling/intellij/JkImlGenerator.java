@@ -102,13 +102,13 @@ public final class JkImlGenerator {
         writeOrderEntrySourceFolder();
         Set<Path> processedPaths  = new HashSet<>();
         if (this.ideSupport.getDependencyResolver() != null) {
-            JkResolveResult resolveResult = ideSupport.getDependencyResolver().resolve(ideSupport.getDependencies());
+            JkResolveResult resolveResult = ideSupport.getDependencyResolver().resolve(ideSupport.getDependencies(),
+                    ideSupport.getDependencyResolver().getDefaultParams());
             JkRepoSet repos = ideSupport.getDependencyResolver().getRepos();
             writeDependencies(resolveResult, repos, processedPaths, false);
         }
         if (this.defDependencyResolver != null) {
-            JkResolveResult resolveResult = defDependencyResolver
-                    .resolveWithoutLocalProjectTransitiveDependencies(defDependencies);
+            JkResolveResult resolveResult = defDependencyResolver.resolve(defDependencies);
             writeDependencies(resolveResult, this.defDependencyResolver.getRepos(), processedPaths, true);
         }
         writeExtraJekaModules(this.extraJekaModules);

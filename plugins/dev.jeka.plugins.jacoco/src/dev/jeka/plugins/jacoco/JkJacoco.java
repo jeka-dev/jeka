@@ -217,10 +217,10 @@ public final class JkJacoco {
         private Path cliJarFile;
 
         EmbeddedToolProvider() {
-            final URL agentJarUrl = JkPluginJacoco.class.getResource("org.jacoco.agent-0.8.7-runtime.jar");
+            final URL agentJarUrl = JacocoJkBean.class.getResource("org.jacoco.agent-0.8.7-runtime.jar");
             agentJarFile = JkUtilsIO.copyUrlContentToCacheFile(agentJarUrl, System.out,
                     JkInternalClassloader.URL_CACHE_DIR);
-            final URL cliJarUrl = JkPluginJacoco.class.getResource("org.jacoco.cli-0.8.7-nodeps.jar");
+            final URL cliJarUrl = JacocoJkBean.class.getResource("org.jacoco.cli-0.8.7-nodeps.jar");
             cliJarFile = JkUtilsIO.copyUrlContentToCacheFile(cliJarUrl, System.out,
                     JkInternalClassloader.URL_CACHE_DIR);
         }

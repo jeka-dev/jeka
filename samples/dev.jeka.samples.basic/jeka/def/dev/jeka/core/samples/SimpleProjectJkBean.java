@@ -19,7 +19,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  * @author Jerome Angibaud
  * @formatter:off
  */
-public class JavaPluginBuild extends JkBean {
+public class SimpleProjectJkBean extends JkBean {
 
     public final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
@@ -48,7 +48,7 @@ public class JavaPluginBuild extends JkBean {
                     .setForkedWithDefaultProcess()
                .__
                .getDependencyResolver()
-                    .getParams()
+                    .getDefaultParams()
                         .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT)
                     .__
                .__
@@ -92,7 +92,7 @@ public class JavaPluginBuild extends JkBean {
     }
     
     public static void main(String[] args) {
-	    JkInit.instanceOf(JavaPluginBuild.class, args).cleanPackPublish();
+	    JkInit.instanceOf(SimpleProjectJkBean.class, args).cleanPackPublish();
     }
 
 

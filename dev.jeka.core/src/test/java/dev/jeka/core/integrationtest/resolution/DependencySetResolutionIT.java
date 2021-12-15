@@ -130,7 +130,7 @@ public class DependencySetResolutionIT {
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder)
-                .getParams().setFailOnDependencyResolutionError(false).__;
+                .getDefaultParams().setFailOnDependencyResolutionError(false).__;
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolveResult.JkErrorReport errorReport = resolveResult.getErrorReport();
         System.out.println(errorReport.getModuleProblems());

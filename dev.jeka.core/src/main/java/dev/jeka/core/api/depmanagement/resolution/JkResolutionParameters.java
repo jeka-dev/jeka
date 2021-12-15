@@ -104,4 +104,11 @@ public final class JkResolutionParameters<T> {
         this.failOnDependencyResolutionError = failOnDependencyResolutionError;
         return this;
     }
+
+    public JkResolutionParameters clone() {
+        return JkResolutionParameters.of()
+                .setFailOnDependencyResolutionError(this.failOnDependencyResolutionError)
+                .setConflictResolver(this.conflictResolver)
+                .setRefreshed(refreshed);
+    }
 }

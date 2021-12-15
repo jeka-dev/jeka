@@ -1,4 +1,4 @@
-import dev.jeka.core.samples.JavaPluginBuild;
+import dev.jeka.core.samples.SimpleProjectJkBean;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectProject;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -10,12 +10,12 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  * 
  * @formatter:off
  */
-public class FatJarBuild extends JkBean {
+public class FatJarJkBean extends JkBean {
 
     ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
     
     @JkInjectProject("../dev.jeka.samples.basic")
-    private JavaPluginBuild sampleBuild;
+    private SimpleProjectJkBean sampleBuild;
 
     @Override
     protected void init() {

@@ -1,0 +1,6 @@
+site_name: My Docs
+theme:
+    name: readthedocs
+    highlightjs: true
+    hljs_languages:
+        - java

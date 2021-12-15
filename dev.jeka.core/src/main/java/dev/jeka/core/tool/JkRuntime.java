@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -29,6 +30,10 @@ public final class JkRuntime {
     private final Path projectBaseDir;
 
     private JkDependencyResolver dependencyResolver;
+
+    private JkPathSequence classpath;
+
+    private JkPathSequence importedProjects;
 
     private List<EngineCommand> fieldInjections = Collections.emptyList();
 
@@ -70,6 +75,20 @@ public final class JkRuntime {
     }
 
     /**
+     * Returns the classpath used to compile def classes.
+     */
+    public JkPathSequence getClasspath() {
+        return classpath;
+    }
+
+    /**
+     * Returns root path of imported projects.
+     */
+    public JkPathSequence getImportedProjects() {
+        return importedProjects;
+    }
+
+    /**
      * Returns the plugin instance of the specified class loaded in the holding JkClass instance. If it does not hold
      * a plugin of the specified class at call time, the plugin is loaded then returned.
      */
@@ -101,6 +120,14 @@ public final class JkRuntime {
 
     void setDependencyResolver(JkDependencyResolver resolverArg) {
         dependencyResolver = resolverArg;
+    }
+
+    void setClasspath(JkPathSequence pathSequence) {
+        this.classpath = pathSequence;
+    }
+
+    void setImportedProjects(JkPathSequence importedProjects) {
+        this.importedProjects = importedProjects;
     }
 
     void init(List<EngineCommand> commands) {

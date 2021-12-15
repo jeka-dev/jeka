@@ -18,7 +18,7 @@ import java.nio.file.Path;
  * @author Jerome Angibaud
  * @formatter:off
  */
-public class WarPluginBuild extends JkBean {
+public class SimpleWarJkBean extends JkBean {
 
     public String port = "8080";
 
@@ -67,7 +67,7 @@ public class WarPluginBuild extends JkBean {
     }
     
     public static void main(String[] args) {
-	    JkInit.instanceOf(WarPluginBuild.class, args, "-LS=DEBUG").cleanPackRun();
+	    JkInit.instanceOf(SimpleWarJkBean.class, args, "-LS=DEBUG").cleanPackRun();
     }
 
 

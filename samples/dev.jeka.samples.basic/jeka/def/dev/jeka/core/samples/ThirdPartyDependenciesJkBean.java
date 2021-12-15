@@ -21,7 +21,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
  */
 @JkInjectClasspath("commons-httpclient:commons-httpclient:3.1")
 @JkInjectClasspath("com.google.guava:guava:21.0")
-public class ThirdPartyPoweredBuild extends JkBean {
+public class ThirdPartyDependenciesJkBean extends JkBean {
 
     ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
     
@@ -34,7 +34,7 @@ public class ThirdPartyPoweredBuild extends JkBean {
             .configureRuntimeDeps(compileDeps -> compileDeps
                 .minus(JAVAX_SERVLET_API))
             .configureTestDeps(deps -> deps
-                .and(JavaPluginBuild.JUNIT5)
+                .and(SimpleProjectJkBean.JUNIT5)
                 .and(MOCKITO_ALL.version("1.10.19")));
     }
 
@@ -53,7 +53,7 @@ public class ThirdPartyPoweredBuild extends JkBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(ThirdPartyPoweredBuild.class, args).cleanPack();
+        JkInit.instanceOf(ThirdPartyDependenciesJkBean.class, args).cleanPack();
     }
 
 }

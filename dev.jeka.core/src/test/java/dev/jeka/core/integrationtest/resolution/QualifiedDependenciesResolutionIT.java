@@ -2,6 +2,7 @@ package dev.jeka.core.integrationtest.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class QualifiedDependenciesResolutionIT {
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("compile, runtime", "com.github.djeang:vincer-dom:1.3.0");
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
+        JkResolvedDependencyNode tree = resolver.resolve(deps, JkResolutionParameters.of()).getDependencyTree();
         assertEquals(1, tree.getChildren().size());
     }
 
@@ -39,7 +40,7 @@ public class QualifiedDependenciesResolutionIT {
         JkProjectDependencies projectDependencies = JkProjectDependencies.of(compile, runtime, JkDependencySet.of());
         JkQualifiedDependencySet qdeps = JkQualifiedDependencySet.computeIdeDependencies(projectDependencies);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(qdeps);
+        JkResolveResult resolveResult = resolver.resolve(qdeps, JkResolutionParameters.of());
         assertTrue(resolveResult.contains(JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(GUAVA));
         assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
@@ -60,7 +61,7 @@ public class QualifiedDependenciesResolutionIT {
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
-        JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
+        JkResolvedDependencyNode tree = resolver.resolve(deps, JkResolutionParameters.of()).getDependencyTree();
 
         System.out.println(tree.toStringTree());
 
@@ -92,7 +93,7 @@ public class QualifiedDependenciesResolutionIT {
 
         // Now check that file dependencies with Test Scope are not present in compile
 
-        tree = resolver.resolve(deps).getDependencyTree();  // intilay was resolve on compile
+        tree = resolver.resolve(deps, JkResolutionParameters.of()).getDependencyTree();  // intilay was resolve on compile
         System.out.println(tree.toStringTree());
 
         root = tree.getModuleInfo();
@@ -111,7 +112,7 @@ public class QualifiedDependenciesResolutionIT {
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
-        JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
+        JkResolvedDependencyNode tree = resolver.resolve(deps, JkResolutionParameters.of()).getDependencyTree();
 
         System.out.println(tree.toStringTree());
 
@@ -158,7 +159,7 @@ public class QualifiedDependenciesResolutionIT {
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder);
-        JkResolveResult resolveResult = resolver.resolve(deps);
+        JkResolveResult resolveResult = resolver.resolve(deps, JkResolutionParameters.of());
         JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         for (Path file : resolveResult.getFiles()) {
             if (!tree.getResolvedFiles().contains(file)) {

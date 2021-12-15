@@ -8,7 +8,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
-public class JkPluginJacoco extends JkBean {
+public class JacocoJkBean extends JkBean {
 
     /**
      * Relative location to the output folder of the generated jacoco report file

@@ -1,6 +1,6 @@
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
-import dev.jeka.core.samples.JavaPluginBuild;
+import dev.jeka.core.samples.SimpleProjectJkBean;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectProject;
 import dev.jeka.core.tool.JkInit;
@@ -18,7 +18,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  * 
  * @formatter:off
  */
-public class NormalJarBuild extends JkBean {
+public class NormalJarJkBean extends JkBean {
 
     ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
 
@@ -28,7 +28,7 @@ public class NormalJarBuild extends JkBean {
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
     @JkInjectProject("../dev.jeka.samples.basic")
-    private JavaPluginBuild sampleBuild;
+    private SimpleProjectJkBean sampleBuild;
 
 
     @Override
@@ -54,7 +54,7 @@ public class NormalJarBuild extends JkBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(NormalJarBuild.class).cleanPack();
+        JkInit.instanceOf(NormalJarJkBean.class).cleanPack();
     }
 
 }

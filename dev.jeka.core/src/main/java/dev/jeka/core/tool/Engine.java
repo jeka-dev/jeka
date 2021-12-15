@@ -59,7 +59,7 @@ final class Engine {
         this.projectBaseDir = baseDir;
         this.beanClassesResolver = new EngineBeanClassResolver(baseDir);
         this.dependencyResolver = JkDependencyResolver.of()
-                .getParams()
+                .getDefaultParams()
                     .setFailOnDependencyResolutionError(true)  // TODO set params at root of Dependency resolver
                 .__
                 .addRepos(getDownloadRepo(), JkRepo.ofLocal());
@@ -87,6 +87,8 @@ final class Engine {
         JkLog.startTask("Setting up runtime");
         JkRuntime runtime = JkRuntime.get(projectBaseDir);
         runtime.setDependencyResolver(dependencyResolver);
+        runtime.setImportedProjects(result.importedProjects);
+        runtime.setClasspath(computedClasspath);
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
                 Environment.standardOptions.jkCBeanName());
         JkLog.startTask("Init runtime");
@@ -113,6 +115,7 @@ final class Engine {
                 .andMatcher(JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
         JkLog.trace("Parse source code of " + sourceFiles);
         final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
+        JkDependencySet parsedDependencies = parser.dependencies();
         return new CompilationContext(
                 jekaClasspath().and(dependencyResolver.resolve(parser.dependencies()).getFiles()),
                 new LinkedList<>(parser.projects()),
@@ -127,7 +130,7 @@ final class Engine {
     private CompilationResult resolveAndCompile(Set<Path> yetCompiledProjects, boolean compileSources,
                                              boolean failOnCompileError) {
         if (yetCompiledProjects.contains(this.projectBaseDir)) {
-            return new CompilationResult(JkPathSequence.of(), JkPathSequence.of());
+            return new CompilationResult(JkPathSequence.of(), JkPathSequence.of(), JkPathSequence.of());
         }
         yetCompiledProjects.add(this.projectBaseDir);
         String msg = "Scanning sources and compiling def classes for project " + this.projectBaseDir.getFileName().toString();
@@ -147,11 +150,12 @@ final class Engine {
         if (compileSources && this.beanClassesResolver.hasDefSource()) {
             if (Environment.standardOptions.forceCompile() || compilationTracker.isOutdated()) {
                 JkLog.trace("Compile classpath : " + classpath);
-                boolean success = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
-                if (!success) {
+                SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
+                if (!result.success) {
                     failedProjects.add(projectBaseDir);
                     compilationTracker.deleteCompileFlag();
                 } else {
+                    classpath = classpath.and(result.extraClasspath);
                     compilationTracker.updateCompileFlag();
                 }
             } else {
@@ -160,11 +164,16 @@ final class Engine {
         }
         JkLog.endTask();
         JkPathSequence resultClasspath = classpath.andPrepend(beanClassesResolver.defClassDir);
-        return new CompilationResult(JkPathSequence.of().and(failedProjects).withoutDuplicates(), resultClasspath);
+        return new CompilationResult(
+                JkPathSequence.of(compilationContext.importedProjectDirs),
+                JkPathSequence.of(failedProjects).withoutDuplicates(),
+                resultClasspath);
     }
 
-    private boolean compileDef(JkPathSequence defClasspath, List<String> compileOptions, boolean failOnCompileError) {
+    private SingleCompileResult compileDef(JkPathSequence defClasspath, List<String> compileOptions,
+                                           boolean failOnCompileError) {
         JkPathTree.of(beanClassesResolver.defClassDir).deleteContent();
+        JkPathSequence extraClasspath = JkPathSequence.of();
         if (hasKotlin()) {
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos())
                     .setLogOutput(true)
@@ -178,9 +187,10 @@ final class Engine {
             }
             boolean success = wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec), failOnCompileError);
             if (!failOnCompileError && !success) {
-                return false;
+                return new SingleCompileResult(false, JkPathSequence.of());
             }
             if (kotlinCompiler.isProvidedCompiler()) {
+                extraClasspath = extraClasspath.and(kotlinCompiler.getStdLib());
                 AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompiler.getStdLib());
             }
         }
@@ -192,12 +202,12 @@ final class Engine {
         }
         boolean success = wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec), failOnCompileError);
         if (!success) {
-            return false;
+            return new SingleCompileResult(false, JkPathSequence.of());
         }
         JkPathTree.of(this.beanClassesResolver.defSourceDir)
                 .andMatching(false, "**/*.java", "*.java", "**/*.kt", "*.kt")
                 .copyTo(this.beanClassesResolver.defClassDir, StandardCopyOption.REPLACE_EXISTING);
-        return true;
+        return new SingleCompileResult(true, extraClasspath);
     }
 
     private JkPathSequence jekaClasspath() {
@@ -297,10 +307,28 @@ final class Engine {
 
         JkPathSequence classpath;
 
-        CompilationResult(JkPathSequence compileFailedProjects, JkPathSequence pathSequence) {
+        // Direct imported projects
+        JkPathSequence importedProjects;
+
+        CompilationResult(JkPathSequence importedProjects, JkPathSequence compileFailedProjects,
+                          JkPathSequence pathSequence) {
+            this.importedProjects = importedProjects;
             this.compileFailedProjects = compileFailedProjects;
             this.classpath = pathSequence;
         }
+    }
+
+    private static class SingleCompileResult {
+
+        boolean success;
+
+        JkPathSequence extraClasspath;
+
+        SingleCompileResult(boolean success, JkPathSequence extraClasspath) {
+            this.success = success;
+            this.extraClasspath = extraClasspath;
+        }
+
     }
 
 }

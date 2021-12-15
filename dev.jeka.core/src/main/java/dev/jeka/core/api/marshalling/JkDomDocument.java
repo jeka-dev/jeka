@@ -1,5 +1,6 @@
 package dev.jeka.core.api.marshalling;
 
+import dev.jeka.core.api.utils.JkUtilsIO;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -11,6 +12,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
@@ -92,9 +94,9 @@ public final class JkDomDocument {
     /**
      * Returns the root element of this document.
      */
-    public JkDomElement<JkDomDocument> root() {
+    public JkDomElement root() {
         Element root = w3cDocument.getDocumentElement();
-        return JkDomElement.of(this, root);
+        return JkDomElement.of(null, root);
     }
 
 
@@ -130,6 +132,12 @@ public final class JkDomDocument {
         } catch (TransformerException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String toXml() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        print(outputStream);
+        return new String(outputStream.toByteArray(), Charset.forName("utf-8"));
     }
 
 }
