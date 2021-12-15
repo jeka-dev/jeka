@@ -142,7 +142,7 @@ Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-n
 
 The distribution is the file named jeka-core-x.x.x-distrib.zip. 
 
-# How to use Jeka ?
+# How to use Jeka ?   
 
 Jeka is designed to be easy to master for Java developers. It is easy to figure out how it works by knowing few 
 concepts and navigate in source code.
