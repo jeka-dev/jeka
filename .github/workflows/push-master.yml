@@ -24,7 +24,8 @@ jobs:
         OSSRH_USER: ${{ secrets.OSSRH_USER }}
         OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-   #   run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
+      run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
+      if: '1' == '2'
     - name: Deploy MkDocs
       uses: mhausenblas/mkdocs-deploy-gh-pages@1.24
       env:
