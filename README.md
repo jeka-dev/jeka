@@ -151,7 +151,7 @@ That said, documentation is needed for a starting point.
 
 Visit following pages according your expectation :
 
-* [Reference Guide](dev.jeka.core/src/main/doc/reference-guide.md)
+* [Reference Guide](https://jerkar.github.io/jeka/reference-guide/)
 * [Frequently Asked Questions](dev.jeka.core/src/main/doc/faq.md)
 * [Javadoc](https://jeka.dev/docs/javadoc)
 * [Working examples](https://github.com/jerkar/working-examples)
@@ -216,6 +216,17 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 For debuging the project, you have to setup Intellij in order to workaround witj an Intellij issue :
 Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
 [See here](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu)
+
+## How to edit documentation
+
+Documentation is generated with [MkDocs](https://www.mkdocs.org/). Documentation sources are located (here)[docs].
+
+You must install _MkDocs_ on your computer in your computer prior to execute following command lines from this repo root directory :
+- `mkdocs serve` : generate and serve the documentation on localhost:8000
+- `mkdocs gh-deploy --force` : generate and deploy the documentation to https://jerkar.github.io/jeka.
+
+The documentation is also supposed to be regenerated after each push/pull-request.
+
 
 ## How to Release ?
 
