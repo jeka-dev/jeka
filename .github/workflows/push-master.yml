@@ -19,12 +19,12 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Build Jeka bootstrapped with ANT
-      env:
-        OSSRH_USER: ${{ secrets.OSSRH_USER }}
-        OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
-        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      # run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
+  #  - name: Build Jeka bootstrapped with ANT
+  #    env:
+  #      OSSRH_USER: ${{ secrets.OSSRH_USER }}
+  #      OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
+  #      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+  #    run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
     - name: Deploy MkDocs
       uses: actions/setup-python@v2
       with:
