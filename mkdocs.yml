@@ -1,4 +1,4 @@
-site_name: My Docs
+site_name: Jeka Build Tool
 theme:
     name: readthedocs
     highlightjs: true

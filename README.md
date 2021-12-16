@@ -151,7 +151,7 @@ That said, documentation is needed for a starting point.
 
 Visit following pages according your expectation :
 
-* [Reference Guide](https://jerkar.github.io/jeka/reference-guide/)
+* [Reference Guide](https://jerkar.github.io/jeka)
 * [Frequently Asked Questions](dev.jeka.core/src/main/doc/faq.md)
 * [Javadoc](https://jeka.dev/docs/javadoc)
 * [Working examples](https://github.com/jerkar/working-examples)
