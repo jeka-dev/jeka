@@ -1,6 +1,30 @@
 site_name: Jeka Build Tool
 theme:
-    name: readthedocs
-    highlightjs: true
-    hljs_languages:
-        - java
+    name: material
+    palette :
+        primary: blue
+    favicon: images/favicon.ico
+    features:
+        - navigation.instant
+        - navigation.tracking
+        - navigation.expand
+        - toc.integrate
+extra:
+    analytics:
+        provider: google
+        property: UA-103449580-2
+    version:
+        provider: mike
+nav:
+    - Home: index.md
+    - Execution Engine: execution-engine.md
+    - Build Library: build-library.md
+repo_url: https://github.com/jerkar/jeka
+markdown_extensions:
+    - admonition
+    - pymdownx.details
+    - pymdownx.superfences
+    - pymdownx.highlight:
+        anchor_linenums: TRUE
+    - pymdownx.inlinehilite
+    - pymdownx.snippets

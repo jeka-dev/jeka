@@ -25,4 +25,7 @@ jobs:
         OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
-
+    - name: Deploy MkDocs
+      uses: actions/setup-python@v2
+      - run: pip install mkdocs
+      - run: mkdocs gh-deploy --force
