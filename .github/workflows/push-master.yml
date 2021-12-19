@@ -26,6 +26,6 @@ jobs:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
     - name: Deploy MkDocs
-      uses: actions/setup-python@v2
-      - run: pip install mkdocs
-      - run: mkdocs gh-deploy --force
+      uses: mhausenblas/mkdocs-deploy-gh-pages@1.24
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
