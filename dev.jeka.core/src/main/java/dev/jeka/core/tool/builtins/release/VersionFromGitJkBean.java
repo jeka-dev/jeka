@@ -17,7 +17,7 @@ import java.util.Optional;
         "  - If last commit contains a message containing [comment_version_prefix]xxxxx, version values xxxxx",
         "  - If last commit is tagged, version values [last tag on last commit]",
         "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
-        "After, If last commit message specifies a version and this version differs from tag, " +
+        "After, if last commit message specifies a version and this version differs from tag, " +
                 "last commit is tagged with specified version."})
 public class VersionFromGitJkBean extends JkBean {
 
