@@ -8,7 +8,7 @@ theme:
         - navigation.instant
         - navigation.tracking
         - navigation.expand
-        - toc.integrate
+        #- toc.integrate
 extra:
     analytics:
         provider: google
@@ -17,7 +17,11 @@ extra:
         provider: mike
 nav:
     - Home: index.md
-    - Execution Engine: execution-engine.md
+    - Execution Engine:
+      - File Structure: execution-engine-files.md
+      - Setup: execution-engine-setup.md
+      - Concepts: execution-engine-concepts.md
+      - Other: execution-engine.md
     - Build Library: build-library.md
 repo_url: https://github.com/jerkar/jeka
 markdown_extensions:
@@ -28,3 +32,8 @@ markdown_extensions:
         anchor_linenums: TRUE
     - pymdownx.inlinehilite
     - pymdownx.snippets
+plugins:
+    - search
+    - mermaid2
+extra_javascript:
+    - https://unpkg.com/mermaid/dist/mermaid.min.js

@@ -11,3 +11,8 @@ _Jeka_ automation code can be run indifferently from IDE (via classic `main` met
 to a bundled lean and fast execution engine. This engine comes with a small set of concepts promoting simplicity,
 flexibility and re-usability.
 
+<br/>
+<p align="center">
+<img src="images/mascot.jpg" width='210' height='210'/>
+</p>
+
