@@ -1,4 +1,3 @@
-
 ## Def classes
 
 Java or Kotlin source files present in _jeka/def_ dir. They can be declared at root or 
@@ -82,7 +81,7 @@ class MyBuild {
 
 ## KBeans
 
-_KBean_ is the central concept of execution engine. It consists in classes sharing characteristics :
+_KBean_ is the central concept of execution engine. 
 
 * Extending `JkBean`
 * May declare `public void` methods taking no arguments. All these methods are invokable from command line.
@@ -104,19 +103,6 @@ Generally _KBeans_ interact with each other inside their `init` method. They acc
 
 When a _KBean_ depends on another one, it's good to declare it as an instance property of the first bean as this 
 dependency will be mentioned in the auto-generated documentation.
-
-``` mermaid
-classDiagram
-  KBean <|-- JkRuntime
-  JkRuntime "1" <--> "0..n" JkBean:lives at
-  class KBean{
-    +int studentNumber
-  }
-  class JkRuntime{
-    + getBean(Class<? extends JkBean> beanClass)
-  }
-```
-
 
 ### Create a Basic KBean
 

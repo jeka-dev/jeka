@@ -1,6 +1,6 @@
-The execution engine let to execute an arbitrary Java/Kotlin method from the command line or an IDE. Methods are declared in regular Java/Kotlin classes. 
+The execution engine let to execute an arbitrary Java/Kotlin method from the command line or from an IDE. Methods are declared in regular Java/Kotlin classes. 
 
-Those classes can be either present as source file in the project directory or present in  Jeka classpath.
+Those classes can be either present as source file in the project directory or present as _.class_ in  Jeka classpath.
 
 ## Project Structure
 
@@ -48,21 +48,18 @@ In this directory, you may find :
   * __options.properties__ (file - optional) : Contains properties defined at project level.
   * __cmd.properties__ (file - optional) : Contains predefined command shortcuts that can be invoked with a single keyword.
 
-Depending on your needs, feel free to store any build related elements in this directory (keys, document templates,...).
-
-Besides, project root may also contains _jekaw_ and _jekaw.bat_ shell scripts to invoke _Jeka_ wrapper conveniently.
+Project root may also contain _jekaw_ and _jekaw.bat_ shell scripts to invoke _Jeka_ wrapper conveniently.
 
 For the following, when we refer to the command `jeka`, you can use `./jekaw` indifferently.
 All command lines are supposed to be launched from the root of the project (and not from _[Project Root]/jeka_).
 
 !!! note
-    When generating a project by scaffold mechanism, these files are created along self explanations inside their body.
+    When generating a project by scaffold mechanism, these files are created along self explanation inside their body.
 
 ## Jeka Wrapper
 
 Jeka wrapper consists in shell scripts, a thin booting jar and a configuration file in order _Jeka_ can be executed on a specified 
-version without being installed on the host machine. This is the recommended way of using _Jeka_ as it makes  builds 
-portable from one machine to another.
+version without being installed on the host machine. This is the recommended way of using _Jeka_ as it makes  builds portable from one machine to another.
 
 * __jekaw__ and __jekaw.bat__ are respectively _Unix like_ and _Windows_ scripts to launch bootstrapping jar.
 * __jeka/wrapper/dev.jeka.core-wrapper.jar__ is the bootable jar in charge of downloading and installing the specified Jeka 

@@ -13,27 +13,20 @@ extra:
     analytics:
         provider: google
         property: UA-103449580-2
-    version:
-        provider: mike
 nav:
-    - Home: index.md
-    - Execution Engine:
-      - File Structure: execution-engine-files.md
-      - Setup: execution-engine-setup.md
-      - Concepts: execution-engine-concepts.md
-      - Other: execution-engine.md
-    - Build Library: build-library.md
+    - Reference Guide:
+        - Abstract : index.md
+        - Execution Engine:
+          - File Structure: execution-engine-files.md
+          - Setup: execution-engine-setup.md
+          - Concepts: execution-engine-concepts.md
+          - Other: execution-engine.md
+        - Build Library: build-library.md
 repo_url: https://github.com/jerkar/jeka
 markdown_extensions:
     - admonition
-    - pymdownx.details
+    - toc:
+        permalink: true
     - pymdownx.superfences
     - pymdownx.highlight:
-        anchor_linenums: TRUE
-    - pymdownx.inlinehilite
-    - pymdownx.snippets
-plugins:
-    - search
-    - mermaid2
-extra_javascript:
-    - https://unpkg.com/mermaid/dist/mermaid.min.js
+        anchor_linenums: true
