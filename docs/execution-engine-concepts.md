@@ -236,7 +236,7 @@ When a _KBean_ depends on another one, it's good to declare it as an instance pr
 dependency will be mentioned in the auto-generated documentation.
 
 
-### KBeans in Multi_Projects
+### KBeans in Multi-Projects
 
 In multi-project build, it's quite common that a _KBean_ accesses to a _KBean_ instance coming from another project. 
 You can achieve it in a statically typed way.

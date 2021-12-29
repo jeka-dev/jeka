@@ -20,8 +20,8 @@ nav:
           - File Structure: execution-engine-files.md
           - Setup: execution-engine-setup.md
           - Concepts: execution-engine-concepts.md
-          - Other: execution-engine.md
         - Build Library: build-library.md
+    - Cheat Sheet: cheat-sheet.md
 repo_url: https://github.com/jerkar/jeka
 markdown_extensions:
     - admonition
