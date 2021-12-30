@@ -2,7 +2,7 @@
 
 Java or Kotlin source files present in _jeka/def_ dir. They can be declared at root or 
 in packages.
-These files are compiled on the fly using the running JDK then are added to the _Jeka classpath_.
+Execution engine compiles these files on the fly prior adding them to the _Jeka classpath_.
 
 It is possible to specify compilation options by annotating a _def class_ as :
 
@@ -17,6 +17,11 @@ class MyBuild {
 !!! note
     * _jeka/def_ can also contain classpath resources.
     * Classes having a name starting by `_` are skipped from compilation.
+
+Java source files are compiled using the running JDK.
+
+Kotlin sources are compiled using Kotlin version specified by _jeka.kotlin.version_ property if present or 
+using Kotlin compiler specified by _KOTLIN_HOME_ environment variable. 
 
 
 ## Jeka Classpath

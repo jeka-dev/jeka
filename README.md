@@ -152,8 +152,6 @@ That said, documentation is needed for a starting point.
 Visit following pages according your expectation :
 
 * [Reference Guide](https://jerkar.github.io/jeka)
-* [Frequently Asked Questions](dev.jeka.core/src/main/doc/faq.md)
-* [Javadoc](https://jeka.dev/docs/javadoc)
 * [Working examples](https://github.com/jerkar/working-examples)
 * [Getting Started (Needs Intellij Plugin)](dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md) 
 
@@ -219,9 +217,9 @@ Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Ko
 
 ## How to edit documentation
 
-Documentation is generated with [MkDocs](https://www.mkdocs.org/). Documentation sources are located (here)[docs].
+Documentation is generated with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). Documentation sources are located (here)[docs].
 
-You must install _MkDocs_ on your computer in your computer prior to execute following command lines from this repo root directory :
+You must install _Python_ and _Material for MkDocs_ on your computer (`pip install mkdocs-material`) prior to execute following command lines from this repo root directory :
 - `mkdocs serve` : generate and serve the documentation on localhost:8000
 - `mkdocs gh-deploy --force` : generate and deploy the documentation to https://jerkar.github.io/jeka.
 
