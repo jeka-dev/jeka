@@ -29,7 +29,7 @@ For working on a project already holding a Jeka wrapper, there is no need to ins
 
 
 !!! note
-    To start from an empty project, clone template blank project from _https://github.com/jerkar/blank-template-project.git_
+    To start from an empty project, clone template blank project from _https://github.com/jerkar/jeka-wrapper-project-template.git_
 
 
 ## Setup IDE

@@ -116,24 +116,6 @@ Getting started in 10 minutes : [Here](https://github.com/jerkar/jeka/blob/maste
 > 
 > This plugin will be upgraded later to use the latest Jeka version. 
 
-# News 
-
-* Completely reworked execution engine. `JkClass` and `JkPlugin` have been merged in the unified `JkBean` concept.
-* Enhanced performance with faster startup and support for Java 11 & 17.
-* Reworked command-line syntax.
-* Improved help and documentation.
-* Experimental support for Kotlin, both for writting build code and build Kotlin projects.
-* Jeka project is now organized in a mono-repo leading in a better integrated/tested components.
-
-# Roadmap/Ideas
- 
-* Improve landing page and provide tutorials based on Intellij plugin for easy/fast starting. 
-* Stabilise api from user feedbacks. API is quite workable now but may be improved.
-* Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
-* Provide a plugin for Android
-* Provides a graphical plugin for better integration with Eclipse
-
-Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
 # Get Jeka
 
@@ -142,12 +124,7 @@ Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-n
 
 The distribution is the file named jeka-core-x.x.x-distrib.zip. 
 
-# How to use Jeka ?   
-
-Jeka is designed to be easy to master for Java developers. It is easy to figure out how it works by knowing few 
-concepts and navigate in source code.
-
-That said, documentation is needed for a starting point.
+# How to use Jeka ?
 
 Visit following pages according your expectation :
 
@@ -172,14 +149,33 @@ Nevertheless, Jeka is extensible and other plugins exist outside the main distib
               <img src="https://jeka.dev/images/ow2.svg" alt="Image" height="60" width="60"></a>
               
 This project is supported by OW2 consortium.
-              
-              
 
 You can ask question using regular using [this repository issues](https://github.com/jerkar/jerkar/issues).
 
 You can also use direct emailing for questions and support : djeangdev@yahoo.fr
 
 A twitter account also exist : https://twitter.com/djeang_dev
+
+# News
+
+* Completely reworked execution engine. `JkClass` and `JkPlugin` have been merged in the unified `JkBean` concept.
+* Enhanced performance with faster startup and support for Java 11 & 17.
+* Reworked command-line syntax.
+* Improved help and documentation.
+* Experimental support for Kotlin, both for writting build code and build Kotlin projects.
+* Jeka project is now organized in a mono-repo leading in a better integrated/tested components.
+
+
+# Roadmap/Ideas
+
+* Improve landing page and provide tutorials based on Intellij plugin for easy/fast starting.
+* Stabilise api from user feedbacks. API is quite workable now but may be improved.
+* Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
+* Provide a plugin for Android
+* Provides a graphical plugin for better integration with Eclipse
+
+Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
+
 
 # How to build Jeka ?
 
@@ -193,7 +189,16 @@ Jeka builds itself. To build Jeka full distrib from sources, the simpler is to u
 
 Once distrib created, add the distrib folder to your PATH environment variable.
 
-## Build Jeka from Eclipse
+## Build Jeka from IntelliJ
+
+* Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
+* Add the `JEKA_USER_HOME` variable pointing on [USER_HOME]/.jeka
+* Make sure the project is configured with a JDK8 or higher.
+* Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
+* Run 'CoreBuild - skip tests' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
+
+
+## Build Jeka from Eclipse (outdated)
 
 * Clone this repository in Eclipse. Project is already configured ( *.project* and *.classpath* are stored in git).
 * Add the `JEKA_USER_HOME` classpath variable pointing on [USER_HOME]/.jeka 
@@ -201,14 +206,6 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 * Run `dev.jeka.core.CoreBuildAndIT` class main method. This class is located in *jeka/def* folder. 
 * This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder and run full Integration test suite.
 
-## Build Jeka from IntelliJ
-
-
-* Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
-* Add the `JEKA_USER_HOME` variable pointing on [USER_HOME]/.jeka 
-* Make sure the project is configured with a JDK8 or higher.
-* Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
-* Run 'CoreBuild - skip tests' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
 
 
 For debuging the project, you have to setup Intellij in order to workaround witj an Intellij issue :
@@ -221,7 +218,7 @@ Documentation is generated with [Material for MkDocs](https://squidfunk.github.i
 
 You must install _Python_ and _Material for MkDocs_ on your computer (`pip install mkdocs-material`) prior to execute following command lines from this repo root directory :
 - `mkdocs serve` : generate and serve the documentation on localhost:8000
-- `mkdocs gh-deploy --force` : generate and deploy the documentation to https://jerkar.github.io/jeka.
+- `mkdocs gh-de
 
 The documentation is also supposed to be regenerated after each push/pull-request.
 
@@ -233,8 +230,6 @@ If the last commit message title contains a word like 'Release:XXX' (case matter
 the binaries will be published on Maven Central.
 Otherwise, the binary wll be simply pushed on OSSRH snapshot.
 
-To really deploy to Maven central, a manual action it still needed to [close/release repository](https://oss.sonatype.org).
-
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img src="http://jeka.dev/images/logo-whole-bg.jpg" width='420' height='420' align='center'/>
+<img src="docs/images/mascot.png" width='420' height='420' align='center'/>
 

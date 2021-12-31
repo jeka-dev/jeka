@@ -20,6 +20,7 @@ nav:
           - File Structure: execution-engine-files.md
           - Setup: execution-engine-setup.md
           - Concepts: execution-engine-concepts.md
+          - Reuse Elements: execution-engine-reuse.md
         - Build Library: build-library.md
     - Cheat Sheet: cheat-sheet.md
 repo_url: https://github.com/jerkar/jeka
