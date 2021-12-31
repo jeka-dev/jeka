@@ -72,9 +72,11 @@ The following snippet constructs a set of dependencies on two external projects 
 _Jeka_.
 ```Java
 Path mavenProject = Paths.get("../a-maven-project");
-JkProcess mavenBuild = JkProcess.of("mvn", "clean", "install").withWorkingDir(mavenProject);
+JkProcess mavenBuild = JkProcess.of("mvn", "clean", "install")
+        .withWorkingDir(mavenProject);
 Path mavenProjectJar = mavenProject.resolve("target/maven-project.jar");
-JkJavaProject externalProject = JkJavaProject.ofSimple(Paths.get("../a-jeka-project")); 
+JkJavaProject externalProject = 
+        JkJavaProject.ofSimple(Paths.get("../a-jeka-project")); 
 JkDependencySet deps = JkDependencySet.of()
     .and(JkComputedDependency.of(mavenBuild, mavenProjectJar))
     .and(externalProject);
@@ -212,12 +214,13 @@ The `JkDependencyResolver` class is responsible JkDependencyResolver.of(JkRepo.o
 `JkdependencySet`.
 
 ```java
-JkDependencySet deps = JkDependencySet
-                            .of("org.apache.httpcomponents:httpclient:4.5.3")
+JkDependencySet deps = JkDependencySet.of()
+                            .and("org.apache.httpcomponents:httpclient:4.5.3")
                             .andFile("libs/my.jar");
 
 // Here, module dependencies are fetched from Maven central repo
-JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());  
+JkDependencyResolver resolver = 
+        JkDependencyResolver.of(JkRepo.ofMavenCentral());  
 JkResolveResult result = resolver().resolve(deps);
 ```
 
@@ -226,7 +229,8 @@ From the result you can :
 * Navigate in the resolved dependency tree as :
 
 ```java
-JkDependencyNode slfjApiNodeDep = result.getDependencyTree().getFirst(JkModuleId.of("org.slf4j:slf4j-api"));
+JkDependencyNode slfjApiNodeDep = result.getDependencyTree()
+        .getFirst(JkModuleId.of("org.slf4j:slf4j-api"));
 System.out.println(slfjApiNode.getModuleInfo().getResolvedVersion());
 ```
 
@@ -234,7 +238,7 @@ System.out.println(slfjApiNode.getModuleInfo().getResolvedVersion());
 
 ```java
 JkPathSequence sequence = result.getFiles();  
-sequence.forEach(System.out::println); // print each files part of the dependency resolution
+sequence.forEach(System.out::println); // print each files part of the result
 ```
 
 ## Publication
@@ -251,36 +255,42 @@ provided elements.
 The following snippet demonstrate a pretty sophisticated publishing on Maven :
 
 ```java
-    JkVersionedModule versionedModule = JkVersionedModule.of("org.myorg:mylib:1.2.6");
-    JkDependencySet deps = JkDependencySet.of()
-            .and("org.slf4j:slf4j-simple", COMPILE_AND_RUNTIME)
-            .and("junit:junit:4.11", TEST);
-    JkMavenPublication mavenPublication = JkMavenPublication.of(Paths.get("org.myorg.mylib.jar"))
+JkVersionedModule versionedModule = 
+        JkVersionedModule.of("org.myorg:mylib:1.2.6");
+JkDependencySet deps = JkDependencySet.of()
+        .and("org.slf4j:slf4j-simple", COMPILE_AND_RUNTIME)
+        .and("junit:junit:4.11", TEST);
+JkMavenPublication mavenPublication = 
+        JkMavenPublication.of(Paths.get("org.myorg.mylib.jar"))
 
-            // the following are optional but required to publish on public repositories.
-            .and(Paths.get("org.myorg.mylib-sources.jar"), "sources")
-            .and(Paths.get("org.myorg.mylib-javadoc.jar"), "javadoc")
-            .withChecksums("sha-2", "md5")
-            .withSigner(JkPgp.of(Paths.get("myPubring"), Paths.get("mySecretRing"), "mypassword"))
-            .with(JkMavenPublicationInfo.of("My sample project",
-                    "A project to demonstrate publishing on Jeka",
-                    "http://project.jeka.org")
-                    .andApache2License()
-                    .andDeveloper("djeang", "myemail@gmail.com", "jeka.org", "http://project.jeka.org/"));
+        // the following are optional but required to publish 
+        // on public repositories.
+        .and(Paths.get("org.myorg.mylib-sources.jar"), "sources")
+        .and(Paths.get("org.myorg.mylib-javadoc.jar"), "javadoc")
+        .withChecksums("sha-2", "md5")
+        .withSigner(JkPgp.of(Paths.get("myPubring"), 
+            Paths.get("mySecretRing"), "mypassword"))
+        .with(JkMavenPublicationInfo.of("My sample project",
+                "A project to demonstrate publishing on Jeka",
+                "http://project.jeka.org")
+                .andApache2License()
+                .andDeveloper("djeang", "myemail@gmail.com", "jeka.org", 
+                    "http://project.jeka.org/"));
 
-    // A complex case for repo (credential + signature + filtering) 
-    JkRepo repo = JkRepo.of("http://myserver/myrepo")
-            .withOptionalCredentials("myUserName", "myPassword")
-            .with(JkRepo.JkPublishConfig.of()
-                        .withUniqueSnapshot(false)
-                        .withNeedSignature(true)
-                        .withFilter(mod -> // only accept SNAPSHOT and MILESTONE
-                            mod.getVersion().isSnapshot() || mod.getVersion().getValue().endsWith("MILESTONE")
-                        ));
-    
-    // Actually publish the artifacts
-    JkPublisher publisher = JkPublisher.of(repo);
-    publisher.publishMaven(versionedModule, mavenPublication, deps);
+// A complex case for repo (credential + signature + filtering) 
+JkRepo repo = JkRepo.of("http://myserver/myrepo")
+        .withOptionalCredentials("myUserName", "myPassword")
+        .with(JkRepo.JkPublishConfig.of()
+                    .withUniqueSnapshot(false)
+                    .withNeedSignature(true)
+                    .withFilter(mod -> // only accept SNAPSHOT and MILESTONE
+                        mod.getVersion().isSnapshot() 
+                        || mod.getVersion().getValue().endsWith("MILESTONE")
+                    ));
+
+// Actually publish the artifacts
+JkPublisher publisher = JkPublisher.of(repo);
+publisher.publishMaven(versionedModule, mavenPublication, deps);
 ```
 
 Notice that Jeka allows to :
@@ -299,17 +309,20 @@ To sign with PGP, no need to have PGP installed on Jeka machine. Jeka uses <a hr
 Publishing on Ivy repo is pretty similar than on Maven though there is specific options to Ivy.
 
 ```java
-    JkVersionedModule versionedModule = JkVersionedModule.of("org.myorg:mylib:1.2.6-SNAPSHOT");
-    JkDependencySet deps = JkDependencySet.of()
-            .and("org.slf4j:slf4j-simple", COMPILE_AND_RUNTIME)
-            .and("junit:junit:4.11", TEST);
+JkVersionedModule versionedModule = 
+        JkVersionedModule.of("org.myorg:mylib:1.2.6-SNAPSHOT");
+JkDependencySet deps = JkDependencySet.of()
+        .and("org.slf4j:slf4j-simple", COMPILE_AND_RUNTIME)
+        .and("junit:junit:4.11", TEST);
 
-    JkIvyPublication publication = JkIvyPublication.of(Paths.get("org.myorg.mylib.jar"), "master")
+JkIvyPublication publication = 
+        JkIvyPublication.of(Paths.get("org.myorg.mylib.jar"), "master")
             .and(Paths.get("org.myorg.mylib-sources.jar"));
 
-    JkRepo repo = JkRepo.ofIvy(Paths.get("ivyrepo"));
+JkRepo repo = JkRepo.ofIvy(Paths.get("ivyrepo"));
 
-    JkPublisher publisher = JkPublisher.of(repo);
-    publisher.publishIvy(versionedModule, publication, deps, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING,
-            Instant.now(), JkVersionProvider.of());
+JkPublisher publisher = JkPublisher.of(repo);
+publisher.publishIvy(versionedModule, publication, deps, 
+        JkJavaDepScopes.DEFAULT_SCOPE_MAPPING,
+        Instant.now(), JkVersionProvider.of());
 ```

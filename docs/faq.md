@@ -1,4 +1,4 @@
-# General
+## General
 
 ### Can def classes be hosted in separate project than the code to build ?
 Yes. If you prefer that your Jeka code lies in a distinct project, create a Jeka project in a sibling 
@@ -18,7 +18,7 @@ protected void setup() {  // project to build lies in a sibling folder.
 You can specify a built-in commandSet class to run. This way, compilation won't occur.
 For example `jeka -JKC` or `jeka -JKC scaffold#run java#"`.
 
-# Compilation
+## Compilation
 
 ### How can I choose the JDK used to compile ?
 

@@ -24,7 +24,6 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import static dev.jeka.core.api.project.JkProject.JAVADOC_ARTIFACT_ID;
@@ -99,7 +98,6 @@ public class CoreBuild extends JkBean {
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
-
     private Path distribFolder() {
         return projectBean.getProject().getOutputDir().resolve("distrib");
     }
@@ -134,12 +132,10 @@ public class CoreBuild extends JkBean {
         }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("wrapper/jekaw")).setPosixExecPermissions();
-        makeDocs();
         if (!projectBean.getProject().getConstruction().getTesting().isSkipped() && runIT) {
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
-        //distrib.zipTo(distribFile);
         zipDistrib(distrib.getRoot(), distribFile);
         JkLog.info("Distribution zipped in " + distribFile);
         JkLog.endTask();
@@ -176,13 +172,6 @@ public class CoreBuild extends JkBean {
                 appendRecursively(file.resolve(filename), prefix + filename, out);
             }
         }
-    }
-
-    private void makeDocs() {
-        JkLog.startTask("Make documentation");
-        String version = projectBean.getProject().getPublication().getMaven().getVersion().getValue();
-        new DocMaker(getBaseDir(), distribFolder(), version).assembleAllDoc();
-        JkLog.endTask();
     }
 
     void testScaffolding()  {
@@ -230,25 +219,6 @@ public class CoreBuild extends JkBean {
         projectBean.getProject().getConstruction().getCompilation().runIfNeeded();
         JkPathTree.of(projectBean.getProject().getConstruction().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
-    }
-
-    public void publishDocsOnGithubPage(String githubToken) {
-        clean();
-        JkProject project = this.projectBean.getProject();
-        Path javadocSourceDir = project.getDocumentation().getJavadocDir();
-        Path tempRepo = getOutputDir().resolve("pagesGitRepo");
-        String userPrefix = githubToken == null ? "" : githubToken + "@";
-        JkGitProcess.of().setLogCommand(false).exec("clone", "--depth=1", "https://"
-                + userPrefix + "github.com/jerkar/jeka-dev-site.git", tempRepo.toString());
-        project.getDocumentation().runIfNecessary();
-        Path javadocTarget = tempRepo.resolve(tempRepo.resolve("docs/javadoc"));
-        JkPathTree.of(javadocSourceDir).copyTo(javadocTarget, StandardCopyOption.REPLACE_EXISTING);
-        makeDocs();
-        JkPathTree.of(distribFolder().resolve("doc")).copyTo(tempRepo.resolve("docs"), StandardCopyOption.REPLACE_EXISTING);
-        JkGitProcess gitTemp = JkGitProcess.of(tempRepo).setLogCommand(true).setFailOnError(true);
-        gitTemp.exec("add", "*");
-        gitTemp.setFailOnError(false).exec("commit", "-am", "Doc");
-        gitTemp.exec("push");
     }
 
     public void cleanPack() {
