@@ -1,6 +1,7 @@
 # Getting started with Jeka
 
 Here, you will :
+
 * [Intall Intellij Jeka plugin](#install)
 * [Create a basic automation project](#helloworld)
 * [Use 3rd party dependencies inside your build logic](#import)
@@ -47,7 +48,7 @@ This will display a contextual help from a list of all available commands and op
   `jekaw` compiles your `Commands` classes behind the scene and execute a Java program which invokes the method.
 
 
-Now, you can now add your own commands (like `printHello` in above example) just by declaring a public no-arg method returning `void`.
+Now, you can add your own commands (like `printHello` in above example) just by declaring a public no-arg method returning `void`.
 Your new method should appear instantaneously in Jeka window tool on the right.
 
 * For adding options, just declare a public field as shown below.
