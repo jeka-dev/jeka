@@ -138,10 +138,10 @@ Jeka comes with plugins out of the box. These plugins covers the most common poi
 when building a project. This includes plugins for IDE metadata generation (IntelliJ, Eclipse), dependency management, git, , java project building, testing, PGP signing, binary repositories, Maven interaction, scaffolding, sonarQube and web archives.
 
 Nevertheless, Jeka is extensible and other plugins exist outside the main distib among :
-* [Springboot Plugin](pluginsdev.jeka.plugins.springboot)
-* [Protobuf Plugin](https://github.com/jerkar/protobuf-plugin)
+* [Springboot Plugin](plugins/dev.jeka.plugins.springboot)
 * [Sonarqube Plugin](plugins/dev.jeka.plugins.sonarqube)
 * [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
+* [Protobuf Plugin](https://github.com/jerkar/protobuf-plugin)
 
 # Community
 

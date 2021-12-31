@@ -1,4 +1,4 @@
-# Reference Guide
+# Welcome to Jeka
 
 Jeka is a general-purpose build tool designed as a library. In other words, users describe programmatically 
 the actions needed to achieve automation tasks, as they would do for regular code.
@@ -13,6 +13,6 @@ flexibility and re-usability.
 
 <br/>
 <p align="center">
-<img src="images/mascot.png" width='210' height='210'/>
+<img src="../images/mascot.png" width='210' height='210'/>
 </p>
 
