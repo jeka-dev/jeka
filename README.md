@@ -223,7 +223,7 @@ You must install _Python_ and _Material for MkDocs_ on your computer (`pip insta
 The documentation is also supposed to be regenerated after each push/pull-request.
 
 
-## How to Release ?
+## How to Release
 
 Release is done automatically by Github action on PUSH on *master*.
 If the last commit message title contains a word like 'Release:XXX' (case matters ) then a tag XXX is created and 
