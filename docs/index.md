@@ -13,6 +13,6 @@ flexibility and re-usability.
 
 <br/>
 <p align="center">
-<img src="../images/mascot.png" width='210' height='210'/>
+<img src="images/mascot.png" width='210' height='210'/>
 </p>
 

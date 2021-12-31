@@ -26,7 +26,7 @@ You can add these options to you command line.
 * `-lv` : Alters console output by displaying trace logs (emitted by `JkLog#trace`)
 * `-dcf` : Force compilation of _def_ classes, even if they are marked as up-to-date.
 
-## How to change the JDK that run Jeka
+## Change the JDK that Run Jeka
 
 To determine the JDK to run upon, _jeka_ looks in priority order at :7
 
@@ -35,7 +35,7 @@ To determine the JDK to run upon, _jeka_ looks in priority order at :7
 
 If none of these variables are present, _jeka_ will run upon the _java_ executable accessible from your _PATH_ environment.
 
-## How to change the repository Jeka uses to fetch dependencies 
+## Change the Repository Jeka uses to Fetch Dependencies 
 
 By default, _jeka_ fetch dependencies from maven central (https://repo.maven.apache.org/maven2).
 
