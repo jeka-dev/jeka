@@ -50,7 +50,7 @@ public class Build extends JkBean {
 }
 ```
 
-### How can I generate Eclipse/Intellij without using Project plugin (JkPluginProject) ?
+### How can I generate Eclipse/Intellij without using ProjectJkBean ?
 
 Just make your _KBean_ class implements` implements `JkJavaIdeSupport`.
 
