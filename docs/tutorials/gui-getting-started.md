@@ -1,13 +1,5 @@
 # Getting started with Jeka
 
-Here, you will :
-
-* [Intall Intellij Jeka plugin](#install)
-* [Create a basic automation project](#helloworld)
-* [Use 3rd party dependencies inside your build logic](#import)
-* [Build a Java project with Jeka](#java)
-* [Build a Springboot project with Jeka](#springboot)
-
 ## Install Intellij Plugin <a name="install"></a>
 
 * Install plugin directly from [here](https://plugins.jetbrains.com/plugin/13489-jeka)
