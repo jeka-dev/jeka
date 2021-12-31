@@ -1,6 +1,9 @@
 For Jeka, a _dependency_ is something that can be resolved to a set of files by a `JkDependencyResolver`.
 Generally a dependency resolves to 1 file (or folder) but it can be 0 or many.
 
+Compared to mainstream build tools, Jeka offers a simpler and more flexible model to deals 
+with multiple dependency configurations required for building a project.
+
 ## Types of Dependency
 
 A dependency is always an instance of `JkDependency`.
@@ -25,18 +28,18 @@ This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ reposito
 Basically you instantiate a `JkModuleDepency` from it's group, name and version.
 
 ```Java
-    JkDependencySet.of()
-        .and(JkPopularModule.GUAVA, "18.0")
-        .and("com.orientechnologies:orientdb-client:[2.0.8, 2.1.0[")
-        .and("mygroup:mymodule:myclassifier:0.2-SNAPSHOT");
+JkDependencySet.of()
+    .and(JkPopularModule.GUAVA, "18.0")
+    .and("com.orientechnologies:orientdb-client:[2.0.8, 2.1.0[")
+    .and("mygroup:mymodule:myclassifier:0.2-SNAPSHOT");
 ```
 There is many way to indicate a module dependency, see Javadoc for browsing possibilities.
 
-Note that :
+!!! note
 
-* A version ending by `-SNAPSHOT` has a special meaning : Jeka will consider it _"changing"_. This means that it won't cache it locally and will download the latest version from repository.
-* As Jeka relies on Ivy under the hood, it accepts dynamic versions as mentioned [here](http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html).
-* Dependency files are downloaded in _[USER HOME]_/.jeka/cache/repo
+    * A version ending by `-SNAPSHOT` has a special meaning : Jeka will consider it _"changing"_. This means that it won't cache it locally and will download the latest version from repository.
+    * As Jeka relies on Ivy under the hood, it accepts dynamic versions as mentioned [here](http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html).
+    * Dependency files are downloaded in _[USER HOME]_/.jeka/cache/repo
 
 ### File System Dependencies
 
@@ -45,7 +48,7 @@ This type of dependency is represented by `JkFileSystemDependency` class.
 Just mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
 
 ```Java
-    JkDependencySet.of().andFiles("libs/my.jar", "libs/my.testingtool.jar");
+JkDependencySet.of().andFiles("libs/my.jar", "libs/my.testingtool.jar");
 ``` 
 
 ### Computed Dependencies
@@ -77,9 +80,9 @@ JkDependencySet deps = JkDependencySet.of()
     .and(externalProject);
 ```
 
-## DependencySet 
+## Dependency Set 
 
-A _dependencySet_ (`JkDependencySet`) is an ordered bunch of dependencies used for a given purpose (compilation,
+A _dependency set_ (`JkDependencySet`) is an ordered bunch of dependencies used for a given purpose (compilation,
 war packaging, testing, ...). It can contain any kind of `JkDependency`. See [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java)
 
 _dependencySet_ also defines :
@@ -101,46 +104,46 @@ merging with other dependencies and _dependencySet_.
         .withVersionProvider(myVersionProvider);
     ```
 
-Note that :
+!!! note
 
-* Module version and scopes can be omitted when declaring dependencies. Versions can be provided by a `JkVersionProvider`.
-* Instances of `JkDependencySet` can be combined together in order to construct large _dependencySet_ from smaller ones.
-* `JkDependencySet#ofTextDescription` provides a mean to instantiate a dependency set from a simple text.
+    * Module version and scopes can be omitted when declaring dependencies. Versions can be provided by a `JkVersionProvider`.
+    * Instances of `JkDependencySet` can be combined together in order to construct large _dependencySet_ from smaller ones.
+    
+#### Full Text Description
 
- <details>
- <summary>Example of text describing dependencies</summary>
+An entire dependency sets can be declared with full text description.
+For this, just pass a string argument to `JkDependencySet#ofTextDescription` describing 
+the module dependencies.
 
-```
-- COMPILE+RUNTIME
-org.springframework.boot:spring-boot-starter-thymeleaf
-org.springframework.boot:spring-boot-starter-data-jpa
+!!! example 
 
-- RUNTIME
-com.h2database:h2
-org.liquibase:liquibase-core
-com.oracle:ojdbc6:12.1.0
-
-- TEST
-org.springframework.boot:spring-boot-starter-test
-org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
-org.fluentlenium:fluentlenium-assertj:3.2.0
-org.fluentlenium:fluentlenium-junit:3.2.0
-
-- COMPILE
-org.projectlombok:lombok:1.16.16
-```
- </details>
- 
-</details>
-
+    ```
+    - COMPILE+RUNTIME
+    org.springframework.boot:spring-boot-starter-thymeleaf
+    org.springframework.boot:spring-boot-starter-data-jpa
+    
+    - RUNTIME
+    com.h2database:h2
+    org.liquibase:liquibase-core
+    com.oracle:ojdbc6:12.1.0
+    
+    - TEST
+    org.springframework.boot:spring-boot-starter-test
+    org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
+    org.fluentlenium:fluentlenium-assertj:3.2.0
+    org.fluentlenium:fluentlenium-junit:3.2.0
+    
+    - COMPILE
+    org.projectlombok:lombok:1.16.16
+    ```
 
 ## Transitivity
 
-Mainstream build tools use a single concept ('scope' or 'configuration') to determine both :
+For each dependency, mainstream build tools use a single concept (_scope_ or _configuration_) to determine both :
 
-1. Which part of the build needs the dependency
-2. Which transitive dependencies to fetch along the dependency. 
-3. If the dependency must be part of the transitive dependencies according a configuration. 
+1. which part of the build needs the dependency
+2. which transitive dependencies to fetch along the dependency
+3. with which transitivity the dependency must be published
 
 This confusion leads in dependency management systems that are bloated, difficult to reason about and not quite flexible.
 Gradle comes with a proliferation of 'configurations' to cover most use case combinations,
@@ -168,14 +171,14 @@ The below example shows a JkJavaProject declaration using explicit transitivity.
 
 ```Java
 JkJavaProject.of().simpleFacade()
-    .setCompileDependencies(deps -> deps
+    .configureCompileDeps(deps -> deps
             .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
             .and("javax.servlet:javax.servlet-api:4.0.1"))
-    .setRuntimeDependencies(deps -> deps
+    .configureRuntimeDeps(deps -> deps
             .and("org.postgresql:postgresql:42.2.19")
             .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
             .minus("javax.servlet:javax.servlet-api"))
-    .setTestDependencies(deps -> deps
+    .configureTestDeps(deps -> deps
             .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
     )
 ```
