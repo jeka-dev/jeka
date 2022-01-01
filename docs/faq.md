@@ -7,16 +7,15 @@ folder and mention where is located the project to build.
 ```java
 ...
 @Override
-protected void setup() {  // project to build lies in a sibling folder. 
+protected void init() { 
       Path projectPath = this.baseDir().resolve("../myProject");   
       java.getProject().simpleFacade().setBaseDir(projectPath);
       ...
 ```
 
-### My JkClass does not compile so I can't invoke any Jeka method as 'help' or 'scaffold#run'. What can I do ?
+### My JkClass does not compile, so I can't invoke any Jeka method as 'scaffold#run'. What can I do ?
 
-You can specify a built-in commandSet class to run. This way, compilation won't occur.
-For example `jeka -JKC` or `jeka -JKC scaffold#run java#"`.
+Use `-dci` option in command line.
 
 ## Compilation
 
