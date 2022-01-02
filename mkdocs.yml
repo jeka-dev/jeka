@@ -27,7 +27,7 @@ nav:
           - Delependency Management: reference-guide/build-library-dependency-management.md
           - Project Build: reference-guide/build-library-project-build.md
           - 3rd Party Tool Integration: reference-guide/build-library-3rd-party-tool-integration.md
-    - Tutorials using IntelliJ Plugin:
+    - Tutorials IntelliJ Plugin:
         - Getting Started: tutorials/gui-getting-started.md
         - Reuse Elements: tutorials/gui-reuse-elements.md
     - Cheat Sheet: cheat-sheet.md
