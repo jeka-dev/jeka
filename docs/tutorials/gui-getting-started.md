@@ -143,8 +143,9 @@ The plugin proposes popular _Spring_ modules as constant to help pickup dependen
 
 You can also switch Springboot version easily by changing `#springbootVersion` argument.
 
-**Do not forget to trigger 'Jeka Synchronize Module' available in context menues, each time you modify dependencies or change springboot version.
-It let Intellij synchronize its iml file with dependencies declared in Jeka.**
+!!! warning
+    Do not forget to trigger 'Jeka Synchronize Module' available in context menues, each time you modify dependencies or change springboot version.
+    It let Intellij synchronize its iml file with dependencies declared in Jeka.
 
 ![plot](images/scaffolded-springboot-2.png)
 
