@@ -171,7 +171,6 @@ In order to be referenced conveniently, _KBeans_ accept to be called by a name. 
 !!! tip
     Execute `jeka`, at the root of a project to display _KBeans_ present in _Jeka classpath_.
 
-
 ### Document KBeans 
 
 _KBean_ classes, methods and properties can be annotated with `@JkDoc` annotation in orderder to provide self documentation.
@@ -233,13 +232,11 @@ Sometimes, you may need to mimic closer the command line behavior, for debugging
 
 ### Let KBeans cooperate
 
-
 Generally _KBeans_ interact with each other inside their `init` method. They access each other using 
-`getRuntime().getBean(MyBean.class)`.
+`getRuntime().getBean(MyBean.class)` as shown in [this example](#simple-example).
 
 When a _KBean_ depends on another one, it's good to declare it as an instance property of the first bean as this 
 dependency will be mentioned in the auto-generated documentation.
-
 
 ### KBeans in Multi-Projects
 
@@ -253,7 +250,6 @@ You can achieve it in a statically typed way.
 * Now, master _KBean_ can access the imported _KBean_ in a static typed way.
 * See example [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.master/jeka/def/MasterBuild.java).
 * Be careful that the imported _KBean_ deals with file paths using `JkBean#getBaseDir` in order it can be safely executed from any working directory.
-
 
 ## Properties
 

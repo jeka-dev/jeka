@@ -17,7 +17,7 @@ class Build extends JkBean {
             .configureCompileDeps(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
             );
-        JkJekaVersionCompatibilityChecker.setJekaPluginCompatibilityRange(javaProject.getConstruction().getManifest(),
+        JkJekaVersionCompatibilityChecker.setCompatibilityRange(javaProject.getConstruction().getManifest(),
                 "${jekaVersion}",
                 "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
 

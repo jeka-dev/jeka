@@ -1,5 +1,10 @@
 # Getting started with Jeka
 
+!!! warning
+    This plugin currently works with Jeka version 0.9.15.RELEASE.
+
+    Next version of Jeka (0.9.20), which is documented here, is not yet working with the IntelliJ Plugin. 
+
 ## Install Intellij Plugin <a name="install"></a>
 
 * Install plugin directly from [here](https://plugins.jetbrains.com/plugin/13489-jeka)

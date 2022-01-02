@@ -1,12 +1,85 @@
-One force of Jeka is to provide powerful and easy means to reuse build elements across projects.
+Jeka provides powerful and easy means to reuse build elements across projects.
 
-Elements can e reused as sources in a multi-project structure or exported as binaries in 
+Elements can be reused as sources in a multi-project structure or exported as binaries in 
 order to be used as third-party dependencies to create a plugin ecosystem.
 
 ## From Sources
 
-_TODO_
+In a multi-project (aka multi-module project), it is possible to use classes defined in other projects.
+When using `@JkInjectProject`, classes defined in _../sub-project-1/jeka/def_ and 
+in the classpath of _sub-project-1_.   
+
+```java
+import dev.jeka.core.tool.JkBean;
+
+@JkInjectProject("../sub-project")
+class MyJkBean extends JkBean {
+    
+}
+```
+
+In a _KBean_, it is possible to use a _KBean_ coming from another project.
+
+```java
+import dev.jeka.core.tool.JkBean;
+
+class MyJkBean extends JkBean {
+    
+    @JkInjectProject("../sub-project")
+    private OtherJkBean importedBean;
+}
+```
 
 ## From Binaries
 
-_TODO_
+You may want to create a library to extend Jeka, such as a plugin for integrating a specific technology, 
+define a set of dependency versions or feature some utility classes.
+
+To achieve it, we need to create a project to pack and export the library.
+
+The project may declare dependencies on Jeka : the simplest is to add a dependency on the jeka jar that 
+is actually build the project using `JkLocator.getJekaJarPath()`.
+
+```java
+import dev.jeka.core.api.project.JkProject;
+
+class Build extends JkBean {
+
+    ProjectJkBean projectBean = getRuntime().getBean(ProjectJkean.class);
+
+    @Override
+    protected void init() {
+        JkProject project = projectBean.getProject();
+        
+        // Optional indication about Jeka version compatibility
+        JkJekaVersionCompatibilityChecker.setCompatibilityRange(project.getConstruction().getManifest(),
+                "0.9.20.RC2",
+                "https://raw.githubusercontent.com/jerkar/protobuf-plugin/breaking_versions.txt");
+        
+        project.simpleFacade()
+                .configureCompileDeps(deps -> deps
+                        .andFiles(JkLocator.getJekaJarPath())
+                );
+    }
+
+}
+```
+
+### Check Jeka Version Compatibility
+
+`JkJekaVersionCompatibilityChecker.setCompatibilityRange` insert information about Jeka
+version compatibility within the Manifest. This information will be used by Jeka to
+alert if the library is marked as incompatible with the running Jeka version.
+
+The method take 3 arguments :
+
+* The object standing for the Manifest file
+* The lowest version of Jeka which is compatible with the library
+* An url string pointing on a file mentioning the versions of Jeka that are no longer compatible
+  with the version of the library
+
+For the last, the information has to be stored outside the library itself as the author 
+can not guess which future version of Jeka will break the compatibility.
+
+An example of such a file is available [here](https://github.com/jerkar/protobuf-plugin/blob/master/breaking_versions.txt)
+

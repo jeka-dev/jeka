@@ -131,7 +131,7 @@ public final class JkJekaVersionCompatibilityChecker {
      * @see JkJekaVersionCompatibilityChecker#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
      * @See JkBean#MANIFEST_BREAKING_CHANGE_URL_ENTRY
      */
-    public static void setJekaPluginCompatibilityRange(JkManifest manifest, String lowestVersion, String breakingChangeUrl) {
+    public static void setCompatibilityRange(JkManifest manifest, String lowestVersion, String breakingChangeUrl) {
         manifest
                 .addMainAttribute(MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, lowestVersion)
                 .addMainAttribute(MANIFEST_BREAKING_CHANGE_URL_ENTRY, breakingChangeUrl);
