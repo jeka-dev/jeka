@@ -5,7 +5,7 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator2;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.maven.PomJkBean;
@@ -77,8 +77,8 @@ public class SimpleProjectJkBean extends JkBean {
 
     // For debugging purpose
     public void printIml() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of(this.projectPlugin.getJavaIdeSupport());
-        String iml = imlGenerator.generate();
+        JkImlGenerator2 imlGenerator = JkImlGenerator2.of().setIdeSupport(this.projectPlugin.getJavaIdeSupport());
+        String iml = imlGenerator.computeIml().toDoc().toXml();
         System.out.println(iml);
     }
 

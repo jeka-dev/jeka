@@ -22,7 +22,7 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
         scaffold("scaffold#run scaffold#wrapper", "help", true);
         projectDir = scaffold("scaffold#run project#", "clean project#pack", false);
         runJeka(projectDir.toString(), "eclipse#files");
-        runJeka(projectDir.toString(), "intellij#iml intellij#modulesXml");
+        runJeka(projectDir.toString(), "intellij#iml");
     }
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {

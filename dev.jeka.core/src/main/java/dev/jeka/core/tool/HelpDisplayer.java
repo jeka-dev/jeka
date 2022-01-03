@@ -71,6 +71,7 @@ final class HelpDisplayer {
         sb.append("  -log.ivy.verbose (shorthand -liv) : logs 'trace' level + Ivy trace level.\n");
         sb.append("  -log.runtime.info (shorthand -lri) : logs Jeka runtime information as Jeka version, JDK version, working dir, classpath ....\n");
         sb.append("  -log.banner (shorthand -lb) : logs intro and outro banners.\n");
+        sb.append("  -log.stacktrace (shorthand -lst) : logs the stacktrace when Jeka fail.\n");
         sb.append("  -log.setup (shorthand -lsu) : logs KBean setup process.\n");
         sb.append("  -log.style (shorthand -ls) : choose the display log style : INDENT(default), BRACE or DEBUG.\n");
         sb.append("  -kbean (shorthand -kb) : Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name.\n");

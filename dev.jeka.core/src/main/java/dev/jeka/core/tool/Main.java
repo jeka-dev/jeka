@@ -65,24 +65,21 @@ public final class Main {
                 JkMemoryBufferLogDecorator.flush();
             }
             JkLog.restoreToInitialState();
-
-            if (e instanceof JkException) {
-                System.err.println();
-                System.err.println(e.getMessage());
-                if (e.getCause() != null) {
-                    e.getCause().printStackTrace(System.err);
-                }
-            } else {
-                System.err.println("An error occurred during def class execution.");
-                System.err.println("It may come from user code/setting or a bug in Jeka.");
-                System.err.println("You can investigate using the stacktrace below or by relaunching the command using option -ls=DEBUG.");
-                if (!JkLog.isVerbose()) {
-                    System.err.println("You can also increase log verbosity using option -lv.");
-                }
-                System.err.println("If error reveals to coming from Jeka engine, please report to " +
-                        ": https://github.com/jerkar/jeka/issues");
-                System.err.println();
+            System.err.println("An error occurred during def class execution.");
+            System.err.println("It may come from user code/setting or a bug in Jeka.");
+            System.err.println("To investigate, relaunch command with options :");
+            System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");
+            System.err.println("    -lv to increase log verbosity.");
+            System.err.println("    -lst to simply log the stacktrace of the thrown exception.");
+            System.err.println("If error reveals to coming from Jeka engine, please report to " +
+                    ": https://github.com/jerkar/jeka/issues");
+            System.err.println();
+            if (JkLog.isVerbose()
+                    || Environment.standardOptions.logStyle == JkLog.Style.DEBUG
+                    || Environment.standardOptions.logStackTrace) {
                 e.printStackTrace(System.err);
+            } else {
+                System.err.println("Error : " + e.getMessage());
             }
             if (Environment.standardOptions.logBanner) {
                 final int length = printAscii(true, "text-failed.ascii");
@@ -112,7 +109,7 @@ public final class Main {
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }
         final Engine engine = new Engine(projectDir);
-        engine.execute(Environment.commandLine);
+        engine.execute(CommandLine.parse(args));
     }
 
     private static int printAscii(boolean error, String fileName) {

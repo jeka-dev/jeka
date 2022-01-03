@@ -72,7 +72,7 @@ final class Engine {
         JkLog.startTask("Compile def and initialise KBeans");
         JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getDefDependencies());
         JkLog.trace("Inject classpath from command line : " + commandLineDependencies);
-        CompilationResult result = resolveAndCompile( new HashSet<>(), true,
+        CompilationResult result = resolveAndCompile( new HashMap<>(), true,
                 !Environment.standardOptions.ignoreCompileFail);
         JkPathSequence computedClasspath = result.classpath
             .andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
@@ -127,13 +127,16 @@ final class Engine {
      * Resolves dependencies and compiles and sources classes contained in jeka/def.
      * It returns a path sequence containing the resolved dependencies and result of compilation.
      */
-    private CompilationResult resolveAndCompile(Set<Path> yetCompiledProjects, boolean compileSources,
+    private CompilationResult resolveAndCompile(Map<Path, JkPathSequence> yetCompiledProjects, boolean compileSources,
                                              boolean failOnCompileError) {
-        if (yetCompiledProjects.contains(this.projectBaseDir)) {
-            return new CompilationResult(JkPathSequence.of(), JkPathSequence.of(), JkPathSequence.of());
+        if (yetCompiledProjects.containsKey(this.projectBaseDir)) {
+            JkLog.trace("Project '%s' already compiled. Skip", this.projectBaseDir);
+            return new CompilationResult(JkPathSequence.of(), JkPathSequence.of(),
+                    yetCompiledProjects.get(this.projectBaseDir));
         }
-        yetCompiledProjects.add(this.projectBaseDir);
-        String msg = "Scanning sources and compiling def classes for project " + this.projectBaseDir.getFileName().toString();
+        yetCompiledProjects.put(this.projectBaseDir, JkPathSequence.of());
+        String msg = "Scanning sources and compiling def classes for project '"
+                + this.projectBaseDir.getFileName() + "'";
         JkLog.startTask(msg);
         CompilationContext compilationContext = preCompile();
         List<Path> importedProjectClasspath = new LinkedList<>();
@@ -164,6 +167,7 @@ final class Engine {
         }
         JkLog.endTask();
         JkPathSequence resultClasspath = classpath.andPrepend(beanClassesResolver.defClassDir);
+        yetCompiledProjects.put(this.projectBaseDir, resultClasspath);
         return new CompilationResult(
                 JkPathSequence.of(compilationContext.importedProjectDirs),
                 JkPathSequence.of(failedProjects).withoutDuplicates(),
@@ -311,10 +315,10 @@ final class Engine {
         JkPathSequence importedProjects;
 
         CompilationResult(JkPathSequence importedProjects, JkPathSequence compileFailedProjects,
-                          JkPathSequence pathSequence) {
+                          JkPathSequence resultClasspath) {
             this.importedProjects = importedProjects;
             this.compileFailedProjects = compileFailedProjects;
-            this.classpath = pathSequence;
+            this.classpath = resultClasspath;
         }
     }
 

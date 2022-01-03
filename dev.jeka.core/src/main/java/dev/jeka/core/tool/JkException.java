@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 /**
  * Marker exception to notice a misconfiguration from the user.
+ * When such an exception is raised, Jeka does not display stacktrace on output console.
  *
  * @author Jerome Angibaud
  */

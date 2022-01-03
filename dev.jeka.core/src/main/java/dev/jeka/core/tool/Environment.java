@@ -75,6 +75,8 @@ class Environment {
 
         boolean logSetup;
 
+        boolean logStackTrace;
+
         JkLog.Style logStyle;
 
         String logRuntimeInformation;
@@ -92,6 +94,7 @@ class Environment {
             this.logQuiteVerbose = valueOf(Boolean.class, map, false, "log.ivy.verbose", "lqv");
             this.logBanner = valueOf(Boolean.class, map, false,"log.banner", "lb");
             this.logSetup = valueOf(Boolean.class, map, false,"log.setup", "lsu");
+            this.logStackTrace = valueOf(Boolean.class, map,false, "log.stacktrace", "lst");
             this.logRuntimeInformation = valueOf(String.class, map, null, "log.runtime.info", "lri");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
             this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");

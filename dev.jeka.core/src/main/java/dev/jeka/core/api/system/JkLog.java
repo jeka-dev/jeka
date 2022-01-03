@@ -148,14 +148,14 @@ public final class JkLog implements Serializable {
         consume(JkLogEvent.ofRegular(Type.WARN, String.format(message, params)));
     }
 
-    public static void trace(String message) {
+    public static void trace(String message, Object ...params) {
         if (verbosity().isVerbose()) {
-            consume(JkLogEvent.ofRegular(Type.TRACE, message));
+            consume(JkLogEvent.ofRegular(Type.TRACE, String.format(message, params)));
         }
     }
 
-    public static void error(String message) {
-        consume(JkLogEvent.ofRegular(Type.ERROR, message));
+    public static void error(String message, String ...params) {
+        consume(JkLogEvent.ofRegular(Type.ERROR, String.format(message, params)));
     }
 
     private static boolean shouldPrint(Type type) {

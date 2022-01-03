@@ -5,13 +5,16 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator2;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.Main;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
@@ -25,11 +28,8 @@ public final class IntellijJkBean extends JkBean {
             "(only a warning will be notified).")
     public boolean failOnDepsResolutionError = true;
 
-    @JkDoc("If specified, the specified module will be added as dependency in place of tJeka lib. Can be '' to simply skip Jeka dependency.")
+    @JkDoc("If specified, the specified module will be added as dependency in place of tJeka lib. Can be set to empty string for skipping Jeka dependency.")
     public String jekaModule;
-
-    @JkDoc("If true, the iml will be ")
-    public boolean shallow = false;
 
     private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
@@ -60,6 +60,7 @@ public final class IntellijJkBean extends JkBean {
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file.")
     public void modulesXml() {
+        checkProjectRoot();
         final Path current = getBaseDir();
         final Iterable<Path> imls = JkPathTree.of(getBaseDir()).andMatching(true,"**.iml").getFiles();
         final IntellijModulesXmlGenerator intellijModulesXmlGenerator = new IntellijModulesXmlGenerator(current, imls);
@@ -75,12 +76,13 @@ public final class IntellijJkBean extends JkBean {
                 .stream()
                     .distinct()
                     .map(path -> path.getParent().getParent())
+                    .map(path -> path == null ? getBaseDir() : path)
                     .forEach(this::generateImlExec);
     }
 
     private void generateImlExec(Path moduleDir) {
-        JkLog.startTask("Generate iml file on " + moduleDir);
-        //Main.exec(moduleDir, "intellij#iml", "-dci");
+        JkLog.startTask("Generate iml file on '%s'", moduleDir);
+        Main.exec(moduleDir, "intellij#iml", "-dci");
         JkLog.endTask();
     }
 
@@ -90,9 +92,19 @@ public final class IntellijJkBean extends JkBean {
     }
 
     @JkDoc("Shorthand for intellij#allIml + intellij#modulesXml.")
-    public void all() {
+    public void fullProject() {
+        checkProjectRoot();
         allIml();
         modulesXml();
+    }
+
+    private void checkProjectRoot() {
+        final IntellijModulesXmlGenerator intellijModulesXmlGenerator = new IntellijModulesXmlGenerator(getBaseDir(),
+                Collections.emptyList());
+        JkUtilsAssert.state(Files.exists(intellijModulesXmlGenerator.outputFile()),
+                "Folder where Jeka has run '%s' seems not to be the root of the project cause no file %s " +
+                        "has been found here.\nPlease relaunch this command from IntelliJ project root directory."
+                , getBaseDir().toAbsolutePath(), intellijModulesXmlGenerator.outputFile());
     }
 
     private JkImlGenerator2 imlGenerator2() {

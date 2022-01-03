@@ -80,7 +80,8 @@ public final class JkInit {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
         sb.append("\nCommand Line : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
-        sb.append(propsAsString("Specified properties", JkProperties.toDisplayedMap(JkProperties.getAll())));
+        sb.append(propsAsString("Specified properties", JkProperties.toDisplayedMap(
+                JkProperties.getAllStartingWith("jeka."))));
         sb.append("\nJava Home : " + System.getProperty("java.home"));
         sb.append("\nJava Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         sb.append("\nJeka Version : " + JkInfo.getJekaVersion());

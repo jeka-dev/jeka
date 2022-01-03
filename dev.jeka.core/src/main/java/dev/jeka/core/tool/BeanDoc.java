@@ -1,6 +1,8 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
+import org.apache.ivy.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -63,7 +65,11 @@ class BeanDoc implements Comparable<BeanDoc> {
 
     public String shortDescription() {
         List<String> description = description();
-        return description.isEmpty() ? null : description.get(0);
+        if (description.isEmpty()) {
+            return null;
+        }
+        String result = description.get(0);
+        return result.contains("\n") ?  JkUtilsString.substringBeforeFirst(result, "\n") : result;
     }
 
     public List<String> activationEffect() {
