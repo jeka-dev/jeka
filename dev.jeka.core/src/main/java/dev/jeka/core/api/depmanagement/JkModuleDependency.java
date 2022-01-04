@@ -52,11 +52,17 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
      */
     public static final Comparator<JkModuleDependency> GROUP_NAME_COMPARATOR = new NameComparator();
 
-
+    /**
+     * Creates a {@link JkModuleDependency} to the specified getModuleId with unspecified version
+     */
+    @SuppressWarnings("unchecked")
+    public static JkModuleDependency of(JkModuleId moduleId) {
+        return of(moduleId, JkVersion.UNSPECIFIED);
+    }
 
     /**
      * Creates a {@link JkModuleDependency} to the specified getModuleId and
-     * <code>JkVersionrange</code>.
+     * <code>JkVersion</code>.
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, JkVersion version) {
@@ -271,7 +277,10 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder(moduleId + ":" + version);
+        StringBuilder result = new StringBuilder(moduleId.toString());
+        if (!version.isUnspecified()) {
+            result.append(":" + version);
+        }
         artifactSpecifications.forEach(spec ->
                 result.append("(classifier=" + spec.classifier + ", type=" + spec.type + ")"));
         if (transitivity != null) {

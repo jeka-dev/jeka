@@ -227,6 +227,9 @@ public class JkPathTreeTest {
         boolean samplePresent = JkPathTree.of(sampleFolder).andMatching(false, "subfolder/**").stream()
                 .anyMatch(path -> path.getFileName().toString().equals("sample.txt"));
         assertFalse(samplePresent);
+        assertFalse(JkPathTree.of(sampleFolder).andMatching("subfolder/*.txt").getFiles().isEmpty());
+        assertFalse(JkPathTree.of(sampleFolder).andMatching("subfolder/*.txt", "*.txt").getFiles().isEmpty());
+        assertFalse(JkPathTree.of(sampleFolder).andMatching("subfolder/*.txt", "*.java").getFiles().isEmpty());
     }
 
     @Test

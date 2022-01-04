@@ -22,6 +22,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
         Path dir = scaffold("-lsu scaffold#run springboot#  springboot#scaffoldDefClasspath="
                         + sprinbootBluginJar + " @" + sprinbootBluginJar,
                 "project#pack -lsu", false);
+        runJeka(dir.toString(), "intellij#iml");
     }
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {

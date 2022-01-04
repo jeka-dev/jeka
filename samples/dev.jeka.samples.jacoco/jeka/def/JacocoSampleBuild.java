@@ -28,9 +28,8 @@ public class JacocoSampleBuild extends JkBean {
                 .configureTestDeps(deps -> deps
                         .and(JkPopularModules.JUNIT_5 + ":5.8.1")
         );
-        intellij.configureImlGenerator(imlGenerator -> imlGenerator
-                .setSkipJeka(true)
-                .configureIml(this::configureIml));
+        intellij.configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
+        intellij.configureIml(this::configureIml);
     }
 
     // For local testing

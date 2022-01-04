@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorIT;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator2;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 /**
  * Created by angibaudj on 21-09-17.
  */
-public class JkImlGenerator2IT {
+public class JkImlGeneratorIT {
 
     @Test
     public void generate() throws Exception {
@@ -31,7 +31,7 @@ public class JkImlGenerator2IT {
                 .getCompilation()
                     .configureDependencies(deps -> deps
                         .and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6"))).__.__;
-        final JkImlGenerator2 baseGenerator = JkImlGenerator2.of()
+        final JkImlGenerator baseGenerator = JkImlGenerator.of()
                 .setIdeSupport(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.computeIml().toDoc().toXml();
         System.out.println("\nbase .classpath");
@@ -51,7 +51,7 @@ public class JkImlGenerator2IT {
                                 .emptyResources().addResource("res-test").__.__
                         .getTestProcessor()
                             .setForkingProcess(true).__.__.__;
-        final JkImlGenerator2 coreGenerator = JkImlGenerator2.of()
+        final JkImlGenerator coreGenerator = JkImlGenerator.of()
                 .setIdeSupport(coreProject.getJavaIdeSupport());
         final String result1 = coreGenerator.computeIml().toDoc().toXml();
         System.out.println("\ncore .classpath");
@@ -66,7 +66,7 @@ public class JkImlGenerator2IT {
                 .getCompilation()
                     .configureDependencies(deps -> deps
                         .and(coreProject.toDependency())).__.__;
-        final JkImlGenerator2 desktopGenerator = JkImlGenerator2.of()
+        final JkImlGenerator desktopGenerator = JkImlGenerator.of()
                 .setIdeSupport(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.computeIml().toDoc().toXml();
         System.out.println("\ndesktop .classpath");

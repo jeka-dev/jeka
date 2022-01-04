@@ -1,5 +1,3 @@
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.samples.SimpleProjectJkBean;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectProject;
@@ -44,13 +42,6 @@ public class NormalJarJkBean extends JkBean {
     public void cleanPack() {
         clean();
         projectPlugin.pack();
-    }
-
-    public void printIml() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of(projectPlugin.getJavaIdeSupport())
-                .setDefDependencies(JkDependencySet.of(sampleBuild.projectPlugin.getProject().toDependency()))
-                .setDefDependencyResolver(this.getRuntime().getDependencyResolver());
-        System.out.println(imlGenerator.generate());
     }
 
     public static void main(String[] args) {

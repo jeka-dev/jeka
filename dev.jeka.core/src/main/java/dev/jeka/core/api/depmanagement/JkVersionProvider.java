@@ -1,12 +1,15 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * Association between getModuleIds and version.
@@ -17,9 +20,12 @@ public final class JkVersionProvider {
 
     private final Map<JkModuleId, JkVersion> map;
 
-    private JkVersionProvider(Map<JkModuleId, JkVersion> map) {
+    private final List<JkModuleDependency> boms;
+
+    private JkVersionProvider(Map<JkModuleId, JkVersion> map, List<JkModuleDependency> boms) {
         super();
         this.map = map;
+        this.boms = boms;
     }
 
     /**
@@ -41,14 +47,14 @@ public final class JkVersionProvider {
      */
     public static JkVersionProvider of(JkModuleId moduleId, JkVersion version) {
         final Map<JkModuleId, JkVersion> result = JkUtilsIterable.mapOf(moduleId, version);
-        return new JkVersionProvider(result);
+        return new JkVersionProvider(result, Collections.emptyList());
     }
 
     /**
      * Creates an empty version provider.
      */
     public static JkVersionProvider of() {
-        return new JkVersionProvider(Collections.emptyMap());
+        return new JkVersionProvider(Collections.emptyMap(), Collections.emptyList());
     }
 
     /**
@@ -59,7 +65,7 @@ public final class JkVersionProvider {
         for (final JkVersionedModule module : modules) {
             result.put(module.getModuleId(), module.getVersion());
         }
-        return new JkVersionProvider(result);
+        return new JkVersionProvider(result, Collections.emptyList());
     }
 
     /**
@@ -102,7 +108,9 @@ public final class JkVersionProvider {
     public JkVersionProvider and(JkVersionProvider other) {
         final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);
         newMap.putAll(other.map);
-        return new JkVersionProvider(newMap);
+        List<JkModuleDependency> newBoms = new LinkedList<>(this.boms);
+        newBoms.addAll(other.boms);
+        return new JkVersionProvider(newMap, newBoms);
     }
 
     /**
@@ -111,7 +119,7 @@ public final class JkVersionProvider {
     public JkVersionProvider and(JkModuleId moduleId, JkVersion version) {
         final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);
         newMap.put(moduleId, version);
-        return new JkVersionProvider(newMap);
+        return new JkVersionProvider(newMap, this.boms);
     }
 
     /**
@@ -119,6 +127,28 @@ public final class JkVersionProvider {
      */
     public JkVersionProvider and(JkModuleId moduleId, String version) {
         return and(moduleId, JkVersion.of(version));
+    }
+
+    /**
+     * @param dependencyDescription Can be expressed as group:name::pom:version
+     * or group:name:version. In last case, it will be converted in the first expression
+     */
+    public JkVersionProvider andBom(String dependencyDescription) {
+        String[] items = dependencyDescription.split(":");
+        final JkModuleDependency moduleDependency;
+        if (items.length == 5) {
+            moduleDependency = JkModuleDependency.of(dependencyDescription);
+        } else if (items.length == 3) {
+            JkModuleId moduleId = JkModuleId.of(items[0], items[1]);
+            JkVersion version = JkVersion.of(items[2]);
+            moduleDependency = JkModuleDependency.of(moduleId, version).withClassifiersAndType("", "pom");
+        } else {
+            throw new IllegalArgumentException("dependencyDescription must be expressed as 'group:name::pom:version' " +
+                    "or 'group:name:version'. was " + dependencyDescription);
+        }
+        List<JkModuleDependency> newBoms = new LinkedList<>(this.boms);
+        newBoms.add(moduleDependency);
+        return new JkVersionProvider(this.map, newBoms);
     }
 
     /**
@@ -181,4 +211,14 @@ public final class JkVersionProvider {
     public int hashCode() {
         return map.hashCode();
     }
+
+    public JkVersionProvider resolveBoms(Function<JkModuleDependency, JkVersionProvider> bomResolver) {
+        JkVersionProvider provider = boms.stream()
+                .distinct()
+                .map(module -> bomResolver.apply(module))
+                .reduce(this, (versionProvider1, versionProvider2) -> versionProvider1.and(versionProvider2));
+        return new JkVersionProvider(provider.map, Collections.emptyList());
+    }
+
+
 }

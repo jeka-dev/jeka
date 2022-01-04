@@ -1,20 +1,26 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsReflect;
 
+import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static dev.jeka.core.tool.JkRepoFromProperties.getDownloadRepo;
 
 /**
  * Class for instantiating builds while displaying meaningful information about environment on console.
@@ -49,6 +55,13 @@ public final class JkInit {
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_REGISTRATION, clazz, null, null));
             commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, JkBean.name(clazz)));
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
+            jkRuntime.setImportedProjects(getImportedProjects(clazz));
+            jkRuntime.setDependencyResolver(JkDependencyResolver.of()
+                    .getDefaultParams()
+                        .setFailOnDependencyResolutionError(true)  // TODO set params at root of Dependency resolver
+                    .__
+                    .addRepos(getDownloadRepo(), JkRepo.ofLocal()));
+            jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
             jkRuntime.init(commands);
             final T jkBean = jkRuntime.getBean(clazz);
             JkLog.info(jkBean.toString() + " is ready to run.");
@@ -118,6 +131,16 @@ public final class JkInit {
 
     private static Path bootDir() {
         return Paths.get(JkConstants.BOOT_DIR);
+    }
+
+    private static JkPathSequence getImportedProjects(Class<?> clazz) {
+        List<Path> paths = JkUtilsReflect.getAllDeclaredFields(clazz, true).stream()
+                .map(field -> field.getAnnotation(JkInjectProject.class))
+                .filter(Objects::nonNull)
+                .map(jkInjectProject -> jkInjectProject.value())
+                .map(Paths::get)
+                .collect(Collectors.toList());
+        return JkPathSequence.of(paths).withoutDuplicates();
     }
 
 

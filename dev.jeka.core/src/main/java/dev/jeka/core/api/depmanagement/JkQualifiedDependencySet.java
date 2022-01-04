@@ -3,6 +3,7 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -171,12 +172,14 @@ public class JkQualifiedDependencySet {
             .and(versionProvider));
     }
 
-    public JkQualifiedDependencySet replaceUnspecifiedVersionsWithProvider() {
+    public JkQualifiedDependencySet replaceUnspecifiedVersionsWithProvider(Function<JkModuleDependency,
+            JkVersionProvider> bomResolver) {
+        JkVersionProvider resolvedVersionProvider = versionProvider.resolveBoms(bomResolver);
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .map(qDep -> {
                     if (qDep.getDependency() instanceof JkModuleDependency) {
                         JkModuleDependency moduleDependency = (JkModuleDependency) qDep.getDependency();
-                        JkVersion providedVersion = versionProvider.getVersionOf(moduleDependency.getModuleId());
+                        JkVersion providedVersion = resolvedVersionProvider.getVersionOf(moduleDependency.getModuleId());
                         if (moduleDependency.getVersion().isUnspecified() && providedVersion != null) {
                             return JkQualifiedDependency.of(qDep.getQualifier(),
                                     moduleDependency.withVersion(providedVersion));
@@ -185,7 +188,7 @@ public class JkQualifiedDependencySet {
                     return qDep;
                 })
                 .collect(Collectors.toList());
-        return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
+        return new JkQualifiedDependencySet(dependencies, globalExclusions, resolvedVersionProvider);
     }
 
 
@@ -195,8 +198,10 @@ public class JkQualifiedDependencySet {
         JkDependencySetMerge prodMerge = projectDependencies.getCompile().merge(projectDependencies.getRuntime());
         JkDependencySetMerge testMerge = prodMerge.getResult().merge(projectDependencies.getTest());
         List<JkQualifiedDependency> result = new LinkedList<>();
-        List<JkDependency> dependencies = testMerge.getResult().normalised(strategy)
-                .assertNoUnspecifiedVersion().getEntries();
+        List<JkDependency> dependencies = testMerge.getResult()
+                .normalised(strategy)
+                //.assertNoUnspecifiedVersion()
+                .getEntries();
         for (JkDependency dependency : dependencies) {
             final String scope;
             if (prodMerge.getResult().getEntries().contains(dependency)) {

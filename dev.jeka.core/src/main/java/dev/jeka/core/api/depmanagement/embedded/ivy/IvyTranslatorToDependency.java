@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 class IvyTranslatorToDependency {
 
     static List<DefaultDependencyDescriptor> toDependencyDescriptors(JkQualifiedDependencySet dependencies) {
-        return dependencies.replaceUnspecifiedVersionsWithProvider().getEntries().stream()
+        return dependencies.replaceUnspecifiedVersionsWithProvider(v -> null).getEntries().stream()
                 .map(qDep -> toDependencyDescriptor(qDep.getQualifier(), (JkModuleDependency) qDep.getDependency()))
                 .collect(Collectors.toList());
     }

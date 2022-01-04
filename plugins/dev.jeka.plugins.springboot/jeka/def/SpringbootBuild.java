@@ -3,6 +3,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class SpringbootBuild extends JkBean {
@@ -29,11 +30,17 @@ public class SpringbootBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectBean.pack();
+        clean(); projectBean.pack(); projectBean.publishLocal();
     }
 
     public static void main(String[] args) {
         JkInit.instanceOf(SpringbootBuild.class, args).cleanPack();
+    }
+
+    static class Iml {
+        public static void main(String[] args) {
+            JkInit.instanceOf(IntellijJkBean.class,args).iml();
+        }
     }
 
 }

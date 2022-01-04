@@ -1,9 +1,6 @@
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.depmanagement.JkVersionProvider;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
@@ -44,6 +41,8 @@ public final class SpringbootJkBean extends JkBean {
     private static final String SPRINGBOOT_APPLICATION_ANNOTATION_NAME =
             "org.springframework.boot.autoconfigure.SpringBootApplication";
 
+    private static final String BOM_COORDINATE = "org.springframework.boot:spring-boot-dependencies::pom:";
+
     public static final String SPRING_BOOT_VERSION_MANIFEST_ENTRY = "Spring-Boot-Version";
 
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
@@ -65,8 +64,6 @@ public final class SpringbootJkBean extends JkBean {
     public String scaffoldDefClasspath;
 
     private final ProjectJkBean projectBean;
-
-    private JkPom cachedSpringbootBom;
 
     /**
      * Right after to be instantiated, plugin instances are likely to configured by the owning build.
@@ -135,9 +132,8 @@ public final class SpringbootJkBean extends JkBean {
                 this.springbootVersion);
 
         // resolve dependency versions upon springboot provided ones
-        JkVersionProvider versionProvider = getSpringbootPom(dependencyResolver, springbootVersion).getVersionProvider();
         project.getConstruction().getCompilation().configureDependencies(deps -> deps
-            .andVersionProvider(versionProvider));
+            .andBom(BOM_COORDINATE + springbootVersion));
 
         // define bootable jar as main artifact
         JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
@@ -179,11 +175,12 @@ public final class SpringbootJkBean extends JkBean {
         JkProjectConstruction construction = projectBean.getProject().getConstruction();
         JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
         JkDependencyResolver dependencyResolver = construction.getDependencyResolver();
-        JkVersionProvider versionProvider = getSpringbootPom(dependencyResolver, springbootVersion).getVersionProvider();
+        JkVersionProvider versionProvider = projectBean.getProject().getConstruction().getDependencyResolver()
+                .resolveBom(JkModuleDependency.of(BOM_COORDINATE + springbootVersion));
         JkVersion loaderVersion = versionProvider.getVersionOf(JkSpringModules.Boot.LOADER);
-        JkModuleDependency bootloaderDep =
-                JkModuleDependency.of(JkSpringModules.Boot.LOADER.withVersion(loaderVersion.getValue()));
-        Path bootloader = dependencyResolver.resolve(bootloaderDep).getFiles().getEntry(0);
+        JkDependencySet bootloaderDependency = JkDependencySet.of(JkModuleDependency.of(JkSpringModules.Boot.LOADER))
+                .andBom(BOM_COORDINATE + springbootVersion);
+        Path bootloader = dependencyResolver.resolve(bootloaderDependency).getFiles().getEntry(0);
         final JkPathSequence embeddedJars = construction.getDependencyResolver().resolve(
                 construction.getRuntimeDependencies().normalised(projectBean.getProject().getDuplicateConflictStrategy()))
                 .getFiles();
@@ -199,14 +196,7 @@ public final class SpringbootJkBean extends JkBean {
         return projectBean;
     }
 
-    private JkPom getSpringbootPom(JkDependencyResolver dependencyResolver, String springbootVersion) {
-        if (cachedSpringbootBom == null) {
-            cachedSpringbootBom = getSpringbootBom(dependencyResolver, springbootVersion);
-        }
-        return cachedSpringbootBom;
-    }
-
-    public static JkPom getSpringbootBom(JkDependencyResolver dependencyResolver, String springbootVersion) {
+    private static JkPom getSpringbootBom(JkDependencyResolver dependencyResolver, String springbootVersion) {
         JkModuleDependency moduleDependency = JkModuleDependency.of(
                 "org.springframework.boot:spring-boot-dependencies::pom:" + springbootVersion);
         JkLog.info("Fetch Springboot dependency versions from " + moduleDependency);

@@ -13,6 +13,11 @@ import java.util.Comparator;
  */
 public final class JkModuleId {
 
+    private final String group;
+
+    private final String name;
+
+
     /**
      * Comparator sorting by module group first then module name.
      */
@@ -49,9 +54,6 @@ public final class JkModuleId {
         return JkModuleId.of(groupAndName, groupAndName);
     }
 
-    private final String group;
-
-    private final String name;
 
     private JkModuleId(String group, String name) {
         super();

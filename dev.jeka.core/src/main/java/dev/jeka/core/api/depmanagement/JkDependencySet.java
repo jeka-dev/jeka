@@ -26,7 +26,8 @@ public class JkDependencySet {
 
     private final JkVersionProvider versionProvider;
 
-    private JkDependencySet(List<? extends JkDependency> dependencies, Set<JkDependencyExclusion> exclusions, JkVersionProvider explicitVersions) {
+    private JkDependencySet(List<? extends JkDependency> dependencies, Set<JkDependencyExclusion> exclusions,
+                            JkVersionProvider explicitVersions) {
         super();
         this.entries = Collections.unmodifiableList(dependencies);
         this.globalExclusions = Collections.unmodifiableSet(exclusions);
@@ -258,8 +259,6 @@ public class JkDependencySet {
         return new JkDependencySet(result, this.globalExclusions, mergedVersionProvider);
     }
 
-
-
     /**
      * Returns a clone of this object but using specified version provider to override
      * versions of transitive dependencies. The previous version provider is replaced
@@ -267,6 +266,14 @@ public class JkDependencySet {
      */
     public JkDependencySet withVersionProvider(JkVersionProvider versionProvider) {
         return new JkDependencySet(this.entries, this.getGlobalExclusions(), versionProvider);
+    }
+
+    /**
+     * @param dependencyDescription Can be expressed as group:name::pom:version
+     * or group:name:version. In last case, it will be converted in the first expression
+     */
+    public JkDependencySet andBom(String dependencyDescription) {
+        return withVersionProvider(this.versionProvider.andBom(dependencyDescription));
     }
 
     /**

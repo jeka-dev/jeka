@@ -1,6 +1,10 @@
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.intellij.JkIml;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.plugins.springboot.SpringbootJkBean;
 import dev.jeka.plugins.springboot.JkSpringModules.Boot;
 
@@ -9,6 +13,8 @@ import dev.jeka.plugins.springboot.JkSpringModules.Boot;
 class SpringbootSampleBuild extends JkBean {
 
     private final SpringbootJkBean springboot = getRuntime().getBean(SpringbootJkBean.class);
+
+    private final IntellijJkBean intellijJkBean = getRuntime().getBean(IntellijJkBean.class);
 
     @Override
     protected void init() {
@@ -26,6 +32,13 @@ class SpringbootSampleBuild extends JkBean {
                 .configureTestDeps(deps -> deps
                     .and(Boot.STARTER_TEST)
                 );
+        intellijJkBean.configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
+        intellijJkBean.configureIml(this::configure);
+    }
+
+    private void configure(JkIml iml) {
+        iml.getComponent().replaceLibByModule("dev.jeka.springboot-plugin.jar",
+                "dev.jeka.plugins.springboot");
     }
 
     public void cleanPack() {
@@ -39,7 +52,15 @@ class SpringbootSampleBuild extends JkBean {
 
     // Clean, compile, test and generate springboot application jar
     public static void main(String[] args) {
-        JkInit.instanceOf(SpringbootSampleBuild.class, args).cleanPack();
+        JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb").cleanPack();
+    }
+
+    // debug purpose
+    static class Iml {
+        public static void main(String[] args) {
+            JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb")
+                    .getRuntime().getBean(IntellijJkBean.class).iml();
+        }
     }
 
 }

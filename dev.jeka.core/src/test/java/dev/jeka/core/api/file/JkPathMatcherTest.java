@@ -23,7 +23,7 @@ public class JkPathMatcherTest {
         assertTrue(JkPathMatcher.of(true,"**.java").matches(Paths.get("foo/Bar.java")));
         assertTrue(JkPathMatcher.of(true,"*.java").matches(Paths.get("Bar.java")));
         assertTrue(JkPathMatcher.of(true,"com/**", "com").matches(Paths.get("com")));
-        assertTrue(!JkPathMatcher.of(true,"com/**/*").matches(Paths.get("com")));
+        assertFalse(JkPathMatcher.of(true,"com/**/*").matches(Paths.get("com")));
 
         final String pathString = "foo/bar.txt";
         Path path = Paths.get(pathString);
@@ -31,6 +31,11 @@ public class JkPathMatcherTest {
         assertTrue(!JkPathMatcher.of(true,"foo/br.txt").matches(path));
         assertTrue(!JkPathMatcher.of(true,"k*/bar.txt").matches(path));
         assertTrue(!JkPathMatcher.of(true,"*.java").matches(Paths.get("foo/Bar.java")));
+    }
+
+    @Test
+    public void testAcceptWithMulti() {
+        assertTrue(JkPathMatcher.of("*.java", "*.txt").matches(Paths.get("my.java")));
     }
 
     @Test

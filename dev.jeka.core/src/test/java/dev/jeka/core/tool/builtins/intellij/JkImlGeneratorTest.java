@@ -4,23 +4,21 @@ package dev.jeka.core.tool.builtins.intellij;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClasspath;
-import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator2;
 import org.junit.Test;
 
 import java.nio.file.Paths;
 
 import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 
-public class JkImlGenerator2Test {
+public class JkImlGeneratorTest {
 
     @Test
     public void withoutJavaProject() {
-        JkImlGenerator2 imlGenerator = JkImlGenerator2.of()
+        JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setDefClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()))
                 .setBaseDir(Paths.get(""));
         JkIml iml = imlGenerator.computeIml();
@@ -31,7 +29,7 @@ public class JkImlGenerator2Test {
     public void withJavaProject() {
         JkProject project = JkProject.of();
         project.getConstruction().getCompilation().configureDependencies(deps -> dependencies());
-        JkImlGenerator2 imlGenerator = JkImlGenerator2.of()
+        JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
                 .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
         JkIml iml = imlGenerator.computeIml();

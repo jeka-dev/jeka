@@ -4,7 +4,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator2;
+import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkConstants;
@@ -33,16 +33,20 @@ public final class IntellijJkBean extends JkBean {
 
     private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
-    private Consumer<JkImlGenerator2> imlGeneratorConfigurer = jkImlGenerator2 -> {};
+    private Consumer<JkImlGenerator> imlGeneratorConfigurer = jkImlGenerator2 -> {};
 
-    public void configureImlGenerator(Consumer<JkImlGenerator2> imlGeneratorConfigurer) {
+    public void configureImlGenerator(Consumer<JkImlGenerator> imlGeneratorConfigurer) {
         this.imlGeneratorConfigurer = this.imlGeneratorConfigurer.andThen(imlGeneratorConfigurer);
+    }
+
+    public void configureIml(Consumer<JkIml> imlConfigurer) {
+        configureImlGenerator(imlGeneratorConfigurer -> imlGeneratorConfigurer.configureIml(imlConfigurer));
     }
 
     @JkDoc("Generates IntelliJ [my-module].iml file.")
     public void iml() {
         Path basePath = getBaseDir();
-        JkImlGenerator2 imlGenerator = imlGenerator2();
+        JkImlGenerator imlGenerator = imlGenerator();
         imlGeneratorConfigurer.accept(imlGenerator);
         JkIml iml = imlGenerator.computeIml();
         final JkPathFile imlFile = JkPathFile.of(findImlFile(basePath))
@@ -53,8 +57,10 @@ public final class IntellijJkBean extends JkBean {
     }
 
     private static Path findImlFile(Path dir) {
-        return JkImlGenerator2.findImlFile(dir).orElse(dir.resolve(".idea")
-                .resolve(dir.getFileName().toString() + ".iml"));
+        String fileName = dir.getFileName().toString().equals("") ? dir.toAbsolutePath().getFileName().toString()
+                : dir.getFileName().toString();
+        return JkImlGenerator.findImlFile(dir).orElse(dir.resolve(".idea")
+                .resolve(fileName + ".iml"));
     }
 
     /** Generate modules.xml files */
@@ -107,8 +113,8 @@ public final class IntellijJkBean extends JkBean {
                 , getBaseDir().toAbsolutePath(), intellijModulesXmlGenerator.outputFile());
     }
 
-    private JkImlGenerator2 imlGenerator2() {
-        JkImlGenerator2 imlGenerator = JkImlGenerator2.of()
+    private JkImlGenerator imlGenerator() {
+        JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setBaseDir(this.getBaseDir())
                 .setDefClasspath(this.getRuntime().getClasspath())
                 .setDefImportedProjects(this.getRuntime().getImportedProjects())

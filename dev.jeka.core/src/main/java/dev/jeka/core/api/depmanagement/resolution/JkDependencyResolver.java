@@ -2,8 +2,11 @@ package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,8 @@ public final class JkDependencyResolver<T> {
     private JkRepoSet repos = JkRepoSet.of();
 
     private final Map<JkQualifiedDependencySet, JkResolveResult> cachedResults = new HashMap<>();
+
+    private final Map<JkModuleDependency, JkVersionProvider> cachedBomResolution = new HashMap<>();
 
     private boolean useCache;
 
@@ -143,14 +148,19 @@ public final class JkDependencyResolver<T> {
             }
         }
         List<JkDependency> allDependencies = qualifiedDependencies.getDependencies();
-        JkQualifiedDependencySet moduleQualifiedDependencies = qualifiedDependencies.withModuleDependenciesOnly()
-                .replaceUnspecifiedVersionsWithProvider().assertNoUnspecifiedVersion();
+        JkQualifiedDependencySet moduleQualifiedDependencies = qualifiedDependencies
+                .withModuleDependenciesOnly()
+                .replaceUnspecifiedVersionsWithProvider(this::resolveBom)
+                .assertNoUnspecifiedVersion();
         boolean hasModule = !moduleQualifiedDependencies.getDependencies().isEmpty();
         if (repos.getRepos().isEmpty() && hasModule) {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
         JkInternalDependencyResolver internalDepResolver = JkInternalDependencyResolver.of(this.repos);
-        JkLog.startTask("Resolve dependencies (" + qualifiedDependencies.getEntries().size() + " declared dependencies).");
+        String message = qualifiedDependencies.getEntries().size() == 1 ?
+                "Resolve " + qualifiedDependencies.getDependencies().get(0).toString()
+                : "Resolve " + qualifiedDependencies.getEntries().size() + " declared dependencies";
+        JkLog.startTask(message);
         JkResolveResult resolveResult;
         if (hasModule) {
             JkUtilsAssert.state(!repos.getRepos().isEmpty(), "Cannot resolve module dependency cause no " +
@@ -182,6 +192,20 @@ public final class JkDependencyResolver<T> {
             this.cachedResults.put(qualifiedDependencies, resolveResult);
         }
         return resolveResult;
+    }
+
+    public JkVersionProvider resolveBom(JkModuleDependency moduleDependency) {
+        if (cachedBomResolution.containsKey(moduleDependency)) {
+            return cachedBomResolution.get(moduleDependency);
+        }
+        JkLog.trace("Fetch bom dependency versions from " + moduleDependency);
+        Path pomFile = this.resolve(moduleDependency).getFiles().getEntries().get(0);
+        if (pomFile == null || !Files.exists(pomFile)) {
+            throw new IllegalStateException(moduleDependency + " not found");
+        }
+        JkVersionProvider result = JkPom.of(pomFile).getVersionProvider();
+        cachedBomResolution.put(moduleDependency, result);
+        return result;
     }
 
     /**
