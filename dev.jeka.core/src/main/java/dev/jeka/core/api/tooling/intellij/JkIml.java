@@ -245,6 +245,16 @@ public final class JkIml {
             return new ModuleLibraryOrderEntry();
         }
 
+        ModuleLibraryOrderEntry copy() {
+            ModuleLibraryOrderEntry copy = new ModuleLibraryOrderEntry();
+            copy.classes = classes;
+            copy.sources = sources;
+            copy.javadoc = javadoc;
+            copy.scope = scope;
+            copy.exported = exported;
+            return copy;
+        }
+
         public Path getClasses() {
             return classes;
         }

@@ -45,6 +45,11 @@ public abstract class JkBean {
         return runtime.getProjectBaseDir();
     }
 
+    public String getBaseDirName() {
+        String result = getBaseDir().getFileName().toString();
+        return result.isEmpty() ? getBaseDir().toAbsolutePath().getFileName().toString() : result;
+    }
+
     /**
      * Returns the output directory where all the final and intermediate artifacts are generated.
      */

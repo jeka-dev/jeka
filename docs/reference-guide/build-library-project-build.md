@@ -1,21 +1,32 @@
 Jeka features high-level and low-level classes to deal with Java builds and JVM concepts.
 
-## Java Tool Base API
+## Java
 
 Base classes are used as foundation for implementing Jeka high-level build API but they can be used directly in a low level build description.
 These classes belong to `dev.jeka.core.api.java` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java).
 
 * `JkClassLoader` and `JkUrlClassloader` Wrap a `java.lang.ClassLoader` adding convenient methods and classpath scanning capability.
-
 * `JkJarPacker` A simple utility tyo create Jar or fat Jar file from compiled classes.
-
 * `JkJavaCompiler` Wraps either a Java Compiler tool, nor a *javac* process.
-
 * `JkJavadocProcessor` A Java source processor producing standard Javadoc
-
 * `JkJavaProcess` A utility to launch Java process (from class dirs or jars)
-
 * `JkManifest` Stands for the manifest file to include in jar files.
+
+## JEE
+
+Located in package `dev.jeka.core.api.j2e`
+
+* `JkJ2eWarArchiver` : Provides methods to generates war files, including dependency jars.
+* `JkJ2eWarProjectAdapter` : Helps to adapt an existing `JkProject` to make it generate _war_ artefacts_.
+
+## Kotlin
+
+Located in `dev.jeka.core.api.kotlin` package.
+
+* `JkKotlinCompiler` : Provides mean to get a suitable compiler according a given Kotlin version and method to 
+  actually compile sources in a fluent way.
+
+* `JkKotlinsModules` : Holds constants of common Kotlin library coordinates.
 
 ## Testing API
 

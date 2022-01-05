@@ -251,6 +251,34 @@ You can achieve it in a statically typed way.
 * See example [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.master/jeka/def/MasterBuild.java).
 * Be careful that the imported _KBean_ deals with file paths using `JkBean#getBaseDir` in order it can be safely executed from any working directory.
 
+### Standard KBeans
+
+There is a bunch of _KBeans_ bundle within _Jeka_. Those _KBeans_ are always present.
+
+#### project
+
+`ProjectJkBean` provides a wrapper around of a `JkProject` for building JVM-based projects. This _KBean_ initialise 
+a default sensitive project object and provides classic method for building project (compile, package in jar, publish ...)
+
+#### intellij
+
+`IntellijJkBean` provides methods for generating metadata files for _IntelliJ_ IDE. Content of _iml_ file is computed 
+according the `JkProject` object found in _project KBean_.
+
+#### scaffold
+
+`ScaffoldjJkBean` provides methods for project directories and files to create a new _Jeka_ project. Basically, 
+it creates a project ready to create vanilla automation tasks.
+
+This _KBean_ offers extension point in order other KBean can augment the scaffolded structure. For example, 
+executing `jeka scaffold#run` will create a basic Jeka project while `jeka scaffold#run project#` will create 
+a project ready to build a JVM-based project. 
+
+#### git
+
+`GitJkBean` exposes some common git command combos.
+
+
 ## Properties
 
 Properties are pairs of String  _key-value_ that are used across Jeka system. It typically carries urls, local paths,

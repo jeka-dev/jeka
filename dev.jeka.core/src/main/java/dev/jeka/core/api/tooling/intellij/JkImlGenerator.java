@@ -130,12 +130,14 @@ public final class JkImlGenerator {
                     ideSupport.getDependencies(),
                     depResolver.getDefaultParams().clone().setFailOnDependencyResolutionError(failOnDepsResolutionError))
                     .getDependencyTree();
-            iml.getComponent().getOrderEntries().addAll(projectOrderEntries(tree));
+            JkLog.trace("Dependencies resolved");
+            iml.getComponent().getOrderEntries().addAll(projectOrderEntries(tree));  // too slow
             Path generatedSources = ideSupport.getProdLayout().resolveGeneratedSourceDir();
             iml.getComponent().getContent().addSourceFolder(generatedSources, false, null);
         }
         iml.getComponent().getOrderEntries().addAll(defOrderEntries());
         imlConfigurer.accept(iml);
+        JkLog.trace("Iml object generated");
         return iml;
     }
 
@@ -157,12 +159,15 @@ public final class JkImlGenerator {
 
         private LinkedHashSet<JkIml.OrderEntry> orderEntries = new LinkedHashSet<>();
 
+        private Map<Path, JkIml.ModuleLibraryOrderEntry> cache = new HashMap<>();
+
         void add(Path entry, JkIml.Scope scope) {
             JkIml.OrderEntry orderEntry;
             if (Files.isDirectory(entry)) {
                 orderEntry = dirAsOrderEntry(entry, scope);
             } else {
-                orderEntry = libAsOrderEntry(entry)
+                orderEntry = cache.computeIfAbsent(entry, JkImlGenerator::libAsOrderEntry)
+                        .copy()
                         .setScope(scope)
                         .setExported(true);
             }
@@ -250,7 +255,9 @@ public final class JkImlGenerator {
         return null;
     }
 
-    private List<JkIml.OrderEntry> projectOrderEntries(JkResolvedDependencyNode tree) {
+
+    private List<JkIml.OrderEntry> projectOrderEntries(JkResolvedDependencyNode tree) {  // TODO This method is too slow
+        long t0 = System.currentTimeMillis();
         OrderEntries orderEntries = new OrderEntries();
         for (final JkResolvedDependencyNode node : tree.toFlattenList()) {
 
@@ -277,6 +284,7 @@ public final class JkImlGenerator {
                 }
             }
         }
+        JkLog.trace("projectOrderEntries() took '%s ms", System.currentTimeMillis() - t0);
         return new LinkedList(orderEntries.orderEntries);
     }
 

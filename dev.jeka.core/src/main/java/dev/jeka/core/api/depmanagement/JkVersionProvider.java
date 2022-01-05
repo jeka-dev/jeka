@@ -3,6 +3,7 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkPom;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -150,6 +151,19 @@ public final class JkVersionProvider {
         newBoms.add(moduleDependency);
         return new JkVersionProvider(this.map, newBoms);
     }
+
+    /**
+     * @param versionedModule module group, name and version expressed as 'group:name:version'
+     * @see JkVersionProvider#and(JkModuleId, JkVersion)
+     */
+    public JkVersionProvider and(String versionedModule) {
+        JkUtilsAssert.argument(versionedModule.split(":").length == 3,
+                "versioned module should be expressed as 'group:name:version' was '%s'", versionedModule);
+        String groupAndName = JkUtilsString.substringBeforeLast(versionedModule, ":");
+        String version = JkUtilsString.substringAfterLast(versionedModule, ":");
+        return and(groupAndName, version);
+    }
+
 
     /**
      * @see JkVersionProvider#and(JkModuleId, JkVersion)
