@@ -1,4 +1,5 @@
 import dev.jeka.core.CoreBuild;
+import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
@@ -9,7 +10,6 @@ import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.release.VersionFromGitJkBean;
-import dev.jeka.core.tool.builtins.crypto.GpgJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 
 class MasterBuild extends JkBean {
@@ -22,8 +22,6 @@ class MasterBuild extends JkBean {
 
     @JkInjectProperty("GH_TOKEN")
     public String githubToken;
-
-    final GpgJkBean gpg = getRuntime().getBean(GpgJkBean.class);
 
     final NexusJkBean nexus = getRuntime().getBean(NexusJkBean.class);
 
@@ -50,7 +48,8 @@ class MasterBuild extends JkBean {
     protected void init() throws Exception {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
-        publishRepos = JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.get().getSigner(""));
+        JkGpg gpg = JkGpg.ofStandardProject(this.getBaseDir());
+        publishRepos = JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.getSigner(""));
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::configureSlave);
     }
 

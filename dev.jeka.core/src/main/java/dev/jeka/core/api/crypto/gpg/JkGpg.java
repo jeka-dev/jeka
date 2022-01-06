@@ -1,7 +1,10 @@
 package dev.jeka.core.api.crypto.gpg;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,6 +44,22 @@ public final class JkGpg {
      */
     public static JkGpg of(Path pubRing, Path secRing, String password) {
         return new JkGpg(pubRing, secRing, password);
+    }
+
+    public static JkGpg ofStandardProject(Path baseDir) {
+        Path localPub = baseDir.resolve(JkConstants.JEKA_DIR).resolve("gpg/pubring.gpg");
+        Path pub = JkUtilsPath.firstExisting(localPub, JkGpg.getDefaultPubring());
+        if (pub == null) {
+            pub = JkGpg.getDefaultPubring();
+        }
+        Path localSec = baseDir.resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
+        Path sec = JkUtilsPath.firstExisting(localSec, JkGpg.getDefaultSecring());
+        if (sec == null) {
+            sec = JkGpg.getDefaultSecring();
+        }
+        String secretKeyPassword = JkUtilsObject.firstNonNull(System.getProperty("jeka.gpg.passphrase"),
+                System.getProperty("JEKA_GPG_PASSPHRASE"), "");
+        return JkGpg.of(pub, sec, secretKeyPassword);
     }
 
     public boolean isPublicAndSecretRingExist() {

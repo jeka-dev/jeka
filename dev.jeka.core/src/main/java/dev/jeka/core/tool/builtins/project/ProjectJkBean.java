@@ -18,7 +18,6 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.crypto.GpgJkBean;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 import org.w3c.dom.Document;
 
@@ -78,13 +77,6 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
         compiler.setJdkHomesWithProperties(JkProperties.getAllStartingWith("jdk."));
         applyRepo(project);
-        applyGpg(project);
-    }
-
-    private void applyGpg(JkProject project) {
-        GpgJkBean pgpPlugin = getRuntime().getBean(GpgJkBean.class);
-        JkGpg gpg = pgpPlugin.get();
-        applyGpg(gpg, pgpPlugin.keyName, project);
     }
 
     private void applyRepo(JkProject project) {
