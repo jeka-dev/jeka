@@ -58,7 +58,7 @@ public final class JkGpg {
             sec = JkGpg.getDefaultSecring();
         }
         String secretKeyPassword = JkUtilsObject.firstNonNull(System.getProperty("jeka.gpg.passphrase"),
-                System.getProperty("JEKA_GPG_PASSPHRASE"), "");
+                System.getenv("JEKA_GPG_PASSPHRASE"), "");
         return JkGpg.of(pub, sec, secretKeyPassword);
     }
 
