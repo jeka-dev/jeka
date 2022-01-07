@@ -31,7 +31,6 @@ public final class JkGpg {
 
     private final String passphrase;
 
-
     private JkGpg(Path pubRing, Path secRing, String password) {
         super();
         this.pubRing = pubRing;

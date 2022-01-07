@@ -102,7 +102,7 @@ class MasterBuild extends JkBean {
 
     private void configureSlave(ProjectJkBean projectPlugin) {
         versionFromGit.configure(projectPlugin.getProject(), false);
-        if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for releasej
+        if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for release
             projectPlugin.pack.javadoc = true;
         }
         projectPlugin.getProject().getPublication()

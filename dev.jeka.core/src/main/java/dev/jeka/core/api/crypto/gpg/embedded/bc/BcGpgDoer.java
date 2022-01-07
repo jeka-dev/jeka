@@ -133,7 +133,8 @@ final class BcGpgDoer implements JkInternalGpgDoer {
             throw JkUtilsThrowable.unchecked(e);
         } catch (final PGPException e) {
             if (e.getMessage().equals("checksum mismatch at 0 of 20")) {
-                throw new IllegalStateException("Secret key password is probably wrong.", e);
+                String passMessage = pass.length == 0 ? "empty" : "'" + pass[0] + "***********'";
+                throw new IllegalStateException("Secret key password is probably wrong. Was " + passMessage, e);
             }
             throw JkUtilsThrowable.unchecked(e);
         }
