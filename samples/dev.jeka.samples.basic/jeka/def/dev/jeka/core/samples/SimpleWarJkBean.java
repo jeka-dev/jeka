@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkRepoFromProperties;
@@ -24,11 +25,10 @@ public class SimpleWarJkBean extends JkBean {
 
     public String jettyRunnerVersion = "9.4.28.v20200408";
 
-    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
-    @Override
-    protected void init() {
-       projectPlugin.getProject().simpleFacade()
+    private void configure(JkProject project) {
+       project.simpleFacade()
                .configureCompileDeps(deps -> deps
                        .and("com.google.guava:guava:30.0-jre")
                        .and("javax.servlet:javax.servlet-api:4.0.1"))
@@ -46,7 +46,7 @@ public class SimpleWarJkBean extends JkBean {
                .getTesting()
                    .setSkipped(true);
        JkJ2eWarProjectAdapter.of()
-               .configure(projectPlugin.getProject());
+               .configure(project);
     }
 
     public void cleanPackRun() {

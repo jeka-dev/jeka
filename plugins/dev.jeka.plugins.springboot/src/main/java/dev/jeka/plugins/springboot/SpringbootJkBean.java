@@ -63,25 +63,10 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("For internal test purpose. If not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
     public String scaffoldDefClasspath;
 
-    private final ProjectJkBean projectBean;
-
-    /**
-     * Right after to be instantiated, plugin instances are likely to configured by the owning build.
-     * Therefore, every plugin members that are likely to be configured by the owning build must be
-     * initialized in the constructor.
-     */
-    protected SpringbootJkBean() {
-        projectBean = getRuntime().getBean(ProjectJkBean.class);
-    }
+    private final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     public void setSpringbootVersion(String springbootVersion) {
         this.springbootVersion = springbootVersion;
-    }
-
-    @Override
-    @JkDoc("Modifies the Java project from Project plugin in such this project produces a SpringBoot jar as the main artifact.")
-    protected void postInit() {
-        configure(projectBean.getProject());
     }
 
     @JkDoc("Run Springboot application from the generated jar")
@@ -137,7 +122,7 @@ public final class SpringbootJkBean extends JkBean {
 
         // define bootable jar as main artifact
         JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
-        Consumer<Path> bootJar = this::createBootJar;
+        Consumer<Path> bootJar = path -> this.createBootJar(project, path);
         artifactProducer.putMainArtifact(bootJar);
 
         // add original jar artifact
@@ -152,7 +137,7 @@ public final class SpringbootJkBean extends JkBean {
             String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/Build.java"));
             String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
             code = code.replace("${dependencyDescription}", defClasspath);
-            code = code.replace("${springbootVersion}", latestSpringbootVersion());
+            code = code.replace("${springbootVersion}", latestSpringbootVersion(project));
             final String jkClassCode = code;
             scaffold.getScaffolder().setJekaClassCodeProvider(() -> jkClassCode);
             scaffold.getScaffolder().getExtraActions()
@@ -163,33 +148,37 @@ public final class SpringbootJkBean extends JkBean {
     /**
      * Creates the bootable jar at the standard location.
      */
-    public void createBootJar() {
-        JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
-        createBootJar(artifactProducer.getMainArtifactPath());
+    private void createBootJar(JkProject project) {
+        JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
+        createBootJar(project, artifactProducer.getMainArtifactPath());
     }
 
     /**
      * Creates the bootable jar at the specified location.
      */
-    public void createBootJar(Path target) {
-        JkProjectConstruction construction = projectBean.getProject().getConstruction();
-        JkStandardFileArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
+    private void createBootJar(JkProject project, Path target) {
+        JkProjectConstruction construction = project.getConstruction();
+        JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
         JkDependencyResolver dependencyResolver = construction.getDependencyResolver();
-        JkVersionProvider versionProvider = projectBean.getProject().getConstruction().getDependencyResolver()
+        JkVersionProvider versionProvider = project.getConstruction().getDependencyResolver()
                 .resolveBom(JkModuleDependency.of(BOM_COORDINATE + springbootVersion));
         JkVersion loaderVersion = versionProvider.getVersionOf(JkSpringModules.Boot.LOADER);
         JkDependencySet bootloaderDependency = JkDependencySet.of(JkModuleDependency.of(JkSpringModules.Boot.LOADER))
                 .andBom(BOM_COORDINATE + springbootVersion);
         Path bootloader = dependencyResolver.resolve(bootloaderDependency).getFiles().getEntry(0);
         final JkPathSequence embeddedJars = construction.getDependencyResolver().resolve(
-                construction.getRuntimeDependencies().normalised(projectBean.getProject().getDuplicateConflictStrategy()))
+                construction.getRuntimeDependencies().normalised(project.getDuplicateConflictStrategy()))
                 .getFiles();
-        Path originalJarPath = projectBean.getProject().getArtifactProducer().getArtifactPath(ORIGINAL_ARTIFACT);
+        Path originalJarPath = project.getArtifactProducer().getArtifactPath(ORIGINAL_ARTIFACT);
         if (!Files.exists(originalJarPath)) {
             construction.createBinJar(originalJarPath);
         }
         createBootJar(originalJarPath, embeddedJars, bootloader,
                 artifactProducer.getMainArtifactPath(), springbootVersion);
+    }
+
+    public void createBootJar() {
+        createBootJar(projectBean.getProject());
     }
 
     public ProjectJkBean projectBean() {
@@ -249,9 +238,9 @@ public final class SpringbootJkBean extends JkBean {
                 .getMainAttribute(JkManifest.IMPLEMENTATION_VERSION);
     }
 
-    private String latestSpringbootVersion() {
+    private String latestSpringbootVersion(JkProject project) {
         try {
-            List<String> springbootVersions = projectBean.getProject().getConstruction().getDependencyResolver()
+            List<String> springbootVersions = project.getConstruction().getDependencyResolver()
                     .searchVersions(JkSpringModules.Boot.STARTER_PARENT);
             return springbootVersions.stream()
                     .sorted(JkVersion.VERSION_COMPARATOR.reversed())

@@ -45,11 +45,9 @@ import dev.jeka.core.api.project.JkProject;
 
 class Build extends JkBean {
 
-    ProjectJkBean projectBean = getRuntime().getBean(ProjectJkean.class);
-
-    @Override
-    protected void init() {
-        JkProject project = projectBean.getProject();
+    ProjectJkBean projectBean = getBean(ProjectJkean.class).configure(this::configure);
+    
+    private void configure(JkProject project) {
         
         // Optional indication about Jeka version compatibility
         JkJekaVersionCompatibilityChecker.setCompatibilityRange(project.getConstruction().getManifest(),

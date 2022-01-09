@@ -43,18 +43,15 @@ public class VersionFromGitJkBean extends JkBean {
     protected VersionFromGitJkBean() {
         GitJkBean gitPlugin = getRuntime().getBeanOptional(GitJkBean.class).orElse(null);
         git = gitPlugin != null ? gitPlugin.getGitProcess() : JkGitProcess.of(getBaseDir());
-    }
-
-    @Override
-    protected void postInit() {
         if (autoConfigureProject) {
             ProjectJkBean projectPlugin = getRuntime().getBeanOptional(ProjectJkBean.class).orElse(null);
             if (projectPlugin == null) {
                 return;
             }
-            configure(projectPlugin.getProject(), tagAfterPublish);
+            projectPlugin.configure(project -> configure(project, tagAfterPublish));
         }
     }
+
 
     /**
      * Configure the specified project to use git version for publishing and tagging the repository.
@@ -78,12 +75,13 @@ public class VersionFromGitJkBean extends JkBean {
         if (cachedVersion != null) {
             return cachedVersion;
         }
-        String currentTagVersion = git.getVersionFromTag(tagPrefixForVersion);
-        String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentVersionPrefix);
-        cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion)
-                .orElseGet(() -> git.getVersionFromTag(tagPrefixForVersion)));
-        if (!cachedVersion.isSnapshot() && git.isWorkspaceDirty()) {
-            cachedVersion = cachedVersion.toSnapshot();
+        boolean dirty = git.isWorkspaceDirty();
+        if (dirty) {
+            cachedVersion = JkVersion.of(git.getCurrentBranch()).toSnapshot();
+        } else {
+            String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentVersionPrefix);
+            cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion)
+                    .orElseGet(() -> git.getVersionFromTag(tagPrefixForVersion)));
         }
         return cachedVersion;
     }

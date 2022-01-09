@@ -5,11 +5,9 @@ Yes. If you prefer that your Jeka code lies in a distinct project, create a Jeka
 folder and mention where is located the project to build.
 
 ```java
-...
-@Override
-protected void init() { 
-      Path projectPath = this.baseDir().resolve("../myProject");   
-      java.getProject().simpleFacade().setBaseDir(projectPath);
+
+Path projectPath = this.baseDir().resolve("../myProject");   
+project.setBaseDir(projectPath);
       ...
 ```
 

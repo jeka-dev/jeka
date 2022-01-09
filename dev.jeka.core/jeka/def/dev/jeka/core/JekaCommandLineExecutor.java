@@ -46,7 +46,7 @@ public abstract class JekaCommandLineExecutor {
         process(dir, useWrapper)
                 .addParams(JkUtilsString.translateCommandline(command))
                 .inheritJkLogOptions()
-                .addParams("-dcf")
+                .addParams("-dcf", "-lst")
                 .setEnv("JEKA_JDK", JkJavaProcess.CURRENT_JAVA_HOME.normalize().toString())
                 .run();
     }

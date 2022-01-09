@@ -50,10 +50,7 @@ public final class EclipseJkBean extends JkBean {
 
     // ------------------------ plugin methods ----------------------
 
-    @Override
-    protected void postInit() {
-        scaffold.getScaffolder().getExtraActions().append(this::files);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
-    }
+
 
     @JkDoc("Generates Eclipse files (.classpath and .project) in the current directory. The files reflect project " +
             "dependencies and source layout.")

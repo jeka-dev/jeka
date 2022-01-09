@@ -7,6 +7,7 @@ import dev.jeka.core.api.java.JkJavaRunner
 import dev.jeka.core.api.java.JkJavaVersion
 import dev.jeka.core.api.kotlin.JkKotlinModules
 import dev.jeka.core.api.kotlin.JkKotlinModules.COMPILER_PLUGIN_KOTLINX_SERIALIZATION
+import dev.jeka.core.api.project.JkProject
 import dev.jeka.core.api.utils.JkUtilsIO
 import dev.jeka.core.api.utils.JkUtilsPath
 import dev.jeka.core.api.utils.JkUtilsString
@@ -17,7 +18,7 @@ import java.awt.Desktop
 
 class Build : JkBean() {
 
-    val kotlin = getRuntime().getBean(KotlinJkBean::class.java)
+    val kotlin = getBean(KotlinJkBean::class.java);
 
     val serializationVersion = "1.2.1"
     val ktorVersion = "1.6.1"
@@ -30,9 +31,12 @@ class Build : JkBean() {
 
     var nodejsArgs = ""
 
-    override fun init() {
-        val jvmProject = kotlin.jvm().project
-        jvmProject.simpleFacade()
+    init {
+        kotlin.jvm().configurators.append(this::configure);
+    }
+
+    fun configure(project: JkProject) {
+        project.simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .configureCompileDeps { deps -> deps
                     .and("io.ktor:ktor-serialization:$ktorVersion")
@@ -44,8 +48,8 @@ class Build : JkBean() {
                 .configureTestDeps {deps -> deps
                     .and(JkKotlinModules.TEST_JUNIT5)
                 }
-        jvmProject.construction.manifest.addMainClass("ServerKt")
-        jvmProject.includeJavadocAndSources(false, false)
+        project.construction.manifest.addMainClass("ServerKt")
+        project.includeJavadocAndSources(false, false)
         kotlin.jvm()
             .useFatJarForMainArtifact()
             .kotlinCompiler

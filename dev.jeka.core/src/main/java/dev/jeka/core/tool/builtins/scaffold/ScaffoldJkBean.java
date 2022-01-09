@@ -1,11 +1,14 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkRepoFromProperties;
+
+import java.util.function.Consumer;
 
 /**
  * Provides method to generate a project skeleton (folder structure, configuration files, ....)
@@ -13,13 +16,15 @@ import dev.jeka.core.tool.JkRepoFromProperties;
 @JkDoc("Generates project skeletons (folder structure and basic build files).")
 public class ScaffoldJkBean extends JkBean {
 
-    private final JkScaffolder scaffolder;
+    private JkScaffolder scaffolder;
 
     @JkDoc("If set then the wrapper shell script will delegate 'jekaw' call to jekaw script located in the specified folder")
     public String wrapDelegatePath;
 
     @JkDoc("Set the Jeka version to fetch for the wrapper. If null, it will use the same Jeka version than the running one.")
     public String wrapperJekaVersion;
+
+    private JkConsumers<JkScaffolder, Void> configurators = JkConsumers.of();
 
     protected ScaffoldJkBean() {
         this.scaffolder = new JkScaffolder(getBaseDir());
@@ -28,10 +33,6 @@ public class ScaffoldJkBean extends JkBean {
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                 .addRepos(JkRepoFromProperties.getDownloadRepo().toSet());
         this.scaffolder.setDependencyResolver(dependencyResolver);
-    }
-
-    public JkScaffolder getScaffolder() {
-        return scaffolder;
     }
 
     @JkDoc("Generates project skeleton (folders and files necessary to work with the project).")
@@ -46,6 +47,32 @@ public class ScaffoldJkBean extends JkBean {
         } else {
             scaffolder.wrapperWithDelegate(this.wrapDelegatePath);
         }
+    }
+
+    /**
+     * Only call this method after KBean initialisations.
+     */
+    public JkScaffolder getScaffolder() {
+        if (scaffolder == null) {
+            scaffolder = createScaffolder();
+        }
+        return scaffolder;
+    }
+
+    public ScaffoldJkBean configure(Consumer<JkScaffolder> configurator) {
+        this.configurators.append(configurator);
+        return this;
+    }
+
+    private JkScaffolder createScaffolder() {
+        JkScaffolder scaffolder = new JkScaffolder(getBaseDir());
+        scaffolder.setJekaClassCodeProvider(
+                () -> JkUtilsIO.read(ScaffoldJkBean.class.getResource("buildclass.snippet")));
+        final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
+                .addRepos(JkRepoFromProperties.getDownloadRepo().toSet());
+        scaffolder.setDependencyResolver(dependencyResolver);
+        configurators.accept(scaffolder);
+        return scaffolder;
     }
 
 }
