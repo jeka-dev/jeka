@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectCompilation;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
@@ -64,13 +65,13 @@ public class KotlinJkBean extends JkBean {
 
     public JkArtifactId addFatJar(String classifier) {
         JkArtifactId artifactId = JkArtifactId.of(classifier, "jar");
-        this.jvm.project.getArtifactProducer()
+        this.jvm.getProject().getArtifactProducer()
                 .putArtifact(artifactId,
-                        path -> jvm.project.getConstruction().createFatJar(path));
+                        path -> jvm.getProject().getConstruction().createFatJar(path));
         return artifactId;
     }
 
-    @Override
+
     protected void postInit() throws Exception {
         if (common != null) {
             common.setupJvmProject(jvm());
@@ -79,7 +80,7 @@ public class KotlinJkBean extends JkBean {
 
     public class JkKotlinJvmProject {
 
-        private JkProject project;
+        private JkProject cachedProject;
 
         private JkKotlinCompiler kotlinCompiler;
 
@@ -87,11 +88,16 @@ public class KotlinJkBean extends JkBean {
 
         private String kotlinTestSourceDir = "src/test/kotlin-jvm";
 
+        public JkConsumers<JkProject, Void> configurators = JkConsumers.of();
+
         private JkKotlinJvmProject() {
         }
 
         public JkProject getProject() {
-            return project;
+            if (cachedProject == null) {
+                cachedProject = createJavaProject();
+            }
+            return cachedProject;
         }
 
         public JkKotlinCompiler getKotlinCompiler() {
@@ -110,13 +116,14 @@ public class KotlinJkBean extends JkBean {
         }
 
         public JkKotlinJvmProject useFatJarForMainArtifact() {
-            project.getArtifactProducer()
+            getProject().getArtifactProducer()
                     .putArtifact(JkArtifactId.ofMainArtifact("jar"),
-                            path -> project.getConstruction().createFatJar(path));
+                            path -> getProject().getConstruction().createFatJar(path));
             return this;
         }
 
-        private void createJavaProject(JkProject project) {
+        private JkProject createJavaProject() {
+            JkProject project = JkProject.of().setBaseDir(KotlinJkBean.this.getBaseDir());
             JkKotlinCompiler kompiler = getKotlinCompiler();
             String effectiveVersion = kompiler.getVersion();
             JkProjectCompilation<?> prodCompile = project.getConstruction().getCompilation();
@@ -156,6 +163,8 @@ public class KotlinJkBean extends JkBean {
                 }
                 return ideSupport;
             });
+            configurators.accept(project);
+            return project;
         }
 
         private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
@@ -218,8 +227,8 @@ public class KotlinJkBean extends JkBean {
         private JKCommon() {}
 
         private void setupJvmProject(JkKotlinJvmProject jvm) {
-            JkProjectCompilation<?> prodCompile = jvm.project.getConstruction().getCompilation();
-            JkProjectCompilation<?> testCompile = jvm.project.getConstruction().getTesting().getCompilation();
+            JkProjectCompilation<?> prodCompile = jvm.getProject().getConstruction().getCompilation();
+            JkProjectCompilation<?> testCompile = jvm.getProject().getConstruction().getTesting().getCompilation();
             if (testSrcDir != null) {
                 testCompile.getLayout().addSource(testSrcDir);
                 if (addCommonStdLibs) {
@@ -231,7 +240,7 @@ public class KotlinJkBean extends JkBean {
             }
             prodCompile.configureDependencies(deps -> deps.and(compileDependencies));
             testCompile.configureDependencies(deps -> deps.and(testDependencies));
-            jvm.project.setJavaIdeSupport(ideSupport -> {
+            jvm.getProject().setJavaIdeSupport(ideSupport -> {
                 ideSupport.getProdLayout().addSource(srcDir);
                 if (!JkUtilsString.isBlank(testSrcDir)) {
                     ideSupport.getTestLayout().addSource(testSrcDir);

@@ -138,39 +138,13 @@ public final class JkRuntime {
 
         // Instantiate & register beans
         JkLog.startTask("Register KBeans");
-        commands.stream()
+        List<? extends JkBean> beans = commands.stream()
                 .filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
                 .map(EngineCommand::getBeanClass)
                 .distinct()
-                .forEach(this::getBean);
-
-        // Apply post-init
-        List<JkRuntime> runtimes = new LinkedList<>(JkRuntime.RUNTIMES.values());
-        Collections.reverse(runtimes);
-        for (JkRuntime runtime : runtimes) {
-            JkLog.startTask("Post-Initializing beans for project " + runtime);
-            runtime.beans.values().forEach(this::postInit);
-            JkLog.endTask();
-        }
+                .map(this::getBean)
+                .collect(Collectors.toList());
         JkLog.endTask();
-    }
-
-    private void init(JkBean bean) {
-        try {
-            bean.init();
-        } catch (Exception e) {
-            throw new JkException(e, "An exception has been raised while initializing KBean " + bean);
-        }
-    }
-
-    private void postInit(JkBean bean) {
-        try {
-            JkLog.startTask("Post-Init KBean " + bean.getClass().getName());
-            bean.postInit();
-            JkLog.endTask();
-        } catch (Exception e) {
-            throw new JkException(e, "An exception has been raised while post-initializing KBean " + bean);
-        }
     }
 
     void run(List<EngineCommand> commands) {
@@ -185,20 +159,6 @@ public final class JkRuntime {
                             + bean.getClass());
                 }
                 JkUtilsReflect.invoke(bean, method);
-            }
-        }
-    }
-
-    private void postInitBeans() {
-        List<JkBean> beans = getBeans();
-        Collections.reverse(beans);
-        for (JkBean bean : beans) {
-            try {
-                JkLog.startTask("PostInit KBean " + bean);
-                bean.postInit();
-                JkLog.endTask();
-            } catch (Exception e) {
-                throw JkUtilsThrowable.unchecked(e);
             }
         }
     }
@@ -220,7 +180,6 @@ public final class JkRuntime {
                     }
                 });
         FieldInjector.injectAnnotatedProperties(bean);
-        init(bean);
         return bean;
     }
 

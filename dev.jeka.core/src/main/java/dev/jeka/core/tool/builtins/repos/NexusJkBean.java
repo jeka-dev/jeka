@@ -22,17 +22,20 @@ public class NexusJkBean extends JkBean {
     @JkDoc("Comma separated filters for taking in account only specified repositories with specified profile name.")
     public String profileNamesFilter = "";
 
-    @Override
-    protected void postInit() throws Exception {
+    protected NexusJkBean() throws Exception {
         ProjectJkBean projectBean = getRuntime().getBeanOptional(ProjectJkBean.class).orElse(null);
         if (projectBean == null) {
             JkLog.warn("No project plugin configured here.");
             return;
         }
-        String[] profileNames = JkUtilsString.isBlank(profileNamesFilter) ? new String[0]
-                : profileNamesFilter.split(",");
-        projectBean.getProject().getPublication().getPostActions().append(TASK_NAME, () -> {
-            JkRepo repo = getFirst(projectBean.getProject());
+        projectBean.configure(this::configure);
+    }
+
+    private void configure(JkProject project) {
+        project.getPublication().getPostActions().append(TASK_NAME, () -> {
+            String[] profileNames = JkUtilsString.isBlank(profileNamesFilter) ? new String[0]
+                    : profileNamesFilter.split(",");
+            JkRepo repo = getFirst(project);
             if (repo != null) {
                 JkNexusRepos.ofUrlAndCredentials(repo).closeAndReleaseOpenRepositories(profileNames);
             } else {

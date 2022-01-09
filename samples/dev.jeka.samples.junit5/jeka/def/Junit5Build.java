@@ -1,3 +1,4 @@
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
@@ -31,15 +32,14 @@ import java.nio.file.Path;
 @JkInjectClasspath("org.junit.platform:junit-platform-launcher:1.8.1")
 class Junit5Build extends JkBean {
 
-    final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
      * fields have already been injected from command line.
      */
-    @Override
-    protected void init() {
-        projectPlugin.getProject()
+    private void configure(JkProject project) {
+        project
             .getConstruction()
                 .getTesting()
                     .getCompilation()
@@ -74,7 +74,7 @@ class Junit5Build extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        clean(); projectBean.pack();
     }
 
     public void checkReportGenerated() {

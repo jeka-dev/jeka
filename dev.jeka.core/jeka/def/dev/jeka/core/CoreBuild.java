@@ -39,13 +39,12 @@ public class CoreBuild extends JkBean {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     public boolean runIT;
 
-    @Override
-    protected void init()  {
-        projectBean.getProject()
+    private void configure(JkProject project)  {
+        project
             .getArtifactProducer()
                 .putMainArtifact(this::doPackWithEmbedded)
                 .putArtifact(DISTRIB_FILE_ID, this::doDistrib)

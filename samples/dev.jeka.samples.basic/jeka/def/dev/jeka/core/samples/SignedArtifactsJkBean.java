@@ -4,6 +4,7 @@ import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectProperty;
@@ -33,7 +34,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
  */
 public class SignedArtifactsJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
@@ -52,9 +53,8 @@ public class SignedArtifactsJkBean extends JkBean {
 
     public String secringPassword = "jeka-pwd";  // Normally injected from command line
 
-    @Override
-    protected void init() {
-        projectPlugin.getProject().simpleFacade()
+    private void configure(JkProject project) {
+        project.simpleFacade()
             .configureCompileDeps(deps -> deps
                 .and(GUAVA.version("30.0-jre"))
             )

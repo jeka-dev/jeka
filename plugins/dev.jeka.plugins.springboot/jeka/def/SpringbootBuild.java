@@ -1,5 +1,6 @@
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
@@ -8,11 +9,10 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class SpringbootBuild extends JkBean {
 
-    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class).configure(this::configure);
 
-    @Override
-    protected void init() {
-        projectBean.getProject().simpleFacade()
+    private void configure(JkProject project) {
+       project.simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .configureCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
@@ -20,7 +20,7 @@ public class SpringbootBuild extends JkBean {
                 .configureRuntimeDeps(deps -> deps
                         .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
                 );
-        projectBean.getProject().getPublication()
+        project.getPublication()
             .setModuleId("dev.jeka:springboot-plugin")
             .getMaven()
                 .getPomMetadata()

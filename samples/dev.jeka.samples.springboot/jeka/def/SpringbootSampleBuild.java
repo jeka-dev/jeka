@@ -1,6 +1,5 @@
-import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkIml;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
@@ -12,14 +11,19 @@ import dev.jeka.plugins.springboot.JkSpringModules.Boot;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
 class SpringbootSampleBuild extends JkBean {
 
-    private final SpringbootJkBean springboot = getRuntime().getBean(SpringbootJkBean.class);
+    private final SpringbootJkBean springboot = getBean(SpringbootJkBean.class);
 
-    private final IntellijJkBean intellijJkBean = getRuntime().getBean(IntellijJkBean.class);
+    private final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class);
 
-    @Override
-    protected void init() {
+    SpringbootSampleBuild() {
         springboot.setSpringbootVersion("2.5.5");
-        springboot.projectBean().getProject().simpleFacade()
+        springboot.projectBean().configure(this::configure);
+        intellijJkBean.configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
+        intellijJkBean.configureIml(this::configure);
+    }
+
+    private void configure(JkProject project) {
+        project.simpleFacade()
                 .configureCompileDeps(deps -> deps
                     .and(Boot.STARTER_WEB)  // Same as .and("org.springframework.boot:spring-boot-starter-web")
                     .and(Boot.STARTER_DATA_JPA)
@@ -32,8 +36,7 @@ class SpringbootSampleBuild extends JkBean {
                 .configureTestDeps(deps -> deps
                     .and(Boot.STARTER_TEST)
                 );
-        intellijJkBean.configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
-        intellijJkBean.configureIml(this::configure);
+
     }
 
     private void configure(JkIml iml) {

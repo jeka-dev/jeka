@@ -43,14 +43,12 @@ class MasterBuild extends JkBean {
 
     private JkRepoSet publishRepos;
 
-
-    @Override
-    protected void init() throws Exception {
+    MasterBuild() throws Exception {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
         JkGpg gpg = JkGpg.ofStandardProject(this.getBaseDir());
         publishRepos = JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.getSigner(""));
-        getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::configureSlave);
+        getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -100,20 +98,21 @@ class MasterBuild extends JkBean {
         });
     }
 
-    private void configureSlave(ProjectJkBean projectPlugin) {
-        versionFromGit.configure(projectPlugin.getProject(), false);
+    private void applyToSlave(ProjectJkBean projectJkBean) {
         if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for release
-            projectPlugin.pack.javadoc = true;
+            projectJkBean.pack.javadoc = true;
         }
-        projectPlugin.getProject().getPublication()
-                .setVersion(versionFromGit::versionAsText)
-                .setRepos(this.publishRepos)
-                .getMaven()
-                    .getPomMetadata()
-                        .setProjectUrl("https://jeka.dev")
-                        .setScmUrl("https://github.com/jerkar/jeka.git")
-                        .addApache2License();
-
+        projectJkBean.configure(project -> {
+                versionFromGit.configure(project, false);
+                project.getPublication()
+                    .setVersion(versionFromGit::versionAsText)
+                    .setRepos(this.publishRepos)
+                    .getMaven()
+                        .getPomMetadata()
+                            .setProjectUrl("https://jeka.dev")
+                            .setScmUrl("https://github.com/jerkar/jeka.git")
+                            .addApache2License();
+        });
     }
 
     public void buildCore() {
@@ -128,6 +127,7 @@ class MasterBuild extends JkBean {
         new PluginScaffoldTester().run();
     }
 
+
     public void publishLocal() {
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publishLocal);
     }
@@ -139,6 +139,12 @@ class MasterBuild extends JkBean {
     static class BuildFast {
         public static void main(String[] args) {
             JkInit.instanceOf(MasterBuild.class, args).buildFast();
+        }
+    }
+
+    static class ShowVersion {
+        public static void main(String[] args) {
+            System.out.println(JkInit.instanceOf(VersionFromGitJkBean.class, args).version());
         }
     }
 

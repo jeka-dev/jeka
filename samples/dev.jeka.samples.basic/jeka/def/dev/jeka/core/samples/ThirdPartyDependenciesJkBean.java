@@ -1,6 +1,7 @@
 package dev.jeka.core.samples;
 
 import com.google.common.base.MoreObjects;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkDoc;
@@ -23,11 +24,10 @@ import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
 @JkInjectClasspath("com.google.guava:guava:21.0")
 public class ThirdPartyDependenciesJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
-    
-    @Override
-    protected void init() {
-        projectPlugin.getProject().simpleFacade()
+    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class).configure(this::configure);
+
+    private void configure(JkProject project) {
+        project.simpleFacade()
             .configureCompileDeps(deps -> deps
                 .and(JAVAX_SERVLET_API.version("3.1.0"))
                 .and(GUAVA.version("30.0-jre")))

@@ -1,17 +1,17 @@
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class Build extends JkBean {
 
-    final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+    final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
      * fields have already been injected from command line.
      */
-    @Override
-    protected void init() {
+    private void configure(JkProject project) {
         projectPlugin.getProject().simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .configureCompileDeps(deps -> deps

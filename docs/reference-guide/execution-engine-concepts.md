@@ -94,7 +94,6 @@ _KBean_ classes share the following characteristics :
 * Extend `JkBean`
 * May declare `public void` methods taking no arguments. All these methods are invokable from command line.
 * May declare `public` fields _(aka KBean properties)_. These field values can be injected from command line.
-* May override `init` and `postInit` methods to perform specific initialisation tasks.
 * They are supposed to be instantiated by the execution engine and not from user code. 
 
 ### Simple Example
@@ -102,37 +101,38 @@ _KBean_ classes share the following characteristics :
 The follwing KBeans exposes `cleanPublish` method which delegate the creation of jar files to the 'project' KBean.
 `ProjectJkBean` is available on Jeka classpath as it is part of the standard KBeans bundled in Jeka distribution.
 
-The _init_ method configures the underlying _JkProject_ hold by the `ProjectJkBean`.
-
+The _configure_ method will be actually invoked at the first `ProjectJkBean#getProject()` call.
 
 ```Java
+import dev.jeka.core.api.project.JkProject;
+
 @JkDoc("A simple example to illustrate KBean concept.")
 public class SimpleJkBean extends JkBean {
 
-    ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class);
+    ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     @JkDoc("Version of junit-jupiter to use for compiling and running tests")
     public String junitVersion = "5.8.1";
 
-    @Override
-    protected void init() {
-       projectBean.getProject().simpleFacade()
-               .configureCompileDeps(deps -> deps
-                   .and("com.google.guava:guava:30.0-jre")
-                   .and("com.sun.jersey:jersey-server:1.19.4")
-               )
-               .configureTestDeps(deps -> deps
-                   .and("org.junit.jupiter:junit-jupiter:" + junitVersion)
-               );
+    private void configure(JkProject project) {
+        project.simpleFacade()
+                .configureCompileDeps(deps -> deps
+                        .and("com.google.guava:guava:30.0-jre")
+                        .and("com.sun.jersey:jersey-server:1.19.4")
+                )
+                .configureTestDeps(deps -> deps
+                        .and("org.junit.jupiter:junit-jupiter:" + junitVersion)
+                );
     }
 
     @JkDoc("Clean, compile, test and create jar files.")
     public void cleanPack() {
-        clean(); projectBean.pack();
+        clean();
+        projectBean.pack();
     }
-    
+
     public static void main(String[] args) {
-      JkInit.instanceOf(SimpleProjectJkBean.class, args).cleanPublish();
+        JkInit.instanceOf(SimpleProjectJkBean.class, args).cleanPublish();
     }
 
 
@@ -260,10 +260,16 @@ There is a bunch of _KBeans_ bundle within _Jeka_. Those _KBeans_ are always pre
 `ProjectJkBean` provides a wrapper around of a `JkProject` for building JVM-based projects. This _KBean_ initialise 
 a default sensitive project object and provides classic method for building project (compile, package in jar, publish ...)
 
+This _KBean_ proposes extension point through its `configure(JkProject)` method. This way, other _KBeans_ can 
+modify the properties of the project to build.
+
 #### intellij
 
 `IntellijJkBean` provides methods for generating metadata files for _IntelliJ_ IDE. Content of _iml_ file is computed 
 according the `JkProject` object found in _project KBean_.
+
+This _KBean_ proposes extension point through its `configure` methods in order to modify the resulting iml
+(e.g. use a module dependency instead of a library dependency).
 
 #### scaffold
 

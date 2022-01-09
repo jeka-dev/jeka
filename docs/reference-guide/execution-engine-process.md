@@ -15,12 +15,9 @@ Jeka follows a specific process before invoking _KBean methods_ :
 8. Identify the default _KBean_ if any. The default _KBean_ is the first class found 
    in _[project dir]/jeka/def_ extending `JkBean`.
 9. Instantiate the default _KBean_. Instantiate means :
-      1. Invoke default constructor
+      1. Invoke _no-arg_ constructor
       2. Inject _KBean properties_ mentioned in command line
-      3. Invoke `init()` method.
 10. Instantiate other _KBean_, if not yet done by order they appear in command line.
-11. Invoke `postInit()` method on all instantiated _KBean_ in reverse order they have
-    been instantiated.
 
 Once _KBeans_ have been instantiated, _KBean methods_ are executed in order they appear
 in the command line.

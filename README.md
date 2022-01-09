@@ -28,9 +28,8 @@ Jeka offers an execution engine, a build API and a powerful plugin architecture 
 class Build extends JkBean {
 
     private JkProject project;
-
-    @Override
-    protected void init() {
+    
+    Build() {
         project = JkProject.of().simpleFacade()
             .setBaseDir(".")
             .includeJavadocAndSources(true, true)
@@ -71,14 +70,16 @@ import dev.jeka.plugins.springboot.SpringbootJkBean;
 @JkInjectClasspath("dev.jeka:springboot-plugin")
 class Build extends JkBean {
 
-    private final SpringbootJkBean springboot = getRuntime().getBean(SpringbootJkBean.class);
+    private final SpringbootJkBean springboot = getBean(SpringbootJkBean.class);
 
     public boolean runIT = true;
-
-    @Override
-    protected void init() {
+    
+    Build() {
         springboot.setSpringbootVersion("2.2.6.RELEASE");
-        JkProject project = springboot.projectBean().getProject();
+        springboot.projectBean().configure(this::configure);
+    }
+    
+    private void configure(JkProject project) {
         project.simpleFacade()
                 .configureCompileDeps(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-web")

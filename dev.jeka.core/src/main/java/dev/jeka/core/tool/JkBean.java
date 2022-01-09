@@ -57,24 +57,13 @@ public abstract class JkBean {
         return getBaseDir().resolve(JkConstants.OUTPUT_PATH);
     }
 
-    /**
-     * This method is invoked once field values have been injected.
-     * Configuration of other KBean is supposed to be implemented here.
-     */
-    protected void init() throws Exception {
-    }
-
-    protected void postInit() throws Exception {
-    }
-
     final String shortName() {
         return name(this.getClass());
     }
 
     /**
-     * Cleans the output directory.
+     * Cleans output directory.
      */
-    @JkDoc("Cleans the output directory.")
     public void clean() {
         Path output = getOutputDir();
         JkLog.info("Clean output directory " + output);
@@ -89,6 +78,10 @@ public abstract class JkBean {
 
     public JkRuntime getRuntime() {
         return runtime;
+    }
+
+    protected <T extends JkBean> T getBean(Class<T> beanClass) {
+        return runtime.getBean(beanClass);
     }
 
     static String name(Class<?> jkBeanClass) {

@@ -1,3 +1,4 @@
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.samples.SimpleProjectJkBean;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectProject;
@@ -12,16 +13,15 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class FatJarJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
     
     @JkInjectProject("../dev.jeka.samples.basic")
     private SimpleProjectJkBean sampleBuild;
 
-    @Override
-    protected void init() {
-        projectPlugin.getProject()
+    private void configure(JkProject project) {
+        project
             .getArtifactProducer()
-                .putMainArtifact(projectPlugin.getProject().getConstruction()::createFatJar)
+                .putMainArtifact(project.getConstruction()::createFatJar)
             .__
             .simpleFacade()
                 .configureCompileDeps(deps -> deps

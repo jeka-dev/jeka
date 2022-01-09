@@ -7,12 +7,10 @@ import dev.jeka.core.tool.JkJekaVersionCompatibilityChecker;
 
 class Build extends JkBean {
 
-    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class);
 
-    @Override
-    protected void init() {
-        JkProject javaProject = projectBean.getProject();
-        javaProject.simpleFacade()
+    private void configure(JkProject project) {
+        project.simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .configureCompileDeps(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
@@ -22,7 +20,7 @@ class Build extends JkBean {
                 "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
 
         // This section is necessary to publish on a public repository
-        javaProject.getPublication()
+        project.getPublication()
                 .setModuleId("your.org:plugin-name")
                 .setVersion("0.0.1-SNAPSHOT")
                 .getMaven()

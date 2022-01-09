@@ -32,13 +32,12 @@ public class JacocoJkBean extends JkBean {
     @JkDoc("Version of Jacoco to use both for agent and report.")
     public String jacocoVersion = "0.8.7";
 
-    @Override
-    protected void postInit() {
+    private ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class).configure(this::configure);
+
+    private void configure(JkProject project) {
         if (!enabled) {
             return;
         }
-        ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
-        final JkProject project = projectPlugin.getProject();
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {
             jacoco = JkJacoco.ofEmbedded();

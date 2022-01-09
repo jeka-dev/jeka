@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
@@ -21,13 +22,12 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class SimpleProjectJkBean extends JkBean {
 
-    public final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+    public final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
-    
-    @Override
-    protected void init() {
-       projectPlugin.getProject().simpleFacade()
+
+    private void configure(JkProject project) {
+       project.simpleFacade()
                .configureCompileDeps(deps -> deps
                    .and("com.google.guava:guava:30.0-jre")
                    .and("com.sun.jersey:jersey-server:1.19.4")

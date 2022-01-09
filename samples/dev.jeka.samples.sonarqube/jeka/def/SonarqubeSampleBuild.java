@@ -17,20 +17,21 @@ import dev.jeka.plugins.sonarqube.JkSonarqube;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
 class SonarqubeSampleBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class);
+    private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class);
 
-    private final JkPluginSonarqube sonarqubePlugin = getRuntime().getBean(JkPluginSonarqube.class);
+    private final JkPluginSonarqube sonarqubePlugin = getBean(JkPluginSonarqube.class);
 
-    @Override
-    protected void init() {
-        projectPlugin.getProject().simpleFacade()
-            .setJvmTargetVersion(JkJavaVersion.V8)
-            .configureCompileDeps(deps -> deps
-                .and("com.github.djeang:vincer-dom:1.4.0")
-            )
-            .configureTestDeps(deps -> deps
-                .and(JkPopularModules.JUNIT_5 + ":+")
-            );
+    SonarqubeSampleBuild() {
+        projectPlugin.configure(project ->
+            project.simpleFacade()
+                .setJvmTargetVersion(JkJavaVersion.V8)
+                .configureCompileDeps(deps -> deps
+                    .and("com.github.djeang:vincer-dom:1.4.0")
+                )
+                .configureTestDeps(deps -> deps
+                    .and(JkPopularModules.JUNIT_5 + ":+")
+                )
+        );
         sonarqubePlugin.provideTestLibs = true;
         sonarqubePlugin.configure(sonarqube -> {
             sonarqube
