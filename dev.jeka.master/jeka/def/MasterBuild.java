@@ -41,13 +41,9 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.springboot")
     SpringbootBuild springbootBuild;
 
-    private JkRepoSet publishRepos;
-
     MasterBuild() throws Exception {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
-        JkGpg gpg = JkGpg.ofStandardProject(this.getBaseDir());
-        publishRepos = JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.getSigner(""));
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
     }
 
@@ -84,7 +80,7 @@ class MasterBuild extends JkBean {
 
     @JkDoc("Closes and releases staging Nexus repositories (typically, after a publish).")
     public void closeAndReleaseRepo() {
-        JkRepo repo = publishRepos.getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
+        JkRepo repo = publishRepo().getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
         JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease();
     }
 
@@ -98,6 +94,11 @@ class MasterBuild extends JkBean {
         });
     }
 
+    private JkRepoSet publishRepo() {
+        JkGpg gpg = JkGpg.ofStandardProject(this.getBaseDir());
+        return  JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, gpg.getSigner(""));
+    }
+
     private void applyToSlave(ProjectJkBean projectJkBean) {
         if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for release
             projectJkBean.pack.javadoc = true;
@@ -106,7 +107,7 @@ class MasterBuild extends JkBean {
                 versionFromGit.configure(project, false);
                 project.getPublication()
                     .setVersion(versionFromGit::versionAsText)
-                    .setRepos(this.publishRepos)
+                    .setRepos(this.publishRepo())
                     .getMaven()
                         .getPomMetadata()
                             .setProjectUrl("https://jeka.dev")
