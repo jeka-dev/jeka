@@ -110,8 +110,6 @@ Explore Jeka possibilities from command line `jekaw -h`.</sub>
 Thanks to wrapper and [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 
 You only need a JDK 8 or higher.
 
-Getting started in 5 minutes : [Here](https://jerkar.github.io/jeka/tutorials/gui-getting-started/)
-
 > Current version of Jeka is no more compatible with Jeka Plugin for Intellij. Stick with Jeka version _0.9.15.RELEASE_ 
 > if you still want to use the IDE plugin. 
 > 
@@ -131,7 +129,7 @@ Visit following pages according your expectation :
 
 * [Reference Guide](https://jerkar.github.io/jeka)
 * [Working examples](https://github.com/jerkar/working-examples)
-* [Getting Started (Needs Intellij Plugin)](dev.jeka.core/src/main/doc/Getting%20Started%20-%20IDE.md) 
+* [Getting Started (Needs Intellij Plugin)](https://jerkar.github.io/jeka/tutorials/gui-getting-started/#getting-started-with-jeka) 
 
 # External plugins
 
