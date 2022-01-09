@@ -7,15 +7,13 @@ Plugin to use the [Jacoco](https://www.eclemma.org/jacoco) coverage tool in your
 
 ## How to use
 
-Just declare the plugin in your build class.  
+Just declare the plugin in your build class.
 
 ```java
 @JkDefClasspath("dev.jeka:jacoco-plugin")
 public class Build extends JkClass {
-    
-    JkPluginProject projectlugin = getPlugin(JkPluginProject.class);
-    
-    JkPluginJacoco jacoco = getPlugin(JkPluginJacoco.class);
+
+    JacocoJkBean jacoco = getPlugin(JacocoJkBean.class);
 
     ...
 }

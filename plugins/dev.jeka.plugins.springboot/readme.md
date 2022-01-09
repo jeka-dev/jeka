@@ -12,6 +12,7 @@ Just declare the plugin in your Jeka class (in _[project Dir]/jeka/def_ ) as abo
 ```java
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
@@ -23,23 +24,20 @@ import static dev.jeka.core.plugins.springboot.JkSpringModules.Boot;
 @JkInjectClasspath("dev.jeka:springboot-plugin")
 class Build extends JkBean {
 
-    private final ProjectJkBean projectBean = getRuntime().getJkBean(ProjectJkBean.class);
+    SpringbootJkBean springbootBean = getJkBean(SpringbootJkBean.class);
 
-    private final springbootJkBean springbootBean = getRuntime().getJkBean(SpringbootJkBean.class); // Load springboot plugin.
-
-    @Override
-    protected void setup() {
+    Build() {
         springbootBean.springbootVersion = "2.5.5";
-        springbootBean.getProject().addDependencies(JkDependencySet.of()
+        springbootBean.projectBean().configure(this::configure);
+    }
+
+    private void configure(JkProject project) {
+        project.addDependencies(JkDependencySet.of()
                 .and(Boot.STARTER_WEB)
                 .and(Boot.STARTER_TEST, JkJavaDepScopes.TEST)
         );
     }
-
-    public static void main(String[] args) {
-        JkInit.instanceOf(Build.class, args).javaPlugin.clean().pack();
-    }
-
+    
 }
 ```
 
@@ -60,7 +58,7 @@ It adds great comfort when picking some Spring dependencies.
  
 ```java
     ...
-    projectBean.getProject().addDependencies(JkDependencySet.of()
+    project.addDependencies(JkDependencySet.of()
             .and(Boot.STARTER_WEB)
             .and(Boot.STARTER_TEST, JkJavaDepScopes.TEST)
             .and(Fwk.JDBC)

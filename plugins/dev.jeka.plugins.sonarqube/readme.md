@@ -14,10 +14,8 @@ Just declare the plugin in your build class.
 ```java
 @JkDefClasspath("dev.jeka:sonarqube-plugin")
 public class Build extends JkClass {
-    
-    JkPluginProject pluginPlugin = getPlugin(JkPluginProject.class);
-    
-    JkPluginSonarqube sonarqube = getPlugin(JkPluginSonarqube.class);
+
+    SonarqubeJkBean sonarqube = getPlugin(SonarqubeJkBean.class);
 
     ...
 }
