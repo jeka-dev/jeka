@@ -215,9 +215,8 @@ Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Ko
 
 Documentation is generated with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). Documentation sources are located (here)[docs].
 
-You must install _Python_ and _Material for MkDocs_ on your computer (`pip install mkdocs-material`) prior to execute following command lines from this repo root directory :
+You must install _Python_ and _Material for MkDocs_ on your computer (`pip install mkdocs-material`) prior to execute following command lines from the repo root directory :
 - `mkdocs serve` : generate and serve the documentation on localhost:8000
-- `mkdocs gh-de
 
 The documentation is also supposed to be regenerated after each push/pull-request.
 
