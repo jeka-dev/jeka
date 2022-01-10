@@ -35,12 +35,33 @@ public final class IntellijJkBean extends JkBean {
 
     private Consumer<JkImlGenerator> imlGeneratorConfigurer = jkImlGenerator2 -> {};
 
-    public void configureImlGenerator(Consumer<JkImlGenerator> imlGeneratorConfigurer) {
+    public IntellijJkBean configureImlGenerator(Consumer<JkImlGenerator> imlGeneratorConfigurer) {
         this.imlGeneratorConfigurer = this.imlGeneratorConfigurer.andThen(imlGeneratorConfigurer);
+        return this;
     }
 
-    public void configureIml(Consumer<JkIml> imlConfigurer) {
+    public IntellijJkBean configureIml(Consumer<JkIml> imlConfigurer) {
         configureImlGenerator(imlGeneratorConfigurer -> imlGeneratorConfigurer.configureIml(imlConfigurer));
+        return this;
+    }
+
+    /**
+     * In multi-module project, it's desirable that a unique module holds the dependency on Jeka, so it can be
+     * updated in a central location.
+     * Calling this method will force the generated iml to have a dependency on the specified module instead
+     * of on the jeka-core jar.
+     */
+    public IntellijJkBean useJekaDefinedInModule(String intellijModule) {
+        configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
+        return configureIml(iml -> iml.getComponent().addModuleOrderEntry(intellijModule, JkIml.Scope.TEST));
+    }
+
+    /**
+     * In multi-module project, Jeka dependency may be already hold by a module this one depends on.
+     * Calling this method prevents to add a direct Jeka dependency on this module.
+     */
+    public IntellijJkBean skipJeka() {
+        return configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
     }
 
     @JkDoc("Generates IntelliJ [my-module].iml file.")
