@@ -1,4 +1,4 @@
-Jerkar welcomes contributors. As a new project there's plenty of free rooms to start : You can extends/debug the jerkar project itself but you van also write addin/plugin for integrate better Jerkar with your favorite technology. Don't be intimidated, it's relatively easy and you can provide great added value just by writing very few code. As an example, look at the [Spring Boot addin](https://github.com/jerkar/spring-boot-addin). 
+Jeka welcomes contributors. As a new project there's plenty of free rooms to start : You can extends/debug the Jeka project but you can also write plugin to integrate better Jeka with your favorite technology. Don't be intimidated, it's relatively easy and you can provide great added value just by writing very few code.
 Also do not hesitate to [contact contributors](https://github.com/djeang) to discuss about what is best to start with.
 
 ## Coding rule
@@ -9,4 +9,4 @@ More concretely :
 * Favor immutable objects when reasonable
 * Embrace a fluent style API
 * Don't use 3rd party dependencies (Use or enrich JkUtilsXxxxx classes for commons). 
-* Jerkar 0.7.x relies on JDK8
+* Jeka must compile on JDK8
