@@ -1,6 +1,6 @@
 The execution engine let to execute an arbitrary Java/Kotlin method from the command line or from an IDE. Methods are declared in regular Java/Kotlin classes. 
 
-Those classes can be either present as source file in the project directory or present as _.class_ in  Jeka classpath.
+Build classes can be defined either as source or _.class_ files in the project to build.
 
 ## Project Structure
 
