@@ -1,7 +1,7 @@
 !!! note
     _Jeka_ organization provides a [plugin](https://plugins.jetbrains.com/plugin/13489-jeka/) for IntelliJ in order to make the following tasks smoother. 
 
-    Here, we'll focus only on how to do it using command line.
+    Here, we'll focus only on how to do it using command line only.
 
 
 You need a JDK 8 or higher installed on your machine. 
