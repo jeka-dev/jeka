@@ -59,7 +59,7 @@ The first Jeka class found is the default Jeka class (sorted by name/package).
 To run `doSomething` method on a specific class named `here.is.MyJekaCommands`, execute `./jekaw -JKC=MyJekaCommands doSomething`.
 
 !!! tip
-    Execute `./jekaw` at the root of the project to knows more about command-line.
+    Execute `./jekaw -help` at the root of the project to knows more about command-line.
 
 ## Import 3rd Party libraries <a name="import"></a>
 
