@@ -1,5 +1,5 @@
 !!! note
-    _Jeka_ organization provides a [plugin](https://plugins.jetbrains.com/plugin/13489-jeka/) for IntelliJ in order to make the following tasks smoother. 
+    _Jeka_ organization provides a [plugin](https://plugins.jetbrains.com/plugin/13489-jeka/) for IntelliJ in order to make the following tasks useless. 
 
     Here, we'll focus only on how to do it using command line only.
 
@@ -84,7 +84,10 @@ Optionally, we can use a classical `main` method to launch it from the IDE.
 
 ### Get Contextual Help
 
-Execute `jeka -h` (or simply `jeka`) to display a contextual help on the console.
+Execute `jeka -h` (or `jeka -help`) to display a contextual help on the console.
 
 Follow instructions to navigate to more specific help context.
+
+!!! warning
+    Do not confuse `jeka -help` and `jeka help`. The last provides only documentation about the default _KBean_.
 
