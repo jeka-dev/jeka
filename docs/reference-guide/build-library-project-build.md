@@ -46,7 +46,7 @@ This is the entry point to launch tests. Tests are executed using the current cl
 We can access to `JkEngineBehavior` by `JkTestProcessor#getEngineBehavior()`. From there we can 
   
   * Select output dir of the test report
-  * Change how test progress are displayed
+  * Change how test progress is displayed
   * Modify how _JUnitPlatform_ will behave by accessing directly to the _JunitPlatform_ API 
 
 ### `JkTestSelection` 
