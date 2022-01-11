@@ -15,6 +15,10 @@ There are two ways of using _jeka_ : by installing _Jeka_ itself or by using a p
 
 ## Install Jeka Distribution
 
+!!! note
+    It is not required to install _Jeka_ distribution to use it. If you fetch a project already holding a wrapper, using `jekaw` would be enough.
+    Nevertheless, if you want to create project from scractch, it will be required.
+
 * Download the latest release from [here](https://search.maven.org/search?q=g:%22dev.jeka%22%20AND%20a:%22jeka-core%22)
   and unpack the _distrib.zip_ wherever you want on your machine. We'll refer to this directory as [JEKA HOME].
 * Add [JEKA HOME] to your _PATH_ environment variable.
