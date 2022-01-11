@@ -38,20 +38,26 @@ code against *Junit-Platform* for fine-tuning.
 
 The API classes all belongs to `dev.jeka.core.api.java.testing` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java/testing).
 
-* `JkTestProcessor` This is the entry point to launch tests. Tests are executed using the
-  current classloader classpath + extra class path mentioned in `#launch` method arguments.
+### `JkTestProcessor` 
+
+This is the entry point to launch tests. Tests are executed using the current classloader classpath 
++ extra class path mentioned in `#launch` method arguments.
   
-  We can access to `JkEngineBehavior` by `JkTestProcessor#getEngineBehavior()`. From there we can 
+We can access to `JkEngineBehavior` by `JkTestProcessor#getEngineBehavior()`. From there we can 
   
   * Select output dir of the test report
   * Change how test progress are displayed
-  * Modify how _JUnitPlatform_ will behave by accessing directly to the _JunitPlatfoem` API 
-  
-  
-* `JkTestResult` The result of a test launch : count for found, failure, skip, success ...
+  * Modify how _JUnitPlatform_ will behave by accessing directly to the _JunitPlatform_ API 
 
-* `JkTestSelection` A mean to determine which test to launch. It can be set using file or tag filter. It is
-  also possible to code against *JUnit Platform*
+### `JkTestSelection` 
+
+This is the object passed as argument of `JkTestProcessor#launch` to determine which test to launch. 
+
+It can be set using file or tag filter. It is also possible to code against  _JunitPlatform_ API.
+
+### `JkTestResult` 
+
+The result of a test launch. Ir provides count for tests found, failure, skip, success ...
 
 
 ## Project API
@@ -63,9 +69,7 @@ It introduces the concept of `JkProject` from where is performed compilation, te
 
 The API contains a lot of extension points to add specific behaviors.
 
-<details>
- <summary>Project API structure</summary>
-
+Project Structure 
 ```
 project
 +- baseDir
@@ -125,7 +129,6 @@ project
 |  +- methods : publish(), getVersion(), getModuleId()
 + methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport(), pack()
 ```
- </details>
 
 For simplicity’s sake, `JkProject` provides a facade in order to setup common settings friendly,
 without navigating deep into the structure. From facade, you can
