@@ -40,7 +40,16 @@ The API classes all belongs to `dev.jeka.core.api.java.testing` [package](https:
 
 * `JkTestProcessor` This is the entry point to launch tests. Tests are executed using the
   current classloader classpath + extra class path mentioned in `#launch` method arguments.
+  
+  We can access to `JkEngineBehavior` by `JkTestProcessor#getEngineBehavior()`. From there we can 
+  
+  * Select output dir of the test report
+  * Change how test progress are displayed
+  * Modify how _JUnitPlatform_ will behave by accessing directly to the _JunitPlatfoem` API 
+  
+  
 * `JkTestResult` The result of a test launch : count for found, failure, skip, success ...
+
 * `JkTestSelection` A mean to determine which test to launch. It can be set using file or tag filter. It is
   also possible to code against *JUnit Platform*
 
@@ -90,6 +99,7 @@ project
 |  |  |  +- preActions
 |  |  |  +- postActions
 |  |  |  +- engineBehavior
+|  |  |  |  +- testReportDir
 |  |  |  |  +- progressDisplayer
 |  |  |  |  +- launcherConfiguration (based on junit5 platform API)
 |  |  |  +- testSelection
