@@ -70,7 +70,7 @@ It introduces the concept of `JkProject` from where is performed compilation, te
 The API contains a lot of extension points to add specific behaviors.
 
 Project Structure 
-```
+``` title="JkProject structure"
 project
 +- baseDir
 +- outputDir
