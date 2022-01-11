@@ -1,15 +1,14 @@
-!!! note
-    _Jeka_ organization provides a [plugin](https://plugins.jetbrains.com/plugin/13489-jeka/) for IntelliJ in order to make the following tasks useless. 
-
-    Here, we'll focus only on how to do it using command line only.
-
-
 You need a JDK 8 or higher installed on your machine. 
 To determine the JDK to run upon, _jeka_ looks in priority order :
 
 * _JEKA_JDK_ environment variable ([_JEKA_JDK_]/bin/java must point on _java_ executable)
 * _JAVA_HOME_ environment variable 
 *  _java_ executable accessible from _PATH_ environment variable.
+
+!!! note
+    _Jeka_ organization provides a [plugin](https://plugins.jetbrains.com/plugin/13489-jeka/) for IntelliJ in order to make the following tasks useless. 
+
+    Here, we'll focus only on how to do it using command line only.
 
 There are two ways of using _jeka_ : by installing _Jeka_ itself or by using a project already containing the _Jeka_ wrapper.
 
