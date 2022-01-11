@@ -1,5 +1,7 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+
 class EngineCommand {
 
     enum Action {
@@ -15,6 +17,7 @@ class EngineCommand {
     private String value;  // for properties only
 
     EngineCommand(Action action, Class<? extends JkBean> beanClass, String valueOrMethod, String value) {
+        JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
         this.action = action;
         this.beanClass = beanClass;
         this.member = valueOrMethod;

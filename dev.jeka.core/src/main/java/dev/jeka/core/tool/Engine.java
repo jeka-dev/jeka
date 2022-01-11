@@ -95,8 +95,8 @@ final class Engine {
         runtime.init(resolvedCommands);
         JkLog.endTask();
         JkLog.endTask();
-        JkLog.info("KBeans are ready to run.");
         JkLog.endTask();
+        JkLog.info("KBeans are ready to run.");
         stopBusyIndicator();
         if (!result.compileFailedProjects.getEntries().isEmpty()) {
             JkLog.warn("Def compilation failed on projects " + result.compileFailedProjects.getEntries()
@@ -106,6 +106,9 @@ final class Engine {
         if (Environment.standardOptions.logRuntimeInformation != null) {
             JkLog.info("Jeka Classpath : ");
             computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
+            if (JkLog.isVerbose()) {
+                System.out.println("Classloader : " + JkClassLoader.ofCurrent());
+            }
         }
         runtime.run(resolvedCommands);
     }

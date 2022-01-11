@@ -63,6 +63,9 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("For internal test purpose. If not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
     public String scaffoldDefClasspath;
 
+    @JkDoc("If true, a .war artifact will be generated.")
+    public boolean buildWar;
+
     private final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     public void setSpringbootVersion(String springbootVersion) {
@@ -196,7 +199,6 @@ public final class SpringbootJkBean extends JkBean {
         JkLog.info("Springboot dependency versions will be resolved from " + pomFile);
         return JkPom.of(pomFile);
     }
-
 
     public static void createBootJar(Path original, JkPathSequence libsToInclude, Path bootLoaderJar, Path targetJar,
                                      String springbootVersion) {

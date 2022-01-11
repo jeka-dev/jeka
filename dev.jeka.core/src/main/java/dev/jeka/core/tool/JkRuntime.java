@@ -93,6 +93,7 @@ public final class JkRuntime {
      * a plugin of the specified class at call time, the plugin is loaded then returned.
      */
     public <T extends JkBean> T getBean(Class<T> jkBeanClass) {
+        JkUtilsAssert.argument(jkBeanClass != null, "KBean class cannot be null.");
         JkBean result = beans.get(jkBeanClass);
         if (result == null) {
             JkLog.startTask("Instantiate KBean " + jkBeanClass + " in project '" + projectBaseDir + "'");

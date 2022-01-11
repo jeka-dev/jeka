@@ -90,10 +90,7 @@ final class EngineBeanClassResolver {
 
     private static Class<? extends JkBean> loadUniqueClassOrFail(List<String> matchingBeanClasses, String beanName) {
         if (matchingBeanClasses.isEmpty()) {
-            throw new JkException("Can not find a KBean named '" + beanName
-                    + "'.\nThe name can be the fully qualified class name of the KBean, its uncapitalized "
-                    + "simple class name or its uncapitalized simple class name without the 'JkBean' suffix.\n"
-                    + "Current class loader is : " + JkClassLoader.ofCurrent().toString());
+            throw beanClassNotFound(beanName);
         } else if (matchingBeanClasses.size() > 1) {
             throw new JkException("Several classes matches default bean name '" + beanName + "' : "
                     + matchingBeanClasses + ". Please precise the fully qualified class name of the default bean " +
@@ -101,6 +98,13 @@ final class EngineBeanClassResolver {
         } else {
             return JkClassLoader.ofCurrent().load(matchingBeanClasses.get(0));
         }
+    }
+
+    private static JkException beanClassNotFound(String name) {
+        return new JkException("Can not find a KBean named '" + name
+                + "'.\nThe name can be the fully qualified class name of the KBean, its uncapitalized "
+                + "simple class name or its uncapitalized simple class name without the 'JkBean' suffix.\n"
+                + "Execute jeka -help to display available beans.");
     }
 
     List<String> globalBeanClassNames() {
@@ -168,8 +172,18 @@ final class EngineBeanClassResolver {
 
     private static EngineCommand toEngineCommand(CommandLine.JkBeanAction action,
                                                  Map<String, Class<? extends JkBean>> beanClasses) {
-        Class<? extends JkBean> beanClass = beanClasses.get(action.beanName);
+        Class<? extends JkBean> beanClass = (action.beanName == null)
+                ? beanClasses.get(null)
+                : getJkBeanClass(beanClasses.values(), action.beanName);
         return new EngineCommand(action.action, beanClass, action.member, action.value);
+    }
+
+    private static Class<? extends JkBean> getJkBeanClass(Collection<Class<? extends JkBean>> beanClasses, String name) {
+        return beanClasses.stream()
+                .filter(Objects::nonNull)
+                .filter(beanClass -> JkBean.nameMatches(beanClass.getName(), name))
+                .findFirst()
+                .orElseThrow(() -> beanClassNotFound(name));
     }
 
     private static List<String> findClassesMatchingName(List<String> beanClassNameCandidates, String name) {

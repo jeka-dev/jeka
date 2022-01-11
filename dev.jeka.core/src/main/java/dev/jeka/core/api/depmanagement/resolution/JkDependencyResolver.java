@@ -172,13 +172,11 @@ public final class JkDependencyResolver<T> {
         final JkResolvedDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(
                 allDependencies);
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module")
-                    + resolveResult.getInvolvedModules());
-            JkLog.info(plurialize(resolveResult.getFiles().getEntries().size(), "artifact") + ".");
-        } else {
-            JkLog.info(plurialize(resolveResult.getInvolvedModules().size(), "module") + " : " +
-                    plurialize(resolveResult.getFiles().getEntries().size(), "file") + ".");
+        int moduleCount = resolveResult.getInvolvedModules().size();
+        int fileCount = resolveResult.getFiles().getEntries().size();
+        JkLog.info(plurialize(moduleCount, "module") + " -> " + plurialize(fileCount, "file"));
+        if (JkLog.isVerbose()) {
+            resolveResult.getFiles().forEach(path -> JkLog.info(path.toString()));
         }
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {

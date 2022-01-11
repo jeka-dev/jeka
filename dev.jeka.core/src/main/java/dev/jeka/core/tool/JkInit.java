@@ -104,8 +104,7 @@ public final class JkInit {
             sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
-        sb.append("\nJeka diowload Repositories : " + JkRepoFromProperties.getDownloadRepo());
-        sb.append("\nJeka Repository Cache : " + JkLocator.getJekaRepositoryCache());
+        sb.append("\nJeka download Repositories : " + JkRepoFromProperties.getDownloadRepo());
         JkLog.info(sb.toString());
     }
 

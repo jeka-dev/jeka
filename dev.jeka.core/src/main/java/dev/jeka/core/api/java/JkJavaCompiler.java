@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Compiler for Java source code. Underlying, it uses either a {@link JavaCompiler} instance either an external
@@ -146,7 +147,8 @@ public final class JkJavaCompiler<T> {
         final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
-            throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
+            throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler." +
+                    " Specified options : " + printableOptions(options));
         }
         if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
             JkLog.info("No source files found in " + compileSpec.getSources());
@@ -154,13 +156,21 @@ public final class JkJavaCompiler<T> {
         }
         JkUtilsPath.createDirectories(outputDir);
         String message = "Compile " + compileSpec.getSources()+ " to " + outputDir;
-        if (JkLog.verbosity().isVerbose()) {
-            message = message + " using options : " + String.join(" ", options);
+        if (JkLog.isVerbose()) {
+            message = message + " using options : \n" + printableOptions(options);
         }
         JkLog.startTask(message);
         final boolean result = runCompiler(compileSpec);
         JkLog.endTask();
         return result;
+    }
+
+    private static String printableOptions(List<String> options) {
+        StringBuilder sb = new StringBuilder();
+        options.stream()
+                .flatMap(item -> Stream.of(item.split(";")))
+                .forEach(item -> sb.append(item + "\n"));
+        return sb.toString();
     }
 
     private static List<File> toFiles(Collection<Path> paths) {
