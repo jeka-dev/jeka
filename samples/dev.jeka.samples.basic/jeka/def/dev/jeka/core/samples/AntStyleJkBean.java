@@ -73,7 +73,7 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     public void javadoc() {
         JkJavadocProcessor.of()
-            .make(JkClasspath.of(), JkPathTreeSet.of(src), getOutputDir().resolve("javadoc"));
+            .make(JkClasspath.of(), JkPathTreeSet.ofRoots(src), getOutputDir().resolve("javadoc"));
     }
 
     public void run() {

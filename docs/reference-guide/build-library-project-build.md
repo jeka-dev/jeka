@@ -53,7 +53,7 @@ We can access to `JkEngineBehavior` by `JkTestProcessor#getEngineBehavior()`. Fr
 
 This is the object passed as argument of `JkTestProcessor#launch` to determine which test to launch. 
 
-It can be set using file or tag filter. It is also possible to code against  _JunitPlatform_ API.
+It can be set using file or tag filter. It is also possible to code against  _JunitPlatform_ API (example [here](https://github.com/jerkar/jeka/blob/master/samples/dev.jeka.samples.junit5/jeka/def/Junit5Build.java)).
 
 ### `JkTestResult` 
 

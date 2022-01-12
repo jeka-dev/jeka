@@ -1,5 +1,7 @@
-package dev.jeka.core.api.java.testing;
+package dev.jeka.core.api.testing;
 
+import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.function.JkUnaryOperator;
@@ -14,13 +16,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 /**
  * Processor executing a given bunch of tests existing in compiled Java classes. <p/>
  * This relies on Junit-platform (junit5), but having Junit-platform libraries on the classpath is optional.
- * For most of cases, processors can be used without coding against junit-platform API but it is possible to use
- * directly Junit-platform API for fine tuning.<p/>
+ * For most of the cases, processors can be used without coding against junit-platform API but, it is possible to use
+ * directly Junit-platform API for fine-tuning.<p/>
  * Users can configure <ul>
  *     <li>Runtime support : classpath, forked process</li>
  *     <li>Engine behavior : listeners, reports, progress display </li>
@@ -53,19 +55,9 @@ public final class JkTestProcessor<T> {
 
     private static final String OPENTEST4J_CLASS_NAME = "org.opentest4j.ValueWrapper";
 
-    private static final String JUNIT_PLATFORM_LAUNCHER_JAR_NAME = "junit-platform-launcher-1.8.1.jar";
+    private static final String JUNIT_PLATFORM_LAUNCHER_MODULE = "org.junit.platform:junit-platform-launcher";
 
-    private static final String JUNIT_PLATFORM_REPORTING_JAR_NAME = "junit-platform-reporting-1.8.1.jar";
-
-    private static final String JUNIT_PLATFORM_ENGINE_JAR_NAME = "junit-platform-engine-1.8.1.jar";
-
-    private static final String JUNIT_PLATFORM_COMMON_JAR_NAME = "junit-platform-commons-1.8.1.jar";
-
-    private static final String JUNIT_VINTAGE_ENGINE_JAR_NAME = "junit-vintage-engine-5.8.1.jar";
-
-    private static final String JUNIT_4_JAR_NAME = "junit-4.13.jar";
-
-    private static final String OPENTEST4J_JAR_NAME = "opentest4j-1.2.0.jar";
+    private static final String JUNIT_PLATFORM_REPORTING_MODULE = "org.junit.platform:junit-platform-reporting";
 
     private JkJavaProcess forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName());  // Tests are forked by default
 
@@ -74,6 +66,10 @@ public final class JkTestProcessor<T> {
     private final JkRunnables preActions = JkRunnables.of();
 
     private final JkRunnables postActions = JkRunnables.of();
+
+    private String junitPlatformVersion = "1.8.2";
+
+    private Supplier<JkRepoSet> repoSetSupplier;
 
     /**
      * For parent chaining
@@ -127,34 +123,38 @@ public final class JkTestProcessor<T> {
         return this;
     }
 
+    public String getJunitPlatformVersion() {
+        return junitPlatformVersion;
+    }
+
+    public JkTestProcessor<T> setJunitPlatformVersion(String junitPlatformVersion) {
+        this.junitPlatformVersion = junitPlatformVersion;
+        return this;
+    }
+
+    public JkTestProcessor<T> setRepoSetSupplier(Supplier<JkRepoSet> repoSetSupplier) {
+        this.repoSetSupplier = repoSetSupplier;
+        return this;
+    }
+
     private List<Path> computeClasspath(JkPathSequence testClasspath) {
         JkClasspath result = JkClasspath.of(testClasspath);
         JkClassLoader classloader = JkClassLoader.ofCurrent();
-        result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_JAR_NAME);
-        result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_JAR_NAME);
-        result = addIfNeeded(result, classloader, PLATFORM_COMMONS_CLASS_NAME, JUNIT_PLATFORM_COMMON_JAR_NAME);
-        result = addIfNeeded(result, classloader, PLATFORM_ENGINE_CLASS_NAME, JUNIT_PLATFORM_ENGINE_JAR_NAME);
-        result = addIfNeeded(result, classloader, OPENTEST4J_CLASS_NAME, OPENTEST4J_JAR_NAME);
+        result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_MODULE);
+        result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_MODULE);
         JkUrlClassLoader ucl = JkUrlClassLoader.of(result, classloader.get());
         Class<?> testEngineClass = ucl.toJkClassLoader().load(ENGINE_SERVICE);
-
-        // If no test engine has been registered, we assume the project to use Junit 4
-        // Thus, the vintage engine is loaded along the latest junit 4 version compatible with vintage.
-        if (!ServiceLoader.load(testEngineClass, ucl.get()).iterator().hasNext()) {
-            result = result.and(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION
-                    + JUNIT_VINTAGE_ENGINE_JAR_NAME));
-            result = result.andPrepending(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION
-                    + JUNIT_4_JAR_NAME )); // overwrite junit4 to last version for compliance with vintage
-        }
         return result.getEntries();
     }
 
-    private static JkClasspath addIfNeeded(JkClasspath classpath, JkClassLoader classloader,
-                                           String className, String jarName) {
+    private JkClasspath addIfNeeded(JkClasspath classpath, JkClassLoader classloader,
+                                           String className, String moduleName) {
         JkClasspath result = classpath;
         if (!classloader.isDefined(className)) {
             if (result.getEntryContainingClass(className) == null) {
-                result = result.and(JkInternalClassloader.getEmbeddedLibAsPath(JAR_LOCATION + jarName));
+                String dep = moduleName + ":" + this.junitPlatformVersion;
+                Path path = JkModuleFileProxy.of(this.repoSetSupplier, dep).get();
+                result = result.and(path);
             }
         }
         return result;
@@ -165,6 +165,10 @@ public final class JkTestProcessor<T> {
      * the classpath of the current classloader plus the specified one.
      */
     public JkTestResult launch(JkPathSequence extraTestClasspath, JkTestSelection testSelection) {
+        if (!testSelection.hasTestClasses()) {
+            JkLog.trace("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
+            return JkTestResult.of();
+        }
         final JkTestResult result;
         preActions.run();
         if (forkingProcess == null) {

@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.tool.JkBean;

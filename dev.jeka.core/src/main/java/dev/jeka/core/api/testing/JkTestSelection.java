@@ -1,6 +1,7 @@
-package dev.jeka.core.api.java.testing;
+package dev.jeka.core.api.testing;
 
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.function.JkUnaryOperator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -200,5 +201,9 @@ public final class JkTestSelection<T> implements Cloneable, Serializable {
                 ", includeTags=" + includeTags +
                 ", excludeTags=" + excludeTags +
                 ", discoveryConfigurer=" + discoveryConfigurer;
+    }
+
+    boolean hasTestClasses() {
+        return JkPathTreeSet.ofRoots(this.testClassRoots.getEntries()).containFiles();
     }
 }

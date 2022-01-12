@@ -1,4 +1,5 @@
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
@@ -20,7 +21,7 @@ import java.nio.file.Path;
  * Normally, for most of cases, you won't need it has the Jeka API are yet powerful enough to customize
  * most of the testing scenario.
  *
- * There is 2 points where you can add *junit5 native* instructions from a {@link dev.jeka.core.api.java.testing.JkTestProcessor} :
+ * There is 2 points where you can add *junit5 native* instructions from a {@link JkTestProcessor} :
  * <ul>
  *     <li>getEngineBehavior().setLauncherConfigurer()</li>
  *     <li>getTestSelection().setDiscoveryConfigurer()</li>
@@ -29,7 +30,7 @@ import java.nio.file.Path;
  * {@link org.junit.platform.launcher.core.LauncherConfig} and
  * {@link org.junit.platform.launcher.LauncherDiscoveryRequest}.
  */
-@JkInjectClasspath("org.junit.platform:junit-platform-launcher:1.8.1")
+@JkInjectClasspath("org.junit.platform:junit-platform-launcher:1.8.2")
 class Junit5Build extends JkBean {
 
     final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
@@ -47,7 +48,7 @@ class Junit5Build extends JkBean {
                             .and("org.jdom:jdom2:2.0.6")
                         )
                         .configureDependencies(deps -> deps
-                            .and("org.junit.jupiter:junit-jupiter-api:5.0.0")
+                            .and("org.junit.jupiter:junit-jupiter:5.8.2")
                         ).__
                     .getTestProcessor()
                         .getEngineBehavior()

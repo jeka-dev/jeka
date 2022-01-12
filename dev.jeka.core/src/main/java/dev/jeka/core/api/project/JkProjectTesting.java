@@ -4,9 +4,9 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
-import dev.jeka.core.api.java.testing.JkTestProcessor;
-import dev.jeka.core.api.java.testing.JkTestResult;
-import dev.jeka.core.api.java.testing.JkTestSelection;
+import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestResult;
+import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
@@ -178,7 +178,9 @@ public class JkProjectTesting {
     private JkTestProcessor<JkProjectTesting> defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.ofParent(this);
         final Path reportDir = compilation.getLayout().getOutputDir().resolve(this.reportDir);
-        result.getEngineBehavior()
+        result
+            .setRepoSetSupplier(() -> this.construction.getDependencyResolver().getRepos())
+            .getEngineBehavior()
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
         return result;

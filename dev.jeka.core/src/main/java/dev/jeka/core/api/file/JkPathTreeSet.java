@@ -49,12 +49,19 @@ public final class JkPathTreeSet {
     /**
      * Creates a {@link JkPathTreeSet} from an array of folder.
      */
-    public static JkPathTreeSet of(Path... folders) {
+    public static JkPathTreeSet ofRoots(Path... folders) {
         final List<JkPathTree> dirs = new ArrayList<>(folders.length);
         for (final Path folder : folders) {
             dirs.add(JkPathTree.of(folder));
         }
         return new JkPathTreeSet(dirs);
+    }
+
+    /**
+     * Creates a {@link JkPathTreeSet} from a {@link JkPathSequence}.
+     */
+    public static JkPathTreeSet ofRoots(List<Path> paths) {
+        return ofRoots(paths.toArray(new Path[0]));
     }
 
     // -------------------------- additional elements in set ----------------------------------
@@ -260,8 +267,6 @@ public final class JkPathTreeSet {
     public boolean containFiles() {
         return count(1, false) > 0;
     }
-
-
 
     public JkPathTreeSet resolve(Path path) {
         List<JkPathTree> list = new LinkedList<>();

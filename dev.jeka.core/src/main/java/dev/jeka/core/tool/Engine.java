@@ -269,7 +269,7 @@ final class Engine {
         JkUtilsPath.createDirectories(beanClassesResolver.defClassDir);
         return JkKotlinJvmCompileSpec.of()
                 .setClasspath(defClasspath)
-                .setSources(JkPathTreeSet.of(beanClassesResolver.defSourceDir))
+                .setSources(JkPathTreeSet.ofRoots(beanClassesResolver.defSourceDir))
                 .setOutputDir(JkUtilsPath.relativizeFromWorkingDir(beanClassesResolver.defClassDir));
     }
 

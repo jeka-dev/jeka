@@ -6,6 +6,8 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestSelection;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

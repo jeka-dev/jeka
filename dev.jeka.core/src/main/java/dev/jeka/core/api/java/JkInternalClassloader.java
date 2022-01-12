@@ -26,7 +26,7 @@ public class JkInternalClassloader {
         this.classLoader = classLoader;
     }
 
-    public static final Path URL_CACHE_DIR = JkLocator.getJekaUserHomeDir().resolve("cache/url-content");
+    public static final Path URL_CACHE_DIR = JkLocator.getCacheDir().resolve("url-content");
 
     static {
         JkUtilsPath.createDirectories(URL_CACHE_DIR);

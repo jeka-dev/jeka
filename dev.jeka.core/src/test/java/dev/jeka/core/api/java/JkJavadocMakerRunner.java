@@ -13,7 +13,7 @@ public class JkJavadocMakerRunner {
     public static void main(String[] args) throws Exception {
         Path srcDir = Paths.get(JkJavadocProcessor.class.getProtectionDomain().getCodeSource().getLocation().toURI())
                 .resolve("../../../src/main/java").normalize();
-        JkPathTreeSet sources = JkPathTreeSet.of(srcDir);
+        JkPathTreeSet sources = JkPathTreeSet.ofRoots(srcDir);
         Path out = Files.createTempDirectory("jekatest");
         JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);

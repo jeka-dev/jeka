@@ -1,10 +1,10 @@
-package dev.jeka.core.api.java.testing.embedded.junitplatform;
+package dev.jeka.core.api.testing.embedded.junitplatform;
 
 import dev.jeka.core.api.function.JkUnaryOperator;
-import dev.jeka.core.api.java.testing.JkInternalJunitDoer;
-import dev.jeka.core.api.java.testing.JkTestProcessor;
-import dev.jeka.core.api.java.testing.JkTestResult;
-import dev.jeka.core.api.java.testing.JkTestSelection;
+import dev.jeka.core.api.testing.JkInternalJunitDoer;
+import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestResult;
+import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import org.junit.platform.engine.Filter;

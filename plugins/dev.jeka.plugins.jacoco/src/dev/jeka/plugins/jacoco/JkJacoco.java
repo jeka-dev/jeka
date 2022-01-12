@@ -6,7 +6,7 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 

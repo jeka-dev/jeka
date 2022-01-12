@@ -1,4 +1,4 @@
-package dev.jeka.core.api.java.testing;
+package dev.jeka.core.api.testing;
 
 import dev.jeka.core.api.java.JkInternalClassloader;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public interface JkInternalJunitDoer {
 
     static JkInternalJunitDoer instance(List<Path> extraPaths) {
-        String IMPL_CLASS = "dev.jeka.core.api.java.testing.embedded.junitplatform.JunitPlatformDoer";
+        String IMPL_CLASS = "dev.jeka.core.api.testing.embedded.junitplatform.JunitPlatformDoer";
         return JkInternalClassloader.ofMainEmbeddedLibs(extraPaths)
                 .createCrossClassloaderProxy(JkInternalJunitDoer.class, IMPL_CLASS, "of");
     }

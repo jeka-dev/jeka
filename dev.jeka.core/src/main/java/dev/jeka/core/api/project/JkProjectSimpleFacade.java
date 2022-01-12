@@ -2,7 +2,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.testing.JkTestSelection;
+import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGitProcess;
 
 import java.nio.file.Path;

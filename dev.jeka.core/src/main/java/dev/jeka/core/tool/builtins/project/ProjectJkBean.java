@@ -11,7 +11,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.project.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;

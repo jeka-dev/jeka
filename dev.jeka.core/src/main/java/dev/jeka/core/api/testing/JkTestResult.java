@@ -1,7 +1,8 @@
-package dev.jeka.core.api.java.testing;
+package dev.jeka.core.api.testing;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +30,11 @@ public final class JkTestResult implements Serializable {
 
     public static JkTestResult of(long timeStarted, long timeFinished, JkCount containerCount, JkCount testCount, List<JkFailure> failures) {
         return new JkTestResult(timeStarted, timeFinished, containerCount, testCount, failures);
+    }
+
+    public static JkTestResult of() {
+        return of(System.currentTimeMillis(), System.currentTimeMillis(), JkCount.of(), JkCount.of(),
+                Collections.emptyList());
     }
 
     public long getTimeStarted() {
@@ -89,6 +95,10 @@ public final class JkTestResult implements Serializable {
 
         public static JkCount of(long found, long started, long skipped, long aborted, long succeded, long failed) {
             return new JkCount(found, started, skipped, aborted, succeded, failed);
+        }
+
+        private static JkCount of() {
+            return new JkCount(0, 0, 0, 0, 0, 0);
         }
 
         public long getFound() {

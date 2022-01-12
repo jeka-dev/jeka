@@ -36,7 +36,7 @@ public final class JkJarPacker {
     }
 
     public static JkJarPacker of(Path classDir) {
-        return of(JkPathTreeSet.of(classDir));
+        return of(JkPathTreeSet.ofRoots(classDir));
     }
 
     public JkJarPacker withManifest(JkManifest manifest) {

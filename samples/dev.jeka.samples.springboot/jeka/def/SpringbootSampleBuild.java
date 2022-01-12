@@ -1,3 +1,4 @@
+import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkBean;
