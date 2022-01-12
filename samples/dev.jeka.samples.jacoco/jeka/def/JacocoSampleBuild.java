@@ -24,7 +24,7 @@ public class JacocoSampleBuild extends JkBean {
         jacoco.enabled = true;
         jacoco.xmlReport = true;
         jacoco.jacocoVersion = "0.8.7";
-        intellij.configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
+        intellij.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
         intellij.configureIml(this::configureIml);
     }
 

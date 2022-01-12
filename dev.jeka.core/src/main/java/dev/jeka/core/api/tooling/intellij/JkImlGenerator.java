@@ -11,6 +11,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkRuntime;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +38,7 @@ public final class JkImlGenerator {
     // Only used if ideSupport is <code>null</code>
     private Path baseDir;
 
-    private boolean skipJeka;
+    private boolean excludeJekaLib;
 
     private Consumer<JkIml> imlConfigurer = jkIml -> {};
 
@@ -97,8 +98,8 @@ public final class JkImlGenerator {
         return this;
     }
 
-    public JkImlGenerator setSkipJeka(boolean skipJeka) {
-        this.skipJeka = skipJeka;
+    public JkImlGenerator setExcludeJekaLib(boolean excludeJekaLib) {
+        this.excludeJekaLib = excludeJekaLib;
         return this;
     }
 
@@ -148,8 +149,15 @@ public final class JkImlGenerator {
     // For def, we have computed classpath from runtime
     private List<JkIml.OrderEntry> defOrderEntries() {
         OrderEntries orderEntries = new OrderEntries();
+        JkPathSequence importedClasspath = defImportedProjects.getEntries().stream()
+                        .map(JkRuntime::get)
+                        .map(JkRuntime::getClasspath)
+                        .reduce(JkPathSequence.of(), (ps1, ps2) -> ps1.and(ps2))
+                        .withoutDuplicates();
+
         defClasspath.and(defImportedProjects).getEntries().stream()
-                .filter((path -> !skipJeka || !JkLocator.getJekaJarPath().equals(path)))
+                .filter(path -> !importedClasspath.getEntries().contains(path))
+                .filter(path -> !excludeJekaLib || !JkLocator.getJekaJarPath().equals(path))
                 .filter(path -> !path.endsWith(Paths.get(JkConstants.DEF_BIN_DIR)))
                 .forEach(path -> orderEntries.add(path, JkIml.Scope.TEST));
         return new LinkedList<>(orderEntries.orderEntries);

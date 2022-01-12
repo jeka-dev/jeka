@@ -28,9 +28,6 @@ public final class IntellijJkBean extends JkBean {
             "(only a warning will be notified).")
     public boolean failOnDepsResolutionError = true;
 
-    @JkDoc("If specified, the specified module will be added as dependency in place of tJeka lib. Can be set to empty string for skipping Jeka dependency.")
-    public String jekaModule;
-
     private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
     private Consumer<JkImlGenerator> imlGeneratorConfigurer = jkImlGenerator2 -> {};
@@ -52,7 +49,7 @@ public final class IntellijJkBean extends JkBean {
      * of on the jeka-core jar.
      */
     public IntellijJkBean useJekaDefinedInModule(String intellijModule) {
-        configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
+        configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
         return configureIml(iml -> iml.getComponent().addModuleOrderEntry(intellijModule, JkIml.Scope.TEST));
     }
 
@@ -60,8 +57,8 @@ public final class IntellijJkBean extends JkBean {
      * In multi-module project, Jeka dependency may be already hold by a module this one depends on.
      * Calling this method prevents to add a direct Jeka dependency on this module.
      */
-    public IntellijJkBean skipJeka() {
-        return configureImlGenerator(imlGenerator -> imlGenerator.setSkipJeka(true));
+    public IntellijJkBean excludeJekaLib() {
+        return configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
     }
 
     @JkDoc("Generates IntelliJ [my-module].iml file.")
@@ -144,12 +141,6 @@ public final class IntellijJkBean extends JkBean {
                 .setIdeSupport(IdeSupport.getProjectIde(this))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
                 .setUseVarPath(useVarPath);
-        if (jekaModule != null) {
-            imlGenerator.setSkipJeka(true);
-            if (!jekaModule.trim().isEmpty()) {
-                imlGenerator.configureIml(jkIml -> jkIml.getComponent().addModuleOrderEntry(jekaModule, JkIml.Scope.TEST));
-            }
-        }
         return imlGenerator;
     }
 

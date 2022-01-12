@@ -47,7 +47,6 @@ final class Engine {
 
     static final JkPathMatcher JAVA_OR_KOTLIN_SOURCE_MATCHER = JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER);
 
-
     private final Path projectBaseDir;
 
     private final JkDependencyResolver dependencyResolver;
@@ -86,8 +85,6 @@ final class Engine {
         }
         JkLog.startTask("Setting up runtime");
         JkRuntime runtime = JkRuntime.get(projectBaseDir);
-        runtime.setDependencyResolver(dependencyResolver);
-        runtime.setImportedProjects(result.importedProjects);
         runtime.setClasspath(computedClasspath);
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
                 Environment.standardOptions.jkCBeanName());
@@ -171,10 +168,15 @@ final class Engine {
         JkLog.endTask();
         JkPathSequence resultClasspath = classpath.andPrepend(beanClassesResolver.defClassDir);
         yetCompiledProjects.put(this.projectBaseDir, resultClasspath);
-        return new CompilationResult(
+        CompilationResult compilationResult = new CompilationResult(
                 JkPathSequence.of(compilationContext.importedProjectDirs),
                 JkPathSequence.of(failedProjects).withoutDuplicates(),
                 resultClasspath);
+        JkRuntime runtime = JkRuntime.get(projectBaseDir);
+        runtime.setDependencyResolver(dependencyResolver);
+        runtime.setImportedProjects(compilationResult.importedProjects);
+        runtime.setClasspath(compilationResult.classpath);
+        return compilationResult;
     }
 
     private SingleCompileResult compileDef(JkPathSequence defClasspath, List<String> compileOptions,
