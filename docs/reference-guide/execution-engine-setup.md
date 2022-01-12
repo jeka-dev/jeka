@@ -90,3 +90,13 @@ Follow instructions to navigate to more specific help context.
 !!! warning
     Do not confuse `jeka -help` and `jeka help`. The last provides only documentation about the default _KBean_.
 
+## Customization
+
+For any reasons, we might like to use different location than the standard ones for _Jeka User Home_ and _Jeka Cache_.
+
+We can change the location using following OS environment variable :
+
+  * `JEKA_USER_HOME` : to set the _Jeka User Home_ to a specified location (absolute path).
+  * `JEKA_CACHE_DIR` : to set the cache (mainly all downloaded files), to a specified location (also absolute file)
+
+

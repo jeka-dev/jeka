@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkProperty;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -24,8 +25,9 @@ public final class JkProperties {
         Map<String, String> props = new TreeMap<>();
         props.putAll(readGlobalProperties());
         props.putAll(readProjectProperties(Paths.get("")));
-        System.getProperties().forEach((key, value) -> props.put((String) key, (String) value));
+        props.putAll(Environment.commandLine.getSystemProperties());
         INSTANCE = new JkProperties(props);
+        props.forEach((k,v) -> System.setProperty(k, v));
     }
 
     private final Map<String, String> props;
@@ -44,17 +46,7 @@ public final class JkProperties {
      * </ul>
      */
     public static String get(String key) {
-        String value = System.getProperty(key);
-        if (value == null) {
-            value = System.getenv(key);
-        }
-        if (value == null) {
-            value = INSTANCE.props.get(key);
-        }
-        if (value != null) {
-            INSTANCE.props.put(key, value);
-        }
-        return value;
+        return JkProperty.get(key);
     }
 
     public static boolean isDefined(String key) {

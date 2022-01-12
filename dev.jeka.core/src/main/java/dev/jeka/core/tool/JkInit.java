@@ -32,6 +32,7 @@ public final class JkInit {
      */
     public static <T extends JkBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
+        JkProperties.isDefined(""); // Force static initializer
         if (!Files.isDirectory(Paths.get("jeka")) ) {
             throw new IllegalStateException("The current directory " + Paths.get("").toAbsolutePath()
                     + " does not seem to be a Jeka project as " +
@@ -104,6 +105,7 @@ public final class JkInit {
             sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
+        sb.append("\nJeka Cache Dir : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
         sb.append("\nJeka download Repositories : " + JkRepoFromProperties.getDownloadRepo());
         JkLog.info(sb.toString());
     }

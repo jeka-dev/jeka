@@ -37,9 +37,9 @@ public final class Main {
             return;
         }
         final long start = System.nanoTime();
-        JkUtilsSystem.disableUnsafeWarning();
         try {
             Environment.initialize(args);
+            JkProperties.isDefined(""); // Force static initializer
             JkLog.setDecorator(Environment.standardOptions.logStyle);
             if (Environment.standardOptions.logBanner) {
                 displayIntro();

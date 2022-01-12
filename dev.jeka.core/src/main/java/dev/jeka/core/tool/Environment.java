@@ -47,9 +47,6 @@ class Environment {
 
         // Parse command line
         final CommandLine commandLine = CommandLine.parse(effectiveCommandLineArgs.toArray(new String[0]));
-        for (final Map.Entry<String, String> entry : commandLine.getSystemProperties().entrySet()) {
-            System.setProperty(entry.getKey(), entry.getValue());
-        }
 
         final StandardOptions standardOptions = new StandardOptions(commandLine.getStandardOptions());
         if (standardOptions.logVerbose) {
