@@ -1,5 +1,6 @@
 package dev.jeka.core.api.crypto.gpg;
 
+import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -18,7 +19,13 @@ public interface JkInternalGpgDoer {
         if (clazz != null) {
             return JkUtilsReflect.invokeStaticMethod(clazz, "of");
         }
-        return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
+        String bouncyCastleVersion = "1.70";
+        JkModuleFileProxy bcProviderJar = JkModuleFileProxy.ofStandardRepos("org.bouncycastle:bcprov-jdk15on:"
+                + bouncyCastleVersion);
+        JkModuleFileProxy bcopenPgpApiJar = JkModuleFileProxy.ofStandardRepos("org.bouncycastle:bcpg-jdk15on:"
+                + bouncyCastleVersion);
+        return JkInternalClassloader.ofMainEmbeddedLibs(bcopenPgpApiJar.get(), bcProviderJar.get())
+                .createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
     }
 
 }

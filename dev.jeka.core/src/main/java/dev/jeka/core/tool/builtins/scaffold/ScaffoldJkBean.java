@@ -6,7 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkRepoFromProperties;
+import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
 
 import java.util.function.Consumer;
 

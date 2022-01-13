@@ -1,8 +1,8 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.tool.JkBean;
 
 import java.util.List;
 import java.util.Set;
@@ -21,7 +21,9 @@ public interface JkInternalClasspathScanner {
         if (clazz != null) {
             return JkUtilsReflect.invokeStaticMethod(clazz, "of");
         }
-        return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
+        JkModuleFileProxy classgraphJar = JkModuleFileProxy.ofStandardRepos("io.github.classgraph:classgraph:4.8.41");
+        return JkInternalClassloader.ofMainEmbeddedLibs(classgraphJar.get())
+                .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
     }
 
     List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);

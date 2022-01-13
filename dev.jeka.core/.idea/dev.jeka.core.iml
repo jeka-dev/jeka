@@ -17,15 +17,6 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/jeka/libs/compile/bouncycastle-pgp-152.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/compile/classgraph-4.8.41.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -145,6 +136,26 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/jeka/libs/test/junit-vintage-engine-5.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/jeka/libs/compile/bcpg-jdk15on-1.70.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.ideaLibSources/bcpg-jdk15on-1.70-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/jeka/libs/runtime/bcprov-jdk15on-1.70.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

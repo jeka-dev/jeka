@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.tool.JkRepoFromProperties.getDownloadRepo;
+import static dev.jeka.core.api.depmanagement.JkRepoFromProperties.getDownloadRepo;
 
 /**
  * Engine having responsibility of compile def classes, instantiate KBeans and run.<br/>

@@ -1,17 +1,10 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsString;
 
-import javax.swing.text.html.Option;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  *  Class behaving as a file supplier for a given dependency.
@@ -33,6 +26,10 @@ public final class JkModuleFileProxy {
 
     public static JkModuleFileProxy of(JkRepoSet repoSet, String dependencyDescription) {
         return of(repoSet, JkModuleDependency.of(dependencyDescription));
+    }
+
+    public static JkModuleFileProxy ofStandardRepos(String dependencyDescription) {
+        return of(JkRepoFromProperties.getDownloadRepo().toSet().and(JkRepo.ofMavenCentral()), dependencyDescription);
     }
 
     public Path get() {
