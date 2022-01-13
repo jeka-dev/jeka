@@ -1,9 +1,13 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkUrlFileProxy;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClassloader;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.util.List;
@@ -42,8 +46,25 @@ public interface JkInternalDependencyResolver {
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
         }
-        return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(
+        return InternalVvyClassloader.get().createCrossClassloaderProxy(
                 JkInternalDependencyResolver.class, factoryClassName, "of", repos);
+    }
+
+    static class InternalVvyClassloader {
+
+        private static JkInternalClassloader IVY_CLASSLOADER;
+
+        public static JkInternalClassloader get() {
+            if (IVY_CLASSLOADER != null) {
+                return IVY_CLASSLOADER;
+            }
+            JkUrlFileProxy fileProxy = JkUrlFileProxy.of(
+                    "https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar",
+                    JkLocator.getCacheDir().resolve("downloads").resolve("for-jeka-internal-ivy-2.5.0"));;
+            IVY_CLASSLOADER = JkInternalClassloader.ofMainEmbeddedLibs(fileProxy.get());
+            return IVY_CLASSLOADER;
+        }
+
     }
 
 }

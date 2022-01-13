@@ -124,6 +124,10 @@ public final class JkPathFile {
         return this;
     }
 
+    public JkPathFile fetchContentFrom(String urlString) {
+        return fetchContentFrom(JkUtilsIO.toUrl(urlString));
+    }
+
     /**
      * Returns <code>true</code> if a file already exists at this location.
      */

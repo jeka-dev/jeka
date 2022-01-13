@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,8 +37,8 @@ public class JkInternalClassloader {
         return new JkInternalClassloader(classLoader);
     }
 
-    public static JkInternalClassloader ofMainEmbeddedLibs() {
-        return ofMainEmbeddedLibs(Collections.emptyList());
+    public static JkInternalClassloader ofMainEmbeddedLibs(Path ... extraEntries) {
+        return ofMainEmbeddedLibs(Arrays.asList(extraEntries));
     }
 
     public static JkInternalClassloader ofMainEmbeddedLibs(List<Path> extraEntries) {

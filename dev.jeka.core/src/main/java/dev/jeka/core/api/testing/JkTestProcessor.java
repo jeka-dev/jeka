@@ -153,7 +153,7 @@ public final class JkTestProcessor<T> {
         if (!classloader.isDefined(className)) {
             if (result.getEntryContainingClass(className) == null) {
                 String dep = moduleName + ":" + this.junitPlatformVersion;
-                Path path = JkModuleFileProxy.of(this.repoSetSupplier, dep).get();
+                Path path = JkModuleFileProxy.of(this.repoSetSupplier.get(), dep).get();
                 result = result.and(path);
             }
         }

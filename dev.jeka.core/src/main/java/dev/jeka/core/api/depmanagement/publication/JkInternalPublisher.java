@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -40,7 +41,7 @@ public interface JkInternalPublisher {
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", publishRepos, artifactDir);
         }
-        return JkInternalClassloader.ofMainEmbeddedLibs().createCrossClassloaderProxy(
+        return JkInternalDependencyResolver.InternalVvyClassloader.get().createCrossClassloaderProxy(
                 JkInternalPublisher.class, FACTORY_CLASS_NAME, "of", publishRepos, artifactDir);
 
     }
