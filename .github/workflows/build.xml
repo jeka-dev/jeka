@@ -37,7 +37,7 @@
 	<target name="run" depends="bootstrap">
 		<property environment="env"/>
 		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.master" fork="true" failonerror="true">
-			<arg line="make -lri -lsu -lb -ls=BRACE -lst -liv" />
+			<arg line="make -lri -lsu -lb -ls=BRACE -lst -liv -lna" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

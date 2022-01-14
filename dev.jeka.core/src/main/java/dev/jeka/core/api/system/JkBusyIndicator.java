@@ -1,6 +1,7 @@
 package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsSystem;
+import org.omg.CORBA.Environment;
 
 import java.io.PrintStream;
 
@@ -24,6 +25,9 @@ public class JkBusyIndicator {
     }
 
     public static void start(String message) {
+        if (!JkLog.isAcceptAnimation()) {
+            return;
+        }
         if (instance != null) {
             throw new IllegalStateException("A running instance of Busy Indicator is already running. " +
                     "Stop it prior starting a new one.");

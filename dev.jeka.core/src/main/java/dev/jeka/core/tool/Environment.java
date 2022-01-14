@@ -67,6 +67,8 @@ class Environment {
 
         boolean logVerbose;
 
+        boolean logAnimation = true;
+
         boolean logBanner;
 
         boolean logSetup;
@@ -88,6 +90,7 @@ class Environment {
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "lv");
             this.logIvyVerbose = valueOf(Boolean.class, map, false, "log.ivy.verbose", "liv");
+            this.logAnimation = valueOf(Boolean.class, map, true, "log.no.animation", "lna");
             this.logBanner = valueOf(Boolean.class, map, false,"log.banner", "lb");
             this.logSetup = valueOf(Boolean.class, map, false,"log.setup", "lsu");
             this.logStackTrace = valueOf(Boolean.class, map,false, "log.stacktrace", "lst");

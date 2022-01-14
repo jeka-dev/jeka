@@ -70,6 +70,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         Path baseDir = getBaseDir();
         JkProject project = JkProject.of().setBaseDir(baseDir);
         project.getConstruction().addTextAndLocalDependencies();
+        if (!JkLog.isAcceptAnimation()) {
+            project.getConstruction().getTesting().getTestProcessor().getEngineBehavior().setProgressDisplayer(
+                    JkTestProcessor.JkProgressOutputStyle.SILENT);
+        }
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
         compiler.setJdkHomesWithProperties(JkProperties.getAllStartingWith("jdk."));
         applyRepo(project);

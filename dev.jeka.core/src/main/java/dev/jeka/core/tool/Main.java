@@ -47,6 +47,7 @@ public final class Main {
             if (Environment.standardOptions.logRuntimeInformation != null) {
                 JkInit.displayRuntimeInfo();
             }
+            JkLog.setAcceptAnimation(Environment.standardOptions.logAnimation);
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
                 JkMemoryBufferLogDecorator.activateOnJkLog();
@@ -104,6 +105,7 @@ public final class Main {
                     "exec" , projectDir, args);
             return;
         }
+        JkLog.setAcceptAnimation(Environment.standardOptions.logAnimation);
         if (!Environment.standardOptions.logSetup) {
             JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();

@@ -68,6 +68,9 @@ public final class JkLog implements Serializable {
 
     private static Style decoratorStyle;
 
+    // if false, no animation should be displayed.
+    private static boolean acceptAnimation = true;
+
     private static LinkedList<Long> getStartTimes() {
         LinkedList<Long> result = START_TIMES.get();
         if (result == null) {
@@ -116,6 +119,14 @@ public final class JkLog implements Serializable {
     public static void setVerbosity(Verbosity verbosityArg) {
         JkUtilsAssert.argument(verbosityArg != null, "Verbosity can noot be set to null.");
         verbosity = verbosityArg;
+    }
+
+    public static boolean isAcceptAnimation() {
+        return acceptAnimation;
+    }
+
+    public static void setAcceptAnimation(boolean acceptAnimation) {
+        JkLog.acceptAnimation = acceptAnimation;
     }
 
     static Style getDecoratorStyle() {
@@ -279,6 +290,8 @@ public final class JkLog implements Serializable {
     }
 
     public static abstract class JkLogDecorator implements Serializable {
+
+        private boolean acceptAnimation = true;
 
         private PrintStream targetOut;
 
