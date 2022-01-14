@@ -1,13 +1,11 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.InputStream;
@@ -47,7 +45,7 @@ public final class Main {
             if (Environment.standardOptions.logRuntimeInformation != null) {
                 JkInit.displayRuntimeInfo();
             }
-            JkLog.setAcceptAnimation(Environment.standardOptions.logAnimation);
+            JkLog.setAcceptAnimation(Environment.standardOptions.logNoAnimation);
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
                 JkMemoryBufferLogDecorator.activateOnJkLog();
@@ -105,7 +103,7 @@ public final class Main {
                     "exec" , projectDir, args);
             return;
         }
-        JkLog.setAcceptAnimation(Environment.standardOptions.logAnimation);
+        JkLog.setAcceptAnimation(Environment.standardOptions.logNoAnimation);
         if (!Environment.standardOptions.logSetup) {
             JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();

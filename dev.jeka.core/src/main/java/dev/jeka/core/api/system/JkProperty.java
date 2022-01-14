@@ -26,7 +26,7 @@ public final class JkProperty {
         }
         result = System.getenv(key);
         if (result != null) {
-            return key;
+            return result;
         }
         String upperCaseKey = key.toUpperCase().replace('.', '_').replace('-', '_');
         return System.getenv(upperCaseKey);
