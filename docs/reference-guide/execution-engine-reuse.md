@@ -32,13 +32,14 @@ class MyJkBean extends JkBean {
 
 ## From Binaries
 
-You may want to create a library to extend Jeka, such as a plugin for integrating a specific technology, 
-define a set of dependency versions or feature some utility classes.
+To extend Jeka capabilities, it's possible to create a jar file in order to be used in any _Jeka_ project.
+An extension (or plugin) can contain _KBean_ or not and can have many purposes (integrate a specific technology, 
+predefine set of dependencies, provide utiliy classes, ...).
 
 To achieve it, we need to create a project to pack and export the library.
 
 The project may declare dependencies on Jeka : the simplest is to add a dependency on the jeka jar that 
-is actually build the project using `JkLocator.getJekaJarPath()`.
+is actually building the project using `JkLocator.getJekaJarPath()`.
 
 ```java
 import dev.jeka.core.api.project.JkProject;
