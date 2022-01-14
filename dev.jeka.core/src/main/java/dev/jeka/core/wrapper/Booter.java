@@ -1,5 +1,7 @@
 package dev.jeka.core.wrapper;
 
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -16,16 +18,19 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-/* This class must not depend of any other package in dev.jeka.core project as it
-   will be turned in its own jar.
+/* This class must not depend on any other package in dev.jeka.core project as it will be turned in its own jar.
+
+   This class is made public to be used by IDE tools.
  */
-class Booter {
+public class Booter {
 
     private static final String MAIN_CLASS_NAME = "dev.jeka.core.tool.Main";
 
     private final static String JK_USER_HOM_ENV_NAME = "JEKA_USER_HOME";
 
     private final static String BIN_NAME = "dev.jeka.jeka-core.jar";
+
+    private final static String JK_CACHE_ENV_NAME = "JEKA_CACHE_DIR";
 
     public static void main(String[] args) throws Exception {
         final Path jekawDir = Paths.get(args[0]);
@@ -36,11 +41,7 @@ class Booter {
             final String version = version(props);
             jekaBinPath = getJekaBinPath(version);
             if (!Files.exists(jekaBinPath)) {
-                final Path zip = downloadDistribZip(version);
-                final Path dir = getJekaVersionCacheDir(version);
-                System.out.println("Unzip distribution to " + dir + " ...");
-                Files.createDirectories(dir);
-                unzip(zip, dir);
+                final Path dir = install(version);
                 Files.deleteIfExists(dir.resolve("global.properties"));
                 Files.deleteIfExists(dir.resolve("jeka.bat"));
                 Files.deleteIfExists(dir.resolve("jeka"));
@@ -60,6 +61,23 @@ class Booter {
         final String[] actualArgs = args.length <= 1 ? new String[0]
                 : Arrays.copyOfRange(args, 1, args.length);
         method.invoke(null, (Object) actualArgs);
+    }
+
+    /**
+     * Download and install the jeka distribution of the specified version
+     * @return The directory of the newly installed distribution
+     */
+    public static Path install(String version) {
+        final Path zip = downloadDistribZip(version);
+        final Path dir = getJekaVersionCacheDir(version);
+        System.out.println("Unzip distribution to " + dir + " ...");
+        try {
+            Files.createDirectories(dir);
+            unzip(zip, dir);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return dir;
     }
 
     private static List<URL> getBootLibs() {
@@ -146,6 +164,17 @@ class Booter {
         }
     }
 
+    private static Path getCacheDir() {
+        final Path result;
+        final String env = System.getenv(JK_CACHE_ENV_NAME);
+        if (!JkUtilsString.isBlank(env)) {
+            result = Paths.get(env);
+        } else {
+            result = getJekaUserHomeDir().resolve("cache");
+        }
+        return result;
+    }
+
     private static Path getJekaUserHomeDir() {
         final Path result;
         final String env = System.getenv(JK_USER_HOM_ENV_NAME);
@@ -169,8 +198,8 @@ class Booter {
         return result;
     }
 
-    private static Path getJekaVersionCacheDir(String verion) {
-        final Path result = getJekaUserHomeDir().resolve("cache/wrapper/" + verion);
+    private static Path getJekaVersionCacheDir(String version) {
+        final Path result = getCacheDir().resolve("wrapper/" + version);
         try {
             Files.createDirectories(result);
         } catch (final IOException e) {

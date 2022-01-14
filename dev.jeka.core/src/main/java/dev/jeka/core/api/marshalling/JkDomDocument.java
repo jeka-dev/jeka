@@ -14,6 +14,10 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 
 /**
@@ -84,6 +88,14 @@ public final class JkDomDocument {
         return parse(inputStream, builder);
     }
 
+    public static JkDomDocument parse(Path file) {
+        try (InputStream is = Files.newInputStream(file)) {
+            return parse(is);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     /**
      * Returns thd underlying w3c {@link Document}.
      */
@@ -106,6 +118,14 @@ public final class JkDomDocument {
      */
     public void print(OutputStream out) {
         print(out, configurer -> {});
+    }
+
+    public void save(Path file) {
+        try (OutputStream os = Files.newOutputStream(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+            print(os);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**

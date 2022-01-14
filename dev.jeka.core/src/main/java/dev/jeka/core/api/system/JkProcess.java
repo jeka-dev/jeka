@@ -228,6 +228,9 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
         if (JkLog.isVerbose()) {
             addParams("-lv");
         }
+        if(!JkLog.isAcceptAnimation()) {
+            addParams("-lna");
+        }
         return (T) this;
     }
 

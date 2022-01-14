@@ -426,33 +426,6 @@ public final class JkRepo {
 
     }
 
-    public static Path cachePath(JkModuleDependency moduleDependency) {
-        String moduleName = moduleDependency.getModuleId().getName();
-        Set<JkModuleDependency.JkArtifactSpecification> artifactSpecifications =
-                moduleDependency.getArtifactSpecifications();
-        JkModuleDependency.JkArtifactSpecification artSpec = !moduleDependency.getArtifactSpecifications().isEmpty() ?
-                moduleDependency.getArtifactSpecifications().iterator().next()
-                : JkModuleDependency.JkArtifactSpecification.of("", "jar");
-        String type = JkUtilsString.isBlank(artSpec.getType()) ? "jar" : artSpec.getType();
-        String fileName = cacheFileName(moduleDependency);
-        Path path = JkLocator.getJekaRepositoryCache()
-                .resolve(moduleDependency.getModuleId().getGroup())
-                .resolve(moduleName)
-                .resolve(type + "s")
-                .resolve(fileName);
-        return path;
-    }
 
-    public static String cacheFileName(JkModuleDependency moduleDependency) {
-        String moduleName = moduleDependency.getModuleId().getName();
-        Set<JkModuleDependency.JkArtifactSpecification> artifactSpecifications =
-                moduleDependency.getArtifactSpecifications();
-        JkModuleDependency.JkArtifactSpecification artSpec = !moduleDependency.getArtifactSpecifications().isEmpty() ?
-                moduleDependency.getArtifactSpecifications().iterator().next()
-                : JkModuleDependency.JkArtifactSpecification.of("", "jar");
-        String type = JkUtilsString.isBlank(artSpec.getType()) ? "jar" : artSpec.getType();
-        String classifierElement = JkUtilsString.isBlank(artSpec.getClassifier()) ? "" : "-" + artSpec.getClassifier();
-        return moduleName + "-" + moduleDependency.getVersion() + classifierElement + "." + type;
-    }
 
 }

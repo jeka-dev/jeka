@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -33,7 +34,7 @@ public final class JkModuleFileProxy {
     }
 
     public Path get() {
-        Path result = JkRepo.cachePath(moduleDependency);
+        Path result = moduleDependency.cachePath();
         if (!Files.exists(result)) {
             JkLog.trace("File %s not found in cache.", result);
             Path downloadPath = repoSet.get(moduleDependency);

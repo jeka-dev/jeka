@@ -1,7 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -412,4 +414,34 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
         result = 31 * result + (ideProjectDir != null ? ideProjectDir.hashCode() : 0);
         return result;
     }
+
+    public Path cachePath() {
+        String moduleName = this.getModuleId().getName();
+        Set<JkModuleDependency.JkArtifactSpecification> artifactSpecifications =
+                this.getArtifactSpecifications();
+        JkModuleDependency.JkArtifactSpecification artSpec = !this.getArtifactSpecifications().isEmpty() ?
+                this.getArtifactSpecifications().iterator().next()
+                : JkModuleDependency.JkArtifactSpecification.of("", "jar");
+        String type = JkUtilsString.isBlank(artSpec.getType()) ? "jar" : artSpec.getType();
+        String fileName = cacheFileName();
+        Path path = JkLocator.getJekaRepositoryCache()
+                .resolve(this.getModuleId().getGroup())
+                .resolve(moduleName)
+                .resolve(type + "s")
+                .resolve(fileName);
+        return path;
+    }
+
+    public String cacheFileName() {
+        String moduleName = this.getModuleId().getName();
+        Set<JkModuleDependency.JkArtifactSpecification> artifactSpecifications =
+                this.getArtifactSpecifications();
+        JkModuleDependency.JkArtifactSpecification artSpec = !this.getArtifactSpecifications().isEmpty() ?
+                this.getArtifactSpecifications().iterator().next()
+                : JkModuleDependency.JkArtifactSpecification.of("", "jar");
+        String type = JkUtilsString.isBlank(artSpec.getType()) ? "jar" : artSpec.getType();
+        String classifierElement = JkUtilsString.isBlank(artSpec.getClassifier()) ? "" : "-" + artSpec.getClassifier();
+        return moduleName + "-" + this.getVersion() + classifierElement + "." + type;
+    }
+
 }
