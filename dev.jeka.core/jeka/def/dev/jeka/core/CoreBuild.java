@@ -69,11 +69,6 @@ public class CoreBuild extends JkBean {
                             .mixResourcesAndSources()
                         .__
                     .__
-                    .getTestProcessor()
-                        .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.BAR)
-                        .__
-                    .__
                     .getTestSelection()
                         .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
                         .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)
