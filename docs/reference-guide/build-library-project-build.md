@@ -36,7 +36,7 @@ Jeka testing API mostly hides *Junit Platform*. For most of the cases, you won't
 against *Junit-Platform* API to launch tests with Jeka. Nevertheless, Jeka allows users to
 code against *Junit-Platform* for fine-tuning.
 
-The API classes all belongs to `dev.jeka.core.api.java.testing` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java/testing).
+The API classes all belongs to `dev.jeka.core.api.testing` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java/testing).
 
 ### `JkTestProcessor` 
 

@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -52,7 +51,7 @@ class Environment {
         if (standardOptions.logVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
-        if (standardOptions.logQuiteVerbose) {
+        if (standardOptions.logIvyVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
         Environment.commandLine = commandLine;
@@ -64,7 +63,7 @@ class Environment {
      */
     static class StandardOptions {
 
-        boolean logQuiteVerbose;
+        boolean logIvyVerbose;
 
         boolean logVerbose;
 
@@ -88,7 +87,7 @@ class Environment {
 
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "lv");
-            this.logQuiteVerbose = valueOf(Boolean.class, map, false, "log.ivy.verbose", "lqv");
+            this.logIvyVerbose = valueOf(Boolean.class, map, false, "log.ivy.verbose", "liv");
             this.logBanner = valueOf(Boolean.class, map, false,"log.banner", "lb");
             this.logSetup = valueOf(Boolean.class, map, false,"log.setup", "lsu");
             this.logStackTrace = valueOf(Boolean.class, map,false, "log.stacktrace", "lst");
