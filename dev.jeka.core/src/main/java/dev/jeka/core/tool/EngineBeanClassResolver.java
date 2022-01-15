@@ -118,7 +118,7 @@ final class EngineBeanClassResolver {
                 classLoader = new URLClassLoader(classpath.toUrls());
                 ignoreParent = true;
             }
-            cachedGlobalBeanClassName = JkInternalClasspathScanner.INSTANCE
+            cachedGlobalBeanClassName = JkInternalClasspathScanner.of()
                     .findClassedExtending(classLoader, JkBean.class, path -> true, true, false);
             if (JkLog.isVerbose()) {
                 JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
@@ -155,7 +155,7 @@ final class EngineBeanClassResolver {
                 classLoader = new URLClassLoader(JkPathSequence.of().and(this.defClassDir).toUrls());
                 ignoreParent = true;
             }
-            cachedDefBeanClassNames = JkInternalClasspathScanner.INSTANCE.findClassedExtending(classLoader,
+            cachedDefBeanClassNames = JkInternalClasspathScanner.of().findClassedExtending(classLoader,
                     JkBean.class, EngineBeanClassResolver::scan, true, ignoreParent);
             if (JkLog.isVerbose()) {
                 JkLog.trace("Def JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");

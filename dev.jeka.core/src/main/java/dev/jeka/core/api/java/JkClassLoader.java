@@ -193,7 +193,7 @@ public class JkClassLoader {
         } else {
             StringBuilder result = new StringBuilder();
             result.append(classLoader).append("\n");
-            JkInternalClasspathScanner.INSTANCE.getClasspath(classLoader)
+            JkInternalClasspathScanner.of().getClasspath(classLoader)
                     .forEach(path -> result.append("  ").append(path).append("  \n"));
             return result.toString();
         }
@@ -273,21 +273,21 @@ public class JkClassLoader {
      * Returns all class names having a <code>main</code> method.
      */
     public List<String> findClassesHavingMainMethod() {
-        return JkInternalClasspathScanner.INSTANCE.findClassesHavingMainMethod(this.delegate);
+        return JkInternalClasspathScanner.of().findClassesHavingMainMethod(this.delegate);
     }
 
     /**
      * Returns all classes matching the specified annotation predicate.
      */
     public List<String> findClassesMatchingAnnotations(Predicate<List<String>> annotationNamePredicate) {
-        return JkInternalClasspathScanner.INSTANCE.findClassesMatchingAnnotations(this.delegate, annotationNamePredicate);
+        return JkInternalClasspathScanner.of().findClassesMatchingAnnotations(this.delegate, annotationNamePredicate);
     }
 
     /**
      * Returns the classpath for this classloader excluding elements on the platform/system classloader.
      */
     public JkPathSequence getClasspath() {
-        return JkInternalClasspathScanner.INSTANCE.getClasspath(this.delegate);
+        return JkInternalClasspathScanner.of().getClasspath(this.delegate);
     }
 
 

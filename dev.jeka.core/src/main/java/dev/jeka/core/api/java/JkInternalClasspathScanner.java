@@ -13,17 +13,8 @@ import java.util.function.Predicate;
  */
 public interface JkInternalClasspathScanner {
 
-    JkInternalClasspathScanner INSTANCE = of();
-
     static JkInternalClasspathScanner of() {
-        String IMPL_CLASS = "dev.jeka.core.api.java.embedded.classgraph.ClassGraphClasspathScanner";
-        Class<JkInternalClasspathScanner> clazz = JkClassLoader.ofCurrent().loadIfExist(IMPL_CLASS);
-        if (clazz != null) {
-            return JkUtilsReflect.invokeStaticMethod(clazz, "of");
-        }
-        JkModuleFileProxy classgraphJar = JkModuleFileProxy.ofStandardRepos("io.github.classgraph:classgraph:4.8.41");
-        return JkInternalClassloader.ofMainEmbeddedLibs(classgraphJar.get())
-                .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
+        return Cache.get();
     }
 
     List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);
@@ -43,5 +34,27 @@ public interface JkInternalClasspathScanner {
     }
 
     JkPathSequence getClasspath(ClassLoader classLoader);
+
+    static class Cache {
+
+        private static JkInternalClasspathScanner CACHED_INSTANCE;
+
+        private static JkInternalClasspathScanner get() {
+            if (CACHED_INSTANCE != null) {
+                return CACHED_INSTANCE;
+            }
+            String IMPL_CLASS = "dev.jeka.core.api.java.embedded.classgraph.ClassGraphClasspathScanner";
+            Class<JkInternalClasspathScanner> clazz = JkClassLoader.ofCurrent().loadIfExist(IMPL_CLASS);
+            if (clazz != null) {
+                return JkUtilsReflect.invokeStaticMethod(clazz, "of");
+            }
+            JkModuleFileProxy classgraphJar = JkModuleFileProxy.ofStandardRepos("io.github.classgraph:classgraph:4.8.41");
+            JkInternalClassloader internalClassloader = JkInternalClassloader.ofMainEmbeddedLibs(classgraphJar.get());
+            CACHED_INSTANCE = internalClassloader
+                    .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
+            return CACHED_INSTANCE;
+        }
+
+    }
 
 }
