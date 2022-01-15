@@ -7,6 +7,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.maven.PomJkBean;
@@ -25,6 +26,8 @@ public class SimpleProjectJkBean extends JkBean {
     public final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
+
+    public String checkedValue;
 
     private void configure(JkProject project) {
        project.simpleFacade()
@@ -73,6 +76,10 @@ public class SimpleProjectJkBean extends JkBean {
 
     public void cleanPackPublish() {
         clean(); projectPlugin.pack(); projectPlugin.publishLocal();
+    }
+
+    public void checkValueIsA() {
+        JkUtilsAssert.state("A".equals(checkedValue), "checkedValue field values %s and not 'A'.", checkedValue);
     }
 
     // For debugging purpose

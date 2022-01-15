@@ -18,8 +18,8 @@ class SamplesTester extends JekaCommandLineExecutor {
     }
 
     void run() {
+        runJekaw("dev.jeka.samples.basic", "-kb=simpleProject cleanPackPublish -value=A checkValueIsA");
         runJeka("dev.jeka.samples.springboot", "@../../plugins/dev.jeka.plugins.springboot clean project#pack");
-        runJekaw("dev.jeka.samples.basic", "-kb=simpleProject cleanPackPublish");
         runJekaw("dev.jeka.samples.basic", "-kb=signedArtifacts cleanPackPublish");
         runJekaw("dev.jeka.samples.basic", "-kb=thirdPartyDependencies cleanPack");
         runJekaw("dev.jeka.samples.basic", "-kb=antStyle cleanPackPublish");

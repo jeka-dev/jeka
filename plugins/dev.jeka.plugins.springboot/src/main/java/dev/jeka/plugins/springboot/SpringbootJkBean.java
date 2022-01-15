@@ -142,9 +142,10 @@ public final class SpringbootJkBean extends JkBean {
             code = code.replace("${dependencyDescription}", defClasspath);
             code = code.replace("${springbootVersion}", latestSpringbootVersion(project));
             final String jkClassCode = code;
-            scaffold.getScaffolder().setJekaClassCodeProvider(() -> jkClassCode);
-            scaffold.getScaffolder().getExtraActions()
-                .append(this::scaffoldSample);
+            scaffold.configure(scaffolder -> {
+                scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
+                scaffolder.getExtraActions() .append(this::scaffoldSample);
+            });
         }
     }
 

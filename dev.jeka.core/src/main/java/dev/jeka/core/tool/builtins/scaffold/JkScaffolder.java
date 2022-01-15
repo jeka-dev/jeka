@@ -84,16 +84,18 @@ public final class JkScaffolder {
         extraActions.run();
     }
 
-    public void wrapper() {
+    public void createStandardWrapperStructure() {
+
         JkLog.info("Create shell files.");
         final Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
         JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
-                "to shell scripts");
+                "to generate shell scripts");
         JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
         Path jekawPath = baseDir.resolve("jekaw");
         JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("wrapper/jekaw"), jekawPath,
                 StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         JkPathFile.of(jekawPath).setPosixExecPermissions(true, true, true);
+
         final Path jekaWrapperJar = JkLocator.getJekaJarPath().getParent().resolve("dev.jeka.jeka-core-wrapper.jar");
         final Path wrapperFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/wrapper");
         JkUtilsPath.createDirectories(wrapperFolder);
@@ -112,7 +114,7 @@ public final class JkScaffolder {
         }
     }
 
-    public void wrapperWithDelegate(String delegateFolder) {
+    public void createWrapperStructureWithDelagation(String delegateFolder) {
         JkPathFile newBatFile = JkPathFile.of(baseDir.resolve("jekaw.bat"));
         JkPathFile newShellFile = JkPathFile.of(baseDir.resolve("jekaw"));
         Path batDelegate = baseDir.resolve(delegateFolder).resolve("jekaw.bat");
@@ -131,6 +133,7 @@ public final class JkScaffolder {
             newShellFile.deleteIfExist().createIfNotExist().write(content.getBytes(Charset.forName("utf8")))
                     .setPosixExecPermissions(true, true, true);
         }
+        JkLog.info("Shell scripts generated.");
     }
 
     public void setJekaClassCodeProvider(Supplier<String> codeProvider) {

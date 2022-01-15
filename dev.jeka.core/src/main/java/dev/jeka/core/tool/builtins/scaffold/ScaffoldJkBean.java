@@ -26,53 +26,38 @@ public class ScaffoldJkBean extends JkBean {
 
     private JkConsumers<JkScaffolder, Void> configurators = JkConsumers.of();
 
-    protected ScaffoldJkBean() {
+    private JkScaffolder scaffolder() {
+        if (scaffolder != null) {
+            return scaffolder;
+        }
         this.scaffolder = new JkScaffolder(getBaseDir());
         this.scaffolder.setJekaClassCodeProvider(
                 () -> JkUtilsIO.read(ScaffoldJkBean.class.getResource("buildclass.snippet")));
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                 .addRepos(JkRepoFromProperties.getDownloadRepo().toSet());
         this.scaffolder.setDependencyResolver(dependencyResolver);
+        configurators.accept(scaffolder);
+        return scaffolder;
     }
 
     @JkDoc("Generates project skeleton (folders and files necessary to work with the project).")
     public void run() {
-        scaffolder.run();
+        scaffolder().run();
     }
 
     @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
     public void wrapper() {
-        if (JkUtilsString.isBlank(this.wrapDelegatePath)) {
-            scaffolder.wrapper();
+        System.out.println("----------------" + wrapDelegatePath);
+        if (JkUtilsString.isBlank(wrapDelegatePath)) {
+            scaffolder().createStandardWrapperStructure();
         } else {
-            scaffolder.wrapperWithDelegate(this.wrapDelegatePath);
+            scaffolder.createWrapperStructureWithDelagation(wrapDelegatePath);
         }
-    }
-
-    /**
-     * Only call this method after KBean initialisations.
-     */
-    public JkScaffolder getScaffolder() {
-        if (scaffolder == null) {
-            scaffolder = createScaffolder();
-        }
-        return scaffolder;
     }
 
     public ScaffoldJkBean configure(Consumer<JkScaffolder> configurator) {
         this.configurators.append(configurator);
         return this;
-    }
-
-    private JkScaffolder createScaffolder() {
-        JkScaffolder scaffolder = new JkScaffolder(getBaseDir());
-        scaffolder.setJekaClassCodeProvider(
-                () -> JkUtilsIO.read(ScaffoldJkBean.class.getResource("buildclass.snippet")));
-        final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                .addRepos(JkRepoFromProperties.getDownloadRepo().toSet());
-        scaffolder.setDependencyResolver(dependencyResolver);
-        configurators.accept(scaffolder);
-        return scaffolder;
     }
 
 }
