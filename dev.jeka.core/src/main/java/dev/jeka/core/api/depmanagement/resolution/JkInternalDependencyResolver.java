@@ -60,7 +60,7 @@ public interface JkInternalDependencyResolver {
             }
             JkUrlFileProxy fileProxy = JkUrlFileProxy.of(
                     "https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar",
-                    JkLocator.getCacheDir().resolve("downloads").resolve("for-jeka-internal-ivy-2.5.0"));;
+                    JkModuleDependency.of("org.apache.ivy:ivy:2.5.0").cachePath());
             IVY_CLASSLOADER = JkInternalClassloader.ofMainEmbeddedLibs(fileProxy.get());
             return IVY_CLASSLOADER;
         }

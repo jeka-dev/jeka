@@ -36,8 +36,7 @@ public class JkUrlFileProxy {
             return file;
         }
         JkLog.info("Download " + url + " to " + file);
-        JkPathFile.of(file).createIfNotExist().fetchContentFrom(url);
-        return file;
+        return JkPathFile.of(file).createIfNotExist().fetchContentFrom(url).get();
     }
 
 }
