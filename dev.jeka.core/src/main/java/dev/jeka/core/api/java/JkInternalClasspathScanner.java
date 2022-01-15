@@ -2,6 +2,7 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.util.List;
@@ -49,9 +50,11 @@ public interface JkInternalClasspathScanner {
                 return JkUtilsReflect.invokeStaticMethod(clazz, "of");
             }
             JkModuleFileProxy classgraphJar = JkModuleFileProxy.ofStandardRepos("io.github.classgraph:classgraph:4.8.41");
-            JkInternalClassloader internalClassloader = JkInternalClassloader.ofMainEmbeddedLibs(classgraphJar.get());
+            JkInternalEmbeddedClassloader internalClassloader = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(classgraphJar.get());
             CACHED_INSTANCE = internalClassloader
                     .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
+            JkUtilsAssert.argument(internalClassloader.get().isDefined(IMPL_CLASS), "Class %s not found in %s",
+                IMPL_CLASS,  "embedded lib");
             return CACHED_INSTANCE;
         }
 

@@ -1,7 +1,5 @@
 package dev.jeka.core.wrapper;
 
-import dev.jeka.core.api.utils.JkUtilsString;
-
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -167,7 +165,7 @@ public class Booter {
     private static Path getCacheDir() {
         final Path result;
         final String env = System.getenv(JK_CACHE_ENV_NAME);
-        if (!JkUtilsString.isBlank(env)) {
+        if (env != null && !env.trim().isEmpty()) {
             result = Paths.get(env);
         } else {
             result = getJekaUserHomeDir().resolve("cache");

@@ -7,7 +7,6 @@ import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;

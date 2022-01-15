@@ -60,9 +60,7 @@ public class JkClassLoader {
         try {
             return (Class<T>) delegate.loadClass(className);
         } catch (final ClassNotFoundException | NoClassDefFoundError e) {
-
-            // using this instead of this.delegate may result in stackoverflow due to the toString method
-            throw new IllegalArgumentException("Fail at loading class " + className + " on " + this.delegate, e);
+            throw new IllegalArgumentException("Fail at loading class " + className + " on " + this, e);
         }
     }
 
@@ -190,15 +188,16 @@ public class JkClassLoader {
     }
 
     private static String toString(ClassLoader classLoader) {
+        String result;
         if (classLoader instanceof URLClassLoader) {
-            return ucltoString((URLClassLoader) classLoader);
+            result = ucltoString((URLClassLoader) classLoader);
         } else {
-            StringBuilder result = new StringBuilder();
-            result.append(classLoader).append("\n");
-            JkInternalClasspathScanner.of().getClasspath(classLoader)
-                    .forEach(path -> result.append("  ").append(path).append("  \n"));
-            return result.toString();
+            result = classLoader.toString();
         }
+        if (classLoader.getParent() != null) {
+            result = result + "\n" + toString(classLoader.getParent());
+        }
+        return result;
     }
 
     private static String ucltoString(URLClassLoader urlClassLoader) {
@@ -207,11 +206,7 @@ public class JkClassLoader {
         for (final URL url : urlClassLoader.getURLs()) {
             builder.append("\n  ").append(url);
         }
-        if (urlClassLoader.getParent() != null) {
-            builder.append("\n").append(toString(urlClassLoader.getParent()));
-        }
         return builder.toString();
-
     }
 
     private static Object crossClassLoader(Object object, ClassLoader to) {

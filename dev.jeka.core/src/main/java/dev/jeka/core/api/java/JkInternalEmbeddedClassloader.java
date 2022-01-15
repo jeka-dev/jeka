@@ -11,7 +11,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,11 +18,11 @@ import java.util.stream.Collectors;
 /**
  * Not part of the public API
  */
-public class JkInternalClassloader {
+public class JkInternalEmbeddedClassloader {
 
     private final ClassLoader classLoader;
 
-    private JkInternalClassloader(ClassLoader classLoader) {
+    private JkInternalEmbeddedClassloader(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
@@ -33,18 +32,19 @@ public class JkInternalClassloader {
         JkUtilsPath.createDirectories(URL_CACHE_DIR);
     }
 
-    public static JkInternalClassloader of(ClassLoader classLoader) {
-        return new JkInternalClassloader(classLoader);
+    private static JkInternalEmbeddedClassloader of(ClassLoader classLoader) {
+        return new JkInternalEmbeddedClassloader(classLoader);
     }
 
-    public static JkInternalClassloader ofMainEmbeddedLibs(Path ... extraEntries) {
+    public static JkInternalEmbeddedClassloader ofMainEmbeddedLibs(Path ... extraEntries) {
         return ofMainEmbeddedLibs(Arrays.asList(extraEntries));
     }
 
-    public static JkInternalClassloader ofMainEmbeddedLibs(List<Path> extraEntries) {
+    public static JkInternalEmbeddedClassloader ofMainEmbeddedLibs(List<Path> extraEntries) {
         JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.
         List<Path> pathList = new LinkedList<>();
-        URL embeddedNameUrl = JkClassLoader.ofCurrent().get().getResource("META-INF/jeka-embedded-name");
+        URL embeddedNameUrl =  JkInternalEmbeddedClassloader.class.getClassLoader()
+                .getResource("META-INF/jeka-embedded-name");
         if (embeddedNameUrl != null) {
             String jarName = JkUtilsIO.read(embeddedNameUrl);
             Path file = getEmbeddedLibAsPath("META-INF/" + jarName);
@@ -55,12 +55,12 @@ public class JkInternalClassloader {
                 .map(JkUtilsPath::toUrl)
                 .collect(Collectors.toList());
         URL[] urls = urlList.toArray(new URL[0]);
-        ClassLoader classLoader = new URLClassLoader(urls, JkClassLoader.ofCurrent().get());
+        ClassLoader classLoader = new URLClassLoader(urls,  targetClassloader());
         return of(classLoader);
     }
 
     public static Path getEmbeddedLibAsPath(String resourcePath) {
-        URL url = JkClassLoader.ofCurrent().get().getResource(resourcePath);
+        URL url =  JkInternalEmbeddedClassloader.class.getClassLoader().getResource(resourcePath);
         final String name = resourcePath.contains("/") ? JkUtilsString.substringBeforeLast(resourcePath, "/")
                 : resourcePath;
         Path result = URL_CACHE_DIR.resolve(name);
@@ -82,9 +82,10 @@ public class JkInternalClassloader {
     public <T> T createCrossClassloaderProxy(Class<T> interfaze, String className,
                                              String staticMethodFactory, Object... args) {
         final Object target = invokeStaticMethod(className, staticMethodFactory, args);
-        ClassLoader from = Thread.currentThread().getContextClassLoader();
-        return ((T) Proxy.newProxyInstance(from,
-                new Class[]{interfaze}, new CrossClassloaderInvocationHandler(target, from)));
+        return ((T) Proxy.newProxyInstance(
+                classLoader,
+                new Class[]{interfaze},
+                new CrossClassloaderInvocationHandler(target, classLoader)));
     }
 
     private class CrossClassloaderInvocationHandler implements InvocationHandler {
@@ -107,10 +108,10 @@ public class JkInternalClassloader {
 
     }
 
+
     @SuppressWarnings("unchecked")
-    private <T> T invokeInstanceMethod(ClassLoader from, Object object, Method method,
-                                      Object... args) {
-        final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+    private <T> T invokeInstanceMethod(ClassLoader from, Object object, Method method, Object... args) {
+        ClassLoader preciousClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
             final Object returned = JkUtilsReflect.invoke(object, method, args);
@@ -118,21 +119,28 @@ public class JkInternalClassloader {
         } catch (final IllegalArgumentException e) {
             throw new RuntimeException(e);
         } finally {
-            Thread.currentThread().setContextClassLoader(currentClassLoader);
+            Thread.currentThread().setContextClassLoader(preciousClassLoader);
         }
     }
 
     @SuppressWarnings("unchecked")
     private <T> T invokeStaticMethod(String className, String methodName,
                                     Object... args) {
-        final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+        ClassLoader preciousClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
             final Class<?> clazz = get().load(className);
             return (T) JkUtilsReflect.invokeStaticMethod(clazz, methodName, args);
         } finally {
-            Thread.currentThread().setContextClassLoader(currentClassLoader);
+            Thread.currentThread().setContextClassLoader(preciousClassLoader);
         }
+    }
+
+    private static ClassLoader targetClassloader() {
+        if (JkClassLoader.ofCurrent().isDefined(JkInternalEmbeddedClassloader.class.getName())) {
+            return JkClassLoader.ofCurrent().get();
+        }
+        return JkInternalEmbeddedClassloader.class.getClassLoader();
     }
 
 }

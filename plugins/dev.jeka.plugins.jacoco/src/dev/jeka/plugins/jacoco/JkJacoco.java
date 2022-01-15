@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkInternalClassloader;
+import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
@@ -219,10 +219,10 @@ public final class JkJacoco {
         EmbeddedToolProvider() {
             final URL agentJarUrl = JacocoJkBean.class.getResource("org.jacoco.agent-0.8.7-runtime.jar");
             agentJarFile = JkUtilsIO.copyUrlContentToCacheFile(agentJarUrl, System.out,
-                    JkInternalClassloader.URL_CACHE_DIR);
+                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
             final URL cliJarUrl = JacocoJkBean.class.getResource("org.jacoco.cli-0.8.7-nodeps.jar");
             cliJarFile = JkUtilsIO.copyUrlContentToCacheFile(cliJarUrl, System.out,
-                    JkInternalClassloader.URL_CACHE_DIR);
+                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
         }
 
         @Override

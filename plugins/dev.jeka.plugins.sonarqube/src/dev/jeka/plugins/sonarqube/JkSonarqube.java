@@ -4,7 +4,7 @@ package dev.jeka.plugins.sonarqube;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.java.JkInternalClassloader;
+import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
@@ -211,7 +211,7 @@ public final class JkSonarqube {
         if (this.sonnarScannerVersion == null) {
             URL embeddedUrl = JkSonarqube.class.getResource(SCANNER_JAR_NAME_46);
             JkLog.info("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
-            return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalClassloader.URL_CACHE_DIR);
+            return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalEmbeddedClassloader.URL_CACHE_DIR);
         }
         JkModuleDependency moduleDep = JkModuleDependency
                 .of("org.sonarsource.scanner.cli", "sonar-scanner-cli", this.sonnarScannerVersion)

@@ -2,8 +2,7 @@ package dev.jeka.core.api.crypto.gpg;
 
 import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkInternalClassloader;
-import dev.jeka.core.api.java.JkInternalClasspathScanner;
+import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;
@@ -36,7 +35,7 @@ public interface JkInternalGpgDoer {
                     + bouncyCastleVersion);
             JkModuleFileProxy bcopenPgpApiJar = JkModuleFileProxy.ofStandardRepos("org.bouncycastle:bcpg-jdk15on:"
                     + bouncyCastleVersion);
-            CACHED_INSTANCE =  JkInternalClassloader.ofMainEmbeddedLibs(bcopenPgpApiJar.get(), bcProviderJar.get())
+            CACHED_INSTANCE =  JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(bcopenPgpApiJar.get(), bcProviderJar.get())
                     .createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
             return CACHED_INSTANCE;
         }
