@@ -60,7 +60,9 @@ public class JkClassLoader {
         try {
             return (Class<T>) delegate.loadClass(className);
         } catch (final ClassNotFoundException | NoClassDefFoundError e) {
-            throw new IllegalArgumentException("Fail at loading class " + className + " on " + this, e);
+
+            // using this instead of this.delegate may result in stackoverflow due to the toString method
+            throw new IllegalArgumentException("Fail at loading class " + className + " on " + this.delegate, e);
         }
     }
 
