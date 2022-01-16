@@ -11,7 +11,7 @@ class Build extends JkBean {
 
     private final SpringbootJkBean springboot = getBean(SpringbootJkBean.class);
 
-    private final ProjectJkBean projectJkBean = getBean(ProjectJkBean.class).configureProject(this::configure);
+    private final ProjectJkBean projectJkBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     Build() {
         springboot.setSpringbootVersion("${springbootVersion}");

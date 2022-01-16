@@ -58,9 +58,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     @JkDoc("The output file for the xml dependency description.")
     public Path output;
 
-    // ----------------------------------------------------------------------------------
-
-    private final ScaffoldJkBean scaffoldJkBean = getBean(ScaffoldJkBean.class);
+    private final ScaffoldJkBean scaffoldJkBean = getBean(ScaffoldJkBean.class).configure(this::configure);
 
     private JkProject project;
 
@@ -79,7 +77,6 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         applyRepo(project);
         projectConfigurators.accept(project);
         this.applyPostSetupOptions(project);
-        scaffoldJkBean.configure(scaffolder-> configureScaffolder(scaffolder, project));
         return project;
     }
 
@@ -131,7 +128,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         }
     }
 
-    private void configureScaffolder(JkScaffolder scaffolder, JkProject project) {
+    private void configure(JkScaffolder scaffolder) {
+        JkProject configuredProject = getProject();
         scaffolder.setJekaClassCodeProvider( () -> {
             final String snippet;
             if (scaffoldTemplate == ScaffoldTemplate.NORMAL) {
@@ -149,17 +147,17 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         scaffolder.getExtraActions().append( () -> {
 
             JkLog.info("Create source directories.");
-            JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
+            JkCompileLayout prodLayout = configuredProject.getConstruction().getCompilation().getLayout();
             prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
             prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-            JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
+            JkCompileLayout testLayout = configuredProject.getConstruction().getTesting().getCompilation().getLayout();
             testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
             testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
 
             // Create specific files and folders
-            JkPathFile.of(project.getBaseDir().resolve("jeka/dependency.txt"))
+            JkPathFile.of(configuredProject.getBaseDir().resolve("jeka/dependency.txt"))
                     .fetchContentFrom(ProjectJkBean.class.getResource("dependencies.txt"));
-            Path libs = project.getBaseDir().resolve("jeka/libs");
+            Path libs = configuredProject.getBaseDir().resolve("jeka/libs");
             JkPathFile.of(libs.resolve("readme.txt"))
                     .fetchContentFrom(ProjectJkBean.class.getResource("libs-readme.txt"));
             JkUtilsPath.createDirectories(libs.resolve("compile+runtime"));
@@ -176,7 +174,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                         "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
                 JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
                 Path sourceDir =
-                        project.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
+                        configuredProject.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
                 String pluginCode = JkUtilsIO.read(ProjectJkBean.class.getResource("pluginclass.snippet"));
                 JkPathFile.of(sourceDir.resolve("your/basepackage/JkPluginXxxxxxx.java"))
                         .createIfNotExist()

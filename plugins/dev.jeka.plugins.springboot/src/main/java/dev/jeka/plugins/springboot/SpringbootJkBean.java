@@ -21,6 +21,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.builtins.scaffold.JkScaffolder;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 
 import java.net.URL;
@@ -66,7 +67,9 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("If true, a .war artifact will be generated.")
     public boolean buildWar;
 
-    private final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+
+    private ScaffoldJkBean scaffoldBean = getBean(ScaffoldJkBean.class).configure(this::configure);
 
     public void setSpringbootVersion(String springbootVersion) {
         this.springbootVersion = springbootVersion;
@@ -133,20 +136,16 @@ public final class SpringbootJkBean extends JkBean {
             Consumer<Path> makeBinJar = project.getConstruction()::createBinJar;
             artifactProducer.putArtifact(ORIGINAL_ARTIFACT, makeBinJar);
         }
+    }
 
-        // Add template build class to scaffold
-        if (getRuntime().getBeanOptional(ScaffoldJkBean.class).isPresent()) {
-            ScaffoldJkBean scaffold = getRuntime().getBean(ScaffoldJkBean.class);
-            String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/Build.java"));
-            String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
-            code = code.replace("${dependencyDescription}", defClasspath);
-            code = code.replace("${springbootVersion}", latestSpringbootVersion(project));
-            final String jkClassCode = code;
-            scaffold.configure(scaffolder -> {
-                scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
-                scaffolder.getExtraActions() .append(this::scaffoldSample);
-            });
-        }
+    private void configure (JkScaffolder scaffolder) {
+        String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/Build.java"));
+        String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
+        code = code.replace("${dependencyDescription}", defClasspath);
+        code = code.replace("${springbootVersion}", latestSpringbootVersion(projectBean.getProject()));
+        final String jkClassCode = code;
+        scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
+        scaffolder.getExtraActions() .append(this::scaffoldSample);
     }
 
     /**

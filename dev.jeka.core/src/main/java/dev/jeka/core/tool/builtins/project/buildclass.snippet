@@ -15,7 +15,7 @@ class Build extends JkBean {
      * fields have already been injected from command line.
      */
     private void configure(JkProject project) {
-        projectKBean.getProject()
+        project
             .getConstruction()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .getCompilation()

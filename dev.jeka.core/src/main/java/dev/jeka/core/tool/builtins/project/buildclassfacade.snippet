@@ -12,7 +12,7 @@ class Build extends JkBean {
      * fields have already been injected from command line.
      */
     private void configure(JkProject project) {
-        projectPlugin.getProject().simpleFacade()
+        project.simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .configureCompileDeps(deps -> deps
                 .and("com.google.guava:guava:21.0")
