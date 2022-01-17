@@ -148,7 +148,7 @@ final class CommandLine {
                 beanExpression = expression;
             }
             if (beanExpression.isEmpty()) {
-                this.action = EngineCommand.Action.BEAN_REGISTRATION;
+                this.action = EngineCommand.Action.BEAN_INSTANTIATION;
                 this.member = null;
                 this.value = null;
             } else if (beanExpression.contains("=")) {

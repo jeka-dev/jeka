@@ -5,7 +5,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 class EngineCommand {
 
     enum Action {
-        PROPERTY_INJECT, METHOD_INVOKE, BEAN_REGISTRATION
+        PROPERTY_INJECT, METHOD_INVOKE, BEAN_INSTANTIATION
     }
 
     private Action action;

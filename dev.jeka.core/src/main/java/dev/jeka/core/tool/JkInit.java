@@ -53,7 +53,7 @@ public final class JkInit {
         try {
             EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get(""));
             List<EngineCommand> commands = new LinkedList<>();
-            commands.add(new EngineCommand(EngineCommand.Action.BEAN_REGISTRATION, clazz, null, null));
+            commands.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, clazz, null, null));
             commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, JkBean.name(clazz)));
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.setImportedProjects(getImportedProjects(clazz));

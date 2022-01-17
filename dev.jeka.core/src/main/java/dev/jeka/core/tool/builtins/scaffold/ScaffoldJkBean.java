@@ -47,7 +47,6 @@ public class ScaffoldJkBean extends JkBean {
 
     @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
     public void wrapper() {
-        System.out.println("----------------" + wrapDelegatePath);
         if (JkUtilsString.isBlank(wrapDelegatePath)) {
             scaffolder().createStandardWrapperStructure();
         } else {

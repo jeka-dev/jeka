@@ -140,7 +140,7 @@ public final class JkRuntime {
         // Instantiate & register beans
         JkLog.startTask("Register KBeans");
         List<? extends JkBean> beans = commands.stream()
-                .filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
+                //.filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
                 .map(EngineCommand::getBeanClass)
                 .distinct()
                 .map(this::getBean)

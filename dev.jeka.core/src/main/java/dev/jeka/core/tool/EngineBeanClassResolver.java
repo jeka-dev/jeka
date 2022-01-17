@@ -4,7 +4,6 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
-import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
@@ -61,7 +60,7 @@ final class EngineBeanClassResolver {
         }
         beanClasses.put(null, defaultBeanClass);
         if (defaultBeanClass != null) {
-            result.add(new EngineCommand(EngineCommand.Action.BEAN_REGISTRATION, defaultBeanClass,
+            result.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, defaultBeanClass,
                     null, null));
         }
         commandLine.getBeanActions().stream()
