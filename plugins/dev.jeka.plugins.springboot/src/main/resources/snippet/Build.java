@@ -9,12 +9,11 @@ import dev.jeka.plugins.springboot.SpringbootJkBean;
 @JkInjectClasspath("${dependencyDescription}")
 class Build extends JkBean {
 
-    private final SpringbootJkBean springboot = getBean(SpringbootJkBean.class);
-
-    private final ProjectJkBean projectJkBean = getBean(ProjectJkBean.class).configure(this::configure);
+    final SpringbootJkBean springbootBean = getBean(SpringbootJkBean.class);
 
     Build() {
-        springboot.setSpringbootVersion("${springbootVersion}");
+        springbootBean.setSpringbootVersion("${springbootVersion}");
+        getBean(ProjectJkBean.class).configure(this::configure);
     }
 
     private void configure(JkProject project) {
@@ -30,7 +29,7 @@ class Build extends JkBean {
 
     @JkDoc("Cleans, tests and creates bootable jar.")
     public void cleanPack() {
-        clean(); springboot.projectBean().pack();
+        clean(); springbootBean.projectBean().pack();
     }
 
     // Clean, compile, test and generate springboot application jar

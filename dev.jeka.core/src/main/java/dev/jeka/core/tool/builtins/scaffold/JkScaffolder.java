@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.scaffold;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkRunnables;
@@ -150,6 +151,10 @@ public final class JkScaffolder {
 
     private String jekaVersion() {
         if (cachedJekaVersion != null) {
+            return cachedJekaVersion;
+        }
+        if (!JkVersion.of(JkInfo.getJekaVersion()).isSnapshot()) {
+            cachedJekaVersion = JkInfo.getJekaVersion();
             return cachedJekaVersion;
         }
         List<String> allVersions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID));

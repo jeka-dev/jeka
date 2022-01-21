@@ -71,8 +71,9 @@ public final class SpringbootJkBean extends JkBean {
 
     private ScaffoldJkBean scaffoldBean = getBean(ScaffoldJkBean.class).configure(this::configure);
 
-    public void setSpringbootVersion(String springbootVersion) {
+    public SpringbootJkBean setSpringbootVersion(String springbootVersion) {
         this.springbootVersion = springbootVersion;
+        return this;
     }
 
     @JkDoc("Run Springboot application from the generated jar")

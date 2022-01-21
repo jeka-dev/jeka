@@ -3,8 +3,8 @@ theme:
     name: material
     logo: images/logo.svg
     palette :
-        primary: ta
-    favicon: images/favicon.ico
+        primary: blue
+        favicon: images/favicon.ico
     features:
         - navigation.instant
         - navigation.tracking
@@ -12,8 +12,6 @@ extra:
     analytics:
         provider: google
         property: UA-103449580-2
-extra_css:
-  - stylesheets/extra.css
 nav:
     - Reference Guide:
         - Execution Engine:

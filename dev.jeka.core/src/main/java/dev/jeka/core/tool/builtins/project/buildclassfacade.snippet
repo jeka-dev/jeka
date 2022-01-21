@@ -5,7 +5,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class Build extends JkBean {
 
-    final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
@@ -27,7 +27,7 @@ class Build extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        clean(); projectBean.pack();
     }
 
 }
