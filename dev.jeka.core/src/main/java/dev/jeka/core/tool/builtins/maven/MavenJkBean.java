@@ -5,23 +5,20 @@ import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkMvn;
 import dev.jeka.core.api.tooling.JkPom;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 @JkDoc("Provides method to help migration from Maven.")
-public class PomJkBean extends JkBean {
+public class MavenJkBean extends JkBean {
 
     @JkDoc("Margin to print dependency code.")
     public int margin = 4;
 
     @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
-    public void code ()  {
+    public void migrationCode()  {
         Path effectivePom = JkUtilsPath.createTempFile("jeka-effective-pom-", ".pom");
         JkMvn.of(getBaseDir(), "help:effective-pom", "-Doutput=" + effectivePom.toString())
                 .toProcess()

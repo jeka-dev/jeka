@@ -28,6 +28,8 @@ public class JkNexusRepos {
 
     private final String basicCredential;
 
+    private int readTimeout;
+
     private JkNexusRepos(String baseUrl, String basicCredential) {
         this.baseUrl = baseUrl;
         this.basicCredential = basicCredential;
@@ -47,6 +49,14 @@ public class JkNexusRepos {
         URL url = repo.getUrl();
         String baseUrl = url.getProtocol() + "://" + url.getHost();
         return JkNexusRepos.ofBasicCredentials(baseUrl, repoCredentials.getUserName(), repoCredentials.getPassword());
+    }
+
+    /**
+     * Sets read timeout of the http connection. Default is zero which leads to infinite.
+     */
+    public JkNexusRepos setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+        return this;
     }
 
     /**
@@ -147,6 +157,7 @@ public class JkNexusRepos {
         HttpURLConnection con = connection(url);
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/xml");
+        con.setReadTimeout(readTimeout);
         assertResponseOk(con, null);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document doc = JkUtilsXml.documentFrom(in);

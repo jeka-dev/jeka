@@ -17,7 +17,7 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
     }
 
     void run() {
-        scaffold("scaffold#run", "help", false);
+        scaffold("scaffold#run -lv", "help", false);
         Path projectDir = scaffold("scaffold#run scaffold#wrapper", "help", false);
         scaffold("scaffold#run scaffold#wrapper", "help", true);
         projectDir = scaffold("scaffold#run project#", "clean project#pack", false);

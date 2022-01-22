@@ -10,7 +10,7 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.maven.PomJkBean;
+import dev.jeka.core.tool.builtins.maven.MavenJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 
@@ -90,8 +90,8 @@ public class SimpleProjectJkBean extends JkBean {
     }
 
     public void printMvn() {
-        PomJkBean pluginPom = getRuntime().getBean(PomJkBean.class);
-        pluginPom.code();
+        MavenJkBean pluginPom = getRuntime().getBean(MavenJkBean.class);
+        pluginPom.migrationCode();
     }
 
     public void showDependencies() {

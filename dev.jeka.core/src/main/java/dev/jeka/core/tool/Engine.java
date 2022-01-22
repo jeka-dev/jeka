@@ -150,8 +150,9 @@ final class Engine {
         }
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
-        if (compileSources) {
-            if (Environment.standardOptions.forceCompile() || compilationTracker.isOutdated()) {
+        boolean outdated = compilationTracker.isOutdated();
+        if (compileSources && this.beanClassesResolver.hasDefSource()) {
+            if (Environment.standardOptions.forceCompile() || outdated) {
                 JkLog.trace("Compile classpath : " + classpath);
                 SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
                 if (!result.success) {
@@ -164,6 +165,8 @@ final class Engine {
             } else {
                 JkLog.trace("Last def classes are up-to-date : No need to compile.");
             }
+        } else if (outdated) {
+            compilationTracker.updateCompileFlag();
         }
         JkLog.endTask();
         JkPathSequence resultClasspath = classpath.andPrepend(beanClassesResolver.defClassDir);

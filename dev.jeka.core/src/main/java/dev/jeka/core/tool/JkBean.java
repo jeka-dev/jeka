@@ -84,13 +84,19 @@ public abstract class JkBean {
         return runtime.getBean(beanClass);
     }
 
-    static String name(Class<?> jkBeanClass) {
-        final String className = jkBeanClass.getSimpleName();
+    static String name(String fullyQualifiedClassName) {
+        final String className = fullyQualifiedClassName.contains(".")
+                ? JkUtilsString.substringAfterLast(fullyQualifiedClassName, ".")
+                : fullyQualifiedClassName;
         if (!className.endsWith(CLASS_SUFFIX) || className.equals(CLASS_SUFFIX)) {
             return JkUtilsString.uncapitalize(className);
         }
         final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFFIX);
         return JkUtilsString.uncapitalize(prefix);
+    }
+
+    static String name(Class<?> jkBeanClass) {
+        return name(jkBeanClass.getName());
     }
 
     static boolean nameMatches(String className, String nameCandidate) {

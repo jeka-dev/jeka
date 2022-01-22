@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.repos;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -10,86 +11,74 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @JkDoc("Provides features to release Nexus repos (as OSSRH) after publication.")
 public class NexusJkBean extends JkBean {
 
     private static final String TASK_NAME = "Closing and releasing repositories";
 
-    @JkDoc("Close and Release automatically repository after publish.")
-    public boolean closeAndRelease = true;
-
     @JkDoc("Comma separated filters for taking in account only specified repositories with specified profile name.")
     public String profileNamesFilter = "";
 
-    protected NexusJkBean() throws Exception {
+    private final JkConsumers<JkNexusRepos, Void> nexusReposConfigurators = JkConsumers.of();
+
+    protected NexusJkBean() {
         ProjectJkBean projectBean = getRuntime().getBeanOptional(ProjectJkBean.class).orElse(null);
         if (projectBean == null) {
-            JkLog.warn("No project plugin configured here.");
-            return;
+            JkLog.warn("No project KBean present to configure repos for.");
+        } else {
+            JkProject project = projectBean.getProject();
+            projectBean.configure(this::configureProject);
         }
-        projectBean.configure(this::configure);
     }
 
-    private void configure(JkProject project) {
+    @JkDoc("Closes and releases the configured nexus repositories.")
+    public void closeAndOrRelease() {
+        JkNexusRepos nexusRepos  = getJkNexusRepos();
+        if (nexusRepos == null) {
+            return;
+        }
+        nexusRepos.closeAndRelease(profiles());
+    }
+
+    public NexusJkBean configure(Consumer<JkNexusRepos> nexusReposConsumer) {
+        this.nexusReposConfigurators.append(nexusReposConsumer);
+        return this;
+    }
+
+    private void configureProject(JkProject project) {
+        JkNexusRepos nexusRepos  = getJkNexusRepos();
+        if (nexusRepos == null) {
+            return;
+        }
         project.getPublication().getPostActions().append(TASK_NAME, () -> {
-            String[] profileNames = JkUtilsString.isBlank(profileNamesFilter) ? new String[0]
-                    : profileNamesFilter.split(",");
-            JkRepo repo = getFirst(project);
-            if (repo != null) {
-                JkNexusRepos.ofUrlAndCredentials(repo).closeAndReleaseOpenRepositories(profileNames);
-            } else {
-                JkLog.warn("No remote repository configured for publishing");
-            }
+            nexusRepos.closeAndReleaseOpenRepositories(profiles());
         });
     }
 
-    public void closeAndOrRelease() {
-        Optional<ProjectJkBean> projectPlugin = getRuntime().getBeanOptional(ProjectJkBean.class);
-        if (!projectPlugin.isPresent()) {
+    private String[] profiles() {
+        return JkUtilsString.isBlank(profileNamesFilter) ? new String[0] : profileNamesFilter.split(",");
+    }
+
+    private JkNexusRepos getJkNexusRepos() {
+        Optional<ProjectJkBean> projectBean = getRuntime().getBeanOptional(ProjectJkBean.class);
+        if (!projectBean.isPresent()) {
             JkLog.warn("No project plugin configured here.");
-            return;
+            return null;
         }
-        String[] profileNames = profileNamesFilter.split(",");
-        JkRepo repo = getFirst(projectPlugin.get().getProject());
-        if (repo != null) {
-            JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease(profileNames);
-        } else {
-            JkLog.warn("No remote repository configured for publishing");
-        }
-    }
-
-    public static void configureForOSSRHRepo(JkProject project, String ...profileNames) {
-        JkRepo repo = project.getPublication().getMaven().getRepos()
-                .getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
-        configureForRepo(project, repo, profileNames);
-    }
-
-    public static void configureForFirstRemoteRepo(JkProject project, String ...profileNames) {
-        JkRepo repo = getFirst(project);
-        configureForRepo(project, repo, profileNames);
-    }
-
-    public static void configureForRepo(JkProject project, JkRepo repo, String ...profileNames) {
-        if (repo == null) {
-            JkLog.warn("No Nexus OSSRH repo found.");
-            return;
-        }
-        JkNexusRepos nexusRepos = JkNexusRepos.ofUrlAndCredentials(repo);
-        configureForRepo(project, nexusRepos, profileNames);
-    }
-
-    public static void configureForRepo(JkProject project, JkNexusRepos nexusRepos, String ...profileNames) {
-        project.getPublication().getPostActions().append(TASK_NAME,
-                () -> nexusRepos.closeAndReleaseOpenRepositories(profileNames));
-    }
-
-    private static JkRepo getFirst(JkProject project) {
+        JkProject project = projectBean.get().getProject();
         JkRepo repo = project.getPublication().findFirstNonLocalRepo();
-        if (repo != null && repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
+        if (repo == null) {
+            JkLog.warn("No remote repository configured for publishing");
+            return null;
+        }
+        if (repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
             JkLog.warn("No credentials found on repo " + repo);
         }
-        return repo;
+        JkNexusRepos result = JkNexusRepos.ofUrlAndCredentials(repo);
+        this.nexusReposConfigurators.accept(result);
+        return result;
     }
 
 }

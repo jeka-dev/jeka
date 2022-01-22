@@ -157,10 +157,7 @@ public final class JkScaffolder {
             cachedJekaVersion = JkInfo.getJekaVersion();
             return cachedJekaVersion;
         }
-        List<String> allVersions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID));
-        final List<String> versions = allVersions.stream()
-                .filter(version -> version.endsWith(".RELEASE"))
-                .collect(Collectors.toList());
+        List<String> versions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID));
         if (versions.isEmpty()) {
             JkLog.warn("Didn't find any version of " + JkInfo.JEKA_MODULE_ID + " in " + dependencyResolver);
             JkLog.warn("Will use current one : " + JkInfo.getJekaVersion());

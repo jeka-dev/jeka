@@ -23,9 +23,9 @@ class MasterBuild extends JkBean {
     @JkInjectProperty("GH_TOKEN")
     public String githubToken;
 
-    final NexusJkBean nexus = getRuntime().getBean(NexusJkBean.class);
+    final NexusJkBean nexus = getBean(NexusJkBean.class).configure(this::configure);
 
-    final VersionFromGitJkBean versionFromGit = getRuntime().getBean(VersionFromGitJkBean.class);
+    final VersionFromGitJkBean versionFromGit = getBean(VersionFromGitJkBean.class);
 
     // ------ Slave projects
 
@@ -92,6 +92,10 @@ class MasterBuild extends JkBean {
             bean.clean();
             bean.getProject().pack();
         });
+    }
+
+    private void configure(JkNexusRepos nexusRepos) {
+        nexusRepos.setReadTimeout(60*1000);
     }
 
     private JkRepoSet publishRepo() {
