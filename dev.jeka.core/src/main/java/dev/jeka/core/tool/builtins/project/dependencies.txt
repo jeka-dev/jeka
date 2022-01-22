@@ -16,7 +16,7 @@
 #  org.springframework.boot:spring-boot-starter-test
 #  org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
 #
-# Note : If you don't need this, you can remove safely this file.
+# Note : If you don't need this, feel free to remove it..
 ##
 
 - COMPILE+RUNTIME

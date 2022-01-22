@@ -421,12 +421,10 @@ public final class JkIml {
 
         private Map<String, Path> substitutes = new LinkedHashMap<>();
 
-        void setPathSubstitute(Path jekaUserHomeDir, Path jekaDir) {
+        void setPathSubstitute(Path jekaCacheDir, Path jekaDir) {
             substitutes.put("MODULE_DIR", JkIml.this.moduleDir);
-            substitutes.put("JEKA_USER_HOME", jekaUserHomeDir);
-            if (!Objects.equals(jekaUserHomeDir, jekaDir)) {
-                substitutes.put("JEKA_HOME", jekaDir);
-            }
+            substitutes.put("JEKA_CACHE_DIR", jekaCacheDir);
+            substitutes.put("JEKA_HOME", jekaDir);
         }
 
         String ideaPath(Path file) {

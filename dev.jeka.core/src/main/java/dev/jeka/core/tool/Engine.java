@@ -150,7 +150,7 @@ final class Engine {
         }
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
-        if (compileSources && this.beanClassesResolver.hasDefSource()) {
+        if (compileSources) {
             if (Environment.standardOptions.forceCompile() || compilationTracker.isOutdated()) {
                 JkLog.trace("Compile classpath : " + classpath);
                 SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);

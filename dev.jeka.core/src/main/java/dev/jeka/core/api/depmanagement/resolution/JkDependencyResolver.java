@@ -23,14 +23,12 @@ public final class JkDependencyResolver<T> {
 
     private final JkResolutionParameters<JkDependencyResolver<T> > defaultParameters;
 
-    // Not necessary but helps Ivy to hide data efficiently.
+    // Not necessary but may help Ivy to do some caching ???
     private JkVersionedModule moduleHolder;
 
     private JkRepoSet repos = JkRepoSet.of();
 
     private final Map<JkQualifiedDependencySet, JkResolveResult> cachedResults = new HashMap<>();
-
-    private final Map<JkModuleDependency, JkVersionProvider> cachedBomResolution = new HashMap<>();
 
     private boolean useCache;
 
@@ -196,17 +194,8 @@ public final class JkDependencyResolver<T> {
     }
 
     public JkVersionProvider resolveBom(JkModuleDependency moduleDependency) {
-        if (cachedBomResolution.containsKey(moduleDependency)) {
-            return cachedBomResolution.get(moduleDependency);
-        }
-        JkLog.trace("Fetch bom dependency versions from " + moduleDependency);
-        Path pomFile = this.resolve(moduleDependency).getFiles().getEntries().get(0);
-        if (pomFile == null || !Files.exists(pomFile)) {
-            throw new IllegalStateException(moduleDependency + " not found");
-        }
-        JkVersionProvider result = JkPom.of(pomFile).getVersionProvider();
-        cachedBomResolution.put(moduleDependency, result);
-        return result;
+        JkModuleFileProxy bom = JkModuleFileProxy.of(this.repos, moduleDependency);
+        return JkPom.of(bom.get()).getVersionProvider();
     }
 
     /**

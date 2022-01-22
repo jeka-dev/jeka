@@ -114,7 +114,7 @@ public final class JkImlGenerator {
         JkLog.trace("Compute iml def classpath : " + defClasspath);
         JkLog.trace("Compute iml def imported projects : " + defImportedProjects);
         if (this.useVarPath) {
-            iml.pathUrlResolver.setPathSubstitute(JkLocator.getJekaUserHomeDir(), JkLocator.getJekaHomeDir());
+            iml.pathUrlResolver.setPathSubstitute(JkLocator.getCacheDir(), JkLocator.getJekaHomeDir());
         }
         iml.getComponent()
                 .getContent()
@@ -262,7 +262,6 @@ public final class JkImlGenerator {
         }
         return null;
     }
-
 
     private List<JkIml.OrderEntry> projectOrderEntries(JkResolvedDependencyNode tree) {  // TODO This method is too slow
         long t0 = System.currentTimeMillis();

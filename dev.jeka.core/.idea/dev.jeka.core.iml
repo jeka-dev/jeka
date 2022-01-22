@@ -144,18 +144,16 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/jeka/libs/compile/bcpg-jdk15on-1.70.jar!/" />
+          <root url="jar://$MODULE_DIR$/jeka/libs/compile/bcprov-jdk15on-1.70.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/.ideaLibSources/bcpg-jdk15on-1.70-sources.jar!/" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/jeka/libs/runtime/bcprov-jdk15on-1.70.jar!/" />
+          <root url="jar://$MODULE_DIR$/jeka/libs/compile/bcpg-jdk15on-1.70.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

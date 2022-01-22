@@ -25,10 +25,11 @@ class EngineCompilationUpdateTracker {
 
     boolean isOutdated() {
         if (globallyOutdated) {
+            JkLog.trace("Compilation cache outdated.");
             return true;
         }
-        long defLastUptateTime = lastModifiedAccordingFileAttributes();
-        boolean result = isWorkOutdated(fileCount(), defLastUptateTime);
+        boolean result = isWorkOutdated();
+        JkLog.trace("Cached compile outdated : %s", result);
         globallyOutdated = result;
         return result;
     }
@@ -44,11 +45,11 @@ class EngineCompilationUpdateTracker {
         flagFile().deleteIfExist();
     }
 
-    private boolean isWorkOutdated(int fileCount, long lastModifiedAccordingFileAttributes) {
-        CountTimestampAndJavaVersion countTimestampAndJavaVersion = lastModifiedAccordingFlag();
-        return countTimestampAndJavaVersion.timestamp < lastModifiedAccordingFileAttributes
-                || !JkJavaVersion.ofCurrent().equals(countTimestampAndJavaVersion.javaVersion)
-                || countTimestampAndJavaVersion.fileCount != fileCount;
+    private boolean isWorkOutdated() {
+        CountTimestampAndJavaVersion flag = stateFromFlagFile();
+        CountTimestampAndJavaVersion current = stateFromFlagCurrent();
+        JkLog.trace("Comparing flagged %s and  current %s", flag, current);
+        return !flag.equals(current);
     }
 
     private long lastModifiedAccordingFileAttributes() {
@@ -75,7 +76,12 @@ class EngineCompilationUpdateTracker {
         return JkPathFile.of(projectBaseDir.resolve(JkConstants.WORK_PATH).resolve(LAST_UPDATE_FILE_NAME));
     }
 
-    private CountTimestampAndJavaVersion lastModifiedAccordingFlag() {
+    private CountTimestampAndJavaVersion stateFromFlagCurrent() {
+        long defLastUptateTime = lastModifiedAccordingFileAttributes();
+        return new CountTimestampAndJavaVersion(fileCount(), defLastUptateTime, JkJavaVersion.ofCurrent());
+    }
+
+    private CountTimestampAndJavaVersion stateFromFlagFile() {
         Path work = projectBaseDir.resolve(JkConstants.WORK_PATH);
         if (!Files.exists(work)) {
             return new CountTimestampAndJavaVersion(0, 0L, JkJavaVersion.ofCurrent());
@@ -115,6 +121,37 @@ class EngineCompilationUpdateTracker {
             this.fileCount = fileCount;
             this.timestamp = timestamp;
             this.javaVersion = javaVersion;
+        }
+
+        @Override
+        public String toString() {
+            return "CountTimestampAndJavaVersion{" +
+                    "fileCount=" + fileCount +
+                    ", timestamp=" + timestamp +
+                    ", javaVersion=" + javaVersion +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            CountTimestampAndJavaVersion that = (CountTimestampAndJavaVersion) o;
+
+            if (fileCount != that.fileCount) return false;
+            if (timestamp != that.timestamp) return false;
+            if (!javaVersion.equals(that.javaVersion)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = fileCount;
+            result = 31 * result + (int) (timestamp ^ (timestamp >>> 32));
+            result = 31 * result + javaVersion.hashCode();
+            return result;
         }
     }
 }

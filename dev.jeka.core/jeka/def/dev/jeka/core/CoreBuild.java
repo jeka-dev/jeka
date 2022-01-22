@@ -6,7 +6,6 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
@@ -46,7 +45,7 @@ public class CoreBuild extends JkBean {
     private void configure(JkProject project)  {
         project
             .getArtifactProducer()
-                .putMainArtifact(this::doPackWithEmbedded)
+                .putMainArtifact(this::doPackWithEmbeddedJar)
                 .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
                 .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper)
             .__
@@ -173,7 +172,7 @@ public class CoreBuild extends JkBean {
         JkLog.endTask();
     }
 
-    private void doPackWithEmbedded(Path targetJar) {
+    private void doPackWithEmbeddedJar(Path targetJar) {
 
         // Main jar
         JkProject project = this.projectBean.getProject();
@@ -184,13 +183,8 @@ public class CoreBuild extends JkBean {
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
         JkPathTree classTree = JkPathTree.of(project.getConstruction().getCompilation().getLayout().resolveClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/compile");
-        JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*"))
-            //.andZips(providedLibs.resolve("bouncycastle-pgp-152.jar"))
-                //.andZip(providedLibs.resolve("classgraph-4.8.41.jar"))
-            //.andZip(providedLibs.resolve("ivy-2.5.0.jar"))
-            .zipTo(embeddedJar);
-        JkPathTree.ofZip(embeddedJar).andMatching( "META-INF/*.SF", "META-INF/*.RSA")
-                .deleteContent().close();
+        JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*")).zipTo(embeddedJar);
+        JkPathTree.ofZip(embeddedJar).andMatching( "META-INF/*.SF", "META-INF/*.RSA").deleteContent().close();
 
         // Name uniquely this embedded jar according its content
         String checksum = JkPathFile.of(embeddedJar).getChecksum("MD5");
