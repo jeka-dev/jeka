@@ -1,6 +1,6 @@
 # Welcome to Jeka
 
-Jeka is a general-purpose build tool designed as a library. In other words, users describe programmatically 
+Jeka is a general purpose build tool that is designed as a library. In other words, users describe programmatically 
 the actions needed to achieve automation tasks, as they would do for regular code.
 
 The library is designed to make complex common tasks as compiling, testing or resolving dependencies as concise as possible.
