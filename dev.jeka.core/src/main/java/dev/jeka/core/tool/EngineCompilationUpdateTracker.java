@@ -125,7 +125,7 @@ class EngineCompilationUpdateTracker {
 
         @Override
         public String toString() {
-            return "CountTimestampAndJavaVersion{" +
+            return "{" +
                     "fileCount=" + fileCount +
                     ", timestamp=" + timestamp +
                     ", javaVersion=" + javaVersion +
