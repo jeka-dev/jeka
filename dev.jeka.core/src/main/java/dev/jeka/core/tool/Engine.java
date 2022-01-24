@@ -76,7 +76,7 @@ final class Engine {
         JkPathSequence computedClasspath = result.classpath
             .andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
         AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
-        beanClassesResolver.setClasspath(computedClasspath);
+        beanClassesResolver.setClasspath(computedClasspath, result.classpathChanged);
         if (commandLine.isHelp()) {
             JkLog.endTask();
             stopBusyIndicator();
@@ -110,16 +110,19 @@ final class Engine {
         runtime.run(resolvedCommands);
     }
 
-    private CompilationContext  preCompile() {
+    private CompilationContext preCompile() {
         final List<Path> sourceFiles = JkPathTree.of(beanClassesResolver.defSourceDir)
                 .andMatcher(JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
         JkLog.trace("Parse source code of " + sourceFiles);
         final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
         JkDependencySet parsedDependencies = parser.dependencies();
+        EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
+        EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(parsedDependencies);
         return new CompilationContext(
-                jekaClasspath().and(dependencyResolver.resolve(parser.dependencies()).getFiles()),
+                jekaClasspath().and(cacheResult.resolvedClasspath),
                 new LinkedList<>(parser.projects()),
-                parser.compileOptions()
+                parser.compileOptions(),
+                cacheResult.changed
         );
     }
 
@@ -132,27 +135,32 @@ final class Engine {
         if (yetCompiledProjects.containsKey(this.projectBaseDir)) {
             JkLog.trace("Project '%s' already compiled. Skip", this.projectBaseDir);
             return new CompilationResult(JkPathSequence.of(), JkPathSequence.of(),
-                    yetCompiledProjects.get(this.projectBaseDir));
+                    yetCompiledProjects.get(this.projectBaseDir), false);
         }
         yetCompiledProjects.put(this.projectBaseDir, JkPathSequence.of());
+        if (Environment.standardOptions.workClean()) {
+            JkPathTree.of(projectBaseDir.resolve(JkConstants.WORK_PATH)).deleteContent();
+        }
         String msg = "Scanning sources and compiling def classes for project '"
                 + this.projectBaseDir.getFileName() + "'";
         JkLog.startTask(msg);
         CompilationContext compilationContext = preCompile();
         List<Path> importedProjectClasspath = new LinkedList<>();
         List<Path> failedProjects = new LinkedList<>();
+        boolean importedProjectClasspathChanged = false;
         for (Path importedProjectDir : compilationContext.importedProjectDirs) {
             Engine importedProjectEngine = new Engine(importedProjectDir);
             CompilationResult compilationResult = importedProjectEngine.resolveAndCompile(yetCompiledProjects,
                     compileSources, failOnCompileError);
             importedProjectClasspath.addAll(compilationResult.classpath.getEntries());
             failedProjects.addAll(compilationResult.compileFailedProjects.getEntries());
+            importedProjectClasspathChanged = importedProjectClasspathChanged || compilationResult.classpathChanged;
         }
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
         boolean outdated = compilationTracker.isOutdated();
         if (compileSources && this.beanClassesResolver.hasDefSource()) {
-            if (Environment.standardOptions.forceCompile() || outdated) {
+            if (outdated) {
                 JkLog.trace("Compile classpath : " + classpath);
                 SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
                 if (!result.success) {
@@ -174,7 +182,8 @@ final class Engine {
         CompilationResult compilationResult = new CompilationResult(
                 JkPathSequence.of(compilationContext.importedProjectDirs),
                 JkPathSequence.of(failedProjects).withoutDuplicates(),
-                resultClasspath);
+                resultClasspath,
+                compilationContext.classpathChanged || importedProjectClasspathChanged);
         JkRuntime runtime = JkRuntime.get(projectBaseDir);
         runtime.setDependencyResolver(dependencyResolver);
         runtime.setImportedProjects(compilationResult.importedProjects);
@@ -289,11 +298,14 @@ final class Engine {
 
         private final List<String> compileOptions;
 
+        private final boolean classpathChanged;
+
         CompilationContext(JkPathSequence classpath, List<Path> importedProjectDirs,
-                           List<String> compileOptions) {
+                           List<String> compileOptions, boolean classpathChanged) {
             this.classpath = classpath;
             this.importedProjectDirs = Collections.unmodifiableList(importedProjectDirs);
             this.compileOptions = Collections.unmodifiableList(compileOptions);
+            this.classpathChanged = classpathChanged;
         }
     }
 
@@ -315,26 +327,29 @@ final class Engine {
 
     private static class CompilationResult {
 
-        JkPathSequence compileFailedProjects;
+        final JkPathSequence compileFailedProjects;
 
-        JkPathSequence classpath;
+        final JkPathSequence classpath;
 
         // Direct imported projects
-        JkPathSequence importedProjects;
+        final JkPathSequence importedProjects;
+
+        final boolean classpathChanged;
 
         CompilationResult(JkPathSequence importedProjects, JkPathSequence compileFailedProjects,
-                          JkPathSequence resultClasspath) {
+                          JkPathSequence resultClasspath, boolean classpathChanged) {
             this.importedProjects = importedProjects;
             this.compileFailedProjects = compileFailedProjects;
             this.classpath = resultClasspath;
+            this.classpathChanged = classpathChanged;
         }
     }
 
     private static class SingleCompileResult {
 
-        boolean success;
+        final boolean success;
 
-        JkPathSequence extraClasspath;
+        final JkPathSequence extraClasspath;
 
         SingleCompileResult(boolean success, JkPathSequence extraClasspath) {
             this.success = success;

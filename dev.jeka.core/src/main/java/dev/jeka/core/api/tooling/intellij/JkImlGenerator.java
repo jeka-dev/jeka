@@ -114,7 +114,7 @@ public final class JkImlGenerator {
         JkLog.trace("Compute iml def classpath : " + defClasspath);
         JkLog.trace("Compute iml def imported projects : " + defImportedProjects);
         if (this.useVarPath) {
-            iml.pathUrlResolver.setPathSubstitute(JkLocator.getCacheDir(), JkLocator.getJekaHomeDir());
+            iml.pathUrlResolver.setPathSubstitute(JkLocator.getCacheDir());
         }
         iml.getComponent()
                 .getContent()

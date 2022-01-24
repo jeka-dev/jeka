@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
@@ -8,6 +9,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,6 +25,8 @@ final class EngineBeanClassResolver {
 
     private static final String JAVA_HOME = JkUtilsPath.toUrl(Paths.get(System.getProperty("java.home"))).toString();
 
+    private static final String CACHE_FILENAME = "kbean-classes.txt";
+
     private final Path baseDir;
 
     final Path defSourceDir;
@@ -34,6 +38,8 @@ final class EngineBeanClassResolver {
     private List<String> cachedDefBeanClassNames;
 
     private List<String> cachedGlobalBeanClassName;
+
+    private boolean useStoredCache;
 
     private static final Comparator<Class> CLASS_NAME_COMPARATOR = Comparator.comparing(Class::getName);
 
@@ -69,8 +75,9 @@ final class EngineBeanClassResolver {
         return Collections.unmodifiableList(result);
     }
 
-    void setClasspath(JkPathSequence classpath) {
+    void setClasspath(JkPathSequence classpath, boolean classpathChanged) {
         this.classpath = classpath;
+        this.useStoredCache = !classpathChanged;
     }
 
     private Class<? extends JkBean> defaultBeanClass(String defaultBeanName) {
@@ -108,6 +115,13 @@ final class EngineBeanClassResolver {
 
     List<String> globalBeanClassNames() {
         if (cachedGlobalBeanClassName == null) {
+            if (useStoredCache) {
+                List<String> storedClassNames = readKbeanClasses();
+                if (!storedClassNames.isEmpty()) {
+                    cachedGlobalBeanClassName = storedClassNames;
+                    return cachedGlobalBeanClassName;
+                }
+            }
             long t0 = System.currentTimeMillis();
             ClassLoader classLoader = JkClassLoader.ofCurrent().get();
             boolean ignoreParent = false;
@@ -123,6 +137,7 @@ final class EngineBeanClassResolver {
                 JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
                 cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
             }
+            storeGlobalKbeanClasses(cachedGlobalBeanClassName);
         }
         return cachedGlobalBeanClassName;
     }
@@ -149,7 +164,6 @@ final class EngineBeanClassResolver {
             ClassLoader classLoader = JkClassLoader.ofCurrent().get();
             boolean ignoreParent = false;
             if (classpath != null) {
-
                 // If classpath is set, then sources has been compiled in work dir
                 classLoader = new URLClassLoader(JkPathSequence.of().and(this.defClassDir).toUrls());
                 ignoreParent = true;
@@ -193,6 +207,20 @@ final class EngineBeanClassResolver {
 
     private JkPathTree defSources() {
         return JkPathTree.of(this.defSourceDir).withMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
+    }
+
+    private void storeGlobalKbeanClasses(List<String> classNames) {
+        Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(CACHE_FILENAME);
+        String content = String.join(System.lineSeparator(), classNames);
+        JkPathFile.of(store).createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private List<String> readKbeanClasses() {
+        Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(CACHE_FILENAME);
+        if (!Files.exists(store)) {
+            return Collections.emptyList();
+        }
+        return JkUtilsPath.readAllLines(store);
     }
 
 }

@@ -3,10 +3,12 @@ package dev.jeka.core.api.file;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -42,6 +44,14 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
 
     public static JkPathSequence of() {
         return new JkPathSequence(Collections.emptyList());
+    }
+
+    public static JkPathSequence ofPathString(String pathString) {
+        List<Path> paths = Arrays.stream(pathString.split(File.pathSeparator))
+                .filter(item -> !JkUtilsString.isBlank(item))
+                .map(Paths::get)
+                .collect(Collectors.toList());
+        return JkPathSequence.of(paths);
     }
 
     /**
@@ -182,6 +192,10 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
     public URL[] toUrls() {
         List<URL> urls = entries.stream().map(JkUtilsPath::toUrl).collect(Collectors.toList());
         return urls.toArray(new URL[0]);
+    }
+
+    public boolean hasNonExisting() {
+        return this.entries.stream().anyMatch(path -> !Files.exists(path));
     }
 
     @Override

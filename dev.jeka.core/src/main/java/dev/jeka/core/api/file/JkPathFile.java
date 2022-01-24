@@ -174,6 +174,10 @@ public final class JkPathFile {
         return this;
     }
 
+    public String readAsString() {
+        return new String(JkUtilsPath.readAllBytes(path));
+    }
+
     /**
      * Produces a files, in the same directory, that contains the checksum of this file.
      */
