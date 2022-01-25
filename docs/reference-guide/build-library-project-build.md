@@ -7,7 +7,7 @@ These classes belong to `dev.jeka.core.api.java` [package](https://github.com/je
 
 * `JkClassLoader` and `JkUrlClassloader` Wrap a `java.lang.ClassLoader` adding convenient methods and classpath scanning capability.
 * `JkJarPacker` A simple utility tyo create Jar or fat Jar file from compiled classes.
-* `JkJavaCompiler` Wraps either a Java Compiler tool, nor a *javac* process.
+* `JkJavaCompiler` Wraps either a Java Compiler tool, or a *javac* process.
 * `JkJavadocProcessor` A Java source processor producing standard Javadoc
 * `JkJavaProcess` A utility to launch Java process (from class dirs or jars)
 * `JkManifest` Stands for the manifest file to include in jar files.
@@ -64,7 +64,7 @@ The result of a test launch. Ir provides count for tests found, failure, skip, s
 
 This is the Jeka high-level API to build Java/JVM projects. API classes belong to  `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
 
-It introduces the concept of `JkProject` from where is performed compilation, testing, resources processing, packaging, publication and more.
+It introduces the concept of `JkProject` from where it performs compilation, testing, resources processing, packaging, publication and more.
 `JkProject` is the root of a deep structure embracing the *parent-chaining* pattern for readability.
 
 The API contains a lot of extension points to add specific behaviors.
@@ -130,7 +130,7 @@ project
 + methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport(), pack()
 ```
 
-For simplicity’s sake, `JkProject` provides a facade in order to setup common settings friendly,
+For simplicity sake, `JkProject` provides a facade in order to make common settings friendly,
 without navigating deep into the structure. From facade, you can
 setup dependencies, java version, project layout, test behavior, test selection and publication.
 
@@ -152,7 +152,7 @@ JkProject.of().simpleFacade()
 
 ```
 
-If facade is not sufficient for setting up project build, it's still possible to complete through the main API.
+If facade is not sufficient for setting up the project build, you can use the main API.
 `JkProject` instances are highly configurable.
 
 Here is a pretty complete example inspired from the [Jeka Build Class](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/jeka/def/dev/jeka/core/CoreBuild.java) .

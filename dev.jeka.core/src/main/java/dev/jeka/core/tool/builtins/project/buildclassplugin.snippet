@@ -7,7 +7,7 @@ import dev.jeka.core.tool.JkJekaVersionCompatibilityChecker;
 
 class Build extends JkBean {
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     private void configure(JkProject project) {
         project.simpleFacade()

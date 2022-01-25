@@ -79,8 +79,7 @@ public final class IntellijJkBean extends JkBean {
     private static Path findImlFile(Path dir) {
         String fileName = dir.getFileName().toString().equals("") ? dir.toAbsolutePath().getFileName().toString()
                 : dir.getFileName().toString();
-        return JkImlGenerator.findImlFile(dir).orElse(dir.resolve(".idea")
-                .resolve(fileName + ".iml"));
+        return JkImlGenerator.findImlFile(dir).orElse(dir.resolve(".idea").resolve(fileName + ".iml"));
     }
 
     /** Generate modules.xml files */

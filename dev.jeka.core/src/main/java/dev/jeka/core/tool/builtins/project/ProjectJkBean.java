@@ -177,7 +177,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             Path sourceDir =
                     configuredProject.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
             String pluginCode = JkUtilsIO.read(ProjectJkBean.class.getResource("pluginclass.snippet"));
-            JkPathFile.of(sourceDir.resolve("your/basepackage/JkPluginXxxxxxx.java"))
+            JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxJkBean.java"))
                     .createIfNotExist()
                     .write(pluginCode.getBytes(StandardCharsets.UTF_8));
         }
