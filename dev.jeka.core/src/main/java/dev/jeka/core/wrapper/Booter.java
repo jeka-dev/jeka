@@ -197,7 +197,7 @@ public class Booter {
     }
 
     private static Path getJekaVersionCacheDir(String version) {
-        final Path result = getCacheDir().resolve("wrapper/" + version);
+        final Path result = getCacheDir().resolve("distributions/" + version);
         try {
             Files.createDirectories(result);
         } catch (final IOException e) {

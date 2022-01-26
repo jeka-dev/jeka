@@ -13,14 +13,20 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * A Java project consists in 3 parts : <ul>
+ * Stands for the whole project model for building purpose. It has the same purpose and scope than the Maven _POM_ but
+ * it also holds methods to actually perform builds.
+ *
+ * A complete overview is available <a href="https://jeka-dev.github.io/jeka/reference-guide/build-library-project-build/#project-api">here</a>.
+ * <p/>
+ *
+ * A <code>JkProject</code> consists in 3 parts : <ul>
  *    <li>{@link JkProjectConstruction} : responsible to compile, tests and make jars</li>
  *    <li>{@link JkProjectDocumentation} : responsible to creates javadoc, sources jar and others</li>
  *    <li>{@link JkProjectPublication} : responsible to publish the artifacts on binary repositories (Maven or Ivy)</li>
  * </ul>
  * Each of these parts are optional. This mean that you don't have to set the publication part if the project is not
- * supposed to be published. Or you don't have to set the <i>production</i> part if the project publishes artifacts
- * that are created by other means than the <i>production<i/> part.
+ * supposed to be published. Or you don't have to set the <i>construction</i> part if the project publishes artifacts
+ * that are created by other means.
  * <p>
  * {@link JkProject} defines <i>base</i> and <i>output</i> directories as they are shared with the 3 parts.
  */

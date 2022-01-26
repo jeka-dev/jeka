@@ -15,10 +15,10 @@ class Build extends JkBean {
         project.simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .configureCompileDeps(deps -> deps
-                .and("com.google.guava:guava:21.0")
+                    .and("com.google.guava:guava:21.0")
             )
             .configureTestDeps(deps -> deps
-                .and("org.junit.jupiter:junit-jupiter:5.8.1")
+                    .and("org.junit.jupiter:junit-jupiter:5.8.1")
             )
 
             // Only necessary if your project is published in a binary repository.

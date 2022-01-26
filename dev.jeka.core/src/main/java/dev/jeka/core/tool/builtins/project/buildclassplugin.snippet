@@ -13,8 +13,9 @@ class Build extends JkBean {
         project.simpleFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .configureCompileDeps(deps -> deps
-                .andFiles(JkLocator.getJekaJarPath())
+                    .andFiles(JkLocator.getJekaJarPath())
             );
+
         JkJekaVersionCompatibilityChecker.setCompatibilityRange(project.getConstruction().getManifest(),
                 "${jekaVersion}",
                 "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");

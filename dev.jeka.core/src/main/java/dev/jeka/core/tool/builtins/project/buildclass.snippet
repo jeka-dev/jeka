@@ -20,7 +20,7 @@ class Build extends JkBean {
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .getCompilation()
                     .configureDependencies(deps -> deps
-                        .and("com.google.guava:guava:21.0")
+                            .and("com.google.guava:guava:21.0")
                     )
                 .__
 
@@ -28,11 +28,10 @@ class Build extends JkBean {
                 // If default is ok for you, you can remove it.
                 .getTesting()
                     .getCompilation().configureDependencies(deps -> deps
-                        .and("org.junit.jupiter:junit-jupiter:5.8.1"))
+                            .and("org.junit.jupiter:junit-jupiter:5.8.1"))
                     .__
                     .getTestSelection()
                         .addIncludeStandardPatterns()
-                        .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN)
                     .__
                     .getTestProcessor()
                         .setForkingProcess(true)
