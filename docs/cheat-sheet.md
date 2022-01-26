@@ -1,45 +1,44 @@
 ## Useful commands 
 
-_Jeka_ comes with predefined methods coming either from `JkClass` or built-in plugins. 
+_Jeka_ has predefined methods that comes either from `JkClass` or built-in plugins. 
 
-* `jeka` : Displays on console methods and options invokable from command line, along plugins available in the classpath.
-* `jeka [pugin-name]#help` : Displays on consoles all methods and option invokable for the specified plugin (e.g. `jeka scaffold#help`).
-* `jeka intellij#iml` : Generates iml file for Intellij. It is generated according the dependencies declared for this project.
-* `jeka intellij#iml -JKC=` : If the above fails cause your def classes do not compile, using `-JKC=` avoids def compilation phase.
+* `jeka` : Displays on console methods and options invokable from command line, along with plugins available in the classpath.
+* `jeka [pugin-name]#help` : Displays on console methods and options invokable for the specified plugin (e.g. `jeka scaffold#help`).
+* `jeka intellij#iml` : Generates iml file for Intellij. It is generated accordingly the dependencies that is declared for _Jeka_ project.
+* `jeka intellij#iml -JKC=` : If the `jeka intellij#iml` fails due to the non-compile def classes, `-JKC=` will avoid def compilation phase.
 * `jeka eclipse#files` : Same purpose as above to generate metadata files for Eclipse.
-* `jeka scaffold#run` : Generates files for creating a basic Jeka project from scratch.
-* `jeka scaffold#wrapper` : Generates wrapper files (jekaw/jekaw.bat and bootstrap jar)
-* `jeka scaffold#run java#` : Generate files for creating a Jeka project for building a JVM language project
+* `jeka scaffold#run` : Generates files for creating a basic _Jeka_ project from scratch.
+* `jeka scaffold#wrapper` : Generates wrapper files (jekaw/jekaw.bat and bootstrap jar).
+* `jeka scaffold#run java#` : Generates files for creating a _Jeka_ a project to build a JVM language project.
 
 ## Useful standard options
 
-You can add these options to you command line.
+You can add the below options to the command line.
 
-* `-kb=[KBeanName]` : By default, Jeka instantiates the first _KBean_ found under _def_ directory to execute methods on. 
-  You can force to instantiate a specific class by passing its long or short name. 
-  If the class is already in classpath, then no _def_ compilation occurs.
-  Using simply `-JKC=` is equivalent to `-JKC=JkClass` which is the base class bundled in Jeka.
-* `-lri` : Displays runtime info. This will display on console meaningfull information about current Jeka version, Java version, base directory, download repository, classpath, ...
-* `-lsu` : Shows logs about jeka setup (compilation of def classes, plugin loading, ...).These informations are not logged by default.
-* `-ls=BRACE` : Alters console output by delimiting tasks with braces and mentioning the processing time for each.
-* `-ls=DEBUG` : Alters console output by showing the class name and line number from where the log has been emitted.
-* `-lv` : Alters console output by displaying trace logs (emitted by `JkLog#trace`)
-* `-dcf` : Force compilation of _def_ classes, even if they are marked as up-to-date.
+* `-kb=[KBeanName]` : By default, _Jeka_ instantiates the first _KBean_ that is found under def directory to execute methods. 
+It can be forced to instantiate a specific class by passing its long or short name.
+If the class is already in classpath, then no def compilation occurs. Simply, `-JKC=` is equivalent to `-JKC=JkClass` which is the base class bundled in _Jeka_.  
+* `-lri` : Displays runtime info which will be displayed meaningfully on console about current _Jeka_ version, Java version, base directory, download repository, classpath, ...
+* `-lsu` : Shows logs about _Jeka_ setup (compilation of def classes, plugin loading, ...). This information is not logged by default.
+* `-ls=BRACE` : Alters console output by delimiting tasks with braces and mentioning the processing time for each task.
+* `-ls=DEBUG` : Alters console output by showing the class name and line number where the log has been emitted.
+* `-lv` : Alters console output by displaying trace logs (emitted by `JkLog#trace`).
+* `-dcf` : Force compilation of def classes, even if it is markes as up-to-date.
 
-## Change the JDK that Run Jeka
+## Change the JDK that Runs _Jeka_
 
-To determine the JDK to run upon, _jeka_ looks in priority order at :7
+To determine the JDK to run upon, _Jeka_ looks in priority order at :7
 
 * _JEKA_JDK_ environment variable ([_JEKA_JDK_]/bin/java must point on _java_ executable)
 * _JAVA_HOME_ environment variable 
 
-If none of these variables are present, _jeka_ will run upon the _java_ executable accessible from your _PATH_ environment.
+If none of the above varaiables are present, _Jeka_ will run upon the _java_ executable accessible from the _PATH_ environment.
 
-## Change the Repository Jeka uses to Fetch Dependencies 
+## Change the Repository _Jeka_ uses to Fetch Dependencies 
 
-By default, _jeka_ fetch dependencies from maven central (https://repo.maven.apache.org/maven2).
+By default, _Jeka_ fetch dependencies from maven central (https://repo.maven.apache.org/maven2).
 
-You can select another default repository by setting the `jeka.repos.download.url` options. 
-We recommend storing this value in your [USER DIR]/.jeka/options.properties file to be reused across projects.
+Another default repository can be selected by setting the `jeka.repos.download.url` option. 
+It has been recommended to store this value in your [USER DIR]/.jeka/options.properties file to be reused across projects.
 
-For more details, see `JkRepoFromOptions` javadoc.
+For more details, please see `JkRepoFromOptions` javadoc.
