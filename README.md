@@ -110,6 +110,11 @@ Explore Jeka possibilities from command line `jekaw -h`.</sub>
 Thanks to wrapper and [Jeka Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 
 You only need a JDK 8 or higher.
 
+Jeka is extremly lightweight, the full distribution size is around 1 MB including source code. 
+The whole tool is contained in a single jar of aproximatly 600 KB and has zero dependency.
+
+It's quite easy to discover what Jeka does behind the scene and troubleshot issues encountered during the build.
+
 > Current version of Jeka is no more compatible with Jeka Plugin for Intellij. Stick with Jeka version _0.9.15.RELEASE_ 
 > if you still want to use the IDE plugin. 
 > 
