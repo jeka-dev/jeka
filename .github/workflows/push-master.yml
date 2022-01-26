@@ -26,6 +26,7 @@ jobs:
         JEKA_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
     - name: Deploy MkDocs
+      if: github.ref == 'refs/heads/master'
       uses: mhausenblas/mkdocs-deploy-gh-pages@1.24
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
