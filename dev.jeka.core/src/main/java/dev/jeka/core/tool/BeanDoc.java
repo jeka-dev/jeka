@@ -2,7 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
-import org.apache.ivy.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

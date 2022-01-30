@@ -8,7 +8,10 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.Main;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 
 import java.nio.charset.Charset;

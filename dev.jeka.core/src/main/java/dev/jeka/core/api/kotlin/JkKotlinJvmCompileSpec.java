@@ -252,7 +252,7 @@ public final class JkKotlinJvmCompileSpec {
         options.add(value);
     }
 
-    public JkKotlinJvmCompileSpec clone() {
+    public JkKotlinJvmCompileSpec copy() {
         JkKotlinJvmCompileSpec result = new JkKotlinJvmCompileSpec();
         result.options.addAll(this.options);
         result.sources = this.sources;

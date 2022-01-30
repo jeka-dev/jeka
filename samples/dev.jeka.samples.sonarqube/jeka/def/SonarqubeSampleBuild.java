@@ -6,7 +6,7 @@ import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
-import dev.jeka.plugins.sonarqube.JkPluginSonarqube;
+import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
 import dev.jeka.plugins.sonarqube.JkSonarqube;
 
 /**
@@ -19,7 +19,7 @@ class SonarqubeSampleBuild extends JkBean {
 
     private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class);
 
-    private final JkPluginSonarqube sonarqubePlugin = getBean(JkPluginSonarqube.class);
+    private final SonarqubeJkBean sonarqubePlugin = getBean(SonarqubeJkBean.class);
 
     SonarqubeSampleBuild() {
         projectPlugin.configure(project ->
@@ -29,7 +29,7 @@ class SonarqubeSampleBuild extends JkBean {
                     .and("com.github.djeang:vincer-dom:1.4.0")
                 )
                 .configureTestDeps(deps -> deps
-                    .and(JkPopularModules.JUNIT_5 + ":+")
+                    .and(JkPopularModules.JUNIT_5 + ":5.8.2")
                 )
         );
         sonarqubePlugin.provideTestLibs = true;

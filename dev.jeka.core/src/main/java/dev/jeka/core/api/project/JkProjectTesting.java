@@ -4,10 +4,10 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestResult;
 import dev.jeka.core.api.testing.JkTestSelection;
-import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

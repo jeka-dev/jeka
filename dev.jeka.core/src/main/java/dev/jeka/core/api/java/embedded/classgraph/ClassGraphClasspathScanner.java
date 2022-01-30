@@ -1,10 +1,8 @@
 package dev.jeka.core.api.java.embedded.classgraph;
 
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkBean;
 import io.github.classgraph.*;
 
 import java.io.File;

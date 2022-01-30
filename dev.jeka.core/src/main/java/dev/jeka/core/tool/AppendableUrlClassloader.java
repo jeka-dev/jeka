@@ -1,7 +1,6 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.net.URL;

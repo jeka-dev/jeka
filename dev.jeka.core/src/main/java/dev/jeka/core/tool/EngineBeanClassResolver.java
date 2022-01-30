@@ -94,7 +94,7 @@ final class EngineBeanClassResolver {
         return loadUniqueClassOrFail(matchingclassNames, defaultBeanName);
     }
 
-    private static Class<? extends JkBean> loadUniqueClassOrFail(List<String> matchingBeanClasses, String beanName) {
+    private Class<? extends JkBean> loadUniqueClassOrFail(List<String> matchingBeanClasses, String beanName) {
         if (matchingBeanClasses.isEmpty()) {
             throw beanClassNotFound(beanName);
         } else if (matchingBeanClasses.size() > 1) {
@@ -106,11 +106,16 @@ final class EngineBeanClassResolver {
         }
     }
 
-    private static JkException beanClassNotFound(String name) {
+    private JkException beanClassNotFound(String name) {
         return new JkException("Can not find a KBean named '" + name
-                + "'.\nThe name can be the fully qualified class name of the KBean, its uncapitalized "
+                + "'.\nUse the name can be the fully qualified class name of the KBean, its uncapitalized "
                 + "simple class name or its uncapitalized simple class name without the 'JkBean' suffix.\n"
-                + "Execute jeka -help to display available beans.");
+                + "Execute jeka -help to display available beans.\n"
+                + "Available KBeans :\n  " + String.join("\n  ",globalBeanClassNames())
+                + "\nCurrent classloader :\n"
+                + JkClassLoader.ofCurrent()
+                + "\n");
+
     }
 
     List<String> globalBeanClassNames() {
@@ -183,7 +188,7 @@ final class EngineBeanClassResolver {
         //return true;
     }
 
-    private static EngineCommand toEngineCommand(CommandLine.JkBeanAction action,
+    private EngineCommand toEngineCommand(CommandLine.JkBeanAction action,
                                                  Map<String, Class<? extends JkBean>> beanClasses) {
         Class<? extends JkBean> beanClass = (action.beanName == null)
                 ? beanClasses.get(null)
@@ -191,7 +196,7 @@ final class EngineBeanClassResolver {
         return new EngineCommand(action.action, beanClass, action.member, action.value);
     }
 
-    private static Class<? extends JkBean> getJkBeanClass(Collection<Class<? extends JkBean>> beanClasses, String name) {
+    private  Class<? extends JkBean> getJkBeanClass(Collection<Class<? extends JkBean>> beanClasses, String name) {
         return beanClasses.stream()
                 .filter(Objects::nonNull)
                 .filter(beanClass -> JkBean.nameMatches(beanClass.getName(), name))
@@ -211,6 +216,9 @@ final class EngineBeanClassResolver {
 
     private void storeGlobalKbeanClasses(List<String> classNames) {
         Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(CACHE_FILENAME);
+        if (!Files.exists(store.getParent().getParent())) {
+            return;
+        }
         String content = String.join(System.lineSeparator(), classNames);
         JkPathFile.of(store).createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
     }

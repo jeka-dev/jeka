@@ -31,7 +31,7 @@ public class JacocoSampleBuild extends JkBean {
     private void configure(JkProject project) {
         project.simpleFacade()
                 .configureTestDeps(deps -> deps
-                        .and(JkPopularModules.JUNIT_5 + ":5.8.1")
+                        .and(JkPopularModules.JUNIT_5 + ":5.8.2")
                 );
     }
 

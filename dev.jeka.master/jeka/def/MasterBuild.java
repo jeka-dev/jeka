@@ -7,10 +7,14 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.release.VersionFromGitJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
+import dev.jeka.plugins.jacoco.JacocoJkBean;
+import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
 
 class MasterBuild extends JkBean {
 
@@ -26,6 +30,7 @@ class MasterBuild extends JkBean {
     final NexusJkBean nexus = getBean(NexusJkBean.class).configure(this::configure);
 
     final VersionFromGitJkBean versionFromGit = getBean(VersionFromGitJkBean.class);
+
 
     // ------ Slave projects
 
@@ -45,6 +50,9 @@ class MasterBuild extends JkBean {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
+        getBean(SonarqubeJkBean.class).configureProjectsToScan(coreBuild.getBean(ProjectJkBean.class)::getProject);
+        JacocoJkBean jacocoJkBean = getBean(JacocoJkBean.class);
+        coreBuild.getBean(JacocoJkBean.class); // load Jacoco bean for Core project
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")

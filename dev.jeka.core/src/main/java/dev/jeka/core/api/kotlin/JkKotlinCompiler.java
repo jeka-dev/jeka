@@ -309,7 +309,7 @@ public final class JkKotlinCompiler {
         JkLog.info("Kotlin version : " + getVersion() + ", Target JVM : " + compileSpec.getTargetVersion() );
         JkProcess kotlincProcess;
         List<String> loggedOptions = new LinkedList<>(this.options);
-        JkKotlinJvmCompileSpec effectiveSpec = compileSpec.clone();
+        JkKotlinJvmCompileSpec effectiveSpec = compileSpec.copy();
         for (Plugin plugin : this.plugins) {
             effectiveSpec.addOptions(plugin.toOption());
             loggedOptions.add(plugin.toOption());

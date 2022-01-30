@@ -1,15 +1,14 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.utils.JkUtilsString.plurialize;

@@ -1,6 +1,5 @@
 package dev.jeka.core.api.marshalling;
 
-import dev.jeka.core.api.utils.JkUtilsIO;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -15,7 +14,6 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
@@ -136,7 +134,7 @@ public final class JkDomDocument {
         TransformerFactory tf = TransformerFactory.newInstance();
         final Transformer transformer;
         try {
-            transformer = tf.newTransformer();
+            transformer = tf.newTransformer();  //NOSONAR
         } catch (TransformerConfigurationException e) {
             throw new RuntimeException(e);
         }

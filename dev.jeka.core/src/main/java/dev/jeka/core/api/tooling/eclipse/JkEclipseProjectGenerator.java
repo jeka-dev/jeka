@@ -138,7 +138,7 @@ public final class JkEclipseProjectGenerator {
         }
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
-            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();  //NOSONAR
             Document doc;
             doc = dBuilder.parse(dotProjectFile.toFile());
             doc.getDocumentElement().normalize();

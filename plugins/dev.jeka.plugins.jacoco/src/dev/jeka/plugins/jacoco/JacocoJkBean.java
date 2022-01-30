@@ -17,7 +17,7 @@ public class JacocoJkBean extends JkBean {
 
     public static final String OUTPUT_XML_RELATIVE_PATH = "jacoco/jacoco.xml";
 
-    @JkDoc("If false, tests will be run without Jacoco.")
+    @JkDoc("If false, project from ProjectJkBean won't be configured for Jacoco.")
     public boolean enabled = true;
 
     @JkDoc("If true, Jacoco will produce a standard XML report usable by Sonarqube.")
@@ -32,12 +32,16 @@ public class JacocoJkBean extends JkBean {
     @JkDoc("Version of Jacoco to use both for agent and report.")
     public String jacocoVersion = "0.8.7";
 
-    private ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class).configure(this::configure);
+    private ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class).configure(this::configureForDefaultProject);
 
-    private void configure(JkProject project) {
+    private void configureForDefaultProject(JkProject project) {
         if (!enabled) {
             return;
         }
+        configure(project);
+    }
+
+    public void configure(JkProject project) {
         final JkJacoco jacoco;
         if (JkUtilsString.isBlank(jacocoVersion)) {
             jacoco = JkJacoco.ofEmbedded();

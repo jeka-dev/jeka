@@ -109,7 +109,8 @@ public final class JkSonarqube {
     }
 
     public void run() {
-        JkLog.startTask("Launch Sonar analysis");
+        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("mocalhost");
+        JkLog.startTask("Launch Sonar analysis on server " + hostUrl);
         Path jar = getToolJar();
         String[] args = JkLog.isVerbose() ? new String[] {"-e", "-X"} : new String[] {"-e"};
         javaProcess(jar, "org.sonarsource.scanner.cli.Main").exec(args);

@@ -105,7 +105,7 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
 
         @Override
         public void write(int aByte) throws IOException {
-            if (pendingStart & !closingBrace) {
+            if (pendingStart && !closingBrace) {
                 delegate.write(LINE_SEPARATOR);
                 lastByte = LINE_SEPARATOR;
                 pendingStart = false;

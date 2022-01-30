@@ -56,7 +56,7 @@ public final class JkUtilsXml {
         }
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
-            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();  //NOSONAR
             Document doc;
             doc = dBuilder.parse(documentFile);
             doc.getDocumentElement().normalize();
@@ -72,7 +72,7 @@ public final class JkUtilsXml {
         }
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
-            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();  //NOSONAR
             Document doc;
             doc = dBuilder.parse(documentFile.toFile());
             doc.getDocumentElement().normalize();
@@ -95,7 +95,7 @@ public final class JkUtilsXml {
     public static Document documentFrom(Reader reader) {
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
-            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();  //NOSONAR
             Document doc;
             doc = dBuilder.parse(new InputSource(reader));
             doc.getDocumentElement().normalize();
@@ -159,7 +159,7 @@ public final class JkUtilsXml {
     public static void output(Document doc, OutputStream outputStream) {
         Transformer transformer;
         try {
-            transformer = TransformerFactory.newInstance().newTransformer();
+            transformer = TransformerFactory.newInstance().newTransformer();  //NOSONAR
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             final DOMSource source = new DOMSource(doc);

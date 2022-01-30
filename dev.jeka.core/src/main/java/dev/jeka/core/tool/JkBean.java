@@ -80,7 +80,7 @@ public abstract class JkBean {
         return runtime;
     }
 
-    protected <T extends JkBean> T getBean(Class<T> beanClass) {
+    public <T extends JkBean> T getBean(Class<T> beanClass) {
         return runtime.getBean(beanClass);
     }
 

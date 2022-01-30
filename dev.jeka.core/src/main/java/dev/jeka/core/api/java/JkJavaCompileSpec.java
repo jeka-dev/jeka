@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Stands for a compilation settings as source and target version, encoding, annotation processing
  * or any option supported by the compileRunner.
  */
-public final class JkJavaCompileSpec<T> implements Cloneable {
+public final class JkJavaCompileSpec<T> {
 
     public static final String SOURCE_OPTS = "-source";
 
@@ -53,14 +53,11 @@ public final class JkJavaCompileSpec<T> implements Cloneable {
         return new JkJavaCompileSpec<>(o);
     }
 
-    public JkJavaCompileSpec<T> clone() {
-        try {
-            JkJavaCompileSpec<T> clone = (JkJavaCompileSpec<T>) super.clone();
-            clone.options = new LinkedList(options);
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    public JkJavaCompileSpec<T> copy() {
+        JkJavaCompileSpec<T> copy = JkJavaCompileSpec.ofParent(this.__);
+        copy.sources = this.sources;
+        copy.options = new LinkedList(this.options);
+        return copy;
     }
 
     /**

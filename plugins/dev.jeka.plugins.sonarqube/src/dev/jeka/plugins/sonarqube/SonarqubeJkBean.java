@@ -12,12 +12,12 @@ import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @JkDoc("Run SonarQube analysis.")
-public class JkPluginSonarqube extends JkBean {
+public class SonarqubeJkBean extends JkBean {
 
     private final Map<String, String> properties = new HashMap<>();
 
@@ -39,7 +39,12 @@ public class JkPluginSonarqube extends JkBean {
 
     private Consumer<JkSonarqube> sonarqubeConfigurer = sonarqube -> {};
 
-    private JkSonarqube createConfiguredSonarqube(JkProject project) {
+    private Supplier<List<JkProject>> projectsSupplier = null;
+
+    /**
+     * Creates a {@link JkSonarqube} object configured for the supplied {@link JkProject}.
+     */
+    public JkSonarqube createConfiguredSonarqube(JkProject project) {
         final JkCompileLayout prodLayout = project.getConstruction().getCompilation().getLayout();
         final JkCompileLayout testLayout = project.getConstruction().getTesting().getCompilation().getLayout();
         final Path baseDir = project.getBaseDir();
@@ -100,14 +105,34 @@ public class JkPluginSonarqube extends JkBean {
             JkLog.info("Sonarqube analysis has been disabled. No analysis will be performed.");
             return;
         }
-        JkProject project = getRuntime().getBean(ProjectJkBean.class).getProject();
-        JkSonarqube sonarqube = createConfiguredSonarqube(project);
-        sonarqubeConfigurer.accept(sonarqube);
-        sonarqube.run();
+        List<JkProject> projects = projectsSupplier == null
+                ? Collections.singletonList(getRuntime().getBean(ProjectJkBean.class).getProject())
+                : projectsSupplier.get();
+        for (JkProject project : projects) {
+            JkSonarqube sonarqube = createConfiguredSonarqube(project);
+            sonarqubeConfigurer.accept(sonarqube);
+            sonarqube.run();
+        }
     }
 
-    public void configure(Consumer<JkSonarqube> sonarqubeConfigurer) {
+    /**
+     * By default, this KBean configures Sonarqube to scan the project defined in the {@link ProjectJkBean}.
+     * You can specify explicitly the projects to scan by using this method.
+     */
+    public SonarqubeJkBean configureProjectsToScan(Supplier<JkProject> ...projectSuppliers) {
+        this.projectsSupplier = () -> {
+            List<JkProject> projects = new LinkedList<>();
+            for (Supplier<JkProject> supplier : projectSuppliers) {
+                projects.add(supplier.get());
+            }
+            return projects;
+        };
+        return this;
+    }
+
+    public SonarqubeJkBean configure(Consumer<JkSonarqube> sonarqubeConfigurer) {
         this.sonarqubeConfigurer = sonarqubeConfigurer;
+        return this;
     }
 
 

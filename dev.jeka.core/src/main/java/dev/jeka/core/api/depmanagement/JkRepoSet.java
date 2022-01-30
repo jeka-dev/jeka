@@ -1,9 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.net.URL;
@@ -11,7 +9,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 

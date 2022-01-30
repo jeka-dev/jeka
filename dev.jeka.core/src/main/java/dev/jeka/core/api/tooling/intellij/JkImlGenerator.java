@@ -129,7 +129,7 @@ public final class JkImlGenerator {
             JkDependencyResolver depResolver = ideSupport.getDependencyResolver();
             JkResolvedDependencyNode tree = depResolver.resolve(
                     ideSupport.getDependencies(),
-                    depResolver.getDefaultParams().clone().setFailOnDependencyResolutionError(failOnDepsResolutionError))
+                    depResolver.getDefaultParams().copy().setFailOnDependencyResolutionError(failOnDepsResolutionError))
                     .getDependencyTree();
             JkLog.trace("Dependencies resolved");
             iml.getComponent().getOrderEntries().addAll(projectOrderEntries(tree));  // too slow

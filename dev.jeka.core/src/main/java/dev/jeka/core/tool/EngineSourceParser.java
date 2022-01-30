@@ -2,9 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 
 import java.io.IOException;
@@ -12,7 +9,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 /*

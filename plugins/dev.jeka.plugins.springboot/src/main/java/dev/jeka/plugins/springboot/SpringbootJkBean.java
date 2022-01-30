@@ -30,9 +30,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
-@JkDoc("Provides enhancement to Project plugin in order to produce a startable Springboot jar for your application.\n" +
-        "The main produced artifact is the springboot one (embedding all dependencies) while the artifact classified as 'original' stands for the vanilla jar.\n" +
-        "Dependency versions are resolved against BOM provided by Spring Boot team according Spring Boot version you use.")
+@JkDoc("Configure project KBean in order to produce bootable springboot jar and war files.")
 public final class SpringbootJkBean extends JkBean {
 
     private static String DEFAULT_SPRINGBOOT_VERSION = "2.5.6";
@@ -88,20 +86,6 @@ public final class SpringbootJkBean extends JkBean {
         }
         JkJavaProcess.ofJavaJar(mainArtifactFile, null).exec(args);
     }
-
-    @JkDoc("Run Springboot application from the generated jar")
-    public void runAsync() {
-        JkArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
-        JkArtifactId mainArtifactId = artifactProducer.getMainArtifactId();
-        artifactProducer.makeMissingArtifacts(mainArtifactId);
-        Path mainArtifactFile = artifactProducer.getMainArtifactPath();
-        String[] args = new String[0];
-        if (!JkUtilsString.isBlank(this.runArgs)) {
-            args = JkUtilsString.translateCommandline(this.runArgs);
-        }
-        JkJavaProcess.ofJavaJar(mainArtifactFile, null).exec(args);
-    }
-
 
     private void configure(JkProject project) {
 

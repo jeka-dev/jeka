@@ -1,12 +1,12 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
+import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
 
 import java.util.function.Consumer;
 
@@ -50,7 +50,7 @@ public class ScaffoldJkBean extends JkBean {
         if (JkUtilsString.isBlank(wrapDelegatePath)) {
             scaffolder().createStandardWrapperStructure();
         } else {
-            scaffolder.createWrapperStructureWithDelagation(wrapDelegatePath);
+            scaffolder().createWrapperStructureWithDelagation(wrapDelegatePath);
         }
     }
 

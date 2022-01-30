@@ -105,7 +105,7 @@ public final class JkResolutionParameters<T> {
         return this;
     }
 
-    public JkResolutionParameters clone() {
+    public JkResolutionParameters copy() {
         return JkResolutionParameters.of()
                 .setFailOnDependencyResolutionError(this.failOnDependencyResolutionError)
                 .setConflictResolver(this.conflictResolver)

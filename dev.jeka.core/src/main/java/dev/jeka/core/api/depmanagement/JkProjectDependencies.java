@@ -29,18 +29,18 @@ public class JkProjectDependencies {
 
 
     // All necessary dependencies for the compile
-    private final JkDependencySet compile;
+    private final JkDependencySet compileDeps;
 
     // All necessary dependencies for the runtime
-    private final JkDependencySet runtime;
+    private final JkDependencySet runtimeDeps;
 
     // Only additional dependencies for testing
-    private final JkDependencySet test;
+    private final JkDependencySet testDeps;
 
-    private JkProjectDependencies(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
-        this.compile = compile;
-        this.runtime = runtime;
-        this.test = test;
+    private JkProjectDependencies(JkDependencySet compileDeps, JkDependencySet runtimeDeps, JkDependencySet testDeps) {
+        this.compileDeps = compileDeps;
+        this.runtimeDeps = runtimeDeps;
+        this.testDeps = testDeps;
     }
 
     public static JkProjectDependencies of(JkDependencySet compile, JkDependencySet runtime, JkDependencySet test) {
@@ -156,20 +156,20 @@ public class JkProjectDependencies {
     }
 
 
-    public JkDependencySet getCompile() {
-        return compile;
+    public JkDependencySet getCompileDeps() {
+        return compileDeps;
     }
 
-    public JkDependencySet getRuntime() {
-        return runtime;
+    public JkDependencySet getRuntimeDeps() {
+        return runtimeDeps;
     }
 
-    public JkDependencySet getTest() {
-        return test;
+    public JkDependencySet getTestDeps() {
+        return testDeps;
     }
 
     public JkProjectDependencies and(JkProjectDependencies other) {
-        return of(compile.and(other.compile), runtime.and(other.runtime), test.and(other.test));
+        return of(compileDeps.and(other.compileDeps), runtimeDeps.and(other.runtimeDeps), testDeps.and(other.testDeps));
     }
 
 }

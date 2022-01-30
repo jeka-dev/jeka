@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -105,23 +106,26 @@ final class HelpDisplayer {
 
     private static String helpBeanDescription(BeanDoc description, JkRuntime runtime) {
         StringBuilder sb = new StringBuilder();
-        sb.append("CLASS\n  " + description.fullName());
-        sb.append("\nNAME\n  " + description.shortName());
+        sb.append("CLASS\n  " + description.fullName() + "\n");
+        sb.append("NAME\n  " + description.shortName() + "\n");
         List<String> deps = description.pluginDependencies();
         if (!deps.isEmpty()) {
-            sb.append("\nDEPENDENCIES ON OTHER KBEANS\n  " + String.join(", ", deps));
+            sb.append("DEPENDENCIES ON OTHER KBEANS\n");
+            deps.forEach(dep -> sb.append("  " + dep + "\n"));
         }
         final List<String> explanations = description.description();
         if (!explanations.isEmpty()) {
-            sb.append("\nPURPOSE\n  " + description.description().get(0));
-            description.description().subList(1, description.description().size()).forEach(
-                    line -> sb.append("\n          " + line));
+            sb.append("PURPOSE\n");
+            description.description().stream()
+                    .flatMap(string -> Arrays.stream(string.split("\n")))
+                    .forEach(line -> sb.append("  " + line + "\n"));
         }
         final List<String> activationEffects = description.activationEffect();
         if (!activationEffects.isEmpty()) {
-            sb.append("\nActivation Effects : " + description.activationEffect().get(0));
-            description.description().subList(1, description.activationEffect().size()).forEach(
-                    line -> sb.append("\n                      " + line));
+            sb.append("INSTANTIATION EFFECT\n");
+            description.activationEffect().stream()
+                    .flatMap(string -> Arrays.stream(string.split("\n")))
+                    .forEach(line -> sb.append("  " + line + "\n"));
         }
         final JkBean bean;
         if (runtime.getBeanOptional(description.beanClass()).isPresent()) {
@@ -129,7 +133,6 @@ final class HelpDisplayer {
         } else {
             bean = JkUtilsReflect.newInstance(description.beanClass());
         }
-        sb.append("\n");
         sb.append(BeanDescription.of(description.beanClass()).flatDescription(description.shortName() + "#"));
         return sb.toString();
     }

@@ -93,7 +93,7 @@ public final class JkDebugLogDecorator extends JkLog.JkLogDecorator {
 
         @Override
         public void write(int aByte) throws IOException {
-            if (pendingStart & !endTask) {
+            if (pendingStart && !endTask) {
                 delegate.write(LINE_SEPARATOR);
                 lastByte = LINE_SEPARATOR;
                 pendingStart = false;

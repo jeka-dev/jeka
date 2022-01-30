@@ -12,13 +12,18 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.testing.JkTestProcessor;
-import dev.jeka.core.api.project.*;
+import dev.jeka.core.api.project.JkCompileLayout;
+import dev.jeka.core.api.project.JkIdeSupport;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkProperties;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffolder;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 import org.w3c.dom.Document;
@@ -210,14 +215,14 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
-    public void test() {
+    public void test() {    //NOSONAR
         getProject().getConstruction().getTesting().run();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
             "\nDoes not re-generate artifacts already generated : " +
             "execute 'clean java#pack' to re-generate artifacts.")
-    public void pack() {
+    public void pack() {   //NOSONAR
         getProject().getArtifactProducer().makeAllMissingArtifacts();
     }
 
@@ -245,7 +250,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     public void showDependenciesXml() {
         Transformer transformer = null;
         try {
-            transformer = TransformerFactory.newInstance().newTransformer();
+            transformer = TransformerFactory.newInstance().newTransformer();  //NOSONAR
         } catch (TransformerConfigurationException e) {
             throw new RuntimeException(e);
         }

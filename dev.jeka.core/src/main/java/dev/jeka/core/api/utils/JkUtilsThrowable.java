@@ -1,5 +1,6 @@
 package dev.jeka.core.api.utils;
 
+import java.io.PrintStream;
 import java.util.function.Consumer;
 
 /**
@@ -74,6 +75,27 @@ public final class JkUtilsThrowable {
                     throw new RuntimeException(e);
                 }
             };
+        }
+    }
+
+    public static void printStackTrace(PrintStream printStream, Throwable e, int maxElement) {
+        printStream.println(e.getClass().getName() + ": " + e.getMessage());
+        StackTraceElement[] stack = e.getStackTrace();
+        int count = 0;
+        for (StackTraceElement element : stack) {
+            count++;
+            if (count > maxElement) {
+                break;
+            }
+            printStream.print("    at ");
+            printStream.println(element.toString());
+        }
+        if (count < stack.length) {
+            printStream.println("    ...");
+        }
+        if (e.getCause() != null) {
+            printStream.print("Caused by: ");
+            printStackTrace(printStream, e.getCause(), maxElement);
         }
     }
 

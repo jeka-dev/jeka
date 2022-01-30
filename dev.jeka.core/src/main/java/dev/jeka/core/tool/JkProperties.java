@@ -8,7 +8,10 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Set of Key/value strings used to parameter Jeka and builds.

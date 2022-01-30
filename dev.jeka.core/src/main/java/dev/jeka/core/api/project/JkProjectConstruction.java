@@ -243,9 +243,9 @@ public class JkProjectConstruction {
         JkProjectDependencies textDeps = JkProjectDependencies.ofTextDescriptionIfExist(
                 baseDir.resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"));
         JkProjectDependencies extraDeps = localDeps.and(textDeps);
-        getCompilation().configureDependencies(deps -> deps.and(extraDeps.getCompile()));
-        configureRuntimeDependencies(deps -> deps.and(extraDeps.getRuntime()));
-        getTesting().getCompilation().configureDependencies(deps -> extraDeps.getTest().and(deps));
+        getCompilation().configureDependencies(deps -> deps.and(extraDeps.getCompileDeps()));
+        configureRuntimeDependencies(deps -> deps.and(extraDeps.getRuntimeDeps()));
+        getTesting().getCompilation().configureDependencies(deps -> extraDeps.getTestDeps().and(deps));
         textAndLocalDependenciesAdded = true;
     }
 

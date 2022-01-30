@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 

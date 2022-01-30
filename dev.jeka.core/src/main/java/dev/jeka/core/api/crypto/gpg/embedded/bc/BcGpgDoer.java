@@ -28,7 +28,7 @@ import java.util.List;
 
 final class BcGpgDoer implements JkInternalGpgDoer {
 
-    private static final int HASH_ALGO = PGPUtil.SHA1;
+    private static final int HASH_ALGO = PGPUtil.SHA1;  //NOSONAR
 
     // Accessed through reflection
     static BcGpgDoer of() {

@@ -6,6 +6,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsThrowable;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.InputStream;
@@ -64,12 +65,12 @@ public final class Main {
                 JkMemoryBufferLogDecorator.flush();
             }
             JkLog.restoreToInitialState();
-            System.err.println("An error occurred during def class execution.");
+            System.err.println("\nAn error occurred during def class execution.");
             System.err.println("It may come from user code/setting or a bug in Jeka.");
             System.err.println("To investigate, relaunch command with options :");
             System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");
             System.err.println("    -lv to increase log verbosity.");
-            System.err.println("    -lst to simply log the stacktrace of the thrown exception.");
+            System.err.println("    -lst to log the full stacktrace of the thrown exception.");
             System.err.println("If error reveals to coming from Jeka engine, please report to " +
                     ": https://github.com/jerkar/jeka/issues");
             System.err.println();
@@ -78,7 +79,7 @@ public final class Main {
                     || Environment.standardOptions.logStackTrace) {
                 e.printStackTrace(System.err);
             } else {
-                System.err.println("Error : " + e.getMessage());
+                JkUtilsThrowable.printStackTrace(System.err, e, 3);
             }
             if (Environment.standardOptions.logBanner) {
                 final int length = printAscii(true, "text-failed.ascii");

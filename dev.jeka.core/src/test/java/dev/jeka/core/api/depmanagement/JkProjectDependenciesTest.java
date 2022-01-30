@@ -12,9 +12,9 @@ public class JkProjectDependenciesTest {
     public void testFromDescription()  {
         URL url = JkProjectDependenciesTest.class.getResource("dependencies.txt");
         JkProjectDependencies commonDeps = JkProjectDependencies.ofTextDescription(url);
-        assertEquals(3, commonDeps.getCompile().getEntries().size());
-        assertEquals(5, commonDeps.getRuntime().getEntries().size());
-        assertEquals(4, commonDeps.getTest().getEntries().size());
+        assertEquals(3, commonDeps.getCompileDeps().getEntries().size());
+        assertEquals(5, commonDeps.getRuntimeDeps().getEntries().size());
+        assertEquals(4, commonDeps.getTestDeps().getEntries().size());
     }
 
 }
