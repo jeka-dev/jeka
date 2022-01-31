@@ -6,6 +6,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
@@ -71,6 +72,11 @@ public class CoreBuild extends JkBean {
                     .getTestSelection()
                         .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
                         .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)
+                    .__
+                    .getTestProcessor()
+                        .getEngineBehavior()
+                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE)
+                        .__
                     .__
                 .__
             .__

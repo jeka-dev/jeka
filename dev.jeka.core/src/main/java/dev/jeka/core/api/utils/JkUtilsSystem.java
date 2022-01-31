@@ -106,6 +106,7 @@ public final class JkUtilsSystem {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -114,6 +115,7 @@ public final class JkUtilsSystem {
         try {
             thread.join();;
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }

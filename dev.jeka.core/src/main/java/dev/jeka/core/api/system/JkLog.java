@@ -64,7 +64,7 @@ public final class JkLog implements Serializable {
 
     private static AtomicInteger currentNestedTaskLevel = new AtomicInteger(0);
 
-    private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();
+    private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();  //NOSONAR
 
     private static Style decoratorStyle;
 

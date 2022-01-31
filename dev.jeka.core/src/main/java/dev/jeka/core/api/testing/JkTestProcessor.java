@@ -201,12 +201,12 @@ public final class JkTestProcessor<T> {
         Path serializedArgPath = JkUtilsPath.createTempFile("testArgs-", ".ser");
         JkUtilsIO.serialize(args, serializedArgPath);
         String arg = serializedArgPath.toAbsolutePath().toString();
-        List<Path> classapth = JkClassLoader.ofCurrent().getClasspath()
-                .and(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
+        List<Path> classpath = JkClassLoader.ofCurrent().getClasspath()
+                .andPrepend(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
         forkingProcess.clone()
-                .setLogCommand(false)
+                .setLogCommand(JkLog.isVerbose())
                 .setFailOnError(true)
-                .setClasspath(classapth)
+                .setClasspath(classpath)
                 .addParams(arg)
                 .exec();
         JkUtilsPath.deleteFile(serializedArgPath);

@@ -109,7 +109,7 @@ public final class JkSonarqube {
     }
 
     public void run() {
-        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("mocalhost");
+        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("localhost");
         JkLog.startTask("Launch Sonar analysis on server " + hostUrl);
         Path jar = getToolJar();
         String[] args = JkLog.isVerbose() ? new String[] {"-e", "-X"} : new String[] {"-e"};
@@ -122,7 +122,7 @@ public final class JkSonarqube {
                 .setClasspath(jar)
                 .setFailOnError(true)
                 .addParams(toProperties())
-                .setLogCommand(JkLog.isVerbose())
+                .setLogCommand(JkLog.isVerbose() || logOutput)
                 .setLogOutput(JkLog.isVerbose() || logOutput);
     }
 
@@ -189,9 +189,9 @@ public final class JkSonarqube {
             final Path file = it.next();
             String path;
             if (file.startsWith(projectDir)) {
-                path = projectDir.relativize(file).toString();
+                path = projectDir.relativize(file).normalize().toString();
             } else {
-                path = file.toAbsolutePath().toString();
+                path = file.toAbsolutePath().normalize().toString();
             }
             result.append(path);
             if (it.hasNext()) {

@@ -141,14 +141,6 @@ public class JkProjectCompilation<T> {
     }
 
     /**
-     * Returns the {@link JkRunnables} to be run for compilation.
-     * Contains {@link JkProjectCompilation#JAVA_SOURCES_COMPILE_ACTION} by default.
-     */
-    public JkRunnables<JkProjectCompilation<T>> getCompileActions() {
-        return postCompileActions;
-    }
-
-    /**
      * Returns the {@link JkRunnables} to be run after compilation. User can chain its own runnable
      * to customise the process. Empty by default.
      */

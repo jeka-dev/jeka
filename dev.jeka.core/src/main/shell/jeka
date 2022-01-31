@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ -z "$Jeka_OPTS" ] ; then
+if [ -z "$JEKA_OPTS" ] ; then
   export "JEKA_OPTS= "
 fi
 

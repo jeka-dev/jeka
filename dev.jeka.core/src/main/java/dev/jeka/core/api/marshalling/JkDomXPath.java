@@ -12,8 +12,6 @@ import javax.xml.xpath.XPathFactory;
  */
 public final class JkDomXPath {
 
-    private static final XPath XPATH = XPathFactory.newInstance().newXPath();
-
     private JkDomXPath() {
     }
 
@@ -22,7 +20,7 @@ public final class JkDomXPath {
      */
     public static XPathExpression compile(String expression) {
         try {
-            return XPATH.compile(expression);
+            return XPathFactory.newInstance().newXPath().compile(expression);
         } catch (XPathExpressionException e) {
             throw new IllegalStateException("Error when compiling xPath expression " + expression, e);
         }

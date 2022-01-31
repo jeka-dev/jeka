@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public final class JkRuntime {
 
-    private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
+    private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();   //NOSONAR
 
     private static final Map<Path, JkRuntime> RUNTIMES = new LinkedHashMap<>();
 

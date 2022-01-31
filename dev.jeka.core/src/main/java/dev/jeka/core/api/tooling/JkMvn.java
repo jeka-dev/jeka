@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleDependency;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependency;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -41,10 +42,12 @@ public final class JkMvn implements Runnable {
     }
 
     private static boolean exist(String cmd) {
+        String command = cmd + " -version";
         try {
-            final int result = Runtime.getRuntime().exec(cmd + " -version").waitFor();
+            final int result = Runtime.getRuntime().exec(command).waitFor();
             return result == 0;
-        } catch (final Exception e) {
+        } catch (final Exception e) {  //NOSONAR
+            JkLog.trace("Error while executing command '" + command + "' : " + e.getMessage());
             return false;
         }
     }

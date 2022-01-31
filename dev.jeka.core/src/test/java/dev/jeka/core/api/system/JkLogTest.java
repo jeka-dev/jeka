@@ -1,8 +1,12 @@
 package dev.jeka.core.api.system;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 public class JkLogTest {
 
-    //@Test
+    @Test
+    @Ignore
     public void testMultiThread() throws Exception {
         JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.info("toto");

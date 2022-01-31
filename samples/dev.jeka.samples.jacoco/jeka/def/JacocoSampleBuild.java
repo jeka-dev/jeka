@@ -1,8 +1,10 @@
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -14,9 +16,9 @@ import java.nio.file.Path;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
 public class JacocoSampleBuild extends JkBean {
 
-    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+    ProjectJkBean project= getBean(ProjectJkBean.class).configure(this::configure);
 
-    JacocoJkBean jacoco = getRuntime().getBean(JacocoJkBean.class);
+    JacocoJkBean jacoco = getRuntime().getBean(JacocoJkBean.class).setHtmlReport(true);
 
     IntellijJkBean intellij = getRuntime().getBean(IntellijJkBean.class);
 
@@ -44,6 +46,13 @@ public class JacocoSampleBuild extends JkBean {
     private void configureIml(JkIml iml) {
        iml.getComponent()
                .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco");
+    }
+
+    public static void main(String[] args) {
+        JacocoSampleBuild build = JkInit.instanceOf(JacocoSampleBuild.class);
+        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
+        build.clean();
+        build.project.test();
     }
 
 

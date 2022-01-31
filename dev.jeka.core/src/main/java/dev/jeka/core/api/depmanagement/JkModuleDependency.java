@@ -103,10 +103,10 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
      * group:name:classifiers...:version
      * group:name:classifiers:type:version
      *
-     * classifiers may be a single classifier or a a list of as <i>linux,mac</i>. The empty string
+     * classifiers may be a single classifier or a list as <i>linux,mac</i>. The empty string
      * stands for the default classifier.
      *
-     * Version can be a '?' if it is unspecified.
+     * Version can be a '?' if it is unspecified or a '+' to take the highest existing version.
      */
     public static JkModuleDependency of(String description) {
         final String[] strings = description.split( ":");

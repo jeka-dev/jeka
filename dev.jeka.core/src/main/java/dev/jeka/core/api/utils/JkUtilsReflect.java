@@ -40,7 +40,7 @@ public final class JkUtilsReflect {
             }
             boolean found = false;
             for (int i = 0; i < originalTypes.length; i++) {
-                if (!originalTypes[i].getName().equals(types[i].getName())) {
+                if (!originalTypes[i].getName().equals(types[i].getName())) {  //NOSONAR
                     break;
                 }
                 found = true;
@@ -520,7 +520,7 @@ public final class JkUtilsReflect {
         if (type1 == null) {
             return true;
         }
-        if (type0.getName().equals(type1.getName())) {
+        if (type0.getName().equals(type1.getName())) {  //NOSONAR
             return true;
         }
         if (type0.isPrimitive()) {

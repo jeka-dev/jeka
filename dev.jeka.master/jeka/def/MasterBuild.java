@@ -27,6 +27,8 @@ class MasterBuild extends JkBean {
     @JkInjectProperty("GH_TOKEN")
     public String githubToken;
 
+    public boolean runSamples = true;
+
     final NexusJkBean nexus = getBean(NexusJkBean.class).configure(this::configure);
 
     final VersionFromGitJkBean versionFromGit = getBean(VersionFromGitJkBean.class);
@@ -46,13 +48,15 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.springboot")
     SpringbootBuild springbootBuild;
 
+    private final JacocoJkBean coreJacocoBean;
+
     MasterBuild() throws Exception {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
         getBean(SonarqubeJkBean.class).configureProjectsToScan(coreBuild.getBean(ProjectJkBean.class)::getProject);
-        JacocoJkBean jacocoJkBean = getBean(JacocoJkBean.class);
-        coreBuild.getBean(JacocoJkBean.class); // load Jacoco bean for Core project
+        coreJacocoBean = coreBuild.getBean(JacocoJkBean.class)
+                .setHtmlReport(true);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -65,10 +69,18 @@ class MasterBuild extends JkBean {
             JkLog.endTask();
         });
         JkLog.endTask();
-        JkLog.startTask("Running samples");
-        runSamples();
-        runScaffoldsWithPlugins();
-        JkLog.endTask();
+        if (runSamples) {
+            JkLog.startTask("Running samples");
+            SamplesTester samplesTester = new SamplesTester();
+            JacocoJkBean.AgentJarAndReportFile jacocoRunInfo = coreJacocoBean.getAgentAndReportFile();
+            samplesTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
+            samplesTester.run();
+            PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
+            pluginScaffoldTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
+            pluginScaffoldTester.run();
+            coreJacocoBean.generateExport();
+            JkLog.endTask();
+        }
         String branch = JkGitProcess.of().getCurrentBranch();
         if (branch.equals("master") && !versionFromGit.version().isSnapshot()) {
             JkLog.startTask("Publishing");

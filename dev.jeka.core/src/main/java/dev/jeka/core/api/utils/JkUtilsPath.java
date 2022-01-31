@@ -2,6 +2,7 @@ package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.system.JkLog;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -85,6 +86,29 @@ public final class JkUtilsPath {
         }
         return fileSystem.getPath("/");
     }
+
+    /*
+    public static class JkZip implements Closeable {
+
+        private final Path root;
+
+        private final FileSystem fileSystem;
+
+        private JkZip(Path root, FileSystem fileSystem) {
+            this.root = root;
+            this.fileSystem = fileSystem;
+        }
+
+        public Path getRoot() {
+            return root;
+        }
+
+        @Override
+        public void close() throws IOException {
+            fileSystem.close();
+        }
+    }
+    */
 
     public static List<File> toFiles(Collection<Path> paths) {
         final List<File> result = new LinkedList<>();

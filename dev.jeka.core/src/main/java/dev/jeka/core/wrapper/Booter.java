@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -83,8 +84,8 @@ public class Booter {
         if (!Files.exists(bootDir)) {
             return Collections.emptyList();
         }
-        try {
-            return Files.list(bootDir)
+        try (Stream<Path> stream = Files.list(bootDir)){
+            return stream
                     .filter(path -> Files.isRegularFile(path))
                     .filter(path -> path.getFileName().toString().toLowerCase().endsWith(".jar"))
                     .map(path -> {
@@ -108,22 +109,24 @@ public class Booter {
         final String urlString = repo + "dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";
         System.out.println("Downloading " + urlString + " ...");
+        final URL url;
         try {
-            final URL url = new URL(urlString);
-            ReadableByteChannel readableByteChannel = null;
-            try {
-                readableByteChannel = Channels.newChannel(url.openStream());
-            } catch (final FileNotFoundException e) {
-                System.out.println(urlString + " not found. Please check that version " + version + " exists in repo " + repo);
-                System.out.println("Jeka version to download is defined in ./jeka/wrapper/wrapper.properties file.");
-                System.exit(1);
-            }
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
+        }
+        try (ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream())) {
             final Path temp = Files.createTempFile("jeka-wrapper", ".zip");
             try (FileOutputStream fileOutputStream = new FileOutputStream(temp.toFile())) {
                 final FileChannel fileChannel = fileOutputStream.getChannel();
                 fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
             }
             return temp;
+        } catch (final FileNotFoundException e) {
+            System.out.println(urlString + " not found. Please check that version " + version + " exists in repo " + repo);
+            System.out.println("Jeka version to download is defined in ./jeka/wrapper/wrapper.properties file.");
+            System.exit(1);
+            return null;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

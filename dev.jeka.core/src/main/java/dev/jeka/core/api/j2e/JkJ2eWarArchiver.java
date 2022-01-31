@@ -50,7 +50,7 @@ public class JkJ2eWarArchiver {
     public void generateWarDir(Path destDir) {
         JkPathTree webappTree = webappDir != null ? JkPathTree.of(webappDir) : null;
         if (webappTree == null || !webappTree.exists() || !webappTree.containFiles()) {
-            JkLog.warn(webappTree.getRoot().toString() + " is empty or does not exists.");
+            JkLog.warn(destDir + " is empty or does not exists.");
         } else {
             webappTree.copyTo(destDir);
         }

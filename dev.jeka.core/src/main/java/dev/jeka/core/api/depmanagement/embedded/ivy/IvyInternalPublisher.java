@@ -210,7 +210,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
             final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleDescriptor
                     .getModuleRevisionId());
-            propsFile.delete();
+            propsFile.delete();  //NOSONAR
         } catch (final ParseException | IOException e) {
             throw new RuntimeException(e);
         }

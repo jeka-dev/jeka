@@ -307,6 +307,7 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
         try {
             exitCode = process.waitFor();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
         outputStreamGobbler.join();

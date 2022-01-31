@@ -152,9 +152,9 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         final ResolutionCacheManager cacheManager = ivy.getSettings().getResolutionCacheManager();
         final ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(module);
         final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
-        propsFile.delete();
+        propsFile.delete();  //NOSONAR
         final File xmlFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
-        xmlFile.delete();
+        xmlFile.delete();  //NOSONAR
     }
 
     private static String logLevel() {

@@ -18,10 +18,19 @@ public abstract class JekaCommandLineExecutor {
 
     private final Path jekaDir;
 
+    private Path jacocoAgentPath;
+
+    private Path jacocoReportFile;
+
     protected JekaCommandLineExecutor(Path samplesRootDir, Path jekaDistrib) {
         super();
         this.samplesRootDir = samplesRootDir;
         this.jekaDir = jekaDistrib;
+    }
+
+    public void setJacoco(Path agent, Path report) {
+        jacocoAgentPath = agent.toAbsolutePath().normalize();
+        jacocoReportFile = report.toAbsolutePath().normalize();
     }
 
     protected JekaCommandLineExecutor(Path projectRootDir) {
@@ -67,11 +76,16 @@ public abstract class JekaCommandLineExecutor {
 
     private JkProcess process(Path workingDir, boolean useWrapper) {
         String cmd = useWrapper ? jekawCmd(workingDir) : jekaCmd();
-        return JkProcess.of(cmd)
+        JkProcess result = JkProcess.of(cmd)
                 .setWorkingDir(workingDir)
                 .setLogCommand(true)
                 .setLogOutput(true)
                 .setFailOnError(true);
+        if (jacocoAgentPath != null) {
+            String arg = "-javaagent:" + jacocoAgentPath + "=destfile=" + jacocoReportFile + ",append=true";
+            result.setEnv("JEKA_OPTS", arg);
+        }
+        return result;
     }
 
 

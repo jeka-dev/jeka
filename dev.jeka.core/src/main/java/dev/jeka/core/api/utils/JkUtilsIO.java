@@ -405,6 +405,7 @@ public final class JkUtilsIO {
             try {
                 thread.join();
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();;
                 throw new IllegalStateException(e);
             }
         }

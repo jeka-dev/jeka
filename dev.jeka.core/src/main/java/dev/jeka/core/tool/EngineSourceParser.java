@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 
 import java.io.IOException;
@@ -348,6 +349,7 @@ final class EngineSourceParser {
                         endResult.append("\n");
                         currentState = insideblockComment;
                     }
+                    break;
                 case insideblockComment:
                     while (character.equals("*") && scanner.hasNext()) {
                         final String c2 = scanner.next();
@@ -357,6 +359,9 @@ final class EngineSourceParser {
                         }
 
                     }
+                    break;
+                default:
+                    break;
             }
         }
         scanner.close();

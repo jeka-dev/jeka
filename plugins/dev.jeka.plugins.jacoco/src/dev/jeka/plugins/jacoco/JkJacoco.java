@@ -4,18 +4,23 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 
+import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Provides convenient methods to deal with Jacoco agent and report tool.
@@ -30,7 +35,7 @@ import java.util.List;
  */
 public final class JkJacoco {
 
-    private final ToolProvider toolProvider;
+    private final RepoToolProvider toolProvider;
 
     private Path execFile;
 
@@ -38,20 +43,15 @@ public final class JkJacoco {
 
     private JkPathMatcher classDirFilter;
 
+    private List<Path> sourceDirs = new LinkedList<>();
+
     private final List<String> agentOptions = new LinkedList<>();
 
     private final List<String> reportOptions = new LinkedList<>();
 
-    private JkJacoco(ToolProvider toolProvider) {
+    private JkJacoco(RepoToolProvider toolProvider) {
         super();
         this.toolProvider = toolProvider;
-    }
-
-    /**
-     * Returns the {@link JkJacoco} object relying on jacoco-agent and jacoco-cli embedded in this plugin.
-     */
-    public static JkJacoco ofEmbedded() {
-        return new JkJacoco(new EmbeddedToolProvider());
     }
 
     /**
@@ -100,6 +100,11 @@ public final class JkJacoco {
         return this;
     }
 
+    public JkJacoco setSources(List<Path> sourceDirs) {
+        this.sourceDirs = sourceDirs;
+        return this;
+    }
+
     public List<String> getReportOptions() {
         return reportOptions;
     }
@@ -111,11 +116,19 @@ public final class JkJacoco {
             JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
                     JkJavaProcess.ofJava(JkTestProcessor.class.getName()));
             process.addAgent(toolProvider.getAgentJar(), agentOptions);
-            JkLog.info("Instrumenting tests with Jacoco agent " + agentOptions);
+            JkLog.info("Instrumenting tests with Jacoco agent options : " + agentOptions);
             testProcessor.setForkingProcess(process);
-            testProcessor.getPostActions().append(new Reporter());
+            testProcessor.getPostActions().append(this::generateExport);
         });
+    }
 
+    private JkPathTree pathTree() {
+        JkUtilsAssert.state(classDir != null, "Class dir has not been specified.");
+        JkPathTree result = JkPathTree.of(classDir);
+        if (classDirFilter != null) {
+            result = result.withMatcher(classDirFilter);
+        }
+        return result;
     }
 
     private String agentOptions() {
@@ -132,61 +145,62 @@ public final class JkJacoco {
         return result;
     }
 
-    private class Reporter implements Runnable {
-
-        @Override
-        public void run() {
-            JkLog.info("Jacoco internal report created at " + execFile.toAbsolutePath());
-            if (!reportOptions.isEmpty()) {
-                if (classDir == null) {
-                    JkLog.warn("No class dir specified. Cannot run jacoco report.");
-                    return;
-                }
-                if (!Files.exists(execFile)) {
-                    JkLog.warn("File " + execFile + " not found. Cannot run jacoco report.");
-                    return;
-                }
-                JkPathTree pathTree = null;
-                if (classDirFilter != null) {
-                    pathTree = JkPathTree.of(classDir).withMatcher(classDirFilter);
-                }
-                List<String> args = new LinkedList<>();
-                args.add("report");
-                args.add(execFile.toString());
-                if (classDirFilter == null) {
-                    args.add("--classfiles");
-                    args.add(classDir.toString());
-                } else {
-                    pathTree.getFiles().forEach(file ->  {
-                        args.add("--classfiles");
-                        args.add(file.toString());
-                    });
-                }
-                args.add("--encoding");
-                args.add("utf-8");
-                args.addAll(reportOptions);
-                if (!JkLog.isVerbose()) {
-                    args.add("--quiet");
-                }
-                JkLog.info("Generate Jacoco report");
-                JkJavaProcess.ofJavaJar(toolProvider.getCmdLineJar(), null)
-                        .setFailOnError(true)
-                        .setLogCommand(JkLog.isVerbose())
-                        .addParams(args)
-                        .exec();
+     public void generateExport() {
+        JkLog.info("Jacoco internal report created at " + execFile.toAbsolutePath().normalize());
+        if (!reportOptions.isEmpty()) {
+            if (classDir == null) {
+                JkLog.warn("No class dir specified. Cannot run jacoco report.");
+                return;
             }
+            if (!Files.exists(execFile)) {
+                JkLog.warn("File " + execFile + " not found. Cannot run jacoco report.");
+                return;
+            }
+            JkPathTree pathTree = null;
+            if (classDirFilter != null) {
+                pathTree = JkPathTree.of(classDir).withMatcher(classDirFilter);
+            }
+            List<String> args = new LinkedList<>();
+            args.add("report");
+            args.add(execFile.toString());
+            if (classDirFilter == null) {
+                args.add("--classfiles");
+                args.add(classDir.toString());
+            } else {
+                pathTree.getFiles().forEach(file ->  {
+                    args.add("--classfiles");
+                    args.add(file.toString());
+                });
+            }
+            for (Path sourceRoot : sourceDirs) {
+               // args.add("--sourcefiles");
+               // args.add(sourceRoot.toString());
+            }
+            args.add("--encoding");
+            args.add("utf-8");
+            args.addAll(reportOptions);
+            if (!JkLog.isVerbose()) {
+                args.add("--quiet");
+            }
+            JkLog.info("Generate Jacoco XML report with args " + args);
+
+            JkJavaProcess.ofJavaJar(toolProvider.getCmdLineJar(), null)
+                    .setFailOnError(true)
+                    .setLogCommand(JkLog.isVerbose())
+                    .addParams(args)
+                    .exec();
         }
     }
 
-    private interface ToolProvider {
-
-        Path getAgentJar();
-
-        Path getCmdLineJar();
-
+    public RepoToolProvider getToolProvider() {
+        return toolProvider;
     }
 
-    private static class RepoToolProvider implements ToolProvider {
+    public Path getExecFile() {
+        return execFile;
+    }
+
+    public static class RepoToolProvider  {
 
         JkDependencyResolver dependencyResolver;
 
@@ -198,42 +212,16 @@ public final class JkJacoco {
         }
 
         public Path getAgentJar() {
-            return dependencyResolver.resolve(JkDependencySet.of("org.jacoco:org.jacoco.agent:runtime:" + version))
-                    .getFiles().getEntries().get(0);
+            return JkModuleFileProxy.of(dependencyResolver.getRepos(),
+                    "org.jacoco:org.jacoco.agent:runtime:" + version).get();
         }
 
         public Path getCmdLineJar() {
-            return dependencyResolver.resolve(JkDependencySet.of()
-                    .and("org.jacoco:org.jacoco.cli:nodeps:" + version, JkTransitivity.NONE))
-                    .getFiles().getEntries().get(0);
+            return JkModuleFileProxy.of(dependencyResolver.getRepos(),
+                    "org.jacoco:org.jacoco.cli:nodeps:" + version).get();
         }
 
     }
 
-    private static class EmbeddedToolProvider implements ToolProvider {
-
-        private Path agentJarFile;
-
-        private Path cliJarFile;
-
-        EmbeddedToolProvider() {
-            final URL agentJarUrl = JacocoJkBean.class.getResource("org.jacoco.agent-0.8.7-runtime.jar");
-            agentJarFile = JkUtilsIO.copyUrlContentToCacheFile(agentJarUrl, System.out,
-                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
-            final URL cliJarUrl = JacocoJkBean.class.getResource("org.jacoco.cli-0.8.7-nodeps.jar");
-            cliJarFile = JkUtilsIO.copyUrlContentToCacheFile(cliJarUrl, System.out,
-                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
-        }
-
-        @Override
-        public Path getAgentJar() {
-            return agentJarFile;
-        }
-
-        @Override
-        public Path getCmdLineJar() {
-            return cliJarFile;
-        }
-    }
 
 }

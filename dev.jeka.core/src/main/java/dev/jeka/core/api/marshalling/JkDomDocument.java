@@ -131,7 +131,7 @@ public final class JkDomDocument {
      * specified {@link Consumer<Transformer>}.
      */
     public void print(OutputStream out, Consumer<Transformer> transformerConfigurer) {
-        TransformerFactory tf = TransformerFactory.newInstance();
+        TransformerFactory tf = TransformerFactory.newInstance();  //NOSONAR
         final Transformer transformer;
         try {
             transformer = tf.newTransformer();  //NOSONAR

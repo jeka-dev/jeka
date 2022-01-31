@@ -39,11 +39,11 @@ final class IvyFollowRedirectUrlHandler extends BasicURLHandler {
                 final boolean redirect = checkRedirect(httpCon);
                 if (redirect) {
                     final String newUrl = httpCon.getHeaderField("Location");
-                    disconnect(srcConn);
+                    disconnectQuietly(srcConn);
                     download(new URL(newUrl), dest, l);
                     return;
                 }
-                if (!checkStatusCode(src, httpCon)) {
+                if (!checkReturnedStatusCode(src, httpCon)) {
                     throw new IOException("The HTTP response code for " + src
                             + " did not indicate a success." + " See log for more detail.");
                 }
@@ -58,7 +58,7 @@ final class IvyFollowRedirectUrlHandler extends BasicURLHandler {
             if (srcConn.getContentEncoding() == null) {
                 final int contentLength = srcConn.getContentLength();
                 if (contentLength != -1 && dest.length() != contentLength) {
-                    dest.delete();
+                    dest.delete();  //NOSONAR
                     throw new IOException(
                             "Downloaded file size doesn't match expected Content Length for " + src
                                     + ". Please retry.");
@@ -68,10 +68,10 @@ final class IvyFollowRedirectUrlHandler extends BasicURLHandler {
             // update modification date
             final long lastModified = srcConn.getLastModified();
             if (lastModified > 0) {
-                dest.setLastModified(lastModified);
+                dest.setLastModified(lastModified);  //NOSONAR
             }
         } finally {
-            disconnect(srcConn);
+            disconnectQuietly(srcConn);
         }
     }
 
@@ -82,7 +82,7 @@ final class IvyFollowRedirectUrlHandler extends BasicURLHandler {
                 || status == HttpURLConnection.HTTP_SEE_OTHER;
     }
 
-    private boolean checkStatusCode(URL url, HttpURLConnection con) throws IOException {
+    private boolean checkReturnedStatusCode(URL url, HttpURLConnection con) throws IOException {
         final int status = con.getResponseCode();
         if (status == HttpStatus.SC_OK) {
             return true;
@@ -104,7 +104,7 @@ final class IvyFollowRedirectUrlHandler extends BasicURLHandler {
         return false;
     }
 
-    private void disconnect(URLConnection con) {
+    private void disconnectQuietly(URLConnection con) {
         if (con instanceof HttpURLConnection) {
             if (!"HEAD".equals(((HttpURLConnection) con).getRequestMethod())) {
                 // We must read the response body before disconnecting!
@@ -113,7 +113,7 @@ final class IvyFollowRedirectUrlHandler extends BasicURLHandler {
                 // [quote]Do not abandon a connection by ignoring the response
                 // body. Doing
                 // so may results in idle TCP connections.[/quote]
-                readResponseBody((HttpURLConnection) con);
+                readResponseBodyQuietly((HttpURLConnection) con);
             }
 
             ((HttpURLConnection) con).disconnect();
@@ -129,7 +129,7 @@ final class IvyFollowRedirectUrlHandler extends BasicURLHandler {
     /**
      * Read and ignore the response body.
      */
-    private void readResponseBody(HttpURLConnection conn) {
+    private void readResponseBodyQuietly(HttpURLConnection conn) {
         final byte[] buffer = new byte[BUFFER_SIZE];
 
         InputStream inStream = null;

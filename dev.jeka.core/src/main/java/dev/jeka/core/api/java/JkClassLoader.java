@@ -108,11 +108,10 @@ public class JkClassLoader {
         return loadIfExist(classNameFromSourceFilePath(classSourcePath));
     }
 
-    private static String classNameFromSourceFilePath(String sourcePath) {
+    public static String classNameFromSourceFilePath(String sourcePath) {
         final String dotName = sourcePath.replace('/', '.').replace('\\', '.');
         return JkUtilsString.substringBeforeLast(dotName, ".");
     }
-
 
     /**
      * Returns <code>true</code> if this classloader is descendant or same as the specified classloader.

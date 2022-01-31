@@ -181,7 +181,7 @@ final class BeanDescription {
     private List<Class<? extends JkBean>> beanClassHierarchy() {
         List<Class<? extends JkBean>> result = new ArrayList<>();
         Class<?> current = beanClass;
-        while (JkBean.class.isAssignableFrom(current) || JkBean.class.isAssignableFrom(current)) {
+        while (JkBean.class.isAssignableFrom(current)) {
             result.add((Class<? extends JkBean>) current);
             current = current.getSuperclass();
         }

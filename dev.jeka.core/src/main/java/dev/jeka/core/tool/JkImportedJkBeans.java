@@ -94,7 +94,7 @@ public final class JkImportedJkBeans {
                 while (!Files.exists(currentClassBaseDir.resolve(JkConstants.DEF_DIR)) && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParent();
                 }
-                if (currentClassBaseDir == null) {
+                if (currentClassBaseDir == null || !Files.exists(currentClassBaseDir)) {
                     throw new IllegalStateException("Can't inject imported run instance of type "
                             + importedJkClass.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
