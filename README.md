@@ -90,7 +90,7 @@ class Build extends JkBean {
                 )
                 .configureTestDeps(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-test")
-                        .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
+                            .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
                 )
                 .addTestExcludeFilterSuffixedBy("IT", !runIT);
     }
