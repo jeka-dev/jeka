@@ -183,15 +183,17 @@ Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-n
 
 # How to build Jeka ?
 
-Jeka is made of following projects :
+This repository is organized as a _mono repo_. It contains The Jeka core project along plugins and samples for 
+automation testing.
+
 * dev.jeka.core : complete Jeka project
-* dev.jeka.samples : A sample project with several build classes to illustrate how Jeka can be used in different ways
-* dev.jeka.depender-samples : A sample project depending on the above sample project to illustrate multi-project builds. 
-These sample projects are also used to run some black-box tests
+* plugins : Many Jeka plugins that are released along Keka core 
+* samples : Sample projects serving for examples and automation testing
+* dev.jeka.master : The master build for building all projects together.
 
 Jeka builds itself. To build Jeka full distrib from sources, the simpler is to use your IDE.
 
-Once distrib created, add the distrib folder to your PATH environment variable.
+Once distribution created, add the distrib folder to your PATH environment variable.
 
 ## Build Jeka from IntelliJ
 
@@ -201,20 +203,22 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 * Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
 * Run 'CoreBuild - skip tests' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
 
-
-## Build Jeka from Eclipse (outdated)
-
-* Clone this repository in Eclipse. Project is already configured ( *.project* and *.classpath* are stored in git).
-* Add the `JEKA_USER_HOME` classpath variable pointing on [USER_HOME]/.jeka 
-* Make sure the project is configured to compile using a JDK8 or higher and not a JRE.
-* Run `dev.jeka.core.CoreBuildAndIT` class main method. This class is located in *jeka/def* folder. 
-* This creates the full distrib in *dev.jeka.core/jeka/output/distrib* folder and run full Integration test suite.
+> For debugging the project, you have to set up Intellij in order to workaround with an Intellij issue :
+> Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
+> [See here](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu)
 
 
+## Build Jeka from command line
 
-For debuging the project, you have to setup Intellij in order to workaround witj an Intellij issue :
-Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
-[See here](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu)
+Jeka builds itself, but we need to compile the Jeka sources prior to execute it. 
+Fot this, a small _Ant_ script bootstraps the build process by compiling Jeka first then launch 
+the Jeka build.
+
+At the repository root dir, execute : `ant -f .github\workflows\build.xml`.
+
+To build the project including Sonarqube and test coverage  : `ant -f .github\workflows\build.xml -Dsonar.host.url=... `.  
+Cause of Sonalqube scanner, this command has to be run with a JDK >= 11.
+
 
 ## How to edit documentation
 

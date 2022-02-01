@@ -74,12 +74,21 @@ final class Engine {
         JkLog.startTask("Compile def and initialise KBeans");
         JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getDefDependencies());
         JkLog.trace("Inject classpath from command line : " + commandLineDependencies);
-        CompilationResult result = resolveAndCompile( new HashMap<>(), true,
-                !Environment.standardOptions.ignoreCompileFail);
-        JkPathSequence computedClasspath = result.classpath
-            .andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
-        AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
-        beanClassesResolver.setClasspath(computedClasspath, result.classpathChanged);
+        final JkPathSequence computedClasspath;
+        final CompilationResult result;
+        boolean hasJekaDir = Files.exists(projectBaseDir.resolve(JkConstants.JEKA_DIR))
+                || commandLine.involvedBeanNames().contains("scaffold");
+        if (hasJekaDir) {
+            result = resolveAndCompile(new HashMap<>(), true,
+                    !Environment.standardOptions.ignoreCompileFail);
+            computedClasspath = result.classpath
+                    .andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
+            AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
+            beanClassesResolver.setClasspath(computedClasspath, result.classpathChanged);
+        } else {
+            computedClasspath = dependencyResolver.resolve(commandLineDependencies).getFiles();
+            result = null;
+        }
         if (commandLine.isHelp()) {
             JkLog.endTask();
             stopBusyIndicator();
@@ -98,7 +107,7 @@ final class Engine {
         JkLog.endTask();
         JkLog.info("KBeans are ready to run.");
         stopBusyIndicator();
-        if (!result.compileFailedProjects.getEntries().isEmpty()) {
+        if (result != null && !result.compileFailedProjects.getEntries().isEmpty()) {
             JkLog.warn("Def compilation failed on projects " + result.compileFailedProjects.getEntries()
                     .stream().map(path -> "'" + path + "'").collect(Collectors.toList()));
             JkLog.warn("As -dci option is on, the failure will be ignored.");
@@ -109,6 +118,9 @@ final class Engine {
             if (JkLog.isVerbose()) {
                 System.out.println("Classloader : " + JkClassLoader.ofCurrent());
             }
+        }
+        if (!hasJekaDir) {
+            JkLog.warn("You are not running Jeka inside a Jeka project.");
         }
         runtime.run(resolvedCommands);
     }

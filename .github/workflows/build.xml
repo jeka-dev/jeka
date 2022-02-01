@@ -1,4 +1,4 @@
-<project name="Jerkar" default="run" basedir=".">
+<project name="Jeka" default="run" basedir="../..">
 
 	<description>
             This ANT file bootstraps Jeka in order it builds itself from nil.
@@ -23,8 +23,10 @@
 	<target name="bootstrap" depends="init" description="Creates an executable instance of Jeka from this source">
 		<delete dir="${bin}" />
 		<mkdir dir="${bin}" />
-		<javac destdir="${bin}" encoding="UTF-8">
+		<javac destdir="${bin}" encoding="UTF-8" includeantruntime="false">
 			<src path="dev.jeka.core/src/main/java" />
+			<src path="plugins/dev.jeka.plugins.jacoco" />
+			<src path="plugins/dev.jeka.plugins.sonarqube" />
 			<classpath>
 				<fileset refid="libs" />
 			</classpath>
@@ -37,7 +39,10 @@
 	<target name="run" depends="bootstrap">
 		<property environment="env"/>
 		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.master" fork="true" failonerror="true">
-			<arg line="make -lri -lsu -lb -ls=BRACE -lst -liv -lna" />
+			<syspropertyset>
+				<propertyref builtin="commandline"/>
+			</syspropertyset>
+			<arg line="clean make -lri -lsu -lb -ls=BRACE -lst -lna" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
@@ -45,6 +50,8 @@
 			</classpath>
 		</java>
 	</target>
+
+
 
 	<target name="test" depends="run"/>
 

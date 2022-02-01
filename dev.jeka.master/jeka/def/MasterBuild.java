@@ -6,10 +6,9 @@ import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.system.JkProperty;
 import dev.jeka.core.api.tooling.JkGitProcess;
-import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.release.VersionFromGitJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
@@ -28,6 +27,8 @@ class MasterBuild extends JkBean {
     public String githubToken;
 
     public boolean runSamples = true;
+
+    public boolean useJacoco = false;
 
     final NexusJkBean nexus = getBean(NexusJkBean.class).configure(this::configure);
 
@@ -48,15 +49,18 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.springboot")
     SpringbootBuild springbootBuild;
 
-    private final JacocoJkBean coreJacocoBean;
+    private JacocoJkBean coreJacocoBean;
 
     MasterBuild() throws Exception {
         versionFromGit.autoConfigureProject = false;
         coreBuild.runIT = true;
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
-        getBean(SonarqubeJkBean.class).configureProjectsToScan(coreBuild.getBean(ProjectJkBean.class)::getProject);
-        coreJacocoBean = coreBuild.getBean(JacocoJkBean.class)
-                .setHtmlReport(true);
+        if (JkProperty.get("sonar.host.url") != null) {
+            useJacoco = true;
+        }
+        if (useJacoco) {
+            coreJacocoBean = coreBuild.getBean(JacocoJkBean.class).setHtmlReport(true);
+        }
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -72,13 +76,17 @@ class MasterBuild extends JkBean {
         if (runSamples) {
             JkLog.startTask("Running samples");
             SamplesTester samplesTester = new SamplesTester();
-            JacocoJkBean.AgentJarAndReportFile jacocoRunInfo = coreJacocoBean.getAgentAndReportFile();
-            samplesTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
-            samplesTester.run();
             PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
-            pluginScaffoldTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
+            if (coreJacocoBean != null) {
+                JacocoJkBean.AgentJarAndReportFile jacocoRunInfo = coreJacocoBean.getAgentAndReportFile();
+                samplesTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
+                pluginScaffoldTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
+            }
+            samplesTester.run();
             pluginScaffoldTester.run();
-            coreJacocoBean.generateExport();
+            if (coreJacocoBean != null) {
+                coreJacocoBean.generateExport();
+            }
             JkLog.endTask();
         }
         String branch = JkGitProcess.of().getCurrentBranch();
@@ -87,6 +95,9 @@ class MasterBuild extends JkBean {
             getImportedJkBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publish);
             closeAndReleaseRepo();
             JkLog.endTask();
+        }
+        if (JkProperty.get("sonar.host.url") != null) {
+            coreBuild.getBean(SonarqubeJkBean.class).run();
         }
     }
 
