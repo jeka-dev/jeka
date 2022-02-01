@@ -18,7 +18,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @JkDoc("Generates Eclipse files (.project and .classpath).")
 public final class EclipseJkBean extends JkBean {
@@ -103,7 +102,7 @@ public final class EclipseJkBean extends JkBean {
         final Iterable<Path> folders = JkPathTree.of(getBaseDir())
                 .andMatching(true,"**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andMatching(false,"**/" + JkConstants.OUTPUT_PATH + "/**")
-                .stream().collect(Collectors.toList());
+                .getFiles();
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.startTask("Generate Eclipse files on " + projectFolder);

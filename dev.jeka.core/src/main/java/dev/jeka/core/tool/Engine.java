@@ -62,7 +62,7 @@ final class Engine {
         this.beanClassesResolver = new EngineBeanClassResolver(baseDir);
         this.dependencyResolver = JkDependencyResolver.of()
                 .getDefaultParams()
-                    .setFailOnDependencyResolutionError(true)  // TODO set params at root of Dependency resolver
+                    .setFailOnDependencyResolutionError(true)
                 .__
                 .addRepos(getDownloadRepo(), JkRepo.ofLocal());
     }

@@ -263,7 +263,7 @@ public final class JkImlGenerator {
         return null;
     }
 
-    private List<JkIml.OrderEntry> projectOrderEntries(JkResolvedDependencyNode tree) {  // TODO This method is too slow
+    private List<JkIml.OrderEntry> projectOrderEntries(JkResolvedDependencyNode tree) {
         long t0 = System.currentTimeMillis();
         OrderEntries orderEntries = new OrderEntries();
         for (final JkResolvedDependencyNode node : tree.toFlattenList()) {

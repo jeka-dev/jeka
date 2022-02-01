@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class JavaProjectBuildIT {
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
         final Path dest = Files.createTempDirectory(JavaProjectBuildIT.class.getName());
         final Path zip = Paths.get(JavaProjectBuildIT.class.getResource(zipName).toURI());
-        JkPathTree.ofZip(zip).copyTo(dest);
+        JkZipTree.of(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;
     }

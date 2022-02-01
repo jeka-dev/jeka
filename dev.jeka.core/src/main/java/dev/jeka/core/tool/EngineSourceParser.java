@@ -2,7 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 
 import java.io.IOException;

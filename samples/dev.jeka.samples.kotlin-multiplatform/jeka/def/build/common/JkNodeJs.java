@@ -1,6 +1,7 @@
 package build.common;
 
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -106,7 +107,7 @@ public class JkNodeJs {
         JkLog.startTask("Downloading " + getDownloadUrl() + " ...");
         JkUtilsIO.copyUrlToFile(getDownloadUrl(), temp);
         JkLog.endTask();
-        JkPathTree.ofZip(temp).copyTo(installAllDistDir, StandardCopyOption.REPLACE_EXISTING);
+        JkZipTree.of(temp).copyTo(installAllDistDir, StandardCopyOption.REPLACE_EXISTING);
     }
 
     private JkProcess process(String command) {

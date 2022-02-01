@@ -20,12 +20,9 @@ import java.util.stream.Collectors;
 /*
  * Holds information carried by the command line.
  */
-// TODO suppress 'option' concept in favor of System properties and KBean properties
 final class CommandLine {
 
     private static final String KBEAN_SYMBOL = "#";
-
-    private static final char KBEAN_SYMBOL_CHAR =  KBEAN_SYMBOL.charAt(0);
 
     private static final String AT_SYMBOL_CHAR = "@";
 
@@ -53,7 +50,7 @@ final class CommandLine {
                 KeyValue keyValue = KeyValue.of(word.substring(1), true);
                 result.standardOptions.put(keyValue.key, keyValue.value);
                 continue;
-            } else if (word.startsWith("@")) {
+            } else if (word.startsWith(AT_SYMBOL_CHAR)) {
                 result.defDependencies.add(toDependency(word.substring(1)));
                 continue;
             } else {
@@ -106,7 +103,7 @@ final class CommandLine {
     static JkDependency toDependency(String depDescription) {
         boolean hasDoubleDotes = JkModuleDependency.isModuleDependencyDescription(depDescription);
         if (!hasDoubleDotes || (JkUtilsSystem.IS_WINDOWS &&
-                (depDescription.substring(1).startsWith(":\\")) || depDescription.substring(1).startsWith(":/") )) {
+                (depDescription.startsWith(":\\", 1)) || depDescription.startsWith(":/", 1) )) {
             Path candidatePath = Paths.get(depDescription);
             if (Files.exists(candidatePath)) {
                 return JkFileSystemDependency.of(candidatePath);

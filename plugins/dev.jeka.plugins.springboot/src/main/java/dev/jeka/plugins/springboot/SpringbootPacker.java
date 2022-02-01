@@ -2,6 +2,7 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.utils.JkUtilsObject;
 
@@ -10,6 +11,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 class SpringbootPacker {
 
@@ -51,7 +53,7 @@ class SpringbootPacker {
         JarWriter jarWriter = new JarWriter(target);
 
         // Manifest
-        Path path = JkPathTree.ofZip(original).goTo("META-INF").get("MANIFEST.MF");
+        Path path = JkZipTree.of(original).goTo("META-INF").get("MANIFEST.MF");
         final JkManifest manifest = Files.exists(path) ? JkManifest.of().loadFromFile(path) : JkManifest.of();
         jarWriter.writeManifest(createManifest(manifest, mainClassName).getManifest());
 
@@ -71,8 +73,9 @@ class SpringbootPacker {
     }
 
     private void writeClasses(Path original, JarWriter jarWriter) {
-        JkPathTree originalJar = JkPathTree.ofZip(original);
-        originalJar.stream()
+        JkZipTree originalJar = JkZipTree.of(original);
+        Stream<Path> stream = originalJar.stream();
+        stream
                 .filter(path -> !path.toString().endsWith("/"))
                 .filter(path -> !Files.isDirectory(path))
                 .forEach(path -> {

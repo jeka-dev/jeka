@@ -9,6 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 class EngineCompilationUpdateTracker {
 
@@ -54,7 +55,8 @@ class EngineCompilationUpdateTracker {
 
     private long lastModifiedAccordingFileAttributes() {
         Path def = projectBaseDir.resolve(JkConstants.DEF_DIR);
-        return JkPathTree.of(def).stream()
+        Stream<Path> stream = JkPathTree.of(def).stream();
+        return stream
                 .map(path -> JkUtilsPath.getLastModifiedTime(path))
                 .map(optional -> optional.orElse(System.currentTimeMillis()))
                 .reduce(0L, Math::max);

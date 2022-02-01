@@ -27,6 +27,9 @@ import static dev.jeka.core.api.depmanagement.JkRepoFromProperties.getDownloadRe
  */
 public final class JkInit {
 
+    private JkInit() {
+    }
+
     /**
      * Creates an instance of the specified Jeka class and displays information about this class andPrepending environment.
      */
@@ -59,7 +62,7 @@ public final class JkInit {
             jkRuntime.setImportedProjects(getImportedProjects(clazz));
             jkRuntime.setDependencyResolver(JkDependencyResolver.of()
                     .getDefaultParams()
-                        .setFailOnDependencyResolutionError(true)  // TODO set params at root of Dependency resolver
+                        .setFailOnDependencyResolutionError(true)
                     .__
                     .addRepos(getDownloadRepo(), JkRepo.ofLocal()));
             jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));

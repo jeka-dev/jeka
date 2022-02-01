@@ -18,7 +18,7 @@ import java.awt.Desktop
 
 class Build : JkBean() {
 
-    val kotlin = getBean(KotlinJkBean::class.java);
+    val kotlin = getBean(KotlinJkBean::class.java)
 
     val serializationVersion = "1.2.1"
     val ktorVersion = "1.6.1"
@@ -32,7 +32,7 @@ class Build : JkBean() {
     var nodejsArgs = ""
 
     init {
-        kotlin.jvm().configurators.append(this::configure);
+        kotlin.jvm().configurators.append(this::configure)
     }
 
     fun configure(project: JkProject) {
@@ -55,32 +55,30 @@ class Build : JkBean() {
             .kotlinCompiler
                 .addPlugin("$COMPILER_PLUGIN_KOTLINX_SERIALIZATION:${kotlin.kotlinVersion}")
         kotlin.common()
-            .setTestSrcDir(null)
-            .setCompileDependencies(JkDependencySet.of()
-                .and("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
-                .and("io.ktor:ktor-client-core:$ktorVersion")
-            )
+            .setTestSrcDir(null).compileDependencies = JkDependencySet.of()
+            .and("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+            .and("io.ktor:ktor-client-core:$ktorVersion")
     }
 
     // -------------------------- End of build description --------------------------------------------------------
 
     fun cleanPack() {
-        clean(); kotlin.jvm().project.pack();
+        clean(); kotlin.jvm().project.pack()
     }
 
     fun run() {
         val jar = kotlin.jvm().project.artifactProducer.mainArtifactPath
-        JkJavaRunner.runInSeparateClassloader(jar);
+        JkJavaRunner.runInSeparateClassloader(jar)
         //JkJavaProcess.ofJavaJar(jar, null).exec()
     }
 
     fun open() {
-        Desktop.getDesktop().browse(JkUtilsIO.toUrl("http:localhost:9090").toURI());
+        Desktop.getDesktop().browse(JkUtilsIO.toUrl("http:localhost:9090").toURI())
     }
 
     fun npm() {
-        val sitePath = baseDir.resolve("jeka/.work/localsite");
-        JkUtilsPath.createDirectories(sitePath);
+        val sitePath = baseDir.resolve("jeka/.work/localsite")
+        JkUtilsPath.createDirectories(sitePath)
         JkNodeJs.of(nodeJsVersion)
             .setWorkingDir(sitePath)
             .exec("npm", *JkUtilsString.translateCommandline(this.nodejsArgs))
@@ -88,8 +86,8 @@ class Build : JkBean() {
     }
 
     fun npx() {
-        val sitePath = baseDir.resolve("jeka/.work/localsite");
-        JkUtilsPath.createDirectories(sitePath);
+        val sitePath = baseDir.resolve("jeka/.work/localsite")
+        JkUtilsPath.createDirectories(sitePath)
         JkNodeJs.of(nodeJsVersion)
             .setWorkingDir(sitePath)
             .exec("npx", *JkUtilsString.translateCommandline(this.nodejsArgs))
@@ -97,7 +95,7 @@ class Build : JkBean() {
 
     object CleanPack {
         @JvmStatic fun main(args: Array<String>) {
-            JkInit.instanceOf(Build::class.java, *args).cleanPack();
+            JkInit.instanceOf(Build::class.java, *args).cleanPack()
         }
     }
 
@@ -115,14 +113,14 @@ class Build : JkBean() {
 
     object CleanCompile {
         @JvmStatic fun main(args: Array<String>) {
-            val build = JkInit.instanceOf(Build::class.java, *args);
-            build.kotlin.jvm().project.construction.compilation.run();
+            val build = JkInit.instanceOf(Build::class.java, *args)
+            build.kotlin.jvm().project.construction.compilation.run()
         }
     }
 
     object Npm {
         @JvmStatic fun main(args: Array<String>) {
-            val build = JkInit.instanceOf(Build::class.java, *args);
+            val build = JkInit.instanceOf(Build::class.java, *args)
             build.npm()
         }
     }

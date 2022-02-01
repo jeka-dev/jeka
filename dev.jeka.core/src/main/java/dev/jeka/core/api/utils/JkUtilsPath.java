@@ -14,6 +14,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipError;
@@ -69,7 +70,7 @@ public final class JkUtilsPath {
         }
     }
 
-    public static Path zipRoot(Path zipFile) {
+    public static JkZipRoot zipRoot(Path zipFile) {
         final URI uri = URI.create("jar:" + zipFile.toUri());
         final Map<String, String> env = JkUtilsIterable.mapOf("create", "true");
         FileSystem fileSystem;
@@ -77,38 +78,55 @@ public final class JkUtilsPath {
             try {
                 fileSystem = FileSystems.getFileSystem(uri);
             } catch (FileSystemNotFoundException e) {
-                fileSystem = FileSystems.newFileSystem(uri, env);
+                fileSystem = FileSystems.newFileSystem(uri, env);  //NOSONAR : this resources will be closed along JkZipRoot
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } catch(ZipError e) {
             throw JkUtilsThrowable.unchecked(e, "Error while opening zip archive " + zipFile);
         }
-        return fileSystem.getPath("/");
+        return new JkZipRoot(zipFile, fileSystem.getPath("/"));
     }
 
-    /*
-    public static class JkZip implements Closeable {
+    /**
+     *  A container object representing both a zip file and its content. The content is seen as a regular
+     *  <code>Path</code> representing the content root.
+     */
+    public static class JkZipRoot implements Supplier<Path>, Closeable {
 
-        private final Path root;
+        private final Path contentRoot;
 
-        private final FileSystem fileSystem;
+        private final Path zipFile;
 
-        private JkZip(Path root, FileSystem fileSystem) {
-            this.root = root;
-            this.fileSystem = fileSystem;
+        private JkZipRoot(Path zipFile, Path contentRoot) {
+            this.zipFile = zipFile;
+            this.contentRoot = contentRoot;
         }
 
-        public Path getRoot() {
-            return root;
+        public Path get() {
+            return contentRoot;
+        }
+
+        public Path getZipFile() {
+            return zipFile;
+        }
+
+        public JkZipRoot withRootInsideZip(Path zipEntry) {
+            return new JkZipRoot(zipFile, zipEntry);
         }
 
         @Override
-        public void close() throws IOException {
-            fileSystem.close();
+        public void close() {
+            JkUtilsIO.closeQuietly(contentRoot.getFileSystem());
         }
+
+        @Override
+        public String toString() {
+            return contentRoot.toString();
+        }
+
     }
-    */
+
 
     public static List<File> toFiles(Collection<Path> paths) {
         final List<File> result = new LinkedList<>();

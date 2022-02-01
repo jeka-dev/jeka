@@ -1,12 +1,8 @@
 package dev.jeka.core.api.file;
 
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
@@ -14,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,62 +24,44 @@ import java.util.stream.Stream;
  *
  * @author Jerome Angibaud
  */
-public final class JkPathTree implements Closeable {
+public class JkPathTree<T extends JkPathTree> {
 
+    protected final Supplier<Path> rootSupplier;
 
+    private final JkPathMatcher matcher;
+
+    protected JkPathTree(Supplier<Path> rootSupplier, JkPathMatcher matcher) {
+        this.rootSupplier = rootSupplier;
+        this.matcher = matcher;
+    }
 
     /**
      * Creates a {@link JkPathTree} having the specified root directory.
      */
     public static JkPathTree of(Path rootDir) {
-        return JkPathTree.of(rootDir, false);
+        return new JkPathTree(() -> rootDir, JkPathMatcher.ACCEPT_ALL);
     }
 
     /**
      * @see #of(Path)
      */
     public static JkPathTree of(String rootDir) {
-        return JkPathTree.of(Paths.get(rootDir), false);
+        return of(Paths.get(rootDir));
     }
 
-    /**
-     * Creates a {@link JkPathTree} having the specified root directory.
-     */
-    public static JkPathTree ofZip(Path zipFile) {
-        return JkPathTree.of(zipFile.toAbsolutePath(), true);
+    protected T newInstance(Supplier<Path> pathSupplier, JkPathMatcher pathMatcher) {
+        return (T) new JkPathTree(pathSupplier, pathMatcher);
     }
 
-    private final RootHolder rootHolder;
-
-    private final JkPathMatcher matcher;
-
-    private static JkPathTree of(Path rootDir, boolean zip) {
-        return of(rootDir, JkPathMatcher.ACCEPT_ALL, zip);
-    }
-
-    private static JkPathTree of(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
-        final RootHolder rootHolder = zipFile ? RootHolder.ofZip(rootDirOrArchive) : RootHolder.ofDir(rootDirOrArchive);
-        return new JkPathTree(rootHolder, matcher);
-    }
-
-    private JkPathTree(RootHolder rootHolder, JkPathMatcher matcher) {
-        this.rootHolder = rootHolder;
-        this.matcher = matcher;
+    protected T withRoot(Path newRoot) {
+        return newInstance(() -> newRoot, this.matcher);
     }
 
     /**
      * Returns the root directory. In case of zip archive it returns a directory entry within the zip archive.
      */
     public Path getRoot() {
-        return rootHolder.get();
-    }
-
-    /**
-     * Returns root directory if this tree is a directory tree and returns a zip file if this
-     * tree has been created from a zip file.
-     */
-    public Path getRootDirOrZipFile() {
-        return  rootHolder.rootFile();
+        return rootSupplier.get();
     }
 
     /**
@@ -112,15 +91,17 @@ public final class JkPathTree implements Closeable {
      * Returns <code>true</code> if the root directory exists.
      */
     public boolean exists() {
-        return rootHolder.exists();
+        return Files.exists(getRoot());
     }
 
     /**
      * Creates root directory if not exists.
      */
-    public JkPathTree createIfNotExist() {
-        this.rootHolder.createIfNotExist();
-        return this;
+    public T createIfNotExist() {
+        if (!Files.exists(getRoot())) {
+            JkUtilsPath.createDirectories(getRoot());
+        }
+        return (T) this;
     }
 
 
@@ -133,14 +114,13 @@ public final class JkPathTree implements Closeable {
      * If this method is called for a zip tree instance, then it should be closed or called within
      * <i>try-with-resources</i> statement in order to avoid resource leaks.
      */
-    public Stream<Path> stream(FileVisitOption ...options) {
+    public Stream stream(FileVisitOption ...options) {
         if(!exists()) {
             return new LinkedList<Path>().stream();
         }
         final JkPathMatcher matcher = JkPathMatcher.of(this.matcher);
         return JkUtilsPath.walk(getRoot(), options)
-                .filter(path -> matcher.matches(getRoot().relativize(path)))
-                .onClose(() -> rootHolder.closeIfNeeded());
+                .filter(path -> matcher.matches(getRoot().relativize(path)));
     }
 
     /**
@@ -164,27 +144,27 @@ public final class JkPathTree implements Closeable {
 
     // ---------------------- Navigate -----------------------------------------------------------
 
+
+
     /**
      * Creates a {@link JkPathTree} having the specified relative path to this root as getRoot directory.
      * Note that the returned tree has no filter even if this tree has one.
      */
-    public JkPathTree goTo(String relativePath) {
+    public T goTo(String relativePath) {
         final Path path = getRoot().resolve(relativePath).normalize();
         if (Files.exists(path) && !Files.isDirectory(path)) {
             throw new IllegalArgumentException(getRoot() + "/" + relativePath + " is not a directory");
         }
-        RootHolder rootHolder = new RootHolder(this.rootHolder.zipFile, path);
-        return new JkPathTree(rootHolder, this.matcher);
+        return withRoot(path);
     }
 
     /**
      * Assuming the root folder is relative, this creates an identical {@link JkPathTree}
      * but having the root as :  [specified new root]/[former root]
      */
-    public JkPathTree resolvedTo(Path newRoot) {
+    public T resolvedTo(Path newRoot) {
         final Path path = newRoot.resolve(getRoot()).normalize();
-        RootHolder rootHolder = new RootHolder(this.rootHolder.zipFile, path);
-        return new JkPathTree(rootHolder, this.matcher);
+        return withRoot(path);
     }
 
     /**
@@ -200,7 +180,7 @@ public final class JkPathTree implements Closeable {
     /**
      * Copies the specified directory and its content at the root of this tree.
      */
-    public JkPathTree importDir(Path dirToCopy, CopyOption... copyOptions) {
+    public T importDir(Path dirToCopy, CopyOption... copyOptions) {
         return importTree(JkPathTree.of(dirToCopy), copyOptions);
     }
 
@@ -210,52 +190,55 @@ public final class JkPathTree implements Closeable {
      * is preserved.
      * Note that the the root of the specified tree is not part of the copied content.
      */
-    public JkPathTree importTree(JkPathTree tree, CopyOption... copyOptions) {
+    public T importTree(JkPathTree tree, CopyOption... copyOptions) {
         createIfNotExist();
         if (tree.exists()) {
-            tree.stream().filter(excludeRootFilter()).forEach(path -> {
-                Path target = this.getRoot().resolve(tree.getRoot().relativize(path).toString());
-                if (Files.isDirectory(path)) {
-                    JkUtilsPath.createDirectories(target);
-                } else {
-                    JkUtilsPath.copy(path, target, copyOptions);
-                }
-            });
+            tree.stream()
+                    .filter(excludeRootFilter())
+                    .forEach(object -> {
+                        Path path = (Path) object;
+                        Path target = this.getRoot().resolve(tree.getRoot().relativize(path).toString());
+                        if (Files.isDirectory(path)) {
+                            JkUtilsPath.createDirectories(target);
+                        } else {
+                            JkUtilsPath.copy(path, target, copyOptions);
+                        }
+                    });
         }
-        return this;
+        return (T) this;
     }
 
     /**
      * Copies the specified files at the root of this tree. The copy is not recursive.
      */
-    public JkPathTree importFiles(Iterable<Path> files, StandardCopyOption ... copyOptions) {
+    public T importFiles(Iterable<Path> files, StandardCopyOption ... copyOptions) {
         createIfNotExist();
         Iterable<Path> paths = JkUtilsPath.disambiguate(files);
         for (final Path file : paths) {
             JkUtilsPath.copy(file, getRoot().resolve(file.getFileName()), copyOptions);
         }
-        return this;
+        return (T) this;
     }
 
     /**
      * Copies the specified file at the specified path within this tree.
      */
-    public JkPathTree importFile(Path src, String targetName, StandardCopyOption ... copyOptions) {
+    public T importFile(Path src, String targetName, StandardCopyOption ... copyOptions) {
         createIfNotExist();
         Path parentTarget = getRoot().resolve(targetName).getParent();
         if (parentTarget != null && !Files.exists(parentTarget)) {
             JkUtilsPath.createDirectories(parentTarget);
         }
         JkUtilsPath.copy(src, getRoot().resolve(targetName), copyOptions);
-        return this;
+        return (T) this;
     }
 
     /**
      * Deletes each and every files in this tree except the root and files not matching this tree filter.
      */
-    public JkPathTree deleteContent() {
+    public T deleteContent() {
         if (!Files.exists(getRoot())) {
-            return this;
+            return (T) this;
         }
         JkUtilsPath.walkFileTree(getRoot(), new SimpleFileVisitor<Path>() {
 
@@ -285,32 +268,16 @@ public final class JkPathTree implements Closeable {
             }
 
         });
-        return this;
+        return (T) this;
     }
 
     /**
      * Deletes root directory of this tree.
      */
-    public JkPathTree deleteRoot() {
-        JkUtilsPath.walkFileTree(getRoot(), new SimpleFileVisitor<Path>() {
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                return visit(file);
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                return visit(dir);
-            }
-
-            private FileVisitResult visit(Path path) {
-                JkUtilsPath.deleteFile(path);
-                return FileVisitResult.CONTINUE;
-            }
-
-        });
-        return this;
+    public T deleteRoot() {
+        withMatcher(JkPathMatcher.ACCEPT_ALL).deleteContent();
+        JkUtilsPath.deleteFile(getRoot());
+        return (T) this;
     }
 
     // ----------------------- Write out ----------------------------------------------------------------
@@ -319,24 +286,22 @@ public final class JkPathTree implements Closeable {
      * Zips the content of this tree to the specified destination file. If the specified destination file
      * already exists, the content of this tree is appended to the existing archive, overriding existing entries within the archive.
      */
-    public JkPathTree zipTo(Path destination) {
+    public T zipTo(Path destination) {
         if (destination.getParent() != null) {
             JkUtilsPath.createDirectories(destination.getParent());
         }
-        final Path zipRootEntry = JkUtilsPath.zipRoot(destination);
-        try (Stream<Path> stream = this.stream()) {
+        try (Stream<Path> stream = this.stream();
+             JkUtilsPath.JkZipRoot zipRoot = JkUtilsPath.zipRoot(destination)) {
+
             stream.filter(excludeRootFilter()).forEach(path -> {
-                Path zipEntry = zipRootEntry.resolve(getRoot().relativize(path).toString());
+                Path zipEntry = zipRoot.get().resolve(getRoot().relativize(path).toString());
                 if (!Files.exists(zipEntry) || !Files.isDirectory(zipEntry)) {
                     JkUtilsPath.createDirectories(zipEntry.getParent());
                     JkUtilsPath.copy(path, zipEntry, StandardCopyOption.REPLACE_EXISTING);
                 }
             });
-            zipRootEntry.getFileSystem().close();
-        } catch (IOException e) {
-           throw new UncheckedIOException(e);
         }
-        return this;
+        return (T) this;
     }
 
     /**
@@ -367,36 +332,36 @@ public final class JkPathTree implements Closeable {
     /**
      * Creates a copy of this {@link JkPathTree} augmented with the specified {@link JkPathMatcher}
      */
-    public JkPathTree andMatcher(PathMatcher pathMatcher) {
-        return new JkPathTree(rootHolder, this.matcher.and(pathMatcher));
+    public T andMatcher(PathMatcher pathMatcher) {
+        return withMatcher(this.matcher.and(pathMatcher));
     }
 
     /**
      * Creates a {@link JkPathTree} which is a copy of this {@link JkPathTree}
      * but the matcher is replaced with the specified one.
      */
-    public JkPathTree withMatcher(JkPathMatcher pathMatcher) {
-        return new JkPathTree(rootHolder, pathMatcher);
+    public T withMatcher(JkPathMatcher pathMatcher) {
+        return newInstance(rootSupplier, pathMatcher);
     }
 
     /**
      * Creates a copy of this {@link JkPathTree} augmented with the specified pattern matcher.
      */
-    public JkPathTree andMatching(boolean positive, String... globPatterns) {
+    public T andMatching(boolean positive, String... globPatterns) {
         return andMatching(positive, Arrays.asList(globPatterns));
     }
 
     /**
      * Shorthand to <code>andMatching(true, globPatterns...)</code>.
      */
-    public JkPathTree andMatching(String... globPatterns) {
+    public T andMatching(String... globPatterns) {
         return andMatching(true, globPatterns);
     }
 
     /**
      * Creates a copy of this {@link JkPathTree} augmented with the specified pattern matcher.
      */
-    public JkPathTree andMatching(boolean positive, Iterable<String> globPatterns) {
+    public T andMatching(boolean positive, Iterable<String> globPatterns) {
         return andMatcher(JkPathMatcher.of(positive, this.getRoot().getFileSystem(), globPatterns));
     }
 
@@ -418,15 +383,6 @@ public final class JkPathTree implements Closeable {
         return count(1, false) > 0;
     }
 
-    /**
-     * If the root of this tree is absolute then this method returns this tree.
-     * If the root of this tree is relative then this method returns a tree having a getRoot
-     * resolved from the specified path to this root.
-     */
-    public JkPathTree resolve(Path path) {
-        return new JkPathTree(rootHolder.resolve(path), this.matcher);
-    }
-
 
     /**
      * Returns a {@link JkPathTreeSet} containing this tree as its single
@@ -438,120 +394,8 @@ public final class JkPathTree implements Closeable {
 
     @Override
     public String toString() {
-        return this.hasFilter() ? rootHolder + ":" + matcher : rootHolder.toString();
+        return this.hasFilter() ? rootSupplier.get().toString() + ":" + matcher : rootSupplier.get().toString();
     }
 
-    /**
-     * This method close the underlying file system. It is only significant for zip trees.
-     * @throws IOException
-     */
-    @Override
-    public void close()  {
-        if (this.rootHolder.isZip()) {
-            JkUtilsIO.closeQuietly(rootHolder.get().getFileSystem());
-        }
-    }
-
-    private static class RootHolder {
-        final Path zipFile;
-        Path dir;
-
-        static RootHolder ofZip(Path zipFile) {
-            JkUtilsAssert.argument(zipFile != null, "zip archive file can't be null.");
-            JkUtilsAssert.argument(!Files.exists(zipFile) || !Files.isDirectory(zipFile),
-                    "Specified zip file " + zipFile + " can't be a directory");
-            return new RootHolder(zipFile, null);
-        }
-
-        static RootHolder ofDir(Path dir) {
-            JkUtilsAssert.argument(dir != null, "Directory rootHolder tree can't be null.");
-            JkUtilsAssert.argument(!Files.exists(dir) || Files.isDirectory(dir),
-                    "Specified zip file " + dir + " must be a directory");
-            return new RootHolder(null, dir);
-        }
-
-        private RootHolder(Path zipFile, Path root) {
-            this.zipFile = zipFile;
-            this.dir = root;
-        }
-
-        Path get() {
-            if (isZip() && dir == null) {
-                dir = JkUtilsPath.zipRoot(zipFile);
-            }
-            return dir;
-        }
-
-        void createIfNotExist() {
-            if (zipFile == null) {
-                if (!Files.exists(dir)) {
-                    JkUtilsPath.createDirectories(dir);
-                }
-            } else {
-                if (!Files.exists(zipFile)) {
-                    JkUtilsPath.createDirectories(zipFile.getParent());
-                    dir = JkUtilsPath.zipRoot(zipFile);
-                } else if (dir == null) {
-                    dir = JkUtilsPath.zipRoot(zipFile);
-                } else if (dir.getFileSystem().isOpen()) {
-                    JkUtilsPath.createDirectories(dir);
-                } else {
-                    Path zipRoot = JkUtilsPath.zipRoot(zipFile);
-                    dir = zipRoot.getFileSystem().getPath(dir.toString());
-                }
-            }
-        }
-
-        boolean exists() {
-            if (!isZip()) {
-                return Files.exists(dir);
-            }
-            if (!Files.exists(zipFile)) {
-                return false;
-            }
-            if (dir == null) {
-                return true; // zip rootHolder always exists
-            }
-            if (dir.getFileSystem().isOpen()) {
-                return Files.exists(dir);
-            }
-            Path zipRoot = JkUtilsPath.zipRoot(zipFile);
-            dir = zipRoot.getFileSystem().getPath(dir.toString());
-            return Files.exists(dir);
-        }
-
-        boolean isZip() {
-            return zipFile != null;
-        }
-
-        void closeIfNeeded() {
-            if (isZip() && dir != null) {
-                try {
-                    dir.getFileSystem().close();
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
-        }
-
-        RootHolder resolve(Path path) {
-            if (isZip()) {
-                return this;
-            }
-            return new RootHolder(null, path.resolve(dir));
-        }
-
-        Path rootFile() {
-            if (isZip()) {
-                return this.zipFile;
-            }
-            return this.dir;
-        }
-
-        @Override
-        public String toString() {
-            return isZip() ? zipFile.toString() : dir.toString();
-        }
-    }
 
 }

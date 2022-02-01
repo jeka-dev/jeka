@@ -84,7 +84,7 @@ public final class JkPathTreeSet {
     public final JkPathTreeSet andZips(Iterable<Path> zipFiles) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(zipFiles);
         final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
-        paths.forEach(zipFile -> list.add(JkPathTree.ofZip(zipFile)));
+        paths.forEach(zipFile -> list.add(JkZipTree.of(zipFile)));
         return new JkPathTreeSet(list);
     }
 
@@ -225,7 +225,7 @@ public final class JkPathTreeSet {
     public List<Path> getRootDirsOrZipFiles() {
         final List<Path> result = new LinkedList<>();
         for (final JkPathTree tree : pathTrees) {
-            result.add(tree.getRootDirOrZipFile());
+            result.add(tree.getRoot());
         }
         return result;
     }
@@ -266,14 +266,6 @@ public final class JkPathTreeSet {
 
     public boolean containFiles() {
         return count(1, false) > 0;
-    }
-
-    public JkPathTreeSet resolve(Path path) {
-        List<JkPathTree> list = new LinkedList<>();
-        for (JkPathTree tree : pathTrees) {
-            list.add(tree.resolve(path));
-        }
-        return new JkPathTreeSet(list);
     }
 
     /**

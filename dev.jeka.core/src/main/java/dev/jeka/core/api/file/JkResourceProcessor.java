@@ -128,7 +128,8 @@ public final class JkResourceProcessor<T> {
             if (!resourceTree.exists()) {
                 continue;
             }
-            resourceTree.stream().forEach(path -> {
+            resourceTree.stream().forEach(object -> {
+                Path path = (Path) object;
                 final Path relativePath = resourceTree.getRoot().relativize(path);
                 final Path out = outputDir.resolve(relativePath);
                 final Map<String, String> data = JkInterpolator.of(relativePath.toString(),

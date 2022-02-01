@@ -3,6 +3,7 @@ package dev.jeka.core.api.tooling.eclipse;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
 import org.junit.Test;
 
@@ -92,7 +93,7 @@ public class JkEclipseClasspathGeneratorIT {
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
         final Path dest = Files.createTempDirectory(JkEclipseClasspathGeneratorIT.class.getName());
         final Path zip = Paths.get(JkEclipseClasspathGeneratorIT.class.getResource(zipName).toURI());
-        JkPathTree.ofZip(zip).copyTo(dest);
+        JkZipTree.of(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;
     }

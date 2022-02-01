@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @JkDoc("Generates Idea Intellij metadata files (*.iml and modules.xml).")
 public final class IntellijJkBean extends JkBean {
@@ -95,14 +96,15 @@ public final class IntellijJkBean extends JkBean {
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void allIml() {
-        JkPathTree.of(getBaseDir())
+        Stream<Path> stream = JkPathTree.of(getBaseDir())
                 .andMatching(true, "**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andMatching(false, "**/" + JkConstants.OUTPUT_PATH + "/**")
-                .stream()
-                    .distinct()
-                    .map(path -> path.getParent().getParent())
-                    .map(path -> path == null ? getBaseDir() : path)
-                    .forEach(this::generateImlExec);
+                .stream();
+        stream
+            .distinct()
+            .map(path -> path.getParent().getParent())
+            .map(path -> path == null ? getBaseDir() : path)
+            .forEach(this::generateImlExec);
     }
 
     private void generateImlExec(Path moduleDir) {

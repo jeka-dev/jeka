@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 
@@ -115,7 +116,7 @@ public final class JkClasspath implements Iterable<Path> {
         final Set<Path> result = new LinkedHashSet<>();
         for (final Path classpathEntry : this.entries) {
             final JkPathTree tree = Files.isDirectory(classpathEntry) ?
-                    JkPathTree.of(classpathEntry) : JkPathTree.ofZip(classpathEntry);
+                    JkPathTree.of(classpathEntry) : JkZipTree.of(classpathEntry);
                     result.addAll(tree.andMatching(true, globPatterns).getRelativeFiles());
         }
         return result;

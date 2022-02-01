@@ -13,8 +13,11 @@ The following classes lie in `dev.jeka.core.api.file` package:
 * `JkPathMatcher` An immutable `java.nio.file.PathMatcher` based on `java.nio.file` glob pattern or regerxp.
   Used by `JkPathTree` to filter in/out files according name patterns.
 
-* `JkPathTree` An Immutable root folder (or a zip file) along a `PathMatcher` providing operations to copy, navigate, zip or iterate.
+* `JkPathTree` An Immutable root folder along a `PathMatcher` providing operations to copy, navigate, zip or iterate.
   This is a central class in Jeka API.
+
+* `JkZipTree` Same as `JkPathTree` but using a zip file instead of a directory. It allows to manipulate a zip file
+  as a regular folder.
 
 * `JkPathTreeSet` An Immutable set of `JkPathTree`. Helpful to define set of sources/resources and create jar/zip files.
 

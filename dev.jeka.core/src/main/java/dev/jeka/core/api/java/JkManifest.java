@@ -2,6 +2,7 @@ package dev.jeka.core.api.java;
 
 
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
@@ -115,7 +116,7 @@ public final class JkManifest<T> {
     }
 
     public JkManifest<T> loadFromJar(Path jar) {
-        JkPathTree jarTree = JkPathTree.ofZip(jar);
+        JkPathTree jarTree = JkZipTree.of(jar);
         Path manifestFile = jarTree.get(STANDARD_LOCATION);
         if (!Files.exists(manifestFile)) {
             throw new IllegalArgumentException("File " + jar + " does not contains " + STANDARD_LOCATION + " entry.");
