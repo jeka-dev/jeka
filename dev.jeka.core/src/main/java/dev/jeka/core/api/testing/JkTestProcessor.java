@@ -203,7 +203,7 @@ public final class JkTestProcessor<T> {
         String arg = serializedArgPath.toAbsolutePath().toString();
         List<Path> classpath = JkClassLoader.ofCurrent().getClasspath()
                 .andPrepend(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
-        forkingProcess.clone()
+        forkingProcess.copy()
                 .setLogCommand(JkLog.isVerbose())
                 .setFailOnError(true)
                 .setClasspath(classpath)

@@ -65,7 +65,7 @@ public class VersionFromGitJkBean extends JkBean {
     }
 
     public JkGitProcess git() {
-        return git.clone();
+        return git.copy();
     }
 
     /**

@@ -18,7 +18,7 @@ import java.util.function.UnaryOperator;
  * By default, when no include/exclude pattern/tag are specified, the selector get all classes
  * under defined class root dirs.
  */
-public final class JkTestSelection<T> implements Cloneable, Serializable {
+public final class JkTestSelection<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,6 +45,16 @@ public final class JkTestSelection<T> implements Cloneable, Serializable {
 
     private JkTestSelection(T __) {
         this.__ = __;
+    }
+
+    private JkTestSelection(JkTestSelection other) {
+        this.__ = (T) other.__;
+        this.discoveryConfigurer = other.discoveryConfigurer;
+        this.excludePatterns = new HashSet<>(other.excludePatterns);
+        this.excludeTags = new HashSet<>(other.excludeTags);
+        this.testClassRoots = other.testClassRoots;
+        this.includePatterns = new HashSet<>(other.includePatterns);
+        this.includeTags = new HashSet<>(other.includeTags);
     }
 
     /**
@@ -179,18 +189,8 @@ public final class JkTestSelection<T> implements Cloneable, Serializable {
         return this;
     }
 
-    @Override
-    public JkTestSelection clone() {
-        try {
-            JkTestSelection<T> result = (JkTestSelection<T>) super.clone();
-            result.excludePatterns = new HashSet<>(excludePatterns);
-            result.excludeTags = new HashSet<>(excludeTags);
-            result.includePatterns = new HashSet<>(includePatterns);
-            result.includeTags = new HashSet<>(includeTags);
-            return result;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    public JkTestSelection copy() {
+        return new JkTestSelection(this);
     }
 
     @Override

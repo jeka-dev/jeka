@@ -26,6 +26,10 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
         super(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
     }
 
+    protected JkJavaProcess(JkJavaProcess other) {
+        super(other);
+    }
+
     /**
      * Creates a process launching the current JDK java command on the specified class.
      */
@@ -86,6 +90,10 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
         }
         final JkPathSequence classpath = JkPathSequence.of(JkUtilsPath.disambiguate(paths));
         return this.addJavaOptions("-cp", classpath.toPath());
+    }
+
+    public JkJavaProcess copy() {
+        return new JkJavaProcess(this);
     }
 
 }

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud
  */
-public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
+public class JkProcess<T extends JkProcess> implements Runnable {
 
     private static final Path CURRENT_JAVA_DIR = Paths.get(System.getProperty("java.home")).resolve("bin");
 
@@ -55,9 +55,21 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
 
     private boolean logOutput = true;
 
+    protected JkProcess() {}
+
     protected JkProcess(String command, String... parameters) {
         this.command = command;
         this.parameters = new LinkedList<>(Arrays.asList(parameters));
+    }
+
+    protected JkProcess(JkProcess other) {
+        this.command = other.command;
+        this.parameters = new LinkedList(other.parameters);
+        this.env = new HashMap(other.env);
+        this.failOnError = other.failOnError;
+        this.logCommand = other.logCommand;
+        this.logOutput = other.logOutput;
+        this.workingDir = other.workingDir;
     }
 
     /**
@@ -107,16 +119,8 @@ public class JkProcess<T extends JkProcess> implements Runnable, Cloneable {
         return of(command, parameters);
     }
 
-    @Override
-    public T clone()  {
-        try {
-            JkProcess clone = (JkProcess) super.clone();
-            clone.parameters = new LinkedList(parameters);
-            clone.env = new HashMap(this.env);
-            return (T) clone;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    public T copy()  {
+        return (T) new JkProcess<T>(this);
     }
 
     /**

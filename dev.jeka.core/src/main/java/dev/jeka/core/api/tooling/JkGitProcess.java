@@ -30,42 +30,46 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
         return of("");
     }
 
+    private JkGitProcess(JkGitProcess other) {
+        super(other);
+    }
+
     public String getCurrentBranch() {
-        return this.clone()
+        return this.copy()
                 .addParams("rev-parse", "--abbrev-ref", "HEAD")
                 .setLogOutput(false)
                 .execAndReturnOutput().get(0);
     }
 
     public boolean isRemoteEqual() {
-        Object local = clone().addParams("rev-parse", "@").execAndReturnOutput();
-        Object remote = clone().addParams("rev-parse", "@{u}").execAndReturnOutput();
+        Object local = copy().addParams("rev-parse", "@").execAndReturnOutput();
+        Object remote = copy().addParams("rev-parse", "@{u}").execAndReturnOutput();
         return local.equals(remote);
     }
 
     public boolean isWorkspaceDirty() {
-        return !clone()
+        return !copy()
                 .addParams("diff", "HEAD", "--stat")
                 .setLogOutput(false)
                 .execAndReturnOutput().isEmpty();
     }
 
     public String getCurrentCommit() {
-        return clone()
+        return copy()
                 .addParams("rev-parse", "HEAD")
                 .setLogOutput(false)
                 .execAndReturnOutput().get(0);
     }
 
     public List<String> getTagsOfCurrentCommit() {
-        return clone()
+        return copy()
                 .addParams("tag", "-l", "--points-at", "HEAD")
                 .setLogOutput(false)
                 .execAndReturnOutput();
     }
 
     public List<String> getLastCommitMessage() {
-        return clone()
+        return copy()
                 .addParams("log", "--oneline", "--format=%B", "-n 1", "HEAD")
                 .setLogOutput(false)
                 .execAndReturnOutput();
@@ -96,12 +100,12 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
 
     public JkGitProcess tagAndPush(String name) {
         tag(name);
-        clone().addParams("push", "origin", name).exec();
+        copy().addParams("push", "origin", name).exec();
         return this;
     }
 
     public JkGitProcess tag(String name) {
-        clone().addParams("tag", name).exec();
+        copy().addParams("tag", name).exec();
         return this;
     }
 
@@ -165,6 +169,11 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
      */
     public JkVersion getJkVersionFromTag() {
         return JkVersion.of(getVersionFromTag());
+    }
+
+    @Override
+    public JkGitProcess copy() {
+        return new JkGitProcess(this);
     }
 
 

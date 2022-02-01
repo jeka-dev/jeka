@@ -16,9 +16,9 @@ public class GitJkBean extends JkBean {
 
     @JkDoc("Perform a dirty check first then put a tag at the HEAD and push it to remote.")
     public void tagRemote() {
-        JkGitProcess aGit = git.clone().setLogCommand(false).setLogOutput(false);
+        JkGitProcess aGit = git.copy().setLogCommand(false).setLogOutput(false);
         System.out.println("Existing tags on origin :");
-        aGit.clone().setLogOutput(true).exec("ls-remote", "--tag", "--sort=creatordate", "origin");
+        aGit.copy().setLogOutput(true).exec("ls-remote", "--tag", "--sort=creatordate", "origin");
         if (aGit.isWorkspaceDirty()) {
             System.out.println("Git workspace is dirty. Please clean your Git workspace and retry");
             return;
