@@ -53,9 +53,11 @@ class SpringbootPacker {
         JarWriter jarWriter = new JarWriter(target);
 
         // Manifest
-        Path path = JkZipTree.of(original).goTo("META-INF").get("MANIFEST.MF");
-        final JkManifest manifest = Files.exists(path) ? JkManifest.of().loadFromFile(path) : JkManifest.of();
-        jarWriter.writeManifest(createManifest(manifest, mainClassName).getManifest());
+        try (JkZipTree zipTree = JkZipTree.of(original)) {
+            Path path = zipTree.goTo("META-INF").get("MANIFEST.MF");
+            final JkManifest manifest = Files.exists(path) ? JkManifest.of().loadFromFile(path) : JkManifest.of();
+            jarWriter.writeManifest(createManifest(manifest, mainClassName).getManifest());
+        }
 
         // Add nested jars
         for (Path nestedJar : this.nestedLibs.withoutDuplicates()) {

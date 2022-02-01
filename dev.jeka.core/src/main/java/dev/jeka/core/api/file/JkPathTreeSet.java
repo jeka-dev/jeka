@@ -3,6 +3,8 @@ package dev.jeka.core.api.file;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,7 +16,7 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-public final class JkPathTreeSet {
+public final class JkPathTreeSet implements Closeable {
 
     private final List<JkPathTree> pathTrees;
 
@@ -324,4 +326,11 @@ public final class JkPathTreeSet {
         } else return pathTrees.equals(other.pathTrees);
     }
 
+    @Override
+    public void close()  {
+        this.pathTrees.stream()
+                .filter(JkZipTree.class::isInstance)
+                .map(JkZipTree.class::cast)
+                .forEach(JkZipTree::close);
+    }
 }

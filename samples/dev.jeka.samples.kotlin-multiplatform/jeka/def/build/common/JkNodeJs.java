@@ -107,7 +107,10 @@ public class JkNodeJs {
         JkLog.startTask("Downloading " + getDownloadUrl() + " ...");
         JkUtilsIO.copyUrlToFile(getDownloadUrl(), temp);
         JkLog.endTask();
-        JkZipTree.of(temp).copyTo(installAllDistDir, StandardCopyOption.REPLACE_EXISTING);
+        try (JkZipTree zipTree = JkZipTree.of(temp)) {
+            zipTree.copyTo(installAllDistDir, StandardCopyOption.REPLACE_EXISTING);
+        }
+
     }
 
     private JkProcess process(String command) {

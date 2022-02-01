@@ -116,12 +116,13 @@ public final class JkManifest<T> {
     }
 
     public JkManifest<T> loadFromJar(Path jar) {
-        JkPathTree jarTree = JkZipTree.of(jar);
-        Path manifestFile = jarTree.get(STANDARD_LOCATION);
-        if (!Files.exists(manifestFile)) {
-            throw new IllegalArgumentException("File " + jar + " does not contains " + STANDARD_LOCATION + " entry.");
+        try (JkZipTree jarTree = JkZipTree.of(jar)) {
+            Path manifestFile = jarTree.get(STANDARD_LOCATION);
+            if (!Files.exists(manifestFile)) {
+                throw new IllegalArgumentException("File " + jar + " does not contains " + STANDARD_LOCATION + " entry.");
+            }
+            loadFromFile(manifestFile);
         }
-        loadFromFile(manifestFile);
         return this;
     }
 

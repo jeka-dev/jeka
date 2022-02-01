@@ -6,10 +6,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
-import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.bcpg.*;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.*;
@@ -28,7 +25,7 @@ import java.util.List;
 
 final class BcGpgDoer implements JkInternalGpgDoer {
 
-    private static final int HASH_ALGO = PGPUtil.SHA1;  //NOSONAR
+    private static final int HASH_ALGO = HashAlgorithmTags.SHA1;  //NOSONAR
 
     // Accessed through reflection
     static BcGpgDoer of() {

@@ -74,7 +74,8 @@ public final class JkJarPacker {
         }
         JkPathTreeSet.ofEmpty().andZips(otherJars).and(classtrees).andMatcher(EXCLUDE_SIGNATURE_MATCHER)
                 .andMatcher(filter)
-                .zipTo(resultFile);  // main jar files must take precedence over files coming form dependencies
+                .zipTo(resultFile)  // main jar files must take precedence over files coming form dependencies
+                .close();
     }
 
 
