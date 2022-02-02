@@ -1,15 +1,16 @@
 # Welcome to Jeka
 
-Jeka is a general purpose build tool that is designed as a library. In other words, users describe programmatically 
-the actions needed to achieve automation tasks, as they would do for regular code.
+_Jeka_ is a general purpose build tool, that is designed as a library + an automation engine. 
+Users simply write build logic in Java or Kotlin, then they can invoke their code directly from the command line. 
 
-The library is designed to make complex common tasks as compiling, testing or resolving dependencies as concise as possible.
-Building projects with Jeka requires less typing compared to other tools you may know, with simplicity and transparency as 
-a bonus.
+_Jeka_ automation engine allows to execute arbitrary Java/Kotlin methods both from an IDE and the command line. 
+Java/Kotlin classes become first class citizen build scripts !
 
-_Jeka_ automation code can be run indifferently from IDE (via classic `main` method) or command line, thanks 
-to its lean and fast execution engine. This engine comes with a small set of concepts promoting simplicity,
-flexibility and re-usability.
+This approcach provides several benefits developers love : flexibility, lightweight, transparency, discoverability, extendability. 
+Beside, Jeka tries to keep cognitive load low, introducing a minimal set of concepts. Good skills in Java/Kotiln should be 
+enough to achive builds of any complexity.
+
+Last but not least, _Jeka_ is very lightweight (less than 1Mb) and has zero dependencies, making it friendly to be used as a simple library.
 
 <br/>
 <p align="center">
