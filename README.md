@@ -2,11 +2,10 @@
 [![Maven Central](https://img.shields.io/maven-central/v/dev.jeka/jeka-core?versionSuffix=.RELEASE)](https://search.maven.org/search?q=g:%22dev.jeka%22%20AND%20a:%22jeka-core%22) 
 [![Gitter](https://badges.gitter.im/jeka-tool/community.svg)](https://gitter.im/jeka-tool/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
-<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img src="http://jeka.dev/images/large-social-logo.png" align='middle'/>
 
 # What is Jeka ?
+
+<img src="./docs/images/knight-color-logo.svg" align="left" width="180"/>
 
 <strong>Jeka</strong> (formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
 
@@ -236,7 +235,7 @@ Release is done automatically by Github action on PUSH on *master*.
 If the last commit message title contains a word like 'Release:XXX' (case matters ) then a tag XXX is created and 
 the binaries will be published on Maven Central.
 Otherwise, the binary wll be simply pushed on OSSRH snapshot.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img src="docs/images/mascot.png" width='420' height='420' align='center'/>
+<p align="center">
+    <img src="docs/images/mascot.png" width='420' height='420' />
+</p>
 
