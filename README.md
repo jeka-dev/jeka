@@ -131,7 +131,7 @@ The distribution is the file named jeka-core-x.x.x-distrib.zip.
 
 Visit following pages according your expectation :
 
-* [Reference Guide](https://jerkar.github.io/jeka)
+* [Reference Guide](https://jeka-dev.github.io/jeka/)
 * [Working examples](https://github.com/jerkar/working-examples)
 * [Getting Started (Needs Intellij Plugin)](https://jerkar.github.io/jeka/tutorials/gui-getting-started/#getting-started-with-jeka) 
 
