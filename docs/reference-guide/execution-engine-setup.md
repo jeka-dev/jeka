@@ -97,6 +97,6 @@ For any reasons, we might like to use different location than the standard ones 
 We can change the location using following OS environment variable :
 
   * `JEKA_USER_HOME` : to set the _Jeka User Home_ to a specified location (absolute path).
-  * `JEKA_CACHE_DIR` : to set the cache (mainly all downloaded files), to a specified location (also absolute file)
+  * `JEKA_CACHE_DIR` : to set the cache (mainly all downloaded files), to a specified location (absolute path)
 
 
