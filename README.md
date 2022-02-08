@@ -69,13 +69,13 @@ import dev.jeka.plugins.springboot.SpringbootJkBean;
 @JkInjectClasspath("dev.jeka:springboot-plugin")
 class Build extends JkBean {
 
-    private final SpringbootJkBean springboot = getBean(SpringbootJkBean.class);
+    private final SpringbootJkBean springbootBean = getBean(SpringbootJkBean.class);
 
     public boolean runIT = true;
     
     Build() {
-        springboot.setSpringbootVersion("2.2.6.RELEASE");
-        springboot.projectBean().configure(this::configure);
+        springbootBean.setSpringbootVersion("2.2.6.RELEASE");
+        springbootBean.projectBean().configure(this::configure);
     }
     
     private void configure(JkProject project) {
@@ -96,7 +96,7 @@ class Build extends JkBean {
 
     public void cleanPack() {
         clean();
-        springboot.projectBean().pack();
+        springbootBean.projectBean().pack();
     }
 
 }
