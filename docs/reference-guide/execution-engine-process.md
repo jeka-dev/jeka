@@ -22,7 +22,7 @@ Jeka follows a specific process before invoking _KBean methods_ :
 Once _KBeans_ have been instantiated, _KBean methods_ are executed in order they appear
 in the command line.
 
-!!! reminder
+!!! info
     There is only one _KBean_ instance by _KBean_ class and by project.
 
 !!! info
