@@ -326,3 +326,15 @@ publisher.publishIvy(versionedModule, publication, deps,
         JkJavaDepScopes.DEFAULT_SCOPE_MAPPING,
         Instant.now(), JkVersionProvider.of());
 ```
+
+## Common Classes
+
+* `JkRepo` and `JkRepoSet` represent both download and upload repositories. 
+
+* `JkRepoFromProperties`provides configured repositories according global or project scopes _properties_.
+
+* `JkDependencySet` represents a set of dependencies.
+
+* `JkDependencyResolver` resolve dependencies to classpath and resolution result that allow resolution exploration.
+
+* `JkModuleFileProxy` provides an smart way to get a file from its coordinates.

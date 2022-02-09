@@ -3,7 +3,6 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -79,7 +78,7 @@ public class JkQualifiedDependencySet {
                 .collect(Collectors.toList());
     }
 
-    public List<JkModuleDependency> getModuleDependencies() {
+    public List<JkModuleDependency>  getModuleDependencies() {
         return entries.stream()
                 .map(JkQualifiedDependency::getDependency)
                 .filter(JkModuleDependency.class::isInstance)
@@ -172,26 +171,13 @@ public class JkQualifiedDependencySet {
             .and(versionProvider));
     }
 
-    public JkQualifiedDependencySet replaceUnspecifiedVersionsWithProvider(Function<JkModuleDependency,
-            JkVersionProvider> bomResolver) {
-        JkVersionProvider resolvedVersionProvider = versionProvider.resolveBoms(bomResolver);
-        List<JkQualifiedDependency> dependencies = entries.stream()
-                .map(qDep -> {
-                    if (qDep.getDependency() instanceof JkModuleDependency) {
-                        JkModuleDependency moduleDependency = (JkModuleDependency) qDep.getDependency();
-                        JkVersion providedVersion = resolvedVersionProvider.getVersionOf(moduleDependency.getModuleId());
-                        if (moduleDependency.getVersion().isUnspecified() && providedVersion != null) {
-                            return JkQualifiedDependency.of(qDep.getQualifier(),
-                                    moduleDependency.withVersion(providedVersion));
-                        }
-                    }
-                    return qDep;
-                })
-                .collect(Collectors.toList());
-        return new JkQualifiedDependencySet(dependencies, globalExclusions, resolvedVersionProvider);
+    /**
+     * Replace the version provider of this object
+     */
+    public JkQualifiedDependencySet withResolvedBoms(JkRepoSet repos) {
+        JkVersionProvider resolvedVersionProvider = versionProvider.withResolvedBoms(repos);
+        return new JkQualifiedDependencySet(this.entries, globalExclusions, resolvedVersionProvider);
     }
-
-
 
     public static JkQualifiedDependencySet computeIdeDependencies(JkProjectDependencies projectDependencies,
                                                                   JkVersionedModule.ConflictStrategy strategy) {
@@ -275,12 +261,34 @@ public class JkQualifiedDependencySet {
     }
 
     public JkQualifiedDependencySet assertNoUnspecifiedVersion() {
-        final List<JkModuleDependency> unspecifiedVersionLodules = getModuleDependencies().stream()
+        final List<JkModuleDependency> unspecifiedVersionModules = getModuleDependencies().stream()
+                .filter(dep -> this.versionProvider.getVersionOfOrUnspecified(dep.getModuleId()).isUnspecified())
                 .filter(dep -> dep.getVersion().isUnspecified())
                 .collect(Collectors.toList());
-        JkUtilsAssert.state(unspecifiedVersionLodules.isEmpty(), "Following module does not specify version : "
-                + unspecifiedVersionLodules);
+        JkUtilsAssert.state(unspecifiedVersionModules.isEmpty(), "Following module does not specify version : "
+                + unspecifiedVersionModules);
         return this;
+    }
+
+    /**
+     * Fills the dependencies without specified version with the version supplied by the {@link JkVersionProvider}.
+     */
+    public JkQualifiedDependencySet toResolvedModuleVersions() {
+        List<JkQualifiedDependency> dependencies = entries.stream()
+                .map(qDep -> {
+                    if (qDep.getDependency() instanceof JkModuleDependency) {
+                        JkModuleDependency moduleDependency = (JkModuleDependency) qDep.getDependency();
+                        JkVersion providedVersion = this.versionProvider
+                                .getVersionOfOrUnspecified(moduleDependency.getModuleId());
+                        if (moduleDependency.getVersion().isUnspecified() && !providedVersion.isUnspecified()) {
+                            return JkQualifiedDependency.of(qDep.getQualifier(),
+                                    moduleDependency.withVersion(providedVersion));
+                        }
+                    }
+                    return qDep;
+                })
+                .collect(Collectors.toList());
+        return new JkQualifiedDependencySet(dependencies, this.globalExclusions, this.versionProvider);
     }
 
     @Override

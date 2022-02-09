@@ -2,7 +2,6 @@ package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.util.Arrays;
@@ -150,8 +149,9 @@ public final class JkDependencyResolver<T> {
         List<JkDependency> allDependencies = qualifiedDependencies.getDependencies();
         JkQualifiedDependencySet moduleQualifiedDependencies = qualifiedDependencies
                 .withModuleDependenciesOnly()
-                .replaceUnspecifiedVersionsWithProvider(this::resolveBom)
-                .assertNoUnspecifiedVersion();
+                .withResolvedBoms(this.repos)
+                .assertNoUnspecifiedVersion()
+                .toResolvedModuleVersions();
         boolean hasModule = !moduleQualifiedDependencies.getDependencies().isEmpty();
         if (repos.getRepos().isEmpty() && hasModule) {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
@@ -190,11 +190,6 @@ public final class JkDependencyResolver<T> {
             this.cachedResults.put(qualifiedDependencies, resolveResult);
         }
         return resolveResult;
-    }
-
-    public JkVersionProvider resolveBom(JkModuleDependency moduleDependency) {
-        JkModuleFileProxy bom = JkModuleFileProxy.of(this.repos, moduleDependency);
-        return JkPom.of(bom.get()).getVersionProvider();
     }
 
     /**

@@ -22,7 +22,7 @@ public class JkProjectPublication {
 
     private final JkProject project;
 
-    private final JkMavenPublication<JkProjectPublication> maven;
+    private final JkMavenPublication maven;
 
     private final JkIvyPublication<JkProjectPublication> ivy;
 
@@ -49,7 +49,8 @@ public class JkProjectPublication {
                 .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
                         project.getConstruction().getCompilation().getDependencies(),
                         project.getConstruction().getRuntimeDependencies(),
-                        project.getDuplicateConflictStrategy()));
+                        project.getDuplicateConflictStrategy()))
+                .setBomResolutionRepos(() -> project.getConstruction().getDependencyResolver().getRepos());
         ivy = JkIvyPublication.of(this)
                 .addArtifacts(() -> project.getArtifactProducer())
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
@@ -145,7 +146,7 @@ public class JkProjectPublication {
     }
 
     public JkProjectPublication setRepos(JkRepoSet repos) {
-        this.maven.setRepos(repos);
+        this.maven.setPublishRepos(repos);
         this.ivy.setRepos(repos);
         return this;
     }
@@ -160,7 +161,7 @@ public class JkProjectPublication {
      * Shorthand to get the first declared publication repository.
      */
     public JkRepo findFirstNonLocalRepo() {
-        return getMaven().getRepos().getRepos().stream()
+        return getMaven().getPublishRepos().getRepos().stream()
                 .filter(repo1 -> !repo1.isLocal())
                 .findFirst().orElse(
                         getIvy().getRepos().getRepos().stream()

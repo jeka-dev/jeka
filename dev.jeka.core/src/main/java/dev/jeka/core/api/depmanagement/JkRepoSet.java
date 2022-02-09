@@ -1,6 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
+import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.io.File;
@@ -160,5 +161,7 @@ public final class JkRepoSet {
         }
         return internalDependencyResolver;
     }
+
+
 
 }

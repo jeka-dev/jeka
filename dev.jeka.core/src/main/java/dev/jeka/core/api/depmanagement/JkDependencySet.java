@@ -269,6 +269,13 @@ public class JkDependencySet {
     }
 
     /**
+     * Returns a clone of this object but using this version provider with bom resolved.
+     */
+    public JkDependencySet withResolvedBoms(JkRepoSet repos) {
+        return withVersionProvider(this.versionProvider.withResolvedBoms(repos));
+    }
+
+    /**
      * @param dependencyDescription Can be expressed as group:name::pom:version
      * or group:name:version. In last case, it will be converted in the first expression
      */
@@ -426,14 +433,33 @@ public class JkDependencySet {
      * Throws a <code>IllegalStateException</code> if one of the module dependencies has an unspecified version.
      */
     public JkDependencySet assertNoUnspecifiedVersion() {
-        final List<JkModuleDependency> unspecifieds = getVersionedDependencies().stream()
-                .filter(JkModuleDependency.class::isInstance)
-                .map(JkModuleDependency.class::cast)
+        final List<JkModuleDependency> unspecifiedVersionModules = getModuleDependencies().stream()
+                .filter(dep -> this.versionProvider.getVersionOfOrUnspecified(dep.getModuleId()).isUnspecified())
                 .filter(dep -> dep.getVersion().isUnspecified())
                 .collect(Collectors.toList());
-        JkUtilsAssert.state(unspecifieds.isEmpty(), "Following module does not specify version : "
-                + unspecifieds);
+        JkUtilsAssert.state(unspecifiedVersionModules.isEmpty(), "Following module does not specify version : "
+                + unspecifiedVersionModules);
         return this;
+    }
+
+    /**
+     * Fills the dependencies without specified version with the version supplied by the {@link JkVersionProvider}.
+     */
+    public JkDependencySet toResolvedModuleVersions() {
+        List<JkDependency> dependencies = entries.stream()
+                .map(dep -> {
+                    if (dep instanceof JkModuleDependency) {
+                        JkModuleDependency moduleDependency = (JkModuleDependency) dep;
+                        JkVersion providedVersion = this.versionProvider
+                                .getVersionOfOrUnspecified(moduleDependency.getModuleId());
+                        if (moduleDependency.getVersion().isUnspecified() && !providedVersion.isUnspecified()) {
+                            return moduleDependency.withVersion(providedVersion);
+                        }
+                    }
+                    return dep;
+                })
+                .collect(Collectors.toList());
+        return new JkDependencySet(dependencies, this.globalExclusions, this.versionProvider);
     }
 
     /**

@@ -7,6 +7,7 @@ import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
@@ -47,27 +48,29 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
     private String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
 
-    @JkDoc("Class name holding main method to start Spring Boot. If null, Jeka will try to guess it at build time.")
-    public String mainClassName;
-
-    @JkDoc("If true, Spring Milestone or Snapshot Repository will be used to fetch non release version of spring modules")
-    public boolean autoSpringRepo = true;
-
     @JkDoc("Command arg line to pass to springboot for #run method (e.g. '--server.port=8083 -Dspring.profiles.active=prod'")
     public String runArgs;
 
-    @JkDoc("If true, the build create also the original jar file (without embedded dependencies")
+    @JkDoc("If true, generate a bootable jar artifact.")
+    public boolean createBooJar = true;
+
+    @JkDoc("If true, generate the original jar artifact (jar without embedded dependencies")
     public boolean createOriginalJar;
+
+    @JkDoc("If true, generate a .war filed.")
+    public boolean createWar;
 
     @JkDoc("For internal test purpose. If not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
     public String scaffoldDefClasspath;
 
-    @JkDoc("If true, a .war artifact will be generated.")
-    public boolean buildWar;
+    private String mainClassName;
+
+    private boolean useSpringRepos = true;
 
     ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     private ScaffoldJkBean scaffoldBean = getBean(ScaffoldJkBean.class).configure(this::configure);
+
 
     public SpringbootJkBean setSpringbootVersion(String springbootVersion) {
         this.springbootVersion = springbootVersion;
@@ -92,7 +95,7 @@ public final class SpringbootJkBean extends JkBean {
         // Add spring snapshot or milestone repos if necessary
         JkDependencyResolver dependencyResolver = project.getConstruction().getDependencyResolver();
         JkVersion version = JkVersion.of(springbootVersion);
-        if (autoSpringRepo && version.hasBlockAt(3)) {
+        if (useSpringRepos && version.hasBlockAt(3)) {
             JkRepoSet repos = JkSpringRepos.getRepoForVersion(version.getBlock(3));
             dependencyResolver.addRepos(repos);
         }
@@ -113,8 +116,14 @@ public final class SpringbootJkBean extends JkBean {
 
         // define bootable jar as main artifact
         JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
-        Consumer<Path> bootJar = path -> this.createBootJar(project, path);
-        artifactProducer.putMainArtifact(bootJar);
+        if (this.createBooJar) {
+            Consumer<Path> bootJarMaker = path -> this.createBootJar(project, path);
+            artifactProducer.putMainArtifact(bootJarMaker);
+        }
+        if (this.createWar) {
+            Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(path, project);
+            artifactProducer.putArtifact("", "war", warMaker);
+        }
 
         // add original jar artifact
         if (createOriginalJar) {
@@ -133,9 +142,6 @@ public final class SpringbootJkBean extends JkBean {
         scaffolder.getExtraActions() .append(this::scaffoldSample);
     }
 
-    /**
-     * Creates the bootable jar at the standard location.
-     */
     private void createBootJar(JkProject project) {
         JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
         createBootJar(project, artifactProducer.getMainArtifactPath());
@@ -148,8 +154,8 @@ public final class SpringbootJkBean extends JkBean {
         JkProjectConstruction construction = project.getConstruction();
         JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
         JkDependencyResolver dependencyResolver = construction.getDependencyResolver();
-        JkVersionProvider versionProvider = project.getConstruction().getDependencyResolver()
-                .resolveBom(JkModuleDependency.of(BOM_COORDINATE + springbootVersion));
+        JkVersionProvider versionProvider = JkVersionProvider.of().andBom(BOM_COORDINATE + springbootVersion)
+                        .withResolvedBoms(project.getConstruction().getDependencyResolver().getRepos());
         JkVersion loaderVersion = versionProvider.getVersionOf(JkSpringModules.Boot.LOADER);
         JkDependencySet bootloaderDependency = JkDependencySet.of(JkModuleDependency.of(JkSpringModules.Boot.LOADER))
                 .andBom(BOM_COORDINATE + springbootVersion);
@@ -237,5 +243,18 @@ public final class SpringbootJkBean extends JkBean {
             JkLog.warn("Cannot find latest springboot version, choose default : " + DEFAULT_SPRINGBOOT_VERSION);
             return DEFAULT_SPRINGBOOT_VERSION;
         }
+    }
+
+    public SpringbootJkBean setMainClassName(String mainClassName) {
+        this.mainClassName = mainClassName;
+        return this;
+    }
+
+    /**
+     *  If true, Spring Milestone or Snapshot Repository will be used to fetch non release version of spring modules.
+     */
+    public SpringbootJkBean setUseSpringRepos(boolean useSpringRepos) {
+        this.useSpringRepos = useSpringRepos;
+        return this;
     }
 }

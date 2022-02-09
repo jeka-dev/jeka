@@ -5,6 +5,7 @@ import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.plugins.springboot.SpringbootJkBean;
 import dev.jeka.plugins.springboot.JkSpringModules.Boot;
 
@@ -36,7 +37,9 @@ class SpringbootSampleBuild extends JkBean {
                 )
                 .configureTestDeps(deps -> deps
                     .and(Boot.STARTER_TEST)
-                );
+                )
+                .setPublishedModuleId("dev.jeka:samples-springboot")
+                .setPublishedVersion("1.0-SNAPSHOT");
 
     }
 
@@ -46,7 +49,7 @@ class SpringbootSampleBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); springboot.createBootJar();
+        clean(); springboot.projectBean().pack();
     }
 
     public void testRun() {
@@ -56,7 +59,10 @@ class SpringbootSampleBuild extends JkBean {
 
     // Clean, compile, test and generate springboot application jar
     public static void main(String[] args) {
-        JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb").cleanPack();
+        SpringbootSampleBuild build = JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb");
+        //build.getBean(SpringbootJkBean.class).createWar = true;
+        build.cleanPack();
+        build.getBean(ProjectJkBean.class).publishLocal();
     }
 
     // debug purpose

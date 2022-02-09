@@ -154,7 +154,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         JkMavenPublication mavenPublication = publication.getMaven();
         if (mavenPublication.getModuleId() != null) {
             builder
-                .append("Publish Maven repositories : " + mavenPublication.getRepos()  + "\n")
+                .append("Publish Maven repositories : " + mavenPublication.getPublishRepos()  + "\n")
                 .append("Published Maven Module & version : " +
                         mavenPublication.getModuleId().withVersion(mavenPublication.getVersion()) + "\n")
                 .append("Published Maven Dependencies :");

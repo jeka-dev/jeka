@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -33,7 +34,9 @@ public final class JkMavenPublication<T> {
 
     private Supplier<JkArtifactLocator> artifactLocatorSupplier;
 
-    private JkRepoSet repos = JkRepoSet.ofLocal();
+    private JkRepoSet publishRepos = JkRepoSet.ofLocal();
+
+    private Supplier<JkRepoSet> bomResolverRepoSupplier = () -> JkRepoSet.of();
 
     private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
 
@@ -82,6 +85,11 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
+    public JkMavenPublication<T> setBomResolutionRepos(Supplier<JkRepoSet> repoSupplier) {
+        this.bomResolverRepoSupplier = repoSupplier;
+        return this;
+    }
+
     public JkModuleId getModuleId() {
         return moduleIdSupplier.get();
     }
@@ -113,17 +121,17 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
-    public JkRepoSet getRepos() {
-        return repos;
+    public JkRepoSet getPublishRepos() {
+        return publishRepos;
     }
 
-    public JkMavenPublication<T> setRepos(JkRepoSet repoSet) {
-        this.repos = repoSet;
+    public JkMavenPublication<T> setPublishRepos(JkRepoSet repoSet) {
+        this.publishRepos = repoSet;
         return this;
     }
 
     public JkMavenPublication<T> addRepos(JkRepo ...repoArgs) {
-        Arrays.stream(repoArgs).forEach(repo -> repos = repos.and(repo));
+        Arrays.stream(repoArgs).forEach(repo -> publishRepos = publishRepos.and(repo));
         return this;
     }
 
@@ -131,7 +139,7 @@ public final class JkMavenPublication<T> {
      * Publishes this publication to its defined repositories
      */
     public JkMavenPublication<T> publish() {
-        publish(this.repos.withDefaultSigner(defaultSigner));
+        publish(this.publishRepos.withDefaultSigner(defaultSigner));
         return this;
     }
 
@@ -143,7 +151,13 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
+
     private JkMavenPublication publish(JkRepoSet repos) {
+        JkRepoSet bomRepos = this.bomResolverRepoSupplier.get().and(repos);
+        JkDependencySet dependencySet = this.getDependencies()
+                .withResolvedBoms(bomRepos)
+                .assertNoUnspecifiedVersion()
+                .toResolvedModuleVersions();
         JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
         JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
@@ -151,7 +165,7 @@ public final class JkMavenPublication<T> {
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
         JkVersionedModule versionedModule = getModuleId().withVersion(versionSupplier.get());
-        internalPublisher.publishMaven(versionedModule, getArtifactLocator(), pomMetadata, getDependencies());
+        internalPublisher.publishMaven(versionedModule, getArtifactLocator(), pomMetadata, dependencySet);
         return this;
     }
 
@@ -167,16 +181,16 @@ public final class JkMavenPublication<T> {
                                                                           JkDependencySet runtimeDeps,
                                                                           JkVersionedModule.ConflictStrategy strategy) {
         JkDependencySetMerge merge = runtimeDeps.merge(compileDeps);
+        JkDependencySet mergeResult = merge.getResult().normalised(strategy);
         List<JkDependency> result = new LinkedList<>();
-        for (JkModuleDependency moduleDependency : merge.getResult().normalised(strategy)
-                .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
+        for (JkModuleDependency moduleDependency : mergeResult.getModuleDependencies()) {
             JkTransitivity transitivity = JkTransitivity.COMPILE;
             if (merge.getAbsentDependenciesFromRight().contains(moduleDependency)) {
                 transitivity = JkTransitivity.RUNTIME;
             }
             result.add(moduleDependency.withTransitivity(transitivity));
         }
-        return JkDependencySet.of(result);
+        return JkDependencySet.of(result).withVersionProvider(mergeResult.getVersionProvider());
     }
 
 

@@ -86,7 +86,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     private void applyRepo(JkProject project) {
-        project.getPublication().getMaven().setRepos(
+        project.getPublication().getMaven().setPublishRepos(
                 Optional.ofNullable(JkRepoFromProperties.getPublishRepository())
                         .orElse(JkRepo.ofLocal())
                 .toSet());
