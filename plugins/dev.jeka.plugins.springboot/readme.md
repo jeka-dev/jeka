@@ -5,7 +5,13 @@
 
 [Jeka](https://jeka.dev) plugin to build Spring Boot applications with minimal effort. <br/>
 
-## Writing the build class
+## Scaffold a Springboot project
+
+Execute command line : `jeka scaffold#run scaffold#wrapper @dev.jeka:springboot-plugin springboot#` 
+
+In Jeka IDE, you can just __right-click__ on module root folder, then __scaffold... | Springboot__
+
+## Writing the build class manually
 
 Just declare the plugin in your Jeka class (in _[project Dir]/jeka/def_ ) as above :
 
@@ -32,16 +38,20 @@ class Build extends JkBean {
     }
 
     private void configure(JkProject project) {
-        project.addDependencies(JkDependencySet.of()
-                .and(Boot.STARTER_WEB)
-                .and(Boot.STARTER_TEST, JkJavaDepScopes.TEST)
-        );
+        project.simpleFacade()
+            .configureCompileDeps(deps -> deps
+                    .and(Boot.STARTER_WEB)
+            )
+            .configureTestDeps(deps -> deps
+                    .and(Boot.STARTER_TEST)
+            );
     }
     
 }
 ```
 
-Running the main method or executing `jeka java#pack` performs :
+
+Running the main method or executing `jeka project#pack` performs :
 
 * Compilation and tests run
 * Generation of the original binary jar along its sources jar
@@ -53,18 +63,18 @@ Utility methods are provided if you want to construct your own springboot jar an
 
 ### Adding extra dependencies
  
-Springboot plugin provides class constants to declare most of dependencies. 
+Springboot plugin provides class constants to declare usual dependencies used in springboot projects. 
 It adds great comfort when picking some Spring dependencies.
  
 ```java
     ...
-    project.addDependencies(JkDependencySet.of()
-            .and(Boot.STARTER_WEB)
-            .and(Boot.STARTER_TEST, JkJavaDepScopes.TEST)
-            .and(Fwk.JDBC)
-            .and(Data.MONGODB)
-            .and(Data.COMMONS)
-            .and(securityOn, Boot.STARTER_SECURITY)    		  
+    .configureCompileDeps(deps -> deps
+        .and(Boot.STARTER_WEB)
+        .and(Boot.STARTER_TEST, JkJavaDepScopes.TEST)
+        .and(Fwk.JDBC)
+        .and(Data.MONGODB)
+        .and(Data.COMMONS)
+        .and(securityOn, Boot.STARTER_SECURITY)    		  
     );    
 }
 ```
