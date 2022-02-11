@@ -2,6 +2,7 @@ package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsPathTest;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -228,9 +229,23 @@ public class JkPathTreeTest {
         boolean samplePresent = stream
                 .anyMatch(path -> path.getFileName().toString().equals("sample.txt"));
         assertFalse(samplePresent);
-        assertFalse(JkPathTree.of(sampleFolder).andMatching("subfolder/*.txt").getFiles().isEmpty());
-        assertFalse(JkPathTree.of(sampleFolder).andMatching("subfolder/*.txt", "*.txt").getFiles().isEmpty());
-        assertFalse(JkPathTree.of(sampleFolder).andMatching("subfolder/*.txt", "*.java").getFiles().isEmpty());
+        JkPathTree tree = JkPathTree.of(sampleFolder);
+        assertFalse(tree.andMatching("subfolder/*.txt").getFiles().isEmpty());
+        assertFalse(tree.andMatching("subfolder/*.txt", "*.txt").getFiles().isEmpty());
+        assertFalse(tree.andMatching("subfolder/*.txt", "*.java").getFiles().isEmpty());
+    }
+
+    @Test
+    @Ignore  // This test fails when launched in forked mode
+    public void testAndMatching_rootIsWorkingDir() throws Exception {
+        final URL sampleFileUrl = JkUtilsPathTest.class
+                .getResource("samplefolder/subfolder/sample.txt");
+        Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        sampleFolder = JkUtilsPath.relativizeFromWorkingDir(sampleFolder);
+        JkPathTree WorkingDirTree = JkPathTree.of("");
+        String filter = sampleFolder.toString().replace('\\', '/') + "/subfolder/*.txt";
+        List<Path> files = WorkingDirTree.andMatching(filter).getFiles();
+        assertFalse(files.isEmpty());
     }
 
     @Test

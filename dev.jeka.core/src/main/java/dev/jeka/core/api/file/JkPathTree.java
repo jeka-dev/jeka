@@ -119,8 +119,9 @@ public class JkPathTree<T extends JkPathTree> {
             return new LinkedList<Path>().stream();
         }
         final JkPathMatcher matcher = JkPathMatcher.of(this.matcher);
-        return JkUtilsPath.walk(getRoot(), options)
-                .filter(path -> matcher.matches(getRoot().relativize(path)));
+        Path root = getRoot().toString().equals("") ? Paths.get(".") : getRoot();
+        return JkUtilsPath.walk(root, options)
+                .filter(path -> matcher.matches(root.relativize(path)));
     }
 
     /**
@@ -128,7 +129,10 @@ public class JkPathTree<T extends JkPathTree> {
      */
     public List<Path> getRelativeFiles() {
         try(Stream<Path> stream = stream()) {
-            return stream.filter(JkPathMatcher.ofNoDirectory().toPredicate()).map(relativePathFunction()).collect(Collectors.toList());
+            return stream
+                    .filter(JkPathMatcher.ofNoDirectory().toPredicate())
+                    .map(relativePathFunction())
+                    .collect(Collectors.toList());
         }
     }
 
@@ -137,7 +141,9 @@ public class JkPathTree<T extends JkPathTree> {
      */
     public List<Path> getFiles() {
         try (Stream<Path> stream = stream()) {
-            return stream.filter(JkPathMatcher.ofNoDirectory().toPredicate()).collect(Collectors.toList());
+            return stream
+                    .filter(JkPathMatcher.ofNoDirectory().toPredicate())
+                    .collect(Collectors.toList());
         }
     }
 

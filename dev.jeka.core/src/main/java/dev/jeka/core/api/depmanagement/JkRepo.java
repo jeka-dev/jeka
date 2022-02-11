@@ -92,6 +92,10 @@ public final class JkRepo {
         return of(MAVEN_CENTRAL_URL);
     }
 
+    public static JkRepo ofGitHub(String owner, String repoName) {
+        return of("https://>https://maven.pkg.github.com/" + owner + "/" + repoName);
+    }
+
     /**
      * Creates an OSSRH repository for both deploying snapshot and download artifacts.
      */
