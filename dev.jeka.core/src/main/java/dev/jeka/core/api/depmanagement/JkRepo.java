@@ -93,7 +93,7 @@ public final class JkRepo {
     }
 
     public static JkRepo ofGitHub(String owner, String repoName) {
-        return of("https://>https://maven.pkg.github.com/" + owner + "/" + repoName);
+        return of("https://maven.pkg.github.com/" + owner + "/" + repoName);
     }
 
     /**
