@@ -90,7 +90,7 @@ class MasterBuild extends JkBean {
             JkLog.endTask();
         }
         String branch = JkGitProcess.of().getCurrentBranch();
-        if (branch.equals("master") && !versionFromGit.version().isSnapshot()) {
+        if (branch.equals("master")) {
             JkLog.startTask("Publishing");
             getImportedJkBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publish);
             closeAndReleaseRepo();

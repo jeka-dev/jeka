@@ -42,7 +42,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="clean make -lri -lsu -lb -ls=BRACE -lst -lna" />
+			<arg line="clean make -lri -lsu -lb -ls=BRACE -lst -lna -lv" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
@@ -50,8 +50,6 @@
 			</classpath>
 		</java>
 	</target>
-
-
 
 	<target name="test" depends="run"/>
 
