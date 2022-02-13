@@ -23,7 +23,7 @@ class MasterBuild extends JkBean {
     @JkInjectProperty("OSSRH_PWD")
     public String ossrhPwd;
 
-    @JkInjectProperty("GH_TOKEN")
+    @JkInjectProperty("GITHUB_TOKEN")
     public String githubToken;
 
     public boolean runSamples = true;
@@ -168,7 +168,6 @@ class MasterBuild extends JkBean {
     public void runScaffoldsWithPlugins() {
         new PluginScaffoldTester().run();
     }
-
 
     public void publishLocal() {
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publishLocal);
