@@ -26,6 +26,9 @@ class MasterBuild extends JkBean {
     @JkInjectProperty("GITHUB_TOKEN")
     public String githubToken;
 
+    @JkInjectProperty("REPO_TOKEN")
+    public String repoToken;
+
     public boolean runSamples = true;
 
     public boolean useJacoco = false;
@@ -136,7 +139,7 @@ class MasterBuild extends JkBean {
                 .getPublishConfig()
                     .setVersionFilter(jkVersion -> jkVersion.getValue().endsWith(".RELEASE")).__;
         JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka")
-                .setCredentials("GITHUB_TOKEN", githubToken);
+                .setCredentials("djeang", githubToken);
         return  JkRepoSet.of(snapshotRepo, releaseRepo, githubRepo);
     }
 
