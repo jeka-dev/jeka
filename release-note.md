@@ -8,6 +8,7 @@
 * Polished console output (progress bars)
 * Possibility to add Filesystem dependencies from the command line (@/path/to/lib.jar)
 * New mono-repo organisation allowing better tested product and version matching between Jeka and its plugins
+* Deploy non-release artifacts in GitHub Packages
 
 
 # 0.9.15.RELEASE
