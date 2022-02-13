@@ -136,7 +136,7 @@ class MasterBuild extends JkBean {
                 .getPublishConfig()
                     .setVersionFilter(jkVersion -> jkVersion.getValue().endsWith(".RELEASE")).__;
         JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka")
-                .setCredentials("", githubToken);
+                .setCredentials("GITHUB_TOKEN", githubToken);
         return  JkRepoSet.of(snapshotRepo, releaseRepo, githubRepo);
     }
 
