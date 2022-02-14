@@ -30,9 +30,6 @@ class MasterBuild extends JkBean {
     @JkInjectProperty("GITHUB_TOKEN")
     public String githubToken;
 
-    @JkInjectProperty("PACKAGES_TOKEN")
-    public String packagesToken;
-
     public boolean runSamples = true;
 
     public boolean useJacoco = false;
@@ -122,16 +119,6 @@ class MasterBuild extends JkBean {
         JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease();
     }
 
-    public void publishGithub() {
-        JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka")
-                .setCredentials("djeang", packagesToken);
-        coreBuild.getBean(ProjectJkBean.class).getProject()
-                .getPublication()
-                    .getMaven()
-                        .setPublishRepos(githubRepo.toSet())
-                        .publish();
-    }
-
     @JkDoc("Clean build of core + plugins bypassing tests.")
     public void buildFast() {
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(bean -> {
@@ -209,10 +196,5 @@ class MasterBuild extends JkBean {
         }
     }
 
-    static class PublishGithub {
-        public static void main(String[] args) {
-            JkInit.instanceOf(MasterBuild.class).publishGithub();
-        }
-    }
 
 }

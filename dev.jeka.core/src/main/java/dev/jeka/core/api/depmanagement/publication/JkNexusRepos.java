@@ -203,6 +203,10 @@ public class JkNexusRepos {
     }
 
     private void doRelease(List<String> repositoryIds) throws IOException {
+        if (repositoryIds.isEmpty()) {
+            JkLog.info("No repository to release.");
+            return;
+        }
         JkLog.startTask("Releasing repositories " + repositoryIds);
         URL url = new URL(baseUrl + "/service/local/staging/bulk/promote");
         HttpURLConnection con = connection(url);
