@@ -93,7 +93,11 @@ public final class JkRepo {
     }
 
     public static JkRepo ofGitHub(String owner, String repoName) {
-        return of("https://maven.pkg.github.com/" + owner + "/" + repoName);
+        return of("https://maven.pkg.github.com/" + owner + "/" + repoName)
+                .setCredentials(JkRepoCredentials.of(null, null, "GitHub Package Registry"))
+                .getPublishConfig()
+                    .setUniqueSnapshot(false)
+                .__;
     }
 
     /**
@@ -197,7 +201,8 @@ public final class JkRepo {
      * @see #setCredentials(JkRepoCredentials)
      */
     public JkRepo setCredentials(String username, String password) {
-        return this.setCredentials(username, password, null);
+        String realm = this.getCredentials() == null ? null : this.getCredentials().realm;
+        return this.setCredentials(username, password, realm);
     }
 
     public JkRepoSet toSet() {

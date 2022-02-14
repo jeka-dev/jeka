@@ -2,8 +2,12 @@ import dev.jeka.core.CoreBuild;
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.system.JkProperty;
@@ -118,6 +122,16 @@ class MasterBuild extends JkBean {
         JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease();
     }
 
+    public void publishGithub() {
+        JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka")
+                .setCredentials("djeang", packagesToken);
+        coreBuild.getBean(ProjectJkBean.class).getProject()
+                .getPublication()
+                    .getMaven()
+                        .setPublishRepos(githubRepo.toSet())
+                        .publish();
+    }
+
     @JkDoc("Clean build of core + plugins bypassing tests.")
     public void buildFast() {
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(bean -> {
@@ -138,8 +152,11 @@ class MasterBuild extends JkBean {
         JkRepo releaseRepo =  JkRepo.ofMavenOssrhDeployRelease(ossrhUser, ossrhPwd,  gpg.getSigner(""))
                 .getPublishConfig()
                     .setVersionFilter(jkVersion -> jkVersion.getValue().endsWith(".RELEASE")).__;
-        JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka")
-                .setCredentials("djeang", packagesToken);
+        JkRepo githubRepo = JkRepo.ofGitHub("GITHUB_TOKEN", "jeka")
+                .setCredentials("djeang", packagesToken)
+                .getPublishConfig()
+                    .setVersionFilter(jkVersion -> !jkVersion.isSnapshot())
+                .__;
         return  JkRepoSet.of(snapshotRepo, releaseRepo, githubRepo);
     }
 
@@ -189,6 +206,12 @@ class MasterBuild extends JkBean {
     static class ShowVersion {
         public static void main(String[] args) {
             System.out.println(JkInit.instanceOf(VersionFromGitJkBean.class, args).version());
+        }
+    }
+
+    static class PublishGithub {
+        public static void main(String[] args) {
+            JkInit.instanceOf(MasterBuild.class).publishGithub();
         }
     }
 
