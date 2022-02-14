@@ -223,7 +223,7 @@ final class EngineBeanClassResolver {
         JkPathFile.of(store).createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
     }
 
-    private List<String> readKbeanClasses() {
+    List<String> readKbeanClasses() {
         Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(CACHE_FILENAME);
         if (!Files.exists(store)) {
             return Collections.emptyList();
