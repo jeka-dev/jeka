@@ -220,6 +220,15 @@ public final class JkUtilsString {
         return string.isEmpty() || " ".equals(string);
     }
 
+    public static boolean isDigits(String string) {
+        try {
+            Double.parseDouble(string);
+            return true;
+        } catch(NumberFormatException e){
+            return false;
+        }
+    }
+
     /**
      * Returns the specified string truncated and ending with <i>...</i> if the specified
      * string is longer than the specified max length. Otherwise, the specified string is returned as is.

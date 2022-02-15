@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.Comparator;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class JkVersionTest {
@@ -20,5 +21,11 @@ public class JkVersionTest {
         assertTrue(comp.compare("1.0", "1.0.1") < 0);
         assertTrue(comp.compare("1.0.0", "1.0.0.1") < 0);
         assertTrue(comp.compare("1.0.0", "1.0.0.0") == 0);
+    }
+
+    @Test
+    public void testIsDigitOnly() {
+        assertTrue(JkVersion.of("12.3.21").isDigitsOnly());
+        assertFalse(JkVersion.of("36.0.6.RC10").isDigitsOnly());
     }
 }

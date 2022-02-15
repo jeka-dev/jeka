@@ -42,7 +42,11 @@ public class Booter {
             final String version = version(props);
             jekaBinPath = getJekaBinPath(version);
             if (!Files.exists(jekaBinPath)) {
-                final Path dir = install(version);
+                String baseUrl = props.getProperty("jeka.distrib.repo", repoOptions());
+                if (baseUrl == null) {
+                    baseUrl = MAVEN_CENTRAL_URL;
+                }
+                final Path dir = install(baseUrl, version);
                 Files.deleteIfExists(dir.resolve("global.properties"));
                 Files.deleteIfExists(dir.resolve("jeka.bat"));
                 Files.deleteIfExists(dir.resolve("jeka"));
@@ -68,8 +72,8 @@ public class Booter {
      * Download and install the jeka distribution of the specified version
      * @return The directory of the newly installed distribution
      */
-    public static Path install(String version) {
-        final Path zip = downloadDistribZip(version);
+    public static Path install(String baseUrl, String version) {
+        final Path zip = downloadDistribZip(baseUrl, version);
         final Path dir = getJekaVersionCacheDir(version);
         System.out.println("Unzip distribution to " + dir + " ...");
         try {
@@ -103,12 +107,9 @@ public class Booter {
         }
     }
 
-    private static Path downloadDistribZip(String version) {
-        String repo = repoOptions();
-        if (repo == null) {
-            repo = MAVEN_CENTRAL_URL;
-        }
-        final String urlString = repo + "dev/jeka/jeka-core/"
+    private static Path downloadDistribZip(String baseUrl, String version) {
+        String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+        final String urlString = base + "dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";
         System.out.println("Downloading " + urlString + " ...");
         final URL url;
@@ -125,7 +126,7 @@ public class Booter {
             }
             return temp;
         } catch (final FileNotFoundException e) {
-            System.out.println(urlString + " not found. Please check that version " + version + " exists in repo " + repo);
+            System.out.println(urlString + " not found. Please check that version " + version + " exists in repo " + baseUrl);
             System.out.println("Jeka version to download is defined in ./jeka/wrapper/wrapper.properties file.");
             System.exit(1);
             return null;

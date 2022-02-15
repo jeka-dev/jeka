@@ -3,7 +3,9 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Used to specify a module version. Versions are comparable.
@@ -76,6 +78,14 @@ public final class JkVersion implements Comparable<JkVersion> {
      */
     public boolean isGreaterThan(JkVersion other) {
         return this.compareTo(other) > 0;
+    }
+
+    public List<String> toItems() {
+        return Arrays.asList(this.value.split("\\."));
+    }
+
+    public boolean isDigitsOnly() {
+        return !toItems().stream().anyMatch(item -> !JkUtilsString.isDigits(item));
     }
 
     /**
