@@ -20,7 +20,7 @@ public class FieldInjectorTest {
         FieldInjector.inject(sample, map);
         Assert.assertEquals(1, sample.a);
         Assert.assertEquals("toto", sample.b.a);
-        Assert.assertTrue(sample.c);
+        Assert.assertFalse(sample.c);
     }
 
     private static final class Sample {

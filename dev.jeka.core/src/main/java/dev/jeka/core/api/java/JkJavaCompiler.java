@@ -68,7 +68,7 @@ public final class JkJavaCompiler<T> {
     }
 
     /**
-     * Same as {@link #of()} but mentioning a owner for parent chaining.
+     * Same as {@link #of()} but mentioning an owner for parent chaining.
      */
     public static <T> JkJavaCompiler<T> ofParent(T parent) {
         return new JkJavaCompiler(parent);

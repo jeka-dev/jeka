@@ -58,7 +58,7 @@ public class JkProjectDocumentation {
 
     public void runIfNecessary() {
         if (done && !Files.exists(project.getOutputDir().resolve(javadocDir))) {
-            JkLog.info("Javadoc already generated. Won't perfom again");
+            JkLog.info("Javadoc already generated. Won't perform again");
         } else {
             run();
             done = true;

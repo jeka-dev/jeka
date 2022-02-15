@@ -66,7 +66,7 @@ public class JkCompileLayout<T> {
         baseDirSupplier = () -> Paths.get("");
         outputDirSupplier = () -> baseDirSupplier.get().resolve("jeka/output");
         setSourceMavenStyle(Concern.PROD);
-        setStandardOuputDirs(Concern.PROD);
+        setStandardOutputDirs(Concern.PROD);
     }
 
     /**
@@ -122,7 +122,7 @@ public class JkCompileLayout<T> {
         return this;
     }
 
-    public JkCompileLayout<T> setStandardOuputDirs(Concern concern) {
+    public JkCompileLayout<T> setStandardOutputDirs(Concern concern) {
         if (concern == Concern.PROD) {
             this.classDir = "classes";
             this.generatedSourceDir = GENERATED_SOURCE_PATH;

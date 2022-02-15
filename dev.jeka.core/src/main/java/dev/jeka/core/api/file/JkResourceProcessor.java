@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 /**
  * This processor basically copies some resource files to a target folder
- * (generally the class folder). It can also proceed to token replacement, i.e
+ * (generally the class folder). It can also proceed to token replacement, i.e,
  * replacing strings between <code>${</code> and <code>}</code> by a specified
  * values.<br/>
  * The processor is constructed from a <code>{@link JkPathTreeSet}</code> and for
@@ -141,7 +141,7 @@ public final class JkResourceProcessor<T> {
                     count.incrementAndGet();
                 }
             });
-            JkLog.info("%s processed from %s.", JkUtilsString.plurialize(count.get(), "file"),
+            JkLog.info("%s processed from %s.", JkUtilsString.pluralize(count.get(), "file"),
                     JkUtilsPath.relativizeFromWorkingDir(resourceTree.getRoot()));
         }
         JkLog.endTask();

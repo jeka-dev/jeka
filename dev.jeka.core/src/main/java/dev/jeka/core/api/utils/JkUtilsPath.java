@@ -32,7 +32,7 @@ public final class JkUtilsPath {
     /**
      * As {@link Path} implements  {@link Iterable<Path>} it is not obvious if an {@link Iterable} of {@link Path} was
      * intended to be a list of {@link Path} or a single {@link Path}.
-     * This methods helps by returning a list of Path containing either a single element if the argument was an instance
+     * This method helps by returning a list of Path containing either a single element if the argument was an instance
      * of {@link Path} nor a list of elements contained in the iterable argument.
      *
      * @param paths
@@ -78,7 +78,7 @@ public final class JkUtilsPath {
             try {
                 fileSystem = FileSystems.getFileSystem(uri);
             } catch (FileSystemNotFoundException e) {
-                fileSystem = FileSystems.newFileSystem(uri, env);  //NOSONAR : this resources will be closed along JkZipRoot
+                fileSystem = FileSystems.newFileSystem(uri, env);  //NOSONAR : this resource will be closed along JkZipRoot
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -196,7 +196,7 @@ public final class JkUtilsPath {
     }
 
     /**
-     * Delegates to {@link Files#readAllBytes(Path)} (Path)}
+     * Delegates to {@link Files#readAllBytes(Path)} (Path)
      */
     public static byte[] readAllBytes(Path path) {
         try {

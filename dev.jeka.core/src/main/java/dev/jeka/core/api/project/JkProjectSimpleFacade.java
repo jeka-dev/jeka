@@ -103,7 +103,7 @@ public class JkProjectSimpleFacade {
     /**
      * Specify the dependencies to add or remove from the production compilation dependencies to
      * get the runtime dependencies.
-     * @param modifier An function that define the runtime dependencies from the compilation ones.
+     * @param modifier A function that define the runtime dependencies from the compilation ones.
      */
     public JkProjectSimpleFacade configureRuntimeDeps(UnaryOperator<JkDependencySet> modifier) {
         project.getConstruction().configureRuntimeDependencies(modifier);
@@ -156,7 +156,7 @@ public class JkProjectSimpleFacade {
     }
 
     /**
-     * By default, every class in test folder are run. If you add a exclude filter,
+     * By default, every class in test folder are run. If you add an exclude filter,
      * tests accepting this filter won't be run.
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
@@ -168,7 +168,7 @@ public class JkProjectSimpleFacade {
     }
 
     /**
-     * By default, every classes in test folder are run. If you add an include filter, only
+     * By default, every class in test folder are run. If you add an including filter, only
      * tests accepting one of the declared filters will run.
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */

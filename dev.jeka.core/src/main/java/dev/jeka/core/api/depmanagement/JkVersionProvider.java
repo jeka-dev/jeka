@@ -95,7 +95,7 @@ public final class JkVersionProvider {
     }
 
     /**
-     * Returns <code>true</code> if this providers is empty.
+     * Returns <code>true</code> if this provider is empty.
      */
     public boolean isEmpty() {
         return this.map.isEmpty();

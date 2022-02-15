@@ -14,7 +14,7 @@ public final class JkUtilsThrowable {
 
     /**
      * Returns the specified exception itself if it is an unchecked exception
-     * (extending {@link RuntimeException}). Otherwise returns a new
+     * (extending {@link RuntimeException}). Otherwise, returns a new
      * {@link RuntimeException} wrapping the exception passed as argument.
      */
     public static RuntimeException unchecked(Exception e) {

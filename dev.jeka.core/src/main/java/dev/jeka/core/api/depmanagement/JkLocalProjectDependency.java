@@ -40,7 +40,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
      * @param producer The runnable producing the jar file.
      * @param file The jar file
      * @param basedir The base directory of the project producing the jar file. Optional (IDE support)
-     * @param dependencies The dependencies that will be consumed by the depender. It's not the
+     * @param dependencies The dependencies that will be consumed by the depender. It's not
      *                     the dependencies needed to compile the jar but the ones that would be
      *                     published.
      */
@@ -50,7 +50,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
     }
 
     /**
-     * Returns the dependencies that will be consumed by the depender. This is not the
+     * Returns the dependencies that will be consumed by the depender. This is not
      * the dependencies needed to compile the jar but the ones that would be published.
      */
     public JkDependencySet getExportedDependencies() {

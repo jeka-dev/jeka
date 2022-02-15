@@ -77,7 +77,7 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
 
     /**
      * Convenient method to extract information from the last commit message title.
-     * This splits title is separated words, then looks for the fist word starting
+     * It splits title is separated words, then looks for the fist word starting
      * with the specified prefix. The returned suffix is the word found minus the prefix.<p/>
      * This method returns <code>null</code> if no such prefix found.
      *

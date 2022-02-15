@@ -141,21 +141,21 @@ public final class JkGpg {
     }
 
     /**
-     * Creates a identical {@link JkGpg} but with the specified secret ring key file.
+     * Creates an identical {@link JkGpg} but with the specified secret ring key file.
      */
     public JkGpg withSecretRing(Path file, String password) {
         return new JkGpg(pubRing, file, password);
     }
 
     /**
-     * Creates a identical {@link JkGpg} but with the specified public ring key file.
+     * Creates an identical {@link JkGpg} but with the specified public ring key file.
      */
     public JkGpg withPublicRing(Path file) {
         return new JkGpg(file, secRing, passphrase);
     }
 
     /**
-     * Creates a identical {@link JkGpg} but with the specified password for secret ring.
+     * Creates an identical {@link JkGpg} but with the specified password for secret ring.
      */
     public JkGpg withSecretRingPassword(String pwd) {
         return new JkGpg(pubRing, secRing, pwd);
@@ -176,7 +176,7 @@ public final class JkGpg {
     }
 
     /**
-     * Creates a signer based on this secret ring and passphrase and using the the specified key.
+     * Creates a signer based on this secret ring and passphrase and using the specified key.
      * @param keyName The secret key to use within the t-scrfet ring. If empty string, the first key
      *                of the secret ring is selected.
      */

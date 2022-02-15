@@ -79,7 +79,7 @@ final class IvyPublisherForMaven {
         final String version;
         if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
-            final JkMavenMetadata mavenMetadata = JkUtilsObject.firstNonNull(loadMavenMedatata(path),
+            final JkMavenMetadata mavenMetadata = JkUtilsObject.firstNonNull(loadMavenMetadata(path),
                     returnedMetaData);
             final JkMavenMetadata.Versioning.JkSnapshot snap = mavenMetadata.currentSnapshot();
             version = versionForUniqueSnapshot(versionedModule.getVersion().getValue(), snap.timestamp,
@@ -117,7 +117,7 @@ final class IvyPublisherForMaven {
         }
         if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
-            JkMavenMetadata mavenMetadata = loadMavenMedatata(path);
+            JkMavenMetadata mavenMetadata = loadMavenMetadata(path);
             final String timestamp = JkUtilsTime.nowUtc("yyyyMMdd.HHmmss");
             if (mavenMetadata == null) {
                 mavenMetadata = JkMavenMetadata.of(versionedModule, timestamp);
@@ -199,11 +199,11 @@ final class IvyPublisherForMaven {
     }
 
     private void publishUniqueSnapshot(JkVersionedModule versionedModule, String classifier,
-            Path source, String versionForUniqueSpshot, JkMavenMetadata mavenMetadata) {
+            Path source, String versionForUniqueSnapshot, JkMavenMetadata mavenMetadata) {
 
         final String extension = JkUtilsString.substringAfterLast(source.getFileName().toString(), ".");
         final String dest = destination(versionedModule, extension, classifier,
-                versionForUniqueSpshot);
+                versionForUniqueSnapshot);
         putInRepo(source, dest, false);
         final String path = snapshotMetadataPath(versionedModule);
         mavenMetadata.addSnapshotVersion(extension, classifier);
@@ -245,7 +245,7 @@ final class IvyPublisherForMaven {
 
     private void updateMetadata(ModuleId moduleId, String version, String timestamp) {
         final String path = versionMetadataPath(of(moduleId, version));
-        JkMavenMetadata mavenMetadata = loadMavenMedatata(path);
+        JkMavenMetadata mavenMetadata = loadMavenMetadata(path);
         if (mavenMetadata == null) {
             mavenMetadata = JkMavenMetadata.of(JkModuleId.of(moduleId.getOrganisation(),
                     moduleId.getName()));
@@ -284,7 +284,7 @@ final class IvyPublisherForMaven {
                 + "/maven-metadata.xml";
     }
 
-    private JkMavenMetadata loadMavenMedatata(String path) {
+    private JkMavenMetadata loadMavenMetadata(String path) {
         try {
             final Resource resource = resolver.getRepository().getResource(completePath(path));
             if (resource.exists()) {

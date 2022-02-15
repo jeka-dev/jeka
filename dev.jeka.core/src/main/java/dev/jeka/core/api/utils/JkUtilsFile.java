@@ -20,9 +20,9 @@ public final class JkUtilsFile {
      * Returns the content of the specified property file as a
      * {@link Properties} object.
      */
-    private static Properties readPropertyFile(Path propertyfile) {
+    private static Properties readPropertyFile(Path propertyFile) {
         final Properties props = new Properties();
-        try (InputStream fileInputStream = Files.newInputStream(propertyfile)){
+        try (InputStream fileInputStream = Files.newInputStream(propertyFile)){
             props.load(fileInputStream);
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
@@ -30,8 +30,8 @@ public final class JkUtilsFile {
         return props;
     }
 
-    public static Map<String, String> readPropertyFileAsMap(Path propertyfile) {
-        final Properties properties = readPropertyFile(propertyfile);
+    public static Map<String, String> readPropertyFileAsMap(Path propertyFile) {
+        final Properties properties = readPropertyFile(propertyFile);
         return JkUtilsIterable.propertiesToMap(properties);
     }
 

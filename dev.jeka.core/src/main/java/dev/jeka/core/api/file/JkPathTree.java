@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  * <code>JkPathTree</code> may have some include/exclude filters to include only
  * or exclude specified files.<br/>
  * When speaking about files contained in a {@link JkPathTree}, we mean all
- * files contained in its root directory or sub-directories, matching positively
+ * files contained in its root directory or subdirectories, matching positively
  * the filter defined on it.
  *
  * @author Jerome Angibaud
@@ -192,9 +192,9 @@ public class JkPathTree<T extends JkPathTree> {
 
     /**
      * Copies the content of the specified tree at the root of this one.
-     * Specified dir to copy to might not exists. The structure of the specified tree
+     * Specified dir to copy to might not exist. The structure of the specified tree
      * is preserved.
-     * Note that the the root of the specified tree is not part of the copied content.
+     * Note that the root of the specified tree is not part of the copied content.
      */
     public T importTree(JkPathTree tree, CopyOption... copyOptions) {
         createIfNotExist();
@@ -240,7 +240,7 @@ public class JkPathTree<T extends JkPathTree> {
     }
 
     /**
-     * Deletes each and every files in this tree except the root and files not matching this tree filter.
+     * Deletes each and every file in this tree except the root and files not matching this tree filter.
      */
     public T deleteContent() {
         if (!Files.exists(getRoot())) {

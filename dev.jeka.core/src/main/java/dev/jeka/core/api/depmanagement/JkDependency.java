@@ -3,7 +3,7 @@ package dev.jeka.core.api.depmanagement;
 import java.nio.file.Path;
 
 /**
- * Interface standing for a dependency. It can be a either :
+ * Interface standing for a dependency. It can be either :
  * <ul>
  * <li>An external module as <code>org.hibernate:hibernate-core:3.0.1</code></li>
  * <li>A project inside a multi-project build</li>
@@ -17,9 +17,9 @@ public interface JkDependency {
 
     /**
      * In the IDE, a dependency can be provided by a project exporting it. When generating IDE metadata files
-     * (.classpath, xxx.iml), its preferable to mention only the project exporting it rather then dependency
+     * (.classpath, xxx.iml), it's preferable to mention only the project exporting it rather than dependency
      * itself.
-     * This method simply returns <code>null</code> when the dependencies is not coming from another project.
+     * This method simply returns <code>null</code> when the dependency is not coming from another project.
      */
     Path getIdeProjectDir();
 

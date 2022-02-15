@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
- * Handles project testing step. This involve both test compilation and run.
+ * Handles project testing step. This involves both test compilation and run.
  * Users can configure inner phases by chaining runnables.
  * They also can modify {@link JkJavaCompiler}, {@link JkJavaCompileSpec} for test compilation and
  * {@link JkTestProcessor}, {@link JkTestSelection} for test run.
@@ -149,7 +149,7 @@ public class JkProjectTesting {
     }
 
     /**
-     * As #run but perfom only if not already done.
+     * As #run, but performs only if not already done.
      */
     public void runIfNeeded() {
         if (done) {

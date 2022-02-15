@@ -19,7 +19,7 @@ public class JkZipTree extends JkPathTree<JkZipTree> implements Closeable {
     }
 
     /**
-     * Creates a path tree from an zip file. The zip file content will be seen as a regular folder.
+     * Creates a path tree from a zip file. The zip file content will be seen as a regular folder.
      *
      * Warn : Don't forget to close this resource when you are finished with.
      */

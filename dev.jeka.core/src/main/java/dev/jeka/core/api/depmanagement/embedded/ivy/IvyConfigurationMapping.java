@@ -4,11 +4,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A  Ivy configuration to configurations mapping declared along each dependency. </p>
+ * An  Ivy configuration to configurations mapping declared along each dependency. </p>
  * The left part describe for which purpose you need this dependency (compile, runtime, test). <br/>
  * The right part describe which transitive dependencies you want to retrieve along the dependency. <br/>
  * <p>
- * For example, your component 'A' depends of component 'B' for compiling. 'A' needs jar 'B' itself, but
+ * For example, your component 'A' depends on component 'B' for compiling. 'A' needs jar 'B' itself, but
  * also its transitive dependencies that 'B' declares for 'compile' and 'runtime' purposes. Then, 'A' to 'B'
  * dependency should be declared with configuration mapping 'compile -> compile, runtime';
  *

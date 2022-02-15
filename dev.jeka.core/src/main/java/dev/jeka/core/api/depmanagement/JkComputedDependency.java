@@ -17,9 +17,9 @@ import java.util.*;
  * responsible to generate the missing files. <p>
  *
  * Computed dependencies are instantiated by providing expected files and a {@link Runnable} that
- * generates these files in case one of them is missng. <p>
+ * generates these files in case one of them is missing. <p>
  *
- * This is yet simple but quite powerful mechanism, cause the runnable can be anything as a Maven or  a ANT build
+ * This is yet simple but quite powerful mechanism, cause the runnable can be anything as a Maven or an ANT build
  * of another project, a Jeka build of another project, ... <p>
  *
  * This is the way to create multi-projects (and multi-techno) builds.
@@ -133,7 +133,7 @@ public class JkComputedDependency implements JkFileDependency {
     }
 
     /**
-     * If this dependency can be represented as a project dependency in a IDE,
+     * If this dependency can be represented as a project dependency in an IDE,
      * this field mentions the baseTree dir of the project.
      */
     public Path getIdeProjectDir() {

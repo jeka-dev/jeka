@@ -82,24 +82,6 @@ public final class JkUtilsString {
         return count;
     }
 
-    /**
-     * Splits the specified String into an array by separating by the specified
-     * delimiter. Items are trimmed to eliminate blank spaces. If <code>str</code> is <code>null</code> then it returns an
-     * empty array.
-     */
-    public static String[] splitTrimmed(String str, String delimiters) {
-        if (str == null) {
-            return new String[0];
-        }
-        final StringTokenizer st = new StringTokenizer(str, delimiters);
-        final List<String> tokens = new ArrayList<>();
-        while (st.hasMoreTokens()) {
-            final String token = st.nextToken();
-            tokens.add(token.trim());
-        }
-        return tokens.toArray(new String[tokens.size()]);
-    }
-
 
     /**
      * Returns the substring after the last delimiter of the specified
@@ -151,7 +133,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns a string made of the the specified pattern repeat the
+     * Returns a string made of the specified pattern repeat the
      * specified count. So, for example, <code>repeat("##", 3)</code> will return <i>######</i>
      */
     public static String repeat(String pattern, int count) {
@@ -166,71 +148,19 @@ public final class JkUtilsString {
      * Returns a string containing the quantity and noun. The noun is the plural form if
      * quantity > 1.
      */
-    public static String plurialize(int count, String singular, String plurial) {
+    public static String pluralize(int count, String singular, String plural) {
         if (count > 1) {
-            return "" + count + " " + plurial;
+            return "" + count + " " + plural;
         }
         return "" + count + " " + singular;
     }
 
     /**
      * Returns a string containing the quantity and noun. The noun is the plural form if
-     * quantity greater than 1. The plurial form is singular form + 's';
+     * quantity greater than 1. The plural form is singular form + 's';
      */
-    public static String plurialize(int count, String singular) {
-        return plurialize(count, singular, singular + 's');
-    }
-
-    /**
-     * Create an instance of the specified type from its string value. For now
-     * handled types are :
-     * <ul>
-     * <li>primitive Wrapper types</li>
-     * <li>{@link File}</li>
-     * <li>Enum</li>
-     * </ul>
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T parse(Class<T> type, String stringValue) throws IllegalArgumentException {
-        if (type.equals(String.class)) {
-            return (T) stringValue;
-        }
-
-        if (type.equals(Boolean.class) || type.equals(boolean.class)) {
-            return (T) Boolean.valueOf(stringValue);
-        }
-        try {
-            if (type.equals(Integer.class) || type.equals(int.class)) {
-                return (T) Integer.valueOf(stringValue);
-            }
-            if (type.equals(Long.class) || type.equals(long.class)) {
-                return (T) Long.valueOf(stringValue);
-            }
-            if (type.equals(Short.class) || type.equals(short.class)) {
-                return (T) Short.valueOf(stringValue);
-            }
-            if (type.equals(Byte.class) || type.equals(byte.class)) {
-                return (T) Byte.valueOf(stringValue);
-            }
-            if (type.equals(Double.class) || type.equals(double.class)) {
-                return (T) Double.valueOf(stringValue);
-            }
-            if (type.equals(Float.class) || type.equals(float.class)) {
-                return (T) Float.valueOf(stringValue);
-            }
-            if (type.equals(File.class)) {
-                return (T) new File(stringValue);
-            }
-        } catch (final NumberFormatException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
-        if (type.isEnum()) {
-            @SuppressWarnings("rawtypes")
-            final Class enumType = type;
-            return (T) Enum.valueOf(enumType, stringValue);
-        }
-        throw new IllegalArgumentException("Can't handle type " + type);
-
+    public static String pluralize(int count, String singular) {
+        return pluralize(count, singular, singular + 's');
     }
 
     private static final byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2', (byte) '3',
@@ -252,29 +182,6 @@ public final class JkUtilsString {
             hex[index++] = HEX_CHAR_TABLE[v & 0xF];
         }
         return new String(hex, StandardCharsets.US_ASCII);
-    }
-
-    /**
-     * Returns <code>true</code> if any of the candidate string is equal to the
-     * string to match.
-     */
-    public static boolean equalsAny(String stringToMatch, String... candidates) {
-        for (final String candidate : candidates) {
-            if (equals(stringToMatch, candidate)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Null safe equals
-     **/
-    public static boolean equals(String string1, String string2) {
-        if (string1 == null) {
-            return string2 == null;
-        }
-        return string1.equals(string2);
     }
 
     /**
@@ -314,29 +221,10 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns the specified string replacing the HTML special characters by
-     * their respective code.
-     */
-    public static String escapeHtml(String s) {
-        final StringBuilder out = new StringBuilder(Math.max(16, s.length()));
-        for (int i = 0; i < s.length(); i++) {
-            final char c = s.charAt(i);
-            if (c > 127 || c == '"' || c == '<' || c == '>' || c == '&') {
-                out.append("&#");
-                out.append((int) c);
-                out.append(';');
-            } else {
-                out.append(c);
-            }
-        }
-        return out.toString();
-    }
-
-    /**
      * Returns the specified string truncated and ending with <i>...</i> if the specified
-     * string is longer than the specified max length. Otherwise the specified string is returned as is.
+     * string is longer than the specified max length. Otherwise, the specified string is returned as is.
      */
-    public static String elipse(String string, int max) {
+    public static String ellipse(String string, int max) {
         if (string.length() <= max || max < 0) {
             return string;
         }
@@ -405,21 +293,6 @@ public final class JkUtilsString {
             throw new IllegalArgumentException("unbalanced quotes in " + toProcess);
         }
         return result.toArray(new String[result.size()]);
-    }
-
-    public static Integer parseInteger(String number) {
-        try {
-            return Integer.parseInt(number);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Converts the supplied String to a string suitable to be used as a package name.
-     */
-    public static String conformPackageName(String string) {
-        return string.toLowerCase().replace('-', '_');
     }
 
     public static String padEnd(String string, int minLength, char padChar) {

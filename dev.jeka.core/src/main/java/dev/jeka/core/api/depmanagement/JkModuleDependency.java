@@ -79,8 +79,7 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
     }
 
     /**
-     * Creates a {@link JkModuleDependency} to its getModuleId and
-     * <code>JkVersionrange</code>.
+     * Creates a {@link JkModuleDependency} of the specified moduleId and version range.
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, String versionRange) {
@@ -151,7 +150,7 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
     }
 
     /**
-     * Returns the version of the module this dependencies is constrained to.
+     * Returns the version of the module this dependency is constrained to.
      */
     public JkVersion getVersion() {
         return version;
@@ -335,7 +334,7 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
     /**
      * When declaring a module dependency, we implicitly request for the main artifact of this module. Nevertheless,
      * we can request for getting others artifacts in place or additionally of the main one.
-     * This class aims at specifying which artifact are we interested for the dependency.
+     * This class aims at specifying which artifact are concerned for the dependency.
      */
     public static class JkArtifactSpecification {
 

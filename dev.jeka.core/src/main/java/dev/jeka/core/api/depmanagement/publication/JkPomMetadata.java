@@ -33,7 +33,7 @@ public final class JkPomMetadata<T> implements Serializable {
 
     private final List<JkDeveloperInfo> developers;
 
-    /** License list for the project, generaly there is a single license */
+    /** License list for the project, generally there is a single license */
     private final List<JkLicenseInfo> licenses;
 
     public String getProjectName() {
@@ -111,7 +111,7 @@ public final class JkPomMetadata<T> implements Serializable {
     }
 
     /**
-     * Adds a developer pthis this publication.
+     * Adds a developer to this publication.
      */
     public JkPomMetadata<T> addDeveloper(JkDeveloperInfo developerInfo) {
         this.developers.add(developerInfo);
@@ -153,7 +153,7 @@ public final class JkPomMetadata<T> implements Serializable {
      * R@see #addLicense(JkLicenseInfo)
      */
     public JkPomMetadata<T> addApache2License() {
-        return addLicense("Apache License V2.0", "http://www.apache.org/licenses/LICENSE-2.0.html");
+        return addLicense("Apache License V2.0", "https://www.apache.org/licenses/LICENSE-2.0.htmll");
     }
 
     /**
@@ -167,7 +167,7 @@ public final class JkPomMetadata<T> implements Serializable {
      *  @see #addLicense(JkLicenseInfo)
      */
     public JkPomMetadata<T> addMitLicense() {
-        return addLicense("MIT License", "http://opensource.org/licenses/MIT");
+        return addLicense("MIT License", "https://opensource.org/licenses/MIT");
     }
 
     public List<JkDeveloperInfo> getDevelopers() {

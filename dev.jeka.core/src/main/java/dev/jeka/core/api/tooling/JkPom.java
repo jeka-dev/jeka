@@ -72,7 +72,7 @@ public final class JkPom {
     }
 
     /**
-     * The artifzctId for this POM.
+     * The artifactId for this POM.
      */
     public String getArtifactId() {
         return JkUtilsXml.directChildText(projectEl(), "artifactId");

@@ -73,7 +73,7 @@ public final class JkKotlinCompiler {
 
     /**
      * Creates a {@link JkKotlinCompiler} based on the specified command. The specified command is supposed to be
-     * accessible from the working directory. Examples of command are "kotlinc", "kotlinc-native", "/my/kotlin/home/kotlin-js', ...
+     * accessible from the working directory. Examples of command are "kotlinc", "kotlinc-native", "/my/kotlin/home/kotlin-js", ...
      */
     public static JkKotlinCompiler ofCommand(String command) {
         String effectiveCommand = command;

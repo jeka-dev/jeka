@@ -60,7 +60,7 @@ public class JkDependencySet {
     }
 
     /**
-     * Returns the unmodifiable list list of scoped dependencies for this object.
+     * Returns the unmodifiable list of scoped dependencies for this object.
      */
     public List<JkDependency> getEntries() {
         return this.entries;
@@ -302,7 +302,7 @@ public class JkDependencySet {
 
     /**
      * Returns overridden versions for transitive dependencies and direct dependencies with no version specified on. <p>
-     * Versions present here will overwrite versions found in transitive dependencies and unversioned direct
+     * Versions present here will overwrite versions found in transitive dependencies and un-versioned direct
      * dependencies. <p>
      * Versions present in direct dependencies won't be overridden.
      */
@@ -346,7 +346,7 @@ public class JkDependencySet {
      * Returns <code>true</code> if this object contains dependency on external
      * module whose rely on dynamic version. It can be either dynamic version as
      * "1.3.+", "[1.0, 2.0[" ,... or snapshot version as defined in Maven (as
-     * "1.0-SNAPSHOT).
+     * "1.0-SNAPSHOT").
      */
     public boolean hasDynamicVersions() {
         return moduleDeps().anyMatch(dep -> dep.getVersion().isDynamic());
@@ -360,7 +360,7 @@ public class JkDependencySet {
      * versions are replaced by fixed resolved ones.
      */
     public boolean hasDynamicAndResolvableVersions() {
-        return moduleDeps().anyMatch(dep -> dep.getVersion().isDynamicAndResovable());
+        return moduleDeps().anyMatch(dep -> dep.getVersion().isDynamicAndResolvable());
     }
 
 
@@ -488,7 +488,7 @@ public class JkDependencySet {
     }
 
     /**
-     * Returns a clone of this dependencySet but adding dependency exclusion on the the last element.
+     * Returns a clone of this dependencySet but adding dependency exclusion on the last element.
      */
     public JkDependencySet withLocalExclusions(JkDependencyExclusion... exclusions) {
         if (entries.isEmpty()) {

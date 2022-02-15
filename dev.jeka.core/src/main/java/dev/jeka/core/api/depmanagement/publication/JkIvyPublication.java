@@ -184,7 +184,7 @@ public final class JkIvyPublication<T> {
     }
 
     /**
-     * Same as {@link #setMainArtifact(Path, String...)} (Path, String...)} but effective only if the specified file exists.
+     * Same as {@link #setMainArtifact(Path, String...)} (Path, String...) but effective only if the specified file exists.
      */
     public JkIvyPublication<T> addOptionalArtifact(Path file, String... configurationNames) {
         if (Files.exists(file)) {
@@ -194,7 +194,7 @@ public final class JkIvyPublication<T> {
     }
 
     /**
-     * Same as {@link #setMainArtifact(Path, String...)} (Path, String, String...)} but effective only if the specified file
+     * Same as {@link #setMainArtifact(Path, String...)} (Path, String, String...) but effective only if the specified file
      * exists.
      */
     public JkIvyPublication<T> addOptionalArtifactWithType(Path file, String type, String... configurationNames) {
@@ -258,7 +258,7 @@ public final class JkIvyPublication<T> {
 
         public final String name;
 
-        public final String extension;  // if not null, override the implicit file extensiion
+        public final String extension;  // if not null, override the implicit file extension
 
     }
 

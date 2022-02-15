@@ -88,7 +88,7 @@ public final class JkEclipseClasspathGenerator {
     // -------------------------- setters ----------------------------
 
     /**
-     * Set whether or not generated .classpath file should contains javadoc link for libraries.
+     * Set if generated .classpath file should contain javadoc link for libraries.
      */
     public JkEclipseClasspathGenerator setIncludeJavadoc(boolean includeJavadoc) {
         this.includeJavadoc = includeJavadoc;
@@ -120,7 +120,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     /**
-     * If the build script depends on external libraries, you must set the resolver of this dependencies here.
+     * If the build script depends on external libraries, you must set the resolver of these dependencies here.
      */
     public JkEclipseClasspathGenerator setDefDependencies(JkDependencyResolver buildDependencyResolver,
                                                           JkDependencySet buildDependencies) {
@@ -131,7 +131,7 @@ public final class JkEclipseClasspathGenerator {
 
     /**
      * For the specified dependency, specify a child attribute tag to add to the mapping classpathentry tag.
-     * @param dependency The dependency paired to the classpathentry we want generate `<attributes></attributes>` children
+     * @param dependency The dependency paired to the classpathentry we want to generate `<attributes></attributes>` children
      *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkModuleDependency} or a
      *                   {@link dev.jeka.core.api.depmanagement.JkFileSystemDependency}.
      *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
@@ -154,7 +154,7 @@ public final class JkEclipseClasspathGenerator {
 
     /**
      * For the specified dependency, specify a child accessrule tag to add to the mapping classpathentry tag.
-     * @param dependency The dependency paired to the classpathentry we want generate `<attributes></attributes>` children
+     * @param dependency The dependency paired to the classpathentry we want to generate `<attributes></attributes>` children
      *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkModuleDependency} or a
      *                   {@link dev.jeka.core.api.depmanagement.JkFileSystemDependency}.
      *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name

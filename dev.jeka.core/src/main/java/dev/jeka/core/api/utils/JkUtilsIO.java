@@ -26,13 +26,13 @@ public final class JkUtilsIO {
      * Creates a no-op print getOutputStream.
      */
     public static PrintStream nopPrintStream() {
-        return new PrintStream(nopOuputStream());
+        return new PrintStream(nopOutputStream());
     }
 
     /**
      * Creates a no-op outputStream.
      */
-    public static OutputStream nopOuputStream() {
+    public static OutputStream nopOutputStream() {
         return new OutputStream() {
 
             @Override
@@ -76,7 +76,7 @@ public final class JkUtilsIO {
     /**
      * Closes the specified closeable object, ignoring any exceptions.
      */
-    public static void closeifClosable(Object closeable) {
+    public static void closeIfClosable(Object closeable) {
         if (closeable != null && closeable instanceof  Closeable) {
             try {
                 ((Closeable)closeable).close();
@@ -357,7 +357,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Serializes an object to the current classloader and unserializes it in
+     * Serializes an object to the current classloader and deserializes it in
      * the specified classloader.
      */
     @SuppressWarnings("unchecked")
@@ -378,7 +378,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Runs a thread copying all data from the specified input stream to sepecified  output streams. The
+     * Runs a thread copying all data from the specified input stream to specified  output streams. The
      * thread is started when the instance is created. You have to call
      * {@link #stop()} to stop the thread.
      */

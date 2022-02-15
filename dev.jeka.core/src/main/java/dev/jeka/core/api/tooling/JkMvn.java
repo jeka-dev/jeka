@@ -54,7 +54,7 @@ public final class JkMvn implements Runnable {
 
     /**
      * Creates a Maven command. Separate argument in different string, don't use
-     * white space to separate workds. Ex : JkMvn.of(myFile, "deleteArtifacts", "install",
+     * white space to separate words. Ex : JkMvn.of(myFile, "deleteArtifacts", "install",
      * "-U").
      */
     public static JkMvn of(Path workingDir, String... args) {
@@ -74,7 +74,7 @@ public final class JkMvn implements Runnable {
 
     /**
      * return a new maven command for this working directory. Separate arguments
-     * in different strings, don't use white space to separate workds. Ex :
+     * in different strings, don't use white space to separate words. Ex :
      * withCommand("deleteArtifacts", "install", "-U").
      */
     public final JkMvn commands(String... args) {
@@ -82,14 +82,14 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Short hand for #withCommand("deleteArtifacts", "package").
+     * Shorthand for #withCommand("deleteArtifacts", "package").
      */
     public final JkMvn cleanPackage() {
         return commands("deleteArtifacts", "package");
     }
 
     /**
-     * Short hand for #withCommand("deleteArtifacts", "install").
+     * Shorthand for #withCommand("deleteArtifacts", "install").
      */
     public final JkMvn cleanInstall() {
         return commands("deleteArtifacts", "install");
@@ -139,7 +139,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Creates a {@link JkDependencySet} from file describing dependencies the followiung way :
+     * Creates a {@link JkDependencySet} from file describing dependencies the following way :
      * <pre>
      * <code>
      * org.springframework:spring-aop:jar:4.2.3.BUILD-SNAPSHOT:compile

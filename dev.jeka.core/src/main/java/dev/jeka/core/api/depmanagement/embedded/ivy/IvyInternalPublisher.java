@@ -90,7 +90,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                 artifactLocator, dependencies);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
         final int count = publishMavenArtifacts(artifactLocator, metadata, ivy.getSettings(), moduleDescriptor);
-        JkLog.info("Module published in %s.", JkUtilsString.plurialize(count, "repository", "repositories"));
+        JkLog.info("Module published in %s.", JkUtilsString.pluralize(count, "repository", "repositories"));
         JkLog.endTask();
     }
 
@@ -164,7 +164,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                 UnaryOperator<Path> signer = publishRepo.getPublishConfig().getSigner();
                 if (signatureRequired && signer == null) {
                     throw new IllegalStateException("Repo " + publishRepo + " requires file signature but " +
-                            "no siigner has been defined on.");
+                            "no signer has been defined on.");
                 }
                 IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
                     signer, resolver, descriptorOutputDir,

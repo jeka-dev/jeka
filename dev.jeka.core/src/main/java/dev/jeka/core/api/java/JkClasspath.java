@@ -18,7 +18,7 @@ import java.util.zip.ZipFile;
  * Each file is called an <code>entry</code>.<br/>
  * Each entry is supposed to be either a <code>jar</code> file either a
  * <code>folder</code>.<br/>
- * Non existing files are accepted as valid <code>entry</code>, though they
+ * Non-existing files are accepted as valid <code>entry</code>, though they
  * won't contain any classes.
  *
  * @author Jerome Angibaud
@@ -75,7 +75,7 @@ public final class JkClasspath implements Iterable<Path> {
     // --------------------------------- Iterate -----------------------------
 
     /**
-     * Returns each entries making this <code>classpath</code>.
+     * Returns each entry making this <code>classpath</code>.
      */
     public List<Path> getEntries() {
         return entries;

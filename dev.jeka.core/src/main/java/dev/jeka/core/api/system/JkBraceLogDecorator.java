@@ -10,7 +10,7 @@ import static dev.jeka.core.api.system.JkIndentLogDecorator.LINE_SEPARATOR;
 import static dev.jeka.core.api.system.JkIndentLogDecorator.MARGIN_UNIT;
 
 /**
- * This decorator add curly brace around task to delimit task. It also add an indication of
+ * This decorator adds curly brace around task to delimit task. It also adds an indication of
  * processing task for each task.
  */
 public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {

@@ -239,7 +239,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
     }
 
     /**
-     * Same as {@link #exec(String...)} ()} but only effective if the specified condition is <code>true</code>.
+     * Same as {@link #exec(String...)} () but only effective if the specified condition is <code>true</code>.
      */
     public void execIf(boolean condition, String ... extraParams) {
         if (condition) {
@@ -275,7 +275,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         commands.addAll(Arrays.asList(extraParams));
         commands.removeAll(Collections.singleton(null));
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOuputStream();
+        final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
         if (logCommand) {
             String workingDirName = this.workingDir == null ? "" : this.workingDir.toString() + ">";
             JkLog.startTask("Start program : " + workingDirName + commands.toString());
@@ -301,8 +301,8 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        OutputStream consoleOutputStream = logOutput ? JkLog.getOutPrintStream() : JkUtilsIO.nopOuputStream();
-        OutputStream consoleErrStream = logOutput ? JkLog.getErrPrintStream() : JkUtilsIO.nopOuputStream();
+        OutputStream consoleOutputStream = logOutput ? JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
+        OutputStream consoleErrStream = logOutput ? JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
         final JkUtilsIO.JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
                 process.getInputStream(), consoleOutputStream, collectOs);
         final JkUtilsIO.JkStreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
@@ -317,18 +317,18 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         outputStreamGobbler.join();
         errorStreamGobbler.join();
         if (exitCode != 0 && failOnError) {
-            throw new IllegalStateException("Process " + String.join(" ",elipsed(commands))
+            throw new IllegalStateException("Process " + String.join(" ", ellipsed(commands))
                     + "\nhas returned with error code " + exitCode);
         }
         return exitCode;
     }
 
-    private static List<String> elipsed(List<String> options) {
+    private static List<String> ellipsed(List<String> options) {
         if (JkLog.isVerbose()) {
             return options;
         }
         return options.stream()
-                .map(option -> JkUtilsString.elipse(option, 120))
+                .map(option -> JkUtilsString.ellipse(option, 120))
                 .collect(Collectors.toList());
     }
 
@@ -391,7 +391,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
 
     /**
      * Returns <code>true</code> if this process must throw an execption if the underlying process returns
-     * code different than 0.
+     * code different from 0.
      */
     public boolean isFailOnError() {
         return failOnError;

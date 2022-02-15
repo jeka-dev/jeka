@@ -28,9 +28,9 @@ public final class JkVersionedModule {
     }
 
     /**
-     * Creates a an unspecified version of {@link JkVersionedModule}.
+     * Creates an unspecified version of {@link JkVersionedModule}.
      */
-    public static JkVersionedModule ofUnspecifiedVerion(JkModuleId moduleId) {
+    public static JkVersionedModule ofUnspecifiedVersion(JkModuleId moduleId) {
         return of(moduleId, JkVersion.UNSPECIFIED);
     }
 
@@ -52,7 +52,7 @@ public final class JkVersionedModule {
      * <code>groupId:name:version</code>.
      */
     public static JkVersionedModule ofRootDirName(String rootDirName) {
-        return ofUnspecifiedVerion(JkModuleId.of(rootDirName));
+        return ofUnspecifiedVersion(JkModuleId.of(rootDirName));
     }
 
     /**

@@ -25,11 +25,13 @@ public class Booter {
 
     private static final String MAIN_CLASS_NAME = "dev.jeka.core.tool.Main";
 
-    private final static String JK_USER_HOM_ENV_NAME = "JEKA_USER_HOME";
+    private static final String JK_USER_HOM_ENV_NAME = "JEKA_USER_HOME";
 
-    private final static String BIN_NAME = "dev.jeka.jeka-core.jar";
+    private static final String BIN_NAME = "dev.jeka.jeka-core.jar";
 
-    private final static String JK_CACHE_ENV_NAME = "JEKA_CACHE_DIR";
+    private static final String JK_CACHE_ENV_NAME = "JEKA_CACHE_DIR";
+
+    private static final String MAVEN_CENTRAL_URL = "https://repo.maven.apache.org/maven2/";
 
     public static void main(String[] args) throws Exception {
         final Path jekawDir = Paths.get(args[0]);
@@ -104,7 +106,7 @@ public class Booter {
     private static Path downloadDistribZip(String version) {
         String repo = repoOptions();
         if (repo == null) {
-            repo = "https://repo.maven.apache.org/maven2/";
+            repo = MAVEN_CENTRAL_URL;
         }
         final String urlString = repo + "dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";

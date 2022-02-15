@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 
 /**
- * Interface to be implemented by classes responsible of producing artifacts. <p>
+ * Interface to be implemented by classes responsible for producing artifacts. <p>
  */
 public interface JkArtifactProducer extends JkArtifactLocator {
 
@@ -22,7 +22,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
 
     /**
      * Produces the specified artifact file. This method is supposed to create it from scratch (should be working after
-     * a clean) but implementations can caches already processed phase result as compilation result or so.
+     * a clean) but implementations can cache already processed phase result as compilation result or so.
      */
     void makeArtifact(JkArtifactId jkArtifactId);
 
@@ -55,7 +55,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     }
 
     /**
-     * Produces specified artifact files. Only non existing files are created.
+     * Produces specified artifact files. Only non-existing files are created.
      */
     default void makeMissingArtifacts(JkArtifactId... artifactFileIds) {
         makeMissingArtifacts(Arrays.asList(artifactFileIds));

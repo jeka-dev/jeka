@@ -166,7 +166,7 @@ public final class JkPathTreeSet implements Closeable {
     }
 
     /**
-     * Returns a concatenation of {@link #getRelativeFiles()} ()} for all trees involved in this set.
+     * Returns a concatenation of {@link #getRelativeFiles()} () for all trees involved in this set.
      */
     public List<Path> getRelativeFiles() {
         final LinkedList<Path> result = new LinkedList<>();
@@ -271,7 +271,7 @@ public final class JkPathTreeSet implements Closeable {
     }
 
     /**
-     * Merges trees having same root by compining their respective matcher.
+     * Merges trees having same root by comparing their respective matcher.
      */
     public JkPathTreeSet mergeDuplicateRoots() {
         List<JkPathTree> result = new ArrayList<>();

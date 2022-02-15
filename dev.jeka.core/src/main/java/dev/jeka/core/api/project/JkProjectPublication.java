@@ -16,7 +16,7 @@ import java.util.function.UnaryOperator;
  * Responsible to publish artifacts on the repository. If the project does not publish anything, this part can be
  * ignored. Jeka can publish on Maven and Ivy repositories. <p>
  * From here, you can control what to publish and the transitive dependencies, depending on the repo system the project
- * is published. Note that a project can be be published on many repositories of different systems.
+ * is published. Note that a project can be published on many repositories of different systems.
  */
 public class JkProjectPublication {
 

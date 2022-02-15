@@ -96,7 +96,7 @@ public class JkProjectCompilation<T> {
         result.compileSpecSupplier = () -> result.computeTestCompileSpec(construction.getCompilation());
         result.layout
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
-                .setStandardOuputDirs(JkCompileLayout.Concern.TEST);
+                .setStandardOutputDirs(JkCompileLayout.Concern.TEST);
         return result;
     }
 

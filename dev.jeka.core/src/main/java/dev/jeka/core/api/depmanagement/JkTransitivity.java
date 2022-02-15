@@ -24,12 +24,12 @@ public class  JkTransitivity {
     public static final JkTransitivity NONE = new JkTransitivity("NONE");
 
     /**
-     * Dependency will be fetch along transitive dependencies declared as 'compile'
+     * Dependency will be fetched along transitive dependencies declared as 'compile'
      */
     public static final JkTransitivity COMPILE = new JkTransitivity("COMPILE");
 
     /**
-     * Dependency will be fetch along transitive dependencies declared as 'runtime'
+     * Dependency will be fetched along transitive dependencies declared as 'runtime'
      * or 'compile'
      */
     public static final JkTransitivity RUNTIME = new JkTransitivity("RUNTIME");

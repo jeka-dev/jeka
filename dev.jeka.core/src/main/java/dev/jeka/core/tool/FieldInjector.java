@@ -111,22 +111,9 @@ final class FieldInjector {
         }
     }
 
-    private static Object defaultValue(Class<?> type) {
-        if (type.equals(Boolean.class) || type.equals(boolean.class)) {
-            return true;
-        }
-        if (type.equals(String.class)) {
-            return "";
-        }
-        return null;
-    }
-
     @SuppressWarnings("unchecked")
     static Object parse(Class<?> type, String stringValue)
             throws IllegalArgumentException {
-        if (stringValue == null) {
-            return defaultValue(type);
-        }
         if (type.equals(String.class)) {
             return stringValue;
         }

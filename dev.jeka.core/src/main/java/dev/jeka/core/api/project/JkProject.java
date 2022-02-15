@@ -215,7 +215,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     }
 
     /**
-     * Short hand to build all missing artifacts for publication.
+     * Shorthand to build all missing artifacts for publication.
      */
     public void pack() {
         artifactProducer.makeAllMissingArtifacts();

@@ -27,7 +27,7 @@ public final class JkProperties {
     static {
         Map<String, String> props = new TreeMap<>();
         props.putAll(readGlobalProperties());
-        props.putAll(readProjectProperties(Paths.get("")));
+        props.putAll(readProjectPropertiesRecursive(Paths.get("")));
         props.putAll(Environment.commandLine.getSystemProperties());
         INSTANCE = new JkProperties(props);
         props.forEach((k,v) -> System.setProperty(k, v));
@@ -104,12 +104,18 @@ public final class JkProperties {
         return Collections.emptyMap();
     }
 
-    private static Map<String, String> readProjectProperties(Path projectBaseDir) {
+    private static Map<String, String> readProjectPropertiesRecursive(Path projectBaseDir) {
+        Path parentProject = projectBaseDir.toAbsolutePath().normalize().getParent();
+        Map<String, String> result = new HashMap<>();
+        if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.JEKA_DIR))
+                & Files.isDirectory(parentProject.resolve(JkConstants.JEKA_DIR))) {
+            result.putAll(readProjectPropertiesRecursive(parentProject));
+        }
         Path presetCommandsFile = projectBaseDir.resolve("jeka/" + PROJECT_PROPERTY_FILE_NAME);
         if (Files.exists(presetCommandsFile)) {
-            return JkUtilsFile.readPropertyFileAsMap(presetCommandsFile);
+            result.putAll(JkUtilsFile.readPropertyFileAsMap(presetCommandsFile));
         }
-        return Collections.emptyMap();
+        return result;
     }
 
 }

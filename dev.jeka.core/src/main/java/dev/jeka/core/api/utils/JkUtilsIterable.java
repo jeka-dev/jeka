@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 public final class JkUtilsIterable {
 
     /**
-     * Returns a list form the the specified {@link Iterable}.
+     * Returns a list form the specified {@link Iterable}.
      * If the specified {@link Iterable} is yet a {@link List} than it
      * is returned as is, otherwise a brand new {@link List} is created.
      */
@@ -238,7 +238,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Concats two arrays
+     * Concatenates two arrays
      */
     public static <T> T[] concat(T[] a, T[] b) {
         final int aLen = a.length;

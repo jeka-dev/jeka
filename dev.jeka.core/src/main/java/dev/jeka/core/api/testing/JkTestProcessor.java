@@ -216,7 +216,7 @@ public final class JkTestProcessor<T> {
     }
 
     /**
-     * Non public API. Used by #launchInClassloader.
+     * Non-public API. Used by #launchInClassloader.
      */
     public static void main(String[] args) {
         Path argFile = Paths.get(args[0]);
@@ -289,7 +289,7 @@ public final class JkTestProcessor<T> {
         }
 
         /**
-         * Lets to setup the Junit-platform native {@link LauncherConfig} used to build
+         * Sets up the Junit-platform native {@link LauncherConfig} used to build
          * the {@link org.junit.platform.launcher.Launcher}.
          * @param launcherConfigurer a function that takes the default {@link LauncherConfig} as argument
          *                          and returns the config to use.

@@ -28,7 +28,7 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
- * Responsible to produce jar files. It  compilation and unit testing.
+ * Responsible to produce jar files. It performs compilation and unit testing.
  * Compilation and tests can be run independently without creating jars.
  * <p>
  * Java Project Jar Production has common characteristics :
@@ -217,7 +217,7 @@ public class JkProjectConstruction {
     /**
      * Specify the dependencies to add or remove from the production compilation dependencies to
      * get the runtime dependencies.
-     * @param modifier An function that define the runtime dependencies from the compilation ones.
+     * @param modifier A function that define the runtime dependencies from the compilation ones.
      */
     public JkProjectConstruction configureRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
         this.dependencySetModifier = modifier;

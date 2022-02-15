@@ -457,15 +457,15 @@ public final class JkUtilsReflect {
         final boolean staticMethod = target == null;
         final Class<?> effectiveClass = clazz == null ? target.getClass() : clazz;
         final String className = effectiveClass.getName();
-        final Set<Method> canditates = new HashSet<>(Arrays.asList(effectiveClass
+        final Set<Method> candidates = new HashSet<>(Arrays.asList(effectiveClass
                 .getMethods()));
-        canditates.addAll(Arrays.asList(effectiveClass.getDeclaredMethods()));
+        candidates.addAll(Arrays.asList(effectiveClass.getDeclaredMethods()));
         final Class<?>[] types = new Class<?>[args.length];
         for (int i = 0; i < args.length; i++) {
             final Object arg = args[i];
             types[i] = arg == null ? null : arg.getClass();
         }
-        final Set<Method> result = findMethodsCompatibleWith(staticMethod, canditates, methodName,
+        final Set<Method> result = findMethodsCompatibleWith(staticMethod, candidates, methodName,
                 types);
         if (result.isEmpty()) {
             throw new IllegalArgumentException("No " + (staticMethod ? "static" : "instance")

@@ -205,7 +205,7 @@ public class JkResolvedDependencyNode {
     }
 
     /**
-     * Returns all nodes descendant of this one, deep first.
+     * Returns all descendant nodes of this one, deep first.
      */
     public List<JkResolvedDependencyNode> toFlattenList() {
         final List<JkResolvedDependencyNode> result = new LinkedList<>();
@@ -470,7 +470,7 @@ public class JkResolvedDependencyNode {
             return new JkFileNodeInfo(dependency.getFiles() ,configurations, null);
         }
 
-        // for serialization we need to use File class instead of Path
+        // for serialization, we need to use File class instead of Path
         private final List<File> files;
 
         private final Set<String> configurations;

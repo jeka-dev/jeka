@@ -142,7 +142,7 @@ public final class JkUrlClassLoader {
      * Loads all class having a relative path matching the supplied
      * glob patterns. For example, if you want to load all class
      * belonging to <code>my.packAllArtifacts</code> or its sub package, then you have to
-     * supply a filter with an include pattern as
+     * supply a filter with an including pattern as
      * <code>my/packAllArtifacts/&#42;&#42;/&#42;.class</code>. Note that ending with
      * <code>.class</code> is important.
      */
@@ -160,7 +160,7 @@ public final class JkUrlClassLoader {
     /**
      * Loads all class having a relative path matching the supplied ANT pattern.
      * For example, if you want to load all class belonging to
-     * <code>my.packAllArtifacts</code> or its sub package, then you have to supply a the
+     * <code>my.packAllArtifacts</code> or its sub package, then you have to supply the
      * following pattern <code>my/packAllArtifacts/&#42;&#42;/&#42;</code>.
      */
     public Set<Class<?>> loadClasses(String... globPatterns) {

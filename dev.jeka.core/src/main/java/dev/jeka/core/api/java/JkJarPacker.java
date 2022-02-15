@@ -61,7 +61,7 @@ public final class JkJarPacker {
 
     /**
      * Creates a fat jar file according specified parameters. Fat jar file including the content of other jars.
-     * The result jar does not contains other jars as zip entry but content of the other jars is merged with the content
+     * The result jar does not contain other jars as zip entry but content of the other jars is merged with the content
      * of original jar.
      * @param resultFile Result file
      * @param otherJars content of other jar to merge with the original jar

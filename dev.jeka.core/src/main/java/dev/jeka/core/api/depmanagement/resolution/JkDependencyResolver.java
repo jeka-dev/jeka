@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.api.utils.JkUtilsString.plurialize;
+import static dev.jeka.core.api.utils.JkUtilsString.pluralize;
 
 /**
  * Class to resolve dependencies to files or dependency tree. Resolution is made upon binary repositories.
@@ -41,7 +41,7 @@ public final class JkDependencyResolver<T> {
     }
 
     /**
-     * Creates a empty (without repo) dependency resolver fetching module dependencies.
+     * Creates an empty (without repo) dependency resolver fetching module dependencies.
      */
     public static JkDependencyResolver<Void> of() {
         return ofParent(null);
@@ -174,7 +174,7 @@ public final class JkDependencyResolver<T> {
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
         int moduleCount = resolveResult.getInvolvedModules().size();
         int fileCount = resolveResult.getFiles().getEntries().size();
-        JkLog.info(plurialize(moduleCount, "module") + " -> " + plurialize(fileCount, "file"));
+        JkLog.info(pluralize(moduleCount, "module") + " -> " + pluralize(fileCount, "file"));
         if (JkLog.isVerbose()) {
             resolveResult.getFiles().forEach(path -> JkLog.info(path.toString()));
         }

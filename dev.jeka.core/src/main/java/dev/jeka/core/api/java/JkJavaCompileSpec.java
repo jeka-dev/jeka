@@ -109,7 +109,7 @@ public final class JkJavaCompileSpec<T> {
 
     /**
      * Sets the target Java version for compiled classes. Normally it is the same as the
-     * platform compileRunner shipped with but you can set it explicitly. Also, when set explicitly
+     * platform compileRunner shipped with, but you can set it explicitly. Also, when set explicitly
      * {@link JkJavaCompiler} can choose to use the appropriate compileRunner to compile to the
      * specified target.
      */

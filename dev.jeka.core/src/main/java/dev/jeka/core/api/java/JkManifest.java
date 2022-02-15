@@ -214,7 +214,7 @@ public final class JkManifest<T> {
     }
 
     /**
-     * Adds attributes of the specified manifest to this one. This manifest attributes are overrode by those of the specified
+     * Adds attributes of the specified manifest to this one. This manifest attributes are overridden by those of the specified
      * one if same attribute exist.
      */
     public JkManifest<T> merge(Manifest other) {

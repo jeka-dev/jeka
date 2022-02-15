@@ -67,7 +67,7 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
         if (engineBehavior.getLegacyReportDir() != null) {
             LegacyXmlReportGeneratingListener reportGeneratingListener = new LegacyXmlReportGeneratingListener(
                     engineBehavior.getLegacyReportDir(),
-                    new PrintWriter(JkUtilsIO.nopOuputStream()));
+                    new PrintWriter(JkUtilsIO.nopOutputStream()));
             listeners.add(reportGeneratingListener);
         }
         listeners.add(new RestoreJkLogListener());

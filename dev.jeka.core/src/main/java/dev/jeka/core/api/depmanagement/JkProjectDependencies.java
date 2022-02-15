@@ -28,7 +28,7 @@ public class JkProjectDependencies {
             RUNTIME, TEST);
 
 
-    // All necessary dependencies for the compile
+    // All necessary dependencies for compiling
     private final JkDependencySet compileDeps;
 
     // All necessary dependencies for the runtime

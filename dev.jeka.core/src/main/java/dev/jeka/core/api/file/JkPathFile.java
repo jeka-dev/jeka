@@ -116,7 +116,7 @@ public final class JkPathFile {
     }
 
     /**
-     * Copies the content of the specified url into this files, replacing the previous content.
+     * Copies the content of the specified url into this file, replacing the previous content.
      */
     public JkPathFile fetchContentFrom(URL url) {
         createIfNotExist();
@@ -146,7 +146,7 @@ public final class JkPathFile {
     }
 
     /**
-     * Returns a ASCII string representation of the checksum of this file for the specified algorithm.
+     * Returns an ASCII string representation of the checksum of this file for the specified algorithm.
      * @param algorithm Hashing algorithm as MD5, SHA-2, ...
      */
     public String getChecksum(String algorithm) {
@@ -179,7 +179,7 @@ public final class JkPathFile {
     }
 
     /**
-     * Produces a files, in the same directory, that contains the checksum of this file.
+     * Produces checksum of this file. Checksum files are created in the same directory as this file.
      */
     public JkPathFile checksum(String ... algorithms) {
         assertExist();
@@ -192,7 +192,7 @@ public final class JkPathFile {
     }
 
     /**
-     * Adds execute permition on this files. No effect on windows system.
+     * Adds execute permissions on this file. No effect on Windows system.
      */
     public JkPathFile setPosixExecPermissions(boolean owner, boolean group, boolean other) {
         assertExist();

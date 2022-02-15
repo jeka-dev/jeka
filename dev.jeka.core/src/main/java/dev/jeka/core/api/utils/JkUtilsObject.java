@@ -24,7 +24,7 @@ public final class JkUtilsObject {
 
     /**
      * Returns <code>true</true> if both object are <code>null</code> or the two
-     * obects are equals. Returns <code>false</code> otherwise.
+     * objects are equals. Returns <code>false</code> otherwise.
      */
     public static boolean equals(Object object1, Object object2) {
         if (object1 == null) {

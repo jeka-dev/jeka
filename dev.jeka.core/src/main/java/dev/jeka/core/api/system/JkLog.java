@@ -81,9 +81,9 @@ public final class JkLog implements Serializable {
     }
 
     /**
-     * By default, events are not consumed, meaning nothing appends when {@link #info(String, Object...)} (String)},
+     * By default, events are not consumed, meaning nothing appends when {@link #info(String, Object...)} (String),
      * {@link #error(String)}, {@link #warn(String)} or {@link #trace(String)} are invoked.
-     * Therefore, users have to set explicitly a consumer using this method or {@link #setDecorator(Style)} ()}.
+     * Therefore, users have to set explicitly a consumer using this method or {@link #setDecorator(Style)} ().
      */
     public static void setDecorator(JkLogDecorator newDecorator) {
         newDecorator.doInit(INITIAL_OUT, INITIAL_ERR);
@@ -191,7 +191,7 @@ public final class JkLog implements Serializable {
     }
 
     /**
-     * Logs a end the current task with a specific message. The specified message is formatted by String#format passing
+     * Logs the end of the current task with a specific message. The specified message is formatted by String#format passing
      * the duration time in milliseconds as argument. So if your message contains '%d', it will be replaced by
      * the duration taken to complete the current task.
      */
@@ -231,7 +231,7 @@ public final class JkLog implements Serializable {
             return;
         }
 
-        // This is necessary for avoing class cast exception when run in other classloader (unit tests)
+        // This is necessary for avoiding class cast exception when run in other classloader (unit tests)
         if (event.getClass().getClassLoader() != decorator.getClass().getClassLoader()) {  // survive to classloader change
             final Object evt = JkUtilsIO.cloneBySerialization(event, decorator.getClass().getClassLoader());
             try {

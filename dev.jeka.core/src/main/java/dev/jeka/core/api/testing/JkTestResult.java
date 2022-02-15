@@ -80,16 +80,16 @@ public final class JkTestResult implements Serializable {
 
         private final long aborted;
 
-        private final long succeded;
+        private final long succeeded;
 
         private final long failed;
 
-        private JkCount(long found, long started, long skipped, long aborted, long succeded, long failed) {
+        private JkCount(long found, long started, long skipped, long aborted, long succeeded, long failed) {
             this.found = found;
             this.started = started;
             this.skipped = skipped;
             this.aborted = aborted;
-            this.succeded = succeded;
+            this.succeeded = succeeded;
             this.failed = failed;
         }
 
@@ -117,8 +117,8 @@ public final class JkTestResult implements Serializable {
             return aborted;
         }
 
-        public long getSucceded() {
-            return succeded;
+        public long getSucceeded() {
+            return succeeded;
         }
 
         public long getFailed() {
@@ -132,7 +132,7 @@ public final class JkTestResult implements Serializable {
                     ", started=" + started +
                     ", skipped=" + skipped +
                     ", aborted=" + aborted +
-                    ", succeded=" + succeded +
+                    ", succeded=" + succeeded +
                     ", failed=" + failed +
                     '}';
         }
@@ -170,12 +170,12 @@ public final class JkTestResult implements Serializable {
 
         private final String throwableMessage;
 
-        private final StackTraceElement[] tacktraces;
+        private final StackTraceElement[] stackTraces;
 
-        private JkFailure(JkTestIdentifier testId, String throwableMessage, StackTraceElement[] tacktraces) {
+        private JkFailure(JkTestIdentifier testId, String throwableMessage, StackTraceElement[] stacktraces) {
             this.testId = testId;
             this.throwableMessage = throwableMessage;
-            this.tacktraces = tacktraces;
+            this.stackTraces = stacktraces;
         }
 
         public static JkFailure of(JkTestIdentifier testId, String throwableMessage, StackTraceElement[] stacktraces) {
@@ -190,8 +190,8 @@ public final class JkTestResult implements Serializable {
             return throwableMessage;
         }
 
-        public StackTraceElement[] getTacktraces() {
-            return tacktraces;
+        public StackTraceElement[] getStackTraces() {
+            return stackTraces;
         }
 
         @Override
@@ -200,14 +200,14 @@ public final class JkTestResult implements Serializable {
             return "{" +
                     "testId=" + testId +
                     ", throwableMessage='" + throwableMessage + '\'' +
-                    ", tacktraces=" + Arrays.toString(tacktraces) +
+                    ", stacktraces=" + Arrays.toString(stackTraces) +
                     '}';
         }
 
         void print(PrintStream printStream) {
             printStream.print(testId + System.lineSeparator() + "-> ");
             printStream.println(throwableMessage);
-            for (final StackTraceElement element : getTacktraces()) {
+            for (final StackTraceElement element : getStackTraces()) {
                 printStream.println("  at " + element);
             }
         }

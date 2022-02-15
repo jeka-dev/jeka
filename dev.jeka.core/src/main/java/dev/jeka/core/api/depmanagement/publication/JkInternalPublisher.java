@@ -20,7 +20,7 @@ public interface JkInternalPublisher {
     String FACTORY_CLASS_NAME = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalPublisherFactory";
 
     /**
-     * Publishes the specified module to the repository mentioned in the publicatioin.
+     * Publishes the specified module to the repository mentioned in the publication.
      *
      * @param versionedModule
      *            The module/version to publish.

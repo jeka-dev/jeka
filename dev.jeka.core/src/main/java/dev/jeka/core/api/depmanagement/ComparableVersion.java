@@ -650,46 +650,4 @@ class ComparableVersion implements Comparable<ComparableVersion> {
         return Comparator.comparing(ComparableVersion::new);
     }
 
-    // CHECKSTYLE_OFF: LineLength
-
-    /**
-     * Main to test version parsing and comparison.
-     * <p>
-     * To check how "1.2.7" compares to "1.2-SNAPSHOT", for example, you can issue
-     * <pre>java -jar ${maven.repo.local}/org/apache/maven/maven-artifact/${maven.version}/maven-artifact-${maven.version}.jar "1.2.7" "1.2-SNAPSHOT"</pre>
-     * command to command line. Result of given command will be something like this:
-     * <pre>
-     * Display parameters as parsed by Maven (in canonical form) and comparison result:
-     * 1. 1.2.7 == 1.2.7
-     *    1.2.7 &gt; 1.2-SNAPSHOT
-     * 2. 1.2-SNAPSHOT == 1.2-snapshot
-     * </pre>
-     *
-     * @param args the version strings to parse and compare. You can pass arbitrary number of version strings and always
-     *             two adjacent will be compared
-     */
-    // CHECKSTYLE_ON: LineLength
-    public static void main(String... args) {
-        System.out.println("Display parameters as parsed by Maven (in canonical form and as a list of tokens) and"
-                + " comparison result:");
-        if (args.length == 0) {
-            return;
-        }
-
-        ComparableVersion prev = null;
-        int i = 1;
-        for (String version : args) {
-            ComparableVersion c = new ComparableVersion(version);
-
-            if (prev != null) {
-                int compare = prev.compareTo(c);
-                System.out.println("   " + prev.toString() + ' '
-                        + ((compare == 0) ? "==" : ((compare < 0) ? "<" : ">")) + ' ' + version);
-            }
-
-            System.out.println((i++) + ". " + version + " -> " + c.getCanonical() + "   " + c.items.toListString());
-
-            prev = c;
-        }
-    }
 }

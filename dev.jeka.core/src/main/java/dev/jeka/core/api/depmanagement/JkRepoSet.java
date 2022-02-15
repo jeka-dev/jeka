@@ -124,14 +124,14 @@ public final class JkRepoSet {
     }
 
     /**
-     * Short hand for {@link #get(JkModuleDependency)}
+     * Shorthand for {@link #get(JkModuleDependency)}
      */
     public Path get(JkModuleId moduleId, String version) {
         return get(JkModuleDependency.of(moduleId, version));
     }
 
     /**
-     * Short hand for {@link #get(JkModuleDependency)}
+     * Shorthand for {@link #get(JkModuleDependency)}
      */
     public Path get(String moduleGroupVersion) {
         return get(JkModuleDependency.of(moduleGroupVersion));

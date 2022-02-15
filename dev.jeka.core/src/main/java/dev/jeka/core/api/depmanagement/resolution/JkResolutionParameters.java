@@ -25,7 +25,7 @@ public final class JkResolutionParameters<T> {
         STRICT,
 
         /**
-         * Select the latest version compatible with version constraints. It act as 'strict' if
+         * Select the latest version compatible with version constraints. It acts as 'strict' if
          * no version are not expressed using constraints.
          */
         LATEST_COMPATIBLE,
@@ -97,8 +97,8 @@ public final class JkResolutionParameters<T> {
     }
 
     /**
-     * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise
-     * just log a warn message. <code>false</code> by default.
+     * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise,
+     * just logs a warning message. <code>false</code> by default.
      */
     public JkResolutionParameters<T> setFailOnDependencyResolutionError(boolean failOnDependencyResolutionError) {
         this.failOnDependencyResolutionError = failOnDependencyResolutionError;

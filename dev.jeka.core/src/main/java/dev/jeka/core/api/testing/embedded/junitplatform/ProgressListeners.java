@@ -198,7 +198,7 @@ class ProgressListeners {
                     JkUtilsString.padStart(Long.toString(testCount), digitLenght, '0'),
                     bar(),
                     testIdentifier.getParentId().orElse("") + "."
-                            + JkUtilsString.elipse(testIdentifier.getDisplayName(), 50));
+                            + JkUtilsString.ellipse(testIdentifier.getDisplayName(), 50));
         }
 
         private String bar() {

@@ -87,7 +87,7 @@ public final class JkVersion implements Comparable<JkVersion> {
         if (value.endsWith("-SNAPSHOT")) {
             return true;
         }
-        return this.isDynamicAndResovable();
+        return this.isDynamicAndResolvable();
     }
 
     /**
@@ -103,7 +103,7 @@ public final class JkVersion implements Comparable<JkVersion> {
      * Returns <code>false</code> if the version is static or snapshot (as
      * 1.4.0, 3.1-SNAPSHOT) A snapshot is not considered as 'resolvable'.
      */
-    public boolean isDynamicAndResovable() {
+    public boolean isDynamicAndResolvable() {
         if ("+".equals(value)) {
             return true;
         }
@@ -130,7 +130,7 @@ public final class JkVersion implements Comparable<JkVersion> {
     }
 
     /**
-     * Returns true when {@link #getBlock(int)} won't throws an {@link IllegalArgumentException}.
+     * Returns true when {@link #getBlock(int)} won't throw an {@link IllegalArgumentException}.
      */
     public boolean hasBlockAt(int index) {
         String[] items = this.value.split("\\.");

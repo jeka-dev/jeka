@@ -81,7 +81,7 @@ public final class JkTestSelection<T> implements Serializable {
     }
 
     /**
-     * Adds specified dir to the test class root directories. It can be an- collection of path or
+     * Adds specified dir to the test class root directories. It can be a collection of path or
      * a single path (as Path implements Iterable<Path>
      */
     public JkTestSelection<T> addTestClassRoots(Iterable<Path> paths) {

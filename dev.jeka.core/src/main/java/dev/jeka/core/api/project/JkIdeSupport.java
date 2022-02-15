@@ -34,7 +34,7 @@ public class JkIdeSupport {
         this.prodLayout = JkCompileLayout.ofParent(this).setBaseDir(baseDir);
         this.testLayout = JkCompileLayout.ofParent(this)
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
-                .setStandardOuputDirs(JkCompileLayout.Concern.TEST)
+                .setStandardOutputDirs(JkCompileLayout.Concern.TEST)
                 .setBaseDir(baseDir);
         this.dependencies = JkQualifiedDependencySet.of();
         this.sourceVersion = JkJavaVersion.V8;
