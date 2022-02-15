@@ -133,8 +133,9 @@ public final class JkImlGenerator {
                     .getDependencyTree();
             JkLog.trace("Dependencies resolved");
             iml.getComponent().getOrderEntries().addAll(projectOrderEntries(tree));  // too slow
-            Path generatedSources = ideSupport.getProdLayout().resolveGeneratedSourceDir();
-            iml.getComponent().getContent().addSourceFolder(generatedSources, false, null);
+            for (Path path : ideSupport.getGeneratedSourceDirs()) {
+                iml.getComponent().getContent().addSourceFolder(path, false, null);
+            }
         }
         iml.getComponent().getOrderEntries().addAll(defOrderEntries());
         imlConfigurer.accept(iml);

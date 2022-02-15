@@ -9,6 +9,7 @@ import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.system.JkLog;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Handles project compilation step. Users can configure inner phases by chaining runnables.
@@ -53,6 +55,8 @@ public class JkProjectCompilation<T> {
     private Supplier<JkDependencySet> dependencyBootSupplier = () -> JkDependencySet.of();
 
     private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
+
+    private List<JkSourceGenerator> sourceGenerators = new LinkedList<>();
 
     private boolean done;
 
@@ -109,11 +113,21 @@ public class JkProjectCompilation<T> {
         return layout;
     }
 
+    public void generateSources() {
+        for (JkSourceGenerator sourceGenerator : sourceGenerators) {
+            JkLog.startTask("Generate sources with " + sourceGenerator);
+            Path path = layout.resolveGeneratedSourceDir().resolve(sourceGenerator.getDirName());
+            sourceGenerator.generate(path);
+            JkLog.endTask();
+        }
+    }
+
     /**
      * Performs entire compilation phase.
      */
     public void run() {
         JkLog.startTask("Run whole compilation process for " + purpose);
+        generateSources();
         preCompileActions.run();
         compileActions.run();
         postCompileActions.run();
@@ -183,6 +197,18 @@ public class JkProjectCompilation<T> {
         return dependenciesModifier.apply(dependencyBootSupplier.get());
     }
 
+    public JkProjectCompilation<T> addSourceGenerator(JkSourceGenerator sourceGenerator) {
+        this.sourceGenerators.add(sourceGenerator);
+        return this;
+    }
+
+    public List<Path> getGeneratedSourceDirs() {
+        return sourceGenerators.stream()
+                .map(sourceGenerator ->
+                        layout.resolveGeneratedSourceDir().resolve(sourceGenerator.getDirName()))
+                .collect(Collectors.toList());
+    }
+
     private void processResources() {
         this.getResourceProcessor().generate(layout.resolveResources(), layout.resolveClassDir());
     }
@@ -199,7 +225,7 @@ public class JkProjectCompilation<T> {
             .setSourceAndTargetVersion(construction.getJvmTargetVersion())
             .setEncoding(construction.getSourceEncoding())
             .setClasspath(resolveDependencies().getFiles())
-            .setSources(layout.resolveSources().and(JkPathTree.of(layout.resolveGeneratedSourceDir())))
+            .setSources(layout.resolveSources().and(getGeneratedSourceDirs().toArray(new Path[0])))
             .addOptions(extraJavaCompilerOptions)
             .setOutputDir(layout.resolveClassDir());
     }
@@ -211,7 +237,7 @@ public class JkProjectCompilation<T> {
                 .setEncoding(construction.getSourceEncoding())
                 .setClasspath(construction.getDependencyResolver().resolve(dependencies).getFiles()
                             .andPrepend(prodStep.layout.resolveClassDir()))
-                .setSources(layout.resolveSources().and(layout.resolveGeneratedSourceDir()))
+                .setSources(layout.resolveSources().and(getGeneratedSourceDirs().toArray(new Path[0])))
                 .addOptions(extraJavaCompilerOptions)
                 .setOutputDir(layout.resolveClassDir());
     }

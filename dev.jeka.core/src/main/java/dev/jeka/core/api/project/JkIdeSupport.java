@@ -8,6 +8,8 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkJavaVersion;
 
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Minimal information necessary to generate metadata project file for IDE.
@@ -29,6 +31,8 @@ public class JkIdeSupport {
     private JkJavaVersion sourceVersion;
 
     private JkDependencyResolver dependencyResolver;
+
+    private List<Path> generatedSourceDirs = new LinkedList<>();
 
     private JkIdeSupport(Path baseDir) {
         this.prodLayout = JkCompileLayout.ofParent(this).setBaseDir(baseDir);
@@ -65,6 +69,10 @@ public class JkIdeSupport {
         return dependencyResolver;
     }
 
+    public List<Path> getGeneratedSourceDirs() {
+        return generatedSourceDirs;
+    }
+
     public JkIdeSupport setProdLayout(JkCompileLayout prodLayout) {
         this.prodLayout = prodLayout;
         return this;
@@ -99,4 +107,8 @@ public class JkIdeSupport {
         return this;
     }
 
+    public JkIdeSupport setGeneratedSourceDirs(List<Path> generatedSourceDirs) {
+        this.generatedSourceDirs = generatedSourceDirs;
+        return this;
+    }
 }

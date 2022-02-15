@@ -15,6 +15,7 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,9 +24,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * Responsible to produce jar files. It performs compilation and unit testing.
@@ -71,7 +76,7 @@ public class JkProjectConstruction {
     private UnaryOperator<JkDependencySet> dependencySetModifier = x -> x;
 
     private boolean textAndLocalDependenciesAdded;
-    
+
     /**
      * For Parent chaining
      */

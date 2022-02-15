@@ -31,7 +31,9 @@ public class Booter {
 
     private static final String JK_CACHE_ENV_NAME = "JEKA_CACHE_DIR";
 
-    private static final String MAVEN_CENTRAL_URL = "https://repo.maven.apache.org/maven2/";
+    public static final String MAVEN_CENTRAL_URL = "https://repo.maven.apache.org/maven2";
+
+    public static final String GITHUB_PACKAGE_URL = "https://maven.pkg.github.com/jeka-dev/jeka";
 
     public static void main(String[] args) throws Exception {
         final Path jekawDir = Paths.get(args[0]);

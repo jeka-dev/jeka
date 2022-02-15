@@ -181,6 +181,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
             .setSourceVersion(construction.getJvmTargetVersion())
             .setProdLayout(construction.getCompilation().getLayout())
             .setTestLayout(construction.getTesting().getCompilation().getLayout())
+            .setGeneratedSourceDirs(construction.getCompilation().getGeneratedSourceDirs())
             .setDependencies(qualifiedDependencies)
             .setDependencyResolver(construction.getDependencyResolver());
         return ideSupportModifier.apply(ideSupport);

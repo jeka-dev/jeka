@@ -282,6 +282,11 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkLog.info("\nExecute 'java#showDependencies' to display details on dependencies.");
     }
 
+    @JkDoc("Generate sources")
+    public void generateSources() {
+        getProject().getConstruction().getCompilation().generateSources();
+    }
+
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
         JkLog.info("Publish " + getProject() + " ...");

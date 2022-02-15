@@ -88,17 +88,17 @@ class Environment {
         private final Set<String> names = new HashSet<>();
 
         StandardOptions (Map<String, String> map) {
-            this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "lv");
-            this.logIvyVerbose = valueOf(Boolean.class, map, false, "log.ivy.verbose", "liv");
-            this.logNoAnimation = valueOf(Boolean.class, map, false, "log.no.animation", "lna");
-            this.logBanner = valueOf(Boolean.class, map, false,"log.banner", "lb");
-            this.logSetup = valueOf(Boolean.class, map, false,"log.setup", "lsu");
-            this.logStackTrace = valueOf(Boolean.class, map,false, "log.stacktrace", "lst");
+            this.logVerbose = valueOf(boolean.class, map, false, "Log.verbose", "lv");
+            this.logIvyVerbose = valueOf(boolean.class, map, false, "log.ivy.verbose", "liv");
+            this.logNoAnimation = valueOf(boolean.class, map, false, "log.no.animation", "lna");
+            this.logBanner = valueOf(boolean.class, map, false,"log.banner", "lb");
+            this.logSetup = valueOf(boolean.class, map, false,"log.setup", "lsu");
+            this.logStackTrace = valueOf(boolean.class, map,false, "log.stacktrace", "lst");
             this.logRuntimeInformation = valueOf(String.class, map, null, "log.runtime.info", "lri");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
             this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");
-            this.ignoreCompileFail = valueOf(Boolean.class, map, false, "def.compile.ignore-failure", "dci");
-            this.workClean = valueOf(Boolean.class, map, false, "work.clean", "wc");
+            this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
+            this.workClean = valueOf(boolean.class, map, false, "work.clean", "wc");
         }
 
         Set<String> names() {
@@ -124,6 +124,9 @@ class Environment {
                 this.names.add(name);
                 if (map.containsKey(name)) {
                     String stringValue = map.get(name);
+                    if (type.equals(boolean.class) && stringValue == null) {
+                        return (T) Boolean.TRUE;
+                    }
                     try {
                         return (T) FieldInjector.parse(type, stringValue);
                     } catch (IllegalArgumentException e) {
