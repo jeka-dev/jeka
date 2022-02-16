@@ -122,10 +122,14 @@ public final class JkImlGenerator {
         if (ideSupport != null) {
             ideSupport.getProdLayout().resolveSources().getRootDirsOrZipFiles()
                     .forEach(path -> iml.getComponent().getContent().addSourceFolder(path, false, null));
-            ideSupport.getProdLayout().resolveResources().getRootDirsOrZipFiles()
+            ideSupport.getProdLayout().resolveResources().getRootDirsOrZipFiles().stream()
+                    .filter(path ->
+                            !ideSupport.getProdLayout().resolveResources().getRootDirsOrZipFiles().contains(path))
                     .forEach(path -> iml.getComponent().getContent().addSourceFolder(path, false, "java-resource"));
-            ideSupport.getTestLayout().resolveSources().getRootDirsOrZipFiles().
-                    forEach(path -> iml.getComponent().getContent().addSourceFolder(path, true, null));
+            ideSupport.getTestLayout().resolveSources().getRootDirsOrZipFiles().stream()
+                    .filter(path ->
+                            !ideSupport.getTestLayout().resolveResources().getRootDirsOrZipFiles().contains(path))
+                    .forEach(path -> iml.getComponent().getContent().addSourceFolder(path, true, "java-resource"));
             JkDependencyResolver depResolver = ideSupport.getDependencyResolver();
             JkResolvedDependencyNode tree = depResolver.resolve(
                     ideSupport.getDependencies(),
