@@ -123,6 +123,7 @@ It's quite easy to discover what Jeka does behind the scene and troubleshot issu
 # Get Jeka
 
 * Snapshots : https://oss.sonatype.org/content/repositories/snapshots/dev/jeka/jeka-core/
+* Milestones and Release Candidates : https://github.com/orgs/jeka-dev/packages?repo_name=jeka
 * Releases : https://repo1.maven.org/maven2/dev/jeka/jeka-core/
 
 The distribution is the file named jeka-core-x.x.x-distrib.zip. 
