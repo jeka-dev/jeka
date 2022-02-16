@@ -5,9 +5,11 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -111,16 +113,10 @@ public class Booter {
 
     private static Path downloadDistribZip(String baseUrl, String version) {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
-        final String urlString = base + "dev/jeka/jeka-core/"
+        final String downloadUrl = base + "dev/jeka/jeka-core/"
                 + version + "/jeka-core-" + version + "-distrib.zip";
-        System.out.println("Downloading " + urlString + " ...");
-        final URL url;
-        try {
-            url = new URL(urlString);
-        } catch (MalformedURLException e) {
-            throw new UncheckedIOException(e);
-        }
-        try (ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream())) {
+        System.out.println("Downloading " + downloadUrl + " ...");
+        try (ReadableByteChannel readableByteChannel = Channels.newChannel(openStream(downloadUrl))) {
             final Path temp = Files.createTempFile("jeka-wrapper", ".zip");
             try (FileOutputStream fileOutputStream = new FileOutputStream(temp.toFile())) {
                 final FileChannel fileChannel = fileOutputStream.getChannel();
@@ -128,7 +124,7 @@ public class Booter {
             }
             return temp;
         } catch (final FileNotFoundException e) {
-            System.out.println(urlString + " not found. Please check that version " + version + " exists in repo " + baseUrl);
+            System.out.println(downloadUrl + " not found. Please check that version " + version + " exists in repo " + baseUrl);
             System.out.println("Jeka version to download is defined in ./jeka/wrapper/wrapper.properties file.");
             System.exit(1);
             return null;
@@ -281,6 +277,30 @@ public class Booter {
                 .map(arg -> arg.split("="))
                 .forEach(items -> props.put(items[0], items[1]));
         return props;
+    }
+
+    private static InputStream openStream(String downloadUrl) throws IOException {
+        final URL url = new URL(downloadUrl);
+        URLConnection uc = url.openConnection();
+        String authorizationHeader = authorisationHeader(downloadUrl);
+        if (authorizationHeader != null) {
+            uc.setRequestProperty ("Authorization", authorizationHeader);
+        }
+        return uc.getInputStream();
+    }
+
+    private static String authorisationHeader(String url) {
+        if (url.startsWith(MAVEN_CENTRAL_URL)) {
+            return null;
+        }
+        String username = System.getenv("JEKA_WRAPPER_REPO_USERNAME");
+        String pwd = System.getenv("JEKA_WRAPPER_REPO_PWD");
+        if (username == null || pwd == null || username.equals("") || pwd.equals("")) {
+            return null;
+        }
+        String concat = username + ":" + pwd;
+        String encoded = Base64.getEncoder().encodeToString(concat.getBytes(StandardCharsets.UTF_8));
+        return "Basic " + encoded;
     }
 
 }

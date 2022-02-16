@@ -27,9 +27,6 @@ class MasterBuild extends JkBean {
     @JkInjectProperty("OSSRH_PWD")
     public String ossrhPwd;
 
-    @JkInjectProperty("GITHUB_TOKEN")
-    public String githubToken;
-
     public boolean runSamples = true;
 
     public boolean useJacoco = false;
@@ -140,7 +137,6 @@ class MasterBuild extends JkBean {
                 .getPublishConfig()
                     .setVersionFilter(jkVersion -> jkVersion.isDigitsOnly()).__;
         JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka")
-                .setCredentials("GITHUB_TOKEN", githubToken)
                 .getPublishConfig()
                     .setVersionFilter(jkVersion -> !jkVersion.isSnapshot())
                 .__;

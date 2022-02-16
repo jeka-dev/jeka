@@ -1,9 +1,11 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -86,15 +88,27 @@ public final class JkRepo {
     }
 
     /**
-     * Creates the Maven central repository.
+     * Creates the Maven central repository. If the github token is present in environment variable GITHUB_TOKEN,
+     * the credential is set up using this token .
      */
     public static JkRepo ofMavenCentral() {
         return of(MAVEN_CENTRAL_URL);
     }
 
     public static JkRepo ofGitHub(String owner, String repoName) {
-        return of("https://maven.pkg.github.com/" + owner + "/" + repoName)
-                .setCredentials(JkRepoCredentials.of(null, null, "GitHub Package Registry"))
+        String baseUrl = "https://maven.pkg.github.com/" + owner + "/" + repoName;
+        String username = null;
+        String pwd = null;
+        String githubToken = System.getenv("GITHUB_TOKEN");
+        if (!JkUtilsString.isBlank(githubToken)) {
+            JkLog.trace("Github token found, configure repo %s with associate credential", baseUrl);
+            username = "GITHUB_TOKEN";
+            pwd = githubToken;
+        } else {
+            JkLog.trace("No Github token found to make credential on repo %s.", baseUrl);
+        }
+        return of(baseUrl)
+                .setCredentials(JkRepoCredentials.of(username, pwd, "GitHub Package Registry"))
                 .getPublishConfig()
                     .setUniqueSnapshot(false)
                 .__;
