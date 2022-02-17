@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.api.depmanagement.JkRepoFromProperties.getDownloadRepo;
+import static dev.jeka.core.api.depmanagement.JkRepoFromProperties.getDownloadRepos;
 
 /**
  * Engine having responsibility of compile def classes, instantiate KBeans and run.<br/>
@@ -64,7 +64,8 @@ final class Engine {
                 .getDefaultParams()
                     .setFailOnDependencyResolutionError(true)
                 .__
-                .addRepos(getDownloadRepo(), JkRepo.ofLocal());
+                .addRepos(getDownloadRepos())
+                .addRepos(JkRepo.ofLocal());
     }
 
     /**

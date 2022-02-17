@@ -34,7 +34,7 @@ public class ScaffoldJkBean extends JkBean {
         this.scaffolder.setJekaClassCodeProvider(
                 () -> JkUtilsIO.read(ScaffoldJkBean.class.getResource("buildclass.snippet")));
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                .addRepos(JkRepoFromProperties.getDownloadRepo().toSet());
+                .addRepos(JkRepoFromProperties.getDownloadRepos());
         this.scaffolder.setDependencyResolver(dependencyResolver);
         configurators.accept(scaffolder);
         return scaffolder;

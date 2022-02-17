@@ -204,6 +204,15 @@ public final class JkRepo {
         return this;
     }
 
+    JkRepo mergeCredential(JkRepoCredentials credentials) {
+        if (this.credentials == null) {
+            this.credentials = credentials;
+            return this;
+        }
+        this.credentials = this.credentials.merge(credentials);
+        return this;
+    }
+
     /**
      * @see #setCredentials(JkRepoCredentials)
      */
@@ -286,6 +295,13 @@ public final class JkRepo {
 
         public static JkRepoCredentials of(String username, String password, String realm) {
             return new JkRepoCredentials(realm, username, password);
+        }
+
+        private JkRepoCredentials merge(JkRepoCredentials other) {
+            String username = Optional.ofNullable(this.userName).orElse(other.userName);
+            String password = Optional.ofNullable(this.password).orElse(other.password);
+            String realm = Optional.ofNullable(this.realm).orElse(other.realm);
+            return of(username ,password, realm);
         }
 
         public String getRealm() {

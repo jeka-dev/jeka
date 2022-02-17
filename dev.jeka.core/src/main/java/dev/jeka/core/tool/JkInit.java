@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.api.depmanagement.JkRepoFromProperties.getDownloadRepo;
+import static dev.jeka.core.api.depmanagement.JkRepoFromProperties.getDownloadRepos;
 
 /**
  * Class for instantiating builds while displaying meaningful information about environment on console.
@@ -64,7 +64,8 @@ public final class JkInit {
                     .getDefaultParams()
                         .setFailOnDependencyResolutionError(true)
                     .__
-                    .addRepos(getDownloadRepo(), JkRepo.ofLocal()));
+                    .addRepos(getDownloadRepos())
+                    .addRepos(JkRepo.ofLocal()));
             jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
             jkRuntime.init(commands);
             final T jkBean = jkRuntime.getBean(clazz);
@@ -109,7 +110,7 @@ public final class JkInit {
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
         sb.append("\nJeka Cache Dir : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
-        sb.append("\nJeka download Repositories : " + JkRepoFromProperties.getDownloadRepo());
+        sb.append("\nJeka download Repositories : " + JkRepoFromProperties.getDownloadRepos());
         JkLog.info(sb.toString());
     }
 

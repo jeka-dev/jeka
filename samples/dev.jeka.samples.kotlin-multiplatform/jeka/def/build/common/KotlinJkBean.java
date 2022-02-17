@@ -110,7 +110,7 @@ public class KotlinJkBean extends JkBean {
                 JkLog.warn("No version of kotlin has been specified, will use the version installed on KOTLIN_HOME : "
                         + kotlinCompiler.getVersion());
             } else {
-                kotlinCompiler = JkKotlinCompiler.ofJvm(JkRepoFromProperties.getDownloadRepo().toSet(), kotlinVersion);
+                kotlinCompiler = JkKotlinCompiler.ofJvm(JkRepoFromProperties.getDownloadRepos(), kotlinVersion);
             }
             kotlinCompiler.setLogOutput(true);
             return kotlinCompiler;

@@ -1,5 +1,8 @@
 package dev.jeka.core.api.system;
 
+import java.util.*;
+import java.util.stream.Stream;
+
 /**
  * Abstraction over system property and environment variable.
  * This class provides a single method to get a value located in System Properties or Environment variables.
@@ -28,8 +31,33 @@ public final class JkProperty {
         if (result != null) {
             return result;
         }
-        String upperCaseKey = key.toUpperCase().replace('.', '_').replace('-', '_');
+        String upperCaseKey = upperCase(key);
         return System.getenv(upperCaseKey);
+    }
+
+    private static String upperCase(String value) {
+        return value.toUpperCase().replace('.', '_').replace('-', '_');
+    }
+
+    private static String lowerCase(String value) {
+        return value.toLowerCase().replace('_', '.');
+    }
+
+    public static Set<String> find(String start) {
+        Set<String> result = new HashSet<>();
+        for (Enumeration propNameEnum = System.getProperties().propertyNames(); propNameEnum.hasMoreElements();) {
+            String name = (String) propNameEnum.nextElement();
+            if ( name.startsWith(start)) {
+                result.add(name);
+            }
+        }
+        String upperCaseKey = upperCase(start);
+        for (String propName : System.getenv().keySet()) {
+            if ( propName.startsWith(start) || propName.startsWith(upperCaseKey)) {
+                result.add(lowerCase(propName));
+            }
+        }
+        return result;
     }
 
 

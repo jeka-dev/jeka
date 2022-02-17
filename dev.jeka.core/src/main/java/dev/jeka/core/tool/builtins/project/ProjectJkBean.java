@@ -3,6 +3,7 @@ package dev.jeka.core.tool.builtins.project;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -86,19 +87,19 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     private void applyRepo(JkProject project) {
-        project.getPublication().getMaven().setPublishRepos(
-                Optional.ofNullable(JkRepoFromProperties.getPublishRepository())
-                        .orElse(JkRepo.ofLocal())
-                .toSet());
-        project.getPublication().getIvy().setRepos(
-                Optional.ofNullable(JkRepoFromProperties.getPublishRepository())
-                        .orElse(JkRepo.ofLocalIvy())
-                        .toSet());
-        final JkRepo downloadRepo = JkRepoFromProperties.getDownloadRepo();
-        JkDependencyResolver resolver = project.getConstruction().getDependencyResolver();
-        if (!resolver.getRepos().contains(downloadRepo.getUrl())) {
-            resolver.addRepos(downloadRepo);
+        JkRepoSet mavenPublishRepos = JkRepoFromProperties.getPublishRepository();
+        if (mavenPublishRepos.getRepos().isEmpty()) {
+            mavenPublishRepos = mavenPublishRepos.and(JkRepo.ofLocal());
         }
+        project.getPublication().getMaven().setPublishRepos(mavenPublishRepos);
+        JkRepoSet ivyPulishRepos = JkRepoFromProperties.getPublishRepository();
+        if (ivyPulishRepos.getRepos().isEmpty()) {
+            ivyPulishRepos = ivyPulishRepos.and(JkRepo.ofLocal());
+        }
+        project.getPublication().getIvy().setRepos(ivyPulishRepos);
+        final JkRepoSet downloadRepos = JkRepoFromProperties.getDownloadRepos();
+        JkDependencyResolver resolver = project.getConstruction().getDependencyResolver();
+        resolver.setRepos(resolver.getRepos().and(downloadRepos));
     }
 
     private void applyPostSetupOptions(JkProject aProject) {

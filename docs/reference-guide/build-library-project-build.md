@@ -23,10 +23,10 @@ Located in package `dev.jeka.core.api.j2e`
 
 Located in `dev.jeka.core.api.kotlin` package.
 
-* `JkKotlinCompiler` : Provides mean to get a suitable compiler according a given Kotlin version and method to 
-  actually compile sources in a fluent way.
+* `JkKotlinCompiler` : Provides mean to get a suitable compiler according a given Kotlin version. This class also provides methods to 
+  compile Kotlin sources in a fluent way.
 
-* `JkKotlinsModules` : Holds constants of common Kotlin library coordinates.
+* `JkKotlinModules` : Holds constants of common Kotlin library coordinates.
 
 ## Testing API
 
@@ -86,6 +86,7 @@ project
 |  +- fatJar (customize produced fat/uber jar if any)
 |  +- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, transpiling, post binary processing, ...)
 |  |  +- layout (where are located source and resource files)
+|  |  +- source generators (plugin mechanism for generating source files)
 |  |  +- dependencies   (stands for compile dependencies)
 |  |  +- preCompileActions (including resources processing)
 |  |  +- compileActions (including java sources compilation. Compilation for other languages can be added here)

@@ -29,7 +29,7 @@ public final class JkModuleFileProxy {
     }
 
     public static JkModuleFileProxy ofStandardRepos(String dependencyDescription) {
-        return of(JkRepoFromProperties.getDownloadRepo().toSet().and(JkRepo.ofMavenCentral()), dependencyDescription);
+        return of(JkRepoFromProperties.getDownloadRepos().and(JkRepo.ofMavenCentral()), dependencyDescription);
     }
 
     public Path get() {

@@ -17,7 +17,9 @@ nav:
         - Execution Engine:
           - File Structure: reference-guide/execution-engine-files.md
           - Setup: reference-guide/execution-engine-setup.md
-          - Concepts: reference-guide/execution-engine-concepts.md
+          - Def-Classpath: reference-guide/execution-engine-defclasspath.md
+          - KBeans: reference-guide/execution-engine-kbeans.md
+          - Properties: reference-guide/execution-engine-properties.md
           - Process: reference-guide/execution-engine-process.md
           - Reuse Elements: reference-guide/execution-engine-reuse.md
         - Build Library:
