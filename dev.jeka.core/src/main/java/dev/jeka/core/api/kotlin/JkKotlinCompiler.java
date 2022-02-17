@@ -12,11 +12,11 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.system.JkProperty;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
-import dev.jeka.core.tool.JkProperties;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -116,7 +116,7 @@ public final class JkKotlinCompiler {
     }
 
     public static JkKotlinCompiler ofJvm(JkRepoSet repos) {
-        String version = JkProperties.get(KOTLIN_VERSION_OPTION);
+        String version = JkProperty.get(KOTLIN_VERSION_OPTION);
         if (version == null) {
             JkLog.info("No jeka.kotlin.version specified, try to resolce Kotlin compiler on local machine");
             return ofKotlinHomeCommand("kotlinc");

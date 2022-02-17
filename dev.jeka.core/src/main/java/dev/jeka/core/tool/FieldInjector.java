@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperty;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -35,10 +36,10 @@ final class FieldInjector {
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             if (injectProperty != null) {
                 String propertyName = injectProperty.value();
-                if (!JkProperties.isDefined(propertyName)) {
+                if (JkProperty.get(propertyName) == null) {
                     JkLog.warn("No property '%s' defined for injecting in field %s.", propertyName, field);
                 }
-                String propertyValue = JkProperties.get(propertyName);
+                String propertyValue = JkProperty.get(propertyName);
                 final Class<?> type = field.getType();
                 Object value;
                 try {

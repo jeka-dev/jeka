@@ -2,10 +2,8 @@ package dev.jeka.core.api.utils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * Utility class for dealing with strings.
@@ -227,6 +225,43 @@ public final class JkUtilsString {
         } catch(NumberFormatException e){
             return false;
         }
+    }
+
+    public static List<String> extractVariableToken(String string) {
+        boolean onDollar = false;
+        boolean inToken = false;
+        String currentToken = "";
+        List<String> result = new LinkedList<>();
+        for (int i = 0; i < string.length(); i++) {
+            char currentChar = string.charAt(i);
+            if (inToken) {
+                if (currentChar == '}') {
+                    result.add(currentToken);
+                    currentToken = "";
+                    inToken = false;
+                } else {
+                    currentToken = currentToken + currentChar;
+                }
+            } else if (onDollar) {
+                if (currentChar == '{') {
+                    inToken = true;
+                }
+            }
+            onDollar = currentChar == '$';
+        }
+        return result;
+    }
+
+    public static String interpolate(String string, Function<String, String> replacer) {
+        List<String> variableTokens = JkUtilsString.extractVariableToken(string);
+        String result = string;
+        for (String token : variableTokens) {
+            String value = replacer.apply(token);
+            if (token != null) {
+                result = result.replace("${" + token + "}", value);
+            }
+        }
+        return result;
     }
 
     /**

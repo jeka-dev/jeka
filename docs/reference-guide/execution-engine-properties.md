@@ -1,9 +1,9 @@
 ## Properties
 
-Properties are pairs of String  _key-value_ that are used across Jeka system. It typically carries urls, local paths,
+_Properties_ are pairs of String  _key-value_ that are used across Jeka system. It typically carries urls, local paths,
 tool versions or credentials. They can be globally accessed using `JkProperties#get*` static method.
 
-Properties can be defined at different level, in order of precedence :
+_Properties_ can be defined at different level, in order of precedence :
 
 * System properties : Properties can be defined using system properties as `-DpropertyName=value`. System properties can
   be injected from Jeka command line.
@@ -12,9 +12,9 @@ Properties can be defined at different level, in order of precedence :
 * Global : Defined in _[User Home]/.jeka/global.properties_ file. Used typically to define urls, local paths and credentials.
 
 
-Properties inherit from project properties defined in project parent folders if exists. Here, project2 will 
-inherit properties defined in _project1/jeka/project.properties_ :
-    
+_Properties_ inherit from project _properties_ defined in project parent folders (if exists). 
+
+Here, project2 will inherit properties defined in _project1/jeka/project.properties_ :
 ```
 project1
    + jeka
@@ -22,6 +22,12 @@ project1
    + project2
       + project.properities.
 ```
+
+!!! info
+    _Properties_ support interpolation via `${}`tokens. 
+    
+    For example, if we define the following properties :
+    `foo=fooValue` and `bar=bar ${foo}` then `JkProperty.get("bar")` will return 'bar fooValue'.
 
 ### Standard properties
 
@@ -31,11 +37,11 @@ project1
 
 ### Repositories
 
-The repositories used to download and publish artifacts can be defined using properties.
-The download repositories are set using `jeka.repos.dowload` property, while publish repository is defined using `jeka.repos.publish`.
+The repositories used to download and publish artifacts can be defined using _properties_.
+The download repositories are set using `jeka.repos.download` property, while publish repository is defined using `jeka.repos.publish`.
 
-Use [this class](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkRepoFromProperties.java)
-to get the repository defined by properties.
+Use [JkRepoFromProperties class](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkRepoFromProperties.java)
+to get the repositories defined by _properties_.
 
 !!! Note
     By default, when no repository is configred, artifacts are downloaded on _Maven Central_ repo.

@@ -14,73 +14,39 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Set of Key/value strings used to parameter Jeka and builds.
+ * Class in charge of loading properties from different sources (property files)
  */
-public final class JkProperties {
+public final class JkPropertyLoader {
 
     public static final String GLOBAL_PROPERTY_FILE_NAME = "global.properties";
 
     public static final String PROJECT_PROPERTY_FILE_NAME = "project.properties";
 
-    private static final JkProperties INSTANCE;
+    private static final JkPropertyLoader INSTANCE;
 
     static {
         Map<String, String> props = new TreeMap<>();
         props.putAll(readGlobalProperties());
-        props.putAll(readProjectPropertiesRecursive(Paths.get("")));
+        props.putAll(readProjectPropertiesRecursively(Paths.get("")));
         props.putAll(Environment.commandLine.getSystemProperties());
-        INSTANCE = new JkProperties(props);
+        INSTANCE = new JkPropertyLoader(props);
         props.forEach((k,v) -> System.setProperty(k, v));
     }
 
     private final Map<String, String> props;
 
-    private JkProperties(Map<String, String> props) {
+    private JkPropertyLoader(Map<String, String> props) {
         this.props = props;
     }
 
-    /**
-     * Returns the value defined for the specified key. The override order is
-     * <ul>
-     *     <li>System Properties</li>
-     *     <li>OS Environment Variables</li>
-     *     <li>Properties defined in [USER DIR]/.jeka/global.properties</li>
-     *     <li>Properties defined in [WORKING DIR]/jeka/project.properties</li>
-     * </ul>
-     */
-    public static String get(String key) {
-        return JkProperty.get(key);
-    }
-
-    public static boolean isDefined(String key) {
+    static boolean isDefined(String key) {
         if (System.getProperties().containsKey(key)) {
             return true;
         }
         return INSTANCE.props.containsKey(key);
     }
 
-    /**
-     * Returns the complete store.
-     */
-    public static Map<String, String> getAll() {
-        return Collections.unmodifiableMap(INSTANCE.props);
-    }
-
-    /**
-     * Returns all defined key/values pair where the key start with the
-     * specified prefix.
-     */
-    public static Map<String, String> getAllStartingWith(String prefix) {
-        final Map<String, String> result = new HashMap<>();
-        for (final String key : INSTANCE.props.keySet()) {
-            if (key.startsWith(prefix)) {
-                result.put(key, INSTANCE.get(key));
-            }
-        }
-        return result;
-    }
-
-    public static Map<String, String> toDisplayedMap(Map<String, String> props) {
+    static Map<String, String> toDisplayedMap(Map<String, String> props) {
         final Map<String, String> result = new TreeMap<>();
         for (final Map.Entry<String, String> entry : props.entrySet()) {
             final String value;
@@ -104,12 +70,12 @@ public final class JkProperties {
         return Collections.emptyMap();
     }
 
-    private static Map<String, String> readProjectPropertiesRecursive(Path projectBaseDir) {
+    static Map<String, String> readProjectPropertiesRecursively(Path projectBaseDir) {
         Path parentProject = projectBaseDir.toAbsolutePath().normalize().getParent();
         Map<String, String> result = new HashMap<>();
         if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.JEKA_DIR))
                 & Files.isDirectory(parentProject.resolve(JkConstants.JEKA_DIR))) {
-            result.putAll(readProjectPropertiesRecursive(parentProject));
+            result.putAll(readProjectPropertiesRecursively(parentProject));
         }
         Path presetCommandsFile = projectBaseDir.resolve("jeka/" + PROJECT_PROPERTY_FILE_NAME);
         if (Files.exists(presetCommandsFile)) {
