@@ -27,7 +27,7 @@ project1
     _Properties_ support interpolation via `${}`tokens. 
     
     For example, if we define the following properties :
-    `foo=fooValue` and `bar=bar ${foo}` then `JkProperty.get("bar")` will return 'bar fooValue'.
+    `foo=fooValue` and `bar=bar ${foo}` then `JkProperties.get("bar")` will return 'bar fooValue'.
 
 ### Standard properties
 

@@ -101,10 +101,6 @@ class Environment {
             this.workClean = valueOf(boolean.class, map, false, "work.clean", "wc");
         }
 
-        Set<String> names() {
-            return names;
-        }
-
         String jkCBeanName() {
             return jkBeanName;
         }

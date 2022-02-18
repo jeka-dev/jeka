@@ -11,7 +11,6 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkPropertyLoader;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -72,8 +71,8 @@ public final class JkScaffolder {
             code = code.replace("${jekaVersion}", version);
         }
         JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
-        JkPathFile.of(baseDir.resolve("jeka/" + JkPropertyLoader.PROJECT_PROPERTY_FILE_NAME))
-                .fetchContentFrom(JkScaffolder.class.getResource(JkPropertyLoader.PROJECT_PROPERTY_FILE_NAME));
+        JkPathFile.of(baseDir.resolve("jeka/" + JkConstants.PROJECT_PROPERTY_FILE_NAME))
+                .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.PROJECT_PROPERTY_FILE_NAME));
         JkPathFile.of(baseDir.resolve("jeka/cmd.properties"))
                 .fetchContentFrom(JkScaffolder.class.getResource("cmd.properties"));
         Path manualHtml = JkLocator.getJekaHomeDir().resolve("doc/reference-guide.html");

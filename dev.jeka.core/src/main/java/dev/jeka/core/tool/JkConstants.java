@@ -19,6 +19,8 @@ public final class JkConstants {
      * Relative path to the project base directory where jeka work files are generated.
      */
     public static final String WORK_PATH = JEKA_DIR + "/.work";
+    public static final String GLOBAL_PROPERTY_FILE_NAME = "global.properties";
+    public static final String PROJECT_PROPERTY_FILE_NAME = "project.properties";
 
     static final String DEF_BIN_DIR_NAME = "def-classes";
 

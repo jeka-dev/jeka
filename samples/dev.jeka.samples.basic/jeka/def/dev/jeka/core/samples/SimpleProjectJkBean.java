@@ -4,10 +4,12 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.maven.MavenJkBean;
@@ -80,6 +82,7 @@ public class SimpleProjectJkBean extends JkBean {
 
     public void checkValueIsA() {
         JkUtilsAssert.state("A".equals(checkedValue), "checkedValue field values %s and not 'A'.", checkedValue);
+        JkUtilsAssert.state("foo".equals(JkProperties.get("my.prop")),"Project property 'my.prop' not found.");
     }
 
     // For debugging purpose
@@ -99,7 +102,9 @@ public class SimpleProjectJkBean extends JkBean {
     }
     
     public static void main(String[] args) {
-	    JkInit.instanceOf(SimpleProjectJkBean.class, args).cleanPackPublish();
+	    SimpleProjectJkBean bean = JkInit.instanceOf(SimpleProjectJkBean.class, args, "checkedValue=A");
+        bean.cleanPackPublish();
+        bean.checkValueIsA();
     }
 
 

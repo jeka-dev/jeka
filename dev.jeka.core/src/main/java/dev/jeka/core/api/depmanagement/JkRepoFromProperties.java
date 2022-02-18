@@ -1,10 +1,9 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.system.JkProperty;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,7 +77,7 @@ public class JkRepoFromProperties {
             return JkRepo.ofMavenCentral();
         }
         String property = "jeka.repos." + name;
-        String url = JkProperty.get(property);
+        String url = JkProperties.get(property);
         JkRepo result;
         if (JEKA_GITHUB_ALIAS.equals(name)) {
             result = JkRepo.ofGitHub("jeka-dev", "jeka");
@@ -93,7 +92,7 @@ public class JkRepoFromProperties {
     }
 
     private static JkRepoSet getRepos(String propertyName) {
-        String nameOrUrls = JkProperty.get(propertyName);
+        String nameOrUrls = JkProperties.get(propertyName);
         if (JkUtilsString.isBlank(nameOrUrls)) {
             return JkRepoSet.of();
         }
@@ -112,14 +111,14 @@ public class JkRepoFromProperties {
     }
 
     private static JkRepo.JkRepoCredentials geCredentials(String prefix) {
-        String userName = JkProperty.get(prefix + ".username");
-        String password = JkProperty.get(prefix + ".password");
-        String realm = JkProperty.get(prefix + ".realm");
+        String userName = JkProperties.get(prefix + ".username");
+        String password = JkProperties.get(prefix + ".password");
+        String realm = JkProperties.get(prefix + ".realm");
         return JkRepo.JkRepoCredentials.of(userName, password, realm);
     }
 
     private static List<String> downloadUrlOrNames() {
-        return urlOrNames(JkProperty.get("jeka.repos.download"));
+        return urlOrNames(JkProperties.get("jeka.repos.download"));
     }
 
     private static List<String> urlOrNames(String value) {

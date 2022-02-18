@@ -60,7 +60,7 @@ public class SimpleWarJkBean extends JkBean {
     public void runWarWithJetty() {
         JkArtifactProducer artifactProducer = projectPlugin.getProject().getArtifactProducer();
         artifactProducer.makeMissingArtifacts();
-        Path jettyRunner = JkRepoFromProperties.getDownloadRepo().toSet().get("org.eclipse.jetty:jetty-runner:"
+        Path jettyRunner = JkRepoFromProperties.getDownloadRepos().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);
         JkJavaProcess.ofJavaJar(jettyRunner, null)
                 .exec(artifactProducer.getMainArtifactPath().toString(), "--port", port);

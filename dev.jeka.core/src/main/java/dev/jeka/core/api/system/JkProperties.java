@@ -8,11 +8,11 @@ import java.util.*;
  * Abstraction over system property and environment variable.
  * This class provides a single method to get a value located in System Properties or Environment variables.
  */
-public final class JkProperty {
+public final class JkProperties {
 
-    private static final Map<String, String> EXTRA_PROPS = new HashMap<>();
+    private static final Map<String, String> OVERRIDE_PROPS = new HashMap<>();
 
-    private JkProperty() {
+    private JkProperties() {
     }
 
     /**
@@ -26,7 +26,7 @@ public final class JkProperty {
      *  See <a href="https://google.github.io/styleguide/shellguide.html#s7.3-constants-and-environment-variable-names">Environment variable conventions</a>
      */
     public static String get(String key) {
-        String result = EXTRA_PROPS.get(EXTRA_PROPS);
+        String result = OVERRIDE_PROPS.get(key);
         if (result != null) {
             return result;
         }
@@ -44,19 +44,22 @@ public final class JkProperty {
     }
 
     /**
-     * Add extra properties without adding a System properties;
-     * @param extraProps
+     * Override the current properties with the specified ones.
+     * Use it with caution !!!
      */
-    public static void loadExtraProps(Map<String, String> extraProps) {
-        EXTRA_PROPS.putAll(extraProps);
+    public static void override(Map<String, String> overrideProps) {
+        OVERRIDE_PROPS.putAll(overrideProps);
     }
 
-    public static void clearExtraProps() {
-        EXTRA_PROPS.clear();;
+    /**
+     * Remove properties that has been ovveridded using {@link #override(Map)}
+     */
+    public static void removeOverride() {
+        OVERRIDE_PROPS.clear();;
     }
 
     private static String interpolate(String string) {
-        return JkUtilsString.interpolate(string, JkProperty::get);
+        return JkUtilsString.interpolate(string, JkProperties::get);
     }
 
     private static String upperCase(String value) {
@@ -77,7 +80,7 @@ public final class JkProperty {
 
     public static Set<String> find(String prefix) {
         Set<String> result = new HashSet<>();
-        for (String extraKey : EXTRA_PROPS.keySet()) {
+        for (String extraKey : OVERRIDE_PROPS.keySet()) {
             if (extraKey.startsWith(prefix)) {
                 result.add(extraKey);
             }

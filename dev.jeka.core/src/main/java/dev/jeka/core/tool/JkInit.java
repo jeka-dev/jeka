@@ -32,7 +32,7 @@ public final class JkInit {
      */
     public static <T extends JkBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
-        JkPropertyLoader.isDefined(""); // Force static initializer
+        PropertyLoader.load(); // Force static initializer
         if (!Files.isDirectory(Paths.get("jeka")) ) {
             throw new IllegalStateException("The current directory " + Paths.get("").toAbsolutePath()
                     + " does not seem to be a Jeka project as " +
@@ -95,8 +95,8 @@ public final class JkInit {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
         sb.append("\nCommand Line : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
-        sb.append(propsAsString("Specified properties", JkPropertyLoader.toDisplayedMap(
-                JkProperty.getAllStartingWith("jeka."))));
+        sb.append(propsAsString("Specified properties", PropertyLoader.toDisplayedMap(
+                JkProperties.getAllStartingWith("jeka."))));
         sb.append("\nJava Home : " + System.getProperty("java.home"));
         sb.append("\nJava Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         sb.append("\nJeka Version : " + JkInfo.getJekaVersion());

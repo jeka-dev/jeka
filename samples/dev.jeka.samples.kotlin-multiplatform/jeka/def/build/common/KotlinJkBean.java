@@ -13,7 +13,7 @@ import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProperty;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 
@@ -38,7 +38,7 @@ public class KotlinJkBean extends JkBean {
     public String kotlinVersion;
 
     protected KotlinJkBean() {
-        kotlinVersion = JkProperty.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
+        kotlinVersion = JkProperties.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
     }
 
     public final JkKotlinJvmProject jvm() {

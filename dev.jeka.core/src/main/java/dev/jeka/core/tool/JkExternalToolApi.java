@@ -2,7 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.system.JkProperty;
+import dev.jeka.core.api.system.JkProperties;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -22,10 +22,10 @@ public class JkExternalToolApi {
     }
 
     public static JkRepoSet getDownloadRepos(Path projectDir) {
-        Map<String, String> projectProps = JkPropertyLoader.readProjectPropertiesRecursively(projectDir);
-        JkProperty.loadExtraProps(projectProps);
+        Map<String, String> projectProps = PropertyLoader.readProjectPropertiesRecursively(projectDir);
+        JkProperties.override(projectProps);
         JkRepoSet result = JkRepoFromProperties.getDownloadRepos();
-        JkProperty.clearExtraProps();
+        JkProperties.removeOverride();
         return result;
     }
 

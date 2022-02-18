@@ -38,7 +38,7 @@ public final class Main {
         final long start = System.nanoTime();
         try {
             Environment.initialize(args);
-            JkPropertyLoader.isDefined(""); // Force static initializer
+            PropertyLoader.load(); // Force static initializer
             JkLog.setDecorator(Environment.standardOptions.logStyle);
             if (Environment.standardOptions.logBanner) {
                 displayIntro();

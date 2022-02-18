@@ -18,7 +18,7 @@ import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProperty;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -79,7 +79,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
-        compiler.setJdkHomesWithProperties(JkProperty.getAllStartingWith("jdk."));
+        compiler.setJdkHomesWithProperties(JkProperties.getAllStartingWith("jdk."));
         applyRepo(project);
         projectConfigurators.accept(project);
         this.applyPostSetupOptions(project);

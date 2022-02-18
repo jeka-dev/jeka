@@ -4,14 +4,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class JkPropertyTest {
+public class JkPropertiesTest {
 
     @Test
     public void get() {
         System.setProperty("foo", "fooValue");
         System.setProperty("bar", "bar ${foo}");
-        assertEquals("bar fooValue", JkProperty.get("bar"));
+        assertEquals("bar fooValue", JkProperties.get("bar"));
         System.setProperty("bar", "bar value");
-        assertEquals("bar value", JkProperty.get("bar"));
+        assertEquals("bar value", JkProperties.get("bar"));
     }
 }

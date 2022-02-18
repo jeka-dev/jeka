@@ -7,7 +7,7 @@ import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProperty;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -75,7 +75,7 @@ public class SonarqubeJkBean extends JkBean {
         sonarqube
                 .setLogOutput(logOutput)
                 .setProjectId(fullName, name, version)
-                .setProperties(JkProperty.getAllStartingWith("sonar."))
+                .setProperties(JkProperties.getAllStartingWith("sonar."))
                 .setProjectBaseDir(baseDir)
                 .setBinaries(project.getConstruction().getCompilation().getLayout().resolveClassDir())
                 .setProperty(JkSonarqube.SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
