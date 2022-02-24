@@ -39,7 +39,7 @@ public final class JkInit {
                     "it does not contain a 'jeka' folder.");
         }
         JkLog.setDecorator(Environment.standardOptions.logStyle);
-        if (Environment.standardOptions.logRuntimeInformation != null) {
+        if (Environment.standardOptions.logRuntimeInformation) {
             displayRuntimeInfo();
             JkLog.info("Jeka Classpath : ");
             JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.info("    " + item));

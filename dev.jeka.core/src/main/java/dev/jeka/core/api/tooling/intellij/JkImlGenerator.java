@@ -51,6 +51,12 @@ public final class JkImlGenerator {
         return new JkImlGenerator();
     }
 
+    public static Path getImlFilePath(Path dir) {
+        String fileName = dir.getFileName().toString().equals("") ? dir.toAbsolutePath().getFileName().toString()
+                : dir.getFileName().toString();
+        return JkImlGenerator.findExistingImlFile(dir).orElse(dir.resolve(".idea").resolve(fileName + ".iml"));
+    }
+
     public boolean isUseVarPath() {
         return useVarPath;
     }
@@ -213,12 +219,12 @@ public final class JkImlGenerator {
     }
 
     private static String moduleName(Path projectDir) {
-        return findImlFile(projectDir)
+        return findExistingImlFile(projectDir)
                 .map(path -> JkUtilsString.substringBeforeLast(path.getFileName().toString(), ".iml"))
                 .orElse(projectDir.getFileName().toString());
     }
 
-    public static Optional<Path> findImlFile(Path projectDir) {
+    private static Optional<Path> findExistingImlFile(Path projectDir) {
         return JkPathTree.of(projectDir).andMatching(".idea/*.iml", "**.iml").stream().findFirst();
     }
 

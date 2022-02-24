@@ -6,6 +6,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.net.URLClassLoader;
@@ -54,7 +55,9 @@ final class EngineBeanClassResolver {
         JkLog.startTask("Resolve KBean classes");
         Map<String, Class<? extends JkBean>> beanClasses = new HashMap<>();
         for (String beanName : commandLine.involvedBeanNames()) {
-            List<String> matchingClassNames = findClassesMatchingName(globalBeanClassNames(), beanName);
+            List<String> beanClassNames = JkUtilsIterable.concatLists(defBeanClassNames(), globalBeanClassNames())
+                    .stream().distinct().collect(Collectors.toList());
+            List<String> matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
             Class<? extends JkBean> selected = loadUniqueClassOrFail(matchingClassNames, beanName);
             beanClasses.put(JkBean.name(selected), selected);
         }

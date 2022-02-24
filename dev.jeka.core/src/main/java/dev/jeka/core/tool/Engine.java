@@ -113,7 +113,7 @@ final class Engine {
                     .stream().map(path -> "'" + path + "'").collect(Collectors.toList()));
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
-        if (Environment.standardOptions.logRuntimeInformation != null) {
+        if (Environment.standardOptions.logRuntimeInformation) {
             JkLog.info("Jeka Classpath : ");
             computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
             if (JkLog.isVerbose()) {

@@ -43,7 +43,7 @@ public final class Main {
             if (Environment.standardOptions.logBanner) {
                 displayIntro();
             }
-            if (Environment.standardOptions.logRuntimeInformation != null) {
+            if (Environment.standardOptions.logRuntimeInformation) {
                 JkInit.displayRuntimeInfo();
             }
             JkLog.setAcceptAnimation(!Environment.standardOptions.logNoAnimation);

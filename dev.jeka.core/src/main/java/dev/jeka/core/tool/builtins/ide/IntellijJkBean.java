@@ -69,7 +69,7 @@ public final class IntellijJkBean extends JkBean {
         JkImlGenerator imlGenerator = imlGenerator();
         imlGeneratorConfigurer.accept(imlGenerator);
         JkIml iml = imlGenerator.computeIml();
-        final JkPathFile imlFile = JkPathFile.of(findImlFile(basePath))
+        final JkPathFile imlFile = JkPathFile.of(JkImlGenerator.getImlFilePath(basePath))
                 .deleteIfExist()
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
@@ -77,11 +77,6 @@ public final class IntellijJkBean extends JkBean {
         JkLog.endTask();
     }
 
-    private static Path findImlFile(Path dir) {
-        String fileName = dir.getFileName().toString().equals("") ? dir.toAbsolutePath().getFileName().toString()
-                : dir.getFileName().toString();
-        return JkImlGenerator.findImlFile(dir).orElse(dir.resolve(".idea").resolve(fileName + ".iml"));
-    }
 
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file.")

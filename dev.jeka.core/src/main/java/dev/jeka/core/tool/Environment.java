@@ -21,8 +21,6 @@ class Environment {
     static StandardOptions standardOptions = new StandardOptions(Collections.emptyMap());
 
     static void initialize(String[] commandLineArgs) {
-
-
         List<String> effectiveCommandLineArgs = new LinkedList<>(Arrays.asList(commandLineArgs));
 
         // Add arguments contained in cmd.properties '_append'
@@ -77,7 +75,7 @@ class Environment {
 
         JkLog.Style logStyle;
 
-        String logRuntimeInformation;
+        boolean logRuntimeInformation;
 
         boolean ignoreCompileFail;
 
@@ -94,7 +92,7 @@ class Environment {
             this.logBanner = valueOf(boolean.class, map, false,"log.banner", "lb");
             this.logSetup = valueOf(boolean.class, map, false,"log.setup", "lsu");
             this.logStackTrace = valueOf(boolean.class, map,false, "log.stacktrace", "lst");
-            this.logRuntimeInformation = valueOf(String.class, map, null, "log.runtime.info", "lri");
+            this.logRuntimeInformation = valueOf(boolean.class, map, false, "log.runtime.info", "lri");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
             this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");
             this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");

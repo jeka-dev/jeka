@@ -1,6 +1,7 @@
 package dev.jeka.core.api.testing;
 
 import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
+import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
@@ -41,13 +42,9 @@ public final class JkTestProcessor<T> {
         FULL, TREE, ONE_LINE, SILENT, BAR
     }
 
-    private static final String JAR_LOCATION = "META-INF/junitplatform/";
-
     private static final String ENGINE_SERVICE = "org.junit.platform.engine.TestEngine";
 
     private static final String PLATFORM_LAUNCHER_CLASS_NAME = "org.junit.platform.launcher.Launcher";
-
-    private static final String PLATFORM_COMMONS_CLASS_NAME = "org.junit.platform.commons.util.ClassNamePatternFilterUtils";
 
     // This class is absent from platform-engine 1.5.2,
     // so if 1.5.2 is present inh the classpath, we need to add 1.6 as well.
@@ -55,8 +52,6 @@ public final class JkTestProcessor<T> {
 
     private static final String PLATFORM_REPORT_CLASS_NAME =
             "org.junit.platform.reporting.legacy.xml.LegacyXmlReportGeneratingListener";
-
-    private static final String OPENTEST4J_CLASS_NAME = "org.opentest4j.ValueWrapper";
 
     private static final String JUNIT_PLATFORM_LAUNCHER_MODULE = "org.junit.platform:junit-platform-launcher";
 
@@ -72,7 +67,7 @@ public final class JkTestProcessor<T> {
 
     private String junitPlatformVersion = "1.8.2";
 
-    private Supplier<JkRepoSet> repoSetSupplier;
+    private Supplier<JkRepoSet> repoSetSupplier = JkRepoFromProperties::getDownloadRepos;
 
     /**
      * For parent chaining
