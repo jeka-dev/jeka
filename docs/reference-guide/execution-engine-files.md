@@ -67,6 +67,8 @@ version without being installed on the host machine. This is the recommended way
   version on the host machine prior to launch _Jeka_
 * __jeka/wrapper/wrapper.properties__ specifies the _Jeka_ version to use.
 
+When _Jeka_ wrapper is installed on a project, execute `jekaw` instead of `jeka`. 
+
 ## Jeka User Directory
 
 _Jeka_ automatically creates a directory  _[User Home]/.jeka_ when running for the first time. This directory may contain :
