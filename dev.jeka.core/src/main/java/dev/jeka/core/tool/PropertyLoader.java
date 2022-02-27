@@ -45,7 +45,7 @@ final class PropertyLoader {
     }
 
     private static Map<String, String> readGlobalProperties() {
-        final Path userPropFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTY_FILE_NAME);
+        final Path userPropFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
         if (Files.exists(userPropFile)) {
             return JkUtilsFile.readPropertyFileAsMap(userPropFile);
         }
@@ -59,7 +59,7 @@ final class PropertyLoader {
                 & Files.isDirectory(parentProject.resolve(JkConstants.JEKA_DIR))) {
             result.putAll(readProjectPropertiesRecursively(parentProject));
         }
-        Path presetCommandsFile = projectBaseDir.resolve("jeka/" + JkConstants.PROJECT_PROPERTY_FILE_NAME);
+        Path presetCommandsFile = projectBaseDir.resolve(JkConstants.JEKA_DIR) .resolve(JkConstants.PROJECT_PROPERTIES);
         if (Files.exists(presetCommandsFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(presetCommandsFile));
         }

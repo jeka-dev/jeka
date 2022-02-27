@@ -3,6 +3,7 @@ package dev.jeka.core.api.utils;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,6 +56,16 @@ public final class JkUtilsIO {
             return uri.toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static URI toUri(String uri) {
+        try {
+            return new URL(uri).toURI();
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 

@@ -1,6 +1,6 @@
 ##
-# This files declares dependencies that are included in projects when JkProject.getConstruction().addTextAndLocalDependencies()
-# is invoked.
+# This file declares some dependencies to be included to the project dependencies.
+# They will be added and won't replace dependencies that have been declared by other means.
 #
 # COMPILE+RUNTIME : stands for dependencies used both for compilation and runtime.
 #                   This is the most common place to declare dependencies.
@@ -10,7 +10,7 @@
 # TEST            : stands for dependencies used only for testing.
 #
 # Dependencies has to be declared using 'gradle-short' format, meaning 'group:module:[classifiers]:[type]:[version]'
-# where classifiers, type and version are optional (see JkModuleDependency.of(String description) for details).
+# where 'classifiers', 'type' and 'version' are optional (see JkModuleDependency.of(String description) for details).
 #
 # Example :
 #

@@ -42,8 +42,6 @@ final class EngineBeanClassResolver {
 
     private boolean useStoredCache;
 
-    private static final Comparator<Class> CLASS_NAME_COMPARATOR = Comparator.comparing(Class::getName);
-
     EngineBeanClassResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;

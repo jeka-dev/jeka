@@ -1,5 +1,4 @@
-This folder contains libraries (jar files) that are included in projects when
-project.construction#addTextAndLocalDependencies() is invoked.
+This folder contains libraries (jar files) to be included in project dependencies.
 
 Libraries are added for appropriate usage according the folder they are contained in.
 

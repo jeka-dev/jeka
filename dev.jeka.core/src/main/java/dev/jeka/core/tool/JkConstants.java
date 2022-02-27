@@ -19,8 +19,8 @@ public final class JkConstants {
      * Relative path to the project base directory where jeka work files are generated.
      */
     public static final String WORK_PATH = JEKA_DIR + "/.work";
-    public static final String GLOBAL_PROPERTY_FILE_NAME = "global.properties";
-    public static final String PROJECT_PROPERTY_FILE_NAME = "project.properties";
+
+    public static final String GLOBAL_PROPERTIES = "global.properties";
 
     static final String DEF_BIN_DIR_NAME = "def-classes";
 
@@ -39,11 +39,8 @@ public final class JkConstants {
      */
     public static final String DEF_DIR = JEKA_DIR + "/def";
 
+    public static final String CMD_PROPERTIES = "cmd.properties";
 
-
-    /**
-     * The default method to be invoked when none is specified.
-     */
-    public static final String DEFAULT_METHOD = "help";
+    public static final String PROJECT_PROPERTIES = "project.properties";
 
 }

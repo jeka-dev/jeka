@@ -132,12 +132,16 @@ class Environment {
         }
     }
 
-    private static Map<String, String> projectCmdProperties() {
-        Path presetCommandsFile = Paths.get("jeka/cmd.properties");
+    static Map<String, String> projectCmdProperties(Path projectDir) {
+        Path presetCommandsFile = projectDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.CMD_PROPERTIES);
         if (Files.exists(presetCommandsFile)) {
             return JkUtilsFile.readPropertyFileAsMap(presetCommandsFile);
         }
         return Collections.emptyMap();
+    }
+
+    private static Map<String, String> projectCmdProperties() {
+        return projectCmdProperties(Paths.get(""));
     }
 
 }

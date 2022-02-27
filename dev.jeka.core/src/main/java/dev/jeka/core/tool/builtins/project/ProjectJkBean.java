@@ -73,7 +73,6 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     private JkProject createProject() {
         Path baseDir = getBaseDir();
         JkProject project = JkProject.of().setBaseDir(baseDir);
-        project.getConstruction().addTextAndLocalDependencies();
         if (!JkLog.isAcceptAnimation()) {
             project.getConstruction().getTesting().getTestProcessor().getEngineBehavior().setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);

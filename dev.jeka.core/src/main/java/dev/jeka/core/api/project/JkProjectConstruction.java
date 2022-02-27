@@ -15,7 +15,6 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -24,13 +23,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 /**
  * Responsible to produce jar files. It performs compilation and unit testing.
@@ -75,7 +70,9 @@ public class JkProjectConstruction {
 
     private UnaryOperator<JkDependencySet> dependencySetModifier = x -> x;
 
-    private boolean textAndLocalDependenciesAdded;
+    private boolean addTextAndLocalDependencies = true;
+
+    private JkProjectDependencies cachedExtraDeps;
 
     /**
      * For Parent chaining
@@ -92,6 +89,7 @@ public class JkProjectConstruction {
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         manifest = JkManifest.ofParent(this);
+        addTextAndLocalDependenciesIfNeeded();
     }
 
     public JkProjectConstruction apply(Consumer<JkProjectConstruction> consumer) {
@@ -238,20 +236,43 @@ public class JkProjectConstruction {
                 .normalised(project.getDuplicateConflictStrategy()));
     }
 
-    public void addTextAndLocalDependencies() {
-        if (textAndLocalDependenciesAdded) {
-            return;
+    public JkProjectConstruction setAddTextAndLocalDependencies(boolean addTextAndLocalDependencies) {
+        this.addTextAndLocalDependencies = addTextAndLocalDependencies;
+        return this;
+    }
+
+    private void addTextAndLocalDependenciesIfNeeded() {
+        getCompilation().configureDependencies(deps -> {
+            if (addTextAndLocalDependencies) {
+                return deps.and(extraDeps().getCompileDeps());
+            }
+            return deps;
+        });
+        configureRuntimeDependencies(deps -> {
+            if (addTextAndLocalDependencies) {
+                return deps.and(extraDeps().getRuntimeDeps());
+            }
+            return deps;
+        });
+        getTesting().getCompilation().configureDependencies(deps -> {
+            if (addTextAndLocalDependencies) {
+                return deps.and(extraDeps().getTestDeps());
+            }
+            return deps;
+        });
+    }
+
+    private JkProjectDependencies extraDeps() {
+        if (cachedExtraDeps != null) {
+            return cachedExtraDeps;
         }
         Path baseDir = project.getBaseDir();
         JkProjectDependencies localDeps = JkProjectDependencies.ofLocal(
                 baseDir.resolve(JkConstants.JEKA_DIR + "/libs"));
         JkProjectDependencies textDeps = JkProjectDependencies.ofTextDescriptionIfExist(
                 baseDir.resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"));
-        JkProjectDependencies extraDeps = localDeps.and(textDeps);
-        getCompilation().configureDependencies(deps -> deps.and(extraDeps.getCompileDeps()));
-        configureRuntimeDependencies(deps -> deps.and(extraDeps.getRuntimeDeps()));
-        getTesting().getCompilation().configureDependencies(deps -> extraDeps.getTestDeps().and(deps));
-        textAndLocalDependenciesAdded = true;
+        cachedExtraDeps = localDeps.and(textDeps);
+        return cachedExtraDeps;
     }
 
     public Document getDependenciesAsXml()  {

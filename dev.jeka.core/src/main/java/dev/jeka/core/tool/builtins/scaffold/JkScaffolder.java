@@ -15,6 +15,7 @@ import dev.jeka.core.tool.JkConstants;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.function.Supplier;
@@ -71,10 +72,10 @@ public final class JkScaffolder {
             code = code.replace("${jekaVersion}", version);
         }
         JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
-        JkPathFile.of(baseDir.resolve("jeka/" + JkConstants.PROJECT_PROPERTY_FILE_NAME))
-                .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.PROJECT_PROPERTY_FILE_NAME));
-        JkPathFile.of(baseDir.resolve("jeka/cmd.properties"))
-                .fetchContentFrom(JkScaffolder.class.getResource("cmd.properties"));
+        JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_PROPERTIES))
+                .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.PROJECT_PROPERTIES));
+        JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.CMD_PROPERTIES))
+                .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.CMD_PROPERTIES));
         Path manualHtml = JkLocator.getJekaHomeDir().resolve("doc/reference-guide.html");
         if (Files.exists(manualHtml)) {
             JkPathFile.of(manualHtml).copyToDir(baseDir.resolve("jeka"));

@@ -13,7 +13,10 @@ import java.util.Map;
 /**
  * Exported methods to integrate with external tool.
  */
-public class JkExternalToolApi {
+public final class JkExternalToolApi {
+
+    private JkExternalToolApi(){
+    }
 
     public static String getBeanName(String fullyQualifiedClassName) {
         return JkBean.name(fullyQualifiedClassName);
@@ -43,7 +46,13 @@ public class JkExternalToolApi {
         if (Files.isDirectory(defDir)) {
             return true;
         }
-        if (Files.isRegularFile(jekaDir.resolve("project.properties"))) {
+        if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROJECT_PROPERTIES))) {
+            return true;
+        }
+        if (Files.isRegularFile(jekaDir.resolve(JkConstants.CMD_PROPERTIES))) {
+            return true;
+        }
+        if (Files.isRegularFile(jekaDir.resolve("dependencies.txt"))) {
             return true;
         }
         Path wrapperDir = jekaDir.resolve("wrapper");
@@ -61,6 +70,10 @@ public class JkExternalToolApi {
 
     public static Path getImlFile(Path moduleDir) {
         return JkImlGenerator.getImlFilePath(moduleDir);
+    }
+
+    public static Map<String, String> getCmdPropertiesContent(Path projectDir) {
+        return Environment.projectCmdProperties(projectDir);
     }
 
 }
