@@ -11,7 +11,7 @@ project root directory.
 All of the following files or directories are optional except the _jeka_ directory.
 
 ```
-project
+Project Base Directory
 +- jekaw
 +- jekaw.bat
 +- jeka
@@ -30,7 +30,7 @@ project
 |  |  +- ...        
 |  +- .work
 |  |  +- ...
-+- ... (project specific files)
++- ... (project specific files like src/main/java, src/test/java, ...)
 ```
 
 ## Jeka Directory Content 
