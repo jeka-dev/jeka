@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -28,6 +29,9 @@ public final class IntellijJkBean extends JkBean {
     @JkDoc("If true, the iml generation fails when a dependency can not be resolved. If false, it will be ignored " +
             "(only a warning will be notified).")
     public boolean failOnDepsResolutionError = true;
+
+    @JkDoc("The path where iml file must be generated. If null, Jeka will decide for a proper place. Mostly used by external tools.")
+    public Path imlFile;
 
     private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
@@ -69,11 +73,12 @@ public final class IntellijJkBean extends JkBean {
         JkImlGenerator imlGenerator = imlGenerator();
         imlGeneratorConfigurer.accept(imlGenerator);
         JkIml iml = imlGenerator.computeIml();
-        final JkPathFile imlFile = JkPathFile.of(JkImlGenerator.getImlFilePath(basePath))
+        Path imlPath = Optional.ofNullable(this.imlFile).orElse(JkImlGenerator.getImlFilePath(basePath));
+        JkPathFile.of(imlPath)
                 .deleteIfExist()
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
-        JkLog.info("Iml file generated at " + imlFile.get());
+        JkLog.info("Iml file generated at " + imlPath);
         JkLog.endTask();
     }
 

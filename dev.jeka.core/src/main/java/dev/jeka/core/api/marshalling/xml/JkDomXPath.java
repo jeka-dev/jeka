@@ -1,4 +1,4 @@
-package dev.jeka.core.api.marshalling;
+package dev.jeka.core.api.marshalling.xml;
 
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;

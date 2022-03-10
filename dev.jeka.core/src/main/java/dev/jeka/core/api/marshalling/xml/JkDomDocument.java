@@ -1,18 +1,20 @@
-package dev.jeka.core.api.marshalling;
+package dev.jeka.core.api.marshalling.xml;
 
+import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.Transformer;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -109,13 +111,11 @@ public final class JkDomDocument {
         return JkDomElement.of(null, root);
     }
 
-
-
     /**
      * Outputs xml in the specified stream.
      */
     public void print(OutputStream out) {
-        print(out, configurer -> {});
+        print(out, dom -> {});
     }
 
     public void save(Path file) {
@@ -130,26 +130,22 @@ public final class JkDomDocument {
      * Same as {@link #print(OutputStream)} but caller can modify the default XML transformer using the
      * specified {@link Consumer<Transformer>}.
      */
-    public void print(OutputStream out, Consumer<Transformer> transformerConfigurer) {
-        TransformerFactory tf = TransformerFactory.newInstance();  //NOSONAR
-        final Transformer transformer;
+    public void print(OutputStream out, Consumer<DOMConfiguration> domConfigurationConfigurer) {
+        final DOMImplementationRegistry registry;
         try {
-            transformer = tf.newTransformer();  //NOSONAR
-        } catch (TransformerConfigurationException e) {
+            registry = DOMImplementationRegistry.newInstance();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-        transformerConfigurer.accept(transformer);
-        try {
-            transformer.transform(new DOMSource(w3cDocument),
-                    new StreamResult(new OutputStreamWriter(out, StandardCharsets.UTF_8)));
-        } catch (TransformerException e) {
-            throw new RuntimeException(e);
-        }
+        final DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
+        final LSSerializer writer = impl.createLSSerializer();
+        LSOutput lsOutput = impl.createLSOutput();
+        lsOutput.setByteStream(out);
+
+        writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
+        writer.getDomConfig().setParameter("xml-declaration", true);
+        domConfigurationConfigurer.accept(writer.getDomConfig());
+        writer.write(w3cDocument, lsOutput);
     }
 
     public String toXml() {

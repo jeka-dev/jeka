@@ -8,6 +8,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -72,6 +73,7 @@ public final class JkImlGenerator {
     }
 
     public JkImlGenerator setDefImportedProjects(JkPathSequence defImportedProjects) {
+        JkUtilsAssert.argument(defImportedProjects != null, "defImportedProjects cannot be null.");
         this.defImportedProjects = defImportedProjects;
         return this;
     }

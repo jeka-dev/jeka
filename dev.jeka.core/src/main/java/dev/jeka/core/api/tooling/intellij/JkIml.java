@@ -1,7 +1,7 @@
 package dev.jeka.core.api.tooling.intellij;
 
-import dev.jeka.core.api.marshalling.JkDomDocument;
-import dev.jeka.core.api.marshalling.JkDomElement;
+import dev.jeka.core.api.marshalling.xml.JkDomDocument;
+import dev.jeka.core.api.marshalling.xml.JkDomElement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;

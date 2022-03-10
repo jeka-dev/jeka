@@ -1,4 +1,4 @@
-package dev.jeka.core.api.marshalling;
+package dev.jeka.core.api.marshalling.xml;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
