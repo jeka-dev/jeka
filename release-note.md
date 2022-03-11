@@ -10,7 +10,6 @@
 * New mono-repo organisation allowing better tested product and version matching between Jeka and its plugins
 * Deploy non-release artifacts in GitHub Packages
 
-
 # 0.9.15.RELEASE
 * Upgrade JUNIT PLATFORM to 1.8.1  
 * Improve scaffolding for Jeka plugins

@@ -83,6 +83,7 @@ public class VersionFromGitJkBean extends JkBean {
             cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion)
                     .orElseGet(() -> git.getVersionFromTag(tagPrefixForVersion)));
         }
+        JkLog.info("Version inferred from Git:" + cachedVersion);
         return cachedVersion;
     }
 
