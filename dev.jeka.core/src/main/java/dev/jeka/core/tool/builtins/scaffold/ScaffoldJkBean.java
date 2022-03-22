@@ -24,6 +24,9 @@ public class ScaffoldJkBean extends JkBean {
     @JkDoc("Set the Jeka version to fetch for the wrapper. If null, it will use the same Jeka version than the running one.")
     public String wrapperJekaVersion;
 
+    @JkDoc("Add extra content at the end of the template cmd.property file.")
+    public String cmdExtraContent = "";
+
     private JkConsumers<JkScaffolder, Void> configurators = JkConsumers.of();
 
     private JkScaffolder scaffolder() {
@@ -36,6 +39,7 @@ public class ScaffoldJkBean extends JkBean {
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                 .addRepos(JkRepoFromProperties.getDownloadRepos());
         this.scaffolder.setDependencyResolver(dependencyResolver);
+        this.scaffolder.addCmdFileContent(this.cmdExtraContent);
         configurators.accept(scaffolder);
         return scaffolder;
     }

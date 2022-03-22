@@ -13,10 +13,8 @@ import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -39,6 +37,8 @@ public final class JkScaffolder {
 
     private String cachedJekaVersion;
 
+    private String cmdExtraContent = "";
+
     JkScaffolder(Path baseDir) {
         super();
         this.jkClassCodeProvider = () -> "";
@@ -57,6 +57,11 @@ public final class JkScaffolder {
         return this;
     }
 
+    public JkScaffolder addCmdFileContent(String cmdExtraContent) {
+        this.cmdExtraContent += cmdExtraContent;
+        return this;
+    }
+
     /**
      * Runs the scaffolding.
      */
@@ -67,15 +72,21 @@ public final class JkScaffolder {
         final Path buildClass = def.resolve(classFilename);
         JkLog.info("Create " + buildClass);
         String code = jkClassCodeProvider.get();
-        if (code.contains("${jekaVersion}")) {
-            final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
-            code = code.replace("${jekaVersion}", version);
+        if (!JkUtilsString.isBlank(code)) {
+            if (code.contains("${jekaVersion}")) {
+                final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
+                code = code.replace("${jekaVersion}", version);
+            }
+            JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
         }
-        JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
         JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_PROPERTIES))
                 .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.PROJECT_PROPERTIES));
-        JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.CMD_PROPERTIES))
+        JkPathFile cmdFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.CMD_PROPERTIES))
                 .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.CMD_PROPERTIES));
+        if (!JkUtilsString.isBlank(this.cmdExtraContent)) {
+            String content = cmdExtraContent.replace("\\n", "\n");
+            cmdFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        }
         Path manualHtml = JkLocator.getJekaHomeDir().resolve("doc/reference-guide.html");
         if (Files.exists(manualHtml)) {
             JkPathFile.of(manualHtml).copyToDir(baseDir.resolve("jeka"));

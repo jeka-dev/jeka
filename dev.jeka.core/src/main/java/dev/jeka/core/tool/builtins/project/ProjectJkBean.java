@@ -137,6 +137,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkProject configuredProject = getProject();
         scaffolder.setJekaClassCodeProvider( () -> {
             final String snippet;
+            if (scaffoldTemplate == ScaffoldTemplate.CODE_LESS) {
+                return null;
+            }
             if (scaffoldTemplate == ScaffoldTemplate.NORMAL) {
                 snippet = "buildclass.snippet";
             } else if (scaffoldTemplate == ScaffoldTemplate.PLUGIN) {
@@ -341,7 +344,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     public enum ScaffoldTemplate {
 
-        NORMAL, SIMPLE_FACADE, PLUGIN
+        NORMAL, SIMPLE_FACADE, PLUGIN, CODE_LESS
 
     }
 }
