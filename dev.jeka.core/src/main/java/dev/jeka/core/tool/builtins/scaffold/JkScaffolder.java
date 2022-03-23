@@ -39,6 +39,8 @@ public final class JkScaffolder {
 
     private String cmdExtraContent = "";
 
+    private String projectExtraContent = "";
+
     JkScaffolder(Path baseDir) {
         super();
         this.jkClassCodeProvider = () -> "";
@@ -62,6 +64,11 @@ public final class JkScaffolder {
         return this;
     }
 
+    public JkScaffolder addProjectPropsFileContent(String extraContent) {
+        this.projectExtraContent += extraContent;
+        return this;
+    }
+
     /**
      * Runs the scaffolding.
      */
@@ -79,13 +86,17 @@ public final class JkScaffolder {
             }
             JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
         }
-        JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_PROPERTIES))
+        JkPathFile projectPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_PROPERTIES))
                 .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.PROJECT_PROPERTIES));
         JkPathFile cmdFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.CMD_PROPERTIES))
                 .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.CMD_PROPERTIES));
         if (!JkUtilsString.isBlank(this.cmdExtraContent)) {
             String content = cmdExtraContent.replace("\\n", "\n");
             cmdFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        }
+        if (!JkUtilsString.isBlank(this.projectExtraContent)) {
+            String content = projectExtraContent.replace("\\n", "\n");
+            projectPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }
         Path manualHtml = JkLocator.getJekaHomeDir().resolve("doc/reference-guide.html");
         if (Files.exists(manualHtml)) {

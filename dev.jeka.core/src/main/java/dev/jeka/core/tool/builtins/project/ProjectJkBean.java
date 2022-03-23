@@ -13,6 +13,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProject;
@@ -25,6 +26,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffolder;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 import org.w3c.dom.Document;
@@ -64,6 +66,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     @JkDoc("The output file for the xml dependency description.")
     public Path output;
 
+    @JkDoc("The target JVM version for compiled files.")
+    @JkInjectProperty("jeka.java.version")
+    public String javaVersion;
+
     private final ScaffoldJkBean scaffoldJkBean = getBean(ScaffoldJkBean.class).configure(this::configure);
 
     private JkProject project;
@@ -79,6 +85,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         }
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
         compiler.setJdkHomesWithProperties(JkProperties.getAllStartingWith("jdk."));
+        if (!JkUtilsString.isBlank(this.javaVersion)) {
+            JkJavaVersion version = JkJavaVersion.of(this.javaVersion);
+            project.getConstruction().setJvmTargetVersion(version);
+        }
         applyRepo(project);
         projectConfigurators.accept(project);
         this.applyPostSetupOptions(project);

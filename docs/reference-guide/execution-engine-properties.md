@@ -34,6 +34,7 @@ project1
 * `jeka.jdk.X=` location of the JDK version X _(e.g. jeka.jdk.11=/my/java/jdk11)_. It is used to compile projects when 
   project JVM target version differs from Jeka running version.
 * `jeka.kotlin.version` : Version of Kotlin used for compiling both _def_ and Kotlin project sources.
+* `jeka.java.version` :  Target JVM version for compiled files.
 
 ### Repositories
 
