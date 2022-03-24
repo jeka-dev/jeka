@@ -29,6 +29,17 @@ public final class JkUtilsPath {
         // Do nothing
     }
 
+    public static String friendlyName(Path path) {
+        if (path.isAbsolute()) {
+            Path relPath = JkUtilsPath.relativizeFromWorkingDir(path);
+            return friendlyName(relPath);
+        }
+        if (path.getFileName().equals("") || path.getFileName().equals(".")) {
+            return path.toAbsolutePath().getFileName().toString();
+        }
+        return path.toString();
+    }
+
     /**
      * As {@link Path} implements  {@link Iterable<Path>} it is not obvious if an {@link Iterable} of {@link Path} was
      * intended to be a list of {@link Path} or a single {@link Path}.

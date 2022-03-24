@@ -188,6 +188,10 @@ public final class JkIml {
             return isTest;
         }
 
+        public String getType() {
+            return type;
+        }
+
         void append(JkDomElement parent, PathUrlResolver pathUrlResolver) {
             JkDomElement el = parent.add("sourceFolder")
                     .attr("url", pathUrlResolver.ideaPath(path))

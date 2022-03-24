@@ -181,7 +181,8 @@ public final class JkDependencyResolver<T> {
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {
             if (params.isFailOnDependencyResolutionError()) {
-                throw new IllegalStateException(report.toString());
+                String msg = report.toString() + " \nRepositories = " + repos;
+                throw new IllegalStateException(msg);
             }
             JkLog.warn(report.toString());
         }

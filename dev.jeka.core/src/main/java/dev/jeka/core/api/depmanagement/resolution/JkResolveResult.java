@@ -1,9 +1,6 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.depmanagement.JkVersionProvider;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 

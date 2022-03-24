@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
@@ -118,7 +119,7 @@ public abstract class JkBean {
 
     @Override
     public String toString() {
-        return shortName() + " in project '" + this.runtime.getProjectBaseDir() + "'";
+        return shortName() + " in project '" + JkUtilsPath.friendlyName(this.runtime.getProjectBaseDir()) + "'";
     }
 }
 

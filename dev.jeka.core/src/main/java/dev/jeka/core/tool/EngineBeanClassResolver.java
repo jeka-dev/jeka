@@ -56,6 +56,14 @@ final class EngineBeanClassResolver {
             List<String> beanClassNames = JkUtilsIterable.concatLists(defBeanClassNames(), globalBeanClassNames())
                     .stream().distinct().collect(Collectors.toList());
             List<String> matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
+            if (matchingClassNames.isEmpty()) {  // maybe the cache is stales -> rescan classpath
+                JkLog.trace("KBean '%s' does not match any class names on %s. Rescan classpath", beanName, beanClasses);
+                reloadGlobalBeanClassNames();
+                matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
+                if (matchingClassNames.isEmpty()) {
+                    JkLog.trace("KBean '%s' does not match any class names on %s. Fail.");
+                }
+            }
             Class<? extends JkBean> selected = loadUniqueClassOrFail(matchingClassNames, beanName);
             beanClasses.put(JkBean.name(selected), selected);
         }
@@ -103,7 +111,12 @@ final class EngineBeanClassResolver {
                     + matchingBeanClasses + ". Please precise the fully qualified class name of the default bean " +
                     "instead of its short name.");
         } else {
-            return JkClassLoader.ofCurrent().load(matchingBeanClasses.get(0));
+            Class<? extends JkBean> result = JkClassLoader.ofCurrent().loadIfExist(matchingBeanClasses.get(0));
+            if (result == null) {  // can happen if cache is stalled
+                reloadGlobalBeanClassNames();
+                throw new JkException("No class " + matchingBeanClasses.get(0) + " found in classpath");
+            }
+            return result;
         }
     }
 
@@ -128,24 +141,28 @@ final class EngineBeanClassResolver {
                     return cachedGlobalBeanClassName;
                 }
             }
-            long t0 = System.currentTimeMillis();
-            ClassLoader classLoader = JkClassLoader.ofCurrent().get();
-            boolean ignoreParent = false;
-            if (classpath != null) {
-
-                // If classpath is set, then sources has been compiled in work dir
-                classLoader = new URLClassLoader(classpath.toUrls());
-                ignoreParent = true;
-            }
-            cachedGlobalBeanClassName = JkInternalClasspathScanner.of()
-                    .findClassedExtending(classLoader, JkBean.class, path -> true, true, false);
-            if (JkLog.isVerbose()) {
-                JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
-                cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
-            }
-            storeGlobalKbeanClasses(cachedGlobalBeanClassName);
+            reloadGlobalBeanClassNames();
         }
         return cachedGlobalBeanClassName;
+    }
+
+    private void reloadGlobalBeanClassNames() {
+        long t0 = System.currentTimeMillis();
+        ClassLoader classLoader = JkClassLoader.ofCurrent().get();
+        boolean ignoreParent = false;
+        if (classpath != null) {
+
+            // If classpath is set, then sources has been compiled in work dir
+            classLoader = new URLClassLoader(classpath.toUrls());
+            ignoreParent = true;
+        }
+        cachedGlobalBeanClassName = JkInternalClasspathScanner.of()
+                .findClassedExtending(classLoader, JkBean.class, path -> true, true, false);
+        if (JkLog.isVerbose()) {
+            JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+            cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
+        }
+        storeGlobalKbeanClasses(cachedGlobalBeanClassName);
     }
 
     List<Class<? extends JkBean>> defBeanClasses() {

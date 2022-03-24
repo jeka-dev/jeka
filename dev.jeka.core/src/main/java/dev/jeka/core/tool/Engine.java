@@ -82,8 +82,9 @@ final class Engine {
         if (hasJekaDir) {
             result = resolveAndCompile(new HashMap<>(), true,
                     !Environment.standardOptions.ignoreCompileFail);
-            computedClasspath = result.classpath
-                    .andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
+            computedClasspath = result.classpath;
+                    // the command deps has been included in cache for classpath resolution
+                    //.andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
             AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
             beanClassesResolver.setClasspath(computedClasspath, result.classpathChanged);
         } else {
@@ -131,8 +132,8 @@ final class Engine {
                 .andMatcher(JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
         JkLog.trace("Parse source code of " + sourceFiles);
         final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
-        JkDependencySet parsedDependencies = parser.dependencies();
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
+        JkDependencySet parsedDependencies = parser.dependencies().and(Environment.commandLine.getDefDependencies());
         EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(parsedDependencies);
         return new CompilationContext(
                 jekaClasspath().and(cacheResult.resolvedClasspath),
@@ -335,7 +336,8 @@ final class Engine {
     private void help() {
         List<Class<? extends JkBean>> localBeanClasses = beanClassesResolver.defBeanClasses();
         List<Class> globalBeanClasses = beanClassesResolver.globalBeanClassNames().stream()
-                .map(className -> JkClassLoader.ofCurrent().load(className))
+                .map(className -> JkClassLoader.ofCurrent().loadIfExist(className))
+                .filter(Objects::nonNull)   // due to cache, some classNames may not be in classpath
                 .filter(beanClass -> !localBeanClasses.contains(beanClass))
                 .collect(Collectors.toList());
         HelpDisplayer.help(localBeanClasses, globalBeanClasses, false);

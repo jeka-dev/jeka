@@ -128,16 +128,18 @@ public final class JkImlGenerator {
                 .getContent()
                     .addJekaStandards();
         if (ideSupport != null) {
-            ideSupport.getProdLayout().resolveSources().getRootDirsOrZipFiles()
+            List<Path> sourcePaths = ideSupport.getProdLayout().resolveSources().getRootDirsOrZipFiles();
+            sourcePaths
                     .forEach(path -> iml.getComponent().getContent().addSourceFolder(path, false, null));
             ideSupport.getProdLayout().resolveResources().getRootDirsOrZipFiles().stream()
-                    .filter(path ->
-                            !ideSupport.getProdLayout().resolveResources().getRootDirsOrZipFiles().contains(path))
+                    .filter(path -> !sourcePaths.contains(path))
                     .forEach(path -> iml.getComponent().getContent().addSourceFolder(path, false, "java-resource"));
-            ideSupport.getTestLayout().resolveSources().getRootDirsOrZipFiles().stream()
-                    .filter(path ->
-                            !ideSupport.getTestLayout().resolveResources().getRootDirsOrZipFiles().contains(path))
-                    .forEach(path -> iml.getComponent().getContent().addSourceFolder(path, true, "java-resource"));
+            List<Path> testSourcePaths = ideSupport.getTestLayout().resolveSources().getRootDirsOrZipFiles();
+            testSourcePaths
+                    .forEach(path -> iml.getComponent().getContent().addSourceFolder(path, true, null));
+            ideSupport.getTestLayout().resolveResources().getRootDirsOrZipFiles().stream()
+                    .filter(path -> !testSourcePaths.contains(path))
+                    .forEach(path -> iml.getComponent().getContent().addSourceFolder(path, false, "java-test-resource"));
             JkDependencyResolver depResolver = ideSupport.getDependencyResolver();
             JkResolvedDependencyNode tree = depResolver.resolve(
                     ideSupport.getDependencies(),

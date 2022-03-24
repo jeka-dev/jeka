@@ -36,7 +36,7 @@ public class SonarqubeJkBean extends JkBean {
     public String scannerVersion = "4.6.2.2472";
 
     @JkDoc("If true, displays sonarqube output on console")
-    public boolean logOutput = false;
+    public boolean logOutput = true;
 
     private Consumer<JkSonarqube> sonarqubeConfigurer = sonarqube -> {};
 
@@ -60,6 +60,9 @@ public class SonarqubeJkBean extends JkBean {
         JkModuleId moduleId = project.getPublication().getModuleId();
         if (moduleId == null) {
             String baseDirName = baseDir.getFileName().toString();
+            if (JkUtilsString.isBlank(baseDirName)) {
+                baseDirName = baseDir.toAbsolutePath().getFileName().toString();
+            }
             moduleId = JkModuleId.of(baseDirName, baseDirName);
         }
         final String version = project.getPublication().getVersion().getValue();
