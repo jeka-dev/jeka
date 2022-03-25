@@ -69,6 +69,8 @@ class Environment {
 
         boolean logBanner;
 
+        boolean logDuration;
+
         boolean logSetup;
 
         boolean logStackTrace;
@@ -90,6 +92,7 @@ class Environment {
             this.logIvyVerbose = valueOf(boolean.class, map, false, "log.ivy.verbose", "liv");
             this.logNoAnimation = valueOf(boolean.class, map, false, "log.no.animation", "lna");
             this.logBanner = valueOf(boolean.class, map, false,"log.banner", "lb");
+            this.logDuration = valueOf(boolean.class, map, false,"log.duration", "ld");
             this.logSetup = valueOf(boolean.class, map, false,"log.setup", "lsu");
             this.logStackTrace = valueOf(boolean.class, map,false, "log.stacktrace", "lst");
             this.logRuntimeInformation = valueOf(boolean.class, map, false, "log.runtime.info", "lri");

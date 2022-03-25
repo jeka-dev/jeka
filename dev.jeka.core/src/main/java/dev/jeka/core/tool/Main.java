@@ -58,6 +58,9 @@ public final class Main {
             if (Environment.standardOptions.logBanner) {
                 displayOutro(start);
             }
+            if (Environment.standardOptions.logDuration && !Environment.standardOptions.logBanner) {
+                displayDuration(start);
+            }
             System.exit(0); // Triggers shutdown hooks
         } catch (final Throwable e) {
             JkBusyIndicator.stop();
@@ -139,6 +142,10 @@ public final class Main {
         final int length = printAscii(false, "text-success.ascii");
         System.out.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
                 + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
+    }
+
+    private static void displayDuration(long startTs) {
+        System.out.println("\nTotal run duration : " + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
     }
 
     private Main() {
