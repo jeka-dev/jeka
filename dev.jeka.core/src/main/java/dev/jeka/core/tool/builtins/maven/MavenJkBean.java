@@ -9,6 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 @JkDoc("Provides method to help migration from Maven.")
@@ -19,6 +20,10 @@ public class MavenJkBean extends JkBean {
 
     @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
     public void migrationCode()  {
+        if (!Files.exists(getBaseDir().resolve("pom.xml"))) {
+            throw new IllegalStateException(("No pom.xml file found at " + JkUtilsPath.friendlyName(getBaseDir())
+                    + ". Won't process."));
+        }
         Path effectivePom = JkUtilsPath.createTempFile("jeka-effective-pom-", ".pom");
         JkMvn.of(getBaseDir(), "help:effective-pom", "-Doutput=" + effectivePom.toString())
                 .toProcess()

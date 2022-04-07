@@ -37,7 +37,7 @@ public abstract class JkBean {
         this(JkRuntime.getCurrentContextBaseDir());
     }
 
-    @JkDoc("Displays help about this plugin.")
+    @JkDoc("Displays help about this KBean")
     public void help() {
         HelpDisplayer.helpJkBean(this);
     }
@@ -65,7 +65,7 @@ public abstract class JkBean {
     /**
      * Cleans output directory.
      */
-    @JkDoc("Delete content of jeka/output directory.")
+    @JkDoc("Delete content of jeka/output directory")
     public void clean() {
         Path output = getOutputDir();
         JkLog.info("Clean output directory " + output);

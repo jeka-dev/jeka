@@ -34,7 +34,7 @@ public final class JkUtilsPath {
             Path relPath = JkUtilsPath.relativizeFromWorkingDir(path);
             return friendlyName(relPath);
         }
-        if (path.getFileName().equals("") || path.getFileName().equals(".")) {
+        if (path.getFileName().toString().equals("") || path.getFileName().toString().equals(".")) {
             return path.toAbsolutePath().getFileName().toString();
         }
         return path.toString();

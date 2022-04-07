@@ -9,8 +9,8 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.builtins.git.GitJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
-import dev.jeka.core.tool.builtins.release.VersionFromGitJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 import dev.jeka.plugins.jacoco.JacocoJkBean;
 import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
@@ -29,7 +29,7 @@ class MasterBuild extends JkBean {
 
     final NexusJkBean nexus = getBean(NexusJkBean.class).configure(this::configure);
 
-    final VersionFromGitJkBean versionFromGit = getBean(VersionFromGitJkBean.class);
+    final GitJkBean git = getBean(GitJkBean.class);
 
 
     // ------ Slave projects
@@ -49,7 +49,7 @@ class MasterBuild extends JkBean {
     private JacocoJkBean coreJacocoBean;
 
     MasterBuild() throws Exception {
-        versionFromGit.autoConfigureProject = false;
+        git.projectVersionSupplier.on = false;
         coreBuild.runIT = true;
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
         if (JkProperties.get("sonar.host.url") != null) {
@@ -141,13 +141,13 @@ class MasterBuild extends JkBean {
     }
 
     private void applyToSlave(ProjectJkBean projectJkBean) {
-        if (!versionFromGit.version().isSnapshot()) {     // Produce javadoc only for release
+        if (!git.projectVersionSupplier.version().isSnapshot()) {     // Produce javadoc only for release
             projectJkBean.pack.javadoc = true;
         }
         projectJkBean.configure(project -> {
-                versionFromGit.configure(project, false);
+                git.projectVersionSupplier.configure(project, false);
                 project.getPublication()
-                    .setVersion(versionFromGit::versionAsText)
+                    .setVersion(git.projectVersionSupplier::versionAsText)
                     .setRepos(this.publishRepo())
                     .getMaven()
                         .getPomMetadata()
@@ -185,7 +185,7 @@ class MasterBuild extends JkBean {
 
     static class ShowVersion {
         public static void main(String[] args) {
-            System.out.println(JkInit.instanceOf(VersionFromGitJkBean.class, args).version());
+            System.out.println(JkInit.instanceOf(GitJkBean.class, args).projectVersionSupplier.version());
         }
     }
 

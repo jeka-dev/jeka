@@ -229,7 +229,7 @@ public final class JkImlGenerator {
     }
 
     private static Optional<Path> findExistingImlFile(Path projectDir) {
-        return JkPathTree.of(projectDir).andMatching(".idea/*.iml", "**.iml").stream().findFirst();
+        return JkPathTree.of(projectDir).andMatching(".idea/*.iml", "*.iml").stream().findFirst();
     }
 
     private static JkIml.ModuleLibraryOrderEntry libAsOrderEntry(Path libPath) {
