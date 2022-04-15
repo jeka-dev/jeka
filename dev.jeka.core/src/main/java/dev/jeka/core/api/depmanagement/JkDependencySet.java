@@ -148,7 +148,7 @@ public class JkDependencySet {
         return and(null, moduleId.toString());
     }
 
-    public JkDependencySet and(String moduleDescriptor) {
+    public JkDependencySet and(@JkDepSuggest String moduleDescriptor) {
         return and(null, moduleDescriptor);
     }
 

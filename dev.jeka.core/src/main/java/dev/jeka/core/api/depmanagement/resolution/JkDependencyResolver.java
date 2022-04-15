@@ -200,6 +200,10 @@ public final class JkDependencyResolver<T> {
         return JkInternalDependencyResolver.of(this.repos).searchGroups();
     }
 
+    public List<String> search(String groupCriteria, String moduleNameCriteria, String versionCriteria) {
+        return JkInternalDependencyResolver.of(this.repos).search(groupCriteria, moduleNameCriteria, versionCriteria);
+    }
+
     /**
      * Returns an alphabetical sorted list of module ids present in these repositories for the specified groupId.
      */

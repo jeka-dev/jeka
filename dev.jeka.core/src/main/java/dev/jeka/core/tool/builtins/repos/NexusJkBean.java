@@ -76,7 +76,7 @@ public class NexusJkBean extends JkBean {
         if (repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
             JkLog.warn("No credentials found on repo " + repo);
         }
-        JkNexusRepos result = JkNexusRepos.ofUrlAndCredentials(repo);
+        JkNexusRepos result = JkNexusRepos.ofRepo(repo);
         this.nexusReposConfigurators.accept(result);
         return result;
     }

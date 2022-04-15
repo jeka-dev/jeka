@@ -9,7 +9,6 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 import java.io.File;
 import java.util.List;
 
-
 /**
  * Not part of the public API.
  */
@@ -37,6 +36,14 @@ public interface JkInternalDependencyResolver {
 
     List<String> searchVersions(JkModuleId moduleId);
 
+    /**
+     * @param groupCriteria
+     * @param moduleNameCtriteria
+     * @param searchExpression
+     * @return
+     */
+    List<String> search(String groupCriteria, String moduleNameCriteria, String versionCriteria);
+
     static JkInternalDependencyResolver of(JkRepoSet repos) {
         final String factoryClassName = "dev.jeka.core.api.depmanagement.embedded.ivy.IvyInternalDepResolverFactory";
         Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(factoryClassName);
@@ -55,10 +62,10 @@ public interface JkInternalDependencyResolver {
             if (IVY_CLASSLOADER != null) {
                 return IVY_CLASSLOADER;
             }
-            JkUrlFileProxy fileProxy = JkUrlFileProxy.of(
+            JkUrlFileProxy fileProxyIvy = JkUrlFileProxy.of(
                     "https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar",
                     JkModuleDependency.of("org.apache.ivy:ivy:2.5.0").cachePath());
-            IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(fileProxy.get());
+            IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(fileProxyIvy.get());
             return IVY_CLASSLOADER;
         }
 

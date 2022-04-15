@@ -109,7 +109,7 @@ class MasterBuild extends JkBean {
     @JkDoc("Closes and releases staging Nexus repositories (typically, after a publish).")
     public void closeAndReleaseRepo() {
         JkRepo repo = publishRepo().getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
-        JkNexusRepos.ofUrlAndCredentials(repo).closeAndRelease();
+        JkNexusRepos.ofRepo(repo).closeAndRelease();
     }
 
     @JkDoc("Clean build of core + plugins bypassing tests.")

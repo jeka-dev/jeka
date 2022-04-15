@@ -1,7 +1,9 @@
 package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsHttp;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -11,10 +13,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class JkNexusRepos {
 
     private static final long CLOSE_TIMEOUT_MILLIS = 15 * 60 * 1000L;
 
-    private static final long  CLOSE_WAIT_INTERVAL_MILLIS = 10_000L;
+    private static final long CLOSE_WAIT_INTERVAL_MILLIS = 10_000L;
 
     private final String baseUrl;
 
@@ -44,10 +43,13 @@ public class JkNexusRepos {
     /**
      * Creates a {@link JkNexusRepos} from information contained in the specified repo, meaning baseUrl and credentials.
      */
-    public static JkNexusRepos ofUrlAndCredentials(JkRepo repo) {
+    public static JkNexusRepos ofRepo(JkRepo repo) {
         JkRepo.JkRepoCredentials repoCredentials = repo.getCredentials();
         URL url = repo.getUrl();
         String baseUrl = url.getProtocol() + "://" + url.getHost();
+        if (repo.getCredentials() == null) {
+            return new JkNexusRepos(baseUrl, null);
+        }
         return JkNexusRepos.ofBasicCredentials(baseUrl, repoCredentials.getUserName(), repoCredentials.getPassword());
     }
 
@@ -62,9 +64,10 @@ public class JkNexusRepos {
     /**
      * Closes then releases staging repositories in OPEN status.
      * Repositories not in OPEN status at time of invoking this method won't be released.
+     *
      * @param profileNames a filter to take in account only repositories having specified profile names. If empty, no filter applies.
      */
-    public void closeAndReleaseOpenRepositories(String ...profileNames) {
+    public void closeAndReleaseOpenRepositories(String... profileNames) {
         JkLog.startTask("Closing and releasing staged repositories");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
         JkLog.info("Found staging repositories : ");
@@ -86,9 +89,10 @@ public class JkNexusRepos {
 
     /**
      * Closes repositories in OPEN Status, waits for all repos are closed then releases all repositories.
+     *
      * @param profileNames a filter to take in account only repositories having specified profile names. If empty, no filter applies.
      */
-    public void closeAndRelease(String ...profileNames) {
+    public void closeAndRelease(String... profileNames) {
         JkLog.startTask("Closing and releasing staged repository");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
         JkLog.info("Found staging repositories : ");
@@ -158,7 +162,7 @@ public class JkNexusRepos {
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/xml");
         con.setReadTimeout(readTimeout);
-        assertResponseOk(con, null);
+        JkUtilsHttp.assertResponseOk(con, null);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document doc = JkUtilsXml.documentFrom(in);
             Element data = JkUtilsXml.directChild(doc.getDocumentElement(), "data");
@@ -174,7 +178,7 @@ public class JkNexusRepos {
         HttpURLConnection con = connection(url);
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/xml");
-        assertResponseOk(con, null);
+        JkUtilsHttp.assertResponseOk(con, null);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document doc = JkUtilsXml.documentFrom(in);
             Element root = doc.getDocumentElement();
@@ -194,11 +198,11 @@ public class JkNexusRepos {
         con.setRequestProperty("Content-Type", "application/json");
         con.setDoOutput(true);
         String json = "{\"data\":{\"stagedRepositoryIds\":" + toJsonArray(repositoryIds) + "}}";
-        try(OutputStream os = con.getOutputStream()) {
+        try (OutputStream os = con.getOutputStream()) {
             byte[] input = json.getBytes("utf-8");
             os.write(input, 0, input.length);
         }
-        assertResponseOk(con, json);
+        JkUtilsHttp.assertResponseOk(con, json);
         JkLog.endTask();
     }
 
@@ -215,11 +219,11 @@ public class JkNexusRepos {
         con.setDoOutput(true);
         String json = "{\"data\":{\"autoDropAfterRelease\":true,\"stagedRepositoryIds\":"
                 + toJsonArray(repositoryIds) + "}}";
-        try(OutputStream os = con.getOutputStream()) {
+        try (OutputStream os = con.getOutputStream()) {
             byte[] input = json.getBytes("utf-8");
             os.write(input, 0, input.length);
         }
-        assertResponseOk(con, json);
+        JkUtilsHttp.assertResponseOk(con, json);
         JkLog.endTask();
     }
 
@@ -239,7 +243,7 @@ public class JkNexusRepos {
         JkLog.endTask();
     }
 
-    private static Predicate<JkStagingRepo> profileNameFilter(String ... profileNames) {
+    private static Predicate<JkStagingRepo> profileNameFilter(String... profileNames) {
         if (profileNames.length == 0) {
             return repo -> true;
         }
@@ -254,30 +258,11 @@ public class JkNexusRepos {
         return con;
     }
 
-    private void assertResponseOk(HttpURLConnection con, String body) throws IOException {
-        int code = con.getResponseCode();
-        if (code >= 400) {
-            InputStream inputStream = con.getErrorStream();
-            if (inputStream == null) {
-                throw new IllegalStateException("Request " + con.getRequestMethod() + " " +  con.getURL()
-                        + " failed with status code " + code + "\nRequest body : " + body);
-            }
-            try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getErrorStream(), "utf-8"))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-                throw new IllegalStateException("Request " + con.getURL() + " failed with status code " + code + "\n"
-                        + "Request body : " + body + "\n"
-                        + "Response body : " + response);
-            }
-        }
-    }
+
 
     private String toJsonArray(List<String> items) {
         StringBuilder sb = new StringBuilder("[");
-        for (Iterator it = items.iterator(); it.hasNext();) {
+        for (Iterator it = items.iterator(); it.hasNext(); ) {
             sb.append("\"").append(it.next()).append("\"");
             if (it.hasNext()) {
                 sb.append(", ");
@@ -315,7 +300,7 @@ public class JkNexusRepos {
                     Long.valueOf(JkUtilsXml.directChildText(el, "updatedTimestamp")),
                     JkUtilsXml.directChildText(el, "repositoryURI"),
                     JkUtilsXml.directChildText(el, "type"),
-                    Boolean.valueOf(JkUtilsXml.directChildText(el,"transitioning")),
+                    Boolean.valueOf(JkUtilsXml.directChildText(el, "transitioning")),
                     JkUtilsXml.directChildText(el, "profileName"));
         }
 
@@ -323,7 +308,7 @@ public class JkNexusRepos {
             if ("open".equals(type)) {
                 return transitioning ? Status.CLOSING : Status.OPEN;
             } else
-            return Status.CLOSED;
+                return Status.CLOSED;
         }
 
         public String getId() {
@@ -365,5 +350,7 @@ public class JkNexusRepos {
 
 
 
-
 }
+
+
+

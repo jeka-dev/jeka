@@ -75,6 +75,7 @@ public final class JkDomDocument {
         return new JkDomDocument(doc);
     }
 
+
     /**
      * Same as {@link #parse(InputStream, DocumentBuilder)} but using a default {@link DocumentBuilder}.
      */
@@ -87,6 +88,8 @@ public final class JkDomDocument {
         }
         return parse(inputStream, builder);
     }
+
+
 
     public static JkDomDocument parse(Path file) {
         try (InputStream is = Files.newInputStream(file)) {

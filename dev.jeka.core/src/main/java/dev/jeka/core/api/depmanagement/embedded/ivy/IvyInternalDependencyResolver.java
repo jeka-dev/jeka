@@ -13,6 +13,7 @@ import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
+import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ConfigurationResolveReport;
@@ -22,6 +23,8 @@ import org.apache.ivy.core.resolve.IvyNode;
 import org.apache.ivy.core.resolve.IvyNodeCallers.Caller;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.search.SearchEngine;
+import org.apache.ivy.plugins.matcher.GlobPatternMatcher;
+import org.apache.ivy.plugins.matcher.PatternMatcher;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -144,6 +147,19 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         SearchEngine searchEngine = new SearchEngine(ivy.getSettings());
         return Arrays.asList(searchEngine.listRevisions(moduleId.getGroup(), moduleId.getName())).stream()
                 .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> search(String groupCriteria, String moduleNameCtriteria, String versionCriteria) {
+        Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, JkResolutionParameters.of());
+        SearchEngine searchEngine = new SearchEngine(ivy.getSettings());
+        ModuleId moduleId = new ModuleId(groupCriteria, moduleNameCtriteria);
+        ModuleRevisionId moduleRevisionId = new ModuleRevisionId(moduleId, versionCriteria);
+        PatternMatcher patternMatcher = new GlobPatternMatcher();
+        ModuleRevisionId[] result = searchEngine.listModules(moduleRevisionId, patternMatcher);
+        return Arrays.stream(result)
+                .map(mrid -> mrid.getOrganisation() + ":" + mrid.getModuleId() + ":" + mrid.getRevision())
                 .collect(Collectors.toList());
     }
 
