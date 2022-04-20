@@ -1,6 +1,6 @@
 The execution engine let to execute an arbitrary Java/Kotlin method from the command line or from an IDE. Methods are declared in regular Java/Kotlin classes. 
 
-Build classes can be defined either as source or _.class_ files in the project to build.
+Build classes can be defined either as source or _.class_ files into the project to build.
 
 ## Project Structure
 
@@ -60,7 +60,7 @@ All command lines are supposed to be launched from the root of the project (and 
 ## Jeka Wrapper
 
 Jeka wrapper consists in shell scripts, a thin booting jar and a configuration file in order _Jeka_ can be executed on a specified 
-version without being installed on the host machine. This is the recommended way of using _Jeka_ as it makes  builds portable from one machine to another.
+version without being installed on the host machine. This is the recommended way of using _Jeka_ as it makes builds portable from one machine to another.
 
 * __jekaw__ and __jekaw.bat__ are respectively _Unix like_ and _Windows_ scripts to launch bootstrapping jar.
 * __jeka/wrapper/dev.jeka.core-wrapper.jar__ is the bootable jar in charge of downloading and installing the specified Jeka 
