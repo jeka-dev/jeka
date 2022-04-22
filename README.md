@@ -186,12 +186,12 @@ Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-n
 This repository is organized as a _mono repo_. It contains The Jeka core project along plugins and samples for 
 automation testing.
 
-* dev.jeka.core : complete Jeka project
-* plugins : Many Jeka plugins that are released along Keka core 
+* dev.jeka.core : Complete Jeka tool
+* plugins : Jeka plugins released along Jeka core 
 * samples : Sample projects serving for examples and automation testing
-* dev.jeka.master : The master build for building all projects together.
+* dev.jeka.master : The master build for building all together.
 
-Jeka builds itself. To build Jeka full distrib from sources, the simpler is to use your IDE.
+Jeka builds itself. To build Jeka full distribution from sources, the simpler is to use your IDE.
 
 Once distribution created, add the distrib folder to your PATH environment variable.
 
