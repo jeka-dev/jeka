@@ -33,13 +33,48 @@ JkDependencySet.of()
     .and("com.orientechnologies:orientdb-client:[2.0.8, 2.1.0[")
     .and("mygroup:mymodule:myclassifier:0.2-SNAPSHOT");
 ```
-There is many way to indicate a module dependency, see Javadoc for browsing possibilities.
+
+Many string formats are accepted to specify a module coordinate :
+
+- _group_:_name_
+- _group_:_name_:_version_
+- _group_:_name_:_classifiers_:_version_
+- _group_:_name_:_classifiers_:_extension_:_version_
+
+_Classifiers_ can be either :
+
+- an empty string to specify the default classifier
+- a simple string as '_linux_' to specify a retrieve a single classifier variant
+- a coma separated string as '_javadoc,sources,_' to specify several variants. Here we have specified javadoc + sources + default artefact.
+
+_Version_ can be either :
+
+- a static version number, as _1.0.2_
+- a snapshot version, as _1.0.2-SNAPSHOT_ 
+- a version range, as _[2.0.8, 2.1.0[_
+
+Examples :
+
+- _com.sun.jersey:jersey-server_ : specify artifact without version
+- _com.sun.jersey:jersey-server:1.19.4_ : specify artifact with version
+- _org.lwjgl:lwjgl:natives_linux:3.1.0_ : specify artifact with 1 classifier and version
+- _org.lwjgl:lwjgl:natives_linux,:_ specify artifact with 2 classifiers ;
+- _org.springframework.boot:spring-boot-dependencies::pom:2.5.6_ specify artifact with _.pom_ extension (to retrieve a BOM)
 
 !!! note
 
     * A version ending by `-SNAPSHOT` has a special meaning : Jeka will consider it _"changing"_. This means that it won't cache it locally and will download the latest version from repository.
     * As Jeka relies on Ivy under the hood, it accepts dynamic versions as mentioned [here](http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html).
     * Dependency files are downloaded in _[USER HOME]_/.jeka/cache/repo
+
+Additionally, it's possible to define the transitivity of the dependency using :  
+
+`JkModuleDependency.of("group:name:sources:zip:version").withTransitivity(JkTransitivity.NONE);`
+
+By default, _Jeka_ uses the most relevant transitivity according the declaration context, so users don't need to specify it 
+unless they want a specific one.
+
+See later for more details about _transitivity_.
 
 ### File System Dependencies
 

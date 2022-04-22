@@ -29,7 +29,4 @@ public class ResolveHibernateIT {
         assertEquals(10, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
     }
 
-
-
-
 }

@@ -7,7 +7,7 @@
 
 <img src="./docs/images/knight-color-logo.svg" align="left" width="180"/>
 
-<strong>Jeka</strong> (formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
+<strong>Jeka</strong> is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
 
 Build/task definitions are expressed with plain *Java* classes to leverage IDE power and Java ecosystem seamlessly.
 
@@ -198,10 +198,10 @@ Once distribution created, add the distrib folder to your PATH environment varia
 ## Build Jeka from IntelliJ
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
-* Add the `JEKA_USER_HOME` variable pointing on [USER_HOME]/.jeka
+* Add the `JEKA_CACHE_DIR` variable pointing on [USER_HOME]/.jeka/cache
 * Make sure the project is configured with a JDK8 or higher.
 * Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
-* Run 'CoreBuild - skip tests' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
+* Run 'FAST BUILD' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
 
 > For debugging the project, you have to set up Intellij in order to workaround with an Intellij issue :
 > Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.

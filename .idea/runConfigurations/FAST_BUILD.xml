@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FAST BUILD" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.Main" />
+    <module name="dev.jeka.core" />
+    <option name="PROGRAM_PARAMETERS" value="clean project#pack project#test.skip=true" />
+    <option name="WORKING_DIRECTORY" value="$MODULE_WORKING_DIR$" />
+    <method v="2">
+      <option name="MakeNoErrorCheck" enabled="false" />
+    </method>
+  </configuration>
+</component>
