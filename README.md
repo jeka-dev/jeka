@@ -31,9 +31,7 @@ class Build extends JkBean {
     Build() {
         project = JkProject.of().simpleFacade()
             .setBaseDir(".")
-            .includeJavadocAndSources(true, true)
-            .useSimpleLayout()  // sources and resources in ./src, tests and test resources in ./tests
-            .mixResourcesAndSources()
+            .includeJavadocAndSources(true, true)  // produce sources and javadoc jars
             .configureCompileDeps(deps -> deps
                 .and("com.google.guava:guava:31.0.1-jre")
                 .and("com.fasterxml.jackson.core:jackson-core:2.13.0")
