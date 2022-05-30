@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.system.JkLog;
 import org.junit.Ignore;
 import org.junit.Test;

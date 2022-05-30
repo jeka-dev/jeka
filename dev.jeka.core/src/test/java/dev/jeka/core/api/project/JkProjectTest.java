@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 public class JkProjectTest {
 
@@ -26,11 +27,44 @@ public class JkProjectTest {
                 .getCompilation().getDependencies();
         JkDependencySet testCompileDeps = javaProject.getConstruction().getTesting()
                 .getCompilation().getDependencies();
-        Assert.assertEquals(1, compileDeps.getEntries().size());
+        Assert.assertEquals(1, compileDeps.getEntries().stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .collect(Collectors.toList())
+                .size());
         Assert.assertNotNull(compileDeps.get("a:a"));
-        Assert.assertEquals(2, testCompileDeps.getEntries().size());
+        Assert.assertEquals(2, testCompileDeps.getEntries().stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .collect(Collectors.toList())
+                .size());
         Assert.assertNotNull(testCompileDeps.get("a:a"));
         Assert.assertNotNull(testCompileDeps.get("b:b"));
+    }
+
+    public void addDependencies() {
+        JkProject javaProject = JkProject.of()
+                .simpleFacade()
+                .addCompileDeps("a:a", "a:a1")
+                .addCompileOnlyDeps("a:a2")
+                .addRuntimeDeps("c:c")
+                .addTestDeps("b:b")
+                .getProject();
+        JkDependencySet compileDeps = javaProject.getConstruction()
+                .getCompilation().getDependencies();
+        JkDependencySet testCompileDeps = javaProject.getConstruction().getTesting()
+                .getCompilation().getDependencies();
+        JkDependencySet runtimeDeps = javaProject.getConstruction().getRuntimeDependencies();
+        Assert.assertEquals(3, compileDeps.getEntries().stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .collect(Collectors.toList())
+                .size());
+        Assert.assertEquals(3, runtimeDeps.getEntries().stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .collect(Collectors.toList())
+                .size());
+        Assert.assertEquals(5, testCompileDeps.getEntries().stream()
+                .filter(JkModuleDependency.class::isInstance)
+                .collect(Collectors.toList())
+                .size());
     }
 
     @Test
@@ -80,9 +114,9 @@ public class JkProjectTest {
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .addTestDependencies(deps -> deps
-                        .and("org.mockito:mockito-core:2.10.0")
-                        .and("io.rest-assured:rest-assured:4.3.3")
+                .configureTestDeps(deps -> deps
+                        .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
+                        .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                 )
                 .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
                 .getProject();
@@ -106,9 +140,9 @@ public class JkProjectTest {
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .addTestDependencies(deps -> deps
-                        .and("org.mockito:mockito-core:2.10.0")
-                        .and("io.rest-assured:rest-assured:4.3.3")
+                .configureTestDeps(deps -> deps
+                        .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
+                        .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 )
                 .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
                 .configurePublishedDeps(deps -> deps.minus("org.postgresql:postgresql"))
@@ -128,9 +162,9 @@ public class JkProjectTest {
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .addTestDependencies(deps -> deps
-                        .and("org.mockito:mockito-core:2.10.0")
-                        .and("io.rest-assured:rest-assured:4.3.3")
+                .configureCompileDeps(deps -> deps
+                        .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
+                        .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
         project.getPublication().getIvy()
                 .setModuleId("my:module")

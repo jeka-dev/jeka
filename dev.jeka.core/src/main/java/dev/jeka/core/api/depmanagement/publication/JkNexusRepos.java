@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsHttp;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -13,7 +12,10 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 

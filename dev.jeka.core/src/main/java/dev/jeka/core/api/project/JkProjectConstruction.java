@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
  * Responsible to produce jar files. It performs compilation and unit testing.
@@ -68,7 +67,7 @@ public class JkProjectConstruction {
 
     private JkPathTreeSet fatJarContentCustomizer = JkPathTreeSet.ofEmpty();
 
-    private UnaryOperator<JkDependencySet> dependencySetModifier = x -> x;
+    private Function<JkDependencySet, JkDependencySet> dependencySetModifier = x -> x;
 
     private boolean addTextAndLocalDependencies = true;
 
@@ -222,7 +221,7 @@ public class JkProjectConstruction {
      * get the runtime dependencies.
      * @param modifier A function that define the runtime dependencies from the compilation ones.
      */
-    public JkProjectConstruction configureRuntimeDependencies(UnaryOperator<JkDependencySet> modifier) {
+    public JkProjectConstruction configureRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependencySetModifier = modifier;
         return this;
     }

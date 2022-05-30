@@ -5,9 +5,6 @@ import dev.jeka.core.api.system.JkLog;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.List;
-
 public class JkNexusReposTest {
 
     @Test

@@ -4,8 +4,6 @@ import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
 
-import static org.junit.Assert.*;
-
 public class JkModuleFileProxyRunner {
 
 

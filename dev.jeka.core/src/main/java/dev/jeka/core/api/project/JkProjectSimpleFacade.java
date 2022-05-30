@@ -1,5 +1,6 @@
 package dev.jeka.core.api.project;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -7,6 +8,10 @@ import dev.jeka.core.api.tooling.JkGitProcess;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -73,19 +78,46 @@ public class JkProjectSimpleFacade {
         return this;
     }
 
+    public JkProjectSimpleFacade includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
+        project.includeJavadocAndSources(includeJavaDoc, includeSources);
+        return this;
+    }
+
     public JkProjectSimpleFacade configureCompileDeps(Function<JkDependencySet, JkDependencySet> modifier) {
         project.getConstruction().getCompilation().configureDependencies(modifier);
         return this;
     }
 
-    public JkProjectSimpleFacade includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
-        project.includeJavadocAndSources(includeJavaDoc, includeSources);
+    public JkProjectSimpleFacade configureRuntimeDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.getConstruction().configureRuntimeDependencies(modifier);
         return this;
     }
 
     public JkProjectSimpleFacade configureTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
         project.getConstruction().getTesting().getCompilation().configureDependencies(modifier);
         return this;
+    }
+
+    public JkProjectSimpleFacade addCompileDeps(@JkDepSuggest String... moduleDescriptors) {
+        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
+        return configureCompileDeps(addFun);
+    }
+
+    public JkProjectSimpleFacade addCompileOnlyDeps(@JkDepSuggest String... moduleDescriptors) {
+        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
+        configureCompileDeps(addFun);
+        UnaryOperator<JkDependencySet> minusFun = deps -> minus(deps, moduleDescriptors);
+        return configureRuntimeDeps(minusFun);
+    }
+
+    public JkProjectSimpleFacade addRuntimeDeps(@JkDepSuggest String... moduleDescriptors) {
+        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
+        return configureRuntimeDeps(addFun);
+    }
+
+    public JkProjectSimpleFacade addTestDeps(@JkDepSuggest String... moduleDescriptors) {
+        UnaryOperator<JkDependencySet> addFun = deps -> addFirst(deps, moduleDescriptors);
+        return addTestDeps(addFun);
     }
 
     public JkProjectSimpleFacade skipTests(boolean skipped) {
@@ -96,7 +128,7 @@ public class JkProjectSimpleFacade {
     /**
      * Add specified dependencies at head of preset dependencies.
      */
-    public JkProjectSimpleFacade addTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectSimpleFacade addTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
         return configureTestDeps(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
     }
 
@@ -105,10 +137,7 @@ public class JkProjectSimpleFacade {
      * get the runtime dependencies.
      * @param modifier A function that define the runtime dependencies from the compilation ones.
      */
-    public JkProjectSimpleFacade configureRuntimeDeps(UnaryOperator<JkDependencySet> modifier) {
-        project.getConstruction().configureRuntimeDependencies(modifier);
-        return this;
-    }
+
 
 
     public JkProjectSimpleFacade setPublishedVersion(Supplier<String> versionSupplier) {
@@ -149,8 +178,7 @@ public class JkProjectSimpleFacade {
     /**
      * Configures the dependencies to be published in a Maven repository.
      */
-    public JkProjectSimpleFacade configurePublishedDeps(
-            Function<JkDependencySet, JkDependencySet> dependencyModifier) {
+    public JkProjectSimpleFacade configurePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
         project.getPublication().getMaven().configureDependencies(dependencyModifier);
         return this;
     }
@@ -190,6 +218,33 @@ public class JkProjectSimpleFacade {
 
     public JkProject getProject() {
         return project;
+    }
+
+    private JkDependencySet add(JkDependencySet deps, String ... descriptors) {
+        JkDependencySet result = deps;
+        for (String descriptor : descriptors) {
+            result = result.and(descriptor);
+        }
+        return result;
+    }
+
+    private JkDependencySet addFirst(JkDependencySet deps, String ... descriptors) {
+        JkDependencySet result = deps;
+        List<String> items = new LinkedList<>(Arrays.asList(descriptors));
+        Collections.reverse(items);
+        for (String descriptor : items) {
+            result = result.and(JkDependencySet.Hint.first(), descriptor);
+        }
+        return result;
+    }
+
+
+    private JkDependencySet minus(JkDependencySet deps, String ... descriptors) {
+        JkDependencySet result = deps;
+        for (String descriptor : descriptors) {
+            result = result.minus(descriptor);
+        }
+        return result;
     }
 
 }

@@ -10,6 +10,7 @@ public class JacocoBuild extends JkBean {
     private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
     private void configure(JkProject project) {
+        System.out.println("toto");
         project.simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .mixResourcesAndSources()

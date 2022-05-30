@@ -2,7 +2,6 @@ package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularModules;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
 import org.junit.Test;
