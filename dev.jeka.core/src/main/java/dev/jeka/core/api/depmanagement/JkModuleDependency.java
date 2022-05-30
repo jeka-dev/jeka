@@ -109,20 +109,32 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
      */
     public static JkModuleDependency of(String description) {
         final String[] strings = description.split( ":");
-        final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
-                ", group:name:version, 'group:name:classifier:version, 'group:name:classifier:type:version'.\n" +
-                "'?' can be used in place of 'version' if this one is unspecified.";
+        final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of \n" +
+                "  group:name \n" +
+                "  group:name:version \n" +
+                "  group:name:classifiers:version \n" +
+                "  group:name:classifiers:extension:version \n" +
+                "  group:name:classifiers:extension: \n" +
+                "where classifiers can be a coma separated list of classifier.";
         JkUtilsAssert.argument(isModuleDependencyDescription(description), errorMessage);
+        int separatorCount = JkUtilsString.countOccurrence(description, ':');
         final JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
-        if (strings.length == 2) {
+        if (separatorCount == 1 && strings.length == 2) {
             return of(moduleId, JkVersion.UNSPECIFIED);
         }
-        if (strings.length == 3) {
+        if (separatorCount == 2 && strings.length == 3) {
             return of(moduleId, JkVersion.of(strings[2]));
-        } if (strings.length == 4) {
+        }
+        if (separatorCount == 3 && strings.length == 4) {
             return of(moduleId, JkVersion.of(strings[3])).withClassifiers(strings[2]);
         }
-        return of(moduleId, JkVersion.of(strings[4])).withClassifiersAndType(strings[2], strings[3]);
+        if (separatorCount == 4 && strings.length == 4) {
+            return of(moduleId, JkVersion.UNSPECIFIED).withClassifiersAndType(strings[2], strings[3]);
+        }
+        if (separatorCount == 4 && strings.length == 5) {
+            return of(moduleId, JkVersion.of(strings[4])).withClassifiersAndType(strings[2], strings[3]);
+        }
+        throw new IllegalArgumentException(errorMessage);
     }
 
     /**
@@ -236,7 +248,7 @@ public final class JkModuleDependency implements JkFileDependency.JkTransitivity
 
     /**
      * Returns the {@link JkArtifactSpecification}s for this module dependency. It can e empty if no
-     * artifact specification as een set. In this case, only the main artifact is taken in account.
+     * artifact specification as been set. In this case, only the main artifact is taken in account.
      */
     public Set<JkArtifactSpecification> getArtifactSpecifications() {
         return this.artifactSpecifications;

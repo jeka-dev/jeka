@@ -7,7 +7,7 @@
 
 <img src="./docs/images/knight-color-logo.svg" align="left" width="180"/>
 
-<strong>Jeka</strong> (formerly Jerkar) is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
+<strong>Jeka</strong> is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
 
 Build/task definitions are expressed with plain *Java* classes to leverage IDE power and Java ecosystem seamlessly.
 
@@ -31,9 +31,7 @@ class Build extends JkBean {
     Build() {
         project = JkProject.of().simpleFacade()
             .setBaseDir(".")
-            .includeJavadocAndSources(true, true)
-            .useSimpleLayout()  // sources and resources in ./src, tests and test resources in ./tests
-            .mixResourcesAndSources()
+            .includeJavadocAndSources(true, true)  // produce javadoc and sources jars
             .configureCompileDeps(deps -> deps
                 .and("com.google.guava:guava:31.0.1-jre")
                 .and("com.fasterxml.jackson.core:jackson-core:2.13.0")
@@ -186,22 +184,22 @@ Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-n
 This repository is organized as a _mono repo_. It contains The Jeka core project along plugins and samples for 
 automation testing.
 
-* dev.jeka.core : complete Jeka project
-* plugins : Many Jeka plugins that are released along Keka core 
+* dev.jeka.core : Complete Jeka tool
+* plugins : Jeka plugins released along Jeka core 
 * samples : Sample projects serving for examples and automation testing
-* dev.jeka.master : The master build for building all projects together.
+* dev.jeka.master : The master build for building all together.
 
-Jeka builds itself. To build Jeka full distrib from sources, the simpler is to use your IDE.
+Jeka builds itself. To build Jeka full distribution from sources, the simpler is to use your IDE.
 
 Once distribution created, add the distrib folder to your PATH environment variable.
 
 ## Build Jeka from IntelliJ
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
-* Add the `JEKA_USER_HOME` variable pointing on [USER_HOME]/.jeka
+* Add the `JEKA_CACHE_DIR` variable pointing on [USER_HOME]/.jeka/cache
 * Make sure the project is configured with a JDK8 or higher.
 * Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
-* Run 'CoreBuild - skip tests' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
+* Run 'FAST BUILD' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
 
 > For debugging the project, you have to set up Intellij in order to workaround with an Intellij issue :
 > Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
