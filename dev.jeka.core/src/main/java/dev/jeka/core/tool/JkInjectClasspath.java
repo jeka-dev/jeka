@@ -1,5 +1,7 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
+
 import java.lang.annotation.*;
 
 /**
@@ -25,6 +27,8 @@ public @interface JkInjectClasspath {
      */
     @Target(ElementType.TYPE)
     @interface JkImports {
+
+        @JkDepSuggest
         JkInjectClasspath[] value();
     }
 

@@ -1,10 +1,10 @@
 site_name: Jeka Build Tool
 theme:
     name: material
-    logo: images/logo.svg
+    logo: images/knight-color-logo.svg
     palette :
-        primary: blue
-        favicon: images/favicon.ico
+        primary: blue grey
+        favicon: images/knight-color-logo.svg
     features:
         - navigation.instant
         - navigation.tracking

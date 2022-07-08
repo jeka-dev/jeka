@@ -140,9 +140,11 @@ public class JkModuleSearch {
     }
 
     private String getApiUrl(String baseCandidate) {
-        final String url;
         if (apiUrl != null) {
             return  apiUrl;
+        }
+        if (JkUtilsString.isBlank(baseCandidate)) {
+            throw new IllegalStateException("No url search or repository has been defined.");
         }
         return getApiUrlForLuceneFromRepoUrl(baseCandidate);
     }

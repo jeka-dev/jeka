@@ -83,7 +83,7 @@ class Environment {
 
         private String jkBeanName;
 
-        private boolean workClean;
+        private boolean cleanWork;
 
         private final Set<String> names = new HashSet<>();
 
@@ -99,7 +99,7 @@ class Environment {
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
             this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");
             this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
-            this.workClean = valueOf(boolean.class, map, false, "work.clean", "wc");
+            this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");
         }
 
         String jkCBeanName() {
@@ -107,7 +107,7 @@ class Environment {
         }
 
         boolean workClean() {
-            return workClean;
+            return cleanWork;
         }
 
         @Override

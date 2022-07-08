@@ -6,6 +6,6 @@ import java.lang.annotation.Target;
 /**
  * Tag to let IDE recognise that the value can be suggested with dependency coordinate
  */
-@Target(ElementType.PARAMETER)
+@Target({ElementType.PARAMETER, ElementType.METHOD})
 public @interface JkDepSuggest {
 }

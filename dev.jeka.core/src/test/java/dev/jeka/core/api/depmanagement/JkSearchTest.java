@@ -59,10 +59,21 @@ public class JkSearchTest {
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkRepo repo = JkRepo.ofMavenCentral();
         List result = JkModuleSearch.of(repo)
-                .setGroupOrNameCriteria("org.springframework.boot:")
+                .setGroupOrNameCriteria("org.springframework.boot")
                 .search();
         result.forEach(System.out::println);
         JkLog.setVerbosity(verbosity);
     }
+
+    @Test
+    @Ignore
+    public void testSearchSpring() throws IOException {
+        JkLog.setDecorator(JkLog.Style.BRACE);
+        List result = JkModuleSearch.of(JkRepo.ofMavenCentral())
+                .setGroupOrNameCriteria("org.sprin*")
+                .search();
+        result.forEach(System.out::println);
+    }
+
 
 }
