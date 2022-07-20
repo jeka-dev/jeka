@@ -18,7 +18,7 @@ class MyBuild {
     * _jeka/def_ can also contain classpath resources.
     * Classes having a name starting by `_` are skipped from compilation.
 
-Java source files are compiled using the running JDK.
+Java source files definded in *def* dir are compiled using the running JDK.
 
 Kotlin sources are compiled using Kotlin version specified by `jeka.kotlin.version` [property](#properties) if present or 
 using Kotlin compiler specified by _KOTLIN_HOME_ environment variable. 
