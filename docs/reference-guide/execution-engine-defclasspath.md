@@ -27,12 +27,12 @@ using Kotlin compiler specified by _KOTLIN_HOME_ environment variable.
 ## Jeka Classpath
 
 Under the hood, Jeka simply executes Java byte code within a flat classloader.
-Classloader's classpath is constructed from :
+This classloader classpath is constructed from :
 
 * jar files present in _jeka/boot_ dir
-* dependencies injected via command line and annotation
+* dependencies injected via command line and annotations
 * compiled def classes
-* Jeka classpaths coming from imported projects.
+* Jeka classpaths coming from imported projects
 
 ### Injected Dependencies
 
