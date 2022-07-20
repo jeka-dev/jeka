@@ -1,6 +1,6 @@
 The execution engine let to execute an arbitrary Java/Kotlin method from the command line or from an IDE. Methods are declared in regular Java/Kotlin classes. 
 
-Build classes can be defined either as source or _.class_ files into the project to build.
+Build classes can be either defined as source file or provided as binary by external libs.
 
 ## Project Structure
 
