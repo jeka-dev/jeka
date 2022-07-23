@@ -15,6 +15,8 @@ Build scripts can be coded, modeled, run, debugged and reused as regular code.
 
 Jeka offers an execution engine, a build API and a powerful plugin architecture to make your automation tasks a breeze. 
 
+<br/>
+
 # Based on simple ideas
 
 - Run Java methods from both IDE and command line indifferently.
