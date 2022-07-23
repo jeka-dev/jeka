@@ -262,14 +262,14 @@ The below example shows a JkJavaProject declaration using explicit transitivity.
 
 ```Java
 JkJavaProject.of().simpleFacade()
-    .setCompileDependencies(deps -> deps
+    .configureCompileDeps(deps -> deps
             .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
             .and("javax.servlet:javax.servlet-api:4.0.1"))
-    .setRuntimeDependencies(deps -> deps
+    .configureRuntimeDeps(deps -> deps
             .and("org.postgresql:postgresql:42.2.19")
             .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
             .minus("javax.servlet:javax.servlet-api"))
-    .setTestDependencies(deps -> deps
+    .configureTestDeps(deps -> deps
             .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
     )
 ```
