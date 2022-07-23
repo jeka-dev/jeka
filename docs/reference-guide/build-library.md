@@ -175,7 +175,7 @@ war packaging, testing, ...). It can contain any kind of `JkDependency`. See [he
 
 _dependencySet_ also defines :
 
-* A **version provider** to define which version of a module we should use in case it is not explicitly mentioned. It ispossible populate a version provider by using a _BOM_ coordinate.
+* A **version provider** to define which version of a module we should use in case it is not explicitly mentioned. It is possible to populate a version provider by passing a _BOM_ coordinate.
 * A set of transitive dependency exclusion rules.
 
 It is designed as an immutable object where we can apply set theory operations for adding, removing or
