@@ -115,7 +115,7 @@ Jeka jar embeds Ivy and executes it in a dedicated classloader to be hidden for 
 
 ![image](images/JkDependency.png)
 
-##### JkModuleDependencies (dependency on module through coordinates)
+**JkModuleDependencies (dependency on module through coordinates)**
 
 This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository. Basically you instantiate a `JkModuleDepency` from it's group, name and version.
 
@@ -133,7 +133,7 @@ Note that :
 * As Jeka relies on Ivy under the hood, it accepts dynamic versions as mentioned [here](http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html).
 * Dependency files are downloaded in _[USER HOME]_/.jeka/cache/repo
 
-##### JkFileSystemSependency (dependency on local files)
+**JkFileSystemSependency (dependency on local files)**
 
 Just mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
 
@@ -141,7 +141,7 @@ Just mention the path of one or several files. If one of the files does not exis
     JkDependencySet.of().andFiles("libs/my.jar", "libs/my.testingtool.jar");
 ``` 
 
-##### JkComputedDependenciy (dependency on files produced by computation)
+**JkComputedDependenciy (dependency on files produced by computation)**
 
 It is typically used for _multi-modules_ or _multi-techno_ projects.
 
