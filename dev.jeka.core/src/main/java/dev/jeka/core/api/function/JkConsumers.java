@@ -5,6 +5,9 @@ import java.util.function.Consumer;
 /**
  * A mutable container for {@link Consumer}. From this object you can replace the underlying {@link Runnable} or
  * chain it with other ones.
+ * @param <T> The type to be consumed by the consumers.
+ * @param <P> The type of the instance holding this <code>JkConsumers</code>. Only used for
+ *           parent chaining purpose.
  */
 public class JkConsumers<T, P> implements Consumer<T> {
 

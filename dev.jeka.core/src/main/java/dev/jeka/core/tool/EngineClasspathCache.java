@@ -49,7 +49,7 @@ class EngineClasspathCache {
     }
 
     /**
-     * Returns true is cached unresolved classpath is not equals to current one.
+     * Returns true if cached unresolved-classpath is not equals to current one.
      */
     private boolean compareAndStore(JkDependencySet dependencySet) {
         Path cacheFile = unresolvedClasspathCache();
@@ -57,7 +57,7 @@ class EngineClasspathCache {
         if (Files.exists(cacheFile)) {
             String cachedContent = new String(JkUtilsPath.readAllBytes(cacheFile));
             if (content.equals(cachedContent)) {
-                JkLog.trace("unresolved-classpath has not changed -> can use 'resolved-classpath' file to determine classpath .");
+                JkLog.trace("unresolved-classpath file is still valid -> Jeka classpath will be determined from this.");
                 return false;
             }
         }

@@ -34,7 +34,7 @@ public class NexusJkBean extends JkBean {
     }
 
     @JkDoc("Closes and releases the configured nexus repositories.")
-    public void closeAndOrRelease() {
+    public void closeAndRelease() {
         JkNexusRepos nexusRepos  = getJkNexusRepos();
         if (nexusRepos == null) {
             return;

@@ -32,6 +32,8 @@ public final class JkConstants {
      */
     public static final String DEF_BIN_DIR = WORK_PATH + "/" + DEF_BIN_DIR_NAME;
 
+    public static final String KBEAN_CLASSES_CACHE_FILE_NAME = "kbean-classes.txt";
+
 
 
     /**
