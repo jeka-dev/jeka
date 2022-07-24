@@ -140,8 +140,9 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
 
     /**
      * If the current commit is tagged and the workspace is not dirty, then the version is the tag name
-     * (last in alphabetical order).
-     * Otherwise, the version is [branch]-SNAPSHOT.
+     * on the current commit. If there is many tags on the current commit, only the last one in alphabetical order is
+     * taken in account.<p>
+     * If no tag is present on the current commit or the workspace is dirty, the version will value <i>[branch]-SNAPSHOT</i>.
      */
     public String getVersionFromTag(String prefix) {
         List<String> tags;
