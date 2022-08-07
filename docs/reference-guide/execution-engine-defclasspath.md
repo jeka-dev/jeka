@@ -1,7 +1,7 @@
 ## Def classes
 
-Java or Kotlin source files present in _jeka/def_ dir. They can be declared at root or 
-in packages.
+Def classes are the compilation result of Java/Kotlin source files located in _jeka/def_. They can be declared at root or 
+in sub-folders for packages.
 Execution engine compiles these files on the fly prior adding them to the [Jeka classpath](#jeka-classpath).
 
 It is possible to specify compilation options by annotating a _def class_ as :
