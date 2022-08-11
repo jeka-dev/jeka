@@ -28,4 +28,4 @@ in the command line.
 !!! info
     `JkRuntime` is the _KBean_ container for a given project. Each _KBean_ instance 
      belongs to a `JkRuntime`. From `JkRuntime`, you can access to other _KBeans_ 
-     and injected projects.
+     from same or other projects.
