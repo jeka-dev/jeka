@@ -177,7 +177,11 @@ final class Engine {
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
         boolean outdated = compilationTracker.isOutdated();
         if (compileSources && this.beanClassesResolver.hasDefSource()) {
-            if (outdated) {
+            boolean missingBinayFiles = compilationTracker.isMissingBinaryFiles();
+            if (missingBinayFiles) {
+                JkLog.trace("Some binary files seem missing.");
+            }
+            if (outdated || missingBinayFiles) {
                 JkLog.trace("Compile classpath : " + classpath);
                 SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
                 if (!result.success) {

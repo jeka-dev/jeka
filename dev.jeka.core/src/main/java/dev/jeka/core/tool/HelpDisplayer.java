@@ -80,6 +80,7 @@ final class HelpDisplayer {
         sb.append("  -log.setup (shorthand -lsu) : log KBean setup process.\n");;
         sb.append("  -kbean (shorthand -kb) : Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name.\n");
         sb.append("  -clean.work (shorthand -cw) : Delete all files cached in jeka/.work.\n");
+        sb.append("  -no.help : Does not display help if no method is invoked.\n");
         sb.append("  -def.compile.ignore-failure (shorthand -dci) : Try to compile def classes. If fail, ignore failure and continue.\n");
         return sb.toString();
     }

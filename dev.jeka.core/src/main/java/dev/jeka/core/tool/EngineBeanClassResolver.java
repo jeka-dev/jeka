@@ -59,7 +59,7 @@ final class EngineBeanClassResolver {
                 reloadGlobalBeanClassNames();
                 matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
                 if (matchingClassNames.isEmpty()) {
-                    JkLog.trace("KBean '%s' does not match any class names on %s. Fail.");
+                    JkLog.trace("KBean '%s' does not match any class names on %s. Fail.", beanName, beanClasses);
                 }
             }
             Class<? extends JkBean> selected = loadUniqueClassOrFail(matchingClassNames, beanName);

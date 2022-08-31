@@ -111,6 +111,13 @@ class EngineCompilationUpdateTracker {
                 .count(5000, true);
     }
 
+    boolean isMissingBinaryFiles() {
+        Path work = projectBaseDir.resolve(JkConstants.DEF_BIN_DIR);
+        Path def = projectBaseDir.resolve(JkConstants.DEF_DIR);
+        return JkPathTree.of(work).count(Integer.MAX_VALUE, false) <
+                JkPathTree.of(def).count(Integer.MAX_VALUE, false);
+    }
+
     private static class CountTimestampAndJavaVersion {
 
         final int fileCount;

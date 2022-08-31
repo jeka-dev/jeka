@@ -89,7 +89,9 @@ final class CommandLine {
         if (!beanActions.isEmpty()) {
             return false;
         }
-        return  standardOptions.isEmpty() || standardOptions.containsKey("help") || standardOptions.containsKey("h");
+        return  standardOptions.isEmpty()
+                || standardOptions.containsKey("help")
+                || standardOptions.containsKey("h");
     }
 
     List<String> involvedBeanNames() {

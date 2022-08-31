@@ -85,6 +85,8 @@ class Environment {
 
         private boolean cleanWork;
 
+        boolean noHelp;
+
         private final Set<String> names = new HashSet<>();
 
         StandardOptions (Map<String, String> map) {
@@ -100,6 +102,7 @@ class Environment {
             this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");
             this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
             this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");
+            this.noHelp = valueOf(boolean.class, map, false, "no.help");
         }
 
         String jkCBeanName() {
