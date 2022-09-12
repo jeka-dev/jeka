@@ -122,7 +122,7 @@ project
 |  +- maven (maven specific information to be published in a Maven Repositoty)
 |  |  +- dependencyCustomizer (customize the dependencies to be published)
 |  |  +- mavenSpecificInfo
-|  |  +- methods : publish
+|  |  +- method : publish()
 |  +- ivy (Ivy specific information to be published in a Ivy Repositoty)
 |  |  +- dependencyCustomizer (customize the dependencies to be published)
 |  |  +- ivySpecifictInfo
