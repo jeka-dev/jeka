@@ -113,7 +113,7 @@ project
 |  |  +- method : run()
 |  +- methods : createBinJar(), createFatJar(), resolveRuntimeDependencies(), getDependenciesAsXml()
 |  +            includeLocalDependencies(), includeTextDependencies()            
-+- documentation (mainly procuces javadoc and source jar)
++- documentation (produces javadoc and source jar)
 |  +- javadocConfiguration
 |  +- methods : createJavadocJar(), createSourceJar(), run()
 +- publication (define information about module and artifacts to be published)
