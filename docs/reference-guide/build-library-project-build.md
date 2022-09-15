@@ -113,7 +113,7 @@ project
 |  |  +- method : run()
 |  +- methods : createBinJar(), createFatJar(), resolveRuntimeDependencies(), getDependenciesAsXml()
 |  +            includeLocalDependencies(), includeTextDependencies()            
-+- documentation (mainly procude javadoc and source jar)
++- documentation (produces javadoc and source jar)
 |  +- javadocConfiguration
 |  +- methods : createJavadocJar(), createSourceJar(), run()
 +- publication (define information about module and artifacts to be published)
@@ -122,7 +122,7 @@ project
 |  +- maven (maven specific information to be published in a Maven Repositoty)
 |  |  +- dependencyCustomizer (customize the dependencies to be published)
 |  |  +- mavenSpecificInfo
-|  |  +- methods : publish
+|  |  +- method : publish()
 |  +- ivy (Ivy specific information to be published in a Ivy Repositoty)
 |  |  +- dependencyCustomizer (customize the dependencies to be published)
 |  |  +- ivySpecifictInfo
