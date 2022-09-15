@@ -127,6 +127,9 @@ public class JkProjectDependencies {
 
        String currentQualifier = COMPILE_AND_RUNTIME;
         for (final String line : lines) {
+            if (line.trim().startsWith("#")) {
+                continue;
+            }
             if (line.trim().isEmpty()) {
                 continue;
             }
@@ -136,6 +139,9 @@ public class JkProjectDependencies {
             }
             final JkModuleDependency dependency = JkModuleDependency.of(line.trim());
             if (COMPILE_AND_RUNTIME.equals(currentQualifier) || COMPILE.equals(currentQualifier)) {
+                compile = compile.and(dependency);
+            }
+            if (COMPILE.equals(currentQualifier)) {
                 compile = compile.and(dependency);
             }
             if (COMPILE_AND_RUNTIME.equals(currentQualifier) || RUNTIME.equals(currentQualifier)) {

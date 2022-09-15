@@ -104,7 +104,7 @@ public final class JkJavaCompileSpec<T> {
         if (version == null) {
             return this;
         }
-        return setOption(SOURCE_OPTS, version.get());
+        return setOption(SOURCE_OPTS, version.toString());
     }
 
     /**
@@ -117,7 +117,7 @@ public final class JkJavaCompileSpec<T> {
         if (version == null) {
             return this;
         }
-        return setOption(TARGET_OPTS, version.get());
+        return setOption(TARGET_OPTS, version.toString());
     }
 
     /**

@@ -12,7 +12,7 @@ public class JkJavaCompilerRunner {
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(Paths.get("jeka/output/bin"))
-                .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V11.get()));
+                .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V11.toString()));
     }
 
 }

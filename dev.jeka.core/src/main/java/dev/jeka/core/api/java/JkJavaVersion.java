@@ -1,7 +1,6 @@
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 /**
  * Java specification version
@@ -11,10 +10,22 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
     /**
      * Creates a Java specification version from the specified name.
      */
-    public static JkJavaVersion of(String value) {
-        JkUtilsAssert.argument(value != null, "version name can't be null. Use 8, 9, 10, 11...");
-        return new JkJavaVersion(value);
+    public static JkJavaVersion of(String stringValue) {
+        if (stringValue.startsWith("1.8")) {
+            return new JkJavaVersion(8);
+        }
+        if (stringValue.contains(".")) {
+            stringValue = JkUtilsString.substringBeforeFirst(stringValue, ".");
+        }
+        try {
+            int value = Integer.parseInt(stringValue);
+            return new JkJavaVersion(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Java version should be an integer as 8, 11, 12,... was " + stringValue);
+        }
     }
+
+
 
     public static JkJavaVersion ofCurrent() {
         return JkJavaVersion.of(System.getProperty("java.version"));
@@ -56,16 +67,16 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
     /** Stands for Java Version  19 */
     public static final JkJavaVersion V19 = JkJavaVersion.of("19");
 
-    private final String value;
+    private final int value;
 
-    private JkJavaVersion(String value) {
+    private JkJavaVersion(int value) {
         this.value = value;
     }
 
     /**
      * Returns literal of this version.
      */
-    public String get() {
+    public int get() {
         return value;
     }
 
@@ -80,22 +91,22 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
 
         final JkJavaVersion that = (JkJavaVersion) o;
 
-        return value.equals(that.value);
+        return value == that.value;
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
-    }
-
-    @Override
-    public String toString() {
         return value;
     }
 
     @Override
+    public String toString() {
+        return Integer.toString(value);
+    }
+
+    @Override
     public int compareTo(JkJavaVersion o) {
-        return JkVersion.of(value).compareTo(JkVersion.of(o.value));
+        return Integer.compare(this.value, o.value);
     }
 
 

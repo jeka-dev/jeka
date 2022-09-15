@@ -84,7 +84,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
-        compiler.setJdkHomesWithProperties(JkProperties.getAllStartingWith("jdk."));
+        compiler.setJdkHomesWithProperties(JkProperties.getAllStartingWith("jeka.jdk."));
         if (!JkUtilsString.isBlank(this.javaVersion)) {
             JkJavaVersion version = JkJavaVersion.of(this.javaVersion);
             project.getConstruction().setJvmTargetVersion(version);
@@ -175,7 +175,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
 
         // Create specific files and folders
-        JkPathFile.of(configuredProject.getBaseDir().resolve("jeka/dependency.txt"))
+        JkPathFile.of(configuredProject.getBaseDir().resolve("jeka/libs/dependencies.txt"))
                 .fetchContentFrom(ProjectJkBean.class.getResource("dependencies.txt"));
         Path libs = configuredProject.getBaseDir().resolve("jeka/libs");
         JkPathFile.of(libs.resolve("readme.txt"))

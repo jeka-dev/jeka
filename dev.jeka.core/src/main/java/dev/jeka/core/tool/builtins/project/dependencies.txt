@@ -17,6 +17,7 @@
 # - TEST
 #  org.springframework.boot:spring-boot-starter-test
 #  org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
+#  org.junit:junit-bom:5.9.0::pom:5.9.0   (for Bill Of Material)
 #
 # If you don't need it, feel free to remove this file.
 ##

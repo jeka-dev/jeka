@@ -124,7 +124,7 @@ public final class JkJavaCompiler<T> {
     public JkJavaCompiler<T> setJdkHomesWithProperties(Map<String, String> jdkLocations) {
         TreeMap<JkJavaVersion, Path> jdks = new TreeMap<>();
         jdkLocations.entrySet().forEach( entry -> {
-            final String version = JkUtilsString.substringAfterFirst(entry.getKey(), "jdk.");
+            final String version = JkUtilsString.substringAfterFirst(entry.getKey(), "jeka.jdk.");
             final String path = entry.getValue();
             if (version != null && path != null) {
                 Path filePath = Paths.get(path);
@@ -216,6 +216,25 @@ public final class JkJavaCompiler<T> {
     }
 
     private static boolean runOnTool(JkJavaCompileSpec compileSpec, JavaCompiler compiler, String[] toolOptions) {
+        int currentJdkVersion = JkJavaVersion.ofCurrent().get();
+        JkJavaVersion specifiedSourceVersion = compileSpec.getSourceVersion();
+        if (specifiedSourceVersion != null && specifiedSourceVersion.get() > currentJdkVersion) {
+            throw new IllegalArgumentException("Compilation source Java version (" + specifiedSourceVersion.get()
+                    + ") cannot be greater than running Jdk version (" + currentJdkVersion  + ")" );
+        }
+        if (specifiedSourceVersion != null && specifiedSourceVersion.get() < currentJdkVersion) {
+            JkLog.warn("Compilation source Java version (" + specifiedSourceVersion.get() + ") " +
+                    "is lower than running Jdk version (" + currentJdkVersion  + ")");
+        }
+        JkJavaVersion specifiedTargetVersion = compileSpec.getTargetVersion();
+        if (specifiedTargetVersion != null && specifiedTargetVersion.get() > currentJdkVersion) {
+            throw new IllegalArgumentException("Compilation target Java version (" + specifiedTargetVersion.get()
+                    + ") cannot be greater than running Jdk version (" + currentJdkVersion  + ")" );
+        }
+        if (specifiedSourceVersion != null && specifiedTargetVersion.get() < currentJdkVersion) {
+            JkLog.warn("Compilation target Java version (" + specifiedSourceVersion.get() + ") " +
+                    "is lower than running Jdk version (" + currentJdkVersion  + ")");
+        }
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
         List<File> files = JkUtilsPath.toFiles(compileSpec.getSources().withMatcher(JAVA_SOURCE_MATCHER).getFiles());
         Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);

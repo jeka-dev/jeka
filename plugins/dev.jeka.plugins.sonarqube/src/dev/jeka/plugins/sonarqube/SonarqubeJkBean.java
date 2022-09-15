@@ -101,8 +101,8 @@ public class SonarqubeJkBean extends JkBean {
         return sonarqube;
     }
 
-    @JkDoc("Runs sonar qube analysis based on properties defined in this plugin. " +
-            "Options prefixed set 'sonar.' as '-sonar.host.url=http://myserver/..' " +
+    @JkDoc("Runs sonarQube analysis based on properties defined in this plugin. " +
+            "roperties prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
             "will be appended to sonarQube properties.")
     public void run() {
         if (!enabled) {

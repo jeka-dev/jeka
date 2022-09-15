@@ -85,7 +85,7 @@ public final class JkKotlinJvmCompileSpec {
         if (version == null) {
             return this;
         }
-        String versionString = version.get();
+        String versionString = version.toString();
         if (versionString.equals("8")) {
             versionString = "1.8";
         }
