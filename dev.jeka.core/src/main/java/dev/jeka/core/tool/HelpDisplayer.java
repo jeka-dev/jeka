@@ -26,7 +26,7 @@ final class HelpDisplayer {
                 .append("[-option | -option=<value> ...] [@<module coordinates> ...] [@<path> ...] ")
                 .append("[-DsystemPropertyName=<value> ...]\n\n")
                 .append("EXAMPLE\n")
-                .append("  jeka clean project#pack project#pack.sources=true -ls=DEBUG -Dmy.prop=aValue @org.example:a-plugin:1.1.0\n\n")
+                .append("  jeka project#clean project#pack project#pack.sources=true -ls=DEBUG -Dmy.prop=aValue @org.example:a-plugin:1.1.0\n\n")
                 .append(standardOptions());
         System.out.println(introSb.toString());
 

@@ -141,9 +141,6 @@ public class JkProjectDependencies {
             if (COMPILE_AND_RUNTIME.equals(currentQualifier) || COMPILE.equals(currentQualifier)) {
                 compile = compile.and(dependency);
             }
-            if (COMPILE.equals(currentQualifier)) {
-                compile = compile.and(dependency);
-            }
             if (COMPILE_AND_RUNTIME.equals(currentQualifier) || RUNTIME.equals(currentQualifier)) {
                 runtime = runtime.and(dependency);
             } else if (TEST.equals(currentQualifier)) {

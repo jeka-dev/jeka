@@ -65,8 +65,7 @@ public abstract class JkBean {
     /**
      * Cleans output directory.
      */
-    @JkDoc("Delete content of jeka/output directory")
-    public void clean() {
+    protected void cleanOutput() {
         Path output = getOutputDir();
         JkLog.info("Clean output directory " + output);
         if (Files.exists(output)) {

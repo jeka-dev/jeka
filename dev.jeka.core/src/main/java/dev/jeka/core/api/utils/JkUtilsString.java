@@ -89,7 +89,7 @@ public final class JkUtilsString {
         if (index == -1 || string.endsWith(delimiter)) {
             return "";
         }
-        return string.substring(index + 1);
+        return string.substring(index + delimiter.length());
     }
 
     /**

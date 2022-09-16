@@ -48,7 +48,7 @@ public class ThirdPartyDependenciesJkBean extends JkBean {
     }
 
     public void cleanPack() {
-        clean();
+        cleanOutput();
         projectPlugin.pack();
     }
 

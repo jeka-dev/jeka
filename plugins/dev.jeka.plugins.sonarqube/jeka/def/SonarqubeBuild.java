@@ -26,7 +26,7 @@ class SonarqubeBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        cleanOutput(); projectPlugin.pack();
     }
 
 

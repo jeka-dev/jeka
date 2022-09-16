@@ -216,7 +216,7 @@ public class CoreBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectBean.pack();
+        cleanOutput(); projectBean.pack();
     }
 
     // This method has to be run in dev.jeka.core (this module root) working directory

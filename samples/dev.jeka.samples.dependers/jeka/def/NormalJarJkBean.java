@@ -40,7 +40,7 @@ public class NormalJarJkBean extends JkBean {
     }
 
     public void cleanPack() {
-        clean();
+        cleanOutput();
         projectPlugin.pack();
     }
 

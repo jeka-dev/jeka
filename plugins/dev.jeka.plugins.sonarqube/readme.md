@@ -20,7 +20,7 @@ public class Build extends JkClass {
     ...
 }
 ```
-Execute `run` method from Sonaqube plugin after a build as `jeka clean java#pack sonarqube#run`.
+Execute `run` method from Sonaqube plugin after a build as `jeka project#clean java#pack sonarqube#run`.
 
 Sonarqube client can be configured programmatically using `sonarqube` instance and/or 
 using standard system properties from the command line as `-Dsonar.host.url=...` (see https://docs.sonarqube.org/latest/analysis/analysis-parameters/).

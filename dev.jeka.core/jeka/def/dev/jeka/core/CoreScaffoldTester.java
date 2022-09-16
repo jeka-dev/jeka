@@ -19,7 +19,7 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
         scaffold("scaffold#run -lv", "help", false);
         Path projectDir = scaffold("scaffold#run scaffold#wrapper", "help", false);
         scaffold("scaffold#run scaffold#wrapper", "help", true);
-        projectDir = scaffold("scaffold#run project#", "clean project#pack", false);
+        projectDir = scaffold("scaffold#run project#", "project#clean project#pack", false);
         runJeka(projectDir.toString(), "eclipse#files");
         runJeka(projectDir.toString(), "intellij#iml");
     }

@@ -77,7 +77,7 @@ public class SimpleProjectJkBean extends JkBean {
     }
 
     public void cleanPackPublish() {
-        clean(); projectPlugin.pack(); projectPlugin.publishLocal();
+        cleanOutput(); projectPlugin.pack(); projectPlugin.publishLocal();
     }
 
     public void checkValueIsA() {

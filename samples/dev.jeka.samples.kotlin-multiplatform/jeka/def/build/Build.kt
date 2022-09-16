@@ -63,7 +63,7 @@ class Build : JkBean() {
     // -------------------------- End of build description --------------------------------------------------------
 
     fun cleanPack() {
-        clean(); kotlin.jvm().project.pack()
+        cleanOutput(); kotlin.jvm().project.pack()
     }
 
     fun run() {

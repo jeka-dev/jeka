@@ -43,12 +43,12 @@ class SonarqubeSampleBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        cleanOutput(); projectPlugin.pack();
     }
 
     @JkDoc("Cleans, tests and creates bootable jar.")
     public void cleanSonar() {
-        clean();
+        cleanOutput();
         projectPlugin.test();
         sonarqubePlugin.run();
     }

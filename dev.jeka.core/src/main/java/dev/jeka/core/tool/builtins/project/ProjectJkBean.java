@@ -57,14 +57,13 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
      */
     public final JkTestOptions test = new JkTestOptions();
 
+    public final JkScaffold scaffold = new JkScaffold();
+
     @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
     public String compilerExtraArgs;
 
-    @JkDoc("The template used for scaffolding the build class")
-    public ScaffoldTemplate scaffoldTemplate = ScaffoldTemplate.SIMPLE_FACADE;
-
     @JkDoc("The output file for the xml dependency description.")
-    public Path output;
+    public Path outputFile;
 
     @JkDoc("The target JVM version for compiled files.")
     @JkInjectProperty("jeka.java.version")
@@ -147,12 +146,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkProject configuredProject = getProject();
         scaffolder.setJekaClassCodeProvider( () -> {
             final String snippet;
-            if (scaffoldTemplate == ScaffoldTemplate.CODE_LESS) {
+            if (scaffold.template == ScaffoldTemplate.CODE_LESS) {
                 return null;
             }
-            if (scaffoldTemplate == ScaffoldTemplate.NORMAL) {
+            if (scaffold.template == ScaffoldTemplate.NORMAL) {
                 snippet = "buildclass.snippet";
-            } else if (scaffoldTemplate == ScaffoldTemplate.PLUGIN) {
+            } else if (scaffold.template == ScaffoldTemplate.PLUGIN) {
                 snippet = "buildclassplugin.snippet";
             } else {
                 snippet = "buildclassfacade.snippet";
@@ -187,7 +186,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkUtilsPath.createDirectories(libs.resolve("sources"));
 
         // This is special scaffolding for project pretending to be plugins for Jeka
-        if (this.scaffoldTemplate == ScaffoldTemplate.PLUGIN) {
+        if (this.scaffold.template == ScaffoldTemplate.PLUGIN) {
             Path breakinkChangeFile = this.getProject().getBaseDir().resolve("breaking_versions.txt");
             String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
                     "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
@@ -216,6 +215,11 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     // ------------------------------- command line methods -----------------------------
+
+    @JkDoc("Delete the ontent of jeka/output directory")
+    public void clean() {
+        super.cleanOutput();
+    }
 
     @JkDoc("Perform declared pre compilation task as generating sources.")
     public void preCompile() {
@@ -271,12 +275,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         Writer out;
-        if (output == null) {
+        if (outputFile == null) {
             out = new PrintWriter(JkLog.getOutPrintStream());
         } else {
             try {
-                JkPathFile.of(output).createIfNotExist();
-                out = new FileWriter(output.toFile());
+                JkPathFile.of(outputFile).createIfNotExist();
+                out = new FileWriter(outputFile.toFile());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -349,6 +353,14 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         /** Argument passed to the JVM if tests are withForking. Example : -Xms2G -Xmx2G */
         @JkDoc("Argument passed to the JVM if tests are executed in a forked process. E.g. -Xms2G -Xmx2G.")
         public String jvmOptions;
+
+    }
+
+    public static class JkScaffold {
+
+        @JkDoc("The template used for scaffolding the build class")
+        public ScaffoldTemplate template = ScaffoldTemplate.SIMPLE_FACADE;
+
 
     }
 

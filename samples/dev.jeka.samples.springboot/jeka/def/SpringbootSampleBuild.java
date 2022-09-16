@@ -48,7 +48,7 @@ class SpringbootSampleBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); springboot.projectBean().pack();
+        cleanOutput(); springboot.projectBean().pack();
     }
 
     public void testRun() {

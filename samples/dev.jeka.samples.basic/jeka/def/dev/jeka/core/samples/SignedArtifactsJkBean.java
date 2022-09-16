@@ -92,7 +92,7 @@ public class SignedArtifactsJkBean extends JkBean {
 
     public void cleanPackPublish() {
         JkPathTree.of(dummyRepoPath).createIfNotExist().deleteRoot();  // start from an empty repo
-        clean(); projectPlugin.pack(); projectPlugin.getProject().getPublication().publish();
+        cleanOutput(); projectPlugin.pack(); projectPlugin.getProject().getPublication().publish();
     }
 
     public static void main(String[] args) {

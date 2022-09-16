@@ -17,4 +17,12 @@ public class JkUtilsStringTest {
                 JkUtilsString.extractVariableToken("yuiy $${foo} d"));
 
     }
+
+    @Test
+    public void substringAfterLast() {
+        assertEquals("eee", JkUtilsString.substringAfterLast("toto=eee", "toto="));
+        assertEquals("", JkUtilsString.substringAfterLast("toto=", "toto="));
+        assertEquals("", JkUtilsString.substringAfterLast("toto=", ""));
+        assertEquals("", JkUtilsString.substringAfterLast("toto=", "a"));
+    }
 }

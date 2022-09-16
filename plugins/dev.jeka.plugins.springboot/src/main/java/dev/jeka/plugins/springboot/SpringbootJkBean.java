@@ -18,6 +18,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
@@ -34,7 +35,7 @@ import java.util.function.Consumer;
 @JkDoc("Configure project KBean in order to produce bootable springboot jar and war files.")
 public final class SpringbootJkBean extends JkBean {
 
-    private static String DEFAULT_SPRINGBOOT_VERSION = "2.5.6";
+    private static String DEFAULT_SPRINGBOOT_VERSION = "2.7.3";
 
     public static final JkArtifactId ORIGINAL_ARTIFACT = JkArtifactId.of("original", "jar");
 
@@ -51,14 +52,14 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("Command arg line to pass to springboot for #run method (e.g. '--server.port=8083 -Dspring.profiles.active=prod'")
     public String runArgs;
 
-    @JkDoc("If true, generate a bootable jar artifact.")
-    public boolean createBooJar = true;
+    @JkDoc("If true, create a bootable jar artifact.")
+    public boolean createBootJar = true;
 
-    @JkDoc("If true, generate the original jar artifact (jar without embedded dependencies")
+    @JkDoc("If true, create original jar artifact for publication (jar without embedded dependencies")
     public boolean createOriginalJar;
 
-    @JkDoc("If true, generate a .war filed.")
-    public boolean createWar;
+    @JkDoc("If true, create a .war filed.")
+    public boolean createWarFile;
 
     @JkDoc("For internal test purpose. If not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
     public String scaffoldDefClasspath;
@@ -116,11 +117,11 @@ public final class SpringbootJkBean extends JkBean {
 
         // define bootable jar as main artifact
         JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
-        if (this.createBooJar) {
+        if (this.createBootJar) {
             Consumer<Path> bootJarMaker = path -> this.createBootJar(project, path);
             artifactProducer.putMainArtifact(bootJarMaker);
         }
-        if (this.createWar) {
+        if (this.createWarFile) {
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(path, project);
             artifactProducer.putArtifact("", "war", warMaker);
         }
@@ -224,6 +225,14 @@ public final class SpringbootJkBean extends JkBean {
         pack = testSourceDir.resolve(basePackage);
         url = SpringbootJkBean.class.getClassLoader().getResource("snippet/ControllerIT.java");
         JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
+    }
+
+    @JkDoc("Provides info about this plugin configuration")
+    public void info() {
+        JkLog.info("Springboot version : " + springbootVersion);
+        JkLog.info("Create Bootable Jar : " + this.createBootJar);
+        JkLog.info("Create original Jar : " + this.createOriginalJar);
+        JkLog.info("Create .war file : " + this.createWarFile);
     }
 
     private String pluginVersion() {

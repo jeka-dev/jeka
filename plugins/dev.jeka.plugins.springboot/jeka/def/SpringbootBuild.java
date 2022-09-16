@@ -31,7 +31,7 @@ public class SpringbootBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectBean.pack(); projectBean.publishLocal();
+        cleanOutput(); projectBean.pack(); projectBean.publishLocal();
     }
 
     public static void main(String[] args) {

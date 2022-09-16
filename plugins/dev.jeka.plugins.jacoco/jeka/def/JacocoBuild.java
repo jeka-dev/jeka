@@ -28,7 +28,7 @@ public class JacocoBuild extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectPlugin.pack();
+        cleanOutput(); projectPlugin.pack();
     }
 
     public static void main(String[] args) {

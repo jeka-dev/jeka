@@ -85,7 +85,7 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     public void cleanPackPublish() {
-        clean();
+        cleanOutput();
         jar();
         javadoc();
         publish();

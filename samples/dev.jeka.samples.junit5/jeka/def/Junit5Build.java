@@ -75,7 +75,7 @@ class Junit5Build extends JkBean {
     }
 
     public void cleanPack() {
-        clean(); projectBean.pack();
+        cleanOutput(); projectBean.pack();
     }
 
     public void checkReportGenerated() {

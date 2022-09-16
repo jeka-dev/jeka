@@ -30,7 +30,7 @@ class Build extends JkBean {
 
     @JkDoc("Cleans, tests and creates bootable jar.")
     public void cleanPack() {
-        clean(); springbootBean.projectBean().pack();
+        cleanOutput(); springbootBean.projectBean().pack();
     }
 
     // Clean, compile, test and generate springboot application jar

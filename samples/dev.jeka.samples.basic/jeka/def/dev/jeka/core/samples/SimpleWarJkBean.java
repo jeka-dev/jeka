@@ -50,7 +50,7 @@ public class SimpleWarJkBean extends JkBean {
     }
 
     public void cleanPackRun() {
-        clean(); projectPlugin.pack(); projectPlugin.publishLocal();
+        cleanOutput(); projectPlugin.pack(); projectPlugin.publishLocal();
     }
 
     public void check() {
