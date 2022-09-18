@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -228,5 +229,21 @@ public class JkProjectTest {
         JkZipTree.of(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;
+    }
+
+    @Test
+    public void getRuntimeDependencies_usingDependenciesTxt_ok() {
+        JkProject project = JkProject.of()
+                .getConstruction()
+                    .setAddTextAndLocalDependencies(true)
+                .getProject();
+        URL dependencyTxtUrl = JkProjectTest.class.getResource("dependencies.txt");
+        project.getConstruction().dependencyTxtUrl = dependencyTxtUrl;
+        JkDependencySet runtimeDependencies = project.getConstruction().getRuntimeDependencies();
+        JkModuleDependency lombokDep = runtimeDependencies.getMatching(JkModuleDependency.of("org.projectlombok:lombok"));
+        runtimeDependencies.getEntries().forEach(System.out::println);
+        Assert.assertNull(lombokDep);  // expect lombok not included
+
+
     }
 }

@@ -21,6 +21,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
@@ -72,6 +73,9 @@ public class JkProjectConstruction {
     private boolean addTextAndLocalDependencies = true;
 
     private JkProjectDependencies cachedExtraDeps;
+
+    // For testing purpose
+    URL dependencyTxtUrl;
 
     /**
      * For Parent chaining
@@ -249,7 +253,7 @@ public class JkProjectConstruction {
         });
         configureRuntimeDependencies(deps -> {
             if (addTextAndLocalDependencies) {
-                return deps.and(extraDeps().getRuntimeDeps());
+                return deps.minus(extraDeps().getCompileDeps().getEntries()).and(extraDeps().getRuntimeDeps());
             }
             return deps;
         });
@@ -268,8 +272,10 @@ public class JkProjectConstruction {
         Path baseDir = project.getBaseDir();
         JkProjectDependencies localDeps = JkProjectDependencies.ofLocal(
                 baseDir.resolve(JkConstants.JEKA_DIR + "/libs"));
-        JkProjectDependencies textDeps = JkProjectDependencies.ofTextDescriptionIfExist(
-                baseDir.resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"));
+        JkProjectDependencies textDeps = dependencyTxtUrl == null
+                ? JkProjectDependencies.ofTextDescriptionIfExist(
+                    baseDir.resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"))
+                : JkProjectDependencies.ofTextDescription(dependencyTxtUrl);
         cachedExtraDeps = localDeps.and(textDeps);
         return cachedExtraDeps;
     }
