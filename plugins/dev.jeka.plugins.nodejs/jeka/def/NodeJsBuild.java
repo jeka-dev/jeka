@@ -5,7 +5,7 @@ import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-public class JacocoBuild extends JkBean {
+public class NodeJsBuild extends JkBean {
 
     private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
@@ -18,11 +18,11 @@ public class JacocoBuild extends JkBean {
                         .andFiles(JkLocator.getJekaJarPath())
                 );
         project.getPublication()
-                .setModuleId("dev.jeka:jacoco-plugin")
+                .setModuleId("dev.jeka:nodejs-plugin")
                 .getMaven()
                     .getPomMetadata()
-                        .setProjectName("Jeka plugin for Jacoco")
-                        .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
+                        .setProjectName("Jeka plugin for NodeJs")
+                        .setProjectDescription("A Jeka plugin to integrate with NodeJs")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
@@ -31,7 +31,8 @@ public class JacocoBuild extends JkBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(JacocoBuild.class, args).cleanPack();
+        JkInit.instanceOf(NodeJsBuild.class).cleanPack();
     }
+
 
 }

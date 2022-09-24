@@ -92,6 +92,7 @@ class EngineCompilationUpdateTracker {
         if (!Files.exists(lastUpdateFile)) {
             return new CountTimestampAndJavaVersion(0, 0L, JkJavaVersion.ofCurrent());
         }
+        JkLog.trace("Read compilation flag file " + lastUpdateFile);
         try {
             String content = JkUtilsPath.readAllLines(lastUpdateFile).get(0);
             String[] items = content.split(";");

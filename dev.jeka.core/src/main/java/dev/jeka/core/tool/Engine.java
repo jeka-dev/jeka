@@ -80,8 +80,9 @@ final class Engine {
         boolean hasJekaDir = Files.exists(projectBaseDir.resolve(JkConstants.JEKA_DIR))
                 || commandLine.involvedBeanNames().contains("scaffold");
         if (hasJekaDir) {
+            boolean failOnError = !Environment.standardOptions.ignoreCompileFail && !commandLine.isHelp();
             result = resolveAndCompile(new HashMap<>(), true,
-                    !Environment.standardOptions.ignoreCompileFail);
+                    failOnError);
             computedClasspath = result.classpath;
                     // the command deps has been included in cache for classpath resolution
                     //.andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
@@ -176,6 +177,9 @@ final class Engine {
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
         EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
         boolean outdated = compilationTracker.isOutdated();
+        if (!beanClassesResolver.hasDefSource() && beanClassesResolver.hasClassesInWorkDir()) {
+            JkPathTree.of(beanClassesResolver.defClassDir).deleteContent();
+        }
         if (compileSources && this.beanClassesResolver.hasDefSource()) {
             boolean missingBinayFiles = compilationTracker.isMissingBinaryFiles();
             if (missingBinayFiles) {

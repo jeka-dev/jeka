@@ -145,6 +145,7 @@ Nevertheless, Jeka is extensible and other plugins exist outside the main distib
 * [Springboot Plugin](plugins/dev.jeka.plugins.springboot)
 * [Sonarqube Plugin](plugins/dev.jeka.plugins.sonarqube)
 * [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
+* [NodeJs Plugin](plugins/dev.jeka.plugins.nodejs)
 * [Protobuf Plugin](https://github.com/jerkar/protobuf-plugin)
 
 # Community

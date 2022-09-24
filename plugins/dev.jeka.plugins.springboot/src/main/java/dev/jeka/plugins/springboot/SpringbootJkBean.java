@@ -16,10 +16,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkPom;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -76,19 +73,6 @@ public final class SpringbootJkBean extends JkBean {
     public SpringbootJkBean setSpringbootVersion(String springbootVersion) {
         this.springbootVersion = springbootVersion;
         return this;
-    }
-
-    @JkDoc("Run Springboot application from the generated jar")
-    public void run() {
-        JkArtifactProducer artifactProducer = projectBean.getProject().getArtifactProducer();
-        JkArtifactId mainArtifactId = artifactProducer.getMainArtifactId();
-        artifactProducer.makeMissingArtifacts(mainArtifactId);
-        Path mainArtifactFile = artifactProducer.getMainArtifactPath();
-        String[] args = new String[0];
-        if (!JkUtilsString.isBlank(this.runArgs)) {
-            args = JkUtilsString.translateCommandline(this.runArgs);
-        }
-        JkJavaProcess.ofJavaJar(mainArtifactFile, null).exec(args);
     }
 
     private void configure(JkProject project) {
@@ -155,9 +139,6 @@ public final class SpringbootJkBean extends JkBean {
         JkProjectConstruction construction = project.getConstruction();
         JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
         JkDependencyResolver dependencyResolver = construction.getDependencyResolver();
-        JkVersionProvider versionProvider = JkVersionProvider.of().andBom(BOM_COORDINATE + springbootVersion)
-                        .withResolvedBoms(project.getConstruction().getDependencyResolver().getRepos());
-        JkVersion loaderVersion = versionProvider.getVersionOf(JkSpringModules.Boot.LOADER);
         JkDependencySet bootloaderDependency = JkDependencySet.of(JkModuleDependency.of(JkSpringModules.Boot.LOADER))
                 .andBom(BOM_COORDINATE + springbootVersion);
         Path bootloader = dependencyResolver.resolve(bootloaderDependency).getFiles().getEntry(0);

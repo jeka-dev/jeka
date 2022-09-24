@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" filepath="$PROJECT_DIR$/dev.jeka.core/.idea/dev.jeka.core.iml" />
       <module fileurl="file://$PROJECT_DIR$/dev.jeka.master/dev.jeka.master.iml" filepath="$PROJECT_DIR$/dev.jeka.master/dev.jeka.master.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.jacoco/dev.jeka.plugins.jacoco.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.jacoco/dev.jeka.plugins.jacoco.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.nodejs/dev.jeka.plugins.nodejs.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.nodejs/dev.jeka.plugins.nodejs.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.sonarqube/dev.jeka.plugins.sonarqube.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.sonarqube/dev.jeka.plugins.sonarqube.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.springboot/dev.jeka.plugins.springboot.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.springboot/dev.jeka.plugins.springboot.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.basic/dev.jeka.samples.basic.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.basic/dev.jeka.samples.basic.iml" />

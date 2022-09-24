@@ -53,7 +53,7 @@ class SpringbootSampleBuild extends JkBean {
 
     public void testRun() {
         cleanPack();
-        springboot.run();
+        springboot.getBean(ProjectJkBean.class).runJar();
     }
 
     // Clean, compile, test and generate springboot application jar

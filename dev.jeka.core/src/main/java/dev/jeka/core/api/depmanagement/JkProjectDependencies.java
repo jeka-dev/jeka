@@ -100,19 +100,19 @@ public class JkProjectDependencies {
     /**
      * Creates a {@link JkProjectDependencies} from a flat file formatted as :
      * <pre>
-     * - COMPILE+RUNTIME
+     * == COMPILE+RUNTIME ==
      * org.springframework.boot:spring-boot-starter-thymeleaf
      * org.springframework.boot:spring-boot-starter-data-jpa
      *
-     * - COMPILE
+     * == COMPILE ==
      * org.projectlombok:lombok:1.16.16
      *
-     * - RUNTIME
+     * == RUNTIME ==
      * com.h2database:h2
      * org.liquibase:liquibase-core
      * com.oracle:ojdbc6:12.1.0
      *
-     * - TEST
+     * == TEST ==
      * org.springframework.boot:spring-boot-starter-test
      * org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
      * org.fluentlenium:fluentlenium-assertj:3.2.0
@@ -133,7 +133,7 @@ public class JkProjectDependencies {
             if (line.trim().isEmpty()) {
                 continue;
             }
-            if (line.startsWith("-")) {
+            if (line.startsWith("==")) {
                 currentQualifier = readQualifier(line);
                 continue;
             }
@@ -151,7 +151,10 @@ public class JkProjectDependencies {
     }
 
     private static String readQualifier(String line) {
-        final String payload = JkUtilsString.substringAfterFirst(line,"-").trim().toLowerCase();
+        String payload = JkUtilsString.substringAfterFirst(line,"==").trim();
+        if (payload.contains("=")) {
+            payload = JkUtilsString.substringBeforeFirst(payload, "=").toLowerCase().trim();
+        }
         if (KNOWN_QUALIFIER.contains(payload)) {
             return payload;
         }

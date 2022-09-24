@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +56,8 @@ public class JkProcess<T extends JkProcess> implements Runnable {
 
     private boolean logOutput = true;
 
+    private boolean destroyAtJvmShutdown;
+
     protected JkProcess() {}
 
     protected JkProcess(String command, String... parameters) {
@@ -70,6 +73,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         this.logCommand = other.logCommand;
         this.logOutput = other.logOutput;
         this.workingDir = other.workingDir;
+        this.destroyAtJvmShutdown = other.destroyAtJvmShutdown;
     }
 
     /**
@@ -128,6 +132,11 @@ public class JkProcess<T extends JkProcess> implements Runnable {
      */
     public T setCommand(String command) {
         this.command = command;
+        return (T) this;
+    }
+
+    public T setDestroyAtJvmShutdown(boolean destroy) {
+        this.destroyAtJvmShutdown = destroy;
         return (T) this;
     }
 
@@ -256,18 +265,29 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         if (extraParams.length == 1) {
             extraParams = JkUtilsString.translateCommandline(extraParams[0]);
         }
-        return exec(false, extraParams).exitCode;
+        return exec(false, process -> {}, extraParams).exitCode;
+    }
+
+    /**
+     * Same as {@link #exec(String...)} but the provided process consumer will be called right after
+     * the process is started. It can be used to get th process pid.
+     */
+    public int exec(Consumer<Process> processConsumer, String ... extraParams) {
+        if (extraParams.length == 1) {
+            extraParams = JkUtilsString.translateCommandline(extraParams[0]);
+        }
+        return exec(false, processConsumer, extraParams).exitCode;
     }
 
     public List<String> execAndReturnOutput(String ... extraParams) {
-        Result result = exec(true, extraParams);
+        Result result = exec(true, process -> {}, extraParams);
         if (result.output.isEmpty()) {
             return Collections.emptyList();
         }
         return Arrays.asList(result.output.split("\\r?\n"));
     }
 
-    private Result exec(boolean collectOutput, String ... extraParams) {
+    private Result exec(boolean collectOutput, Consumer<Process> processConsumer, String ... extraParams) {
         JkUtilsAssert.state(!JkUtilsString.isBlank(command), "No command has been specified");
         final List<String> commands = new LinkedList<>();
         commands.add(this.command);
@@ -280,7 +300,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
             String workingDirName = this.workingDir == null ? "" : this.workingDir.toString() + ">";
             JkLog.startTask("Start program : " + workingDirName + commands.toString());
         }
-        int exitCode = runProcess(commands, collectOs);
+        int exitCode = runProcess(commands,processConsumer, collectOs);
         if (logCommand) {
             JkLog.endTask();
         }
@@ -290,17 +310,22 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         return out;
     }
 
-    private int runProcess(List<String> commands, OutputStream collectOs) {
+    private int runProcess(List<String> commands, Consumer<Process> processConsumer, OutputStream collectOs) {
         final ProcessBuilder processBuilder = processBuilder(commands);
-        if (workingDir != null) {
-            processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
-        }
         final Process process;
         try {
             process = processBuilder.start();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        if (destroyAtJvmShutdown) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (process.isAlive()) {
+                    process.destroyForcibly();
+                }
+            }));
+        }
+        processConsumer.accept(process);
         OutputStream consoleOutputStream = logOutput ? JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
         OutputStream consoleErrStream = logOutput ? JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
         final JkUtilsIO.JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(

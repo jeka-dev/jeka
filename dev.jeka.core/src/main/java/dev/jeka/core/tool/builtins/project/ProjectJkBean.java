@@ -36,7 +36,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -51,6 +54,11 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
     public final JkPackOptions pack = new JkPackOptions();
+
+    /**
+     * Options for run tasks
+     */
+    public final JkRunOptions run = new JkRunOptions();
 
     /**
      * Options for the testing tasks. These options are injectable from command line.
@@ -146,12 +154,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkProject configuredProject = getProject();
         scaffolder.setJekaClassCodeProvider( () -> {
             final String snippet;
-            if (scaffold.template == ScaffoldTemplate.CODE_LESS) {
+            if (scaffold.template == JkScaffold.Template.CODE_LESS) {
                 return null;
             }
-            if (scaffold.template == ScaffoldTemplate.NORMAL) {
+            if (scaffold.template == JkScaffold.Template.NORMAL) {
                 snippet = "buildclass.snippet";
-            } else if (scaffold.template == ScaffoldTemplate.PLUGIN) {
+            } else if (scaffold.template == JkScaffold.Template.PLUGIN) {
                 snippet = "buildclassplugin.snippet";
             } else {
                 snippet = "buildclassfacade.snippet";
@@ -161,44 +169,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             return template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         });
         scaffolder.setClassFilename("Build.java");
-        scaffolder.getExtraActions().append( () -> scaffoldProjectStructure(configuredProject));
+        scaffolder.getExtraActions().append( () -> this.scaffold.scaffoldProjectStructure(configuredProject));
     }
 
-    private void scaffoldProjectStructure(JkProject configuredProject) {
-        JkLog.info("Create source directories.");
-        JkCompileLayout prodLayout = configuredProject.getConstruction().getCompilation().getLayout();
-        prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        JkCompileLayout testLayout = configuredProject.getConstruction().getTesting().getCompilation().getLayout();
-        testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
-        testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
 
-        // Create specific files and folders
-        JkPathFile.of(configuredProject.getBaseDir().resolve("jeka/libs/dependencies.txt"))
-                .fetchContentFrom(ProjectJkBean.class.getResource("dependencies.txt"));
-        Path libs = configuredProject.getBaseDir().resolve("jeka/libs");
-        JkPathFile.of(libs.resolve("readme.txt"))
-                .fetchContentFrom(ProjectJkBean.class.getResource("libs-readme.txt"));
-        JkUtilsPath.createDirectories(libs.resolve("compile+runtime"));
-        JkUtilsPath.createDirectories(libs.resolve("compile"));
-        JkUtilsPath.createDirectories(libs.resolve("runtime"));
-        JkUtilsPath.createDirectories(libs.resolve("test"));
-        JkUtilsPath.createDirectories(libs.resolve("sources"));
-
-        // This is special scaffolding for project pretending to be plugins for Jeka
-        if (this.scaffold.template == ScaffoldTemplate.PLUGIN) {
-            Path breakinkChangeFile = this.getProject().getBaseDir().resolve("breaking_versions.txt");
-            String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
-                    "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
-            JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
-            Path sourceDir =
-                    configuredProject.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
-            String pluginCode = JkUtilsIO.read(ProjectJkBean.class.getResource("pluginclass.snippet"));
-            JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxJkBean.java"))
-                    .createIfNotExist()
-                    .write(pluginCode.getBytes(StandardCharsets.UTF_8));
-        }
-    }
 
     // ------------------------------ Accessors -----------------------------------------
 
@@ -304,6 +278,11 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         getProject().getConstruction().getCompilation().generateSources();
     }
 
+    @JkDoc("Run the generated jar.")
+    public void runJar() {
+        this.run.runJar();
+    }
+
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
         JkLog.info("Publish " + getProject() + " ...");
@@ -356,17 +335,135 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     }
 
+    public class JkRunOptions {
+
+        @JkDoc("JVM options to use when running generated jar")
+        public String jvmOptions;
+
+        @JkDoc("Program arguments to use when running generated jar")
+        public String programArgs;
+
+        @JkDoc("If true, the resolved runtime classpath will be used when running the generated jar.\n" +
+                "If the generated jar is a Uber jar or contains all the needed dependencies, leave it to 'false'")
+        public boolean useRuntimeDepsForClasspath;
+
+        void runJar() {
+            Path jarPath = ProjectJkBean.this.getProject().getArtifactProducer().getMainArtifactPath();
+            if (!Files.exists(jarPath)) {
+                ProjectJkBean.this.getProject().getArtifactProducer().makeMainArtifact();
+            }
+            JkJavaProcess javaProcess  = JkJavaProcess.ofJavaJar(jarPath, null).setLogCommand(JkLog.isVerbose())
+                    .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
+                    .addParams(JkUtilsString.translateCommandline(programArgs));
+            if (useRuntimeDepsForClasspath) {
+                javaProcess
+                        .setClasspath(ProjectJkBean.this.getProject().getConstruction().resolveRuntimeDependencies().getFiles());
+            }
+            Consumer<Process> processConsumer = process ->
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    JkLog.info("Destroy process " + process);
+                    process.destroyForcibly();
+                }));
+            javaProcess.exec(processConsumer);
+        }
+    }
+
     public static class JkScaffold {
 
+        public enum Template {
+
+            NORMAL, SIMPLE_FACADE, PLUGIN, CODE_LESS
+
+        }
+
         @JkDoc("The template used for scaffolding the build class")
-        public ScaffoldTemplate template = ScaffoldTemplate.SIMPLE_FACADE;
+        public Template template = Template.SIMPLE_FACADE;
+
+        @JkDoc("Generate jeka/libs sub-folders for hosting local libraries")
+        public boolean generateLocalLibsFolders = true;
+
+        @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE+RUNTIME section")
+        public String dependenciesTxtCompileAndRuntime;
+
+        @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE section")
+        public String dependenciesTxtCompile;
+
+        @JkDoc("Comma separated dependencies to include in dependencies.txt RUNTIME section")
+        public String dependenciesTxtRuntime;
+
+        @JkDoc("Comma separated dependencies to include in dependencies.txt TEST section")
+        public String dependenciesTxtTest;
+
+        private void scaffoldProjectStructure(JkProject configuredProject) {
+            JkLog.info("Create source directories.");
+            JkCompileLayout prodLayout = configuredProject.getConstruction().getCompilation().getLayout();
+            prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
+            prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+            JkCompileLayout testLayout = configuredProject.getConstruction().getTesting().getCompilation().getLayout();
+            testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
+            testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
+
+            // Create specific files and folders
+            String dependenciesTxtContent = makeDependenciesTxtContent();
+            JkPathFile.of(configuredProject.getBaseDir().resolve("jeka/libs/dependencies.txt"))
+                    .createIfNotExist()
+                    .write(dependenciesTxtContent.getBytes(StandardCharsets.UTF_8));
+            Path libs = configuredProject.getBaseDir().resolve("jeka/libs");
+            if (generateLocalLibsFolders) {
+                JkPathFile.of(libs.resolve("readme.txt"))
+                        .fetchContentFrom(ProjectJkBean.class.getResource("libs-readme.txt"));
+                JkUtilsPath.createDirectories(libs.resolve("compile+runtime"));
+                JkUtilsPath.createDirectories(libs.resolve("compile"));
+                JkUtilsPath.createDirectories(libs.resolve("runtime"));
+                JkUtilsPath.createDirectories(libs.resolve("test"));
+                JkUtilsPath.createDirectories(libs.resolve("sources"));
+            }
+
+            // This is special scaffolding for project pretending to be plugins for Jeka
+            if (this.template == Template.PLUGIN) {
+                Path breakinkChangeFile = configuredProject.getBaseDir().resolve("breaking_versions.txt");
+                String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
+                        "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
+                JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
+                Path sourceDir =
+                        configuredProject.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
+                String pluginCode = JkUtilsIO.read(ProjectJkBean.class.getResource("pluginclass.snippet"));
+                JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxJkBean.java"))
+                        .createIfNotExist()
+                        .write(pluginCode.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+
+        private String makeDependenciesTxtContent() {
+            List<String> lines = JkUtilsIO.readAsLines(ProjectJkBean.class.getResourceAsStream("dependencies.txt"));
+            StringBuilder sb = new StringBuilder();
+            for (String line : lines) {
+                sb.append(line).append("\n");
+                if (line.startsWith("== COMPILE+RUNTIME ==") && !JkUtilsString.isBlank(this.dependenciesTxtCompileAndRuntime)) {
+                    Arrays.stream(this.dependenciesTxtCompileAndRuntime.split(",")).forEach(extraDep ->
+                            sb.append(extraDep.trim()).append("\n")
+                    );
+                }
+                if (line.startsWith("== COMPILE ==") && !JkUtilsString.isBlank(this.dependenciesTxtCompile)) {
+                    Arrays.stream(this.dependenciesTxtCompile.split(",")).forEach(extraDep ->
+                            sb.append(extraDep.trim()).append("\n")
+                    );
+                }
+                if (line.startsWith("== RUNTIME ==") && !JkUtilsString.isBlank(this.dependenciesTxtRuntime)) {
+                    Arrays.stream(this.dependenciesTxtRuntime.split(",")).forEach(extraDep ->
+                            sb.append(extraDep.trim()).append("\n")
+                    );
+                }
+                if (line.startsWith("== TEST ==") && !JkUtilsString.isBlank(this.dependenciesTxtTest)) {
+                    Arrays.stream(this.dependenciesTxtTest.split(",")).forEach(extraDep ->
+                            sb.append(extraDep.trim()).append("\n")
+                    );
+                }
+            }
+            return sb.toString();
+        }
 
 
     }
 
-    public enum ScaffoldTemplate {
-
-        NORMAL, SIMPLE_FACADE, PLUGIN, CODE_LESS
-
-    }
 }

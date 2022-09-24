@@ -64,26 +64,16 @@ public final class Main {
             System.exit(0); // Triggers shutdown hooks
         } catch (final Throwable e) {
             JkBusyIndicator.stop();
-            if (JkMemoryBufferLogDecorator.isActive()) {
-                JkMemoryBufferLogDecorator.flush();
-            }
             JkLog.restoreToInitialState();
-            System.err.println("\nAn error occurred during def class execution.");
-            System.err.println("It may come from user code/setting or a bug in Jeka.");
-            System.err.println("To investigate, relaunch command with options :");
-            System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");
-            System.err.println("    -lv to increase log verbosity.");
-            System.err.println("    -lst to log the full stacktrace of the thrown exception.");
-            System.err.println("If error reveals to coming from Jeka engine, please report to " +
-                    ": https://github.com/jerkar/jeka/issues");
-            System.err.println();
-            if (JkLog.isVerbose()
-                    || Environment.standardOptions.logStyle == JkLog.Style.DEBUG
-                    || Environment.standardOptions.logStackTrace) {
-                e.printStackTrace(System.err);
+            if (e instanceof JkException && !shouldPrintExceptionDetails()) {
+                System.err.println("\n" + e.getMessage());
             } else {
-                JkUtilsThrowable.printStackTrace(System.err, e, 3);
+                if (JkMemoryBufferLogDecorator.isActive()) {
+                    JkMemoryBufferLogDecorator.flush();
+                }
+                handleRegularException(e);
             }
+
             if (Environment.standardOptions.logBanner) {
                 final int length = printAscii(true, "text-failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
@@ -92,6 +82,30 @@ public final class Main {
                 System.err.println("Failed !");
             }
             System.exit(1);
+        }
+    }
+
+    private static boolean shouldPrintExceptionDetails() {
+        return !Environment.standardOptions.ignoreCompileFail || Environment.standardOptions.logVerbose
+                || Environment.standardOptions.logStackTrace;
+    }
+
+    private static void handleRegularException(Throwable e) {
+        System.err.println("\nAn error occurred during def class execution.");
+        System.err.println("It may come from user code/setting or a bug in Jeka.");
+        System.err.println("To investigate, relaunch command with options :");
+        System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");
+        System.err.println("    -lv to increase log verbosity.");
+        System.err.println("    -lst to log the full stacktrace of the thrown exception.");
+        System.err.println("If error reveals to coming from Jeka engine, please report to " +
+                ": https://github.com/jerkar/jeka/issues");
+        System.err.println();
+        if (JkLog.isVerbose()
+                || Environment.standardOptions.logStyle == JkLog.Style.DEBUG
+                || Environment.standardOptions.logStackTrace) {
+            e.printStackTrace(System.err);
+        } else {
+            JkUtilsThrowable.printStackTrace(System.err, e, 3);
         }
     }
 

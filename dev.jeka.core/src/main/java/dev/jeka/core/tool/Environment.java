@@ -130,7 +130,8 @@ class Environment {
                     try {
                         return (T) FieldInjector.parse(type, stringValue);
                     } catch (IllegalArgumentException e) {
-                        throw new JkException("Option " + name + " has been set with improper value '" + stringValue + "'");
+                        throw new JkException("Property " + name + " has been set with improper value '"
+                                + stringValue + "' : " + e.getMessage());
                     }
                 }
             }

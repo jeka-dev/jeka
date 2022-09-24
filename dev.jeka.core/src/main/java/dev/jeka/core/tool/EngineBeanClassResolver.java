@@ -112,7 +112,7 @@ final class EngineBeanClassResolver {
             Class<? extends JkBean> result = JkClassLoader.ofCurrent().loadIfExist(matchingBeanClasses.get(0));
             if (result == null) {  // can happen if cache is stalled
                 reloadGlobalBeanClassNames();
-                throw new JkException("No class " + matchingBeanClasses.get(0) + " found in classpath");
+                throw new JkException("No class " + matchingBeanClasses.get(0) + " found in classpath. Execute 'Jeka -h' to see available KBeans.");
             }
             return result;
         }
@@ -177,6 +177,11 @@ final class EngineBeanClassResolver {
         }
         return JkPathTree.of(defSourceDir).andMatching(true,
                 "**.java", "*.java", "**.kt", "*.kt").count(0, false) > 0;
+    }
+
+    boolean hasClassesInWorkDir() {
+        return JkPathTree.of(defClassDir).andMatching(true, "**.class")
+                .count(0, false) > 0;
     }
 
     private List<String> defBeanClassNames() {

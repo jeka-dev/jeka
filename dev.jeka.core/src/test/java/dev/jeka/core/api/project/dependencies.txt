@@ -22,16 +22,16 @@
 # If you don't need it, feel free to remove this file.
 ##
 
-- COMPILE+RUNTIME
+== COMPILE+RUNTIME ==
 org.springframework.boot:spring-boot-starter-web
 
-- COMPILE
+== COMPILE ==
 org.projectlombok:lombok:1.18.24
 
-- RUNTIME
+== RUNTIME ==
 com.h2database:h2:2.1.214
 
-- TEST
+== TEST ==
 org.springframework.boot:spring-boot-starter-test
 
 

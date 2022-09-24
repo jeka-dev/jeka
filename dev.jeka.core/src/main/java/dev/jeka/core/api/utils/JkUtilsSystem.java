@@ -10,8 +10,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Utility class to deal with the underlying ofSystem.
@@ -31,23 +30,26 @@ public final class JkUtilsSystem {
 
     public static final boolean IS_MACOS = isMacos();
 
+    public static final boolean IS_LINUX = isLinux();
+
     private static final Class UNSAFE_CLASS = JkClassLoader.ofCurrent().loadIfExist("sun.misc.Unsafe");
 
     private static boolean isWindows() {
-        final String osName = System.getProperty("os.name");
-        if (osName == null) {
-            return false;
-        }
-        return osName.startsWith("Windows");
+        final String osName = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+        return osName.contains("win");
     }
 
     private static boolean isMacos() {
-        final String osName = System.getProperty("os.name");
-        if (osName == null) {
-            return false;
-        }
-        return osName.startsWith("Mac OS X");
+        final String osName = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+        return osName.contains("mac") || osName.contains("darwin");
     }
+
+    private static boolean isLinux() {
+        final String osName = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+        return osName.contains("nux");
+    }
+
+
 
     /**
      * Returns the classpath of this classloader without mentioning classpath of
@@ -118,6 +120,324 @@ public final class JkUtilsSystem {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
+    }
+
+    // ------------ code borrowed from apache commons 3 --------------------------------------
+
+    private static final Map<String, Processor> ARCH_TO_PROCESSOR;
+
+    static {
+        ARCH_TO_PROCESSOR = new HashMap<>();
+        init();
+    }
+
+    private static void init() {
+        init_X86_32Bit();
+        init_X86_64Bit();
+        init_IA64_32Bit();
+        init_IA64_64Bit();
+        init_PPC_32Bit();
+        init_PPC_64Bit();
+        init_Aarch_64Bit();
+    }
+
+    private static void init_Aarch_64Bit() {
+        final Processor processor = new Processor(Processor.Arch.BIT_64, Processor.Type.AARCH_64);
+        addProcessors(processor, "aarch64");
+    }
+
+    private static void init_X86_32Bit() {
+        final Processor processor = new Processor(Processor.Arch.BIT_32, Processor.Type.X86);
+        addProcessors(processor, "x86", "i386", "i486", "i586", "i686", "pentium");
+    }
+
+    private static void init_X86_64Bit() {
+        final Processor processor = new Processor(Processor.Arch.BIT_64, Processor.Type.X86);
+        addProcessors(processor, "x86_64", "amd64", "em64t", "universal");
+    }
+
+    private static void init_IA64_32Bit() {
+        final Processor processor = new Processor(Processor.Arch.BIT_32, Processor.Type.IA_64);
+        addProcessors(processor, "ia64_32", "ia64n");
+    }
+
+    private static void init_IA64_64Bit() {
+        final Processor processor = new Processor(Processor.Arch.BIT_64, Processor.Type.IA_64);
+        addProcessors(processor, "ia64", "ia64w");
+    }
+
+    private static void init_PPC_32Bit() {
+        final Processor processor = new Processor(Processor.Arch.BIT_32, Processor.Type.PPC);
+        addProcessors(processor, "ppc", "power", "powerpc", "power_pc", "power_rs");
+    }
+
+    private static void init_PPC_64Bit() {
+        final Processor processor = new Processor(Processor.Arch.BIT_64, Processor.Type.PPC);
+        addProcessors(processor, "ppc64", "power64", "powerpc64", "power_pc64", "power_rs64");
+    }
+
+    /**
+     * Adds the given {@link Processor} with the given key {@link String} to the map.
+     *
+     * @param key The key as {@link String}.
+     * @param processor The {@link Processor} to add.
+     * @throws IllegalStateException If the key already exists.
+     */
+    private static void addProcessor(final String key, final Processor processor) {
+        if (ARCH_TO_PROCESSOR.containsKey(key)) {
+            throw new IllegalStateException("Key " + key + " already exists in processor map");
+        }
+        ARCH_TO_PROCESSOR.put(key, processor);
+    }
+
+    /**
+     * Adds the given {@link Processor} with the given keys to the map.
+     *
+     * @param keys The keys.
+     * @param processor The {@link Processor} to add.
+     * @throws IllegalStateException If the key already exists.
+     */
+    private static void addProcessors(final Processor processor, final String... keys) {
+        Arrays.stream(keys).forEach(e -> addProcessor(e, processor));
+    }
+
+    /**
+     * Gets a {@link Processor} object of the current JVM.
+     *
+     * <p>
+     * Important: The os.arch System Property returns the architecture used by the JVM
+     * not of the operating system.
+     * </p>
+     *
+     * @return A {@link Processor} when supported, else {@code null}.
+     */
+    public static Processor getProcessor() {
+        return getProcessor(Processor.OS_ARCH);
+    }
+
+    /**
+     * Gets a {@link Processor} object the given value {@link String}. The {@link String} must be
+     * like a value returned by the {@code os.arch} System Property.
+     *
+     * @param value A {@link String} like a value returned by the {@code os.arch} System Property.
+     * @return A {@link Processor} when it exists, else {@code null}.
+     */
+    public static Processor getProcessor(final String value) {
+        return ARCH_TO_PROCESSOR.get(value);
+    }
+
+    public static class Processor {
+
+        public static final String OS_ARCH = System.getProperty("os.arch");
+
+        /**
+         * The {@link Arch} enum defines the architecture of
+         * a microprocessor. The architecture represents the bit value
+         * of the microprocessor.
+         * The following architectures are defined:
+         * <ul>
+         *     <li>32-bit</li>
+         *     <li>64-bit</li>
+         *     <li>Unknown</li>
+         * </ul>
+         */
+        public enum Arch {
+
+            /**
+             * A 32-bit processor architecture.
+             */
+            BIT_32("32-bit"),
+
+            /**
+             * A 64-bit processor architecture.
+             */
+            BIT_64("64-bit"),
+
+            /**
+             * An unknown-bit processor architecture.
+             */
+            UNKNOWN("Unknown");
+
+            /**
+             * A label suitable for display.
+             */
+            private final String label;
+
+            Arch(final String label) {
+                this.label = label;
+            }
+
+            /**
+             * Gets the label suitable for display.
+             *
+             * @return the label.
+             */
+            public String getLabel() {
+                return label;
+            }
+        }
+
+        /**
+         * The {@link Type} enum defines types of a microprocessor.
+         * The following types are defined:
+         * <ul>
+         *     <li>AArch64</li>
+         *     <li>x86</li>
+         *     <li>ia64</li>
+         *     <li>PPC</li>
+         *     <li>Unknown</li>
+         * </ul>
+         */
+        public enum Type {
+
+            /**
+             * ARM 64-bit.
+             *
+             * @since 3.13.0
+             */
+            AARCH_64("AArch64"),
+
+            /**
+             * Intel x86 series of instruction set architectures.
+             */
+            X86("x86"),
+
+            /**
+             * Intel Itanium 64-bit architecture.
+             */
+            IA_64("IA-64"),
+
+            /**
+             * Apple–IBM–Motorola PowerPC architecture.
+             */
+            PPC("PPC"),
+
+            /**
+             * Unknown architecture.
+             */
+            UNKNOWN("Unknown");
+
+            /**
+             * A label suitable for display.
+             */
+            private final String label;
+
+            Type(final String label) {
+                this.label = label;
+            }
+
+            /**
+             * Gets the label suitable for display.
+             *
+             * @return the label.
+             * @since 3.13.0
+             */
+            public String getLabel() {
+                return label;
+            }
+
+        }
+
+        private final Arch arch;
+        private final Type type;
+
+        /**
+         * Constructs a {@link Processor} object with the given
+         * parameters.
+         *
+         * @param arch The processor architecture.
+         * @param type The processor type.
+         */
+        public Processor(final Arch arch, final Type type) {
+            this.arch = arch;
+            this.type = type;
+        }
+
+        /**
+         * Gets the processor architecture as an {@link Arch} enum.
+         * The processor architecture defines, if the processor has
+         * a 32 or 64 bit architecture.
+         *
+         * @return A {@link Arch} enum.
+         */
+        public Arch getArch() {
+            return arch;
+        }
+
+        /**
+         * Gets the processor type as {@link Type} enum.
+         * The processor type defines, if the processor is for example
+         * an x86 or PPA.
+         *
+         * @return A {@link Type} enum.
+         */
+        public Type getType() {
+            return type;
+        }
+
+        /**
+         * Tests if {@link Processor} is 32 bit.
+         *
+         * @return {@code true}, if {@link Processor} is {@link Arch#BIT_32}, else {@code false}.
+         */
+        public boolean is32Bit() {
+            return Arch.BIT_32 == arch;
+        }
+
+        /**
+         * Tests if {@link Processor} is 64 bit.
+         *
+         * @return {@code true}, if {@link Processor} is {@link Arch#BIT_64}, else {@code false}.
+         */
+        public boolean is64Bit() {
+            return Arch.BIT_64 == arch;
+        }
+
+        /**
+         * Tests if {@link Processor} is type of Aarch64.
+         *
+         * @return {@code true}, if {@link Processor} is {@link Type#X86}, else {@code false}.
+         *
+         * @since 3.13.0
+         */
+        public boolean isAarch64() {
+            return Type.AARCH_64 == type;
+        }
+
+        /**
+         * Tests if {@link Processor} is type of Intel Itanium.
+         *
+         * @return {@code true}. if {@link Processor} is {@link Type#IA_64}, else {@code false}.
+         */
+        public boolean isIA64() {
+            return Type.IA_64 == type;
+        }
+
+        /**
+         * Tests if {@link Processor} is type of Power PC.
+         *
+         * @return {@code true}. if {@link Processor} is {@link Type#PPC}, else {@code false}.
+         */
+        public boolean isPPC() {
+            return Type.PPC == type;
+        }
+
+        /**
+         * Tests if {@link Processor} is type of x86.
+         *
+         * @return {@code true}, if {@link Processor} is {@link Type#X86}, else {@code false}.
+         */
+        public boolean isX86() {
+            return Type.X86 == type;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder builder = new StringBuilder();
+            builder.append(type.getLabel()).append(' ').append(arch.getLabel());
+            return builder.toString();
+        }
+
     }
 
 }

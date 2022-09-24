@@ -40,7 +40,7 @@ final class HelpDisplayer {
         }
 
         // Global KBeans
-        sb.append("\nGLOBAL KBEANS\n");
+        sb.append("\nCLASSPATH KBEANS\n");
         classpathBeanClasses.stream()
                 .sorted(Comparator.comparing(Class::getSimpleName))
                 .forEach(aClass -> sb.append(beanDescription(aClass, false)));

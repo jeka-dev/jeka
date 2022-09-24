@@ -46,6 +46,9 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.springboot")
     SpringbootBuild springbootBuild;
 
+    @JkInjectProject("../plugins/dev.jeka.plugins.nodejs")
+    NodeJsBuild nodeJsBuild;
+
     private JacocoJkBean coreJacocoBean;
 
     MasterBuild() throws Exception {

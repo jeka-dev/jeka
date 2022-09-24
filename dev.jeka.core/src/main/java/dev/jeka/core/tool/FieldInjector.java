@@ -46,7 +46,7 @@ final class FieldInjector {
                     value = parse(type, propertyValue);
                 } catch (final IllegalArgumentException e) {
                     throw new JkException("Property " + injectProperty.value() + " has been set with improper value '"
-                            + propertyValue + "'");
+                            + propertyValue + "' : " + e.getMessage());
                 }
                 JkUtilsReflect.setFieldValue(target, field, value);
             }
@@ -82,7 +82,8 @@ final class FieldInjector {
             try {
                 value = parse(type, stringValue);
             } catch (final IllegalArgumentException e) {
-                throw new JkException("Option " + name + " has been set with improper value '" + stringValue + "'");
+                throw new JkException("Option " + name + " has been set with improper value '" + stringValue + "' : "
+                        + e.getMessage());
             }
             if (value == UNHANDLED_TYPE) {
                 throw new IllegalArgumentException("Class " + target.getClass().getName()
