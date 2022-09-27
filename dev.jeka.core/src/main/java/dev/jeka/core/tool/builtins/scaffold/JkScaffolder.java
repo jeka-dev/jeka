@@ -1,6 +1,5 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -181,7 +180,7 @@ public final class JkScaffolder {
             cachedJekaVersion = JkInfo.getJekaVersion();
             return cachedJekaVersion;
         }
-        List<String> versions = dependencyResolver.searchVersions(JkModuleId.of(JkInfo.JEKA_MODULE_ID));
+        List<String> versions = dependencyResolver.searchVersions(JkInfo.JEKA_MODULE_ID);
         if (versions.isEmpty()) {
             JkLog.warn("Didn't find any version of " + JkInfo.JEKA_MODULE_ID + " in " + dependencyResolver);
             JkLog.warn("Will use current one : " + JkInfo.getJekaVersion());

@@ -1,9 +1,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.depmanagement.JkVersionProvider;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
@@ -38,10 +36,10 @@ public final class JkResolveResult {
     /**
      * Creates an empty {@link JkResolveResult}
      */
-    static JkResolveResult ofRoot(JkVersionedModule module) {
-        final JkResolvedDependencyNode.JkModuleNodeInfo nodeInfo = module == null ?
+    static JkResolveResult ofRoot(JkCoordinate coordinate) {
+        final JkResolvedDependencyNode.JkModuleNodeInfo nodeInfo = coordinate == null ?
                 JkResolvedDependencyNode.JkModuleNodeInfo.ofAnonymousRoot() :
-                    JkResolvedDependencyNode.JkModuleNodeInfo.ofRoot(module);
+                    JkResolvedDependencyNode.JkModuleNodeInfo.ofRoot(coordinate);
                 return of(JkResolvedDependencyNode.ofEmpty(nodeInfo));
     }
 
@@ -66,21 +64,21 @@ public final class JkResolveResult {
     /**
      * Shorthand for <code>dependencyTree.contains(JkModuleId)</code>
      */
-    public boolean contains(JkModuleId moduleId) {
-        return this.depTree.contains(moduleId);
+    public boolean contains(GroupAndName groupAndName) {
+        return this.depTree.contains(groupAndName);
     }
 
     /**
      * Shorthand for <code>resolvedVersion.getVersionOf(JkModuleId)</code>
      */
-    public JkVersion getVersionOf(JkModuleId moduleId) {
-        return this.getResolvedVersionProvider().getVersionOf(moduleId);
+    public JkVersion getVersionOf(GroupAndName groupAndName) {
+        return this.getResolvedVersionProvider().getVersionOf(groupAndName);
     }
 
     /**
      * Shorthand for <code>dependencyTree.childModules(JkModuleId)</code>
      */
-    public Set<JkVersionedModule> getInvolvedModules() {
+    public Set<JkCoordinate> getInvolvedCoordinates() {
         return this.depTree.getChildModules();
     }
 
@@ -94,8 +92,8 @@ public final class JkResolveResult {
     /**
      * Returns files the specified module is resolved to.
      */
-    public JkPathSequence getFilesFor(JkModuleId moduleId) {
-        final JkResolvedDependencyNode dependencyNode = this.depTree.getFirst(moduleId);
+    public JkPathSequence getFilesFor(GroupAndName groupAndName) {
+        final JkResolvedDependencyNode dependencyNode = this.depTree.getFirst(groupAndName);
         if (dependencyNode == null) {
             return JkPathSequence.of();
         }

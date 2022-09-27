@@ -21,10 +21,12 @@ import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToDepend
 
 class IvyTranslatorToModuleDescriptor {
 
-    static DefaultModuleDescriptor toResolveModuleDescriptor(JkVersionedModule module,
+    static DefaultModuleDescriptor toResolveModuleDescriptor(JkCoordinate coordinate,
                                                              JkQualifiedDependencySet dependencies) {
-        final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
-                .getModuleId().getGroup(), module.getModuleId().getName(), module.getVersion().getValue());
+        final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(
+                coordinate.getGroupAndName().getGroup(),
+                coordinate.getGroupAndName().getName(),
+                coordinate.getVersion().getValue());
         final DefaultModuleDescriptor result = newDefaultModuleDescriptor(thisModuleRevisionId);
 
         // Add configurations
@@ -40,40 +42,40 @@ class IvyTranslatorToModuleDescriptor {
 
         // Add version overwrites for transitive dependencies
         JkVersionProvider versionProvider = dependencies.getVersionProvider();
-        for (final JkModuleId moduleId : versionProvider.getModuleIds()) {
-            final JkVersion version = versionProvider.getVersionOf(moduleId);
-            result.addDependencyDescriptorMediator(toModuleId(moduleId),
+        for (final JkCoordinate.GroupAndName groupAndName : versionProvider.getGroupAndNames()) {
+            final JkVersion version = versionProvider.getVersionOf(groupAndName);
+            result.addDependencyDescriptorMediator(toModuleId(groupAndName),
                     ExactOrRegexpPatternMatcher.INSTANCE,
                     new OverrideDependencyDescriptorMediator(null, version.getValue()));
         }
         return result;
     }
 
-    static DefaultModuleDescriptor toMavenPublishModuleDescriptor(JkVersionedModule module,
+    static DefaultModuleDescriptor toMavenPublishModuleDescriptor(JkCoordinate coordinate,
                                                                   JkDependencySet dependencies,
                                                                   JkArtifactLocator artifactLocator) {
         List<JkQualifiedDependency> qualifiedDependencies = dependencies.getEntries().stream()
-                .filter(JkModuleDependency.class::isInstance)
-                .map(JkModuleDependency.class::cast)
+                .filter(JkCoordinateDependency.class::isInstance)
+                .map(JkCoordinateDependency.class::cast)
                 .map(dep -> {
                     JkTransitivity transitivity = dep.getTransitivity();
                     String qualifier = JkTransitivity.COMPILE.equals(transitivity) ? "compile" : "runtime";
                     return JkQualifiedDependency.of(qualifier, dep);
                 })
                 .collect(Collectors.toList());
-        DefaultModuleDescriptor result = toResolveModuleDescriptor(module,
+        DefaultModuleDescriptor result = toResolveModuleDescriptor(coordinate,
                 JkQualifiedDependencySet.of(qualifiedDependencies));
-        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(module, artifactLocator);
+        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(coordinate, artifactLocator);
         IvyTranslatorToArtifact.bind(result, artifactMap);
         return result;
     }
 
-    static DefaultModuleDescriptor toIvyPublishModuleDescriptor(JkVersionedModule module,
+    static DefaultModuleDescriptor toIvyPublishModuleDescriptor(JkCoordinate coordinate,
                                                                 JkQualifiedDependencySet dependencies,
                                                                 List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts) {
-        DefaultModuleDescriptor result = toResolveModuleDescriptor(module, dependencies);
+        DefaultModuleDescriptor result = toResolveModuleDescriptor(coordinate, dependencies);
         List<IvyTranslatorToArtifact.ArtifactAndConfigurations> artifactAndConfigurationsList =
-            IvyTranslatorToArtifact.toIvyArtifacts(module, publishedArtifacts);
+            IvyTranslatorToArtifact.toIvyArtifacts(coordinate, publishedArtifacts);
         IvyTranslatorToArtifact.bind(result, artifactAndConfigurationsList);
         return result;
     }

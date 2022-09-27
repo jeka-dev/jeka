@@ -1,9 +1,6 @@
 package dev.jeka.core.api.tooling;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependency;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -182,21 +179,20 @@ public final class JkMvn implements Runnable {
         if (items.length == 5) {
             final String classifier = items[2];
             final String scope = JkPom.toScope(items[4]);
-            JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1], items[3]);
+            JkCoordinate coordinate = JkCoordinate.of(items[0], items[1], items[3]);
             if (!"jar".equals(classifier)) {
-                dependency = dependency.withClassifiers(classifier);
+                coordinate = coordinate.withClassifiers(classifier);
             }
+            JkCoordinateDependency dependency = JkCoordinateDependency.of(coordinate);
             return JkQualifiedDependency.of(scope, dependency);
         }
+        final JkCoordinate coordinate = JkCoordinate.of(items[0], items[1], items[2]);
+        final JkCoordinateDependency dependency = JkCoordinateDependency.of(coordinate);
         if (items.length == 4) {
             final String scope = JkPom.toScope(items[3]);
-            final JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1],
-                    items[2]);
             return JkQualifiedDependency.of(scope, dependency);
         }
         if (items.length == 3) {
-            final JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1],
-                    items[2]);
             return JkQualifiedDependency.of(null, dependency);
         }
         return null;

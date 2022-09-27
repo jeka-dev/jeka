@@ -1,7 +1,7 @@
 package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
 import org.junit.Test;
@@ -27,11 +27,11 @@ public class JkEclipseClasspathGeneratorIT {
             .setBaseDir(top.resolve("base"))
             .simpleFacade()
                 .configureCompileDeps(deps -> deps
-                        .and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6"))).getProject();
+                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.version("4.5.6"))).getProject();
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
             .setDefDependencies(baseProject.getConstruction().getDependencyResolver(),
-                    JkDependencySet.of().and(JkPopularModules.GUAVA.version("21.0")));
+                    JkDependencySet.of().and(JkPopularLibs.GUAVA.version("21.0")));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class JkModuleSearch {
+public class JkCoordinateSearch {
 
     private static final Map<String, String> REPO_API_URL = new HashMap<>();
 
@@ -48,15 +48,15 @@ public class JkModuleSearch {
 
     private String groupOrNameCriteria;
 
-    private JkModuleSearch() {
+    private JkCoordinateSearch() {
     }
 
-    public static JkModuleSearch of() {
-        return new JkModuleSearch();
+    public static JkCoordinateSearch of() {
+        return new JkCoordinateSearch();
     }
 
-    public static JkModuleSearch of(JkRepo repo) {
-        JkModuleSearch result = of();
+    public static JkCoordinateSearch of(JkRepo repo) {
+        JkCoordinateSearch result = of();
         String repoUrl = repo.getUrl().toString();
         String resolvedUrl = REPO_API_URL.get(repoUrl);
         if (resolvedUrl != null) {
@@ -67,19 +67,19 @@ public class JkModuleSearch {
         return result;
     }
 
-    public JkModuleSearch setApiUrl(String url) {
+    public JkCoordinateSearch setApiUrl(String url) {
         this.apiUrl = url;
         return this;
     }
 
 
 
-    public JkModuleSearch setTimeout(int timeout) {
+    public JkCoordinateSearch setTimeout(int timeout) {
         this.timeout = timeout;
         return this;
     }
 
-    public JkModuleSearch setGroupOrNameCriteria(String groupOrNameCriteria) {
+    public JkCoordinateSearch setGroupOrNameCriteria(String groupOrNameCriteria) {
         this.groupOrNameCriteria = groupOrNameCriteria;
         return this;
     }

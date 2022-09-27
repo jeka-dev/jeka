@@ -1,8 +1,6 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -103,7 +101,7 @@ final class CommandLine {
     }
 
     static JkDependency toDependency(String depDescription) {
-        boolean hasDoubleDotes = JkModuleDependency.isModuleDependencyDescription(depDescription);
+        boolean hasDoubleDotes = JkCoordinate.isCoordinateDescription(depDescription);
         if (!hasDoubleDotes || (JkUtilsSystem.IS_WINDOWS &&
                 (depDescription.startsWith(":\\", 1)) || depDescription.startsWith(":/", 1) )) {
             Path candidatePath = Paths.get(depDescription);
@@ -115,13 +113,13 @@ final class CommandLine {
                         "Is " + candidatePath.toAbsolutePath() + " an existing file ?");
             }
         } else {
-            JkModuleDependency moduleDependency = JkModuleDependency.of(depDescription);
-            boolean specifiedVersion = !moduleDependency.hasUnspecifiedVersion();
+            JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of(depDescription);
+            boolean specifiedVersion = !coordinateDependency.getCoordinate().hasUnspecifiedVersion();
             if (specifiedVersion) {
-                return moduleDependency;
-            } else if (moduleDependency.getModuleId().getGroup().equals("dev.jeka")) {
-                moduleDependency = moduleDependency.withVersion(JkInfo.getJekaVersion());
-                return moduleDependency;
+                return coordinateDependency;
+            } else if (coordinateDependency.getCoordinate().getGroupAndName().getGroup().equals("dev.jeka")) {
+                coordinateDependency = coordinateDependency.withVersion(JkVersion.of(JkInfo.getJekaVersion()));
+                return coordinateDependency;
             } else {
                 throw new JkException("Command line argument "
                         + depDescription + " does not mention a version. " +

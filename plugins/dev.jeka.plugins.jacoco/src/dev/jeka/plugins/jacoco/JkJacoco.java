@@ -4,23 +4,16 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkClasspath;
-import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 
-import java.io.File;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Provides convenient methods to deal with Jacoco agent and report tool.
@@ -212,12 +205,12 @@ public final class JkJacoco {
         }
 
         public Path getAgentJar() {
-            return JkModuleFileProxy.of(dependencyResolver.getRepos(),
+            return JkCoordinateFileProxy.of(dependencyResolver.getRepos(),
                     "org.jacoco:org.jacoco.agent:runtime:" + version).get();
         }
 
         public Path getCmdLineJar() {
-            return JkModuleFileProxy.of(dependencyResolver.getRepos(),
+            return JkCoordinateFileProxy.of(dependencyResolver.getRepos(),
                     "org.jacoco:org.jacoco.cli:nodeps:" + version).get();
         }
 

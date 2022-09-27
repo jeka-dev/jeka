@@ -1,6 +1,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -22,7 +23,7 @@ public final class JkDependencyResolver<T> {
     private final JkResolutionParameters<JkDependencyResolver<T> > defaultParameters;
 
     // Not necessary but may help Ivy to do some caching ???
-    private JkVersionedModule moduleHolder;
+    private JkCoordinate moduleHolder;
 
     private JkRepoSet repos = JkRepoSet.of();
 
@@ -103,21 +104,21 @@ public final class JkDependencyResolver<T> {
      * module+version for which the resolution is made. This is only relevant
      * for of dependencies and have no effect for of dependencies.
      */
-    public JkDependencyResolver<T> setModuleHolder(JkVersionedModule versionedModule) {
+    public JkDependencyResolver<T> setModuleHolder(JkCoordinate versionedModule) {
         this.moduleHolder = versionedModule;
         return this;
     }
 
-    public JkResolveResult resolve(JkModuleDependency moduleDependency) {
-        return resolve(moduleDependency, defaultParameters);
+    public JkResolveResult resolve(JkCoordinateDependency coordinateDependency) {
+        return resolve(coordinateDependency, defaultParameters);
     }
 
     public JkResolveResult resolve(String dependencyDescription) {
-        return resolve(JkModuleDependency.of(dependencyDescription));
+        return resolve(JkCoordinateDependency.of(dependencyDescription));
     }
 
-    public JkResolveResult resolve(JkModuleDependency moduleDependency, JkResolutionParameters params) {
-        return resolve(JkDependencySet.of(moduleDependency), params);
+    public JkResolveResult resolve(JkCoordinateDependency coordinateDependency, JkResolutionParameters params) {
+        return resolve(JkDependencySet.of(coordinateDependency), params);
     }
 
     public JkResolveResult resolve(JkDependencySet dependencies) {
@@ -126,7 +127,7 @@ public final class JkDependencyResolver<T> {
 
     public JkResolveResult resolve(JkDependencySet dependencies, JkResolutionParameters params) {
         return resolve(JkQualifiedDependencySet.of(
-                dependencies.normalised(JkVersionedModule.ConflictStrategy.FAIL)
+                dependencies.normalised(JkCoordinate.ConflictStrategy.FAIL)
                             .mergeLocalProjectExportedDependencies()), params);
     }
 
@@ -172,7 +173,7 @@ public final class JkDependencyResolver<T> {
         final JkResolvedDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(
                 allDependencies);
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
-        int moduleCount = resolveResult.getInvolvedModules().size();
+        int moduleCount = resolveResult.getInvolvedCoordinates().size();
         int fileCount = resolveResult.getFiles().getEntries().size();
         JkLog.info(pluralize(moduleCount, "module") + " -> " + pluralize(fileCount, "file"));
         if (JkLog.isVerbose()) {
@@ -207,17 +208,22 @@ public final class JkDependencyResolver<T> {
     /**
      * Returns an alphabetical sorted list of module ids present in these repositories for the specified groupId.
      */
-    public List<String> searchModules(String groupId) {
+    public List<String> searchGroupAndNames(String groupId) {
         return JkInternalDependencyResolver.of(this.repos).searchModules(groupId);
     }
 
     /**
      * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
      */
-    public List<String> searchVersions(JkModuleId moduleId) {
-        return JkInternalDependencyResolver.of(this.repos).searchVersions(moduleId).stream()
+    public List<String> searchVersions(GroupAndName groupAndName) {
+        return JkInternalDependencyResolver.of(this.repos).searchVersions(groupAndName).stream()
                 .sorted(JkVersion.VERSION_COMPARATOR).collect(Collectors.toList());
     }
+
+    public List<String> searchVersions(String groupAndName) {
+        return searchVersions(GroupAndName.of(groupAndName));
+    }
+
 
     @Override
     public String toString() {

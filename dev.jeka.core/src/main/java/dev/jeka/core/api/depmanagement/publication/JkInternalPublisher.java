@@ -1,9 +1,6 @@
 package dev.jeka.core.api.depmanagement.publication;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
 import dev.jeka.core.api.java.JkClassLoader;
@@ -22,17 +19,17 @@ public interface JkInternalPublisher {
     /**
      * Publishes the specified module to the repository mentioned in the publication.
      *
-     * @param versionedModule
+     * @param coordinate
      *            The module/version to publish.
      * @param publishedArtifacts
      *            The artifacts to publish.
      * @param dependencies
      *            The dependencies of the published module.
      */
-    void publishIvy(JkVersionedModule versionedModule, List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts,
+    void publishIvy(JkCoordinate coordinate, List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts,
                     JkQualifiedDependencySet dependencies);
 
-    void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator, JkPomMetadata pomMetadata,
+    void publishMaven(JkCoordinate coordinate, JkArtifactLocator artifactLocator, JkPomMetadata pomMetadata,
                       JkDependencySet dependencySet);
 
     static JkInternalPublisher of(JkRepoSet publishRepos, Path artifactDir) {

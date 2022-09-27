@@ -1,8 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata;
@@ -71,27 +69,27 @@ final class IvyPublisherForMaven {
         }
 
         // publish artifacts
-        final JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(ivyModuleRevisionId);
-        final JkMavenMetadata returnedMetaData = publish(versionedModule, artifactLocator);
+        final JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(ivyModuleRevisionId);
+        final JkMavenMetadata returnedMetaData = publish(coordinate, artifactLocator);
 
         // publish pom
         final Path pomXml = makePom(moduleDescriptor, artifactLocator, metadata);
         final String version;
-        if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
-            final String path = snapshotMetadataPath(versionedModule);
+        if (coordinate.getVersion().isSnapshot() && this.uniqueSnapshot) {
+            final String path = snapshotMetadataPath(coordinate);
             final JkMavenMetadata mavenMetadata = JkUtilsObject.firstNonNull(loadMavenMetadata(path),
                     returnedMetaData);
             final JkMavenMetadata.Versioning.JkSnapshot snap = mavenMetadata.currentSnapshot();
-            version = versionForUniqueSnapshot(versionedModule.getVersion().getValue(), snap.timestamp,
+            version = versionForUniqueSnapshot(coordinate.getVersion().getValue(), snap.timestamp,
                     snap.buildNumber);
-            final String pomDest = destination(versionedModule, "pom", JkArtifactId.MAIN_ARTIFACT_NAME,
+            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME,
                     version);
             putInRepo(pomXml, pomDest, true);
             mavenMetadata.addSnapshotVersion("pom", JkArtifactId.MAIN_ARTIFACT_NAME);
             push(mavenMetadata, path);
         } else {
-            version = versionedModule.getVersion().getValue();
-            final String pomDest = destination(versionedModule, "pom", JkArtifactId.MAIN_ARTIFACT_NAME, version);
+            version = coordinate.getVersion().getValue();
+            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME, version);
             putInRepo(pomXml, pomDest, true);
         }
         if (this.descriptorOutputDir == null) {
@@ -107,34 +105,34 @@ final class IvyPublisherForMaven {
         commitPublication(resolver);
     }
 
-    private JkMavenMetadata publish(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator) {
-        if (!versionedModule.getVersion().isSnapshot()) {
-            final String existing = checkNotExist(versionedModule, artifactLocator);
+    private JkMavenMetadata publish(JkCoordinate coordinate, JkArtifactLocator artifactLocator) {
+        if (!coordinate.getVersion().isSnapshot()) {
+            final String existing = checkNotExist(coordinate, artifactLocator);
             if (existing != null) {
                 throw new IllegalArgumentException("Artifact " + existing
                         + " already exists on repo.");
             }
         }
-        if (versionedModule.getVersion().isSnapshot() && this.uniqueSnapshot) {
-            final String path = snapshotMetadataPath(versionedModule);
+        if (coordinate.getVersion().isSnapshot() && this.uniqueSnapshot) {
+            final String path = snapshotMetadataPath(coordinate);
             JkMavenMetadata mavenMetadata = loadMavenMetadata(path);
             final String timestamp = JkUtilsTime.nowUtc("yyyyMMdd.HHmmss");
             if (mavenMetadata == null) {
-                mavenMetadata = JkMavenMetadata.of(versionedModule, timestamp);
+                mavenMetadata = JkMavenMetadata.of(coordinate, timestamp);
             }
             mavenMetadata.updateSnapshot(timestamp);
             push(mavenMetadata, path);
             final int buildNumber = mavenMetadata.currentBuildNumber();
-            final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.getVersion()
+            final String versionUniqueSnapshot = versionForUniqueSnapshot(coordinate.getVersion()
                     .getValue(), timestamp, buildNumber);
             for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
-                publishUniqueSnapshot(versionedModule, artifactId.getName(),
+                publishUniqueSnapshot(coordinate, artifactId.getName(),
                     artifactLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
             }
             return mavenMetadata;
         } else {
             for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
-                publishNormal(versionedModule, artifactId.getName(), artifactLocator.getArtifactPath(artifactId));
+                publishNormal(coordinate, artifactId.getName(), artifactLocator.getArtifactPath(artifactId));
             }
             return null;
         }
@@ -172,15 +170,15 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private String checkNotExist(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator) {
-        final String pomDest = destination(versionedModule, "pom", JkArtifactId.MAIN_ARTIFACT_NAME);
+    private String checkNotExist(JkCoordinate coordinate, JkArtifactLocator artifactLocator) {
+        final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME);
         if (existOnRepo(pomDest)) {
-            throw new IllegalArgumentException("The main artifact already exist for " + versionedModule);
+            throw new IllegalArgumentException("The main artifact already exist for " + coordinate);
         }
         for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
             Path artifactFile = artifactLocator.getArtifactPath(artifactId);
             final String ext = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
-            final String dest = destination(versionedModule, ext, null);
+            final String dest = destination(coordinate, ext, null);
             if (existOnRepo(dest)) {
                 return dest;
             }
@@ -198,38 +196,38 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private void publishUniqueSnapshot(JkVersionedModule versionedModule, String classifier,
+    private void publishUniqueSnapshot(JkCoordinate coordinate, String classifier,
             Path source, String versionForUniqueSnapshot, JkMavenMetadata mavenMetadata) {
 
         final String extension = JkUtilsString.substringAfterLast(source.getFileName().toString(), ".");
-        final String dest = destination(versionedModule, extension, classifier,
+        final String dest = destination(coordinate, extension, classifier,
                 versionForUniqueSnapshot);
         putInRepo(source, dest, false);
-        final String path = snapshotMetadataPath(versionedModule);
+        final String path = snapshotMetadataPath(coordinate);
         mavenMetadata.addSnapshotVersion(extension, classifier);
         push(mavenMetadata, path);
     }
 
-    private void publishNormal(JkVersionedModule versionedModule, String classifier, Path source) {
+    private void publishNormal(JkCoordinate coordinate, String classifier, Path source) {
 
         final String extension = JkUtilsString.substringAfterLast(source.getFileName().toString(), ".");
-        final String version = versionedModule.getVersion().getValue();
-        final String dest = destination(versionedModule.withVersion(version), extension, classifier);
-        final boolean overwrite = versionedModule.getVersion().isSnapshot();
+        final String version = coordinate.getVersion().getValue();
+        final String dest = destination(coordinate.withVersion(version), extension, classifier);
+        final boolean overwrite = coordinate.getVersion().isSnapshot();
         putInRepo(source, dest, overwrite);
     }
 
-    private static String destination(JkVersionedModule versionedModule, String ext,
+    private static String destination(JkCoordinate coordinate, String ext,
             String classifier) {
-        return destination(versionedModule, ext, classifier, versionedModule.getVersion().getValue());
+        return destination(coordinate, ext, classifier, coordinate.getVersion().getValue());
     }
 
-    private static String destination(JkVersionedModule versionedModule, String ext,
+    private static String destination(JkCoordinate coordinate, String ext,
             String classifier, String uniqueVersion) {
-        final JkModuleId moduleId = versionedModule.getModuleId();
-        final String version = versionedModule.getVersion().getValue();
-        final StringBuilder result = new StringBuilder(moduleBasePath(moduleId)).append("/")
-                .append(version).append("/").append(moduleId.getName()).append("-")
+        final JkCoordinate.GroupAndName groupAndName = coordinate.getGroupAndName();
+        final String version = coordinate.getVersion().getValue();
+        final StringBuilder result = new StringBuilder(moduleBasePath(groupAndName)).append("/")
+                .append(version).append("/").append(groupAndName.getName()).append("-")
                 .append(uniqueVersion);
         if (!JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
             result.append("-").append(classifier);
@@ -247,7 +245,7 @@ final class IvyPublisherForMaven {
         final String path = versionMetadataPath(of(moduleId, version));
         JkMavenMetadata mavenMetadata = loadMavenMetadata(path);
         if (mavenMetadata == null) {
-            mavenMetadata = JkMavenMetadata.of(JkModuleId.of(moduleId.getOrganisation(),
+            mavenMetadata = JkMavenMetadata.of(JkCoordinate.GroupAndName.of(moduleId.getOrganisation(),
                     moduleId.getName()));
         }
         mavenMetadata.addVersion(version, timestamp);
@@ -266,21 +264,17 @@ final class IvyPublisherForMaven {
         putInRepo(file, path, true);
     }
 
-    private static JkVersionedModule of(ModuleId moduleId, String version) {
-        return JkVersionedModule.of(JkModuleId.of(moduleId.getOrganisation(), moduleId.getName()),
-                JkVersion.of(version));
+
+    private static String versionMetadataPath(JkCoordinate coordinate) {
+        return moduleBasePath(coordinate.getGroupAndName()) + "/maven-metadata.xml";
     }
 
-    private static String versionMetadataPath(JkVersionedModule module) {
-        return moduleBasePath(module.getModuleId()) + "/maven-metadata.xml";
+    private static String moduleBasePath(JkCoordinate.GroupAndName groupAndName) {
+        return groupAndName.getGroup().replace(".", "/") + "/" + groupAndName.getName();
     }
 
-    private static String moduleBasePath(JkModuleId module) {
-        return module.getGroup().replace(".", "/") + "/" + module.getName();
-    }
-
-    private static String snapshotMetadataPath(JkVersionedModule module) {
-        return moduleBasePath(module.getModuleId()) + "/" + module.getVersion().getValue()
+    private static String snapshotMetadataPath(JkCoordinate coordinate) {
+        return moduleBasePath(coordinate.getGroupAndName()) + "/" + coordinate.getVersion().getValue()
                 + "/maven-metadata.xml";
     }
 
@@ -345,6 +339,11 @@ final class IvyPublisherForMaven {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
+
+    private static JkCoordinate of(ModuleId moduleId, String version) {
+        return JkCoordinate.GroupAndName.of(moduleId.getOrganisation(), moduleId.getName()).toCoordinate(version);
+    }
+
 
     private static class ScopeMapping extends PomWriterOptions.ConfigurationScopeMapping {
 

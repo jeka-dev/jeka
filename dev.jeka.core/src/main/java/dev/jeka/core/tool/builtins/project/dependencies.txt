@@ -4,8 +4,8 @@
 #
 # COMPILE+RUNTIME : stands for dependencies used both for compilation and runtime.
 #                   This is the most common place to declare dependencies.
-# COMPILE         : stands for dependencies used for compilation only (not for runtime).
-# RUNTIME         : stands for dependencies used for runtime only (not for compilation).
+# COMPILE_ONLY    : stands for dependencies used for compilation only (not for runtime).
+# RUNTIME_ONLY    : stands for dependencies used for runtime only (not for compilation).
 #                   Runtime dependencies has impact when creating fat jars and for the definition of published dependencies.
 # TEST            : stands for dependencies used only for testing.
 #
@@ -24,9 +24,9 @@
 
 == COMPILE+RUNTIME ==
 
-== COMPILE ==
+== COMPILE_ONLY ==
 
-== RUNTIME ==
+== RUNTIME_ONLY ==
 
 == TEST ==
 

@@ -42,7 +42,7 @@ public class JkProjectPublication {
     JkProjectPublication(JkProject project) {
         this.project = project;
         this.__ = project;
-        JkVersionedModule.ConflictStrategy conflictStrategy = project.getDuplicateConflictStrategy();
+        JkCoordinate.ConflictStrategy conflictStrategy = project.getDuplicateConflictStrategy();
         JkArtifactLocator artifactLocator = project.getArtifactProducer();
         maven = JkMavenPublication.of(this)
                 .setArtifactLocatorSupplier(() -> project.getArtifactProducer())
@@ -121,17 +121,17 @@ public class JkProjectPublication {
         return this;
     }
 
-    public JkModuleId getModuleId() {
-        return Optional.ofNullable(maven.getModuleId()).orElseGet(ivy::getModuleId);
+    public JkCoordinate.GroupAndName getGroupAndName() {
+        return Optional.ofNullable(maven.getGroupAndName()).orElseGet(ivy::getGroupAndName);
     }
 
     public JkVersion getVersion() {
         return Optional.ofNullable(maven.getVersion()).orElseGet(ivy::getVersion);
     }
 
-    public JkProjectPublication setModuleId(String moduleId) {
-        this.maven.setModuleId(moduleId);
-        this.ivy.setModuleId(moduleId);
+    public JkProjectPublication setGroupAndName(String groupAndName) {
+        this.maven.setModuleId(groupAndName);
+        this.ivy.setGroupAndName(groupAndName);
         return this;
     }
 

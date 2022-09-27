@@ -13,7 +13,7 @@ public class JkSearchTest {
     @Ignore
     public void testSearchWithSpecifiedUrl() throws IOException {
         JkLog.setDecorator(JkLog.Style.BRACE);
-        List result = JkModuleSearch.of()
+        List result = JkCoordinateSearch.of()
                 .setApiUrl("https://oss.sonatype.org/service/local/lucene/search")
                         .setGroupOrNameCriteria("guav")
                         .search();
@@ -27,11 +27,11 @@ public class JkSearchTest {
         JkLog.Verbosity verbosity = JkLog.verbosity();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkRepo repo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot("djeang", System.getenv("jiraPwd"));
-        List result = JkModuleSearch.of(repo)
+        List result = JkCoordinateSearch.of(repo)
                 .setGroupOrNameCriteria("guav")
                 .search();
         result.forEach(System.out::println);
-        JkModuleSearch.of(repo)
+        JkCoordinateSearch.of(repo)
                 .setGroupOrNameCriteria("guav")
                 .search();
         JkLog.setVerbosity(verbosity);
@@ -44,7 +44,7 @@ public class JkSearchTest {
         JkLog.Verbosity verbosity = JkLog.verbosity();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkRepo repo = JkRepo.ofMavenCentral();
-        List result = JkModuleSearch.of(repo)
+        List result = JkCoordinateSearch.of(repo)
                 .setGroupOrNameCriteria("guav")
                 .search();
         result.forEach(System.out::println);
@@ -58,7 +58,7 @@ public class JkSearchTest {
         JkLog.Verbosity verbosity = JkLog.verbosity();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkRepo repo = JkRepo.ofMavenCentral();
-        List result = JkModuleSearch.of(repo)
+        List result = JkCoordinateSearch.of(repo)
                 .setGroupOrNameCriteria("org.springframework.boot")
                 .search();
         result.forEach(System.out::println);
@@ -69,7 +69,7 @@ public class JkSearchTest {
     @Ignore
     public void testSearchSpring() throws IOException {
         JkLog.setDecorator(JkLog.Style.BRACE);
-        List result = JkModuleSearch.of(JkRepo.ofMavenCentral())
+        List result = JkCoordinateSearch.of(JkRepo.ofMavenCentral())
                 .setGroupOrNameCriteria("org.sprin*")
                 .search();
         result.forEach(System.out::println);

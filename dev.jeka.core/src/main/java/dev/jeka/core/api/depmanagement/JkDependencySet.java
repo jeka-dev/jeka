@@ -36,8 +36,8 @@ public class JkDependencySet {
 
     public static JkDependencySet of(String dependencyDesc) {
         final JkDependency dependency;
-        if (JkModuleDependency.isModuleDependencyDescription(dependencyDesc)) {
-            dependency = JkModuleDependency.of(dependencyDesc);
+        if (JkCoordinate.isCoordinateDescription(dependencyDesc)) {
+            dependency = JkCoordinateDependency.of(dependencyDesc);
         } else {
             dependency = JkFileSystemDependency.of(Paths.get(dependencyDesc));
         }
@@ -137,15 +137,15 @@ public class JkDependencySet {
     }
 
     public JkDependencySet and(Hint hint, String moduleDescriptor) {
-        return and(hint, JkModuleDependency.of(moduleDescriptor));
+        return and(hint, JkCoordinateDependency.of(moduleDescriptor));
     }
 
-    public JkDependencySet and(Hint hint, JkModuleId moduleId) {
-        return and(hint, moduleId.toString());
+    public JkDependencySet and(Hint hint, JkCoordinate.GroupAndName groupAndName) {
+        return and(hint, groupAndName.toString());
     }
 
-    public JkDependencySet and(JkModuleId moduleId) {
-        return and(null, moduleId.toString());
+    public JkDependencySet and(JkCoordinate.GroupAndName groupAndName) {
+        return and(null, groupAndName.toString());
     }
 
     public JkDependencySet and(@JkDepSuggest String moduleDescriptor) {
@@ -153,7 +153,7 @@ public class JkDependencySet {
     }
 
     public JkDependencySet and(Hint hint, String moduleDescriptor, JkTransitivity transitivity) {
-        return and(hint, JkModuleDependency.of(moduleDescriptor).withTransitivity(transitivity));
+        return and(hint, JkCoordinateDependency.of(moduleDescriptor).withTransitivity(transitivity));
     }
 
     public JkDependencySet and(String moduleDescriptor, JkTransitivity transitivity) {
@@ -199,21 +199,21 @@ public class JkDependencySet {
         return minus(JkFileSystemDependency.of(path));
     }
 
-    public JkDependencySet minus(JkModuleId moduleId) {
-        return minus(JkModuleDependency.of(moduleId, JkVersion.UNSPECIFIED));
+    public JkDependencySet minus(JkCoordinate.GroupAndName groupAndName) {
+        return minus(JkCoordinateDependency.of(JkCoordinate.of(groupAndName)));
     }
 
-    public JkDependencySet minus(String moduleId) {
-        return minus(JkModuleId.of(moduleId));
+    public JkDependencySet minus(String groupAndName) {
+        return minus(JkCoordinate.GroupAndName.of(groupAndName));
     }
 
     public JkDependencySet withGlobalTransitivityReplacement(JkTransitivity formerTransitivity, JkTransitivity newTransitivity) {
         final List<JkDependency> list = new LinkedList<>();
         for (JkDependency dep : this.entries) {
-            if (dep instanceof JkModuleDependency) {
-                JkModuleDependency moduleDependency = (JkModuleDependency) dep;
-                if (Objects.equals(moduleDependency.getTransitivity(), formerTransitivity)) {
-                    dep = moduleDependency.withTransitivity(newTransitivity);
+            if (dep instanceof JkCoordinateDependency) {
+                JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dep;
+                if (Objects.equals(coordinateDependency.getTransitivity(), formerTransitivity)) {
+                    dep = coordinateDependency.withTransitivity(newTransitivity);
                 }
             }
             list.add(dep);
@@ -224,10 +224,10 @@ public class JkDependencySet {
     public JkDependencySet withTransitivity(String moduleId, JkTransitivity newTransitivity) {
         final List<JkDependency> list = new LinkedList<>();
         for (JkDependency dep : this.entries) {
-            if (dep instanceof JkModuleDependency) {
-                JkModuleDependency moduleDependency = (JkModuleDependency) dep;
-                if (JkModuleId.of(moduleId).equals(moduleDependency.getModuleId())) {
-                    dep = moduleDependency.withTransitivity(newTransitivity);
+            if (dep instanceof JkCoordinateDependency) {
+                JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dep;
+                if (JkCoordinate.GroupAndName.of(moduleId).equals(coordinateDependency.getCoordinate().getGroupAndName())) {
+                    dep = coordinateDependency.withTransitivity(newTransitivity);
                 }
             }
             list.add(dep);
@@ -297,7 +297,7 @@ public class JkDependencySet {
      * {@link JkModuleDependency}.
      */
     public boolean hasModules() {
-        return entries.stream().filter(JkModuleDependency.class::isInstance).findAny().isPresent();
+        return entries.stream().filter(JkCoordinateDependency.class::isInstance).findAny().isPresent();
     }
 
     /**
@@ -320,9 +320,9 @@ public class JkDependencySet {
      * {@link JkModuleId}. Returns <code>null</code> if no dependency on this
      * module exists in this object.
      */
-    public JkModuleDependency get(String moduleId) {
+    public JkCoordinateDependency get(String moduleId) {
         return moduleDeps()
-                .filter(dep -> dep.getModuleId().toString().equals(moduleId))
+                .filter(dep -> dep.getCoordinate().getGroupAndName().toString().equals(moduleId))
                 .findFirst().orElse(null);
     }
 
@@ -332,14 +332,14 @@ public class JkDependencySet {
                 .findFirst().orElse(null);
     }
 
-    public List<JkModuleDependency> getModuleDependencies() {
+    public List<JkCoordinateDependency> getCoordinateDependencies() {
         return moduleDeps().collect(Collectors.toList());
     }
 
-    private Stream<JkModuleDependency> moduleDeps() {
+    private Stream<JkCoordinateDependency> moduleDeps() {
         return this.entries.stream()
-                .filter(JkModuleDependency.class::isInstance)
-                .map(JkModuleDependency.class::cast);
+                .filter(JkCoordinateDependency.class::isInstance)
+                .map(JkCoordinateDependency.class::cast);
     }
 
     /**
@@ -349,7 +349,7 @@ public class JkDependencySet {
      * "1.0-SNAPSHOT").
      */
     public boolean hasDynamicVersions() {
-        return moduleDeps().anyMatch(dep -> dep.getVersion().isDynamic());
+        return moduleDeps().anyMatch(dep -> dep.getCoordinate().getVersion().isDynamic());
     }
 
     /**
@@ -360,7 +360,7 @@ public class JkDependencySet {
      * versions are replaced by fixed resolved ones.
      */
     public boolean hasDynamicAndResolvableVersions() {
-        return moduleDeps().anyMatch(dep -> dep.getVersion().isDynamicAndResolvable());
+        return moduleDeps().anyMatch(dep -> dep.getCoordinate().getVersion().isDynamicAndResolvable());
     }
 
 
@@ -376,7 +376,7 @@ public class JkDependencySet {
     public JkDependencySet minusModuleDependenciesHavingIdeProjectDir() {
         List<JkDependency> result = new LinkedList<>();
         for (JkDependency dependency : this.entries) {
-            if (dependency.getIdeProjectDir() == null || !(dependency instanceof JkModuleDependency)) {
+            if (dependency.getIdeProjectDir() == null || !(dependency instanceof JkCoordinateDependency)) {
                 result.add(dependency);
             }
         }
@@ -401,22 +401,29 @@ public class JkDependencySet {
      * Removes duplicates and select a version according the specified strategy in
      * case of duplicate with distinct versions.
      */
-    public JkDependencySet normalised(JkVersionedModule.ConflictStrategy conflictStrategy) {
-        Map<JkModuleId, JkVersion> moduleIdVersionMap = new HashMap<>();
+    public JkDependencySet normalised(JkCoordinate.ConflictStrategy conflictStrategy) {
+        Map<JkCoordinate.GroupAndName, JkVersion> moduleIdVersionMap = new HashMap<>();
         entries.stream()
-                .filter(JkModuleDependency.class::isInstance)
-                .map(JkModuleDependency.class::cast)
-                .forEach(dep -> {
-                    moduleIdVersionMap.putIfAbsent(dep.getModuleId(),dep.getVersion());
-                    moduleIdVersionMap.computeIfPresent(dep.getModuleId(),
-                            (moduleId, version) -> JkVersionedModule.of(moduleId, version)
-                                    .resolveConflict(dep.getVersion(), conflictStrategy).getVersion());
+                .filter(JkCoordinateDependency.class::isInstance)
+                .map(JkCoordinateDependency.class::cast)
+                .map(JkCoordinateDependency::getCoordinate)
+                .forEach(coordinate -> {
+                    moduleIdVersionMap.putIfAbsent(coordinate.getGroupAndName(), coordinate.getVersion());
+                    moduleIdVersionMap.computeIfPresent(coordinate.getGroupAndName(),
+                            (groupAndName, version) -> groupAndName.toCoordinate(version)
+                                    .resolveConflict(coordinate.getVersion(), conflictStrategy).getVersion());
         });
         List<JkDependency> result = entries.stream()
                 .map(dependency -> {
-                    if (dependency instanceof JkModuleDependency) {
-                        JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                        return moduleDependency.withVersion(moduleIdVersionMap.get(moduleDependency.getModuleId()));
+                    if (dependency instanceof JkCoordinateDependency) {
+                        JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
+                        JkCoordinate coordinate = coordinateDependency.getCoordinate();
+                        JkVersion newVersion = moduleIdVersionMap.get(coordinate.getGroupAndName());
+                        JkCoordinate newCoordinate = coordinate.withVersion(newVersion);
+                        return JkCoordinateDependency.of(newCoordinate)
+                                .andExclusions(coordinateDependency.getExclusions())
+                                .withTransitivity(coordinateDependency.getTransitivity())
+                                .withIdeProjectDir(coordinateDependency.getIdeProjectDir());
                     }
                     return dependency;
                 })
@@ -426,16 +433,17 @@ public class JkDependencySet {
     }
 
     public JkDependencySet normalised() {
-        return normalised(JkVersionedModule.ConflictStrategy.FAIL);
+        return normalised(JkCoordinate.ConflictStrategy.FAIL);
     }
 
     /**
      * Throws a <code>IllegalStateException</code> if one of the module dependencies has an unspecified version.
      */
     public JkDependencySet assertNoUnspecifiedVersion() {
-        final List<JkModuleDependency> unspecifiedVersionModules = getModuleDependencies().stream()
-                .filter(dep -> this.versionProvider.getVersionOfOrUnspecified(dep.getModuleId()).isUnspecified())
-                .filter(dep -> dep.getVersion().isUnspecified())
+        final List<JkCoordinateDependency> unspecifiedVersionModules = getCoordinateDependencies().stream()
+                .filter(dep -> this.versionProvider.getVersionOfOrUnspecified(
+                                    dep.getCoordinate().getGroupAndName()).isUnspecified())
+                .filter(dep -> dep.getCoordinate().getVersion().isUnspecified())
                 .collect(Collectors.toList());
         JkUtilsAssert.state(unspecifiedVersionModules.isEmpty(), "Following module does not specify version : "
                 + unspecifiedVersionModules);
@@ -448,12 +456,13 @@ public class JkDependencySet {
     public JkDependencySet toResolvedModuleVersions() {
         List<JkDependency> dependencies = entries.stream()
                 .map(dep -> {
-                    if (dep instanceof JkModuleDependency) {
-                        JkModuleDependency moduleDependency = (JkModuleDependency) dep;
+                    if (dep instanceof JkCoordinateDependency) {
+                        JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dep;
+                        JkCoordinate coordinate = coordinateDependency.getCoordinate();
                         JkVersion providedVersion = this.versionProvider
-                                .getVersionOfOrUnspecified(moduleDependency.getModuleId());
-                        if (moduleDependency.getVersion().isUnspecified() && !providedVersion.isUnspecified()) {
-                            return moduleDependency.withVersion(providedVersion);
+                                .getVersionOfOrUnspecified(coordinate.getGroupAndName());
+                        if (coordinate.getVersion().isUnspecified() && !providedVersion.isUnspecified()) {
+                            return coordinateDependency.withVersion(providedVersion);
                         }
                     }
                     return dep;
@@ -472,10 +481,10 @@ public class JkDependencySet {
                 .collect(Collectors.toList());
     }
 
-    public List<JkModuleDependency> getVersionedModuleDependencies() {
+    public List<JkCoordinateDependency> getVersionResolvedCoordinateDependencies() {
         return getVersionedDependencies().stream()
-                .filter(JkModuleDependency.class::isInstance)
-                .map(JkModuleDependency.class::cast)
+                .filter(JkCoordinateDependency.class::isInstance)
+                .map(JkCoordinateDependency.class::cast)
                 .collect(Collectors.toList());
     }
 
@@ -496,13 +505,13 @@ public class JkDependencySet {
         }
         final LinkedList<JkDependency> deps = new LinkedList<>(entries);
         final JkDependency last = deps.getLast();
-        if (last instanceof JkModuleDependency) {
-            JkModuleDependency moduleDependency = (JkModuleDependency) last;
+        if (last instanceof JkCoordinateDependency) {
+            JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) last;
             for (JkDependencyExclusion exclusion : exclusions) {
-                moduleDependency = moduleDependency.andExclusion(exclusion);
+                coordinateDependency = coordinateDependency.andExclusions(exclusion);
             }
             deps.removeLast();
-            deps.add(moduleDependency);
+            deps.add(coordinateDependency);
             return new JkDependencySet(deps, globalExclusions, versionProvider);
         }
         return this;
@@ -549,11 +558,12 @@ public class JkDependencySet {
         final String indent = JkUtilsString.repeat(" ", indentCount);
         final StringBuilder builder = new StringBuilder();
         for (final JkDependency dependency : dependencies) {
-            if (dependency instanceof JkModuleDependency) {
-                final JkModuleDependency moduleDep = (JkModuleDependency) dependency;
-                String dependencyString = moduleDep.getModuleId().getGroup() + ":" + moduleDep.getModuleId().getName();
-                if (and && !moduleDep.getVersion().isUnspecified()) {
-                    dependencyString = dependencyString + ":" + moduleDep.getVersion().getValue();
+            if (dependency instanceof JkCoordinateDependency) {
+                final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
+                JkCoordinate coordinate = coordinateDependency.getCoordinate();
+                String dependencyString = coordinate.getGroupAndName().getColonNotation();
+                if (and && !coordinate.getVersion().isUnspecified()) {
+                    dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
                 }
                 builder.append(indent).append(".").append(method).append("(\"")
                         .append(dependencyString)

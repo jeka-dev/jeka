@@ -1,9 +1,6 @@
 package dev.jeka.core.api.kotlin;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
@@ -159,7 +156,7 @@ public final class JkKotlinCompiler {
             JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
             return Paths.get(value).resolve("lib/kotlin-stdlib.jar");
         }
-        return repos.get(JkKotlinModules.STDLIB);
+        return repos.get(JkCoordinate.of(JkKotlinModules.STDLIB));
     }
 
     public JkPathSequence getStdJdk8Lib() {
@@ -226,7 +223,7 @@ public final class JkKotlinCompiler {
 
     public JkKotlinCompiler addPlugin(String pluginModule) {
         Plugin plugin = new Plugin();
-        plugin.pluginModule = pluginModule.isEmpty() ? null : JkVersionedModule.of(pluginModule);
+        plugin.pluginCoordinate = pluginModule.isEmpty() ? null : JkCoordinate.of(pluginModule);
         plugins.add(plugin);
         return this;
     }
@@ -392,15 +389,15 @@ public final class JkKotlinCompiler {
 
         Path jar;
 
-        JkVersionedModule pluginModule;
+        JkCoordinate pluginCoordinate;
 
         private Path getJar() {
             if (jar != null) {
                 return jar;
             }
-            jar = repos.get(pluginModule);
+            jar = repos.get(pluginCoordinate);
             if (jar == null) {
-                throw new IllegalStateException("Cannot retrieve module " + pluginModule);
+                throw new IllegalStateException("Cannot retrieve module " + pluginCoordinate);
             }
             return jar;
         }

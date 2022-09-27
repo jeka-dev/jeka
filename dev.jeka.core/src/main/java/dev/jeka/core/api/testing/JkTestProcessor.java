@@ -1,6 +1,6 @@
 package dev.jeka.core.api.testing;
 
-import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
+import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -151,7 +151,7 @@ public final class JkTestProcessor<T> {
         if (!classloader.isDefined(className)) {
             if (result.getEntryContainingClass(className) == null) {
                 String dep = moduleName + ":" + this.junitPlatformVersion;
-                Path path = JkModuleFileProxy.of(this.repoSetSupplier.get(), dep).get();
+                Path path = JkCoordinateFileProxy.of(this.repoSetSupplier.get(), dep).get();
                 result = result.and(path);
             }
         }

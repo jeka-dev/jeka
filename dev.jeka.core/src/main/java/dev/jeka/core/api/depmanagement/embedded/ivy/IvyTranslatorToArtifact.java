@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
@@ -21,12 +21,12 @@ class IvyTranslatorToArtifact {
 
     private static final String EXTRA_PREFIX = "e";
 
-    static Map<String, Artifact> toMavenArtifacts(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator) {
+    static Map<String, Artifact> toMavenArtifacts(JkCoordinate coordinate, JkArtifactLocator artifactLocator) {
         Map<String, Artifact> result = new HashMap<>();
         Instant now = Instant.now();
         for (JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
             Path file = artifactLocator.getArtifactPath(artifactId);
-            ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(versionedModule);
+            ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(coordinate);
             String classifier = artifactId.getName();
             final Artifact artifact = toMavenArtifact(file, classifier, moduleRevisionId, now);
             result.put(classifier, artifact);
@@ -34,12 +34,12 @@ class IvyTranslatorToArtifact {
         return result;
     }
 
-    static List<ArtifactAndConfigurations> toIvyArtifacts(JkVersionedModule versionedModule,
-                                                List<JkIvyPublication.JkPublishedArtifact> jkArtifacts) {
+    static List<ArtifactAndConfigurations> toIvyArtifacts(JkCoordinate coordinate,
+                                                          List<JkIvyPublication.JkPublishedArtifact> jkArtifacts) {
         List<ArtifactAndConfigurations> result = new LinkedList<>();
         Instant now = Instant.now();
         for (JkIvyPublication.JkPublishedArtifact jkArtifact : jkArtifacts) {
-            ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(versionedModule);
+            ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(coordinate);
             final Artifact artifact = toIvyArtifact(jkArtifact, moduleRevisionId, now);
             result.add(new ArtifactAndConfigurations(artifact, jkArtifact.configurationNames));
         }

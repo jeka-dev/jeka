@@ -43,7 +43,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     private final JkStandardFileArtifactProducer<JkProject> artifactProducer =
             JkStandardFileArtifactProducer.ofParent(this).setArtifactFilenameComputation(this::getArtifactPath);
 
-    private JkVersionedModule.ConflictStrategy duplicateConflictStrategy = JkVersionedModule.ConflictStrategy.FAIL;
+    private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
 
     private final JkProjectDocumentation documentation;
 
@@ -99,11 +99,11 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return this;
     }
 
-    public JkVersionedModule.ConflictStrategy getDuplicateConflictStrategy() {
+    public JkCoordinate.ConflictStrategy getDuplicateConflictStrategy() {
         return duplicateConflictStrategy;
     }
 
-    public JkProject setDuplicateConflictStrategy(JkVersionedModule.ConflictStrategy duplicateConflictStrategy) {
+    public JkProject setDuplicateConflictStrategy(JkCoordinate.ConflictStrategy duplicateConflictStrategy) {
         this.duplicateConflictStrategy = duplicateConflictStrategy;
         return this;
     }
@@ -152,20 +152,20 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
         builder.append("Defined Artifacts : " + artifactProducer.getArtifactIds());
         JkMavenPublication mavenPublication = publication.getMaven();
-        if (mavenPublication.getModuleId() != null) {
+        if (mavenPublication.getGroupAndName() != null) {
             builder
                 .append("Publish Maven repositories : " + mavenPublication.getPublishRepos()  + "\n")
                 .append("Published Maven Module & version : " +
-                        mavenPublication.getModuleId().withVersion(mavenPublication.getVersion()) + "\n")
+                        mavenPublication.getGroupAndName().toCoordinate(mavenPublication.getVersion()) + "\n")
                 .append("Published Maven Dependencies :");
             mavenPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
         }
         JkIvyPublication ivyPublication = publication.getIvy();
-        if (ivyPublication.getModuleId() != null) {
+        if (ivyPublication.getGroupAndName() != null) {
             builder
                     .append("Publish Ivy repositories : " + ivyPublication.getRepos()  + "\n")
                     .append("Published Ivy Module & version : " +
-                            ivyPublication.getModuleId().withVersion(mavenPublication.getVersion()) + "\n")
+                            ivyPublication.getGroupAndName().toCoordinate(mavenPublication.getVersion()) + "\n")
                     .append("Published Ivy Dependencies :");
             ivyPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
         }
@@ -176,7 +176,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     public JkIdeSupport getJavaIdeSupport() {
         JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
                 construction.getProjectDependencies(),
-                JkVersionedModule.ConflictStrategy.TAKE_FIRST);
+                JkCoordinate.ConflictStrategy.TAKE_FIRST);
         JkIdeSupport ideSupport = JkIdeSupport.of(baseDir)
             .setSourceVersion(construction.getJvmTargetVersion())
             .setProdLayout(construction.getCompilation().getLayout())
@@ -209,8 +209,8 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     }
 
     private Path getArtifactPath(JkArtifactId artifactId) {
-        JkModuleId moduleId = publication.getModuleId();
-        String fileBaseName = moduleId != null ? moduleId.getDotedName()
+        JkCoordinate.GroupAndName groupAndName = publication.getGroupAndName();
+        String fileBaseName = groupAndName != null ? groupAndName.getDotNotation()
                 : baseDir.toAbsolutePath().getFileName().toString();
         return baseDir.resolve(outputDir).resolve(artifactId.toFileName(fileBaseName));
     }

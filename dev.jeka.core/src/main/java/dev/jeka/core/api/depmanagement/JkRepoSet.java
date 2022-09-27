@@ -113,31 +113,13 @@ public final class JkRepoSet {
     /**
      * Retrieves directly the file embodying the specified the external dependency.
      */
-    public Path get(JkModuleDependency moduleDependency) {
+    public Path get(JkCoordinate coordinate) {
         final JkInternalDependencyResolver depResolver = getInternalDependencyResolver();
-        final File file = depResolver.get(moduleDependency);
+        final File file = depResolver.get(coordinate);
         if (file == null) {
             return null;
         }
-        return depResolver.get(moduleDependency).toPath();
-    }
-
-    /**
-     * Shorthand for {@link #get(JkModuleDependency)}
-     */
-    public Path get(JkModuleId moduleId, String version) {
-        return get(JkModuleDependency.of(moduleId, version));
-    }
-
-    /**
-     * Shorthand for {@link #get(JkModuleDependency)}
-     */
-    public Path get(String moduleGroupVersion) {
-        return get(JkModuleDependency.of(moduleGroupVersion));
-    }
-
-    public Path get(JkVersionedModule versionedModule) {
-        return get(JkModuleDependency.of(versionedModule));
+        return file.toPath();
     }
 
     public JkRepoSet withDefaultSigner(UnaryOperator<Path> signer) {

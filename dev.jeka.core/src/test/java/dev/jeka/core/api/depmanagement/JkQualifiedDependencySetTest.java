@@ -4,8 +4,8 @@ package dev.jeka.core.api.depmanagement;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
-import static dev.jeka.core.api.depmanagement.JkPopularModules.JAVAX_SERVLET_API;
+import static dev.jeka.core.api.depmanagement.JkPopularLibs.GUAVA;
+import static dev.jeka.core.api.depmanagement.JkPopularLibs.JAVAX_SERVLET_API;
 
 public class JkQualifiedDependencySetTest {
 

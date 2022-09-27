@@ -1,4 +1,4 @@
-import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
@@ -33,7 +33,7 @@ public class JacocoSampleBuild extends JkBean {
     private void configure(JkProject project) {
         project.simpleFacade()
                 .configureTestDeps(deps -> deps
-                        .and(JkPopularModules.JUNIT_5 + ":5.8.2")
+                        .and(JkPopularLibs.JUNIT_5 + ":5.8.2")
                 );
     }
 

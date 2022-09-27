@@ -14,8 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
-import static dev.jeka.core.api.depmanagement.JkPopularModules.JAVAX_SERVLET_API;
+import static dev.jeka.core.api.depmanagement.JkPopularLibs.GUAVA;
+import static dev.jeka.core.api.depmanagement.JkPopularLibs.JAVAX_SERVLET_API;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -43,7 +43,7 @@ public class QualifiedDependenciesResolutionIT {
         JkResolveResult resolveResult = resolver.resolve(qdeps, JkResolutionParameters.of());
         assertTrue(resolveResult.contains(JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(GUAVA));
-        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
+        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getGroupAndNames().size());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class QualifiedDependenciesResolutionIT {
 
         JkResolvedDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredConfigurations().isEmpty());
-        assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
+        assertEquals(holder.getModuleId(), tree.getModuleInfo().getGroupAndName());
         assertEquals(5, tree.getChildren().size());
 
         JkResolvedDependencyNode file0Node = tree.getChildren().get(0);
@@ -76,7 +76,7 @@ public class QualifiedDependenciesResolutionIT {
         assertEquals(expected, file0Node.getResolvedFiles());
 
         JkResolvedDependencyNode starterwebNode = tree.getChildren().get(1);
-        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getModuleId());
+        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getGroupAndName());
 
         JkResolvedDependencyNode file1Node = tree.getChildren().get(2);
         List<Path> expected1 = new LinkedList<>();
@@ -84,7 +84,7 @@ public class QualifiedDependenciesResolutionIT {
         assertEquals(expected1, file1Node.getResolvedFiles());
 
         JkResolvedDependencyNode jsonRpcNode = tree.getChildren().get(3);
-        assertEquals(JkModuleId.of("com.github.briandilley.jsonrpc4j:jsonrpc4j"), jsonRpcNode.getModuleInfo().getModuleId());
+        assertEquals(JkModuleId.of("com.github.briandilley.jsonrpc4j:jsonrpc4j"), jsonRpcNode.getModuleInfo().getGroupAndName());
 
         JkResolvedDependencyNode file2Node = tree.getChildren().get(4);
         List<Path> expected2 = new LinkedList<>();
@@ -98,7 +98,7 @@ public class QualifiedDependenciesResolutionIT {
 
         root = tree.getModuleInfo();
         assertTrue(root.getDeclaredConfigurations().isEmpty());
-        assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
+        assertEquals(holder.getModuleId(), tree.getModuleInfo().getGroupAndName());
         assertEquals(5, tree.getChildren().size());
     }
 
@@ -118,11 +118,11 @@ public class QualifiedDependenciesResolutionIT {
 
         JkResolvedDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredConfigurations().isEmpty());
-        assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
+        assertEquals(holder.getModuleId(), tree.getModuleInfo().getGroupAndName());
         assertEquals(3, tree.getChildren().size());
 
         JkResolvedDependencyNode starterwebNode = tree.getChildren().get(0);
-        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getModuleId());
+        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.getModuleInfo().getGroupAndName());
         assertEquals(2, starterwebNode.getModuleInfo().getDeclaredConfigurations().size());
         assertTrue(starterwebNode.getModuleInfo().getDeclaredConfigurations().contains("compile"));
         assertTrue(starterwebNode.getModuleInfo().getDeclaredConfigurations().contains("runtime"));

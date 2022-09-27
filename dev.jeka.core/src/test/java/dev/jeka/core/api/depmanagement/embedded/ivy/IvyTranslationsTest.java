@@ -1,9 +1,9 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
-import dev.jeka.core.api.depmanagement.JkModuleDependency;
+import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
@@ -16,12 +16,12 @@ import static org.junit.Assert.assertEquals;
  */
 public class IvyTranslationsTest {
 
-    private static final JkVersionedModule OWNER = JkVersionedModule.of("ownerGroup:ownerName:ownerVersion");
+    private static final JkCoordinate OWNER = JkCoordinate.of("ownerGroup:ownerName:ownerVersion");
 
     @Test
     public void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn1dependencies() {
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
-                .and(null, JkModuleDependency.of("aGroup:aName:1.0").andClassifier("linux"))
+                .and(null, JkCoordinateDependency.of(JkCoordinate.of("aGroup:aName:1.0").andClassifier("linux")))
                 .and(null, "bGroup:bName:win:exe:1.0");
         final DefaultModuleDescriptor desc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
                 OWNER, deps);

@@ -1,6 +1,6 @@
 package dev.jeka.core.integrationtest.tooling.intellij;
 
-import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
@@ -31,7 +31,7 @@ public class JkImlGeneratorIT {
             .getConstruction()
                 .getCompilation()
                     .configureDependencies(deps -> deps
-                        .and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6"))).__.__;
+                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.version("4.5.6"))).__.__;
         final JkImlGenerator baseGenerator = JkImlGenerator.of()
                 .setIdeSupport(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.computeIml().toDoc().toXml();

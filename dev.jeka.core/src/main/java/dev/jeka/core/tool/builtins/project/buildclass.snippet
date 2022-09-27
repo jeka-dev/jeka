@@ -45,7 +45,7 @@ class Build extends JkBean {
             // Many projects as jee war jar, springboot application, tools, Graphical application
             // does not need this section at all.  In this case you can remove it.
             .getPublication()
-                .setModuleId("your.group:your.project")
+                .setGroupAndName("your.group:your.project")
                 .setVersion(() -> JkGitProcess.of().getVersionFromTag());  // Version inferred from Git
     }
 

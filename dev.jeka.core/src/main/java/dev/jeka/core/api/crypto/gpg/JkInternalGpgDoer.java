@@ -1,6 +1,6 @@
 package dev.jeka.core.api.crypto.gpg;
 
-import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
+import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -31,9 +31,9 @@ public interface JkInternalGpgDoer {
                 return JkUtilsReflect.invokeStaticMethod(clazz, "of");
             }
             String bouncyCastleVersion = "1.70";
-            JkModuleFileProxy bcProviderJar = JkModuleFileProxy.ofStandardRepos("org.bouncycastle:bcprov-jdk15on:"
+            JkCoordinateFileProxy bcProviderJar = JkCoordinateFileProxy.ofStandardRepos("org.bouncycastle:bcprov-jdk15on:"
                     + bouncyCastleVersion);
-            JkModuleFileProxy bcopenPgpApiJar = JkModuleFileProxy.ofStandardRepos("org.bouncycastle:bcpg-jdk15on:"
+            JkCoordinateFileProxy bcopenPgpApiJar = JkCoordinateFileProxy.ofStandardRepos("org.bouncycastle:bcpg-jdk15on:"
                     + bouncyCastleVersion);
             CACHED_INSTANCE =  JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(bcopenPgpApiJar.get(), bcProviderJar.get())
                     .createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");

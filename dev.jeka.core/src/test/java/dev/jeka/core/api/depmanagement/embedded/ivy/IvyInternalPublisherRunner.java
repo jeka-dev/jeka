@@ -24,13 +24,13 @@ public class IvyInternalPublisherRunner {
 
     public static void testPublishIvy() throws IOException {
         final IvyInternalPublisher jkIvyInternalPublisher = IvyInternalPublisher.of(ivyRepo().toSet(), Paths.get("jeka/output/test-out"));
-        final JkVersionedModule versionedModule = JkVersionedModule.of(
-                JkModuleId.of("mygroup", "mymodule"), JkVersion.of("myVersion"));
+        final JkCoordinate coordinate =
+                JkCoordinate.GroupAndName.of("mygroup:mymodule").toCoordinate("myVersion");
         final JkIvyPublication ivyPublication = JkIvyPublication.of()
                 .setMainArtifact(sampleJarfile(), "compile", "test");
         final JkQualifiedDependencySet deps = JkQualifiedDependencySet.of().of()
                 .and("compile", "org.springframework:spring-jdbc:3.0.+");
-        jkIvyInternalPublisher.publishIvy(versionedModule, ivyPublication.getAllArtifacts(), deps);
+        jkIvyInternalPublisher.publishIvy(coordinate, ivyPublication.getAllArtifacts(), deps);
     }
 
     private static Path sampleJarfile() {

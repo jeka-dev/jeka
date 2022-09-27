@@ -22,7 +22,7 @@ public class SpringbootBuild extends JkBean {
                 );
         project.getConstruction().getTesting().setSkipped(true);
         project.getPublication()
-            .setModuleId("dev.jeka:springboot-plugin")
+            .setGroupAndName("dev.jeka:springboot-plugin")
             .getMaven()
                 .getPomMetadata()
                     .setProjectName("Jeka plugin for Spring Boot")

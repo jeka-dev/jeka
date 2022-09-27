@@ -67,26 +67,26 @@ final class IvyInternalPublisher implements JkInternalPublisher {
 
 
     @Override
-    public void publishIvy(JkVersionedModule versionedModule,
+    public void publishIvy(JkCoordinate coordinate,
                            List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts,
                            JkQualifiedDependencySet dependencies) {
         JkLog.startTask( "Publish on Ivy repositories");
         final ModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toIvyPublishModuleDescriptor(
-                versionedModule, dependencies, publishedArtifacts);
+                coordinate, dependencies, publishedArtifacts);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(JkRepoSet.of(), JkResolutionParameters.of());
         int publishCount = publishIvyArtifacts(publishedArtifacts, Instant.now(), moduleDescriptor, ivy.getSettings());
         if (publishCount == 0) {
-            JkLog.warn("No Ivy repository matching for " + versionedModule + " found. Configured repos are "
+            JkLog.warn("No Ivy repository matching for " + coordinate + " found. Configured repos are "
                     + publishRepos);
         }
         JkLog.endTask();
     }
 
     @Override
-    public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
+    public void publishMaven(JkCoordinate coordinate, JkArtifactLocator artifactLocator,
                              JkPomMetadata metadata, JkDependencySet dependencies) {
-        JkLog.startTask("Publish " + versionedModule + " on Maven repositories");
-        final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptorForMavenPublish(versionedModule,
+        JkLog.startTask("Publish " + coordinate + " on Maven repositories");
+        final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptorForMavenPublish(coordinate,
                 artifactLocator, dependencies);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
         final int count = publishMavenArtifacts(artifactLocator, metadata, ivy.getSettings(), moduleDescriptor);
@@ -100,8 +100,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         for (JkRepo publishRepo : this.publishRepos.getRepos()) {
             RepositoryResolver resolver = IvyTranslatorToResolver.convertToPublishAndBind(publishRepo, ivySettings);
             ModuleRevisionId moduleRevisionId = moduleDescriptor.getModuleRevisionId();
-            final JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(moduleRevisionId);
-            JkVersion version = versionedModule.getVersion();
+            final JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(moduleRevisionId);
+            JkVersion version = coordinate.getVersion();
             if (!isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(version)) {
                 JkLog.startTask("Publish for repository " + resolver);
                 this.publishIvyArtifacts(resolver, publishedArtifacts, date, moduleDescriptor, ivySettings);
@@ -156,8 +156,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         for (JkRepo publishRepo : this.publishRepos.getRepos()) {
             RepositoryResolver resolver = IvyTranslatorToResolver.convertToPublishAndBind(publishRepo, ivySettings);
             ModuleRevisionId moduleRevisionId = moduleDescriptor.getModuleRevisionId();
-            JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(moduleRevisionId);
-            JkVersion version = versionedModule.getVersion();
+            JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(moduleRevisionId);
+            JkVersion version = coordinate.getVersion();
             if (isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(version)) {
                 JkLog.startTask("Publish to " + publishRepo.getUrl());
                 boolean signatureRequired = publishRepo.getPublishConfig().isSignatureRequired();
@@ -216,10 +216,10 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         }
     }
 
-    private DefaultModuleDescriptor createModuleDescriptorForMavenPublish(JkVersionedModule versionedModule,
+    private DefaultModuleDescriptor createModuleDescriptorForMavenPublish(JkCoordinate coordinate,
                                                            JkArtifactLocator artifactLocator,
                                                            JkDependencySet dependencies) {
-        return IvyTranslatorToModuleDescriptor.toMavenPublishModuleDescriptor(versionedModule, dependencies,
+        return IvyTranslatorToModuleDescriptor.toMavenPublishModuleDescriptor(coordinate, dependencies,
                 artifactLocator);
     }
 

@@ -1,7 +1,7 @@
 package dev.jeka.core.api.project;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkProjectDependencies;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
@@ -164,13 +164,13 @@ public class JkProjectConstruction {
     }
 
     private void addManifestDefaults() {
-        JkModuleId moduleId = project.getPublication().getModuleId();
+        JkCoordinate.GroupAndName groupAndName = project.getPublication().getGroupAndName();
         String version = project.getPublication().getVersion().getValue();
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && moduleId != null) {
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && groupAndName != null) {
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, groupAndName.getName());
         }
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VENDOR) == null && moduleId != null) {
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup());
+        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VENDOR) == null && groupAndName != null) {
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, groupAndName.getGroup());
         }
         if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null && version != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);

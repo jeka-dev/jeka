@@ -87,7 +87,7 @@ public class JkProjectTest {
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
-        Assert.assertEquals("org.mockito:mockito-core", testDependencies.getModuleDependencies().get(0)
+        Assert.assertEquals("org.mockito:mockito-core", testDependencies.getCoordinateDependencies().get(0)
                 .getModuleId().toString());
     }
 
@@ -125,9 +125,9 @@ public class JkProjectTest {
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
-        Assert.assertEquals("org.mockito:mockito-core", testDependencies.getModuleDependencies().get(0)
+        Assert.assertEquals("org.mockito:mockito-core", testDependencies.getCoordinateDependencies().get(0)
                 .getModuleId().toString());
-        Assert.assertEquals("io.rest-assured:rest-assured", testDependencies.getModuleDependencies().get(1)
+        Assert.assertEquals("io.rest-assured:rest-assured", testDependencies.getCoordinateDependencies().get(1)
                 .getModuleId().toString());
     }
 
@@ -168,7 +168,7 @@ public class JkProjectTest {
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
         project.getPublication().getIvy()
-                .setModuleId("my:module")
+                .setGroupAndName("my:module")
                 .setVersion("0.1");
         System.out.println(project.getConstruction().getCompilation().getDependencies());
         JkQualifiedDependencySet publishDeps = project.getPublication().getIvy().getDependencies();
@@ -182,7 +182,7 @@ public class JkProjectTest {
         Path base = top.resolve("base");
         JkProject baseProject = JkProject.of().simpleFacade()
                 .setBaseDir(base)
-                .configureCompileDeps(deps -> deps.and(JkPopularModules.APACHE_HTTP_CLIENT.version("4.5.6")))
+                .configureCompileDeps(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.version("4.5.6")))
                 .getProject().getConstruction()
                 .getCompilation()
                 .getLayout()

@@ -1,6 +1,6 @@
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.depmanagement.JkModuleFileProxy;
+import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -49,7 +49,7 @@ public interface JkInternalClasspathScanner {
             if (clazz != null) {
                 return JkUtilsReflect.invokeStaticMethod(clazz, "of");
             }
-            JkModuleFileProxy classgraphJar = JkModuleFileProxy.ofStandardRepos("io.github.classgraph:classgraph:4.8.41");
+            JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos("io.github.classgraph:classgraph:4.8.41");
             JkInternalEmbeddedClassloader internalClassloader = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(classgraphJar.get());
             CACHED_INSTANCE = internalClassloader
                     .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");

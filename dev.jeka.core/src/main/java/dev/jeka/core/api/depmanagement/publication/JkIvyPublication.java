@@ -25,7 +25,7 @@ public final class JkIvyPublication<T> {
 
     public final T __;
 
-    private Supplier<JkModuleId> moduleIdSupplier = () -> null;
+    private Supplier<JkCoordinate.GroupAndName> groupAndNameSupplier = () -> null;
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
@@ -53,13 +53,13 @@ public final class JkIvyPublication<T> {
         return new JkIvyPublication<>(null);
     }
 
-    public JkIvyPublication<T> setModuleId(String moduleId) {
-        this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
+    public JkIvyPublication<T> setGroupAndName(String groupAndNAme) {
+        this.groupAndNameSupplier = () -> JkCoordinate.GroupAndName.of(groupAndNAme);
         return this;
     }
 
-    public JkIvyPublication<T> setModuleId(Supplier<String> moduleIdSupplier) {
-        this.moduleIdSupplier = () -> JkModuleId.of(moduleIdSupplier.get());
+    public JkIvyPublication<T> setGroupAndName(Supplier<String> groupAndNAmeSupplier) {
+        this.groupAndNameSupplier = () -> JkCoordinate.GroupAndName.of(groupAndNAmeSupplier.get());
         return this;
     }
 
@@ -72,8 +72,8 @@ public final class JkIvyPublication<T> {
         return setVersion(() -> version);
     }
 
-    public JkModuleId getModuleId() {
-        return moduleIdSupplier.get();
+    public JkCoordinate.GroupAndName getGroupAndName() {
+        return groupAndNameSupplier.get();
     }
 
     public JkVersion getVersion() {
@@ -110,13 +110,13 @@ public final class JkIvyPublication<T> {
     }
 
     public JkIvyPublication<T> setDependencies(JkProjectDependencies projectDependencies,
-                                               JkVersionedModule.ConflictStrategy conflictStrategy) {
+                                               JkCoordinate.ConflictStrategy conflictStrategy) {
         return setDependencies(JkQualifiedDependencySet.computeIvyPublishDependencies(projectDependencies,
                 conflictStrategy));
     }
 
     public JkIvyPublication<T> setDependencies(JkProjectDependencies projectDependencies) {
-        return setDependencies(projectDependencies, JkVersionedModule.ConflictStrategy.FAIL);
+        return setDependencies(projectDependencies, JkCoordinate.ConflictStrategy.FAIL);
     }
 
     public JkQualifiedDependencySet getDependencies() {
@@ -225,11 +225,11 @@ public final class JkIvyPublication<T> {
     }
 
     private void publish(JkRepoSet repos) {
-        JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
+        JkUtilsAssert.state(groupAndNameSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos.withDefaultSigner(defaultSigner),
                 null);
-        internalPublisher.publishIvy(getModuleId().withVersion(versionSupplier.get()), getAllArtifacts(),
+        internalPublisher.publishIvy(getGroupAndName().toCoordinate(versionSupplier.get()), getAllArtifacts(),
                 getDependencies());
     }
 
@@ -280,20 +280,20 @@ public final class JkIvyPublication<T> {
 
     public static JkQualifiedDependencySet getPublishDependencies(JkDependencySet compileDependencies,
                                                                   JkDependencySet runtimeDependencies,
-                                                                  JkVersionedModule.ConflictStrategy strategy) {
+                                                                  JkCoordinate.ConflictStrategy strategy) {
         JkDependencySetMerge merge = compileDependencies.merge(runtimeDependencies);
         List<JkQualifiedDependency> result = new LinkedList<>();
-        for (JkModuleDependency moduleDependency : merge.getResult().normalised(strategy)
-                .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
+        for (JkCoordinateDependency coordinateDependency : merge.getResult().normalised(strategy)
+                .assertNoUnspecifiedVersion().getVersionResolvedCoordinateDependencies()) {
             String configuration = "compile->compile(*),master(*)";
-            if (merge.getAbsentDependenciesFromRight().contains(moduleDependency)) {
+            if (merge.getAbsentDependenciesFromRight().contains(coordinateDependency)) {
                // compile only dependency
-            } else if (merge.getAbsentDependenciesFromLeft().contains(moduleDependency)) {
+            } else if (merge.getAbsentDependenciesFromLeft().contains(coordinateDependency)) {
                 configuration = "runtime->runtime(*),master(*)";
             } else {
                 configuration = configuration + ";runtime -> runtime(*),master(*)";
             }
-            result.add(JkQualifiedDependency.of(configuration, moduleDependency));
+            result.add(JkQualifiedDependency.of(configuration, coordinateDependency));
         }
         return JkQualifiedDependencySet.of(result);
 

@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement.publication;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata.Versioning.JkSnapshot;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -31,21 +30,21 @@ import java.util.List;
  */
 public final class JkMavenMetadata {
 
-    public static JkMavenMetadata of(JkVersionedModule versionedModule, String timestamp) {
+    public static JkMavenMetadata of(JkCoordinate coordinate, String timestamp) {
         final JkMavenMetadata metadata = new JkMavenMetadata();
-        metadata.groupId = versionedModule.getModuleId().getGroup();
-        metadata.artifactId = versionedModule.getModuleId().getName();
+        metadata.groupId = coordinate.getGroupAndName().getGroup();
+        metadata.artifactId = coordinate.getGroupAndName().getName();
         metadata.modelVersion = "1.1.0";
-        metadata.version = versionedModule.getVersion().getValue();
+        metadata.version = coordinate.getVersion().getValue();
         metadata.versioning = new Versioning();
         metadata.versioning.snapshot = new JkSnapshot(timestamp, 0);
         return metadata;
     }
 
-    public static JkMavenMetadata of(JkModuleId moduleId) {
+    public static JkMavenMetadata of(JkCoordinate.GroupAndName groupAndName) {
         final JkMavenMetadata metadata = new JkMavenMetadata();
-        metadata.groupId = moduleId.getGroup();
-        metadata.artifactId = moduleId.getName();
+        metadata.groupId = groupAndName.getGroup();
+        metadata.artifactId = groupAndName.getName();
         metadata.modelVersion = "1.1.0";
         return metadata;
     }

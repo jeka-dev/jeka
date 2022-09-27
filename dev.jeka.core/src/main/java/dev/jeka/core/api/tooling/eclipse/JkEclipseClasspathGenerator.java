@@ -388,7 +388,7 @@ public final class JkEclipseClasspathGenerator {
             // Maven dependency
             if (node.isModuleNode()) {
                 final JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
-                JkDependency dependency = JkModuleDependency.of(moduleNodeInfo.getModuleId().getGroupAndName());
+                JkDependency dependency = JkModuleDependency.of(moduleNodeInfo.getGroupAndName().getGroupAndName());
                 Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
                 Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);
                 writeModuleEntry(writer,

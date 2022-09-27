@@ -22,7 +22,7 @@ class Build extends JkBean {
 
         // This section is necessary to publish on a public repository
         project.getPublication()
-                .setModuleId("your.org:plugin-name")
+                .setGroupAndName("your.org:plugin-name")
                 .setVersion("0.0.1-SNAPSHOT")
                 .getMaven()
                     .getPomMetadata()

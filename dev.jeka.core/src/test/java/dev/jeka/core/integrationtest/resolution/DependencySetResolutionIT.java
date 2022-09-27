@@ -126,7 +126,7 @@ public class DependencySetResolutionIT {
     public void resolve_notExistingModuleId_reportError() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkPopularModules.JAVAX_SERVLET_API.version("2.5.3"));  // does not exist
+                .and(JkPopularLibs.JAVAX_SERVLET_API.version("2.5.3"));  // does not exist
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder)
@@ -228,7 +228,7 @@ public class DependencySetResolutionIT {
         URL sampleJarUrl = DependencySetResolutionIT.class.getResource("myArtifactSample.jar");
         Path jarFile = Paths.get(sampleJarUrl.toURI());
         JkDependencySet dependencies = JkDependencySet.of()
-                .and(JkPopularModules.GUAVA.version("23.0"))
+                .and(JkPopularLibs.GUAVA.version("23.0"))
                 .andFiles(jarFile);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
@@ -240,7 +240,7 @@ public class DependencySetResolutionIT {
     public void resolve_only1ModuleDependencies_ok() throws Exception {
         JkLog.Verbosity verbosity = JkLog.verbosity();
         JkDependencySet dependencies = JkDependencySet.of()
-                .and(JkPopularModules.GUAVA + ":23.0");
+                .and(JkPopularLibs.GUAVA + ":23.0");
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
         resolveResult.assertNoError();

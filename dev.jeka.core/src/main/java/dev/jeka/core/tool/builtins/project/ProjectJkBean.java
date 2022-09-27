@@ -385,11 +385,11 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE+RUNTIME section")
         public String dependenciesTxtCompileAndRuntime;
 
-        @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE section")
-        public String dependenciesTxtCompile;
+        @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE_ONLY section")
+        public String dependenciesTxtCompileOnly;
 
-        @JkDoc("Comma separated dependencies to include in dependencies.txt RUNTIME section")
-        public String dependenciesTxtRuntime;
+        @JkDoc("Comma separated dependencies to include in dependencies.txt RUNTIME_ONLY section")
+        public String dependenciesTxtRuntimeOnly;
 
         @JkDoc("Comma separated dependencies to include in dependencies.txt TEST section")
         public String dependenciesTxtTest;
@@ -413,8 +413,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 JkPathFile.of(libs.resolve("readme.txt"))
                         .fetchContentFrom(ProjectJkBean.class.getResource("libs-readme.txt"));
                 JkUtilsPath.createDirectories(libs.resolve("compile+runtime"));
-                JkUtilsPath.createDirectories(libs.resolve("compile"));
-                JkUtilsPath.createDirectories(libs.resolve("runtime"));
+                JkUtilsPath.createDirectories(libs.resolve("compile_only"));
+                JkUtilsPath.createDirectories(libs.resolve("runtime_only"));
                 JkUtilsPath.createDirectories(libs.resolve("test"));
                 JkUtilsPath.createDirectories(libs.resolve("sources"));
             }
@@ -444,13 +444,13 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("== COMPILE ==") && !JkUtilsString.isBlank(this.dependenciesTxtCompile)) {
-                    Arrays.stream(this.dependenciesTxtCompile.split(",")).forEach(extraDep ->
+                if (line.startsWith("== COMPILE ==") && !JkUtilsString.isBlank(this.dependenciesTxtCompileOnly)) {
+                    Arrays.stream(this.dependenciesTxtCompileOnly.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("== RUNTIME ==") && !JkUtilsString.isBlank(this.dependenciesTxtRuntime)) {
-                    Arrays.stream(this.dependenciesTxtRuntime.split(",")).forEach(extraDep ->
+                if (line.startsWith("== RUNTIME ==") && !JkUtilsString.isBlank(this.dependenciesTxtRuntimeOnly)) {
+                    Arrays.stream(this.dependenciesTxtRuntimeOnly.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }

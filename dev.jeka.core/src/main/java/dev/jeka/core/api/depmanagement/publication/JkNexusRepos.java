@@ -114,14 +114,14 @@ public class JkNexusRepos {
                 .filter(repo -> JkStagingRepo.Status.CLOSING == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
-        JkLog.info("Repositories to wait for been closed : " + closingRepoIds);
+        JkLog.info("Closing repositories " + closingRepoIds);
         closingRepoIds.forEach(this::waitForClosing);
         List<String> closedRepoIds = findStagingRepositories().stream()
                 .filter(profileNameFilter(profileNames))
                 .filter(repo -> JkStagingRepo.Status.CLOSED == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
-        JkLog.info("Repositories to release : " + closedRepoIds);
+        JkLog.info("Releasing repositories " + closedRepoIds);
         release(closedRepoIds);
         JkLog.endTask();
     }

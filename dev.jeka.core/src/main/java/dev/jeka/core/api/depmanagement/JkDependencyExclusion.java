@@ -10,12 +10,12 @@ import java.util.Optional;
  */
 public final class JkDependencyExclusion {
 
-    private final JkModuleId moduleId;
+    private final JkCoordinate.GroupAndName moduleId;
 
-    private final JkModuleDependency.JkArtifactSpecification artifactSpecification;
+    private final JkCoordinate.JkArtifactSpecification artifactSpecification;
 
-    private JkDependencyExclusion(JkModuleId moduleId,
-                                  JkModuleDependency.JkArtifactSpecification artifactSpecification) {
+    private JkDependencyExclusion(JkCoordinate.GroupAndName moduleId,
+                                  JkCoordinate.JkArtifactSpecification artifactSpecification) {
         super();
         this.moduleId = moduleId;
         this.artifactSpecification = artifactSpecification;
@@ -25,7 +25,7 @@ public final class JkDependencyExclusion {
      * Creates an exclusion of the specified module.
      */
     @SuppressWarnings("unchecked")
-    public static JkDependencyExclusion of(JkModuleId moduleId) {
+    public static JkDependencyExclusion of(JkCoordinate.GroupAndName moduleId) {
         return new JkDependencyExclusion(moduleId, null);
     }
 
@@ -33,18 +33,18 @@ public final class JkDependencyExclusion {
      * Creates an exclusion of the specified module.
      */
     public static JkDependencyExclusion of(String group, String name) {
-        return of(JkModuleId.of(group, name));
+        return of(JkCoordinate.GroupAndName.of(group, name));
     }
 
     /**
      * Creates an exclusion of the specified module.
      */
     public static JkDependencyExclusion of(String groupAndName) {
-        return of(JkModuleId.of(groupAndName));
+        return of(JkCoordinate.GroupAndName.of(groupAndName));
     }
 
     public JkDependencyExclusion withClassierAndType(String classifier, String type) {
-        return new JkDependencyExclusion(moduleId, JkModuleDependency.JkArtifactSpecification.of(classifier, type));
+        return new JkDependencyExclusion(moduleId, JkCoordinate.JkArtifactSpecification.of(classifier, type));
     }
 
     public JkDependencyExclusion withType(String type) {
@@ -58,7 +58,7 @@ public final class JkDependencyExclusion {
     /**
      * Returns the module id to exclude.
      */
-    public JkModuleId getModuleId() {
+    public JkCoordinate.GroupAndName getModuleId() {
         return moduleId;
     }
 

@@ -32,8 +32,8 @@ public class JkQualifiedDependency {
         return dependency;
     }
 
-    public JkModuleDependency getModuleDependency() {
-        return (JkModuleDependency) dependency;
+    public JkCoordinateDependency getCoordinateDependency() {
+        return (JkCoordinateDependency) dependency;
     }
 
     @Override

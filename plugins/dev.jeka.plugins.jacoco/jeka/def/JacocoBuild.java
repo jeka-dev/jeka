@@ -18,7 +18,7 @@ public class JacocoBuild extends JkBean {
                         .andFiles(JkLocator.getJekaJarPath())
                 );
         project.getPublication()
-                .setModuleId("dev.jeka:jacoco-plugin")
+                .setGroupAndName("dev.jeka:jacoco-plugin")
                 .getMaven()
                     .getPomMetadata()
                         .setProjectName("Jeka plugin for Jacoco")

@@ -57,7 +57,7 @@ public class SonarqubeJkBean extends JkBean {
             libs = project.getConstruction().getDependencyResolver().resolve(deps).getFiles();
         }
         final Path testReportDir = project.getConstruction().getTesting().getReportDir();
-        JkModuleId moduleId = project.getPublication().getModuleId();
+        JkModuleId moduleId = project.getPublication().getGroupAndName();
         if (moduleId == null) {
             String baseDirName = baseDir.getFileName().toString();
             if (JkUtilsString.isBlank(baseDirName)) {

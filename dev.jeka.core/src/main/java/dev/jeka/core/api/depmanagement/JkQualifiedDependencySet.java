@@ -78,11 +78,11 @@ public class JkQualifiedDependencySet {
                 .collect(Collectors.toList());
     }
 
-    public List<JkModuleDependency>  getModuleDependencies() {
+    public List<JkCoordinateDependency> getCoordinateDependencies() {
         return entries.stream()
                 .map(JkQualifiedDependency::getDependency)
-                .filter(JkModuleDependency.class::isInstance)
-                .map(JkModuleDependency.class::cast)
+                .filter(JkCoordinateDependency.class::isInstance)
+                .map(JkCoordinateDependency.class::cast)
                 .collect(Collectors.toList());
     }
 
@@ -96,8 +96,9 @@ public class JkQualifiedDependencySet {
 
     public List<JkQualifiedDependency> findByModule(String moduleId) {
         return this.entries.stream()
-                .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)
-                .filter(qDep -> qDep.getModuleDependency().getModuleId().toString().equals(moduleId))
+                .filter(qDep -> qDep.getDependency() instanceof JkCoordinateDependency)
+                .filter(qDep -> qDep.getCoordinateDependency().getCoordinate().getGroupAndName().getColonNotation()
+                        .equals(moduleId))
                 .collect(Collectors.toList());
     }
 
@@ -119,11 +120,11 @@ public class JkQualifiedDependencySet {
     }
 
     public JkQualifiedDependencySet and(String qualifier, String moduleDependencyDescriptor) {
-        return and(qualifier, JkModuleDependency.of(moduleDependencyDescriptor));
+        return and(qualifier, JkCoordinateDependency.of(moduleDependencyDescriptor));
     }
 
     public JkQualifiedDependencySet remove(String dep) {
-        return remove(JkModuleDependency.of(dep));
+        return remove(JkCoordinateDependency.of(dep));
     }
 
     public JkQualifiedDependencySet replaceQualifier(JkDependency dependency, String qualifier) {
@@ -134,7 +135,7 @@ public class JkQualifiedDependencySet {
     }
 
     public JkQualifiedDependencySet replaceQualifier(String dependency, String qualifier) {
-        return replaceQualifier(JkModuleDependency.of(dependency), qualifier);
+        return replaceQualifier(JkCoordinateDependency.of(dependency), qualifier);
     }
 
     public JkQualifiedDependencySet withQualifiersOnly(String ... qualifiers) {
@@ -146,7 +147,7 @@ public class JkQualifiedDependencySet {
 
     public JkQualifiedDependencySet withModuleDependenciesOnly() {
         List<JkQualifiedDependency> dependencies = entries.stream()
-                .filter(qDep -> qDep.getDependency() instanceof JkModuleDependency)
+                .filter(qDep -> qDep.getDependency() instanceof JkCoordinateDependency)
                 .collect(Collectors.toList());
         return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
@@ -180,7 +181,7 @@ public class JkQualifiedDependencySet {
     }
 
     public static JkQualifiedDependencySet computeIdeDependencies(JkProjectDependencies projectDependencies,
-                                                                  JkVersionedModule.ConflictStrategy strategy) {
+                                                                  JkCoordinate.ConflictStrategy strategy) {
         JkDependencySetMerge prodMerge = projectDependencies.getCompileDeps().merge(projectDependencies.getRuntimeDeps());
         JkDependencySetMerge testMerge = prodMerge.getResult().merge(projectDependencies.getTestDeps());
         List<JkQualifiedDependency> result = new LinkedList<>();
@@ -210,16 +211,16 @@ public class JkQualifiedDependencySet {
     }
 
     public static JkQualifiedDependencySet computeIdeDependencies(JkProjectDependencies projectDependencies) {
-        return computeIdeDependencies(projectDependencies, JkVersionedModule.ConflictStrategy.FAIL);
+        return computeIdeDependencies(projectDependencies, JkCoordinate.ConflictStrategy.FAIL);
     }
 
     public static JkQualifiedDependencySet computeIvyPublishDependencies(JkProjectDependencies projectDependencies,
-                                                                         JkVersionedModule.ConflictStrategy strategy) {
+                                                                         JkCoordinate.ConflictStrategy strategy) {
         JkDependencySetMerge mergeWithProd = projectDependencies.getCompileDeps().merge(projectDependencies.getRuntimeDeps());
         JkDependencySetMerge mergeWithTest = mergeWithProd.getResult().merge(projectDependencies.getTestDeps());
         List<JkQualifiedDependency> result = new LinkedList<>();
-        for (JkModuleDependency dependency : mergeWithTest.getResult().normalised(strategy)
-                .assertNoUnspecifiedVersion().getVersionedModuleDependencies()) {
+        for (JkCoordinateDependency dependency : mergeWithTest.getResult().normalised(strategy)
+                .assertNoUnspecifiedVersion().getVersionResolvedCoordinateDependencies()) {
             final String configurationSource;
             String configurationTarget;
             if (mergeWithProd.getResult().getMatching(dependency) != null) {
@@ -261,9 +262,10 @@ public class JkQualifiedDependencySet {
     }
 
     public JkQualifiedDependencySet assertNoUnspecifiedVersion() {
-        final List<JkModuleDependency> unspecifiedVersionModules = getModuleDependencies().stream()
-                .filter(dep -> this.versionProvider.getVersionOfOrUnspecified(dep.getModuleId()).isUnspecified())
-                .filter(dep -> dep.getVersion().isUnspecified())
+        final List<JkCoordinateDependency> unspecifiedVersionModules = getCoordinateDependencies().stream()
+                .filter(dep -> this.versionProvider.getVersionOfOrUnspecified(
+                        dep.getCoordinate().getGroupAndName()).isUnspecified())
+                .filter(dep -> dep.getCoordinate().getVersion().isUnspecified())
                 .collect(Collectors.toList());
         JkUtilsAssert.state(unspecifiedVersionModules.isEmpty(), "Following module does not specify version : "
                 + unspecifiedVersionModules);
@@ -276,13 +278,14 @@ public class JkQualifiedDependencySet {
     public JkQualifiedDependencySet toResolvedModuleVersions() {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .map(qDep -> {
-                    if (qDep.getDependency() instanceof JkModuleDependency) {
-                        JkModuleDependency moduleDependency = (JkModuleDependency) qDep.getDependency();
+                    if (qDep.getDependency() instanceof JkCoordinateDependency) {
+                        JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) qDep.getDependency();
                         JkVersion providedVersion = this.versionProvider
-                                .getVersionOfOrUnspecified(moduleDependency.getModuleId());
-                        if (moduleDependency.getVersion().isUnspecified() && !providedVersion.isUnspecified()) {
+                                .getVersionOfOrUnspecified(coordinateDependency.getCoordinate().getGroupAndName());
+                        if (coordinateDependency.getCoordinate().getVersion().isUnspecified()
+                                && !providedVersion.isUnspecified()) {
                             return JkQualifiedDependency.of(qDep.getQualifier(),
-                                    moduleDependency.withVersion(providedVersion));
+                                    coordinateDependency.withVersion(providedVersion));
                         }
                     }
                     return qDep;

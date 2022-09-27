@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.system.JkLog;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
@@ -16,7 +16,7 @@ import java.util.Map;
  */
 final class IvyArtifactContainer {
 
-    private final Map<JkVersionedModule, List<Path>> map = new HashMap<>();
+    private final Map<JkCoordinate, List<Path>> map = new HashMap<>();
 
     static IvyArtifactContainer of(ArtifactDownloadReport[] artifactDownloadReports) {
         IvyArtifactContainer result = new IvyArtifactContainer();
@@ -32,13 +32,13 @@ final class IvyArtifactContainer {
     }
 
     private void put(ModuleRevisionId moduleRevisionId, Path file) {
-        JkVersionedModule versionedModule = IvyTranslatorToDependency.toJkVersionedModule(moduleRevisionId);
-        List<Path> files = map.computeIfAbsent(versionedModule, k -> new LinkedList<>());
+        JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(moduleRevisionId);
+        List<Path> files = map.computeIfAbsent(coordinate, k -> new LinkedList<>());
         files.add(file);
     }
 
-    List<Path> getArtifacts(JkVersionedModule versionedModule) {
-        List<Path> result = map.get(versionedModule);
+    List<Path> getArtifacts(JkCoordinate coordinate) {
+        List<Path> result = map.get(coordinate);
         if (result == null) {
             return new LinkedList<>();
         }

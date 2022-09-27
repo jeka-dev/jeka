@@ -18,23 +18,23 @@ public interface JkInternalDependencyResolver {
      * @param  module The resolved module. Only use for caching purpose. Can be <code>null</code>
      * @param parameters can be null.
      */
-    default JkResolveResult resolve(JkVersionedModule module, JkDependencySet deps,
+    default JkResolveResult resolve(JkCoordinate coordinate, JkDependencySet deps,
                                     JkResolutionParameters parameters) {
-        List<JkDependency> depList = deps.normalised(JkVersionedModule.ConflictStrategy.FAIL)
+        List<JkDependency> depList = deps.normalised(JkCoordinate.ConflictStrategy.FAIL)
                 .getVersionedDependencies();
-        return resolve(module, JkQualifiedDependencySet.ofDependencies(depList)
+        return resolve(coordinate, JkQualifiedDependencySet.ofDependencies(depList)
                         .withGlobalExclusions(deps.getGlobalExclusions()), parameters);
     }
 
-    JkResolveResult resolve(JkVersionedModule module, JkQualifiedDependencySet deps, JkResolutionParameters parameters);
+    JkResolveResult resolve(JkCoordinate coordinate, JkQualifiedDependencySet deps, JkResolutionParameters parameters);
 
-    File get(JkModuleDependency dependency);
+    File get(JkCoordinate coordinate);
 
     List<String> searchGroups();
 
     List<String> searchModules(String groupId);
 
-    List<String> searchVersions(JkModuleId moduleId);
+    List<String> searchVersions(JkCoordinate.GroupAndName groupAndName);
 
     /**
      * @param groupCriteria
@@ -64,7 +64,7 @@ public interface JkInternalDependencyResolver {
             }
             JkUrlFileProxy fileProxyIvy = JkUrlFileProxy.of(
                     "https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar",
-                    JkModuleDependency.of("org.apache.ivy:ivy:2.5.0").cachePath());
+                    JkCoordinate.of("org.apache.ivy:ivy:2.5.0").cachePath());
             IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(fileProxyIvy.get());
             return IVY_CLASSLOADER;
         }

@@ -18,7 +18,7 @@ public class NodeJsBuild extends JkBean {
                         .andFiles(JkLocator.getJekaJarPath())
                 );
         project.getPublication()
-                .setModuleId("dev.jeka:nodejs-plugin")
+                .setGroupAndName("dev.jeka:nodejs-plugin")
                 .getMaven()
                     .getPomMetadata()
                         .setProjectName("Jeka plugin for NodeJs")

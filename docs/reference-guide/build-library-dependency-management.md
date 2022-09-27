@@ -57,9 +57,9 @@ Examples :
 
 - _com.sun.jersey:jersey-server_ : specify artifact without version
 - _com.sun.jersey:jersey-server:1.19.4_ : specify artifact with version
-- _org.lwjgl:lwjgl:natives_linux:3.1.0_ : specify artifact with 1 classifier and version
-- _org.lwjgl:lwjgl:natives_linux,:_ specify artifact with 2 classifiers ;
-- _org.springframework.boot:spring-boot-dependencies::pom:2.5.6_ specify artifact with _.pom_ extension (to retrieve a BOM)
+- _org.lwjgl:lwjgl:natives_linux:3.1.0_ : specify artifact having *natives_linux* classifier and _3.1.0_ version
+- _org.lwjgl:lwjgl:natives_linux,:_ specify 2 artifacts having respectively *natives-linux* and *default* classifier
+- _org.springframework.boot:spring-boot-dependencies::pom:2.5.6_ specify artifact having _.pom_ extension (to retrieve a BOM)
 
 !!! note
 

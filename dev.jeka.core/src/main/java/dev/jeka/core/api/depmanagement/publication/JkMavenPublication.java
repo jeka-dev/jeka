@@ -1,6 +1,7 @@
 package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -27,7 +28,7 @@ public final class JkMavenPublication<T> {
 
     private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
-    private Supplier<JkModuleId> moduleIdSupplier = () -> null;
+    private Supplier<GroupAndName> groupAndNameSupplier = () -> null;
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
@@ -65,12 +66,12 @@ public final class JkMavenPublication<T> {
     }
 
     public JkMavenPublication<T> setModuleId(String moduleId) {
-        this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
+        this.groupAndNameSupplier = () -> GroupAndName.of(moduleId);
         return this;
     }
 
     public JkMavenPublication<T> setModuleId(Supplier<String> moduleIdSupplier) {
-        this.moduleIdSupplier = () -> JkModuleId.of(moduleIdSupplier.get());
+        this.groupAndNameSupplier = () -> GroupAndName.of(moduleIdSupplier.get());
         return this;
     }
 
@@ -89,8 +90,8 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
-    public JkModuleId getModuleId() {
-        return moduleIdSupplier.get();
+    public GroupAndName getGroupAndName() {
+        return groupAndNameSupplier.get();
     }
 
     public JkVersion getVersion() {
@@ -158,13 +159,13 @@ public final class JkMavenPublication<T> {
                 .assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
         JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
-        JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
+        JkUtilsAssert.state(groupAndNameSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        JkVersionedModule versionedModule = getModuleId().withVersion(versionSupplier.get());
-        internalPublisher.publishMaven(versionedModule, getArtifactLocator(), pomMetadata, dependencySet);
+        JkCoordinate coordinate = getGroupAndName().toCoordinate(versionSupplier.get());
+        internalPublisher.publishMaven(coordinate, getArtifactLocator(), pomMetadata, dependencySet);
         return this;
     }
 
@@ -178,16 +179,16 @@ public final class JkMavenPublication<T> {
 
     public static JkDependencySet computeMavenPublishDependencies(JkDependencySet compileDeps,
                                                                           JkDependencySet runtimeDeps,
-                                                                          JkVersionedModule.ConflictStrategy strategy) {
+                                                                          JkCoordinate.ConflictStrategy strategy) {
         JkDependencySetMerge merge = runtimeDeps.merge(compileDeps);
         JkDependencySet mergeResult = merge.getResult().normalised(strategy);
         List<JkDependency> result = new LinkedList<>();
-        for (JkModuleDependency moduleDependency : mergeResult.getModuleDependencies()) {
+        for (JkCoordinateDependency coordinateDependency : mergeResult.getCoordinateDependencies()) {
             JkTransitivity transitivity = JkTransitivity.COMPILE;
-            if (merge.getAbsentDependenciesFromRight().contains(moduleDependency)) {
+            if (merge.getAbsentDependenciesFromRight().contains(coordinateDependency)) {
                 transitivity = JkTransitivity.RUNTIME;
             }
-            result.add(moduleDependency.withTransitivity(transitivity));
+            result.add(coordinateDependency.withTransitivity(transitivity));
         }
         return JkDependencySet.of(result).withVersionProvider(mergeResult.getVersionProvider());
     }

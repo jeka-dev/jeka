@@ -16,18 +16,6 @@ import java.util.List;
  */
 public class JkProjectDependencies {
 
-    private static final String COMPILE_AND_RUNTIME = "compile+runtime";
-
-    private static final String COMPILE = "compile";
-
-    private static final String RUNTIME = "runtime";
-
-    private static final String TEST = "test";
-
-    private static final List<String> KNOWN_QUALIFIER = JkUtilsIterable.listOf(COMPILE, COMPILE_AND_RUNTIME,
-            RUNTIME, TEST);
-
-
     // All necessary dependencies for compiling
     private final JkDependencySet compileDeps;
 
@@ -58,19 +46,7 @@ public class JkProjectDependencies {
      * test are supposed to be in <code>baseDir/test</code> and so on.
      */
     public static JkProjectDependencies ofLocal(Path baseDir) {
-        final JkPathTree libDir = JkPathTree.of(baseDir);
-        if (!libDir.exists()) {
-            return JkProjectDependencies.of();
-        }
-        JkDependencySet compile = JkDependencySet.of()
-                .andFiles(libDir.andMatching(true, "*.jar", COMPILE + "/*.jar").getFiles())
-                .andFiles(libDir.andMatching(true, COMPILE_AND_RUNTIME + "/*.jar").getFiles());
-        JkDependencySet runtime = JkDependencySet.of()
-                .andFiles(libDir.andMatching(true, "*.jar", RUNTIME + "/*.jar").getFiles())
-                .andFiles(libDir.andMatching(true, COMPILE_AND_RUNTIME + "/*.jar").getFiles());
-        JkDependencySet test = JkDependencySet.of()
-                .andFiles(libDir.andMatching(true, "*.jar", TEST + "/*.jar").getFiles());
-        return of(compile, runtime, test);
+        return Parser.parseFileStructure(baseDir);
     }
 
     /**
@@ -104,10 +80,10 @@ public class JkProjectDependencies {
      * org.springframework.boot:spring-boot-starter-thymeleaf
      * org.springframework.boot:spring-boot-starter-data-jpa
      *
-     * == COMPILE ==
+     * == COMPILE_ONLY ==
      * org.projectlombok:lombok:1.16.16
      *
-     * == RUNTIME ==
+     * == RUNTIME_ONLY ==
      * com.h2database:h2
      * org.liquibase:liquibase-core
      * com.oracle:ojdbc6:12.1.0
@@ -120,46 +96,10 @@ public class JkProjectDependencies {
      * </pre>
      */
     public static JkProjectDependencies ofTextDescription(String description) {
-        final String[] lines = description.split(System.lineSeparator());
-        JkDependencySet compile = JkDependencySet.of();
-        JkDependencySet runtime = JkDependencySet.of();
-        JkDependencySet test = JkDependencySet.of();
-
-       String currentQualifier = COMPILE_AND_RUNTIME;
-        for (final String line : lines) {
-            if (line.trim().startsWith("#")) {
-                continue;
-            }
-            if (line.trim().isEmpty()) {
-                continue;
-            }
-            if (line.startsWith("==")) {
-                currentQualifier = readQualifier(line);
-                continue;
-            }
-            final JkModuleDependency dependency = JkModuleDependency.of(line.trim());
-            if (COMPILE_AND_RUNTIME.equals(currentQualifier) || COMPILE.equals(currentQualifier)) {
-                compile = compile.and(dependency);
-            }
-            if (COMPILE_AND_RUNTIME.equals(currentQualifier) || RUNTIME.equals(currentQualifier)) {
-                runtime = runtime.and(dependency);
-            } else if (TEST.equals(currentQualifier)) {
-                test = test.and(dependency);
-            }
-        }
-        return JkProjectDependencies.of(compile, runtime, test);
+        return Parser.parseTxt(description);
     }
 
-    private static String readQualifier(String line) {
-        String payload = JkUtilsString.substringAfterFirst(line,"==").trim();
-        if (payload.contains("=")) {
-            payload = JkUtilsString.substringBeforeFirst(payload, "=").toLowerCase().trim();
-        }
-        if (KNOWN_QUALIFIER.contains(payload)) {
-            return payload;
-        }
-        return COMPILE_AND_RUNTIME;
-    }
+
 
 
     public JkDependencySet getCompileDeps() {
@@ -176,6 +116,79 @@ public class JkProjectDependencies {
 
     public JkProjectDependencies and(JkProjectDependencies other) {
         return of(compileDeps.and(other.compileDeps), runtimeDeps.and(other.runtimeDeps), testDeps.and(other.testDeps));
+    }
+
+    private static class Parser {
+
+        private static final String COMPILE_AND_RUNTIME = "compile+runtime";
+
+        private static final String COMPILE = "compile_only";
+
+        private static final String RUNTIME = "runtime_only";
+
+        private static final String TEST = "test";
+
+        private static final List<String> KNOWN_QUALIFIER = JkUtilsIterable.listOf(COMPILE, COMPILE_AND_RUNTIME,
+                RUNTIME, TEST);
+
+        static JkProjectDependencies parseFileStructure(Path baseDir) {
+            final JkPathTree libDir = JkPathTree.of(baseDir);
+            if (!libDir.exists()) {
+                return JkProjectDependencies.of();
+            }
+            JkDependencySet compile = JkDependencySet.of()
+                    .andFiles(libDir.andMatching(true, "*.jar", COMPILE + "/*.jar").getFiles())
+                    .andFiles(libDir.andMatching(true, COMPILE_AND_RUNTIME + "/*.jar").getFiles());
+            JkDependencySet runtime = JkDependencySet.of()
+                    .andFiles(libDir.andMatching(true, "*.jar", RUNTIME + "/*.jar").getFiles())
+                    .andFiles(libDir.andMatching(true, COMPILE_AND_RUNTIME + "/*.jar").getFiles());
+            JkDependencySet test = JkDependencySet.of()
+                    .andFiles(libDir.andMatching(true, "*.jar", TEST + "/*.jar").getFiles());
+            return of(compile, runtime, test);
+        }
+
+        static JkProjectDependencies parseTxt(String description) {
+            final String[] lines = description.split(System.lineSeparator());
+            JkDependencySet compile = JkDependencySet.of();
+            JkDependencySet runtime = JkDependencySet.of();
+            JkDependencySet test = JkDependencySet.of();
+
+            String currentQualifier = COMPILE_AND_RUNTIME;
+            for (final String line : lines) {
+                if (line.trim().startsWith("#")) {
+                    continue;
+                }
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                if (line.startsWith("==")) {
+                    currentQualifier = readQualifier(line);
+                    continue;
+                }
+                final JkCoordinateDependency dependency = JkCoordinateDependency.of(line.trim());
+                if (COMPILE_AND_RUNTIME.equals(currentQualifier) || COMPILE.equals(currentQualifier)) {
+                    compile = compile.and(dependency);
+                }
+                if (COMPILE_AND_RUNTIME.equals(currentQualifier) || RUNTIME.equals(currentQualifier)) {
+                    runtime = runtime.and(dependency);
+                } else if (TEST.equals(currentQualifier)) {
+                    test = test.and(dependency);
+                }
+            }
+            return JkProjectDependencies.of(compile, runtime, test);
+        }
+
+        private static String readQualifier(String line) {
+            String payload = JkUtilsString.substringAfterFirst(line,"==").trim();
+            if (payload.contains("=")) {
+                payload = JkUtilsString.substringBeforeFirst(payload, "=").toLowerCase().trim();
+            }
+            if (KNOWN_QUALIFIER.contains(payload)) {
+                return payload;
+            }
+            return COMPILE_AND_RUNTIME;
+        }
+
     }
 
 }

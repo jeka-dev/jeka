@@ -25,7 +25,7 @@ class IvyTranslatorToDependency {
     static List<DefaultDependencyDescriptor> toDependencyDescriptors(JkQualifiedDependencySet dependencies) {
         return dependencies
                 .getEntries().stream()
-                    .map(qDep -> toDependencyDescriptor(qDep.getQualifier(), (JkModuleDependency) qDep.getDependency()))
+                    .map(qDep -> toDependencyDescriptor(qDep.getQualifier(), (JkCoordinateDependency) qDep.getDependency()))
                     .collect(Collectors.toList());
     }
 
@@ -38,14 +38,15 @@ class IvyTranslatorToDependency {
     }
 
     private static DefaultDependencyDescriptor toDependencyDescriptor(String qualifier,
-                                                                      JkModuleDependency moduleDependency) {
+                                                                      JkCoordinateDependency coordinateDependency) {
 
-        JkVersion version = moduleDependency.getVersion();
+        JkCoordinate coordinate = coordinateDependency.getCoordinate();
+        JkVersion version = coordinate.getVersion();
         ModuleRevisionId moduleRevisionId = ModuleRevisionId.newInstance(
-                moduleDependency.getModuleId().getGroup(), moduleDependency.getModuleId().getName(),
+                coordinate.getGroupAndName().getGroup(), coordinate.getGroupAndName().getName(),
                 version.getValue());
         boolean changing = version.isDynamic() || version.isSnapshot();
-        boolean isTransitive = moduleDependency.getTransitivity() != JkTransitivity.NONE;
+        boolean isTransitive = coordinateDependency.getTransitivity() != JkTransitivity.NONE;
         final boolean force = !version.isDynamic();
         DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, force, changing,
                 isTransitive);
@@ -55,15 +56,15 @@ class IvyTranslatorToDependency {
            final Set<String> masterConfigurations = configurationMapping.getLeft().isEmpty() ?
                    Collections.singleton(IvyTranslatorToConfiguration.DEFAULT) : configurationMapping.getLeft();
            for (String masterConfiguration : masterConfigurations) {
-               moduleDependency.getExclusions().forEach(exclusion ->
+               coordinateDependency.getExclusions().forEach(exclusion ->
                        result.addExcludeRule(masterConfiguration, toExcludeRule(exclusion)));
                final Set<String> dependencyConfigurations = configurationMapping.getRight().isEmpty() ?
                        Collections.singleton(null) : configurationMapping.getRight();
                for (String dependencyConfiguration : dependencyConfigurations) {
-                   Set<String> effectiveDepConfs = dependencyConfs(dependencyConfiguration, moduleDependency.getTransitivity());
+                   Set<String> effectiveDepConfs = dependencyConfs(dependencyConfiguration, coordinateDependency.getTransitivity());
                    effectiveDepConfs.forEach(depConf -> result.addDependencyConfiguration(masterConfiguration, depConf));
                }
-               for (JkModuleDependency.JkArtifactSpecification artifactSpecification : moduleDependency.getArtifactSpecifications()) {
+               for (JkCoordinate.JkArtifactSpecification artifactSpecification : coordinate.getArtifactSpecifications()) {
                    result.addDependencyArtifact(masterConfiguration, IvyTranslatorToArtifact.toArtifactDependencyDescriptor(
                            result, artifactSpecification.getClassifier(), artifactSpecification.getType()));
                }
@@ -91,19 +92,18 @@ class IvyTranslatorToDependency {
         return result;
     }
 
-    static ModuleId toModuleId(JkModuleId moduleId) {
-        return new ModuleId(moduleId.getGroup(), moduleId.getName());
+    static ModuleId toModuleId(JkCoordinate.GroupAndName groupAndName) {
+        return new ModuleId(groupAndName.getGroup(), groupAndName.getName());
     }
 
-    static ModuleRevisionId toModuleRevisionId(JkVersionedModule jkVersionedModule) {
-        return new ModuleRevisionId(toModuleId(jkVersionedModule.getModuleId()), jkVersionedModule
+    static ModuleRevisionId toModuleRevisionId(JkCoordinate coordinate) {
+        return new ModuleRevisionId(toModuleId(coordinate.getGroupAndName()), coordinate
                 .getVersion().getValue());
     }
 
-    static JkVersionedModule toJkVersionedModule(ModuleRevisionId moduleRevisionId) {
-        return JkVersionedModule.of(
-                JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
-                JkVersion.of(moduleRevisionId.getRevision()));
+    static JkCoordinate toJkCoordinate(ModuleRevisionId moduleRevisionId) {
+        return JkCoordinate.GroupAndName.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName())
+                        .toCoordinate(moduleRevisionId.getRevision());
     }
 
 }

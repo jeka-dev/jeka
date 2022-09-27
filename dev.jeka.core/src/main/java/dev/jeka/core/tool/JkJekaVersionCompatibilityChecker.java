@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkManifest;
@@ -279,7 +278,7 @@ public final class JkJekaVersionCompatibilityChecker {
 
     private static void printUpperJekaVersion(JkDependencyResolver dependencyResolver, JkVersion minVersion) {
         JkLog.warn("Jeka version upper or equals to " + minVersion + " are ; ");
-        List<String> versions = dependencyResolver.searchVersions(JkModuleId.of("dev.jeka:jeka-core"));
+        List<String> versions = dependencyResolver.searchVersions("dev.jeka:jeka-core");
         versions.stream()
                 .map(version -> JkVersion.of(version))
                 .filter(version -> version.compareTo(minVersion) >= 0)

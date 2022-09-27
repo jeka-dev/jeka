@@ -101,7 +101,7 @@ public final class JkPom {
      * section of this POM.
      */
     public JkVersionProvider getVersionProvider() {
-        final List<JkVersionedModule> versionedModules = new LinkedList<>();
+        final List<JkCoordinate> coordinates = new LinkedList<>();
         Element dependencyManagementEl = dependencyManagementEl();
         if (dependencyManagementEl == null) {
             return JkVersionProvider.of();
@@ -112,13 +112,13 @@ public final class JkPom {
             return JkVersionProvider.of();
         }
         final JkQualifiedDependencySet scopedDependencies = dependencies(dependenciesEl, getProperties());
-        for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
-            final JkVersionedModule versionedModule = JkVersionedModule.of(
-                    moduleDependency.getModuleId(),
-                    JkVersion.of(moduleDependency.getVersion().getValue()));
-            versionedModules.add(versionedModule);
+        for (final JkCoordinateDependency coordinateDependency : scopedDependencies.getCoordinateDependencies()) {
+            final JkCoordinate coordinate = JkCoordinate.of(
+                    coordinateDependency.getCoordinate().getGroupAndName(),
+                    JkVersion.of(coordinateDependency.getCoordinate().getVersion().getValue()));
+            coordinates.add(coordinate);
         }
-        return JkVersionProvider.of(versionedModules);
+        return JkVersionProvider.of(coordinates);
     }
 
     /**
@@ -175,9 +175,10 @@ public final class JkPom {
             return result;
         }
         final JkQualifiedDependencySet scopedDependencies = dependencies(dependenciesEl, getProperties());
-        for (final JkModuleDependency moduleDependency : scopedDependencies.getModuleDependencies()) {
-            if (!moduleDependency.getExclusions().isEmpty()) {
-                result = result.and(moduleDependency.getModuleId(), moduleDependency.getExclusions());
+        for (final JkCoordinateDependency coordinateDependency : scopedDependencies.getCoordinateDependencies()) {
+            if (!coordinateDependency.getExclusions().isEmpty()) {
+                result = result.and(coordinateDependency.getCoordinate().getGroupAndName(),
+                        coordinateDependency.getExclusions());
             }
         }
         return result;
@@ -208,24 +209,25 @@ public final class JkPom {
     private JkQualifiedDependency scopedDep(Element mvnDependency, Map<String, String> props) {
         final String groupId = JkUtilsXml.directChildText(mvnDependency, "groupId");
         final String artifactId = JkUtilsXml.directChildText(mvnDependency, "artifactId");
-        final String version = resolveProps(JkUtilsXml.directChildText(mvnDependency, "version"), props) ;
-        JkModuleDependency moduleDependency = JkModuleDependency.of(groupId, artifactId, version);
+        final String version = resolveProps(JkUtilsXml.directChildText(mvnDependency, "version"), props);
+        JkCoordinate coordinate = JkCoordinate.of(groupId, artifactId, version);
         final String type = JkUtilsXml.directChildText(mvnDependency, "type");
         final String classifier = JkUtilsXml.directChildText(mvnDependency, "classifier");
         if (type != null || classifier != null) {
-            moduleDependency = moduleDependency.andClassifierAndType(classifier, type);
+            coordinate = coordinate.andClassifierAndType(classifier, type);
         }
+        JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of(coordinate);
         final Element exclusionsEl = JkUtilsXml.directChild(mvnDependency, "exclusions");
         if (exclusionsEl != null) {
             for (final Element exclusionElement : JkUtilsXml.directChildren(exclusionsEl,
                     "exclusion")) {
-                moduleDependency = moduleDependency.andExclusion(jkDepExclude(exclusionElement));
+                coordinateDependency = coordinateDependency.andExclusions(jkDepExclude(exclusionElement));
             }
         }
         String scope = JkUtilsXml.directChildText(mvnDependency, "scope");
         scope = JkUtilsObject.firstNonNull(scope, COMPILE_SCOPE);
         String realScope = toScope(scope);
-        return JkQualifiedDependency.of(realScope, moduleDependency);
+        return JkQualifiedDependency.of(realScope, coordinateDependency);
     }
 
     private JkDependencyExclusion jkDepExclude(Element exclusionEl) {

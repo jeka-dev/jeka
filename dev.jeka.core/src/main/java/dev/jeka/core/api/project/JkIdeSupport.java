@@ -1,9 +1,9 @@
 package dev.jeka.core.api.project;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkProjectDependencies;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkJavaVersion;
 
@@ -89,12 +89,12 @@ public class JkIdeSupport {
     }
 
     public JkIdeSupport setDependencies(JkProjectDependencies projectDependencies,
-                                        JkVersionedModule.ConflictStrategy conflictStrategy) {
+                                        JkCoordinate.ConflictStrategy conflictStrategy) {
         return setDependencies(JkQualifiedDependencySet.computeIdeDependencies(projectDependencies, conflictStrategy));
     }
 
     public JkIdeSupport setDependencies(JkProjectDependencies projectDependencies) {
-        return setDependencies(projectDependencies, JkVersionedModule.ConflictStrategy.FAIL);
+        return setDependencies(projectDependencies, JkCoordinate.ConflictStrategy.FAIL);
     }
 
     public JkIdeSupport setSourceVersion(JkJavaVersion sourceVersion) {

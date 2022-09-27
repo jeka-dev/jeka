@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
+import static dev.jeka.core.api.depmanagement.JkPopularLibs.*;
 
 public class JkImlGeneratorTest {
 
