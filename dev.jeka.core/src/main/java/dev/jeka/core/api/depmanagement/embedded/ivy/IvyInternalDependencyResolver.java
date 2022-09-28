@@ -102,9 +102,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
     public File get(JkCoordinate coordinate) {
         final ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency
                 .toModuleRevisionId(coordinate);
-        JkCoordinate.JkArtifactSpecification artifactSpecification =
-                coordinate.getArtifactSpecifications().isEmpty() ? JkCoordinate.JkArtifactSpecification.MAIN :
-                        coordinate.getArtifactSpecifications().iterator().next();
+        JkCoordinate.JkArtifactSpecification artifactSpecification = coordinate.getArtifactSpecification();
         final DefaultArtifact artifact;
         String type = JkUtilsObject.firstNonNull(artifactSpecification.getType(), "jar");
         if ("pom".equals(artifactSpecification.getType())) {

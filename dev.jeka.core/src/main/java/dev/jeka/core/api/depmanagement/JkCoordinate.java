@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static dev.jeka.core.api.utils.JkUtilsString.blankToNull;
+import static dev.jeka.core.api.utils.JkUtilsString.nullToEmpty;
 
 /**
  * Set of identifiers for binary artifact.
@@ -24,17 +25,17 @@ public final class JkCoordinate {
 
     private final JkVersion version;
 
-    private final Set<JkArtifactSpecification> artifactSpecifications;
+    private final JkArtifactSpecification artifactSpecification;
 
 
     private JkCoordinate(JkModuleId moduleId, JkVersion version,
-                         Set<JkArtifactSpecification> artifactSpecifications) {
+                         JkArtifactSpecification artifactSpecification) {
         JkUtilsAssert.argument(moduleId != null, "module cannot be null.");
         JkUtilsAssert.argument(version != null, version + " version cannot be null.");
-        JkUtilsAssert.argument(artifactSpecifications != null, moduleId + " artifactSpecifications cannot be null.");
+        JkUtilsAssert.argument(artifactSpecification != null, moduleId + " artifactSpecification cannot be null.");
         this.moduleId = moduleId;
         this.version = version;
-        this.artifactSpecifications = artifactSpecifications;
+        this.artifactSpecification = artifactSpecification;
     }
 
     /**
@@ -51,7 +52,7 @@ public final class JkCoordinate {
      */
     @SuppressWarnings("unchecked")
     public static JkCoordinate of(JkModuleId jkModuleId, JkVersion version) {
-        return new JkCoordinate(jkModuleId, version, Collections.singleton(JkArtifactSpecification.MAIN));
+        return new JkCoordinate(jkModuleId, version, JkArtifactSpecification.MAIN);
     }
 
     /**
@@ -105,14 +106,14 @@ public final class JkCoordinate {
             return of(jkModuleId, JkVersion.of(strings[3])).withClassifiers(blankToNull(strings[2]));
         }
         if (separatorCount == 4 && strings.length == 3) {
-            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifiersAndType(blankToNull(strings[2]), null);
+            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifierAndType(blankToNull(strings[2]), null);
         }
         if (separatorCount == 4 && strings.length == 4) {
-            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifiersAndType(blankToNull(strings[2]),
+            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifierAndType(blankToNull(strings[2]),
                     blankToNull(strings[3]));
         }
         if (separatorCount == 4 && strings.length == 5) {
-            return of(jkModuleId, JkVersion.of(strings[4])).withClassifiersAndType(blankToNull(strings[2])
+            return of(jkModuleId, JkVersion.of(strings[4])).withClassifierAndType(blankToNull(strings[2])
                     , blankToNull(strings[3]));
         }
         throw new IllegalArgumentException(errorMessage);
@@ -157,7 +158,7 @@ public final class JkCoordinate {
         if (version == null) {
             return this;
         }
-        return new JkCoordinate(moduleId, version, artifactSpecifications);
+        return new JkCoordinate(moduleId, version, artifactSpecification);
     }
 
     public JkCoordinate withVersion(String version) {
@@ -168,10 +169,10 @@ public final class JkCoordinate {
     }
 
     /**
-     * @see #withClassifiersAndType(String, String)
+     * @see #withClassifierAndType(String, String)
      */
     public JkCoordinate withClassifiers(String classifier) {
-        return withClassifiersAndType(classifier, null);
+        return withClassifierAndType(classifier, null);
     }
 
     /**
@@ -181,52 +182,41 @@ public final class JkCoordinate {
      *                    linux and mac classifier. ',mac' stands for the default classifier +
      *                    mac classifier
      */
-    public JkCoordinate withClassifiersAndType(String classifiers, String type) {
+    public JkCoordinate withClassifierAndType(String classifiers, String type) {
         Set<JkArtifactSpecification> artifactSpecifications = new LinkedHashSet<>();
         for (String classifier : (classifiers + " ").split(",")) {
             artifactSpecifications.add(new JkArtifactSpecification(classifier.trim(), type));
         }
-        return new JkCoordinate(moduleId, version, Collections.unmodifiableSet(artifactSpecifications));
+        return new JkCoordinate(moduleId, version, artifactSpecification);
     }
 
     /**
      * @see #andClassifierAndType(String, String)
      */
-    public JkCoordinate andClassifier(String classifier) {
-        return andClassifierAndType(classifier, null);
+    public JkCoordinate withClassifier(String classifier) {
+        return withClassifierAndType(classifier, null);
     }
 
-    /**
-     * Returns a JkModuleDependency identical to this one but adding the specified
-     * classifier and type {@link JkArtifactSpecification}.
-     */
-    public JkCoordinate andClassifierAndType(String classifier, String type) {
-        JkArtifactSpecification artifactSpecification = new JkArtifactSpecification(classifier, type);
-        Set<JkArtifactSpecification> set = new LinkedHashSet<>(this.artifactSpecifications);
-        if (set.isEmpty()) {
-            set.add(JkArtifactSpecification.MAIN);
-        }
-        set.add(artifactSpecification);
-        return new JkCoordinate(moduleId, version, Collections.unmodifiableSet(set));
-    }
 
     /**
-     * Returns the {@link JkArtifactSpecification}s for this module dependency. It can e empty if no
-     * artifact specification as been set. In this case, only the main artifact is taken in account.
+     * Returns the {@link JkArtifactSpecification} for this module dependency.
      */
-    public Set<JkArtifactSpecification> getArtifactSpecifications() {
-        return this.artifactSpecifications;
+    public JkArtifactSpecification getArtifactSpecification() {
+        return this.artifactSpecification;
     }
 
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder(moduleId.toString());
-        if (!version.isUnspecified()) {
-            result.append(":" + version);
+        if (JkArtifactSpecification.MAIN.equals(artifactSpecification)) {
+            if (JkVersion.UNSPECIFIED.equals(version)) {
+                return result.toString();
+            }
+            return result.append(":").append(version.getValue()).toString();
         }
-        artifactSpecifications.forEach(spec ->
-                result.append("(classifier=" + spec.classifier + ", type=" + spec.type + ")"));
+        result.append(artifactSpecification).append(":");
+        result.append(this.hasUnspecifiedVersion() ? "" : version.getValue());
         return result.toString();
     }
 
@@ -250,6 +240,7 @@ public final class JkCoordinate {
             this.type = type;
         }
 
+        // TODO blankToNull args
         public static JkArtifactSpecification of(String classifier, String type) {
             return new JkArtifactSpecification(classifier, type);
         }
@@ -281,6 +272,11 @@ public final class JkCoordinate {
             result = 31 * result + (type != null ? type.hashCode() : 0);
             return result;
         }
+
+        @Override
+        public String toString() {
+            return nullToEmpty(this.classifier) + ":" + nullToEmpty(this.type);
+        }
     }
 
     @Override
@@ -291,24 +287,22 @@ public final class JkCoordinate {
         JkCoordinate that = (JkCoordinate) o;
         if (!moduleId.equals(that.moduleId)) return false;
         if (!version.equals(that.version)) return false;
-        return  artifactSpecifications.equals(that.artifactSpecifications);
+        return  artifactSpecification.equals(that.artifactSpecification);
     }
 
     @Override
     public int hashCode() {
         int result = moduleId.hashCode();
         result = 31 * result + version.hashCode();
-        result = 31 * result + artifactSpecifications.hashCode();
+        result = 31 * result + artifactSpecification.hashCode();
         return result;
     }
 
     public Path cachePath() {
         String moduleName = this.moduleId.getName();
-        Set<JkCoordinate.JkArtifactSpecification> artifactSpecifications =
-                this.getArtifactSpecifications();
-        JkCoordinate.JkArtifactSpecification artSpec = !this.getArtifactSpecifications().isEmpty() ?
-                this.getArtifactSpecifications().iterator().next()
-                : JkCoordinate.JkArtifactSpecification.of("", "jar");
+        JkCoordinate.JkArtifactSpecification artSpec = !this.getArtifactSpecification().equals(JkArtifactSpecification.MAIN) ?
+                this.artifactSpecification
+                : JkArtifactSpecification.of("", "jar");
         String type = JkUtilsString.isBlank(artSpec.getType()) ? "jar" : artSpec.getType();
         String fileName = cacheFileName();
         Path path = JkLocator.getJekaRepositoryCache()
@@ -321,11 +315,9 @@ public final class JkCoordinate {
 
     public String cacheFileName() {
         String moduleName = this.moduleId.getName();
-        Set<JkCoordinate.JkArtifactSpecification> artifactSpecifications =
-                this.getArtifactSpecifications();
-        JkCoordinate.JkArtifactSpecification artSpec = !this.getArtifactSpecifications().isEmpty() ?
-                this.getArtifactSpecifications().iterator().next()
-                : JkCoordinate.JkArtifactSpecification.of("", "jar");
+        JkCoordinate.JkArtifactSpecification artSpec = !this.getArtifactSpecification().equals(JkArtifactSpecification.MAIN) ?
+                this.artifactSpecification
+                : JkArtifactSpecification.of("", "jar");
         String type = JkUtilsString.isBlank(artSpec.getType()) ? "jar" : artSpec.getType();
         String classifierElement = JkUtilsString.isBlank(artSpec.getClassifier()) ? "" : "-" + artSpec.getClassifier();
         return moduleName + "-" + this.getVersion() + classifierElement + "." + type;

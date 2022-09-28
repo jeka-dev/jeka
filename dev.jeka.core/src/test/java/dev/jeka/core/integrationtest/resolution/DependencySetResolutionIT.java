@@ -104,8 +104,37 @@ public class DependencySetResolutionIT {
         //JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         JkCoordinate lwjgl= JkCoordinate.of("org.lwjgl:lwjgl:3.1.1");
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkCoordinateDependency.of(lwjgl.andClassifier("natives-linux")))
+                .and(lwjgl.withClassifier("natives-linux"))
                 .and(COMMONS_LOGIN_102);
+        JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = resolver.resolve(deps);
+        JkResolvedDependencyNode treeRoot = resolveResult.getDependencyTree();
+        System.out.println(resolveResult.getFiles());
+        System.out.println(treeRoot.toStringTree());
+
+        // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
+        // it should results in a single node.
+        // The classpath order will also place all artifacts of a same module sequentially.
+        assertEquals(2, treeRoot.getChildren().size());
+        assertEquals(3, treeRoot.getResolvedFiles().size());
+
+        JkResolvedDependencyNode lwjglNode = treeRoot.getChildren().get(0);
+        List<Path> lwjglFiles = lwjglNode.getNodeInfo().getFiles();
+        System.out.println(lwjglFiles);
+        assertEquals(2, lwjglFiles.size());
+
+    }
+
+    @Test
+    public void resolve_moduleWithMainAndExtraArtifactInDistinctCoordinates_bothArtifactsArePresentInResult() {
+        //JkLog.setDecorator(JkLog.Style.INDENT);
+        //JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
+        JkDependencySet deps = JkDependencySet.of()
+                .and("org.lwjgl:lwjgl")
+                .and("org.lwjgl:lwjgl:natives-linux::")
+                .andVersionProvider(JkVersionProvider.of()
+                        .and("org.lwjgl:lwjgl", "3.1.1")
+                );
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolvedDependencyNode treeRoot = resolveResult.getDependencyTree();

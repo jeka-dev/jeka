@@ -146,7 +146,7 @@ public final class JkVersionProvider {
         } else if (items.length == 3) {
             JkModuleId jkModuleId = JkModuleId.of(items[0], items[1]);
             JkVersion version = JkVersion.of(items[2]);
-            coordinate = JkCoordinate.of(jkModuleId, version).withClassifiersAndType("", "pom");
+            coordinate = JkCoordinate.of(jkModuleId, version).withClassifierAndType("", "pom");
         } else {
             throw new IllegalArgumentException("dependencyDescription must be expressed as 'group:name::pom:version' " +
                     "or 'group:name:version'. was " + dependencyDescription);

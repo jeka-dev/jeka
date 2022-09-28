@@ -21,7 +21,7 @@ public class IvyTranslationsTest {
     @Test
     public void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn1dependencies() {
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
-                .and(null, JkCoordinateDependency.of(JkCoordinate.of("aGroup:aName:1.0").andClassifier("linux")))
+                .and(null, JkCoordinateDependency.of(JkCoordinate.of("aGroup:aName:1.0").withClassifier("linux")))
                 .and(null, "bGroup:bName:win:exe:1.0");
         final DefaultModuleDescriptor desc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(
                 OWNER, deps);

@@ -214,7 +214,7 @@ public final class JkPom {
         final String type = JkUtilsXml.directChildText(mvnDependency, "type");
         final String classifier = JkUtilsXml.directChildText(mvnDependency, "classifier");
         if (type != null || classifier != null) {
-            coordinate = coordinate.andClassifierAndType(classifier, type);
+            coordinate = coordinate.withClassifierAndType(classifier, type);
         }
         JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of(coordinate);
         final Element exclusionsEl = JkUtilsXml.directChild(mvnDependency, "exclusions");

@@ -365,4 +365,8 @@ public final class JkUtilsString {
     public static String blankToNull(String in) {
         return isBlank(in) ? null : in;
     }
+
+    public static String nullToEmpty(String in) {
+        return in == null ? "" : in;
+    }
 }

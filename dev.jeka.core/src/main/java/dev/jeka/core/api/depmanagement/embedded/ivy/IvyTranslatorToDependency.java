@@ -64,10 +64,9 @@ class IvyTranslatorToDependency {
                    Set<String> effectiveDepConfs = dependencyConfs(dependencyConfiguration, coordinateDependency.getTransitivity());
                    effectiveDepConfs.forEach(depConf -> result.addDependencyConfiguration(masterConfiguration, depConf));
                }
-               for (JkCoordinate.JkArtifactSpecification artifactSpecification : coordinate.getArtifactSpecifications()) {
-                   result.addDependencyArtifact(masterConfiguration, IvyTranslatorToArtifact.toArtifactDependencyDescriptor(
-                           result, artifactSpecification.getClassifier(), artifactSpecification.getType()));
-               }
+               JkCoordinate.JkArtifactSpecification artifactSpecification = coordinate.getArtifactSpecification();
+               result.addDependencyArtifact(masterConfiguration, IvyTranslatorToArtifact.toArtifactDependencyDescriptor(
+                       result, artifactSpecification.getClassifier(), artifactSpecification.getType()));
            }
        }
         return result;
