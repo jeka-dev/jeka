@@ -7,6 +7,8 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.nio.file.Path;
 import java.util.*;
 
+import static dev.jeka.core.api.utils.JkUtilsString.blankToNull;
+
 /**
  * Set of identifiers for binary artifact.
  * Most of the time 1 coordinate identifies 1 artifacts, identified with its group name and version.
@@ -100,13 +102,18 @@ public final class JkCoordinate {
             return of(jkModuleId, JkVersion.of(strings[2]));
         }
         if (separatorCount == 3 && strings.length == 4) {
-            return of(jkModuleId, JkVersion.of(strings[3])).withClassifiers(strings[2]);
+            return of(jkModuleId, JkVersion.of(strings[3])).withClassifiers(blankToNull(strings[2]));
+        }
+        if (separatorCount == 4 && strings.length == 3) {
+            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifiersAndType(blankToNull(strings[2]), null);
         }
         if (separatorCount == 4 && strings.length == 4) {
-            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifiersAndType(strings[2], strings[3]);
+            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifiersAndType(blankToNull(strings[2]),
+                    blankToNull(strings[3]));
         }
         if (separatorCount == 4 && strings.length == 5) {
-            return of(jkModuleId, JkVersion.of(strings[4])).withClassifiersAndType(strings[2], strings[3]);
+            return of(jkModuleId, JkVersion.of(strings[4])).withClassifiersAndType(blankToNull(strings[2])
+                    , blankToNull(strings[3]));
         }
         throw new IllegalArgumentException(errorMessage);
     }

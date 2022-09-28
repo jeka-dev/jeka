@@ -361,4 +361,8 @@ public final class JkUtilsString {
         sb.append(string);
         return sb.toString();
     }
+
+    public static String blankToNull(String in) {
+        return isBlank(in) ? null : in;
+    }
 }
