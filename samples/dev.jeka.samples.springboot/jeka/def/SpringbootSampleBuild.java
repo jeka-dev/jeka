@@ -35,7 +35,7 @@ class SpringbootSampleBuild extends JkBean {
                     .and("com.h2database:h2:1.4.200")
                 )
                 .configureTestDeps(deps -> deps
-                    .and(Boot.STARTER_TEST)
+                    .and(Boot.STARTER_TEST.toCoordinate())
                 )
                 .setPublishedModuleId("dev.jeka:samples-springboot")
                 .setPublishedVersion("1.0-SNAPSHOT");

@@ -25,7 +25,7 @@ public final class JkIvyPublication<T> {
 
     public final T __;
 
-    private Supplier<JkCoordinate.GroupAndName> groupAndNameSupplier = () -> null;
+    private Supplier<JkModuleId> moduleIdSupplier = () -> null;
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
@@ -53,13 +53,13 @@ public final class JkIvyPublication<T> {
         return new JkIvyPublication<>(null);
     }
 
-    public JkIvyPublication<T> setGroupAndName(String groupAndNAme) {
-        this.groupAndNameSupplier = () -> JkCoordinate.GroupAndName.of(groupAndNAme);
+    public JkIvyPublication<T> setModuleId(String moduleId) {
+        this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
         return this;
     }
 
-    public JkIvyPublication<T> setGroupAndName(Supplier<String> groupAndNAmeSupplier) {
-        this.groupAndNameSupplier = () -> JkCoordinate.GroupAndName.of(groupAndNAmeSupplier.get());
+    public JkIvyPublication<T> setModuleId(Supplier<String> groupAndNAmeSupplier) {
+        this.moduleIdSupplier = () -> JkModuleId.of(groupAndNAmeSupplier.get());
         return this;
     }
 
@@ -72,8 +72,8 @@ public final class JkIvyPublication<T> {
         return setVersion(() -> version);
     }
 
-    public JkCoordinate.GroupAndName getGroupAndName() {
-        return groupAndNameSupplier.get();
+    public JkModuleId getModuleId() {
+        return moduleIdSupplier.get();
     }
 
     public JkVersion getVersion() {
@@ -225,11 +225,11 @@ public final class JkIvyPublication<T> {
     }
 
     private void publish(JkRepoSet repos) {
-        JkUtilsAssert.state(groupAndNameSupplier.get() != null, "moduleId cannot be null.");
+        JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos.withDefaultSigner(defaultSigner),
                 null);
-        internalPublisher.publishIvy(getGroupAndName().toCoordinate(versionSupplier.get()), getAllArtifacts(),
+        internalPublisher.publishIvy(getModuleId().toCoordinate(versionSupplier.get()), getAllArtifacts(),
                 getDependencies());
     }
 

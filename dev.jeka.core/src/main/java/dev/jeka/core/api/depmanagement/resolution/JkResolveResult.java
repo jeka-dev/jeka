@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
@@ -64,15 +64,15 @@ public final class JkResolveResult {
     /**
      * Shorthand for <code>dependencyTree.contains(JkModuleId)</code>
      */
-    public boolean contains(GroupAndName groupAndName) {
-        return this.depTree.contains(groupAndName);
+    public boolean contains(JkModuleId jkModuleId) {
+        return this.depTree.contains(jkModuleId);
     }
 
     /**
      * Shorthand for <code>resolvedVersion.getVersionOf(JkModuleId)</code>
      */
-    public JkVersion getVersionOf(GroupAndName groupAndName) {
-        return this.getResolvedVersionProvider().getVersionOf(groupAndName);
+    public JkVersion getVersionOf(JkModuleId jkModuleId) {
+        return this.getResolvedVersionProvider().getVersionOf(jkModuleId);
     }
 
     /**
@@ -92,8 +92,8 @@ public final class JkResolveResult {
     /**
      * Returns files the specified module is resolved to.
      */
-    public JkPathSequence getFilesFor(GroupAndName groupAndName) {
-        final JkResolvedDependencyNode dependencyNode = this.depTree.getFirst(groupAndName);
+    public JkPathSequence getFilesFor(JkModuleId jkModuleId) {
+        final JkResolvedDependencyNode dependencyNode = this.depTree.getFirst(jkModuleId);
         if (dependencyNode == null) {
             return JkPathSequence.of();
         }

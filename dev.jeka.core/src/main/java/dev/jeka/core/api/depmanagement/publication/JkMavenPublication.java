@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -28,7 +28,7 @@ public final class JkMavenPublication<T> {
 
     private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
-    private Supplier<GroupAndName> groupAndNameSupplier = () -> null;
+    private Supplier<JkModuleId> moduleIdSupplier = () -> null;
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
@@ -66,12 +66,12 @@ public final class JkMavenPublication<T> {
     }
 
     public JkMavenPublication<T> setModuleId(String moduleId) {
-        this.groupAndNameSupplier = () -> GroupAndName.of(moduleId);
+        this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
         return this;
     }
 
     public JkMavenPublication<T> setModuleId(Supplier<String> moduleIdSupplier) {
-        this.groupAndNameSupplier = () -> GroupAndName.of(moduleIdSupplier.get());
+        this.moduleIdSupplier = () -> JkModuleId.of(moduleIdSupplier.get());
         return this;
     }
 
@@ -90,8 +90,8 @@ public final class JkMavenPublication<T> {
         return this;
     }
 
-    public GroupAndName getGroupAndName() {
-        return groupAndNameSupplier.get();
+    public JkModuleId getModuleId() {
+        return moduleIdSupplier.get();
     }
 
     public JkVersion getVersion() {
@@ -159,12 +159,12 @@ public final class JkMavenPublication<T> {
                 .assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
         JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
-        JkUtilsAssert.state(groupAndNameSupplier.get() != null, "moduleId cannot be null.");
+        JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        JkCoordinate coordinate = getGroupAndName().toCoordinate(versionSupplier.get());
+        JkCoordinate coordinate = getModuleId().toCoordinate(versionSupplier.get());
         internalPublisher.publishMaven(coordinate, getArtifactLocator(), pomMetadata, dependencySet);
         return this;
     }

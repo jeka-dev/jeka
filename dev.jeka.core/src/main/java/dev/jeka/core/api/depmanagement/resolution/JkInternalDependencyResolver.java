@@ -34,7 +34,7 @@ public interface JkInternalDependencyResolver {
 
     List<String> searchModules(String groupId);
 
-    List<String> searchVersions(JkCoordinate.GroupAndName groupAndName);
+    List<String> searchVersions(JkModuleId jkModuleId);
 
     /**
      * @param groupCriteria

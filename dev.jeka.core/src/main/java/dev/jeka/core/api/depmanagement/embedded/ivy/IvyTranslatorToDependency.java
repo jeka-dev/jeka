@@ -43,7 +43,7 @@ class IvyTranslatorToDependency {
         JkCoordinate coordinate = coordinateDependency.getCoordinate();
         JkVersion version = coordinate.getVersion();
         ModuleRevisionId moduleRevisionId = ModuleRevisionId.newInstance(
-                coordinate.getGroupAndName().getGroup(), coordinate.getGroupAndName().getName(),
+                coordinate.getModuleId().getGroup(), coordinate.getModuleId().getName(),
                 version.getValue());
         boolean changing = version.isDynamic() || version.isSnapshot();
         boolean isTransitive = coordinateDependency.getTransitivity() != JkTransitivity.NONE;
@@ -92,17 +92,17 @@ class IvyTranslatorToDependency {
         return result;
     }
 
-    static ModuleId toModuleId(JkCoordinate.GroupAndName groupAndName) {
-        return new ModuleId(groupAndName.getGroup(), groupAndName.getName());
+    static ModuleId toModuleId(JkModuleId jkModuleId) {
+        return new ModuleId(jkModuleId.getGroup(), jkModuleId.getName());
     }
 
     static ModuleRevisionId toModuleRevisionId(JkCoordinate coordinate) {
-        return new ModuleRevisionId(toModuleId(coordinate.getGroupAndName()), coordinate
+        return new ModuleRevisionId(toModuleId(coordinate.getModuleId()), coordinate
                 .getVersion().getValue());
     }
 
     static JkCoordinate toJkCoordinate(ModuleRevisionId moduleRevisionId) {
-        return JkCoordinate.GroupAndName.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName())
+        return JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName())
                         .toCoordinate(moduleRevisionId.getRevision());
     }
 

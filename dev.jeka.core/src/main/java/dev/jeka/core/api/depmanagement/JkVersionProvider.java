@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -15,11 +14,11 @@ import java.util.*;
  */
 public final class JkVersionProvider {
 
-    private final Map<GroupAndName, JkVersion> map;
+    private final Map<JkModuleId, JkVersion> map;
 
     private final LinkedHashSet<JkCoordinate> boms;
 
-    private JkVersionProvider(Map<GroupAndName, JkVersion> map, LinkedHashSet<JkCoordinate> boms) {
+    private JkVersionProvider(Map<JkModuleId, JkVersion> map, LinkedHashSet<JkCoordinate> boms) {
         super();
         this.map = map;
         this.boms = boms;
@@ -29,21 +28,21 @@ public final class JkVersionProvider {
      * @see #of(JkModuleId, JkVersion)
      */
     public static JkVersionProvider of(String moduleId, String version) {
-        return of(GroupAndName.of(moduleId), version);
+        return of(JkModuleId.of(moduleId), version);
     }
 
     /**
      * @see #of(JkModuleId, JkVersion)
      */
-    public static JkVersionProvider of(GroupAndName groupAndName, String version) {
-        return of(groupAndName, JkVersion.of(version));
+    public static JkVersionProvider of(JkModuleId jkModuleId, String version) {
+        return of(jkModuleId, JkVersion.of(version));
     }
 
     /**
      * Creates a {@link JkVersionProvider} holding a single version providing.
      */
-    public static JkVersionProvider of(GroupAndName groupAndName, JkVersion version) {
-        final Map<GroupAndName, JkVersion> result = JkUtilsIterable.mapOf(groupAndName, version);
+    public static JkVersionProvider of(JkModuleId jkModuleId, JkVersion version) {
+        final Map<JkModuleId, JkVersion> result = JkUtilsIterable.mapOf(jkModuleId, version);
         return new JkVersionProvider(result, new LinkedHashSet<>());
     }
 
@@ -58,9 +57,9 @@ public final class JkVersionProvider {
      * Creates a version provider from the specified versioned modules.
      */
     public static JkVersionProvider of(Iterable<JkCoordinate> coordinates) {
-        final Map<GroupAndName, JkVersion> result = new HashMap<>();
+        final Map<JkModuleId, JkVersion> result = new HashMap<>();
         for (final JkCoordinate coordinate : coordinates) {
-            result.put(coordinate.getGroupAndName(), coordinate.getVersion());
+            result.put(coordinate.getModuleId(), coordinate.getVersion());
         }
         return new JkVersionProvider(result, new LinkedHashSet<>());
     }
@@ -68,11 +67,11 @@ public final class JkVersionProvider {
     /**
      * Returns the version to use with specified module.
      */
-    public JkVersion getVersionOf(GroupAndName groupAndName) {
-        return this.map.get(groupAndName);
+    public JkVersion getVersionOf(JkModuleId jkModuleId) {
+        return this.map.get(jkModuleId);
     }
 
-    public JkVersion getVersionOfOrUnspecified(GroupAndName moduleId) {
+    public JkVersion getVersionOfOrUnspecified(JkModuleId moduleId) {
         return Optional.ofNullable(getVersionOf(moduleId)).orElse(JkVersion.UNSPECIFIED);
     }
 
@@ -80,7 +79,7 @@ public final class JkVersionProvider {
      * Returns the version to use with specified module.
      */
     public String getVersionOf(String moduleId) {
-        JkVersion version = getVersionOf(GroupAndName.of(moduleId));
+        JkVersion version = getVersionOf(JkModuleId.of(moduleId));
         if (version == null) {
             return null;
         }
@@ -93,7 +92,7 @@ public final class JkVersionProvider {
         }
         JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
         JkCoordinate coordinate = coordinateDependency.getCoordinate();
-        JkVersion providedVersion = this.getVersionOf(coordinate.getGroupAndName());
+        JkVersion providedVersion = this.getVersionOf(coordinate.getModuleId());
         if (coordinate.getVersion().isUnspecified() && providedVersion != null) {
             return coordinateDependency.withVersion(providedVersion);
         }
@@ -112,7 +111,7 @@ public final class JkVersionProvider {
      * The versions present in the specified one will override versions specified in this one.
      */
     public JkVersionProvider and(JkVersionProvider other) {
-        final Map<GroupAndName, JkVersion> newMap = new HashMap<>(this.map);
+        final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);
         newMap.putAll(other.map);
         LinkedHashSet<JkCoordinate> newBoms = new LinkedHashSet<>(this.boms);
         newBoms.addAll(other.boms);
@@ -122,17 +121,17 @@ public final class JkVersionProvider {
     /**
      * Returns a {@link JkVersionProvider} that is the union of this provider and the specified one.
      */
-    public JkVersionProvider and(GroupAndName groupAndName, JkVersion version) {
-        final Map<GroupAndName, JkVersion> newMap = new HashMap<>(this.map);
-        newMap.put(groupAndName, version);
+    public JkVersionProvider and(JkModuleId jkModuleId, JkVersion version) {
+        final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);
+        newMap.put(jkModuleId, version);
         return new JkVersionProvider(newMap, this.boms);
     }
 
     /**
      * @see JkVersionProvider#and(JkModuleId, JkVersion)
      */
-    public JkVersionProvider and(GroupAndName groupAndName, String version) {
-        return and(groupAndName, JkVersion.of(version));
+    public JkVersionProvider and(JkModuleId jkModuleId, String version) {
+        return and(jkModuleId, JkVersion.of(version));
     }
 
     /**
@@ -145,9 +144,9 @@ public final class JkVersionProvider {
         if (items.length == 5) {
             coordinate= JkCoordinate.of(dependencyDescription);
         } else if (items.length == 3) {
-            GroupAndName groupAndName = GroupAndName.of(items[0], items[1]);
+            JkModuleId jkModuleId = JkModuleId.of(items[0], items[1]);
             JkVersion version = JkVersion.of(items[2]);
-            coordinate = JkCoordinate.of(groupAndName, version).withClassifiersAndType("", "pom");
+            coordinate = JkCoordinate.of(jkModuleId, version).withClassifiersAndType("", "pom");
         } else {
             throw new IllegalArgumentException("dependencyDescription must be expressed as 'group:name::pom:version' " +
                     "or 'group:name:version'. was " + dependencyDescription);
@@ -164,23 +163,23 @@ public final class JkVersionProvider {
     public JkVersionProvider and(String versionedModule) {
         JkUtilsAssert.argument(versionedModule.split(":").length == 3,
                 "versioned module should be expressed as 'group:name:version' was '%s'", versionedModule);
-        String groupAndName = JkUtilsString.substringBeforeLast(versionedModule, ":");
+        String moduleId = JkUtilsString.substringBeforeLast(versionedModule, ":");
         String version = JkUtilsString.substringAfterLast(versionedModule, ":");
-        return and(groupAndName, version);
+        return and(moduleId, version);
     }
 
 
     /**
      * @see JkVersionProvider#and(JkModuleId, JkVersion)
      */
-    public JkVersionProvider and(String groupAndName, String version) {
-        return and(GroupAndName.of(groupAndName), version);
+    public JkVersionProvider and(String moduleId, String version) {
+        return and(JkModuleId.of(moduleId), version);
     }
 
     /**
-     * Returns all modules that this object provides version for.
+     * Returns all module ids that this object provides version for.
      */
-    public Set<GroupAndName> getGroupAndNames() {
+    public Set<JkModuleId> getModuleIds() {
         return map.keySet();
     }
 
@@ -189,7 +188,7 @@ public final class JkVersionProvider {
         return this.map.toString() +  ", " + boms;
     }
 
-    public Map<GroupAndName, JkVersion> toMap() {
+    public Map<JkModuleId, JkVersion> toMap() {
         return Collections.unmodifiableMap(map);
     }
 
@@ -200,11 +199,11 @@ public final class JkVersionProvider {
         final String indent = JkUtilsString.repeat(" ", margin);
         final StringBuilder builder = new StringBuilder();
         builder.append("JkVersionProvider.of()");
-        for (final Map.Entry<GroupAndName, JkVersion> entry : map.entrySet()) {
-            GroupAndName groupAndName = entry.getKey();
+        for (final Map.Entry<JkModuleId, JkVersion> entry : map.entrySet()) {
+            JkModuleId jkModuleId = entry.getKey();
             JkVersion version = entry.getValue();
             builder.append("\n").append(indent).append(".and(\"")
-                    .append(groupAndName + "\", ")
+                    .append(jkModuleId + "\", ")
                     .append("\"" + version + "\")");
         }
         return builder.toString();

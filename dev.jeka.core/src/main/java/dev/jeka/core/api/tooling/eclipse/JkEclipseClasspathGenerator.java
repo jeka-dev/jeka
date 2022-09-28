@@ -388,7 +388,7 @@ public final class JkEclipseClasspathGenerator {
             // Maven dependency
             if (node.isModuleNode()) {
                 final JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
-                JkCoordinate coordinate = JkCoordinate.of(moduleNodeInfo.getGroupAndName().getColonNotation());
+                JkCoordinate coordinate = JkCoordinate.of(moduleNodeInfo.getModuleId().getColonNotation());
                 JkDependency dependency = JkCoordinateDependency.of(coordinate);
                 Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
                 Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);
@@ -543,7 +543,7 @@ public final class JkEclipseClasspathGenerator {
             if (dep2 instanceof JkCoordinateDependency) {
                 JkCoordinateDependency modDep1 = (JkCoordinateDependency) dep1;
                 JkCoordinateDependency modDep2 = (JkCoordinateDependency) dep2;
-                return modDep1.getCoordinate().getGroupAndName().equals(modDep2.getCoordinate().getGroupAndName());
+                return modDep1.getCoordinate().getModuleId().equals(modDep2.getCoordinate().getModuleId());
             }
             return false;
         }

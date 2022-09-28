@@ -97,7 +97,7 @@ public class JkQualifiedDependencySet {
     public List<JkQualifiedDependency> findByModule(String moduleId) {
         return this.entries.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkCoordinateDependency)
-                .filter(qDep -> qDep.getCoordinateDependency().getCoordinate().getGroupAndName().getColonNotation()
+                .filter(qDep -> qDep.getCoordinateDependency().getCoordinate().getModuleId().getColonNotation()
                         .equals(moduleId))
                 .collect(Collectors.toList());
     }
@@ -264,7 +264,7 @@ public class JkQualifiedDependencySet {
     public JkQualifiedDependencySet assertNoUnspecifiedVersion() {
         final List<JkCoordinateDependency> unspecifiedVersionModules = getCoordinateDependencies().stream()
                 .filter(dep -> this.versionProvider.getVersionOfOrUnspecified(
-                        dep.getCoordinate().getGroupAndName()).isUnspecified())
+                        dep.getCoordinate().getModuleId()).isUnspecified())
                 .filter(dep -> dep.getCoordinate().getVersion().isUnspecified())
                 .collect(Collectors.toList());
         JkUtilsAssert.state(unspecifiedVersionModules.isEmpty(), "Following module does not specify version : "
@@ -281,7 +281,7 @@ public class JkQualifiedDependencySet {
                     if (qDep.getDependency() instanceof JkCoordinateDependency) {
                         JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) qDep.getDependency();
                         JkVersion providedVersion = this.versionProvider
-                                .getVersionOfOrUnspecified(coordinateDependency.getCoordinate().getGroupAndName());
+                                .getVersionOfOrUnspecified(coordinateDependency.getCoordinate().getModuleId());
                         if (coordinateDependency.getCoordinate().getVersion().isUnspecified()
                                 && !providedVersion.isUnspecified()) {
                             return JkQualifiedDependency.of(qDep.getQualifier(),

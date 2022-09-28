@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.resolution.*;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode.JkModuleNodeInfo;
 import dev.jeka.core.api.system.JkLog;
@@ -108,7 +108,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         final DefaultArtifact artifact;
         String type = JkUtilsObject.firstNonNull(artifactSpecification.getType(), "jar");
         if ("pom".equals(artifactSpecification.getType())) {
-            artifact = new DefaultArtifact(moduleRevisionId, null, coordinate.getGroupAndName().getName(), type,
+            artifact = new DefaultArtifact(moduleRevisionId, null, coordinate.getModuleId().getName(), type,
                     type, true);
         } else {
             String classifier = artifactSpecification.getClassifier();
@@ -116,7 +116,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
             if (classifier != null) {
                 extra.put("classifier", classifier);
             }
-            artifact = new DefaultArtifact(moduleRevisionId, null, coordinate.getGroupAndName().getName(), type,
+            artifact = new DefaultArtifact(moduleRevisionId, null, coordinate.getModuleId().getName(), type,
                     type, extra);
         }
         Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, JkResolutionParameters.of());
@@ -143,10 +143,10 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
     }
 
     @Override
-    public List<String> searchVersions(GroupAndName groupAndName) {
+    public List<String> searchVersions(JkModuleId jkModuleId) {
         Ivy ivy = IvyTranslatorToIvy.toIvy(repoSet, JkResolutionParameters.of());
         SearchEngine searchEngine = new SearchEngine(ivy.getSettings());
-        return Arrays.asList(searchEngine.listRevisions(groupAndName.getGroup(), groupAndName.getName())).stream()
+        return Arrays.asList(searchEngine.listRevisions(jkModuleId.getGroup(), jkModuleId.getName())).stream()
                 .sorted()
                 .collect(Collectors.toList());
     }
@@ -196,7 +196,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
 
     private static JkCoordinate anonymousCoordinate() {
         final String version = Long.toString(RANDOM.nextLong());
-        return GroupAndName.of("anonymousGroup:anonymousName").toCoordinate(version);
+        return JkModuleId.of("anonymousGroup:anonymousName").toCoordinate(version);
     }
 
 
@@ -211,7 +211,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
     private static class IvyTreeResolver {
 
         // parent to children parentChildMap
-        private final Map<GroupAndName, List<JkModuleNodeInfo>> parentChildMap = new HashMap<>();
+        private final Map<JkModuleId, List<JkModuleNodeInfo>> parentChildMap = new HashMap<>();
 
         IvyTreeResolver(Iterable<IvyNode> nodes, IvyArtifactContainer artifactContainer) {
 
@@ -220,14 +220,14 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                 if (node.isCompletelyBlacklisted()) {
                     continue;
                 }
-                final GroupAndName groupAndName = GroupAndName.of(node.getId().getOrganisation()
+                final JkModuleId jkModuleId = JkModuleId.of(node.getId().getOrganisation()
                         + ":" + node.getId().getName());
                 final JkVersion resolvedVersion = JkVersion.of(node.getResolvedId().getRevision());
                 final Set<String> rootConfigurations = JkUtilsIterable.setOf(node.getRootModuleConfigurations());
 
                 List<Path> artifacts;
                 if (!node.isCompletelyEvicted()) {
-                    artifacts = artifactContainer.getArtifacts(groupAndName.toCoordinate(resolvedVersion.getValue()));
+                    artifacts = artifactContainer.getArtifacts(jkModuleId.toCoordinate(resolvedVersion.getValue()));
                 } else {
                     artifacts = new LinkedList<>();
                 }
@@ -237,24 +237,24 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
                     final JkCoordinate parent = IvyTranslatorToDependency
                             .toJkCoordinate(caller.getModuleRevisionId());
                     final List<JkModuleNodeInfo> list = parentChildMap.computeIfAbsent(
-                            parent.getGroupAndName(), k -> new LinkedList<>());
+                            parent.getModuleId(), k -> new LinkedList<>());
                     final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
                     final Set<String> masterConfigurations = JkUtilsIterable.setOf(
                             dependencyDescriptor.getModuleConfigurations());
                     final JkVersion version = JkVersion.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());
-                    final JkModuleNodeInfo moduleNodeInfo  = JkModuleNodeInfo.of(groupAndName, version,
+                    final JkModuleNodeInfo moduleNodeInfo  = JkModuleNodeInfo.of(jkModuleId, version,
                             masterConfigurations, rootConfigurations, resolvedVersion, artifacts);
-                    if (!containsSame(list, groupAndName)) {
+                    if (!containsSame(list, jkModuleId)) {
                         list.add(moduleNodeInfo);
                     }
                 }
             }
         }
 
-        private static boolean containsSame(List<JkModuleNodeInfo> list, GroupAndName moduleId) {
+        private static boolean containsSame(List<JkModuleNodeInfo> list, JkModuleId moduleId) {
             for (final JkModuleNodeInfo moduleNodeInfo : list) {
-                if (moduleNodeInfo.getGroupAndName().equals(moduleId)) {
+                if (moduleNodeInfo.getModuleId().equals(moduleId)) {
                     return true;
                 }
             }
@@ -262,11 +262,11 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         }
 
         JkResolvedDependencyNode createNode(JkModuleNodeInfo holder) {
-            if (parentChildMap.get(holder.getGroupAndName()) == null || holder.isEvicted()) {
+            if (parentChildMap.get(holder.getModuleId()) == null || holder.isEvicted()) {
                 return JkResolvedDependencyNode.ofModuleDep(holder, new LinkedList<>());
             }
 
-            List<JkResolvedDependencyNode.JkModuleNodeInfo> moduleNodeInfos = parentChildMap.get(holder.getGroupAndName());
+            List<JkResolvedDependencyNode.JkModuleNodeInfo> moduleNodeInfos = parentChildMap.get(holder.getModuleId());
             if (moduleNodeInfos == null) {
                 moduleNodeInfos = new LinkedList<>();
             }

@@ -152,20 +152,20 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
         builder.append("Defined Artifacts : " + artifactProducer.getArtifactIds());
         JkMavenPublication mavenPublication = publication.getMaven();
-        if (mavenPublication.getGroupAndName() != null) {
+        if (mavenPublication.getModuleId() != null) {
             builder
                 .append("Publish Maven repositories : " + mavenPublication.getPublishRepos()  + "\n")
                 .append("Published Maven Module & version : " +
-                        mavenPublication.getGroupAndName().toCoordinate(mavenPublication.getVersion()) + "\n")
+                        mavenPublication.getModuleId().toCoordinate(mavenPublication.getVersion()) + "\n")
                 .append("Published Maven Dependencies :");
             mavenPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
         }
         JkIvyPublication ivyPublication = publication.getIvy();
-        if (ivyPublication.getGroupAndName() != null) {
+        if (ivyPublication.getModuleId() != null) {
             builder
                     .append("Publish Ivy repositories : " + ivyPublication.getRepos()  + "\n")
                     .append("Published Ivy Module & version : " +
-                            ivyPublication.getGroupAndName().toCoordinate(mavenPublication.getVersion()) + "\n")
+                            ivyPublication.getModuleId().toCoordinate(mavenPublication.getVersion()) + "\n")
                     .append("Published Ivy Dependencies :");
             ivyPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
         }
@@ -209,8 +209,8 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     }
 
     private Path getArtifactPath(JkArtifactId artifactId) {
-        JkCoordinate.GroupAndName groupAndName = publication.getGroupAndName();
-        String fileBaseName = groupAndName != null ? groupAndName.getDotNotation()
+        JkModuleId jkModuleId = publication.getModuleId();
+        String fileBaseName = jkModuleId != null ? jkModuleId.getDotNotation()
                 : baseDir.toAbsolutePath().getFileName().toString();
         return baseDir.resolve(outputDir).resolve(artifactId.toFileName(fileBaseName));
     }

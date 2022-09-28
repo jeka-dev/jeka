@@ -117,7 +117,7 @@ final class CommandLine {
             boolean specifiedVersion = !coordinateDependency.getCoordinate().hasUnspecifiedVersion();
             if (specifiedVersion) {
                 return coordinateDependency;
-            } else if (coordinateDependency.getCoordinate().getGroupAndName().getGroup().equals("dev.jeka")) {
+            } else if (coordinateDependency.getCoordinate().getModuleId().getGroup().equals("dev.jeka")) {
                 coordinateDependency = coordinateDependency.withVersion(JkVersion.of(JkInfo.getJekaVersion()));
                 return coordinateDependency;
             } else {

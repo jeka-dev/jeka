@@ -1,7 +1,7 @@
 package dev.jeka.core.integrationtest.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
@@ -44,7 +44,7 @@ public class QualifiedDependenciesResolutionIT {
         JkResolveResult resolveResult = resolver.resolve(qdeps, JkResolutionParameters.of());
         assertTrue(resolveResult.contains(JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(GUAVA));
-        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getGroupAndNames().size());
+        assertEquals(2, resolveResult.getDependencyTree().getResolvedVersions().getModuleIds().size());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class QualifiedDependenciesResolutionIT {
 
         JkResolvedDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredConfigurations().isEmpty());
-        assertEquals(holder.getGroupAndName(), tree.getModuleInfo().getGroupAndName());
+        assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(5, tree.getChildren().size());
 
         JkResolvedDependencyNode file0Node = tree.getChildren().get(0);
@@ -77,8 +77,8 @@ public class QualifiedDependenciesResolutionIT {
         assertEquals(expected, file0Node.getResolvedFiles());
 
         JkResolvedDependencyNode starterwebNode = tree.getChildren().get(1);
-        assertEquals(GroupAndName.of("org.springframework.boot:spring-boot-starter-web"),
-                starterwebNode.getModuleInfo().getGroupAndName());
+        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"),
+                starterwebNode.getModuleInfo().getModuleId());
 
         JkResolvedDependencyNode file1Node = tree.getChildren().get(2);
         List<Path> expected1 = new LinkedList<>();
@@ -86,7 +86,7 @@ public class QualifiedDependenciesResolutionIT {
         assertEquals(expected1, file1Node.getResolvedFiles());
 
         JkResolvedDependencyNode jsonRpcNode = tree.getChildren().get(3);
-        assertEquals(GroupAndName.of("com.github.briandilley.jsonrpc4j:jsonrpc4j"), jsonRpcNode.getModuleInfo().getGroupAndName());
+        assertEquals(JkModuleId.of("com.github.briandilley.jsonrpc4j:jsonrpc4j"), jsonRpcNode.getModuleInfo().getModuleId());
 
         JkResolvedDependencyNode file2Node = tree.getChildren().get(4);
         List<Path> expected2 = new LinkedList<>();
@@ -100,7 +100,7 @@ public class QualifiedDependenciesResolutionIT {
 
         root = tree.getModuleInfo();
         assertTrue(root.getDeclaredConfigurations().isEmpty());
-        assertEquals(holder.getGroupAndName(), tree.getModuleInfo().getGroupAndName());
+        assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(5, tree.getChildren().size());
     }
 
@@ -120,12 +120,12 @@ public class QualifiedDependenciesResolutionIT {
 
         JkResolvedDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
         assertTrue(root.getDeclaredConfigurations().isEmpty());
-        assertEquals(holder.getGroupAndName(), tree.getModuleInfo().getGroupAndName());
+        assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
         assertEquals(3, tree.getChildren().size());
 
         JkResolvedDependencyNode starterwebNode = tree.getChildren().get(0);
-        assertEquals(GroupAndName.of("org.springframework.boot:spring-boot-starter-web"),
-                starterwebNode.getModuleInfo().getGroupAndName());
+        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"),
+                starterwebNode.getModuleInfo().getModuleId());
         assertEquals(2, starterwebNode.getModuleInfo().getDeclaredConfigurations().size());
         assertTrue(starterwebNode.getModuleInfo().getDeclaredConfigurations().contains("compile"));
         assertTrue(starterwebNode.getModuleInfo().getDeclaredConfigurations().contains("runtime"));
@@ -136,7 +136,7 @@ public class QualifiedDependenciesResolutionIT {
         assertTrue(scopes.contains("compile"));
         assertTrue(scopes.contains("runtime"));
 
-        List<JkResolvedDependencyNode> snakeYamlNodes = starterNode.getChildren(GroupAndName.of("org.yaml:snakeyaml"));
+        List<JkResolvedDependencyNode> snakeYamlNodes = starterNode.getChildren(JkModuleId.of("org.yaml:snakeyaml"));
         assertEquals(1, snakeYamlNodes.size());
         JkResolvedDependencyNode snakeYamlNode = snakeYamlNodes.get(0);
         assertEquals(1, snakeYamlNode.getModuleInfo().getDeclaredConfigurations().size());
@@ -145,10 +145,10 @@ public class QualifiedDependenciesResolutionIT {
 
         assertEquals(5, starterNode.getChildren().size());
 
-        List<JkResolvedDependencyNode> springCoreNodes = starterNode.getChildren(GroupAndName.of("org.springframework:spring-core"));
+        List<JkResolvedDependencyNode> springCoreNodes = starterNode.getChildren(JkModuleId.of("org.springframework:spring-core"));
         assertEquals(1, springCoreNodes.size());
         JkResolvedDependencyNode springCoreNode = springCoreNodes.get(0);
-        List<JkResolvedDependencyNode> commonLoggingNodes = springCoreNode.getChildren(GroupAndName.of("commons-logging:commons-logging"));
+        List<JkResolvedDependencyNode> commonLoggingNodes = springCoreNode.getChildren(JkModuleId.of("commons-logging:commons-logging"));
         assertEquals(1, commonLoggingNodes.size());
     }
 

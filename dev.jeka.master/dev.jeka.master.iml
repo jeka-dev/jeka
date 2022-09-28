@@ -16,5 +16,6 @@
     <orderEntry type="module" module-name="dev.jeka.plugins.jacoco" />
     <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" />
     <orderEntry type="module" module-name="dev.jeka.plugins.springboot" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.nodejs" />
   </component>
 </module>

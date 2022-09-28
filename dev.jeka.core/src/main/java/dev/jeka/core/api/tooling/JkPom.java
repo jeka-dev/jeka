@@ -114,7 +114,7 @@ public final class JkPom {
         final JkQualifiedDependencySet scopedDependencies = dependencies(dependenciesEl, getProperties());
         for (final JkCoordinateDependency coordinateDependency : scopedDependencies.getCoordinateDependencies()) {
             final JkCoordinate coordinate = JkCoordinate.of(
-                    coordinateDependency.getCoordinate().getGroupAndName(),
+                    coordinateDependency.getCoordinate().getModuleId(),
                     JkVersion.of(coordinateDependency.getCoordinate().getVersion().getValue()));
             coordinates.add(coordinate);
         }
@@ -177,7 +177,7 @@ public final class JkPom {
         final JkQualifiedDependencySet scopedDependencies = dependencies(dependenciesEl, getProperties());
         for (final JkCoordinateDependency coordinateDependency : scopedDependencies.getCoordinateDependencies()) {
             if (!coordinateDependency.getExclusions().isEmpty()) {
-                result = result.and(coordinateDependency.getCoordinate().getGroupAndName(),
+                result = result.and(coordinateDependency.getCoordinate().getModuleId(),
                         coordinateDependency.getExclusions());
             }
         }

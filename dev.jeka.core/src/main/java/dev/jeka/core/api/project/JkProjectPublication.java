@@ -121,17 +121,17 @@ public class JkProjectPublication {
         return this;
     }
 
-    public JkCoordinate.GroupAndName getGroupAndName() {
-        return Optional.ofNullable(maven.getGroupAndName()).orElseGet(ivy::getGroupAndName);
+    public JkModuleId getModuleId() {
+        return Optional.ofNullable(maven.getModuleId()).orElseGet(ivy::getModuleId);
     }
 
     public JkVersion getVersion() {
         return Optional.ofNullable(maven.getVersion()).orElseGet(ivy::getVersion);
     }
 
-    public JkProjectPublication setGroupAndName(String groupAndName) {
-        this.maven.setModuleId(groupAndName);
-        this.ivy.setGroupAndName(groupAndName);
+    public JkProjectPublication setModuleId(String moduleId) {
+        this.maven.setModuleId(moduleId);
+        this.ivy.setModuleId(moduleId);
         return this;
     }
 

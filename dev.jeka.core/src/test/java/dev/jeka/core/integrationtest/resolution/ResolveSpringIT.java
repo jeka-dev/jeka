@@ -1,6 +1,6 @@
 package dev.jeka.core.integrationtest.resolution;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
@@ -20,7 +20,7 @@ public class ResolveSpringIT {
 
     private static final String SPRINGBOOT_STARTER = "org.springframework.boot:spring-boot-starter:1.5.13.RELEASE";
 
-    private static final GroupAndName SLF4J_API = GroupAndName.of("org.slf4j:slf4j-api");
+    private static final JkModuleId SLF4J_API = JkModuleId.of("org.slf4j:slf4j-api");
 
     @Test
     public void resolveCompile() {
@@ -29,7 +29,7 @@ public class ResolveSpringIT {
         System.out.println(result.getDependencyTree().toStringTree());
         result.getFiles().forEach(System.out::println);
         final List<JkResolvedDependencyNode> slf4japiNodes = result.getDependencyTree().toFlattenList().stream()
-                .filter(node -> node.getModuleInfo().getGroupAndName().equals(SLF4J_API)).collect(Collectors.toList());
+                .filter(node -> node.getModuleInfo().getModuleId().equals(SLF4J_API)).collect(Collectors.toList());
         for (final JkResolvedDependencyNode slf4japiNode : slf4japiNodes) {
             System.out.println("---------------------");
             System.out.println(slf4japiNode);
@@ -51,7 +51,7 @@ public class ResolveSpringIT {
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", JkTransitivity.RUNTIME);
         final JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
-        final Set<GroupAndName> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getGroupAndNames();
+        final Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
 
         // According presence or absence of cache it could be 24 or 25
         assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() >= 24);

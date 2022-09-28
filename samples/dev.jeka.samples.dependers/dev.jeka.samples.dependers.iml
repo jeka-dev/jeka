@@ -14,67 +14,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/bundles/guava-22.0.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-22.0-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.guava/guava/jars/guava-22.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.code.findbugs/jsr305/jars/jsr305-1.3.9.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$JEKA_USER_HOME$/cache/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="module" module-name="dev.jeka.samples.basic" exported="" />
     <orderEntry type="module" module-name="dev.jeka.core" scope="TEST" />
   </component>

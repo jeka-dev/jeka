@@ -88,7 +88,7 @@ public class JavaProjectBuildIT {
                         .and("org.mockito:mockito-core:2.10.0")
                 ).getProject();
         project.getPublication().getIvy()
-                .setGroupAndName("my:module")
+                .setModuleId("my:module")
                 .setVersion("0.1");
         project.getArtifactProducer().makeAllArtifacts();
         project.getPublication().getIvy().publishLocal();

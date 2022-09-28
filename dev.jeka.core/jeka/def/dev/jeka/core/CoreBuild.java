@@ -88,7 +88,7 @@ public class CoreBuild extends JkBean {
                 .__
             .__
             .getPublication()
-                .setGroupAndName("dev.jeka:jeka-core")
+                .setModuleId("dev.jeka:jeka-core")
                 .setVersion(JkGitProcess.of()::getVersionFromTag)
                 .getMaven()
                     .getPomMetadata()

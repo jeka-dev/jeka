@@ -1,20 +1,19 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
+import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.nio.file.Path;
 import java.util.function.UnaryOperator;
-
-import static dev.jeka.core.api.depmanagement.JkPopularModules.GUAVA;
 
 /**
  * When publishing on a public repository as Maven central, you need to provide extra metadata information, checksum
@@ -56,7 +55,7 @@ public class SignedArtifactsJkBean extends JkBean {
     private void configure(JkProject project) {
         project.simpleFacade()
             .configureCompileDeps(deps -> deps
-                .and(GUAVA.version("30.0-jre"))
+                .and(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"))
             )
             .configureTestDeps(deps -> deps
                 .and(SimpleProjectJkBean.JUNIT5)

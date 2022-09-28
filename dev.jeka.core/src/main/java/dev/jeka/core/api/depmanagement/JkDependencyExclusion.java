@@ -10,11 +10,11 @@ import java.util.Optional;
  */
 public final class JkDependencyExclusion {
 
-    private final JkCoordinate.GroupAndName moduleId;
+    private final JkModuleId moduleId;
 
     private final JkCoordinate.JkArtifactSpecification artifactSpecification;
 
-    private JkDependencyExclusion(JkCoordinate.GroupAndName moduleId,
+    private JkDependencyExclusion(JkModuleId moduleId,
                                   JkCoordinate.JkArtifactSpecification artifactSpecification) {
         super();
         this.moduleId = moduleId;
@@ -25,7 +25,7 @@ public final class JkDependencyExclusion {
      * Creates an exclusion of the specified module.
      */
     @SuppressWarnings("unchecked")
-    public static JkDependencyExclusion of(JkCoordinate.GroupAndName moduleId) {
+    public static JkDependencyExclusion of(JkModuleId moduleId) {
         return new JkDependencyExclusion(moduleId, null);
     }
 
@@ -33,14 +33,14 @@ public final class JkDependencyExclusion {
      * Creates an exclusion of the specified module.
      */
     public static JkDependencyExclusion of(String group, String name) {
-        return of(JkCoordinate.GroupAndName.of(group, name));
+        return of(JkModuleId.of(group, name));
     }
 
     /**
      * Creates an exclusion of the specified module.
      */
-    public static JkDependencyExclusion of(String groupAndName) {
-        return of(JkCoordinate.GroupAndName.of(groupAndName));
+    public static JkDependencyExclusion of(String moduleId) {
+        return of(JkModuleId.of(moduleId));
     }
 
     public JkDependencyExclusion withClassierAndType(String classifier, String type) {
@@ -58,7 +58,7 @@ public final class JkDependencyExclusion {
     /**
      * Returns the module id to exclude.
      */
-    public JkCoordinate.GroupAndName getModuleId() {
+    public JkModuleId getModuleId() {
         return moduleId;
     }
 

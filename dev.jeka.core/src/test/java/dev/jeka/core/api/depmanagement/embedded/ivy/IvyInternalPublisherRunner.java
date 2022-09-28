@@ -25,7 +25,7 @@ public class IvyInternalPublisherRunner {
     public static void testPublishIvy() throws IOException {
         final IvyInternalPublisher jkIvyInternalPublisher = IvyInternalPublisher.of(ivyRepo().toSet(), Paths.get("jeka/output/test-out"));
         final JkCoordinate coordinate =
-                JkCoordinate.GroupAndName.of("mygroup:mymodule").toCoordinate("myVersion");
+                JkModuleId.of("mygroup:mymodule").toCoordinate("myVersion");
         final JkIvyPublication ivyPublication = JkIvyPublication.of()
                 .setMainArtifact(sampleJarfile(), "compile", "test");
         final JkQualifiedDependencySet deps = JkQualifiedDependencySet.of().of()

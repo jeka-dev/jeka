@@ -1,13 +1,13 @@
-import dev.jeka.core.api.depmanagement.JkPopularModules;
+import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
-import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
 import dev.jeka.plugins.sonarqube.JkSonarqube;
+import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
 
 /**
  * As there we have no embedded sonar server, this sample cannot be run automatically.
@@ -29,7 +29,7 @@ class SonarqubeSampleBuild extends JkBean {
                     .and("com.github.djeang:vincer-dom:1.4.0")
                 )
                 .configureTestDeps(deps -> deps
-                    .and(JkPopularModules.JUNIT_5 + ":5.8.2")
+                    .and(JkPopularLibs.JUNIT_5 + ":5.8.2")
                 )
         );
         sonarqubePlugin.provideTestLibs = true;

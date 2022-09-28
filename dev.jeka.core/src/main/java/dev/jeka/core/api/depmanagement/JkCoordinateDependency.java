@@ -47,12 +47,12 @@ public final class JkCoordinateDependency implements JkFileDependency.JkTransiti
         return new JkCoordinateDependency(coordinate, null, Collections.emptyList(),  null);
     }
 
-    public static JkCoordinateDependency of(JkCoordinate.GroupAndName groupAndName) {
-        return of(groupAndName.toCoordinate(JkVersion.UNSPECIFIED));
+    public static JkCoordinateDependency of(JkModuleId jkModuleId) {
+        return of(jkModuleId.toCoordinate(JkVersion.UNSPECIFIED));
     }
 
-    public static JkCoordinateDependency of(String groupAndName, String version) {
-        return of(JkCoordinate.GroupAndName.of(groupAndName).toCoordinate(version));
+    public static JkCoordinateDependency of(String moduleId, String version) {
+        return of(JkModuleId.of(moduleId).toCoordinate(version));
     }
 
     public static JkCoordinateDependency of(String description) {
@@ -94,8 +94,8 @@ public final class JkCoordinateDependency implements JkFileDependency.JkTransiti
      * Returns a JkModuleDependency identical to this one but adding the
      * specified exclusion.
      */
-    public JkCoordinateDependency andExclusion(String groupAndName) {
-        return andExclusions(JkDependencyExclusion.of(groupAndName));
+    public JkCoordinateDependency andExclusion(String moduleId) {
+        return andExclusions(JkDependencyExclusion.of(moduleId));
     }
 
     /**
@@ -161,7 +161,7 @@ public final class JkCoordinateDependency implements JkFileDependency.JkTransiti
     public boolean matches(JkDependency other) {
         if (other instanceof JkCoordinateDependency) {
             JkCoordinateDependency moduleDependency = (JkCoordinateDependency) other;
-            return this.coordinate.getGroupAndName().equals(moduleDependency.coordinate.getGroupAndName());
+            return this.coordinate.getModuleId().equals(moduleDependency.coordinate.getModuleId());
         }
         return false;
     }

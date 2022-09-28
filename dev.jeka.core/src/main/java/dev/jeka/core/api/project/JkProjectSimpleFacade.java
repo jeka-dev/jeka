@@ -171,7 +171,7 @@ public class JkProjectSimpleFacade {
      *                 Must be formatted as 'group:artifactId'
      */
     public JkProjectSimpleFacade setPublishedModuleId(String moduleId) {
-        project.getPublication().setGroupAndName(moduleId);
+        project.getPublication().setModuleId(moduleId);
         return this;
     }
 

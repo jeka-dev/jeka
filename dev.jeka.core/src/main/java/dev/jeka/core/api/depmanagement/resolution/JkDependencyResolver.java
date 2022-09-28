@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -208,20 +208,20 @@ public final class JkDependencyResolver<T> {
     /**
      * Returns an alphabetical sorted list of module ids present in these repositories for the specified groupId.
      */
-    public List<String> searchGroupAndNames(String groupId) {
+    public List<String> searchModuleIds(String groupId) {
         return JkInternalDependencyResolver.of(this.repos).searchModules(groupId);
     }
 
     /**
      * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
      */
-    public List<String> searchVersions(GroupAndName groupAndName) {
-        return JkInternalDependencyResolver.of(this.repos).searchVersions(groupAndName).stream()
+    public List<String> searchVersions(JkModuleId jkModuleId) {
+        return JkInternalDependencyResolver.of(this.repos).searchVersions(jkModuleId).stream()
                 .sorted(JkVersion.VERSION_COMPARATOR).collect(Collectors.toList());
     }
 
-    public List<String> searchVersions(String groupAndName) {
-        return searchVersions(GroupAndName.of(groupAndName));
+    public List<String> searchVersions(String moduleId) {
+        return searchVersions(JkModuleId.of(moduleId));
     }
 
 

@@ -228,12 +228,12 @@ public final class JkSonarqube {
         if (resolveResult.getErrorReport().hasErrors()) {
             StringBuilder sb = new StringBuilder();
             sb.append("Cannot find dependency " + coordinate + "\n");
-            List<String> versions = dependencyResolver.searchVersions(coordinate.getGroupAndName());
+            List<String> versions = dependencyResolver.searchVersions(coordinate.getModuleId());
             sb.append("Known versions are : \n");
             versions.forEach(name -> sb.append(name + "\n"));
             throw new IllegalStateException(sb.toString());
         }
-        JkVersion effectiveVersion = resolveResult.getVersionOf(coordinate.getGroupAndName());  // Get effective version if specified one is '+'
+        JkVersion effectiveVersion = resolveResult.getVersionOf(coordinate.getModuleId());  // Get effective version if specified one is '+'
         JkLog.info("Run sonar scanner " + effectiveVersion);
         return resolveResult.getFiles().getEntries().get(0);
     }

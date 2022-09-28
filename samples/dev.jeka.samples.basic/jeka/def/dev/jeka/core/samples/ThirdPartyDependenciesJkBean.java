@@ -3,16 +3,16 @@ package dev.jeka.core.samples;
 import com.google.common.base.MoreObjects;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
 
-import static dev.jeka.core.api.depmanagement.JkPopularModules.*;
+import static dev.jeka.core.api.depmanagement.JkPopularLibs.*;
 
 /**
  * This build demonstrates how to use 3rd party dependencies into your build class.
@@ -29,13 +29,13 @@ public class ThirdPartyDependenciesJkBean extends JkBean {
     private void configure(JkProject project) {
         project.simpleFacade()
             .configureCompileDeps(deps -> deps
-                .and(JAVAX_SERVLET_API.version("3.1.0"))
-                .and(GUAVA.version("30.0-jre")))
+                .and(JAVAX_SERVLET_API.toCoordinate("3.1.0"))
+                .and(GUAVA.toCoordinate("30.0-jre")))
             .configureRuntimeDeps(compileDeps -> compileDeps
                 .minus(JAVAX_SERVLET_API))
             .configureTestDeps(deps -> deps
                 .and(SimpleProjectJkBean.JUNIT5)
-                .and(MOCKITO_ALL.version("1.10.19")));
+                .and(MOCKITO_ALL.toCoordinate("1.10.19")));
     }
 
     @JkDoc("Performs some load test using http client")

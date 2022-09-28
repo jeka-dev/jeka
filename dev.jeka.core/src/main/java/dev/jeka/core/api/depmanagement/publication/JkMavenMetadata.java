@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement.publication;
 
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata.Versioning.JkSnapshot;
@@ -32,8 +33,8 @@ public final class JkMavenMetadata {
 
     public static JkMavenMetadata of(JkCoordinate coordinate, String timestamp) {
         final JkMavenMetadata metadata = new JkMavenMetadata();
-        metadata.groupId = coordinate.getGroupAndName().getGroup();
-        metadata.artifactId = coordinate.getGroupAndName().getName();
+        metadata.groupId = coordinate.getModuleId().getGroup();
+        metadata.artifactId = coordinate.getModuleId().getName();
         metadata.modelVersion = "1.1.0";
         metadata.version = coordinate.getVersion().getValue();
         metadata.versioning = new Versioning();
@@ -41,10 +42,10 @@ public final class JkMavenMetadata {
         return metadata;
     }
 
-    public static JkMavenMetadata of(JkCoordinate.GroupAndName groupAndName) {
+    public static JkMavenMetadata of(JkModuleId jkModuleId) {
         final JkMavenMetadata metadata = new JkMavenMetadata();
-        metadata.groupId = groupAndName.getGroup();
-        metadata.artifactId = groupAndName.getName();
+        metadata.groupId = jkModuleId.getGroup();
+        metadata.artifactId = jkModuleId.getName();
         metadata.modelVersion = "1.1.0";
         return metadata;
     }

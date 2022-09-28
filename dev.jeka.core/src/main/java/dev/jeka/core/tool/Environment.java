@@ -61,6 +61,8 @@ class Environment {
      */
     static class StandardOptions {
 
+        Set<String> acceptedOptions = new HashSet<>();
+
         boolean logIvyVerbose;
 
         boolean logVerbose;
@@ -121,6 +123,7 @@ class Environment {
 
         private <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... optionNames) {
             for (String name : optionNames) {
+                acceptedOptions.add(name);
                 this.names.add(name);
                 if (map.containsKey(name)) {
                     String stringValue = map.get(name);
@@ -137,6 +140,7 @@ class Environment {
             }
             return defaultValue;
         }
+
     }
 
     static Map<String, String> projectCmdProperties(Path projectDir) {

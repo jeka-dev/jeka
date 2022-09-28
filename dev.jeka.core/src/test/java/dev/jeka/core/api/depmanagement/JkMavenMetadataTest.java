@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
 import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,7 +31,7 @@ public class JkMavenMetadataTest {
 
     @Test
     public void testAddRelease() throws UnsupportedEncodingException {
-        final JkMavenMetadata mavenMetadata = JkMavenMetadata.of(GroupAndName.of("dev.jeka", "core"));
+        final JkMavenMetadata mavenMetadata = JkMavenMetadata.of(JkModuleId.of("dev.jeka", "core"));
         mavenMetadata.addVersion("1.3.2", "20151023145532");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         mavenMetadata.output(outputStream);
@@ -48,7 +47,7 @@ public class JkMavenMetadataTest {
 
     @Test
     public void testAddSnapshot() throws UnsupportedEncodingException {
-        final JkMavenMetadata mavenMetadata = JkMavenMetadata.of(GroupAndName.of("dev.jeka", "core"));
+        final JkMavenMetadata mavenMetadata = JkMavenMetadata.of(JkModuleId.of("dev.jeka", "core"));
         mavenMetadata.addVersion("1.3.2-SNAPSHOT", "20151023145532");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         mavenMetadata.output(outputStream);

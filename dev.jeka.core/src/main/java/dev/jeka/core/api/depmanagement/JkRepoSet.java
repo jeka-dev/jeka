@@ -122,6 +122,10 @@ public final class JkRepoSet {
         return file.toPath();
     }
 
+    public Path get(String coordinate) {
+        return get(JkCoordinate.of(coordinate));
+    }
+
     public JkRepoSet withDefaultSigner(UnaryOperator<Path> signer) {
         List<JkRepo> reposCopy = repos.stream()
                 .map(repo -> {

@@ -1,10 +1,10 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.crypto.gpg.JkGpg;
+import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkProjectDependencies;
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkVersionedModule;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.artifact.JkSuppliedFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
@@ -96,7 +96,7 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkGpg pgp = JkGpg.ofSecretRing(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd");
         JkRepo ivyRepo = JkRepo.of(getOutputDir().resolve("test-output/ivy-repo"));
         JkRepo mavenRepo = JkRepo.of(getOutputDir().resolve("test-output/maven-repo"));
-        JkVersionedModule versionedModule = JkVersionedModule.of("myGroup:myName:0.2.2-SNAPSHOT");
+        JkCoordinateDependency versionedModule = JkCoordinateDependency.of("myGroup:myName:0.2.2-SNAPSHOT");
         JkArtifactProducer artifactProducer = JkSuppliedFileArtifactProducer.of()
                 .putMainArtifact(jarFile, this::jar)
                 .putArtifact(JkProject.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
@@ -104,13 +104,13 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)
                 .configureDependencies(deps -> prodDependencies)
-                .setModuleId(versionedModule.getModuleId().toString())
-                .setVersion(versionedModule.getVersion().getValue())
+                .setModuleId(versionedModule.getCoordinate().getModuleId().toString())
+                .setVersion(versionedModule.getCoordinate().getVersion().getValue())
                 .addRepos(mavenRepo.getPublishConfig().setSigner(pgp.getSigner("")).__)
                 .publish();
         JkIvyPublication.of()
-                .setModuleId(versionedModule.getModuleId().toString())
-                .setVersion(versionedModule.getVersion().getValue())
+                .setModuleId(versionedModule.getCoordinate().getModuleId().toString())
+                .setVersion(versionedModule.getCoordinate().getVersion().getValue())
                 .setDependencies(JkProjectDependencies.of(prodDependencies, prodDependencies, testDependencies))
                 .addArtifacts(artifactProducer)
                 .addRepos(ivyRepo)

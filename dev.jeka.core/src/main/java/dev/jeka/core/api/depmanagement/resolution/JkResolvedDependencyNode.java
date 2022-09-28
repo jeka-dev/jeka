@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -59,7 +59,7 @@ public class JkResolvedDependencyNode {
         final Set<JkFileDependency> addedFileDeps = new HashSet<>();
         for (final JkResolvedDependencyNode node : this.children) {
                     if (node.isModuleNode()) {
-                        addFileDepsToTree(dependencies, result, addedFileDeps, node.groupAndName());
+                        addFileDepsToTree(dependencies, result, addedFileDeps, node.getModuleId());
                 result.add(node);
             }
         }
@@ -116,8 +116,8 @@ public class JkResolvedDependencyNode {
      * Returns <code>true</code> if this node or one of its descendant stand for the specified module.
      * Evicted nodes are not taken in account.
      */
-    public boolean contains(GroupAndName moduleId) {
-        if (this.isModuleNode() && moduleId.equals(this.getModuleInfo().getGroupAndName()) && !this.getModuleInfo().isEvicted()) {
+    public boolean contains(JkModuleId moduleId) {
+        if (this.isModuleNode() && moduleId.equals(this.getModuleInfo().getModuleId()) && !this.getModuleInfo().isEvicted()) {
             return true;
         }
         for (final JkResolvedDependencyNode child : this.children) {
@@ -146,7 +146,7 @@ public class JkResolvedDependencyNode {
     private Set<JkCoordinate> resolvedModules(boolean root) {
         final Set<JkCoordinate> result = new HashSet<>();
         if (!root && this.isModuleNode() && !this.getModuleInfo().isEvicted()) {
-            result.add(this.getModuleInfo().groupAndName.toCoordinate(this.getModuleInfo().resolvedVersion.getValue()));
+            result.add(this.getModuleInfo().jkModuleId.toCoordinate(this.getModuleInfo().resolvedVersion.getValue()));
         }
         for (final JkResolvedDependencyNode child : this.children) {
             result.addAll(child.resolvedModules(false));
@@ -157,10 +157,10 @@ public class JkResolvedDependencyNode {
     /**
      * Returns the children nodes for this node having the specified getModuleId.
      */
-    public List<JkResolvedDependencyNode> getChildren(GroupAndName groupAndName) {
+    public List<JkResolvedDependencyNode> getChildren(JkModuleId jkModuleId) {
         final List<JkResolvedDependencyNode> result = new LinkedList<>();
         for (final JkResolvedDependencyNode child : getChildren()) {
-            if (child.getModuleInfo().getGroupAndName().equals(groupAndName)) {
+            if (child.getModuleInfo().getModuleId().equals(jkModuleId)) {
                 result.add(child);
             }
         }
@@ -170,9 +170,9 @@ public class JkResolvedDependencyNode {
     /**
      * Returns the getChild node having the specified getModuleId.
      */
-    public JkResolvedDependencyNode getChild(GroupAndName groupAndName) {
+    public JkResolvedDependencyNode getChild(JkModuleId jkModuleId) {
         for (final JkResolvedDependencyNode node : children) {
-            if (node.groupAndName().equals(groupAndName)) {
+            if (node.getModuleId().equals(jkModuleId)) {
                 return node;
             }
         }
@@ -186,7 +186,7 @@ public class JkResolvedDependencyNode {
     public JkResolvedDependencyNode withMerging(JkResolvedDependencyNode other) {
         final List<JkResolvedDependencyNode> resultChildren = new LinkedList<>(this.children);
         for (final JkResolvedDependencyNode otherNodeChild : other.children) {
-            if (!otherNodeChild.isModuleNode() || !directChildrenContains(otherNodeChild.getModuleInfo().getGroupAndName())) {
+            if (!otherNodeChild.isModuleNode() || !directChildrenContains(otherNodeChild.getModuleInfo().getModuleId())) {
                 resultChildren.add(otherNodeChild);
             }
         }
@@ -194,8 +194,8 @@ public class JkResolvedDependencyNode {
     }
 
     private static void addFileDepsToTree(List<? extends JkDependency> dependencies, List<JkResolvedDependencyNode> result,
-                                          Set<JkFileDependency> addedFileDeps, GroupAndName groupAndName) {
-        for (final JkDependency dependency : depsUntilLast(dependencies, groupAndName)) {
+                                          Set<JkFileDependency> addedFileDeps, JkModuleId jkModuleId) {
+        for (final JkDependency dependency : depsUntilLast(dependencies, jkModuleId)) {
             final JkFileDependency fileDep = (JkFileDependency) dependency;
             if (!addedFileDeps.contains(fileDep)) {
                 final JkResolvedDependencyNode fileNode = JkResolvedDependencyNode.ofFileDep(fileDep, Collections.emptySet());
@@ -220,21 +220,21 @@ public class JkResolvedDependencyNode {
     /**
      * Returns first node descendant of this one standing for the specified getModuleId, deep first.
      */
-    public JkResolvedDependencyNode getFirst(GroupAndName groupAndName) {
-        if (this.isModuleNode() && groupAndName.equals(this.groupAndName())) {
+    public JkResolvedDependencyNode getFirst(JkModuleId jkModuleId) {
+        if (this.isModuleNode() && jkModuleId.equals(this.getModuleId())) {
             return this;
         }
         for (final JkResolvedDependencyNode child : this.toFlattenList()) {
-            if (child.isModuleNode() && groupAndName.equals(child.groupAndName())) {
+            if (child.isModuleNode() && jkModuleId.equals(child.getModuleId())) {
                 return child;
             }
         }
         return null;
     }
 
-    private boolean directChildrenContains(GroupAndName groupAndName) {
+    private boolean directChildrenContains(JkModuleId jkModuleId) {
         for (final JkResolvedDependencyNode dependencyNode : this.children) {
-            if (dependencyNode.isModuleNode() && dependencyNode.groupAndName().equals(groupAndName)) {
+            if (dependencyNode.isModuleNode() && dependencyNode.getModuleId().equals(jkModuleId)) {
                 return true;
             }
         }
@@ -252,15 +252,15 @@ public class JkResolvedDependencyNode {
         return Collections.singletonList(this.getModuleInfo().toString());
     }
 
-    private List<String> toStrings(boolean showRoot, int indentLevel, Set<GroupAndName> extendedModules) {
+    private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> extendedModules) {
         final List<String> result = new LinkedList<>();
         if (showRoot) {
             final String label = nodeInfo.toString();
             result.add(JkUtilsString.repeat(INDENT, indentLevel) + label);
         }
-        if (this.nodeInfo == null || (this.isModuleNode() && !extendedModules.contains(this.groupAndName()))) {
+        if (this.nodeInfo == null || (this.isModuleNode() && !extendedModules.contains(this.getModuleId()))) {
             if (this.nodeInfo != null) {
-                extendedModules.add(this.groupAndName());
+                extendedModules.add(this.getModuleId());
             }
             for (final JkResolvedDependencyNode child : children) {
                 result.addAll(child.toStrings(true, indentLevel+1, extendedModules));
@@ -277,7 +277,7 @@ public class JkResolvedDependencyNode {
             element = document.createElement("dependency");
             if (nodeInfo != null && nodeInfo instanceof JkModuleNodeInfo) {
                 JkModuleNodeInfo moduleNodeInfo = (JkModuleNodeInfo) nodeInfo;
-                element.setAttribute("moduleId", moduleNodeInfo.groupAndName.toString());
+                element.setAttribute("moduleId", moduleNodeInfo.jkModuleId.toString());
                 element.setAttribute("resolvedVersion", moduleNodeInfo.resolvedVersion.getValue());
                 if (moduleNodeInfo.isEvicted()) {
                     element.setAttribute("evicted", "true");
@@ -304,8 +304,8 @@ public class JkResolvedDependencyNode {
         return builder.toString();
     }
 
-    private GroupAndName groupAndName() {
-        return getModuleInfo().getGroupAndName();
+    private JkModuleId getModuleId() {
+        return getModuleInfo().getModuleId();
     }
 
     @Override
@@ -325,7 +325,7 @@ public class JkResolvedDependencyNode {
 
         private static final long serialVersionUID = 1L;
 
-        private final GroupAndName groupAndName;
+        private final JkModuleId jkModuleId;
         private final JkVersion declaredVersion;
         private final Set<String> declaredConfigurations;  // the left conf mapping side in the caller dependency description
         private final Set<String> rootConfigurations; // configurations fetching this node to baseTree
@@ -333,14 +333,14 @@ public class JkResolvedDependencyNode {
         private final List<File> artifacts; // Path is not serializable
         private final boolean treeRoot;
 
-        JkModuleNodeInfo(GroupAndName groupAndName, JkVersion declaredVersion, Set<String> declaredConfigurations,
+        JkModuleNodeInfo(JkModuleId jkModuleId, JkVersion declaredVersion, Set<String> declaredConfigurations,
                          Set<String> rootConfigurations, JkVersion resolvedVersion, List<Path> artifacts) {
-            this(groupAndName, declaredVersion, declaredConfigurations, rootConfigurations, resolvedVersion, artifacts, false);
+            this(jkModuleId, declaredVersion, declaredConfigurations, rootConfigurations, resolvedVersion, artifacts, false);
         }
 
-        JkModuleNodeInfo(GroupAndName groupAndName, JkVersion declaredVersion, Set<String> declaredConfigurations,
+        JkModuleNodeInfo(JkModuleId jkModuleId, JkVersion declaredVersion, Set<String> declaredConfigurations,
                          Set<String> rootConfigurations, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
-            this.groupAndName = groupAndName;
+            this.jkModuleId = jkModuleId;
             this.declaredVersion = declaredVersion;
             this.declaredConfigurations = declaredConfigurations;
             this.rootConfigurations = rootConfigurations;
@@ -350,17 +350,17 @@ public class JkResolvedDependencyNode {
         }
 
         static JkModuleNodeInfo ofAnonymousRoot() {
-            return new JkModuleNodeInfo(GroupAndName.of("anonymousGroup:anonymousName"),
+            return new JkModuleNodeInfo(JkModuleId.of("anonymousGroup:anonymousName"),
                     JkVersion.UNSPECIFIED,
                     new HashSet<>(), new HashSet<>(), JkVersion.UNSPECIFIED, new LinkedList<>());
         }
 
         public static JkModuleNodeInfo ofRoot(JkCoordinate versionedCoordinate) {
-            return new JkModuleNodeInfo(versionedCoordinate.getGroupAndName(), versionedCoordinate.getVersion(),
+            return new JkModuleNodeInfo(versionedCoordinate.getModuleId(), versionedCoordinate.getVersion(),
                     new HashSet<>(), new HashSet<>(), versionedCoordinate.getVersion(), new LinkedList<>(), true);
         }
 
-        public static JkModuleNodeInfo of(GroupAndName moduleId, JkVersion declaredVersion,
+        public static JkModuleNodeInfo of(JkModuleId moduleId, JkVersion declaredVersion,
                                           Set<String> declaredConfigurations,
                                           Set<String> rootConfigurations,
                                           JkVersion resolvedVersion,
@@ -369,15 +369,15 @@ public class JkResolvedDependencyNode {
                     resolvedVersion, artifacts);
         }
 
-        public GroupAndName getGroupAndName() {
-            return groupAndName;
+        public JkModuleId getModuleId() {
+            return jkModuleId;
         }
 
         /**
-         * Shorthand for {@link #groupAndName} + {@link #getResolvedVersion()}
+         * Shorthand for {@link #jkModuleId} + {@link #getResolvedVersion()}
          */
         public JkCoordinate getResolvedVersionedModule() {
-            return groupAndName.toCoordinate(resolvedVersion.getValue());
+            return jkModuleId.toCoordinate(resolvedVersion.getValue());
         }
 
         public JkVersion getDeclaredVersion() {
@@ -404,7 +404,7 @@ public class JkResolvedDependencyNode {
             }
             final String resolvedVersionName = isEvicted() ? "(evicted)" : resolvedVersion.getValue();
             final String declaredVersionLabel = getDeclaredVersion().getValue().equals(resolvedVersionName) ? "" : " as " + getDeclaredVersion();
-            String module = groupAndName + ":" + resolvedVersion;
+            String module = jkModuleId + ":" + resolvedVersion;
             if (!declaredConfigurations.equals(Collections.singleton("default"))) {
                 module = module + " (declared " + declaredVersionLabel  + declaredConfigurations + ")";
             }
@@ -426,14 +426,14 @@ public class JkResolvedDependencyNode {
 
 
 
-    private static List<JkDependency> depsUntilLast(List<? extends JkDependency> dependencies, GroupAndName to) {
+    private static List<JkDependency> depsUntilLast(List<? extends JkDependency> dependencies, JkModuleId to) {
         final List<JkDependency> result = new LinkedList<>();
         final List<JkDependency> partialResult = new LinkedList<>();
         for (final JkDependency dependency : dependencies) {
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
-                final JkCoordinate.GroupAndName groupAndName = coordinateDependency.getCoordinate().getGroupAndName();
-                if (groupAndName.equals(to)) {
+                final JkModuleId jkModuleId = coordinateDependency.getCoordinate().getModuleId();
+                if (jkModuleId.equals(to)) {
                     result.addAll(partialResult);
                     partialResult.clear();
                 }
@@ -452,7 +452,7 @@ public class JkResolvedDependencyNode {
         if (nodeInfo instanceof JkModuleNodeInfo) {
             final JkModuleNodeInfo moduleNodeInfo = (JkModuleNodeInfo) nodeInfo;
             if (!moduleNodeInfo.treeRoot && !moduleNodeInfo.isEvicted()) {
-                result = result.and(moduleNodeInfo.groupAndName, moduleNodeInfo.resolvedVersion);
+                result = result.and(moduleNodeInfo.jkModuleId, moduleNodeInfo.resolvedVersion);
             }
         }
         for (final JkResolvedDependencyNode child : children) {

@@ -67,7 +67,7 @@ public abstract class JkBean {
      */
     protected void cleanOutput() {
         Path output = getOutputDir();
-        JkLog.info("Clean output directory " + output);
+        JkLog.info("Clean output directory " + output.toAbsolutePath().normalize());
         if (Files.exists(output)) {
             JkPathTree.of(output).deleteContent();
         }

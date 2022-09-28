@@ -24,8 +24,8 @@ class IvyTranslatorToModuleDescriptor {
     static DefaultModuleDescriptor toResolveModuleDescriptor(JkCoordinate coordinate,
                                                              JkQualifiedDependencySet dependencies) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(
-                coordinate.getGroupAndName().getGroup(),
-                coordinate.getGroupAndName().getName(),
+                coordinate.getModuleId().getGroup(),
+                coordinate.getModuleId().getName(),
                 coordinate.getVersion().getValue());
         final DefaultModuleDescriptor result = newDefaultModuleDescriptor(thisModuleRevisionId);
 
@@ -42,9 +42,9 @@ class IvyTranslatorToModuleDescriptor {
 
         // Add version overwrites for transitive dependencies
         JkVersionProvider versionProvider = dependencies.getVersionProvider();
-        for (final JkCoordinate.GroupAndName groupAndName : versionProvider.getGroupAndNames()) {
-            final JkVersion version = versionProvider.getVersionOf(groupAndName);
-            result.addDependencyDescriptorMediator(toModuleId(groupAndName),
+        for (final JkModuleId jkModuleId : versionProvider.getModuleIds()) {
+            final JkVersion version = versionProvider.getVersionOf(jkModuleId);
+            result.addDependencyDescriptorMediator(toModuleId(jkModuleId),
                     ExactOrRegexpPatternMatcher.INSTANCE,
                     new OverrideDependencyDescriptorMediator(null, version.getValue()));
         }

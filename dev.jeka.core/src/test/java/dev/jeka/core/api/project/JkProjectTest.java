@@ -88,7 +88,7 @@ public class JkProjectTest {
         Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
         Assert.assertEquals("org.mockito:mockito-core", testDependencies.getCoordinateDependencies().get(0)
-                .getCoordinate().getGroupAndName().toString());
+                .getCoordinate().getModuleId().toString());
     }
 
     @Test
@@ -126,9 +126,9 @@ public class JkProjectTest {
         Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
         Assert.assertEquals("org.mockito:mockito-core", testDependencies.getCoordinateDependencies().get(0)
-                .getCoordinate().getGroupAndName().toString());
+                .getCoordinate().getModuleId().toString());
         Assert.assertEquals("io.rest-assured:rest-assured", testDependencies.getCoordinateDependencies().get(1)
-                .getCoordinate().getGroupAndName().toString());
+                .getCoordinate().getModuleId().toString());
     }
 
     @Test
@@ -168,7 +168,7 @@ public class JkProjectTest {
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
         project.getPublication().getIvy()
-                .setGroupAndName("my:module")
+                .setModuleId("my:module")
                 .setVersion("0.1");
         System.out.println(project.getConstruction().getCompilation().getDependencies());
         JkQualifiedDependencySet publishDeps = project.getPublication().getIvy().getDependencies();

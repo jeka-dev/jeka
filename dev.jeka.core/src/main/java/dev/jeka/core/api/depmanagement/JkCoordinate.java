@@ -2,7 +2,6 @@ package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
@@ -19,19 +18,19 @@ import java.util.*;
  */
 public final class JkCoordinate {
 
-    private final GroupAndName groupAndName;
+    private final JkModuleId moduleId;
 
     private final JkVersion version;
 
     private final Set<JkArtifactSpecification> artifactSpecifications;
 
 
-    private JkCoordinate(GroupAndName groupAndName, JkVersion version,
+    private JkCoordinate(JkModuleId moduleId, JkVersion version,
                          Set<JkArtifactSpecification> artifactSpecifications) {
-        JkUtilsAssert.argument(groupAndName != null, "module cannot be null.");
+        JkUtilsAssert.argument(moduleId != null, "module cannot be null.");
         JkUtilsAssert.argument(version != null, version + " version cannot be null.");
-        JkUtilsAssert.argument(artifactSpecifications != null, groupAndName + " artifactSpecifications cannot be null.");
-        this.groupAndName = groupAndName;
+        JkUtilsAssert.argument(artifactSpecifications != null, moduleId + " artifactSpecifications cannot be null.");
+        this.moduleId = moduleId;
         this.version = version;
         this.artifactSpecifications = artifactSpecifications;
     }
@@ -40,8 +39,8 @@ public final class JkCoordinate {
      * Creates a {@link JkCoordinate} to the specified getModuleId with unspecified version
      */
     @SuppressWarnings("unchecked")
-    public static JkCoordinate of(GroupAndName groupAndName) {
-        return of(groupAndName, JkVersion.UNSPECIFIED);
+    public static JkCoordinate of(JkModuleId jkModuleId) {
+        return of(jkModuleId, JkVersion.UNSPECIFIED);
     }
 
     /**
@@ -49,16 +48,16 @@ public final class JkCoordinate {
      * <code>JkVersion</code>.
      */
     @SuppressWarnings("unchecked")
-    public static JkCoordinate of(GroupAndName groupAndName, JkVersion version) {
-        return new JkCoordinate(groupAndName, version, Collections.singleton(JkArtifactSpecification.MAIN));
+    public static JkCoordinate of(JkModuleId jkModuleId, JkVersion version) {
+        return new JkCoordinate(jkModuleId, version, Collections.singleton(JkArtifactSpecification.MAIN));
     }
 
     /**
      * Creates a {@link JkCoordinate} of the specified moduleId and version range.
      */
     @SuppressWarnings("unchecked")
-    public static JkCoordinate of(GroupAndName groupAndName, String version) {
-        return groupAndName.toCoordinate(version);
+    public static JkCoordinate of(JkModuleId jkModuleId, String version) {
+        return jkModuleId.toCoordinate(version);
     }
 
     /**
@@ -67,7 +66,7 @@ public final class JkCoordinate {
      * {@link JkVersion#of(String)}.
      */
     public static JkCoordinate of(String group, String name, String version) {
-        return of(GroupAndName.of(group, name), JkVersion.of(version));
+        return of(JkModuleId.of(group, name), JkVersion.of(version));
     }
 
     /**
@@ -93,21 +92,21 @@ public final class JkCoordinate {
                 "where classifiers can be a coma separated list of classifier.";
         JkUtilsAssert.argument(isCoordinateDescription(description), errorMessage);
         int separatorCount = JkUtilsString.countOccurrence(description, ':');
-        final GroupAndName groupAndName = GroupAndName.of(strings[0], strings[1]);
+        final JkModuleId jkModuleId = JkModuleId.of(strings[0], strings[1]);
         if (separatorCount == 1 && strings.length == 2) {
-            return of(groupAndName, JkVersion.UNSPECIFIED);
+            return of(jkModuleId, JkVersion.UNSPECIFIED);
         }
         if (separatorCount == 2 && strings.length == 3) {
-            return of(groupAndName, JkVersion.of(strings[2]));
+            return of(jkModuleId, JkVersion.of(strings[2]));
         }
         if (separatorCount == 3 && strings.length == 4) {
-            return of(groupAndName, JkVersion.of(strings[3])).withClassifiers(strings[2]);
+            return of(jkModuleId, JkVersion.of(strings[3])).withClassifiers(strings[2]);
         }
         if (separatorCount == 4 && strings.length == 4) {
-            return of(groupAndName, JkVersion.UNSPECIFIED).withClassifiersAndType(strings[2], strings[3]);
+            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifiersAndType(strings[2], strings[3]);
         }
         if (separatorCount == 4 && strings.length == 5) {
-            return of(groupAndName, JkVersion.of(strings[4])).withClassifiersAndType(strings[2], strings[3]);
+            return of(jkModuleId, JkVersion.of(strings[4])).withClassifiersAndType(strings[2], strings[3]);
         }
         throw new IllegalArgumentException(errorMessage);
     }
@@ -124,8 +123,8 @@ public final class JkCoordinate {
     /**
      * Returns the getModuleId of this dependency.
      */
-    public GroupAndName getGroupAndName() {
-        return groupAndName;
+    public JkModuleId getModuleId() {
+        return moduleId;
     }
 
     /**
@@ -151,7 +150,7 @@ public final class JkCoordinate {
         if (version == null) {
             return this;
         }
-        return new JkCoordinate(groupAndName, version, artifactSpecifications);
+        return new JkCoordinate(moduleId, version, artifactSpecifications);
     }
 
     public JkCoordinate withVersion(String version) {
@@ -180,7 +179,7 @@ public final class JkCoordinate {
         for (String classifier : (classifiers + " ").split(",")) {
             artifactSpecifications.add(new JkArtifactSpecification(classifier.trim(), type));
         }
-        return new JkCoordinate(groupAndName, version, Collections.unmodifiableSet(artifactSpecifications));
+        return new JkCoordinate(moduleId, version, Collections.unmodifiableSet(artifactSpecifications));
     }
 
     /**
@@ -201,7 +200,7 @@ public final class JkCoordinate {
             set.add(JkArtifactSpecification.MAIN);
         }
         set.add(artifactSpecification);
-        return new JkCoordinate(groupAndName, version, Collections.unmodifiableSet(set));
+        return new JkCoordinate(moduleId, version, Collections.unmodifiableSet(set));
     }
 
     /**
@@ -215,7 +214,7 @@ public final class JkCoordinate {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder(groupAndName.toString());
+        StringBuilder result = new StringBuilder(moduleId.toString());
         if (!version.isUnspecified()) {
             result.append(":" + version);
         }
@@ -260,9 +259,13 @@ public final class JkCoordinate {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
+
             JkArtifactSpecification that = (JkArtifactSpecification) o;
+
             if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
-            return type != null ? type.equals(that.type) : that.type == null;
+            if (type != null ? !type.equals(that.type) : that.type != null) return false;
+
+            return true;
         }
 
         @Override
@@ -273,28 +276,27 @@ public final class JkCoordinate {
         }
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         JkCoordinate that = (JkCoordinate) o;
-        if (!groupAndName.equals(that.groupAndName)) return false;
+        if (!moduleId.equals(that.moduleId)) return false;
         if (!version.equals(that.version)) return false;
-        return  !artifactSpecifications.equals(that.artifactSpecifications);
+        return  artifactSpecifications.equals(that.artifactSpecifications);
     }
 
     @Override
     public int hashCode() {
-        int result = groupAndName.hashCode();
+        int result = moduleId.hashCode();
         result = 31 * result + version.hashCode();
         result = 31 * result + artifactSpecifications.hashCode();
         return result;
     }
 
     public Path cachePath() {
-        String moduleName = this.groupAndName.getName();
+        String moduleName = this.moduleId.getName();
         Set<JkCoordinate.JkArtifactSpecification> artifactSpecifications =
                 this.getArtifactSpecifications();
         JkCoordinate.JkArtifactSpecification artSpec = !this.getArtifactSpecifications().isEmpty() ?
@@ -303,7 +305,7 @@ public final class JkCoordinate {
         String type = JkUtilsString.isBlank(artSpec.getType()) ? "jar" : artSpec.getType();
         String fileName = cacheFileName();
         Path path = JkLocator.getJekaRepositoryCache()
-                .resolve(this.groupAndName.getGroup())
+                .resolve(this.moduleId.getGroup())
                 .resolve(moduleName)
                 .resolve(type + "s")
                 .resolve(fileName);
@@ -311,7 +313,7 @@ public final class JkCoordinate {
     }
 
     public String cacheFileName() {
-        String moduleName = this.groupAndName.getName();
+        String moduleName = this.moduleId.getName();
         Set<JkCoordinate.JkArtifactSpecification> artifactSpecifications =
                 this.getArtifactSpecifications();
         JkCoordinate.JkArtifactSpecification artSpec = !this.getArtifactSpecifications().isEmpty() ?
@@ -330,7 +332,7 @@ public final class JkCoordinate {
             return this;
         }
         if (strategy == ConflictStrategy.FAIL && !version.equals(other)) {
-            throw new IllegalStateException(this.groupAndName + " has been declared with both version '" + version +
+            throw new IllegalStateException(this.moduleId + " has been declared with both version '" + version +
                     "' and '" + other + "'");
         }
         if (version.isSnapshot() && !other.isSnapshot()) {
@@ -348,130 +350,6 @@ public final class JkCoordinate {
 
     public enum ConflictStrategy {
         TAKE_FIRST, TAKE_HIGHEST, TAKE_LOWEST, FAIL
-    }
-
-    public static final class GroupAndName implements Comparator<GroupAndName> {
-
-        private final String group;
-
-        private final String name;
-
-
-        /**
-         * Creates a project id according the specified group and name.
-         */
-        public static GroupAndName of(String group, String name) {
-            JkUtilsAssert.argument(!JkUtilsString.isBlank(group), "Group can't be empty");
-            JkUtilsAssert.argument(!JkUtilsString.isBlank(name), "Name can't be empty");
-            return new JkCoordinate.GroupAndName(group, name);
-        }
-
-        /**
-         * Creates a project id according a string supposed to be formatted as
-         * <code>group</code>.<code>name</code> or <code>group</code>:
-         * <code>name</code>. The last '.' is considered as the separator between
-         * the group and the name. <br/>
-         * If there is no '.' then the whole string will serve both for group and
-         * name.
-         */
-        public static JkCoordinate.GroupAndName of(String groupAndName) {
-            if (groupAndName.contains(":")) {
-                final String group = JkUtilsString.substringBeforeLast(groupAndName, ":").trim();
-                final String name = JkUtilsString.substringAfterLast(groupAndName, ":").trim();
-                return GroupAndName.of(group, name);
-            }
-            if (groupAndName.contains(".")) {
-                final String group = JkUtilsString.substringBeforeLast(groupAndName, ".").trim();
-                final String name = JkUtilsString.substringAfterLast(groupAndName, ".").trim();
-                return GroupAndName.of(group, name);
-            }
-            return GroupAndName.of(groupAndName, groupAndName);
-        }
-
-        private GroupAndName(String group, String name) {
-            super();
-            this.group = group;
-            this.name = name;
-        }
-
-        /**
-         * Group of this module.
-         */
-        public String getGroup() {
-            return group;
-        }
-
-        /**
-         * Name of this module.
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * A concatenation of the group and name of the module as '[group].[name]'.
-         */
-        public String getDotNotation() {
-            if (group.equals(name)) {
-                return name;
-            }
-            return group + "." + name;
-        }
-
-        /**
-         * A concatenation of the group and name of this module as '[group]:[value]'.
-         */
-        public String getColonNotation() {
-            return group + ":" + name;
-        }
-
-        /**
-         * Creates a {@link JkVersionedModule} from this module and the specified
-         * version.
-         */
-        public JkCoordinate toCoordinate(String version) {
-            return toCoordinate(JkVersion.of(version));
-        }
-
-        /**
-         * Creates a {@link JkVersionedModule} from this module and the specified version.
-         */
-        public JkCoordinate toCoordinate(JkVersion version) {
-            return JkCoordinate.of(this, version);
-        }
-
-        @Override
-        public String toString() {
-            return getColonNotation();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            GroupAndName that = (GroupAndName) o;
-
-            if (!group.equals(that.group)) return false;
-            if (!name.equals(that.name)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = group.hashCode();
-            result = 31 * result + name.hashCode();
-            return result;
-        }
-
-        @Override
-        public int compare(GroupAndName o1, GroupAndName o2) {
-            if (o1.group.equals(o2.group)) {
-                return o1.name.compareTo(o2.name);
-            }
-            return o1.group.compareTo(o2.group);
-        }
     }
 
 }

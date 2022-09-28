@@ -157,7 +157,9 @@ final class Engine {
         }
         yetCompiledProjects.put(this.projectBaseDir, JkPathSequence.of());
         if (Environment.standardOptions.workClean()) {
-            JkPathTree.of(projectBaseDir.resolve(JkConstants.WORK_PATH)).deleteContent();
+            Path workDir = projectBaseDir.resolve(JkConstants.WORK_PATH);
+            JkLog.info("Clean .work directory " + workDir.toAbsolutePath().normalize());
+            JkPathTree.of(workDir).deleteContent();
         }
         String msg = "Scanning sources and compiling def classes for project '"
                 + this.projectBaseDir.getFileName() + "'";

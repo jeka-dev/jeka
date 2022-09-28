@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
@@ -224,10 +225,10 @@ final class IvyPublisherForMaven {
 
     private static String destination(JkCoordinate coordinate, String ext,
             String classifier, String uniqueVersion) {
-        final JkCoordinate.GroupAndName groupAndName = coordinate.getGroupAndName();
+        final JkModuleId jkModuleId = coordinate.getModuleId();
         final String version = coordinate.getVersion().getValue();
-        final StringBuilder result = new StringBuilder(moduleBasePath(groupAndName)).append("/")
-                .append(version).append("/").append(groupAndName.getName()).append("-")
+        final StringBuilder result = new StringBuilder(moduleBasePath(jkModuleId)).append("/")
+                .append(version).append("/").append(jkModuleId.getName()).append("-")
                 .append(uniqueVersion);
         if (!JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
             result.append("-").append(classifier);
@@ -245,7 +246,7 @@ final class IvyPublisherForMaven {
         final String path = versionMetadataPath(of(moduleId, version));
         JkMavenMetadata mavenMetadata = loadMavenMetadata(path);
         if (mavenMetadata == null) {
-            mavenMetadata = JkMavenMetadata.of(JkCoordinate.GroupAndName.of(moduleId.getOrganisation(),
+            mavenMetadata = JkMavenMetadata.of(JkModuleId.of(moduleId.getOrganisation(),
                     moduleId.getName()));
         }
         mavenMetadata.addVersion(version, timestamp);
@@ -266,15 +267,15 @@ final class IvyPublisherForMaven {
 
 
     private static String versionMetadataPath(JkCoordinate coordinate) {
-        return moduleBasePath(coordinate.getGroupAndName()) + "/maven-metadata.xml";
+        return moduleBasePath(coordinate.getModuleId()) + "/maven-metadata.xml";
     }
 
-    private static String moduleBasePath(JkCoordinate.GroupAndName groupAndName) {
-        return groupAndName.getGroup().replace(".", "/") + "/" + groupAndName.getName();
+    private static String moduleBasePath(JkModuleId jkModuleId) {
+        return jkModuleId.getGroup().replace(".", "/") + "/" + jkModuleId.getName();
     }
 
     private static String snapshotMetadataPath(JkCoordinate coordinate) {
-        return moduleBasePath(coordinate.getGroupAndName()) + "/" + coordinate.getVersion().getValue()
+        return moduleBasePath(coordinate.getModuleId()) + "/" + coordinate.getVersion().getValue()
                 + "/maven-metadata.xml";
     }
 
@@ -341,7 +342,7 @@ final class IvyPublisherForMaven {
     }
 
     private static JkCoordinate of(ModuleId moduleId, String version) {
-        return JkCoordinate.GroupAndName.of(moduleId.getOrganisation(), moduleId.getName()).toCoordinate(version);
+        return JkModuleId.of(moduleId.getOrganisation(), moduleId.getName()).toCoordinate(version);
     }
 
 
