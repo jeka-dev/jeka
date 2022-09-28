@@ -104,8 +104,8 @@ public class DependencySetResolutionIT {
         //JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         JkCoordinate lwjgl= JkCoordinate.of("org.lwjgl:lwjgl:3.1.1");
         JkDependencySet deps = JkDependencySet.of()
-                .and(lwjgl.withClassifier("natives-linux"))
-                .and(COMMONS_LOGIN_102);
+                .and(lwjgl)
+                .and(lwjgl.withClassifier("natives-linux"));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolvedDependencyNode treeRoot = resolveResult.getDependencyTree();
@@ -115,8 +115,8 @@ public class DependencySetResolutionIT {
         // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
         // it should results in a single node.
         // The classpath order will also place all artifacts of a same module sequentially.
-        assertEquals(2, treeRoot.getChildren().size());
-        assertEquals(3, treeRoot.getResolvedFiles().size());
+        assertEquals(1, treeRoot.getChildren().size());
+        assertEquals(2, treeRoot.getResolvedFiles().size());
 
         JkResolvedDependencyNode lwjglNode = treeRoot.getChildren().get(0);
         List<Path> lwjglFiles = lwjglNode.getNodeInfo().getFiles();
@@ -125,34 +125,6 @@ public class DependencySetResolutionIT {
 
     }
 
-    @Test
-    public void resolve_moduleWithMainAndExtraArtifactInDistinctCoordinates_bothArtifactsArePresentInResult() {
-        //JkLog.setDecorator(JkLog.Style.INDENT);
-        //JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
-        JkDependencySet deps = JkDependencySet.of()
-                .and("org.lwjgl:lwjgl")
-                .and("org.lwjgl:lwjgl:natives-linux::")
-                .andVersionProvider(JkVersionProvider.of()
-                        .and("org.lwjgl:lwjgl", "3.1.1")
-                );
-        JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps);
-        JkResolvedDependencyNode treeRoot = resolveResult.getDependencyTree();
-        System.out.println(resolveResult.getFiles());
-        System.out.println(treeRoot.toStringTree());
-
-        // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
-        // it should results in a single node.
-        // The classpath order will also place all artifacts of a same module sequentially.
-        assertEquals(2, treeRoot.getChildren().size());
-        assertEquals(3, treeRoot.getResolvedFiles().size());
-
-        JkResolvedDependencyNode lwjglNode = treeRoot.getChildren().get(0);
-        List<Path> lwjglFiles = lwjglNode.getNodeInfo().getFiles();
-        System.out.println(lwjglFiles);
-        assertEquals(2, lwjglFiles.size());
-
-    }
 
     @Test
     public void resolve_notExistingModuleId_reportError() {
@@ -182,6 +154,7 @@ public class DependencySetResolutionIT {
                 .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        System.out.println(tree.toStringTree());
 
         JkResolvedDependencyNode bootNode = tree.getChildren().get(0);
         JkResolvedDependencyNode.JkModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.getFirst(springCoreModule).getModuleInfo();
@@ -193,6 +166,22 @@ public class DependencySetResolutionIT {
         JkResolvedDependencyNode.JkModuleNodeInfo springCoreDirectModuleNodeInfo = tree.getChildren().get(1).getModuleInfo();
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getDeclaredVersion().getValue());
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.getResolvedVersion().getValue());
+    }
+
+    @Test
+    public void resolve_sourcesArtifact_doesNotBringTransitiveDependencies() {
+        JkDependencySet deps = JkDependencySet.of()
+                .and(JkCoordinateDependency.of(
+                        "org.springframework.boot:spring-boot-starter-web:sources:1.5.10.RELEASE"))
+               ;
+        JkDependencyResolver resolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral());
+        JkResolveResult resolveResult = resolver.resolve(deps);
+        JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        System.out.println(resolveResult.getFiles());
+        System.out.println(tree.toStringTree());
+
+
     }
 
     @Test
@@ -285,7 +274,9 @@ public class DependencySetResolutionIT {
         JkProject project = JkProject.of().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V11)
                 .configureCompileDeps(deps -> deps
-                        .and("org.openjfx:javafx-controls:win,linux,mac:11.0.2", JkTransitivity.NONE))
+                        .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE)
+                        .and("org.openjfx:javafx-controls:linux:11.0.2", JkTransitivity.NONE)
+                        .and("org.openjfx:javafx-controls:mac:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.getConstruction().setAddTextAndLocalDependencies(false);
         JkResolveResult resolveResult = project.getConstruction().getCompilation().resolveDependencies();
@@ -300,14 +291,14 @@ public class DependencySetResolutionIT {
         JkProject project = JkProject.of().simpleFacade()
                 .setJvmTargetVersion(JkJavaVersion.V11)
                 .configureCompileDeps(deps -> deps
-                        .and("org.openjfx:javafx-controls:win,:11.0.2", JkTransitivity.NONE))
+                        .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.getConstruction().setAddTextAndLocalDependencies(false);
         JkResolveResult resolveResult = project.getConstruction().getCompilation().resolveDependencies();
         resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
         JkPathSequence paths = resolveResult.getFiles();
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
-        assertEquals(2, paths.getEntries().size());
+        assertEquals(1, paths.getEntries().size());
         // the order Ivy resolve classifiers cannot be controlled
     }
 

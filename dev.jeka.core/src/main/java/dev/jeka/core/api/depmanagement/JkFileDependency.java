@@ -12,9 +12,4 @@ public interface JkFileDependency extends JkDependency {
 
     List<Path> getFiles();
 
-    interface JkTransitivityDependency extends JkDependency {
-
-        JkTransitivity getTransitivity();
-
-    }
 }

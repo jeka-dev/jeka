@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * A dependency on a jar produced locally along its dependencies for consumers.
  */
 public class JkLocalProjectDependency extends JkComputedDependency
-        implements JkFileDependency.JkTransitivityDependency {
+        implements JkTransitivityDependency {
 
     // exported dependencies
     private JkDependencySet exportedDependencies;

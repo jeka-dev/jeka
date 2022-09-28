@@ -119,6 +119,10 @@ public final class JkCoordinate {
         throw new IllegalArgumentException(errorMessage);
     }
 
+    public boolean isTransitiveByDefault() {
+        return JkArtifactSpecification.MAIN.equals(artifactSpecification);
+    }
+
     /**
      * Returns <code>true</code> if the specified candidate matches to a module description.
      * @see #of(String)
@@ -182,12 +186,8 @@ public final class JkCoordinate {
      *                    linux and mac classifier. ',mac' stands for the default classifier +
      *                    mac classifier
      */
-    public JkCoordinate withClassifierAndType(String classifiers, String type) {
-        Set<JkArtifactSpecification> artifactSpecifications = new LinkedHashSet<>();
-        for (String classifier : (classifiers + " ").split(",")) {
-            artifactSpecifications.add(new JkArtifactSpecification(classifier.trim(), type));
-        }
-        return new JkCoordinate(moduleId, version, artifactSpecification);
+    public JkCoordinate withClassifierAndType(String classifier, String type) {
+        return new JkCoordinate(moduleId, version, JkArtifactSpecification.of(classifier, type));
     }
 
     /**

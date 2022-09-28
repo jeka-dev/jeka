@@ -18,7 +18,7 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-public final class JkCoordinateDependency implements JkFileDependency.JkTransitivityDependency {
+public final class JkCoordinateDependency implements JkTransitivityDependency {
 
     private final JkCoordinate coordinate;
 

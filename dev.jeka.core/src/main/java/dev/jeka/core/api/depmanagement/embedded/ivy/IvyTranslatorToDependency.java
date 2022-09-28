@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class IvyTranslatorToDependency {
 
@@ -34,7 +35,21 @@ class IvyTranslatorToDependency {
         // If we don't set parent, force version on resolution won't work
         final Field field = JkUtilsReflect.getField(DefaultDependencyDescriptor.class, "parentId");
         JkUtilsReflect.setFieldValue(dependencyDescriptor, field, moduleDescriptor.getModuleRevisionId());
-        moduleDescriptor.addDependency(dependencyDescriptor);
+        DefaultDependencyDescriptor existingDep = (DefaultDependencyDescriptor) findDependency(moduleDescriptor, dependencyDescriptor);
+        if (existingDep == null) {
+            moduleDescriptor.addDependency(dependencyDescriptor);
+        } else {
+            Arrays.stream(moduleDescriptor.getConfigurationsNames()).forEach(confName ->
+            existingDep.addDependencyArtifact(confName, dependencyDescriptor.getAllDependencyArtifacts()[0]));
+        }
+    }
+
+    private static DependencyDescriptor findDependency(DefaultModuleDescriptor moduleDescriptor,
+                                                       DependencyDescriptor dependencyDescriptor) {
+        return Arrays.stream(moduleDescriptor.getDependencies())
+                .filter(dep -> dep.getDependencyRevisionId().getModuleId().equals(
+                        dependencyDescriptor.getDependencyRevisionId().getModuleId()))
+                .findFirst().orElse(null);
     }
 
     private static DefaultDependencyDescriptor toDependencyDescriptor(String qualifier,
@@ -46,7 +61,16 @@ class IvyTranslatorToDependency {
                 coordinate.getModuleId().getGroup(), coordinate.getModuleId().getName(),
                 version.getValue());
         boolean changing = version.isDynamic() || version.isSnapshot();
-        boolean isTransitive = coordinateDependency.getTransitivity() != JkTransitivity.NONE;
+        JkTransitivity declaredTransitivity = coordinateDependency.getTransitivity();
+        final boolean isTransitive;
+        if (declaredTransitivity != null) {
+            isTransitive  = coordinateDependency.getTransitivity() != JkTransitivity.NONE;
+        } else {
+
+            // If transitivity is not explicit then use transitivity only on default artifact
+            isTransitive = JkCoordinate.JkArtifactSpecification.MAIN.equals(coordinate.getArtifactSpecification());
+        }
+
         final boolean force = !version.isDynamic();
         DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, force, changing,
                 isTransitive);
