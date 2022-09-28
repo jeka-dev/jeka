@@ -29,12 +29,12 @@ public class JkProjectTest {
         JkDependencySet testCompileDeps = javaProject.getConstruction().getTesting()
                 .getCompilation().getDependencies();
         Assert.assertEquals(1, compileDeps.getEntries().stream()
-                .filter(JkModuleDependency.class::isInstance)
+                .filter(JkCoordinateDependency.class::isInstance)
                 .collect(Collectors.toList())
                 .size());
         Assert.assertNotNull(compileDeps.get("a:a"));
         Assert.assertEquals(2, testCompileDeps.getEntries().stream()
-                .filter(JkModuleDependency.class::isInstance)
+                .filter(JkCoordinateDependency.class::isInstance)
                 .collect(Collectors.toList())
                 .size());
         Assert.assertNotNull(testCompileDeps.get("a:a"));
@@ -55,15 +55,15 @@ public class JkProjectTest {
                 .getCompilation().getDependencies();
         JkDependencySet runtimeDeps = javaProject.getConstruction().getRuntimeDependencies();
         Assert.assertEquals(3, compileDeps.getEntries().stream()
-                .filter(JkModuleDependency.class::isInstance)
+                .filter(JkCoordinateDependency.class::isInstance)
                 .collect(Collectors.toList())
                 .size());
         Assert.assertEquals(3, runtimeDeps.getEntries().stream()
-                .filter(JkModuleDependency.class::isInstance)
+                .filter(JkCoordinateDependency.class::isInstance)
                 .collect(Collectors.toList())
                 .size());
         Assert.assertEquals(5, testCompileDeps.getEntries().stream()
-                .filter(JkModuleDependency.class::isInstance)
+                .filter(JkCoordinateDependency.class::isInstance)
                 .collect(Collectors.toList())
                 .size());
     }
@@ -88,7 +88,7 @@ public class JkProjectTest {
         Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
         Assert.assertEquals("org.mockito:mockito-core", testDependencies.getCoordinateDependencies().get(0)
-                .getModuleId().toString());
+                .getCoordinate().getGroupAndName().toString());
     }
 
     @Test
@@ -126,9 +126,9 @@ public class JkProjectTest {
         Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
         Assert.assertEquals("org.mockito:mockito-core", testDependencies.getCoordinateDependencies().get(0)
-                .getModuleId().toString());
+                .getCoordinate().getGroupAndName().toString());
         Assert.assertEquals("io.rest-assured:rest-assured", testDependencies.getCoordinateDependencies().get(1)
-                .getModuleId().toString());
+                .getCoordinate().getGroupAndName().toString());
     }
 
     @Test
@@ -182,7 +182,7 @@ public class JkProjectTest {
         Path base = top.resolve("base");
         JkProject baseProject = JkProject.of().simpleFacade()
                 .setBaseDir(base)
-                .configureCompileDeps(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.version("4.5.6")))
+                .configureCompileDeps(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6")))
                 .getProject().getConstruction()
                 .getCompilation()
                 .getLayout()
@@ -240,7 +240,7 @@ public class JkProjectTest {
         URL dependencyTxtUrl = JkProjectTest.class.getResource("dependencies.txt");
         project.getConstruction().dependencyTxtUrl = dependencyTxtUrl;
         JkDependencySet runtimeDependencies = project.getConstruction().getRuntimeDependencies();
-        JkModuleDependency lombokDep = runtimeDependencies.getMatching(JkModuleDependency.of("org.projectlombok:lombok"));
+        JkCoordinateDependency lombokDep = runtimeDependencies.getMatching(JkCoordinateDependency.of("org.projectlombok:lombok"));
         runtimeDependencies.getEntries().forEach(System.out::println);
         Assert.assertNull(lombokDep);  // expect lombok not included
 

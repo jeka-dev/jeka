@@ -139,7 +139,8 @@ public final class SpringbootJkBean extends JkBean {
         JkProjectConstruction construction = project.getConstruction();
         JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
         JkDependencyResolver dependencyResolver = construction.getDependencyResolver();
-        JkDependencySet bootloaderDependency = JkDependencySet.of(JkModuleDependency.of(JkSpringModules.Boot.LOADER))
+        JkDependencySet bootloaderDependency =
+                JkDependencySet.of(JkCoordinateDependency.of(JkSpringModules.Boot.LOADER))
                 .andBom(BOM_COORDINATE + springbootVersion);
         Path bootloader = dependencyResolver.resolve(bootloaderDependency).getFiles().getEntry(0);
         final JkPathSequence embeddedJars = construction.getDependencyResolver().resolve(
@@ -162,12 +163,12 @@ public final class SpringbootJkBean extends JkBean {
     }
 
     private static JkPom getSpringbootBom(JkDependencyResolver dependencyResolver, String springbootVersion) {
-        JkModuleDependency moduleDependency = JkModuleDependency.of(
+        JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of(
                 "org.springframework.boot:spring-boot-dependencies::pom:" + springbootVersion);
-        JkLog.info("Fetch Springboot dependency versions from " + moduleDependency);
-        Path pomFile = dependencyResolver.resolve(moduleDependency).getFiles().getEntries().get(0);
+        JkLog.info("Fetch Springboot dependency versions from " + coordinateDependency);
+        Path pomFile = dependencyResolver.resolve(coordinateDependency).getFiles().getEntries().get(0);
         if (pomFile == null || !Files.exists(pomFile)) {
-            throw new IllegalStateException(moduleDependency + " not found");
+            throw new IllegalStateException(coordinateDependency + " not found");
         }
         JkLog.info("Springboot dependency versions will be resolved from " + pomFile);
         return JkPom.of(pomFile);

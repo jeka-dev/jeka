@@ -12,8 +12,8 @@ public class JkQualifiedDependencySetTest {
     @Test
     public void computeIdeDependencies_1compileAnd1provided_ok() {
         JkDependencySet compile = JkDependencySet.of()
-                .and(GUAVA.version("19.0"))
-                .and (JAVAX_SERVLET_API.version("4.0.1"));
+                .and(GUAVA.toCoordinate("19.0").toString())
+                .and (JAVAX_SERVLET_API.toCoordinate("4.0.1").toString());
         JkDependencySet runtime = compile.minus(JAVAX_SERVLET_API);
         JkProjectDependencies projectDependencies = JkProjectDependencies.of(compile, runtime, JkDependencySet.of());
         JkQualifiedDependencySet qdeps = JkQualifiedDependencySet.computeIdeDependencies(projectDependencies);

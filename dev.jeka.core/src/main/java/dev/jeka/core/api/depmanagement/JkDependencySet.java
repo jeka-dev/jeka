@@ -136,20 +136,24 @@ public class JkDependencySet {
         return and(null, others);
     }
 
-    public JkDependencySet and(Hint hint, String moduleDescriptor) {
-        return and(hint, JkCoordinateDependency.of(moduleDescriptor));
+    public JkDependencySet and(Hint hint, String coordinate) {
+        return and(hint, JkCoordinate.of(coordinate));
     }
 
     public JkDependencySet and(Hint hint, JkCoordinate.GroupAndName groupAndName) {
         return and(hint, groupAndName.toString());
     }
 
-    public JkDependencySet and(JkCoordinate.GroupAndName groupAndName) {
-        return and(null, groupAndName.toString());
+    public JkDependencySet and(Hint hint, JkCoordinate coordinate) {
+        return and(hint, JkCoordinateDependency.of(coordinate));
     }
 
-    public JkDependencySet and(@JkDepSuggest String moduleDescriptor) {
-        return and(null, moduleDescriptor);
+    public JkDependencySet and(JkCoordinate coordinate) {
+        return and(null, coordinate);
+    }
+
+    public JkDependencySet and(@JkDepSuggest String coordinate) {
+        return and(null, coordinate);
     }
 
     public JkDependencySet and(Hint hint, String moduleDescriptor, JkTransitivity transitivity) {

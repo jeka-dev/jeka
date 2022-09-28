@@ -57,10 +57,10 @@ public class JkImlGeneratorTest {
 
     private JkDependencySet dependencies() {
         return JkDependencySet.of()
-                .and(GUAVA.version("21.0"))
-                .and(JAVAX_SERVLET_API.version("3.1.0"))
-                .and(JUNIT.version("4.11"))
-                .and(MOCKITO_ALL.version("1.10.19"));
+                .and(GUAVA.toCoordinate("21.0"))
+                .and(JAVAX_SERVLET_API.toCoordinate("3.1.0"))
+                .and(JUNIT.toCoordinate("4.11"))
+                .and(MOCKITO_ALL.toCoordinate("1.10.19"));
     }
 
 }

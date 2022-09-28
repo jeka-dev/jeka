@@ -47,6 +47,14 @@ public final class JkCoordinateDependency implements JkFileDependency.JkTransiti
         return new JkCoordinateDependency(coordinate, null, Collections.emptyList(),  null);
     }
 
+    public static JkCoordinateDependency of(JkCoordinate.GroupAndName groupAndName) {
+        return of(groupAndName.toCoordinate(JkVersion.UNSPECIFIED));
+    }
+
+    public static JkCoordinateDependency of(String groupAndName, String version) {
+        return of(JkCoordinate.GroupAndName.of(groupAndName).toCoordinate(version));
+    }
+
     public static JkCoordinateDependency of(String description) {
         return of(JkCoordinate.of(description));
     }
@@ -148,53 +156,6 @@ public final class JkCoordinateDependency implements JkFileDependency.JkTransiti
         return first.equals(second);
     }
 
-    /**
-     * When declaring a module dependency, we implicitly request for the main artifact of this module. Nevertheless,
-     * we can request for getting others artifacts in place or additionally of the main one.
-     * This class aims at specifying which artifact are concerned for the dependency.
-     */
-    public static class JkArtifactSpecification {
-
-        /** Stands for the main artifact */
-        public static final JkArtifactSpecification MAIN = new JkArtifactSpecification(null, null);
-
-        private final String classifier;
-
-        private final String type;
-
-        private JkArtifactSpecification (String classifier, String type) {
-            this.classifier = classifier;
-            this.type = type;
-        }
-
-        public static JkArtifactSpecification of(String classifier, String type) {
-            return new JkArtifactSpecification(classifier, type);
-        }
-
-        public String getClassifier() {
-            return classifier;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            JkArtifactSpecification that = (JkArtifactSpecification) o;
-            if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
-            return type != null ? type.equals(that.type) : that.type == null;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = classifier != null ? classifier.hashCode() : 0;
-            result = 31 * result + (type != null ? type.hashCode() : 0);
-            return result;
-        }
-    }
 
     @Override
     public boolean matches(JkDependency other) {

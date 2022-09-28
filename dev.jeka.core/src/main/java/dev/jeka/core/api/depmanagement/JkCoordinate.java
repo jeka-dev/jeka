@@ -50,7 +50,7 @@ public final class JkCoordinate {
      */
     @SuppressWarnings("unchecked")
     public static JkCoordinate of(GroupAndName groupAndName, JkVersion version) {
-        return new JkCoordinate(groupAndName, version, null);
+        return new JkCoordinate(groupAndName, version, Collections.singleton(JkArtifactSpecification.MAIN));
     }
 
     /**
@@ -445,6 +445,25 @@ public final class JkCoordinate {
             return getColonNotation();
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            GroupAndName that = (GroupAndName) o;
+
+            if (!group.equals(that.group)) return false;
+            if (!name.equals(that.name)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = group.hashCode();
+            result = 31 * result + name.hashCode();
+            return result;
+        }
 
         @Override
         public int compare(GroupAndName o1, GroupAndName o2) {

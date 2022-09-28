@@ -23,7 +23,7 @@ public class JkDependencySetMergeTest {
     private static JkDependencySet of (String ... depNames) {
         List<JkDependency> dependencies = new LinkedList<>();
         for (String depName : depNames) {
-            dependencies.add(JkModuleDependency.of(depName + ":" + depName));
+            dependencies.add(JkCoordinateDependency.of(depName + ":" + depName));
         }
         return JkDependencySet.of(dependencies);
     }

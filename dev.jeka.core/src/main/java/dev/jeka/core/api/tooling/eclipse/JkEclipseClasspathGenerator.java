@@ -388,7 +388,8 @@ public final class JkEclipseClasspathGenerator {
             // Maven dependency
             if (node.isModuleNode()) {
                 final JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
-                JkDependency dependency = JkModuleDependency.of(moduleNodeInfo.getGroupAndName().getGroupAndName());
+                JkCoordinate coordinate = JkCoordinate.of(moduleNodeInfo.getGroupAndName().getColonNotation());
+                JkDependency dependency = JkCoordinateDependency.of(coordinate);
                 Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
                 Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);
                 writeModuleEntry(writer,
@@ -418,13 +419,13 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<Path> files,
+    private void writeModuleEntry(XMLStreamWriter writer, JkCoordinate coordinate, Iterable<Path> files,
                                   JkRepoSet repos, Set<String> paths, Properties attributeProps,
                                   Properties accessRuleProps) throws XMLStreamException {
-        final Path source = repos.get(JkModuleDependency.of(versionedModule).withClassifiers("sources"));
+        final Path source = repos.get(coordinate.withClassifiers("sources"));
         Path javadoc = null;
         if (source == null || !Files.exists(source) || this.includeJavadoc) {
-            javadoc = repos.get(JkModuleDependency.of(versionedModule).withClassifiers("javadoc"));
+            javadoc = repos.get(coordinate.withClassifiers("javadoc"));
         }
         if (javadoc != null) {
             attributeProps.put("javadoc_location", javadocAttributeValue(javadoc));
@@ -538,11 +539,11 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private static boolean depsMatchForExtraAttributes(JkDependency dep1, JkDependency dep2) {
-        if (dep1 instanceof JkModuleDependency) {
-            if (dep2 instanceof JkModuleDependency) {
-                JkModuleDependency modDep1 = (JkModuleDependency) dep1;
-                JkModuleDependency modDep2 = (JkModuleDependency) dep2;
-                return modDep1.getModuleId().equals(modDep2.getModuleId());
+        if (dep1 instanceof JkCoordinateDependency) {
+            if (dep2 instanceof JkCoordinateDependency) {
+                JkCoordinateDependency modDep1 = (JkCoordinateDependency) dep1;
+                JkCoordinateDependency modDep2 = (JkCoordinateDependency) dep2;
+                return modDep1.getCoordinate().getGroupAndName().equals(modDep2.getCoordinate().getGroupAndName());
             }
             return false;
         }

@@ -214,25 +214,26 @@ public final class JkSonarqube {
             JkLog.info("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
             return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalEmbeddedClassloader.URL_CACHE_DIR);
         }
-        JkModuleDependency moduleDep = JkModuleDependency
-                .of("org.sonarsource.scanner.cli", "sonar-scanner-cli", this.sonnarScannerVersion)
+        JkCoordinate coordinate = JkCoordinate.of("org.sonarsource.scanner.cli", "sonar-scanner-cli",
+                this.sonnarScannerVersion);
+        JkCoordinateDependency coordinateDependency = JkCoordinateDependency
+                .of(coordinate)
                 .withTransitivity(JkTransitivity.NONE);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                 .addRepos(repos)
                 .getDefaultParams()
                     .setFailOnDependencyResolutionError(false)
                 .__;
-        JkResolveResult resolveResult = dependencyResolver.resolve(JkDependencySet.of().and(moduleDep));
+        JkResolveResult resolveResult = dependencyResolver.resolve(JkDependencySet.of().and(coordinateDependency));
         if (resolveResult.getErrorReport().hasErrors()) {
             StringBuilder sb = new StringBuilder();
-            String coordinates =  moduleDep.getModuleId().withVersion(this.sonnarScannerVersion).toString();
-            sb.append("Cannot find dependency " + coordinates + "\n");
-            List<String> versions = dependencyResolver.searchVersions(moduleDep.getModuleId());
+            sb.append("Cannot find dependency " + coordinate + "\n");
+            List<String> versions = dependencyResolver.searchVersions(coordinate.getGroupAndName());
             sb.append("Known versions are : \n");
             versions.forEach(name -> sb.append(name + "\n"));
             throw new IllegalStateException(sb.toString());
         }
-        JkVersion effectiveVersion = resolveResult.getVersionOf(moduleDep.getModuleId());  // Get effective version if specified one is '+'
+        JkVersion effectiveVersion = resolveResult.getVersionOf(coordinate.getGroupAndName());  // Get effective version if specified one is '+'
         JkLog.info("Run sonar scanner " + effectiveVersion);
         return resolveResult.getFiles().getEntries().get(0);
     }

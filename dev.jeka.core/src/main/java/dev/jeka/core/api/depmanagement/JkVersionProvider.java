@@ -80,7 +80,11 @@ public final class JkVersionProvider {
      * Returns the version to use with specified module.
      */
     public String getVersionOf(String moduleId) {
-        return getVersionOf(GroupAndName.of(moduleId)).getValue();
+        JkVersion version = getVersionOf(GroupAndName.of(moduleId));
+        if (version == null) {
+            return null;
+        }
+        return version.getValue();
     }
 
     public JkDependency version(JkDependency dependency) {

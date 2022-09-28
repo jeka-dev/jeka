@@ -16,8 +16,8 @@ public class JkDependencySetTest {
                 .andFiles("./foo.jar")
                 .and("my.group:module")
                 .and("other:other")
-                .normalised(JkVersionedModule.ConflictStrategy.TAKE_HIGHEST);
-        assertEquals("2.8", dependencySet.get("my.group:module").getVersion().toString());
+                .normalised(JkCoordinate.ConflictStrategy.TAKE_HIGHEST);
+        assertEquals("2.8", dependencySet.get("my.group:module").getCoordinate().getVersion().toString());
     }
 
     @Test

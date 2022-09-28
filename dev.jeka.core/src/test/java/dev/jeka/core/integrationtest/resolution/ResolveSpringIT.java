@@ -1,7 +1,7 @@
 package dev.jeka.core.integrationtest.resolution;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -20,7 +20,7 @@ public class ResolveSpringIT {
 
     private static final String SPRINGBOOT_STARTER = "org.springframework.boot:spring-boot-starter:1.5.13.RELEASE";
 
-    private static final JkModuleId SLF4J_API = JkModuleId.of("org.slf4j:slf4j-api");
+    private static final GroupAndName SLF4J_API = GroupAndName.of("org.slf4j:slf4j-api");
 
     @Test
     public void resolveCompile() {
@@ -51,7 +51,7 @@ public class ResolveSpringIT {
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", JkTransitivity.RUNTIME);
         final JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
-        final Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getGroupAndNames();
+        final Set<GroupAndName> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getGroupAndNames();
 
         // According presence or absence of cache it could be 24 or 25
         assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() >= 24);

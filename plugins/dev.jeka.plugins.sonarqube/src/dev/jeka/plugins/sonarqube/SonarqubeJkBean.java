@@ -1,7 +1,8 @@
 package dev.jeka.plugins.sonarqube;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
@@ -57,17 +58,17 @@ public class SonarqubeJkBean extends JkBean {
             libs = project.getConstruction().getDependencyResolver().resolve(deps).getFiles();
         }
         final Path testReportDir = project.getConstruction().getTesting().getReportDir();
-        JkModuleId moduleId = project.getPublication().getGroupAndName();
-        if (moduleId == null) {
+        GroupAndName groupAndName = project.getPublication().getGroupAndName();
+        if (groupAndName == null) {
             String baseDirName = baseDir.getFileName().toString();
             if (JkUtilsString.isBlank(baseDirName)) {
                 baseDirName = baseDir.toAbsolutePath().getFileName().toString();
             }
-            moduleId = JkModuleId.of(baseDirName, baseDirName);
+            groupAndName = GroupAndName.of(baseDirName, baseDirName);
         }
         final String version = project.getPublication().getVersion().getValue();
-        final String fullName = moduleId.getDotedName();
-        final String name = moduleId.getName();
+        final String fullName = groupAndName.getDotNotation();
+        final String name = groupAndName.getName();
         final JkSonarqube sonarqube;
         if (JkUtilsString.isBlank(scannerVersion)) {
             sonarqube = JkSonarqube.ofEmbedded();

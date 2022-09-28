@@ -27,11 +27,12 @@ public class JkEclipseClasspathGeneratorIT {
             .setBaseDir(top.resolve("base"))
             .simpleFacade()
                 .configureCompileDeps(deps -> deps
-                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.version("4.5.6"))).getProject();
+                        .and("org.apache.httpcomponents.client5:httpclient5:5.1.3"))
+                .getProject();
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
             .setDefDependencies(baseProject.getConstruction().getDependencyResolver(),
-                    JkDependencySet.of().and(JkPopularLibs.GUAVA.version("21.0")));
+                    JkDependencySet.of().and(JkPopularLibs.GUAVA.toCoordinate("21.0").toString()));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);

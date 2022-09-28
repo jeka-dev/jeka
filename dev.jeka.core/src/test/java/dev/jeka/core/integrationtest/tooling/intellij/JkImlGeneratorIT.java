@@ -31,7 +31,7 @@ public class JkImlGeneratorIT {
             .getConstruction()
                 .getCompilation()
                     .configureDependencies(deps -> deps
-                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.version("4.5.6"))).__.__;
+                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6"))).__.__;
         final JkImlGenerator baseGenerator = JkImlGenerator.of()
                 .setIdeSupport(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.computeIml().toDoc().toXml();

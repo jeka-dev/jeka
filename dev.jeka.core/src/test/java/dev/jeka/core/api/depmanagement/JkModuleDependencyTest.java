@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate.JkArtifactSpecification;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,17 +12,17 @@ public class JkModuleDependencyTest {
 
     @Test
     public void testOf() {
-        JkModuleDependency dep = JkModuleDependency.of("group:name:sources:zip:version")
+        JkCoordinateDependency dep = JkCoordinateDependency.of("group:name:sources:zip:version")
                 .withTransitivity(JkTransitivity.NONE);
-        JkModuleDependency.JkArtifactSpecification artifactSpecification =
-                dep.getArtifactSpecifications().iterator().next();
+        JkArtifactSpecification artifactSpecification =
+                dep.getCoordinate().getArtifactSpecifications().iterator().next();
         Assert.assertEquals("sources", artifactSpecification.getClassifier());
         Assert.assertEquals("zip", artifactSpecification.getType());
         Assert.assertEquals(JkTransitivity.NONE, dep.getTransitivity());
 
-        dep = JkModuleDependency.of("group:name:sources,javadoc:zip:");
-        Assert.assertEquals(JkVersion.UNSPECIFIED, dep.getVersion());
-        List<JkModuleDependency.JkArtifactSpecification> specs = new LinkedList<>(dep.getArtifactSpecifications());
+        dep = JkCoordinateDependency.of("group:name:sources,javadoc:zip:");
+        Assert.assertEquals(JkVersion.UNSPECIFIED, dep.getCoordinate().getVersion());
+        List<JkArtifactSpecification> specs = new LinkedList<>(dep.getCoordinate().getArtifactSpecifications());
         Assert.assertEquals("sources", specs.get(0).getClassifier());
         Assert.assertEquals("javadoc", specs.get(1).getClassifier());
     }

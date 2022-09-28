@@ -1,6 +1,7 @@
 package dev.jeka.core.integrationtest.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkCoordinate.GroupAndName;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
@@ -45,7 +46,7 @@ public class DependencySetResolutionIT {
     @Test
     public void resolve_jerseyServer_ok() {
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of("com.sun.jersey:jersey-server:1.19.4")
+                .and(JkCoordinateDependency.of("com.sun.jersey:jersey-server:1.19.4")
                         .withTransitivity(JkTransitivity.NONE));
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
@@ -57,7 +58,7 @@ public class DependencySetResolutionIT {
     @Test
     public void resolve_dependencyDeclaredAsNonTransitive_ok() {
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of(SPRINGBOOT_TEST_AND_VERSION).withTransitivity(JkTransitivity.NONE));
+                .and(JkCoordinateDependency.of(SPRINGBOOT_TEST_AND_VERSION).withTransitivity(JkTransitivity.NONE));
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
@@ -68,40 +69,42 @@ public class DependencySetResolutionIT {
     @Test
     public void resolve_transitiveDependency_ok() {
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of(SPRINGBOOT_TEST_AND_VERSION));
+                .and(JkCoordinateDependency.of(SPRINGBOOT_TEST_AND_VERSION));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
         System.out.println(resolveResult.getFiles());
-        assertTrue(resolveResult.contains(JkModuleId.of(SPRINGBOOT_TEST)));
-        assertTrue(resolveResult.contains(JkModuleId.of(COMMONS_LOGIN)));
+        assertTrue(resolveResult.contains(GroupAndName.of(SPRINGBOOT_TEST)));
+        assertTrue(resolveResult.contains(GroupAndName.of(COMMONS_LOGIN)));
     }
 
     @Test
     public void resolve_transitiveDependencyLocallyExcluded_ok() {
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of(SPRINGBOOT_TEST_AND_VERSION).andExclusion(COMMONS_LOGIN));
+                .and(JkCoordinateDependency.of(SPRINGBOOT_TEST_AND_VERSION).andExclusion(COMMONS_LOGIN));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
-        assertTrue(resolveResult.contains(JkModuleId.of(SPRINGBOOT_TEST)));
-        assertFalse(resolveResult.contains(JkModuleId.of(COMMONS_LOGIN)));
+        assertTrue(resolveResult.contains(GroupAndName.of(SPRINGBOOT_TEST)));
+        assertFalse(resolveResult.contains(GroupAndName.of(COMMONS_LOGIN)));
     }
 
     @Test
     public void resolve_transitiveDependencyGloballyExcluded_ok() {
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkModuleDependency.of(SPRINGBOOT_TEST_AND_VERSION))
+                .and(JkCoordinateDependency.of(SPRINGBOOT_TEST_AND_VERSION))
                 .andGlobalExclusion(COMMONS_LOGIN);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
-        assertTrue(resolveResult.contains(JkModuleId.of(SPRINGBOOT_TEST)));
-        assertFalse(resolveResult.contains(JkModuleId.of(COMMONS_LOGIN)));
+        assertTrue(resolveResult.contains(GroupAndName.of(SPRINGBOOT_TEST)));
+        assertFalse(resolveResult.contains(GroupAndName.of(COMMONS_LOGIN)));
     }
 
     @Test
     public void resolve_moduleWithMainAndExtraArtifact_bothArtifactsArePresentInResult() {
-        JkModuleDependency lwjgl= JkModuleDependency.of("org.lwjgl:lwjgl:3.1.1");
+        //JkLog.setDecorator(JkLog.Style.INDENT);
+        //JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
+        JkCoordinate lwjgl= JkCoordinate.of("org.lwjgl:lwjgl:3.1.1");
         JkDependencySet deps = JkDependencySet.of()
-                .and(lwjgl.andClassifier("natives-linux"))
+                .and(JkCoordinateDependency.of(lwjgl.andClassifier("natives-linux")))
                 .and(COMMONS_LOGIN_102);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
@@ -124,9 +127,9 @@ public class DependencySetResolutionIT {
 
     @Test
     public void resolve_notExistingModuleId_reportError() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
+        JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
-                .and(JkPopularLibs.JAVAX_SERVLET_API.version("2.5.3"));  // does not exist
+                .and(JkPopularLibs.JAVAX_SERVLET_API.toCoordinate("2.5.3").toString());  // does not exist
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder)
@@ -139,13 +142,13 @@ public class DependencySetResolutionIT {
 
     @Test
     public void resolve_sameDependencyAsDirectAndTransitiveWithDistinctVersion_directWin() {
-        JkModuleId starterWebModule = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
-        JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
+        GroupAndName starterWebModule = GroupAndName.of("org.springframework.boot:spring-boot-starter-web");
+        GroupAndName springCoreModule = GroupAndName.of("org.springframework:spring-core");
         String directCoreVersion = "4.3.6.RELEASE";
         JkDependencySet deps = JkDependencySet.of()
-                .and(starterWebModule.version("1.5.10.RELEASE").withTransitivity(JkTransitivity.COMPILE))
+                .and(JkCoordinateDependency.of(starterWebModule.toCoordinate("1.5.10.RELEASE")).withTransitivity(JkTransitivity.COMPILE))
                 // force a version lower than the transitive above
-                .and(springCoreModule.version(directCoreVersion).withTransitivity(JkTransitivity.COMPILE));
+                .and(JkCoordinateDependency.of(springCoreModule.toCoordinate(directCoreVersion)).withTransitivity(JkTransitivity.COMPILE));
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
@@ -165,12 +168,12 @@ public class DependencySetResolutionIT {
 
     @Test
     public void resolve_usingDynamicVersion_ok() {
-        JkModuleId moduleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
-        JkDependencySet deps = JkDependencySet.of().and(moduleId.version("1.4.+"));
+        GroupAndName groupAndName = GroupAndName.of("org.springframework.boot:spring-boot-starter-web");
+        JkDependencySet deps = JkDependencySet.of().and(groupAndName.toCoordinate("1.4.+"));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolvedDependencyNode tree = resolver.resolve(deps).assertNoError().getDependencyTree();
         System.out.println(tree.toStrings());
-        JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getFirst(moduleId).getModuleInfo();
+        JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getFirst(groupAndName).getModuleInfo();
         assertTrue(moduleNodeInfo.getDeclaredVersion().getValue().equals("1.4.+"));
         String resolvedVersionName = moduleNodeInfo.getResolvedVersion().getValue();
         assertEquals("1.4.7.RELEASE", resolvedVersionName);
@@ -182,7 +185,7 @@ public class DependencySetResolutionIT {
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", JkTransitivity.COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
-        boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
+        boolean snakeyamlHere = resolveResult.contains( GroupAndName.of("org.yaml:snakeyaml"));
         assertFalse(snakeyamlHere);
     }
 
@@ -192,7 +195,7 @@ public class DependencySetResolutionIT {
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", JkTransitivity.RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps);
-        boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
+        boolean snakeyamlHere = resolveResult.contains( GroupAndName.of("org.yaml:snakeyaml"));
         assertTrue(snakeyamlHere);
     }
 
@@ -228,7 +231,7 @@ public class DependencySetResolutionIT {
         URL sampleJarUrl = DependencySetResolutionIT.class.getResource("myArtifactSample.jar");
         Path jarFile = Paths.get(sampleJarUrl.toURI());
         JkDependencySet dependencies = JkDependencySet.of()
-                .and(JkPopularLibs.GUAVA.version("23.0"))
+                .and(JkPopularLibs.GUAVA.toCoordinate("23.0"))
                 .andFiles(jarFile);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
