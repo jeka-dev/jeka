@@ -74,7 +74,7 @@ Project Structure
 project
 +- baseDir
 +- outputDir
-+- artifactProducer (define artifacts to be produce by the build as map of artifactName -> Consumer<Path> producing the artifact)
++- artifactProducer (define artifacts procuded by the build)
 +- duplicateDependencyConflictStrategy
 +- construction  (Produce packaged binaries from sources. This includes test checking)
 |  +- jvmTargetVersion
@@ -84,7 +84,7 @@ project
 |  +- runtimeDependencies
 |  +- manifest
 |  +- fatJar (customize produced fat/uber jar if any)
-|  +- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, transpiling, post binary processing, ...)
+|  +- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
 |  |  +- layout (where are located source and resource files)
 |  |  +- source generators (plugin mechanism for generating source files)
 |  |  +- dependencies   (stands for compile dependencies)
