@@ -41,23 +41,33 @@ import java.util.stream.Collectors;
  * If  <i>download</i> or <i>publish</i> repo is defined to use a named repo (as jeka.repos.download.name=aRepoName),
  * this takes precedence over basic configuration.
  */
-public class JkRepoFromProperties {
+public class JkRepoProperties {
 
     public static final String MAVEN_CENTRAL_ALIAS = "mavenCentral";
 
     public static final String JEKA_GITHUB_ALIAS = "jekaGithub";
 
+    private final JkProperties properties;
+
+    private JkRepoProperties(JkProperties properties) {
+        this.properties = properties;
+    }
+
+    public static JkRepoProperties of(JkProperties properties) {
+        return new JkRepoProperties(properties);
+    }
+
     /**
      * Returns repository where are published artifacts. Returns <code>null</code> if no download publish repo is defined.
      */
-    public static JkRepoSet getPublishRepository() {
+    public JkRepoSet getPublishRepository() {
         return getRepos("jeka.repos.publish");
     }
 
     /**
      * Returns repo from where are downloaded dependencies. Returns Maven central repo if no download repository is defined.
      */
-    public static JkRepoSet getDownloadRepos() {
+    public JkRepoSet getDownloadRepos() {
         JkRepoSet repoSet = getRepos("jeka.repos.download");
         if (repoSet.getRepos().isEmpty()) {
             repoSet = repoSet.and(JkRepo.ofMavenCentral());
@@ -72,12 +82,12 @@ public class JkRepoFromProperties {
      * <code>repo.[repoName].password</code> options for creating according
      * repository.
      */
-    public static JkRepo getRepoByName(String name) {
+    public JkRepo getRepoByName(String name) {
         if (MAVEN_CENTRAL_ALIAS.equals(name)) {
             return JkRepo.ofMavenCentral();
         }
         String property = "jeka.repos." + name;
-        String url = JkProperties.get(property);
+        String url = properties.get(property);
         JkRepo result;
         if (JEKA_GITHUB_ALIAS.equals(name)) {
             result = JkRepo.ofGitHub("jeka-dev", "jeka");
@@ -86,13 +96,13 @@ public class JkRepoFromProperties {
         } else {
             result = JkRepo.of(url);
         }
-        JkRepo.JkRepoCredentials credentials = geCredentials(property);
+        JkRepo.JkRepoCredentials credentials = getCredentials(property);
         result.mergeCredential(credentials);
         return result;
     }
 
-    private static JkRepoSet getRepos(String propertyName) {
-        String nameOrUrls = JkProperties.get(propertyName);
+    private JkRepoSet getRepos(String propertyName) {
+        String nameOrUrls = properties.get(propertyName);
         if (JkUtilsString.isBlank(nameOrUrls)) {
             return JkRepoSet.of();
         }
@@ -103,22 +113,22 @@ public class JkRepoFromProperties {
         return JkRepoSet.of(repos);
     }
 
-    private static JkRepo getRepo(String propertyName, String nameOrUrl) {
+    private JkRepo getRepo(String propertyName, String nameOrUrl) {
         if (isUrl(nameOrUrl)) {
-            return JkRepo.of(nameOrUrl).setCredentials(geCredentials(propertyName));
+            return JkRepo.of(nameOrUrl).setCredentials(getCredentials(propertyName));
         }
         return getRepoByName(nameOrUrl);
     }
 
-    private static JkRepo.JkRepoCredentials geCredentials(String prefix) {
-        String userName = JkProperties.get(prefix + ".username");
-        String password = JkProperties.get(prefix + ".password");
-        String realm = JkProperties.get(prefix + ".realm");
+    private JkRepo.JkRepoCredentials getCredentials(String prefix) {
+        String userName = properties.get(prefix + ".username");
+        String password = properties.get(prefix + ".password");
+        String realm = properties.get(prefix + ".realm");
         return JkRepo.JkRepoCredentials.of(userName, password, realm);
     }
 
-    private static List<String> downloadUrlOrNames() {
-        return urlOrNames(JkProperties.get("jeka.repos.download"));
+    private List<String> downloadUrlOrNames() {
+        return urlOrNames(properties.get("jeka.repos.download"));
     }
 
     private static List<String> urlOrNames(String value) {

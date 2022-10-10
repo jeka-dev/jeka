@@ -1,5 +1,6 @@
 package dev.jeka.core.samples;
 
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkJavaProcess;
@@ -7,7 +8,6 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.nio.file.Path;
@@ -60,7 +60,7 @@ public class SimpleWarJkBean extends JkBean {
     public void runWarWithJetty() {
         JkArtifactProducer artifactProducer = projectPlugin.getProject().getArtifactProducer();
         artifactProducer.makeMissingArtifacts();
-        Path jettyRunner = JkRepoFromProperties.getDownloadRepos().get("org.eclipse.jetty:jetty-runner:"
+        Path jettyRunner = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);
         JkJavaProcess.ofJavaJar(jettyRunner, null)
                 .exec(artifactProducer.getMainArtifactPath().toString(), "--port", port);

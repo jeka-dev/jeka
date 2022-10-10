@@ -2,8 +2,13 @@
   <configuration default="false" name="FULL BUILD" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.Main" />
     <module name="dev.jeka.master" />
-    <option name="PROGRAM_PARAMETERS" value="-lv project#clean make publishLocal -lsu -lri -wc" />
+    <option name="PROGRAM_PARAMETERS" value="-lv project#clean make publishLocal -lsu -lri -cw" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

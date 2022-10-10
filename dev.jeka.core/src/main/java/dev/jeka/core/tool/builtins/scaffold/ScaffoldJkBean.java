@@ -1,6 +1,6 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
-import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -40,7 +40,7 @@ public class ScaffoldJkBean extends JkBean {
         this.scaffolder.setJekaClassCodeProvider(
                 () -> JkUtilsIO.read(ScaffoldJkBean.class.getResource("buildclass.snippet")));
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                .addRepos(JkRepoFromProperties.getDownloadRepos());
+                .addRepos(JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos());
         this.scaffolder.setDependencyResolver(dependencyResolver);
         this.scaffolder.addCmdFileContent(this.cmdExtraContent);
         this.scaffolder.addProjectPropsFileContent(this.projectPropsExtraContent);

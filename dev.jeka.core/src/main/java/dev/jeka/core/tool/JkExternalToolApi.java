@@ -1,6 +1,6 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
@@ -27,10 +27,8 @@ public final class JkExternalToolApi {
     }
 
     public static JkRepoSet getDownloadRepos(Path projectDir) {
-        Map<String, String> projectProps = PropertyLoader.readProjectPropertiesRecursively(projectDir);
-        JkProperties.override(projectProps);
-        JkRepoSet result = JkRepoFromProperties.getDownloadRepos();
-        JkProperties.removeOverride();
+        JkProperties properties = JkRuntime.constructProperties(projectDir);
+        JkRepoSet result = JkRepoProperties.of(properties).getDownloadRepos();
         return result;
     }
 

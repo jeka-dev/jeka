@@ -6,7 +6,6 @@ import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.git.GitJkBean;
@@ -55,7 +54,7 @@ class MasterBuild extends JkBean {
         git.projectVersionSupplier.on = false;
         coreBuild.runIT = true;
         getImportedJkBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
-        if (JkProperties.get("sonar.host.url") != null) {
+        if (getRuntime().getProperties().get("sonar.host.url") != null) {
             useJacoco = true;
         }
         if (useJacoco) {
@@ -96,7 +95,7 @@ class MasterBuild extends JkBean {
             closeAndReleaseRepo();
             JkLog.endTask();
         }
-        if (JkProperties.get("sonar.host.url") != null) {
+        if (getRuntime().getProperties().get("sonar.host.url") != null) {
             coreBuild.getBean(SonarqubeJkBean.class).run();
         }
     }

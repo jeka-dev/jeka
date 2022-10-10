@@ -1,5 +1,6 @@
 package dev.jeka.core.api.crypto.gpg;
 
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -23,7 +24,8 @@ public final class JkGpg {
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
-    private static final JkInternalGpgDoer INTERNAL_GPG_DOER = JkInternalGpgDoer.of();
+    private static final JkInternalGpgDoer INTERNAL_GPG_DOER = JkInternalGpgDoer.of(
+            JkProperties.ofSystemProperties().withFallback(JkProperties.ofEnvironmentVariables()));
 
     private final Path pubRing;
 

@@ -3,6 +3,7 @@ package dev.jeka.core.api.crypto.gpg;
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;
@@ -13,15 +14,15 @@ public interface JkInternalGpgDoer {
 
     void sign(Path fileToSign, Path secringFile, String keyName, Path signatureFile, char[] pass, boolean armor);
 
-    static JkInternalGpgDoer of() {
-        return Cache.get();
+    static JkInternalGpgDoer of(JkProperties properties) {
+        return Cache.get(properties);
     }
 
-    static class Cache {
+    class Cache {
 
         private static JkInternalGpgDoer CACHED_INSTANCE;
 
-        private static JkInternalGpgDoer get() {
+        private static JkInternalGpgDoer get(JkProperties properties) {
             if (CACHED_INSTANCE != null) {
                 return CACHED_INSTANCE;
             }
@@ -31,9 +32,9 @@ public interface JkInternalGpgDoer {
                 return JkUtilsReflect.invokeStaticMethod(clazz, "of");
             }
             String bouncyCastleVersion = "1.70";
-            JkCoordinateFileProxy bcProviderJar = JkCoordinateFileProxy.ofStandardRepos("org.bouncycastle:bcprov-jdk15on:"
+            JkCoordinateFileProxy bcProviderJar = JkCoordinateFileProxy.ofStandardRepos(properties, "org.bouncycastle:bcprov-jdk15on:"
                     + bouncyCastleVersion);
-            JkCoordinateFileProxy bcopenPgpApiJar = JkCoordinateFileProxy.ofStandardRepos("org.bouncycastle:bcpg-jdk15on:"
+            JkCoordinateFileProxy bcopenPgpApiJar = JkCoordinateFileProxy.ofStandardRepos(properties, "org.bouncycastle:bcpg-jdk15on:"
                     + bouncyCastleVersion);
             CACHED_INSTANCE =  JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(bcopenPgpApiJar.get(), bcProviderJar.get())
                     .createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");

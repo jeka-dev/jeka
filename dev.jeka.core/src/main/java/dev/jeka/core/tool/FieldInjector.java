@@ -31,15 +31,15 @@ final class FieldInjector {
         return usedProperties;
     }
 
-    static void injectAnnotatedProperties(Object target) {
+    static void injectAnnotatedProperties(Object target, JkProperties properties) {
         for (final Field field : getPropertyFields(target.getClass())) {
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             if (injectProperty != null) {
                 String propertyName = injectProperty.value();
-                if (JkProperties.get(propertyName) == null) {
+                if (properties.get(propertyName) == null) {
                     JkLog.warn("No property '%s' defined for injecting in field %s.", propertyName, field);
                 }
-                String propertyValue = JkProperties.get(propertyName);
+                String propertyValue = properties.get(propertyName);
                 final Class<?> type = field.getType();
                 Object value;
                 try {

@@ -1,7 +1,7 @@
 ## Properties
 
 _Properties_ are pairs of String  _key-value_ that are used across Jeka system. It typically carries urls, local paths,
-tool versions or credentials. They can be globally accessed using `JkProperties#get*` static method.
+tool versions or credentials. 
 
 _Properties_ can be defined at different level, in order of precedence :
 
@@ -19,8 +19,9 @@ Here, project2 will inherit properties defined in _project1/jeka/project.propert
 project1
    + jeka
       + project.properties
-   + project2
-      + project.properities.
+   + project2   (sub-project)
+      + jeka
+         + project.properties
 ```
 
 !!! info
