@@ -46,42 +46,40 @@ public class CoreBuild extends JkBean {
 
     private void configure(JkProject project)  {
         project
+            .setJvmTargetVersion(JkJavaVersion.V8)
             .getArtifactProducer()
                 .putMainArtifact(this::doPackWithEmbeddedJar)
                 .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
                 .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper)
             .__
-            .getConstruction()
-                .getManifest()
-                    .addMainClass("dev.jeka.core.tool.Main").__
-                .getCompiler()
-                    .setForkedWithDefaultProcess()
+            .getCompiler()
+                .setForkedWithDefaultProcess()
+            .__
+            .getCompilation()
+                .getLayout()
+                    .mixResourcesAndSources()
                 .__
-                .setJvmTargetVersion(JkJavaVersion.V8)
+                .addJavaCompilerOptions("-Xlint:none","-g")
+            .__
+            .getTesting()
                 .getCompilation()
                     .getLayout()
                         .mixResourcesAndSources()
                     .__
-                    .addJavaCompilerOptions("-Xlint:none","-g")
                 .__
-                .getTesting()
-                    .getCompilation()
-                        .getLayout()
-                            .mixResourcesAndSources()
-                        .__
-                    .__
-                    .getTestSelection()
-                        .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
-                        .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)
-                    .__
-                    .getTestProcessor()
-                        .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE)
-                        .__
+                .getTestSelection()
+                    .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
+                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)
+                .__
+                .getTestProcessor()
+                    .getEngineBehavior()
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE)
                     .__
                 .__
             .__
-            .getDocumentation()
+            .getPackaging()
+                .getManifest()
+                    .addMainClass("dev.jeka.core.tool.Main").__
                 .getJavadocProcessor()
                     .setDisplayOutput(false)
                     .addOptions("-notimestamp")
@@ -131,7 +129,7 @@ public class CoreBuild extends JkBean {
         }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("wrapper/jekaw")).setPosixExecPermissions();
-        if (!projectBean.getProject().getConstruction().getTesting().isSkipped() && runIT) {
+        if (!projectBean.getProject().getTesting().isSkipped() && runIT) {
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
@@ -183,12 +181,12 @@ public class CoreBuild extends JkBean {
 
         // Main jar
         JkProject project = this.projectBean.getProject();
-        project.getConstruction().createBinJar(targetJar);
+        project.getPackaging().createBinJar(targetJar);
         JkZipTree jarTree = JkZipTree.of(targetJar);
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
-        JkPathTree classTree = JkPathTree.of(project.getConstruction().getCompilation().getLayout().resolveClassDir());
+        JkPathTree classTree = JkPathTree.of(project.getCompilation().getLayout().resolveClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/compile");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*")).zipTo(embeddedJar);
         JkZipTree.of(embeddedJar).andMatching( "META-INF/*.SF", "META-INF/*.RSA").deleteContent().close();
@@ -210,8 +208,8 @@ public class CoreBuild extends JkBean {
     }
 
     private void doWrapper(Path wrapperJar) {
-        projectBean.getProject().getConstruction().getCompilation().runIfNeeded();
-        JkPathTree.of(projectBean.getProject().getConstruction().getCompilation().getLayout()
+        projectBean.getProject().getCompilation().runIfNeeded();
+        JkPathTree.of(projectBean.getProject().getCompilation().getLayout()
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 

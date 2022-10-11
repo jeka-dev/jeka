@@ -39,7 +39,6 @@ public class SimpleWarJkBean extends JkBean {
                .setJvmTargetVersion(JkJavaVersion.V8)
                .includeJavadocAndSources(false, false)
                .getProject()
-                    .getConstruction()
                         .getCompilation()
                             .getLayout()
                                 .emptySources().addSource("src/main/javaweb").__.__

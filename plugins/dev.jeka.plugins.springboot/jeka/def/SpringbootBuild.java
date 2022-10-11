@@ -20,7 +20,7 @@ public class SpringbootBuild extends JkBean {
                 .configureRuntimeDeps(deps -> deps
                         .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
                 );
-        project.getConstruction().getTesting().setSkipped(true);
+        project.getTesting().setSkipped(true);
         project.getPublication()
             .setModuleId("dev.jeka:springboot-plugin")
             .getMaven()

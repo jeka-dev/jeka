@@ -28,10 +28,9 @@ public class JkImlGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
-            .getConstruction()
-                .getCompilation()
+            .getCompilation()
                     .configureDependencies(deps -> deps
-                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6"))).__.__;
+                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6"))).__;
         final JkImlGenerator baseGenerator = JkImlGenerator.of()
                 .setIdeSupport(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.computeIml().toDoc().toXml();
@@ -42,16 +41,15 @@ public class JkImlGeneratorIT {
         final JkProject coreProject = JkProject.of()
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
-                .getConstruction()
+                .getCompilation()
+                    .configureDependencies(deps -> deps.and(baseProject.toDependency())).__
+                .getTesting()
                     .getCompilation()
-                        .configureDependencies(deps -> deps.and(baseProject.toDependency())).__
-                    .getTesting()
-                        .getCompilation()
-                            .getLayout()
-                                .emptySources().addSource("test")
-                                .emptyResources().addResource("res-test").__.__
-                        .getTestProcessor()
-                            .setForkingProcess(true).__.__.__;
+                        .getLayout()
+                            .emptySources().addSource("test")
+                            .emptyResources().addResource("res-test").__.__
+                    .getTestProcessor()
+                        .setForkingProcess(true).__.__;
         final JkImlGenerator coreGenerator = JkImlGenerator.of()
                 .setIdeSupport(coreProject.getJavaIdeSupport());
         final String result1 = coreGenerator.computeIml().toDoc().toXml();
@@ -63,10 +61,9 @@ public class JkImlGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
-            .getConstruction()
                 .getCompilation()
                     .configureDependencies(deps -> deps
-                        .and(coreProject.toDependency())).__.__;
+                        .and(coreProject.toDependency())).__;
         final JkImlGenerator desktopGenerator = JkImlGenerator.of()
                 .setIdeSupport(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.computeIml().toDoc().toXml();
@@ -79,7 +76,6 @@ public class JkImlGeneratorIT {
 
     private void configureCompileLayout(JkProject javaProject) {
         javaProject
-            .getConstruction()
                 .getCompilation()
                     .getLayout()
                         .emptySources().addSource("src")
@@ -88,7 +84,6 @@ public class JkImlGeneratorIT {
 
     private void configureEmptyTestCompileLayout(JkProject javaProject) {
         javaProject
-            .getConstruction()
                 .getTesting()
                     .getCompilation()
                         .getLayout()

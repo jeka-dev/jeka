@@ -17,7 +17,6 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
@@ -87,14 +86,14 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         Path baseDir = getBaseDir();
         JkProject project = JkProject.of().setBaseDir(baseDir);
         if (!JkLog.isAcceptAnimation()) {
-            project.getConstruction().getTesting().getTestProcessor().getEngineBehavior().setProgressDisplayer(
+            project.getTesting().getTestProcessor().getEngineBehavior().setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
-        JkJavaCompiler compiler = project.getConstruction().getCompiler();
+        JkJavaCompiler compiler = project.getCompiler();
         compiler.setJdkHomesWithProperties(getRuntime().getProperties().getAllStartingWith("jeka.jdk."));
         if (!JkUtilsString.isBlank(this.javaVersion)) {
             JkJavaVersion version = JkJavaVersion.of(this.javaVersion);
-            project.getConstruction().setJvmTargetVersion(version);
+            project.setJvmTargetVersion(version);
         }
         applyRepo(project);
         projectConfigurators.accept(project);
@@ -115,7 +114,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         }
         project.getPublication().getIvy().setRepos(ivyPulishRepos);
         final JkRepoSet downloadRepos = repoProperties.getDownloadRepos();
-        JkDependencyResolver resolver = project.getConstruction().getDependencyResolver();
+        JkDependencyResolver resolver = project.getDependencyResolver();
         resolver.setRepos(resolver.getRepos().and(downloadRepos));
     }
 
@@ -125,17 +124,17 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         if (pack.sources != null && !pack.sources) {
             artifactProducer.removeArtifact(sources);
         } else if (pack.sources != null && pack.sources && !artifactProducer.getArtifactIds().contains(sources)) {
-            Consumer<Path> sourceJar = aProject.getDocumentation()::createSourceJar;
+            Consumer<Path> sourceJar = aProject.getPackaging()::createSourceJar;
             artifactProducer.putArtifact(sources, sourceJar);
         }
         JkArtifactId javadoc = JkProject.JAVADOC_ARTIFACT_ID;
         if (pack.javadoc != null && !pack.javadoc) {
             artifactProducer.removeArtifact(javadoc);
         } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
-            Consumer<Path> javadocJar = aProject.getDocumentation()::createJavadocJar;
+            Consumer<Path> javadocJar = aProject.getPackaging()::createJavadocJar;
             artifactProducer.putArtifact(javadoc, javadocJar);
         }
-        JkTestProcessor testProcessor = aProject.getConstruction().getTesting().getTestProcessor();
+        JkTestProcessor testProcessor = aProject.getTesting().getTestProcessor();
         if (test.fork != null && test.fork && testProcessor.getForkingProcess() == null) {
             final JkJavaProcess javaProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName())
                     .addJavaOptions(this.test.jvmOptions);
@@ -144,10 +143,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             testProcessor.setForkingProcess(false);
         }
         if (test.skip != null) {
-            aProject.getConstruction().getTesting().setSkipped(test.skip);
+            aProject.getTesting().setSkipped(test.skip);
         }
         if (this.compilerExtraArgs != null) {
-            aProject.getConstruction().getCompilation().addJavaCompilerOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+            aProject.getCompilation().addJavaCompilerOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }
     }
 
@@ -198,17 +197,17 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @JkDoc("Perform declared pre compilation task as generating sources.")
     public void preCompile() {
-        getProject().getConstruction().getCompilation().getPreCompileActions().run();
+        getProject().getCompilation().getPreCompileActions().run();
     }
 
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
-        getProject().getConstruction().getCompilation().run();
+        getProject().getCompilation().run();
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
     public void test() {    //NOSONAR
-        getProject().getConstruction().getTesting().run();
+        getProject().getTesting().run();
     }
 
     @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
@@ -223,15 +222,14 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        JkProjectConstruction construction = getProject().getConstruction();
-        showDependencies("compile", construction.getCompilation().getDependencies());
-        showDependencies("runtime", construction.getRuntimeDependencies());
-        showDependencies("test", construction.getTesting().getCompilation().getDependencies());
+        showDependencies("compile", project.getCompilation().getDependencies());
+        showDependencies("runtime", project.getPackaging().getRuntimeDependencies());
+        showDependencies("test", project.getTesting().getCompilation().getDependencies());
     }
 
     private void showDependencies(String purpose, JkDependencySet deps) {
         JkLog.info("\nDependencies for " + purpose + " : ");
-        final JkResolveResult resolveResult = this.getProject().getConstruction().getDependencyResolver().resolve(deps);
+        final JkResolveResult resolveResult = this.getProject().getDependencyResolver().resolve(deps);
         final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info("------------------------------");
         JkLog.info(String.join("\n", tree.toStrings()));
@@ -260,7 +258,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 throw new UncheckedIOException(e);
             }
         }
-        Document document = getProject().getConstruction().getDependenciesAsXml();
+        Document document = getProject().getDependenciesAsXml();
         try {
             transformer.transform(new DOMSource(document), new StreamResult(out));
         } catch (TransformerException e) {
@@ -276,7 +274,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @JkDoc("Generate sources")
     public void generateSources() {
-        getProject().getConstruction().getCompilation().generateSources();
+        getProject().getCompilation().generateSources();
     }
 
     @JkDoc("Run the generated jar.")
@@ -358,7 +356,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                     .addParams(JkUtilsString.translateCommandline(programArgs));
             if (useRuntimeDepsForClasspath) {
                 javaProcess
-                        .setClasspath(ProjectJkBean.this.getProject().getConstruction().resolveRuntimeDependencies().getFiles());
+                        .setClasspath(ProjectJkBean.this.getProject().getPackaging().resolveRuntimeDependencies().getFiles());
             }
             Consumer<Process> processConsumer = process ->
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -397,10 +395,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
         private void scaffoldProjectStructure(JkProject configuredProject) {
             JkLog.info("Create source directories.");
-            JkCompileLayout prodLayout = configuredProject.getConstruction().getCompilation().getLayout();
+            JkCompileLayout prodLayout = configuredProject.getCompilation().getLayout();
             prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
             prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-            JkCompileLayout testLayout = configuredProject.getConstruction().getTesting().getCompilation().getLayout();
+            JkCompileLayout testLayout = configuredProject.getTesting().getCompilation().getLayout();
             testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
             testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
 
@@ -427,7 +425,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                         "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
                 JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
                 Path sourceDir =
-                        configuredProject.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
+                        configuredProject.getCompilation().getLayout().getSources().toList().get(0).getRoot();
                 String pluginCode = JkUtilsIO.read(ProjectJkBean.class.getResource("pluginclass.snippet"));
                 JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxJkBean.java"))
                         .createIfNotExist()

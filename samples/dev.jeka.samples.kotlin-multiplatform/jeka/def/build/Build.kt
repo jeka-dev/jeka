@@ -48,7 +48,7 @@ class Build : JkBean() {
                 .configureTestDeps {deps -> deps
                     .and(JkKotlinModules.TEST_JUNIT5)
                 }
-        project.construction.manifest.addMainClass("ServerKt")
+        project.packaging.manifest.addMainClass("ServerKt")
         project.includeJavadocAndSources(false, false)
         kotlin.jvm()
             .useFatJarForMainArtifact()
@@ -114,7 +114,7 @@ class Build : JkBean() {
     object CleanCompile {
         @JvmStatic fun main(args: Array<String>) {
             val build = JkInit.instanceOf(Build::class.java, *args)
-            build.kotlin.jvm().project.construction.compilation.run()
+            build.kotlin.jvm().project.compilation.run()
         }
     }
 

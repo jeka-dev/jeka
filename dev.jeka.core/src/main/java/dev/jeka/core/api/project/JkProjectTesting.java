@@ -1,6 +1,5 @@
 package dev.jeka.core.api.project;
 
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
@@ -22,7 +21,7 @@ import java.util.function.UnaryOperator;
  */
 public class JkProjectTesting {
 
-    private final JkProjectConstruction construction;
+    private final JkProject project;
 
     private final JkProjectCompilation<JkProjectTesting> compilation;
 
@@ -42,12 +41,12 @@ public class JkProjectTesting {
     /**
      * For parent chaining
      */
-    public final JkProjectConstruction __;
+    public final JkProject __;
 
-    JkProjectTesting(JkProjectConstruction construction) {
-        this.construction = construction;
-        this.__ = construction;
-        compilation = JkProjectCompilation.ofTest(construction, this);
+    JkProjectTesting(JkProject project) {
+        this.project = project;
+        this.__ = project;
+        compilation = JkProjectCompilation.ofTest(project, this);
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
     }
@@ -85,13 +84,12 @@ public class JkProjectTesting {
      * dependencies defined in testing/compile.
      */
     public JkPathSequence getTestClasspath() {
-        JkDependencyResolver resolver = construction.getDependencyResolver();
-        JkProjectCompilation prodCompilation = construction.getCompilation();
+        JkProjectCompilation prodCompilation = project.getCompilation();
         return JkPathSequence.of()
                 .and(compilation.getLayout().resolveClassDir())
                 .and(compilation.resolveDependencies().getFiles())
                 .and(prodCompilation.getLayout().resolveClassDir())
-                .and(construction.resolveRuntimeDependencies().getFiles())
+                .and(project.getPackaging().resolveRuntimeDependencies().getFiles())
                 .withoutDuplicates();
     }
 
@@ -123,7 +121,7 @@ public class JkProjectTesting {
     }
 
     public Path getReportDir() {
-        return construction.getProject().getOutputDir().resolve(reportDir);
+        return project.getOutputDir().resolve(reportDir);
     }
 
     public JkProjectTesting setReportDir(String reportDir) {
@@ -142,7 +140,7 @@ public class JkProjectTesting {
      */
     public void run() {
         JkLog.startTask("Process tests");
-        this.construction.getCompilation().runIfNeeded();
+        this.project.getCompilation().runIfNeeded();
         this.compilation.run();
         executeWithTestProcessor();
         JkLog.endTask();
@@ -167,7 +165,7 @@ public class JkProjectTesting {
     }
 
     private void executeWithTestProcessor() {
-        UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(construction.getProject().getOutputDir());
+        UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(project.getOutputDir());
         testSelection.setTestClassRoots(op);
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
         if (breakOnFailures) {
@@ -179,7 +177,7 @@ public class JkProjectTesting {
         JkTestProcessor result = JkTestProcessor.ofParent(this);
         final Path reportDir = compilation.getLayout().getOutputDir().resolve(this.reportDir);
         result
-            .setRepoSetSupplier(() -> this.construction.getDependencyResolver().getRepos())
+            .setRepoSetSupplier(() -> project.getDependencyResolver().getRepos())
             .getEngineBehavior()
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);

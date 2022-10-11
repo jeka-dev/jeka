@@ -29,7 +29,7 @@ public class JkProjectSimpleFacade {
     }
 
     public JkProjectSimpleFacade setJvmTargetVersion(JkJavaVersion version) {
-        project.getConstruction().setJvmTargetVersion(version);
+        project.setJvmTargetVersion(version);
         return this;
     }
 
@@ -54,7 +54,7 @@ public class JkProjectSimpleFacade {
     }
 
     public JkProjectSimpleFacade setJavaSourceEncoding(String sourceEncoding) {
-        project.getConstruction().setSourceEncoding(sourceEncoding);
+        project.setSourceEncoding(sourceEncoding);
         return this;
     }
 
@@ -63,8 +63,8 @@ public class JkProjectSimpleFacade {
      * Sets test Java source files and resources in "test".
      */
     public JkProjectSimpleFacade useSimpleLayout() {
-        project.getConstruction().getCompilation().getLayout().setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
-        project.getConstruction().getTesting().getCompilation().getLayout()
+        project.getCompilation().getLayout().setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
+        project.getTesting().getCompilation().getLayout()
                 .setSourceSimpleStyle(JkCompileLayout.Concern.TEST);
         return this;
     }
@@ -73,8 +73,8 @@ public class JkProjectSimpleFacade {
      * The resources will be located in same dirs than sources.
      */
     public JkProjectSimpleFacade mixResourcesAndSources() {
-        project.getConstruction().getCompilation().getLayout().mixResourcesAndSources();
-        project.getConstruction().getTesting().getCompilation().getLayout().mixResourcesAndSources();
+        project.getCompilation().getLayout().mixResourcesAndSources();
+        project.getTesting().getCompilation().getLayout().mixResourcesAndSources();
         return this;
     }
 
@@ -84,17 +84,17 @@ public class JkProjectSimpleFacade {
     }
 
     public JkProjectSimpleFacade configureCompileDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.getConstruction().getCompilation().configureDependencies(modifier);
+        project.getCompilation().configureDependencies(modifier);
         return this;
     }
 
     public JkProjectSimpleFacade configureRuntimeDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.getConstruction().configureRuntimeDependencies(modifier);
+        project.getPackaging().configureRuntimeDependencies(modifier);
         return this;
     }
 
     public JkProjectSimpleFacade configureTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.getConstruction().getTesting().getCompilation().configureDependencies(modifier);
+        project.getTesting().getCompilation().configureDependencies(modifier);
         return this;
     }
 
@@ -121,7 +121,7 @@ public class JkProjectSimpleFacade {
     }
 
     public JkProjectSimpleFacade skipTests(boolean skipped) {
-        project.getConstruction().getTesting().setSkipped(skipped);
+        project.getTesting().setSkipped(skipped);
         return this;
     }
 
@@ -131,14 +131,6 @@ public class JkProjectSimpleFacade {
     public JkProjectSimpleFacade addTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
         return configureTestDeps(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
     }
-
-    /**
-     * Specify the dependencies to add or remove from the production compilation dependencies to
-     * get the runtime dependencies.
-     * @param modifier A function that define the runtime dependencies from the compilation ones.
-     */
-
-
 
     public JkProjectSimpleFacade setPublishedVersion(Supplier<String> versionSupplier) {
         project.getPublication().setVersion(versionSupplier);
@@ -190,7 +182,7 @@ public class JkProjectSimpleFacade {
      */
     public JkProjectSimpleFacade addTestExcludeFilterSuffixedBy(String suffix, boolean condition) {
         if (condition) {
-            project.getConstruction().getTesting().getTestSelection().addExcludePatterns(".*" + suffix);
+            project.getTesting().getTestSelection().addExcludePatterns(".*" + suffix);
         }
         return this;
     }
@@ -201,7 +193,7 @@ public class JkProjectSimpleFacade {
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
     public JkProjectSimpleFacade addTestIncludeFilterSuffixedBy(String suffix, boolean condition) {
-        project.getConstruction().getTesting().getTestSelection().addIncludePatternsIf(condition, ".*" + suffix);
+        project.getTesting().getTestSelection().addIncludePatternsIf(condition, ".*" + suffix);
         return this;
     }
 
@@ -211,7 +203,7 @@ public class JkProjectSimpleFacade {
      * This is a standard filter in many tools.
      */
     public JkProjectSimpleFacade addTestIncludeFilterOnStandardNaming(boolean condition) {
-        project.getConstruction().getTesting().getTestSelection().addIncludePatternsIf(condition,
+        project.getTesting().getTestSelection().addIncludePatternsIf(condition,
                 JkTestSelection.STANDARD_INCLUDE_PATTERN);
        return this;
     }

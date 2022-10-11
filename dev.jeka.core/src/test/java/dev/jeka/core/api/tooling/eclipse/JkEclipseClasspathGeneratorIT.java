@@ -31,7 +31,7 @@ public class JkEclipseClasspathGeneratorIT {
                 .getProject();
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
-            .setDefDependencies(baseProject.getConstruction().getDependencyResolver(),
+            .setDefDependencies(baseProject.getDependencyResolver(),
                     JkDependencySet.of().and(JkPopularLibs.GUAVA.toCoordinate("21.0").toString()));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
@@ -40,7 +40,6 @@ public class JkEclipseClasspathGeneratorIT {
         final JkProject coreProject = JkProject.of()
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
-            .getConstruction()
             .getCompilation()
                 .configureDependencies(deps -> deps.and(baseProject.toDependency())).__
                 .getTesting()
@@ -49,7 +48,7 @@ public class JkEclipseClasspathGeneratorIT {
                             .emptySources().addSource("test")
                             .emptyResources().addResource("res-test").__.__
                     .getTestProcessor()
-                        .setForkingProcess(true).__.__.__;
+                        .setForkingProcess(true).__.__;
         final JkEclipseClasspathGenerator coreGenerator =
                 JkEclipseClasspathGenerator.of(coreProject.getJavaIdeSupport());
         final String coreClasspath = coreGenerator.generate();
@@ -60,9 +59,8 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
-            .getConstruction()
-                .getCompilation()
-                    .configureDependencies(deps -> deps.and(coreProject.toDependency())).__.__;
+            .getCompilation()
+                    .configureDependencies(deps -> deps.and(coreProject.toDependency())).__;
         desktopProject.getArtifactProducer().makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());
@@ -73,7 +71,6 @@ public class JkEclipseClasspathGeneratorIT {
 
     private void configureCompileLayout(JkProject javaProject) {
         javaProject
-            .getConstruction()
                 .getCompilation()
                     .getLayout()
                         .emptySources().addSource("src")
@@ -82,7 +79,6 @@ public class JkEclipseClasspathGeneratorIT {
 
     private void configureTestCompileLayout(JkProject javaProject) {
         javaProject
-            .getConstruction()
                 .getTesting()
                     .getCompilation()
                         .getLayout()

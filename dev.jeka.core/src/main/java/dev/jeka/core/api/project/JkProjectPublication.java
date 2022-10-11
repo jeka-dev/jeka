@@ -47,15 +47,15 @@ public class JkProjectPublication {
         maven = JkMavenPublication.of(this)
                 .setArtifactLocatorSupplier(() -> project.getArtifactProducer())
                 .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                        project.getConstruction().getCompilation().getDependencies(),
-                        project.getConstruction().getRuntimeDependencies(),
+                        project.getCompilation().getDependencies(),
+                        project.getPackaging().getRuntimeDependencies(),
                         project.getDuplicateConflictStrategy()))
-                .setBomResolutionRepos(() -> project.getConstruction().getDependencyResolver().getRepos());
+                .setBomResolutionRepos(() -> project.getDependencyResolver().getRepos());
         ivy = JkIvyPublication.of(this)
                 .addArtifacts(() -> project.getArtifactProducer())
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
-                        project.getConstruction().getCompilation().getDependencies(),
-                        project.getConstruction().getRuntimeDependencies(), project.getDuplicateConflictStrategy()));
+                        project.getCompilation().getDependencies(),
+                        project.getPackaging().getRuntimeDependencies(), project.getDuplicateConflictStrategy()));
         this.preActions = JkRunnables.ofParent(this);
         this.postActions = JkRunnables.ofParent(this);
     }

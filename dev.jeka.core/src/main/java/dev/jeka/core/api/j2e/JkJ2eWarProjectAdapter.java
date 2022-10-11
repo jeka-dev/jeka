@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
@@ -43,7 +42,6 @@ public class JkJ2eWarProjectAdapter {
 
     /**
      * Configures a project in order it publishes war archive.
-     * It impacts {@link JkProjectPublication#pack()} as jar archive may be created or not.
      * @param publishedAsMainArtifact if true, war will be published as the main artifact, so without any dependencies.
      * @param keepJar if false, no jar archive will be created/deployed.
      */
@@ -78,7 +76,7 @@ public class JkJ2eWarProjectAdapter {
         if (webappPath != null) {
             effectiveWebappPath = project.getBaseDir().resolve(webappPath);
         } else {
-            Path src =  project.getConstruction().getCompilation().getLayout().getSources().toList().get(0).getRoot();
+            Path src =  project.getCompilation().getLayout().getSources().toList().get(0).getRoot();
             effectiveWebappPath = src.resolveSibling("webapp");
         }
         generateWar(project, dist, effectiveWebappPath, extraStaticResourcePath, generateExploded);
@@ -88,12 +86,12 @@ public class JkJ2eWarProjectAdapter {
                                     boolean generateDir) {
 
         JkJ2eWarArchiver archiver = JkJ2eWarArchiver.of()
-                .setClassDir(project.getConstruction().getCompilation().getLayout().resolveClassDir())
+                .setClassDir(project.getCompilation().getLayout().resolveClassDir())
                 .setExtraStaticResourceDir(extraStaticResourcePath)
-                .setLibs(project.getConstruction().resolveRuntimeDependencies().getFiles().getEntries())
+                .setLibs(project.getPackaging().resolveRuntimeDependencies().getFiles().getEntries())
                 .setWebappDir(webappPath);
-        project.getConstruction().getCompilation().runIfNeeded();
-        project.getConstruction().getTesting().runIfNeeded();
+        project.getCompilation().runIfNeeded();
+        project.getTesting().runIfNeeded();
         if (generateDir) {
             Path dirPath = project.getOutputDir().resolve("j2e-war");
             archiver.generateWarDir(dirPath);
