@@ -65,7 +65,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
 
-    private final JkDependencyResolver dependencyResolver;
+    private final JkDependencyResolver<JkProject> dependencyResolver;
 
     private final JkJavaCompiler<JkProject> compiler;
 
@@ -93,12 +93,12 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
-
-        dependencyResolver = JkDependencyResolver.of()
+        dependencyResolver = JkDependencyResolver.ofParent(this)
                 .addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral())
                 .setUseCache(true);
         registerArtifacts();
         publication = new JkProjectPublication(this);
+        addTextAndLocalDependenciesIfNeeded();
     }
 
     public static JkProject of() {
@@ -196,7 +196,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return packaging;
     }
 
-    public JkDependencyResolver getDependencyResolver() {
+    public JkDependencyResolver<JkProject> getDependencyResolver() {
         return dependencyResolver;
     }
 

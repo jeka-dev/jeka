@@ -41,7 +41,6 @@ class Junit5Build extends JkBean {
      */
     private void configure(JkProject project) {
         project
-            .getConstruction()
                 .getTesting()
                     .getCompilation()
                         .configureDependencies(deps -> deps

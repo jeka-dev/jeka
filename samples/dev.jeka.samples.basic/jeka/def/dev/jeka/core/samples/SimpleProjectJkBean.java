@@ -46,7 +46,6 @@ public class SimpleProjectJkBean extends JkBean {
                .setPublishedModuleId("dev.jeka:sample-javaplugin")
                .setPublishedVersion("1.0-SNAPSHOT")
        .getProject()
-           .getConstruction()
                .getCompiler()
                     .setForkedWithDefaultProcess()
                .__
@@ -63,7 +62,6 @@ public class SimpleProjectJkBean extends JkBean {
                         .__
                     .__
                .__
-           .__
            .getPublication()
                .getMaven()
                     .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose

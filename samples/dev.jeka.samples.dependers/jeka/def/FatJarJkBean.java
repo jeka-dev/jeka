@@ -21,7 +21,7 @@ public class FatJarJkBean extends JkBean {
     private void configure(JkProject project) {
         project
             .getArtifactProducer()
-                .putMainArtifact(project.getConstruction()::createFatJar)
+                .putMainArtifact(project.getPackaging()::createFatJar)
             .__
             .simpleFacade()
                 .configureCompileDeps(deps -> deps

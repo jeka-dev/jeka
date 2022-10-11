@@ -4,6 +4,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkBean;
@@ -58,9 +59,16 @@ public class NodeJsJkBean extends JkBean {
        JkLog.info("Downloading " + url + "... ");
        tempZip.fetchContentFrom(constructDownloadUrl());
        JkLog.info("unpack " + url + " to " + getDistribPath());
-       try (JkZipTree zipTree = JkZipTree.of(tempZip.get())) {
-           zipTree.goTo(nodeArchiveFolderName()).copyTo(getDistribPath(), StandardCopyOption.REPLACE_EXISTING);
-       } finally {
+       if (JkUtilsSystem.IS_WINDOWS) {
+           try (JkZipTree zipTree = JkZipTree.of(tempZip.get())) {
+               zipTree.goTo(nodeArchiveFolderName()).copyTo(getDistribPath(), StandardCopyOption.REPLACE_EXISTING);
+           } finally {
+               JkUtilsPath.deleteFile(tempZip.get());
+           }
+       } else {
+           JkProcess.of("tar", "-xf", tempZip.toString(), "-C", getDistribPath().toString())
+                   .setLogCommand(true)
+                   .run();
            JkUtilsPath.deleteFile(tempZip.get());
        }
 
