@@ -1,5 +1,8 @@
 package dev.jeka.core.wrapper;
 
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -86,6 +89,11 @@ public class Booter {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        if (!JkUtilsSystem.IS_WINDOWS) {
+            JkPathFile.of(dir.resolve("jeka")).setPosixExecPermissions();
+            JkPathFile.of(dir.resolve("wrapper/jekaw")).setPosixExecPermissions();
+        }
+
         return dir;
     }
 

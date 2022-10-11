@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 
@@ -72,6 +73,16 @@ public final class JkExternalToolApi {
 
     public static Map<String, String> getCmdPropertiesContent(Path projectDir) {
         return Environment.projectCmdProperties(projectDir);
+    }
+
+    public static JkProperties getGlobalProperties() {
+        JkProperties result = JkProperties.ofSystemProperties()
+                .withFallback(JkProperties.ofEnvironmentVariables());
+        Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
+        if (Files.exists(globalPropertiesFile)) {
+            result = result.withFallback(JkProperties.of(globalPropertiesFile));
+        }
+        return result;
     }
 
 }
