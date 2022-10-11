@@ -20,7 +20,7 @@ public class JkNodeJs {
     }
 
     public void npm(Path workingDir, String commandLine) {
-        String cmd = JkUtilsSystem.IS_WINDOWS ? "npm.cmd" : "npm";
+        String cmd = JkUtilsSystem.IS_WINDOWS ? "npm.cmd" : "bin/npm";
         createProcess(workingDir, cmd).exec(JkUtilsString.translateCommandline(commandLine));
     }
 
@@ -35,6 +35,6 @@ public class JkNodeJs {
         if (JkUtilsSystem.IS_WINDOWS) {
             return Files.exists(installDir.resolve("npm.cmd"));
         }
-        return Files.exists(installDir.resolve("npm"));
+        return Files.exists(installDir.resolve("bin/npm"));
     }
 }

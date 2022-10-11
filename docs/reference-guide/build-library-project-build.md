@@ -76,46 +76,43 @@ project
 +- outputDir
 +- artifactProducer (define artifacts procuded by the build)
 +- duplicateDependencyConflictStrategy
-+- construction  (Produce packaged binaries from sources. This includes test checking)
-|  +- jvmTargetVersion
-|  +- sourceEncoding
-|  +- javaCompiler
-|  +- dependencyResolver
++- jvmTargetVersion
++- sourceEncoding
++- javaCompiler
++- dependencyResolver
++- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
+|  +- layout (where are located source and resource files)
+|  +- source generators (plugin mechanism for generating source files)
+|  +- dependencies   (stands for compile dependencies)
+|  +- preCompileActions (including resources processing)
+|  +- compileActions (including java sources compilation. Compilation for other languages can be added here)
+|  +- postCompileActions
+|  +- methods : resolveDependencies(), run()
++- testing
+|  +- compilation (same as above 'compilation' but for test sources/resources)
+|  |  +- layout
+|  |  +- dependencies (stands for test dependencies)
+|  |  + ...
+|  +- breakOnFailure (true/false)
+|  +- skipped (true/false)
+|  +- testProcessor
+|  |  +- forkedProcess (configured the forked process who will run tests)
+|  |  +- preActions
+|  |  +- postActions
+|  |  +- engineBehavior
+|  |  |  +- testReportDir
+|  |  |  +- progressDisplayer
+|  |  |  +- launcherConfiguration (based on junit5 platform API)
+|  |  +- testSelection
+|  |  |  +- includePatterns
+|  |  |  +- includeTags
+|  +- method : run()
++- packaging (produces javadoc and source jar and bin jars)
+|  +- javadocConfiguration
 |  +- runtimeDependencies
 |  +- manifest
 |  +- fatJar (customize produced fat/uber jar if any)
-|  +- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
-|  |  +- layout (where are located source and resource files)
-|  |  +- source generators (plugin mechanism for generating source files)
-|  |  +- dependencies   (stands for compile dependencies)
-|  |  +- preCompileActions (including resources processing)
-|  |  +- compileActions (including java sources compilation. Compilation for other languages can be added here)
-|  |  +- postCompileActions
-|  |  +- methods : resolveDependencies(), run()
-|  +- testing
-|  |  +- compilation (same as above 'compilation' but for test sources/resources)
-|  |  |  +- layout
-|  |  |  +- dependencies (stands for test dependencies)
-|  |  |  + ...
-|  |  +- breakOnFailure (true/false)
-|  |  +- skipped (true/false)
-|  |  +- testProcessor
-|  |  |  +- forkedProcess (configured the forked process who will run tests)
-|  |  |  +- preActions
-|  |  |  +- postActions
-|  |  |  +- engineBehavior
-|  |  |  |  +- testReportDir
-|  |  |  |  +- progressDisplayer
-|  |  |  |  +- launcherConfiguration (based on junit5 platform API)
-|  |  |  +- testSelection
-|  |  |  |  +- includePatterns
-|  |  |  |  +- includeTags
-|  |  +- method : run()
-|  +- methods : createBinJar(), createFatJar(), resolveRuntimeDependencies(), getDependenciesAsXml()
-|  +            includeLocalDependencies(), includeTextDependencies()            
-+- documentation (produces javadoc and source jar)
-|  +- javadocConfiguration
-|  +- methods : createJavadocJar(), createSourceJar(), run()
+|  +- methods : createJavadocJar(), createSourceJar(), run(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
 +- publication (define information about module and artifacts to be published)
 |  +- moduleId (group:name)
 |  +- version
@@ -128,7 +125,7 @@ project
 |  |  +- ivySpecifictInfo
 |  |  +- method : publish()
 |  +- methods : publish(), getVersion(), getModuleId()
-+ methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport(), pack()
++ methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport(), pack(), +- methods : getDependenciesAsXml(), includeLocalAndTextDependencies()           
 ```
 
 For simplicity sake, `JkProject` provides a facade in order to make common settings friendly,

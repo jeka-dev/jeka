@@ -10,6 +10,9 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
@@ -58,17 +61,26 @@ public class NodeJsJkBean extends JkBean {
        String url = constructDownloadUrl();
        JkLog.info("Downloading " + url + "... ");
        tempZip.fetchContentFrom(constructDownloadUrl());
-       JkLog.info("unpack " + url + " to " + getDistribPath());
+       Path distribPath = getDistribPath();
+       JkLog.info("unpack " + url + " to " + distribPath);
        if (JkUtilsSystem.IS_WINDOWS) {
            try (JkZipTree zipTree = JkZipTree.of(tempZip.get())) {
-               zipTree.goTo(nodeArchiveFolderName()).copyTo(getDistribPath(), StandardCopyOption.REPLACE_EXISTING);
+               zipTree.goTo(nodeArchiveFolderName()).copyTo(distribPath, StandardCopyOption.REPLACE_EXISTING);
            } finally {
                JkUtilsPath.deleteFile(tempZip.get());
            }
        } else {
-           JkProcess.of("tar", "-xf", tempZip.toString(), "-C", getDistribPath().toString())
+           Path distribParent = distribPath.getParent();
+           JkUtilsPath.createDirectories(distribParent);
+           JkProcess.of("tar", "-xf", tempZip.toString(), "-C", distribParent.toString())
                    .setLogCommand(true)
                    .run();
+           Path extractDir = distribParent.resolve(nodeArchiveFolderName());
+           try {
+               Files.move(extractDir, extractDir.resolveSibling(version), StandardCopyOption.REPLACE_EXISTING);
+           } catch (IOException e) {
+               throw new UncheckedIOException(e);
+           }
            JkUtilsPath.deleteFile(tempZip.get());
        }
 
