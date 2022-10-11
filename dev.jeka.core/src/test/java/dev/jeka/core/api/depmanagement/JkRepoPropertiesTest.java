@@ -6,21 +6,21 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class JkRepoFromPropertiesTest {
+public class JkRepoPropertiesTest {
 
     private static final String URL = "https://myurl";
 
     @Test
     public void getPublishRepository_default_mavenCentral() {
         clearProps();
-        assertEquals(JkRepo.ofMavenCentral().getUrl(), JkRepoFromProperties.getDownloadRepos().getRepos().get(0).getUrl());
+        assertEquals(JkRepo.ofMavenCentral().getUrl(), systemRepoProps().getDownloadRepos().getRepos().get(0).getUrl());
     }
 
     @Test
     public void getPublishRepository_downloadPropOnly_present() {
         clearProps();
         System.setProperty("jeka.repos.download", URL);
-        JkRepo repo = JkRepoFromProperties.getDownloadRepos().getRepos().get(0);
+        JkRepo repo = systemRepoProps().getDownloadRepos().getRepos().get(0);
         assertEquals(URL, repo.getUrl().toString());
     }
 
@@ -34,7 +34,7 @@ public class JkRepoFromPropertiesTest {
         System.setProperty("jeka.repos.download.username", name);
         System.setProperty("jeka.repos.download.password", pwd);
         System.setProperty("jeka.repos.download.realm", realm);
-        JkRepo repo = JkRepoFromProperties.getDownloadRepos().getRepos().get(0);
+        JkRepo repo = systemRepoProps().getDownloadRepos().getRepos().get(0);
         assertEquals(URL, repo.getUrl().toString());
         assertEquals(name, repo.getCredentials().getUserName());
         assertEquals(pwd, repo.getCredentials().getPassword());
@@ -56,13 +56,13 @@ public class JkRepoFromPropertiesTest {
         String myRepoUsername = "myRepoUsername";
         System.setProperty("jeka.repos.myRepo", myRepoUrl);
         System.setProperty("jeka.repos.myRepo.username", myRepoUsername);
-        JkRepo repo = JkRepoFromProperties.getDownloadRepos().getRepos().get(0);
+        JkRepo repo = systemRepoProps().getDownloadRepos().getRepos().get(0);
         assertEquals(URL, repo.getUrl().toString());
         assertEquals(name, repo.getCredentials().getUserName());
         assertEquals(pwd, repo.getCredentials().getPassword());
         assertEquals(realm, repo.getCredentials().getRealm());
 
-        JkRepo repo2 = JkRepoFromProperties.getDownloadRepos().getRepos().get(1);
+        JkRepo repo2 = systemRepoProps().getDownloadRepos().getRepos().get(1);
         assertEquals(myRepoUrl, repo2.getUrl().toString());
         assertEquals(myRepoUsername, repo2.getCredentials().getUserName());
     }
@@ -73,12 +73,12 @@ public class JkRepoFromPropertiesTest {
         clearProps();
         String name = "myname";
         String pwd = "myPwd";
-        System.setProperty("jeka.repos.download", JkRepoFromProperties.JEKA_GITHUB_ALIAS
-                + ", " + JkRepoFromProperties.JEKA_GITHUB_ALIAS);
+        System.setProperty("jeka.repos.download", JkRepoProperties.JEKA_GITHUB_ALIAS
+                + ", " + JkRepoProperties.JEKA_GITHUB_ALIAS);
         System.setProperty("jeka.repos.jekaGithub.username", name);
         System.setProperty("jeka.repos.jekaGithub.password", pwd);
 
-        JkRepo repo = JkRepoFromProperties.getDownloadRepos().getRepos().get(1);
+        JkRepo repo = systemRepoProps().getDownloadRepos().getRepos().get(1);
         JkRepo ghRepo = JkRepo.ofGitHub("jeka-dev", "jeka");
         assertEquals(ghRepo.getUrl(), repo.getUrl());
         assertEquals(name, repo.getCredentials().getUserName());
@@ -86,7 +86,11 @@ public class JkRepoFromPropertiesTest {
         assertEquals(ghRepo.getCredentials().getRealm(), repo.getCredentials().getRealm());
     }
 
+    private static JkRepoProperties systemRepoProps() {
+        return JkRepoProperties.of(JkProperties.ofSystemProperties());
+    }
+
     private static void clearProps() {
-        JkProperties.find("jeka.repos.").forEach(System::clearProperty);
+        JkProperties.ofSystemProperties().find("jeka.repos.").forEach(System::clearProperty);
     }
 }

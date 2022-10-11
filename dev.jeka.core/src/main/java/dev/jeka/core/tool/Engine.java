@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -26,8 +27,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static dev.jeka.core.api.depmanagement.JkRepoFromProperties.getDownloadRepos;
 
 /**
  * Engine having responsibility of compile def classes, instantiate KBeans and run.<br/>
@@ -64,7 +63,7 @@ final class Engine {
                 .getDefaultParams()
                     .setFailOnDependencyResolutionError(true)
                 .__
-                .addRepos(getDownloadRepos())
+                .addRepos(JkRepoProperties.of(JkRuntime.constructProperties(baseDir)).getDownloadRepos())
                 .addRepos(JkRepo.ofLocal());
     }
 

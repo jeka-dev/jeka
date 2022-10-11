@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
@@ -91,7 +91,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
         JkJavaCompiler compiler = project.getConstruction().getCompiler();
-        compiler.setJdkHomesWithProperties(JkProperties.getAllStartingWith("jeka.jdk."));
+        compiler.setJdkHomesWithProperties(getRuntime().getProperties().getAllStartingWith("jeka.jdk."));
         if (!JkUtilsString.isBlank(this.javaVersion)) {
             JkJavaVersion version = JkJavaVersion.of(this.javaVersion);
             project.getConstruction().setJvmTargetVersion(version);
@@ -103,17 +103,18 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     }
 
     private void applyRepo(JkProject project) {
-        JkRepoSet mavenPublishRepos = JkRepoFromProperties.getPublishRepository();
+        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRuntime().getProperties());
+        JkRepoSet mavenPublishRepos = repoProperties.getPublishRepository();
         if (mavenPublishRepos.getRepos().isEmpty()) {
             mavenPublishRepos = mavenPublishRepos.and(JkRepo.ofLocal());
         }
         project.getPublication().getMaven().setPublishRepos(mavenPublishRepos);
-        JkRepoSet ivyPulishRepos = JkRepoFromProperties.getPublishRepository();
+        JkRepoSet ivyPulishRepos = repoProperties.getPublishRepository();
         if (ivyPulishRepos.getRepos().isEmpty()) {
             ivyPulishRepos = ivyPulishRepos.and(JkRepo.ofLocal());
         }
         project.getPublication().getIvy().setRepos(ivyPulishRepos);
-        final JkRepoSet downloadRepos = JkRepoFromProperties.getDownloadRepos();
+        final JkRepoSet downloadRepos = repoProperties.getDownloadRepos();
         JkDependencyResolver resolver = project.getConstruction().getDependencyResolver();
         resolver.setRepos(resolver.getRepos().and(downloadRepos));
     }

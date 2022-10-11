@@ -1,7 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.api.depmanagement.JkRepoFromProperties.getDownloadRepos;
 
 /**
  * Class for instantiating builds while displaying meaningful information about environment on console.
@@ -32,7 +31,7 @@ public final class JkInit {
      */
     public static <T extends JkBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
-        PropertyLoader.load(); // Force static initializer
+        Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
         if (!Files.isDirectory(Paths.get("jeka")) ) {
             throw new IllegalStateException("The current directory " + Paths.get("").toAbsolutePath()
                     + " does not seem to be a Jeka project as " +
@@ -57,16 +56,17 @@ public final class JkInit {
             commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, JkBean.name(clazz)));
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.setImportedProjects(getImportedProjects(clazz));
+            JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
             jkRuntime.setDependencyResolver(JkDependencyResolver.of()
                     .getDefaultParams()
                         .setFailOnDependencyResolutionError(true)
                     .__
-                    .addRepos(getDownloadRepos())
+                    .addRepos(JkRepoProperties.of(properties).getDownloadRepos())
                     .addRepos(JkRepo.ofLocal()));
             jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
             jkRuntime.init(commands);
             final T jkBean = jkRuntime.getBean(clazz);
-            JkLog.info(jkBean.toString() + " is ready to run.");
+            JkLog.info(jkBean + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();
             }
@@ -95,8 +95,6 @@ public final class JkInit {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
         sb.append("\nCommand Line : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
-        sb.append(propsAsString("Specified properties", PropertyLoader.toDisplayedMap(
-                JkProperties.getAllStartingWith("jeka."))));
         sb.append("\nJava Home : " + System.getProperty("java.home"));
         sb.append("\nJava Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         sb.append("\nJeka Version : " + JkInfo.getJekaVersion());
@@ -107,7 +105,8 @@ public final class JkInit {
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
         sb.append("\nJeka Cache Dir : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
-        sb.append("\nJeka download Repositories : " + JkRepoFromProperties.getDownloadRepos());
+        JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
+        sb.append("\nJeka download Repositories : " + JkRepoProperties.of(properties).getDownloadRepos());
         JkLog.info(sb.toString());
     }
 

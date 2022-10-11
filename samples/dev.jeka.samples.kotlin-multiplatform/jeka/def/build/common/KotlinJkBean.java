@@ -1,21 +1,22 @@
 package build.common;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.function.JkConsumers;
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectCompilation;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectCompilation;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInjectClasspath;
 
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -38,7 +39,7 @@ public class KotlinJkBean extends JkBean {
     public String kotlinVersion;
 
     protected KotlinJkBean() {
-        kotlinVersion = JkProperties.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
+        kotlinVersion = getRuntime().getProperties().get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
     }
 
     public final JkKotlinJvmProject jvm() {
@@ -111,7 +112,7 @@ public class KotlinJkBean extends JkBean {
                 JkLog.warn("No version of kotlin has been specified, will use the version installed on KOTLIN_HOME : "
                         + kotlinCompiler.getVersion());
             } else {
-                kotlinCompiler = JkKotlinCompiler.ofJvm(JkRepoFromProperties.getDownloadRepos(), kotlinVersion);
+                kotlinCompiler = JkKotlinCompiler.ofJvm(JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos(), kotlinVersion);
             }
             kotlinCompiler.setLogOutput(true);
             return kotlinCompiler;

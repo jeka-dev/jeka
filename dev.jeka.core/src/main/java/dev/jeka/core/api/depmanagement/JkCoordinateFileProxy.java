@@ -1,6 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Files;
@@ -28,8 +29,8 @@ public final class JkCoordinateFileProxy {
         return of(repoSet, JkCoordinate.of(dependencyDescription));
     }
 
-    public static JkCoordinateFileProxy ofStandardRepos(String dependencyDescription) {
-        return of(JkRepoFromProperties.getDownloadRepos().and(JkRepo.ofMavenCentral()), dependencyDescription);
+    public static JkCoordinateFileProxy ofStandardRepos(JkProperties properties, String dependencyDescription) {
+        return of(JkRepoProperties.of(properties).getDownloadRepos().and(JkRepo.ofMavenCentral()), dependencyDescription);
     }
 
     public Path get() {

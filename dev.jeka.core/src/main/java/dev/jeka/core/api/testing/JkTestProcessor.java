@@ -1,7 +1,7 @@
 package dev.jeka.core.api.testing;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
-import dev.jeka.core.api.depmanagement.JkRepoFromProperties;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
@@ -11,6 +11,7 @@ import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import org.junit.platform.launcher.core.LauncherConfig;
@@ -67,7 +68,9 @@ public final class JkTestProcessor<T> {
 
     private String junitPlatformVersion = "1.8.2";
 
-    private Supplier<JkRepoSet> repoSetSupplier = JkRepoFromProperties::getDownloadRepos;
+    private Supplier<JkRepoSet> repoSetSupplier = () ->
+            JkRepoProperties.of(JkProperties.ofSystemProperties().withFallback(JkProperties.ofEnvironmentVariables()))
+                    .getDownloadRepos();
 
     /**
      * For parent chaining

@@ -2,7 +2,9 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -35,10 +37,13 @@ public final class JkRuntime {
 
     private List<EngineCommand> fieldInjections = Collections.emptyList();
 
+    private JkProperties properties;
+
     private final Map<Class<? extends JkBean>, JkBean> beans = new LinkedHashMap<>();
 
     private JkRuntime(Path projectBaseDir) {
         this.projectBaseDir = projectBaseDir;
+        this.properties = constructProperties(projectBaseDir);
     }
 
     public static JkRuntime get(Path projectBaseDir) {
@@ -117,6 +122,10 @@ public final class JkRuntime {
         return new LinkedList<>(beans.values());
     }
 
+    public JkProperties getProperties() {
+        return this.properties;
+    }
+
     void setDependencyResolver(JkDependencyResolver resolverArg) {
         dependencyResolver = resolverArg;
     }
@@ -178,8 +187,19 @@ public final class JkRuntime {
                         throw new JkException("Field %s does not exist in KBean %s", injectedProp, bean);
                     }
                 });
-        FieldInjector.injectAnnotatedProperties(bean);
+        FieldInjector.injectAnnotatedProperties(bean, properties);
         return bean;
+    }
+
+    static JkProperties constructProperties(Path baseDir) {
+        JkProperties result = JkProperties.ofSystemProperties()
+                .withFallback(JkProperties.ofEnvironmentVariables())
+                .withFallback(readProjectPropertiesRecursively(baseDir));
+        Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
+        if (Files.exists(globalPropertiesFile)) {
+            result = result.withFallback(JkProperties.of(globalPropertiesFile));
+        }
+        return result;
     }
 
     @Override
@@ -188,6 +208,25 @@ public final class JkRuntime {
                 "projectBaseDir=" + projectBaseDir +
                 ", beans=" + beans.keySet() +
                 '}';
+    }
+
+    // Reads the properties from the baseDir/jeka/project.properties
+    // Takes also in account properties defined in parent dirs if any.
+    private static JkProperties readProjectPropertiesRecursively(Path projectBaseDir) {
+        Path baseDir = projectBaseDir.toAbsolutePath().normalize();
+        Path projectPropertiesFile = baseDir
+                .resolve(JkConstants.JEKA_DIR)
+                .resolve(JkConstants.PROJECT_PROPERTIES);
+        JkProperties result = JkProperties.EMPTY;
+        if (Files.exists(projectPropertiesFile)) {
+            result = JkProperties.of(projectPropertiesFile);
+        }
+        Path parentProject =baseDir.getParent();
+        if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.JEKA_DIR))
+                & Files.isDirectory(parentProject.resolve(JkConstants.JEKA_DIR))) {
+            result = result.withFallback(readProjectPropertiesRecursively(parentProject));
+        }
+        return result;
     }
 
 }

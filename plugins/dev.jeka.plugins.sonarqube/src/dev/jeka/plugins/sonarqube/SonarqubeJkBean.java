@@ -1,15 +1,16 @@
 package dev.jeka.plugins.sonarqube;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectConstruction;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.nio.file.Path;
@@ -78,7 +79,7 @@ public class SonarqubeJkBean extends JkBean {
         sonarqube
                 .setLogOutput(logOutput)
                 .setProjectId(fullName, name, version)
-                .setProperties(JkProperties.getAllStartingWith("sonar."))
+                .setProperties(getRuntime().getProperties().getAllStartingWith("sonar."))
                 .setProjectBaseDir(baseDir)
                 .setBinaries(project.getConstruction().getCompilation().getLayout().resolveClassDir())
                 .setProperty(JkSonarqube.SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())

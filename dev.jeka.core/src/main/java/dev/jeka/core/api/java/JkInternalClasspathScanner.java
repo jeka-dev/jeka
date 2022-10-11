@@ -2,6 +2,7 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
@@ -15,7 +16,8 @@ import java.util.function.Predicate;
 public interface JkInternalClasspathScanner {
 
     static JkInternalClasspathScanner of() {
-        return Cache.get();
+        return Cache.get(
+                JkProperties.ofSystemProperties().withFallback(JkProperties.ofEnvironmentVariables()));
     }
 
     List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);
@@ -36,11 +38,11 @@ public interface JkInternalClasspathScanner {
 
     JkPathSequence getClasspath(ClassLoader classLoader);
 
-    static class Cache {
+    class Cache {
 
         private static JkInternalClasspathScanner CACHED_INSTANCE;
 
-        private static JkInternalClasspathScanner get() {
+        private static JkInternalClasspathScanner get(JkProperties properties) {
             if (CACHED_INSTANCE != null) {
                 return CACHED_INSTANCE;
             }
@@ -49,7 +51,7 @@ public interface JkInternalClasspathScanner {
             if (clazz != null) {
                 return JkUtilsReflect.invokeStaticMethod(clazz, "of");
             }
-            JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos("io.github.classgraph:classgraph:4.8.41");
+            JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos(properties, "io.github.classgraph:classgraph:4.8.41");
             JkInternalEmbeddedClassloader internalClassloader = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(classgraphJar.get());
             CACHED_INSTANCE = internalClassloader
                     .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
