@@ -12,7 +12,6 @@ import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
@@ -34,8 +33,6 @@ public class JkProjectPackaging {
     private final JkJavadocProcessor<JkProjectPackaging> javadocProcessor;
 
     private Function<JkDependencySet, JkDependencySet> dependencySetModifier = x -> x;
-
-    private boolean done;
 
     // relative to output path
     private String javadocDir = "javadoc";
@@ -64,22 +61,13 @@ public class JkProjectPackaging {
     /**
      * Generates javadoc files (files + zip)
      */
-    public void run() {
+    private void createJavadocFiles() {
         JkProjectCompilation compilation = project.getCompilation();
         Iterable<Path> classpath = project.getDependencyResolver()
                 .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
         JkPathTreeSet sources = compilation.getLayout().resolveSources();
         javadocProcessor.make(classpath, sources, dir);
-    }
-
-    public void runIfNecessary() {
-        if (done && !Files.exists(project.getOutputDir().resolve(javadocDir))) {
-            JkLog.info("Javadoc already generated. Won't perform again");
-        } else {
-            run();
-            done = true;
-        }
     }
 
     public Path getJavadocDir() {
@@ -96,13 +84,8 @@ public class JkProjectPackaging {
     }
 
     public void createJavadocJar(Path target) {
-        runIfNecessary();
+        createJavadocFiles();
         Path javadocDir = getJavadocDir();
-        /*
-        if (!Files.exists(javadocDir)) {
-            throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
-                    + ". Can't create a javadoc jar until javadoc files has been generated.");
-        }*/
         JkPathTree.of(javadocDir).zipTo(target);
     }
 
@@ -194,10 +177,6 @@ public class JkProjectPackaging {
         if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null && version != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
         }
-    }
-
-    void reset() {
-        done = false;
     }
 
 }

@@ -112,7 +112,7 @@ project
 |  +- runtimeDependencies
 |  +- manifest
 |  +- fatJar (customize produced fat/uber jar if any)
-|  +- methods : createJavadocJar(), createSourceJar(), run(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
+|  +- methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
 +- publication (define information about module and artifacts to be published)
 |  +- moduleId (group:name)
 |  +- version
