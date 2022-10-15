@@ -193,8 +193,8 @@ public final class JkRuntime {
 
     static JkProperties constructProperties(Path baseDir) {
         JkProperties result = JkProperties.ofSystemProperties()
-                .withFallback(JkProperties.ofEnvironmentVariables())
-                .withFallback(readProjectPropertiesRecursively(baseDir));
+                .withFallback(JkProperties.ofEnvironmentVariables()
+                    .withFallback(readProjectPropertiesRecursively(baseDir)));
         Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
         if (Files.exists(globalPropertiesFile)) {
             result = result.withFallback(JkProperties.of(globalPropertiesFile));
@@ -225,6 +225,7 @@ public final class JkRuntime {
         if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.JEKA_DIR))
                 & Files.isDirectory(parentProject.resolve(JkConstants.JEKA_DIR))) {
             result = result.withFallback(readProjectPropertiesRecursively(parentProject));
+
         }
         return result;
     }

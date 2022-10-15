@@ -46,8 +46,9 @@ public final class JkProperties {
     public static JkProperties ofEnvironmentVariables() {
         Map<String, String> props = new HashMap<>();
         for (String varName : System.getenv().keySet() ) {
-            String propName = lowerCase(varName);
-            props.put(propName, System.getenv(varName));
+            String value = System.getenv(varName);
+            props.put(varName, value);
+            props.put(lowerCase(varName), value);
         }
         return new JkProperties("Environment Variables", Collections.unmodifiableMap(props), null);
     }
@@ -73,7 +74,13 @@ public final class JkProperties {
     }
 
     public JkProperties withFallback(JkProperties fallback) {
-        return new JkProperties(this.source, this.props, fallback);
+        if (fallback == null || fallback == EMPTY) {
+            return this;
+        }
+        if (this.fallback == null) {
+            return new JkProperties(this.source, this.props, fallback);
+        }
+        return new JkProperties(this.source, this.props, this.fallback.withFallback(fallback));
     }
 
     /**
