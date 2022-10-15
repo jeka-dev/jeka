@@ -24,17 +24,17 @@ class SpringbootSampleBuild extends JkBean {
     }
 
     private void configure(JkProject project) {
-        project.simpleFacade()
-                .configureCompileDeps(deps -> deps
+        project.flatFacade()
+                .configureCompileDependencies(deps -> deps
                     .and(Boot.STARTER_WEB)  // Same as .and("org.springframework.boot:spring-boot-starter-web")
                     .and(Boot.STARTER_DATA_JPA)
                     .and(Boot.STARTER_DATA_REST)
                     .and("com.google.guava:guava:30.0-jre")
                 )
-                .configureRuntimeDeps(deps -> deps
+                .configureRuntimeDependencies(deps -> deps
                     .and("com.h2database:h2:1.4.200")
                 )
-                .configureTestDeps(deps -> deps
+                .configureTestDependencies(deps -> deps
                     .and(Boot.STARTER_TEST.toCoordinate())
                 )
                 .setPublishedModuleId("dev.jeka:samples-springboot")

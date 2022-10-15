@@ -17,12 +17,12 @@ class Build extends JkBean {
     }
 
     private void configure(JkProject project) {
-        project.simpleFacade()
-            .configureCompileDeps(deps -> deps
+        project.flatFacade()
+            .configureCompileDependencies(deps -> deps
                     .and("org.springframework.boot:spring-boot-starter-web")
                     // Add dependencies here
             )
-            .configureTestDeps(deps -> deps
+            .configureTestDependencies(deps -> deps
                     .and("org.springframework.boot:spring-boot-starter-test")
                         .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
             );

@@ -23,12 +23,12 @@ class SonarqubeSampleBuild extends JkBean {
 
     SonarqubeSampleBuild() {
         projectPlugin.configure(project ->
-            project.simpleFacade()
+            project.flatFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
-                .configureCompileDeps(deps -> deps
+                .configureCompileDependencies(deps -> deps
                     .and("com.github.djeang:vincer-dom:1.4.0")
                 )
-                .configureTestDeps(deps -> deps
+                .configureTestDependencies(deps -> deps
                     .and(JkPopularLibs.JUNIT_5 + ":5.8.2")
                 )
         );

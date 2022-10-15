@@ -27,13 +27,13 @@ public class ThirdPartyDependenciesJkBean extends JkBean {
     ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class).configure(this::configure);
 
     private void configure(JkProject project) {
-        project.simpleFacade()
-            .configureCompileDeps(deps -> deps
+        project.flatFacade()
+            .configureCompileDependencies(deps -> deps
                 .and(JAVAX_SERVLET_API.toCoordinate("3.1.0"))
                 .and(GUAVA.toCoordinate("30.0-jre")))
-            .configureRuntimeDeps(compileDeps -> compileDeps
+            .configureRuntimeDependencies(compileDeps -> compileDeps
                 .minus(JAVAX_SERVLET_API))
-            .configureTestDeps(deps -> deps
+            .configureTestDependencies(deps -> deps
                 .and(SimpleProjectJkBean.JUNIT5)
                 .and(MOCKITO_ALL.toCoordinate("1.10.19")));
     }

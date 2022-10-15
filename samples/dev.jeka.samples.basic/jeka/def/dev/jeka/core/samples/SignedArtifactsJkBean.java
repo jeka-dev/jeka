@@ -53,11 +53,11 @@ public class SignedArtifactsJkBean extends JkBean {
     public String secringPassword = "jeka-pwd";  // Normally injected from command line
 
     private void configure(JkProject project) {
-        project.simpleFacade()
-            .configureCompileDeps(deps -> deps
+        project.flatFacade()
+            .configureCompileDependencies(deps -> deps
                 .and(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"))
             )
-            .configureTestDeps(deps -> deps
+            .configureTestDependencies(deps -> deps
                 .and(SimpleProjectJkBean.JUNIT5)
             )
             .getProject()

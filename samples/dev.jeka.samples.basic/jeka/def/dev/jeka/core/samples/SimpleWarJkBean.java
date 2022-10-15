@@ -28,13 +28,13 @@ public class SimpleWarJkBean extends JkBean {
     ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
     private void configure(JkProject project) {
-       project.simpleFacade()
-               .configureCompileDeps(deps -> deps
+       project.flatFacade()
+               .configureCompileDependencies(deps -> deps
                        .and("com.google.guava:guava:30.0-jre")
                        .and("javax.servlet:javax.servlet-api:4.0.1"))
                .setPublishedModuleId("dev.jeka.samples:war-project")
                .setPublishedVersion("1.0-SNAPSHOT")
-               .configureRuntimeDeps(compileDeps -> compileDeps
+               .configureRuntimeDependencies(compileDeps -> compileDeps
                        .minus("javax.servlet:javax.servlet-api"))
                .setJvmTargetVersion(JkJavaVersion.V8)
                .includeJavadocAndSources(false, false)

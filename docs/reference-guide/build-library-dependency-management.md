@@ -158,7 +158,7 @@ the module dependencies.
 !!! example 
 
     ```
-    == COMPILE+RUNTIME ==
+    == REGULAR ==
     org.springframework.boot:spring-boot-starter-thymeleaf
     org.springframework.boot:spring-boot-starter-data-jpa
 
@@ -175,7 +175,6 @@ the module dependencies.
     org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
     org.fluentlenium:fluentlenium-assertj:3.2.0
     org.fluentlenium:fluentlenium-junit:3.2.0
-    
 
     ```
 

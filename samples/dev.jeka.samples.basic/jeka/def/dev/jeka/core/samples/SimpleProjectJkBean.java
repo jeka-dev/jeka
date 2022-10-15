@@ -30,22 +30,18 @@ public class SimpleProjectJkBean extends JkBean {
     public String checkedValue;
 
     private void configure(JkProject project) {
-       project.simpleFacade()
-               .configureCompileDeps(deps -> deps
+       project.flatFacade()
+               .configureCompileDependencies(deps -> deps
                    .and("com.google.guava:guava:30.0-jre")
                    .and("com.sun.jersey:jersey-server:1.19.4")
                )
-               .configureRuntimeDeps(deps -> deps
-                   .and("com.github.djeang:vincer-dom:1.2.0")
-               )
-               .configureTestDeps(deps -> deps
+               .configureTestDependencies(deps -> deps
                    .and(JUNIT5)
                )
                .addTestExcludeFilterSuffixedBy("IT", false)
-               .setJvmTargetVersion(JkJavaVersion.V8)
-               .setPublishedModuleId("dev.jeka:sample-javaplugin")
-               .setPublishedVersion("1.0-SNAPSHOT")
+
        .getProject()
+               .setJvmTargetVersion(JkJavaVersion.V8)
                .getCompiler()
                     .setForkedWithDefaultProcess()
                .__
@@ -53,6 +49,11 @@ public class SimpleProjectJkBean extends JkBean {
                     .getDefaultParams()
                         .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT)
                     .__
+               .__
+               .getPackaging()
+                   .configureRuntimeDependencies(deps -> deps
+                           .and("com.github.djeang:vincer-dom:1.2.0")
+                   )
                .__
                .getTesting()
                     .getTestProcessor()
@@ -63,6 +64,8 @@ public class SimpleProjectJkBean extends JkBean {
                     .__
                .__
            .getPublication()
+               .setModuleId("dev.jeka:sample-javaplugin")
+               .setVersion("1.0-SNAPSHOT")
                .getMaven()
                     .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
 

@@ -12,12 +12,13 @@ public class SpringbootBuild extends JkBean {
     final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class).configure(this::configure);
 
     private void configure(JkProject project) {
-       project.simpleFacade()
-                .setJvmTargetVersion(JkJavaVersion.V8)
-                .configureCompileDeps(deps -> deps
+       project
+           .setJvmTargetVersion(JkJavaVersion.V8)
+           .flatFacade()
+                .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 )
-                .configureRuntimeDeps(deps -> deps
+                .configureRuntimeDependencies(deps -> deps
                         .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
                 );
         project.getTesting().setSkipped(true);

@@ -16,13 +16,11 @@ In Jeka IDE, you can just __right-click__ on module root folder, then __scaffold
 Just declare the plugin in your Jeka class (in _[project Dir]/jeka/def_ ) as above :
 
 ```java
-import dev.jeka.core.api.depmanagement.JkDependencySet;
+
 import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.plugins.springboot.SpringbootJkBean;
 
 import static dev.jeka.core.plugins.springboot.JkSpringModules.Boot;
@@ -38,15 +36,15 @@ class Build extends JkBean {
     }
 
     private void configure(JkProject project) {
-        project.simpleFacade()
-            .configureCompileDeps(deps -> deps
-                    .and(Boot.STARTER_WEB)
-            )
-            .configureTestDeps(deps -> deps
-                    .and(Boot.STARTER_TEST)
-            );
+        project.flatFacade()
+                .configureCompileDependencies(deps -> deps
+                        .and(Boot.STARTER_WEB)
+                )
+                .configureTestDependencies(deps -> deps
+                        .and(Boot.STARTER_TEST)
+                );
     }
-    
+
 }
 ```
 

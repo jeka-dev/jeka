@@ -7,14 +7,14 @@ public class PureApi {
         JkLog.setDecorator(JkLog.Style.INDENT);  // activate console logging
 
         // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
-        JkProject coreProject = JkProject.of().simpleFacade()
+        JkProject coreProject = JkProject.of().flatFacade()
                 .setBaseDir("../dev.jeka.samples.basic")
-                .configureTestDeps(deps -> deps
+                .configureTestDependencies(deps -> deps
                     .and("junit:junit:4.13")).getProject();
 
         // A project depending on the first project + Guava
-        JkProject dependerProject = JkProject.of().simpleFacade()
-                .configureCompileDeps(deps -> deps
+        JkProject dependerProject = JkProject.of().flatFacade()
+                .configureCompileDependencies(deps -> deps
                     .and("com.google.guava:guava:30.0-jre")
                     .and(coreProject.toDependency()))
                 .setPublishedModuleId("mygroup:depender")

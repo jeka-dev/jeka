@@ -109,8 +109,8 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return this;
     }
 
-    public JkProjectSimpleFacade simpleFacade() {
-        return new JkProjectSimpleFacade(this);
+    public JkProjectFlatFacade flatFacade() {
+        return new JkProjectFlatFacade(this);
     }
 
     // ---------------------------- Getters / setters --------------------------------------------

@@ -31,8 +31,8 @@ public class JacocoSampleBuild extends JkBean {
     }
 
     private void configure(JkProject project) {
-        project.simpleFacade()
-                .configureTestDeps(deps -> deps
+        project.flatFacade()
+                .configureTestDependencies(deps -> deps
                         .and(JkPopularLibs.JUNIT_5 + ":5.8.2")
                 );
     }

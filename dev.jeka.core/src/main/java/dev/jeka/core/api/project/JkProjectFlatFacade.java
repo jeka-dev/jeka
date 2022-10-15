@@ -20,49 +20,50 @@ import java.util.function.UnaryOperator;
 /**
  * Simple facade over {@link JkProject} to access common setting conveniently.
  */
-public class JkProjectSimpleFacade {
+public class JkProjectFlatFacade {
 
     private final JkProject project;
 
-    JkProjectSimpleFacade(JkProject project) {
+    JkProjectFlatFacade(JkProject project) {
         this.project = project;
     }
 
-    public JkProjectSimpleFacade setJvmTargetVersion(JkJavaVersion version) {
-        project.setJvmTargetVersion(version);
-        return this;
-    }
-
-    public JkProjectSimpleFacade applyOnProject(Consumer<JkProject> projectConsumer) {
+    public JkProjectFlatFacade applyOnProject(Consumer<JkProject> projectConsumer) {
         project.apply(projectConsumer);
         return this;
     }
 
-    public JkProjectSimpleFacade apply(Consumer<JkProjectSimpleFacade> facadeConsumer) {
+    public JkProjectFlatFacade apply(Consumer<JkProjectFlatFacade> facadeConsumer) {
         facadeConsumer.accept(this);
         return this;
     }
 
-    public JkProjectSimpleFacade setBaseDir(String path) {
-        project.setBaseDir(Paths.get(path));
+    public JkProjectFlatFacade setJvmTargetVersion(JkJavaVersion version) {
+        project.setJvmTargetVersion(version);
         return this;
     }
 
-    public JkProjectSimpleFacade setBaseDir(Path path) {
-        project.setBaseDir(path);
+    public JkProjectFlatFacade setSourceEncoding(String encoding) {
+        project.setSourceEncoding(encoding);
         return this;
     }
 
-    public JkProjectSimpleFacade setJavaSourceEncoding(String sourceEncoding) {
-        project.setSourceEncoding(sourceEncoding);
+    public JkProjectFlatFacade setBaseDir(Path baseDir) {
+        project.setBaseDir(baseDir);
         return this;
     }
+
+    public JkProjectFlatFacade setBaseDir(String baseDir) {
+        return setBaseDir(Paths.get(baseDir));
+    }
+
+
 
     /**
      * Sets product Java source files and resources in "src".
      * Sets test Java source files and resources in "test".
      */
-    public JkProjectSimpleFacade useSimpleLayout() {
+    public JkProjectFlatFacade useSimpleLayout() {
         project.getCompilation().getLayout().setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
         project.getTesting().getCompilation().getLayout()
                 .setSourceSimpleStyle(JkCompileLayout.Concern.TEST);
@@ -72,55 +73,55 @@ public class JkProjectSimpleFacade {
     /**
      * The resources will be located in same dirs than sources.
      */
-    public JkProjectSimpleFacade mixResourcesAndSources() {
+    public JkProjectFlatFacade mixResourcesAndSources() {
         project.getCompilation().getLayout().mixResourcesAndSources();
         project.getTesting().getCompilation().getLayout().mixResourcesAndSources();
         return this;
     }
 
-    public JkProjectSimpleFacade includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
+    public JkProjectFlatFacade includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
         project.includeJavadocAndSources(includeJavaDoc, includeSources);
         return this;
     }
 
-    public JkProjectSimpleFacade configureCompileDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectFlatFacade configureCompileDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         project.getCompilation().configureDependencies(modifier);
         return this;
     }
 
-    public JkProjectSimpleFacade configureRuntimeDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectFlatFacade configureRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         project.getPackaging().configureRuntimeDependencies(modifier);
         return this;
     }
 
-    public JkProjectSimpleFacade configureTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectFlatFacade configureTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         project.getTesting().getCompilation().configureDependencies(modifier);
         return this;
     }
 
-    public JkProjectSimpleFacade addCompileDeps(@JkDepSuggest String... moduleDescriptors) {
+    public JkProjectFlatFacade addCompileDeps(@JkDepSuggest String... moduleDescriptors) {
         UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
-        return configureCompileDeps(addFun);
+        return configureCompileDependencies(addFun);
     }
 
-    public JkProjectSimpleFacade addCompileOnlyDeps(@JkDepSuggest String... moduleDescriptors) {
+    public JkProjectFlatFacade addCompileOnlyDeps(@JkDepSuggest String... moduleDescriptors) {
         UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
-        configureCompileDeps(addFun);
+        configureCompileDependencies(addFun);
         UnaryOperator<JkDependencySet> minusFun = deps -> minus(deps, moduleDescriptors);
-        return configureRuntimeDeps(minusFun);
+        return configureRuntimeDependencies(minusFun);
     }
 
-    public JkProjectSimpleFacade addRuntimeDeps(@JkDepSuggest String... moduleDescriptors) {
+    public JkProjectFlatFacade addRuntimeDeps(@JkDepSuggest String... moduleDescriptors) {
         UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
-        return configureRuntimeDeps(addFun);
+        return configureRuntimeDependencies(addFun);
     }
 
-    public JkProjectSimpleFacade addTestDeps(@JkDepSuggest String... moduleDescriptors) {
+    public JkProjectFlatFacade addTestDeps(@JkDepSuggest String... moduleDescriptors) {
         UnaryOperator<JkDependencySet> addFun = deps -> addFirst(deps, moduleDescriptors);
         return addTestDeps(addFun);
     }
 
-    public JkProjectSimpleFacade skipTests(boolean skipped) {
+    public JkProjectFlatFacade skipTests(boolean skipped) {
         project.getTesting().setSkipped(skipped);
         return this;
     }
@@ -128,16 +129,16 @@ public class JkProjectSimpleFacade {
     /**
      * Add specified dependencies at head of preset dependencies.
      */
-    public JkProjectSimpleFacade addTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        return configureTestDeps(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
+    public JkProjectFlatFacade addTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        return configureTestDependencies(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
     }
 
-    public JkProjectSimpleFacade setPublishedVersion(Supplier<String> versionSupplier) {
+    public JkProjectFlatFacade setPublishedVersion(Supplier<String> versionSupplier) {
         project.getPublication().setVersion(versionSupplier);
         return this;
     }
 
-    public JkProjectSimpleFacade setPublishedVersion(String version) {
+    public JkProjectFlatFacade setPublishedVersion(String version) {
         return setPublishedVersion(() -> version);
     }
 
@@ -145,7 +146,7 @@ public class JkProjectSimpleFacade {
      * The published version will be computed according the current git tag.
      * @see JkGitProcess#getVersionFromTag()
      */
-    public JkProjectSimpleFacade setPublishedVersionFromGitTag() {
+    public JkProjectFlatFacade setPublishedVersionFromGitTag() {
         return setPublishedVersion(() -> JkGitProcess.of(getProject().getBaseDir()).getVersionFromTag());
     }
 
@@ -153,7 +154,7 @@ public class JkProjectSimpleFacade {
      * The published version will be computed according the git last commit message.
      * @see JkGitProcess#getVersionFromCommitMessage(String)
      */
-    public JkProjectSimpleFacade setPublishedVersionFromGitTagCommitMessage(String suffixKeyword) {
+    public JkProjectFlatFacade setPublishedVersionFromGitTagCommitMessage(String suffixKeyword) {
         return setPublishedVersion(() -> JkGitProcess.of(getProject().getBaseDir())
                 .getVersionFromCommitMessage(suffixKeyword));
     }
@@ -162,7 +163,7 @@ public class JkProjectSimpleFacade {
      * @param moduleId group + artifactId to use when publishing on a binary repository.
      *                 Must be formatted as 'group:artifactId'
      */
-    public JkProjectSimpleFacade setPublishedModuleId(String moduleId) {
+    public JkProjectFlatFacade setPublishedModuleId(String moduleId) {
         project.getPublication().setModuleId(moduleId);
         return this;
     }
@@ -170,7 +171,7 @@ public class JkProjectSimpleFacade {
     /**
      * Configures the dependencies to be published in a Maven repository.
      */
-    public JkProjectSimpleFacade configurePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
+    public JkProjectFlatFacade configurePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
         project.getPublication().getMaven().configureDependencies(dependencyModifier);
         return this;
     }
@@ -180,7 +181,7 @@ public class JkProjectSimpleFacade {
      * tests accepting this filter won't be run.
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
-    public JkProjectSimpleFacade addTestExcludeFilterSuffixedBy(String suffix, boolean condition) {
+    public JkProjectFlatFacade addTestExcludeFilterSuffixedBy(String suffix, boolean condition) {
         if (condition) {
             project.getTesting().getTestSelection().addExcludePatterns(".*" + suffix);
         }
@@ -192,7 +193,7 @@ public class JkProjectSimpleFacade {
      * tests accepting one of the declared filters will run.
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
-    public JkProjectSimpleFacade addTestIncludeFilterSuffixedBy(String suffix, boolean condition) {
+    public JkProjectFlatFacade addTestIncludeFilterSuffixedBy(String suffix, boolean condition) {
         project.getTesting().getTestSelection().addIncludePatternsIf(condition, ".*" + suffix);
         return this;
     }
@@ -202,7 +203,7 @@ public class JkProjectSimpleFacade {
      * Adds a test include filters for test classes named as <code>^(Test.*|.+[.$]Test.*|.*Tests?)$</code>.
      * This is a standard filter in many tools.
      */
-    public JkProjectSimpleFacade addTestIncludeFilterOnStandardNaming(boolean condition) {
+    public JkProjectFlatFacade addTestIncludeFilterOnStandardNaming(boolean condition) {
         project.getTesting().getTestSelection().addIncludePatternsIf(condition,
                 JkTestSelection.STANDARD_INCLUDE_PATTERN);
        return this;

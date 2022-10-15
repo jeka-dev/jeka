@@ -9,11 +9,10 @@ class SonarqubeBuild extends JkBean {
     private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
 
     private void configure(JkProject project) {
-        project.simpleFacade()
-                .setJvmTargetVersion(JkJavaVersion.V8)
+        project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
                 .mixResourcesAndSources()
                 .useSimpleLayout()
-                .configureCompileDeps(deps -> deps
+                .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
         project.getPublication()

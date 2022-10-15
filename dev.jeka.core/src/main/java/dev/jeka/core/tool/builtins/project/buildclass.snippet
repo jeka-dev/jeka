@@ -15,28 +15,26 @@ class Build extends JkBean {
      */
     private void configure(JkProject project) {
         project
-            .getConstruction()
-                .setJvmTargetVersion(JkJavaVersion.V8)
-                .getCompilation()
-                    .configureDependencies(deps -> deps
-                            .and("com.google.guava:guava:21.0")
-                    )
-                .__
+            .setJvmTargetVersion(JkJavaVersion.V8)
+            .getCompilation()
+                .configureDependencies(deps -> deps
+                        .and("com.google.guava:guava:21.0")
+                )
+            .__
 
-                // this testing setup is almost default setting, this is here for illustration purpose
-                // If default is ok for you, you can remove it.
-                .getTesting()
-                    .getCompilation().configureDependencies(deps -> deps
-                            .and("org.junit.jupiter:junit-jupiter:5.8.1"))
-                    .__
-                    .getTestSelection()
-                        .addIncludeStandardPatterns()
-                    .__
-                    .getTestProcessor()
-                        .setForkingProcess(true)
-                        .getEngineBehavior()
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE)
-                        .__
+            // this testing setup is almost default setting, this is here for illustration purpose
+            // If default is ok for you, you can remove it.
+            .getTesting()
+                .getCompilation().configureDependencies(deps -> deps
+                        .and("org.junit.jupiter:junit-jupiter:5.8.1"))
+                .__
+                .getTestSelection()
+                    .addIncludeStandardPatterns()
+                .__
+                .getTestProcessor()
+                    .setForkingProcess(true)
+                    .getEngineBehavior()
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE)
                     .__
                 .__
             .__

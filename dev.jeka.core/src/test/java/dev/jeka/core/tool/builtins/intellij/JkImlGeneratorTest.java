@@ -48,7 +48,7 @@ public class JkImlGeneratorTest {
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
                 .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
-        project.simpleFacade().useSimpleLayout();
+        project.flatFacade().useSimpleLayout();
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
         List<JkIml.SourceFolder> sourceFolders = iml.getComponent().getContent().getSourceFolders();

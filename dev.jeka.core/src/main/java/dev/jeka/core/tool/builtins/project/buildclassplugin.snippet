@@ -10,13 +10,13 @@ class Build extends JkBean {
     final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     private void configure(JkProject project) {
-        project.simpleFacade()
+        project.flatFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
-            .configureCompileDeps(deps -> deps
+            .configureCompileDependencies(deps -> deps
                     .andFiles(JkLocator.getJekaJarPath())
             );
 
-        JkJekaVersionCompatibilityChecker.setCompatibilityRange(project.getConstruction().getManifest(),
+        JkJekaVersionCompatibilityChecker.setCompatibilityRange(project.getPackaging().getManifest(),
                 "${jekaVersion}",
                 "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
 

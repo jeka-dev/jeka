@@ -36,16 +36,16 @@ class Build : JkBean() {
     }
 
     fun configure(project: JkProject) {
-        project.simpleFacade()
+        project.flatFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
-                .configureCompileDeps { deps -> deps
+                .configureCompileDependencies { deps -> deps
                     .and("io.ktor:ktor-serialization:$ktorVersion")
                     .and("io.ktor:ktor-server-core:$ktorVersion")
                     .and("io.ktor:ktor-server-netty:$ktorVersion")
                     .and("ch.qos.logback:logback-classic:$logbackVersion")
                     .and("org.litote.kmongo:kmongo-coroutine-serialization:$kmongoVersion")
                 }
-                .configureTestDeps {deps -> deps
+                .configureTestDependencies { deps -> deps
                     .and(JkKotlinModules.TEST_JUNIT5)
                 }
         project.packaging.manifest.addMainClass("ServerKt")
