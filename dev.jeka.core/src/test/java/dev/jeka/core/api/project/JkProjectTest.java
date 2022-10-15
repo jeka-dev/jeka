@@ -232,8 +232,8 @@ public class JkProjectTest {
     @Test
     public void getRuntimeDependencies_usingDependenciesTxt_ok() {
         JkProject project = JkProject.of()
-                    .setAddTextAndLocalDependencies(true);
-        URL dependencyTxtUrl = JkProjectTest.class.getResource("dependencies.txt");
+                    .setIncludeTextAndLocalDependencies(true);
+        URL dependencyTxtUrl = JkProjectTest.class.getResource("simple-dependencies-simple.txt");
         project.dependencyTxtUrl = dependencyTxtUrl;
         JkDependencySet runtimeDependencies = project.getPackaging().getRuntimeDependencies();
         JkCoordinateDependency lombokDep = runtimeDependencies.getMatching(JkCoordinateDependency.of("org.projectlombok:lombok"));

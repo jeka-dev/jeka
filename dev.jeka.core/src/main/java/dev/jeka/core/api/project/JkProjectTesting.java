@@ -1,5 +1,6 @@
 package dev.jeka.core.api.project;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
@@ -46,7 +47,7 @@ public class JkProjectTesting {
     JkProjectTesting(JkProject project) {
         this.project = project;
         this.__ = project;
-        compilation = JkProjectCompilation.ofTest(project, this);
+        compilation = new JkProjectTestCompilation();
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
     }
@@ -187,6 +188,41 @@ public class JkProjectTesting {
     private JkTestSelection<JkProjectTesting> defaultTestSelection() {
         return JkTestSelection.ofParent(this).addTestClassRoots(
                 Paths.get(compilation.getLayout().getClassDir()));
+    }
+
+    private class JkProjectTestCompilation extends JkProjectCompilation<JkProjectTesting> {
+
+        public JkProjectTestCompilation() {
+            super(JkProjectTesting.this.project, JkProjectTesting.this);
+        }
+
+        @Override
+        protected String purpose() {
+            return "test";
+        }
+
+        @Override
+        protected JkDependencySet baseDependencies() {
+            JkDependencySet base = project.getPackaging().getRuntimeDependencies()
+                    .merge(project.getCompilation().getDependencies()).getResult();
+            if (project.isIncludeTextAndLocalDependencies()) {
+                base = project.textAndLocalDeps().getTest().and(base);
+            }
+            return base;
+        }
+
+        @Override
+        protected JkCompileLayout layout() {
+            return super.layout()
+                    .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
+                    .setStandardOutputDirs(JkCompileLayout.Concern.TEST);
+        }
+
+        @Override
+        protected JkPathSequence classpath() {
+            return super.classpath()
+                    .andPrepend(project.getCompilation().getLayout().resolveClassDir());
+        }
     }
 
 }

@@ -2,12 +2,13 @@
 # This file declares some dependencies to be included to the project dependencies.
 # They will be added and won't replace dependencies that have been declared by other means.
 #
-# COMPILE+RUNTIME : stands for dependencies used both for compilation and runtime.
+# REGULAR         : stands for dependencies used both for compilation and runtime.
 #                   This is the most common place to declare dependencies.
 # COMPILE_ONLY    : stands for dependencies used for compilation only (not for runtime).
 # RUNTIME_ONLY    : stands for dependencies used for runtime only (not for compilation).
 #                   Runtime dependencies has impact when creating fat jars and for the definition of published dependencies.
 # TEST            : stands for dependencies used only for testing.
+# VERSIONS        : Only
 #
 # Dependencies has to be declared using format as 'group:module:[classifier]:[type]:[version]'
 # where 'classifier', 'type' and 'version' are optional (see JkCoordinate.of(String description) for details).
@@ -20,16 +21,22 @@
 #  org.junit:junit-bom:5.9.0::pom:5.9.0   (for Bill Of Material)
 #  org.lwjgl:lwjgl:natives-linux::        (for classifier 'native-linux', default extension and default version)
 #
+# == VERSIONS ==
+# org.lwjgl:lwjgl:3.1.0
+#
+#
 # If you don't need it, feel free to remove this file.
 ##
 
-== COMPILE+RUNTIME ==
+== REGULAR ==
 
 == COMPILE_ONLY ==
 
 == RUNTIME_ONLY ==
 
 == TEST ==
+
+== VERSIONS ==
 
 
 

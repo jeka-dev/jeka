@@ -180,10 +180,13 @@ public class JkQualifiedDependencySet {
         return new JkQualifiedDependencySet(this.entries, globalExclusions, resolvedVersionProvider);
     }
 
-    public static JkQualifiedDependencySet computeIdeDependencies(JkProjectDependencies projectDependencies,
-                                                                  JkCoordinate.ConflictStrategy strategy) {
-        JkDependencySetMerge prodMerge = projectDependencies.getCompileDeps().merge(projectDependencies.getRuntimeDeps());
-        JkDependencySetMerge testMerge = prodMerge.getResult().merge(projectDependencies.getTestDeps());
+    public static JkQualifiedDependencySet computeIdeDependencies(
+            JkDependencySet allCompileDeps,
+            JkDependencySet allRuntimeDeps,
+            JkDependencySet allTestDeps,
+            JkCoordinate.ConflictStrategy strategy) {
+        JkDependencySetMerge prodMerge = allCompileDeps.merge(allRuntimeDeps);
+        JkDependencySetMerge testMerge = prodMerge.getResult().merge(allTestDeps);
         List<JkQualifiedDependency> result = new LinkedList<>();
         List<JkDependency> dependencies = testMerge.getResult()
                 .normalised(strategy)
@@ -210,14 +213,20 @@ public class JkQualifiedDependencySet {
                 testMerge.getResult().getVersionProvider());
     }
 
-    public static JkQualifiedDependencySet computeIdeDependencies(JkProjectDependencies projectDependencies) {
-        return computeIdeDependencies(projectDependencies, JkCoordinate.ConflictStrategy.FAIL);
+    public static JkQualifiedDependencySet computeIdeDependencies(
+            JkDependencySet allCompileDeps,
+            JkDependencySet allRuntimeDeps,
+            JkDependencySet allTestDeps) {
+        return computeIdeDependencies(allCompileDeps, allRuntimeDeps, allTestDeps, JkCoordinate.ConflictStrategy.FAIL);
     }
 
-    public static JkQualifiedDependencySet computeIvyPublishDependencies(JkProjectDependencies projectDependencies,
-                                                                         JkCoordinate.ConflictStrategy strategy) {
-        JkDependencySetMerge mergeWithProd = projectDependencies.getCompileDeps().merge(projectDependencies.getRuntimeDeps());
-        JkDependencySetMerge mergeWithTest = mergeWithProd.getResult().merge(projectDependencies.getTestDeps());
+    public static JkQualifiedDependencySet computeIvyPublishDependencies(
+            JkDependencySet allCompileDeps,
+            JkDependencySet allRuntimeDeps,
+            JkDependencySet allTestDeps,
+            JkCoordinate.ConflictStrategy strategy) {
+        JkDependencySetMerge mergeWithProd = allCompileDeps.merge(allRuntimeDeps);
+        JkDependencySetMerge mergeWithTest = mergeWithProd.getResult().merge(allTestDeps);
         List<JkQualifiedDependency> result = new LinkedList<>();
         for (JkCoordinateDependency dependency : mergeWithTest.getResult().normalised(strategy)
                 .assertNoUnspecifiedVersion().getVersionResolvedCoordinateDependencies()) {
@@ -248,6 +257,7 @@ public class JkQualifiedDependencySet {
         return new JkQualifiedDependencySet(result, mergeWithTest.getResult().getGlobalExclusions(),
                 mergeWithTest.getResult().getVersionProvider());
     }
+
 
     public static String getIvyTargetConfigurations(JkTransitivity transitivity) {
         return TRANSITIVITY_TARGET_CONF_MAP.get(transitivity);

@@ -126,7 +126,13 @@ public class JkProjectPackaging {
     }
 
     public JkDependencySet getRuntimeDependencies() {
-        return dependencySetModifier.apply(project.getCompilation().getDependencies());
+        JkDependencySet baseDependencies = project.getCompilation().getDependencies();
+        if (project.isIncludeTextAndLocalDependencies()) {
+            baseDependencies = baseDependencies
+                    .minus(project.textAndLocalDeps().getCompileOnly().getEntries())
+                    .and(project.textAndLocalDeps().getRuntimeOnly());
+        }
+        return dependencySetModifier.apply(baseDependencies);
     }
 
     public JkResolveResult resolveRuntimeDependencies() {

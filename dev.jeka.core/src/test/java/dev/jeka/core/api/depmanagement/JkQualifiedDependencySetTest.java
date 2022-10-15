@@ -15,8 +15,7 @@ public class JkQualifiedDependencySetTest {
                 .and(GUAVA.toCoordinate("19.0").toString())
                 .and (JAVAX_SERVLET_API.toCoordinate("4.0.1").toString());
         JkDependencySet runtime = compile.minus(JAVAX_SERVLET_API);
-        JkProjectDependencies projectDependencies = JkProjectDependencies.of(compile, runtime, JkDependencySet.of());
-        JkQualifiedDependencySet qdeps = JkQualifiedDependencySet.computeIdeDependencies(projectDependencies);
+        JkQualifiedDependencySet qdeps = JkQualifiedDependencySet.computeIdeDependencies(compile, runtime, JkDependencySet.of());
         JkQualifiedDependency guava = qdeps.findByModule(GUAVA.toString()).get(0);
         JkQualifiedDependency servlet = qdeps.findByModule(JAVAX_SERVLET_API.toString()).get(0);
         Assert.assertEquals("compile", guava.getQualifier() );

@@ -78,9 +78,9 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     private final JkProjectTesting testing;
 
 
-    private boolean addTextAndLocalDependencies = true;
+    private boolean includeTextAndLocalDependencies = true;
 
-    private JkProjectDependencies cachedExtraDeps;
+    private LocalAndTxtDependencies cachedTextAndLocalDeps;
 
     // For testing purpose
     URL dependencyTxtUrl;
@@ -98,7 +98,6 @@ public class JkProject implements JkIdeSupport.JkSupplier {
                 .setUseCache(true);
         registerArtifacts();
         publication = new JkProjectPublication(this);
-        addTextAndLocalDependenciesIfNeeded();
     }
 
     public static JkProject of() {
@@ -167,11 +166,6 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return this;
     }
 
-    public JkProjectDependencies getProjectDependencies() {
-        return JkProjectDependencies.of(compilation.getDependencies(), packaging.getRuntimeDependencies(),
-                testing.getCompilation().getDependencies());
-    }
-
     /**
      * Returns the compiler compiling Java sources for this project. The returned instance is mutable
      * so users can modify it from this method return.
@@ -203,6 +197,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     public JkStandardFileArtifactProducer<JkProject> getArtifactProducer() {
         return artifactProducer;
     }
+
 
     // -------------------------- Other -------------------------
 
@@ -255,7 +250,9 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     @Override
     public JkIdeSupport getJavaIdeSupport() {
         JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
-                getProjectDependencies(),
+                compilation.getDependencies(),
+                packaging.getRuntimeDependencies(),
+                testing.getCompilation().getDependencies(),
                 JkCoordinate.ConflictStrategy.TAKE_FIRST);
         JkIdeSupport ideSupport = JkIdeSupport.of(baseDir)
             .setSourceVersion(jvmTargetVersion)
@@ -325,44 +322,27 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return this;
     }
 
-    public JkProject setAddTextAndLocalDependencies(boolean addTextAndLocalDependencies) {
-        this.addTextAndLocalDependencies = addTextAndLocalDependencies;
+    public boolean isIncludeTextAndLocalDependencies() {
+        return includeTextAndLocalDependencies;
+    }
+
+    public JkProject setIncludeTextAndLocalDependencies(boolean includeTextAndLocalDependencies) {
+        this.includeTextAndLocalDependencies = includeTextAndLocalDependencies;
         return this;
     }
 
-    private void addTextAndLocalDependenciesIfNeeded() {
-        getCompilation().configureDependencies(deps -> {
-            if (addTextAndLocalDependencies) {
-                return deps.and(extraDeps().getCompileDeps());
-            }
-            return deps;
-        });
-        packaging.configureRuntimeDependencies(deps -> {
-            if (addTextAndLocalDependencies) {
-                return deps.minus(extraDeps().getCompileDeps().getEntries()).and(extraDeps().getRuntimeDeps());
-            }
-            return deps;
-        });
-        testing.getCompilation().configureDependencies(deps -> {
-            if (addTextAndLocalDependencies) {
-                return deps.and(extraDeps().getTestDeps());
-            }
-            return deps;
-        });
-    }
-
-    private JkProjectDependencies extraDeps() {
-        if (cachedExtraDeps != null) {
-            return cachedExtraDeps;
+     LocalAndTxtDependencies textAndLocalDeps() {
+        if (cachedTextAndLocalDeps != null) {
+            return cachedTextAndLocalDeps;
         }
-        JkProjectDependencies localDeps = JkProjectDependencies.ofLocal(
+        LocalAndTxtDependencies localDeps = LocalAndTxtDependencies.ofLocal(
                 baseDir.resolve(JkConstants.JEKA_DIR + "/libs"));
-        JkProjectDependencies textDeps = dependencyTxtUrl == null
-                ? JkProjectDependencies.ofTextDescriptionIfExist(
+        LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
+                ? LocalAndTxtDependencies.ofTextDescriptionIfExist(
                 baseDir.resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"))
-                : JkProjectDependencies.ofTextDescription(dependencyTxtUrl);
-        cachedExtraDeps = localDeps.and(textDeps);
-        return cachedExtraDeps;
+                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
+        cachedTextAndLocalDeps = localDeps.and(textDeps);
+        return cachedTextAndLocalDeps;
     }
 
     public Document getDependenciesAsXml()  {

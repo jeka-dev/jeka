@@ -38,8 +38,7 @@ public class QualifiedDependenciesResolutionIT {
                 .and (JAVAX_SERVLET_API.toCoordinate(JkVersion.UNSPECIFIED))
                 .andVersionProvider(JkVersionProvider.of(JAVAX_SERVLET_API, "4.0.1"));
         JkDependencySet runtime = compile.minus(JAVAX_SERVLET_API);
-        JkProjectDependencies projectDependencies = JkProjectDependencies.of(compile, runtime, JkDependencySet.of());
-        JkQualifiedDependencySet qdeps = JkQualifiedDependencySet.computeIdeDependencies(projectDependencies);
+        JkQualifiedDependencySet qdeps = JkQualifiedDependencySet.computeIdeDependencies(compile, runtime, JkDependencySet.of());
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(qdeps, JkResolutionParameters.of());
         assertTrue(resolveResult.contains(JAVAX_SERVLET_API));

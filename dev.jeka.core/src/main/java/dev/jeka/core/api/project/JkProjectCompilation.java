@@ -2,6 +2,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
@@ -15,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -27,10 +27,6 @@ public class JkProjectCompilation<T> {
     public static final String RESOURCES_PROCESS_ACTION = "resources-process";
 
     public static final String JAVA_SOURCES_COMPILE_ACTION = "java-sources-compile";
-
-    private static final String PRODUCTION_PURPOSE = "production";
-
-    private static final String TEST_PURPOSE = "test";
 
     /**
      * For parent chaining
@@ -51,22 +47,14 @@ public class JkProjectCompilation<T> {
 
     private Function<JkDependencySet, JkDependencySet> dependenciesModifier = deps -> deps;
 
-    private Supplier<JkDependencySet> dependencyBootSupplier = () -> JkDependencySet.of();
-
     private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
 
     private List<JkSourceGenerator> sourceGenerators = new LinkedList<>();
 
     private boolean done;
 
-    // label to mention the purpose of the compilation (production, test, ...)
-    private String purpose;
-
-    private Supplier<JkJavaCompileSpec> compileSpecSupplier;
-
-    private JkProjectCompilation(JkProject project, String purpose, T parent) {
+    JkProjectCompilation(JkProject project, T parent) {
         __ = parent;
-        this.purpose = purpose;
         this.project = project;
         resourceProcessor = JkResourceProcessor.ofParent(this);
         preCompileActions = JkRunnables.ofParent(this)
@@ -77,30 +65,11 @@ public class JkProjectCompilation<T> {
                 .append(JAVA_SOURCES_COMPILE_ACTION, this::compileJava);
         postCompileActions = JkRunnables.ofParent(this)
                 .setLogRunnableName(true);
-
-        layout = JkCompileLayout.ofParent(this)
-                .setBaseDirSupplier(project::getBaseDir)
-                .setOutputDirSupplier(project::getOutputDir);
+        layout = layout();
     }
 
     static JkProjectCompilation<JkProject> ofProd(JkProject project) {
-        JkProjectCompilation result =
-                new JkProjectCompilation(project, PRODUCTION_PURPOSE, project);
-        result.compileSpecSupplier = () -> result.computeProdCompileSpec();
-        return result;
-    }
-
-    static JkProjectCompilation<JkProjectTesting> ofTest(JkProject project,
-                                                         JkProjectTesting parent) {
-        JkProjectCompilation result =
-                new JkProjectCompilation(project, TEST_PURPOSE, parent);
-        result.dependencyBootSupplier = () -> project.getPackaging().getRuntimeDependencies().merge(project
-            .getCompilation().getDependencies()).getResult();
-        result.compileSpecSupplier = () -> result.computeTestCompileSpec(project.getCompilation());
-        result.layout
-                .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
-                .setStandardOutputDirs(JkCompileLayout.Concern.TEST);
-        return result;
+        return new JkProjectCompilation(project, project);
     }
 
     public JkProjectCompilation apply(Consumer<JkProjectCompilation> consumer) {
@@ -125,7 +94,7 @@ public class JkProjectCompilation<T> {
      * Performs entire compilation phase.
      */
     public void run() {
-        JkLog.startTask("Run whole compilation process for " + purpose);
+        JkLog.startTask("Run whole compilation process for " + purpose());
         generateSources();
         preCompileActions.run();
         compileActions.run();
@@ -193,7 +162,7 @@ public class JkProjectCompilation<T> {
     }
 
     public JkDependencySet getDependencies() {
-        return dependenciesModifier.apply(dependencyBootSupplier.get());
+        return dependenciesModifier.apply(baseDependencies());
     }
 
     public JkProjectCompilation<T> addSourceGenerator(JkSourceGenerator sourceGenerator) {
@@ -213,32 +182,44 @@ public class JkProjectCompilation<T> {
     }
 
     private void compileJava() {
-        boolean success = project.getCompiler().compile(compileSpecSupplier.get());
+        boolean success = project.getCompiler().compile(compileSpec());
         if (!success) {
             throw new IllegalStateException("Compilation of Java sources failed.");
         }
     }
 
-    private JkJavaCompileSpec computeProdCompileSpec() {
+    private JkJavaCompileSpec compileSpec() {
         return JkJavaCompileSpec.of()
             .setSourceAndTargetVersion(project.getJvmTargetVersion())
             .setEncoding(project.getSourceEncoding())
-            .setClasspath(resolveDependencies().getFiles())
+            .setClasspath(classpath())
             .setSources(layout.resolveSources().and(getGeneratedSourceDirs().toArray(new Path[0])))
             .addOptions(extraJavaCompilerOptions)
             .setOutputDir(layout.resolveClassDir());
     }
 
-    private JkJavaCompileSpec computeTestCompileSpec(JkProjectCompilation prodStep) {
-        JkDependencySet dependencies = getDependencies();
-        return JkJavaCompileSpec.of()
-                .setSourceAndTargetVersion(project.getJvmTargetVersion())
-                .setEncoding(project.getSourceEncoding())
-                .setClasspath(project.getDependencyResolver().resolve(dependencies).getFiles()
-                            .andPrepend(prodStep.layout.resolveClassDir()))
-                .setSources(layout.resolveSources().and(getGeneratedSourceDirs().toArray(new Path[0])))
-                .addOptions(extraJavaCompilerOptions)
-                .setOutputDir(layout.resolveClassDir());
+    // -------- methods to override for test compilation
+
+    protected JkCompileLayout layout() {
+        return JkCompileLayout.ofParent(this)
+                .setBaseDirSupplier(project::getBaseDir)
+                .setOutputDirSupplier(project::getOutputDir);
+    }
+
+    protected JkPathSequence classpath() {
+        return resolveDependencies().getFiles();
+    }
+
+    protected JkDependencySet baseDependencies() {
+        if (project.isIncludeTextAndLocalDependencies()) {
+            return project.textAndLocalDeps().getRegular()
+                    .and(project.textAndLocalDeps().getCompileOnly());
+        }
+        return JkDependencySet.of();
+    }
+
+    protected String purpose() {
+        return "production";
     }
 
 }

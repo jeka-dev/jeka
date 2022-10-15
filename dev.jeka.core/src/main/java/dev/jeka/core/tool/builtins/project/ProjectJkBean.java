@@ -411,7 +411,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             if (generateLocalLibsFolders) {
                 JkPathFile.of(libs.resolve("readme.txt"))
                         .fetchContentFrom(ProjectJkBean.class.getResource("libs-readme.txt"));
-                JkUtilsPath.createDirectories(libs.resolve("compile+runtime"));
+                JkUtilsPath.createDirectories(libs.resolve("regular"));
                 JkUtilsPath.createDirectories(libs.resolve("compile_only"));
                 JkUtilsPath.createDirectories(libs.resolve("runtime_only"));
                 JkUtilsPath.createDirectories(libs.resolve("test"));

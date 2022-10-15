@@ -1,7 +1,6 @@
 package dev.jeka.core.api.project;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
-import dev.jeka.core.api.depmanagement.JkProjectDependencies;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -15,6 +14,8 @@ import java.util.List;
  * Minimal information necessary to generate metadata project file for IDE.
  */
 public class JkIdeSupport {
+
+
 
     public interface JkSupplier {
 
@@ -88,13 +89,11 @@ public class JkIdeSupport {
         return this;
     }
 
-    public JkIdeSupport setDependencies(JkProjectDependencies projectDependencies,
-                                        JkCoordinate.ConflictStrategy conflictStrategy) {
-        return setDependencies(JkQualifiedDependencySet.computeIdeDependencies(projectDependencies, conflictStrategy));
-    }
-
-    public JkIdeSupport setDependencies(JkProjectDependencies projectDependencies) {
-        return setDependencies(projectDependencies, JkCoordinate.ConflictStrategy.FAIL);
+    public JkIdeSupport setDependencies(
+            JkDependencySet allCompileDeps,
+            JkDependencySet allRuntimeDeps,
+            JkDependencySet allTestDeps) {
+        return setDependencies(JkQualifiedDependencySet.computeIdeDependencies(allCompileDeps, allRuntimeDeps, allTestDeps));
     }
 
     public JkIdeSupport setSourceVersion(JkJavaVersion sourceVersion) {

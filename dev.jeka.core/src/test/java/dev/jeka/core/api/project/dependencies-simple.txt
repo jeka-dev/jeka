@@ -14,27 +14,25 @@
 #
 # Example :
 #
-# == TEST ==
+# - TEST
 #  org.springframework.boot:spring-boot-starter-test
 #  org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
+#  org.junit:junit-bom:5.9.0::pom:5.9.0   (for Bill Of Material)
 #
 # If you don't need it, feel free to remove this file.
 ##
 
 == COMPILE+RUNTIME ==
-org.springframework.boot:spring-boot-starter-thymeleaf
-org.springframework.boot:spring-boot-starter-data-jpa
+org.springframework.boot:spring-boot-starter-web
+
+== COMPILE_ONLY ==
+org.projectlombok:lombok:1.18.24
 
 == RUNTIME_ONLY ==
-com.h2database:h2
-org.liquibase:liquibase-core
-com.oracle:ojdbc6:12.1.0
+com.h2database:h2:2.1.214
 
 == TEST ==
 org.springframework.boot:spring-boot-starter-test
-org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
-org.fluentlenium:fluentlenium-assertj:3.2.0
-org.fluentlenium:fluentlenium-junit:3.2.0
 
-== COMPILE_ONLY ==
-org.projectlombok:lombok:1.16.16
+
+

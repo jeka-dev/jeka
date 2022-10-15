@@ -3,7 +3,6 @@ package dev.jeka.core.samples;
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkProjectDependencies;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.artifact.JkSuppliedFileArtifactProducer;
@@ -17,8 +16,8 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkInjectClasspath;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -111,7 +110,7 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkIvyPublication.of()
                 .setModuleId(versionedModule.getCoordinate().getModuleId().toString())
                 .setVersion(versionedModule.getCoordinate().getVersion().getValue())
-                .setDependencies(JkProjectDependencies.of(prodDependencies, prodDependencies, testDependencies))
+                .setDependencies(prodDependencies, prodDependencies, testDependencies)
                 .addArtifacts(artifactProducer)
                 .addRepos(ivyRepo)
                 .publish();
@@ -128,7 +127,7 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 .emptySources()
                 .addSource(test)
             .__
-            .setDependencies(JkProjectDependencies.of(prodDependencies, prodDependencies, testDependencies))
+            .setDependencies(prodDependencies, prodDependencies, testDependencies)
             .setDependencyResolver(resolver);
     }
 
