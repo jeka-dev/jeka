@@ -29,23 +29,19 @@ class LocalAndTxtDependencies {
     // Equals to Maven 'test' scope
     private final JkDependencySet test;
 
-    private final JkVersionProvider versionProvider;
-
     private LocalAndTxtDependencies(JkDependencySet regular,
                                     JkDependencySet compileOnly,
                                     JkDependencySet runtimeOnly,
-                                    JkDependencySet test,
-                                    JkVersionProvider versionProvider) {
+                                    JkDependencySet test) {
         this.regular = regular;
         this.compileOnly = compileOnly;
         this.runtimeOnly = runtimeOnly;
         this.test = test;
-        this.versionProvider = versionProvider;
     }
 
     static LocalAndTxtDependencies of() {
         return new LocalAndTxtDependencies(JkDependencySet.of(), JkDependencySet.of(),
-                JkDependencySet.of(), JkDependencySet.of(), JkVersionProvider.of());
+                JkDependencySet.of(), JkDependencySet.of());
     }
 
     /**
@@ -97,28 +93,25 @@ class LocalAndTxtDependencies {
      * org.fluentlenium:fluentlenium-junit:3.2.0
      * </pre>
      *
-     * ==  VERSIONS ==
-     * org.junit.platform:junit-platform-engine:1.9.1
-     *
      */
     public static LocalAndTxtDependencies ofTextDescription(String description) {
         return Parser.parseTxt(description);
     }
 
     public JkDependencySet getRegular() {
-        return regular.withVersionProvider(versionProvider);
+        return regular;
     }
 
     public JkDependencySet getCompileOnly() {
-        return compileOnly.withVersionProvider(versionProvider);
+        return compileOnly;
     }
 
     public JkDependencySet getRuntimeOnly() {
-        return runtimeOnly.withVersionProvider(versionProvider);
+        return runtimeOnly;
     }
 
     public JkDependencySet getTest() {
-        return test.withVersionProvider(versionProvider);
+        return test;
     }
 
 
@@ -127,8 +120,7 @@ class LocalAndTxtDependencies {
                 regular.and(other.regular),
                 compileOnly.and(other.compileOnly),
                 runtimeOnly.and(other.runtimeOnly),
-                test.and(other.test),
-                versionProvider.and(other.versionProvider)
+                test.and(other.test)
         );
     }
 
@@ -141,8 +133,6 @@ class LocalAndTxtDependencies {
         private static final String RUNTIME = "runtime_only";
 
         private static final String TEST = "test";
-
-        private static final String VERSIONS = "versions";
 
         private static final List<String> KNOWN_QUALIFIER = JkUtilsIterable.listOf(COMPILE, REGULAR,
                 RUNTIME, TEST);
@@ -160,7 +150,7 @@ class LocalAndTxtDependencies {
                     .andFiles(libDir.andMatching(true, "*.jar", RUNTIME + "/*.jar").getFiles());
             JkDependencySet test = JkDependencySet.of()
                     .andFiles(libDir.andMatching(true, "*.jar", TEST + "/*.jar").getFiles());
-            return new LocalAndTxtDependencies(regular, compileOnly, runtimeOnly, test, JkVersionProvider.of());
+            return new LocalAndTxtDependencies(regular, compileOnly, runtimeOnly, test);
         }
 
         static LocalAndTxtDependencies parseTxt(String description) {
@@ -192,12 +182,9 @@ class LocalAndTxtDependencies {
                     runtimeOnly = runtimeOnly.and(dependency);
                 } else if (TEST.equals(currentQualifier)) {
                     test = test.and(dependency);
-                } else if (VERSIONS.equals(currentQualifier)) {
-                    versionProvider = versionProvider.and(dependency.getCoordinate().getModuleId(),
-                            dependency.getCoordinate().getVersion());
                 }
             }
-            return new LocalAndTxtDependencies(regular, compileOnly, runtimeOnly, test, versionProvider);
+            return new LocalAndTxtDependencies(regular, compileOnly, runtimeOnly, test);
         }
 
         private static String readQualifier(String line) {

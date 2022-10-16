@@ -77,7 +77,7 @@ public class SonarqubeJkBean extends JkBean {
         sonarqube
                 .setLogOutput(logOutput)
                 .setProjectId(fullName, name, version)
-                .setProperties(getRuntime().getProperties().getAllStartingWith("sonar."))
+                .setProperties(getRuntime().getProperties().getAllStartingWith("sonar.", true))
                 .setProjectBaseDir(baseDir)
                 .setBinaries(project.getCompilation().getLayout().resolveClassDir())
                 .setProperty(JkSonarqube.SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())

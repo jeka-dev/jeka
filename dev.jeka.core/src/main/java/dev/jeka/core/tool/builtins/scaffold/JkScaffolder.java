@@ -104,7 +104,7 @@ public final class JkScaffolder {
         if (Files.exists(manualHtml)) {
             JkPathFile.of(manualHtml).copyToDir(baseDir.resolve("jeka"));
         }
-        JkUtilsPath.createDirectories(baseDir.resolve(JkConstants.JEKA_DIR).resolve("boot"));
+        //JkUtilsPath.createDirectories(baseDir.resolve(JkConstants.JEKA_DIR).resolve("boot"));
         extraActions.run();
     }
 

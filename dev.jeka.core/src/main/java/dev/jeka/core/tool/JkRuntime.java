@@ -177,6 +177,16 @@ public final class JkRuntime {
                     + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
         }
         JkBean bean = JkUtilsReflect.newInstance(beanClass);
+
+        // Inject properties having name matching with a bean field
+        String beanName = JkBean.name(beanClass);
+        Map<String, String> props = properties.getAllStartingWith(beanName + "#", false);
+        FieldInjector.inject(bean, props);
+
+        // Inject properties on fields with @JkInjectProperty
+        FieldInjector.injectAnnotatedProperties(bean, properties);
+
+        // Inject from command nale
         fieldInjections.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
                 .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
@@ -187,7 +197,7 @@ public final class JkRuntime {
                         throw new JkException("Field %s does not exist in KBean %s", injectedProp, bean);
                     }
                 });
-        FieldInjector.injectAnnotatedProperties(bean, properties);
+
         return bean;
     }
 

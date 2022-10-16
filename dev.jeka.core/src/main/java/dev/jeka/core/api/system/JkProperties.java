@@ -116,9 +116,10 @@ public final class JkProperties {
         return value.toLowerCase().replace('_', '.');
     }
 
-    public Map<String,String> getAllStartingWith(String prefix) {
+    public Map<String,String> getAllStartingWith(String prefix, boolean keepPrefix) {
         Map<String, String> result = new HashMap<>();
         for (String key : find(prefix)) {
+            String resultKey = keepPrefix ? key : JkUtilsString.substringAfterFirst(key, prefix);
             result.put(key, get(key));
         }
         return result;

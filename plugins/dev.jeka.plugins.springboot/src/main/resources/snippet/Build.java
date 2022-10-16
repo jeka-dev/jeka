@@ -24,7 +24,6 @@ class Build extends JkBean {
             )
             .configureTestDependencies(deps -> deps
                     .and("org.springframework.boot:spring-boot-starter-test")
-                        .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
             );
     }
 

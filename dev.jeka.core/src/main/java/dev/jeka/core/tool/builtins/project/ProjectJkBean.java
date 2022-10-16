@@ -90,7 +90,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
         JkJavaCompiler compiler = project.getCompiler();
-        compiler.setJdkHomesWithProperties(getRuntime().getProperties().getAllStartingWith("jeka.jdk."));
+        compiler.setJdkHomesWithProperties(getRuntime().getProperties().getAllStartingWith("jeka.jdk.", true));
         if (!JkUtilsString.isBlank(this.javaVersion)) {
             JkJavaVersion version = JkJavaVersion.of(this.javaVersion);
             project.setJvmTargetVersion(version);
@@ -222,9 +222,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        showDependencies("compile", project.getCompilation().getDependencies());
-        showDependencies("runtime", project.getPackaging().getRuntimeDependencies());
-        showDependencies("test", project.getTesting().getCompilation().getDependencies());
+        showDependencies("compile", getProject().getCompilation().getDependencies());
+        showDependencies("runtime", getProject().getPackaging().getRuntimeDependencies());
+        showDependencies("test", getProject().getTesting().getCompilation().getDependencies());
     }
 
     private void showDependencies(String purpose, JkDependencySet deps) {
@@ -381,8 +381,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         @JkDoc("Generate jeka/libs sub-folders for hosting local libraries")
         public boolean generateLocalLibsFolders = true;
 
-        @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE+RUNTIME section")
-        public String dependenciesTxtCompileAndRuntime;
+        @JkDoc("Comma separated dependencies to include in dependencies.txt REGULAR section")
+        public String dependenciesTxtRegular;
 
         @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE_ONLY section")
         public String dependenciesTxtCompileOnly;
@@ -438,8 +438,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             StringBuilder sb = new StringBuilder();
             for (String line : lines) {
                 sb.append(line).append("\n");
-                if (line.startsWith("== COMPILE+RUNTIME ==") && !JkUtilsString.isBlank(this.dependenciesTxtCompileAndRuntime)) {
-                    Arrays.stream(this.dependenciesTxtCompileAndRuntime.split(",")).forEach(extraDep ->
+                if (line.startsWith("== REGULAR ==") && !JkUtilsString.isBlank(this.dependenciesTxtRegular)) {
+                    Arrays.stream(this.dependenciesTxtRegular.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
