@@ -1,14 +1,14 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsFile;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import static dev.jeka.core.tool.JkConstants.*;
 
 class Environment {
 
@@ -24,15 +24,17 @@ class Environment {
         List<String> effectiveCommandLineArgs = new LinkedList<>(Arrays.asList(commandLineArgs));
 
         // Add arguments contained in cmd.properties '_append'
-        Map<String, String> presets = projectCmdProperties();
-        List<String> appendedArgs = Arrays.asList(JkUtilsString.translateCommandline(presets.get("_append")));
+        JkProperties props = JkRuntime.readProjectPropertiesRecursively(Paths.get(""));
+        List<String> appendedArgs = Arrays.asList(JkUtilsString.translateCommandline(props.get(CMD_APPEND_PROP)));
         effectiveCommandLineArgs.addAll(appendedArgs);
 
         // Interpolate arguments passed as $key to respective value
         for (ListIterator<String> it = effectiveCommandLineArgs.listIterator(); it.hasNext(); ) {
             String word = it.next();
-            if (word.startsWith("$")) {
-                String presetValue = presets.get(word.substring(1));
+            if (word.startsWith(CMD_SUBSTITUTE_SYMBOL)) {
+                String token = word.substring(CMD_SUBSTITUTE_SYMBOL.length());
+                String propName = CMD_PROP_PREFIX + token;
+                String presetValue = props.get(propName);
                 if (presetValue != null) {
                     String[] replacingItems = JkUtilsString.translateCommandline(presetValue);
                     it.remove();
@@ -143,16 +145,5 @@ class Environment {
 
     }
 
-    static Map<String, String> projectCmdProperties(Path projectDir) {
-        Path presetCommandsFile = projectDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.CMD_PROPERTIES);
-        if (Files.exists(presetCommandsFile)) {
-            return JkUtilsFile.readPropertyFileAsMap(presetCommandsFile);
-        }
-        return Collections.emptyMap();
-    }
-
-    private static Map<String, String> projectCmdProperties() {
-        return projectCmdProperties(Paths.get(""));
-    }
 
 }

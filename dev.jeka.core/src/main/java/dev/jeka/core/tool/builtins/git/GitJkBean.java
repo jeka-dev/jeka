@@ -17,7 +17,7 @@ public class GitJkBean extends JkBean {
     @JkDoc({"Manages versioning of projects by extracting Git information.",
             "The version is inferred from git : ",
             "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
-            "  - If last commit contains a message containing [comment_version_prefix]xxxxx, version values xxxxx",
+            "  - If last commit contains a message containing [commentKeyword]xxxxx, version values xxxxx",
             "  - If last commit is tagged, version values [last tag on last commit]",
             "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
             "After, if last commit message specifies a version and this version differs from tag, " +
@@ -72,16 +72,13 @@ public class GitJkBean extends JkBean {
     public class ProjectVersionProvider {
 
         @JkDoc("If true and a ProjectJkBean project is bound to the build instance, the project will be configured for " +
-                "publishing with the inferred version.")
+                "publishing with version tagged in GIT")
         public boolean on = false;
 
         public static final String TAG_TASK_NAME = "version-from-git-tag";
 
-        @JkDoc("The prefix to use in commit message to specify a version.")
-        public String commentVersionPrefix = "Release:";
-
-        @JkDoc("Tags with following prefix. This may help to distinguish tags for versioning from others.")
-        public String tagPrefixForVersion = "";
+        @JkDoc("The keyword to use in commit message to order a tag (e.g. 'Release:1.0.2' will put a tag '1.0.2')")
+        public String commentKeyword = "Release:";
 
         @JkDoc("If true and autoConfigureProject, project will be configured to push tag after project.publication.publish() succeed.")
         public boolean tagAfterPublish = true;
@@ -93,14 +90,14 @@ public class GitJkBean extends JkBean {
          * If no version is specified or the specified version is equals to the current tag, no tag will be set.
          */
         public boolean tagIfDiffers() {
-            String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentVersionPrefix);
+            String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentKeyword);
             if (commitCommentVersion == null) {
                 return false;
             }
-            String currentTagVersion = git.getVersionFromTag(tagPrefixForVersion);
+            String currentTagVersion = git.getVersionFromTag("");
             if (!commitCommentVersion.equals(currentTagVersion)) {
                 JkLog.info("Tagging git with " + commitCommentVersion);
-                git.tagAndPush(tagPrefixForVersion + commitCommentVersion);
+                git.tagAndPush(commitCommentVersion);
                 return true;
             }
             return false;
@@ -117,9 +114,9 @@ public class GitJkBean extends JkBean {
             if (dirty) {
                 cachedVersion = JkVersion.of(git.getCurrentBranch()).toSnapshot();
             } else {
-                String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentVersionPrefix);
+                String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentKeyword);
                 cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion)
-                        .orElseGet(() -> git.getVersionFromTag(tagPrefixForVersion)));
+                        .orElseGet(() -> git.getVersionFromTag("")));
             }
             JkLog.info("Version inferred from Git:" + cachedVersion);
             return cachedVersion;
@@ -145,8 +142,5 @@ public class GitJkBean extends JkBean {
         }
 
     }
-
-
-
 
 }

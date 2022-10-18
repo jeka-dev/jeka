@@ -66,6 +66,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     public final JkScaffold scaffold = new JkScaffold();
 
+    public final Layout layout = new Layout();
+
     @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
     public String compilerExtraArgs;
 
@@ -96,6 +98,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             project.setJvmTargetVersion(version);
         }
         applyRepo(project);
+        if (layout.style == Layout.Style.SIMPLE) {
+            project.flatFacade().useSimpleLayout();
+        }
+        if (layout.mixSourcesAndResources) {
+            project.flatFacade().mixResourcesAndSources();
+        }
         projectConfigurators.accept(project);
         this.applyPostSetupOptions(project);
         return project;
@@ -334,6 +342,16 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     }
 
+    public static class Layout {
+
+        enum Style {SIMPLE, MAVEN}
+
+        public Style style = Style.MAVEN;
+
+        public boolean mixSourcesAndResources = false;
+
+    }
+
     public class JkRunOptions {
 
         @JkDoc("JVM options to use when running generated jar")
@@ -381,17 +399,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         @JkDoc("Generate jeka/libs sub-folders for hosting local libraries")
         public boolean generateLocalLibsFolders = true;
 
-        @JkDoc("Comma separated dependencies to include in dependencies.txt REGULAR section")
-        public String dependenciesTxtRegular;
-
-        @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE_ONLY section")
-        public String dependenciesTxtCompileOnly;
-
-        @JkDoc("Comma separated dependencies to include in dependencies.txt RUNTIME_ONLY section")
-        public String dependenciesTxtRuntimeOnly;
-
-        @JkDoc("Comma separated dependencies to include in dependencies.txt TEST section")
-        public String dependenciesTxtTest;
+        public final DependenciesTxt dependenciesTxt = new DependenciesTxt();
 
         private void scaffoldProjectStructure(JkProject configuredProject) {
             JkLog.info("Create source directories.");
@@ -438,28 +446,44 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             StringBuilder sb = new StringBuilder();
             for (String line : lines) {
                 sb.append(line).append("\n");
-                if (line.startsWith("== REGULAR ==") && !JkUtilsString.isBlank(this.dependenciesTxtRegular)) {
-                    Arrays.stream(this.dependenciesTxtRegular.split(",")).forEach(extraDep ->
+                if (line.startsWith("== REGULAR ==") && !JkUtilsString.isBlank(this.dependenciesTxt.regular)) {
+                    Arrays.stream(this.dependenciesTxt.regular.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("== COMPILE ==") && !JkUtilsString.isBlank(this.dependenciesTxtCompileOnly)) {
-                    Arrays.stream(this.dependenciesTxtCompileOnly.split(",")).forEach(extraDep ->
+                if (line.startsWith("== COMPILE ==") && !JkUtilsString.isBlank(this.dependenciesTxt.compileOnly)) {
+                    Arrays.stream(this.dependenciesTxt.compileOnly.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("== RUNTIME ==") && !JkUtilsString.isBlank(this.dependenciesTxtRuntimeOnly)) {
-                    Arrays.stream(this.dependenciesTxtRuntimeOnly.split(",")).forEach(extraDep ->
+                if (line.startsWith("== RUNTIME ==") && !JkUtilsString.isBlank(this.dependenciesTxt.runtimeOnly)) {
+                    Arrays.stream(this.dependenciesTxt.runtimeOnly.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("== TEST ==") && !JkUtilsString.isBlank(this.dependenciesTxtTest)) {
-                    Arrays.stream(this.dependenciesTxtTest.split(",")).forEach(extraDep ->
+                if (line.startsWith("== TEST ==") && !JkUtilsString.isBlank(this.dependenciesTxt.test)) {
+                    Arrays.stream(this.dependenciesTxt.test.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
             }
             return sb.toString();
+        }
+
+        public static class DependenciesTxt {
+
+            @JkDoc("Comma separated dependencies to include in dependencies.txt REGULAR section")
+            public String regular;
+
+            @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE_ONLY section")
+            public String compileOnly;
+
+            @JkDoc("Comma separated dependencies to include in dependencies.txt RUNTIME_ONLY section")
+            public String runtimeOnly;
+
+            @JkDoc("Comma separated dependencies to include in dependencies.txt TEST section")
+            public String test;
+
         }
 
 

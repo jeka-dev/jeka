@@ -39,8 +39,6 @@ public final class JkScaffolder {
 
     private String cachedJekaVersion;
 
-    private String cmdExtraContent = "";
-
     private String projectExtraContent = "";
 
     JkScaffolder(Path baseDir) {
@@ -58,11 +56,6 @@ public final class JkScaffolder {
 
     public JkScaffolder setDependencyResolver(JkDependencyResolver jkDependencyResolver) {
         this.dependencyResolver = jkDependencyResolver;
-        return this;
-    }
-
-    public JkScaffolder addCmdFileContent(String cmdExtraContent) {
-        this.cmdExtraContent += cmdExtraContent;
         return this;
     }
 
@@ -88,14 +81,8 @@ public final class JkScaffolder {
             }
             JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
         }
-        JkPathFile projectPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_PROPERTIES))
-                .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.PROJECT_PROPERTIES));
-        JkPathFile cmdFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.CMD_PROPERTIES))
-                .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.CMD_PROPERTIES));
-        if (!JkUtilsString.isBlank(this.cmdExtraContent)) {
-            String content = cmdExtraContent.replace("\\n", "\n");
-            cmdFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-        }
+        JkPathFile projectPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE))
+                .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.PROPERTIES_FILE));
         if (!JkUtilsString.isBlank(this.projectExtraContent)) {
             String content = projectExtraContent.replace("\\n", "\n");
             projectPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);

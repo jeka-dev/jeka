@@ -45,10 +45,7 @@ public final class JkExternalToolApi {
         if (Files.isDirectory(defDir)) {
             return true;
         }
-        if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROJECT_PROPERTIES))) {
-            return true;
-        }
-        if (Files.isRegularFile(jekaDir.resolve(JkConstants.CMD_PROPERTIES))) {
+        if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROPERTIES_FILE))) {
             return true;
         }
         if (Files.isRegularFile(jekaDir.resolve("dependencies.txt"))) {
@@ -71,8 +68,11 @@ public final class JkExternalToolApi {
         return JkImlGenerator.getImlFilePath(moduleDir);
     }
 
-    public static Map<String, String> getCmdPropertiesContent(Path projectDir) {
-        return Environment.projectCmdProperties(projectDir);
+    public static Map<String, String> getCmdShortcutsProperties(Path projectDir) {
+        Map<String, String> result = JkRuntime.readProjectPropertiesRecursively(projectDir)
+                .getAllStartingWith(JkConstants.CMD_PROP_PREFIX, false);
+        result.remove(JkConstants.CMD_APPEND_PROP);
+        return result;
     }
 
     public static JkProperties getGlobalProperties() {
@@ -80,7 +80,7 @@ public final class JkExternalToolApi {
                 .withFallback(JkProperties.ofEnvironmentVariables());
         Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
         if (Files.exists(globalPropertiesFile)) {
-            result = result.withFallback(JkProperties.of(globalPropertiesFile));
+            result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));
         }
         return result;
     }

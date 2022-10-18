@@ -41,8 +41,12 @@ public final class JkConstants {
      */
     public static final String DEF_DIR = JEKA_DIR + "/def";
 
-    public static final String CMD_PROPERTIES = "cmd.properties";
+    public static final String CMD_PROP_PREFIX = "jeka.cmd.";
 
-    public static final String PROJECT_PROPERTIES = "project.properties";
+    public static final String CMD_APPEND_PROP = CMD_PROP_PREFIX + "_append";
+
+    public static final String CMD_SUBSTITUTE_SYMBOL = ":";
+
+    public static final String PROPERTIES_FILE = "project.properties";
 
 }

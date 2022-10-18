@@ -186,15 +186,15 @@ public final class JkRuntime {
         // Inject properties on fields with @JkInjectProperty
         FieldInjector.injectAnnotatedProperties(bean, properties);
 
-        // Inject from command nale
+        // Inject from command name
         fieldInjections.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
                 .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
                 .forEach(action -> {
-                    Set<String> injectedProp =
+                    Set<String> usedProperties =
                             FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(), action.getValue()));
-                    if (injectedProp.isEmpty()) {
-                        throw new JkException("Field %s does not exist in KBean %s", injectedProp, bean);
+                    if (usedProperties.isEmpty()) {
+                        throw new JkException("Field %s do not exist in KBean %s", action.getMember(), bean.getClass().getName());
                     }
                 });
 
@@ -207,7 +207,7 @@ public final class JkRuntime {
                     .withFallback(readProjectPropertiesRecursively(baseDir)));
         Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
         if (Files.exists(globalPropertiesFile)) {
-            result = result.withFallback(JkProperties.of(globalPropertiesFile));
+            result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));
         }
         return result;
     }
@@ -221,15 +221,13 @@ public final class JkRuntime {
     }
 
     // Reads the properties from the baseDir/jeka/project.properties
-    // Takes also in account properties defined in parent dirs if any.
-    private static JkProperties readProjectPropertiesRecursively(Path projectBaseDir) {
+    // Takes also in account properties defined in parent project dirs if any.
+    static JkProperties readProjectPropertiesRecursively(Path projectBaseDir) {
         Path baseDir = projectBaseDir.toAbsolutePath().normalize();
-        Path projectPropertiesFile = baseDir
-                .resolve(JkConstants.JEKA_DIR)
-                .resolve(JkConstants.PROJECT_PROPERTIES);
+        Path projectPropertiesFile = baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
         JkProperties result = JkProperties.EMPTY;
         if (Files.exists(projectPropertiesFile)) {
-            result = JkProperties.of(projectPropertiesFile);
+            result = JkProperties.ofFile(projectPropertiesFile);
         }
         Path parentProject =baseDir.getParent();
         if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.JEKA_DIR))

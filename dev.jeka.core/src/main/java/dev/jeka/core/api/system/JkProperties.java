@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  */
 public final class JkProperties {
 
-    public static final JkProperties EMPTY = JkProperties.of("", Collections.emptyMap());
+    public static final JkProperties EMPTY = JkProperties.ofFile("", Collections.emptyMap());
 
     private final String source;
 
@@ -39,8 +39,8 @@ public final class JkProperties {
         this.fallback = fallback;
     }
 
-    public static JkProperties of(String soureName, Map<String, String> props) {
-        return new JkProperties(soureName, Collections.unmodifiableMap(new HashMap<>(props)), null);
+    public static JkProperties ofFile(String sourceName, Map<String, String> props) {
+        return new JkProperties(sourceName, Collections.unmodifiableMap(new HashMap<>(props)), null);
     }
 
     public static JkProperties ofEnvironmentVariables() {
@@ -61,11 +61,11 @@ public final class JkProperties {
         return new JkProperties("System Properties", Collections.unmodifiableMap(props), null);
     }
 
-    public static JkProperties of(Path propertyFile) {
+    public static JkProperties ofFile(Path propertyFile) {
         Properties properties = new Properties();
         try (InputStream is = new FileInputStream(propertyFile.toFile())) {
             properties.load(is);
-            return of(propertyFile.toString(), JkUtilsIterable.propertiesToMap(properties));
+            return ofFile(propertyFile.toString(), JkUtilsIterable.propertiesToMap(properties));
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException(propertyFile + " not found");
         } catch (IOException e) {
@@ -140,8 +140,8 @@ public final class JkProperties {
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
-        result.append(source).append("\n");
-        props.forEach( (key, val) -> result.append(key +  "=" + val + "\n"));
+        result.append("== " + source + " ==").append("\n");
+        props.forEach( (key, val) -> result.append("  " + key +  "=" + val + "\n"));
         if (fallback != null) {
             result.append(fallback);
         }

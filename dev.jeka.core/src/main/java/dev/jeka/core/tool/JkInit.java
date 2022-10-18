@@ -107,6 +107,9 @@ public final class JkInit {
         sb.append("\nJeka Cache Dir : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
         JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
         sb.append("\nJeka download Repositories : " + JkRepoProperties.of(properties).getDownloadRepos());
+        if (JkLog.isVerbose()) {
+            sb.append("\nProperties:\n").append(properties);
+        }
         JkLog.info(sb.toString());
     }
 

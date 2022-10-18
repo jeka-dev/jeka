@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,6 +28,7 @@ public final class Main {
      * Entry point for Jeka application when launched from command-line
      */
     public static void main(String[] args) {
+        System.out.println("========" + Arrays.asList(args));
         if (!(Thread.currentThread().getContextClassLoader() instanceof AppendableUrlClassloader)) {
             final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);

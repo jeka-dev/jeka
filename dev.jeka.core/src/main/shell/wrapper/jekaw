@@ -99,21 +99,6 @@ if $mingw ; then
     JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
 fi
 
-if [ -z "$JAVA_HOME" ]; then
-  javaExecutable="`which javac`"
-  if [ -n "$javaExecutable" ] && ! [ "`expr \"$javaExecutable\" : '\([^ ]*\)'`" = "no" ]; then
-    # readlink(1) is not available as standard on Solaris 10.
-    readLink=`which readlink`
-    if [ ! `expr "$readLink" : '\([^ ]*\)'` = "no" ]; then
-      javaExecutable="`readlink -f \"$javaExecutable\"`"
-      javaHome="`dirname \"$javaExecutable\"`"
-      javaHome=`expr "$javaHome" : '\(.*\)/bin'`
-      JAVA_HOME="$javaHome"
-      export JAVA_HOME
-    fi
-  fi
-fi
-
 if [ -z "$JAVACMD" ] ; then
   if [ -n "$JAVA_HOME"  ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
@@ -132,10 +117,6 @@ if [ ! -x "$JAVACMD" ] ; then
   echo "  We cannot execute $JAVACMD" >&2
   echo "  You can specify which JDK to use by setting JEKA_JDK environment variable." >&2
   exit 1
-fi
-
-if [ -z "$JAVA_HOME" ] ; then
-  echo "Warning: JAVA_HOME environment variable is not set."
 fi
 
 # For Cygwin, switch paths to Windows format before running java
