@@ -75,6 +75,10 @@ public final class JkExternalToolApi {
         return result;
     }
 
+    public static JkProperties getProperties(Path projectDir) {
+        return JkRuntime.readProjectPropertiesRecursively(projectDir);
+    }
+
     public static JkProperties getGlobalProperties() {
         JkProperties result = JkProperties.ofSystemProperties()
                 .withFallback(JkProperties.ofEnvironmentVariables());

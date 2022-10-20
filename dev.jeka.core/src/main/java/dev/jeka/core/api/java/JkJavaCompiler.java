@@ -179,10 +179,13 @@ public final class JkJavaCompiler<T> {
 
     private boolean runCompiler(JkJavaCompileSpec compileSpec) {
         JkJavaVersion runningJdkVersion = JkJavaVersion.of(runningJdkVersion());
+        JkJavaVersion sourceVersion = compileSpec.getSourceVersion();
+        Path jdkHome = this.jdkHomes.get(sourceVersion);
         if (compileTool != null) {
-            if (compileSpec.getSourceVersion() == null
-                    || canCompile(compileTool, compileSpec.getSourceVersion())) {
+            if (sourceVersion == null || sourceVersion.equals(runningJdkVersion)) {
                 return runOnTool(compileSpec, compileTool, toolParams);
+            } else if (sourceVersion.equals(runningJdkVersion)) {
+
             } else {
                 throw new IllegalStateException("Tool compiler does not support Java source version "
                         + compileSpec.getSourceVersion()
@@ -260,8 +263,11 @@ public final class JkJavaCompiler<T> {
 
     private static JavaCompiler getDefaultOrFail() {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        JkUtilsAssert.state(compiler != null, "This platform does not provide compileRunner. " +
-                "Try another JDK or specify option jdk.[version]=/path/to/jdk");
+        if (compiler == null) {
+            String javaHome = System.getProperty("java.home");
+            throw new IllegalStateException("The current Java Platform " + javaHome + " does not provide compiler."  +
+                    "Try another JDK or specify property jeka.jdk.[version]=/path/to/jdk");
+        }
         return compiler;
     }
 
@@ -289,6 +295,7 @@ public final class JkJavaCompiler<T> {
         return compilerTool.getSourceVersions().stream()
                 .map(sourceVersion -> JkUtilsString.substringAfterFirst(sourceVersion.name(), "RELEASE_"))
                 .map(JkJavaVersion::of)
+                .filter(javaVersion -> javaVersion.equals(version))
                 .findAny().isPresent();
     }
 

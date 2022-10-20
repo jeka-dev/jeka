@@ -79,8 +79,12 @@ final class CommandLine {
         return rawArgs;
     }
 
-    boolean containsDefaultBean() {
-        return beanActions.stream().anyMatch(beanAction -> beanAction.beanName == null);
+    boolean containsDefaultBeanActions() {
+        return !getDefaultBeanActions().isEmpty();
+    }
+
+    List<JkBeanAction> getDefaultBeanActions() {
+        return beanActions.stream().filter(beanAction -> beanAction.beanName == null).collect(Collectors.toList());
     }
 
     boolean isHelp() {
