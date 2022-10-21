@@ -37,6 +37,17 @@ project1
 * `jeka.kotlin.version` : Version of Kotlin used for compiling both _def_ and Kotlin project sources.
 * `jeka.java.version` :  Target JVM version for compiled files.
 
+### Command shorthands
+
+* `jeka.cmd.xxx=` define an alias that can be substituted to its value in the command line using `:` symbol.
+    Example : `jeka.cmd.myBuild=${jeka.cmd.build} sonarqube#run jacoco#` lets to simply execute `jeka :myBuild`.
+*  `jeka.cmd._append=` will append the argument  to every Jeka execution command.
+   Example : `jeka.cmd._append=@dev.jeka:springboot-plugin` will add springboot plugin to Jeka classpath for each execution.
+
+!!! Note
+    Command shorthands is a really powerful mechanism to get rid of build classes.
+    Many projects can be builds using properties only !
+
 ### Repositories
 
 The repositories used to download and publish artifacts can be defined using _properties_.
