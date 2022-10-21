@@ -120,7 +120,7 @@ public final class JkProperties {
         Map<String, String> result = new HashMap<>();
         for (String key : find(prefix)) {
             String resultKey = keepPrefix ? key : JkUtilsString.substringAfterFirst(key, prefix);
-            result.put(key, get(key));
+            result.put(resultKey, get(key));
         }
         return result;
     }

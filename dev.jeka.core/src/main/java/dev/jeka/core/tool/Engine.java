@@ -91,9 +91,7 @@ final class Engine {
             computedClasspath = dependencyResolver.resolve(commandLineDependencies).getFiles();
             result = null;
         }
-        if (commandLine.isHelp()) {
-            JkLog.endTask();
-            stopBusyIndicator();
+        if (isHelpCmd()) {
             help();
             return;
         }
@@ -101,7 +99,7 @@ final class Engine {
         JkRuntime runtime = JkRuntime.get(projectBaseDir);
         runtime.setClasspath(computedClasspath);
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
-                Environment.standardOptions.jkCBeanName());
+                Environment.standardOptions.kBeanName());
         JkLog.startTask("Init runtime");
         runtime.init(resolvedCommands);
         JkLog.endTask();
@@ -124,12 +122,24 @@ final class Engine {
         if (!hasJekaDir) {
             JkLog.warn("You are not running Jeka inside a Jeka project.");
         }
+        if (!commandLine.hasMethodInvokations()) {
+            JkLog.warn("This command contains no actions. Execute 'jeka help' to know about available actions.");
+        }
         runtime.run(resolvedCommands);
     }
 
+    private boolean isHelpCmd() {
+        if (Environment.isPureHelpCmd()) {
+            return true;
+        }
+        return "help".equals(Environment.originalCmdLineAsString())
+                        && beanClassesResolver.getSourceFiles().isEmpty()
+                        && Environment.standardOptions.kBeanName() == null;
+
+    }
+
     private CompilationContext preCompile() {
-        final List<Path> sourceFiles = JkPathTree.of(beanClassesResolver.defSourceDir)
-                .andMatcher(JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
+        final List<Path> sourceFiles = beanClassesResolver.getSourceFiles();
         JkLog.trace("Parse source code of " + sourceFiles);
         final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
@@ -343,13 +353,15 @@ final class Engine {
     }
 
     private void help() {
+        JkLog.endTask();
+        stopBusyIndicator();
         List<Class<? extends JkBean>> localBeanClasses = beanClassesResolver.defBeanClasses();
         List<Class> globalBeanClasses = beanClassesResolver.globalBeanClassNames().stream()
                 .map(className -> JkClassLoader.ofCurrent().loadIfExist(className))
                 .filter(Objects::nonNull)   // due to cache, some classNames may not be in classpath
                 .filter(beanClass -> !localBeanClasses.contains(beanClass))
                 .collect(Collectors.toList());
-        HelpDisplayer.help(localBeanClasses, globalBeanClasses, false);
+        HelpDisplayer.help(localBeanClasses, globalBeanClasses, false, this.projectBaseDir);
     }
 
     private static class CompilationResult {

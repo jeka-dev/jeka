@@ -71,8 +71,8 @@ public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
      */
     public static void flush() {
         JkUtilsAssert.state(isActive(),"This decorator must be activated in order to flush");
-       byte[] bytes = jkLogInstance.byteArrayBufferStream.toByteArray();
-       JkUtilsIO.write(jkLogInstance.delegate.getTargetOut(), bytes);
+        byte[] bytes = jkLogInstance.byteArrayBufferStream.toByteArray();
+        JkUtilsIO.write(jkLogInstance.delegate.getTargetOut(), bytes);
     }
 
     private static ByteArrayOutputStream byteArrayBufferStream() {

@@ -190,7 +190,6 @@ public class JkProjectCompilation<T> {
 
     private JkJavaCompileSpec compileSpec() {
         return JkJavaCompileSpec.of()
-            .setSourceAndTargetVersion(project.getJvmTargetVersion())
             .setEncoding(project.getSourceEncoding())
             .setClasspath(classpath())
             .setSources(layout.resolveSources().and(getGeneratedSourceDirs().toArray(new Path[0])))

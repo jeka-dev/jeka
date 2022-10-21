@@ -118,7 +118,7 @@ public class JkCoordinateSearch {
 
     private List<String> search(String apiUrl) throws IOException {
         String query = createQuery();
-        String encodedQuery = URLEncoder.encode(query);
+        String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String versionParam = showVersion() ? "&core=gav" : "";
         URL aUrl = new URL(apiUrl + "?q=" + encodedQuery + versionParam + "&wt=xm&rows=200");
         HttpURLConnection con = (HttpURLConnection) aUrl.openConnection();

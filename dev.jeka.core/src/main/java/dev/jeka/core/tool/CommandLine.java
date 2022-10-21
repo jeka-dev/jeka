@@ -9,10 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -69,6 +66,11 @@ final class CommandLine {
 
     List<JkBeanAction> getBeanActions() {
         return beanActions;
+    }
+
+    boolean hasMethodInvokations() {
+        return beanActions.stream()
+                .anyMatch(item -> item.action == EngineCommand.Action.METHOD_INVOKE);
     }
 
     List<JkDependency> getDefDependencies() {
@@ -171,6 +173,18 @@ final class CommandLine {
         public String toString() {
             return "action=" + action + ", beanName='" + beanName + '\'' + ", member='" + member + '\'' +
                     ", value='" + value + '\'';
+        }
+
+        String shortDescription() {
+            String actionName = null;
+            if (action  == EngineCommand.Action.METHOD_INVOKE) {
+                actionName = "method";
+            } else if (action == EngineCommand.Action.PROPERTY_INJECT) {
+                actionName = "field";
+            } else {
+                actionName = "constructor";
+            }
+            return String.format("%s '%s'", actionName, member);
         }
     }
 

@@ -9,15 +9,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 final class HelpDisplayer {
 
     static void help(List<Class<? extends JkBean>> localBeanClasses, List<Class> classpathBeanClasses,
-                     boolean compilationFailed) {
+                     boolean compilationFailed, Path baseDir) {
         final StringBuilder introSb = new StringBuilder()
                 .append("PURPOSE\n")
                 .append("  Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n")
@@ -27,8 +25,8 @@ final class HelpDisplayer {
                 .append("[-DsystemPropertyName=<value> ...]\n\n")
                 .append("EXAMPLE\n")
                 .append("  jeka project#clean project#pack project#pack.sources=true -ls=DEBUG -Dmy.prop=aValue @org.example:a-plugin:1.1.0\n\n")
-                .append(standardOptions());
-        System.out.println(introSb.toString());
+                .append(standardProperties());
+        System.out.println(introSb);
 
         final StringBuilder sb = new StringBuilder().append("LOCAL KBEANS\n");
         if (compilationFailed) {
@@ -44,8 +42,9 @@ final class HelpDisplayer {
         classpathBeanClasses.stream()
                 .sorted(Comparator.comparing(Class::getSimpleName))
                 .forEach(aClass -> sb.append(beanDescription(aClass, false)));
+        sb.append(shortcuts(baseDir));
         sb.append("\nType 'jeka [kbean]#help' to get help on a particular KBean (ex : 'jeka project#help'). ");
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
 
     private static String beanDescription(Class beanClass, boolean isDefault) {
@@ -64,7 +63,7 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    private static String standardOptions() {
+    private static String standardProperties() {
         StringBuilder sb = new StringBuilder();
         sb.append("OPTIONS\n");
         sb.append("  -help (shorthand -h) : display this message.\n");
@@ -82,6 +81,21 @@ final class HelpDisplayer {
         sb.append("  -clean.work (shorthand -cw) : Delete all files cached in jeka/.work.\n");
         sb.append("  -no.help : Does not display help if no method is invoked.\n");
         sb.append("  -def.compile.ignore-failure (shorthand -dci) : Try to compile def classes. If fail, ignore failure and continue.\n");
+        return sb.toString();
+    }
+
+    private static String shortcuts(Path baseDir) {
+        StringBuilder sb = new StringBuilder();
+        Map<String, String> props = JkExternalToolApi.getCmdShortcutsProperties(baseDir);
+        if (props.isEmpty()) {
+            return "";
+        }
+        sb.append("\nCOMMAND SHORTCUTS\n");
+        int maxLength = Collections.max(props.keySet().stream().map(String::length).collect(Collectors.toSet()));
+
+        for (Map.Entry<String, String> entry : props.entrySet()) {
+            sb.append("  :" + JkUtilsString.padEnd(entry.getKey(), maxLength + 2, ' ') + ": " + entry.getValue() + "\n");
+        }
         return sb.toString();
     }
 
@@ -105,6 +119,7 @@ final class HelpDisplayer {
     static void helpJkBean(JkBean jkBean) {
         BeanDoc beanDescription = new BeanDoc(jkBean.getClass());
         JkLog.info(helpBeanDescription(beanDescription, jkBean.getRuntime()));
+        JkLog.info("Execute 'jeka -help' to get global help.");
     }
 
     private static String helpBeanDescription(BeanDoc description, JkRuntime runtime) {

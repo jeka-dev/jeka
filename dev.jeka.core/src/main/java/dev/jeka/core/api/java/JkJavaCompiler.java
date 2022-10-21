@@ -3,9 +3,7 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -15,7 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -37,17 +38,13 @@ public final class JkJavaCompiler<T> {
      */
     public static final PathMatcher JAVA_SOURCE_MATCHER = JkPathMatcher.of(true, "**/*.java", "*.java");
 
-    // Explicit compile command line
-    private JkProcess compileProcess;
-
-    // Explicit compile tool
-    private JavaCompiler compileTool;
-
-    private SortedMap<JkJavaVersion, Path> jdkHomes = Collections.emptySortedMap();
+    private ToolOrProcess toolOrProcess = new ToolOrProcess(null, null);
 
     private String[] forkParams;
 
     private String[] toolParams = new String[0];
+
+    private GuessHints guessHints = GuessHints.ofDefault();
 
     /**
      * Owner for parent chaining
@@ -79,29 +76,23 @@ public final class JkJavaCompiler<T> {
      * Since in-process compilers cannot be run in forking process mode, this method disables any
      * previous fork options that may have been set.
      */
-    public JkJavaCompiler<T> setCompileTool(JavaCompiler compiler, String... params) {
-        this.compileTool = compiler;
+    public JkJavaCompiler<T> setCompileTool(JavaCompiler tool, String... params) {
+        this.toolOrProcess = new ToolOrProcess(tool, null);
         this.toolParams = params;
-        this.compileProcess = null;
         return this;
     }
+
 
     /**
      * Sets the underlying compiler with the specified process. The process is typically a 'javac' command.
      */
-    public JkJavaCompiler<T> setForkedWithProcess(JkProcess compileProcess) {
-        this.compileTool = null;
-        this.compileProcess = compileProcess;
+    public JkJavaCompiler<T> setJavacProcess(JkProcess compileProcess) {
+        this.toolOrProcess = new ToolOrProcess(null, compileProcess);
         return this;
     }
 
-    /**
-     * Sets available JDK in order to choose the most appropriate version
-     * for compiling.
-     */
-    public JkJavaCompiler<T> setJdkHomes(Map<JkJavaVersion, Path> jdks) {
-        this.jdkHomes = new TreeMap<>(jdks);
-        return this;
+    public JkJavaCompiler<T> setJavacProcessJavaHome(Path javaHome) {
+        return this.setJavacProcess(JkProcess.of(javaHome.resolve("bin/javac").toString()));
     }
 
     /**
@@ -111,28 +102,59 @@ public final class JkJavaCompiler<T> {
      * an extra-one according the source version.
      */
     public JkJavaCompiler<T> setForkedWithDefaultProcess(String... processParams) {
-        this.compileTool = null;
         this.forkParams = processParams;
         return this;
     }
 
-    /**
-     * Sets available JDK in order to choose the most appropriate version
-     * for compiling. Here the entries are expected to be formatted as jdk.12 => /path/to/jdk/home
-     * @see #setJdkHomes(Map).
-     */
-    public JkJavaCompiler<T> setJdkHomesWithProperties(Map<String, String> jdkLocations) {
-        TreeMap<JkJavaVersion, Path> jdks = new TreeMap<>();
-        jdkLocations.entrySet().forEach( entry -> {
-            final String version = JkUtilsString.substringAfterFirst(entry.getKey(), "jeka.jdk.");
-            final String path = entry.getValue();
-            if (version != null && path != null) {
-                Path filePath = Paths.get(path);
-                jdks.put(JkJavaVersion.of(version), filePath);
-            }
-        });
-        this.jdkHomes = jdks;
+    public JkJavaCompiler<T> setGuessHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
+        GuessHints guessHints = new GuessHints(jdks, javaVersion, preferTool);
+        this.guessHints = guessHints;
         return this;
+    }
+
+    private ToolOrProcess guess() {
+        if (guessHints.javaVersion == null) {
+            if (guessHints.preferTool && ToolProvider.getSystemJavaCompiler() != null) {
+                JkLog.trace("Use current JDK tool to compile.");
+                return new ToolOrProcess(compileToolOrFail());
+            }
+            Path javaHome = Paths.get(System.getProperty("java.home"));
+            if (!Files.exists(javaHome.resolve("bin/javac"))) {
+                throw  new IllegalStateException("The current Java is not a JDK." +
+                        " Please run a JDK or precise the java version to run.");
+            }
+            return new ToolOrProcess(javaHome);
+        }
+        Path currentJavaHome = Paths.get(System.getProperty("java.home"));
+        boolean hasJavac = Files.exists(currentJavaHome.resolve("bin/java"));
+        boolean currentVersionMatch = guessHints.javaVersion.equals(JkJavaVersion.ofCurrent());
+        if (currentVersionMatch) {
+            if (guessHints.preferTool || !hasJavac) {
+                return new ToolOrProcess(compileToolOrFail());
+            }
+            return new ToolOrProcess(currentJavaHome);
+        }
+        Path specificJavaHome = guessHints.jdks.getHome(guessHints.javaVersion);
+        if (specificJavaHome != null) {
+            JkLog.info("Use JDK %s to compile for JVM %s", specificJavaHome, guessHints.javaVersion);
+            return new ToolOrProcess(specificJavaHome);
+        }
+        JkLog.warn("No JDK path defined for version %s. Will use embedded compiler %s",
+                guessHints.javaVersion, JkJavaVersion.ofCurrent());
+        return new ToolOrProcess(compileToolOrFail());
+    }
+
+    public boolean isToolOrProcessSpecified() {
+        return toolOrProcess.isSpecified();
+    }
+
+    private static JavaCompiler compileToolOrFail() {
+        JavaCompiler result = ToolProvider.getSystemJavaCompiler();
+        if (result == null) {
+            throw new IllegalArgumentException("The current running Java platform does not provide a compiler. " +
+                    "Please, run this program with a JDK and not a JRE");
+        }
+        return result;
     }
 
     /**
@@ -173,71 +195,14 @@ public final class JkJavaCompiler<T> {
         return sb.toString();
     }
 
-    private static List<File> toFiles(Collection<Path> paths) {
-        return JkUtilsPath.toFiles(paths);
-    }
-
     private boolean runCompiler(JkJavaCompileSpec compileSpec) {
-        JkJavaVersion runningJdkVersion = JkJavaVersion.of(runningJdkVersion());
-        JkJavaVersion sourceVersion = compileSpec.getSourceVersion();
-        Path jdkHome = this.jdkHomes.get(sourceVersion);
-        if (compileTool != null) {
-            if (sourceVersion == null || sourceVersion.equals(runningJdkVersion)) {
-                return runOnTool(compileSpec, compileTool, toolParams);
-            } else if (sourceVersion.equals(runningJdkVersion)) {
-
-            } else {
-                throw new IllegalStateException("Tool compiler does not support Java source version "
-                        + compileSpec.getSourceVersion()
-                        + ". It only supports " + compileTool.getSourceVersions());
-            }
+        if (toolOrProcess.isSpecified()) {
+            return toolOrProcess.run(compileSpec);
         }
-        if (compileProcess != null) {
-            runOnProcess(compileSpec, compileProcess);
-        }
-
-        // Try to use running JDK compiler
-        JavaCompiler runningJdkCompilerTool = getDefaultOrFail();
-        if (compileSpec.getSourceVersion() == null
-                || compileSpec.getSourceVersion().equals(runningJdkVersion)) {
-            if (forkParams == null) {
-                return runOnTool(compileSpec, runningJdkCompilerTool, toolParams);
-            } else {
-                return runOnProcess(compileSpec, JkProcess.ofJavaTool("javac", forkOptions()));
-            }
-        }
-        JkProcess process = resolveCompileProcessFromJdksForVersion(compileSpec.getSourceVersion());
-        if (process != null) {
-            return runOnProcess(compileSpec, process.addParams(forkOptions()));
-        }
-        if (canCompile(runningJdkCompilerTool, compileSpec.getSourceVersion())) {
-            return runOnTool(compileSpec, runningJdkCompilerTool, toolParams);
-        }
-        throw new IllegalStateException("Cannot find suitable JDK to compile version "
-                + compileSpec.getSourceVersion()
-                + "\nRunning JDK is " + runningJdkVersion + " and known JDK homes are " + this.jdkHomes);
+        return guess().run(compileSpec);
     }
 
     private static boolean runOnTool(JkJavaCompileSpec compileSpec, JavaCompiler compiler, String[] toolOptions) {
-        int currentJdkVersion = JkJavaVersion.ofCurrent().get();
-        JkJavaVersion specifiedSourceVersion = compileSpec.getSourceVersion();
-        if (specifiedSourceVersion != null && specifiedSourceVersion.get() > currentJdkVersion) {
-            throw new IllegalArgumentException("Compilation source Java version (" + specifiedSourceVersion.get()
-                    + ") cannot be greater than running Jdk version (" + currentJdkVersion  + ")" );
-        }
-        if (specifiedSourceVersion != null && specifiedSourceVersion.get() < currentJdkVersion) {
-            JkLog.warn("Compilation source Java version (" + specifiedSourceVersion.get() + ") " +
-                    "is lower than running Jdk version (" + currentJdkVersion  + ")");
-        }
-        JkJavaVersion specifiedTargetVersion = compileSpec.getTargetVersion();
-        if (specifiedTargetVersion != null && specifiedTargetVersion.get() > currentJdkVersion) {
-            throw new IllegalArgumentException("Compilation target Java version (" + specifiedTargetVersion.get()
-                    + ") cannot be greater than running Jdk version (" + currentJdkVersion  + ")" );
-        }
-        if (specifiedSourceVersion != null && specifiedTargetVersion.get() < currentJdkVersion) {
-            JkLog.warn("Compilation target Java version (" + specifiedSourceVersion.get() + ") " +
-                    "is lower than running Jdk version (" + currentJdkVersion  + ")");
-        }
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
         List<File> files = JkUtilsPath.toFiles(compileSpec.getSources().withMatcher(JAVA_SOURCE_MATCHER).getFiles());
         Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
@@ -247,6 +212,10 @@ public final class JkJavaCompiler<T> {
         CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutPrintStream()),
                 null, new JkDiagnosticListener(), options, null, javaFileObjects);
         return task.call();
+    }
+
+    private static boolean runOnProcess(JkJavaCompileSpec compileSpec, Path javaHome) {
+        return runOnProcess(compileSpec, JkProcess.of(javaHome + "/bin/javac"));
     }
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
@@ -261,7 +230,7 @@ public final class JkJavaCompiler<T> {
         return (result == 0);
     }
 
-    private static JavaCompiler getDefaultOrFail() {
+    private static JavaCompiler getDefaultCompilerToolOrFail() {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
             String javaHome = System.getProperty("java.home");
@@ -289,44 +258,8 @@ public final class JkJavaCompiler<T> {
         return items[0];
     }
 
-
-
-    private static boolean canCompile(JavaCompiler compilerTool, JkJavaVersion version) {
-        return compilerTool.getSourceVersions().stream()
-                .map(sourceVersion -> JkUtilsString.substringAfterFirst(sourceVersion.name(), "RELEASE_"))
-                .map(JkJavaVersion::of)
-                .filter(javaVersion -> javaVersion.equals(version))
-                .findAny().isPresent();
-    }
-
     private String[] forkOptions() {
         return forkParams == null ? new String[0] : forkParams;
-    }
-
-    /**
-     * Returns a suitable javac from jdk homes to compile with specified source version.
-     */
-    private JkProcess resolveCompileProcessFromJdksForVersion(JkJavaVersion sourceVersion) {
-        Path jdkPath = null;
-        for (Map.Entry<JkJavaVersion, Path> entry : jdkHomes.entrySet()) {
-            if (entry.getKey().compareTo(sourceVersion) < 0) {
-                continue;
-            }
-            Path path = entry.getValue();
-            if (!Files.exists(path)) {
-                JkLog.warn("JdkHome " + entry.getKey() + " " + path + " does not exist.");
-                continue;
-            }
-            JkLog.info("Found Jdk " + entry.getKey() + " " + path + " to compile for with source version="
-                    + sourceVersion);
-            jdkPath = path;
-            break;
-        }
-        if (jdkPath == null) {
-            return null;
-        }
-        final String cmd = jdkPath + "/bin/javac";
-        return JkProcess.of(cmd);
     }
 
     @SuppressWarnings("rawtypes")
@@ -340,6 +273,60 @@ public final class JkJavaCompiler<T> {
                 System.out.println(diagnostic);
             }
         }
+    }
+
+    private static class GuessHints {
+        final JkJdks jdks;
+        final JkJavaVersion javaVersion;
+        final boolean preferTool;
+
+        GuessHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
+            this.jdks = jdks;
+            this.javaVersion = javaVersion;
+            this.preferTool = preferTool;
+        }
+
+        static GuessHints ofDefault() {
+            return new GuessHints(JkJdks.of(), null, true);
+        }
+    }
+
+    private class ToolOrProcess {
+
+        final JkProcess compileProcess;
+
+        final JavaCompiler compileTool;
+
+        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess) {
+            this.compileProcess = compileProcess;
+            this.compileTool = compileTool;
+        }
+
+        ToolOrProcess(JavaCompiler compileTool) {
+            this(compileTool, null);
+        }
+
+        ToolOrProcess(JkProcess compileProcess) {
+            this(null, compileProcess);
+        }
+
+        ToolOrProcess(Path path) {
+            this(JkProcess.of(path.resolve("bin/javac").toString()));
+        }
+
+        boolean isSpecified() {
+            return compileTool != null || compileProcess != null;
+        }
+
+         boolean run(JkJavaCompileSpec compileSpec) {
+             if (compileTool != null) {
+                 return runOnTool(compileSpec, compileTool, toolParams);
+             } else if (compileProcess != null) {
+                 return runOnProcess(compileSpec, compileProcess);
+             } else {
+                 throw new IllegalStateException("Neither compilatoin tool or process has been specified.");
+             }
+         }
     }
 
 }

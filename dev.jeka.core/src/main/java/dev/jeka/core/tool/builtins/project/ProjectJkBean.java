@@ -14,6 +14,7 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.JkJdks;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProject;
@@ -91,8 +92,6 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             project.getTesting().getTestProcessor().getEngineBehavior().setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
-        JkJavaCompiler compiler = project.getCompiler();
-        compiler.setJdkHomesWithProperties(getRuntime().getProperties().getAllStartingWith("jeka.jdk.", true));
         if (!JkUtilsString.isBlank(this.javaVersion)) {
             JkJavaVersion version = JkJavaVersion.of(this.javaVersion);
             project.setJvmTargetVersion(version);
@@ -105,8 +104,16 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             project.flatFacade().mixResourcesAndSources();
         }
         projectConfigurators.accept(project);
+        JkJavaCompiler compiler = project.getCompiler();
+        if (!compiler.isToolOrProcessSpecified()) {
+            compiler.setGuessHints(jdks(), project.getJvmTargetVersion(), true);
+        }
         this.applyPostSetupOptions(project);
         return project;
+    }
+
+    private JkJdks jdks() {
+        return JkJdks.ofJdkHomeProps(getRuntime().getProperties().getAllStartingWith("jeka.jdk.", false));
     }
 
     private void applyRepo(JkProject project) {
@@ -143,13 +150,23 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             artifactProducer.putArtifact(javadoc, javadocJar);
         }
         JkTestProcessor testProcessor = aProject.getTesting().getTestProcessor();
+        testProcessor.setJvmHints(jdks(), aProject.getJvmTargetVersion());
         if (test.fork != null && test.fork && testProcessor.getForkingProcess() == null) {
             final JkJavaProcess javaProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName())
                     .addJavaOptions(this.test.jvmOptions);
+            if (project.getJvmTargetVersion() != null &&
+                    !JkJavaVersion.ofCurrent().equals(project.getJvmTargetVersion())) {
+                Path javaHome = jdks().getHome(project.getJvmTargetVersion());
+                if (javaHome != null) {
+                    JkLog.trace("Tests are configured to run using JDK %s", javaHome);
+                    javaProcess.setCommand(javaHome.resolve("bin/java").toString());
+                }
+            }
             testProcessor.setForkingProcess(javaProcess);
         } else if (test.fork != null && !test.fork && testProcessor.getForkingProcess() != null) {
             testProcessor.setForkingProcess(false);
         }
+        if (test.fork == null)
         if (test.skip != null) {
             aProject.getTesting().setSkipped(test.skip);
         }

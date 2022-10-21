@@ -66,7 +66,7 @@ public final class Main {
             JkBusyIndicator.stop();
             JkLog.restoreToInitialState();
             if (e instanceof JkException && !shouldPrintExceptionDetails()) {
-                System.err.println("\n" + e.getMessage());
+                System.err.println(" \n" + e.getMessage());
             } else {
                 if (JkMemoryBufferLogDecorator.isActive()) {
                     JkMemoryBufferLogDecorator.flush();
@@ -86,7 +86,7 @@ public final class Main {
     }
 
     private static boolean shouldPrintExceptionDetails() {
-        return !Environment.standardOptions.ignoreCompileFail || Environment.standardOptions.logVerbose
+        return Environment.standardOptions.logVerbose
                 || Environment.standardOptions.logStackTrace;
     }
 

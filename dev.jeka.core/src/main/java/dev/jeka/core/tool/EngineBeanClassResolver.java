@@ -69,9 +69,11 @@ final class EngineBeanClassResolver {
         List<EngineCommand> result = new LinkedList<>();
         List<CommandLine.JkBeanAction> defaultBeanActions = commandLine.getDefaultBeanActions();
         if (defaultBeanClass == null && !defaultBeanActions.isEmpty()) {
-            throw new JkException("Cannot find any KBean in jeka/def dir for defining "
-                    + defaultBeanActions.stream().map(action -> action.member).collect(Collectors.toList())
-                    + ". Use -kb=[beanName] to precise a "
+            String suggest = "help".equals(Environment.originalCmdLineAsString()) ? " ( You mean '-help' ? )" : "";
+            throw new JkException("No default KBean has bean has been selected. "
+                    + "One is necessary to define "
+                    + defaultBeanActions.get(0).shortDescription() + suggest + "."
+                    + "\nUse -kb=[beanName] to precise a "
                     + "bean present in classpath or create a class extending JkBean into jeka/def dir.");
         }
         beanClasses.put(null, defaultBeanClass);
@@ -253,6 +255,11 @@ final class EngineBeanClassResolver {
             return Collections.emptyList();
         }
         return JkUtilsPath.readAllLines(store);
+    }
+
+    List<Path> getSourceFiles() {
+        return JkPathTree.of(defSourceDir)
+                .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
     }
 
 }

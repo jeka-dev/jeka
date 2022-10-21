@@ -54,7 +54,8 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(classDir)
                 .setClasspath(prodClasspath)
-                .setSourceAndTargetVersion(JkJavaVersion.V8)
+                .setSourceVersion("8")
+                .setTargetVersion("8")
                 .setSources(javaSources.toSet()));
         JkPathTree resources =   JkPathTree.of(src).andMatching(false, "**/*.java");
         resources.copyTo(classDir);

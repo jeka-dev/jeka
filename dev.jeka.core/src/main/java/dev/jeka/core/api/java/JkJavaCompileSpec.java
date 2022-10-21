@@ -7,10 +7,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -23,6 +20,8 @@ public final class JkJavaCompileSpec<T> {
     public static final String SOURCE_OPTS = "-source";
 
     public static final String TARGET_OPTS = "-target";
+
+    public static final String RELEASE_OPTS = "-release";
 
     public static final String PROCESSOR_OPTS = "-processor";
 
@@ -81,50 +80,37 @@ public final class JkJavaCompileSpec<T> {
 
     // ------- Java version & encoding ----------------
 
-    public JkJavaVersion getSourceVersion() {
-        final String rawResult = getNextValue(SOURCE_OPTS);
-        if (rawResult == null) {
-            return null;
-        }
-        return JkJavaVersion.of(rawResult);
+    public String getSourceVersion() {
+        return getNextValue(SOURCE_OPTS);
     }
 
-    public JkJavaVersion getTargetVersion() {
-        final String rawResult = getNextValue(TARGET_OPTS);
-        if (rawResult == null) {
-            return null;
-        }
-        return JkJavaVersion.of(rawResult);
+    public String getReleaseVersion() {
+        return getNextValue(RELEASE_OPTS);
+    }
+
+    public String getTargetVersion() {
+        return getNextValue(TARGET_OPTS);
     }
 
     /**
-     * Sets the version of source code accepted.
+     * Sets option <code>-source</code>
      */
-    public JkJavaCompileSpec<T> setSourceVersion(JkJavaVersion version) {
-        if (version == null) {
-            return this;
-        }
-        return setOption(SOURCE_OPTS, version.toString());
+    public JkJavaCompileSpec<T> setSourceVersion(String version) {
+        return setOption(SOURCE_OPTS, version);
     }
 
     /**
-     * Sets the target Java version for compiled classes. Normally it is the same as the
-     * platform compileRunner shipped with, but you can set it explicitly. Also, when set explicitly
-     * {@link JkJavaCompiler} can choose to use the appropriate compileRunner to compile to the
-     * specified target.
+     * Sets option <code>-target</code>
      */
-    public JkJavaCompileSpec<T> setTargetVersion(JkJavaVersion version) {
-        if (version == null) {
-            return this;
-        }
-        return setOption(TARGET_OPTS, version.toString());
+    public JkJavaCompileSpec<T> setTargetVersion(String version) {
+        return setOption(TARGET_OPTS, version);
     }
 
     /**
-     * Shorthand for #setSourceVersion chained to #setTargetVersion
+     * Sets option <code>-release</code>
      */
-    public JkJavaCompileSpec<T> setSourceAndTargetVersion(JkJavaVersion version) {
-        return this.setSourceVersion(version).setTargetVersion(version);
+    public JkJavaCompileSpec<T> setReleaseVersion(String version) {
+        return setOption(RELEASE_OPTS, version);
     }
 
     public String getEncoding() {
@@ -289,7 +275,6 @@ public final class JkJavaCompileSpec<T> {
         options.add(optionName);
         options.add(value);
     }
-
 
 
 }

@@ -6,12 +6,10 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.function.JkUnaryOperator;
-import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkClasspath;
-import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import org.junit.platform.launcher.core.LauncherConfig;
@@ -68,6 +66,8 @@ public final class JkTestProcessor<T> {
 
     private String junitPlatformVersion = "1.8.2";
 
+    private JvmHints jvmHints = JvmHints.ofDefault();
+
     private Supplier<JkRepoSet> repoSetSupplier = () ->
             JkRepoProperties.of(JkProperties.ofSystemProperties().withFallback(JkProperties.ofEnvironmentVariables()))
                     .getDownloadRepos();
@@ -109,6 +109,12 @@ public final class JkTestProcessor<T> {
 
     public JkTestProcessor<T> setForkingProcess(JkJavaProcess process) {
         this.forkingProcess = process;
+        return this;
+    }
+
+    public JkTestProcessor<T> setJvmHints(JkJdks jdks,  JkJavaVersion javaVersion) {
+        JkUtilsAssert.argument(jdks != null, "jdks argument cannot be null");
+        this.jvmHints = new JvmHints(jdks, javaVersion);
         return this;
     }
 
@@ -201,12 +207,18 @@ public final class JkTestProcessor<T> {
         String arg = serializedArgPath.toAbsolutePath().toString();
         List<Path> classpath = JkClassLoader.ofCurrent().getClasspath()
                 .andPrepend(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
-        forkingProcess.copy()
+        JkJavaProcess clonedProcess = forkingProcess.copy()
                 .setLogCommand(JkLog.isVerbose())
                 .setFailOnError(true)
                 .setClasspath(classpath)
-                .addParams(arg)
-                .exec();
+                .addParams(arg);
+        Path specificJdkHome = this.jvmHints.javaHome();
+        if (specificJdkHome != null) {
+            JkLog.info("Run tests on JVM %s", specificJdkHome);
+            clonedProcess.setCommand(specificJdkHome.resolve("bin/java").toString());
+        }
+        clonedProcess.exec();
+
         JkUtilsPath.deleteFile(serializedArgPath);
         JkTestResult result = JkUtilsIO.deserialize(serializedResultPath);
         JkUtilsPath.deleteFile(serializedResultPath);
@@ -297,6 +309,27 @@ public final class JkTestProcessor<T> {
             return this;
         }
 
+    }
+
+    private static class JvmHints {
+        final JkJdks jdks;
+        final JkJavaVersion javaVersion;
+
+        JvmHints(JkJdks jdks, JkJavaVersion javaVersion) {
+            this.jdks = jdks;
+            this.javaVersion = javaVersion;
+        }
+
+        static JvmHints ofDefault() {
+            return new JvmHints(JkJdks.of(), null);
+        }
+
+        Path javaHome() {
+            if (javaVersion == null) {
+                return null;
+            }
+            return jdks.getHome(javaVersion);
+        }
     }
 
 }

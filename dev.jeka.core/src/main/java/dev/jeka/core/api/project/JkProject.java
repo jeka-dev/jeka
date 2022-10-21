@@ -48,7 +48,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
 
-    private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V8;
+    private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V17;
 
     private static final String DEFAULT_ENCODING = "UTF-8";
 

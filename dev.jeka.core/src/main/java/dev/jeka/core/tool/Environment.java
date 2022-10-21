@@ -20,7 +20,10 @@ class Environment {
 
     static StandardOptions standardOptions = new StandardOptions(Collections.emptyMap());
 
+    static String[] originalArgs;
+
     static void initialize(String[] commandLineArgs) {
+        originalArgs = commandLineArgs;
         List<String> effectiveCommandLineArgs = new LinkedList<>(Arrays.asList(commandLineArgs));
 
         // Add arguments contained in cmd.properties '_append'
@@ -109,7 +112,7 @@ class Environment {
             this.noHelp = valueOf(boolean.class, map, false, "no.help");
         }
 
-        String jkCBeanName() {
+        String kBeanName() {
             return jkBeanName;
         }
 
@@ -143,6 +146,16 @@ class Environment {
             return defaultValue;
         }
 
+    }
+
+
+    static String originalCmdLineAsString() {
+        return String.join(" ", originalArgs);
+    }
+
+    static boolean isPureHelpCmd() {
+        return Environment.originalArgs.length == 1 &&
+                (Environment.originalArgs[0].equals("-help") || Environment.originalArgs[0].equals("-h"));
     }
 
 

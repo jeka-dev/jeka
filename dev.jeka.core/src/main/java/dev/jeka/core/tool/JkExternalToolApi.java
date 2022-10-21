@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Exported methods to integrate with external tool.
@@ -71,8 +72,8 @@ public final class JkExternalToolApi {
     public static Map<String, String> getCmdShortcutsProperties(Path projectDir) {
         Map<String, String> result = JkRuntime.readProjectPropertiesRecursively(projectDir)
                 .getAllStartingWith(JkConstants.CMD_PROP_PREFIX, false);
-        result.remove(JkConstants.CMD_APPEND_PROP);
-        return result;
+        result.remove(JkConstants.CMD_APPEND_PROP.substring(JkConstants.CMD_PROP_PREFIX.length()));
+        return new TreeMap(result);
     }
 
     public static JkProperties getProperties(Path projectDir) {
