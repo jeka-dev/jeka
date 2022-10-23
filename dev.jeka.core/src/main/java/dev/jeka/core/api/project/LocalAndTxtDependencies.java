@@ -1,5 +1,6 @@
 package dev.jeka.core.api.project;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkVersionProvider;
@@ -159,7 +160,6 @@ class LocalAndTxtDependencies {
             JkDependencySet compileOnly = JkDependencySet.of();
             JkDependencySet runtimeOnly = JkDependencySet.of();
             JkDependencySet test = JkDependencySet.of();
-            JkVersionProvider versionProvider = JkVersionProvider.of();
 
             String currentQualifier = REGULAR;
             for (final String line : lines) {
@@ -175,16 +175,27 @@ class LocalAndTxtDependencies {
                 }
                 final JkCoordinateDependency dependency = JkCoordinateDependency.of(line.trim());
                 if (REGULAR.equals(currentQualifier) ) {
-                    regular = regular.and(dependency);
+                    regular = plus(regular, dependency);
                 } else if (COMPILE.equals(currentQualifier)) {
-                    compileOnly = compileOnly.and(dependency);
+                    compileOnly = plus(compileOnly, dependency);
                 } else if (RUNTIME.equals(currentQualifier)) {
-                    runtimeOnly = runtimeOnly.and(dependency);
+                    runtimeOnly = plus(runtimeOnly, dependency);
                 } else if (TEST.equals(currentQualifier)) {
-                    test = test.and(dependency);
+                    test = plus(test, dependency);
                 }
             }
             return new LocalAndTxtDependencies(regular, compileOnly, runtimeOnly, test);
+        }
+
+        private static JkDependencySet plus(JkDependencySet dependencySet,
+                                            JkCoordinateDependency dependency) {
+            JkCoordinate coordinate = dependency.getCoordinate();
+            JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
+            if (spec.getClassifier() == null && "pom".equals(spec.getType())) {
+                JkVersionProvider versionProvider = dependencySet.getVersionProvider().andBom(coordinate);
+                return dependencySet.withVersionProvider(versionProvider);
+            }
+            return dependencySet.and(dependency);
         }
 
         private static String readQualifier(String line) {

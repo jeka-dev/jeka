@@ -16,6 +16,8 @@ public class LocalAndTxtDependenciesTest {
         assertEquals(1, commonDeps.getCompileOnly().getEntries().size());
         assertEquals(3, commonDeps.getRuntimeOnly().getEntries().size());
         assertEquals(4, commonDeps.getTest().getEntries().size());
+
+        assertEquals(1, commonDeps.getRegular().getVersionProvider().getBoms().size());
     }
 
 }

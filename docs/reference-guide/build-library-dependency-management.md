@@ -3,6 +3,7 @@ Generally a dependency resolves to 1 file (or folder) but it can be 0 or many.
 
 Compared to mainstream build tools, Jeka offers a simpler and more flexible model to deals 
 with multiple dependency configurations required for building a project.
+See [project dependencies](build-library-project-build.md#dependencies)
 
 ## Types of Dependency
 
@@ -47,9 +48,8 @@ _Classifier_ can be either :
 - a simple string as '_linux_' to specify a retrieve a single classifier variant
 
 !!! note
-By default, dependencies specifying a classifier or an extension are not considered as transitive. 
-Tough, transitivity can be explicitly configured.
-
+    By default, dependencies specifying a classifier or an extension are not considered as transitive. 
+    Tough, transitivity can be explicitly configured.
 
 _Version_ can be either :
 
@@ -145,38 +145,8 @@ merging with other dependencies and _dependencySet_.
     ```
 
 !!! note
-
     * Module version and scopes can be omitted when declaring dependencies. Versions can be provided by a `JkVersionProvider`.
     * Instances of `JkDependencySet` can be combined together in order to construct large _dependencySet_ from smaller ones.
-    
-#### Full Text Description
-
-An entire dependency sets can be declared with full text description.
-For this, just pass a string argument to `JkDependencySet#ofTextDescription` describing 
-the module dependencies.
-
-!!! example 
-
-    ```
-    == REGULAR ==
-    org.springframework.boot:spring-boot-starter-thymeleaf
-    org.springframework.boot:spring-boot-starter-data-jpa
-
-    == COMPILE_ONLY ==
-    org.projectlombok:lombok:1.16.16
-    
-    == RUNTIME_ONLY ==
-    com.h2database:h2
-    org.liquibase:liquibase-core
-    com.oracle:ojdbc6:12.1.0
-    
-    == TEST ==
-    org.springframework.boot:spring-boot-starter-test
-    org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
-    org.fluentlenium:fluentlenium-assertj:3.2.0
-    org.fluentlenium:fluentlenium-junit:3.2.0
-
-    ```
 
 ## Transitivity
 

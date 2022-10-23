@@ -1,6 +1,6 @@
 Jeka features high-level and low-level classes to deal with Java builds and JVM concepts.
 
-## Java
+## Package `dev.jeka.core.api.java`
 
 Base classes are used as foundation for implementing Jeka high-level build API but they can be used directly in a low level build description.
 These classes belong to `dev.jeka.core.api.java` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java).
@@ -12,23 +12,19 @@ These classes belong to `dev.jeka.core.api.java` [package](https://github.com/je
 * `JkJavaProcess` A utility to launch Java process (from class dirs or jars)
 * `JkManifest` Stands for the manifest file to include in jar files.
 
-## JEE
-
-Located in package `dev.jeka.core.api.j2e`
+## Package `dev.jeka.core.api.j2e`
 
 * `JkJ2eWarArchiver` : Provides methods to generates war files, including dependency jars.
 * `JkJ2eWarProjectAdapter` : Helps to adapt an existing `JkProject` to make it generate _war_ artefacts_.
 
-## Kotlin
-
-Located in `dev.jeka.core.api.kotlin` package.
+## Package `dev.jeka.core.api.kotlin`
 
 * `JkKotlinCompiler` : Provides mean to get a suitable compiler according a given Kotlin version. This class also provides methods to 
   compile Kotlin sources in a fluent way.
 
 * `JkKotlinModules` : Holds constants of common Kotlin library coordinates.
 
-## Testing API
+## Package `dev.jeka.core.api.testing`
 
 Jeka features a simple yet powerful API to launch tests. It relies entirely on JUnit5. This means that any test framework supported by Junit5 platform.
 
@@ -60,7 +56,7 @@ It can be set using file or tag filter. It is also possible to code against  _Ju
 The result of a test launch. Ir provides count for tests found, failure, skip, success ...
 
 
-## Project API
+## Package `dev.jeka.core.api.project`
 
 This is the Jeka high-level API to build Java/JVM projects. API classes belong to  `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
 
@@ -69,7 +65,7 @@ It introduces the concept of `JkProject` from where it performs compilation, tes
 
 The API contains a lot of extension points to add specific behaviors.
 
-Project Structure 
+### Project Structure 
 ``` title="JkProject structure"
 project
 +- baseDir
@@ -128,12 +124,12 @@ project
 + methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport(), pack(), +- methods : getDependenciesAsXml(), includeLocalAndTextDependencies()           
 ```
 
-For simplicity sake, `JkProject` provides a facade in order to make common settings friendly,
+For convenience, `JkProject` provides a facade in order to make common settings friendly,
 without navigating deep into the structure. From facade, you can
 setup dependencies, java version, project layout, test behavior, test selection and publication.
 
 ```Java
-JkProject.of().simpleFacade()
+JkProject.of().flatFacade()
    .configureCompileDeps(deps -> deps
            .and("com.google.guava:guava:21.0")
            .and("com.sun.jersey:jersey-server:1.19.4")
@@ -154,4 +150,88 @@ If facade is not sufficient for setting up the project build, you can use the ma
 `JkProject` instances are highly configurable.
 
 Here is a pretty complete example inspired from the [Jeka Build Class](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/jeka/def/dev/jeka/core/CoreBuild.java) .
+
+### Dependencies
+
+Project dependencies are managed differently than in Maven/Gradle. Instead of defining 
+a single collection of dependencies, each bounded for a specific scope/configuration, 
+Jeka projects define 3 distinct classpath : compile, runtime and test.
+
+Each classpath defines its own set of dependencies independently tough they are defined relatively to each other.
+
+*Compile classpath :* is defined using `project.getCompilation().configureDependencies()`.
+
+*Runtime classpath :* is defined from *Compile Classpath*. This base can be modified using `project.packaging.configureDependencies()`.
+
+*Test classpath :* is defined from a merge of *Compile Classpath* and *Runtime Classpath*. This base can be modified 
+using `project.getTesing().getCompilation().configureDependencies()`
+
+#### Full Text Description
+
+An entire project dependency sets can be declared with full text description.
+
+For this, just pass a string argument to `JkDependencySet#ofTextDescription` describing
+the module dependencies.
+
+When using `ProjectJkBean`, the content of the file *jeka/libs/dependencies.txt* is
+automatically added to the project dependencies, tough it can be modified programmatically.
+
+Dependencies have to be declared with format `group:module:[classifier]:[type]:[version]` where *classifier*, *type* and *version' are optional.  
+See `JkCoordinate.of(String description)* for details.
+
+To import *bill-of-materials* (aka BOMs) just declare a dependency as '*group:module::pom:version'
+
+!!! example
+
+    ```
+    == REGULAR ==
+    org.lwjgl:lwjgl-bom::pom:3.3.1
+    org.lwjgl:lwjgl:natives-linux::
+
+    == TEST ==
+    org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
+    org.fluentlenium:fluentlenium-assertj:3.2.0
+    org.fluentlenium:fluentlenium-junit:3.2.0
+
+    == COMPILE_ONLY ==
+    org.projectlombok:lombok:1.16.16
+    
+    == RUNTIME_ONLY ==
+    org.postgresql:postgresql:42.5.0
+    ```
+
+`== REGULAR ==`  
+Stands for dependencies used both for compilation and runtime. This is the most common place to declare dependencies.
+
+`== TEST ==`  
+Stands for dependencies used only for testing.
+
+`== COMPILE_ONLY ==`  
+Stands for dependencies used for compilation only (not for runtime).
+
+`== RUNTIME_ONLY ==`  
+Stands for dependencies used for runtime only (not for compilation).
+Runtime dependencies has impact when creating fat jars and for the definition of published dependencies.
+
+!!! tip
+    If you are using Jeka plugin for Intellij, hit `ctrl+<space>` for displaying suggestions.
+
+
+### Publication
+
+Projects can be published on a binary repositories (as Maven or Ivy repo) using `project.getPubliication().publish()`.
+When this method is invoked, all artifacts defined in the projects are published. 
+Artifacts can be binary, sources, javadoc or any kind of file.
+
+When published on repository, a metadata file is generated mentioning moduleId, version and transitive 
+dependencies. 
+
+Transitive dependencies are inferred from *compile* and *runtime* dependencies declared for the project, tough it 
+can be modified programmatically using respectively `project.getPublication().getMaven().configureDependencies()`
+and `project.getPublication().getIvy().configureDependencies()`.
+
+
+
+
+
 

@@ -5,7 +5,6 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
-import java.util.*;
 
 import static dev.jeka.core.api.utils.JkUtilsString.blankToNull;
 import static dev.jeka.core.api.utils.JkUtilsString.nullToEmpty;
@@ -215,7 +214,7 @@ public final class JkCoordinate {
             }
             return result.append(":").append(version.getValue()).toString();
         }
-        result.append(artifactSpecification).append(":");
+        result.append(":").append(artifactSpecification).append(":");
         result.append(this.hasUnspecifiedVersion() ? "" : version.getValue());
         return result.toString();
     }

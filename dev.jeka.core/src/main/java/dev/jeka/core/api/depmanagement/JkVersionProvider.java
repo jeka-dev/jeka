@@ -151,6 +151,10 @@ public final class JkVersionProvider {
             throw new IllegalArgumentException("dependencyDescription must be expressed as 'group:name::pom:version' " +
                     "or 'group:name:version'. was " + dependencyDescription);
         }
+        return andBom(coordinate);
+    }
+
+    public JkVersionProvider andBom(JkCoordinate coordinate) {
         LinkedHashSet<JkCoordinate> newBoms = new LinkedHashSet<>(this.boms);
         newBoms.add(coordinate);
         return new JkVersionProvider(this.map, newBoms);
@@ -235,6 +239,10 @@ public final class JkVersionProvider {
                 })
                 .reduce(this, (versionProvider1, versionProvider2) -> versionProvider1.and(versionProvider2));
         return new JkVersionProvider(provider.map, new LinkedHashSet<>());
+    }
+
+    public Set<JkCoordinate> getBoms() {
+        return Collections.unmodifiableSet(boms);
     }
 
 

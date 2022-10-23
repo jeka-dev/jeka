@@ -1,26 +1,3 @@
-##
-# This file declares some dependencies to be included to the project dependencies.
-# They will be added and won't replace dependencies that have been declared by other means.
-#
-# COMPILE+RUNTIME : stands for dependencies used both for compilation and runtime.
-#                   This is the most common place to declare dependencies.
-# COMPILE         : stands for dependencies used for compilation only (not for runtime).
-# RUNTIME         : stands for dependencies used for runtime only (not for compilation).
-#                   Runtime dependencies has impact when creating fat jars and for the definition of published dependencies.
-# TEST            : stands for dependencies used only for testing.
-#
-# Dependencies has to be declared using 'gradle-short' format, meaning 'group:module:[classifiers]:[type]:[version]'
-# where 'classifiers', 'type' and 'version' are optional (see JkModuleDependency.of(String description) for details).
-#
-# Example :
-#
-# - TEST
-#  org.springframework.boot:spring-boot-starter-test
-#  org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
-#  org.junit:junit-bom:5.9.0::pom:5.9.0   (for Bill Of Material)
-#
-# If you don't need it, feel free to remove this file.
-##
 
 == COMPILE+RUNTIME ==
 org.springframework.boot:spring-boot-starter-web
