@@ -173,6 +173,9 @@ public final class JkProperties {
         Set<String> keys = find("");
         StringBuilder sb = new StringBuilder();
         JkProperties systemLess = systemLess();
+        if (systemLess == null) {
+            return "";
+        }
         for (String key : keys) {
             if (systemLess.get(key) == null) {
                 continue;
