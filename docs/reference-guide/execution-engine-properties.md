@@ -90,12 +90,33 @@ jeka.repos.download=myRepo1, myRepo2
 jeka.repos.publish=myRepo2
 ```
 
-Aliases exist for _Maven Central_ and Jeka Github Repo
+Aliases exist for _Maven Central_ and Jeka GitHub Repo
 ```
 jeka.repos.download=https://my.company/repo1, mavenCentral, jekaGithub
 jeka.repos.jekaGithub.username=myGithubAccountName
 jeka.repos.jekaGithub.password=myGithubPersonalAccessToken
 ```
+
+### KBean field value injection
+
+If a property is named as `xxx#yyyyy` then Jeka will try to inject its value 
+in public field `yyyyy` of KBean `xxx`. 
+
+examples:
+```
+springboot#springbootVersion=2.4.7
+project#test.skip=true
+```
+
+!!! Note
+    There is a slight difference between using `-Dproject#test.skip=true` and 
+    `project#test.skip=true` on the command line.<br/>
+    For the first, field is injected via system properties, this means that for multi-modules projects,
+    the value will be injected on every Jeka module.
+    While for the second, the value will be injected only on the root module.
+
+
+
 
 
 

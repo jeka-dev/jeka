@@ -49,7 +49,7 @@ public final class JkExternalToolApi {
         if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROPERTIES_FILE))) {
             return true;
         }
-        if (Files.isRegularFile(jekaDir.resolve("dependencies.txt"))) {
+        if (Files.isRegularFile(jekaDir.resolve("libs/dependencies.txt"))) {
             return true;
         }
         Path wrapperDir = jekaDir.resolve("wrapper");
@@ -81,8 +81,8 @@ public final class JkExternalToolApi {
     }
 
     public static JkProperties getGlobalProperties() {
-        JkProperties result = JkProperties.ofSystemProperties()
-                .withFallback(JkProperties.ofEnvironmentVariables());
+        JkProperties result = JkProperties.SYSTEM_PROPERTIES
+                .withFallback(JkProperties.ENVIRONMENT_VARIABLES);
         Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
         if (Files.exists(globalPropertiesFile)) {
             result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));

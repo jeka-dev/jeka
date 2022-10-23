@@ -25,7 +25,16 @@ import java.util.stream.Collectors;
  */
 public final class JkProperties {
 
-    public static final JkProperties EMPTY = JkProperties.ofFile("", Collections.emptyMap());
+    public static final JkProperties ENVIRONMENT_VARIABLES = ofEnvironmentVariables();
+
+    public static final JkProperties SYSTEM_PROPERTIES = ofSystemProperties();
+
+    private static final String ENV_VARS_NAME = "Environment Variables";
+
+    private static final String SYS_PROPS_NAME = "System Properties";
+
+    public static final JkProperties EMPTY = JkProperties.ofMap("", Collections.emptyMap());
+
 
     private final String source;
 
@@ -39,33 +48,37 @@ public final class JkProperties {
         this.fallback = fallback;
     }
 
-    public static JkProperties ofFile(String sourceName, Map<String, String> props) {
+    public static JkProperties ofMap(String sourceName, Map<String, String> props) {
         return new JkProperties(sourceName, Collections.unmodifiableMap(new HashMap<>(props)), null);
     }
 
-    public static JkProperties ofEnvironmentVariables() {
+    public static JkProperties ofMap(Map<String, String> props) {
+        return ofMap("map", props);
+    }
+
+    private static JkProperties ofEnvironmentVariables() {
         Map<String, String> props = new HashMap<>();
         for (String varName : System.getenv().keySet() ) {
             String value = System.getenv(varName);
             props.put(varName, value);
             props.put(lowerCase(varName), value);
         }
-        return new JkProperties("Environment Variables", Collections.unmodifiableMap(props), null);
+        return new JkProperties(ENV_VARS_NAME, Collections.unmodifiableMap(props), null);
     }
 
-    public static JkProperties ofSystemProperties() {
+    private static JkProperties ofSystemProperties() {
         Map<String, String> props = new HashMap<>();
         for (String propName : System.getProperties().stringPropertyNames() ) {
             props.put(propName, System.getProperty(propName));
         }
-        return new JkProperties("System Properties", Collections.unmodifiableMap(props), null);
+        return new JkProperties(SYS_PROPS_NAME, Collections.unmodifiableMap(props), null);
     }
 
     public static JkProperties ofFile(Path propertyFile) {
         Properties properties = new Properties();
         try (InputStream is = new FileInputStream(propertyFile.toFile())) {
             properties.load(is);
-            return ofFile(propertyFile.toString(), JkUtilsIterable.propertiesToMap(properties));
+            return ofMap(propertyFile.toString(), JkUtilsIterable.propertiesToMap(properties));
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException(propertyFile + " not found");
         } catch (IOException e) {
@@ -125,12 +138,20 @@ public final class JkProperties {
         return result;
     }
 
+    /**
+     * Returns all keys with the specified prefix. If prefix is <code>null</code> or empty,
+     * then returns all keys.
+     */
     public Set<String> find(String prefix) {
         Set<String> result = new HashSet<>();
-        result.addAll(props.keySet().stream()
-                .filter(name -> name.startsWith(prefix))
-                .collect(Collectors.toSet())
-        );
+        if (prefix == null || prefix.isEmpty()) {
+            result = new LinkedHashSet<>(props.keySet());
+        } else {
+            result.addAll(props.keySet().stream()
+                    .filter(name -> name.startsWith(prefix))
+                    .collect(Collectors.toSet())
+            );
+        }
         if (fallback != null) {
             result.addAll(fallback.find(prefix));
         }
@@ -146,5 +167,40 @@ public final class JkProperties {
             result.append(fallback);
         }
         return result.toString();
+    }
+
+    public String toKeyValueString() {
+        Set<String> keys = find("");
+        StringBuilder sb = new StringBuilder();
+        JkProperties systemLess = systemLess();
+        for (String key : keys) {
+            if (systemLess.get(key) == null) {
+                continue;
+            }
+            JkProperties declaringProps = getSourceDefining(key);
+            sb.append(key + "=" + get(key) + "   (from " + declaringProps.source + ")\n");
+        }
+        return sb.toString();
+    }
+
+    private JkProperties getSourceDefining(String key) {
+        if (this.props.containsKey(key)) {
+            return this;
+        }
+        if (this.fallback != null) {
+            return fallback.getSourceDefining(key);
+        }
+        return null;
+    }
+
+    private JkProperties systemLess() {
+        if (this.isSystem()) {
+            return fallback == null ? null : fallback.systemLess();
+        }
+        return fallback == null ? this : new JkProperties(source, props, fallback.systemLess());
+    }
+
+    private boolean isSystem() {
+        return SYS_PROPS_NAME == source || ENV_VARS_NAME == source;
     }
 }

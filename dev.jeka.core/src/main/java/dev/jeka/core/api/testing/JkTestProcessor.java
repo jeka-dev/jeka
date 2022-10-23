@@ -69,7 +69,7 @@ public final class JkTestProcessor<T> {
     private JvmHints jvmHints = JvmHints.ofDefault();
 
     private Supplier<JkRepoSet> repoSetSupplier = () ->
-            JkRepoProperties.of(JkProperties.ofSystemProperties().withFallback(JkProperties.ofEnvironmentVariables()))
+            JkRepoProperties.of(JkProperties.SYSTEM_PROPERTIES.withFallback(JkProperties.ENVIRONMENT_VARIABLES))
                     .getDownloadRepos();
 
     /**

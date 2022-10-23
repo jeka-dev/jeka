@@ -17,7 +17,7 @@ public interface JkInternalClasspathScanner {
 
     static JkInternalClasspathScanner of() {
         return Cache.get(
-                JkProperties.ofSystemProperties().withFallback(JkProperties.ofEnvironmentVariables()));
+                JkProperties.SYSTEM_PROPERTIES.withFallback(JkProperties.ENVIRONMENT_VARIABLES));
     }
 
     List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);
