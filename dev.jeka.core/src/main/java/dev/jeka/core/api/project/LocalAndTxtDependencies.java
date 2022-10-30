@@ -58,7 +58,7 @@ class LocalAndTxtDependencies {
     /**
      * @see #ofTextDescription(String)
      */
-    public static LocalAndTxtDependencies ofTextDescriptionIfExist(Path path) {
+    public static LocalAndTxtDependencies ofOptionalTextDescription(Path path) {
         if (Files.notExists(path)) {
             return LocalAndTxtDependencies.of();
         }
@@ -173,7 +173,11 @@ class LocalAndTxtDependencies {
                     currentQualifier = readQualifier(line);
                     continue;
                 }
-                final JkCoordinateDependency dependency = JkCoordinateDependency.of(line.trim());
+                String effectiveLine = line;
+                if (line.contains("#")) {
+                    effectiveLine = JkUtilsString.substringBeforeFirst(line, "#");
+                }
+                final JkCoordinateDependency dependency = JkCoordinateDependency.of(effectiveLine.trim());
                 if (REGULAR.equals(currentQualifier) ) {
                     regular = plus(regular, dependency);
                 } else if (COMPILE.equals(currentQualifier)) {

@@ -8,20 +8,20 @@ _Properties_ can be defined at different level, in order of precedence :
 * System properties : Properties can be defined using system properties as `-DpropertyName=value`. System properties can
   be injected from Jeka command line.
 * OS environment variables : Properties can also be defined as OS environment variable.
-* Project : Defined in _[Project Root]/jeka/project.properties_. Used typically for storing tool version (e.g. `jeka.kotlin.version=1.5.21`).
+* Project : Defined in _[Project Root]/jeka/local.properties_. Used typically for storing tool version (e.g. `jeka.kotlin.version=1.5.21`).
 * Global : Defined in _[User Home]/.jeka/global.properties_ file. Used typically to define urls, local paths and credentials.
 
 
 _Properties_ inherit from project _properties_ defined in project parent folders (if exists). 
 
-Here, project2 will inherit properties defined in _project1/jeka/project.properties_ :
+Here, project2 will inherit properties defined in _project1/jeka/local.properties_ :
 ```
 project1
    + jeka
-      + project.properties
+      + local.properties
    + project2   (sub-project)
       + jeka
-         + project.properties
+         + local.properties
 ```
 
 !!! info
@@ -57,7 +57,7 @@ Use [JkRepoFromProperties class](https://github.com/jeka-dev/jeka/blob/master/de
 to get the repositories defined by _properties_.
 
 !!! Note
-    By default, when no repository is configred, artifacts are downloaded on _Maven Central_ repo.
+    By default, when no repository is configured, artifacts are downloaded on _Maven Central_ repo.
 
 Using single repo
 ```
@@ -90,7 +90,7 @@ jeka.repos.download=myRepo1, myRepo2
 jeka.repos.publish=myRepo2
 ```
 
-Aliases exist for _Maven Central_ and Jeka GitHub Repo
+Aliases are predefined for _Maven Central_ and Jeka GitHub Repos
 ```
 jeka.repos.download=https://my.company/repo1, mavenCentral, jekaGithub
 jeka.repos.jekaGithub.username=myGithubAccountName

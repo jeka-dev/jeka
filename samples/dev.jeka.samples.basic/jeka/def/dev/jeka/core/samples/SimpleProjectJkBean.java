@@ -93,7 +93,7 @@ public class SimpleProjectJkBean extends JkBean {
 
     public void printMvn() {
         MavenJkBean pluginPom = getRuntime().getBean(MavenJkBean.class);
-        pluginPom.migrationCode();
+        pluginPom.migrateToCode();
     }
 
     public void showDependencies() {

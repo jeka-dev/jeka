@@ -19,7 +19,7 @@ public class MavenJkBean extends JkBean {
     public int codeIndent = 4;
 
     @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
-    public void migrationCode()  {
+    public void migrateToCode()  {
         if (!Files.exists(getBaseDir().resolve("pom.xml"))) {
             throw new IllegalStateException(("No pom.xml file found at " + JkUtilsPath.friendlyName(getBaseDir())
                     + ". Won't process."));
@@ -46,5 +46,35 @@ public class MavenJkBean extends JkBean {
         System.out.println("Test");
         System.out.println(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
                 JkQualifiedDependencySet.TEST_SCOPE), true));
+    }
+
+    @JkDoc("Displays project-dependencies content based on pom.xml. The pom.xml file is supposed to be in root directory.")
+    public void migrateToDependenciesTxt()  {
+        if (!Files.exists(getBaseDir().resolve("pom.xml"))) {
+            throw new IllegalStateException(("No pom.xml file found at " + JkUtilsPath.friendlyName(getBaseDir())
+                    + ". Won't process."));
+        }
+        Path effectivePom = JkUtilsPath.createTempFile("jeka-effective-pom-", ".pom");
+        JkMvn.of(getBaseDir(), "help:effective-pom", "-Doutput=" + effectivePom.toString())
+                .toProcess()
+                .setLogCommand(true)
+                .setLogOutput(JkLog.isVerbose())
+                .run();
+        JkPom pom = JkPom.of(effectivePom);
+        System.out.println("\n== REGULAR ==");
+        System.out.println(JkDependencySet.toTxt( pom.getDependencies().getDependenciesHavingQualifier(null,
+                JkQualifiedDependencySet.COMPILE_SCOPE)));
+
+        System.out.println("\n== TEST ==");
+        System.out.println(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
+                JkQualifiedDependencySet.TEST_SCOPE)));
+
+        System.out.println("\n== RUNTIME_ONLY ==");
+        System.out.println(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
+                JkQualifiedDependencySet.RUNTIME_SCOPE)));
+
+        System.out.println("\n== COMPILE_ONLY ==");
+        System.out.println(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
+                JkQualifiedDependencySet.PROVIDED_SCOPE)));
     }
 }

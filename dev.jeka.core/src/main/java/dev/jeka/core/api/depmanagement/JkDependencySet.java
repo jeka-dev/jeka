@@ -215,6 +215,11 @@ public class JkDependencySet {
         return minus(JkModuleId.of(moduleId));
     }
 
+    public JkDependencySet withMoving(Hint hint, String moduleId) {
+        JkDependency dependency = getMatching(JkCoordinateDependency.of(moduleId));
+        return minus(dependency).and(hint, dependency);
+    }
+
     public JkDependencySet withGlobalTransitivityReplacement(JkTransitivity formerTransitivity, JkTransitivity newTransitivity) {
         final List<JkDependency> list = new LinkedList<>();
         for (JkDependency dep : this.entries) {
@@ -302,7 +307,7 @@ public class JkDependencySet {
 
     /**
      * Returns <code>true</code> if this object contains dependencies whose are
-     * {@link JkModuleDependency}.
+     * {@link JkCoordinateDependency}.
      */
     public boolean hasModules() {
         return entries.stream().filter(JkCoordinateDependency.class::isInstance).findAny().isPresent();
@@ -497,7 +502,7 @@ public class JkDependencySet {
     }
 
     /**
-     * Returns all dependencies declared as {@link JkModuleDependency}.
+     * Returns all dependencies declared as {@link JkCoordinateDependency}.
      */
     public JkDependencySet withModuleDependenciesOnly() {
         final List<JkDependency> result = moduleDeps().collect(Collectors.toList());
@@ -577,6 +582,22 @@ public class JkDependencySet {
                         .append(dependencyString)
                         .append('"')
                         .append(")\n");
+            }
+        }
+        return builder.toString();
+    }
+
+    public static String toTxt(List<JkDependency> dependencies) {
+        final StringBuilder builder = new StringBuilder();
+        for (final JkDependency dependency : dependencies) {
+            if (dependency instanceof JkCoordinateDependency) {
+                final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
+                JkCoordinate coordinate = coordinateDependency.getCoordinate();
+                String dependencyString = coordinate.getModuleId().getColonNotation();
+                if (!coordinate.getVersion().isUnspecified()) {
+                    dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
+                }
+                builder.append(dependencyString).append("\n");
             }
         }
         return builder.toString();

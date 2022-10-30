@@ -25,6 +25,7 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffolder;
@@ -428,11 +429,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
 
             // Create specific files and folders
-            String dependenciesTxtContent = makeDependenciesTxtContent();
-            JkPathFile.of(configuredProject.getBaseDir().resolve("jeka/libs/dependencies.txt"))
+            String dependenciesTxtContent = dependenciesTxtContent();
+            JkPathFile.of(configuredProject.getBaseDir().resolve(JkConstants.JEKA_DIR)
+                    .resolve("project-dependencies.txt"))
                     .createIfNotExist()
                     .write(dependenciesTxtContent.getBytes(StandardCharsets.UTF_8));
-            Path libs = configuredProject.getBaseDir().resolve("jeka/libs");
+            Path libs = configuredProject.getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs");
             if (generateLocalLibsFolders) {
                 JkPathFile.of(libs.resolve("readme.txt"))
                         .fetchContentFrom(ProjectJkBean.class.getResource("libs-readme.txt"));
@@ -458,7 +460,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             }
         }
 
-        private String makeDependenciesTxtContent() {
+        private String dependenciesTxtContent() {
             List<String> lines = JkUtilsIO.readAsLines(ProjectJkBean.class.getResourceAsStream("dependencies.txt"));
             StringBuilder sb = new StringBuilder();
             for (String line : lines) {
@@ -489,16 +491,16 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
         public static class DependenciesTxt {
 
-            @JkDoc("Comma separated dependencies to include in dependencies.txt REGULAR section")
+            @JkDoc("Comma separated dependencies to include in project-dependencies.txt REGULAR section")
             public String regular;
 
-            @JkDoc("Comma separated dependencies to include in dependencies.txt COMPILE_ONLY section")
+            @JkDoc("Comma separated dependencies to include in project-dependencies.txt COMPILE_ONLY section")
             public String compileOnly;
 
-            @JkDoc("Comma separated dependencies to include in dependencies.txt RUNTIME_ONLY section")
+            @JkDoc("Comma separated dependencies to include in project-dependencies.txt RUNTIME_ONLY section")
             public String runtimeOnly;
 
-            @JkDoc("Comma separated dependencies to include in dependencies.txt TEST section")
+            @JkDoc("Comma separated dependencies to include in project-dependencies.txt TEST section")
             public String test;
 
         }

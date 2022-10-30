@@ -47,6 +47,6 @@ public final class JkConstants {
 
     public static final String CMD_SUBSTITUTE_SYMBOL = ":";
 
-    public static final String PROPERTIES_FILE = "project.properties";
+    public static final String PROPERTIES_FILE = "local.properties";
 
 }

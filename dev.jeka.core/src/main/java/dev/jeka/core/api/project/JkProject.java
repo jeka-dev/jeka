@@ -82,8 +82,8 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     private LocalAndTxtDependencies cachedTextAndLocalDeps;
 
-    // For testing purpose
-    URL dependencyTxtUrl;
+
+    private URL dependencyTxtUrl;
 
     public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
 
@@ -136,6 +136,11 @@ public class JkProject implements JkIdeSupport.JkSupplier {
      */
     public JkProject setOutputDir(String relativePath) {
         this.outputDir = relativePath;
+        return this;
+    }
+
+    JkProject setDependencyTxtUrl(URL url) {
+        this.dependencyTxtUrl = url;
         return this;
     }
 
@@ -331,19 +336,20 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return this;
     }
 
-     LocalAndTxtDependencies textAndLocalDeps() {
+    LocalAndTxtDependencies textAndLocalDeps() {
         if (cachedTextAndLocalDeps != null) {
             return cachedTextAndLocalDeps;
         }
         LocalAndTxtDependencies localDeps = LocalAndTxtDependencies.ofLocal(
                 baseDir.resolve(JkConstants.JEKA_DIR + "/libs"));
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
-                ? LocalAndTxtDependencies.ofTextDescriptionIfExist(
-                baseDir.resolve(JkConstants.JEKA_DIR + "/libs/dependencies.txt"))
+                ? LocalAndTxtDependencies.ofOptionalTextDescription(
+                baseDir.resolve(JkConstants.JEKA_DIR).resolve("project-dependencies.txt"))
                 : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;
     }
+
 
     public Document getDependenciesAsXml()  {
         Document document;

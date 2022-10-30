@@ -7,6 +7,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.Method;
@@ -204,7 +205,7 @@ public final class JkRuntime {
     static JkProperties constructProperties(Path baseDir) {
         JkProperties result = JkProperties.SYSTEM_PROPERTIES
                 .withFallback(JkProperties.ENVIRONMENT_VARIABLES
-                    .withFallback(readProjectPropertiesRecursively(baseDir)));
+                    .withFallback(readProjectPropertiesRecursively(JkUtilsPath.relativizeFromWorkingDir(baseDir))));
         Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
         if (Files.exists(globalPropertiesFile)) {
             result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));
@@ -220,7 +221,7 @@ public final class JkRuntime {
                 '}';
     }
 
-    // Reads the properties from the baseDir/jeka/project.properties
+    // Reads the properties from the baseDir/jeka/local.properties
     // Takes also in account properties defined in parent project dirs if any.
     static JkProperties readProjectPropertiesRecursively(Path projectBaseDir) {
         Path baseDir = projectBaseDir.toAbsolutePath().normalize();
