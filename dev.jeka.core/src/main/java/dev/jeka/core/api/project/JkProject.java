@@ -8,6 +8,7 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -59,6 +60,8 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     private JkJavaVersion jvmTargetVersion = DEFAULT_JAVA_VERSION;
 
     private String sourceEncoding = DEFAULT_ENCODING;
+
+    private final JkRunnables<Void> cleanExtraActions = JkRunnables.of();
 
     private final JkStandardFileArtifactProducer<JkProject> artifactProducer =
             JkStandardFileArtifactProducer.ofParent(this).setArtifactFilenameComputation(this::getArtifactPath);
@@ -117,6 +120,11 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     public Path getBaseDir() {
         return this.baseDir;
+    }
+
+
+    public JkRunnables<Void> getCleanExtraActions() {
+        return cleanExtraActions;
     }
 
     public JkProject setBaseDir(Path baseDir) {
@@ -209,6 +217,11 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     @Override
     public String toString() {
         return "project " + getBaseDir().getFileName();
+    }
+
+    public JkProject executeCleanExtraActions() {
+        cleanExtraActions.run();
+        return this;
     }
 
     public String getInfo() {
@@ -341,10 +354,10 @@ public class JkProject implements JkIdeSupport.JkSupplier {
             return cachedTextAndLocalDeps;
         }
         LocalAndTxtDependencies localDeps = LocalAndTxtDependencies.ofLocal(
-                baseDir.resolve(JkConstants.JEKA_DIR + "/libs"));
+                baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_LIBS_DIR));
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
                 ? LocalAndTxtDependencies.ofOptionalTextDescription(
-                baseDir.resolve(JkConstants.JEKA_DIR).resolve("project-dependencies.txt"))
+                baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_DEPENDENCIES_TXT_FILE))
                 : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;

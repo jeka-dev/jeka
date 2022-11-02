@@ -18,6 +18,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -33,7 +34,7 @@ import java.util.function.Consumer;
 @JkDoc("Configure project KBean in order to produce bootable springboot jar and war files.")
 public final class SpringbootJkBean extends JkBean {
 
-    private static String DEFAULT_SPRINGBOOT_VERSION = "2.7.3";
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "2.7.5";
 
     public static final JkArtifactId ORIGINAL_ARTIFACT = JkArtifactId.of("original", "jar");
 
@@ -191,7 +192,19 @@ public final class SpringbootJkBean extends JkBean {
                 return;
             }
         }
-        throw new IllegalStateException("No @SpringBootApplication class with main method found.");
+
+        // Kotlin adds a special [mainClass]Kt class to host main method
+        for (String name : mainClasses) {
+            if (name.endsWith("Kt")) {
+                String originalName = JkUtilsString.substringBeforeLast(name, "Kt");
+                if (classWithSpringbootAppAnnotation.contains(originalName)) {
+                    SpringbootPacker.of(libsToInclude, bootLoaderJar, name,
+                            springbootVersion).makeExecJar(original, targetJar);
+                    return;
+                }
+            }
+        }
+        throw new IllegalStateException("No class annotated with @SpringBootApplication found.");
     }
 
     @JkDoc("Scaffold a basic example application in package org.example")

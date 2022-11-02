@@ -10,10 +10,7 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsSystem;
-import dev.jeka.core.api.utils.JkUtilsTime;
+import dev.jeka.core.api.utils.*;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -42,9 +39,9 @@ public final class JkKotlinCompiler {
 
     private boolean failOnError = true;
 
-    private boolean logOutput;
+    private boolean logOutput = JkLog.isVerbose();
 
-    private boolean logCommand;
+    private boolean logCommand = JkLog.isVerbose();
 
     private final List<String> jvmOptions = new LinkedList<>();
 
@@ -222,9 +219,22 @@ public final class JkKotlinCompiler {
         return this;
     }
 
-    public JkKotlinCompiler addPlugin(String pluginModule) {
+    /**
+     * Instructs this compiler to use the plugin identified by the specified coordinates.
+     * If the coordinate does n ot mention the version, the Kotlin version of this compiler is chosen.<p>
+     * {@link Plugins} class provides constants about most common plugin coordinates.
+     */
+    public JkKotlinCompiler addPlugin(String coordinate) {
         Plugin plugin = new Plugin();
-        plugin.pluginCoordinate = pluginModule.isEmpty() ? null : JkCoordinate.of(pluginModule);
+        if (JkUtilsString.isBlank(coordinate)) {
+            plugin.pluginCoordinate = null;
+        } else {
+            JkCoordinate effectiveCoordinate = JkCoordinate.of(coordinate);
+            if (effectiveCoordinate.getVersion().isUnspecified()) {
+                effectiveCoordinate = effectiveCoordinate.withVersion(getVersion());
+            }
+            plugin.pluginCoordinate = effectiveCoordinate;
+        }
         plugins.add(plugin);
         return this;
     }
@@ -319,7 +329,8 @@ public final class JkKotlinCompiler {
                             .map(JkKotlinCompiler::toJavaOption)
                             .collect(Collectors.toList()));
         } else {
-            JkLog.info("Use kotlin compiler with options " + loggedOptions);
+            JkLog.trace("Use Kotlin compiler using jars %s", jarsVersionAndTarget);
+            JkLog.info("Use Kotlin compiler with options " + loggedOptions);
             kotlincProcess = JkJavaProcess.ofJava("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
                     .setClasspath(jarsVersionAndTarget.jars)
                     .addJavaOptions(this.jvmOptions)
@@ -379,6 +390,15 @@ public final class JkKotlinCompiler {
             this.version = version;
             this.target = target;
         }
+
+        @Override
+        public String toString() {
+            return "JarsVersionAndTarget{" +
+                    "jars=" + jars +
+                    ", version='" + version + '\'' +
+                    ", target=" + target +
+                    '}';
+        }
     }
 
     private static String toJavaOption(String option) {
@@ -406,6 +426,16 @@ public final class JkKotlinCompiler {
         private String toOption() {
             return "-Xplugin=" + getJar();
         }
+
+    }
+
+    public static class Plugins {
+
+        public static final String ALL_OPEN = "org.jetbrains.kotlin:kotlin-allopen";
+
+        public static final String NO_ARG = "org.jetbrains.kotlin:kotlin-noarg";
+
+        public static final String SAM_WITH_RECEIVER = "org.jetbrains.kotlin:kotlin-sam-with-receiver-compiler-plugin";
 
     }
 

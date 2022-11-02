@@ -77,7 +77,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     }
 
     default void makeAllMissingArtifacts() {
-        makeArtifacts(this.getArtifactIds());
+        makeMissingArtifacts(this.getArtifactIds());
     }
 
 }

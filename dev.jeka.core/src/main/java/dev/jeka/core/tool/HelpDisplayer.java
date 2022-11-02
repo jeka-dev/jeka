@@ -1,13 +1,8 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,7 +37,6 @@ final class HelpDisplayer {
         classpathBeanClasses.stream()
                 .sorted(Comparator.comparing(Class::getSimpleName))
                 .forEach(aClass -> sb.append(beanDescription(aClass, false)));
-        sb.append(shortcuts(baseDir));
         sb.append("\nType 'jeka [kbean]#help' to get help on a particular KBean (ex : 'jeka project#help'). ");
         System.out.println(sb);
     }
@@ -99,23 +93,6 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    static void help(Class<? extends JkBean> beanClass, Path xmlFile) {
-        final Document document = JkUtilsXml.createDocument();
-        final Element runEl = BeanDescription.of(beanClass).toElement(document);
-        document.appendChild(runEl);
-        if (xmlFile == null) {
-            JkUtilsXml.output(document, System.out);
-        } else {
-            JkUtilsPath.createFile(xmlFile);
-            try (final OutputStream os = Files.newOutputStream(xmlFile)) {
-                JkUtilsXml.output(document, os);
-            } catch (final IOException e) {
-                throw JkUtilsThrowable.unchecked(e);
-            }
-            JkLog.info("Xml help file generated at " + xmlFile);
-        }
-    }
-
     static void helpJkBean(JkBean jkBean) {
         BeanDoc beanDescription = new BeanDoc(jkBean.getClass());
         JkLog.info(helpBeanDescription(beanDescription, jkBean.getRuntime()));
@@ -145,18 +122,11 @@ final class HelpDisplayer {
                     .flatMap(string -> Arrays.stream(string.split("\n")))
                     .forEach(line -> sb.append("  " + line + "\n"));
         }
-        final JkBean bean;
-        if (runtime.getBeanOptional(description.beanClass()).isPresent()) {
-            bean = runtime.getBean(description.beanClass());
-        } else {
-            bean = JkUtilsReflect.newInstance(description.beanClass());
-        }
         sb.append(BeanDescription.of(description.beanClass()).flatDescription(description.shortName() + "#"));
+        sb.append(shortcuts(runtime.getProjectBaseDir()));
         return sb.toString();
     }
 
-    static List<String> propertyValues(List<BeanDescription.BeanField> propertyDescriptions) {
-        return propertyDescriptions.stream().map(optionDef -> optionDef.shortDescription()).collect(Collectors.toList());
-    }
+
 
 }

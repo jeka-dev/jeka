@@ -130,14 +130,14 @@ setup dependencies, java version, project layout, test behavior, test selection 
 
 ```Java
 JkProject.of().flatFacade()
-   .configureCompileDeps(deps -> deps
+   .configureCompileDependencies(deps -> deps
            .and("com.google.guava:guava:21.0")
            .and("com.sun.jersey:jersey-server:1.19.4")
            .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
-   .configureRuntimeDeps(deps -> deps
+   .configureRuntimeDependencies(deps -> deps
            .minus("org.junit.jupiter:junit-jupiter-engine")
            .and("com.github.djeang:vincer-dom:1.2.0"))
-   .configureTestDeps(deps -> deps
+   .configureTestDependencies(deps -> deps
            .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
    .addTestExcludeFilterSuffixedBy("IT", false)
    .setJavaVersion(JkJavaVersion.V8)
@@ -184,34 +184,37 @@ To import *bill-of-materials* (aka BOMs) just declare a dependency as '*group:mo
 !!! example
 
     ```
-    == REGULAR ==
-    org.lwjgl:lwjgl-bom::pom:3.3.1
-    org.lwjgl:lwjgl:natives-linux::
+    == COMPILE ==
+    org.lwjgl:lwjgl-bom::pom:3.3.1   # Use lwjgl BOM so we don't need to specify lwjgl versions afterward
+    org.lwjgl:lwjgl:natives-linux::  # specify the 'natives-linux' classifier for lwjgl
+    org.projectlombok:lombok:1.16.16  
+
+    == RUNTIME ==
+    org.postgresql:postgresql:42.5.0
+    - org.projectlombok:lombok       # remove lombok from runtime dependencies 
 
     == TEST ==
     org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
-    org.fluentlenium:fluentlenium-assertj:3.2.0
     org.fluentlenium:fluentlenium-junit:3.2.0
+    @ org.apache.httpcomponents:httpclient  # exclude http-client from fluentlenium-junit transitive dependencies
+    org.fluentlenium:fluentlenium-assertj:3.2.0
+    @@ net.sourceforge.htmlunit:htmlunit    # exclude htmlunit from all transitive dependencies
 
-    == COMPILE_ONLY ==
-    org.projectlombok:lombok:1.16.16
-    
-    == RUNTIME_ONLY ==
-    org.postgresql:postgresql:42.5.0
     ```
 
-`== REGULAR ==`  
-Stands for dependencies used both for compilation and runtime. This is the most common place to declare dependencies.
+`== COMPILE ==`  
+Defines dependencies that will constitute the *compile* classpath.
+
+`== RUNTIME ==`  
+Defines dependencies that will constitute the *runtime* classpath.  
+The dependencies will be the ones declared in *== COMPILE ==* section plus the ones declared in *== RUNTIME ==* section.  
+If dependencies declared in *== compile ==* section should not be included for *runtime* classpath, it should 
+be explicitly be removed using '-' symbol.
+
 
 `== TEST ==`  
-Stands for dependencies used only for testing.
-
-`== COMPILE_ONLY ==`  
-Stands for dependencies used for compilation only (not for runtime).
-
-`== RUNTIME_ONLY ==`  
-Stands for dependencies used for runtime only (not for compilation).
-Runtime dependencies has impact when creating fat jars and for the definition of published dependencies.
+Defines dependencies that will constitute the *test* classpath.
+The dependencies will be the ones declared in *== COMPILE ==* or *== RUNTIME ==* sections (merge) plus the ones declared in *== TEST ==* section.  
 
 !!! tip
     If you are using Jeka plugin for Intellij, hit `ctrl+<space>` for displaying suggestions.

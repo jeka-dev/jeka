@@ -87,11 +87,8 @@ public final class JkScaffolder {
             String content = projectExtraContent.replace("\\n", "\n");
             projectPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }
-        Path manualHtml = JkLocator.getJekaHomeDir().resolve("doc/reference-guide.html");
-        if (Files.exists(manualHtml)) {
-            JkPathFile.of(manualHtml).copyToDir(baseDir.resolve("jeka"));
-        }
-        //JkUtilsPath.createDirectories(baseDir.resolve(JkConstants.JEKA_DIR).resolve("boot"));
+        JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(".gitignore"))
+                        .fetchContentFrom(JkScaffolder.class.getResource("gitignore.snippet"));
         extraActions.run();
     }
 

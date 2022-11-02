@@ -24,9 +24,18 @@ public class JkNodeJs {
         createProcess(workingDir, cmd).exec(JkUtilsString.translateCommandline(commandLine));
     }
 
+    public void npx(Path workingDir, String commandLine) {
+        String cmd = JkUtilsSystem.IS_WINDOWS ? "npx.cmd" : "bin/npx";
+        createProcess(workingDir, cmd).exec(JkUtilsString.translateCommandline(commandLine));
+    }
+
     private JkProcess createProcess(Path workingDir, String cmdName) {
+        //String path = System.getenv("PATH");
+        //String pathVar = this.installDir.toString() + File.pathSeparator + path;
         return JkProcess.of(installDir.resolve(cmdName).toString())
                 .setWorkingDir(workingDir)
+                .setFailOnError(true)
+                //.setEnv("PATH", pathVar)
                 .setLogCommand(true)
                 .setLogOutput(true);
     }

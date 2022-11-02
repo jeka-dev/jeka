@@ -1,7 +1,6 @@
 package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -23,21 +22,17 @@ class SpringbootPacker {
 
     private final String mainClassName;
 
-    private final String springbootVersion;
-
-    private SpringbootPacker(JkPathSequence nestedLibs, Path loader, String mainClassNeme, JkManifest manifestToMerge,
-                             String springbootVersion) {
+    private SpringbootPacker(JkPathSequence nestedLibs, Path loader, String mainClassNeme, JkManifest manifestToMerge) {
         super();
         this.nestedLibs = nestedLibs;
         this.bootLoaderJar = loader;
         this.manifestToMerge = manifestToMerge;
         this.mainClassName = mainClassNeme;
-        this.springbootVersion = springbootVersion;
     }
 
     public static final SpringbootPacker of(JkPathSequence nestedLibs, Path loader, String mainClassName,
                                             String springbootVersion) {
-        return new SpringbootPacker(nestedLibs, loader, mainClassName, null, springbootVersion);
+        return new SpringbootPacker(nestedLibs, loader, mainClassName, null);
     }
 
     public void makeExecJar(Path original, Path target) {
@@ -92,7 +87,6 @@ class SpringbootPacker {
 
     private JkManifest createManifest(JkManifest original, String startClassName) {
         JkManifest result = JkUtilsObject.firstNonNull(original, JkManifest.of())
-            .addMainAttribute("Spring-Boot_Version", springbootVersion)
             .addMainClass("org.springframework.boot.loader.JarLauncher")
             .addMainAttribute("Start-Class", startClassName)
             .addMainAttribute("Spring-Boot-Classes", "BOOT-INF/classes/")

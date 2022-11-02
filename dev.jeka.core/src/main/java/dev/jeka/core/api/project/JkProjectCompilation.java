@@ -211,8 +211,7 @@ public class JkProjectCompilation<T> {
 
     protected JkDependencySet baseDependencies() {
         if (project.isIncludeTextAndLocalDependencies()) {
-            return project.textAndLocalDeps().getRegular()
-                    .and(project.textAndLocalDeps().getCompileOnly());
+            return project.textAndLocalDeps().getCompile();
         }
         return JkDependencySet.of();
     }

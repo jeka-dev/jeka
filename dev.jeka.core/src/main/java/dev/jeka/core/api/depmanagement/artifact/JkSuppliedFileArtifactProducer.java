@@ -12,8 +12,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * This {@link JkArtifactProducer} produces artifacts files at the path
- * provided by the caller<p/>
+ * This {@link JkArtifactProducer} produces artifacts files at the pathprovided by the caller<p/>
  * To add artifacts to produce, caller has to provide the {@link Path} where is generated artifact along
  * the {@link Runnable} for generating it.
  */

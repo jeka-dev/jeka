@@ -57,7 +57,7 @@ public final class JkDependencySetMerge {
         JkVersionProvider mergedVersionProvider = left.getVersionProvider().and(right.getVersionProvider());
         HashSet<JkDependencyExclusion> mergedExcludes = new HashSet<>(left.getGlobalExclusions());
         mergedExcludes.addAll(right.getGlobalExclusions());
-        JkDependencySet mergedDependencySet = JkDependencySet.of(result).withGlobalExclusion(mergedExcludes)
+        JkDependencySet mergedDependencySet = JkDependencySet.of(result).withGlobalExclusions(mergedExcludes)
                 .withVersionProvider(mergedVersionProvider);
         return new JkDependencySetMerge(absentFromLeft, absentFromRight, mergedDependencySet);
     }

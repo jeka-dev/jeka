@@ -558,9 +558,17 @@ public class JkDependencySet {
         return andGlobalExclusion(depExclusion);
     }
 
-    public JkDependencySet withGlobalExclusion(Set<JkDependencyExclusion> excludes) {
+    public JkDependencySet withGlobalExclusions(Set<JkDependencyExclusion> excludes) {
         final Set<JkDependencyExclusion> depExcludes = new HashSet<>(excludes);
         return new JkDependencySet(this.entries, Collections.unmodifiableSet(depExcludes), this.versionProvider);
+    }
+
+    public JkDependencySet withGlobalExclusions(String ...moduleIds) {
+        final Set<JkDependencyExclusion> depExcludes = Arrays.stream(moduleIds)
+                .map(JkModuleId::of)
+                .map(JkDependencyExclusion::of)
+                .collect(Collectors.toSet());
+        return withGlobalExclusions(depExcludes);
     }
 
     /**

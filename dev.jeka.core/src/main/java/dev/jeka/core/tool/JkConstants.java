@@ -49,4 +49,8 @@ public final class JkConstants {
 
     public static final String PROPERTIES_FILE = "local.properties";
 
+    public static final String PROJECT_DEPENDENCIES_TXT_FILE = "project-dependencies.txt";
+
+    public static final String PROJECT_LIBS_DIR = "project-libs";
+
 }

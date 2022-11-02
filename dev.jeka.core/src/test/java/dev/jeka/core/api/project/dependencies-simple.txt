@@ -1,12 +1,11 @@
 
-== COMPILE+RUNTIME ==
+== COMPILE ==
 org.springframework.boot:spring-boot-starter-web
-
-== COMPILE_ONLY ==
 org.projectlombok:lombok:1.18.24
 
-== RUNTIME_ONLY ==
+== RUNTIME ==
 com.h2database:h2:2.1.214
+- org.projectlombok:lombok
 
 == TEST ==
 org.springframework.boot:spring-boot-starter-test

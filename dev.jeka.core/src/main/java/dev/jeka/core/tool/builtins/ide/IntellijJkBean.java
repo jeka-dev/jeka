@@ -68,7 +68,6 @@ public final class IntellijJkBean extends JkBean {
 
     @JkDoc("Generates IntelliJ [my-module].iml file.")
     public void iml() {
-        JkLog.startTask("Generating Iml for project '%s'...", getBaseDirName());
         Path basePath = getBaseDir();
         JkImlGenerator imlGenerator = imlGenerator();
         imlGeneratorConfigurer.accept(imlGenerator);
@@ -79,7 +78,6 @@ public final class IntellijJkBean extends JkBean {
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
         JkLog.info("Iml file generated at " + imlPath);
-        JkLog.endTask();
     }
 
 

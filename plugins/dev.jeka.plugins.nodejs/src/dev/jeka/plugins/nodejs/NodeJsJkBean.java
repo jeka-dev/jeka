@@ -22,7 +22,7 @@ public class NodeJsJkBean extends JkBean {
     private static final String BASE_URL = "https://nodejs.org/dist/";
 
     @JkDoc("The version of NodeJs to use")
-    public String version = "16.17.0";
+    public String version = "18.12.0";
 
     @JkDoc("The command line to execute (without command name.")
     public String cmdLine;
@@ -42,6 +42,11 @@ public class NodeJsJkBean extends JkBean {
         npm(this.cmdLine);
    }
 
+    @JkDoc("Execute npx using the command line specified in 'cmdLine' property.")
+    public void npx() {
+        npx(this.cmdLine);
+    }
+
     public void npm(String cmdLine) {
         Path distrib = getDistribPath();
         JkNodeJs nodeJs = JkNodeJs.of(distrib);
@@ -51,10 +56,24 @@ public class NodeJsJkBean extends JkBean {
         JkNodeJs.of(distrib).npm(workingDir, cmdLine);
     }
 
+    public void npx(String cmdLine) {
+        Path distrib = getDistribPath();
+        JkNodeJs nodeJs = JkNodeJs.of(distrib);
+        if (!nodeJs.isBinaryPresent()) {
+            download();
+        }
+        JkNodeJs.of(distrib).npx(workingDir, cmdLine);
+    }
+
    public NodeJsJkBean setWorkingDir(Path workingDir) {
         this.workingDir = workingDir;
         return this;
    }
+
+    public NodeJsJkBean setWorkingDir(String relativePath) {
+        this.workingDir = getBaseDir().resolve(relativePath);
+        return this;
+    }
 
    private void download() {
        JkPathFile tempZip = JkPathFile.of(JkUtilsPath.createTempFile("nodejs-downloded", ""));
@@ -102,11 +121,11 @@ public class NodeJsJkBean extends JkBean {
            return baseName + arch;
        } else if (JkUtilsSystem.IS_MACOS) {
            baseName = baseName + "darwin-";
-           String arch = JkUtilsSystem.getProcessor().isAarch64() ? "x64" : "arm64";
+           String arch = JkUtilsSystem.getProcessor().isAarch64() ? "arm64" : "x64";
            return baseName + arch;
        } else if (JkUtilsSystem.IS_LINUX) {
            baseName = baseName + "linux-";
-           String arch = JkUtilsSystem.getProcessor().isAarch64() ? "x64" : "arm64";
+           String arch = JkUtilsSystem.getProcessor().isAarch64() ? "arm64" : "x64";
            return baseName + arch;
        } else {
            throw new IllegalStateException("Unknow operating system " + System.getProperty("os.name"));

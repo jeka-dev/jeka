@@ -129,8 +129,8 @@ public class JkProjectPackaging {
         JkDependencySet baseDependencies = project.getCompilation().getDependencies();
         if (project.isIncludeTextAndLocalDependencies()) {
             baseDependencies = baseDependencies
-                    .minus(project.textAndLocalDeps().getCompileOnly().getEntries())
-                    .and(project.textAndLocalDeps().getRuntimeOnly());
+                    .minus(project.textAndLocalDeps().getCompile().getEntries())
+                    .and(project.textAndLocalDeps().getRuntime());
         }
         return dependencySetModifier.apply(baseDependencies);
     }

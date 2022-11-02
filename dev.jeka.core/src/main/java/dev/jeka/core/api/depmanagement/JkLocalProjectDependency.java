@@ -29,7 +29,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
                 .map(dep -> dep.withIdeProjectDir(ideProjectDir))
                 .collect(Collectors.toList());
         this.exportedDependencies = JkDependencySet.of(relocatedDependencies)
-                .withGlobalExclusion(exportedDependencies.getGlobalExclusions())
+                .withGlobalExclusions(exportedDependencies.getGlobalExclusions())
                 .withVersionProvider(exportedDependencies.getVersionProvider());
         this.transitivity = transitivity;
     }
@@ -65,7 +65,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
                     .collect(Collectors.toList());
             return JkDependencySet.of(filteredDependencies)
                     .withVersionProvider(exportedDependencies.getVersionProvider())
-                    .withGlobalExclusion(exportedDependencies.getGlobalExclusions());
+                    .withGlobalExclusions(exportedDependencies.getGlobalExclusions());
         }
         return JkDependencySet.of();
     }

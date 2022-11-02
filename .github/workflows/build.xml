@@ -8,11 +8,11 @@
 
 	<property name="bin" location="jeka-bin" />
 
-	<fileset id="libs" dir="dev.jeka.core/jeka/libs/compile_only">
+	<fileset id="libs" dir="dev.jeka.core/jeka/project-libs/compile-only">
 		<include name='**/*.jar' />
 	</fileset>
 
-	<fileset id="junit5-libs" dir="dev.jeka.core/jeka/libs/test">
+	<fileset id="junit5-libs" dir="dev.jeka.core/jeka/project-libs/test">
 		<include name='**/*.jar' />
 	</fileset>
 

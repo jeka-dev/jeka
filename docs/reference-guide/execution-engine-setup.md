@@ -92,7 +92,7 @@ Follow instructions to navigate to more specific help context.
 
 ## Customization
 
-For any reasons, we might like to use different location than the standard ones for _Jeka User Home_ and _Jeka Cache_.
+For any reasons, we might use different location than the standard ones for _Jeka User Home_ and _Jeka Cache_.
 
 We can change the location using following OS environment variable :
 

@@ -1,9 +1,6 @@
 package dev.jeka.core.api.project;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
-import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkVersionProvider;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -13,35 +10,30 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.List;
 
 
 class LocalAndTxtDependencies {
 
-    // Equals to Maven 'compile' scope or Gradle 'implementation' configuration
-    private final JkDependencySet regular;
-
-    // Equals to Maven 'provided' scope
-    private final JkDependencySet compileOnly;
+    private final JkDependencySet compile;
 
     // Equals to Maven 'runtime' scope
-    private final JkDependencySet runtimeOnly;
+    private final JkDependencySet runtime;
 
     // Equals to Maven 'test' scope
     private final JkDependencySet test;
 
-    private LocalAndTxtDependencies(JkDependencySet regular,
-                                    JkDependencySet compileOnly,
-                                    JkDependencySet runtimeOnly,
+    private LocalAndTxtDependencies(JkDependencySet compile,
+                                    JkDependencySet runtime,
                                     JkDependencySet test) {
-        this.regular = regular;
-        this.compileOnly = compileOnly;
-        this.runtimeOnly = runtimeOnly;
+        this.compile = compile;
+        this.runtime = runtime;
         this.test = test;
     }
 
     static LocalAndTxtDependencies of() {
-        return new LocalAndTxtDependencies(JkDependencySet.of(), JkDependencySet.of(),
+        return new LocalAndTxtDependencies(JkDependencySet.of(),
                 JkDependencySet.of(), JkDependencySet.of());
     }
 
@@ -52,7 +44,7 @@ class LocalAndTxtDependencies {
      * test are supposed to be in <code>baseDir/test</code> and so on.
      */
     public static LocalAndTxtDependencies ofLocal(Path baseDir) {
-        return Parser.parseFileStructure(baseDir);
+        return Parser.inspectFileStructure(baseDir);
     }
 
     /**
@@ -75,17 +67,16 @@ class LocalAndTxtDependencies {
     /**
      * Creates a {@link LocalAndTxtDependencies} from a flat file formatted as :
      * <pre>
-     * == REGULAR ==
+     * == COMPILE ==
      * org.springframework.boot:spring-boot-starter-thymeleaf
      * org.springframework.boot:spring-boot-starter-data-jpa
-     *
-     * == COMPILE_ONLY ==
      * org.projectlombok:lombok:1.16.16
      *
-     * == RUNTIME_ONLY ==
+     * == RUNTIME ==
      * com.h2database:h2
      * org.liquibase:liquibase-core
      * com.oracle:ojdbc6:12.1.0
+     * - org.projectlombok:lombok
      *
      * == TEST ==
      * org.springframework.boot:spring-boot-starter-test
@@ -99,16 +90,12 @@ class LocalAndTxtDependencies {
         return Parser.parseTxt(description);
     }
 
-    public JkDependencySet getRegular() {
-        return regular;
+    public JkDependencySet getCompile() {
+        return compile;
     }
 
-    public JkDependencySet getCompileOnly() {
-        return compileOnly;
-    }
-
-    public JkDependencySet getRuntimeOnly() {
-        return runtimeOnly;
+    public JkDependencySet getRuntime() {
+        return runtime;
     }
 
     public JkDependencySet getTest() {
@@ -118,50 +105,58 @@ class LocalAndTxtDependencies {
 
     public LocalAndTxtDependencies and(LocalAndTxtDependencies other) {
         return new LocalAndTxtDependencies(
-                regular.and(other.regular),
-                compileOnly.and(other.compileOnly),
-                runtimeOnly.and(other.runtimeOnly),
+                compile.and(other.compile),
+                runtime.and(other.runtime),
                 test.and(other.test)
         );
     }
 
     private static class Parser {
 
-        private static final String REGULAR = "regular";
+        private static final String COMPILE = "compile";
 
-        private static final String COMPILE = "compile_only";
-
-        private static final String RUNTIME = "runtime_only";
+        private static final String RUNTIME = "runtime";
 
         private static final String TEST = "test";
 
-        private static final List<String> KNOWN_QUALIFIER = JkUtilsIterable.listOf(COMPILE, REGULAR,
+        private static final String MINUS_SYMBOL = "-";
+
+
+        private static final String LOCAL_EXCLUDE_SYMBOL = "@";
+
+        private static final String GLOBAL_EXCLUDE_SYMBOL = "@@";
+
+
+        private static final List<String> KNOWN_QUALIFIER = JkUtilsIterable.listOf(COMPILE,
                 RUNTIME, TEST);
 
-        private static LocalAndTxtDependencies parseFileStructure(Path baseDir) {
+        private static LocalAndTxtDependencies inspectFileStructure(Path baseDir) {
             final JkPathTree libDir = JkPathTree.of(baseDir);
             if (!libDir.exists()) {
                 return LocalAndTxtDependencies.of();
             }
             JkDependencySet regular = JkDependencySet.of()
-                    .andFiles(libDir.andMatching(true, REGULAR + "/*.jar").getFiles());
+                    .andFiles(libDir.andMatching(true, "regular" + "/*.jar").getFiles());
             JkDependencySet compileOnly = JkDependencySet.of()
-                    .andFiles(libDir.andMatching(true, COMPILE + "/*.jar").getFiles());
+                    .andFiles(libDir.andMatching(true, "compile-only" + "/*.jar").getFiles());
             JkDependencySet runtimeOnly = JkDependencySet.of()
-                    .andFiles(libDir.andMatching(true, "*.jar", RUNTIME + "/*.jar").getFiles());
+                    .andFiles(libDir.andMatching(true, "*.jar", "runtime-only" + "/*.jar").getFiles());
             JkDependencySet test = JkDependencySet.of()
                     .andFiles(libDir.andMatching(true, "*.jar", TEST + "/*.jar").getFiles());
-            return new LocalAndTxtDependencies(regular, compileOnly, runtimeOnly, test);
+
+            return new LocalAndTxtDependencies(
+                    regular.and(compileOnly),
+                    regular.and(runtimeOnly),
+                    test.and(regular).and(compileOnly).and(runtimeOnly));
         }
 
         static LocalAndTxtDependencies parseTxt(String description) {
             final String[] lines = description.split(System.lineSeparator());
-            JkDependencySet regular = JkDependencySet.of();
-            JkDependencySet compileOnly = JkDependencySet.of();
-            JkDependencySet runtimeOnly = JkDependencySet.of();
-            JkDependencySet test = JkDependencySet.of();
+            List<String> compileEntries = new LinkedList<>();
+            List<String> runtimeEntries = new LinkedList<>();
+            List<String> testEntries = new LinkedList<>();
 
-            String currentQualifier = REGULAR;
+            String currentQualifier = COMPILE;
             for (final String line : lines) {
                 if (line.trim().startsWith("#")) {
                     continue;
@@ -173,44 +168,69 @@ class LocalAndTxtDependencies {
                     currentQualifier = readQualifier(line);
                     continue;
                 }
-                String effectiveLine = line;
+                String effectiveLine = line.trim();
                 if (line.contains("#")) {
-                    effectiveLine = JkUtilsString.substringBeforeFirst(line, "#");
+                    effectiveLine = JkUtilsString.substringBeforeFirst(line, "#").trim();
                 }
-                final JkCoordinateDependency dependency = JkCoordinateDependency.of(effectiveLine.trim());
-                if (REGULAR.equals(currentQualifier) ) {
-                    regular = plus(regular, dependency);
-                } else if (COMPILE.equals(currentQualifier)) {
-                    compileOnly = plus(compileOnly, dependency);
+                //final JkCoordinateDependency dependency = JkCoordinateDependency.of(effectiveLine.trim());
+                if (COMPILE.equals(currentQualifier)) {
+                    compileEntries.add(effectiveLine);
                 } else if (RUNTIME.equals(currentQualifier)) {
-                    runtimeOnly = plus(runtimeOnly, dependency);
+                    runtimeEntries.add(effectiveLine);
                 } else if (TEST.equals(currentQualifier)) {
-                    test = plus(test, dependency);
+                    testEntries.add(effectiveLine);
                 }
             }
-            return new LocalAndTxtDependencies(regular, compileOnly, runtimeOnly, test);
+            JkDependencySet compile = JkDependencySet.of();
+            for (String line : compileEntries) {
+                compile = apply(line, compile);
+            }
+            JkDependencySet runtime = compile;
+            for (String line : runtimeEntries) {
+                runtime = apply(line, runtime);
+            }
+            JkDependencySet test = runtime.merge(compile).getResult();
+            for (String line : testEntries) {
+                test = apply(line, test);
+            }
+
+
+            return new LocalAndTxtDependencies(compile, runtime, test);
         }
 
-        private static JkDependencySet plus(JkDependencySet dependencySet,
-                                            JkCoordinateDependency dependency) {
-            JkCoordinate coordinate = dependency.getCoordinate();
-            JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
-            if (spec.getClassifier() == null && "pom".equals(spec.getType())) {
-                JkVersionProvider versionProvider = dependencySet.getVersionProvider().andBom(coordinate);
-                return dependencySet.withVersionProvider(versionProvider);
+        private static JkDependencySet apply(String line, JkDependencySet current) {
+            if (line.startsWith(MINUS_SYMBOL)) {
+                String coordinate = line.substring(MINUS_SYMBOL.length()).trim();
+                return current.minus(coordinate);
             }
-            return dependencySet.and(dependency);
+            if (line.startsWith(LOCAL_EXCLUDE_SYMBOL)) {
+                String coordinate = line.substring(LOCAL_EXCLUDE_SYMBOL.length()).trim();
+                return current.withLocalExclusions(coordinate);
+            }
+            if (line.startsWith(GLOBAL_EXCLUDE_SYMBOL)) {
+                String coordinate = line.substring(GLOBAL_EXCLUDE_SYMBOL.length()).trim();
+                return current.withGlobalExclusions(coordinate);
+            }
+            else {
+                JkCoordinate coordinate = JkCoordinate.of(line);
+                JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
+                if (spec.getClassifier() == null && "pom".equals(spec.getType())) {
+                    JkVersionProvider versionProvider = current.getVersionProvider().andBom(coordinate);
+                    return current.withVersionProvider(versionProvider);
+                }
+                return current.and(line);
+            }
         }
 
         private static String readQualifier(String line) {
-            String payload = JkUtilsString.substringAfterFirst(line,"==").trim();
+            String payload = JkUtilsString.substringAfterFirst(line,"== ").trim();
             if (payload.contains("=")) {
                 payload = JkUtilsString.substringBeforeFirst(payload, "=").toLowerCase().trim();
             }
             if (KNOWN_QUALIFIER.contains(payload)) {
                 return payload;
             }
-            return REGULAR;
+            return COMPILE;
         }
 
     }

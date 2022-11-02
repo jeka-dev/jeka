@@ -27,6 +27,11 @@ public final class Main {
      * Entry point for Jeka application when launched from command-line
      */
     public static void main(String[] args) {
+        final Path workingDir = Paths.get("");
+        if (!JkExternalToolApi.isJekaProject(workingDir)) {
+            System.err.println("This directory is not a Jeka project. Cannot process.");
+            return;
+        }
         if (!(Thread.currentThread().getContextClassLoader() instanceof AppendableUrlClassloader)) {
             final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);
@@ -52,7 +57,6 @@ public final class Main {
                 JkMemoryBufferLogDecorator.activateOnJkLog();
                 JkLog.info("");   // To have a br prior the memory log is flushed
             }
-            final Path workingDir = Paths.get("");
             final Engine engine = new Engine(workingDir);
             engine.execute(Environment.commandLine);   // log in memory are inactivated inside this method if it goes ok
             if (Environment.standardOptions.logBanner) {

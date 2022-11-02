@@ -49,7 +49,10 @@ public final class JkExternalToolApi {
         if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROPERTIES_FILE))) {
             return true;
         }
-        if (Files.isRegularFile(jekaDir.resolve("project-dependencies.txt"))) {
+        if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROJECT_DEPENDENCIES_TXT_FILE))) {
+            return true;
+        }
+        if (Files.isDirectory(jekaDir.resolve(JkConstants.PROJECT_LIBS_DIR))) {
             return true;
         }
         Path wrapperDir = jekaDir.resolve("wrapper");

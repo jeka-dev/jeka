@@ -231,7 +231,7 @@ final class Engine {
                                            boolean failOnCompileError) {
         JkPathTree.of(beanClassesResolver.defClassDir).deleteContent();
         JkPathSequence extraClasspath = JkPathSequence.of();
-        if (hasKotlin()) {
+        if (hasKotlinSource()) {
             JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos())
                     .setLogOutput(true)
                     .setFailOnError(failOnCompileError)
@@ -298,7 +298,7 @@ final class Engine {
         return success;
     }
 
-    private boolean hasKotlin() {
+    private boolean hasKotlinSource() {
         return JkPathTree.of(beanClassesResolver.defSourceDir).andMatcher(KOTLIN_DEF_SOURCE_MATCHER)
                 .count(1, false) > 0;
     }

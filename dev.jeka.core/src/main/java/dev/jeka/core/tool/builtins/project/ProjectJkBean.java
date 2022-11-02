@@ -216,9 +216,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     // ------------------------------- command line methods -----------------------------
 
-    @JkDoc("Delete the ontent of jeka/output directory")
+    @JkDoc("Delete the content of jeka/output directory and might execute extra clean actions")
     public void clean() {
         super.cleanOutput();
+        getProject().executeCleanExtraActions();
     }
 
     @JkDoc("Perform declared pre compilation task as generating sources.")
@@ -414,7 +415,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         @JkDoc("The template used for scaffolding the build class")
         public Template template = Template.SIMPLE_FACADE;
 
-        @JkDoc("Generate jeka/libs sub-folders for hosting local libraries")
+        @JkDoc("Generate jeka/project-libs sub-folders for hosting local libraries")
         public boolean generateLocalLibsFolders = true;
 
         public final DependenciesTxt dependenciesTxt = new DependenciesTxt();
@@ -431,16 +432,17 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             // Create specific files and folders
             String dependenciesTxtContent = dependenciesTxtContent();
             JkPathFile.of(configuredProject.getBaseDir().resolve(JkConstants.JEKA_DIR)
-                    .resolve("project-dependencies.txt"))
+                    .resolve(JkConstants.PROJECT_DEPENDENCIES_TXT_FILE))
                     .createIfNotExist()
                     .write(dependenciesTxtContent.getBytes(StandardCharsets.UTF_8));
-            Path libs = configuredProject.getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs");
+            Path libs = configuredProject.getBaseDir().resolve(JkConstants.JEKA_DIR)
+                    .resolve(JkConstants.PROJECT_LIBS_DIR);
             if (generateLocalLibsFolders) {
                 JkPathFile.of(libs.resolve("readme.txt"))
                         .fetchContentFrom(ProjectJkBean.class.getResource("libs-readme.txt"));
                 JkUtilsPath.createDirectories(libs.resolve("regular"));
-                JkUtilsPath.createDirectories(libs.resolve("compile_only"));
-                JkUtilsPath.createDirectories(libs.resolve("runtime_only"));
+                JkUtilsPath.createDirectories(libs.resolve("compile-only"));
+                JkUtilsPath.createDirectories(libs.resolve("runtime-only"));
                 JkUtilsPath.createDirectories(libs.resolve("test"));
                 JkUtilsPath.createDirectories(libs.resolve("sources"));
             }
