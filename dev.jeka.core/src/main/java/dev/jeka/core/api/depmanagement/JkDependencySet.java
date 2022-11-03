@@ -595,15 +595,18 @@ public class JkDependencySet {
         return builder.toString();
     }
 
-    public static String toTxt(List<JkDependency> dependencies) {
+    public static String toTxt(List<JkDependency> dependencies, boolean minus) {
         final StringBuilder builder = new StringBuilder();
         for (final JkDependency dependency : dependencies) {
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
                 JkCoordinate coordinate = coordinateDependency.getCoordinate();
                 String dependencyString = coordinate.getModuleId().getColonNotation();
-                if (!coordinate.getVersion().isUnspecified()) {
+                if (!coordinate.getVersion().isUnspecified() && !minus) {
                     dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
+                }
+                if (minus) {
+                    dependencyString = "- " + dependencyString;
                 }
                 builder.append(dependencyString).append("\n");
             }

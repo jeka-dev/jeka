@@ -1,7 +1,6 @@
 package dev.jeka.core.tool.builtins.maven;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkMvn;
 import dev.jeka.core.api.tooling.JkPom;
@@ -11,6 +10,8 @@ import dev.jeka.core.tool.JkDoc;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static dev.jeka.core.api.depmanagement.JkQualifiedDependencySet.*;
 
 @JkDoc("Provides method to help migration from Maven.")
 public class MavenJkBean extends JkBean {
@@ -35,17 +36,17 @@ public class MavenJkBean extends JkBean {
         JkPom pom = JkPom.of(effectivePom);
         System.out.println("Compile");
         System.out.println(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(null,
-                JkQualifiedDependencySet.COMPILE_SCOPE, JkQualifiedDependencySet.PROVIDED_SCOPE), true));
+                COMPILE_SCOPE, PROVIDED_SCOPE), true));
 
         System.out.println("Runtime");
         System.out.print(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencySet.RUNTIME_SCOPE), true));
+                RUNTIME_SCOPE), true));
         System.out.println(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencySet.PROVIDED_SCOPE), false));
+                PROVIDED_SCOPE), false));
 
         System.out.println("Test");
         System.out.println(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencySet.TEST_SCOPE), true));
+                TEST_SCOPE), true));
     }
 
     @JkDoc("Displays project-dependencies content based on pom.xml. The pom.xml file is supposed to be in root directory.")
@@ -61,20 +62,20 @@ public class MavenJkBean extends JkBean {
                 .setLogOutput(JkLog.isVerbose())
                 .run();
         JkPom pom = JkPom.of(effectivePom);
-        System.out.println("\n== REGULAR ==");
-        System.out.println(JkDependencySet.toTxt( pom.getDependencies().getDependenciesHavingQualifier(null,
-                JkQualifiedDependencySet.COMPILE_SCOPE)));
+        System.out.println("\n==== COMPILE ====");
+        System.out.print(JkDependencySet.toTxt( pom.getDependencies().getDependenciesHavingQualifier(null,
+                COMPILE_SCOPE, PROVIDED_SCOPE), false));
 
-        System.out.println("\n== TEST ==");
-        System.out.println(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencySet.TEST_SCOPE)));
+        System.out.println("\n\n==== RUNTIME ====");
+        System.out.print(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
+                RUNTIME_SCOPE), false));
+        System.out.print(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
+                PROVIDED_SCOPE), true));
 
-        System.out.println("\n== RUNTIME_ONLY ==");
+        System.out.println("\n\n==== TEST ====");
         System.out.println(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencySet.RUNTIME_SCOPE)));
+                TEST_SCOPE), false));
 
-        System.out.println("\n== COMPILE_ONLY ==");
-        System.out.println(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
-                JkQualifiedDependencySet.PROVIDED_SCOPE)));
+
     }
 }
