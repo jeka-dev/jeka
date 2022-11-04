@@ -48,6 +48,8 @@ public final class JkExternalToolApi {
         }
         Path defDir = jekaDir.resolve(JkConstants.DEF_DIR);
         System.out.println("jeka def is dir ?" + Files.isDirectory(defDir));
+        System.out.println("jeka def exist ?" + Files.exists(defDir));
+        System.out.println(defDir.toAbsolutePath());
         System.out.println(Arrays.asList(defDir.toFile().listFiles()));
         if (Files.isDirectory(defDir)) {
             return true;
