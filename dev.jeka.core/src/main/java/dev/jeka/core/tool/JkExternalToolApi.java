@@ -8,7 +8,6 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,17 +39,10 @@ public final class JkExternalToolApi {
      */
     public static boolean isJekaProject(Path candidate) {
         Path jekaDir = candidate.resolve(JkConstants.JEKA_DIR);
-        System.out.println(Arrays.asList(jekaDir.toFile().listFiles()));
-        System.out.println("dir " + candidate.toAbsolutePath());
-        System.out.println("jeka is dir ?" + Files.isDirectory(jekaDir));
         if (!Files.isDirectory(jekaDir)) {
             return false;
         }
-        Path defDir = jekaDir.resolve(JkConstants.DEF_DIR);
-        System.out.println("jeka def is dir ?" + Files.isDirectory(defDir));
-        System.out.println("jeka def exist ?" + Files.exists(defDir));
-        System.out.println(defDir.toAbsolutePath());
-        System.out.println(Arrays.asList(defDir.toFile().listFiles()));
+        Path defDir = candidate.resolve(JkConstants.DEF_DIR);
         if (Files.isDirectory(defDir)) {
             return true;
         }
