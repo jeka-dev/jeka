@@ -41,8 +41,8 @@ public final class JkExternalToolApi {
     public static boolean isJekaProject(Path candidate) {
         Path jekaDir = candidate.resolve(JkConstants.JEKA_DIR);
         System.out.println(Arrays.asList(jekaDir.toFile().listFiles()));
+        System.out.println("jeka dir ?" + Files.isDirectory(jekaDir));
         if (!Files.isDirectory(jekaDir)) {
-            System.out.println("jeka dir ?" + Files.isDirectory(jekaDir));
             return false;
         }
         Path defDir = jekaDir.resolve(JkConstants.DEF_DIR);
