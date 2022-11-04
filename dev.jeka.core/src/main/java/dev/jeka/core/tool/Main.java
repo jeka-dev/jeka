@@ -30,6 +30,7 @@ public final class Main {
         final Path workingDir = Paths.get("");
         if (!JkExternalToolApi.isJekaProject(workingDir)) {
             System.err.println("This directory is not a Jeka project. Cannot process.");
+            System.exit(1);
             return;
         }
         if (!(Thread.currentThread().getContextClassLoader() instanceof AppendableUrlClassloader)) {
