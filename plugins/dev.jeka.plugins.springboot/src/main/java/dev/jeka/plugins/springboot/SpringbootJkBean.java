@@ -222,6 +222,8 @@ public final class SpringbootJkBean extends JkBean {
         pack = testSourceDir.resolve(basePackage);
         url = SpringbootJkBean.class.getClassLoader().getResource("snippet/ControllerIT.java");
         JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
+        JkPathFile.of(projectBean.getProject().getCompilation().getLayout().getResources()
+                .getRootDirsOrZipFiles().get(0).resolve("application.properties")).createIfNotExist();
     }
 
     @JkDoc("Provides info about this plugin configuration")

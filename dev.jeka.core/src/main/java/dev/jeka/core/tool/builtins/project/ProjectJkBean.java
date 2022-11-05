@@ -469,22 +469,17 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             StringBuilder sb = new StringBuilder();
             for (String line : lines) {
                 sb.append(line).append("\n");
-                if (line.startsWith("== REGULAR ==") && !JkUtilsString.isBlank(this.dependenciesTxt.regular)) {
-                    Arrays.stream(this.dependenciesTxt.regular.split(",")).forEach(extraDep ->
+                if (line.startsWith("==== COMPILE") && !JkUtilsString.isBlank(this.dependenciesTxt.compile)) {
+                    Arrays.stream(this.dependenciesTxt.compile.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("== COMPILE ==") && !JkUtilsString.isBlank(this.dependenciesTxt.compileOnly)) {
-                    Arrays.stream(this.dependenciesTxt.compileOnly.split(",")).forEach(extraDep ->
+                if (line.startsWith("==== RUNTIME") && !JkUtilsString.isBlank(this.dependenciesTxt.runtime)) {
+                    Arrays.stream(this.dependenciesTxt.runtime.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("== RUNTIME ==") && !JkUtilsString.isBlank(this.dependenciesTxt.runtimeOnly)) {
-                    Arrays.stream(this.dependenciesTxt.runtimeOnly.split(",")).forEach(extraDep ->
-                            sb.append(extraDep.trim()).append("\n")
-                    );
-                }
-                if (line.startsWith("== TEST ==") && !JkUtilsString.isBlank(this.dependenciesTxt.test)) {
+                if (line.startsWith("==== TEST") && !JkUtilsString.isBlank(this.dependenciesTxt.test)) {
                     Arrays.stream(this.dependenciesTxt.test.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
@@ -495,14 +490,11 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
         public static class DependenciesTxt {
 
-            @JkDoc("Comma separated dependencies to include in project-dependencies.txt REGULAR section")
-            public String regular;
+            @JkDoc("Comma separated dependencies to include in project-dependencies.txt COMPILE section")
+            public String compile;
 
-            @JkDoc("Comma separated dependencies to include in project-dependencies.txt COMPILE_ONLY section")
-            public String compileOnly;
-
-            @JkDoc("Comma separated dependencies to include in project-dependencies.txt RUNTIME_ONLY section")
-            public String runtimeOnly;
+            @JkDoc("Comma separated dependencies to include in project-dependencies.txt RUNTIME section")
+            public String runtime;
 
             @JkDoc("Comma separated dependencies to include in project-dependencies.txt TEST section")
             public String test;
