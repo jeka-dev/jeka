@@ -1,11 +1,11 @@
 package dev.jeka.core;
 
 import dev.jeka.core.tool.Main;
+import dev.jeka.core.wrapper.Booter;
 import jdepend.framework.JDepend;
 import jdepend.framework.JavaClass;
 import jdepend.framework.JavaPackage;
 import jdepend.framework.PackageFilter;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+
 @SuppressWarnings("javadoc")
 public class PackageDependencyTest {
 
@@ -22,8 +24,9 @@ public class PackageDependencyTest {
     public void testDependencies() throws Exception {
         final String packagePrefix = "dev.jeka.core";
         final File classDir = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
-        final String cycle = PackageAnalyser.of(classDir, packagePrefix).cycle();
-        Assert.assertTrue(cycle, cycle == null);
+        PackageAnalyser packageAnalyser = PackageAnalyser.of(classDir, packagePrefix);
+        final String cycle = packageAnalyser.cycle();
+        assertTrue(cycle, cycle == null);
     }
 
     public static class PackageAnalyser {
@@ -35,7 +38,7 @@ public class PackageDependencyTest {
         }
 
         @SuppressWarnings("unchecked")
-        public static PackageAnalyser of(File classDir, final String packagePrefix) {
+        public static PackageAnalyser of(File classDir, final String packagePrefix) throws IOException {
             final PackageFilter filter = new PackageFilter() {
 
                 @Override
@@ -45,11 +48,7 @@ public class PackageDependencyTest {
 
             };
             final JDepend depend = new JDepend(filter);
-            try {
-                depend.addDirectory(classDir.getPath());
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
+            depend.addDirectory(classDir.getPath());
             final Collection<JavaPackage> packages = depend.analyze();
             return new PackageAnalyser(packages);
         }
@@ -92,6 +91,27 @@ public class PackageDependencyTest {
             }
             return builder.toString();
         }
+    }
+
+    @Test
+    public void testWrapperHasNoImport() throws Exception {
+        final String packageName = "dev.jeka.core.wrapper";
+        final File classDir = Paths.get(Booter.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
+        final JDepend jDepend = new JDepend(new PackageFilter() {
+            @Override
+            public boolean accept(String packageName) {
+                return packageName.startsWith("dev.jeka.core.");
+            }
+        });
+        jDepend.addPackage(packageName);
+        jDepend.addDirectory(classDir.getPath());
+        Collection<JavaPackage> javaPackages = jDepend.analyze();
+        JavaPackage wrapper = javaPackages.stream()
+                .peek(javaPackage -> System.out.println(javaPackage.getName()))
+                .filter(javaPackage -> javaPackage.getName().equals(packageName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(packageName +  " not found"));
+        assertTrue("wrapper.Booter class has dependencies on other Jeka packages", wrapper.getEfferents().isEmpty());
     }
 
 }

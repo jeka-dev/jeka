@@ -1,7 +1,5 @@
 package dev.jeka.core.wrapper;
 
-import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -16,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,9 +88,9 @@ public class Booter {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        if (!JkUtilsSystem.IS_WINDOWS) {
-            JkPathFile.of(dir.resolve("jeka")).setPosixExecPermissions();
-            JkPathFile.of(dir.resolve("wrapper/jekaw")).setPosixExecPermissions();
+        if (!isWindows()) {
+            setPosixExecPermissions(dir.resolve("jeka"));
+            setPosixExecPermissions(dir.resolve("wrapper/jekaw"));
         }
 
         return dir;
@@ -309,6 +308,26 @@ public class Booter {
         String concat = username + ":" + pwd;
         String encoded = Base64.getEncoder().encodeToString(concat.getBytes(StandardCharsets.UTF_8));
         return "Basic " + encoded;
+    }
+
+    private static boolean isWindows() {
+        final String osName = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+        return osName.contains("win");
+    }
+
+    private static void setPosixExecPermissions(Path path) {
+        Set<PosixFilePermission> perms = null;
+        try {
+            perms = Files.getPosixFilePermissions(path);
+            perms.add(PosixFilePermission.OWNER_EXECUTE);
+            perms.add(PosixFilePermission.GROUP_EXECUTE);
+            perms.add(PosixFilePermission.OTHERS_EXECUTE);
+            Files.setPosixFilePermissions(path, perms);
+        } catch (UnsupportedOperationException e) {
+            System.err.println("Can not set POSIX permissions to file " + path);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
 }
