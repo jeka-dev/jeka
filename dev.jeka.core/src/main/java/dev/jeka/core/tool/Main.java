@@ -27,12 +27,6 @@ public final class Main {
      * Entry point for Jeka application when launched from command-line
      */
     public static void main(String[] args) {
-        final Path workingDir = Paths.get("");
-        if (!JkExternalToolApi.isJekaProject(workingDir)) {
-            System.err.println("This directory is not a Jeka project. Cannot process.");
-            System.exit(1);
-            return;
-        }
         if (!(Thread.currentThread().getContextClassLoader() instanceof AppendableUrlClassloader)) {
             final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
             Thread.currentThread().setContextClassLoader(urlClassLoader);
@@ -52,6 +46,7 @@ public final class Main {
             if (Environment.standardOptions.logRuntimeInformation) {
                 JkInit.displayRuntimeInfo();
             }
+            final Path workingDir = Paths.get("");
             JkLog.setAcceptAnimation(!Environment.standardOptions.logNoAnimation);
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");

@@ -66,9 +66,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
      */
     public final JkTestOptions test = new JkTestOptions();
 
-    public final JkScaffold scaffold = new JkScaffold();
+    public final JkScaffoldOptions scaffold = new JkScaffoldOptions();
 
-    public final Layout layout = new Layout();
+    public final JkLayoutOptions layout = new JkLayoutOptions();
 
     @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
     public String compilerExtraArgs;
@@ -98,7 +98,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             project.setJvmTargetVersion(version);
         }
         applyRepo(project);
-        if (layout.style == Layout.Style.SIMPLE) {
+        if (layout.style == JkLayoutOptions.Style.SIMPLE) {
             project.flatFacade().useSimpleLayout();
         }
         if (layout.mixSourcesAndResources) {
@@ -180,12 +180,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         JkProject configuredProject = getProject();
         scaffolder.setJekaClassCodeProvider( () -> {
             final String snippet;
-            if (scaffold.template == JkScaffold.Template.CODE_LESS) {
+            if (scaffold.template == JkScaffoldOptions.Template.CODE_LESS) {
                 return null;
             }
-            if (scaffold.template == JkScaffold.Template.NORMAL) {
+            if (scaffold.template == JkScaffoldOptions.Template.NORMAL) {
                 snippet = "buildclass.snippet";
-            } else if (scaffold.template == JkScaffold.Template.PLUGIN) {
+            } else if (scaffold.template == JkScaffoldOptions.Template.PLUGIN) {
                 snippet = "buildclassplugin.snippet";
             } else {
                 snippet = "buildclassfacade.snippet";
@@ -361,12 +361,14 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     }
 
-    public static class Layout {
+    public static class JkLayoutOptions {
 
         enum Style {SIMPLE, MAVEN}
 
+        @JkDoc("Style of directory source structure (src/main/java or just src)")
         public Style style = Style.MAVEN;
 
+        @JkDoc("If true, Resource files are located in same folder than Java code.")
         public boolean mixSourcesAndResources = false;
 
     }
@@ -404,7 +406,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         }
     }
 
-    public static class JkScaffold {
+    public static class JkScaffoldOptions {
 
         public enum Template {
 

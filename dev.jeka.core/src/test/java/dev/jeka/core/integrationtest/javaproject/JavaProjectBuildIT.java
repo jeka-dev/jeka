@@ -21,12 +21,14 @@ public class JavaProjectBuildIT {
         Path root = unzipToDir("sample-multiproject.zip");
 
         JkProject baseProject = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
-
+                .useSimpleLayout()
                 .configureCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")).getProject();
 
         JkProject coreProject = JkProject.of().setBaseDir(root.resolve("core")).flatFacade()
-                .configureCompileDependencies(deps -> deps.and(baseProject.toDependency())).getProject();
+                .useSimpleLayout()
+                .configureCompileDependencies(deps -> deps.and(baseProject.toDependency()))
+                .getProject();
 
         JkResolveResult resolveResult = coreProject.getCompilation().resolveDependencies();
 
@@ -49,6 +51,7 @@ public class JavaProjectBuildIT {
     public void publish_maven_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
+                .useSimpleLayout()
                 .configureCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
@@ -74,6 +77,7 @@ public class JavaProjectBuildIT {
     public void publish_ivy_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
+                .useSimpleLayout()
                 .configureCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))

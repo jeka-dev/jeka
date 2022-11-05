@@ -2,7 +2,6 @@ package dev.jeka.core.api.depmanagement.artifact;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -55,9 +54,8 @@ public class JkStandardFileArtifactProducer<T> implements JkArtifactProducer {
                     "Artifact defined are : " + consumers.entrySet());
         }
         Path path = getArtifactPath(artifactId);
-        JkLog.startTask("Make artifact " + path.getFileName());
+        JkLog.startTask("Making artifact " + path.getFileName());
         consumer.accept(path);
-        JkLog.info("Artifact created at " + JkUtilsPath.relativizeFromWorkingDir(path));
         JkLog.endTask();
     }
 

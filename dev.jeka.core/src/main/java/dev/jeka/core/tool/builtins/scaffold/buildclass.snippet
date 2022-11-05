@@ -1,11 +1,13 @@
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkDoc;
 
 class Build extends JkBean {
 
-    public static void main(String[] args) throws Exception {
-        Build build = JkInit.instanceOf(Build.class, args);
-        build.cleanOutput();
+    public String name = "World";
+
+    @JkDoc("Print greetings on console.")
+    public void hello() {
+        System.out.println("Hello " + name);
     }
 
 }

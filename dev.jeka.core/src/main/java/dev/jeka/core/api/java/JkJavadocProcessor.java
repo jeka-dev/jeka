@@ -95,16 +95,12 @@ public final class JkJavadocProcessor<T> {
      */
     public void make(Iterable<Path> classpath, JkPathTreeSet srcDirs, Path outputDir) {
         JkLog.startTask("Generate javadoc");
-        if (srcDirs.hasNoExistingRoot()) {
-            JkLog.warn("No sources found in " + srcDirs);
+        if (srcDirs.hasNoExistingRoot() || !srcDirs.containFiles()) {
+            JkLog.warn("No source file detected. Skip Javadoc.");
+            JkLog.endTask();
             return;
         }
-        //executeTool(outputDir);
-        if (srcDirs.count(1, false) > 0) {
-            executeCommandLine(classpath, srcDirs, outputDir);
-        } else {
-            JkLog.warn("No source file detected. Skip Javadoc.");
-        }
+        executeCommandLine(classpath, srcDirs, outputDir);
         JkLog.endTask();
     }
 

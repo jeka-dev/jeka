@@ -2,9 +2,9 @@ package dev.jeka.core.api.depmanagement.artifact;
 
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,10 +49,8 @@ public class JkSuppliedFileArtifactProducer<T> implements JkArtifactProducer {
                     "Artifact defined are : " + fileRunnables.entrySet());
         }
         Path path = fileRunnable.file;
-        JkLog.startTask("Make artifact " + path.getFileName());
+        JkLog.startTask("Making artifact " + JkUtilsPath.relativizeFromWorkingDir(path));
         fileRunnable.runnable.run();
-        Path relPath = path.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(path) : path;
-        JkLog.info("Artifact created at " + relPath);
         JkLog.endTask();
     }
 

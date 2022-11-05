@@ -12,6 +12,7 @@ import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
@@ -61,13 +62,17 @@ public class JkProjectPackaging {
     /**
      * Generates javadoc files (files + zip)
      */
-    private void createJavadocFiles() {
+    private boolean createJavadocFiles() {
         JkProjectCompilation compilation = project.getCompilation();
         Iterable<Path> classpath = project.getDependencyResolver()
                 .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
         JkPathTreeSet sources = compilation.getLayout().resolveSources();
+        if (!sources.containFiles()) {
+            return false;
+        }
         javadocProcessor.make(classpath, sources, dir);
+        return true;
     }
 
     public Path getJavadocDir() {
@@ -84,7 +89,11 @@ public class JkProjectPackaging {
     }
 
     public void createJavadocJar(Path target) {
-        createJavadocFiles();
+        boolean created = createJavadocFiles();
+        if (!created) {
+            JkLog.warn("No javadoc files generated : skip javadoc jar.");
+            return;
+        }
         Path javadocDir = getJavadocDir();
         JkPathTree.of(javadocDir).zipTo(target);
     }
@@ -95,6 +104,12 @@ public class JkProjectPackaging {
 
     public void createSourceJar(Path target) {
         JkProjectCompilation compilation = project.getCompilation();
+        JkPathTreeSet allSources = compilation.getLayout().resolveSources().and(compilation
+                .getLayout().resolveGeneratedSourceDir());
+        if (!allSources.containFiles()) {
+            JkLog.warn("No sources found : skip sources jar.");
+            return;
+        }
         compilation.getLayout().resolveSources().and(compilation
                 .getLayout().resolveGeneratedSourceDir()).zipTo(target);
     }
@@ -147,8 +162,13 @@ public class JkProjectPackaging {
     public void createBinJar(Path target) {
         project.getCompilation().runIfNeeded();
         project.getTesting().runIfNeeded();
+        Path classDir = project.getCompilation().getLayout().resolveClassDir();
+        if (!Files.exists(classDir)) {
+            JkLog.warn("No class dir found : skip bin jar.");
+            return;
+        }
         addManifestDefaults();
-        JkJarPacker.of(project.getCompilation().getLayout().resolveClassDir())
+        JkJarPacker.of(classDir)
                 .withManifest(manifest)
                 .withExtraFiles(getExtraFilesToIncludeInJar())
                 .makeJar(target);
