@@ -76,7 +76,7 @@ project
 +- sourceEncoding
 +- javaCompiler
 +- dependencyResolver
-+- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
++- prodCompilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
 |  +- layout (where are located source and resource files)
 |  +- source generators (plugin mechanism for generating source files)
 |  +- dependencies   (stands for compile dependencies)
@@ -85,7 +85,7 @@ project
 |  +- postCompileActions
 |  +- methods : resolveDependencies(), run()
 +- testing
-|  +- compilation (same as above 'compilation' but for test sources/resources)
+|  +- testCompilation (same as above 'prodcCompilation' but for test sources)
 |  |  +- layout
 |  |  +- dependencies (stands for test dependencies)
 |  |  + ...

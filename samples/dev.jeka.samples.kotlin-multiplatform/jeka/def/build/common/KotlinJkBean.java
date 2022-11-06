@@ -68,9 +68,9 @@ public class KotlinJkBean extends JkBean {
 
     public JkArtifactId addFatJar(String classifier) {
         JkArtifactId artifactId = JkArtifactId.of(classifier, "jar");
-        this.jvm.getProject().getArtifactProducer()
+        this.jvm.getProject().artifactProducer
                 .putArtifact(artifactId,
-                        path -> jvm.getProject().getPackaging().createFatJar(path));
+                        path -> jvm.getProject().packaging.createFatJar(path));
         return artifactId;
     }
 
@@ -119,9 +119,9 @@ public class KotlinJkBean extends JkBean {
         }
 
         public JkKotlinJvmProject useFatJarForMainArtifact() {
-            getProject().getArtifactProducer()
+            getProject().artifactProducer
                     .putArtifact(JkArtifactId.ofMainArtifact("jar"),
-                            path -> getProject().getPackaging().createFatJar(path));
+                            path -> getProject().packaging.createFatJar(path));
             return this;
         }
 
@@ -129,26 +129,26 @@ public class KotlinJkBean extends JkBean {
             JkProject project = JkProject.of().setBaseDir(KotlinJkBean.this.getBaseDir());
             JkKotlinCompiler kompiler = getKotlinCompiler();
             String effectiveVersion = kompiler.getVersion();
-            JkProjectCompilation<?> prodCompile = project.getCompilation();
-            JkProjectCompilation<?> testCompile = project.getTesting().getCompilation();
+            JkProjectCompilation<?> prodCompile = project.prodCompilation;
+            JkProjectCompilation<?> testCompile = project.testing.testCompilation;
             JkVersionProvider versionProvider = JkKotlinModules.versionProvider(effectiveVersion);
             prodCompile
-                    .getPreCompileActions()
-                    .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                            () -> compileKotlin(kompiler, project))
+                    .preCompileActions
+                        .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
+                                () -> compileKotlin(kompiler, project))
                     .__
                     .configureDependencies(deps -> deps.andVersionProvider(versionProvider));
             testCompile
-                    .getPreCompileActions()
-                    .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                            () -> compileTestKotlin(kompiler, project))
-                    .__
-                    .getLayout()
+                    .preCompileActions
+                        .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
+                                () -> compileTestKotlin(kompiler, project))
+                        .__
+                    .layout
                         .addSource(jvm.kotlinTestSourceDir);
             JkPathTree javaInKotlinDir = JkPathTree.of(project.getBaseDir().resolve(kotlinSourceDir));
             JkPathTree javaInKotlinTestDir = JkPathTree.of(project.getBaseDir().resolve(kotlinTestSourceDir));
-            prodCompile.getLayout().setSources(javaInKotlinDir);
-            testCompile.getLayout().setSources(javaInKotlinTestDir);
+            prodCompile.layout.setSources(javaInKotlinDir);
+            testCompile.layout.setSources(javaInKotlinTestDir);
             if (addStdlib) {
                 if (kompiler.isProvidedCompiler()) {
                     prodCompile.configureDependencies(deps -> deps.andFiles(kompiler.getStdLib()));
@@ -171,8 +171,8 @@ public class KotlinJkBean extends JkBean {
         }
 
         private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
-            JkProjectCompilation compilation = javaProject.getTesting().getCompilation();
-            JkPathTreeSet sources = compilation.getLayout().resolveSources();
+            JkProjectCompilation compilation = javaProject.testing.testCompilation;
+            JkPathTreeSet sources = compilation.layout.resolveSources();
             if (kotlinTestSourceDir == null) {
                 sources = sources.and(javaProject.getBaseDir().resolve(kotlinTestSourceDir));
             }
@@ -185,16 +185,16 @@ public class KotlinJkBean extends JkBean {
             }
             JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
                     .setClasspath(compilation.resolveDependencies().getFiles()
-                            .and(compilation.getLayout().getClassDirPath()))
-                    .setOutputDir(compilation.getLayout().getOutputDir().resolve("test-classes"))
+                            .and(compilation.layout.getClassDirPath()))
+                    .setOutputDir(compilation.layout.getOutputDir().resolve("test-classes"))
                     .setTargetVersion(javaProject.getJvmTargetVersion())
-                    .setSources(compilation.getLayout().resolveSources());
+                    .setSources(compilation.layout.resolveSources());
             kotlinCompiler.compile(compileSpec);
         }
 
         private void compileKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
-            JkProjectCompilation compilation = javaProject.getCompilation();
-            JkPathTreeSet sources = compilation.getLayout().resolveSources()
+            JkProjectCompilation compilation = javaProject.prodCompilation;
+            JkPathTreeSet sources = compilation.layout.resolveSources()
                     .and(javaProject.getBaseDir().resolve(kotlinSourceDir));
             if (common != null && !JkUtilsString.isBlank(common.srcDir)) {
                 sources = sources.and(javaProject.getBaseDir().resolve(common.srcDir));
@@ -205,7 +205,7 @@ public class KotlinJkBean extends JkBean {
             }
             JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
                     .setClasspath(compilation.resolveDependencies().getFiles())
-                    .setOutputDir(compilation.getLayout().getOutputDir().resolve("classes"))
+                    .setOutputDir(compilation.layout.getOutputDir().resolve("classes"))
                     .setTargetVersion(javaProject.getJvmTargetVersion())
                     .setSources(sources);
             kotlinCompiler.compile(compileSpec);
@@ -230,10 +230,10 @@ public class KotlinJkBean extends JkBean {
         private JKCommon() {}
 
         private void setupJvmProject(JkKotlinJvmProject jvm) {
-            JkProjectCompilation<?> prodCompile = jvm.getProject().getCompilation();
-            JkProjectCompilation<?> testCompile = jvm.getProject().getTesting().getCompilation();
+            JkProjectCompilation<?> prodCompile = jvm.getProject().prodCompilation;
+            JkProjectCompilation<?> testCompile = jvm.getProject().testing.testCompilation;
             if (testSrcDir != null) {
-                testCompile.getLayout().addSource(testSrcDir);
+                testCompile.layout.addSource(testSrcDir);
                 if (addCommonStdLibs) {
                     testCompile.configureDependencies(deps -> deps
                             .and(JkKotlinModules.TEST_COMMON)

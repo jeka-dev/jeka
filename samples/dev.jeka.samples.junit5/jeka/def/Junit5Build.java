@@ -41,19 +41,19 @@ class Junit5Build extends JkBean {
      */
     private void configure(JkProject project) {
         project
-                .getTesting()
-                    .getCompilation()
+                .testing
+                    .testCompilation
                         .configureDependencies(deps -> deps
                             .and("org.jdom:jdom2:2.0.6")
                         )
                         .configureDependencies(deps -> deps
                             .and("org.junit.jupiter:junit-jupiter:5.8.2")
                         ).__
-                    .getTestProcessor()
-                        .getEngineBehavior()
+                    .testProcessor
+                        .engineBehavior
                             .setLauncherConfigurer(builder -> builder  // Junit5-platform API. see nit.org/junit5/docs/5.3.0/api/org/junit/platform/launcher/core/LauncherConfig.html
                                 .addTestExecutionListeners(new MyJunit5PlatformListener())).__.__
-                    .getTestSelection()
+                    .testSelection
                         .setDiscoveryConfigurer(builder -> builder  // see https://junit.org/junit5/docs/5.0.0/api/org/junit/platform/launcher/core/LauncherDiscoveryRequestBuilder.html
                             .configurationParameter("key1", "value1")
                             .selectors(

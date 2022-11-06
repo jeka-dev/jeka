@@ -15,10 +15,10 @@ class SonarqubeBuild extends JkBean {
                 .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        project.getPublication()
+        project.publication
                 .setModuleId("dev.jeka:sonarqube-plugin")
-                .getMaven()
-                    .getPomMetadata()
+                .maven
+                    .pomMetadata
                         .setProjectName("Jeka plugin for Sonarqube")
                         .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");

@@ -16,10 +16,10 @@ public class NodeJsBuild extends JkBean {
                 .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        project.getPublication()
+        project.publication
                 .setModuleId("dev.jeka:nodejs-plugin")
-                .getMaven()
-                    .getPomMetadata()
+                .maven
+                    .pomMetadata
                         .setProjectName("Jeka plugin for NodeJs")
                         .setProjectDescription("A Jeka plugin to integrate with NodeJs")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");

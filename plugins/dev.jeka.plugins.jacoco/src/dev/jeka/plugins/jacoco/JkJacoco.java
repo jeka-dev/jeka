@@ -104,14 +104,14 @@ public final class JkJacoco {
 
     public void configure(JkTestProcessor testProcessor) {
         JkUtilsAssert.state(execFile != null, "The exec file has not been specified.");
-        testProcessor.getPreActions().append(() -> {
+        testProcessor.preActions.append(() -> {
             String agentOptions = agentOptions();
             JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
                     JkJavaProcess.ofJava(JkTestProcessor.class.getName()));
             process.addAgent(toolProvider.getAgentJar(), agentOptions);
             JkLog.info("Instrumenting tests with Jacoco agent options : " + agentOptions);
             testProcessor.setForkingProcess(process);
-            testProcessor.getPostActions().append(this::generateExport);
+            testProcessor.postActions.append(this::generateExport);
         });
     }
 

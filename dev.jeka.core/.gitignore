@@ -1,8 +1,0 @@
-*.class
-
-# Package Files #
-*.war
-*.ear
-/bin
-/.sonar
-/src/test/http-client.private.env.json

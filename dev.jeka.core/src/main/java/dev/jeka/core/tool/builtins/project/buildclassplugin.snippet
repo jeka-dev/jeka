@@ -16,16 +16,16 @@ class Build extends JkBean {
                     .andFiles(JkLocator.getJekaJarPath())
             );
 
-        JkJekaVersionCompatibilityChecker.setCompatibilityRange(project.getPackaging().getManifest(),
+        JkJekaVersionCompatibilityChecker.setCompatibilityRange(project.packaging.manifest,
                 "${jekaVersion}",
                 "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
 
         // This section is necessary to publish on a public repository
-        project.getPublication()
+        project.publication
                 .setModuleId("your.org:plugin-name")
                 .setVersion("0.0.1-SNAPSHOT")
-                .getMaven()
-                    .getPomMetadata()
+                .maven
+                    .pomMetadata
                         .addApache2License()
                         .setProjectName("Jeka plugin for ....")
                         .setProjectDescription("A Jeka plugin for ...")

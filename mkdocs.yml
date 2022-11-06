@@ -23,7 +23,7 @@ nav:
           - Process: reference-guide/execution-engine-process.md
           - Reuse Elements: reference-guide/execution-engine-reuse.md
         - Build Library:
-          - Style: reference-guide/build-library-style.md
+          - Intro: reference-guide/build-library-intro.md
           - System: reference-guide/build-library-system.md
           - File Management: reference-guide/build-library-files.md
           - Delependency Management: reference-guide/build-library-dependency-management.md

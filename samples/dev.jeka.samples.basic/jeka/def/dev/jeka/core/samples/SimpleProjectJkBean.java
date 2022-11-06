@@ -42,31 +42,31 @@ public class SimpleProjectJkBean extends JkBean {
 
        .getProject()
                .setJvmTargetVersion(JkJavaVersion.V8)
-               .getCompiler()
+               .compiler
                     .setForkedWithDefaultProcess()
                .__
-               .getDependencyResolver()
+               .dependencyResolver
                     .getDefaultParams()
                         .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT)
                     .__
                .__
-               .getPackaging()
+               .packaging
                    .configureRuntimeDependencies(deps -> deps
                            .and("com.github.djeang:vincer-dom:1.2.0")
                    )
                .__
-               .getTesting()
-                    .getTestProcessor()
+               .testing
+                    .testProcessor
                         .setForkingProcess(false)
-                        .getEngineBehavior()
+                        .engineBehavior
                             .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE)
                         .__
                     .__
                .__
-           .getPublication()
+           .publication
                .setModuleId("dev.jeka:sample-javaplugin")
                .setVersion("1.0-SNAPSHOT")
-               .getMaven()
+               .maven
                     .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
 
                    // Published dependencies can be modified here from the ones declared in dependency management.

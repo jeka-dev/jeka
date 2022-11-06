@@ -148,11 +148,11 @@ class MasterBuild extends JkBean {
         }
         projectJkBean.configure(project -> {
                 git.projectVersionSupplier.configure(project, false);
-                project.getPublication()
+                project.publication
                     .setVersion(git.projectVersionSupplier::versionAsText)
                     .setRepos(this.publishRepo())
-                    .getMaven()
-                        .getPomMetadata()
+                    .maven
+                        .pomMetadata
                             .setProjectUrl("https://jeka.dev")
                             .setScmUrl("https://github.com/jerkar/jeka.git")
                             .addApache2License();

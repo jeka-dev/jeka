@@ -16,10 +16,10 @@ public class JacocoBuild extends JkBean {
                 .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        project.getPublication()
+        project.publication
                 .setModuleId("dev.jeka:jacoco-plugin")
-                .getMaven()
-                    .getPomMetadata()
+                .maven
+                    .pomMetadata
                         .setProjectName("Jeka plugin for Jacoco")
                         .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");

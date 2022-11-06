@@ -19,11 +19,8 @@ public class FatJarJkBean extends JkBean {
     private SimpleProjectJkBean sampleBuild;
 
     private void configure(JkProject project) {
-        project
-            .getArtifactProducer()
-                .putMainArtifact(project.getPackaging()::createFatJar)
-            .__
-            .flatFacade()
+        project.artifactProducer.putMainArtifact(project.packaging::createFatJar);
+        project.flatFacade()
                 .configureCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:22.0")
                         .and(sampleBuild.projectPlugin.getProject().toDependency()));

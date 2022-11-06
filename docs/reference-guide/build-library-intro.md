@@ -10,8 +10,9 @@ _Jeka_ tries to stick with a consistent API design style.
 * As a rule of thumb _Jeka_ favors immutable objects for shallow structures and
 [parent-chaining trees](https://github.com/djeang/parent-chaining/blob/master/readme.md) for deeper ones.
 Both provide a fluent interface when possible.
+* In deep structure, final fields are declared `public` and have no getter counterpart.
 * All objects are instantiated using static factory methods. Every factory method names start with `of`.
-* All accessor method names (methods returning a result without requiring IO, only computation) starts with `get`.
+* All accessor method names (methods returning a result without requiring IO, meaning computation only) starts with `get`.
 * To create a subtly different object from another immutable one, _Jeka_ provides :
   * Methods starting with `with` when a property is to be replaced by another.
   * Methods starting with `and` when a collection property is to be replaced by the same one plus an extra element.

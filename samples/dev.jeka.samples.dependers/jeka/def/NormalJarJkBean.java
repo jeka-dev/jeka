@@ -32,8 +32,8 @@ public class NormalJarJkBean extends JkBean {
 
     private void configure(JkProject project) {
         project
-            .getArtifactProducer()
-                    .putMainArtifact(project.getPackaging()::createFatJar).__
+            .artifactProducer
+                    .putMainArtifact(project.packaging::createFatJar).__
             .flatFacade()
                 .configureCompileDependencies(deps -> deps
                         .and(sampleBuild.projectPlugin.getProject().toDependency()));

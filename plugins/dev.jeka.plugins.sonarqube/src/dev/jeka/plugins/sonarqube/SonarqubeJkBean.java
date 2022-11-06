@@ -46,17 +46,17 @@ public class SonarqubeJkBean extends JkBean {
      * Creates a {@link JkSonarqube} object configured for the supplied {@link JkProject}.
      */
     public JkSonarqube createConfiguredSonarqube(JkProject project) {
-        final JkCompileLayout prodLayout = project.getCompilation().getLayout();
-        final JkCompileLayout testLayout = project.getTesting().getCompilation().getLayout();
+        final JkCompileLayout prodLayout = project.prodCompilation.layout;
+        final JkCompileLayout testLayout = project.testing.testCompilation.layout;
         final Path baseDir = project.getBaseDir();
         JkPathSequence libs = JkPathSequence.of();
         if (provideProductionLibs) {
-            JkDependencySet deps = project.getCompilation().getDependencies()
-                    .merge(project.getPackaging().getRuntimeDependencies()).getResult();
-            libs = project.getDependencyResolver().resolve(deps).getFiles();
+            JkDependencySet deps = project.prodCompilation.getDependencies()
+                    .merge(project.packaging.getRuntimeDependencies()).getResult();
+            libs = project.dependencyResolver.resolve(deps).getFiles();
         }
-        final Path testReportDir = project.getTesting().getReportDir();
-        JkModuleId jkModuleId = project.getPublication().getModuleId();
+        final Path testReportDir = project.testing.getReportDir();
+        JkModuleId jkModuleId = project.publication.getModuleId();
         if (jkModuleId == null) {
             String baseDirName = baseDir.getFileName().toString();
             if (JkUtilsString.isBlank(baseDirName)) {
@@ -64,14 +64,14 @@ public class SonarqubeJkBean extends JkBean {
             }
             jkModuleId = JkModuleId.of(baseDirName, baseDirName);
         }
-        final String version = project.getPublication().getVersion().getValue();
+        final String version = project.publication.getVersion().getValue();
         final String fullName = jkModuleId.getDotNotation();
         final String name = jkModuleId.getName();
         final JkSonarqube sonarqube;
         if (JkUtilsString.isBlank(scannerVersion)) {
             sonarqube = JkSonarqube.ofEmbedded();
         } else {
-            sonarqube = JkSonarqube.ofVersion(project.getDependencyResolver().getRepos(),
+            sonarqube = JkSonarqube.ofVersion(project.dependencyResolver.getRepos(),
                     scannerVersion);
         }
         sonarqube
@@ -79,7 +79,7 @@ public class SonarqubeJkBean extends JkBean {
                 .setProjectId(fullName, name, version)
                 .setProperties(getRuntime().getProperties().getAllStartingWith("sonar.", true))
                 .setProjectBaseDir(baseDir)
-                .setBinaries(project.getCompilation().getLayout().resolveClassDir())
+                .setBinaries(project.prodCompilation.layout.resolveClassDir())
                 .setProperty(JkSonarqube.SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
                 .setProperty(JkSonarqube.TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
                 .setProperty(JkSonarqube.WORKING_DIRECTORY, baseDir.resolve(JkConstants.JEKA_DIR + "/.sonar").toString())
@@ -93,8 +93,8 @@ public class SonarqubeJkBean extends JkBean {
                 .setProperty(JkSonarqube.JAVA_LIBRARIES, libs)
                 .setProperty(JkSonarqube.JAVA_TEST_BINARIES, testLayout.getClassDirPath());
         if (provideTestLibs) {
-            JkDependencySet deps = project.getTesting().getCompilation().getDependencies();
-            JkPathSequence testLibs = project.getDependencyResolver().resolve(deps).getFiles();
+            JkDependencySet deps = project.testing.testCompilation.getDependencies();
+            JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
             sonarqube.setProperty(JkSonarqube.JAVA_TEST_LIBRARIES, testLibs);
         }
         return sonarqube;

@@ -32,9 +32,4 @@ class Build extends JkBean {
         cleanOutput(); springbootBean.projectBean().pack();
     }
 
-    // Clean, compile, test and generate springboot application jar
-    public static void main(String[] args) {
-        JkInit.instanceOf(Build.class, args).cleanPack();
-    }
-
 }

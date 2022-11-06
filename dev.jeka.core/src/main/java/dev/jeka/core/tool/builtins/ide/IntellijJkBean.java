@@ -6,6 +6,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
@@ -22,6 +23,10 @@ import java.util.stream.Stream;
 
 @JkDoc("Generates Idea Intellij metadata files (*.iml and modules.xml).")
 public final class IntellijJkBean extends JkBean {
+
+    @JkDoc("Add a iml dependency on the specified module (hosting Jeka) instead of adding a direct dependency on Jeka jar." +
+            "This is desirable on multi-module projects to share a single Jeka version.")
+    public String jekaModuleName;
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")
     public boolean useVarPath = true;
@@ -70,6 +75,9 @@ public final class IntellijJkBean extends JkBean {
     public void iml() {
         Path basePath = getBaseDir();
         JkImlGenerator imlGenerator = imlGenerator();
+        if (!JkUtilsString.isBlank(this.jekaModuleName)) {
+            useJekaDefinedInModule(this.jekaModuleName.trim());
+        }
         imlGeneratorConfigurer.accept(imlGenerator);
         JkIml iml = imlGenerator.computeIml();
         Path imlPath = Optional.ofNullable(this.imlFile).orElse(JkImlGenerator.getImlFilePath(basePath));

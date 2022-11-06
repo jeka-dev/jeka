@@ -37,15 +37,10 @@ public class SimpleWarJkBean extends JkBean {
                .configureRuntimeDependencies(compileDeps -> compileDeps
                        .minus("javax.servlet:javax.servlet-api"))
                .setJvmTargetVersion(JkJavaVersion.V8)
-               .includeJavadocAndSources(false, false)
-               .getProject()
-                        .getCompilation()
-                            .getLayout()
-                                .emptySources().addSource("src/main/javaweb").__.__
-               .getTesting()
-                   .setSkipped(true);
-       JkJ2eWarProjectAdapter.of()
-               .configure(project);
+               .includeJavadocAndSources(false, false);
+       project.prodCompilation.layout.emptySources().addSource("src/main/javaweb");
+       project.testing.setSkipped(true);
+       JkJ2eWarProjectAdapter.of().configure(project);
     }
 
     public void cleanPackRun() {
@@ -57,7 +52,7 @@ public class SimpleWarJkBean extends JkBean {
     }
 
     public void runWarWithJetty() {
-        JkArtifactProducer artifactProducer = projectPlugin.getProject().getArtifactProducer();
+        JkArtifactProducer artifactProducer = projectPlugin.getProject().artifactProducer;
         artifactProducer.makeMissingArtifacts();
         Path jettyRunner = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);

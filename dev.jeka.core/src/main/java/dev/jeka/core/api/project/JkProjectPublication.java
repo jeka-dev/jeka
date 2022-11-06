@@ -22,7 +22,7 @@ import java.util.function.UnaryOperator;
  */
 public class JkProjectPublication {
 
-    public final JkMavenPublication maven;
+    public final JkMavenPublication<JkProjectPublication> maven;
 
     public final JkIvyPublication<JkProjectPublication> ivy;
 

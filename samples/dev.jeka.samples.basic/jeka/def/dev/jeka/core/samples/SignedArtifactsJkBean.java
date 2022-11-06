@@ -61,13 +61,13 @@ public class SignedArtifactsJkBean extends JkBean {
                 .and(SimpleProjectJkBean.JUNIT5)
             )
             .getProject()
-            .getPublication()
+            .publication
                 .apply(this::configForLocalRepo)
                 .setModuleId("dev.jeka.core:samples-signedArtifacts")
                 .setVersion("1.3.1")
                 .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
-                .getMaven()
-                    .getPomMetadata()
+                .maven
+                    .pomMetadata
                         .setProjectName("my project")
                         .setProjectDescription("My description")
                         .setProjectUrl("https://github.com/jerkar/jeka/samples")
@@ -91,7 +91,7 @@ public class SignedArtifactsJkBean extends JkBean {
 
     public void cleanPackPublish() {
         JkPathTree.of(dummyRepoPath).createIfNotExist().deleteRoot();  // start from an empty repo
-        cleanOutput(); projectPlugin.pack(); projectPlugin.getProject().getPublication().publish();
+        cleanOutput(); projectPlugin.pack(); projectPlugin.getProject().publication.publish();
     }
 
     public static void main(String[] args) {
