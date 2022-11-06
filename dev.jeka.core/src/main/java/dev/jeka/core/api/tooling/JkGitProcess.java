@@ -68,11 +68,15 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
                 .execAndReturnOutput();
     }
 
-    public List<String> getLastCommitMessage() {
+    public List<String> getLastCommitMessageMultiLine() {
         return copy()
                 .addParams("log", "--oneline", "--format=%B", "-n 1", "HEAD")
                 .setLogOutput(false)
                 .execAndReturnOutput();
+    }
+
+    public String getLastCommitMessage() {
+        return String.join("\n", getLastCommitMessageMultiLine());
     }
 
     /**
@@ -85,7 +89,7 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
      * invoking this method with 'Release:' argument will return '0.9.5.RC1'.
      */
     public String extractSuffixFromLastCommitMessage(String prefix) {
-        List<String> messageLines = getLastCommitMessage();
+        List<String> messageLines = getLastCommitMessageMultiLine();
         if (messageLines.isEmpty()) {
             return null;
         }

@@ -171,6 +171,7 @@ public final class JkPathFile {
      * Shorthand for {@link Files#write(Path, byte[], OpenOption...)}
      */
     public JkPathFile write(byte[] bytes, OpenOption ... options) {
+        createIfNotExist();
         JkUtilsPath.write(path, bytes, options);
         return this;
     }
