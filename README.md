@@ -34,11 +34,11 @@ class Build extends JkBean {
         project = JkProject.of().simpleFacade()
             .setBaseDir(".")
             .includeJavadocAndSources(true, true)  // produce javadoc and sources jars
-            .configureCompileDeps(deps -> deps
+            .configureCompileDependencies(deps -> deps
                 .and("com.google.guava:guava:31.0.1-jre")
                 .and("com.fasterxml.jackson.core:jackson-core:2.13.0")
             )
-            .configureTestDeps(deps -> deps
+            .configureTestDependencies(deps -> deps
                 .and("org.junit.jupiter:junit-jupiter-engine:5.8.2")
             )
             .setPublishedModuleId("my.org:my-module")
@@ -46,7 +46,7 @@ class Build extends JkBean {
     }
 
     public void cleanPack() {
-        clean();
+        JkPathTree.of(getBaseDir().resolve("jeka//output")).deleteContent();
         project.pack();  // package all artifacts of the project (jar, source jar and javadoc)
     }
 
@@ -80,14 +80,14 @@ class Build extends JkBean {
     
     private void configure(JkProject project) {
         project.simpleFacade()
-                .configureCompileDeps(deps -> deps
+                .configureCompileDependencies(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-web")
                         .and("org.projectlombok:lombok:1.18.20")
                 )
-                .configureRuntimeDeps(deps -> deps
+                .configureRuntimeDependencies(deps -> deps
                         .minus("org.projectlombok:lombok")
                 )
-                .configureTestDeps(deps -> deps
+                .configureTestDependencies(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-test")
                             .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
                 )
@@ -95,11 +95,44 @@ class Build extends JkBean {
     }
 
     public void cleanPack() {
-        clean();
+        springbootBean.projectBean().clean();
         springbootBean.projectBean().pack();
     }
 
 }
+```
+</details>
+
+Projects can be **also built without any build code** in a very concise way : 1 properties and 1 flat file only.
+
+<details>
+<summary>Example building springboot project using Sonarqube + Jacoco test coverage</summary>
+
+*local.properties*
+```properties 
+jeka.cmd._append=springboot# @dev.jeka:jacoco-plugin @dev.jeka:sonarqube-plugin @dev.jeka:springboot-plugin
+
+jeka.cmd.build=project#clean project#pack
+jeka.cmd.build_quality=project#clean project#pack sonarqube#run jacoco# sonarqube#logOutput=true -Dsonar.host.url=http://localhost:9000
+
+jeka.java.version=17
+springboot#springbootVersion=2.7.5
+
+intellij#jekaModuleName=wrapper-common
+```
+
+*project-dependencies.txt*
+```text
+==== COMPILE ====
+org.springframework.boot:spring-boot-starter-web
+org.projectlombok:lombok:1.18.24
+
+==== RUNTIME ====
+org.postgresql:postgresql:42.3.7
+- org.projectlombok:lombok
+
+==== TEST ====
+org.springframework.boot:spring-boot-starter-test
 ```
 </details>
 

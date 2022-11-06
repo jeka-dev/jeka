@@ -195,7 +195,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             return template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         });
         scaffolder.setClassFilename("Build.java");
-        scaffolder.getExtraActions().append( () -> this.scaffold.scaffoldProjectStructure(configuredProject));
+        scaffolder.extraActions.append( () -> this.scaffold.scaffoldProjectStructure(configuredProject));
     }
 
 

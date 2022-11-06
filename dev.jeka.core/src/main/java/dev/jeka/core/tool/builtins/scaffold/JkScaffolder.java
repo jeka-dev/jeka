@@ -35,7 +35,7 @@ public final class JkScaffolder {
 
     private JkDependencyResolver dependencyResolver;
 
-    private final JkRunnables extraActions = JkRunnables.of();
+    public final JkRunnables extraActions = JkRunnables.of();
 
     private String cachedJekaVersion;
 
@@ -150,10 +150,6 @@ public final class JkScaffolder {
 
     public void setClassFilename(String classFilename) {
         this.classFilename = classFilename;
-    }
-
-    public JkRunnables getExtraActions() {
-        return extraActions;
     }
 
     private String jekaVersion() {

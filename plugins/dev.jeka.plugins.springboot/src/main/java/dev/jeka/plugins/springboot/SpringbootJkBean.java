@@ -128,7 +128,7 @@ public final class SpringbootJkBean extends JkBean {
         if (this.projectBean.scaffold.template != ProjectJkBean.JkScaffoldOptions.Template.CODE_LESS) {
             scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
         }
-        scaffolder.getExtraActions() .append(this::scaffoldSample);
+        scaffolder.extraActions.append(this::scaffoldSample);
     }
 
     private void createBootJar(JkProject project) {
