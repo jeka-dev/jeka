@@ -28,7 +28,7 @@ public class JkImlGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
-            .getCompilation()
+            .prodCompilation
                     .configureDependencies(deps -> deps
                         .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6"))).__;
         final JkImlGenerator baseGenerator = JkImlGenerator.of()
@@ -41,14 +41,14 @@ public class JkImlGeneratorIT {
         final JkProject coreProject = JkProject.of()
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
-                .getCompilation()
+                .prodCompilation
                     .configureDependencies(deps -> deps.and(baseProject.toDependency())).__
-                .getTesting()
-                    .getCompilation()
-                        .getLayout()
+                .testing
+                    .testCompilation
+                        .layout
                             .emptySources().addSource("test")
                             .emptyResources().addResource("res-test").__.__
-                    .getTestProcessor()
+                    .testProcessor
                         .setForkingProcess(true).__.__;
         final JkImlGenerator coreGenerator = JkImlGenerator.of()
                 .setIdeSupport(coreProject.getJavaIdeSupport());
@@ -61,7 +61,7 @@ public class JkImlGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
-                .getCompilation()
+                .prodCompilation
                     .configureDependencies(deps -> deps
                         .and(coreProject.toDependency())).__;
         final JkImlGenerator desktopGenerator = JkImlGenerator.of()
@@ -70,23 +70,23 @@ public class JkImlGeneratorIT {
         System.out.println("\ndesktop .classpath");
         System.out.println(result2);
 
-        desktopProject.getArtifactProducer().makeAllArtifacts();
+        desktopProject.artifactProducer.makeAllArtifacts();
         JkPathTree.of(top).deleteContent();
     }
 
     private void configureCompileLayout(JkProject javaProject) {
         javaProject
-                .getCompilation()
-                    .getLayout()
+                .prodCompilation
+                    .layout
                         .emptySources().addSource("src")
                         .emptyResources().addResource("res");
     }
 
     private void configureEmptyTestCompileLayout(JkProject javaProject) {
         javaProject
-                .getTesting()
-                    .getCompilation()
-                        .getLayout()
+                .testing
+                    .testCompilation
+                        .layout
                             .emptySources()
                             .emptyResources();
     }

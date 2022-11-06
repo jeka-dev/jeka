@@ -25,9 +25,9 @@ public class JkProjectTest {
                 .configureTestDependencies(deps -> deps.and("b:b"))
                 .getProject();
         JkDependencySet compileDeps = javaProject
-                .getCompilation().getDependencies();
-        JkDependencySet testCompileDeps = javaProject.getTesting()
-                .getCompilation().getDependencies();
+                .prodCompilation.getDependencies();
+        JkDependencySet testCompileDeps = javaProject.testing
+                .testCompilation.getDependencies();
         Assert.assertEquals(1, compileDeps.getEntries().stream()
                 .filter(JkCoordinateDependency.class::isInstance)
                 .collect(Collectors.toList())
@@ -50,10 +50,10 @@ public class JkProjectTest {
                 .addTestDeps("b:b")
                 .getProject();
         JkDependencySet compileDeps = javaProject
-                .getCompilation().getDependencies();
-        JkDependencySet testCompileDeps = javaProject.getTesting()
-                .getCompilation().getDependencies();
-        JkDependencySet runtimeDeps = javaProject.getPackaging().getRuntimeDependencies();
+                .prodCompilation.getDependencies();
+        JkDependencySet testCompileDeps = javaProject.testing
+                .testCompilation.getDependencies();
+        JkDependencySet runtimeDeps = javaProject.packaging.getRuntimeDependencies();
         Assert.assertEquals(3, compileDeps.getEntries().stream()
                 .filter(JkCoordinateDependency.class::isInstance)
                 .collect(Collectors.toList())
@@ -83,7 +83,7 @@ public class JkProjectTest {
                 )
                 .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
                 .getProject();
-        JkDependencySet testDependencies = project.getTesting().getCompilation().getDependencies();
+        JkDependencySet testDependencies = project.testing.testCompilation.getDependencies();
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
@@ -100,7 +100,7 @@ public class JkProjectTest {
                         .andVersionProvider(versionProvider)
                         .and("javax.servlet:javax.servlet-api")
                 ).getProject();
-        JkDependencySet testDeps = project.getTesting().getCompilation().getDependencies();
+        JkDependencySet testDeps = project.testing.testCompilation.getDependencies();
         Assert.assertEquals("4.0.1",
                 testDeps.getVersionProvider().getVersionOf("javax.servlet:javax.servlet-api"));
     }
@@ -121,7 +121,7 @@ public class JkProjectTest {
                 )
                 .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
                 .getProject();
-        JkDependencySet testDependencies = project.getTesting().getCompilation().getDependencies();
+        JkDependencySet testDependencies = project.testing.testCompilation.getDependencies();
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.RUNTIME, testDependencies.get("com.google.guava:guava").getTransitivity());
         Assert.assertNotNull(testDependencies.get("javax.servlet:javax.servlet-api"));
@@ -148,7 +148,7 @@ public class JkProjectTest {
                 .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
                 .configurePublishedDeps(deps -> deps.minus("org.postgresql:postgresql"))
                 .getProject();
-        JkDependencySet publishDeps = project.getPublication().getMaven().getDependencies();
+        JkDependencySet publishDeps = project.publication.maven.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
         Assert.assertEquals(JkTransitivity.COMPILE, publishDeps.get("javax.servlet:javax.servlet-api").getTransitivity());
     }
@@ -167,11 +167,11 @@ public class JkProjectTest {
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
-        project.getPublication().getIvy()
+        project.publication.ivy
                 .setModuleId("my:module")
                 .setVersion("0.1");
-        System.out.println(project.getCompilation().getDependencies());
-        JkQualifiedDependencySet publishDeps = project.getPublication().getIvy().getDependencies();
+        System.out.println(project.prodCompilation.getDependencies());
+        JkQualifiedDependencySet publishDeps = project.publication.ivy.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
     }
 
@@ -183,39 +183,39 @@ public class JkProjectTest {
         JkProject baseProject = JkProject.of().setBaseDir(base).flatFacade()
                 .configureCompileDependencies(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6")))
                 .getProject()
-                    .getCompilation()
-                        .getLayout()
+                    .prodCompilation
+                        .layout
                             .emptySources().addSource("src")
                             .emptyResources().addResource("res")
                             .mixResourcesAndSources()
                         .__
                 .__;
-        baseProject.getArtifactProducer().makeAllArtifacts();
+        baseProject.artifactProducer.makeAllArtifacts();
 
         final Path core = top.resolve("core");
         final JkProject coreProject = JkProject.of()
                 .setBaseDir(core)
-                    .getCompilation()
+                    .prodCompilation
                         .configureDependencies(deps -> deps
                             .and(baseProject.toDependency())
                         )
-                        .getLayout()
+                        .layout
                             .setSourceSimpleStyle(JkCompileLayout.Concern.PROD)
                         .__
                     .__;
 
         //Desktop.getDesktop().open(core.toFile());
-        coreProject.getArtifactProducer().makeAllArtifacts();
+        coreProject.artifactProducer.makeAllArtifacts();
 
         final Path desktop = top.resolve("desktop");
         final JkProject desktopProject = JkProject.of()
                 .setBaseDir(desktop)
-                .getCompilation()
-                .configureDependencies(deps -> deps
-                        .and(coreProject.toDependency())).__
-                .getCompilation()
-                .getLayout()
-                .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__;
+                .prodCompilation
+                    .configureDependencies(deps -> deps
+                            .and(coreProject.toDependency())).__
+                .prodCompilation
+                    .layout
+                    .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__;
         //Desktop.getDesktop().open(desktop.toFile());
         //desktopProject.getArtifactProducer().makeAllArtifacts();
 
@@ -237,7 +237,7 @@ public class JkProjectTest {
                     .setIncludeTextAndLocalDependencies(true);
         URL dependencyTxtUrl = JkProjectTest.class.getResource("simple-dependencies-simple.txt");
         project.setDependencyTxtUrl(dependencyTxtUrl);
-        JkDependencySet runtimeDependencies = project.getPackaging().getRuntimeDependencies();
+        JkDependencySet runtimeDependencies = project.packaging.getRuntimeDependencies();
         JkCoordinateDependency lombokDep = runtimeDependencies.getMatching(JkCoordinateDependency.of("org.projectlombok:lombok"));
         runtimeDependencies.getEntries().forEach(System.out::println);
         Assert.assertNull(lombokDep);  // expect lombok not included

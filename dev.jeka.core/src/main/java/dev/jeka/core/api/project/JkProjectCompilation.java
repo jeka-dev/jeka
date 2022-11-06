@@ -35,15 +35,24 @@ public class JkProjectCompilation<T> {
 
     private final JkProject project;
 
-    private final JkRunnables<JkProjectCompilation<T>> preCompileActions;
+    /**
+     * The {@link JkRunnables} to run after source and resource generation. User can chain its own runnable
+     * to customise the process. Contains {@link JkProjectCompilation#RESOURCES_PROCESS_ACTION} by default
+     */
+    public final JkRunnables<JkProjectCompilation<T>> preCompileActions;
+
 
     private final JkRunnables<JkProjectCompilation<T>> compileActions;
 
-    private final JkRunnables<JkProjectCompilation<T>> postCompileActions;
+    /**
+     * The {@link JkRunnables} to be run after compilation. User can chain its own runnable
+     * to customise the process. Empty by default.
+     */
+    public final JkRunnables<JkProjectCompilation<T>> postCompileActions;
 
-    private final JkResourceProcessor<JkProjectCompilation<T>> resourceProcessor;
+    public final JkResourceProcessor<JkProjectCompilation<T>> resourceProcessor;
 
-    private final JkCompileLayout<JkProjectCompilation<T>> layout;
+    public final JkCompileLayout<JkProjectCompilation<T>> layout;
 
     private Function<JkDependencySet, JkDependencySet> dependenciesModifier = deps -> deps;
 
@@ -65,7 +74,7 @@ public class JkProjectCompilation<T> {
                 .append(JAVA_SOURCES_COMPILE_ACTION, this::compileJava);
         postCompileActions = JkRunnables.ofParent(this)
                 .setLogRunnableName(true);
-        layout = layout();
+        layout = initialLayout();
     }
 
     static JkProjectCompilation<JkProject> ofProd(JkProject project) {
@@ -77,9 +86,6 @@ public class JkProjectCompilation<T> {
         return this;
     }
 
-    public JkCompileLayout<JkProjectCompilation<T>> getLayout() {
-        return layout;
-    }
 
     public void generateSources() {
         for (JkSourceGenerator sourceGenerator : sourceGenerators) {
@@ -114,21 +120,6 @@ public class JkProjectCompilation<T> {
         }
     }
 
-    /**
-     * Returns the {@link JkRunnables} to run after source and resource generation. User can chain its own runnable
-     * to customise the process. Contains {@link JkProjectCompilation#RESOURCES_PROCESS_ACTION} by default
-     */
-    public JkRunnables<JkProjectCompilation<T>> getPreCompileActions() {
-        return preCompileActions;
-    }
-
-    /**
-     * Returns the {@link JkRunnables} to be run after compilation. User can chain its own runnable
-     * to customise the process. Empty by default.
-     */
-    public JkRunnables<JkProjectCompilation<T>> getPostCompileActions() {
-        return postCompileActions;
-    }
 
     /**
      * Returns extra compile options passed to the compiler
@@ -145,20 +136,13 @@ public class JkProjectCompilation<T> {
         return this;
     }
 
-    /**
-     * Returns the resource processor.
-     */
-    public JkResourceProcessor<JkProjectCompilation<T>> getResourceProcessor() {
-        return resourceProcessor;
-    }
-
     public JkProjectCompilation<T> configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
     }
 
     public JkResolveResult resolveDependencies() {
-        return project.getDependencyResolver().resolve(getDependencies());
+        return project.dependencyResolver.resolve(getDependencies());
     }
 
     public JkDependencySet getDependencies() {
@@ -178,11 +162,11 @@ public class JkProjectCompilation<T> {
     }
 
     private void processResources() {
-        this.getResourceProcessor().generate(layout.resolveResources(), layout.resolveClassDir());
+        this.resourceProcessor.generate(layout.resolveResources(), layout.resolveClassDir());
     }
 
     private void compileJava() {
-        boolean success = project.getCompiler().compile(compileSpec());
+        boolean success = project.compiler.compile(compileSpec());
         if (!success) {
             throw new IllegalStateException("Compilation of Java sources failed.");
         }
@@ -199,7 +183,7 @@ public class JkProjectCompilation<T> {
 
     // -------- methods to override for test compilation
 
-    protected JkCompileLayout layout() {
+    protected JkCompileLayout initialLayout() {
         return JkCompileLayout.ofParent(this)
                 .setBaseDirSupplier(project::getBaseDir)
                 .setOutputDirSupplier(project::getOutputDir);

@@ -1,7 +1,9 @@
 package dev.jeka.core.api.project;
 
-import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.function.JkRunnables;
@@ -20,15 +22,13 @@ import java.util.function.UnaryOperator;
  */
 public class JkProjectPublication {
 
-    private final JkProject project;
+    public final JkMavenPublication maven;
 
-    private final JkMavenPublication maven;
+    public final JkIvyPublication<JkProjectPublication> ivy;
 
-    private final JkIvyPublication<JkProjectPublication> ivy;
+    public final JkRunnables<JkProjectPublication> preActions;
 
-    private final JkRunnables<JkProjectPublication> preActions;
-
-    private final JkRunnables<JkProjectPublication> postActions;
+    public final JkRunnables<JkProjectPublication> postActions;
 
     private boolean publishMaven = true;
 
@@ -40,22 +40,19 @@ public class JkProjectPublication {
     public final JkProject __;
 
     JkProjectPublication(JkProject project) {
-        this.project = project;
         this.__ = project;
-        JkCoordinate.ConflictStrategy conflictStrategy = project.getDuplicateConflictStrategy();
-        JkArtifactLocator artifactLocator = project.getArtifactProducer();
         maven = JkMavenPublication.of(this)
-                .setArtifactLocatorSupplier(() -> project.getArtifactProducer())
+                .setArtifactLocatorSupplier(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                        project.getCompilation().getDependencies(),
-                        project.getPackaging().getRuntimeDependencies(),
+                        project.prodCompilation.getDependencies(),
+                        project.packaging.getRuntimeDependencies(),
                         project.getDuplicateConflictStrategy()))
-                .setBomResolutionRepos(() -> project.getDependencyResolver().getRepos());
+                .setBomResolutionRepos(() -> project.dependencyResolver.getRepos());
         ivy = JkIvyPublication.of(this)
-                .addArtifacts(() -> project.getArtifactProducer())
+                .addArtifacts(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
-                        project.getCompilation().getDependencies(),
-                        project.getPackaging().getRuntimeDependencies(), project.getDuplicateConflictStrategy()));
+                        project.prodCompilation.getDependencies(),
+                        project.packaging.getRuntimeDependencies(), project.getDuplicateConflictStrategy()));
         this.preActions = JkRunnables.ofParent(this);
         this.postActions = JkRunnables.ofParent(this);
     }
@@ -63,22 +60,6 @@ public class JkProjectPublication {
     public JkProjectPublication apply(Consumer<JkProjectPublication> consumer) {
         consumer.accept(this);
         return this;
-    }
-
-    public JkRunnables<JkProjectPublication> getPreActions() {
-        return preActions;
-    }
-
-    public JkRunnables<JkProjectPublication> getPostActions() {
-        return postActions;
-    }
-
-    public JkMavenPublication<JkProjectPublication> getMaven() {
-        return maven;
-    }
-
-    public JkIvyPublication<JkProjectPublication> getIvy() {
-        return ivy;
     }
 
     public void publish() {
@@ -161,10 +142,10 @@ public class JkProjectPublication {
      * Shorthand to get the first declared publication repository.
      */
     public JkRepo findFirstNonLocalRepo() {
-        return getMaven().getPublishRepos().getRepos().stream()
+        return maven.getPublishRepos().getRepos().stream()
                 .filter(repo1 -> !repo1.isLocal())
                 .findFirst().orElse(
-                        getIvy().getRepos().getRepos().stream()
+                        ivy.getRepos().getRepos().stream()
                                 .filter(repo1 -> !repo1.isLocal())
                                 .findFirst().orElse(null)
                 );

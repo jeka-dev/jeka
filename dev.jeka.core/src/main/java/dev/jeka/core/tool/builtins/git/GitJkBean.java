@@ -127,9 +127,9 @@ public class GitJkBean extends JkBean {
          * @param tag If true, the repository will be tagged right after the project.publication.publish()
          */
         public void configure(JkProject project, boolean tag) {
-            project.getPublication().setVersion(() -> version().toString());
+            project.publication.setVersion(() -> version().toString());
             if (tag) {
-                project.getPublication().getPostActions().append(TAG_TASK_NAME, this::tagIfDiffers);
+                project.publication.postActions.append(TAG_TASK_NAME, this::tagIfDiffers);
             }
         }
 

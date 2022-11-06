@@ -52,7 +52,7 @@ public class NexusJkBean extends JkBean {
         if (nexusRepos == null) {
             return;
         }
-        project.getPublication().getPostActions().append(TASK_NAME, () -> {
+        project.publication.postActions.append(TASK_NAME, () -> {
             nexusRepos.closeAndReleaseOpenRepositories(profiles());
         });
     }
@@ -68,7 +68,7 @@ public class NexusJkBean extends JkBean {
             return null;
         }
         JkProject project = projectBean.get().getProject();
-        JkRepo repo = project.getPublication().findFirstNonLocalRepo();
+        JkRepo repo = project.publication.findFirstNonLocalRepo();
         if (repo == null) {
             JkLog.warn("No remote repository configured for publishing");
             return null;

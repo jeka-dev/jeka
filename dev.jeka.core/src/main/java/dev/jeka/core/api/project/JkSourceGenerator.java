@@ -25,12 +25,12 @@ public abstract class JkSourceGenerator {
     }
 
     public JkSourceGenerator bindToProd() {
-        project.getCompilation().addSourceGenerator(this);
+        project.prodCompilation.addSourceGenerator(this);
         return this;
     }
 
     public JkSourceGenerator bindToTest() {
-        project.getTesting().getCompilation().addSourceGenerator(this);
+        project.testing.testCompilation.addSourceGenerator(this);
         return this;
     }
 }

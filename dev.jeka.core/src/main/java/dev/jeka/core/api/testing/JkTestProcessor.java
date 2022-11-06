@@ -58,11 +58,11 @@ public final class JkTestProcessor<T> {
 
     private JkJavaProcess forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName());  // Tests are forked by default
 
-    private JkEngineBehavior<T> engineBehavior;
+    public final JkEngineBehavior<T> engineBehavior;
 
-    private final JkRunnables preActions = JkRunnables.of();
+    public final JkRunnables preActions = JkRunnables.of();
 
-    private final JkRunnables postActions = JkRunnables.of();
+    public final JkRunnables postActions = JkRunnables.of();
 
     private String junitPlatformVersion = "1.8.2";
 
@@ -79,6 +79,7 @@ public final class JkTestProcessor<T> {
 
     private JkTestProcessor(T __) {
         this.__ = __;
+        engineBehavior = new JkEngineBehavior<>(this);
     }
 
     public static JkTestProcessor<Void> of() {
@@ -86,25 +87,11 @@ public final class JkTestProcessor<T> {
     }
 
     public static <T> JkTestProcessor<T> ofParent(T parent) {
-        JkTestProcessor<T> result = new JkTestProcessor<T>(parent);
-        result.engineBehavior = new JkEngineBehavior(result);
-        return result;
+        return new JkTestProcessor<T>(parent);
     }
 
     public JkJavaProcess getForkingProcess() {
         return forkingProcess;
-    }
-
-    public JkEngineBehavior<T> getEngineBehavior() {
-        return engineBehavior;
-    }
-
-    public JkRunnables getPreActions() {
-        return preActions;
-    }
-
-    public JkRunnables getPostActions() {
-        return postActions;
     }
 
     public JkTestProcessor<T> setForkingProcess(JkJavaProcess process) {

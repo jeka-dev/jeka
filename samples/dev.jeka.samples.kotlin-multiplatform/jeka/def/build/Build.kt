@@ -114,7 +114,7 @@ class Build : JkBean() {
     object CleanCompile {
         @JvmStatic fun main(args: Array<String>) {
             val build = JkInit.instanceOf(Build::class.java, *args)
-            build.kotlin.jvm().project.compilation.run()
+            build.kotlin.jvm().project.prodCompilation.run()
         }
     }
 

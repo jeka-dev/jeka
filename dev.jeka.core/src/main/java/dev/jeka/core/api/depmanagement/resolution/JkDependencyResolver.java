@@ -20,7 +20,7 @@ import static dev.jeka.core.api.utils.JkUtilsString.pluralize;
  */
 public final class JkDependencyResolver<T> {
 
-    private final JkResolutionParameters<JkDependencyResolver<T> > defaultParameters;
+    public final JkResolutionParameters<JkDependencyResolver<T> > parameters;
 
     // Not necessary but may help Ivy to do some caching ???
     private JkCoordinate moduleHolder;
@@ -38,7 +38,7 @@ public final class JkDependencyResolver<T> {
 
     private JkDependencyResolver(T parent) {
         __ = parent;
-        defaultParameters = JkResolutionParameters.ofParent(this);
+        parameters = JkResolutionParameters.ofParent(this);
     }
 
     /**
@@ -82,7 +82,7 @@ public final class JkDependencyResolver<T> {
         return this;
     }
 
-    public boolean isUseCache(boolean useCache) {
+    public boolean isUseCache() {
         return this.useCache;
     }
 
@@ -95,7 +95,7 @@ public final class JkDependencyResolver<T> {
      * Returns the parameters of this dependency resolver.
      */
     public JkResolutionParameters<JkDependencyResolver<T> > getDefaultParams() {
-        return this.defaultParameters;
+        return this.parameters;
     }
 
     /**
@@ -110,7 +110,7 @@ public final class JkDependencyResolver<T> {
     }
 
     public JkResolveResult resolve(JkCoordinateDependency coordinateDependency) {
-        return resolve(coordinateDependency, defaultParameters);
+        return resolve(coordinateDependency, parameters);
     }
 
     public JkResolveResult resolve(String dependencyDescription) {
@@ -122,7 +122,7 @@ public final class JkDependencyResolver<T> {
     }
 
     public JkResolveResult resolve(JkDependencySet dependencies) {
-        return resolve(dependencies, defaultParameters);
+        return resolve(dependencies, parameters);
     }
 
     public JkResolveResult resolve(JkDependencySet dependencies, JkResolutionParameters params) {

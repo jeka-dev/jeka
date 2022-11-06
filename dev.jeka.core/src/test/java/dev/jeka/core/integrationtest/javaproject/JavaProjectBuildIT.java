@@ -30,7 +30,7 @@ public class JavaProjectBuildIT {
                 .configureCompileDependencies(deps -> deps.and(baseProject.toDependency()))
                 .getProject();
 
-        JkResolveResult resolveResult = coreProject.getCompilation().resolveDependencies();
+        JkResolveResult resolveResult = coreProject.prodCompilation.resolveDependencies();
 
         Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size()); // base dir and guava
         JkResolvedDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);
@@ -65,10 +65,10 @@ public class JavaProjectBuildIT {
                 .setPublishedModuleId("my:project").setPublishedVersion("MyVersion-snapshot")
                 .setPublishedVersion("1-SNAPSHOT")
                 .getProject();
-        project.getArtifactProducer().makeAllArtifacts();
-        project.getPublication().getMaven().publishLocal();
+        project.artifactProducer.makeAllArtifacts();
+        project.publication.maven.publishLocal();
         System.out.println(project.getInfo());
-        Assert.assertEquals(JkTransitivity.COMPILE, project.getPublication().getMaven().getDependencies()
+        Assert.assertEquals(JkTransitivity.COMPILE, project.publication.maven.getDependencies()
                 .get("com.google.guava:guava").getTransitivity());
 
     }
@@ -88,11 +88,11 @@ public class JavaProjectBuildIT {
                 .configureTestDependencies(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 ).getProject();
-        project.getPublication().getIvy()
+        project.publication.ivy
                 .setModuleId("my:module")
                 .setVersion("0.1");
-        project.getArtifactProducer().makeAllArtifacts();
-        project.getPublication().getIvy().publishLocal();
+        project.artifactProducer.makeAllArtifacts();
+        project.publication.ivy.publishLocal();
         System.out.println(project.getInfo());
 
 

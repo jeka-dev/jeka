@@ -49,7 +49,7 @@ public class JkJ2eWarProjectAdapter {
         JkUtilsAssert.argument(publishedAsMainArtifact || keepJar,
                 "Both publishedAsMainArtifact and keepJar cannot be false.");
         Path staticResourceDir = project.getBaseDir().resolve("src/main/webapp/static");
-        JkStandardFileArtifactProducer artifactProducer = project.getArtifactProducer();
+        JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
         Consumer<Path> originalJarMaker = path -> artifactProducer.makeMainArtifact();
         Consumer<Path> warMaker = path -> generateWar(path, project);
         if (publishedAsMainArtifact) {
@@ -76,7 +76,7 @@ public class JkJ2eWarProjectAdapter {
         if (webappPath != null) {
             effectiveWebappPath = project.getBaseDir().resolve(webappPath);
         } else {
-            Path src =  project.getCompilation().getLayout().getSources().toList().get(0).getRoot();
+            Path src =  project.prodCompilation.layout.getSources().toList().get(0).getRoot();
             effectiveWebappPath = src.resolveSibling("webapp");
         }
         generateWar(project, dist, effectiveWebappPath, extraStaticResourcePath, generateExploded);
@@ -86,12 +86,12 @@ public class JkJ2eWarProjectAdapter {
                                     boolean generateDir) {
 
         JkJ2eWarArchiver archiver = JkJ2eWarArchiver.of()
-                .setClassDir(project.getCompilation().getLayout().resolveClassDir())
+                .setClassDir(project.prodCompilation.layout.resolveClassDir())
                 .setExtraStaticResourceDir(extraStaticResourcePath)
-                .setLibs(project.getPackaging().resolveRuntimeDependencies().getFiles().getEntries())
+                .setLibs(project.packaging.resolveRuntimeDependencies().getFiles().getEntries())
                 .setWebappDir(webappPath);
-        project.getCompilation().runIfNeeded();
-        project.getTesting().runIfNeeded();
+        project.prodCompilation.runIfNeeded();
+        project.testing.runIfNeeded();
         if (generateDir) {
             Path dirPath = project.getOutputDir().resolve("j2e-war");
             archiver.generateWarDir(dirPath);

@@ -64,8 +64,8 @@ public class JkProjectFlatFacade {
      * Sets test Java source files and resources in "test".
      */
     public JkProjectFlatFacade useSimpleLayout() {
-        project.getCompilation().getLayout().setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
-        project.getTesting().getCompilation().getLayout()
+        project.prodCompilation.layout.setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
+        project.testing.testCompilation.layout
                 .setSourceSimpleStyle(JkCompileLayout.Concern.TEST);
         return this;
     }
@@ -74,8 +74,8 @@ public class JkProjectFlatFacade {
      * The resources will be located in same dirs than sources.
      */
     public JkProjectFlatFacade mixResourcesAndSources() {
-        project.getCompilation().getLayout().mixResourcesAndSources();
-        project.getTesting().getCompilation().getLayout().mixResourcesAndSources();
+        project.prodCompilation.layout.mixResourcesAndSources();
+        project.testing.testCompilation.layout.mixResourcesAndSources();
         return this;
     }
 
@@ -85,17 +85,17 @@ public class JkProjectFlatFacade {
     }
 
     public JkProjectFlatFacade configureCompileDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.getCompilation().configureDependencies(modifier);
+        project.prodCompilation.configureDependencies(modifier);
         return this;
     }
 
     public JkProjectFlatFacade configureRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.getPackaging().configureRuntimeDependencies(modifier);
+        project.packaging.configureRuntimeDependencies(modifier);
         return this;
     }
 
     public JkProjectFlatFacade configureTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.getTesting().getCompilation().configureDependencies(modifier);
+        project.testing.testCompilation.configureDependencies(modifier);
         return this;
     }
 
@@ -122,7 +122,7 @@ public class JkProjectFlatFacade {
     }
 
     public JkProjectFlatFacade skipTests(boolean skipped) {
-        project.getTesting().setSkipped(skipped);
+        project.testing.setSkipped(skipped);
         return this;
     }
 
@@ -134,7 +134,7 @@ public class JkProjectFlatFacade {
     }
 
     public JkProjectFlatFacade setPublishedVersion(Supplier<String> versionSupplier) {
-        project.getPublication().setVersion(versionSupplier);
+        project.publication.setVersion(versionSupplier);
         return this;
     }
 
@@ -164,7 +164,7 @@ public class JkProjectFlatFacade {
      *                 Must be formatted as 'group:artifactId'
      */
     public JkProjectFlatFacade setPublishedModuleId(String moduleId) {
-        project.getPublication().setModuleId(moduleId);
+        project.publication.setModuleId(moduleId);
         return this;
     }
 
@@ -172,7 +172,7 @@ public class JkProjectFlatFacade {
      * Configures the dependencies to be published in a Maven repository.
      */
     public JkProjectFlatFacade configurePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
-        project.getPublication().getMaven().configureDependencies(dependencyModifier);
+        project.publication.maven.configureDependencies(dependencyModifier);
         return this;
     }
 
@@ -183,7 +183,7 @@ public class JkProjectFlatFacade {
      */
     public JkProjectFlatFacade addTestExcludeFilterSuffixedBy(String suffix, boolean condition) {
         if (condition) {
-            project.getTesting().getTestSelection().addExcludePatterns(".*" + suffix);
+            project.testing.testSelection.addExcludePatterns(".*" + suffix);
         }
         return this;
     }
@@ -194,7 +194,7 @@ public class JkProjectFlatFacade {
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
     public JkProjectFlatFacade addTestIncludeFilterSuffixedBy(String suffix, boolean condition) {
-        project.getTesting().getTestSelection().addIncludePatternsIf(condition, ".*" + suffix);
+        project.testing.testSelection.addIncludePatternsIf(condition, ".*" + suffix);
         return this;
     }
 
@@ -204,7 +204,7 @@ public class JkProjectFlatFacade {
      * This is a standard filter in many tools.
      */
     public JkProjectFlatFacade addTestIncludeFilterOnStandardNaming(boolean condition) {
-        project.getTesting().getTestSelection().addIncludePatternsIf(condition,
+        project.testing.testSelection.addIncludePatternsIf(condition,
                 JkTestSelection.STANDARD_INCLUDE_PATTERN);
        return this;
     }

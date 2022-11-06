@@ -24,7 +24,7 @@ public final class JkMavenPublication<T> {
 
     public final T __; // For parent chaining
 
-    private final JkPomMetadata<JkMavenPublication<T>> pomMetadata = JkPomMetadata.ofParent(this);
+    public final JkPomMetadata<JkMavenPublication<T>> pomMetadata = JkPomMetadata.ofParent(this);
 
     private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
@@ -50,10 +50,6 @@ public final class JkMavenPublication<T> {
 
     public static <T> JkMavenPublication<Void> of() {
         return new JkMavenPublication(null);
-    }
-
-    public JkPomMetadata<JkMavenPublication<T>> getPomMetadata() {
-        return this.pomMetadata;
     }
 
     public JkMavenPublication<T> configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {

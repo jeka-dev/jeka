@@ -25,13 +25,13 @@ public class JkProjectPackaging {
 
     private final JkProject project;
 
-    private final JkManifest<JkProjectPackaging> manifest;
+    public final JkManifest<JkProjectPackaging> manifest;
 
-    private JkPathTreeSet fatJarContentCustomizer = JkPathTreeSet.ofEmpty();
+    private JkPathTreeSet fatJarExtraContent = JkPathTreeSet.ofEmpty();
 
     private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
-    private final JkJavadocProcessor<JkProjectPackaging> javadocProcessor;
+    public final JkJavadocProcessor<JkProjectPackaging> javadocProcessor;
 
     private Function<JkDependencySet, JkDependencySet> dependencySetModifier = x -> x;
 
@@ -55,19 +55,15 @@ public class JkProjectPackaging {
          return this;
     }
 
-    public JkJavadocProcessor<JkProjectPackaging> getJavadocProcessor() {
-        return javadocProcessor;
-    }
-
     /**
      * Generates javadoc files (files + zip)
      */
     private boolean createJavadocFiles() {
-        JkProjectCompilation compilation = project.getCompilation();
-        Iterable<Path> classpath = project.getDependencyResolver()
+        JkProjectCompilation compilation = project.prodCompilation;
+        Iterable<Path> classpath = project.dependencyResolver
                 .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
-        JkPathTreeSet sources = compilation.getLayout().resolveSources();
+        JkPathTreeSet sources = compilation.layout.resolveSources();
         if (!sources.containFiles()) {
             return false;
         }
@@ -84,10 +80,6 @@ public class JkProjectPackaging {
         return this;
     }
 
-    public JkManifest<JkProjectPackaging> getManifest() {
-        return manifest;
-    }
-
     public void createJavadocJar(Path target) {
         boolean created = createJavadocFiles();
         if (!created) {
@@ -99,34 +91,34 @@ public class JkProjectPackaging {
     }
 
     public void createJavadocJar() {
-        createJavadocJar(project.getArtifactProducer().getArtifactPath(JkProject.JAVADOC_ARTIFACT_ID));
+        createJavadocJar(project.artifactProducer.getArtifactPath(JkProject.JAVADOC_ARTIFACT_ID));
     }
 
     public void createSourceJar(Path target) {
-        JkProjectCompilation compilation = project.getCompilation();
-        JkPathTreeSet allSources = compilation.getLayout().resolveSources().and(compilation
-                .getLayout().resolveGeneratedSourceDir());
+        JkProjectCompilation compilation = project.prodCompilation;
+        JkPathTreeSet allSources = compilation.layout.resolveSources().and(compilation
+                .layout.resolveGeneratedSourceDir());
         if (!allSources.containFiles()) {
             JkLog.warn("No sources found : skip sources jar.");
             return;
         }
-        compilation.getLayout().resolveSources().and(compilation
-                .getLayout().resolveGeneratedSourceDir()).zipTo(target);
+        compilation.layout.resolveSources().and(compilation
+                .layout.resolveGeneratedSourceDir()).zipTo(target);
     }
 
     public void createBinJar() {
-        createBinJar(project.getArtifactProducer().getArtifactPath(JkArtifactId.ofMainArtifact("jar")));
+        createBinJar(project.artifactProducer.getArtifactPath(JkArtifactId.ofMainArtifact("jar")));
     }
 
-    public JkPathTreeSet getExtraFilesToIncludeInJar() {
-        return this.fatJarContentCustomizer;
+    public JkPathTreeSet getFatJarExtraContent() {
+        return this.fatJarExtraContent;
     }
 
     /**
      * Allows customizing thz content of produced fat jar.
      */
     public JkProjectPackaging customizeFatJarContent(Function<JkPathTreeSet, JkPathTreeSet> customizer) {
-        this.fatJarContentCustomizer = customizer.apply(fatJarContentCustomizer);
+        this.fatJarExtraContent = customizer.apply(fatJarExtraContent);
         return this;
     }
 
@@ -141,7 +133,7 @@ public class JkProjectPackaging {
     }
 
     public JkDependencySet getRuntimeDependencies() {
-        JkDependencySet baseDependencies = project.getCompilation().getDependencies();
+        JkDependencySet baseDependencies = project.prodCompilation.getDependencies();
         if (project.isIncludeTextAndLocalDependencies()) {
             baseDependencies = baseDependencies
                     .minus(project.textAndLocalDeps().getCompile().getEntries())
@@ -151,18 +143,18 @@ public class JkProjectPackaging {
     }
 
     public JkResolveResult resolveRuntimeDependencies() {
-        return project.getDependencyResolver().resolve(getRuntimeDependencies()
+        return project.dependencyResolver.resolve(getRuntimeDependencies()
                 .normalised(project.getDuplicateConflictStrategy()));
     }
 
     public void createSourceJar() {
-        createSourceJar(project.getArtifactProducer().getArtifactPath(JkProject.SOURCES_ARTIFACT_ID));
+        createSourceJar(project.artifactProducer.getArtifactPath(JkProject.SOURCES_ARTIFACT_ID));
     }
 
     public void createBinJar(Path target) {
-        project.getCompilation().runIfNeeded();
-        project.getTesting().runIfNeeded();
-        Path classDir = project.getCompilation().getLayout().resolveClassDir();
+        project.prodCompilation.runIfNeeded();
+        project.testing.runIfNeeded();
+        Path classDir = project.prodCompilation.layout.resolveClassDir();
         if (!Files.exists(classDir)) {
             JkLog.warn("No class dir found : skip bin jar.");
             return;
@@ -170,30 +162,30 @@ public class JkProjectPackaging {
         addManifestDefaults();
         JkJarPacker.of(classDir)
                 .withManifest(manifest)
-                .withExtraFiles(getExtraFilesToIncludeInJar())
+                .withExtraFiles(getFatJarExtraContent())
                 .makeJar(target);
     }
 
     public void createFatJar(Path target) {
-        project.getCompilation().runIfNeeded();
-        project.getTesting().runIfNeeded();
+        project.prodCompilation.runIfNeeded();
+        project.testing.runIfNeeded();
         JkLog.startTask("Packing fat jar...");
         Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
         addManifestDefaults();
-        JkJarPacker.of(project.getCompilation().getLayout().resolveClassDir())
+        JkJarPacker.of(project.prodCompilation.layout.resolveClassDir())
                 .withManifest(manifest)
-                .withExtraFiles(getExtraFilesToIncludeInJar())
+                .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
         JkLog.endTask();
     }
 
     public void createFatJar() {
-        createFatJar(project.getArtifactProducer().getArtifactPath(JkArtifactId.of("fat", "jar")));
+        createFatJar(project.artifactProducer.getArtifactPath(JkArtifactId.of("fat", "jar")));
     }
 
     private void addManifestDefaults() {
-        JkModuleId jkModuleId = project.getPublication().getModuleId();
-        String version = project.getPublication().getVersion().getValue();
+        JkModuleId jkModuleId = project.publication.getModuleId();
+        String version = project.publication.getVersion().getValue();
         if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && jkModuleId != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, jkModuleId.getName());
         }
