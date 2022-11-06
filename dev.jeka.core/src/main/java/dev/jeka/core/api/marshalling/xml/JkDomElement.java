@@ -1,5 +1,6 @@
 package dev.jeka.core.api.marshalling.xml;
 
+import dev.jeka.core.api.utils.JkUtilsString;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -171,6 +172,15 @@ public final class JkDomElement {
      * Returns <code>null</null> if the underlying element does not exist or no such named child exists.
      */
     public JkDomElement child(String name, Predicate<JkDomElement> predicate) {
+        if (name.contains("/")) {
+            String first = JkUtilsString.substringBeforeFirst(name, "/");
+            String then = JkUtilsString.substringAfterFirst(name, "/");
+            JkDomElement firstChildEl = child(first, predicate);
+            if (firstChildEl == null) {
+                throw new IllegalArgumentException("Cannot find node " + first);
+            }
+            return firstChildEl.child(then);
+        }
         if (!exist()) {
             return null;
         }
@@ -259,6 +269,10 @@ public final class JkDomElement {
         assertExist();
         consumer.accept(this);
         return this;
+    }
+
+    public JkDomDocument getDoc() {
+        return JkDomDocument.of(this.getW3cElement().getOwnerDocument());
     }
 
     /**

@@ -12,6 +12,7 @@ import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.MessageDigest;
@@ -172,6 +173,10 @@ public final class JkPathFile {
     public JkPathFile write(byte[] bytes, OpenOption ... options) {
         JkUtilsPath.write(path, bytes, options);
         return this;
+    }
+
+    public JkPathFile write(String contentUtf8, OpenOption ... options) {
+        return write(contentUtf8.getBytes(StandardCharsets.UTF_8), options);
     }
 
     public String readAsString() {
