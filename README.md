@@ -196,13 +196,7 @@ A twitter account also exist : https://twitter.com/djeang_dev
 
 # News
 
-* Completely reworked execution engine. `JkClass` and `JkPlugin` have been merged in the unified `JkBean` concept.
-* Enhanced performance with faster startup and support for Java 11 & 17.
-* Reworked command-line syntax.
-* Improved help and documentation.
-* Experimental support for Kotlin, both for writting build code and build Kotlin projects.
-* Jeka project is now organized in a mono-repo leading in a better integrated/tested components.
-
+* Version 0.10.0 soon available. Stay tuned !
 
 # Roadmap/Ideas
 

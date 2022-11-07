@@ -1,10 +1,5 @@
 # Getting started with Jeka
 
-!!! warning
-    This plugin currently works with Jeka version 0.9.15.RELEASE.
-
-    Next version of Jeka (0.9.20), which is documented here, is not yet working with the IntelliJ Plugin. 
-
 ## Install Intellij Plugin <a name="install"></a>
 
 * Install plugin directly from [here](https://plugins.jetbrains.com/plugin/13489-jeka)
@@ -16,74 +11,51 @@ As this plugin embbeds its own version of _Jeka_, that's all you need to install
 
 The below example showcases how to write tasks executable both from IDE and command line. 
 
-* Create a basic Java module in Intellij : _New_ > _Module ..._ > _Java_ > _Next_ > _Finish_
+* Create a new Jeka project in Intellij : _New_ > _Project ..._ > _Jeka_ 
+
+![plot](images/blank-project-wizard.png)
+
+Leave default (you might change the name) and press _Create_.
+
+!!! Note
+    Jeka structure (folders and files) can be created on an existing project from any type.
+    On IntelliJ *project* window-tool : _Select project_ > Click Left > Jeka ... > Scaffold ...
 
 
-* Right-click on the module, then _Jeka_ > _Generate Jeka files and folders..._
+![plot](images/blank-overall.png)
 
-![plot](images/generate-jeka-files.png)
-<br/><br/>
-* Dialog box will be open with default setting
+You get a workable Jeka project from you can :
 
-![plot](images/create-jeka-files.png)
-
-* Select *SIMPLE* and click _OK_
-
-_You get the following..._
-![plot](images/step-1.png)
-
-
-The _Jeka_ folder structure will be generated with an empty _Jeka_ class.
-
-On the right side of the IDE, nodes can be expanded to navigate on Jeka commands. These commands either come from the `Commands` class or plugins present in classpath.
-
-* Click _Commands_ > _help_ to trigger the `help` method coming from `Commands` class.
-This will display a contextual help from a list of all available commands and options.
-  
-  
-* Open a terminal and execute `./jekaw help`. This will execute the same but from the command line. For this, 
-  `jekaw` compiles your `Commands` classes behind the scene and execute a Java program which invokes the method.
-
-
-Now, you can add your own commands (like `hello` in above example) just by declaring a public no-arg method returning `void`.
-Your new method should appear instantaneously in Jeka window tool on the right.
-
-* For adding properties, just declare a public field as shown below.
-
-![plot](images/step-2.png)
-
-* Execute or debug the method by clicking on editor gutter or Jeka tool window. 
-
-* Execute `./jekaw hello -name=Joe` in terminal for invoking method while injecting property value.
-
-You can write as many method as you want, of any complexity. Also, your project can contain several KBeans.
-The first KBean class found (by fully qualified name order) is the default KBean.
-
-To run `doSomething` method on a specific kbean class named `here.is.MyOtherBean`, execute `./jekaw -kb=MyOtherBean doSomething` 
-or `./jekaw myOtherBean#doSomething`
-
-!!! tip
-    Execute `./jekaw -help` at the root of the project to knows more about command-line.
-
-[Learn more about KBeans](/reference-guide/execution-engine-concepts/#kbeans)
+- execute/debug methods from the IDE using editor glutter buttons or tool-windows explorer.
+- navigate to discover available kbeans on this project, and their content.
+- create Intellij *run-configuration* from existing methods
+- execute methods directly in the terminal (execute `./jekaw hello name=Joe` on a terminal)
+- create new method/fields. If they do not appear on tool-window, use top menu button to refresh view.
 
 ## Import 3rd Party libraries <a name="import"></a>
 
-Your classes can also use any third party libraries available on your file system or in a bynary repository.
+You can also import 3rd-party libraries to use in your build classes by using `@JkInjectClasspath`annotation.
 
-Let's add *guava* to our `Build` class : just add the `@JkInjectClasspath` annotation and refresh ide module to 
-make it available on IDE classpath.
+Libraries referenced with coordinates will come into classpath along all their dependencies.
 
-![plot](images/step-3.png)
+![plot](images/third-party-refresh.png)
 
-<br/>
-Now you can use guava in your _Build_ class.
+Do not forget to refresh *iml* explicitly when Jeka classpath has been changed.
+
+!!! Tip
+    Use _Ctrl+space_ when editing `@JkInjectClasspath`  to get dependency auto-completion.
+
+
+    ![plot](images/third-party-suggest.png)
+
+
+
 
 ## Build a Java Project
 
-It's possible to use your favorite build tool (Maven, Gradle, ...) beside Jeka in your project and let Jeka delegate builds.
+It is possible to use your favorite build tool (Maven, Gradle, ...) beside Jeka in your project and let Jeka delegate builds.
 
-It's also possible to build projects(compile, tests, jars, publish) using native Jeka capabilities.
+It is also possible to build projects(compile, tests, jars, publish) using native Jeka capabilities.
 
 1. Create a basic Java module in Intellij 
 

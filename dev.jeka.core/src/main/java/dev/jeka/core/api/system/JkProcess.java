@@ -50,7 +50,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
 
     private Path workingDir;
 
-    private boolean failOnError;
+    private boolean failOnError = true;
 
     private boolean logCommand;
 
