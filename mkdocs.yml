@@ -2,6 +2,7 @@ site_name: Jeka Build Tool
 theme:
     name: material
     logo: images/knight-color-logo.svg
+    favicon: images/knight-color-logo.svg
     palette :
         primary: blue grey
         favicon: images/knight-color-logo.svg
