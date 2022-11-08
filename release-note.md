@@ -1,4 +1,4 @@
-# 0.9.20.RELEASE (ongoing)
+# 0.9.20.RELEASE (ongoing)  
 * Polished Dependency management api  
 * Completely reworked execution engine 
 * Cleaner command-line syntax and help
