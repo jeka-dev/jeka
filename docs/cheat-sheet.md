@@ -3,7 +3,7 @@
 _Jeka_ has predefined methods that comes either from `JkClass` or built-in plugins. 
 
 * `jeka` : Displays on console methods and options invokable from command line, along with plugins available in the classpath.
-* `jeka [pugin-name]#help` : Displays on console methods and options invokable for the specified plugin (e.g. `jeka scaffold#help`).
+* `jeka [kbean-name]#help` : Displays on console methods and options invokable for the specified plugin (e.g. `jeka scaffold#help`).
 * `jeka intellij#iml` : Generates iml file for Intellij. It is generated accordingly the dependencies that is declared for _Jeka_ project.
 * `jeka intellij#iml -JKC=` : If the `jeka intellij#iml` fails due to the non-compile def classes, `-JKC=` will avoid def compilation phase.
 * `jeka eclipse#files` : Same purpose as above to generate metadata files for Eclipse.
@@ -23,7 +23,7 @@ If the class is already in classpath, then no def compilation occurs. Simply, `-
 * `-ls=BRACE` : Alters console output by delimiting tasks with braces and mentioning the processing time for each task.
 * `-ls=DEBUG` : Alters console output by showing the class name and line number where the log has been emitted.
 * `-lv` : Alters console output by displaying trace logs (emitted by `JkLog#trace`).
-* `-dcf` : Force compilation of def classes, even if it is markes as up-to-date.
+* `-cw` : Clean _.work_ directory, forcing compilation of def classes, even if it is marked as up-to-date.
 
 ## Change the JDK that Runs _Jeka_
 

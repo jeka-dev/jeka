@@ -66,6 +66,12 @@ After modifying your dependencies, do not forget to refresh Intellij by _Right C
 
 Our project is ready to code. Invoke `cleanPack` to generate binary, sources and javadoc jar files.
 
+!!! Tip
+    Navigate to the right-side _Jeka Tool Window_ > _Classpath KBeans_ > _project_ to see all available methods.
+
+    Right-click on a methods to run/debug it from IDE. 
+    It is possible to combine several methods using _Run..._ or _Debug..._
+
 For most standard project, we may not need build code, only simple properties file. To scaffold such a project :
 
 * Create a new Jeka project in Intellij : _New_ > _Project ..._ > _Jeka_
