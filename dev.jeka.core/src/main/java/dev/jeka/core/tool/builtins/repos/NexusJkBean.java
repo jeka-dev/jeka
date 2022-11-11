@@ -18,7 +18,7 @@ public class NexusJkBean extends JkBean {
 
     private static final String TASK_NAME = "Closing and releasing repositories";
 
-    @JkDoc("Comma separated filters for taking in account only specified repositories with specified profile name.")
+    @JkDoc("Comma separated filters for taking in account only repositories with specified profile names.")
     public String profileNamesFilter = "";
 
     private final JkConsumers<JkNexusRepos, Void> nexusReposConfigurators = JkConsumers.of();
@@ -33,7 +33,7 @@ public class NexusJkBean extends JkBean {
         }
     }
 
-    @JkDoc("Closes and releases the configured nexus repositories.")
+    @JkDoc("Closes and releases the nexus repositories used by project KBean to publish artifacts.")
     public void closeAndRelease() {
         JkNexusRepos nexusRepos  = getJkNexusRepos();
         if (nexusRepos == null) {

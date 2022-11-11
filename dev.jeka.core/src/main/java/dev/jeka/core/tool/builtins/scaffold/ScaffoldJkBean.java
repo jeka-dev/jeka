@@ -25,7 +25,7 @@ public class ScaffoldJkBean extends JkBean {
     public String wrapperJekaVersion;
 
     @JkDoc("Add extra content at the end of the template local.properties file.")
-    public String projectPropsExtraContent = "";
+    public String localPropsExtraContent = "";
 
     private JkConsumers<JkScaffolder, Void> configurators = JkConsumers.of();
 
@@ -39,7 +39,7 @@ public class ScaffoldJkBean extends JkBean {
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                 .addRepos(JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos());
         this.scaffolder.setDependencyResolver(dependencyResolver);
-        this.scaffolder.addProjectPropsFileContent(this.projectPropsExtraContent);
+        this.scaffolder.addProjectPropsFileContent(this.localPropsExtraContent);
         configurators.accept(scaffolder);
         return scaffolder;
     }
