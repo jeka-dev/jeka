@@ -27,7 +27,7 @@ If the class is already in classpath, then no def compilation occurs. Simply, `-
 
 ## Change the JDK that Runs _Jeka_
 
-To determine the JDK to run upon, _Jeka_ looks in priority order at :7
+To determine the JDK to run upon, _Jeka_ looks in priority order at :
 
 * _JEKA_JDK_ environment variable ([_JEKA_JDK_]/bin/java must point on _java_ executable)
 * _JAVA_HOME_ environment variable 
