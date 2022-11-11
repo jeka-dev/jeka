@@ -18,6 +18,7 @@ public class JkVersionTest {
         assertTrue(comp.compare("0.8.9.RELEASE", "0.8.14.RELEASE") < 0);
         assertTrue(comp.compare("0.8.9.M9", "0.8.9.M11") < 0);
         assertTrue(comp.compare("1.0.0", "1.0.0.RC1") > 0);
+        assertTrue(comp.compare("1.0.0", "1.0.0-RC1") > 0);
         assertTrue(comp.compare("1.0", "1.0.1") < 0);
         assertTrue(comp.compare("1.0.0", "1.0.0.1") < 0);
         assertTrue(comp.compare("1.0.0", "1.0.0.0") == 0);

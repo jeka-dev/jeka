@@ -222,9 +222,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         getProject().executeCleanExtraActions();
     }
 
-    @JkDoc("Perform declared pre compilation task as generating sources.")
-    public void preCompile() {
-        getProject().prodCompilation.preCompileActions.run();
+    @JkDoc("Generate sources")
+    public void generateSources() {
+        getProject().prodCompilation.generateSources();
     }
 
     @JkDoc("Performs compilation and resource processing.")
@@ -297,11 +297,6 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     public void info() {
         JkLog.info(this.getProject().getInfo());
         JkLog.info("\nExecute 'java#showDependencies' to display details on dependencies.");
-    }
-
-    @JkDoc("Generate sources")
-    public void generateSources() {
-        getProject().prodCompilation.generateSources();
     }
 
     @JkDoc("Run the generated jar.")
