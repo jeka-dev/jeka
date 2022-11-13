@@ -19,7 +19,7 @@ Jeka offers an execution engine, a build API and a powerful plugin architecture 
 
 # Based on simple ideas
 
-- Run Java methods from both IDE and command line indifferently.
+- Run Java public methods from both IDE and command line indifferently.
 - Simply use Java libraries for building Java projects programmatically.
 
 <br/>
@@ -103,7 +103,8 @@ class Build extends JkBean {
 ```
 </details>
 
-Projects can be **also built without any build code** in a very concise way : 1 properties and 1 flat file only.
+Projects can be **also built without any build code** in a very concise way : 1 properties file for configuration and 
+on flat file only for declaring dependencies.
 
 <details>
 <summary>Example building springboot project using Sonarqube + Jacoco test coverage</summary>
@@ -113,7 +114,7 @@ Projects can be **also built without any build code** in a very concise way : 1 
 jeka.cmd._append=springboot# @dev.jeka:jacoco-plugin @dev.jeka:sonarqube-plugin @dev.jeka:springboot-plugin
 
 jeka.cmd.build=project#clean project#pack
-jeka.cmd.build_quality=project#clean project#pack sonarqube#run jacoco# sonarqube#logOutput=true -Dsonar.host.url=http://localhost:9000
+jeka.cmd.build_quality=:build sonarqube#run jacoco# sonarqube#logOutput=true -Dsonar.host.url=http://localhost:9000
 
 jeka.java.version=17
 springboot#springbootVersion=2.7.5
@@ -155,6 +156,9 @@ It's quite easy to discover what Jeka does behind the scene and troubleshot issu
 
 # Get Jeka
 
+The simpler way to get Jeka is by using [IntelliJ plugin](https://github.com/jerkar/jeka-ide-intellij) that will 
+handle distribution installation for you. Anyway you can get the binary distributions from the following places :
+
 * Snapshots : https://oss.sonatype.org/content/repositories/snapshots/dev/jeka/jeka-core/
 * Milestones and Release Candidates : https://github.com/orgs/jeka-dev/packages?repo_name=jeka
 * Releases : https://repo1.maven.org/maven2/dev/jeka/jeka-core/
@@ -165,9 +169,9 @@ The distribution is the file named jeka-core-x.x.x-distrib.zip.
 
 Visit following pages according your expectation :
 
+* [Getting Started (Needs Intellij Plugin)](https://jeka-dev.github.io/jeka/tutorials/gui-getting-started/#getting-started-with-jeka)
 * [Reference Guide](https://jeka-dev.github.io/jeka/)
 * [Working examples](https://github.com/jeka-dev/working-examples)
-* [Getting Started (Needs Intellij Plugin)](https://jeka-dev.github.io/jeka/tutorials/gui-getting-started/#getting-started-with-jeka) 
 
 # External plugins
 
@@ -200,11 +204,14 @@ A twitter account also exist : https://twitter.com/djeang_dev
 
 # Roadmap/Ideas
 
-* Improve landing page and provide tutorials based on Intellij plugin for easy/fast starting.
-* Stabilise api from user feedbacks. API is quite workable now but may be improved.
+We hope the 0.10.xx series to be the last prior 1.0.0. 
+0.10.xx series is a considerable improvement from 0.9.xx. 
+We expect our users to give feedbacks to finalise the product.  
+
+* Stabilise api from user feedbacks. API is quite workable now but may be improved from user inputs
 * Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
+* Improve Kotlin integration
 * Provide a plugin for Android
-* Provides a graphical plugin for better integration with Eclipse
 
 Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
@@ -215,7 +222,7 @@ This repository is organized as a _mono repo_. It contains The Jeka core project
 automation testing.
 
 * dev.jeka.core : Complete Jeka tool
-* plugins : Jeka plugins released along Jeka core 
+* plugins : Jeka plugins released along Jeka core (Springboot, NodeJs, Jacoco and Sonarqube)
 * samples : Sample projects serving for examples and automation testing
 * dev.jeka.master : The master build for building all together.
 

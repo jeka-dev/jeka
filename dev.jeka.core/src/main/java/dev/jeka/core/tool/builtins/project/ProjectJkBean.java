@@ -449,7 +449,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 Path breakinkChangeFile = configuredProject.getBaseDir().resolve("breaking_versions.txt");
                 String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
                         "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
-                JkPathFile.of(breakinkChangeFile).createIfNotExist().write(text.getBytes(StandardCharsets.UTF_8));
+                JkPathFile.of(breakinkChangeFile).write(text);
                 Path sourceDir =
                         configuredProject.prodCompilation.layout.getSources().toList().get(0).getRoot();
                 String pluginCode = JkUtilsIO.read(ProjectJkBean.class.getResource("pluginclass.snippet"));
