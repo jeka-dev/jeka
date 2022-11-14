@@ -79,7 +79,7 @@ class Build extends JkBean {
     }
     
     private void configure(JkProject project) {
-        project.simpleFacade()
+        project.flatFacade()
                 .configureCompileDependencies(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-web")
                         .and("org.projectlombok:lombok:1.18.20")
