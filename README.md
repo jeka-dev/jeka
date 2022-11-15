@@ -31,7 +31,7 @@ class Build extends JkBean {
     private JkProject project;
     
     Build() {
-        project = JkProject.of().simpleFacade()
+        project = JkProject.of().flatFacade()
             .setBaseDir(".")
             .includeJavadocAndSources(true, true)  // produce javadoc and sources jars
             .configureCompileDependencies(deps -> deps
@@ -46,7 +46,7 @@ class Build extends JkBean {
     }
 
     public void cleanPack() {
-        JkPathTree.of(getBaseDir().resolve("jeka//output")).deleteContent();
+        cleanOutput();
         project.pack();  // package all artifacts of the project (jar, source jar and javadoc)
     }
 
