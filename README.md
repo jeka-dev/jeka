@@ -200,7 +200,11 @@ A twitter account also exist : https://twitter.com/djeang_dev
 
 # News
 
-* Version 0.10.0 soon available. Stay tuned !
+* Version 0.10.0 is out ! This is major product improvement.
+
+# Versioning 
+
+Jeka versioning follows [semantic versioning 2.0](https://semver.org/spec/v2.0.0.html).
 
 # Roadmap/Ideas
 
