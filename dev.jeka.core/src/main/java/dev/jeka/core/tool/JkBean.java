@@ -73,7 +73,7 @@ public abstract class JkBean {
         }
     }
 
-    public JkImportedJkBeans getImportedJkBeans() {
+    public JkImportedJkBeans getImportedBeans() {
         return importedJkBeans;
     }
 

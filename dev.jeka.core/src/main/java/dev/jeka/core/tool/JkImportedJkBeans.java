@@ -67,7 +67,7 @@ public final class JkImportedJkBeans {
         for (final JkBean jkBean : directs) {
             final Path dir = jkBean.getBaseDir();
             if (!files.contains(dir)) {
-                result.addAll(jkBean.getImportedJkBeans().computeTransitives(files));
+                result.addAll(jkBean.getImportedBeans().computeTransitives(files));
                 result.add(jkBean);
                 files.add(dir);
             }

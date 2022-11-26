@@ -61,7 +61,7 @@ public final class EclipseJkBean extends JkBean {
         JkIdeSupport projectIde = IdeSupport.getProjectIde(this);
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
-            for (final JkBean importedJkBean : getImportedJkBeans().get(false)) {
+            for (final JkBean importedJkBean : getImportedBeans().get(false)) {
                 importedRunProjects.add(importedJkBean.getBaseDir());
             }
             final JkEclipseClasspathGenerator classpathGenerator =
