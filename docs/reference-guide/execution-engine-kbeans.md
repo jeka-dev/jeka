@@ -106,11 +106,16 @@ Many methods/properties can be invoked in a single command line.
 !!! info
     _[kbeanName]#_ prefix can be omitted. By default, it will be resolved on the first KBean found in _def_ dir. 
     Search is made by fully qualified class name alphabetical order.
+    
+    
 
-#### From KBean main method
+#### From IntelliJ Jeka Plugin
 
+[IntelliJ Jeka Plugin] allows to invoke methods directly from the editor or the explorer tool window.
 
-_KBean_ methods can also be launched/debugged from IDE.
+#### From naked IDE
+
+_KBean_ methods can also be launched/debugged from IDE using classic `main` methods.
 
 In _KBean_ class, declare one or many main methods as :
 
@@ -137,7 +142,6 @@ Launching or debugging this way is performant as all build classes and their dep
 
     To change _intelliJ_ defaults, follow : **Edit Configurations | Edit configuration templates... |  Application | Working Directory : $MODULE_DIR$**.
 
-#### From dev.jeka.core.tool.Main 
 
 Sometimes, you may need to mimic closer the command line behavior, for debugging purpose or to pass '@' arguments.
 
@@ -150,7 +154,7 @@ Sometimes, you may need to mimic closer the command line behavior, for debugging
 
 Generally _KBeans_ interact with each other by declaring KbBeans using `JkBean#getBean(MyBean.class)` method as shown in [this example](#simple-example).
 
-When a _KBean_ depends on another one, it's good to declare it as an instance property of the first bean as this 
+When a _KBean_ depends on another one, it's good to declare it as an instance field of the first bean, as this 
 dependency will be mentioned in the auto-generated documentation and showed explicitly in IDE tool.
 
 ### KBeans in Multi-Projects
