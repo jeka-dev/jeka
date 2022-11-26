@@ -148,15 +148,14 @@ Sometimes, you may need to mimic closer the command line behavior, for debugging
 
 ### Let KBeans cooperate
 
-Generally _KBeans_ interact with each other inside their `init` method. They access each other using 
-`getRuntime().getBean(MyBean.class)` as shown in [this example](#simple-example).
+Generally _KBeans_ interact with each other by declaring KbBeans using `JkBean#getBean(MyBean.class)` method as shown in [this example](#simple-example).
 
 When a _KBean_ depends on another one, it's good to declare it as an instance property of the first bean as this 
-dependency will be mentioned in the auto-generated documentation.
+dependency will be mentioned in the auto-generated documentation and showed explicitly in IDE tool.
 
 ### KBeans in Multi-Projects
 
-In multi-project build, it's quite common that a _KBean_ accesses to a _KBean_ instance coming from another project. 
+In multi-project, it's quite common that a _KBean_ accesses to a _KBean_ instance coming from another project. 
 You can achieve it in a statically typed way.
 
 * In _master_ _KBean_, declare a field of type `JkBean` (e.g. ´JkBean importedBuild;`). It doesn't have to be public.
@@ -169,7 +168,7 @@ You can achieve it in a statically typed way.
 
 ### Standard KBeans
 
-There is a bunch of _KBeans_ bundle within _Jeka_. Those _KBeans_ are always present.
+There is a bunch of _KBeans_ bundled within _Jeka_. Those _KBeans_ are always present.
 
 #### project
 
@@ -198,4 +197,4 @@ a project ready to build a JVM-based project.
 
 #### git
 
-`GitJkBean` exposes some common git command combos.
+`GitJkBean` exposes some common git command combos. It can also auto-inject version inferred from Git into *project* KBean.
