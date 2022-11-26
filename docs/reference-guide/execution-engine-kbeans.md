@@ -45,6 +45,8 @@ public class SimpleJkBean extends JkBean {
         projectBean.pack();
     }
 
+    // The main method is only here for convenience in order to execute conveniently Jeka within the IDE
+    // If you use IntelliJ plugin, you won't need it.
     public static void main(String[] args) {
         JkInit.instanceOf(SimpleProjectJkBean.class, args).cleanPublish();
     }
