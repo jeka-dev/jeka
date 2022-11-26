@@ -109,4 +109,4 @@ Execute `./jekaw project#pack` to generate the bootable jar.
 Execute `./jekaw project#runJar` to run the bootable.jar
 
 !!! Note
-    As for _java project_, Springbooty projects can be scaffolded with _code.less_ flavor.
+    As for _java project_, Springboot projects can be scaffolded with _code.less_ flavor.
