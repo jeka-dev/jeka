@@ -1,7 +1,6 @@
 ## Def classes
 
-Def classes are the compilation result of Java/Kotlin source files located in _jeka/def_. They can be declared at root or 
-in sub-folders for packages.
+Def classes are the compilation result of Java/Kotlin source files located in _jeka/def_. 
 Execution engine compiles these files on the fly prior adding them to the [Jeka classpath](#jeka-classpath).
 
 It is possible to specify compilation options by annotating a _def class_ as :
@@ -9,7 +8,7 @@ It is possible to specify compilation options by annotating a _def class_ as :
 ```Java
 @JkCompileOption("-deprecation")
 @JkCompileOption({"-processorPath", "/foo/bar"})
-class MyBuild {
+class MyBuild extends JkBean {
   ...
 }
 ```
@@ -41,8 +40,8 @@ It's possible to inject transitively dependencies into classpath by either annot
 !!! note
     By default, _jeka_ fetch dependencies from maven central (https://repo.maven.apache.org/maven2).
 
-    You can select another default repository by setting the `jeka.repos.download.url` options. 
-    We recommend storing this value in your [USER DIR]/.jeka/options.properties file to be reused across projects.
+    You can select another default repository by setting the `jeka.repos.download.url` property. 
+    We recommend storing this value in your [USER DIR]/.jeka/global.properties file to be reused across projects.
 
     For more details, see `JkRepoFromOptions` javadoc.
 
@@ -79,7 +78,8 @@ Jeka supports multi-module projects in _Jeka classpath_ of a given project can i
 
 ```Java
 @JkInjectProject("../core")
-class MyBuild {
+class MyBuild extends JkBean {
   ...
 }
 ```
+Now, classes from project '../core' can be reused in this buiild class.
