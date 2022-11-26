@@ -70,7 +70,7 @@ When _Jeka_ wrapper is installed on a project, execute `jekaw` instead of `jeka`
 
 _Jeka_ automatically creates a directory  _[User Home]/.jeka_ when running for the first time. This directory may contain :
 
-* __options.properties__ (file - optional) : Properties defined at global level (see later section).
+* __global.properties__ (file - optional) : Properties defined at global level (see later section).
 * __cache__ (directory - generated) : Various files cached by Jeka as downloaded files and specifically dependency artifacts. This directory can be safely deleted.
 * __maven_publish_dir__ (directory - generated) : Contains artifacts that your projects have published locally respecting Maven repository standards
 * __ivy_publish_dir__ (directory - generated) : Contains artifacts that your projects have published locally respecting Ivy repository standards
