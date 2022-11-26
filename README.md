@@ -199,7 +199,7 @@ A twitter account also exist : https://twitter.com/djeang_dev
 
 # Versioning 
 
-JeKa versioning follows [semantic versioning 2.0](https://semver.org/spec/v2.0.0.html).
+JeKa follows [semantic versioning 2.0](https://semver.org/spec/v2.0.0.html).
 
 # Roadmap/Ideas
 
