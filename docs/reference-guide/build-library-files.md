@@ -1,10 +1,10 @@
 ## Files
 
-File manipulation is a central part for building software.
-Jeka embraces JDK7 *java.nio.file* API by adding some concepts around, to provide a powerful fluent style API performing
+File manipulation is a central part of building software.
+Jeka embraces JDK7 *java.nio.file* API by adding some concepts around it, to provide a powerful and fluent style of API performing
 recurrent tasks with minimal effort.
 
-The following classes lie in `dev.jeka.core.api.file` package:
+The following classes lie in the `dev.jeka.core.api.file` package:
 
 * `JkPathFile` A simple wrapper for files (not folders). It provides copying, interpolation, checksum, deletion and creation methods.
 
@@ -13,16 +13,16 @@ The following classes lie in `dev.jeka.core.api.file` package:
 * `JkPathMatcher` An immutable `java.nio.file.PathMatcher` based on `java.nio.file` glob pattern or regerxp.
   Used by `JkPathTree` to filter in/out files according name patterns.
 
-* `JkPathTree` An Immutable root folder along a `PathMatcher` providing operations to copy, navigate, zip or iterate.
+* `JkPathTree` An Immutable root folder along a `PathMatcher` providing operations to copy, navigate, zip, or iterate.
   This is a central class in Jeka API.
 
-* `JkZipTree` Same as `JkPathTree` but using a zip file instead of a directory. It allows to manipulate a zip file
+* `JkZipTree` Same as `JkPathTree` but using a zip file instead of a directory. It allows you to manipulate a zip file
   as a regular folder.
 
-* `JkPathTreeSet` An Immutable set of `JkPathTree`. Helpful to define set of sources/resources and create jar/zip files.
+* `JkPathTreeSet` An Immutable set of `JkPathTree`. Helpful to define a set of sources/resources and create jar/zip files.
 
 * `JkResourceProcessor` A mutable processor for copying a set of files, preserving the structure and
-  replacing some text by other text. Typically, used for replacing token as `${server.ip}` by an actual value.
+  replacing some texts with others. Typically used for replacing the token `${server.ip}` with an actual value.
 
 Examples
 
