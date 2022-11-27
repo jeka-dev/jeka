@@ -9,7 +9,7 @@ As this plugin embeds its own version of _Jeka_, that's all we need to install o
 
 ## Hello World ! <a name="helloworld"></a>
 
-The below example showcases how to write tasks executable both from IDE and command line. 
+The below example showcases how to write tasks executable both from IDE and the  command line. 
 
 * Create a new Jeka project in Intellij : _New_ > _Project ..._ > _Jeka_ 
 
@@ -18,32 +18,32 @@ The below example showcases how to write tasks executable both from IDE and comm
 Leave default (we might change the name) and press _Create_.
 
 !!! Note
-    Jeka structure (folders and files) can be created on an existing project from any type.
+    A Jeka structure (folders and files) can be created in an existing project of any type.
     On IntelliJ *project* window-tool : _Select project_ > Click Left > Jeka ... > Scaffold ...
 
 
 ![plot](images/blank-overall.png)
 
-We get a workable Jeka project from we can :
+We get a workable Jeka project from which we can :
 
 - execute/debug methods from the IDE using editor gutter buttons or tool-windows explorer.
 - navigate to discover available KBeans on this project, and their content.
 - create Intellij *run-configuration* from existing methods
 - execute methods directly in the terminal *(e.g. `./jekaw hello name=Joe`)*
-- create new methods/fields. If they do not appear on tool-window, use top menu button to refresh view.
+- create new methods/fields. If they do not appear in the tool-window, use the top menu button to refresh view.
 
 ## Import 3rd Party libraries <a name="import"></a>
 
-We can also import 3rd-party libraries to use in our build classes by using `@JkInjectClasspath`annotation.
+We can also import 3rd-party libraries to use in our build classes by using the `@JkInjectClasspath`annotation.
 
-Libraries referenced with coordinates will come into classpath along all their dependencies.
+Libraries referenced with coordinates will come into classpath along with all their dependencies.
 
 ![plot](images/third-party-refresh.png)
 
-Do not forget to refresh *iml* explicitly when Jeka classpath has been changed.
+Do not forget to refresh *iml* explicitly when the Jeka classpath has been changed.
 
 !!! Tip
-    Use _Ctrl+space_ when editing `@JkInjectClasspath`  to get dependency auto-completion.
+    Use _Ctrl+space_ when editing `@JkInjectClasspath` to get dependency auto-completion.
 
     ![plot](images/third-party-suggest.png)
 
@@ -56,23 +56,23 @@ Do not forget to refresh *iml* explicitly when Jeka classpath has been changed.
 
 ![plot](images/java-build-code.png)
 
-We get a workable Java project. Now we can :
+Now we have a workable Java project. We can :
 
 * Add dependencies using `project.flatFacade().configureXxxDependencies()` in _Build_ class.
 * Add dependencies by editing _project-dependencies.txt_ file
-* Customize `project` instance in order it fits our need.
+* Customize `project` instance in order to fits your need.
 
 After modifying your dependencies, do not forget to refresh Intellij by _Right Click_ > _Jeka Synchronise Iml File_
 
-Our project is ready to code. Invoke `cleanPack` to generate binary, sources and javadoc jar files.
+Our project is ready to code. Invoke `cleanPack` to generate binary, sources, and javadoc jar files.
 
 !!! Tip
     Navigate to the right-side _Jeka Tool Window_ > _Classpath KBeans_ > _project_ to see all available methods.
 
-    Right-click on a methods to run/debug it from IDE. 
+    Right-click on a method to run/debug it from IDE. 
     It is possible to combine several methods using _Run..._ or _Debug..._
 
-For most standard project, we may not need build code, only simple properties file. To scaffold such a project :
+For most standard projects, we may not need a build code, only a simple properties file. To scaffold such a project :
 
 * Create a new Jeka project in Intellij : _New_ > _Project ..._ > _Jeka_
 
@@ -82,9 +82,9 @@ We get :
 
 ![plot](images/java-build-properties.png)
 
-Execute `./jekaw :build_quality` to make a full build and perform Sonarqube analysis + code coverage.
+Execute `./jekaw :build_quality` to create a full build and perform Sonarqube analysis + code coverage.
 
-Properties and code can be used in conjunction, tough build class may override values defined in _local.properties_.
+Properties and code can be used in conjunction, a tough build class may override values defined in _local.properties_.
 
 
 We will find many project examples [here](https://github.com/jerkar/working-examples)
@@ -102,7 +102,7 @@ We will find many project examples [here](https://github.com/jerkar/working-exam
 
 ![plot](images/springboot.png)
 
-We get a project ready to code containing already a workable _RestController_ and its test counterpart.
+We now have a project ready to code, and already containing a workable _RestController_ and its test counterpart.
 
 Execute `./jekaw project#pack` to generate the bootable jar.
 
