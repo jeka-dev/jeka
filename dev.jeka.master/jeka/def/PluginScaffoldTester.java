@@ -1,6 +1,7 @@
 import dev.jeka.core.JekaCommandLineExecutor;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,7 +23,8 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
         Path dir = scaffold("-lsu scaffold#run springboot#  springboot#scaffoldDefClasspath="
                         + sprinbootBluginJar + " @" + sprinbootBluginJar,
                 "project#pack -lsu", false);
-        if (properties.get("jeka.jdk.17") != null) {   // No JDK 17 set on github actions
+        String jdk17 = properties.get("jeka.jdk.17");
+        if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
             runJeka(dir.toString(), "intellij#iml");
         }
     }
