@@ -25,14 +25,17 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 "project#pack -lsu", false);
         String jdk17 = properties.get("jeka.jdk.17");
         if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
-            //runJeka(dir.toString(), "intellij#iml");
+            runJeka(dir.toString(), "intellij#iml");
         }
     }
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
         runJeka(path.toString(), scaffoldCmdLine);
-        runJeka(checkWithWrapper, path.toString(), checkCommandLine);
+        String jdk17 = properties.get("jeka.jdk.17");
+        if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
+            runJeka(checkWithWrapper, path.toString(), checkCommandLine);
+        }
         return path;
     }
 
