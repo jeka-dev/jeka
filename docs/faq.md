@@ -34,7 +34,7 @@ Simply mention it as option, for example in your _[JEKA HOME]/options.properties
 jeka.jdk.9=/software/jdk9
 ```
 
-This way, if one of your project source codes is declared to be in a specific Java version, the relevant JDK version will be picked up automatically.
+This way, if one of your project source code is declared to be in a specific Java version, the relevant JDK version will be picked up automatically.
 
 ### How can I use Eclipse compiler in Jeka ?
 
@@ -56,7 +56,7 @@ public class Build extends JkBean {
 
 ### How can I generate Eclipse/Intellij without using ProjectJkBean ?
 
-Just make your _KBean_ class implement` implements `JkJavaIdeSupport`.
+Just make your _KBean_ class implement `JkJavaIdeSupport`.
 
 
 
