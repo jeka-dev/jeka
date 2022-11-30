@@ -1,6 +1,6 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Path;
@@ -11,8 +11,8 @@ import java.nio.file.Path;
  */
 class CoreScaffoldTester extends JekaCommandLineExecutor {
 
-    CoreScaffoldTester() {
-        super("..");
+    CoreScaffoldTester(JkProperties properties) {
+        super("..", properties);
     }
 
     void run() {
@@ -29,11 +29,6 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
         runJeka(path.toString(), scaffoldCmdLine);
         runJeka(checkWithWrapper, path.toString(), checkCommandLine);
         return path;
-    }
-
-    public static void main(String[] args) throws Exception {
-        JkLog.setDecorator(JkLog.Style.BRACE);
-        new CoreScaffoldTester().run();
     }
 
 }

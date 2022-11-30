@@ -1,5 +1,5 @@
 import dev.jeka.core.JekaCommandLineExecutor;
-import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.awt.*;
@@ -13,8 +13,8 @@ import java.nio.file.Path;
  */
 class SamplesTester extends JekaCommandLineExecutor {
 
-    SamplesTester() {
-        super("..");
+    SamplesTester(JkProperties properties) {
+        super("..", properties);
     }
 
     void run() {
@@ -40,17 +40,5 @@ class SamplesTester extends JekaCommandLineExecutor {
             throw new UncheckedIOException(e);
         }
     }
-
-    public static void main(String[] args) throws IOException {
-        JkLog.setDecorator(JkLog.Style.BRACE);
-        new SamplesTester().run();
-    }
-
-    public static class ExtraLauncher {
-        public static void main(String[] args) {
-            new SamplesTester().launchManually("scaffold#run project#");
-        }
-    }
-
 
 }

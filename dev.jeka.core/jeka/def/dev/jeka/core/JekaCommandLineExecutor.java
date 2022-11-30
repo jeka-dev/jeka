@@ -2,6 +2,7 @@ package dev.jeka.core;
 
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -22,10 +23,13 @@ public abstract class JekaCommandLineExecutor {
 
     private Path jacocoReportFile;
 
-    protected JekaCommandLineExecutor(Path samplesRootDir, Path jekaDistrib) {
+    protected final JkProperties properties;
+
+    protected JekaCommandLineExecutor(Path samplesRootDir, Path jekaDistrib, JkProperties properties) {
         super();
         this.samplesRootDir = samplesRootDir;
         this.jekaDir = jekaDistrib;
+        this.properties =properties;
     }
 
     public void setJacoco(Path agent, Path report) {
@@ -33,12 +37,12 @@ public abstract class JekaCommandLineExecutor {
         jacocoReportFile = report.toAbsolutePath().normalize();
     }
 
-    protected JekaCommandLineExecutor(Path projectRootDir) {
-        this(projectRootDir.resolve("samples"), projectRootDir.resolve("dev.jeka.core/jeka/output/distrib"));
+    protected JekaCommandLineExecutor(Path projectRootDir, JkProperties properties) {
+        this(projectRootDir.resolve("samples"), projectRootDir.resolve("dev.jeka.core/jeka/output/distrib"), properties);
     }
 
-    protected JekaCommandLineExecutor(String projectRootDir) {
-        this(Paths.get(projectRootDir));
+    protected JekaCommandLineExecutor(String projectRootDir, JkProperties properties) {
+        this(Paths.get(projectRootDir), properties);
     }
 
     protected void runJekaw(String projectDir, String cmdLine) {

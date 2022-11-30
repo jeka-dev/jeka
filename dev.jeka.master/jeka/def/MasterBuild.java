@@ -74,8 +74,8 @@ class MasterBuild extends JkBean {
         JkLog.endTask();
         if (runSamples) {
             JkLog.startTask("Running samples");
-            SamplesTester samplesTester = new SamplesTester();
-            PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
+            SamplesTester samplesTester = new SamplesTester(this.getRuntime().getProperties());
+            PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester(this.getRuntime().getProperties());
             if (coreJacocoBean != null) {
                 JacocoJkBean.AgentJarAndReportFile jacocoRunInfo = coreJacocoBean.getAgentAndReportFile();
                 samplesTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
@@ -164,11 +164,11 @@ class MasterBuild extends JkBean {
     }
 
     public void runSamples()  {
-        new SamplesTester().run();
+        new SamplesTester(this.getRuntime().getProperties()).run();
     }
 
     public void runScaffoldsWithPlugins() {
-        new PluginScaffoldTester().run();
+        new PluginScaffoldTester(this.getRuntime().getProperties()).run();
     }
 
     public void publishLocal() {

@@ -173,7 +173,7 @@ public class CoreBuild extends JkBean {
 
     void testScaffolding()  {
         JkLog.startTask("Run scaffold tests");
-        new CoreScaffoldTester().run();
+        new CoreScaffoldTester(this.getRuntime().getProperties()).run();
         JkLog.endTask();
     }
 
