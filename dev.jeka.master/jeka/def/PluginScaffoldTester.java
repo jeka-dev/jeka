@@ -25,7 +25,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 "project#pack -lsu", false);
         String jdk17 = properties.get("jeka.jdk.17");
         if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
-            runJeka(dir.toString(), "intellij#iml");
+            //runJeka(dir.toString(), "intellij#iml");
         }
     }
 
