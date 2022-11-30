@@ -1,8 +1,8 @@
-The `dev.jeka.core.api.tooling` package provides integration with tools developers generally deal with.
+The `dev.jeka.core.api.tooling` package provides integration with tools that developers generally deal with.
 
 ## Eclipse
 
-`JkEclipseClasspathGenerator` and `JkEclipseProjectGenerator` provides method to generate a proper .classpath and .project file respectively.
+`JkEclipseClasspathGenerator` and `JkEclipseProjectGenerator` provides a method for generating a proper .classpath and .project file respectively.
 
 `JkEclipseClasspathApplier` reads information from a .classpath file.
 
@@ -19,6 +19,6 @@ The `dev.jeka.core.api.tooling` package provides integration with tools develope
 `JkMvn` wraps Maven command line in a lean API
 
 `JkPom` reads POM/BOM to extract information like : declared dependencies, dependency management, repos,
-properties, version and artifactId.
+properties, version, and artifactId.
 
 
