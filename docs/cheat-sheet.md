@@ -2,8 +2,8 @@
 
 _Jeka_ has predefined methods that comes either from `JkClass` or built-in plugins. 
 
-* `jeka` : Displays console methods and options invokable from command line, along with plugins available in the classpath.
-* `jeka [kbean-name]#help` : Displays console methods and options invokable for the specified plugin (e.g. `jeka scaffold#help`).
+* `jeka help` : Displays methods and options invokable from command line, along with plugins available in the classpath.
+* `jeka [kbean-name]#help` : Displays methods and options invokable for the specified plugin (e.g. `jeka scaffold#help`).
 * `jeka intellij#iml` : Generates iml file for Intellij. This is generated according to the dependencies declared for _Jeka_ project.
 * `jeka intellij#iml -JKC=` : If the `jeka intellij#iml` fails due to the non-compile def classes, `-JKC=` will avoid def compilation phase.
 * `jeka eclipse#files` : Same purpose as above to generate metadata files for Eclipse.
@@ -32,7 +32,7 @@ To determine the JDK to run upon, _Jeka_ looks at, in order of priority :
 * _JEKA_JDK_ environment variable ([_JEKA_JDK_]/bin/java must point on _java_ executable)
 * _JAVA_HOME_ environment variable 
 
-If none of the above varaiables are present, _Jeka_ will run on the _java_ executable accessible from the _PATH_ environment.
+If none of the above variables are present, _Jeka_ will run on the _java_ executable accessible from the _PATH_ environment.
 
 ## Change the Repository _Jeka_ uses to Fetch Dependencies 
 
