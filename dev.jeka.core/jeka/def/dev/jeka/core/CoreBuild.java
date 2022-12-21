@@ -25,7 +25,6 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import static dev.jeka.core.api.project.JkProject.JAVADOC_ARTIFACT_ID;
 import static dev.jeka.core.api.project.JkProject.SOURCES_ARTIFACT_ID;
@@ -111,8 +110,6 @@ public class CoreBuild extends JkBean {
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
-        final List<Path> ivySourceLibs = JkPathTree.of(getBaseDir()).goTo("jeka/sources")
-                .andMatching(true, "ivy-*.jar").getFiles();
         distrib
             .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"))
             .importDir(getBaseDir().resolve("src/main/shell"))
@@ -125,7 +122,6 @@ public class CoreBuild extends JkBean {
 
         if (artifactProducer.getArtifactIds().contains(JAVADOC_ARTIFACT_ID)) {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
-            // distrib.importFiles(artifactProducer.getArtifactPath(JAVADOC_ARTIFACT_ID));
         }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("wrapper/jekaw")).setPosixExecPermissions();
