@@ -26,8 +26,10 @@ import dev.jeka.core.tool.builtins.scaffold.JkScaffolder;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -129,6 +131,11 @@ public final class SpringbootJkBean extends JkBean {
             scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
         }
         scaffolder.extraActions.append(this::scaffoldSample);
+        String readmeContent = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/README.md"));
+        scaffolder.extraActions.append(() -> {
+            JkPathFile readmeFile = JkPathFile.of(getBaseDir().resolve("README.md")).createIfNotExist();
+            readmeFile.write(readmeContent.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        });
     }
 
     private void createBootJar(JkProject project) {

@@ -24,14 +24,13 @@ public class NodeJsJkBean extends JkBean {
     @JkDoc("The version of NodeJs to use")
     public String version = "18.12.0";
 
-    @JkDoc("The command line to execute (without command name.")
+    @JkDoc("The command line to execute with nodeJs#npm or nodeJs#npx (without command name.")
     public String cmdLine;
 
-    private Path workingDir;
+    @JkDoc("The relative path of the nodeJs project.")
+    public String clientDir = "client";
 
-    public NodeJsJkBean() {
-        this.workingDir = getBaseDir();
-    }
+    private Path workingDir;
 
     private Path getDistribPath() {
         return JkLocator.getCacheDir().resolve("nodejs").resolve(version);
@@ -53,7 +52,7 @@ public class NodeJsJkBean extends JkBean {
         if (!nodeJs.isBinaryPresent()) {
             download();
         }
-        JkNodeJs.of(distrib).npm(workingDir, cmdLine);
+        JkNodeJs.of(distrib).npm(getWorkingDir(), cmdLine);
     }
 
     public void npx(String cmdLine) {
@@ -62,7 +61,7 @@ public class NodeJsJkBean extends JkBean {
         if (!nodeJs.isBinaryPresent()) {
             download();
         }
-        JkNodeJs.of(distrib).npx(workingDir, cmdLine);
+        JkNodeJs.of(distrib).npx(getWorkingDir(), cmdLine);
     }
 
    public NodeJsJkBean setWorkingDir(Path workingDir) {
@@ -128,8 +127,15 @@ public class NodeJsJkBean extends JkBean {
            String arch = JkUtilsSystem.getProcessor().isAarch64() ? "arm64" : "x64";
            return baseName + arch;
        } else {
-           throw new IllegalStateException("Unknow operating system " + System.getProperty("os.name"));
+           throw new IllegalStateException("Unknown operating system " + System.getProperty("os.name"));
        }
+   }
+
+   public Path getWorkingDir() {
+        if (workingDir != null) {
+            return workingDir;
+        }
+        return getBaseDir().resolve(clientDir);
    }
 
 }

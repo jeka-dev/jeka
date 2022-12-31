@@ -65,8 +65,8 @@ final class HelpDisplayer {
         sb.append("  -log.verbose (shorthand -lv) : log 'trace' level.\n");
         sb.append("  -log.ivy.verbose (shorthand -liv) : log 'trace' level + Ivy trace level.\n");
         sb.append("  -log.runtime.information (shorthand -lri) : log Jeka runtime information at startup.\n");
-        sb.append("  -log.no.animation (shorthand -lna) : do not log animations on console.");
-        sb.append("  -log.duration (shorthand -ld) : log execution duration.");
+        sb.append("  -log.no.animation (shorthand -lna) : do not log animations on console.\n");
+        sb.append("  -log.duration (shorthand -ld) : log execution duration.\n");
         sb.append("  -log.runtime.info (shorthand -lri) : log Jeka runtime information as Jeka version, JDK version, working dir, classpath ....\n");
         sb.append("  -log.banner (shorthand -lb) : log intro and outro banners.\n");
         sb.append("  -log.stacktrace (shorthand -lst) : log the stacktrace when Jeka fail.\n");

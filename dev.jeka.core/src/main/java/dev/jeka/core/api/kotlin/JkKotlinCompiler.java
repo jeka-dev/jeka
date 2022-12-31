@@ -330,8 +330,8 @@ public final class JkKotlinCompiler {
                             .collect(Collectors.toList()));
         } else {
             JkLog.trace("Use Kotlin compiler using jars %s", jarsVersionAndTarget);
-            JkLog.info("Use Kotlin compiler with options " + loggedOptions);
-            kotlincProcess = JkJavaProcess.ofJava("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
+            JkLog.info("Use Kotlin compiler with options %s", loggedOptions);
+            kotlincProcess = JkJavaProcess.ofJava( "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
                     .setClasspath(jarsVersionAndTarget.jars)
                     .addJavaOptions(this.jvmOptions)
                     .addParams("-no-stdlib", "-no-reflect");
@@ -429,14 +429,6 @@ public final class JkKotlinCompiler {
 
     }
 
-    public static class Plugins {
 
-        public static final String ALL_OPEN = "org.jetbrains.kotlin:kotlin-allopen";
-
-        public static final String NO_ARG = "org.jetbrains.kotlin:kotlin-noarg";
-
-        public static final String SAM_WITH_RECEIVER = "org.jetbrains.kotlin:kotlin-sam-with-receiver-compiler-plugin";
-
-    }
 
 }
