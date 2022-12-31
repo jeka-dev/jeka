@@ -2,7 +2,7 @@
 
 # returns the value of a property within a property file
 # call `prop file propName'
-function prop {
+prop() {
     if [ ! -f "$1" ]; then
         return
     fi
@@ -10,7 +10,7 @@ function prop {
 }
 
 # call `propJavaVersion currentDir
-function propJavaVersion {
+propJavaVersion() {
   local version=$(prop $1/jeka/local.properties jeka.java.version)
   version=$(echo $version | sed 's/ //g')
   if [ -z $version ]
@@ -27,7 +27,7 @@ function propJavaVersion {
 }
 
 # call `propJdkVersion currentDir javaVersion`
-function propJdkHome {
+propJdkHome() {
   local envValue=$(printenv "JEKA_JDK_${2}")
   if [ ! -z $envValue ]; then
     echo $envValue
