@@ -4,6 +4,7 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -30,12 +31,12 @@ public class JkNodeJs {
     }
 
     private JkProcess createProcess(Path workingDir, String cmdName) {
-        //String path = System.getenv("PATH");
-        //String pathVar = this.installDir.toString() + File.pathSeparator + path;
+        String path = System.getenv("PATH");
+        String pathVar = this.installDir.toString() + File.pathSeparator + path;
         return JkProcess.of(installDir.resolve(cmdName).toString())
                 .setWorkingDir(workingDir)
                 .setFailOnError(true)
-                //.setEnv("PATH", pathVar)
+                .setEnv("PATH", pathVar)
                 .setLogCommand(true)
                 .setLogOutput(true);
     }
