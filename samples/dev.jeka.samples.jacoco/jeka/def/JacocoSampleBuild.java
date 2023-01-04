@@ -28,6 +28,7 @@ public class JacocoSampleBuild extends JkBean {
         jacoco.jacocoVersion = "0.8.7";
         intellij.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
         intellij.configureIml(this::configureIml);
+        intellij.jekaModuleName = "dev.jeka.core";
     }
 
     private void configure(JkProject project) {

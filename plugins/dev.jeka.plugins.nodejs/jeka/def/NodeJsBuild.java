@@ -3,11 +3,16 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class NodeJsBuild extends JkBean {
 
     private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+
+    NodeJsBuild() {
+        getBean(IntellijJkBean.class).jekaModuleName = "dev.jeka.core";
+    }
 
     private void configure(JkProject project) {
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
@@ -28,10 +33,5 @@ public class NodeJsBuild extends JkBean {
     public void cleanPack() {
         cleanOutput(); projectPlugin.pack();
     }
-
-    public static void main(String[] args) {
-        JkInit.instanceOf(NodeJsBuild.class).cleanPack();
-    }
-
 
 }

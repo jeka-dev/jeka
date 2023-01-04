@@ -15,6 +15,7 @@ public class JkProcessTest {
 
     @Test
     public void dirOnWindows() throws Exception {
+        //JkLog.setDecorator(JkLog.Style.BRACE);
 
         if (JkUtilsSystem.IS_WINDOWS) {
             Path toto = Paths.get(JkProcessTest.class.getResource( "toto").toURI());
@@ -22,8 +23,9 @@ public class JkProcessTest {
             Path parent = toto.getParent();
 
             Assert.assertTrue(Files.exists(parent));
-            //new ProcessBuilder().command("explorer", parent.getAbsolutePath()).start().waitFor();
-            JkProcess.of("find", "a string", totoWithSpaces.toAbsolutePath().toString()).exec();
+            JkProcess.of("find", "a string", totoWithSpaces.toAbsolutePath().toString())
+                    //.setLogCommand(true)
+                    .exec();
         }
     }
 
