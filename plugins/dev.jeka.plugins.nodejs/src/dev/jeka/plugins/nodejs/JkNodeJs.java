@@ -31,6 +31,8 @@ public class JkNodeJs {
     }
 
     private JkProcess createProcess(Path workingDir, String cmdName) {
+
+        // This is needed for windows when nodeJs is not installed, otherwise npx won't find it
         String path = System.getenv("PATH");
         String pathVar = this.installDir.toString() + File.pathSeparator + path;
         return JkProcess.of(installDir.resolve(cmdName).toString())
