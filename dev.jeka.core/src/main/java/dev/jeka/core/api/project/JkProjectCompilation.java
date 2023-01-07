@@ -62,6 +62,8 @@ public class JkProjectCompilation<T> {
 
     private boolean done;
 
+    private JkResolveResult cachedResolveResult = null;
+
     JkProjectCompilation(JkProject project, T parent) {
         __ = parent;
         this.project = project;
@@ -100,7 +102,7 @@ public class JkProjectCompilation<T> {
      * Performs entire compilation phase.
      */
     public void run() {
-        JkLog.startTask("Run whole compilation process for " + purpose());
+        JkLog.startTask("Run compilation phase for " + purpose());
         generateSources();
         preCompileActions.run();
         compileActions.run();
@@ -118,6 +120,10 @@ public class JkProjectCompilation<T> {
             run();
             done = true;
         }
+    }
+
+    public void skipJavaCompiilation() {
+        this.compileActions.remove(JAVA_SOURCES_COMPILE_ACTION);
     }
 
 
@@ -142,7 +148,11 @@ public class JkProjectCompilation<T> {
     }
 
     public JkResolveResult resolveDependencies() {
-        return project.dependencyResolver.resolve(getDependencies());
+        if (cachedResolveResult != null) {
+            return cachedResolveResult;
+        }
+        cachedResolveResult = project.dependencyResolver.resolve(getDependencies());
+        return cachedResolveResult;
     }
 
     public JkDependencySet getDependencies() {

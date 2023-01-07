@@ -42,8 +42,6 @@ public class JacocoJkBean extends JkBean {
     @JkDoc("Version of Jacoco to use both for agent and report.")
     public String jacocoVersion = "0.8.7";
 
-    private ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class).configure(this::configureForDefaultProject);
-
     private JkJacoco jacoco;
 
     /**
@@ -52,6 +50,10 @@ public class JacocoJkBean extends JkBean {
     public JacocoJkBean generateExport() {
         jacoco.generateExport();
         return this;
+    }
+
+    private JacocoJkBean() {
+        getRuntime().getBean(ProjectJkBean.class).configure(this::configureForDefaultProject);
     }
 
     private void configureForDefaultProject(JkProject project) {

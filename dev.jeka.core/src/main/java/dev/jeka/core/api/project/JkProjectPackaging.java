@@ -38,6 +38,8 @@ public class JkProjectPackaging {
     // relative to output path
     private String javadocDir = "javadoc";
 
+    private JkResolveResult cachedJkResolveResult;
+
     /**
      * For parent chaining
      */
@@ -143,8 +145,12 @@ public class JkProjectPackaging {
     }
 
     public JkResolveResult resolveRuntimeDependencies() {
-        return project.dependencyResolver.resolve(getRuntimeDependencies()
+        if (cachedJkResolveResult != null) {
+            return cachedJkResolveResult;
+        }
+        cachedJkResolveResult = project.dependencyResolver.resolve(getRuntimeDependencies()
                 .normalised(project.getDuplicateConflictStrategy()));
+        return cachedJkResolveResult;
     }
 
     public void createSourceJar() {

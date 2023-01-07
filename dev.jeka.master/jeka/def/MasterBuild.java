@@ -48,9 +48,12 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.nodejs")
     NodeJsBuild nodeJsBuild;
 
+    @JkInjectProject("../plugins/dev.jeka.plugins.kotlin")
+    KotlinBuild kotlinBuild;
+
     private JacocoJkBean coreJacocoBean;
 
-    MasterBuild() throws Exception {
+    MasterBuild()  {
         git.projectVersionSupplier.on = false;
         coreBuild.runIT = true;
         getImportedBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);

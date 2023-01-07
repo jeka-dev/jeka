@@ -3,6 +3,7 @@ package dev.jeka.plugins.springboot;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsObject;
 
 import java.io.IOException;
@@ -67,6 +68,7 @@ class SpringbootPacker {
 
         jarWriter.close();
         jarWriter.setExecutableFilePermission(target);
+        JkLog.info("Bootable jar created at " + target);
     }
 
     private void writeClasses(Path original, JarWriter jarWriter) {

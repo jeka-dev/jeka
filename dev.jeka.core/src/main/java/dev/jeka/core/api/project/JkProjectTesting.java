@@ -2,6 +2,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.system.JkLog;
@@ -127,6 +128,10 @@ public class JkProjectTesting {
         JkLog.startTask("Process tests");
         this.project.prodCompilation.runIfNeeded();
         this.testCompilation.run();
+        if (!JkPathTree.of(this.testCompilation.layout.resolveClassDir()).containFiles()) {
+            JkLog.endTask("No tests to execute.");
+            return;
+        }
         executeWithTestProcessor();
         JkLog.endTask();
     }
