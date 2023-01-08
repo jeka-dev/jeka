@@ -7,6 +7,7 @@ import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
@@ -19,6 +20,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * A Jeka plugin cain contains zero, one or many KBeans.
@@ -48,6 +50,8 @@ public class KotlinJvmJkBean extends JkBean {
     private JkKotlinCompiler kotlinCompiler;
 
     private JkRepoSet downloadRepos;
+
+    private final JkConsumers<JkKotlinCompiler, Void> compilerConfigurators = JkConsumers.of();
 
     KotlinJvmJkBean() {
         kotlinVersion = Optional.of(getRuntime().getProperties().get("jeka.kotlin.version")).orElse(DEFAULT_VERSION);
@@ -83,13 +87,13 @@ public class KotlinJvmJkBean extends JkBean {
         prodCompile
                 .preCompileActions
                 .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileKotlin(getKotlinCompiler(), project))
+                        () -> compileKotlin(getCompiler(), project))
                 .__
                 .configureDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()));
         testCompile
                 .preCompileActions
                 .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileTestKotlin(getKotlinCompiler(), project))
+                        () -> compileTestKotlin(getCompiler(), project))
                 .__
                 .layout
                 .addSource(kotlinTestSourceDir);
@@ -114,22 +118,35 @@ public class KotlinJvmJkBean extends JkBean {
          */
     }
 
+    /**
+     * Register a configurator to be applied at the first call of {@link #getCompiler()}
+     */
+    public KotlinJvmJkBean configureCompiler(Consumer<JkKotlinCompiler> compilerConsumer) {
+        if (this.kotlinCompiler != null) {
+            throw new IllegalStateException("The compiler has already been instantiated. " +
+                    "Use this method in the constructor of your KBean in order to configure the kompiler " +
+                    "at creation time.");
+        }
+        this.compilerConfigurators.append(compilerConsumer);
+        return this;
+    }
+
     private JkDependencySet addStdLibsToProdDeps(JkDependencySet deps) {
-        return getKotlinCompiler().isProvidedCompiler()
-                ? deps.andFiles(getKotlinCompiler().getStdLib())
+        return getCompiler().isProvidedCompiler()
+                ? deps.andFiles(getCompiler().getStdLib())
                 : deps.and(JkKotlinModules.STDLIB_JDK8).and(JkKotlinModules.REFLECT);
     }
 
     private JkDependencySet addStdLibsToTestDeps(JkDependencySet deps) {
-        return getKotlinCompiler().isProvidedCompiler() ? deps.and(JkKotlinModules.TEST) : deps;
+        return getCompiler().isProvidedCompiler() ? deps.and(JkKotlinModules.TEST) : deps;
     }
 
     private JkVersionProvider kotlinVersionProvider() {
-        return JkKotlinModules.versionProvider(getKotlinCompiler().getVersion());
+        return JkKotlinModules.versionProvider(getCompiler().getVersion());
     }
 
 
-    public JkKotlinCompiler getKotlinCompiler() {
+    public JkKotlinCompiler getCompiler() {
         if (kotlinCompiler != null) {
             return kotlinCompiler;
         }
@@ -138,15 +155,10 @@ public class KotlinJvmJkBean extends JkBean {
             JkLog.warn("No version of kotlin has been specified, will use the version installed on KOTLIN_HOME : "
                     + kotlinCompiler.getVersion());
         } else {
-            JkLog.startTask("Fetching Kotlin compiler " + kotlinVersion);
             kotlinCompiler = JkKotlinCompiler.ofJvm(downloadRepos, kotlinVersion);
-            JkLog.endTask();
         }
         kotlinCompiler.setLogOutput(true);
-        kotlinCompiler
-                //.addPlugin(Paths.get(System.getenv("KOTLIN_HOME") + "/libexec/lib/allopen-compiler-plugin.jar"))
-                .addPlugin("org.jetbrains.kotlin:kotlin-allopen:" + kotlinVersion)
-                .addPluginOption("org.jetbrains.kotlin.allopen", "preset", "spring");
+        compilerConfigurators.accept(kotlinCompiler);
         return kotlinCompiler;
     }
 

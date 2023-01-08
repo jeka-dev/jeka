@@ -48,7 +48,9 @@ class EngineCompilationUpdateTracker {
 
     private boolean isWorkOutdated() {
         CountTimestampAndJavaVersion flag = stateFromFlagFile();
+        JkLog.traceStartTask("Checking file last upadte time");
         CountTimestampAndJavaVersion current = stateFromFlagCurrent();
+        JkLog.traceEndTask();
         JkLog.trace("Comparing flagged %s and  current %s", flag, current);
         return !flag.equals(current);
     }
@@ -57,6 +59,8 @@ class EngineCompilationUpdateTracker {
         Path def = projectBaseDir.resolve(JkConstants.DEF_DIR);
         Stream<Path> stream = JkPathTree.of(def).stream();
         return stream
+                .filter(path -> !Files.isDirectory(path))
+                .peek(path -> JkLog.trace("read file attribute of " + path))
                 .map(path -> JkUtilsPath.getLastModifiedTime(path))
                 .map(optional -> optional.orElse(System.currentTimeMillis()))
                 .reduce(0L, Math::max);
@@ -80,7 +84,10 @@ class EngineCompilationUpdateTracker {
 
     private CountTimestampAndJavaVersion stateFromFlagCurrent() {
         long defLastUptateTime = lastModifiedAccordingFileAttributes();
-        return new CountTimestampAndJavaVersion(fileCount(), defLastUptateTime, JkJavaVersion.ofCurrent());
+        JkLog.traceStartTask("counting files");
+        int count = fileCount();
+        JkLog.traceEndTask();
+        return new CountTimestampAndJavaVersion(count, defLastUptateTime, JkJavaVersion.ofCurrent());
     }
 
     private CountTimestampAndJavaVersion stateFromFlagFile() {
@@ -108,8 +115,8 @@ class EngineCompilationUpdateTracker {
     }
 
     private int fileCount() {
-        return JkPathTree.of(projectBaseDir.toAbsolutePath()).andMatching("jeka/def/**", "jeka/boot/**")
-                .count(5000, true);
+        return JkPathTree.of(projectBaseDir.toAbsolutePath().resolve(JkConstants.DEF_DIR)).count(1000, true) +
+                JkPathTree.of(projectBaseDir.toAbsolutePath().resolve(JkConstants.BOOT_DIR)).count(1000,true);
     }
 
     boolean isMissingBinaryFiles() {

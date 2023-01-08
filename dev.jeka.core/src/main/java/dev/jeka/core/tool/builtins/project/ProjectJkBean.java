@@ -29,7 +29,6 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffolder;
-import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.*;
@@ -70,17 +69,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     public final JkLayoutOptions layout = new JkLayoutOptions();
 
-    @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
-    public String compilerExtraArgs;
+    public final JkCompilationOptions compilation = new JkCompilationOptions();
 
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
-
-    @JkDoc("The target JVM version for compiled files.")
-    @JkInjectProperty("jeka.java.version")
-    public String javaVersion;
-
-    private final ScaffoldJkBean scaffoldJkBean = getBean(ScaffoldJkBean.class).configure(this::configure);
 
     private JkProject project;
 
@@ -93,8 +85,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
-        if (!JkUtilsString.isBlank(this.javaVersion)) {
-            JkJavaVersion version = JkJavaVersion.of(this.javaVersion);
+        if (!JkUtilsString.isBlank(compilation.javaVersion)) {
+            JkJavaVersion version = JkJavaVersion.of(compilation.javaVersion);
             project.setJvmTargetVersion(version);
         }
         applyRepo(project);
@@ -171,8 +163,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         if (test.skip != null) {
             aProject.testing.setSkipped(test.skip);
         }
-        if (this.compilerExtraArgs != null) {
-            aProject.prodCompilation.addJavaCompilerOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+        if (compilation.compilerExtraArgs != null) {
+            aProject.prodCompilation.addJavaCompilerOptions(
+                    JkUtilsString.translateCommandline(compilation.compilerExtraArgs));
         }
     }
 
@@ -265,7 +258,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @JkDoc("Displays resolved dependency tree in xml")
     public void showDependenciesXml() {
-        Transformer transformer = null;
+        final Transformer transformer;
         try {
             transformer = TransformerFactory.newInstance().newTransformer();  //NOSONAR
         } catch (TransformerConfigurationException e) {
@@ -365,6 +358,17 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
         @JkDoc("If true, Resource files are located in same folder than Java code.")
         public boolean mixSourcesAndResources = false;
+
+    }
+
+    public static class JkCompilationOptions {
+
+        @JkDoc("The target JVM version for compiled files.")
+        @JkInjectProperty("jeka.java.version")
+        public String javaVersion;
+
+        @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
+        public String compilerExtraArgs;
 
     }
 
@@ -495,7 +499,6 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             public String test;
 
         }
-
 
     }
 

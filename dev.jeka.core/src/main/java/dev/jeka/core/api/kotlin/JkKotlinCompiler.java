@@ -2,11 +2,12 @@ package dev.jeka.core.api.kotlin;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.system.JkProperties;
@@ -95,17 +96,32 @@ public final class JkKotlinCompiler {
      *  compiler matching the specified Kotlin version is downloaded from the specified repo.
      */
     public static JkKotlinCompiler ofTarget(JkRepoSet repos, Target target, String kotlinVersion) {
-        JkResolveResult resolveResult = JkDependencyResolver.of()
-                .addRepos(repos)
-                .resolve(JkDependencySet.of()
-                        .and("org.jetbrains.kotlin:kotlin-compiler:" + kotlinVersion)
-                )
-                .assertNoError();
+        JkPathTree kotlincDir = JkPathTree.of(getLibsDir(kotlinVersion));
+        JkPathSequence kotlincFiles;
+        if (kotlincDir.exists() && kotlincDir.containFiles()) {
+           kotlincFiles = JkPathSequence.of(kotlincDir.getFiles());
+        } else {
+            JkLog.startTask("Downloading Kotlin compiler " + kotlinVersion);
+            kotlincFiles= JkDependencyResolver.of()
+                    .addRepos(repos)
+                    .resolve(JkDependencySet.of()
+                            .and("org.jetbrains.kotlin:kotlin-compiler:" + kotlinVersion)
+                    )
+                    .assertNoError()
+                    .getFiles();
+            JkLog.endTask();
+            kotlincDir.importFiles(kotlincFiles.getEntries());
+        }
         return new JkKotlinCompiler(null,
-                new JarsVersionAndTarget(resolveResult.getFiles(), kotlinVersion, target));
+                new JarsVersionAndTarget(kotlincFiles, kotlinVersion, target));
+    }
+
+    private static Path getLibsDir(String version) {
+        return JkLocator.getCacheDir().resolve("kotlinc").resolve(version);
     }
 
     public static JkKotlinCompiler ofJvm(JkRepoSet repos, String version) {
+        JkUtilsAssert.argument(version != null, "Kotlin version cannot be null. You mist provide one.");
         return ofTarget(repos, Target.JAVA, version);
     }
 
@@ -154,21 +170,28 @@ public final class JkKotlinCompiler {
             JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
             return Paths.get(value).resolve("lib/kotlin-stdlib.jar");
         }
-        return repos.get(JkCoordinate.of(JkKotlinModules.STDLIB));
+        JkCoordinate coordinate = JkCoordinate.of(JkKotlinModules.STDLIB).withVersion(this.getVersion());
+        return JkCoordinateFileProxy.of(repos, coordinate).get();
     }
 
     public JkPathSequence getStdJdk8Lib() {
+        final Path jarDir;
         if (isProvidedCompiler()) {
             String value = System.getenv("KOTLIN_HOME");
             JkUtilsAssert.state(value != null, KOTLIN_HOME + " environment variable is not defined.");
-            Path kotlinDir = Paths.get(value);
+            jarDir = Paths.get(value).resolve("lib");
             return JkPathSequence.of()
-                    .and(kotlinDir.resolve("lib/kotlin-stdlib.jar"))
-                    .and(kotlinDir.resolve("lib/kotlin-stdlib-jdk7.jar"))
-                    .and(kotlinDir.resolve("lib/kotlin-stdlib-jdk8.jar"));
+                    .and(jarDir.resolve("kotlin-stdlib.jar"))
+                    .and(jarDir.resolve("kotlin-stdlib-jdk7.jar"))
+                    .and(jarDir.resolve("kotlin-stdlib-jdk8.jar"));
+        } else {
+            jarDir = getLibsDir(getVersion());
+            return JkPathSequence.of()
+                    .and(jarDir.resolve(String.format("kotlin-stdlib-%s.jar", getVersion())))
+                    .and(jarDir.resolve(String.format("kotlin-stdlib-jdk7-%s.jar", getVersion())))
+                    .and(jarDir.resolve(String.format("kotlin-stdlib-jdk8-%s.jar", getVersion())));
         }
-        return JkDependencyResolver.of().addRepos(repos).resolve(JkDependencySet.of(JkKotlinModules.STDLIB_JDK8 + ":"
-                        + getVersion())).getFiles();
+
     }
 
     public JkKotlinCompiler setFailOnError(boolean fail) {
@@ -221,8 +244,8 @@ public final class JkKotlinCompiler {
 
     /**
      * Instructs this compiler to use the plugin identified by the specified coordinates.
-     * If the coordinate does n ot mention the version, the Kotlin version of this compiler is chosen.<p>
-     * {@link Plugins} class provides constants about most common plugin coordinates.
+     * If the coordinate does not mention the version, the Kotlin version of this compiler is chosen.<p>
+     * {@link Plugin} class provides constants about most common plugin coordinates.
      */
     public JkKotlinCompiler addPlugin(String coordinate) {
         Plugin plugin = new Plugin();
@@ -416,11 +439,7 @@ public final class JkKotlinCompiler {
             if (jar != null) {
                 return jar;
             }
-            jar = repos.get(pluginCoordinate);
-            if (jar == null) {
-                throw new IllegalStateException("Cannot retrieve module " + pluginCoordinate);
-            }
-            return jar;
+            return JkCoordinateFileProxy.of(repos, pluginCoordinate).get();
         }
 
         private String toOption() {
@@ -428,7 +447,5 @@ public final class JkKotlinCompiler {
         }
 
     }
-
-
 
 }

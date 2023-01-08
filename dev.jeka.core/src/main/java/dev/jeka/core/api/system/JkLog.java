@@ -165,6 +165,8 @@ public final class JkLog implements Serializable {
         }
     }
 
+
+
     public static void error(String message, String ...params) {
         consume(JkLogEvent.ofRegular(Type.ERROR, String.format(message, params)));
     }
@@ -187,6 +189,12 @@ public final class JkLog implements Serializable {
         if (shouldPrint(Type.START_TASK)) {
             currentNestedTaskLevel.incrementAndGet();
             getStartTimes().addLast(System.nanoTime());
+        }
+    }
+
+    public static void traceStartTask(String message, Object ... params) {
+        if (verbosity.isVerbose()) {
+            startTask(message, params);
         }
     }
 
@@ -217,6 +225,12 @@ public final class JkLog implements Serializable {
      */
     public static void endTask() {
         endTask("");
+    }
+
+    public static void traceEndTask() {
+        if (verbosity.isVerbose()) {
+            endTask();
+        }
     }
 
     public static boolean isVerbose() {

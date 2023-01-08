@@ -1,3 +1,7 @@
+# 0.10.4
+- Improve Kotlin integration
+- Improve startup performance
+
 # 0.10.3
 - Springboot : bootable jar is created quicker
 - Springboot : SpringbootJkBean#projectBean() has been replaced by SpringbootJkBean#projectBean

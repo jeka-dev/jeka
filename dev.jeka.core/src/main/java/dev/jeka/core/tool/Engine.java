@@ -14,11 +14,10 @@ import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
-import dev.jeka.core.api.system.JkBusyIndicator;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
+import dev.jeka.core.api.system.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import javax.tools.ToolProvider;
 import java.nio.file.Files;
@@ -140,11 +139,12 @@ final class Engine {
 
     private CompilationContext preCompile() {
         final List<Path> sourceFiles = beanClassesResolver.getSourceFiles();
-        JkLog.trace("Parse source code of " + sourceFiles);
+        JkLog.traceStartTask("Parse source code of " + sourceFiles);
         final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
         JkDependencySet parsedDependencies = parser.dependencies().and(Environment.commandLine.getDefDependencies());
         EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(parsedDependencies);
+        JkLog.traceEndTask();
         return new CompilationContext(
                 jekaClasspath().and(cacheResult.resolvedClasspath),
                 new LinkedList<>(parser.projects()),
@@ -207,6 +207,16 @@ final class Engine {
                     compilationTracker.updateCompileFlag();
                 }
             } else {
+                // We need to add kotlin libs in order to invoke local KBean compiled with kotlin
+                if (hasKotlinSource()) {
+                    JkLog.traceStartTask("Preparing for Kotlin");
+                    JkProperties props = JkRuntime.constructProperties(projectBaseDir);
+                    String kotVer = props.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
+                    JkUtilsAssert.state(!JkUtilsString.isBlank(kotVer), "No jeka.kotlin.version property has been defined.");
+                    JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos(), kotVer);
+                    AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompiler.getStdLib());
+                    JkLog.traceEndTask();
+                }
                 JkLog.trace("Last def classes are up-to-date : No need to compile.");
             }
         } else if (outdated) {
@@ -231,25 +241,28 @@ final class Engine {
                                            boolean failOnCompileError) {
         JkPathTree.of(beanClassesResolver.defClassDir).deleteContent();
         JkPathSequence extraClasspath = JkPathSequence.of();
+        JkProperties props = JkRuntime.constructProperties(projectBaseDir);
+        String kotVer = props.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
         if (hasKotlinSource()) {
-            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos())
+            JkUtilsAssert.state(!JkUtilsString.isBlank(kotVer), "No jeka.kotlin.version property has been defined.");
+            JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos(), kotVer)
                     .setLogOutput(true)
                     .setFailOnError(failOnCompileError)
                     .addOption("-nowarn");
-            compileOptions.forEach(option -> kotlinCompiler.addOption(option));
-            JkPathSequence kotlinClasspath = defClasspath.and(kotlinCompiler.getStdJdk8Lib());
-            final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(kotlinClasspath);
-            if (JkLog.isVerbose()) {
-                kotlinCompiler.addOption("-verbose");
-            }
-            boolean success = wrapCompile(() -> kotlinCompiler.compile(kotlinCompileSpec), failOnCompileError);
+            boolean success = wrapCompile(() -> {
+                compileOptions.forEach(option -> kotlinCompiler.addOption(option));
+                JkPathSequence kotlinClasspath = defClasspath.and(kotlinCompiler.getStdJdk8Lib());
+                final JkKotlinJvmCompileSpec kotlinCompileSpec = defKotlinCompileSpec(kotlinClasspath);
+                if (JkLog.isVerbose()) {
+                    kotlinCompiler.addOption("-verbose");
+                }
+                return kotlinCompiler.compile(kotlinCompileSpec);
+                    }, failOnCompileError);
             if (!failOnCompileError && !success) {
                 return new SingleCompileResult(false, JkPathSequence.of());
             }
-            if (kotlinCompiler.isProvidedCompiler()) {
-                extraClasspath = extraClasspath.and(kotlinCompiler.getStdLib());
-                AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompiler.getStdLib());
-            }
+            extraClasspath = extraClasspath.and(kotlinCompiler.getStdLib());
+            AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompiler.getStdLib());
         }
         final JkJavaCompileSpec javaCompileSpec = defJavaCompileSpec(defClasspath, compileOptions);
         if (javaCompileSpec.getSources().containFiles() && ToolProvider.getSystemJavaCompiler() == null) {
