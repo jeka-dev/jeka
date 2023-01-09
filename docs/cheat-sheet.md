@@ -35,7 +35,7 @@ If the java version is mentionned in local.properties file (i.e. `jeka.java.vers
 
 If none of the above options is present, _Jeka_ will run on the _java_ executable accessible from the _PATH_ environment.
 
-## Change the Repository _Jeka_ uses to Fetch Dependencies 
+## Change the Repositories _Jeka_ uses to Fetch Dependencies 
 
 By default, _Jeka_ fetch dependencies from Maven central (https://repo.maven.apache.org/maven2).
 
