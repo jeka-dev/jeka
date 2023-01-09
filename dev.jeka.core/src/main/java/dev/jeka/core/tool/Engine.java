@@ -59,11 +59,11 @@ final class Engine {
         this.projectBaseDir = baseDir;
         this.beanClassesResolver = new EngineBeanClassResolver(baseDir);
         this.dependencyResolver = JkDependencyResolver.of()
-                .getDefaultParams()
-                    .setFailOnDependencyResolutionError(true)
-                .__
                 .addRepos(JkRepoProperties.of(JkRuntime.constructProperties(baseDir)).getDownloadRepos())
                 .addRepos(JkRepo.ofLocal());
+        this.dependencyResolver
+                .getDefaultParams()
+                    .setFailOnDependencyResolutionError(true);
     }
 
     /**

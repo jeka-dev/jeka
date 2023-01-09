@@ -20,11 +20,9 @@ import java.util.function.UnaryOperator;
  *   <li>Information about describing the project as some public repositories require</li>
  * </ul>
  */
-public final class JkMavenPublication<T> {
+public final class JkMavenPublication {
 
-    public final T __; // For parent chaining
-
-    public final JkPomMetadata<JkMavenPublication<T>> pomMetadata = JkPomMetadata.ofParent(this);
+    public final JkPomMetadata pomMetadata = JkPomMetadata.of();
 
     private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
@@ -40,19 +38,14 @@ public final class JkMavenPublication<T> {
 
     private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
 
-    private JkMavenPublication(T parent) {
-        this.__ = parent;
+    private JkMavenPublication() {
     }
 
-    public static <T> JkMavenPublication<T> of(T parent) {
-        return new JkMavenPublication(parent);
+    public static JkMavenPublication of() {
+        return new JkMavenPublication();
     }
 
-    public static <T> JkMavenPublication<Void> of() {
-        return new JkMavenPublication(null);
-    }
-
-    public JkMavenPublication<T> configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkMavenPublication configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependencies = dependencies.andThen(modifier);
         return this;
     }
@@ -61,27 +54,27 @@ public final class JkMavenPublication<T> {
         return dependencies.apply(JkDependencySet.of());
     }
 
-    public JkMavenPublication<T> setModuleId(String moduleId) {
+    public JkMavenPublication setModuleId(String moduleId) {
         this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
         return this;
     }
 
-    public JkMavenPublication<T> setModuleId(Supplier<String> moduleIdSupplier) {
+    public JkMavenPublication setModuleId(Supplier<String> moduleIdSupplier) {
         this.moduleIdSupplier = () -> JkModuleId.of(moduleIdSupplier.get());
         return this;
     }
 
-    public JkMavenPublication<T> setVersion(String version) {
+    public JkMavenPublication setVersion(String version) {
         this.versionSupplier = () -> JkVersion.of(version);
         return this;
     }
 
-    public JkMavenPublication<T> setVersion(Supplier<String> versionSupplier) {
+    public JkMavenPublication setVersion(Supplier<String> versionSupplier) {
         this.versionSupplier = () -> JkVersion.of(versionSupplier.get());
         return this;
     }
 
-    public JkMavenPublication<T> setBomResolutionRepos(Supplier<JkRepoSet> repoSupplier) {
+    public JkMavenPublication setBomResolutionRepos(Supplier<JkRepoSet> repoSupplier) {
         this.bomResolverRepoSupplier = repoSupplier;
         return this;
     }
@@ -98,7 +91,7 @@ public final class JkMavenPublication<T> {
         return defaultSigner;
     }
 
-    public JkMavenPublication<T> setDefaultSigner(UnaryOperator<Path> defaultSigner) {
+    public JkMavenPublication setDefaultSigner(UnaryOperator<Path> defaultSigner) {
         this.defaultSigner = defaultSigner;
         return this;
     }
@@ -107,12 +100,12 @@ public final class JkMavenPublication<T> {
         return artifactLocatorSupplier.get();
     }
 
-    public JkMavenPublication<T> setArtifactLocatorSupplier(Supplier<JkArtifactLocator> artifactLocatorSupplier) {
+    public JkMavenPublication setArtifactLocatorSupplier(Supplier<JkArtifactLocator> artifactLocatorSupplier) {
         this.artifactLocatorSupplier = artifactLocatorSupplier;
         return this;
     }
 
-    public JkMavenPublication<T> setArtifactLocator(JkArtifactLocator artifactLocatorArg) {
+    public JkMavenPublication setArtifactLocator(JkArtifactLocator artifactLocatorArg) {
         this.artifactLocatorSupplier = () -> artifactLocatorArg;
         return this;
     }
@@ -121,12 +114,12 @@ public final class JkMavenPublication<T> {
         return publishRepos;
     }
 
-    public JkMavenPublication<T> setPublishRepos(JkRepoSet repoSet) {
+    public JkMavenPublication setPublishRepos(JkRepoSet repoSet) {
         this.publishRepos = repoSet;
         return this;
     }
 
-    public JkMavenPublication<T> addRepos(JkRepo ...repoArgs) {
+    public JkMavenPublication addRepos(JkRepo ...repoArgs) {
         Arrays.stream(repoArgs).forEach(repo -> publishRepos = publishRepos.and(repo));
         return this;
     }
@@ -134,7 +127,7 @@ public final class JkMavenPublication<T> {
     /**
      * Publishes this publication to its defined repositories
      */
-    public JkMavenPublication<T> publish() {
+    public JkMavenPublication publish() {
         publish(this.publishRepos.withDefaultSigner(defaultSigner));
         return this;
     }
@@ -142,7 +135,7 @@ public final class JkMavenPublication<T> {
     /**
      * Publishes this publication on the local repository
      */
-    public JkMavenPublication<T> publishLocal() {
+    public JkMavenPublication publishLocal() {
         publish(JkRepoSet.ofLocal());
         return this;
     }

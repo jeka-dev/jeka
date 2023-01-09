@@ -57,12 +57,11 @@ public final class JkInit {
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.setImportedProjects(getImportedProjects(clazz));
             JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
-            jkRuntime.setDependencyResolver(JkDependencyResolver.of()
-                    .getDefaultParams()
-                        .setFailOnDependencyResolutionError(true)
-                    .__
+            JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                     .addRepos(JkRepoProperties.of(properties).getDownloadRepos())
-                    .addRepos(JkRepo.ofLocal()));
+                    .addRepos(JkRepo.ofLocal());
+            dependencyResolver.getDefaultParams().setFailOnDependencyResolutionError(true);
+            jkRuntime.setDependencyResolver(dependencyResolver);
             jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
             jkRuntime.init(commands);
             final T jkBean = jkRuntime.getBean(clazz);

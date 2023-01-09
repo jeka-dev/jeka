@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  *     <li>The tests to run: discovery, selectors, filters, ...</li>
  * </ul>
  */
-public final class JkTestProcessor<T> {
+public final class JkTestProcessor {
 
     /**
      * Style of progress mark to display on console while the tests are running.
@@ -58,7 +58,7 @@ public final class JkTestProcessor<T> {
 
     private JkJavaProcess forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName());  // Tests are forked by default
 
-    public final JkEngineBehavior<T> engineBehavior;
+    public final JkEngineBehavior engineBehavior;
 
     public final JkRunnables preActions = JkRunnables.of();
 
@@ -72,40 +72,30 @@ public final class JkTestProcessor<T> {
             JkRepoProperties.of(JkProperties.SYSTEM_PROPERTIES.withFallback(JkProperties.ENVIRONMENT_VARIABLES))
                     .getDownloadRepos();
 
-    /**
-     * For parent chaining
-     */
-    public final transient T __;
-
-    private JkTestProcessor(T __) {
-        this.__ = __;
-        engineBehavior = new JkEngineBehavior<>(this);
+    private JkTestProcessor() {
+        engineBehavior = new JkEngineBehavior();
     }
 
-    public static JkTestProcessor<Void> of() {
-        return ofParent(null);
-    }
-
-    public static <T> JkTestProcessor<T> ofParent(T parent) {
-        return new JkTestProcessor<T>(parent);
+    public static JkTestProcessor of() {
+        return new JkTestProcessor();
     }
 
     public JkJavaProcess getForkingProcess() {
         return forkingProcess;
     }
 
-    public JkTestProcessor<T> setForkingProcess(JkJavaProcess process) {
+    public JkTestProcessor setForkingProcess(JkJavaProcess process) {
         this.forkingProcess = process;
         return this;
     }
 
-    public JkTestProcessor<T> setJvmHints(JkJdks jdks,  JkJavaVersion javaVersion) {
+    public JkTestProcessor setJvmHints(JkJdks jdks,  JkJavaVersion javaVersion) {
         JkUtilsAssert.argument(jdks != null, "jdks argument cannot be null");
         this.jvmHints = new JvmHints(jdks, javaVersion);
         return this;
     }
 
-    public JkTestProcessor<T> setForkingProcess(boolean fork) {
+    public JkTestProcessor setForkingProcess(boolean fork) {
         if (fork) {
             if (forkingProcess != null) {
                 return this;
@@ -121,12 +111,12 @@ public final class JkTestProcessor<T> {
         return junitPlatformVersion;
     }
 
-    public JkTestProcessor<T> setJunitPlatformVersion(String junitPlatformVersion) {
+    public JkTestProcessor setJunitPlatformVersion(String junitPlatformVersion) {
         this.junitPlatformVersion = junitPlatformVersion;
         return this;
     }
 
-    public JkTestProcessor<T> setRepoSetSupplier(Supplier<JkRepoSet> repoSetSupplier) {
+    public JkTestProcessor setRepoSetSupplier(Supplier<JkRepoSet> repoSetSupplier) {
         this.repoSetSupplier = repoSetSupplier;
         return this;
     }
@@ -236,14 +226,9 @@ public final class JkTestProcessor<T> {
 
     }
 
-    public static class JkEngineBehavior<T> implements Serializable {
+    public static class JkEngineBehavior implements Serializable {
 
         private static final long serialVersionUID = 1L;
-
-        /**
-         * Parent chaining.
-         */
-        public final transient JkTestProcessor<T> __;
 
         private String legacyReportDir; // Use String instead of Path for serialisation
 
@@ -251,8 +236,7 @@ public final class JkTestProcessor<T> {
 
         private JkUnaryOperator<LauncherConfig.Builder> launcherConfigurer;
 
-        private JkEngineBehavior(JkTestProcessor<T> __) {
-            this.__ = __;
+        private JkEngineBehavior() {
         }
 
         public Path getLegacyReportDir() {
@@ -271,7 +255,7 @@ public final class JkTestProcessor<T> {
          * Sets the directory where will be generated the legacy standard XML report.
          * If {@code null}, no legacy standard XML report will be generated.
          */
-        public JkEngineBehavior<T> setLegacyReportDir(Path legacyReportDir) {
+        public JkEngineBehavior setLegacyReportDir(Path legacyReportDir) {
             this.legacyReportDir = legacyReportDir == null ? null : legacyReportDir.toString();
             return this;
         }
@@ -280,7 +264,7 @@ public final class JkTestProcessor<T> {
          * Sets the test progress type to display on the console.
          * If {@code null}, no progress will be displayed.
          */
-        public JkEngineBehavior<T> setProgressDisplayer(JkProgressOutputStyle progressDisplayer) {
+        public JkEngineBehavior setProgressDisplayer(JkProgressOutputStyle progressDisplayer) {
             this.progressDisplayer = progressDisplayer;
             return this;
         }
@@ -291,7 +275,7 @@ public final class JkTestProcessor<T> {
          * @param launcherConfigurer a function that takes the default {@link LauncherConfig} as argument
          *                          and returns the config to use.
          */
-        public JkEngineBehavior<T> setLauncherConfigurer(JkUnaryOperator<LauncherConfig.Builder> launcherConfigurer) {
+        public JkEngineBehavior setLauncherConfigurer(JkUnaryOperator<LauncherConfig.Builder> launcherConfigurer) {
             this.launcherConfigurer = launcherConfigurer;
             return this;
         }

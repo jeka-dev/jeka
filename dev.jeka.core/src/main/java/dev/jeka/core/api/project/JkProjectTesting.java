@@ -30,12 +30,12 @@ public class JkProjectTesting {
     /**
      * The processor running the tests.
      */
-    public final JkTestProcessor<JkProjectTesting>  testProcessor;
+    public final JkTestProcessor testProcessor;
 
     /**
      * Tests to be run.
      */
-    public final JkTestSelection<JkProjectTesting> testSelection;
+    public final JkTestSelection testSelection;
 
     // relative path from output dir
     private String reportDir = "test-report";
@@ -163,8 +163,8 @@ public class JkProjectTesting {
         }
     }
 
-    private JkTestProcessor<JkProjectTesting> defaultTestProcessor() {
-        JkTestProcessor result = JkTestProcessor.ofParent(this);
+    private JkTestProcessor defaultTestProcessor() {
+        JkTestProcessor result = JkTestProcessor.of();
         final Path reportDir = testCompilation.layout.getOutputDir().resolve(this.reportDir);
         result
             .setRepoSetSupplier(() -> project.dependencyResolver.getRepos())
@@ -174,8 +174,8 @@ public class JkProjectTesting {
         return result;
     }
 
-    private JkTestSelection<JkProjectTesting> defaultTestSelection() {
-        return JkTestSelection.ofParent(this).addTestClassRoots(
+    private JkTestSelection defaultTestSelection() {
+        return JkTestSelection.of().addTestClassRoots(
                 Paths.get(testCompilation.layout.getClassDir()));
     }
 

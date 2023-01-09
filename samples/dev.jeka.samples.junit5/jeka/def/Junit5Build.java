@@ -41,23 +41,27 @@ class Junit5Build extends JkBean {
      */
     private void configure(JkProject project) {
         project
-                .testing
-                    .testCompilation
-                        .configureDependencies(deps -> deps
-                            .and("org.jdom:jdom2:2.0.6")
-                        )
-                        .configureDependencies(deps -> deps
-                            .and("org.junit.jupiter:junit-jupiter:5.8.2")
-                        ).__
-                    .testProcessor
-                        .engineBehavior
-                            .setLauncherConfigurer(builder -> builder  // Junit5-platform API. see nit.org/junit5/docs/5.3.0/api/org/junit/platform/launcher/core/LauncherConfig.html
-                                .addTestExecutionListeners(new MyJunit5PlatformListener())).__.__
-                    .testSelection
-                        .setDiscoveryConfigurer(builder -> builder  // see https://junit.org/junit5/docs/5.0.0/api/org/junit/platform/launcher/core/LauncherDiscoveryRequestBuilder.html
-                            .configurationParameter("key1", "value1")
-                            .selectors(
-                                DiscoverySelectors.selectMethod("dev.jeka.core.samples.FooTest#testDisplay")));
+            .testing
+                .testCompilation
+                    .configureDependencies(deps -> deps
+                        .and("org.jdom:jdom2:2.0.6")
+                    )
+                    .configureDependencies(deps -> deps
+                        .and("org.junit.jupiter:junit-jupiter:5.8.2")
+                    );
+        project
+            .testing
+                .testProcessor
+                    .engineBehavior
+                        .setLauncherConfigurer(builder -> builder  // Junit5-platform API. see nit.org/junit5/docs/5.3.0/api/org/junit/platform/launcher/core/LauncherConfig.html
+                            .addTestExecutionListeners(new MyJunit5PlatformListener()));
+        project
+            .testing
+                .testSelection
+                    .setDiscoveryConfigurer(builder -> builder  // see https://junit.org/junit5/docs/5.0.0/api/org/junit/platform/launcher/core/LauncherDiscoveryRequestBuilder.html
+                        .configurationParameter("key1", "value1")
+                        .selectors(
+                            DiscoverySelectors.selectMethod("dev.jeka.core.samples.FooTest#testDisplay")));
     }
 
     static class MyJunit5PlatformListener implements TestExecutionListener {

@@ -16,29 +16,19 @@ import java.util.function.Supplier;
  * To add artifacts to produce, caller has to provide the {@link Path} where is generated artifact along
  * the {@link Runnable} for generating it.
  */
-public class JkSuppliedFileArtifactProducer<T> implements JkArtifactProducer {
+public class JkSuppliedFileArtifactProducer  implements JkArtifactProducer {
 
     private final static Supplier<JkPathSequence> EMPTY_SUPPLIER = () -> JkPathSequence.of();
 
-    /**
-     * For parent chaining
-     */
-    public final T __;
-
     private final Map<JkArtifactId, FileRunnable> fileRunnables = new HashMap<>();
 
-    private JkSuppliedFileArtifactProducer(T __) {
-        this.__ = __;
+    private JkSuppliedFileArtifactProducer() {
     }
 
     private String mainArtifactExt = "jar";
 
-    public static <T> JkSuppliedFileArtifactProducer<T> ofParent(T __) {
-        return new JkSuppliedFileArtifactProducer<>( __);
-    }
-
-    public static JkSuppliedFileArtifactProducer<Void> of() {
-        return ofParent(null);
+    public static JkSuppliedFileArtifactProducer of() {
+        return new JkSuppliedFileArtifactProducer();
     }
 
     @Override
@@ -66,16 +56,16 @@ public class JkSuppliedFileArtifactProducer<T> implements JkArtifactProducer {
     }
 
 
-    public JkSuppliedFileArtifactProducer<T> putArtifact(JkArtifactId artifactId, Path target, Runnable fileMaker) {
+    public JkSuppliedFileArtifactProducer  putArtifact(JkArtifactId artifactId, Path target, Runnable fileMaker) {
         fileRunnables.put(artifactId, new FileRunnable(target, fileMaker));
         return this;
     }
 
-    public JkSuppliedFileArtifactProducer<T> putMainArtifact(Path target, Runnable fileMaker) {
+    public JkSuppliedFileArtifactProducer  putMainArtifact(Path target, Runnable fileMaker) {
         return putArtifact(getMainArtifactId(), target, fileMaker);
     }
 
-    public JkSuppliedFileArtifactProducer<T> removeArtifact(JkArtifactId artifactId) {
+    public JkSuppliedFileArtifactProducer  removeArtifact(JkArtifactId artifactId) {
         fileRunnables.remove(artifactId);
         return this;
     }
@@ -85,7 +75,7 @@ public class JkSuppliedFileArtifactProducer<T> implements JkArtifactProducer {
         return mainArtifactExt;
     }
 
-    public JkSuppliedFileArtifactProducer<T> setMainArtifactExt(String mainArtifactExt) {
+    public JkSuppliedFileArtifactProducer  setMainArtifactExt(String mainArtifactExt) {
         this.mainArtifactExt = mainArtifactExt;
         return this;
     }

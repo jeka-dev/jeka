@@ -10,14 +10,9 @@ import java.util.List;
  *
  * @author Jerome Angibaud
  */
-public final class JkPomMetadata<T> implements Serializable {
+public final class JkPomMetadata  implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * For parent chaining
-     */
-    public final T __;
 
     private String projectName;
 
@@ -48,32 +43,32 @@ public final class JkPomMetadata<T> implements Serializable {
         return projectUrl;
     }
 
-    public JkPomMetadata<T> setProjectName(String name) {
+    public JkPomMetadata  setProjectName(String name) {
         this.projectName = name;
         return this;
     }
 
-    public JkPomMetadata<T> setProjectDescription(String description) {
+    public JkPomMetadata setProjectDescription(String description) {
         this.projectDescription = description;
         return this;
     }
 
-    public JkPomMetadata<T> setProjectUrl(String projectUrl) {
+    public JkPomMetadata setProjectUrl(String projectUrl) {
         this.projectUrl = projectUrl;
         return this;
     }
 
-    public JkPomMetadata<T> setScmConnection(String scmConnection) {
+    public JkPomMetadata setScmConnection(String scmConnection) {
         this.scmConnection = scmConnection;
         return this;
     }
 
-    public JkPomMetadata<T> setScmDeveloperConnection(String scmDeveloperConnection) {
+    public JkPomMetadata setScmDeveloperConnection(String scmDeveloperConnection) {
         this.scmDeveloperConnection = scmDeveloperConnection;
         return this;
     }
 
-    public JkPomMetadata<T> setScmUrl(String scmUrl) {
+    public JkPomMetadata setScmUrl(String scmUrl) {
         this.scmUrl = scmUrl;
         return this;
     }
@@ -90,8 +85,7 @@ public final class JkPomMetadata<T> implements Serializable {
         return scmUrl;
     }
 
-    private JkPomMetadata(T parent) {
-        this.__ = parent;
+    private JkPomMetadata() {
         this.developers = new LinkedList<>();
         this.licenses = new LinkedList<>();
     }
@@ -99,21 +93,14 @@ public final class JkPomMetadata<T> implements Serializable {
     /**
      * Creates an empty publication info.
      */
-    public static JkPomMetadata<Void> of() {
-        return new JkPomMetadata(null);
-    }
-
-    /**
-     * Creates an empty publication info.
-     */
-    public static <T> JkPomMetadata<T> ofParent(T parent) {
-        return new JkPomMetadata(parent);
+    public static JkPomMetadata of() {
+        return new JkPomMetadata();
     }
 
     /**
      * Adds a developer to this publication.
      */
-    public JkPomMetadata<T> addDeveloper(JkDeveloperInfo developerInfo) {
+    public JkPomMetadata addDeveloper(JkDeveloperInfo developerInfo) {
         this.developers.add(developerInfo);
         return this;
     }
@@ -121,7 +108,7 @@ public final class JkPomMetadata<T> implements Serializable {
     /**
      * @see #addDeveloper(JkDeveloperInfo)
      */
-    public JkPomMetadata<T> addDeveloper(String name, String email, String organisation,
+    public JkPomMetadata addDeveloper(String name, String email, String organisation,
                                          String organisationUrl) {
         return addDeveloper(new JkDeveloperInfo(name, email, organisation, organisationUrl));
     }
@@ -129,14 +116,14 @@ public final class JkPomMetadata<T> implements Serializable {
     /**
      * @see #addDeveloper(JkDeveloperInfo)
      */
-    public JkPomMetadata<T> addGithubDeveloper(String name, String email) {
+    public JkPomMetadata addGithubDeveloper(String name, String email) {
         return addDeveloper(new JkDeveloperInfo(name, email, "Github", "https://github.com"));
     }
 
     /**
      * Adds license information about this publication
      */
-    public JkPomMetadata<T> addLicense(JkLicenseInfo licenseInfo) {
+    public JkPomMetadata addLicense(JkLicenseInfo licenseInfo) {
         this.licenses.add(licenseInfo);
         return this;
     }
@@ -144,7 +131,7 @@ public final class JkPomMetadata<T> implements Serializable {
     /**
      * @see #addLicense(JkLicenseInfo)
      */
-    public JkPomMetadata<T> addLicense(String name, String url) {
+    public JkPomMetadata addLicense(String name, String url) {
         this.licenses.add(JkLicenseInfo.of(name, url));
         return this;
     }
@@ -152,21 +139,21 @@ public final class JkPomMetadata<T> implements Serializable {
     /**
      * R@see #addLicense(JkLicenseInfo)
      */
-    public JkPomMetadata<T> addApache2License() {
+    public JkPomMetadata addApache2License() {
         return addLicense("Apache License V2.0", "https://www.apache.org/licenses/LICENSE-2.0.htmll");
     }
 
     /**
      * @see #addLicense(JkLicenseInfo)
      */
-    public JkPomMetadata<T> addGpl3License() {
+    public JkPomMetadata addGpl3License() {
         return addLicense("GNU General public license V3", "https://www.gnu.org/copyleft/gpl.html");
     }
 
     /**
      *  @see #addLicense(JkLicenseInfo)
      */
-    public JkPomMetadata<T> addMitLicense() {
+    public JkPomMetadata addMitLicense() {
         return addLicense("MIT License", "https://opensource.org/licenses/MIT");
     }
 

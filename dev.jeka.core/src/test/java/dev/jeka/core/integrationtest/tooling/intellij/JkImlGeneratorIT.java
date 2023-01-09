@@ -38,7 +38,8 @@ public class JkImlGeneratorIT {
         System.out.println(result0);
 
         final Path core = top.resolve("core");
-        final JkProject coreProject = JkProject.of()
+        final JkProject coreProject = JkProject.of();
+        coreProject
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
                 .prodCompilation
@@ -47,9 +48,11 @@ public class JkImlGeneratorIT {
                     .testCompilation
                         .layout
                             .emptySources().addSource("test")
-                            .emptyResources().addResource("res-test").__.__
+                            .emptyResources().addResource("res-test");
+        coreProject
+                .testing
                     .testProcessor
-                        .setForkingProcess(true).__.__;
+                        .setForkingProcess(true);
         final JkImlGenerator coreGenerator = JkImlGenerator.of()
                 .setIdeSupport(coreProject.getJavaIdeSupport());
         final String result1 = coreGenerator.computeIml().toDoc().toXml();

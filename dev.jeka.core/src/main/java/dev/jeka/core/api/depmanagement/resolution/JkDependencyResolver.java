@@ -18,9 +18,9 @@ import static dev.jeka.core.api.utils.JkUtilsString.pluralize;
  *
  * @author Jerome Angibaud
  */
-public final class JkDependencyResolver<T> {
+public final class JkDependencyResolver  {
 
-    public final JkResolutionParameters<JkDependencyResolver<T> > parameters;
+    public final JkResolutionParameters parameters;
 
     // Not necessary but may help Ivy to do some caching ???
     private JkCoordinate moduleHolder;
@@ -31,28 +31,15 @@ public final class JkDependencyResolver<T> {
 
     private boolean useCache;
 
-    /**
-     * For parent chaining
-     */
-    public final T __;
-
-    private JkDependencyResolver(T parent) {
-        __ = parent;
-        parameters = JkResolutionParameters.ofParent(this);
+    private JkDependencyResolver() {
+        parameters = JkResolutionParameters.of();
     }
 
     /**
      * Creates an empty (without repo) dependency resolver fetching module dependencies.
      */
-    public static JkDependencyResolver<Void> of() {
-        return ofParent(null);
-    }
-
-    /**
-     * Same as {@link #of()} but providing parent chaining.
-     */
-    public static <T> JkDependencyResolver<T> ofParent(T parent) {
-        return new JkDependencyResolver(parent);
+    public static JkDependencyResolver of() {
+        return new JkDependencyResolver();
     }
 
     /**
@@ -62,22 +49,22 @@ public final class JkDependencyResolver<T> {
         return this.repos;
     }
 
-    public JkDependencyResolver<T> setRepos(JkRepoSet repos) {
+    public JkDependencyResolver  setRepos(JkRepoSet repos) {
         JkUtilsAssert.argument(repos != null, "repos cannot be null");
         this.repos = repos;
         this.cachedResults.clear();
         return this;
     }
 
-    public JkDependencyResolver<T> addRepos(JkRepoSet repos) {
+    public JkDependencyResolver  addRepos(JkRepoSet repos) {
         return setRepos(this.repos.and(repos));
     }
 
-    public JkDependencyResolver<T> addRepos(JkRepo... repos) {
+    public JkDependencyResolver  addRepos(JkRepo... repos) {
         return addRepos(JkRepoSet.of(Arrays.asList(repos)));
     }
 
-    public JkDependencyResolver<T> setUseCache(boolean useCache) {
+    public JkDependencyResolver  setUseCache(boolean useCache) {
         this.useCache = useCache;
         return this;
     }
@@ -86,7 +73,7 @@ public final class JkDependencyResolver<T> {
         return this.useCache;
     }
 
-    public JkDependencyResolver<T> cleanCache() {
+    public JkDependencyResolver  cleanCache() {
         this.cachedResults.clear();
         return this;
     }
@@ -94,7 +81,7 @@ public final class JkDependencyResolver<T> {
     /**
      * Returns the parameters of this dependency resolver.
      */
-    public JkResolutionParameters<JkDependencyResolver<T> > getDefaultParams() {
+    public JkResolutionParameters getDefaultParams() {
         return this.parameters;
     }
 
@@ -104,7 +91,7 @@ public final class JkDependencyResolver<T> {
      * module+version for which the resolution is made. This is only relevant
      * for of dependencies and have no effect for of dependencies.
      */
-    public JkDependencyResolver<T> setModuleHolder(JkCoordinate versionedModule) {
+    public JkDependencyResolver setModuleHolder(JkCoordinate versionedModule) {
         this.moduleHolder = versionedModule;
         return this;
     }

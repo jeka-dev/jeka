@@ -18,7 +18,7 @@ import java.util.function.UnaryOperator;
  * By default, when no include/exclude pattern/tag are specified, the selector get all classes
  * under defined class root dirs.
  */
-public final class JkTestSelection<T> implements Serializable {
+public final class JkTestSelection implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,17 +38,10 @@ public final class JkTestSelection<T> implements Serializable {
 
     private JkUnaryOperator<LauncherDiscoveryRequestBuilder> discoveryConfigurer;
 
-    /**
-     * For parent chaining
-     */
-    public final transient T __;
-
-    private JkTestSelection(T __) {
-        this.__ = __;
+    private JkTestSelection() {
     }
 
     private JkTestSelection(JkTestSelection other) {
-        this.__ = (T) other.__;
         this.discoveryConfigurer = other.discoveryConfigurer;
         this.excludePatterns = new HashSet<>(other.excludePatterns);
         this.excludeTags = new HashSet<>(other.excludeTags);
@@ -62,15 +55,8 @@ public final class JkTestSelection<T> implements Serializable {
      * The created instance does not include any include filter nor class root dirs
      * so no test will be included out of the box.
      */
-    public static JkTestSelection<Void> of() {
-        return ofParent(null);
-    }
-
-    /**
-     * Same as {@link #of()} but mentioning a parent for chaining
-     */
-    public static <T> JkTestSelection<T> ofParent(T parent) {
-        return new JkTestSelection(parent);
+    public static JkTestSelection of() {
+        return new JkTestSelection();
     }
 
     /**
@@ -84,7 +70,7 @@ public final class JkTestSelection<T> implements Serializable {
      * Adds specified dir to the test class root directories. It can be a collection of path or
      * a single path (as Path implements Iterable<Path>
      */
-    public JkTestSelection<T> addTestClassRoots(Iterable<Path> paths) {
+    public JkTestSelection addTestClassRoots(Iterable<Path> paths) {
         List<Path> pathList = JkUtilsPath.disambiguate(paths);
         testClassRoots = testClassRoots.and(pathList);
         return this;
@@ -97,20 +83,20 @@ public final class JkTestSelection<T> implements Serializable {
         return Collections.unmodifiableSet(includePatterns);
     }
 
-    public JkTestSelection<T> addIncludePatterns(Iterable<String> patterns) {
+    public JkTestSelection addIncludePatterns(Iterable<String> patterns) {
         JkUtilsIterable.addAllWithoutDuplicate(this.includePatterns, patterns);
         return this;
     }
 
-    public JkTestSelection<T> addIncludeStandardPatterns() {
+    public JkTestSelection addIncludeStandardPatterns() {
         return addIncludePatterns(STANDARD_INCLUDE_PATTERN);
     }
 
-    public JkTestSelection<T> addIncludePatterns(String ...patterns) {
+    public JkTestSelection addIncludePatterns(String ...patterns) {
         return addIncludePatterns(Arrays.asList(patterns));
     }
 
-    public JkTestSelection<T> addIncludePatternsIf(boolean condition, String ...patterns) {
+    public JkTestSelection addIncludePatternsIf(boolean condition, String ...patterns) {
         if (!condition) {
             return this;
         }
@@ -124,12 +110,12 @@ public final class JkTestSelection<T> implements Serializable {
         return Collections.unmodifiableSet(excludePatterns);
     }
 
-    public JkTestSelection<T> addExcludePatterns(Iterable<String> patterns) {
+    public JkTestSelection addExcludePatterns(Iterable<String> patterns) {
         JkUtilsIterable.addAllWithoutDuplicate(this.excludePatterns, patterns);
         return this;
     }
 
-    public JkTestSelection<T> addExcludePatterns(String ...patterns) {
+    public JkTestSelection addExcludePatterns(String ...patterns) {
         return addExcludePatterns(Arrays.asList(patterns));
     }
 
@@ -137,12 +123,12 @@ public final class JkTestSelection<T> implements Serializable {
         return Collections.unmodifiableSet(includeTags);
     }
 
-    public JkTestSelection<T> addIncludeTags(Iterable<String> patterns) {
+    public JkTestSelection addIncludeTags(Iterable<String> patterns) {
         JkUtilsIterable.addAllWithoutDuplicate(this.includeTags, patterns);
         return this;
     }
 
-    public JkTestSelection<T> addIncludeTags(String ...patterns) {
+    public JkTestSelection addIncludeTags(String ...patterns) {
         return addIncludeTags(Arrays.asList(patterns));
     }
 
@@ -150,12 +136,12 @@ public final class JkTestSelection<T> implements Serializable {
         return excludeTags;
     }
 
-    public JkTestSelection<T> addExcludeTags(Iterable<String> patterns) {
+    public JkTestSelection addExcludeTags(Iterable<String> patterns) {
         JkUtilsIterable.addAllWithoutDuplicate(this.excludeTags, patterns);
         return this;
     }
 
-    public JkTestSelection<T> addExcludeTags(String ...patterns) {
+    public JkTestSelection addExcludeTags(String ...patterns) {
         return addExcludeTags(Arrays.asList(patterns));
     }
 
@@ -163,7 +149,7 @@ public final class JkTestSelection<T> implements Serializable {
         return discoveryConfigurer;
     }
 
-    public JkTestSelection<T> setTestClassRoots(UnaryOperator<JkPathSequence> pathSequencer) {
+    public JkTestSelection setTestClassRoots(UnaryOperator<JkPathSequence> pathSequencer) {
         testClassRoots = pathSequencer.apply(testClassRoots);
         return this;
     }
@@ -184,7 +170,7 @@ public final class JkTestSelection<T> implements Serializable {
      *     </code>
      * </pre>
      */
-    public JkTestSelection<T> setDiscoveryConfigurer(JkUnaryOperator<LauncherDiscoveryRequestBuilder> discoveryConfigurer) {
+    public JkTestSelection setDiscoveryConfigurer(JkUnaryOperator<LauncherDiscoveryRequestBuilder> discoveryConfigurer) {
         this.discoveryConfigurer = discoveryConfigurer;
         return this;
     }

@@ -69,7 +69,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
 
-    public final JkDependencyResolver<JkProject> dependencyResolver;
+    public final JkDependencyResolver dependencyResolver;
 
     /**
      * The compiler for compiling Java sources for this project.
@@ -99,7 +99,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         prodCompilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
-        dependencyResolver = JkDependencyResolver.ofParent(this)
+        dependencyResolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral())
                 .setUseCache(true);
         registerArtifacts();

@@ -220,10 +220,10 @@ public final class JkSonarqube {
                 .of(coordinate)
                 .withTransitivity(JkTransitivity.NONE);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                .addRepos(repos)
+                .addRepos(repos);
+        dependencyResolver
                 .getDefaultParams()
-                    .setFailOnDependencyResolutionError(false)
-                .__;
+                    .setFailOnDependencyResolutionError(false);
         JkResolveResult resolveResult = dependencyResolver.resolve(JkDependencySet.of().and(coordinateDependency));
         if (resolveResult.getErrorReport().hasErrors()) {
             StringBuilder sb = new StringBuilder();

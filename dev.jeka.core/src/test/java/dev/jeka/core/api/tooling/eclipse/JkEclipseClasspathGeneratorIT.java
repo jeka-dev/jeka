@@ -37,18 +37,22 @@ public class JkEclipseClasspathGeneratorIT {
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);
 
-        final JkProject coreProject = JkProject.of()
+        final JkProject coreProject = JkProject.of();
+        coreProject
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
             .prodCompilation
-                .configureDependencies(deps -> deps.and(baseProject.toDependency())).__
+                .configureDependencies(deps -> deps.and(baseProject.toDependency()));
+        coreProject
             .testing
                 .testCompilation
                     .layout
                         .emptySources().addSource("test")
-                        .emptyResources().addResource("res-test").__.__
+                        .emptyResources().addResource("res-test");
+        coreProject
+            .testing
                 .testProcessor
-                    .setForkingProcess(true).__.__;
+                    .setForkingProcess(true);
         final JkEclipseClasspathGenerator coreGenerator =
                 JkEclipseClasspathGenerator.of(coreProject.getJavaIdeSupport());
         final String coreClasspath = coreGenerator.generate();

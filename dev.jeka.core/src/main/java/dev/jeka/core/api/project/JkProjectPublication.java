@@ -22,7 +22,7 @@ import java.util.function.UnaryOperator;
  */
 public class JkProjectPublication {
 
-    public final JkMavenPublication<JkProjectPublication> maven;
+    public final JkMavenPublication maven;
 
     public final JkIvyPublication<JkProjectPublication> ivy;
 
@@ -34,14 +34,8 @@ public class JkProjectPublication {
 
     private boolean publishIvy = false;
 
-    /**
-     * For parent chaining
-     */
-    public final JkProject __;
-
     JkProjectPublication(JkProject project) {
-        this.__ = project;
-        maven = JkMavenPublication.of(this)
+        maven = JkMavenPublication.of()
                 .setArtifactLocatorSupplier(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
                         project.prodCompilation.getDependencies(),

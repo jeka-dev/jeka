@@ -131,10 +131,11 @@ public class DependencySetResolutionIT {
         JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularLibs.JAVAX_SERVLET_API.toCoordinate("2.5.3").toString());  // does not exist
-        JkDependencyResolver resolver = JkDependencyResolver.of()
+        JkDependencyResolver resolver = JkDependencyResolver.of();
+        resolver
                 .addRepos(JkRepo.ofMavenCentral())
                 .setModuleHolder(holder)
-                .getDefaultParams().setFailOnDependencyResolutionError(false).__;
+                .getDefaultParams().setFailOnDependencyResolutionError(false);
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolveResult.JkErrorReport errorReport = resolveResult.getErrorReport();
         System.out.println(errorReport.getModuleProblems());
@@ -227,7 +228,7 @@ public class DependencySetResolutionIT {
         JkDependencyResolver resolver = JkDependencyResolver.of();
         JkResolvedDependencyNode tree = resolver.resolve(deps).getDependencyTree();
         assertEquals(2, tree.toFlattenList().size());
-        resolver = JkDependencyResolver.ofParent(JkRepo.ofMavenCentral().toSet());
+        resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         assertEquals(2, resolver.resolve(deps).getDependencyTree().toFlattenList().size());
 
     }

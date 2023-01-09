@@ -5,7 +5,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 /**
  * Contains parameters likely to impact module resolution behavior.
  */
-public final class JkResolutionParameters<T> {
+public final class JkResolutionParameters  {
 
     /**
      * Strategy for resolving version conflict
@@ -42,21 +42,12 @@ public final class JkResolutionParameters<T> {
 
     private boolean failOnDependencyResolutionError = true;
 
-    /**
-     * For parent chaining
-     */
-    public T __;
+    private JkResolutionParameters() {
 
-    private JkResolutionParameters(T parent) {
-        __ = parent;
-    }
-
-    static <T> JkResolutionParameters ofParent(T parent) {
-        return new JkResolutionParameters(parent);
     }
 
     public static JkResolutionParameters of() {
-        return new JkResolutionParameters(null);
+        return new JkResolutionParameters();
     }
 
     /**
@@ -69,7 +60,7 @@ public final class JkResolutionParameters<T> {
     /**
      * Set the {@link JkConflictResolver} to use.
      */
-    public JkResolutionParameters<T> setConflictResolver(JkConflictResolver conflictResolver) {
+    public JkResolutionParameters  setConflictResolver(JkConflictResolver conflictResolver) {
         JkUtilsAssert.argument(conflictResolver != null, "conflictResolver can not be null.");
         this.conflictResolver = conflictResolver;
         return this;
@@ -86,7 +77,7 @@ public final class JkResolutionParameters<T> {
     /**
      * @see JkResolutionParameters#isRefreshed()
      */
-    public JkResolutionParameters<T> setRefreshed(boolean refreshed) {
+    public JkResolutionParameters  setRefreshed(boolean refreshed) {
         this.refreshed = refreshed;
         return this;
     }
@@ -100,7 +91,7 @@ public final class JkResolutionParameters<T> {
      * If <code>true</code> this object will throw a JkException whenever a dependency resolution occurs. Otherwise,
      * just logs a warning message. <code>false</code> by default.
      */
-    public JkResolutionParameters<T> setFailOnDependencyResolutionError(boolean failOnDependencyResolutionError) {
+    public JkResolutionParameters  setFailOnDependencyResolutionError(boolean failOnDependencyResolutionError) {
         this.failOnDependencyResolutionError = failOnDependencyResolutionError;
         return this;
     }
