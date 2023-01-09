@@ -82,8 +82,8 @@ public class KotlinJvmJkBean extends JkBean {
         if (!JkUtilsString.isBlank(kotlinTestSourceDir)) {
             project.testing.testCompilation.layout.setSources(kotlinTestSourceDir);
         }
-        JkProjectCompilation<?> prodCompile = project.prodCompilation;
-        JkProjectCompilation<?> testCompile = project.testing.testCompilation;
+        JkProjectCompilation prodCompile = project.prodCompilation;
+        JkProjectCompilation testCompile = project.testing.testCompilation;
         prodCompile
                 .configureDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()))
                 .preCompileActions

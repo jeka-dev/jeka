@@ -24,13 +24,14 @@ public class JkImlGeneratorIT {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
 
         final Path base = top.resolve("base");
-        final JkProject baseProject = JkProject.of()
+        final JkProject baseProject = JkProject.of();
+        baseProject
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
             .prodCompilation
                     .configureDependencies(deps -> deps
-                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6"))).__;
+                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6")));
         final JkImlGenerator baseGenerator = JkImlGenerator.of()
                 .setIdeSupport(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.computeIml().toDoc().toXml();
@@ -43,7 +44,8 @@ public class JkImlGeneratorIT {
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
                 .prodCompilation
-                    .configureDependencies(deps -> deps.and(baseProject.toDependency())).__
+                    .configureDependencies(deps -> deps.and(baseProject.toDependency()));
+        coreProject
                 .testing
                     .testCompilation
                         .layout
@@ -60,13 +62,14 @@ public class JkImlGeneratorIT {
         System.out.println(result1);
 
         final Path desktop = top.resolve("desktop");
-        final JkProject desktopProject = JkProject.of()
+        final JkProject desktopProject = JkProject.of();
+        desktopProject
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
                 .prodCompilation
                     .configureDependencies(deps -> deps
-                        .and(coreProject.toDependency())).__;
+                        .and(coreProject.toDependency()));
         final JkImlGenerator desktopGenerator = JkImlGenerator.of()
                 .setIdeSupport(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.computeIml().toDoc().toXml();

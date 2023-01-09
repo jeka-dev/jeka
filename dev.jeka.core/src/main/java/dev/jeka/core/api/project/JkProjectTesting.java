@@ -25,7 +25,7 @@ public class JkProjectTesting {
 
     private final JkProject project;
 
-    public final JkProjectCompilation<JkProjectTesting> testCompilation;
+    public final JkProjectCompilation testCompilation;
 
     /**
      * The processor running the tests.
@@ -179,10 +179,10 @@ public class JkProjectTesting {
                 Paths.get(testCompilation.layout.getClassDir()));
     }
 
-    private class JkProjectTestCompilation extends JkProjectCompilation<JkProjectTesting> {
+    private class JkProjectTestCompilation extends JkProjectCompilation {
 
         public JkProjectTestCompilation() {
-            super(JkProjectTesting.this.project, JkProjectTesting.this);
+            super(JkProjectTesting.this.project);
         }
 
         @Override

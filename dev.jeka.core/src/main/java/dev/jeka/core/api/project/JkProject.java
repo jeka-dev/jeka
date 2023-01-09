@@ -80,7 +80,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     public final JkProjectPublication publication;
 
-    public final JkProjectCompilation<JkProject> prodCompilation;
+    public final JkProjectCompilation prodCompilation;
 
     public final JkProjectTesting testing;
 

@@ -14,11 +14,12 @@ public class JkEclipseClasspathGeneratorRunner {
         final Path zip = Paths.get(JkEclipseClasspathGeneratorIT.class.getResource(JkEclipseClasspathGeneratorIT.ZIP_NAME).toURI());
         JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of("junit:junit:4.11");
         JkFileSystemDependency fileDep = JkFileSystemDependency.of(zip);
-        JkProject project = JkProject.of()
+        JkProject project = JkProject.of();
+        project
                 .prodCompilation
                     .configureDependencies(deps -> deps
                             .and(fileDep)
-                            .and(coordinateDependency)).__;
+                            .and(coordinateDependency));
         JkEclipseClasspathGenerator generator = JkEclipseClasspathGenerator.of(project.getJavaIdeSupport());
         generator.addAttribute(fileDep, "myValue", "myKey");
         generator.addAttribute(fileDep, "myValue2", "myKey2");

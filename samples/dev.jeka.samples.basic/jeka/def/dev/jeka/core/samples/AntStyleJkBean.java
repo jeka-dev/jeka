@@ -119,17 +119,19 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @Override
     public JkIdeSupport getJavaIdeSupport() {
-        return JkIdeSupport.of(getBaseDir())
+        JkIdeSupport result = JkIdeSupport.of(getBaseDir());
+        result
             .getProdLayout()
                 .emptySources()
-                .addSource(src)
-            .__
+                .addSource(src);
+        result
             .getTestLayout()
                 .emptySources()
-                .addSource(test)
-            .__
+                .addSource(test);
+        result
             .setDependencies(prodDependencies, prodDependencies, testDependencies)
             .setDependencyResolver(resolver);
+        return result;
     }
 
     public static void main(String[] args) {

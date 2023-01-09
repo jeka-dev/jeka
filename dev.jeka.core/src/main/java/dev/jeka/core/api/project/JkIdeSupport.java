@@ -23,9 +23,9 @@ public class JkIdeSupport {
 
     }
 
-    private JkCompileLayout<JkIdeSupport> prodLayout;
+    private JkCompileLayout prodLayout;
 
-    private JkCompileLayout<JkIdeSupport>  testLayout;
+    private JkCompileLayout testLayout;
 
     private JkQualifiedDependencySet dependencies;
 
@@ -36,8 +36,8 @@ public class JkIdeSupport {
     private List<Path> generatedSourceDirs = new LinkedList<>();
 
     private JkIdeSupport(Path baseDir) {
-        this.prodLayout = JkCompileLayout.ofParent(this).setBaseDir(baseDir);
-        this.testLayout = JkCompileLayout.ofParent(this)
+        this.prodLayout = JkCompileLayout.of().setBaseDir(baseDir);
+        this.testLayout = JkCompileLayout.of()
                 .setSourceMavenStyle(JkCompileLayout.Concern.TEST)
                 .setStandardOutputDirs(JkCompileLayout.Concern.TEST)
                 .setBaseDir(baseDir);
@@ -50,11 +50,11 @@ public class JkIdeSupport {
         return new JkIdeSupport(baseDir);
     }
 
-    public JkCompileLayout<JkIdeSupport> getProdLayout() {
+    public JkCompileLayout getProdLayout() {
         return prodLayout;
     }
 
-    public JkCompileLayout<JkIdeSupport> getTestLayout() {
+    public JkCompileLayout getTestLayout() {
         return testLayout;
     }
 

@@ -180,42 +180,42 @@ public class JkProjectTest {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
 
         Path base = top.resolve("base");
-        JkProject baseProject = JkProject.of().setBaseDir(base).flatFacade()
+        JkProject baseProject = JkProject.of();
+        baseProject.setBaseDir(base).flatFacade()
                 .configureCompileDependencies(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6")))
                 .getProject()
                     .prodCompilation
                         .layout
                             .emptySources().addSource("src")
                             .emptyResources().addResource("res")
-                            .mixResourcesAndSources()
-                        .__
-                .__;
+                            .mixResourcesAndSources();
         baseProject.artifactProducer.makeAllArtifacts();
 
         final Path core = top.resolve("core");
-        final JkProject coreProject = JkProject.of()
+        final JkProject coreProject = JkProject.of();
+        coreProject
                 .setBaseDir(core)
                     .prodCompilation
                         .configureDependencies(deps -> deps
                             .and(baseProject.toDependency())
                         )
                         .layout
-                            .setSourceSimpleStyle(JkCompileLayout.Concern.PROD)
-                        .__
-                    .__;
+                            .setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
 
         //Desktop.getDesktop().open(core.toFile());
         coreProject.artifactProducer.makeAllArtifacts();
 
         final Path desktop = top.resolve("desktop");
-        final JkProject desktopProject = JkProject.of()
+        final JkProject desktopProject = JkProject.of();
+        desktopProject
                 .setBaseDir(desktop)
                 .prodCompilation
                     .configureDependencies(deps -> deps
-                            .and(coreProject.toDependency())).__
+                            .and(coreProject.toDependency()));
+        desktopProject
                 .prodCompilation
                     .layout
-                    .setSourceSimpleStyle(JkCompileLayout.Concern.PROD).__.__;
+                    .setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
         //Desktop.getDesktop().open(desktop.toFile());
         //desktopProject.getArtifactProducer().makeAllArtifacts();
 

@@ -59,12 +59,13 @@ public class JkEclipseClasspathGeneratorIT {
         System.out.println("\ncore .classpath");
         System.out.println(coreClasspath);
 
-        final JkProject desktopProject = JkProject.of()
+        final JkProject desktopProject = JkProject.of();
+        desktopProject
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
             .prodCompilation
-                    .configureDependencies(deps -> deps.and(coreProject.toDependency())).__;
+                    .configureDependencies(deps -> deps.and(coreProject.toDependency()));
         desktopProject.artifactProducer.makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());

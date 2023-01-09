@@ -22,16 +22,11 @@ import java.util.stream.Collectors;
  * Handles project compilation step. Users can configure inner phases by chaining runnables.
  * They also can modify {@link JkJavaCompiler} and {@link JkJavaCompileSpec} to use.
  */
-public class JkProjectCompilation<T> {
+public class JkProjectCompilation {
 
     public static final String RESOURCES_PROCESS_ACTION = "resources-process";
 
     public static final String JAVA_SOURCES_COMPILE_ACTION = "java-sources-compile";
-
-    /**
-     * For parent chaining
-     */
-    public final T __;
 
     private final JkProject project;
 
@@ -52,7 +47,7 @@ public class JkProjectCompilation<T> {
 
     public final JkResourceProcessor resourceProcessor;
 
-    public final JkCompileLayout<JkProjectCompilation<T>> layout;
+    public final JkCompileLayout layout;
 
     private Function<JkDependencySet, JkDependencySet> dependenciesModifier = deps -> deps;
 
@@ -64,8 +59,7 @@ public class JkProjectCompilation<T> {
 
     private JkResolveResult cachedResolveResult = null;
 
-    JkProjectCompilation(JkProject project, T parent) {
-        __ = parent;
+    JkProjectCompilation(JkProject project) {
         this.project = project;
         resourceProcessor = JkResourceProcessor.of();
         preCompileActions = JkRunnables.of()
@@ -79,8 +73,8 @@ public class JkProjectCompilation<T> {
         layout = initialLayout();
     }
 
-    static JkProjectCompilation<JkProject> ofProd(JkProject project) {
-        return new JkProjectCompilation(project, project);
+    static JkProjectCompilation ofProd(JkProject project) {
+        return new JkProjectCompilation(project);
     }
 
     public JkProjectCompilation apply(Consumer<JkProjectCompilation> consumer) {
@@ -137,12 +131,12 @@ public class JkProjectCompilation<T> {
     /**
      * Adds options to be passed to Java compiler
      */
-    public JkProjectCompilation<T> addJavaCompilerOptions(String ... options) {
+    public JkProjectCompilation addJavaCompilerOptions(String ... options) {
         this.extraJavaCompilerOptions.addAll(Arrays.asList(options));
         return this;
     }
 
-    public JkProjectCompilation<T> configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectCompilation configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
     }
@@ -159,7 +153,7 @@ public class JkProjectCompilation<T> {
         return dependenciesModifier.apply(baseDependencies());
     }
 
-    public JkProjectCompilation<T> addSourceGenerator(JkSourceGenerator sourceGenerator) {
+    public JkProjectCompilation addSourceGenerator(JkSourceGenerator sourceGenerator) {
         this.sourceGenerators.add(sourceGenerator);
         return this;
     }
@@ -194,7 +188,7 @@ public class JkProjectCompilation<T> {
     // -------- methods to override for test compilation
 
     protected JkCompileLayout initialLayout() {
-        return JkCompileLayout.ofParent(this)
+        return JkCompileLayout.of()
                 .setBaseDirSupplier(project::getBaseDir)
                 .setOutputDirSupplier(project::getOutputDir);
     }
