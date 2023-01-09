@@ -10,36 +10,24 @@ import java.util.stream.Collectors;
  * A mutable container for {@link Runnable}. From this object you can replace the underlying {@link Runnable} or
  * chain it with other ones.
  */
-public class JkRunnables<T> implements Runnable {
+public class JkRunnables implements Runnable {
 
     private final LinkedList<Entry> entries = new LinkedList<>();
 
     private boolean log;
 
     /**
-     * For parent chaining
-     */
-    public final T __;
-
-    /**
      * Creates a {@link JkRunnables} delegating to a no-op runnable.
      */
-    public static JkRunnables<Void> of() {
-        return ofParent(null);
+    public static JkRunnables of() {
+        return new JkRunnables();
     }
 
-    /**
-     * Same as {@link #of()} but providing parent chaining
-     */
-    public static <T> JkRunnables<T> ofParent(T parent) {
-        return new JkRunnables<T>(parent);
+
+    private JkRunnables() {
     }
 
-    private JkRunnables(T parent) {
-        this.__ = parent;
-    }
-
-    private JkRunnables<T> append(String name, Runnable runnable, Entry.RelativePlace relativePlace) {
+    private JkRunnables append(String name, Runnable runnable, Entry.RelativePlace relativePlace) {
         JkUtilsAssert.argument(!this.contains(name), "runnable container contains already an entry named '"
                 + name + "'");
         Entry entry = new Entry(name, runnable, relativePlace);
@@ -48,7 +36,7 @@ public class JkRunnables<T> implements Runnable {
         return this;
     }
 
-    public JkRunnables<T> append(String name, Runnable runnable) {
+    public JkRunnables append(String name, Runnable runnable) {
         return append(name, runnable, null);
     }
 
@@ -56,16 +44,16 @@ public class JkRunnables<T> implements Runnable {
      * Chains this underlying {@link Runnable} with the specified one. The specified runnable will
      * be executed at the end.
      */
-    public JkRunnables<T> append(Runnable runnable) {
+    public JkRunnables append(Runnable runnable) {
         return append(runnable.toString(), runnable);
     }
 
 
-    public JkRunnables<T> appendBefore(String name, String beforeRunnableName, Runnable runnable) {
+    public JkRunnables appendBefore(String name, String beforeRunnableName, Runnable runnable) {
         return append(name, runnable, new Entry.RelativePlace(beforeRunnableName, Entry.Where.BEFORE));
     }
 
-    public JkRunnables<T> appendAfter(String name, String afterRunnableName, Runnable runnable) {
+    public JkRunnables appendAfter(String name, String afterRunnableName, Runnable runnable) {
         return append(name, runnable, new Entry.RelativePlace(afterRunnableName, Entry.Where.AFTER));
     }
 
@@ -73,7 +61,7 @@ public class JkRunnables<T> implements Runnable {
         return entries.stream().map(entry -> entry.name).collect(Collectors.toList());
     }
 
-    public JkRunnables<T> remove(String runnableName) {
+    public JkRunnables remove(String runnableName) {
         for (Iterator<Entry> it = entries.iterator(); it.hasNext();) {
             if (it.next().name.equals(runnableName)) {
                 it.remove();
@@ -191,7 +179,7 @@ public class JkRunnables<T> implements Runnable {
 
     }
 
-    public JkRunnables<T> setLogRunnableName(boolean log) {
+    public JkRunnables setLogRunnableName(boolean log) {
         this.log = log;
         return this;
     }

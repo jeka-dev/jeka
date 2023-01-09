@@ -38,41 +38,38 @@ public class SimpleProjectJkBean extends JkBean {
                .configureTestDependencies(deps -> deps
                    .and(JUNIT5)
                )
-               .addTestExcludeFilterSuffixedBy("IT", false)
+               .addTestExcludeFilterSuffixedBy("IT", false);
 
-       .getProject()
-               .setJvmTargetVersion(JkJavaVersion.V8)
-               .compiler
-                    .setForkedWithDefaultProcess()
-               .__
-               .dependencyResolver
-                    .getDefaultParams()
-                        .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT)
-                    .__
-               .__
-               .packaging
-                   .configureRuntimeDependencies(deps -> deps
-                           .and("com.github.djeang:vincer-dom:1.2.0")
-                   )
-               .__
-               .testing
-                    .testProcessor
-                        .setForkingProcess(false)
-                        .engineBehavior
-                            .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE)
-                        .__
-                    .__
-               .__
+       project
+           .setJvmTargetVersion(JkJavaVersion.V8)
+           .compiler
+                .setForkedWithDefaultProcess();
+       project
+           .dependencyResolver
+                .getDefaultParams()
+                    .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT);
+       project
+           .packaging
+               .configureRuntimeDependencies(deps -> deps
+                       .and("com.github.djeang:vincer-dom:1.2.0")
+               );
+       project
+           .testing
+                .testProcessor
+                    .setForkingProcess(false)
+                    .engineBehavior
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
+       project
            .publication
                .setModuleId("dev.jeka:sample-javaplugin")
                .setVersion("1.0-SNAPSHOT")
                .maven
                     .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
 
-                   // Published dependencies can be modified here from the ones declared in dependency management.
-                   // Here jersey-server is not supposed to be part of the API but only needed at runtime.
-                   .configureDependencies(deps -> deps
-                       .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME));
+               // Published dependencies can be modified here from the ones declared in dependency management.
+               // Here jersey-server is not supposed to be part of the API but only needed at runtime.
+               .configureDependencies(deps -> deps
+                   .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME));
     }
 
     public void cleanPackPublish() {

@@ -31,7 +31,7 @@ public class JkProjectPackaging {
 
     private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
-    public final JkJavadocProcessor<JkProjectPackaging> javadocProcessor;
+    public final JkJavadocProcessor javadocProcessor;
 
     private Function<JkDependencySet, JkDependencySet> dependencySetModifier = x -> x;
 
@@ -47,9 +47,9 @@ public class JkProjectPackaging {
 
      JkProjectPackaging(JkProject project) {
         this.project = project;
-        this.manifest = JkManifest.ofParent(this);
+        this.manifest = JkManifest.of();
         this.__ = project;
-        javadocProcessor = JkJavadocProcessor.ofParent(this);
+        javadocProcessor = JkJavadocProcessor.of();
     }
 
     public JkProjectPackaging apply(Consumer<JkProjectPackaging> consumer) {

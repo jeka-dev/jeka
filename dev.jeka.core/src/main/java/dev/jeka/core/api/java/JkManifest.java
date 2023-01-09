@@ -66,13 +66,7 @@ public final class JkManifest<T> {
 
     private Manifest manifest;
 
-    /**
-     *  For parent chaining
-     */
-    public final T __;
-
-    private JkManifest(T __) {
-        this.__ = __;
+    private JkManifest() {
         this.manifest = new Manifest();
         this.manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
     }
@@ -80,15 +74,8 @@ public final class JkManifest<T> {
     /**
      * Creates an empty JkManifest
      */
-    public static JkManifest<Void> of() {
-        return ofParent(null);
-    }
-
-    /**
-     * Same as {@link #of()} but providing a parent for method chaining
-     */
-    public static <T> JkManifest<T> ofParent(T parent) {
-         return new JkManifest(parent);
+    public static JkManifest of() {
+        return new JkManifest();
     }
 
     /**
@@ -101,7 +88,7 @@ public final class JkManifest<T> {
     /**
      * Set the underlying {@link Manifest} with the specified one.
      */
-    public JkManifest<T> set(Manifest manifest) {
+    public JkManifest set(Manifest manifest) {
         this.manifest = manifest;
         return this;
     }
@@ -109,12 +96,12 @@ public final class JkManifest<T> {
     /**
      * Loads the manifest file from the specified path and set it as the underlying manifest.
      */
-    public JkManifest<T> loadFromFile(Path file) {
+    public JkManifest loadFromFile(Path file) {
         this.manifest = read(file);
         return this;
     }
 
-    public JkManifest<T> loadFromJar(Path jar) {
+    public JkManifest loadFromJar(Path jar) {
         try (JkZipTree jarTree = JkZipTree.of(jar)) {
             Path manifestFile = jarTree.get(STANDARD_LOCATION);
             if (!Files.exists(manifestFile)) {
@@ -128,14 +115,14 @@ public final class JkManifest<T> {
     /**
      * Loads the manifest from the specified input stream and set it as the underlying manifest.
      */
-    public JkManifest<T> loadFromInputStream(InputStream inputStream) {
+    public JkManifest loadFromInputStream(InputStream inputStream) {
         return this.set(read(inputStream));
     }
 
     /**
      * Loads the manifest from the jar or the base class directory the specified class belongs to.
      */
-    public JkManifest<T> loadFromClass(Class<?> clazz) {
+    public JkManifest loadFromClass(Class<?> clazz) {
         String className = clazz.getSimpleName() + ".class";
         String classPath = clazz.getResource(className).toString();
         if (!classPath.startsWith("jar")) {
@@ -153,7 +140,7 @@ public final class JkManifest<T> {
      * Adds the specified attributes in the "main" attributes section.
      * This method return this object.
      */
-    public JkManifest<T> addMainAttribute(Name key, String value) {
+    public JkManifest addMainAttribute(Name key, String value) {
         this.manifest.getMainAttributes().putValue(key.toString(), value);
         return this;
     }
@@ -161,7 +148,7 @@ public final class JkManifest<T> {
     /**
      * Adds the main class entry by auto-detecting the class holding the main method.
      */
-    public JkManifest<T> addAutodetectMain(Path classDir) {
+    public JkManifest addAutodetectMain(Path classDir) {
         ClassLoader classLoader = JkUrlClassLoader.of(classDir).get();
         List<String> classes = JkInternalClasspathScanner.of().findClassesHavingMainMethod(classLoader);
         if (!classes.isEmpty()) {
@@ -175,7 +162,7 @@ public final class JkManifest<T> {
     /**
      * @see #addMainAttribute(Name, String)
      */
-    public JkManifest<T> addMainAttribute(String key, String value) {
+    public JkManifest addMainAttribute(String key, String value) {
         this.manifest.getMainAttributes().putValue(key, value);
         return this;
     }
@@ -184,7 +171,7 @@ public final class JkManifest<T> {
      * Adds the 'Main-Class' attribute to this manifest.
      * This method returns this object.
      */
-    public JkManifest<T> addMainClass(String value) {
+    public JkManifest addMainClass(String value) {
         return addMainAttribute(Name.MAIN_CLASS, value);
     }
 
@@ -192,7 +179,7 @@ public final class JkManifest<T> {
      * Fills this manifest with contextual infoString : {@link #CREATED_BY},
      * {@link #BUILT_BY} and {@link #BUILD_JDK}
      */
-    public JkManifest<T> addContextualInfo() {
+    public JkManifest addContextualInfo() {
         return addMainAttribute(CREATED_BY, "Jeka").addMainAttribute(BUILT_BY,
                 System.getProperty("user.name")).addMainAttribute(BUILD_JDK,
                         System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
@@ -216,7 +203,7 @@ public final class JkManifest<T> {
      * Adds attributes of the specified manifest to this one. This manifest attributes are overridden by those of the specified
      * one if same attribute exist.
      */
-    public JkManifest<T> merge(Manifest other) {
+    public JkManifest merge(Manifest other) {
         final Map<String, Attributes> otherEntryAttributes = other.getEntries();
         for (final String entry : otherEntryAttributes.keySet()) {
             final Attributes otherAttributes = otherEntryAttributes.get(entry);

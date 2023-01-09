@@ -39,18 +39,18 @@ public class JkProjectCompilation<T> {
      * The {@link JkRunnables} to run after source and resource generation. User can chain its own runnable
      * to customise the process. Contains {@link JkProjectCompilation#RESOURCES_PROCESS_ACTION} by default
      */
-    public final JkRunnables<JkProjectCompilation<T>> preCompileActions;
+    public final JkRunnables preCompileActions;
 
 
-    private final JkRunnables<JkProjectCompilation<T>> compileActions;
+    private final JkRunnables compileActions;
 
     /**
      * The {@link JkRunnables} to be run after compilation. User can chain its own runnable
      * to customise the process. Empty by default.
      */
-    public final JkRunnables<JkProjectCompilation<T>> postCompileActions;
+    public final JkRunnables postCompileActions;
 
-    public final JkResourceProcessor<JkProjectCompilation<T>> resourceProcessor;
+    public final JkResourceProcessor resourceProcessor;
 
     public final JkCompileLayout<JkProjectCompilation<T>> layout;
 
@@ -67,14 +67,14 @@ public class JkProjectCompilation<T> {
     JkProjectCompilation(JkProject project, T parent) {
         __ = parent;
         this.project = project;
-        resourceProcessor = JkResourceProcessor.ofParent(this);
-        preCompileActions = JkRunnables.ofParent(this)
+        resourceProcessor = JkResourceProcessor.of();
+        preCompileActions = JkRunnables.of()
                 .setLogRunnableName(true)
                 .append(RESOURCES_PROCESS_ACTION, this::processResources);
-        compileActions = JkRunnables.ofParent(this)
+        compileActions = JkRunnables.of()
                 .setLogRunnableName(true)
                 .append(JAVA_SOURCES_COMPILE_ACTION, this::compileJava);
-        postCompileActions = JkRunnables.ofParent(this)
+        postCompileActions = JkRunnables.of()
                 .setLogRunnableName(true);
         layout = initialLayout();
     }

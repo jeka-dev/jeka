@@ -10,11 +10,10 @@ class Build extends JkBean {
     final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     private void configure(JkProject project) {
-        project.flatFacade()
-            .setJvmTargetVersion(JkJavaVersion.V8)
-            .configureCompileDependencies(deps -> deps
-                    .andFiles(JkLocator.getJekaJarPath())
-            );
+        project.setJvmTargetVersion(JkJavaVersion.V8);
+        project.prodCompilation.configureDependencies(deps -> deps
+                .andFiles(JkLocator.getJekaJarPath())
+        );
 
         JkJekaVersionCompatibilityChecker.setCompatibilityRange(project.packaging.manifest,
                 "${jekaVersion}",

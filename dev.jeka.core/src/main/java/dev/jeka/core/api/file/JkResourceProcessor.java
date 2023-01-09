@@ -25,26 +25,21 @@ import java.util.function.Consumer;
  *
  * @author Jerome Angibaud
  */
-public final class JkResourceProcessor<T> {
+public final class JkResourceProcessor {
 
     private final List<JkInterpolator> interpolators = new LinkedList<>();
 
     // Charset for interpolation
     private Charset interpolationCharset = Charset.forName("UTF-8");
 
-    /**
-     * For parent chaining
-     */
-    public final T __;
+    private JkResourceProcessor() {
 
-    private JkResourceProcessor(T parent) {
-        this.__ = parent;
     }
 
     /**
      * Applies the specified consumer to this object.
      */
-    public JkResourceProcessor<T> apply(Consumer<JkResourceProcessor> consumer) {
+    public JkResourceProcessor apply(Consumer<JkResourceProcessor> consumer) {
         consumer.accept(this);
         return this;
     }
@@ -52,21 +47,14 @@ public final class JkResourceProcessor<T> {
     /**
      * Creates an empty resource processor
      */
-    public static JkResourceProcessor<Void> of() {
-        return ofParent(null);
-    }
-
-    /**
-     * Same as {@link #of()} with providing a parent chaining
-     */
-    public static <T> JkResourceProcessor<T> ofParent(T parent) {
-        return new JkResourceProcessor<>(parent);
+    public static JkResourceProcessor of() {
+        return new JkResourceProcessor();
     }
 
     /**
      * Adds specified interpolators to this resource processor.
      */
-    public JkResourceProcessor<T> addInterpolators(Iterable<JkInterpolator> interpolators) {
+    public JkResourceProcessor addInterpolators(Iterable<JkInterpolator> interpolators) {
         JkUtilsIterable.addAllWithoutDuplicate(this.interpolators, interpolators);
         return this;
     }
@@ -74,28 +62,28 @@ public final class JkResourceProcessor<T> {
     /**
      * @see #addInterpolators(Iterable)
      */
-    public JkResourceProcessor<T> addInterpolators(JkInterpolator ... interpolators) {
+    public JkResourceProcessor addInterpolators(JkInterpolator ... interpolators) {
         return addInterpolators(Arrays.asList(interpolators));
     }
 
     /**
      * @see #addInterpolators(Iterable)
      */
-    public JkResourceProcessor<T> addInterpolator(PathMatcher pathMatcher, Map<String, String> keyValues) {
+    public JkResourceProcessor addInterpolator(PathMatcher pathMatcher, Map<String, String> keyValues) {
         return addInterpolators(JkInterpolator.of(pathMatcher, keyValues));
     }
 
     /**
      * @see #addInterpolators(Iterable)
      */
-    public JkResourceProcessor<T> addInterpolator(String acceptPattern, Map<String, String> keyValues) {
+    public JkResourceProcessor addInterpolator(String acceptPattern, Map<String, String> keyValues) {
         return addInterpolator(JkPathMatcher.of(true, acceptPattern), keyValues);
     }
 
     /**
      * @see #addInterpolators(Iterable)
      */
-    public JkResourceProcessor<T> addInterpolator(String acceptPattern, String... keyValues) {
+    public JkResourceProcessor addInterpolator(String acceptPattern, String... keyValues) {
         return addInterpolator(acceptPattern, JkUtilsIterable.mapOfAny(keyValues));
     }
 
@@ -109,7 +97,7 @@ public final class JkResourceProcessor<T> {
     /**
      * Set the charset used for interpolation. This charset is not used if no interpolation occurs.
      */
-    public JkResourceProcessor<T> setInterpolationCharset(Charset interpolationCharset) {
+    public JkResourceProcessor setInterpolationCharset(Charset interpolationCharset) {
         JkUtilsAssert.argument(interpolationCharset != null, "interpolation charset cannot be null.");
         this.interpolationCharset = interpolationCharset;
         return this;

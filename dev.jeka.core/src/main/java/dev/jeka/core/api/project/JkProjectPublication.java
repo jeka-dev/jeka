@@ -26,9 +26,9 @@ public class JkProjectPublication {
 
     public final JkIvyPublication<JkProjectPublication> ivy;
 
-    public final JkRunnables<JkProjectPublication> preActions;
+    public final JkRunnables preActions;
 
-    public final JkRunnables<JkProjectPublication> postActions;
+    public final JkRunnables postActions;
 
     private boolean publishMaven = true;
 
@@ -53,8 +53,8 @@ public class JkProjectPublication {
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
                         project.prodCompilation.getDependencies(),
                         project.packaging.getRuntimeDependencies(), project.getDuplicateConflictStrategy()));
-        this.preActions = JkRunnables.ofParent(this);
-        this.postActions = JkRunnables.ofParent(this);
+        this.preActions = JkRunnables.of();
+        this.postActions = JkRunnables.of();
     }
 
     public JkProjectPublication apply(Consumer<JkProjectPublication> consumer) {

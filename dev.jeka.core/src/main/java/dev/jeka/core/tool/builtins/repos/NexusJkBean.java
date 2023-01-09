@@ -21,7 +21,7 @@ public class NexusJkBean extends JkBean {
     @JkDoc("Comma separated filters for taking in account only repositories with specified profile names.")
     public String profileNamesFilter = "";
 
-    private final JkConsumers<JkNexusRepos, Void> nexusReposConfigurators = JkConsumers.of();
+    private final JkConsumers<JkNexusRepos> nexusReposConfigurators = JkConsumers.of();
 
     protected NexusJkBean() {
         ProjectJkBean projectBean = getRuntime().getBeanOptional(ProjectJkBean.class).orElse(null);

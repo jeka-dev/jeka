@@ -49,41 +49,40 @@ public class CoreBuild extends JkBean {
             .artifactProducer
                 .putMainArtifact(this::doPackWithEmbeddedJar)
                 .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
-                .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper)
-            .__
+                .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
+        project
             .compiler
-                .setForkedWithDefaultProcess()
-            .__
+                .setForkedWithDefaultProcess();
+        project
             .prodCompilation
-                .layout
-                    .mixResourcesAndSources()
-                .__
                 .addJavaCompilerOptions("-Xlint:none","-g")
-            .__
+                .layout
+                    .mixResourcesAndSources();
+        project
             .testing
                 .testCompilation
                     .layout
-                        .mixResourcesAndSources()
-                    .__
-                .__
+                        .mixResourcesAndSources();
+        project
+            .testing
                 .testSelection
                     .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
-                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN)
-                .__
+                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN);
+        project
+            .testing
                 .testProcessor
                     .engineBehavior
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE)
-                    .__
-                .__
-            .__
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
+        project
             .packaging
                 .manifest
-                    .addMainClass("dev.jeka.core.tool.Main").__
+                    .addMainClass("dev.jeka.core.tool.Main");
+        project
+            .packaging
                 .javadocProcessor
                     .setDisplayOutput(false)
-                    .addOptions("-notimestamp")
-                .__
-            .__
+                    .addOptions("-notimestamp");
+        project
             .publication
                 .setModuleId("dev.jeka:jeka-core")
                 .setVersion(JkGitProcess.of()::getVersionFromTag)

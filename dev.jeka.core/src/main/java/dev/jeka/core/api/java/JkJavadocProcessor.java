@@ -23,40 +23,18 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-public final class JkJavadocProcessor<T> {
-
-    //private final JkPathTreeSet srcDirs;
+public final class JkJavadocProcessor {
 
     private final List<String> options = new LinkedList<>();
 
-    //private final Iterable<Path> classpath;
-
-    //private final Path outputDir;
-
     private Boolean displayOutput;
 
-    /**
-     * For parent chaining
-     */
-    public final T __;
-
-
-    private JkJavadocProcessor(T parent) {
-        this.__ = parent;
-    }
 
     /**
      * Creates a default {@link JkJavadocProcessor} .
      */
-    public static JkJavadocProcessor<Void> of() {
-        return ofParent(null);
-    }
-
-    /**
-     * Sale as {@link #of()} but providing a parent chaining
-     */
-    public static <T> JkJavadocProcessor<T> ofParent(T parent) {
-        return new JkJavadocProcessor(parent);
+    public static JkJavadocProcessor of() {
+        return new JkJavadocProcessor();
     }
 
     /**
@@ -69,14 +47,14 @@ public final class JkJavadocProcessor<T> {
     /**
      * Adds the specified parameters to Javadoc tool.
      */
-    public JkJavadocProcessor<T> addOptions(String ... options) {
+    public JkJavadocProcessor addOptions(String ... options) {
         return addOptions(Arrays.asList(options));
     }
 
     /**
      * @see #addOptions(String...)
      */
-    public JkJavadocProcessor<T> addOptions(Iterable<String> options) {
+    public JkJavadocProcessor addOptions(Iterable<String> options) {
         JkUtilsIterable.addAllWithoutDuplicate(this.options, options);
         return this;
     }
@@ -85,7 +63,7 @@ public final class JkJavadocProcessor<T> {
         return displayOutput;
     }
 
-    public JkJavadocProcessor<T> setDisplayOutput(Boolean displayOutput) {
+    public JkJavadocProcessor setDisplayOutput(Boolean displayOutput) {
         this.displayOutput = displayOutput;
         return this;
     }

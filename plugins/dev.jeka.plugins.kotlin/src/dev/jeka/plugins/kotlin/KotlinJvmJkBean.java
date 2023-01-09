@@ -51,7 +51,7 @@ public class KotlinJvmJkBean extends JkBean {
 
     private JkRepoSet downloadRepos;
 
-    private final JkConsumers<JkKotlinCompiler, Void> compilerConfigurators = JkConsumers.of();
+    private final JkConsumers<JkKotlinCompiler> compilerConfigurators = JkConsumers.of();
 
     KotlinJvmJkBean() {
         kotlinVersion = Optional.of(getRuntime().getProperties().get("jeka.kotlin.version")).orElse(DEFAULT_VERSION);
@@ -85,18 +85,17 @@ public class KotlinJvmJkBean extends JkBean {
         JkProjectCompilation<?> prodCompile = project.prodCompilation;
         JkProjectCompilation<?> testCompile = project.testing.testCompilation;
         prodCompile
+                .configureDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()))
                 .preCompileActions
-                .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileKotlin(getCompiler(), project))
-                .__
-                .configureDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()));
+                    .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
+                            () -> compileKotlin(getCompiler(), project));
         testCompile
                 .preCompileActions
                 .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileTestKotlin(getCompiler(), project))
-                .__
+                        () -> compileTestKotlin(getCompiler(), project));
+        testCompile
                 .layout
-                .addSource(kotlinTestSourceDir);
+                    .addSource(kotlinTestSourceDir);
         JkPathTree javaInKotlinDir = JkPathTree.of(project.getBaseDir().resolve(kotlinSourceDir));
         JkPathTree javaInKotlinTestDir = JkPathTree.of(project.getBaseDir().resolve(kotlinTestSourceDir));
         prodCompile.layout.setSources(javaInKotlinDir);

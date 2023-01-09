@@ -76,7 +76,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     private JkProject project;
 
-    private JkConsumers<JkProject, Void> projectConfigurators = JkConsumers.of();
+    private JkConsumers<JkProject> projectConfigurators = JkConsumers.of();
 
     private JkProject createProject() {
         Path baseDir = getBaseDir();

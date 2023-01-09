@@ -31,7 +31,7 @@ import java.util.stream.Stream;
  *         among the ones specified in jdkHomes</ul>
  * </li>
  */
-public final class JkJavaCompiler<T> {
+public final class JkJavaCompiler {
 
     /**
      * Filter to consider only Java source
@@ -46,13 +46,7 @@ public final class JkJavaCompiler<T> {
 
     private GuessHints guessHints = GuessHints.ofDefault();
 
-    /**
-     * Owner for parent chaining
-     */
-    public final T __;
-
-    private JkJavaCompiler(T __) {
-        this.__ = __;
+    private JkJavaCompiler() {
     }
 
     /**
@@ -60,15 +54,8 @@ public final class JkJavaCompiler<T> {
      * When nothing is specified, this compiler will try the default {@link JavaCompiler} instance provided
      * by the running JDK.
      */
-    public static JkJavaCompiler<Void> of() {
-        return ofParent(null);
-    }
-
-    /**
-     * Same as {@link #of()} but mentioning an owner for parent chaining.
-     */
-    public static <T> JkJavaCompiler<T> ofParent(T parent) {
-        return new JkJavaCompiler(parent);
+    public static JkJavaCompiler of() {
+        return new JkJavaCompiler();
     }
 
     /**
@@ -76,7 +63,7 @@ public final class JkJavaCompiler<T> {
      * Since in-process compilers cannot be run in forking process mode, this method disables any
      * previous fork options that may have been set.
      */
-    public JkJavaCompiler<T> setCompileTool(JavaCompiler tool, String... params) {
+    public JkJavaCompiler setCompileTool(JavaCompiler tool, String... params) {
         this.toolOrProcess = new ToolOrProcess(tool, null);
         this.toolParams = params;
         return this;
@@ -86,12 +73,12 @@ public final class JkJavaCompiler<T> {
     /**
      * Sets the underlying compiler with the specified process. The process is typically a 'javac' command.
      */
-    public JkJavaCompiler<T> setJavacProcess(JkProcess compileProcess) {
+    public JkJavaCompiler setJavacProcess(JkProcess compileProcess) {
         this.toolOrProcess = new ToolOrProcess(null, compileProcess);
         return this;
     }
 
-    public JkJavaCompiler<T> setJavacProcessJavaHome(Path javaHome) {
+    public JkJavaCompiler setJavacProcessJavaHome(Path javaHome) {
         return this.setJavacProcess(JkProcess.of(javaHome.resolve("bin/javac").toString()));
     }
 
@@ -101,12 +88,12 @@ public final class JkJavaCompiler<T> {
      * The forked process will be a javac command taken from the running jdk or
      * an extra-one according the source version.
      */
-    public JkJavaCompiler<T> setForkedWithDefaultProcess(String... processParams) {
+    public JkJavaCompiler setForkedWithDefaultProcess(String... processParams) {
         this.forkParams = processParams;
         return this;
     }
 
-    public JkJavaCompiler<T> setGuessHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
+    public JkJavaCompiler setGuessHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
         GuessHints guessHints = new GuessHints(jdks, javaVersion, preferTool);
         this.guessHints = guessHints;
         return this;

@@ -91,7 +91,7 @@ public class KotlinJkBean extends JkBean {
 
         private String kotlinTestSourceDir = "src/test/kotlin-jvm";
 
-        public JkConsumers<JkProject, Void> configurators = JkConsumers.of();
+        public JkConsumers<JkProject> configurators = JkConsumers.of();
 
         private JkKotlinJvmProject() {
         }
@@ -133,16 +133,15 @@ public class KotlinJkBean extends JkBean {
             JkProjectCompilation<?> testCompile = project.testing.testCompilation;
             JkVersionProvider versionProvider = JkKotlinModules.versionProvider(effectiveVersion);
             prodCompile
+                    .configureDependencies(deps -> deps.andVersionProvider(versionProvider))
                     .preCompileActions
                         .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                                () -> compileKotlin(kompiler, project))
-                    .__
-                    .configureDependencies(deps -> deps.andVersionProvider(versionProvider));
+                                () -> compileKotlin(kompiler, project));
             testCompile
                     .preCompileActions
                         .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                                () -> compileTestKotlin(kompiler, project))
-                        .__
+                                () -> compileTestKotlin(kompiler, project));
+            testCompile
                     .layout
                         .addSource(jvm.kotlinTestSourceDir);
             JkPathTree javaInKotlinDir = JkPathTree.of(project.getBaseDir().resolve(kotlinSourceDir));

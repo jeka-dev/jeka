@@ -14,37 +14,26 @@ class Build extends JkBean {
      * fields have already been injected from command line.
      */
     private void configure(JkProject project) {
-        project
-            .setJvmTargetVersion(JkJavaVersion.V8)
-            .prodCompilation
-                .configureDependencies(deps -> deps
-                        .and("com.google.guava:guava:21.0")
-                )
-            .__
+        project.setJvmTargetVersion(JkJavaVersion.V8);
+        project.prodCompilation.configureDependencies(deps -> deps
+                .and("com.google.guava:guava:21.0")
+        );
 
-            // this testing setup is almost default setting, this is here for illustration purpose
-            // If default is ok for you, you can remove it.
-            .testing
-                .testCompilation.configureDependencies(deps -> deps
-                        .and("org.junit.jupiter:junit-jupiter:5.8.1"))
-                .__
-                .testSelection
-                    .addIncludeStandardPatterns()
-                .__
-                .testProcessor
-                    .setForkingProcess(true)
-                    .engineBehavior
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE)
-                    .__
-                .__
-            .__
+        // this testing setup is almost default setting, this is here for illustration purpose
+        // If default is ok for you, you can remove it.
+        project.testing.testSelection.addIncludeStandardPatterns();
+        project.testing.testProcessor.setForkingProcess(true);
+        project.testing.testProcessor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
+        project.testing.testCompilation.configureDependencies(deps -> deps
+                .and("org.junit.jupiter:junit-jupiter:5.8.1")
+        );
 
-            // Publication is only necessary if your project is being deployed on a binary repository.
-            // Many projects as jee war jar, springboot application, tools, Graphical application
-            // does not need this section at all.  In this case you can remove it.
-            .publication
-                .setModuleId("your.group:your.project")
-                .setVersion(() -> JkGitProcess.of().getVersionFromTag());  // Version inferred from Git
+        // Publication is only necessary if your project is being deployed on a binary repository.
+        // Many projects as jee war jar, springboot application, tools, Graphical application
+        // does not need this section at all.  In this case you can remove it.
+        project.publication
+            .setModuleId("your.group:your.project")
+            .setVersion(() -> JkGitProcess.of().getVersionFromTag());  // Version inferred from Git
     }
 
     public void cleanPack() {

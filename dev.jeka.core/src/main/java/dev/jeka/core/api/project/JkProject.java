@@ -61,10 +61,10 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     private String sourceEncoding = DEFAULT_ENCODING;
 
-    private final JkRunnables<Void> cleanExtraActions = JkRunnables.of();
+    private final JkRunnables cleanExtraActions = JkRunnables.of();
 
-    public final JkStandardFileArtifactProducer<JkProject> artifactProducer =
-            JkStandardFileArtifactProducer.ofParent(this)
+    public final JkStandardFileArtifactProducer artifactProducer =
+            JkStandardFileArtifactProducer.of()
                     .setArtifactFilenameComputation(this::getArtifactPath);
 
     private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
@@ -74,7 +74,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     /**
      * The compiler for compiling Java sources for this project.
      */
-    public final JkJavaCompiler<JkProject> compiler;
+    public final JkJavaCompiler compiler;
 
     public final JkProjectPackaging packaging;
 
@@ -94,9 +94,8 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
 
-
     private JkProject() {
-        compiler = JkJavaCompiler.ofParent(this);
+        compiler = JkJavaCompiler.of();
         prodCompilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
@@ -127,7 +126,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     }
 
 
-    public JkRunnables<Void> getCleanExtraActions() {
+    public JkRunnables getCleanExtraActions() {
         return cleanExtraActions;
     }
 

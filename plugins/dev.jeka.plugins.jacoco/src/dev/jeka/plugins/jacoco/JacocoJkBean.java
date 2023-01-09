@@ -24,8 +24,8 @@ public class JacocoJkBean extends JkBean {
 
     public static final String OUTPUT_HTML_RELATIVE_PATH = "jacoco/html";  // this is a folder
 
-    @JkDoc("If false, project from ProjectJkBean won't be configured for Jacoco.")
-    public boolean enabled = true;
+    @JkDoc("If true, project from ProjectJkBean will be configured with Jacoco automatically.")
+    public boolean configureProject = true;
 
     @JkDoc("If true, Jacoco will produce a standard XML report usable by Sonarqube.")
     public boolean xmlReport = true;
@@ -57,7 +57,7 @@ public class JacocoJkBean extends JkBean {
     }
 
     private void configureForDefaultProject(JkProject project) {
-        if (!enabled) {
+        if (!configureProject) {
             return;
         }
         configure(project);
@@ -90,8 +90,8 @@ public class JacocoJkBean extends JkBean {
         jacoco.setSources(sourceDirs);
     }
 
-    public JacocoJkBean setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public JacocoJkBean setConfigureProject(boolean configureProject) {
+        this.configureProject = configureProject;
         return this;
     }
 

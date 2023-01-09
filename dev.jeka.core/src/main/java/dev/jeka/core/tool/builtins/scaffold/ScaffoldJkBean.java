@@ -27,7 +27,7 @@ public class ScaffoldJkBean extends JkBean {
     @JkDoc("Add extra content at the end of the template local.properties file.")
     public String localPropsExtraContent = "";
 
-    private JkConsumers<JkScaffolder, Void> configurators = JkConsumers.of();
+    private JkConsumers<JkScaffolder> configurators = JkConsumers.of();
 
     private JkScaffolder scaffolder() {
         if (scaffolder != null) {
