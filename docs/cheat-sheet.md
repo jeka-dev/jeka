@@ -5,7 +5,7 @@ _Jeka_ has predefined methods that comes either from `JkClass` or built-in plugi
 * `jeka help` : Displays methods and options invokable from command line, along with plugins available in the classpath.
 * `jeka [kbean-name]#help` : Displays methods and options invokable for the specified plugin (e.g. `jeka scaffold#help`).
 * `jeka intellij#iml` : Generates iml file for Intellij. This is generated according to the dependencies declared for _Jeka_ project.
-* `jeka intellij#iml -JKC=` : If the `jeka intellij#iml` fails due to the non-compile def classes, `-JKC=` will avoid def compilation phase.
+* `jeka intellij#iml -dci` : If the `jeka intellij#iml` fails due to compilation error on def classes, `-JKC=` will avoid def compilation phase.
 * `jeka eclipse#files` : Same purpose as above to generate metadata files for Eclipse.
 * `jeka scaffold#run` : Generates files to create a basic _Jeka_ project from scratch.
 * `jeka scaffold#wrapper` : Generates wrapper files (jekaw/jekaw.bat and bootstrap jar).
@@ -41,4 +41,4 @@ By default, _Jeka_ fetch dependencies from Maven central (https://repo.maven.apa
 Another default repository can be selected by setting the `jeka.repos.download.url` option. 
 It has been recommended to store this value in your [USER DIR]/.jeka/options.properties file to be reused across projects.
 
-For more details, please see `JkRepoFromOptions` javadoc.
+More details can be found [here](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-properties/#repositories).
