@@ -32,8 +32,8 @@ relies on other lower level ones provided by _Jeka_. At a glance, these are the 
 * __Cryptography :__ PGP signer
 * __Dependency management :__ Dependency management, publishing on repositories
 * __Java :__ Compilation, javadoc, resource processor, manifest, packager, classloader, classpath, launching
-    * __Testing :__ Launching tests and get reports
-    * __Project :__ Project structure to be built
+* __Testing :__ Launching tests and get reports
+* __Project :__ Project structure to be built
 * __Tooling :__ Eclipse integration, intellij integration, Maven interaction, Git
 * __Support :__ Set of utility class with static methods to handle low-level concerns
 
