@@ -110,3 +110,5 @@ Execute `./jekaw project#runJar` to run the bootable.jar
 
 !!! Note
     As for _java project_, Springboot projects can be scaffolded with _code.less_ flavor.
+
+Visit [JeKa sample projects](https://github.com/jeka-dev/working-examples) to have concrete implementation examples.

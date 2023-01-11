@@ -129,8 +129,8 @@ public class KotlinJkBean extends JkBean {
             JkProject project = JkProject.of().setBaseDir(KotlinJkBean.this.getBaseDir());
             JkKotlinCompiler kompiler = getKotlinCompiler();
             String effectiveVersion = kompiler.getVersion();
-            JkProjectCompilation<?> prodCompile = project.prodCompilation;
-            JkProjectCompilation<?> testCompile = project.testing.testCompilation;
+            JkProjectCompilation prodCompile = project.prodCompilation;
+            JkProjectCompilation testCompile = project.testing.testCompilation;
             JkVersionProvider versionProvider = JkKotlinModules.versionProvider(effectiveVersion);
             prodCompile
                     .configureDependencies(deps -> deps.andVersionProvider(versionProvider))
@@ -229,8 +229,8 @@ public class KotlinJkBean extends JkBean {
         private JKCommon() {}
 
         private void setupJvmProject(JkKotlinJvmProject jvm) {
-            JkProjectCompilation<?> prodCompile = jvm.getProject().prodCompilation;
-            JkProjectCompilation<?> testCompile = jvm.getProject().testing.testCompilation;
+            JkProjectCompilation prodCompile = jvm.getProject().prodCompilation;
+            JkProjectCompilation testCompile = jvm.getProject().testing.testCompilation;
             if (testSrcDir != null) {
                 testCompile.layout.addSource(testSrcDir);
                 if (addCommonStdLibs) {
