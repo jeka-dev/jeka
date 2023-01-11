@@ -26,6 +26,7 @@ import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.search.SearchEngine;
 import org.apache.ivy.plugins.matcher.GlobPatternMatcher;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
+import org.apache.ivy.util.url.URLHandlerRegistry;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -48,6 +49,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
     private final JkRepoSet repoSet;
 
     private IvyInternalDependencyResolver(JkRepoSet repoSet) {
+        URLHandlerRegistry.setDefault(IvyCustomUrlHandler.of(repoSet)); // must be set before ivy is initialised
         this.repoSet = repoSet;
     }
 
@@ -308,5 +310,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
         }
         return result;
     }
+
+
 
 }

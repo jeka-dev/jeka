@@ -57,6 +57,8 @@ public final class JkRepo {
 
     private JkPublishConfig publishConfig = new JkPublishConfig(this);
 
+    private Map<String, String> httpHeaders = new HashMap<>();
+
     public final boolean ivyRepo; // true if this repository is an Ivy one, false if it is a Maven one.
 
     private JkRepo(URL url, boolean ivyRepo) {
@@ -188,7 +190,7 @@ public final class JkRepo {
     /**
      * Returns the getRealm of this repository.
      */
-    public final JkRepoCredentials getCredentials() {
+    public JkRepoCredentials getCredentials() {
         return credentials;
     }
 
@@ -226,6 +228,19 @@ public final class JkRepo {
     public JkRepo setCredentials(String username, String password) {
         String realm = this.getCredentials() == null ? null : this.getCredentials().realm;
         return this.setCredentials(username, password, realm);
+    }
+
+    public Map<String, String> getHttpHeaders() {
+        return Collections.unmodifiableMap(this.httpHeaders);
+    }
+
+    public JkRepo setHttpHeaders(String ...keysAndValues) {
+        return setHttpHeaders(JkUtilsIterable.mapOfAny(keysAndValues));
+    }
+
+    public JkRepo setHttpHeaders(Map<String, String> headers) {
+        this.httpHeaders = new HashMap<>(headers);
+        return this;
     }
 
     public JkRepoSet toSet() {

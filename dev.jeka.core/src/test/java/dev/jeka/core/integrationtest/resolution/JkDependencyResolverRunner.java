@@ -8,10 +8,12 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 public class JkDependencyResolverRunner {
 
     public static void main(String[] args) {
+        JkRepo repo = JkRepo.ofMavenCentral().copy();
+        repo.setHttpHeaders("x-toto", "tototototo");
         JkResolveResult resolveResult = JkDependencyResolver.of()
-                .addRepos(JkRepo.ofMavenCentral())
-                .resolve(JkDependencySet.of("dev.jeka.plugins:spring-boot:2.0.0.RC1"));
+                .addRepos(repo)
+                .resolve(JkDependencySet.of("org.springframework.boot:spring-boot-starter:1.5.0.RELEASE"));
         resolveResult.assertNoError();
-        System.out.println(resolveResult);
+        System.out.println(resolveResult.getDependencyTree());
     }
 }

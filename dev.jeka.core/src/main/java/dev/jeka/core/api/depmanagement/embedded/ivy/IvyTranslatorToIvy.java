@@ -9,7 +9,6 @@ import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.conflict.AbstractConflictManager;
 import org.apache.ivy.plugins.resolver.AbstractResolver;
-import org.apache.ivy.util.url.URLHandlerRegistry;
 
 class IvyTranslatorToIvy {
 
@@ -17,7 +16,8 @@ class IvyTranslatorToIvy {
 
     static Ivy toIvy(JkRepoSet repoSet, JkResolutionParameters parameters) {
         IvySettings ivySettings = ivySettingsOf(repoSet, parameters);
-        return ivy(ivySettings);
+        Ivy ivy = ivy(ivySettings);
+        return ivy;
     }
 
     private static Ivy ivy(IvySettings ivySettings) {
@@ -29,7 +29,6 @@ class IvyTranslatorToIvy {
         IvyContext.getContext().setIvy(ivy);
         ivy.setSettings(ivySettings);
         ivy.bind();
-        URLHandlerRegistry.setDefault(new IvyFollowRedirectUrlHandler());
         return ivy;
     }
 

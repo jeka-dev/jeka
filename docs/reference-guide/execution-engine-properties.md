@@ -76,6 +76,12 @@ jeka.repos.download.username=myUsername
 jeka.repos.download.password=myPassword
 ```
 
+Specifying http headers to include in each request towards the repo
+```
+jeka.repos.download.headers.my-header-name=myHeaderValue
+jeka.repos.download.headers.another-header-name=anotherHeaderValue
+```
+
 For convenience, we can define multiple repositories and reference them using aliases
 ```
 jeka.repos.myRepo1=https://my.company/repo

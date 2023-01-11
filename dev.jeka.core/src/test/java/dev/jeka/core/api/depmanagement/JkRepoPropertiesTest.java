@@ -37,11 +37,17 @@ public class JkRepoPropertiesTest {
         props.put("jeka.repos.download.username", name);
         props.put("jeka.repos.download.password", pwd);
         props.put("jeka.repos.download.realm", realm);
+        props.put("jeka.repos.download.headers.a", "1");
+        props.put("jeka.repos.download.headers.bb", "2");
         JkRepo repo = of(props).getDownloadRepos().getRepos().get(0);
         assertEquals(URL, repo.getUrl().toString());
         assertEquals(name, repo.getCredentials().getUserName());
         assertEquals(pwd, repo.getCredentials().getPassword());
         assertEquals(realm, repo.getCredentials().getRealm());
+        Map<String, String> headers = repo.getHttpHeaders();
+        assertEquals(2, headers.size());
+        assertEquals("1", headers.get("a"));
+        assertEquals("2", headers.get("bb"));
     }
 
     @Test

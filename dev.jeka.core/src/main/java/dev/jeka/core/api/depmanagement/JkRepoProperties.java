@@ -5,6 +5,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -17,11 +18,14 @@ import java.util.stream.Collectors;
  * jeka.repos.download.username=    (optional)
  * jeka.repos.download.password=    (optional)
  * jeka.repos.download.realm=    (optional)
+ * jeka.repos.download.headers.myHeaderName= (optional : any header name fits)
+ * jeka.repos.download.headers.anotherHeaderName= (optional any header name fits)
  *
  * jeka.repos.publish=  (url)
  * jeka.repos.publish.username=     (optional)
  * jeka.repos.publish.password=     (optional)
  * jeka.repos.publish.realm=     (optional)
+ * jeka.repos.publish.headers.myHeaderName= (optional : any header name fits)
  * </pre>
  *
  * <p>
@@ -34,6 +38,7 @@ import java.util.stream.Collectors;
  * jeka.repos.anotherRepoName= (url)
  * jeka.repos.anotherRepoName.username=    (optional)
  * jeka.repos.anotherRepoName.password=    (optional)
+ * jeka.repos.anotherRepoName.headers.myHeaderName= (optional : any header name fits)
  *
  * jeka.repos.download.name=aRepoName, anotherRepoName
  *
@@ -113,9 +118,11 @@ public class JkRepoProperties {
         return JkRepoSet.of(repos);
     }
 
-    private JkRepo getRepo(String propertyName, String nameOrUrl) {
+    private JkRepo getRepo(String repoNameProperty, String nameOrUrl) {
         if (isUrl(nameOrUrl)) {
-            return JkRepo.of(nameOrUrl).setCredentials(getCredentials(propertyName));
+            return JkRepo.of(nameOrUrl)
+                    .setCredentials(getCredentials(repoNameProperty))
+                    .setHttpHeaders(getHttpHeaders(repoNameProperty));
         }
         return getRepoByName(nameOrUrl);
     }
@@ -127,8 +134,9 @@ public class JkRepoProperties {
         return JkRepo.JkRepoCredentials.of(userName, password, realm);
     }
 
-    private List<String> downloadUrlOrNames() {
-        return urlOrNames(properties.get("jeka.repos.download"));
+    private Map<String, String> getHttpHeaders(String prefix) {
+        String headersPropName = prefix + ".headers.";
+        return properties.getAllStartingWith(headersPropName, false);
     }
 
     private static List<String> urlOrNames(String value) {

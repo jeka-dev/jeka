@@ -22,6 +22,7 @@ import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
+import org.apache.ivy.util.url.URLHandlerRegistry;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +40,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     private final Path descriptorOutputDir;
 
     private IvyInternalPublisher(JkRepoSet publishRepo, Path descriptorOutputDir) {
-        super();
+        URLHandlerRegistry.setDefault(IvyCustomUrlHandler.of(publishRepo)); // must be set before ivy is initialised
         this.publishRepos = publishRepo;
         this.descriptorOutputDir = descriptorOutputDir;
     }

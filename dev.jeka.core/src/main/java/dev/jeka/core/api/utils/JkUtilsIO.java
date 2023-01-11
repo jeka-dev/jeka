@@ -59,6 +59,11 @@ public final class JkUtilsIO {
         }
     }
 
+    public static boolean isHttpOrHttps(URL url) {
+        String protocol = url.getProtocol();
+        return "http".equals(protocol) || "https".equals(protocol);
+    }
+
     public static URI toUri(String uri) {
         try {
             return new URL(uri).toURI();
