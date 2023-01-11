@@ -7,7 +7,7 @@
 
 <img src="./docs/images/knight-color-logo.svg" align="left" width="180"/>
 
-<strong>JeKa</strong> is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
+<strong>JeKa</strong> is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using direct Java/Kptlin code instead of using XML or Groovy/Kotlin DSLs. However, it's strong emphasis on conventions-over-configuration, let users define complete project builds whith just a minimalist property file.
 
 Build/task definitions are expressed with plain *Java* classes to leverage IDE power and Java ecosystem seamlessly.
 
