@@ -1,5 +1,6 @@
 # 0.10.5
-- Remove parent chaining pattern 
+- Let users set arbitrary headers on requests towards http repositories
+- Remove parent-chaining pattern 
 
 # 0.10.4
 - Improve Kotlin integration
