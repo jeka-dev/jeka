@@ -21,6 +21,7 @@ JeKa offers an execution engine, a build API and a powerful plugin architecture 
 
 - Run Java public methods from both IDE and command line indifferently.
 - Simply use Java libraries for building Java projects programmatically.
+- Thin wrapper around to just need minimalist property file to build projects reliying on popular tools.
 
 <br/>
 <sub>This is an example for building a simple Java Project.</sub>
