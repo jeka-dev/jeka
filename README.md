@@ -108,19 +108,19 @@ Projects can be **also built without any build code** in a very concise way : 1 
 on flat file only for declaring dependencies.
 
 <details>
-<summary>Example building springboot project using Sonarqube + Jacoco test coverage</summary>
+<summary>Example (without requiering build code) building springboot project using Sonarqube + Jacoco test coverage</summary>
 
 *local.properties*
 ```properties 
 jeka.cmd._append=springboot# @dev.jeka:jacoco-plugin @dev.jeka:sonarqube-plugin @dev.jeka:springboot-plugin
 
 jeka.cmd.build=project#clean project#pack
-jeka.cmd.build_quality=:build sonarqube#run jacoco# sonarqube#logOutput=true -Dsonar.host.url=http://localhost:9000
+jeka.cmd.build_quality=:build sonarqube#run jacoco# sonarqube#logOutput=true
 
 jeka.java.version=17
 springboot#springbootVersion=2.7.5
 
-intellij#jekaModuleName=wrapper-common
+sonar.host.url=http://localhost:9000
 ```
 
 *project-dependencies.txt*
