@@ -7,7 +7,7 @@
 
 <img src="./docs/images/knight-color-logo.svg" align="left" width="180"/>
 
-<strong>JeKa</strong> is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using Java as its main language instead of using XML or Groovy/Kotlin DSLs.
+<strong>JeKa</strong> is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using direct Java/Kptlin code instead of using XML or Groovy/Kotlin DSLs. However, it's strong emphasis on conventions-over-configuration, let users define complete project builds whith just a minimalist property file.
 
 Build/task definitions are expressed with plain *Java* classes to leverage IDE power and Java ecosystem seamlessly.
 
@@ -21,6 +21,7 @@ JeKa offers an execution engine, a build API and a powerful plugin architecture 
 
 - Run Java public methods from both IDE and command line indifferently.
 - Simply use Java libraries for building Java projects programmatically.
+- Thin wrapper around to just need minimalist property file to build projects reliying on popular tools.
 
 <br/>
 <sub>This is an example for building a simple Java Project.</sub>
@@ -107,19 +108,19 @@ Projects can be **also built without any build code** in a very concise way : 1 
 on flat file only for declaring dependencies.
 
 <details>
-<summary>Example building springboot project using Sonarqube + Jacoco test coverage</summary>
+<summary>Example (without requiering build code) building springboot project using Sonarqube + Jacoco test coverage</summary>
 
 *local.properties*
 ```properties 
 jeka.cmd._append=springboot# @dev.jeka:jacoco-plugin @dev.jeka:sonarqube-plugin @dev.jeka:springboot-plugin
 
 jeka.cmd.build=project#clean project#pack
-jeka.cmd.build_quality=:build sonarqube#run jacoco# sonarqube#logOutput=true -Dsonar.host.url=http://localhost:9000
+jeka.cmd.build_quality=:build sonarqube#run jacoco# sonarqube#logOutput=true
 
 jeka.java.version=17
 springboot#springbootVersion=2.7.5
 
-intellij#jekaModuleName=wrapper-common
+sonar.host.url=http://localhost:9000
 ```
 
 *project-dependencies.txt*
