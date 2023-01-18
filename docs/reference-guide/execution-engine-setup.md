@@ -2,6 +2,7 @@ You must have a JDK 8 or higher installed on your machine.
 To determine the JDK to run upon, _jeka_ prioritizes the following, in order :
 
 * _JEKA_JDK_ environment variable ([_JEKA_JDK_]/bin/java must point on _java_ executable)
+* _jeka.jdk.XX_ property definied in _[JEKA_USER_DIR]/global.properties_, if a _jeka.java.version=XX_ property is defined in _[PROJECT_ROOT]/jeka/local.properties_ file.
 * _JAVA_HOME_ environment variable 
 *  _java_ executable accessible from _PATH_ environment variable.
 
