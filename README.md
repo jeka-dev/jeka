@@ -3,142 +3,84 @@
 [![Gitter](https://badges.gitter.im/jeka-tool/community.svg)](https://gitter.im/jeka-tool/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
-# What is JeKa ?
+#  Why JeKa
 
-<img src="./docs/images/knight-color-logo.svg" align="left" width="180"/>
+<img src="./docs/images/knight-color-logo.svg" align="left" width="120"/>
 
-<strong>JeKa</strong> is a complete **Java build system** ala _Ant_, _Maven_ or _Gradle_ using direct Java/Kptlin code instead of using XML or Groovy/Kotlin DSLs. However, it's strong emphasis on conventions-over-configuration, let users define complete project builds whith just a minimalist property file.
+Basically, <strong>JeKa</strong> is an automation tool that allows users to execute **Java / Kotlin** source code directly
+from the command line.
 
-Build/task definitions are expressed with plain *Java* classes to leverage IDE power and Java ecosystem seamlessly.
+It comes with a variety of plugins and utilities to make common **devOps** tasks easy to implement, 
+such as **building projects** with various technologies, creating **pipelines** and performing **quality checks**.
 
-Build scripts can be coded, modeled, run, debugged and reused as regular code.
+JeKa aims at bridging **dev** and **ops** by allowing the entire process to be implemented in a single language,
+for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, 
+ *deploying containers*, *provisioning platforms*, and *testing*.
 
-JeKa offers an execution engine, a build API and a powerful plugin architecture to make your automation tasks a breeze. 
+Generally, devOps tasks are implemented using scripts or specific template languages, resulting in a proliferation 
+of languages and technologies that increase cognitive load and may discourage developers from fully committing to devOps tasks or implementing them poorly.
 
-<br/>
+Bringing **Java or Kotlin** to the **devOps side** can not only lead to better developer engagement but also more careful 
+and **robust** implementation due to the **statically typed** nature of these languages. 
+This is especially true when working with well-designed, expressive APIs.
 
-# Based on simple ideas
+Nevertheless, Jeka is very flexible and allows users to pick only the parts they are interested in by integrating 
+with any tool providing a command-line interface (such as Maven, Gradle, Skaffold, Helm, Terraform, etc.).
 
-- Run Java public methods from both IDE and command line indifferently.
-- Simply use Java libraries for building Java projects programmatically.
-- Thin wrapper around to just need minimalist property file to build projects reliying on popular tools.
+# What Can You Do with JeKa
 
-<br/>
-<sub>This is an example for building a simple Java Project.</sub>
+## Create Pipelines
+That is the primary intent of JeKa and it is very simple: you only have to code public methods in Java or Kotlin 
+and you can invoke them simply from the command line without worrying about compilation 
+(JeKa will take care of it behind the scenes).
 
-```java
-class Build extends JkBean {
+You can use any library in your code by declaring its Maven coordinates in an annotation, JeKa will take care of fetching and resolving dependencies for you.
 
-    private JkProject project;
-    
-    Build() {
-        project = JkProject.of().flatFacade()
-            .setBaseDir(".")
-            .includeJavadocAndSources(true, true)  // produce javadoc and sources jars
-            .configureCompileDependencies(deps -> deps
-                .and("com.google.guava:guava:31.0.1-jre")
-                .and("com.fasterxml.jackson.core:jackson-core:2.13.0")
-            )
-            .configureTestDependencies(deps -> deps
-                .and("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-            )
-            .setPublishedModuleId("my.org:my-module")
-            .setPublishedVersion(JkGitProcess.of().getVersionFromTag());
-    }
+Method execution can be parameterized using instance fields or OS environment variables. The command-line interface allows injecting field values. 
+The parameters accept various types such as string, mumbers, file path, booleans, enumerations, and composite objects.
 
-    public void cleanPack() {
-        cleanOutput();
-        project.pack();  // package all artifacts of the project (jar, source jar and javadoc)
-    }
+JeKa offers many utilities out-of-the-box for dealing with common devOps tasks such as handling files/file-trees/zips, 
+working with Git, interacting with command-line tools, launching Java programs, running tests, managing interactions 
+with Maven repositories, and handling XML.
 
-}
-```
-<sub>To build the project, execute ´cleanPack´ from your IDE or execute the following command line.</sub>
-```
-/home/me/myproject>./jekaw cleanPack
-```
+Pipeline methods can be annotated to provide information about their purpose or function when the help command is invoked.
 
-<details>
-<summary>Example of Springboot project.</summary>
+## Build projects
+Project building for JVM projects includes tasks such as compiling, unit and integration testing, 
+performing quality checks, and packaging artifacts (such as jar, sources, and doc). 
+JeKa provides a powerful and flexible build tool out-of-the-box to achieve these tasks.
 
-```java
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.plugins.springboot.SpringbootJkBean;
+If you're not a fan of traditional build tools for JVM projects, JeKa's build tool is definitely worth checking out. 
+It is quite concise and flexible. It currently supports projects using technologies such as Java, Kotlin-JVM, 
+Spring-Boot, Sonarqube, Jacoco, Node.js, and Protocol Buffer.
 
-@JkInjectClasspath("dev.jeka:springboot-plugin")
-class Build extends JkBean {
+For other technologies, there are currently no plugins available for zero-effort integration, but it is still possible to use 
+their Java API or command-line interface to integrate them into your builds. 
+This is more straightforward than with traditional build tools, thanks to JeKa's simple design and rich utilities.
 
-    private final SpringbootJkBean springbootBean = getBean(SpringbootJkBean.class);
+Alternatively, you can use your preferred build tool from a JeKa pipeline through its command-line interface.
 
-    public boolean runIT = true;
-    
-    Build() {
-        springbootBean.setSpringbootVersion("2.2.6.RELEASE");
-        springbootBean.projectBean().configure(this::configure);
-    }
-    
-    private void configure(JkProject project) {
-        project.flatFacade()
-                .configureCompileDependencies(deps -> deps
-                        .and("org.springframework.boot:spring-boot-starter-web")
-                        .and("org.projectlombok:lombok:1.18.20")
-                )
-                .configureRuntimeDependencies(deps -> deps
-                        .minus("org.projectlombok:lombok")
-                )
-                .configureTestDependencies(deps -> deps
-                        .and("org.springframework.boot:spring-boot-starter-test")
-                            .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
-                )
-                .addTestExcludeFilterSuffixedBy("IT", !runIT);
-    }
+## Publish Artifacts
+Publishing artifacts is a crucial step for sharing and distributing tools or reusable components such as a Java library, documentation, or a container image.
 
-    public void cleanPack() {
-        springbootBean.projectBean().clean();
-        springbootBean.projectBean().pack();
-    }
+JeKa offers seamless support for publishing to Maven/Ivy repositories and Nexus, and specifically to OSSRH for deploying artifacts on Maven Central.
 
-}
-```
-</details>
+For other types of repositories, you can use your preferred Java HTTP client or a client library.
 
-Projects can be **also built without any build code** in a very concise way : 1 properties file for configuration and 
-on flat file only for declaring dependencies.
+For container images, it is possible to publish via the command-line interface or using Java libraries such as the Docker client for Java.
+## Package and Deliver Containers
 
-<details>
-<summary>Example (without requiering build code) building springboot project using Sonarqube + Jacoco test coverage</summary>
+Packaging and deliver containers generally means to deploy the application in a Kubernetes cluster.
+This implies build container images, publish it, creating a Kubernetes manifest and install it on the cluster.
 
-*local.properties*
-```properties 
-jeka.cmd._append=springboot# @dev.jeka:jacoco-plugin @dev.jeka:sonarqube-plugin @dev.jeka:springboot-plugin
+Also, during development time, developers may need to deploy 
 
-jeka.cmd.build=project#clean project#pack
-jeka.cmd.build_quality=:build sonarqube#run jacoco# sonarqube#logOutput=true
 
-jeka.java.version=17
-springboot#springbootVersion=2.7.5
 
-sonar.host.url=http://localhost:9000
-```
 
-*project-dependencies.txt*
-```text
-==== COMPILE ====
-org.springframework.boot:spring-boot-starter-web
-org.projectlombok:lombok:1.18.24
 
-==== RUNTIME ====
-org.postgresql:postgresql:42.3.7
-- org.projectlombok:lombok
 
-==== TEST ====
-org.springframework.boot:spring-boot-starter-test
-```
-</details>
 
-Explore JeKa possibilities from command line `jekaw -h`.</sub>
 
 # User friendly
 Thanks to wrapper and [JeKa Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 

@@ -123,6 +123,10 @@ public final class JkGpg {
         INTERNAL_GPG_DOER.sign(fileToSign, secRing, keyName, signatureFile, pass, true);
     }
 
+    public void signWithDefaultHeyName(Path fileToSign, Path signatureFile) {
+        sign(fileToSign, "", signatureFile);
+    }
+
     /**
      * Returns file that are created if a signature occurs on specified files.
      */
@@ -186,6 +190,10 @@ public final class JkGpg {
         JkUtilsAssert.argument(keyName != null, "Key name cannot be null. Use \"\" to select the first " +
                 "key present in " + this.secRing);
         return new Signer(keyName);
+    }
+
+    public UnaryOperator<Path> getSignerWithDefaultKey() {
+        return getSigner("");
     }
 
     private class Signer implements UnaryOperator<Path> {
