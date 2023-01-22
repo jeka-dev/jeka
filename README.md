@@ -69,9 +69,7 @@ It is quite concise and flexible. It currently supports out-of-the-box projects 
 Spring-Boot, Sonarqube, Jacoco, Node.js, and Protocol Buffer.
 
 For other technologies, it is possible to directly use their Java API or command-line interface to integrate them into 
-your builds. This is quite straightforward thanks to JeKa's simple design and rich utilities. For example,
-it is possible to use the [Jib Core](https://github.com/GoogleContainerTools/jib/tree/master/jib-core) library direcly inside the 
-build to produce docker/OCI container images.
+your builds. This is quite straightforward thanks to JeKa's simple design and rich utilities. 
 
 See [examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
