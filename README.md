@@ -148,7 +148,8 @@ We hope the 0.10.xx series to be the last prior 1.0.0.
 0.10.xx series is a considerable improvement from 0.9.xx.
 We expect our users to give feedbacks to finalise the product.
 
-* Stabilise api from user feedbacks. API is quite workable now but may be improved from user inputs
+* Provides a concrete example of a complete pipeline delivering to a Kubernetes cluster.
+* Stabilize the API based on user feedback. The API is functional now, but it can be improved with user input.
 * Improve [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
 * Improve Kotlin integration
 * Provide a plugin for Android
