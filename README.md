@@ -3,9 +3,11 @@
 [![Gitter](https://badges.gitter.im/jeka-tool/community.svg)](https://gitter.im/jeka-tool/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
-#  Why JeKa
 
-<img src="./docs/images/knight-color-logo.svg" align="left" width="120"/>
+
+#  Why JeKa ?
+
+<img src="./docs/images/knight-color-logo.svg" width="100" align="left" hspace="15"  />
 
 Basically, <strong>JeKa</strong> is an automation tool that allows users to execute **Java / Kotlin** source code directly
 from the command line.
@@ -14,82 +16,86 @@ It comes with a variety of plugins and utilities to make common **devOps** tasks
 such as **building projects** with various technologies, creating **pipelines** and performing **quality checks**.
 
 JeKa aims at bridging **dev** and **ops** by allowing the entire process to be implemented in a single language,
-for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, 
- *deploying containers*, *provisioning platforms*, and *testing*.
+for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, *testing*, 
+*deploying containers*, *provisioning platforms*.
 
-Generally, devOps tasks are implemented using scripts or specific template languages, resulting in a proliferation 
-of languages and technologies that increase cognitive load and may discourage developers from fully committing to devOps tasks or implementing them poorly.
+Generally, devOps tasks are implemented using scripts or configuration files with specific template languages around, 
+resulting in a proliferation of languages and technologies that increase cognitive load 
+and may discourage developers from fully committing to devOps tasks or implementing them poorly.
 
 Bringing **Java or Kotlin** to the **devOps side** can not only lead to better developer engagement but also more careful 
 and **robust** implementation due to the **statically typed** nature of these languages. 
-This is especially true when working with well-designed, expressive APIs.
+This is especially true when working with well-designed, expressive APIs. 
+One other good thing is that Jeka works only with familiar Java structure making tasks implementation manageable
+by ops with basic Java knowledge.
 
-Nevertheless, Jeka is very flexible and allows users to pick only the parts they are interested in by integrating 
+Nevertheless, JeKa is very flexible and allows users to pick only the parts they are interested in by integrating 
 with any tool providing a command-line interface (such as Maven, Gradle, Skaffold, Helm, Terraform, etc.).
 
-# What Can You Do with JeKa
+# What Can You Do with JeKa ?
 
-## Create Pipelines
-That is the primary intent of JeKa and it is very simple: you only have to code public methods in Java or Kotlin 
-and you can invoke them simply from the command line without worrying about compilation 
-(JeKa will take care of it behind the scenes).
+## Implement Pipelines
 
-You can use any library in your code by declaring its Maven coordinates in an annotation, JeKa will take care of fetching and resolving dependencies for you.
+Here, by "implementing pipelines" we mean implementing the specific steps that the CI/CD pipeline will execute 
+to move the application from source code to delivery. 
+These steps typically include building, testing, publishing, and deploying the application.
 
-Method execution can be parameterized using instance fields or OS environment variables. The command-line interface allows injecting field values. 
-The parameters accept various types such as string, mumbers, file path, booleans, enumerations, and composite objects.
+This is quite straightforward with JeKa: you only have to code public methods in Java or Kotlin and you can invoke them simply from the command line without worrying about compilation (JeKa will take care of it behind the scenes).
+
+You can also use any library in your code by declaring its Maven coordinates in an annotation, 
+JeKa will take care of fetching and resolving dependencies for you.
+
+Method execution can be parameterized using property files,OS environment variables, or command line arguments. 
+The parameters accept various types such as string, numbers, file paths, booleans, enumerations, and composite objects.
 
 JeKa offers many utilities out-of-the-box for dealing with common devOps tasks such as handling files/file-trees/zips, 
-working with Git, interacting with command-line tools, launching Java programs, running tests, managing interactions 
-with Maven repositories, and handling XML.
+working with Git, interacting with command-line tools, launching Java programs, running tests, and managing interactions with Maven repositories.
 
-Pipeline methods can be annotated to provide information about their purpose or function when the help command is invoked.
+Pipeline code, like any Java code, can be shared on a Maven repository. 
+When shared, pipelines can be invoked simply by mentioning their Maven coordinates without the need for it to be 
+present on the local drive.
 
-## Build projects
-Project building for JVM projects includes tasks such as compiling, unit and integration testing, 
-performing quality checks, and packaging artifacts (such as jar, sources, and doc). 
-JeKa provides a powerful and flexible build tool out-of-the-box to achieve these tasks.
+By adding annotations, pipeline code can provide context and explanations for its methods and fields, 
+which will be visible when calling the help command.
+
+
+## Build Projects
+JVM projects building includes tasks such as compiling, unit and integration testing, performing quality 
+checks, packaging artifacts (such as jar, sources, and container images), and publishing them. JeKa provides a powerful 
+and flexible build tool out-of-the-box to achieve these tasks.
 
 If you're not a fan of traditional build tools for JVM projects, JeKa's build tool is definitely worth checking out. 
-It is quite concise and flexible. It currently supports projects using technologies such as Java, Kotlin-JVM, 
+It is quite concise and flexible. It currently supports out-of-the-box projects using technologies such as Java, Kotlin-JVM, 
 Spring-Boot, Sonarqube, Jacoco, Node.js, and Protocol Buffer.
 
-For other technologies, there are currently no plugins available for zero-effort integration, but it is still possible to use 
-their Java API or command-line interface to integrate them into your builds. 
-This is more straightforward than with traditional build tools, thanks to JeKa's simple design and rich utilities.
+For other technologies, it is possible to directly use their Java API or command-line interface to integrate them into 
+your builds. This is quite straightforward thanks to JeKa's simple design and rich utilities. For example,
+it is possible to use the [Jib Core](https://github.com/GoogleContainerTools/jib/tree/master/jib-core) library direcly inside the 
+build to produce docker/OCI container images.
 
-Alternatively, you can use your preferred build tool from a JeKa pipeline through its command-line interface.
+See [examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
-## Publish Artifacts
-Publishing artifacts is a crucial step for sharing and distributing tools or reusable components such as a Java library, documentation, or a container image.
+## Define Infrastructure as Code
 
-JeKa offers seamless support for publishing to Maven/Ivy repositories and Nexus, and specifically to OSSRH for deploying artifacts on Maven Central.
+Packaging an application generally means to deploy the application in a Kubernetes cluster. 
+Kubernetes provides a Java client library that allows to define an application deployment 
+using *Infrastructure as Code* (IaC) and install, uninstall it.
 
-For other types of repositories, you can use your preferred Java HTTP client or a client library.
+You can use this library directly in JeKa to define Kubernetes manifests using plain Java objects and manage the 
+installation and uninstallation of the application, similar to how Helm operates.
 
-For container images, it is possible to publish via the command-line interface or using Java libraries such as the Docker client for Java.
-## Package and Deliver Containers
+Some cloud platforms such as Azure or AWS propose solutions to implement Infrastructure as Code (IaC) using Java. 
+They provide tutorials on how to use these solutions with Maven, but it's possible to use Jeka instead if you prefer to avoid using Maven.
 
-Packaging and deliver containers generally means to deploy the application in a Kubernetes cluster.
-This implies build container images, publish it, creating a Kubernetes manifest and install it on the cluster.
+Alternatively, you can use a tool such as Pulumi and integrate it into a Jeka pipeline using its command line interface (CLI)
 
-Also, during development time, developers may need to deploy 
+# JeKa is User Friendly
 
+Thanks to its wrapper and the [Plugin for IntelliJ](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine to run Jeka. You only need a JDK 8 or higher.
 
+JeKa is extremely lightweight, the full distribution size is around 1 MB including source code. The whole tool is contained in a single jar of approximately 600 KB and has zero dependencies.
 
-
-
-
-
-
-# User friendly
-Thanks to wrapper and [JeKa Plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine. 
-You only need a JDK 8 or higher.
-
-JeKa is extremly lightweight, the full distribution size is around 1 MB including source code. 
-The whole tool is contained in a single jar of aproximatly 600 KB and has zero dependency.
-
-It's quite easy to discover what JeKa does behind the scene and troubleshot issues encountered during the build.
+It's quite easy to discover what JeKa does behind the scenes and troubleshoot issues encountered during execution.
 
 
 # Get JeKa
@@ -111,17 +117,45 @@ Visit following pages according your expectation :
 * [Reference Guide](https://jeka-dev.github.io/jeka/)
 * [Working examples](https://github.com/jeka-dev/working-examples)
 
-# External plugins
+# External Plugins
 
-JeKa comes with plugins out of the box. These plugins covers the most common points a Java developer need to address 
-when building a project. This includes plugins for IDE metadata generation (IntelliJ, Eclipse), dependency management, git, , java project building, testing, PGP signing, binary repositories, Maven interaction, scaffolding, sonarQube and web archives.
+JeKa comes with plugins out-of-the-box. These plugins cover most of the common needs a Java developer has when building 
+a project. This includes plugins for IDE metadata generation (IntelliJ, Eclipse), 
+dependency management, Git, Java project building, testing, GPG signing, binary repositories, 
+Maven interaction, scaffolding, and JEE Web ARchives.
 
-Nevertheless, JeKa is extensible and other plugins exist outside the main distib among :
+Nevertheless, JeKa is extensible and other plugins exist outside the main distribution. Some of them are located in the
+same monorepo, which means that you don't need to specify their version as JeKa will automatically pick the right version for you.
+
+### Plugins Hosted in JeKa Monorepo
+
+
 * [Springboot Plugin](plugins/dev.jeka.plugins.springboot)
 * [Sonarqube Plugin](plugins/dev.jeka.plugins.sonarqube)
 * [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
 * [NodeJs Plugin](plugins/dev.jeka.plugins.nodejs)
+
+### Known external Plugins
+
 * [Protobuf Plugin](https://github.com/jerkar/protobuf-plugin)
+
+# News
+
+* Out-of-the-box support for Kotlin-JVM. See [sample using springboot-kotlin-nodejs toghether](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
+* Version 0.10.0 is out ! This is major product improvement.
+
+# Roadmap/Ideas
+
+We hope the 0.10.xx series to be the last prior 1.0.0.
+0.10.xx series is a considerable improvement from 0.9.xx.
+We expect our users to give feedbacks to finalise the product.
+
+* Stabilise api from user feedbacks. API is quite workable now but may be improved from user inputs
+* Improve [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
+* Improve Kotlin integration
+* Provide a plugin for Android
+
+Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
 # Community
 
@@ -136,31 +170,15 @@ You can also use direct emailing for questions and support : djeangdev@yahoo.fr
 
 A twitter account also exist : https://twitter.com/djeang_dev
 
-# News
-
-* Version 0.10.0 is out ! This is major product improvement.
-
 # Versioning 
 
-JeKa follows [semantic versioning 2.0](https://semver.org/spec/v2.0.0.html).
+JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
 
-# Roadmap/Ideas
+# Developer Notes
 
-We hope the 0.10.xx series to be the last prior 1.0.0. 
-0.10.xx series is a considerable improvement from 0.9.xx. 
-We expect our users to give feedbacks to finalise the product.  
+## How is organized this repo ?
 
-* Stabilise api from user feedbacks. API is quite workable now but may be improved from user inputs
-* Enhance existing graphical [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
-* Improve Kotlin integration
-* Provide a plugin for Android
-
-Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
-
-
-# How to build JeKa ?
-
-This repository is organized as a _mono repo_. It contains The JeKa core project along plugins and samples for 
+This repository is organized as a _monorepo_. It contains The JeKa core project along plugins and samples for 
 automation testing.
 
 * dev.jeka.core : Complete JeKa tool
@@ -170,17 +188,15 @@ automation testing.
 
 JeKa builds itself. To build JeKa full distribution from sources, the simpler is to use your IDE.
 
-Once distribution created, add the distrib folder to your PATH environment variable.
-
 ## Build JeKa from IntelliJ
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
-* Add the `JEKA_CACHE_DIR` variable pointing on [USER_HOME]/.jeka/cache
+* If you have not installed JeKa plugin, add the `JEKA_CACHE_DIR` variable pointing on [USER_HOME]/.jeka/cache
 * Make sure the project is configured with a JDK8 or higher.
 * Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
 * Run 'FAST BUILD' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
 
-> For debugging the project, you have to set up Intellij in order to workaround with an Intellij issue :
+> For debugging the project, you may have to set up Intellij in order to workaround with an Intellij issue :
 > Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
 > [See here](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu)
 
@@ -194,10 +210,10 @@ the JeKa build.
 At the repository root dir, execute : `ant -f .github\workflows\build.xml`.
 
 To build the project including Sonarqube and test coverage  : `ant -f .github\workflows\build.xml -Dsonar.host.url=... `.  
-Cause of Sonalqube scanner, this command has to be run with a JDK >= 11.
+Cause of Sonarqube scanner, this command has to be run with a JDK >= 11.
 
 
-## How to edit documentation
+## How to edit documentation ?
 
 Documentation is generated with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). Documentation sources are located (here)[docs].
 
@@ -207,7 +223,7 @@ You must install _Python_ and _Material for MkDocs_ on your computer (`pip insta
 The documentation is also supposed to be regenerated after each push/pull-request.
 
 
-## How to Release
+## How to Release ?
 
 Release is done automatically by Github action on PUSH on *master*.
 If the last commit message title contains a word like 'Release:XXX' (case matters ) then a tag XXX is created and 
