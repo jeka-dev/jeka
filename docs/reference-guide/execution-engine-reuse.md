@@ -5,7 +5,7 @@ order to be used as third-party dependencies to create a plugin ecosystem.
 
 ## From Sources
 
-In a multi-project (aka multi-module project), it is possible to use classes defined in other sub-projects.
+In a multi-project (aka multi-module project), it is possible to use *def classes* defined in other sub-projects.
 When using `@JkInjectProject`, classes defined in _../sub-project-1/jeka/def_ and 
 in the classpath of _sub-project-1_.   
 
