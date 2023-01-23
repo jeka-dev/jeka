@@ -4,7 +4,6 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
 
-
 #  Why JeKa ?
 
 <img src="./docs/images/knight-color-logo.svg" width="100" align="left" hspace="15"  />
@@ -82,10 +81,10 @@ using *Infrastructure as Code* (IaC) and install, uninstall it.
 You can use this library directly in JeKa to define Kubernetes manifests using plain Java objects and manage the 
 installation and uninstallation of the application, similar to how Helm operates.
 
-Some cloud platforms such as Azure or AWS propose solutions to implement Infrastructure as Code (IaC) using Java. 
+Some cloud platforms such as Azure or AWS propose solutions to implement Infrastructure as Code using Java. 
 They provide tutorials on how to use these solutions with Maven, but it's possible to use Jeka instead if you prefer to avoid using Maven.
 
-Alternatively, you can use a tool such as Pulumi and integrate it into a Jeka pipeline using its command line interface (CLI)
+Alternatively, you can use a tool such as Pulumi and integrate it into a Jeka pipeline using its command line interface.
 
 # JeKa is User Friendly
 
