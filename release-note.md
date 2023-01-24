@@ -1,3 +1,6 @@
+# 0.10.6
+- Bugfix : @JkInjectClasspath(file) was resolved on the working dir and not on the root dir of the project.
+
 # 0.10.5 
 - Let users set arbitrary headers on requests towards http repositories
 - Remove parent-chaining pattern 

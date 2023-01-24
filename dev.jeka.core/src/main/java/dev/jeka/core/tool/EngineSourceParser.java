@@ -95,7 +95,7 @@ final class EngineSourceParser {
     private static JkDependencySet dependenciesFromImports(Path baseDir, List<String> deps) {
         JkDependencySet result = JkDependencySet.of();
         for (final String dependencyDescription : deps) {
-                JkDependency dep = CommandLine.toDependency(dependencyDescription);
+                JkDependency dep = CommandLine.toDependency(baseDir, dependencyDescription);
                 result = result.and(dep);
         }
         return result;

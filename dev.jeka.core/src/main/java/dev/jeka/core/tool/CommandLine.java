@@ -46,7 +46,7 @@ final class CommandLine {
                 result.standardOptions.put(keyValue.key, keyValue.value);
                 continue;
             } else if (word.startsWith(AT_SYMBOL_CHAR)) {
-                result.defDependencies.add(toDependency(word.substring(1)));
+                result.defDependencies.add(toDependency(Paths.get(""), word.substring(1)));
                 continue;
             } else {
                 result.beanActions.add(new JkBeanAction(word));
@@ -106,17 +106,17 @@ final class CommandLine {
                 .collect(Collectors.toList());
     }
 
-    static JkDependency toDependency(String depDescription) {
+    static JkDependency toDependency(Path baseDir, String depDescription) {
         boolean hasDoubleDotes = JkCoordinate.isCoordinateDescription(depDescription);
         if (!hasDoubleDotes || (JkUtilsSystem.IS_WINDOWS &&
                 (depDescription.startsWith(":\\", 1)) || depDescription.startsWith(":/", 1) )) {
-            Path candidatePath = Paths.get(depDescription);
+            Path candidatePath = baseDir.resolve(depDescription);
             if (Files.exists(candidatePath)) {
                 return JkFileSystemDependency.of(candidatePath);
             } else {
                 throw new JkException("Command line argument "
                         + depDescription + " cannot be recognized as a file. " +
-                        "Is " + candidatePath.toAbsolutePath() + " an existing file ?");
+                        "Is " + candidatePath.toAbsolutePath().normalize() + " an existing file ?");
             }
         } else {
             JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of(depDescription);
