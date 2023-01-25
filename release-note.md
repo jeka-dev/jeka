@@ -1,4 +1,4 @@
-# 0.10.7
+# 0.10.7 
 - Add JkProjectFlatFacade#setMainArtifactJarType convenient method
 - Add ProjectJkBean#cleanPack convenience method
 - Bugfix : re-enable ProjectJkBean scaffold configuration.
