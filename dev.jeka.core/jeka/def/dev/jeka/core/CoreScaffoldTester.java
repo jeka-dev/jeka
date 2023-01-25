@@ -1,8 +1,10 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -22,6 +24,8 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
         projectDir = scaffold("scaffold#run project#", "project#clean project#pack", false);
         runJeka(projectDir.toString(), "eclipse#files");
         runJeka(projectDir.toString(), "intellij#iml");
+        JkUtilsAssert.state(Files.exists(projectDir.resolve("src/main/java")),
+                "No source tree has been created when scaffolding Java.");
     }
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {

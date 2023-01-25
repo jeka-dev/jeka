@@ -1,3 +1,8 @@
+# 0.10.7
+- Add JkProjectFlatFacade#setMainArtifactJarType convenient method
+- Add ProjectJkBean#cleanPack convenience method
+- Bugfix : re-enable ProjectJkBean scaffold configuration.
+
 # 0.10.6 
 - Bugfix : @JkInjectClasspath(file) was resolved on the working dir and not on the root dir of the project.
 

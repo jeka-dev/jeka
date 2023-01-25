@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkInfo;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -114,9 +115,10 @@ final class CommandLine {
             if (Files.exists(candidatePath)) {
                 return JkFileSystemDependency.of(candidatePath);
             } else {
-                throw new JkException("Command line argument "
+                JkLog.warn("Command line argument "
                         + depDescription + " cannot be recognized as a file. " +
                         "Is " + candidatePath.toAbsolutePath().normalize() + " an existing file ?");
+                return JkFileSystemDependency.of(candidatePath);
             }
         } else {
             JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of(depDescription);

@@ -12,11 +12,11 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="dev.jeka.core" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.jacoco" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.springboot" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.nodejs" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.kotlin" />
+    <orderEntry type="module" module-name="dev.jeka.core" exported="" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.jacoco" exported="" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" exported="" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.springboot" exported="" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.nodejs" exported="" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.kotlin" exported="" />
   </component>
 </module>

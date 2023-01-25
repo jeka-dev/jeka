@@ -18,6 +18,7 @@ import dev.jeka.core.api.java.JkJdks;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
@@ -29,6 +30,7 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffolder;
+import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.*;
@@ -77,6 +79,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     private JkProject project;
 
     private JkConsumers<JkProject> projectConfigurators = JkConsumers.of();
+
+    public ProjectJkBean() {
+        getBean(ScaffoldJkBean.class).configure(this::configure);
+    }
 
     private JkProject createProject() {
         Path baseDir = getBaseDir();
@@ -141,6 +147,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
             Consumer<Path> javadocJar = aProject.packaging::createJavadocJar;
             artifactProducer.putArtifact(javadoc, javadocJar);
+        }
+        if (pack.jarType != null) {
+            project.flatFacade().setMainArtifactJarType(pack.jarType);
         }
         JkTestProcessor testProcessor = aProject.testing.testProcessor;
         testProcessor.setJvmHints(jdks(), aProject.getJvmTargetVersion());
@@ -237,6 +246,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         getProject().artifactProducer.makeAllMissingArtifacts();
     }
 
+    @JkDoc("Convenient method to perform a 'clean' followed by a 'pack'.")
+    public void cleanPack() {
+        clean();
+        pack();
+    }
+
     /**
      * Displays the resolved dependency tree on the console.
      */
@@ -327,6 +342,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         /** When true, sources are packed in a jar file.*/
         @JkDoc("If true, sources jar is added in the list of artifact to produce/publish.")
         public Boolean sources;
+
+        @JkDoc("Set the type of jar to produce for the main artifact.")
+        public JkProjectPackaging.JarType jarType;
 
     }
 

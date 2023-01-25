@@ -23,6 +23,10 @@ import java.util.function.Function;
  */
 public class JkProjectPackaging {
 
+    public enum JarType {
+        REGULAR, FAT
+    }
+
     private final JkProject project;
 
     public final JkManifest<JkProjectPackaging> manifest;

@@ -43,6 +43,17 @@ public class JkProjectFlatFacade {
         return this;
     }
 
+    public JkProjectFlatFacade setMainArtifactJarType(JkProjectPackaging.JarType jarType) {
+        if (jarType == JkProjectPackaging.JarType.REGULAR) {
+            project.artifactProducer.putMainArtifact(project.packaging::createBinJar);
+        } else if (jarType == JkProjectPackaging.JarType.FAT) {
+            project.artifactProducer.putMainArtifact(project.packaging::createFatJar);
+        } else {
+            throw new IllegalArgumentException("Jar type " + jarType + " is not handled.");
+        }
+        return this;
+    }
+
     public JkProjectFlatFacade setSourceEncoding(String encoding) {
         project.setSourceEncoding(encoding);
         return this;
