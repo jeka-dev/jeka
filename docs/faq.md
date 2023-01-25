@@ -20,7 +20,8 @@ Use `-dci` option in command line.
 _Jeka_ helps translate all dependencies declared in a _Maven_ project into the equivalent _Java_ code.
 
 Assuming _Maven_ is already installed and there is a _pom.xml_ file at the root of the project, 
-execute `jeka maven#migrationCode`to display _Java_ code to copy-paste in a build class.
+execute `jeka maven#migrateToCode` or `jeka maven#migrateToDependencies.txt` to display _Java_ code/configuration to 
+copy-paste in a build class or *dependencies.txt* file..
 
 ## Compilation
 
