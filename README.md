@@ -44,7 +44,7 @@ This is quite straightforward with JeKa: you only have to code public methods in
 You can also use any library in your code by declaring its Maven coordinates in an annotation, 
 JeKa will take care of fetching and resolving dependencies for you.
 
-Method execution can be parameterized using property files,OS environment variables, or command line arguments. 
+Method execution can be parameterized using property files, OS environment variables, or command line arguments. 
 The parameters accept various types such as string, numbers, file paths, booleans, enumerations, and composite objects.
 
 JeKa offers many utilities out-of-the-box for dealing with common devOps tasks such as handling files/file-trees/zips, 
@@ -74,25 +74,25 @@ See [examples of projects built with JeKa](https://github.com/jeka-dev/working-e
 
 ## Define Infrastructure as Code
 
-Packaging an application generally means to deploy the application in a Kubernetes cluster. 
+For containerized applications, *packaging/deploying* generally means to deploy the application in a Kubernetes cluster. 
 Kubernetes provides a Java client library that allows to define an application deployment 
-using *Infrastructure as Code* (IaC) and install, uninstall it.
+using *Infrastructure as Code* (IaC), and install/uninstall it.
 
 You can use this library directly in JeKa to define Kubernetes manifests using plain Java objects and manage the 
-installation and uninstallation of the application, similar to how Helm operates.
+installation and uninstallation of the application, similar to how *Helm* operates.
 
 Some cloud platforms such as Azure or AWS propose solutions to implement Infrastructure as Code using Java. 
 They provide tutorials on how to use these solutions with Maven, but it's possible to use Jeka instead if you prefer to avoid using Maven.
 
-Alternatively, you can use a tool such as Pulumi and integrate it into a Jeka pipeline using its command line interface.
+Alternatively, you can use a tool such as *Pulumi* and integrate it into a Jeka pipeline using its command line interface.
 
-# JeKa is User Friendly
+# What makes JeKa User Friendly ?
 
 Thanks to its wrapper and the [Plugin for IntelliJ](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine to run Jeka. You only need a JDK 8 or higher.
 
 JeKa is extremely lightweight, the full distribution size is around 1 MB including source code. The whole tool is contained in a single jar of approximately 600 KB and has zero dependencies.
 
-It's quite easy to discover what JeKa does behind the scenes and troubleshoot issues encountered during execution.
+Jeka does its best to not obfuscate what is happening behind the scene, making it easy to discover and troubleshoot issues encountered during execution.
 
 
 # Get JeKa
