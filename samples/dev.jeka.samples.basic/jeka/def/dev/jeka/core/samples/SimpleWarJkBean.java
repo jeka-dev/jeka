@@ -38,7 +38,7 @@ public class SimpleWarJkBean extends JkBean {
                        .minus("javax.servlet:javax.servlet-api"))
                .setJvmTargetVersion(JkJavaVersion.V8)
                .includeJavadocAndSources(false, false);
-       project.prodCompilation.layout.emptySources().addSource("src/main/javaweb");
+       project.compilation.layout.emptySources().addSource("src/main/javaweb");
        project.testing.setSkipped(true);
        JkJ2eWarProjectAdapter.of().configure(project);
     }

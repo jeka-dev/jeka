@@ -1,4 +1,5 @@
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
@@ -11,7 +12,7 @@ class SonarqubeBuild extends JkBean {
     private void configure(JkProject project) {
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
                 .mixResourcesAndSources()
-                .useSimpleLayout()
+                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );

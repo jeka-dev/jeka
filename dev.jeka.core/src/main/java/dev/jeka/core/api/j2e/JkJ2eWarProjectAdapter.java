@@ -76,7 +76,7 @@ public class JkJ2eWarProjectAdapter {
         if (webappPath != null) {
             effectiveWebappPath = project.getBaseDir().resolve(webappPath);
         } else {
-            Path src =  project.prodCompilation.layout.getSources().toList().get(0).getRoot();
+            Path src =  project.compilation.layout.getSources().toList().get(0).getRoot();
             effectiveWebappPath = src.resolveSibling("webapp");
         }
         generateWar(project, dist, effectiveWebappPath, extraStaticResourcePath, generateExploded);
@@ -86,11 +86,11 @@ public class JkJ2eWarProjectAdapter {
                                     boolean generateDir) {
 
         JkJ2eWarArchiver archiver = JkJ2eWarArchiver.of()
-                .setClassDir(project.prodCompilation.layout.resolveClassDir())
+                .setClassDir(project.compilation.layout.resolveClassDir())
                 .setExtraStaticResourceDir(extraStaticResourcePath)
                 .setLibs(project.packaging.resolveRuntimeDependencies().getFiles().getEntries())
                 .setWebappDir(webappPath);
-        project.prodCompilation.runIfNeeded();
+        project.compilation.runIfNeeded();
         project.testing.runIfNeeded();
         if (generateDir) {
             Path dirPath = project.getOutputDir().resolve("j2e-war");

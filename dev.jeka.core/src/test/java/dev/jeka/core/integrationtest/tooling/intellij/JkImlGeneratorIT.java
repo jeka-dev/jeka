@@ -29,7 +29,7 @@ public class JkImlGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
-            .prodCompilation
+            .compilation
                     .configureDependencies(deps -> deps
                         .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6")));
         final JkImlGenerator baseGenerator = JkImlGenerator.of()
@@ -43,11 +43,11 @@ public class JkImlGeneratorIT {
         coreProject
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
-                .prodCompilation
+                .compilation
                     .configureDependencies(deps -> deps.and(baseProject.toDependency()));
         coreProject
                 .testing
-                    .testCompilation
+                    .compilation
                         .layout
                             .emptySources().addSource("test")
                             .emptyResources().addResource("res-test");
@@ -67,7 +67,7 @@ public class JkImlGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
-                .prodCompilation
+                .compilation
                     .configureDependencies(deps -> deps
                         .and(coreProject.toDependency()));
         final JkImlGenerator desktopGenerator = JkImlGenerator.of()
@@ -82,7 +82,7 @@ public class JkImlGeneratorIT {
 
     private void configureCompileLayout(JkProject javaProject) {
         javaProject
-                .prodCompilation
+                .compilation
                     .layout
                         .emptySources().addSource("src")
                         .emptyResources().addResource("res");
@@ -91,7 +91,7 @@ public class JkImlGeneratorIT {
     private void configureEmptyTestCompileLayout(JkProject javaProject) {
         javaProject
                 .testing
-                    .testCompilation
+                    .compilation
                         .layout
                             .emptySources()
                             .emptyResources();

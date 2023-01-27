@@ -38,14 +38,14 @@ public class JkProjectPublication {
         maven = JkMavenPublication.of()
                 .setArtifactLocatorSupplier(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                        project.prodCompilation.getDependencies(),
+                        project.compilation.getDependencies(),
                         project.packaging.getRuntimeDependencies(),
                         project.getDuplicateConflictStrategy()))
                 .setBomResolutionRepos(() -> project.dependencyResolver.getRepos());
         ivy = JkIvyPublication.of(this)
                 .addArtifacts(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
-                        project.prodCompilation.getDependencies(),
+                        project.compilation.getDependencies(),
                         project.packaging.getRuntimeDependencies(), project.getDuplicateConflictStrategy()));
         this.preActions = JkRunnables.of();
         this.postActions = JkRunnables.of();

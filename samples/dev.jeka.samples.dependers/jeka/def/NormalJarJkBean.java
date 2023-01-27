@@ -32,7 +32,7 @@ public class NormalJarJkBean extends JkBean {
 
     private void configure(JkProject project) {
         project.artifactProducer.putMainArtifact(project.packaging::createFatJar);
-        project.prodCompilation.configureDependencies(deps -> deps
+        project.compilation.configureDependencies(deps -> deps
                 .and(sampleBuild.projectPlugin.getProject().toDependency())
         );
     }

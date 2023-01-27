@@ -4,6 +4,7 @@ package dev.jeka.core.tool.builtins.intellij;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClasspath;
+import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.tooling.intellij.JkIml;
@@ -30,13 +31,13 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProject() {
         JkProject project = JkProject.of();
-        project.prodCompilation.configureDependencies(deps -> dependencies());
+        project.compilation.configureDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
                 .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
-        List<JkIml.SourceFolder> sourceFolders = iml.getComponent().getContent().getSourceFolders();
+        List<JkIml.SourceFolder> sourceFolders = iml.component.getContent().getSourceFolders();
         JkIml.SourceFolder test = sourceFolders.get(3);
         Assert.assertNull(test.getType());
     }
@@ -44,14 +45,14 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProjectSimpleLayout() {
         JkProject project = JkProject.of();
-        project.prodCompilation.configureDependencies(deps -> dependencies());
+        project.compilation.configureDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
                 .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
-        project.flatFacade().useSimpleLayout();
+        project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
-        List<JkIml.SourceFolder> sourceFolders = iml.getComponent().getContent().getSourceFolders();
+        List<JkIml.SourceFolder> sourceFolders = iml.component.getContent().getSourceFolders();
         Assert.assertEquals(3, sourceFolders.size());
     }
 

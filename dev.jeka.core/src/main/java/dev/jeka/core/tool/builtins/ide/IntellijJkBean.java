@@ -60,7 +60,7 @@ public final class IntellijJkBean extends JkBean {
      */
     public IntellijJkBean useJekaDefinedInModule(String intellijModule) {
         configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
-        return configureIml(iml -> iml.getComponent().addModuleOrderEntry(intellijModule, JkIml.Scope.TEST));
+        return configureIml(iml -> iml.component.addModuleOrderEntry(intellijModule, JkIml.Scope.TEST));
     }
 
     /**

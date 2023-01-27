@@ -1,4 +1,5 @@
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
@@ -16,7 +17,7 @@ class KotlinBuild extends JkBean {
     private void configure(JkProject project) {
         project.flatFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
-            .useSimpleLayout()
+            .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
             .mixResourcesAndSources()
             .configureCompileDependencies(deps -> deps
                     .andFiles(JkLocator.getJekaJarPath())

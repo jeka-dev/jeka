@@ -42,7 +42,7 @@ class Junit5Build extends JkBean {
     private void configure(JkProject project) {
         project
             .testing
-                .testCompilation
+                .compilation
                     .configureDependencies(deps -> deps
                         .and("org.jdom:jdom2:2.0.6")
                     )

@@ -15,7 +15,7 @@ class Build extends JkBean {
      */
     private void configure(JkProject project) {
         project.setJvmTargetVersion(JkJavaVersion.V8);
-        project.prodCompilation.configureDependencies(deps -> deps
+        project.compilation.configureDependencies(deps -> deps
                 .and("com.google.guava:guava:21.0")
         );
 
@@ -24,7 +24,7 @@ class Build extends JkBean {
         project.testing.testSelection.addIncludeStandardPatterns();
         project.testing.testProcessor.setForkingProcess(true);
         project.testing.testProcessor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
-        project.testing.testCompilation.configureDependencies(deps -> deps
+        project.testing.compilation.configureDependencies(deps -> deps
                 .and("org.junit.jupiter:junit-jupiter:5.8.1")
         );
 

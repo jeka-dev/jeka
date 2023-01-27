@@ -41,11 +41,11 @@ public class JkEclipseClasspathGeneratorIT {
         coreProject
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
-            .prodCompilation
+            .compilation
                 .configureDependencies(deps -> deps.and(baseProject.toDependency()));
         coreProject
             .testing
-                .testCompilation
+                .compilation
                     .layout
                         .emptySources().addSource("test")
                         .emptyResources().addResource("res-test");
@@ -64,7 +64,7 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
-            .prodCompilation
+            .compilation
                     .configureDependencies(deps -> deps.and(coreProject.toDependency()));
         desktopProject.artifactProducer.makeAllArtifacts();
         final JkEclipseClasspathGenerator desktopGenerator =
@@ -76,7 +76,7 @@ public class JkEclipseClasspathGeneratorIT {
 
     private void configureCompileLayout(JkProject javaProject) {
         javaProject
-                .prodCompilation
+                .compilation
                     .layout
                         .emptySources().addSource("src")
                         .emptyResources().addResource("res");
@@ -85,7 +85,7 @@ public class JkEclipseClasspathGeneratorIT {
     private void configureTestCompileLayout(JkProject javaProject) {
         javaProject
                 .testing
-                    .testCompilation
+                    .compilation
                         .layout
                             .emptySources()
                             .emptyResources();

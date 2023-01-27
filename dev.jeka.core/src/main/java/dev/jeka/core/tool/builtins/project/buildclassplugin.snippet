@@ -11,7 +11,7 @@ class Build extends JkBean {
 
     private void configure(JkProject project) {
         project.setJvmTargetVersion(JkJavaVersion.V8);
-        project.prodCompilation.configureDependencies(deps -> deps
+        project.compilation.configureDependencies(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
         );
 

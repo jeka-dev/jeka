@@ -87,7 +87,7 @@ public class JkProjectCompilation {
         for (JkSourceGenerator sourceGenerator : sourceGenerators) {
             JkLog.startTask("Generate sources with " + sourceGenerator);
             Path path = layout.resolveGeneratedSourceDir().resolve(sourceGenerator.getDirName());
-            sourceGenerator.generate(path);
+            sourceGenerator.generate(this.project, path);
             JkLog.endTask();
         }
     }

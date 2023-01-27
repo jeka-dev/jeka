@@ -54,13 +54,13 @@ public class CoreBuild extends JkBean {
             .compiler
                 .setForkedWithDefaultProcess();
         project
-            .prodCompilation
+            .compilation
                 .addJavaCompilerOptions("-Xlint:none","-g")
                 .layout
                     .mixResourcesAndSources();
         project
             .testing
-                .testCompilation
+                .compilation
                     .layout
                         .mixResourcesAndSources();
         project
@@ -181,7 +181,7 @@ public class CoreBuild extends JkBean {
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
-        JkPathTree classTree = JkPathTree.of(project.prodCompilation.layout.resolveClassDir());
+        JkPathTree classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
         Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/compile");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*")).zipTo(embeddedJar);
         JkZipTree.of(embeddedJar).andMatching( "META-INF/*.SF", "META-INF/*.RSA").deleteContent().close();
@@ -203,8 +203,8 @@ public class CoreBuild extends JkBean {
     }
 
     private void doWrapper(Path wrapperJar) {
-        projectBean.getProject().prodCompilation.runIfNeeded();
-        JkPathTree.of(projectBean.getProject().prodCompilation.layout
+        projectBean.getProject().compilation.runIfNeeded();
+        JkPathTree.of(projectBean.getProject().compilation.layout
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 

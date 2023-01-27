@@ -77,13 +77,13 @@ public class KotlinJvmJkBean extends JkBean {
 
     public void configure(JkProject project) {
         if (!JkUtilsString.isBlank(kotlinSourceDir)) {
-            project.prodCompilation.layout.setSources(kotlinTestSourceDir);
+            project.compilation.layout.setSources(kotlinTestSourceDir);
         }
         if (!JkUtilsString.isBlank(kotlinTestSourceDir)) {
-            project.testing.testCompilation.layout.setSources(kotlinTestSourceDir);
+            project.testing.compilation.layout.setSources(kotlinTestSourceDir);
         }
-        JkProjectCompilation prodCompile = project.prodCompilation;
-        JkProjectCompilation testCompile = project.testing.testCompilation;
+        JkProjectCompilation prodCompile = project.compilation;
+        JkProjectCompilation testCompile = project.testing.compilation;
         prodCompile
                 .configureDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()))
                 .preCompileActions
@@ -162,7 +162,7 @@ public class KotlinJvmJkBean extends JkBean {
     }
 
     private void compileKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
-        JkProjectCompilation compilation = javaProject.prodCompilation;
+        JkProjectCompilation compilation = javaProject.compilation;
         JkPathTreeSet sources = compilation.layout.resolveSources()
                 .and(javaProject.getBaseDir().resolve(kotlinSourceDir));
         if (sources.count(1, false) == 0) {
@@ -178,7 +178,7 @@ public class KotlinJvmJkBean extends JkBean {
     }
 
     private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
-        JkProjectCompilation compilation = javaProject.testing.testCompilation;
+        JkProjectCompilation compilation = javaProject.testing.compilation;
         JkPathTreeSet sources = compilation.layout.resolveSources();
         if (kotlinTestSourceDir == null) {
             sources = sources.and(javaProject.getBaseDir().resolve(kotlinTestSourceDir));

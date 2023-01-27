@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,16 +22,16 @@ public class JavaProjectBuildIT {
         Path root = unzipToDir("sample-multiproject.zip");
 
         JkProject baseProject = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
-                .useSimpleLayout()
+                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")).getProject();
 
         JkProject coreProject = JkProject.of().setBaseDir(root.resolve("core")).flatFacade()
-                .useSimpleLayout()
+                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps.and(baseProject.toDependency()))
                 .getProject();
 
-        JkResolveResult resolveResult = coreProject.prodCompilation.resolveDependencies();
+        JkResolveResult resolveResult = coreProject.compilation.resolveDependencies();
 
         Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size()); // base dir and guava
         JkResolvedDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);
@@ -51,7 +52,7 @@ public class JavaProjectBuildIT {
     public void publish_maven_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
-                .useSimpleLayout()
+                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
@@ -77,7 +78,7 @@ public class JavaProjectBuildIT {
     public void publish_ivy_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
-                .useSimpleLayout()
+                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))

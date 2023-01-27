@@ -65,7 +65,7 @@ public class JkProjectPackaging {
      * Generates javadoc files (files + zip)
      */
     private boolean createJavadocFiles() {
-        JkProjectCompilation compilation = project.prodCompilation;
+        JkProjectCompilation compilation = project.compilation;
         Iterable<Path> classpath = project.dependencyResolver
                 .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
         Path dir = project.getOutputDir().resolve(javadocDir);
@@ -101,7 +101,7 @@ public class JkProjectPackaging {
     }
 
     public void createSourceJar(Path target) {
-        JkProjectCompilation compilation = project.prodCompilation;
+        JkProjectCompilation compilation = project.compilation;
         JkPathTreeSet allSources = compilation.layout.resolveSources().and(compilation
                 .layout.resolveGeneratedSourceDir());
         if (!allSources.containFiles()) {
@@ -139,7 +139,7 @@ public class JkProjectPackaging {
     }
 
     public JkDependencySet getRuntimeDependencies() {
-        JkDependencySet baseDependencies = project.prodCompilation.getDependencies();
+        JkDependencySet baseDependencies = project.compilation.getDependencies();
         if (project.isIncludeTextAndLocalDependencies()) {
             baseDependencies = baseDependencies
                     .minus(project.textAndLocalDeps().getCompile().getEntries())
@@ -162,9 +162,9 @@ public class JkProjectPackaging {
     }
 
     public void createBinJar(Path target) {
-        project.prodCompilation.runIfNeeded();
+        project.compilation.runIfNeeded();
         project.testing.runIfNeeded();
-        Path classDir = project.prodCompilation.layout.resolveClassDir();
+        Path classDir = project.compilation.layout.resolveClassDir();
         if (!Files.exists(classDir)) {
             JkLog.warn("No class dir found : skip bin jar.");
             return;
@@ -177,12 +177,12 @@ public class JkProjectPackaging {
     }
 
     public void createFatJar(Path target) {
-        project.prodCompilation.runIfNeeded();
+        project.compilation.runIfNeeded();
         project.testing.runIfNeeded();
         JkLog.startTask("Packing fat jar...");
         Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
         addManifestDefaults();
-        JkJarPacker.of(project.prodCompilation.layout.resolveClassDir())
+        JkJarPacker.of(project.compilation.layout.resolveClassDir())
                 .withManifest(manifest)
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);

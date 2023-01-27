@@ -93,7 +93,7 @@ public final class SpringbootJkBean extends JkBean {
                 this.springbootVersion);
 
         // resolve dependency versions upon springboot provided ones
-        project.prodCompilation.configureDependencies(deps -> deps
+        project.compilation.configureDependencies(deps -> deps
             .andBom(BOM_COORDINATE + springbootVersion));
 
         // define bootable jar as main artifact
@@ -207,19 +207,19 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("Scaffold a basic example application in package org.example")
     public void scaffoldSample() {
         String basePackage = "your/basepackage";
-        Path sourceDir = projectBean.getProject().prodCompilation.layout
+        Path sourceDir = projectBean.getProject().compilation.layout
                 .getSources().getRootDirsOrZipFiles().get(0);
         Path pack = sourceDir.resolve(basePackage);
         URL url = SpringbootJkBean.class.getClassLoader().getResource("src/snippet/Application.java");
         JkPathFile.of(pack.resolve("Application.java")).createIfNotExist().fetchContentFrom(url);
         url = SpringbootJkBean.class.getClassLoader().getResource("src/snippet/Controller.java");
         JkPathFile.of(pack.resolve("Controller.java")).createIfNotExist().fetchContentFrom(url);
-        Path testSourceDir = projectBean.getProject().testing.testCompilation.layout
+        Path testSourceDir = projectBean.getProject().testing.compilation.layout
                 .getSources().getRootDirsOrZipFiles().get(0);
         pack = testSourceDir.resolve(basePackage);
         url = SpringbootJkBean.class.getClassLoader().getResource("src/snippet/ControllerIT.java");
         JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
-        JkPathFile.of(projectBean.getProject().prodCompilation.layout.getResources()
+        JkPathFile.of(projectBean.getProject().compilation.layout.getResources()
                 .getRootDirsOrZipFiles().get(0).resolve("application.properties")).createIfNotExist();
     }
 

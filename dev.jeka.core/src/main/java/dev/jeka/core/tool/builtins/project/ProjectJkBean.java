@@ -96,8 +96,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             project.setJvmTargetVersion(version);
         }
         applyRepo(project);
-        if (layout.style == JkLayoutOptions.Style.SIMPLE) {
-            project.flatFacade().useSimpleLayout();
+        if (layout.style != null) {
+            project.flatFacade().setLayoutStyle(layout.style);
         }
         if (layout.mixSourcesAndResources) {
             project.flatFacade().mixResourcesAndSources();
@@ -173,7 +173,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             aProject.testing.setSkipped(test.skip);
         }
         if (compilation.compilerExtraArgs != null) {
-            aProject.prodCompilation.addJavaCompilerOptions(
+            aProject.compilation.addJavaCompilerOptions(
                     JkUtilsString.translateCommandline(compilation.compilerExtraArgs));
         }
     }
@@ -226,12 +226,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @JkDoc("Generate sources")
     public void generateSources() {
-        getProject().prodCompilation.generateSources();
+        getProject().compilation.generateSources();
     }
 
     @JkDoc("Performs compilation and resource processing.")
     public void compile() {
-        getProject().prodCompilation.run();
+        getProject().compilation.run();
     }
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
@@ -257,9 +257,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        showDependencies("compile", getProject().prodCompilation.getDependencies());
+        showDependencies("compile", getProject().compilation.getDependencies());
         showDependencies("runtime", getProject().packaging.getRuntimeDependencies());
-        showDependencies("test", getProject().testing.testCompilation.getDependencies());
+        showDependencies("test", getProject().testing.compilation.getDependencies());
     }
 
     private void showDependencies(String purpose, JkDependencySet deps) {
@@ -369,10 +369,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     public static class JkLayoutOptions {
 
-        enum Style {SIMPLE, MAVEN}
-
         @JkDoc("Style of directory source structure (src/main/java or just src)")
-        public Style style = Style.MAVEN;
+        public JkCompileLayout.Style style = JkCompileLayout.Style.MAVEN;
 
         @JkDoc("If true, Resource files are located in same folder than Java code.")
         public boolean mixSourcesAndResources = false;
@@ -441,10 +439,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
         private void scaffoldProjectStructure(JkProject configuredProject) {
             JkLog.info("Create source directories.");
-            JkCompileLayout prodLayout = configuredProject.prodCompilation.layout;
+            JkCompileLayout prodLayout = configuredProject.compilation.layout;
             prodLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
             prodLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
-            JkCompileLayout testLayout = configuredProject.testing.testCompilation.layout;
+            JkCompileLayout testLayout = configuredProject.testing.compilation.layout;
             testLayout.resolveSources().toList().stream().forEach(tree -> tree.createIfNotExist());
             testLayout.resolveResources().toList().stream().forEach(tree -> tree.createIfNotExist());
 
@@ -473,7 +471,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                         "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
                 JkPathFile.of(breakinkChangeFile).write(text);
                 Path sourceDir =
-                        configuredProject.prodCompilation.layout.getSources().toList().get(0).getRoot();
+                        configuredProject.compilation.layout.getSources().toList().get(0).getRoot();
                 String pluginCode = JkUtilsIO.read(ProjectJkBean.class.getResource("pluginclass.snippet"));
                 JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxJkBean.java"))
                         .createIfNotExist()

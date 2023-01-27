@@ -4,33 +4,19 @@ import java.nio.file.Path;
 
 public abstract class JkSourceGenerator {
 
-    private final JkProject project;
-
-    protected JkSourceGenerator(JkProject project) {
-        this.project = project;
-    }
-
     /**
      * Sources will be generated under the <i>output/generated_sources/[name returned by thus method]</i>
+     * This path will be passed as argument to {@link #generate(JkProject, Path)}
      */
-    public abstract String getDirName();
+    protected abstract String getDirName();
 
     /**
      * Generates source code under the supplied source directory.
+     * 
+     * @param project The project for which the sources will be generated.
+     * @param generatedSourceDir The dir where the source should be generated
+     *                
      */
-    public abstract void generate(Path sourceDir);
+    protected abstract void generate(JkProject project, Path generatedSourceDir);
 
-    protected JkProject getProject() {
-        return project;
-    }
-
-    public JkSourceGenerator bindToProd() {
-        project.prodCompilation.addSourceGenerator(this);
-        return this;
-    }
-
-    public JkSourceGenerator bindToTest() {
-        project.testing.testCompilation.addSourceGenerator(this);
-        return this;
-    }
 }

@@ -3,12 +3,16 @@ import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-public class JacocoBuild extends JkBean {
+class ProtobufBuild extends JkBean {
 
     private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+
+    ProtobufBuild() {
+        getBean(IntellijJkBean.class).jekaModuleName = "dev.jeka.core";
+    }
 
     private void configure(JkProject project) {
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
@@ -17,20 +21,16 @@ public class JacocoBuild extends JkBean {
                         .andFiles(JkLocator.getJekaJarPath())
                 );
         project.publication
-                .setModuleId("dev.jeka:jacoco-plugin")
-                .maven
-                    .pomMetadata
-                        .setProjectName("Jeka plugin for Jacoco")
-                        .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
-                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+                .setModuleId("dev.jeka:protobuf-plugin")
+                .maven.pomMetadata
+                    .setProjectName("Jeka plugin for NodeJs")
+                    .setProjectDescription("A Jeka plugin to integrate with NodeJs")
+                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
     public void cleanPack() {
-        cleanOutput(); projectPlugin.pack();
+        projectPlugin.cleanPack();
     }
 
-    public static void main(String[] args) {
-        JkInit.instanceOf(JacocoBuild.class, args).cleanPack();
-    }
 
 }

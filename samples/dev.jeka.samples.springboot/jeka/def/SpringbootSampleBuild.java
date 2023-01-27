@@ -43,7 +43,7 @@ class SpringbootSampleBuild extends JkBean {
     }
 
     private void configure(JkIml iml) {
-        iml.getComponent().replaceLibByModule("dev.jeka.springboot-plugin.jar",
+        iml.component.replaceLibByModule("dev.jeka.springboot-plugin.jar",
                 "dev.jeka.plugins.springboot");
     }
 

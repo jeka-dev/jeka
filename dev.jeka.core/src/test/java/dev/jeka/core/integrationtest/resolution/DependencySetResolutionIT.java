@@ -281,7 +281,7 @@ public class DependencySetResolutionIT {
                         .and("org.openjfx:javafx-controls:mac:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.setIncludeTextAndLocalDependencies(false);
-        JkResolveResult resolveResult = project.prodCompilation.resolveDependencies();
+        JkResolveResult resolveResult = project.compilation.resolveDependencies();
         resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
         JkPathSequence paths = resolveResult.getFiles();
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
@@ -297,7 +297,7 @@ public class DependencySetResolutionIT {
                         .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.setIncludeTextAndLocalDependencies(false);
-        JkResolveResult resolveResult = project.prodCompilation.resolveDependencies();
+        JkResolveResult resolveResult = project.compilation.resolveDependencies();
         resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
         JkPathSequence paths = resolveResult.getFiles();
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));

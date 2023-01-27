@@ -46,12 +46,12 @@ public class SonarqubeJkBean extends JkBean {
      * Creates a {@link JkSonarqube} object configured for the supplied {@link JkProject}.
      */
     public JkSonarqube createConfiguredSonarqube(JkProject project) {
-        final JkCompileLayout prodLayout = project.prodCompilation.layout;
-        final JkCompileLayout testLayout = project.testing.testCompilation.layout;
+        final JkCompileLayout prodLayout = project.compilation.layout;
+        final JkCompileLayout testLayout = project.testing.compilation.layout;
         final Path baseDir = project.getBaseDir();
         JkPathSequence libs = JkPathSequence.of();
         if (provideProductionLibs) {
-            JkDependencySet deps = project.prodCompilation.getDependencies()
+            JkDependencySet deps = project.compilation.getDependencies()
                     .merge(project.packaging.getRuntimeDependencies()).getResult();
             libs = project.dependencyResolver.resolve(deps).getFiles();
         }
@@ -79,7 +79,7 @@ public class SonarqubeJkBean extends JkBean {
                 .setProjectId(fullName, name, version)
                 .setProperties(getRuntime().getProperties().getAllStartingWith("sonar.", false))
                 .setProjectBaseDir(baseDir)
-                .setBinaries(project.prodCompilation.layout.resolveClassDir())
+                .setBinaries(project.compilation.layout.resolveClassDir())
                 .setProperty(JkSonarqube.SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
                 .setProperty(JkSonarqube.TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
                 .setProperty(JkSonarqube.WORKING_DIRECTORY, baseDir.resolve(JkConstants.JEKA_DIR + "/.sonar").toString())
@@ -93,7 +93,7 @@ public class SonarqubeJkBean extends JkBean {
                 .setProperty(JkSonarqube.JAVA_LIBRARIES, libs)
                 .setProperty(JkSonarqube.JAVA_TEST_BINARIES, testLayout.getClassDirPath());
         if (provideTestLibs) {
-            JkDependencySet deps = project.testing.testCompilation.getDependencies();
+            JkDependencySet deps = project.testing.compilation.getDependencies();
             JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
             sonarqube.setProperty(JkSonarqube.JAVA_TEST_LIBRARIES, testLibs);
         }

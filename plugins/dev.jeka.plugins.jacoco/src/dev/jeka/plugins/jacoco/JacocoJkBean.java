@@ -66,7 +66,7 @@ public class JacocoJkBean extends JkBean {
     public void configure(JkProject project) {
         jacoco = JkJacoco.ofManaged(project.dependencyResolver, jacocoVersion);
         jacoco.setExecFile(project.getOutputDir().resolve(OUTPUT_RELATIVE_PATH))
-            .setClassDir(project.prodCompilation.layout.getClassDirPath());
+            .setClassDir(project.compilation.layout.getClassDirPath());
         if (xmlReport) {
             jacoco.addReportOptions("--xml",
                     project.getOutputDir().resolve(OUTPUT_XML_RELATIVE_PATH).toString());
@@ -83,7 +83,7 @@ public class JacocoJkBean extends JkBean {
             jacoco.addAgentOptions(agentOptions.split(","));
         }
         jacoco.configure(project.testing.testProcessor);
-        List<Path> sourceDirs =project.prodCompilation
+        List<Path> sourceDirs =project.compilation
                 .layout.getSources().getRootDirsOrZipFiles().stream()
                     .map(path -> path.isAbsolute() ? path : project.getBaseDir().resolve(path))
                     .collect(Collectors.toList());

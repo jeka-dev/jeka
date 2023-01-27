@@ -45,7 +45,7 @@ public class JacocoSampleBuild extends JkBean {
     }
 
     private void configureIml(JkIml iml) {
-       iml.getComponent()
+       iml.component
                .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco");
     }
 

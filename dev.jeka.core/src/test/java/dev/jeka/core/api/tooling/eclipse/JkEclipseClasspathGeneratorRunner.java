@@ -16,7 +16,7 @@ public class JkEclipseClasspathGeneratorRunner {
         JkFileSystemDependency fileDep = JkFileSystemDependency.of(zip);
         JkProject project = JkProject.of();
         project
-                .prodCompilation
+                .compilation
                     .configureDependencies(deps -> deps
                             .and(fileDep)
                             .and(coordinateDependency));

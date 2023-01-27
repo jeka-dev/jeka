@@ -25,7 +25,7 @@ public class JkProjectTesting {
 
     private final JkProject project;
 
-    public final JkProjectCompilation testCompilation;
+    public final JkProjectCompilation compilation;
 
     /**
      * The processor running the tests.
@@ -54,7 +54,7 @@ public class JkProjectTesting {
     JkProjectTesting(JkProject project) {
         this.project = project;
         this.__ = project;
-        testCompilation = new JkProjectTestCompilation();
+        compilation = new JkProjectTestCompilation();
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
     }
@@ -70,10 +70,10 @@ public class JkProjectTesting {
      * dependencies defined in testing/compile.
      */
     public JkPathSequence getTestClasspath() {
-        JkProjectCompilation prodCompilation = project.prodCompilation;
+        JkProjectCompilation prodCompilation = project.compilation;
         return JkPathSequence.of()
-                .and(testCompilation.initialLayout().resolveClassDir())
-                .and(testCompilation.resolveDependencies().getFiles())
+                .and(compilation.initialLayout().resolveClassDir())
+                .and(compilation.resolveDependencies().getFiles())
                 .and(prodCompilation.layout.resolveClassDir())
                 .and(project.packaging.resolveRuntimeDependencies().getFiles())
                 .withoutDuplicates();
@@ -126,9 +126,9 @@ public class JkProjectTesting {
      */
     public void run() {
         JkLog.startTask("Process tests");
-        this.project.prodCompilation.runIfNeeded();
-        this.testCompilation.run();
-        if (!JkPathTree.of(this.testCompilation.layout.resolveClassDir()).containFiles()) {
+        this.project.compilation.runIfNeeded();
+        this.compilation.run();
+        if (!JkPathTree.of(this.compilation.layout.resolveClassDir()).containFiles()) {
             JkLog.endTask("No tests to execute.");
             return;
         }
@@ -165,7 +165,7 @@ public class JkProjectTesting {
 
     private JkTestProcessor defaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.of();
-        final Path reportDir = testCompilation.layout.getOutputDir().resolve(this.reportDir);
+        final Path reportDir = compilation.layout.getOutputDir().resolve(this.reportDir);
         result
             .setRepoSetSupplier(() -> project.dependencyResolver.getRepos())
             .engineBehavior
@@ -176,7 +176,7 @@ public class JkProjectTesting {
 
     private JkTestSelection defaultTestSelection() {
         return JkTestSelection.of().addTestClassRoots(
-                Paths.get(testCompilation.layout.getClassDir()));
+                Paths.get(compilation.layout.getClassDir()));
     }
 
     private class JkProjectTestCompilation extends JkProjectCompilation {
@@ -193,7 +193,7 @@ public class JkProjectTesting {
         @Override
         protected JkDependencySet baseDependencies() {
             JkDependencySet base = project.packaging.getRuntimeDependencies()
-                    .merge(project.prodCompilation.getDependencies()).getResult();
+                    .merge(project.compilation.getDependencies()).getResult();
             if (project.isIncludeTextAndLocalDependencies()) {
                 base = project.textAndLocalDeps().getTest().and(base);
             }
@@ -210,7 +210,7 @@ public class JkProjectTesting {
         @Override
         protected JkPathSequence classpath() {
             return super.classpath()
-                    .andPrepend(project.prodCompilation.layout.resolveClassDir());
+                    .andPrepend(project.compilation.layout.resolveClassDir());
         }
     }
 

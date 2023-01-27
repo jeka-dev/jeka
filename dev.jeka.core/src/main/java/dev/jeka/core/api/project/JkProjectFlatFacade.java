@@ -17,6 +17,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import static dev.jeka.core.api.project.JkCompileLayout.Concern.PROD;
+import static dev.jeka.core.api.project.JkCompileLayout.Concern.TEST;
+
 /**
  * Simple facade over {@link JkProject} to access common setting conveniently.
  */
@@ -69,24 +72,27 @@ public class JkProjectFlatFacade {
     }
 
 
-
-    /**
-     * Sets product Java source files and resources in "src".
-     * Sets test Java source files and resources in "test".
-     */
-    public JkProjectFlatFacade useSimpleLayout() {
-        project.prodCompilation.layout.setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
-        project.testing.testCompilation.layout
-                .setSourceSimpleStyle(JkCompileLayout.Concern.TEST);
+    public JkProjectFlatFacade setLayoutStyle(JkCompileLayout.Style style) {
+        if (style == JkCompileLayout.Style.SIMPLE) {
+            project.compilation.layout.setSourceSimpleStyle(PROD);
+            project.testing.compilation.layout.setSourceSimpleStyle(TEST);
+        } else if (style == JkCompileLayout.Style.MAVEN) {
+            project.compilation.layout.setSourceMavenStyle(PROD);
+            project.testing.compilation.layout.setSourceMavenStyle(TEST);
+        } else {
+            throw new IllegalStateException("Style " + style + " not handled.");
+        }
         return this;
     }
+
+
 
     /**
      * The resources will be located in same dirs than sources.
      */
     public JkProjectFlatFacade mixResourcesAndSources() {
-        project.prodCompilation.layout.mixResourcesAndSources();
-        project.testing.testCompilation.layout.mixResourcesAndSources();
+        project.compilation.layout.mixResourcesAndSources();
+        project.testing.compilation.layout.mixResourcesAndSources();
         return this;
     }
 
@@ -96,7 +102,7 @@ public class JkProjectFlatFacade {
     }
 
     public JkProjectFlatFacade configureCompileDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.prodCompilation.configureDependencies(modifier);
+        project.compilation.configureDependencies(modifier);
         return this;
     }
 
@@ -106,7 +112,7 @@ public class JkProjectFlatFacade {
     }
 
     public JkProjectFlatFacade configureTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.testing.testCompilation.configureDependencies(modifier);
+        project.testing.compilation.configureDependencies(modifier);
         return this;
     }
 
@@ -218,6 +224,11 @@ public class JkProjectFlatFacade {
         project.testing.testSelection.addIncludePatternsIf(condition,
                 JkTestSelection.STANDARD_INCLUDE_PATTERN);
        return this;
+    }
+
+    public JkProjectFlatFacade addSourceGenerator(JkSourceGenerator sourceGenerator) {
+        project.compilation.addSourceGenerator(sourceGenerator);
+        return this;
     }
 
     public JkProject getProject() {

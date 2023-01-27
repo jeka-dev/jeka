@@ -19,6 +19,8 @@ public class JkCompileLayout {
         PROD, TEST
     }
 
+    public enum Style {SIMPLE, MAVEN}
+
     private static final String GENERATED_SOURCE_PATH = "generated_sources/java";
 
     private static final String GENERATED_RESOURCE_PATH = "generated_resources";

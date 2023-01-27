@@ -19,7 +19,7 @@ public final class JkIml {
 
     private Path moduleDir = Paths.get("");
 
-    private Component component = new Component();
+    public final Component component = new Component();
 
     final PathUrlResolver pathUrlResolver = new PathUrlResolver();
 
@@ -33,10 +33,6 @@ public final class JkIml {
     public JkIml setModuleDir(Path path) {
         this.moduleDir = path;
         return this;
-    }
-
-    public Component getComponent() {
-        return component;
     }
 
     public enum Scope {

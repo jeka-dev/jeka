@@ -1,6 +1,7 @@
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
@@ -16,14 +17,14 @@ public class SpringbootBuild extends JkBean {
        project
            .setJvmTargetVersion(JkJavaVersion.V8)
            .flatFacade()
-               .useSimpleLayout()
+               .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 )
                 .configureRuntimeDependencies(deps -> deps
                         .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
                 );
-       project.prodCompilation.layout.setResources(JkPathTreeSet.ofRoots(getBaseDir().resolve("res")));
+       project.compilation.layout.setResources(JkPathTreeSet.ofRoots(getBaseDir().resolve("res")));
         project.testing.setSkipped(true);
         project.publication
             .setModuleId("dev.jeka:springboot-plugin")

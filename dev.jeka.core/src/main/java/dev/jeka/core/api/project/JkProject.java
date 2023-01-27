@@ -80,7 +80,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     public final JkProjectPublication publication;
 
-    public final JkProjectCompilation prodCompilation;
+    public final JkProjectCompilation compilation;
 
     public final JkProjectTesting testing;
 
@@ -96,7 +96,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     private JkProject() {
         compiler = JkJavaCompiler.of();
-        prodCompilation = JkProjectCompilation.ofProd(this);
+        compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
         dependencyResolver = JkDependencyResolver.of()
@@ -195,15 +195,15 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     }
 
     public String getInfo() {
-        JkDependencySet compileDependencies = prodCompilation.getDependencies();
+        JkDependencySet compileDependencies = compilation.getDependencies();
         JkDependencySet runtimeDependencies = packaging.getRuntimeDependencies();
-        JkDependencySet testDependencies = testing.testCompilation.getDependencies();
+        JkDependencySet testDependencies = testing.compilation.getDependencies();
         StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
-            .append("Production sources : " + prodCompilation.layout.getInfo()).append("\n")
-            .append("Test sources : " + testing.testCompilation.layout.getInfo()).append("\n")
+            .append("Production sources : " + compilation.layout.getInfo()).append("\n")
+            .append("Test sources : " + testing.compilation.layout.getInfo()).append("\n")
             .append("Java Source Version : " + jvmTargetVersion + "\n")
             .append("Source Encoding : " + sourceEncoding + "\n")
-            .append("Source file count : " + prodCompilation.layout.resolveSources()
+            .append("Source file count : " + compilation.layout.resolveSources()
                     .count(Integer.MAX_VALUE, false) + "\n")
             .append("Download Repositories : " + dependencyResolver.getRepos() + "\n")
             .append("Declared Compile Dependencies : " + compileDependencies.getEntries().size() + " elements.\n");
@@ -238,15 +238,15 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     @Override
     public JkIdeSupport getJavaIdeSupport() {
         JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
-                prodCompilation.getDependencies(),
+                compilation.getDependencies(),
                 packaging.getRuntimeDependencies(),
-                testing.testCompilation.getDependencies(),
+                testing.compilation.getDependencies(),
                 JkCoordinate.ConflictStrategy.TAKE_FIRST);
         JkIdeSupport ideSupport = JkIdeSupport.of(baseDir)
             .setSourceVersion(jvmTargetVersion)
-            .setProdLayout(prodCompilation.layout)
-            .setTestLayout(testing.testCompilation.layout)
-            .setGeneratedSourceDirs(prodCompilation.getGeneratedSourceDirs())
+            .setProdLayout(compilation.layout)
+            .setTestLayout(testing.compilation.layout)
+            .setGeneratedSourceDirs(compilation.getGeneratedSourceDirs())
             .setDependencies(qualifiedDependencies)
             .setDependencyResolver(dependencyResolver);
         return ideSupportModifier.apply(ideSupport);
@@ -267,7 +267,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
     public JkLocalProjectDependency toDependency(JkArtifactId artifactId, JkTransitivity transitivity) {
        Runnable maker = () -> artifactProducer.makeArtifact(artifactId);
        Path artifactPath = artifactProducer.getArtifactPath(artifactId);
-       JkDependencySet exportedDependencies = prodCompilation.getDependencies()
+       JkDependencySet exportedDependencies = compilation.getDependencies()
                .merge(packaging.getRuntimeDependencies()).getResult();
         return JkLocalProjectDependency.of(maker, artifactPath, this.baseDir, exportedDependencies)
                 .withTransitivity(transitivity);
@@ -343,9 +343,9 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         }
         Element root = document.createElement("dependencies");
         document.appendChild(root);
-        root.appendChild(xmlDeps(document, "compile", prodCompilation.getDependencies()));
+        root.appendChild(xmlDeps(document, "compile", compilation.getDependencies()));
         root.appendChild(xmlDeps(document, "runtime", packaging.getRuntimeDependencies()));
-        root.appendChild(xmlDeps(document, "test", testing.testCompilation.getDependencies()));
+        root.appendChild(xmlDeps(document, "test", testing.compilation.getDependencies()));
         return document;
     }
 
