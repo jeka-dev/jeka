@@ -1,4 +1,4 @@
-# 0.10.8
+# 0.10.9
 - Bugfix : re-enable ProjectJkBean scaffold configuration.
 - Move JkProjectFlatFace#useSimpleStyle to JkProjectFlatFace#setLayoutStyle.
 - Move JkIml#getComponent() to JkIml#component
