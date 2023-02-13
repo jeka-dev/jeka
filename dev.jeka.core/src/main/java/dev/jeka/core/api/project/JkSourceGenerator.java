@@ -4,6 +4,9 @@ import java.nio.file.Path;
 
 public abstract class JkSourceGenerator {
 
+    protected JkSourceGenerator() {
+    }
+
     /**
      * Sources will be generated under the <i>output/generated_sources/[name returned by thus method]</i>
      * This path will be passed as argument to {@link #generate(JkProject, Path)}

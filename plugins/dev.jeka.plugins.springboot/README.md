@@ -11,27 +11,39 @@ Execute command line : `jeka scaffold#run scaffold#wrapper @dev.jeka:springboot-
 
 In Jeka IDE, you can just __right-click__ on module root folder, then __scaffold... | Springboot__
 
+## How to Use declaratively 
+
+Add the following in your *local.properties* file
+
+```properties
+jeka.cmd._append=@dev.jeka:jacoco-plugin springboot#
+springboot#springbootVersion=3.0.1
+```
+This will add *Springboot Plugin* to *Jeka* classpath, and instantiate *springboot* KBean.
+This has the effect to modify the *project* in such this produces a bootable jar or 
+deployable *war* archive.
+
+To add needed dependencies, edit the *dependencies.txt* file as follows :
+```text
+==== COMPILE ====
+org.springframework.boot:spring-boot-starter-web
+
+==== TEST ====
+org.springframework.boot:spring-boot-starter-test
+```
+
 ## Writing the build class manually
 
 Just declare the plugin in your Jeka class (in _[project Dir]/jeka/def_ ) as above :
 
 ```java
-
-import dev.jeka.core.api.depmanagement.JkJavaDepScopes;
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.plugins.springboot.SpringbootJkBean;
-
-import static dev.jeka.core.plugins.springboot.JkSpringModules.Boot;
-
 @JkInjectClasspath("dev.jeka:springboot-plugin")
 class Build extends JkBean {
 
     SpringbootJkBean springbootBean = getJkBean(SpringbootJkBean.class);
 
     Build() {
-        springbootBean.springbootVersion = "2.5.5";
+        springbootBean.springbootVersion = "3.0.1";
         springbootBean.projectBean().configure(this::configure);
     }
 
@@ -76,7 +88,3 @@ It adds great comfort when picking some Spring dependencies.
     );    
 }
 ```
-
-## Scaffold a springboot project for jeka
-
-* Execute `jeka scaffold#run springboot# @dev.jeka:springboot-plugin`

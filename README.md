@@ -131,10 +131,8 @@ same monorepo, which means that you don't need to specify their version as JeKa 
 * [Sonarqube Plugin](plugins/dev.jeka.plugins.sonarqube)
 * [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
 * [NodeJs Plugin](plugins/dev.jeka.plugins.nodejs)
+* [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
 
-### Known external Plugins
-
-* [Protobuf Plugin](https://github.com/jerkar/protobuf-plugin)
 
 # News
 

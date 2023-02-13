@@ -8,47 +8,46 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.function.Supplier;
 
 public class JkProtocSourceGenerator extends JkSourceGenerator {
 
     private final String protoFilePath;
 
-    private String extraArgs = "";
+    private String extraProtocOptions = "";
 
-    private Supplier<JkRepoSet> repoSupplier;
+    private JkRepoSet repos;
 
-    private String protocVersion;
+    private String protocJarVersion;
 
-    private JkProtocSourceGenerator(JkProject project, String protoFilePath) {
+    private JkProtocSourceGenerator(JkRepoSet repos, String protoFilePath) {
+        super();
         this.protoFilePath = protoFilePath;
-        this.repoSupplier = () -> project.dependencyResolver.getRepos();
+        this.repos = repos;
     }
 
-    public static JkProtocSourceGenerator of(JkProject project, String protoFilePath) {
-        return new JkProtocSourceGenerator(project, protoFilePath);
+    public static JkProtocSourceGenerator of(JkRepoSet repos, String protoFilePath) {
+        return new JkProtocSourceGenerator(repos, protoFilePath);
     }
 
-    public static JkProtocSourceGenerator of(JkProject project) {
-        return new JkProtocSourceGenerator(project, "src/main/proto");
+    public static JkProtocSourceGenerator of(JkRepoSet repos) {
+        return new JkProtocSourceGenerator(repos, "src/main/proto");
     }
 
-    public JkProtocSourceGenerator setExtraArgs(String extraArgs) {
-        this.extraArgs = extraArgs;
+    public JkProtocSourceGenerator setExtraProtocOptions(String extraOptions) {
+        this.extraProtocOptions = extraOptions;
         return this;
     }
 
     public JkProtocSourceGenerator setRepos(JkRepoSet repos) {
-        this.repoSupplier = () -> repos;
+        this.repos = repos;
         return this;
     }
 
     /**
      * The effective version of the compiler to be chosen from https://mvnrepository.com/artifact/com.google.protobuf/protoc
      */
-    public JkProtocSourceGenerator setProtocVersion(String protocVersion) {
-        this.protocVersion = protocVersion;
+    public JkProtocSourceGenerator setProtocJarVersion(String protocJarVersion) {
+        this.protocJarVersion = protocJarVersion;
         return this;
     }
 
@@ -58,12 +57,17 @@ public class JkProtocSourceGenerator extends JkSourceGenerator {
     }
 
     @Override
-    public void generate(JkProject project, Path sourceDir) {
+    public void generate(JkProject project, Path generatedSourceDir) {
         JkLog.startTask("Compiling protocol buffer files from " + protoFilePath);
         JkPathTree protoFiles = JkPathTree.of(project.getBaseDir()).goTo(protoFilePath);
-        String[] extraArguments = JkUtilsString.translateCommandline(extraArgs);
-        JkProtobuf.compile(protoFiles, Arrays.asList(extraArguments), sourceDir, repoSupplier.get(),
-                protocVersion);
+        String[] extraOptions = JkUtilsString.translateCommandline(extraProtocOptions);
+        JkProtoc protoc = JkProtoc.ofJava(generatedSourceDir)
+                .setRepos(repos)
+                .addOptions(extraOptions);
+        if (!JkUtilsString.isBlank(protocJarVersion)) {
+            protoc.setProtocJarVersion(protocJarVersion);
+        }
+        protoc.compile(protoFiles.toSet());
         JkLog.endTask();
     }
 }

@@ -1,3 +1,7 @@
+# 0.10.10
+- Rework JkSourceGenerator
+- Include ProtoBuuffers plugin in mono-repo
+
 # 0.10.9
 - Bugfix : re-enable ProjectJkBean scaffold configuration.
 - Move JkProjectFlatFace#useSimpleStyle to JkProjectFlatFace#setLayoutStyle.
@@ -7,7 +11,6 @@
 - Add JkProjectFlatFacade#setMainArtifactJarType convenient method.
 - Add ProjectJkBean#cleanPack convenience method.
 - Add JkProjectFlatFacade#addSourceGenerator convenience method.
-
 
 
 # 0.10.6 
