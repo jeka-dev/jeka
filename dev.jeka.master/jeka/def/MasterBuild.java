@@ -51,6 +51,9 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.kotlin")
     KotlinBuild kotlinBuild;
 
+    @JkInjectProject("../plugins/dev.jeka.plugins.protobuf")
+    ProtobufBuild protobufBuild;
+
     private JacocoJkBean coreJacocoBean;
 
     MasterBuild()  {
