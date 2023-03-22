@@ -1,3 +1,6 @@
+# 0.10.11
+- Fix Springboot plugin to generate example code at scaffold time.
+
 # 0.10.10
 - Rework JkSourceGenerator
 - Include ProtoBuuffers plugin in mono-repo
