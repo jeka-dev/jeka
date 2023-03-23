@@ -121,7 +121,7 @@ public final class SpringbootJkBean extends JkBean {
     }
 
     private void configure (JkScaffolder scaffolder) {
-        String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("src/snippet/Build.java"));
+        String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/Build.java"));
         String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
         code = code.replace("${dependencyDescription}", defClasspath);
         code = code.replace("${springbootVersion}", latestSpringbootVersion(projectBean.getProject()));
@@ -130,7 +130,7 @@ public final class SpringbootJkBean extends JkBean {
             scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
         }
         scaffolder.extraActions.append(this::scaffoldSample);
-        String readmeContent = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("src/snippet/README.md"));
+        String readmeContent = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/README.md"));
         scaffolder.extraActions.append(() -> {
             JkPathFile readmeFile = JkPathFile.of(getBaseDir().resolve("README.md")).createIfNotExist();
             readmeFile.write(readmeContent.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
@@ -216,14 +216,14 @@ public final class SpringbootJkBean extends JkBean {
         Path sourceDir = projectBean.getProject().compilation.layout
                 .getSources().getRootDirsOrZipFiles().get(0);
         Path pack = sourceDir.resolve(basePackage);
-        URL url = SpringbootJkBean.class.getClassLoader().getResource("src/snippet/Application.java");
+        URL url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Application.java");
         JkPathFile.of(pack.resolve("Application.java")).createIfNotExist().fetchContentFrom(url);
-        url = SpringbootJkBean.class.getClassLoader().getResource("src/snippet/Controller.java");
+        url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Controller.java");
         JkPathFile.of(pack.resolve("Controller.java")).createIfNotExist().fetchContentFrom(url);
         Path testSourceDir = projectBean.getProject().testing.compilation.layout
                 .getSources().getRootDirsOrZipFiles().get(0);
         pack = testSourceDir.resolve(basePackage);
-        url = SpringbootJkBean.class.getClassLoader().getResource("src/snippet/ControllerIT.java");
+        url = SpringbootJkBean.class.getClassLoader().getResource("snippet/ControllerIT.java");
         JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
         JkPathFile.of(projectBean.getProject().compilation.layout.getResources()
                 .getRootDirsOrZipFiles().get(0).resolve("application.properties")).createIfNotExist();

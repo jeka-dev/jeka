@@ -4,11 +4,9 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.Closeable;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
+import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A set of {@link JkPathTree}.
@@ -56,6 +54,13 @@ public final class JkPathTreeSet implements Closeable {
             dirs.add(JkPathTree.of(folder));
         }
         return new JkPathTreeSet(dirs);
+    }
+
+    public static JkPathTreeSet ofRoots(String folder, String... folders) {
+        List<Path> allFolders = JkUtilsIterable.listOf1orMore(folder, folders).stream()
+                .map(Paths::get)
+                .collect(Collectors.toList());
+        return ofRoots(allFolders.toArray(new Path[0]));
     }
 
     /**
