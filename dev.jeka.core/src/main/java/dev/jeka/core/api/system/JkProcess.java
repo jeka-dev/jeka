@@ -58,6 +58,8 @@ public class JkProcess<T extends JkProcess> implements Runnable {
 
     private boolean destroyAtJvmShutdown;
 
+    private boolean inheritEnv = true;
+
     protected JkProcess() {}
 
     protected JkProcess(String command, String... parameters) {
@@ -179,6 +181,11 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         List<String> params = new LinkedList<>(parameters);
         params.removeAll(Collections.singleton(null));
         this.parameters.addAll(0, params);
+        return (T) this;
+    }
+
+    public T setInheritEnv(Boolean inheritEnv) {
+        this.inheritEnv = inheritEnv;
         return (T) this;
     }
 
@@ -365,6 +372,9 @@ public class JkProcess<T extends JkProcess> implements Runnable {
     private ProcessBuilder processBuilder(List<String> command) {
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);
+        if (inheritEnv) {
+            builder.environment().putAll(System.getenv());
+        }
         builder.environment().putAll(env);
         if (this.workingDir != null) {
             builder.directory(workingDir.toAbsolutePath().normalize().toFile());

@@ -100,4 +100,6 @@ We can change the location using the following OS environment variables :
   * `JEKA_USER_HOME` : to set the _Jeka User Home_ to a specified location (absolute path).
   * `JEKA_CACHE_DIR` : to set the cache (mainly all downloaded files), to a specified location (absolute path)
 
+Or setting the following *System properties* :
 
+* `jeka.cache.dir` : to set the cache (mainly all downloaded files), to a specified location (absolute path)

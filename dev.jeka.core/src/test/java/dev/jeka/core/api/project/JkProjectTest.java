@@ -4,6 +4,9 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -182,7 +185,7 @@ public class JkProjectTest {
         Path base = top.resolve("base");
         JkProject baseProject = JkProject.of();
         baseProject.setBaseDir(base).flatFacade()
-                .configureCompileDependencies(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6")))
+                .configureCompileDependencies(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.14")))
                 .getProject()
                     .compilation
                         .layout

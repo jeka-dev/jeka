@@ -16,8 +16,7 @@ import java.util.function.Predicate;
 public interface JkInternalClasspathScanner {
 
     static JkInternalClasspathScanner of() {
-        return Cache.get(
-                JkProperties.SYSTEM_PROPERTIES.withFallback(JkProperties.ENVIRONMENT_VARIABLES));
+        return Cache.get(JkProperties.SYS_PROPS_THEN_ENV);
     }
 
     List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);

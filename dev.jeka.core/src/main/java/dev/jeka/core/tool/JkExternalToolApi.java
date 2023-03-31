@@ -84,8 +84,7 @@ public final class JkExternalToolApi {
     }
 
     public static JkProperties getGlobalProperties() {
-        JkProperties result = JkProperties.SYSTEM_PROPERTIES
-                .withFallback(JkProperties.ENVIRONMENT_VARIABLES);
+        JkProperties result = JkProperties.SYS_PROPS_THEN_ENV;
         Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
         if (Files.exists(globalPropertiesFile)) {
             result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));

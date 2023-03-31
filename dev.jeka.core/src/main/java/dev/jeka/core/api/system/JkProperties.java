@@ -25,9 +25,18 @@ import java.util.stream.Collectors;
  */
 public final class JkProperties {
 
+    /**
+     * Environment variables exposed as JkProperties.<p>
+     * Each environment variable is exposed with 2 names : <ul>
+     *     <li>Its original name as it is known by the OS (e.g MY_ENV_VAR)</li>
+     *     <li>Its dot-lowercase name counterpart (e.g. my.env.var)</li>
+     * </ul>
+     */
     public static final JkProperties ENVIRONMENT_VARIABLES = ofEnvironmentVariables();
 
     public static final JkProperties SYSTEM_PROPERTIES = ofSystemProperties();
+
+    public static final JkProperties SYS_PROPS_THEN_ENV = SYSTEM_PROPERTIES.withFallback(ENVIRONMENT_VARIABLES);
 
     private static final String ENV_VARS_NAME = "Environment Variables";
 
