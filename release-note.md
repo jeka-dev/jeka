@@ -1,3 +1,7 @@
+# 0.10.12
+- Allow to customize repo url for bootstrapping Ivy
+- Allow to use system property to redefine local repo location
+
 # 0.10.11
 - Fix Springboot plugin to generate example code at scaffold time.
 
