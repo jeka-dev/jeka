@@ -4,9 +4,16 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkUrlFileProxy;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.io.File;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -14,8 +21,12 @@ import java.util.List;
  */
 public interface JkInternalDependencyResolver {
 
+    String IVY_URL_PATH = "org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar";
+
+    JkCoordinate IVY_COORDINATE = JkCoordinate.of("org.apache.ivy:ivy:2.5.0");
+
     /**
-     * @param  module The resolved module. Only use for caching purpose. Can be <code>null</code>
+     * @param  coordinate The coordinate of the module to be resolved. Only used for caching purpose. Can be <code>null</code>
      * @param parameters can be null.
      */
     default JkResolveResult resolve(JkCoordinate coordinate, JkDependencySet deps,
@@ -36,12 +47,6 @@ public interface JkInternalDependencyResolver {
 
     List<String> searchVersions(JkModuleId jkModuleId);
 
-    /**
-     * @param groupCriteria
-     * @param moduleNameCtriteria
-     * @param searchExpression
-     * @return
-     */
     List<String> search(String groupCriteria, String moduleNameCriteria, String versionCriteria);
 
     static JkInternalDependencyResolver of(JkRepoSet repos) {
@@ -54,7 +59,7 @@ public interface JkInternalDependencyResolver {
                 JkInternalDependencyResolver.class, factoryClassName, "of", repos);
     }
 
-    static class InternalVvyClassloader {
+    class InternalVvyClassloader {
 
         private static JkInternalEmbeddedClassloader IVY_CLASSLOADER;
 
@@ -62,13 +67,54 @@ public interface JkInternalDependencyResolver {
             if (IVY_CLASSLOADER != null) {
                 return IVY_CLASSLOADER;
             }
-            JkUrlFileProxy fileProxyIvy = JkUrlFileProxy.of(
-                    "https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar",
-                    JkCoordinate.of("org.apache.ivy:ivy:2.5.0").cachePath());
-            IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(fileProxyIvy.get());
+            Path targetPath = IVY_COORDINATE.cachePath();
+            if (!Files.exists(targetPath)) {
+                downloadIvy(targetPath);
+            }
+            IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(targetPath);
             return IVY_CLASSLOADER;
         }
 
     }
+
+    static void downloadIvy(Path path) {
+        Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve("global.properties");
+        Path localPropertiesFile = Paths.get("jeka").resolve("local.properties");
+        JkProperties properties = JkProperties.SYS_PROPS_THEN_ENV;
+        if (Files.exists(localPropertiesFile)) {
+            properties = properties.withFallback(JkProperties.ofFile(localPropertiesFile));
+        }
+        if (Files.exists(globalPropertiesFile)) {
+            properties = properties.withFallback(JkProperties.ofFile(globalPropertiesFile));
+        }
+        JkRepoSet repos = JkRepoProperties.of(properties).getDownloadRepos();
+        for (JkRepo repo : repos.getRepos()) {
+            String url = repo.getUrl().toString();
+            if (!url.endsWith("/")) {
+                url = url + "/";
+            }
+            String fullUrl = url + IVY_URL_PATH;
+            try {
+                JkLog.info("Trying to download ivy from (jeka.repos.download) " + fullUrl);
+                JkUrlFileProxy.of(fullUrl, path).get();
+                return;
+            } catch (UncheckedIOException e) {
+                JkLog.info("Failed to download ivy from " + fullUrl);
+            }
+        }
+        String fullUrl = "https://repo1.maven.org/maven2/" + IVY_URL_PATH;
+        try {
+            JkLog.info("Trying to download ivy from " + fullUrl);
+            JkUrlFileProxy.of(fullUrl, path).get();
+        } catch (UncheckedIOException e) {
+            JkLog.error("Failed to download ivy from " + fullUrl);
+            JkLog.error("set environment variable JEKA_REPOS_DOWNLOAD or a property 'jeka.repos.download' " +
+                    "such as $JEKA_REPOS_DOWNLOAD/" + IVY_URL_PATH + " point to an accessible jar file." );
+            throw e;
+        }
+
+    }
+
+
 
 }

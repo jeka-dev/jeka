@@ -10,6 +10,13 @@ Path projectPath = this.baseDir().resolve("../myProject");
 project.setBaseDir(projectPath);
       ...
 ```
+ 
+## I'm behind a firewall that prevent me to access to Maven central, what should I do ?
+
+Define the `jeka.repos.download` property in your USER_HOME/.jeka/global.properties file
+Alternatively, you can define the JEKA_REPOS_DOWNLOAD environment variable.
+
+See [here](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-properties/#repositories) for more details.
 
 ### My JkClass does not compile, so I can't invoke any Jeka method as 'scaffold#run'. What can I do ?
 
@@ -22,6 +29,7 @@ _Jeka_ helps translate all dependencies declared in a _Maven_ project into the e
 Assuming _Maven_ is already installed and there is a _pom.xml_ file at the root of the project, 
 execute `jeka maven#migrateToCode` or `jeka maven#migrateToDependencies.txt` to display _Java_ code/configuration to 
 copy-paste in a build class or *dependencies.txt* file..
+
 
 ## Compilation
 
