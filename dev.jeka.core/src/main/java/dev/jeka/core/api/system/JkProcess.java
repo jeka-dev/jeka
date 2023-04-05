@@ -76,6 +76,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         this.logOutput = other.logOutput;
         this.workingDir = other.workingDir;
         this.destroyAtJvmShutdown = other.destroyAtJvmShutdown;
+        this.inheritEnv = other.inheritEnv;
     }
 
     /**
@@ -301,11 +302,12 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         commands.addAll(parameters);
         commands.addAll(Arrays.asList(extraParams));
         commands.removeAll(Collections.singleton(null));
+        customizeCommand(commands);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
         if (logCommand) {
-            String workingDirName = this.workingDir == null ? "" : this.workingDir.toString() + ">";
-            JkLog.startTask("Start program : " + workingDirName + commands.toString());
+            String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
+            JkLog.startTask("Start program : " + workingDirName + commands);
         }
         int exitCode = runProcess(commands,processConsumer, collectOs);
         if (logCommand) {
@@ -315,6 +317,9 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         out.exitCode = exitCode;
         out.output = collectOutput ? new String(byteArrayOutputStream.toByteArray()) : null;
         return out;
+    }
+
+    protected void customizeCommand(List<String> commands) {
     }
 
     private int runProcess(List<String> commands, Consumer<Process> processConsumer, OutputStream collectOs) {

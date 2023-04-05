@@ -34,10 +34,6 @@ public final class JkProperties {
      */
     public static final JkProperties ENVIRONMENT_VARIABLES = ofEnvironmentVariables();
 
-    public static final JkProperties SYSTEM_PROPERTIES = ofSystemProperties();
-
-    public static final JkProperties SYS_PROPS_THEN_ENV = SYSTEM_PROPERTIES.withFallback(ENVIRONMENT_VARIABLES);
-
     private static final String ENV_VARS_NAME = "Environment Variables";
 
     private static final String SYS_PROPS_NAME = "System Properties";
@@ -65,6 +61,10 @@ public final class JkProperties {
         return ofMap("map", props);
     }
 
+    public static JkProperties ofSysPropsThenEnv() {
+        return ofSystemProperties().withFallback(ENVIRONMENT_VARIABLES);
+    }
+
     private static JkProperties ofEnvironmentVariables() {
         Map<String, String> props = new HashMap<>();
         for (String varName : System.getenv().keySet() ) {
@@ -75,6 +75,7 @@ public final class JkProperties {
         return new JkProperties(ENV_VARS_NAME, Collections.unmodifiableMap(props), null);
     }
 
+    // The system properties are likely to change suring the run, so we cannot cache it.
     private static JkProperties ofSystemProperties() {
         Map<String, String> props = new HashMap<>();
         for (String propName : System.getProperties().stringPropertyNames() ) {

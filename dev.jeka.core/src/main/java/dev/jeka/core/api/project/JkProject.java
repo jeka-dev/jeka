@@ -99,9 +99,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
-        dependencyResolver = JkDependencyResolver.of()
-                .addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral())
-                .setUseCache(true);
+        dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseCache(true);
         registerArtifacts();
         publication = new JkProjectPublication(this);
     }

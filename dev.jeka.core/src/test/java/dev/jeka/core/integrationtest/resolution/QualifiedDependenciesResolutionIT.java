@@ -54,7 +54,7 @@ public class QualifiedDependenciesResolutionIT {
         Path dep2File = Paths.get(QualifiedDependenciesResolutionIT.class.getResource( "dep2").toURI());
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("test", JkFileSystemDependency.of(dep0File))
-                .and("compile, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE")
+                .and("compile, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.22.RELEASE")
                 .and("test", JkFileSystemDependency.of(dep1File))
                 .and("compile", "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0")
                 .and("compile", JkFileSystemDependency.of(dep2File));
@@ -107,8 +107,8 @@ public class QualifiedDependenciesResolutionIT {
     public void resolve_manyModules_resultTreeIsCorrect() {
         JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
-                .and("compile, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE")
-                .and("test", "org.springframework.boot:spring-boot-starter-test:1.5.+")
+                .and("compile, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.22.RELEASE")
+                .and("test", "org.springframework.boot:spring-boot-starter-test:1.5.22.RELEASE")
                 .and("compile", "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0");
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())
@@ -155,8 +155,8 @@ public class QualifiedDependenciesResolutionIT {
     public void resolve_manyModules_artifactCountIsCorrect() {
         JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
-                .and("comple, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE")
-                .and("test", "org.springframework.boot:spring-boot-starter-test:1.5.+")
+                .and("comple, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.22.RELEASE")
+                .and("test", "org.springframework.boot:spring-boot-starter-test:1.5.22.RELEASE")
                 .and("compile", "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0");
         JkDependencyResolver resolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral())

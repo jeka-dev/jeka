@@ -203,7 +203,7 @@ public final class JkRuntime {
     }
 
     static JkProperties constructProperties(Path baseDir) {
-        JkProperties result = JkProperties.SYS_PROPS_THEN_ENV
+        JkProperties result = JkProperties.ofSysPropsThenEnv()
                     .withFallback(readProjectPropertiesRecursively(JkUtilsPath.relativizeFromWorkingDir(baseDir)));
         Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
         if (Files.exists(globalPropertiesFile)) {

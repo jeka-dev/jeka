@@ -55,7 +55,7 @@ public final class JkJacoco {
     }
 
     public static JkJacoco ofManaged(JkRepoSet repos, String version) {
-        return ofManaged(JkDependencyResolver.of().addRepos(repos), version);
+        return ofManaged(JkDependencyResolver.of(repos), version);
     }
 
     public static JkJacoco ofManaged(String version) {

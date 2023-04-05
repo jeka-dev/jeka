@@ -43,7 +43,7 @@ public class JkIdeSupport {
                 .setBaseDir(baseDir);
         this.dependencies = JkQualifiedDependencySet.of();
         this.sourceVersion = JkJavaVersion.V8;
-        this.dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());;
+        this.dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());;
     }
 
     public static JkIdeSupport of(Path baseDir) {

@@ -3,6 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -58,9 +59,8 @@ final class Engine {
         super();
         this.projectBaseDir = baseDir;
         this.beanClassesResolver = new EngineBeanClassResolver(baseDir);
-        this.dependencyResolver = JkDependencyResolver.of()
-                .addRepos(JkRepoProperties.of(JkRuntime.constructProperties(baseDir)).getDownloadRepos())
-                .addRepos(JkRepo.ofLocal());
+        JkRepoSet repos = JkRepoProperties.of(JkRuntime.constructProperties(baseDir)).getDownloadRepos();
+        this.dependencyResolver = JkDependencyResolver.of(repos);
         this.dependencyResolver
                 .getDefaultParams()
                     .setFailOnDependencyResolutionError(true);

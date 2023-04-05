@@ -219,8 +219,7 @@ public final class JkSonarqube {
         JkCoordinateDependency coordinateDependency = JkCoordinateDependency
                 .of(coordinate)
                 .withTransitivity(JkTransitivity.NONE);
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                .addRepos(repos);
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
         dependencyResolver
                 .getDefaultParams()
                     .setFailOnDependencyResolutionError(false);

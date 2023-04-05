@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Offers fluent interface for launching Java processes.
@@ -22,12 +24,15 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
 
     public static final Path CURRENT_JAVA_EXEC_DIR = CURRENT_JAVA_HOME.resolve("bin");
 
+    private boolean inheritSystemProperties = true;
+
     protected JkJavaProcess() {
         super(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
     }
 
     protected JkJavaProcess(JkJavaProcess other) {
         super(other);
+        this.inheritSystemProperties = other.inheritSystemProperties;
     }
 
     /**
@@ -92,8 +97,27 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
         return this.addJavaOptions("-cp", classpath.toPath());
     }
 
+    public JkJavaProcess addSystemProperty(String key, String value) {
+        addParams("-D" + key + "=" + value);
+        return this;
+    }
+
     public JkJavaProcess copy() {
         return new JkJavaProcess(this);
     }
 
+    @Override
+    protected void customizeCommand(List<String> commands) {
+        if (inheritSystemProperties) {
+            Properties props = System.getProperties();
+            for (Object key : props.keySet()) {
+                String name = (String) key;
+                String prefix = "-D" + name + "=";
+                if (commands.stream().anyMatch(command -> command.startsWith(prefix))) {
+                    continue;
+                }
+                commands.add(prefix + props.getProperty(name));
+            }
+        }
+    }
 }

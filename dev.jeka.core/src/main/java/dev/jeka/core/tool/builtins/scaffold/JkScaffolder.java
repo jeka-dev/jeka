@@ -45,7 +45,7 @@ public final class JkScaffolder {
         super();
         this.jkClassCodeProvider = () -> "";
         this.baseDir= baseDir;
-        dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
+        dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
     }
 
 

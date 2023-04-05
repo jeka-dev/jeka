@@ -25,7 +25,7 @@ class Build extends JkBean {
         project.testing.testProcessor.setForkingProcess(true);
         project.testing.testProcessor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
         project.testing.compilation.configureDependencies(deps -> deps
-                .and("org.junit.jupiter:junit-jupiter:5.8.1")
+                .and("org.junit.jupiter:junit-jupiter:5.9.2")
         );
 
         // Publication is only necessary if your project is being deployed on a binary repository.

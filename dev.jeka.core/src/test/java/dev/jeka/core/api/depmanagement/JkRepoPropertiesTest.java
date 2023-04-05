@@ -81,7 +81,7 @@ public class JkRepoPropertiesTest {
         Map<String, String> map = new HashMap<>();
         map.put("toto", "totovalue");
         map.put("java.home", "iiii");
-        JkProperties props = JkProperties.SYS_PROPS_THEN_ENV
+        JkProperties props = JkProperties.ofSysPropsThenEnv()
                 .withFallback(JkProperties.ofMap("map", map));
         System.out.println(props.toKeyValueString());
     }

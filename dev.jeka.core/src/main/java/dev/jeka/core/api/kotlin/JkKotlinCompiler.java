@@ -48,7 +48,7 @@ public final class JkKotlinCompiler {
 
     private List<String> options = new LinkedList<>();
 
-    private JkRepoSet repos = JkRepoSet.of(JkRepo.ofLocal(), JkRepo.ofMavenCentral());
+    private JkRepoSet repos = JkRepoSet.of(JkRepo.ofMavenCentral());
 
     private List<Plugin> plugins = new LinkedList<>();
 
@@ -102,8 +102,7 @@ public final class JkKotlinCompiler {
            kotlincFiles = JkPathSequence.of(kotlincDir.getFiles());
         } else {
             JkLog.startTask("Downloading Kotlin compiler " + kotlinVersion);
-            kotlincFiles= JkDependencyResolver.of()
-                    .addRepos(repos)
+            kotlincFiles= JkDependencyResolver.of(repos)
                     .resolve(JkDependencySet.of()
                             .and("org.jetbrains.kotlin:kotlin-compiler:" + kotlinVersion)
                     )
@@ -126,7 +125,7 @@ public final class JkKotlinCompiler {
     }
 
     public static JkKotlinCompiler ofJvm(JkRepoSet repos) {
-        JkProperties props = JkProperties.SYS_PROPS_THEN_ENV;
+        JkProperties props = JkProperties.ofSysPropsThenEnv();
         String version = props.get(KOTLIN_VERSION_OPTION);
         if (version == null) {
             JkLog.info("No jeka.kotlin.version specified, try to resolce Kotlin compiler on local machine");

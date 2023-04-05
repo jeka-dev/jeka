@@ -7,9 +7,11 @@ import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,7 +70,7 @@ public interface JkInternalDependencyResolver {
                 return IVY_CLASSLOADER;
             }
             Path targetPath = IVY_COORDINATE.cachePath();
-            if (!Files.exists(targetPath)) {
+            if (!Files.exists(targetPath) || !ivyJarValid(targetPath)) {
                 downloadIvy(targetPath);
             }
             IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(targetPath);
@@ -80,7 +82,7 @@ public interface JkInternalDependencyResolver {
     static void downloadIvy(Path path) {
         Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve("global.properties");
         Path localPropertiesFile = Paths.get("jeka").resolve("local.properties");
-        JkProperties properties = JkProperties.SYS_PROPS_THEN_ENV;
+        JkProperties properties = JkProperties.ofSysPropsThenEnv();
         if (Files.exists(localPropertiesFile)) {
             properties = properties.withFallback(JkProperties.ofFile(localPropertiesFile));
         }
@@ -96,8 +98,12 @@ public interface JkInternalDependencyResolver {
             String fullUrl = url + IVY_URL_PATH;
             try {
                 JkLog.info("Trying to download ivy from (jeka.repos.download) " + fullUrl);
+                JkUtilsPath.deleteIfExists(path);
                 JkUrlFileProxy.of(fullUrl, path).get();
-                return;
+                if (checkDowloadOk(path)) {
+                    return;
+                }
+
             } catch (UncheckedIOException e) {
                 JkLog.info("Failed to download ivy from " + fullUrl);
             }
@@ -105,14 +111,33 @@ public interface JkInternalDependencyResolver {
         String fullUrl = "https://repo1.maven.org/maven2/" + IVY_URL_PATH;
         try {
             JkLog.info("Trying to download ivy from " + fullUrl);
+            JkUtilsPath.deleteIfExists(path);
             JkUrlFileProxy.of(fullUrl, path).get();
+            if (!checkDowloadOk(path)) {
+                throw new UncheckedIOException(new IOException("Iby download not completed"));
+            }
         } catch (UncheckedIOException e) {
             JkLog.error("Failed to download ivy from " + fullUrl);
             JkLog.error("set environment variable JEKA_REPOS_DOWNLOAD or a property 'jeka.repos.download' " +
-                    "such as $JEKA_REPOS_DOWNLOAD/" + IVY_URL_PATH + " point to an accessible jar file." );
+                    "such as $JEKA_REPOS_DOWNLOAD/" + IVY_URL_PATH + " pointing to an accessible jar file." );
             throw e;
         }
 
+    }
+
+
+    static boolean checkDowloadOk(Path path) {
+        if (!ivyJarValid(path)) {
+            JkLog.warn("Ivy download not completed.");
+            return false;
+        }
+        JkLog.info("Ivy downloaded with success.");
+        return true;
+    }
+
+    // May be improved by checking checksum
+    static boolean ivyJarValid(Path path) {
+        return JkUtilsPath.size(path) > 10000;
     }
 
 

@@ -79,7 +79,7 @@ public final class JkLocator {
 
     public static Path getCacheDir() {
         final Path result;
-        final String env = JkProperties.SYS_PROPS_THEN_ENV.get(JK_CACHE_PROP_NAME);
+        final String env = JkProperties.ofSysPropsThenEnv().get(JK_CACHE_PROP_NAME);
         if (!JkUtilsString.isBlank(env)) {
             result = Paths.get(env);
         } else {

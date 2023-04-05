@@ -1,5 +1,20 @@
 ## General
 
+### I'm behind a firewall that prevent me to access to Maven central, what should I do ?
+
+Define the `jeka.repos.download` property in your USER_HOME/.jeka/global.properties file
+Alternatively, you can define the JEKA_REPOS_DOWNLOAD environment variable.
+
+See [here](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-properties/#repositories) for more details.
+
+### I'm behind a proxy, how should I configure Jeka ?
+
+JeKa just leverage the standard Java mechanism to handle proxy. For example, You can :
+* Set the `JAVA_TOOL_OPTIONS` environment variable as `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`
+* Or specify proxy properties to the jeka command line, as :  `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`
+
+See [here](https://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be-used-by-the-jvm) for more details on arguments.
+
 ### Can def classes be hosted in a separate project than the build code ?
 Yes. If you prefer for your Jeka code to lie in a distinct project, create a Jeka project in a sibling 
 folder and mention where is located to the build project.
@@ -11,12 +26,8 @@ project.setBaseDir(projectPath);
       ...
 ```
  
-## I'm behind a firewall that prevent me to access to Maven central, what should I do ?
 
-Define the `jeka.repos.download` property in your USER_HOME/.jeka/global.properties file
-Alternatively, you can define the JEKA_REPOS_DOWNLOAD environment variable.
 
-See [here](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-properties/#repositories) for more details.
 
 ### My JkClass does not compile, so I can't invoke any Jeka method as 'scaffold#run'. What can I do ?
 

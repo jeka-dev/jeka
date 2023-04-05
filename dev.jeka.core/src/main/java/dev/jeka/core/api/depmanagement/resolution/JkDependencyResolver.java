@@ -31,6 +31,8 @@ public final class JkDependencyResolver  {
 
     private boolean useCache;
 
+    private boolean includeLocalRepo = true;
+
     private JkDependencyResolver() {
         parameters = JkResolutionParameters.of();
     }
@@ -40,6 +42,14 @@ public final class JkDependencyResolver  {
      */
     public static JkDependencyResolver of() {
         return new JkDependencyResolver();
+    }
+
+    public static JkDependencyResolver of(JkRepoSet repos) {
+        return of().setRepos(repos);
+    }
+
+    public static JkDependencyResolver of(JkRepo repo) {
+        return of().setRepos(repo.toSet());
     }
 
     /**
@@ -73,7 +83,7 @@ public final class JkDependencyResolver  {
         return this.useCache;
     }
 
-    public JkDependencyResolver  cleanCache() {
+    public JkDependencyResolver cleanCache() {
         this.cachedResults.clear();
         return this;
     }
@@ -137,21 +147,21 @@ public final class JkDependencyResolver  {
         List<JkDependency> allDependencies = qualifiedDependencies.getDependencies();
         JkQualifiedDependencySet moduleQualifiedDependencies = qualifiedDependencies
                 .withModuleDependenciesOnly()
-                .withResolvedBoms(this.repos)
+                .withResolvedBoms(effectiveRepos())
                 .assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
         boolean hasModule = !moduleQualifiedDependencies.getDependencies().isEmpty();
-        if (repos.getRepos().isEmpty() && hasModule) {
+        if (effectiveRepos().getRepos().isEmpty() && hasModule) {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
-        JkInternalDependencyResolver internalDepResolver = JkInternalDependencyResolver.of(this.repos);
+        JkInternalDependencyResolver internalDepResolver = JkInternalDependencyResolver.of(effectiveRepos());
         String message = qualifiedDependencies.getEntries().size() == 1 ?
                 "Resolve " + qualifiedDependencies.getDependencies().get(0).toString()
                 : "Resolve " + qualifiedDependencies.getEntries().size() + " declared dependencies";
         JkLog.startTask(message);
         JkResolveResult resolveResult;
         if (hasModule) {
-            JkUtilsAssert.state(!repos.getRepos().isEmpty(), "Cannot resolve module dependency cause no " +
+            JkUtilsAssert.state(!effectiveRepos().getRepos().isEmpty(), "Cannot resolve module dependency cause no " +
                     "repos has defined on resolver " + this);
             resolveResult = internalDepResolver.resolve(moduleHolder, moduleQualifiedDependencies, params);
         } else {
@@ -169,7 +179,7 @@ public final class JkDependencyResolver  {
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {
             if (params.isFailOnDependencyResolutionError()) {
-                String msg = report.toString() + " \nRepositories = " + repos;
+                String msg = report.toString() + " \nRepositories = " + effectiveRepos();
                 throw new IllegalStateException(msg);
             }
             JkLog.warn(report.toString());
@@ -185,25 +195,25 @@ public final class JkDependencyResolver  {
      * Returns an alphabetical sorted list of groupId present in these repositories
      */
     public List<String> searchGroups() {
-        return JkInternalDependencyResolver.of(this.repos).searchGroups();
+        return JkInternalDependencyResolver.of(effectiveRepos()).searchGroups();
     }
 
     public List<String> search(String groupCriteria, String moduleNameCriteria, String versionCriteria) {
-        return JkInternalDependencyResolver.of(this.repos).search(groupCriteria, moduleNameCriteria, versionCriteria);
+        return JkInternalDependencyResolver.of(effectiveRepos()).search(groupCriteria, moduleNameCriteria, versionCriteria);
     }
 
     /**
      * Returns an alphabetical sorted list of module ids present in these repositories for the specified groupId.
      */
     public List<String> searchModuleIds(String groupId) {
-        return JkInternalDependencyResolver.of(this.repos).searchModules(groupId);
+        return JkInternalDependencyResolver.of(effectiveRepos()).searchModules(groupId);
     }
 
     /**
      * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
      */
     public List<String> searchVersions(JkModuleId jkModuleId) {
-        return JkInternalDependencyResolver.of(this.repos).searchVersions(jkModuleId).stream()
+        return JkInternalDependencyResolver.of(effectiveRepos()).searchVersions(jkModuleId).stream()
                 .sorted(JkVersion.VERSION_COMPARATOR).collect(Collectors.toList());
     }
 
@@ -218,6 +228,10 @@ public final class JkDependencyResolver  {
             return "No repo resolver";
         }
         return repos.toString();
+    }
+
+    private JkRepoSet effectiveRepos() {
+        return includeLocalRepo ? repos.and(JkRepo.ofLocal()) : repos;
     }
 
 

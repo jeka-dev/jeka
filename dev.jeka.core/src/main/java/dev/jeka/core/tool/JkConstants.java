@@ -34,8 +34,6 @@ public final class JkConstants {
 
     public static final String KBEAN_CLASSES_CACHE_FILE_NAME = "kbean-classes.txt";
 
-
-
     /**
      * Relative path to the project where the def definition sources lie.
      */

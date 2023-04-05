@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
@@ -57,9 +58,8 @@ public final class JkInit {
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.setImportedProjects(getImportedProjects(clazz));
             JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
-            JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
-                    .addRepos(JkRepoProperties.of(properties).getDownloadRepos())
-                    .addRepos(JkRepo.ofLocal());
+            JkRepoSet repos = JkRepoProperties.of(properties).getDownloadRepos();
+            JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
             dependencyResolver.getDefaultParams().setFailOnDependencyResolutionError(true);
             jkRuntime.setDependencyResolver(dependencyResolver);
             jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));

@@ -127,9 +127,12 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
             ivyPulishRepos = ivyPulishRepos.and(JkRepo.ofLocal());
         }
         project.publication.ivy.setRepos(ivyPulishRepos);
+
+        // set dependency resolver
         final JkRepoSet downloadRepos = repoProperties.getDownloadRepos();
-        JkDependencyResolver resolver = project.dependencyResolver;
-        resolver.setRepos(resolver.getRepos().and(downloadRepos));
+        if (!downloadRepos.getRepos().isEmpty()) {
+            project.dependencyResolver.setRepos(downloadRepos);
+        }
     }
 
     private void applyPostSetupOptions(JkProject aProject) {
@@ -165,10 +168,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 }
             }
             testProcessor.setForkingProcess(javaProcess);
-        } else if (test.fork != null && !test.fork && testProcessor.getForkingProcess() != null) {
+        } else if (test.fork != null && !test.fork) {
             testProcessor.setForkingProcess(false);
         }
-        if (test.fork == null)
         if (test.skip != null) {
             aProject.testing.setSkipped(test.skip);
         }
