@@ -1,3 +1,6 @@
+# 0.10.14
+- Springboot plugin : fix fat-jar generation by re-including boot-loader classes.
+
 # 0.10.13
 - Fix JkProperties bug introduced in 0.10.12
 - Sanitize default download repositories

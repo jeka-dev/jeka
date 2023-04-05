@@ -45,6 +45,8 @@ public final class SpringbootJkBean extends JkBean {
 
     private static final String BOM_COORDINATE = "org.springframework.boot:spring-boot-dependencies::pom:";
 
+    private static final String LOADER_COORDINATE = "org.springframework.boot:spring-boot-loader:";
+
     public static final String SPRING_BOOT_VERSION_MANIFEST_ENTRY = "Spring-Boot-Version";
 
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
@@ -153,9 +155,9 @@ public final class SpringbootJkBean extends JkBean {
         JkLog.startTask("Packaging bootable jar");
         JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
         JkDependencyResolver dependencyResolver = project.dependencyResolver;
-        JkCoordinateFileProxy bomProxy = JkCoordinateFileProxy.of(dependencyResolver.getRepos(),
-                BOM_COORDINATE + springbootVersion);
-        Path bootloader = bomProxy.get();
+        JkCoordinateFileProxy loaderProxy = JkCoordinateFileProxy.of(dependencyResolver.getRepos(),
+                LOADER_COORDINATE + springbootVersion);
+        Path bootloader = loaderProxy.get();
         final JkPathSequence embeddedJars = dependencyResolver.resolve(
                 project.packaging.getRuntimeDependencies().normalised(project.getDuplicateConflictStrategy()))
                 .getFiles();
