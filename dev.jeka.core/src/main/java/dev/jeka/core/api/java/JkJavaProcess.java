@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import static dev.jeka.core.api.utils.JkUtilsIterable.listOf;
+
 /**
  * Offers fluent interface for launching Java processes.
  *
@@ -24,7 +26,10 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
 
     public static final Path CURRENT_JAVA_EXEC_DIR = CURRENT_JAVA_HOME.resolve("bin");
 
-    private boolean inheritSystemProperties = true;
+    private static final List<String> PROXY_PROPS = listOf("http.proxyHost", "http.proxyPort",
+            "https.proxyHost", "https.proxyPort", "http.nonProxyHosts", "java.net.useSystemProxies");
+
+    private boolean inheritSystemProperties = false;
 
     protected JkJavaProcess() {
         super(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
@@ -102,22 +107,29 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
         return this;
     }
 
+    public JkJavaProcess setInheritSystemProperties(boolean inheritSystemProperties) {
+        this.inheritSystemProperties = inheritSystemProperties;
+        return this;
+    }
+
     public JkJavaProcess copy() {
-        return new JkJavaProcess(this);
+        return new JkJavaProcess(this)
+                .setInheritSystemProperties(this.inheritSystemProperties);
     }
 
     @Override
     protected void customizeCommand(List<String> commands) {
-        if (inheritSystemProperties) {
-            Properties props = System.getProperties();
-            for (Object key : props.keySet()) {
-                String name = (String) key;
-                String prefix = "-D" + name + "=";
-                if (commands.stream().anyMatch(command -> command.startsWith(prefix))) {
-                    continue;
-                }
-                commands.add(prefix + props.getProperty(name));
+        Properties props = System.getProperties();
+        for (Object key : props.keySet()) {
+            String name = (String) key;
+            String prefix = "-D" + name + "=";
+            if (commands.stream().anyMatch(command -> command.startsWith(prefix))) {
+                continue;
+            }
+            if (inheritSystemProperties || PROXY_PROPS.contains(name)) {
+                this.addSystemProperty(name, props.getProperty(name));
             }
         }
+
     }
 }

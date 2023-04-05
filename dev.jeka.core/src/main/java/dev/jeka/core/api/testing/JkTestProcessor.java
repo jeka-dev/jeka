@@ -56,7 +56,8 @@ public final class JkTestProcessor {
 
     private static final String JUNIT_PLATFORM_REPORTING_MODULE = "org.junit.platform:junit-platform-reporting";
 
-    private JkJavaProcess forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName());  // Tests are forked by default
+    private JkJavaProcess forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName())
+            .setDestroyAtJvmShutdown(true);  // Tests are forked by default
 
     public final JkEngineBehavior engineBehavior;
 

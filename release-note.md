@@ -1,3 +1,7 @@
+# 0.10.13
+- Fix JkProperties bug introduced in 0.10.12
+- Sanitize default download repositories
+
 # 0.10.12
 - Allow to customize repo url for bootstrapping Ivy
 - Allow to use system property to redefine local repo location
