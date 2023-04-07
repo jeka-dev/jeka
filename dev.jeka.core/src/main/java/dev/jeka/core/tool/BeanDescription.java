@@ -96,13 +96,13 @@ final class BeanDescription {
         }
         String margin = withHeader ? "  " : "";
         if (!methods.isEmpty()) {
-            stringBuilder.append(margin + "\nMethods\n");
+            stringBuilder.append(margin + "\nMethods:\n");
             List<RenderItem> items = methods.stream().map(BeanDescription::renderItem).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
             container.render().forEach(line -> stringBuilder.append(margin + "  " + line + "\n"));
         }
         if (!properties.isEmpty()) {
-            stringBuilder.append(margin + "\nProperties\n");
+            stringBuilder.append(margin + "\nProperties:\n");
             List<RenderItem> items = properties.stream().map(BeanDescription::renderItem).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
             container.render().forEach(line -> stringBuilder.append(margin + "  " + line + "\n"));

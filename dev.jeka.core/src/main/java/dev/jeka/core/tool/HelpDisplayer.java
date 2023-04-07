@@ -12,18 +12,18 @@ final class HelpDisplayer {
     static void help(List<Class<? extends JkBean>> localBeanClasses, List<Class> classpathBeanClasses,
                      boolean compilationFailed, Path baseDir) {
         final StringBuilder introSb = new StringBuilder()
-                .append("\nPURPOSE\n")
+                .append("\nPurpose:\n")
                 .append("  Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n")
-                .append("USAGE\n")
+                .append("Usage:\n")
                 .append("  jeka (method | kbean#method ...) [property=<value> | kbean#property=<value> ...] ")
                 .append("[-option | -option=<value> ...] [@<module coordinates> ...] [@<path> ...] ")
                 .append("[-DsystemPropertyName=<value> ...]\n\n")
-                .append("EXAMPLE\n")
+                .append("Example:\n")
                 .append("  jeka project#clean project#pack project#pack.sources=true -ls=DEBUG -Dmy.prop=aValue @org.example:a-plugin:1.1.0\n\n")
                 .append(standardProperties());
         System.out.println(introSb);
 
-        final StringBuilder sb = new StringBuilder().append("LOCAL KBEANS\n");
+        final StringBuilder sb = new StringBuilder().append("Local KBeans:\n");
         if (compilationFailed) {
             sb.append("  [WARN] Compilation of jeka/def failed. Cannot provide information about KBean defined locally.\n");
         } else {
@@ -35,13 +35,13 @@ final class HelpDisplayer {
         }
 
         // Global KBeans
-        sb.append("\nCLASSPATH KBEANS\n");
+        sb.append("\nClasspath KBeans:\n");
         List<RenderItem> renderItems = classpathBeanClasses.stream()
                 .sorted(Comparator.comparing(Class::getSimpleName))
                 .map(beanClass -> bean(beanClass, false))
                 .collect(Collectors.toList());
         new ItemContainer(renderItems).render().forEach(line -> sb.append("  " + line + "\n"));
-        sb.append("\nType 'jeka [kbean]#help' to get help on a particular KBean (ex : 'jeka project#help'). ");
+        sb.append("\nType 'jeka [kbean]#help' to get help on a particular KBean (ex : 'jeka project#help').\n");
         System.out.println(sb);
     }
 
@@ -63,7 +63,7 @@ final class HelpDisplayer {
 
     private static String standardProperties() {
         StringBuilder sb = new StringBuilder();
-        sb.append("OPTIONS\n");
+        sb.append("Options:\n");
         List<RenderItem> items = new LinkedList<>();
         items.add(option("help", "h", "display this message"));
         items.add(option("log.style", "ls", "choose the display log style : INDENT(default), BRACE or DEBUG"));
@@ -98,7 +98,7 @@ final class HelpDisplayer {
         if (props.isEmpty()) {
             return "";
         }
-        sb.append("\nCOMMAND SHORTCUTS\n");
+        sb.append("\nCommand Shortcuts:\n");
         int maxLength = Collections.max(props.keySet().stream().map(String::length).collect(Collectors.toSet()));
 
         for (Map.Entry<String, String> entry : props.entrySet()) {
@@ -110,7 +110,7 @@ final class HelpDisplayer {
     static void helpJkBean(JkBean jkBean) {
         BeanDoc beanDescription = new BeanDoc(jkBean.getClass());
         JkLog.info(helpBeanDescription(beanDescription, jkBean.getRuntime()));
-        JkLog.info("Execute 'jeka -help' to get global help.");
+        JkLog.info("Execute 'jeka -help' to get global help.\n");
     }
 
     private static String helpBeanDescription(BeanDoc description, JkRuntime runtime) {
@@ -121,7 +121,7 @@ final class HelpDisplayer {
         items.add(RenderItem.of("Name", description.shortName()));
         List<String> deps = description.pluginDependencies();
         if (!deps.isEmpty()) {
-            items.add(new RenderItem("Dependencies on other KBeans", deps));
+            items.add(new RenderItem("KBean Dependencies", deps));
         }
         final List<String> explanations = description.description();
         if (!explanations.isEmpty()) {
@@ -197,7 +197,5 @@ final class HelpDisplayer {
         }
 
     }
-
-
 
 }
