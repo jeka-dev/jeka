@@ -195,7 +195,7 @@ public final class JkUtilsReflect {
         try {
             method = target.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
-            throw new IllegalArgumentException("No method " + methodName + " found on class " + methodName);
+            throw new IllegalArgumentException("No method " + methodName + " found on class " + target.getClass().getName());
         }
         return invoke(target, method);
     }

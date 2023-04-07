@@ -6,7 +6,6 @@ import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathFile;
@@ -231,19 +230,18 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         getProject().compilation.generateSources();
     }
 
-    @JkDoc("Performs compilation and resource processing.")
+    @JkDoc("Performs compilation and resource processing")
     public void compile() {
         getProject().compilation.run();
     }
 
-    @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
+    @JkDoc("Compiles and run tests defined within the project (typically Junit tests)")
     public void test() {    //NOSONAR
         getProject().testing.run();
     }
 
-    @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
-            "\nDoes not re-generate artifacts already generated : " +
-            "execute 'clean java#pack' to re-generate artifacts.")
+    @JkDoc("Generates from scratch artifacts defined through 'pack' options if not yet generated. " +
+            "Use #cleanPack to force re-generation.")
     public void pack() {   //NOSONAR
         getProject().artifactProducer.makeAllMissingArtifacts();
     }
@@ -364,7 +362,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         public Boolean fork;
 
         /** Argument passed to the JVM if tests are withForking. Example : -Xms2G -Xmx2G */
-        @JkDoc("Argument passed to the JVM if tests are executed in a forked process. E.g. -Xms2G -Xmx2G.")
+        @JkDoc("Argument passed to the JVM if tests are executed in a forked process (example -Xms2G -Xmx2G).")
         public String jvmOptions;
 
     }
@@ -385,7 +383,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         @JkInjectProperty("jeka.java.version")
         public String javaVersion;
 
-        @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
+        @JkDoc("Extra arguments to be passed to the compiler (example -Xlint:unchecked).")
         public String compilerExtraArgs;
 
     }
@@ -398,7 +396,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         @JkDoc("Program arguments to use when running generated jar")
         public String programArgs;
 
-        @JkDoc("If true, the resolved runtime classpath will be used when running the generated jar.\n" +
+        @JkDoc("If true, the resolved runtime classpath will be used when running the generated jar. " +
                 "If the generated jar is a Uber jar or contains all the needed dependencies, leave it to 'false'")
         public boolean useRuntimeDepsForClasspath;
 

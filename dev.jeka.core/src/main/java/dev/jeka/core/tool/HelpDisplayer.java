@@ -12,7 +12,7 @@ final class HelpDisplayer {
     static void help(List<Class<? extends JkBean>> localBeanClasses, List<Class> classpathBeanClasses,
                      boolean compilationFailed, Path baseDir) {
         final StringBuilder introSb = new StringBuilder()
-                .append("PURPOSE\n")
+                .append("\nPURPOSE\n")
                 .append("  Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n")
                 .append("USAGE\n")
                 .append("  jeka (method | kbean#method ...) [property=<value> | kbean#property=<value> ...] ")
@@ -27,55 +27,69 @@ final class HelpDisplayer {
         if (compilationFailed) {
             sb.append("  [WARN] Compilation of jeka/def failed. Cannot provide information about KBean defined locally.\n");
         } else {
+            List<RenderItem> renderItems = new LinkedList<>();
             for (int i = 0; i < localBeanClasses.size(); i++) {
-                sb.append(beanDescription(localBeanClasses.get(i), i== 0));
+                renderItems.add(bean(localBeanClasses.get(i), i == 0));
             }
+            new ItemContainer(renderItems).render().forEach(line -> sb.append("  " + line + "\n"));
         }
 
         // Global KBeans
         sb.append("\nCLASSPATH KBEANS\n");
-        classpathBeanClasses.stream()
+        List<RenderItem> renderItems = classpathBeanClasses.stream()
                 .sorted(Comparator.comparing(Class::getSimpleName))
-                .forEach(aClass -> sb.append(beanDescription(aClass, false)));
+                .map(beanClass -> bean(beanClass, false))
+                .collect(Collectors.toList());
+        new ItemContainer(renderItems).render().forEach(line -> sb.append("  " + line + "\n"));
         sb.append("\nType 'jeka [kbean]#help' to get help on a particular KBean (ex : 'jeka project#help'). ");
         System.out.println(sb);
     }
 
-    private static String beanDescription(Class beanClass, boolean isDefault) {
+    private static RenderItem bean(Class beanClass, boolean isDefault) {
         String shortName = JkBean.name(beanClass);
         if (isDefault) {
             shortName = shortName + " (default)";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("  " + JkUtilsString.padEnd(shortName, 25, ' ') + ": ");
         String beanDescription = new BeanDoc(beanClass).shortDescription();
-        if (beanDescription != null) {
-            sb.append(beanDescription).append(" ");
+        if (JkUtilsString.isBlank(beanDescription)) {
+            beanDescription = "";
+        } else if (!beanDescription.endsWith(".")) {
+            beanDescription = beanDescription + ".";
         }
-        sb.append("[" + beanClass.getName() + "]");
-        sb.append("\n");
-        return sb.toString();
+        beanDescription = beanDescription.trim();
+        beanDescription = beanDescription + "[" + beanClass.getName() + "]";
+        return new RenderItem(shortName, Collections.singletonList(beanDescription));
     }
 
     private static String standardProperties() {
         StringBuilder sb = new StringBuilder();
         sb.append("OPTIONS\n");
-        sb.append("  -help (shorthand -h) : display this message.\n");
-        sb.append("  -log.style (shorthand -ls) : choose the display log style : INDENT(default), BRACE or DEBUG.\n");
-        sb.append("  -log.verbose (shorthand -lv) : log 'trace' level.\n");
-        sb.append("  -log.ivy.verbose (shorthand -liv) : log 'trace' level + Ivy trace level.\n");
-        sb.append("  -log.runtime.information (shorthand -lri) : log Jeka runtime information at startup.\n");
-        sb.append("  -log.no.animation (shorthand -lna) : do not log animations on console.\n");
-        sb.append("  -log.duration (shorthand -ld) : log execution duration.\n");
-        sb.append("  -log.runtime.info (shorthand -lri) : log Jeka runtime information as Jeka version, JDK version, working dir, classpath ....\n");
-        sb.append("  -log.banner (shorthand -lb) : log intro and outro banners.\n");
-        sb.append("  -log.stacktrace (shorthand -lst) : log the stacktrace when Jeka fail.\n");
-        sb.append("  -log.setup (shorthand -lsu) : log KBean setup process.\n");;
-        sb.append("  -kbean (shorthand -kb) : Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name.\n");
-        sb.append("  -clean.work (shorthand -cw) : Delete all files cached in jeka/.work.\n");
-        sb.append("  -no.help : Does not display help if no method is invoked.\n");
-        sb.append("  -def.compile.ignore-failure (shorthand -dci) : Try to compile def classes. If fail, ignore failure and continue.\n");
+        List<RenderItem> items = new LinkedList<>();
+        items.add(option("help", "h", "display this message"));
+        items.add(option("log.style", "ls", "choose the display log style : INDENT(default), BRACE or DEBUG"));
+        items.add(option("log.verbose", "lv", "log 'trace' level"));
+        items.add(option("log.ivy.verbose", "liv",  " log 'trace' level + Ivy trace level"));
+        items.add(option("log.runtime.information", "lri",  " log Jeka runtime information at startup"));
+        items.add(option("log.no.animation", "lna",  " do not log animations on console"));
+        items.add(option("log.duration", "ld",  " log execution duration"));
+        items.add(option("log.runtime.info", "lri",  " log Jeka runtime information as Jeka version, JDK version, working dir, classpath ..."));
+        items.add(option("log.banner", "lb",  " log intro and outro banners"));
+        items.add(option("log.stacktrace", "lst",  " log the stacktrace when Jeka fail"));
+        items.add(option("log.setup", "lsu",  " log KBean setup process"));;
+        items.add(option("kbean", "kb",  " Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name"));
+        items.add(option("clean.work", "cw",  " Delete all files cached in jeka/.work"));
+        items.add(option("no.help", "", "Does not display help if no method is invoked"));
+        items.add(option("def.compile.ignore-failure", "dci",  " Try to compile def classes. If fail, ignore failure and continue"));
+        new ItemContainer(items).render().forEach(item -> sb.append("  " + item + "\n"));
         return sb.toString();
+    }
+
+    private static RenderItem option(String name, String shortHand, String desc) {
+        String key = "-" + name;
+        if (!JkUtilsString.isBlank(shortHand)) {
+            key = key + " (shorthand -" + shortHand + ")";
+        }
+        return new RenderItem(key, Collections.singletonList(JkUtilsString.capitalize(desc.trim())));
     }
 
     private static String shortcuts(Path baseDir) {
@@ -101,30 +115,87 @@ final class HelpDisplayer {
 
     private static String helpBeanDescription(BeanDoc description, JkRuntime runtime) {
         StringBuilder sb = new StringBuilder();
-        sb.append("CLASS\n  " + description.fullName() + "\n");
-        sb.append("NAME\n  " + description.shortName() + "\n");
+        sb.append("\n");
+        List<RenderItem> items = new LinkedList<>();
+        items.add(RenderItem.of("Class", description.fullName()));
+        items.add(RenderItem.of("Name", description.shortName()));
         List<String> deps = description.pluginDependencies();
         if (!deps.isEmpty()) {
-            sb.append("DEPENDENCIES ON OTHER KBEANS\n");
-            deps.forEach(dep -> sb.append("  " + dep + "\n"));
+            items.add(new RenderItem("Dependencies on other KBeans", deps));
         }
         final List<String> explanations = description.description();
         if (!explanations.isEmpty()) {
-            sb.append("PURPOSE\n");
-            description.description().stream()
-                    .flatMap(string -> Arrays.stream(string.split("\n")))
-                    .forEach(line -> sb.append("  " + line + "\n"));
+            items.add(new RenderItem("Purpose", explanations));
         }
         final List<String> activationEffects = description.activationEffect();
         if (!activationEffects.isEmpty()) {
-            sb.append("INSTANTIATION EFFECT\n");
-            description.activationEffect().stream()
-                    .flatMap(string -> Arrays.stream(string.split("\n")))
-                    .forEach(line -> sb.append("  " + line + "\n"));
+            items.add(new RenderItem("Instantiation effects", activationEffects));
         }
-        sb.append(BeanDescription.of(description.beanClass()).flatDescription(description.shortName() + "#"));
+        new ItemContainer(items).render().forEach(line -> sb.append(line + "\n"));
+        sb.append(BeanDescription.renderItem(description.beanClass()).flatDescription(description.shortName() + "#"));
         sb.append(shortcuts(runtime.getProjectBaseDir()));
         return sb.toString();
+    }
+
+    static class RenderItem {
+
+        private static final String SEPARATOR = " : ";
+
+        private final String name;
+
+        private final List<String> lines;
+
+        RenderItem(String name, List<String> lines) {
+            this.name = name;
+            this.lines = lines;
+        }
+
+        static RenderItem of(String name, String line) {
+            return new RenderItem(name, Collections.singletonList(line));
+        }
+
+        static List<String> split(String line) {
+            return Arrays.stream(line.split("\\.\\s|\\r?\\n"))
+                    .map(l -> l.replace('\r', ' ').trim())
+                    .filter(l -> !JkUtilsString.isBlank(l))
+                    .map(l -> l.endsWith(".") ? l : l + ".")
+                    .collect(Collectors.toList());
+        }
+
+        List<String> render(int maxNameSize) {
+            String paddedName = JkUtilsString.padEnd(name, maxNameSize, ' ');
+            List<String> result = new LinkedList<>();
+            result.add(paddedName + SEPARATOR + lines.get(0));
+            String margin = JkUtilsString.repeat(" ", maxNameSize);
+            margin = margin + JkUtilsString.repeat(" ", SEPARATOR.length());
+            for (int i = 1; i < lines.size(); i++) {
+                result.add(margin + lines.get(i));
+            }
+            return result;
+        }
+    }
+
+    static class ItemContainer {
+
+        private final List<RenderItem> items;
+
+        ItemContainer(List<RenderItem> items) {
+            this.items = items;
+        }
+
+        List<String> render() {
+            int maxNameSize = maxLength(items.stream().map(item -> item.name).collect(Collectors.toList()));
+            List<String> result = new LinkedList<>();
+            for (RenderItem item : items) {
+                result.addAll(item.render(maxNameSize));
+            }
+            return result;
+        }
+
+        private static int maxLength(List<String> lines) {
+            return Collections.max(lines, Comparator.comparing(String::length)).length();
+        }
+
     }
 
 

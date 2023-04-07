@@ -1,10 +1,9 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import dev.jeka.core.tool.HelpDisplayer.ItemContainer;
+import dev.jeka.core.tool.HelpDisplayer.RenderItem;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,14 +25,14 @@ final class BeanDescription {
     private final Class<? extends JkBean> beanClass;
 
     private BeanDescription(Class<? extends JkBean> beanClass, List<BeanMethod> beanMethods,
-                      List<BeanField> beanFields) {
+                            List<BeanField> beanFields) {
         super();
         this.beanClass = beanClass;
         this.beanMethods = Collections.unmodifiableList(beanMethods);
         this.beanFields = Collections.unmodifiableList(beanFields);
     }
 
-    static BeanDescription of(Class<? extends JkBean> beanClass) {
+    static BeanDescription renderItem(Class<? extends JkBean> beanClass) {
         final List<BeanMethod> methods = new LinkedList<>();
         for (final Method method : executableMethods(beanClass)) {
             methods.add(BeanMethod.of(method));
@@ -46,14 +45,6 @@ final class BeanDescription {
         }
         Collections.sort(options);
         return new BeanDescription(beanClass, methods, options);
-    }
-
-    List<BeanMethod> beanMethods() {
-        return beanMethods;
-    }
-
-    List<BeanField> beanFields() {
-        return beanFields;
     }
 
     private static List<Method> executableMethods(Class<?> clazz) {
@@ -89,14 +80,6 @@ final class BeanDescription {
         return !JkUtilsReflect.getAllDeclaredFields(field.getType(), JkDoc.class).isEmpty();
     }
 
-    String description() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Class<? extends JkBean> buildClass : this.beanClassHierarchy()) {
-            stringBuilder.append(description(buildClass, "", true, false));
-        }
-        return stringBuilder.toString();
-    }
-
     String flatDescription(String prefix) {
         return description(beanClass, prefix, false, true);
     }
@@ -113,79 +96,18 @@ final class BeanDescription {
         }
         String margin = withHeader ? "  " : "";
         if (!methods.isEmpty()) {
-            stringBuilder.append(margin + "METHODS\n");
-            int maxSize = 0;
-            for (BeanMethod method : methods) {
-                final String displayedMethodName = prefix + method.name;
-                if (displayedMethodName.length() > maxSize) {
-                    maxSize = displayedMethodName.length();
-                }
-            }
-            for (BeanMethod methodDef : methods) {
-                final String displayedMethodName =
-                        JkUtilsString.padEnd(prefix + methodDef.name, maxSize + 1, ' ');
-                if (methodDef.description == null) {
-                    stringBuilder.append( margin + "  " + displayedMethodName + " : No description available.\n");
-                } else {
-                    stringBuilder.append(margin).append("  ").append(displayedMethodName)
-                            .append(" : ").append(methodDef.description.replace("\n", " "))
-                            .append("\n");
-                }
-            }
+            stringBuilder.append(margin + "\nMethods\n");
+            List<RenderItem> items = methods.stream().map(BeanDescription::renderItem).collect(Collectors.toList());
+            ItemContainer container = new ItemContainer(items);
+            container.render().forEach(line -> stringBuilder.append(margin + "  " + line + "\n"));
         }
         if (!properties.isEmpty()) {
-            stringBuilder.append(margin + "PROPERTIES\n");
-            int maxSize = 0;
-            for (BeanField property : properties) {
-                final String displayName = prefix + property.name ;
-                if (displayName.length() > maxSize) {
-                    maxSize = displayName.length();
-                }
-            }
-            for (BeanField property : properties) {
-                String displayName =
-                        JkUtilsString.padEnd(prefix + property.name + "=", maxSize + 1, ' ');
-                stringBuilder.append(property.description(displayName, margin));
-            }
+            stringBuilder.append(margin + "\nProperties\n");
+            List<RenderItem> items = properties.stream().map(BeanDescription::renderItem).collect(Collectors.toList());
+            ItemContainer container = new ItemContainer(items);
+            container.render().forEach(line -> stringBuilder.append(margin + "  " + line + "\n"));
         }
         return stringBuilder.toString();
-    }
-
-    Map<String, String> optionValues(JkBean bean) {
-        final Map<String, String> result = new LinkedHashMap<>();
-        for (final BeanField optionDef : this.beanFields) {
-            final String name = optionDef.name;
-            final Object value = BeanField.value(bean, name);
-            result.put(name, JkUtilsObject.toString(value));
-        }
-        return result;
-    }
-
-    Element toElement(Document document) {
-        final Element runEl = document.createElement("run");
-        final Element methodsEl = document.createElement("methods");
-        runEl.appendChild(methodsEl);
-        for (final BeanMethod beanMethod : this.beanMethods) {
-            final Element methodEl = beanMethod.toXmlElement(document);
-            methodsEl.appendChild(methodEl);
-        }
-        final Element optionsEl = document.createElement("options");
-        runEl.appendChild(optionsEl);
-        for (final BeanField beanField : this.beanFields) {
-            final Element optionEl = beanField.toElement(document);
-            optionsEl.appendChild(optionEl);
-        }
-        return runEl;
-    }
-
-    private List<Class<? extends JkBean>> beanClassHierarchy() {
-        List<Class<? extends JkBean>> result = new ArrayList<>();
-        Class<?> current = beanClass;
-        while (JkBean.class.isAssignableFrom(current)) {
-            result.add((Class<? extends JkBean>) current);
-            current = current.getSuperclass();
-        }
-        return result;
     }
 
     private List<BeanMethod> methodsOf(Class<?> runClass) {
@@ -203,7 +125,7 @@ final class BeanDescription {
      *
      * @author Jerome Angibaud
      */
-     static final class BeanMethod implements Comparable<BeanMethod> {
+    static final class BeanMethod implements Comparable<BeanMethod> {
 
         private final String name;
 
@@ -235,24 +157,6 @@ final class BeanDescription {
             return 1;
         }
 
-
-
-        Element toXmlElement(Document document) {
-            final Element methodEl = document.createElement("method");
-            final Element nameEl = document.createElement("name");
-            nameEl.setTextContent(this.name);
-            final Element descriptionEl = document.createElement("description");
-            if (description != null) {
-                descriptionEl.appendChild(document.createCDATASection(description));
-            }
-            final Element classEl = document.createElement("declaringClass");
-            classEl.setTextContent(declaringClass.getName());
-            methodEl.appendChild(nameEl);
-            methodEl.appendChild(descriptionEl);
-            methodEl.appendChild(classEl);
-            return methodEl;
-        }
-
     }
 
     /**
@@ -261,7 +165,7 @@ final class BeanDescription {
      *
      * @author Jerome Angibaud
      */
-     static final class BeanField implements Comparable<BeanField> {
+    static final class BeanField implements Comparable<BeanField> {
 
         private final String name;
 
@@ -325,10 +229,6 @@ final class BeanDescription {
             return 1;
         }
 
-        String shortDescription() {
-            return name + " = " + defaultValue;
-        }
-
         String description(String displayName, String margin) {
             String desc = description != null ? description : "No description available.";
             String oneLineDesc = desc.replace("\n", " ");
@@ -356,29 +256,6 @@ final class BeanDescription {
             return result.toString();
         }
 
-        String defaultValue() {
-            return this.defaultValue == null ? "null" : this.defaultValue.toString();
-        }
-
-        Element toElement(Document document) {
-            final Element optionEl = document.createElement("option");
-            final Element nameEl = document.createElement("name");
-            nameEl.setTextContent(this.name);
-            final Element descriptionEl = document.createElement("description");
-            if (description != null) {
-                descriptionEl.appendChild(document.createCDATASection(this.description));
-            }
-            final Element typeEl = document.createElement("type");
-            typeEl.setTextContent(this.type());
-            final Element defaultValueEl = document.createElement("defaultValue");
-            defaultValueEl.appendChild(document.createCDATASection(this.defaultValue()));
-            optionEl.appendChild(nameEl);
-            optionEl.appendChild(descriptionEl);
-            optionEl.appendChild(typeEl);
-            optionEl.appendChild(defaultValueEl);
-            return optionEl;
-        }
-
     }
 
     private static class NameAndField {
@@ -401,5 +278,28 @@ final class BeanDescription {
         }
 
     }
+
+    static RenderItem renderItem(BeanMethod beanMethod) {
+        String name = beanMethod.name;
+        List<String> descLines = JkUtilsString.isBlank(beanMethod.description)
+                ? Collections.singletonList("No description available.")
+                : RenderItem.split(beanMethod.description);
+        return new RenderItem(name, descLines);
+    }
+
+    static RenderItem renderItem(BeanField beanField) {
+        String name = beanField.name;
+        List<String> descLines = JkUtilsString.isBlank(beanField.description)
+                ? Collections.singletonList("No description available.")
+                : RenderItem.split(beanField.description);
+        LinkedList result = new LinkedList(descLines);
+        String last = (String) result.pollLast();
+        last = last + "  [" + beanField.type() + "  default=" + beanField.defaultValue + "]";
+        result.add(last);
+        return new RenderItem(name, result);
+    }
+
+
+
 
 }
