@@ -18,4 +18,9 @@ public @interface JkDoc {
      */
     String[] value();
 
+    /**
+     * If true, the method/field won't be displayed in 'help' command.
+     */
+    boolean hide() default false;
+
 }

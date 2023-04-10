@@ -52,9 +52,6 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
     private String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
 
-    @JkDoc("Command arg line to pass to springboot for #run method (e.g. '--server.port=8083 -Dspring.profiles.active=prod'")
-    public String runArgs;
-
     @JkDoc("If true, create a bootable jar artifact.")
     public boolean createBootJar = true;
 
@@ -64,11 +61,12 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("If true, create a .war filed.")
     public boolean createWarFile;
 
-    @JkDoc("For internal test purpose. If not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
+    @JkDoc(hide = true, value = "For internal test purpose : if not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
     public String scaffoldDefClasspath;
 
     private boolean useSpringRepos = true;
 
+    @JkDoc(hide = true, value = "")
     public final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
 
     SpringbootJkBean() {
@@ -185,16 +183,21 @@ public final class SpringbootJkBean extends JkBean {
     public static void createBootJar(Path original, JkPathSequence libsToInclude, Path bootLoaderJar, Path targetJar,
                                      String springbootVersion) {
         JkUtilsAssert.argument(Files.exists(original), "Original jar not found at " + original);
-        JkClassLoader classLoader = JkUrlClassLoader.of(original, ClassLoader.getSystemClassLoader().getParent())
+        String mainClassName = findMainClassName(original);
+
+        SpringbootPacker.of(libsToInclude, bootLoaderJar, mainClassName,
+                springbootVersion).makeExecJar(original, targetJar);
+    }
+
+    private static String findMainClassName(Iterable<Path> jarOrFolder) {
+        JkClassLoader classLoader = JkUrlClassLoader.of(jarOrFolder, ClassLoader.getSystemClassLoader().getParent())
                 .toJkClassLoader();
         List<String> mainClasses = classLoader.findClassesHavingMainMethod();
         List<String> classWithSpringbootAppAnnotation = classLoader.findClassesMatchingAnnotations(
                 annotationNames -> annotationNames.contains(SPRINGBOOT_APPLICATION_ANNOTATION_NAME));
         for (String name : mainClasses) {
             if (classWithSpringbootAppAnnotation.contains(name)) {
-                SpringbootPacker.of(libsToInclude, bootLoaderJar, name,
-                        springbootVersion).makeExecJar(original, targetJar);
-                return;
+                return name;
             }
         }
 
@@ -203,13 +206,12 @@ public final class SpringbootJkBean extends JkBean {
             if (name.endsWith("Kt")) {
                 String originalName = JkUtilsString.substringBeforeLast(name, "Kt");
                 if (classWithSpringbootAppAnnotation.contains(originalName)) {
-                    SpringbootPacker.of(libsToInclude, bootLoaderJar, name,
-                            springbootVersion).makeExecJar(original, targetJar);
-                    return;
+                    return name;
                 }
             }
         }
         throw new IllegalStateException("No class annotated with @SpringBootApplication found.");
+
     }
 
     @JkDoc("Scaffold a basic example application in package org.example")
@@ -265,4 +267,12 @@ public final class SpringbootJkBean extends JkBean {
         this.useSpringRepos = useSpringRepos;
         return this;
     }
+
+    /**
+     * Returns fully qualified name of springboot main class. This method should be invoked only after compilation.
+     */
+    public String getMainClass() {
+        return SpringbootJkBean.findMainClassName(projectBean.getProject().compilation.layout.resolveClassDir());
+    }
+
 }

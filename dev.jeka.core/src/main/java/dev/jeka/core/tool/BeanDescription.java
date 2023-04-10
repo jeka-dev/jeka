@@ -50,6 +50,10 @@ final class BeanDescription {
     private static List<Method> executableMethods(Class<?> clazz) {
         final List<Method> result = new LinkedList<>();
         for (final Method method : clazz.getMethods()) {
+            final JkDoc jkDoc = method.getAnnotation(JkDoc.class);
+            if (jkDoc != null && jkDoc.hide()) {
+                continue;
+            }
             final int modifier = method.getModifiers();
             if (method.getReturnType().equals(void.class) && method.getParameterTypes().length == 0
                     && !JkUtilsReflect.isMethodPublicIn(Object.class, method.getName())
@@ -64,6 +68,10 @@ final class BeanDescription {
     private static List<NameAndField> fields(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
         final List<NameAndField> result = new LinkedList<>();
         for (final Field field : FieldInjector.getPropertyFields(clazz)) {
+            final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
+            if (jkDoc != null && jkDoc.hide()) {
+                continue;
+            }
             final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
             if (!hasSubOption(field)) {
                 result.add(new NameAndField(prefix + field.getName(), field, rootClass));
@@ -80,11 +88,11 @@ final class BeanDescription {
         return !JkUtilsReflect.getAllDeclaredFields(field.getType(), JkDoc.class).isEmpty();
     }
 
-    String flatDescription(String prefix) {
-        return description(beanClass, prefix, false, true);
+    String flatDescription() {
+        return description(beanClass, false, true);
     }
 
-    private String description(Class<?> beanClass, String prefix, boolean withHeader, boolean includeHierarchy) {
+    private String description(Class<?> beanClass, boolean withHeader, boolean includeHierarchy) {
         List<BeanMethod> methods = includeHierarchy ? this.beanMethods : this.methodsOf(beanClass);
         List<BeanField> properties = includeHierarchy ? this.beanFields : this.optionsOf(beanClass);
         if (methods.isEmpty() && properties.isEmpty()) {
@@ -97,13 +105,15 @@ final class BeanDescription {
         String margin = withHeader ? "  " : "";
         if (!methods.isEmpty()) {
             stringBuilder.append(margin + "\nMethods:\n");
-            List<RenderItem> items = methods.stream().map(BeanDescription::renderItem).collect(Collectors.toList());
+            List<RenderItem> items = methods.stream()
+                    .map(BeanDescription::renderItem).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
             container.render().forEach(line -> stringBuilder.append(margin + "  " + line + "\n"));
         }
         if (!properties.isEmpty()) {
             stringBuilder.append(margin + "\nProperties:\n");
-            List<RenderItem> items = properties.stream().map(BeanDescription::renderItem).collect(Collectors.toList());
+            List<RenderItem> items = properties.stream()
+                    .map(BeanDescription::renderItem).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
             container.render().forEach(line -> stringBuilder.append(margin + "  " + line + "\n"));
         }
@@ -142,7 +152,12 @@ final class BeanDescription {
 
         static BeanMethod of(Method method) {
             final JkDoc jkDoc = JkUtilsReflect.getInheritedAnnotation(method, JkDoc.class);
-            final String descr = jkDoc != null ? String.join("\n", jkDoc.value()) : null;
+            final String descr;
+            if (jkDoc != null) {
+                descr = String.join("\n", jkDoc.value());
+            } else {
+                descr = null;
+            }
             return new BeanMethod(method.getName(), descr, method.getDeclaringClass());
         }
 
@@ -194,8 +209,13 @@ final class BeanDescription {
         }
 
         static BeanField of(Class<? extends JkBean> beanClass, Field field, String name, Class<?> rootDeclaringClass) {
-            final JkDoc opt = field.getAnnotation(JkDoc.class);
-            final String descr = opt != null ? String.join("\n", opt.value()) : null;
+            final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
+            final String descr;
+            if (jkDoc != null) {
+                descr = String.join("\n", jkDoc.value());
+            } else {
+                descr = null;
+            }
             final Class<?> type = field.getType();
             Object instance = JkUtilsReflect.newInstance(beanClass);
             final Object defaultValue = value(instance, name);

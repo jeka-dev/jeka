@@ -132,7 +132,7 @@ final class HelpDisplayer {
             items.add(new RenderItem("Instantiation effects", activationEffects));
         }
         new ItemContainer(items).render().forEach(line -> sb.append(line + "\n"));
-        sb.append(BeanDescription.renderItem(description.beanClass()).flatDescription(description.shortName() + "#"));
+        sb.append(BeanDescription.renderItem(description.beanClass()).flatDescription());
         sb.append(shortcuts(runtime.getProjectBaseDir()));
         return sb.toString();
     }
