@@ -1,3 +1,7 @@
+# 0.10.15
+- Improve help output
+- Add example use-case involving springboot+docker+kubernetes in springboot sample project
+
 # 0.10.14
 - Springboot plugin : fix fat-jar generation by re-including boot-loader classes.
 
