@@ -5,21 +5,29 @@ import com.google.cloud.tools.jib.api.DockerDaemonImage;
 import com.google.cloud.tools.jib.api.Jib;
 import com.google.cloud.tools.jib.api.LogEvent;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.plugins.springboot.SpringbootJkBean;
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.fabric8.kubernetes.client.utils.Serialization;
+import org.yaml.snakeyaml.Yaml;
 
-import java.util.Map;
+import java.util.List;
 
+import static dev.jeka.core.api.utils.JkUtilsIterable.listOf;
 import static dev.jeka.core.api.utils.JkUtilsIterable.mapOf;
 import static java.util.Collections.singletonList;
+
+// see
+// - https://github.com/fabric8io/kubernetes-client
+// - https://learnk8s.io/spring-boot-kubernetes-guide
+// - https://github.com/fabric8io/kubernetes-client/blob/master/doc/CHEATSHEET.md
 
 @JkInjectClasspath("com.google.cloud.tools:jib-core:0.23.0")
 @JkInjectClasspath("io.fabric8:kubernetes-client:6.5.1")
@@ -32,15 +40,13 @@ class Kube extends JkBean {
 
     private static final String IMAGE_REPO_NAME = "my-images/hello-app";
 
-    public static void main(String[] args) {
-        JkInit.instanceOf(Kube.class, args, "kube");
-    }
-
-    {
+    Kube() {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
     }
 
+    @JkDoc("Build Springboot application image")
     public void jib() throws Exception {
+        JkLog.startTask("Make image");
         JkProject project = springboot.projectBean.getProject();
         DockerDaemonImage image = DockerDaemonImage.named(IMAGE_REPO_NAME);
         Containerizer containerizer = Containerizer.to(image).addEventHandler(LogEvent.class,
@@ -50,44 +56,76 @@ class Kube extends JkBean {
                 .addLayer(singletonList(project.compilation.layout.resolveClassDir()), "/app")
                 .setEntrypoint("java", "-cp", "/app/classes:/app/libs/*", springboot.getMainClass())
                 .containerize(containerizer);
+        JkLog.endTask();
     }
 
-    // see https://github.com/fabric8io/kubernetes-client
-    // https://learnk8s.io/spring-boot-kubernetes-guide
-    // https://github.com/fabric8io/kubernetes-client/blob/master/doc/CHEATSHEET.md
-    public void apply() throws Exception {
-        Map<String, String> labels = mapOf("app", "hello");
-        Deployment deployment = new DeploymentBuilder()
+    public void apply()  {
+        JkLog.startTask("Apply to kube");
+        List<HasMetadata> kubeResources = kubeResources();
+        kubeResources.forEach(r -> System.out.println(Serialization.asYaml(r)));
+        client().resourceList(kubeResources).inNamespace(namespace()).createOrReplace();
+        JkLog.endTask();
+    }
+
+    public void delete() {
+        client().resourceList(kubeResources()).inNamespace(namespace()).delete();
+    }
+
+    public void pipeline()  {
+        springboot.projectBean.clean();
+        springboot.projectBean.compile();
+        jibQuietly();
+        apply();
+    }
+
+    public void watch() {
+        springboot.projectBean.getProject().compilation.layout.resolveSources().watch(2000, this::pipeline);
+    }
+
+    private void jibQuietly() {
+        try {
+            jib();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<HasMetadata> kubeResources() {
+        return listOf(deployment(), service());
+    }
+
+    private Deployment deployment() {
+       return new DeploymentBuilder(parse(Deployment.class, "deployment.yaml"))
+                .editSpec()
+                    .editTemplate()
+                        .editSpec()
+                            .editContainer(0)
+                                .withImage(IMAGE_REPO_NAME)
+                .endContainer().endSpec().endTemplate().endSpec().build();
+    }
+
+    private Service service() {
+        return new ServiceBuilder()
                 .withNewMetadata()
-                    .withName("hello-deployment")
+                    .withName("greeting")
                 .endMetadata()
                 .withNewSpec()
-                    .withReplicas(1)
-                    .withNewSelector()
-                        .addToMatchLabels(mapOf("app", "hello"))
-                    .endSelector()
-                    .withNewTemplate()
-                        .withNewMetadata()
-                            .addToLabels("app", "hello")
-                        .endMetadata()
-                        .withNewSpec()
-                            .addNewContainerLike(serverContainer("hello-server", IMAGE_REPO_NAME, 8080))
-                            .endContainer()
-                        .endSpec()
-                    .endTemplate()
+                    .withSelector(mapOf("app", "greeting"))
+                    .withPorts(new ServicePortBuilder().withPort(8080).withTargetPort(new IntOrString(8080)).build())
+                    .withType("LoadBalancer")
                 .endSpec().build();
-        KubernetesClient client = new KubernetesClientBuilder().build();
-        client.apps().deployments().inNamespace("default").createOrReplace(deployment);
     }
 
-    private Container serverContainer(String name, String image, int port) {
-        return new ContainerBuilder()
-                .withName(name)
-                .withImage(image)
-                .addNewPort()
-                    .withContainerPort(port)
-                .endPort()
-                .build();
+    private String namespace() {
+        return "default";
+    }
+
+    private KubernetesClient client() {
+        return new KubernetesClientBuilder().build();
+    }
+
+    private static <T> T parse(Class<T> targetClass, String resourceName) {
+        return new Yaml().loadAs(Kube.class.getResourceAsStream(resourceName), targetClass);
     }
 
 }

@@ -155,15 +155,24 @@ public final class JkPathFile {
         try (final InputStream is = Files.newInputStream(path)) {
             final MessageDigest md = MessageDigest.getInstance(algorithm);
             md.reset();
-            final byte[] buf = new byte[2048];
-            int len;
-            while ((len = is.read(buf)) != -1) {
-                md.update(buf, 0, len);
-            }
+            updateDigest(md);
             final byte[] bytes = md.digest();
             return JkUtilsString.toHexString(bytes);
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    void updateDigest(MessageDigest messageDigest) {
+        assertExist();
+        try (final InputStream is = Files.newInputStream(path)) {;
+            final byte[] buf = new byte[2048];
+            int len;
+            while ((len = is.read(buf)) != -1) {
+                messageDigest.update(buf, 0, len);
+            }
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -188,9 +197,10 @@ public final class JkPathFile {
     }
 
     /**
-     * Produces checksum of this file. Checksum files are created in the same directory as this file.
+     * Creates sibling files containing the checksum of this file.
+     * Checksum files are created in the same directory as this file.
      */
-    public JkPathFile checksum(String ... algorithms) {
+    public JkPathFile createChecksumFiles(String ... algorithms) {
         assertExist();
         for (String algorithm : algorithms) {
             final String fileName = this.path.getFileName().toString() + "." + algorithm.toLowerCase();

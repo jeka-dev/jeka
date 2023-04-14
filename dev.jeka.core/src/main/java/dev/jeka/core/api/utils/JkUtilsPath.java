@@ -510,4 +510,12 @@ public final class JkUtilsPath {
         }
     }
 
+    public static WatchKey register(Path dir, WatchService watchService, WatchEvent.Kind<?>... watchEventKinds) {
+        try {
+            return dir.register(watchService, watchEventKinds);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
 }

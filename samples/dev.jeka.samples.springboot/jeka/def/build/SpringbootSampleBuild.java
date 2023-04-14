@@ -1,3 +1,5 @@
+package build;
+
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkBean;
@@ -10,14 +12,14 @@ import dev.jeka.plugins.springboot.SpringbootJkBean;
 
 
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
-class SpringbootSampleBuild extends JkBean {
+public class SpringbootSampleBuild extends JkBean {
 
     private final SpringbootJkBean springboot = getBean(SpringbootJkBean.class);
 
     private final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class);
 
     SpringbootSampleBuild() {
-        springboot.setSpringbootVersion("2.5.5");
+        springboot.setSpringbootVersion("2.7.1");
         springboot.projectBean.configure(this::configure);
         intellijJkBean.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
         intellijJkBean.configureIml(this::configure);
@@ -71,8 +73,5 @@ class SpringbootSampleBuild extends JkBean {
                     .getRuntime().getBean(IntellijJkBean.class).iml();
         }
     }
-
-
-
 
 }

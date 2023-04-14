@@ -1,11 +1,20 @@
 package dev.jeka.core.api.file;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.Closeable;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -336,5 +345,57 @@ public final class JkPathTreeSet implements Closeable {
                 .filter(JkZipTree.class::isInstance)
                 .map(JkZipTree.class::cast)
                 .forEach(JkZipTree::close);
+    }
+
+    /**
+     * Same as {@link JkPathTree#watch(long, AtomicBoolean, Consumer)} but acting on this full path tree set.
+     */
+    public void watch(long millis, AtomicBoolean run, Consumer<List<JkPathTree.FileChange>> fileChangeConsumer)  {
+        try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
+            List<WatchKey> watchKeys = (List<WatchKey>) this.pathTrees.stream()
+                    .filter(tree -> Files.isDirectory(tree.getRoot()))
+                    .flatMap(tree -> tree.getWatchKeys(watchService).stream())
+                    .collect(Collectors.toCollection(() -> new LinkedList<>()));
+            while (run.get()) {
+                JkUtilsSystem.sleep(millis);
+                List<JkPathTree.FileChange> fileChanges = (List<JkPathTree.FileChange>) this.pathTrees.stream()
+                        .flatMap(tree -> tree.getFileChanges(watchService, watchKeys).stream())
+                        .collect(Collectors.toList());
+                if (!fileChanges.isEmpty()) {
+                    JkLog.trace("File change detected : " + fileChanges);
+                    fileChangeConsumer.accept(fileChanges);
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Same as {@link #watch(long, AtomicBoolean, Consumer)} but just triggering a consumer on file changes.
+     */
+    public void watch(long millis, AtomicBoolean run, Runnable runnable) {
+        watch(millis, run, cf -> runnable.run());
+    }
+
+    /**
+     * Same as {@link #watch(long, AtomicBoolean, Runnable)} but running indefinitely.
+     */
+    public void watch(long millis, Runnable runnable) {
+        watch(millis, new AtomicBoolean(true), cf -> runnable.run());
+    }
+
+    /**
+     * @see JkPathTree#checksum(String)
+     */
+    public String checksum(String algorithm) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        this.pathTrees.forEach(pathTree -> pathTree.updateDigest(digest));
+        return new String(digest.digest(), StandardCharsets.UTF_8);
     }
 }

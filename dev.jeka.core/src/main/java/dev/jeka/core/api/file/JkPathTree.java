@@ -1,18 +1,29 @@
 package dev.jeka.core.api.file;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * Provides a view on files and sub-folders contained in a given directory or zip file. A
@@ -403,5 +414,131 @@ public class JkPathTree<T extends JkPathTree> {
         return this.hasFilter() ? rootSupplier.get().toString() + ":" + matcher : rootSupplier.get().toString();
     }
 
+    /**
+     * Watches file and directory changes involved in this path tree. This method blocks for the specified millis
+     * time to capture filesystem changes and pass them to the specified consumer.
+     * @param millis Time to wait for capturing file changes
+     * @param run Semaphore, this methods loop until this values false
+     * @param fileChangeConsumer The consumer to be invoked on file changes
+     */
+    public void watch(long millis, AtomicBoolean run, Consumer<List<FileChange>> fileChangeConsumer)  {
+        try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
+            List<WatchKey> watchKeys = getWatchKeys(watchService);
+            while (run.get()) {
+                JkUtilsSystem.sleep(millis);
+                ;
+                List<FileChange> fileChanges = getFileChanges(watchService, watchKeys);
+                if (!fileChanges.isEmpty()) {
+                    JkLog.trace("File change detected : " + fileChanges);
+                    fileChangeConsumer.accept(fileChanges);
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Same as {@link #watch(long, AtomicBoolean, Consumer)} but just triggering a consumer on file changes.
+     */
+    public void watch(long millis, AtomicBoolean run, Runnable runnable) {
+        watch(millis, run, cf -> runnable.run());
+    }
+
+    /**
+     * Same as {@link #watch(long, AtomicBoolean, Runnable)} but running indefinitely.
+     */
+    public void watch(long millis, Runnable runnable) {
+        watch(millis, new AtomicBoolean(true), cf -> runnable.run());
+    }
+
+    List<FileChange> getFileChanges(WatchService watchService, List<WatchKey> watchKeys) {
+        List<FileChange> fileChanges = new LinkedList<>();
+        for (ListIterator<WatchKey> it = watchKeys.listIterator(); it.hasNext();) {
+            WatchKey watchKey = it.next();
+            if (!watchKey.isValid()) {
+                it.remove();
+                continue;
+            }
+            for (WatchEvent<?> watchEvent : watchKey.pollEvents()) {
+                Path dir = (Path) watchKey.watchable();
+                Path filePath = dir.resolve((Path) watchEvent.context());
+                if (Files.isDirectory(filePath) && ENTRY_CREATE.equals(watchEvent.kind())) {
+                    it.add(
+                            JkUtilsPath.register(filePath, watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY));
+                    JkLog.trace("Watch directory " + filePath);
+                }
+                Path relPath = this.getRoot().relativize(filePath);
+
+                // We don't want to add dir change (only file change)
+                // if a file is deleted, it must be notified. We have no mean to check if it is a dir or file
+                // when deleted so we notify for all delete event.
+                if (this.matcher.matches(relPath) && (!Files.exists(filePath) || !Files.isDirectory(filePath))) {
+                    FileChange fileChange = new FileChange(watchEvent.kind(), filePath);
+                    fileChanges.add(fileChange);
+                }
+            }
+        }
+        return fileChanges;
+    }
+
+    List<WatchKey> getWatchKeys(WatchService watchService) {
+        List<WatchKey> watchKeys = JkUtilsPath.walk(this.getRoot(), FileVisitOption.FOLLOW_LINKS)
+                .filter(Files::isDirectory)
+                .filter(path -> this.matcher.matches(path))
+                .map(dir -> JkUtilsPath.register(dir, watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY))
+                .collect(Collectors.toCollection(() -> new LinkedList<>()));
+        return watchKeys;
+    }
+
+    /**
+     * Computes the checksum of this tree content. This includes file contents and file structure.
+     * This means that changing a file name without but keeping its content unchanged will
+     * produce distinct checksum.
+     * @param algorithm algorithm used to produce checksum, such as md5 or sha256.
+     */
+    public String checksum(String algorithm) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        updateDigest(digest);
+        return new String(digest.digest(), StandardCharsets.UTF_8);
+    }
+
+    public static class FileChange {
+
+        private final WatchEvent.Kind kind;
+
+        private final Path path;
+
+        FileChange(WatchEvent.Kind kind, Path path) {
+            this.kind = kind;
+            this.path = path;
+        }
+
+        public WatchEvent.Kind getKind() {
+            return kind;
+        }
+
+        public Path getPath() {
+            return path;
+        }
+
+        @Override
+        public String toString() {
+            return kind.name() + " : " + path;
+        }
+    }
+
+    void updateDigest(MessageDigest messageDigest) {
+        for (Path relPath : this.getRelativeFiles()) {
+            messageDigest.update(relPath.toString().getBytes(StandardCharsets.UTF_8));
+            Path path = this.getRoot().resolve(relPath);
+            JkPathFile.of(path).updateDigest(messageDigest);
+        }
+    }
 
 }
