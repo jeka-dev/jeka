@@ -104,8 +104,10 @@ KBean methods can be invoked from the command line using
 Many methods/properties can be invoked in a single command line.
 
 !!! info
-    _[kbeanName]#_ prefix can be omitted. By default, it will be resolved on the first KBean found in _def_ dir. 
-    Search is executed by alphabetical order of fully qualified class names.
+    _[kbeanName]_ prefix can be omitted. By default, it will be resolved on the first KBean found in _def_ dir. 
+    Search is executed by alphabetical order of fully qualified class names. 
+    Example : `jeka #toSomething #aProperty=xxxx`
+    
     
     
 

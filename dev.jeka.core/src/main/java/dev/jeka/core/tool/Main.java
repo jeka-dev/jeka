@@ -121,13 +121,14 @@ public final class Main {
                     "exec" , projectDir, args);
             return;
         }
+        CommandLine commandLine = CommandLine.parse(args);
         JkLog.setAcceptAnimation(!Environment.standardOptions.logNoAnimation);
         if (!Environment.standardOptions.logSetup) {
             JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }
         final Engine engine = new Engine(projectDir);
-        engine.execute(CommandLine.parse(args));
+        engine.execute(commandLine);
     }
 
     private static int printAscii(boolean error, String fileName) {

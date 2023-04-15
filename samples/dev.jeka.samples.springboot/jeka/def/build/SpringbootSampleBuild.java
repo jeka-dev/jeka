@@ -14,6 +14,8 @@ import dev.jeka.plugins.springboot.SpringbootJkBean;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
 public class SpringbootSampleBuild extends JkBean {
 
+    public String aa;
+
     private final SpringbootJkBean springboot = getBean(SpringbootJkBean.class);
 
     private final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class);
@@ -32,6 +34,7 @@ public class SpringbootSampleBuild extends JkBean {
                     .and(Boot.STARTER_DATA_JPA)
                     .and(Boot.STARTER_DATA_REST)
                     .and("com.google.guava:guava:30.0-jre")
+                        .and("io.fabric8:kubernetes-client-api:6.5.1")
                 )
                 .configureRuntimeDependencies(deps -> deps
                     .and("com.h2database:h2:1.4.200")
@@ -54,6 +57,7 @@ public class SpringbootSampleBuild extends JkBean {
     }
 
     public void testRun() {
+        System.out.println(this.aa);
         cleanPack();
         springboot.getBean(ProjectJkBean.class).runJar();
     }

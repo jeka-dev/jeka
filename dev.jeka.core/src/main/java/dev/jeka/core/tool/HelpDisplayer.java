@@ -193,7 +193,11 @@ final class HelpDisplayer {
         }
 
         private static int maxLength(List<String> lines) {
-            return Collections.max(lines, Comparator.comparing(String::length)).length();
+            if (lines.isEmpty()) {
+                return 0;
+            }
+            return Collections.max(lines.stream().filter(o -> o != null).collect(Collectors.toList()),
+                    Comparator.comparing(String::length)).length();
         }
 
     }

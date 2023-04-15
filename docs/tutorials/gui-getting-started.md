@@ -29,7 +29,7 @@ We get a workable Jeka project from which we can :
 - execute/debug methods from the IDE using editor gutter buttons or tool-windows explorer.
 - navigate to discover available KBeans on this project, and their content.
 - create Intellij *run-configuration* from existing methods
-- execute methods directly in the terminal *(e.g. `./jekaw hello name=Joe`)*
+- execute methods directly in the terminal *(e.g. `./jekaw #hello #name=Joe`)*
 - create new methods/fields. If they do not appear in the tool-window, use the top menu button to refresh view.
 
 ## Import 3rd Party libraries <a name="import"></a>

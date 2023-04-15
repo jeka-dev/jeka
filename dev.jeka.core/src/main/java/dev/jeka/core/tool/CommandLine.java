@@ -45,10 +45,8 @@ final class CommandLine {
             } else if (word.startsWith("-")) {
                 KeyValue keyValue = KeyValue.of(word.substring(1), true);
                 result.standardOptions.put(keyValue.key, keyValue.value);
-                continue;
             } else if (word.startsWith(AT_SYMBOL_CHAR)) {
                 result.defDependencies.add(toDependency(Paths.get(""), word.substring(1)));
-                continue;
             } else {
                 result.beanActions.add(new JkBeanAction(word));
             }
@@ -80,10 +78,6 @@ final class CommandLine {
 
     String[] rawArgs() {
         return rawArgs;
-    }
-
-    boolean containsDefaultBeanActions() {
-        return !getDefaultBeanActions().isEmpty();
     }
 
     List<JkBeanAction> getDefaultBeanActions() {
@@ -146,12 +140,14 @@ final class CommandLine {
 
         final String value; // if property
 
-        JkBeanAction (String expression) {
+        JkBeanAction(String expression) {
             final String beanExpression;
-            if (expression.contains("#")) {
-                this.beanName = JkUtilsString.substringBeforeFirst(expression, "#");
-                beanExpression = JkUtilsString.substringAfterFirst(expression, "#");
+            if (expression.contains(KBEAN_SYMBOL)) {
+                String before = JkUtilsString.substringBeforeFirst(expression, KBEAN_SYMBOL);
+                this.beanName = JkUtilsString.isBlank(before) ? null : before;
+                beanExpression = JkUtilsString.substringAfterFirst(expression, KBEAN_SYMBOL);
             } else {
+                System.err.println("Usage of '" + expression + "' is deprecated. Use '#" + expression + "' instead.");
                 this.beanName = null;
                 beanExpression = expression;
             }

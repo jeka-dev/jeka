@@ -8,6 +8,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.plugins.springboot.SpringbootJkBean;
 import io.fabric8.kubernetes.api.model.*;
@@ -32,7 +33,6 @@ import static java.util.Collections.singletonList;
 @JkInjectClasspath("com.google.cloud.tools:jib-core:0.23.0")
 @JkInjectClasspath("io.fabric8:kubernetes-client:6.5.1")
 @JkInjectClasspath("io.fabric8:kubernetes-client-api:6.5.1")
-@JkInjectClasspath("io.fabric8:kubernetes-model:6.5.1")
 @JkInjectClasspath("org.slf4j:slf4j-simple:2.0.7")
 class Kube extends JkBean {
 
@@ -49,8 +49,7 @@ class Kube extends JkBean {
         JkLog.startTask("Make image");
         JkProject project = springboot.projectBean.getProject();
         DockerDaemonImage image = DockerDaemonImage.named(IMAGE_REPO_NAME);
-        Containerizer containerizer = Containerizer.to(image).addEventHandler(LogEvent.class,
-                logEvent -> System.out.println(logEvent.getLevel() + ": " + logEvent.getMessage()));
+        Containerizer containerizer = Containerizer.to(image).addEventHandler(LogEvent.class, this::handleJibLog);
         Jib.from("openjdk:17")
                 .addLayer(project.packaging.resolveRuntimeDependencies().getFiles().getEntries(), "/app/libs")
                 .addLayer(singletonList(project.compilation.layout.resolveClassDir()), "/app")
@@ -126,6 +125,14 @@ class Kube extends JkBean {
 
     private static <T> T parse(Class<T> targetClass, String resourceName) {
         return new Yaml().loadAs(Kube.class.getResourceAsStream(resourceName), targetClass);
+    }
+
+    private void handleJibLog(LogEvent logEvent) {
+        System.out.println(logEvent.getLevel() + ": " + logEvent.getMessage());
+    }
+
+    public static void main(String[] args) {
+        JkInit.instanceOf(Kube.class).apply();
     }
 
 }

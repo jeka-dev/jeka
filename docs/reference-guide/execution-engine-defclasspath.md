@@ -82,4 +82,4 @@ class MyBuild extends JkBean {
   ...
 }
 ```
-Now, classes from project '../core' can be reused in this buiild class.
+Now, classes from project '../core' can be reused in this build class.

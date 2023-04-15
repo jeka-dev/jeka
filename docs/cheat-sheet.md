@@ -2,7 +2,7 @@
 
 _Jeka_ has predefined methods that comes either from `JkClass` or built-in plugins. 
 
-* `jeka help` : Displays methods and options invokable from command line, along with plugins available in the classpath.
+* `jeka #help` : Displays methods and options invokable from command line, along with plugins available in the classpath.
 * `jeka [kbean-name]#help` : Displays methods and options invokable for the specified plugin (e.g. `jeka scaffold#help`).
 * `jeka intellij#iml` : Generates iml file for Intellij. This is generated according to the dependencies declared for _Jeka_ project.
 * `jeka intellij#iml -dci` : If the `jeka intellij#iml` fails due to compilation error on def classes, `-dci` forces ignore compileation error on *def classes*.

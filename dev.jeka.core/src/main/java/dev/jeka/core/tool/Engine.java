@@ -1,7 +1,6 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -306,7 +305,9 @@ final class Engine {
     private boolean wrapCompile(Supplier<Boolean> compileTask, boolean failOnError) {
         boolean success = compileTask.get();
         if (!success && failOnError) {
-            throw new JkException("Compilation of Jeka files failed. Run jeka with '-dci' option to ignore compilation failure.");
+            throw new JkException("Compilation of Jeka files failed. " +
+                    "\nRun with '-dci' option to ignore compilation failure. " +
+                    "\nRun with '-lv' option to display compilation failure details.");
         }
         return success;
     }
