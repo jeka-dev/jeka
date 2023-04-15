@@ -89,7 +89,7 @@ Execute `jeka -h` (or `jeka -help`) to display contextual help on the console.
 Follow the instructions to navigate to more specific help.
 
 !!! warning
-    Do not confuse `jeka -help` and `jeka help`. The latter only provides documentation about the default _KBean_.
+    Do not confuse `jeka -help` and `jeka #help`. The latter only provides documentation about the default _KBean_.
 
 ## Customization
 
