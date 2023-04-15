@@ -1,3 +1,9 @@
+# 0.10.16
+- Introduce #methodName and #fieldName= syntax in command line to replace 'jeka methodName fieldName='.
+- Add JkPathTree#watch and JkPathTreeSet#wath methods for watching filesystem.
+- Add JkPathTree#checksum and JkPathTreeSet#checksum methods.
+- Add Kubernetes showcasing to Springboot sample project.
+
 # 0.10.15
 - Improve help output
 - Add example use-case involving springboot+docker+kubernetes in springboot sample project

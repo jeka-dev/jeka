@@ -19,16 +19,16 @@ class SamplesTester extends JekaCommandLineExecutor {
 
     void run() {
         runJeka("dev.jeka.samples.protobuf", "@../../plugins/dev.jeka.plugins.protobuf project#cleanPack");
-        runJekaw("dev.jeka.samples.basic", "-kb=simpleProject cleanPackPublish checkedValue=A checkValueIsA");
+        runJekaw("dev.jeka.samples.basic", "-kb=simpleProject #cleanPackPublish #checkedValue=A #checkValueIsA");
         runJeka("dev.jeka.samples.springboot", "@../../plugins/dev.jeka.plugins.springboot project#clean project#pack project#publishLocal");
-        runJekaw("dev.jeka.samples.basic", "-kb=signedArtifacts cleanPackPublish");
-        runJekaw("dev.jeka.samples.basic", "-kb=thirdPartyDependencies cleanPack");
-        runJekaw("dev.jeka.samples.basic", "-kb=antStyle cleanPackPublish");
+        runJekaw("dev.jeka.samples.basic", "-kb=signedArtifacts #cleanPackPublish");
+        runJekaw("dev.jeka.samples.basic", "-kb=thirdPartyDependencies #cleanPack");
+        runJekaw("dev.jeka.samples.basic", "-kb=antStyle #cleanPackPublish");
         runJekaw("dev.jeka.samples.dependers", "-kb=fatJar project#clean project#pack");
         runJekaw("dev.jeka.samples.dependers", "-kb=normalJar project#clean project#pack");
         runJekaw("dev.jeka.samples.junit5", "project#clean project#pack");
-        runJekaw("dev.jeka.samples.junit5", "project#clean project#pack checkReportGenerated -project#tests.fork");
-        runJeka("dev.jeka.samples.jacoco", "@../../plugins/dev.jeka.plugins.jacoco project#clean project#pack checkReportGenerated");
+        runJekaw("dev.jeka.samples.junit5", "project#clean project#pack #checkReportGenerated -project#tests.fork");
+        runJeka("dev.jeka.samples.jacoco", "@../../plugins/dev.jeka.plugins.jacoco project#clean project#pack #checkReportGenerated");
         runJeka("dev.jeka.samples.sonarqube", "@../../plugins/dev.jeka.plugins.sonarqube project#clean project#pack");
     }
 
