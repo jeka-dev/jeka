@@ -2,7 +2,7 @@
   <configuration default="false" name="FAST BUILD" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.Main" />
     <module name="dev.jeka.core" />
-    <option name="PROGRAM_PARAMETERS" value="project#clean project#pack project#test.skip=true -lst" />
+    <option name="PROGRAM_PARAMETERS" value="project#clean project#pack project#test.skip=true -lst -lri -lv project#pack.javadoc=false project#pack.sources=false" />
     <option name="WORKING_DIRECTORY" value="$MODULE_WORKING_DIR$" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />

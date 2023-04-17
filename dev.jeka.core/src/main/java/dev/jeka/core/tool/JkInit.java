@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -106,7 +105,7 @@ public final class JkInit {
         sb.append("\nJeka Cache Dir : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
         JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
         sb.append("\nJeka download Repositories : " + JkRepoProperties.of(properties).getDownloadRepos());
-        sb.append("\nProperties:\n").append(properties.toKeyValueString());
+        sb.append("\nProperties :\n").append(properties.toKeyValueString("  "));
         JkLog.info(sb.toString());
     }
 

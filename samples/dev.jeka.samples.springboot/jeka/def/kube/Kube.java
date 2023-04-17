@@ -44,18 +44,11 @@ class Kube extends JkBean {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
     }
 
-    @JkDoc("Build Springboot application image")
-    public void jib() throws Exception {
-        JkLog.startTask("Make image");
-        JkProject project = springboot.projectBean.getProject();
-        DockerDaemonImage image = DockerDaemonImage.named(IMAGE_REPO_NAME);
-        Containerizer containerizer = Containerizer.to(image).addEventHandler(LogEvent.class, this::handleJibLog);
-        Jib.from("openjdk:17")
-                .addLayer(project.packaging.resolveRuntimeDependencies().getFiles().getEntries(), "/app/libs")
-                .addLayer(singletonList(project.compilation.layout.resolveClassDir()), "/app")
-                .setEntrypoint("java", "-cp", "/app/classes:/app/libs/*", springboot.getMainClass())
-                .containerize(containerizer);
-        JkLog.endTask();
+    public void pipeline()  {
+        springboot.projectBean.clean();
+        springboot.projectBean.compile();
+        jibQuietly();
+        apply();
     }
 
     public void apply()  {
@@ -70,15 +63,22 @@ class Kube extends JkBean {
         client().resourceList(kubeResources()).inNamespace(namespace()).delete();
     }
 
-    public void pipeline()  {
-        springboot.projectBean.clean();
-        springboot.projectBean.compile();
-        jibQuietly();
-        apply();
-    }
-
     public void watch() {
         springboot.projectBean.getProject().compilation.layout.resolveSources().watch(2000, this::pipeline);
+    }
+
+    @JkDoc("Build Springboot application image")
+    public void jib() throws Exception {
+        JkLog.startTask("Make image");
+        JkProject project = springboot.projectBean.getProject();
+        DockerDaemonImage image = DockerDaemonImage.named(IMAGE_REPO_NAME);
+        Containerizer containerizer = Containerizer.to(image).addEventHandler(LogEvent.class, this::handleJibLog);
+        Jib.from("openjdk:17")
+                .addLayer(project.packaging.resolveRuntimeDependencies().getFiles().getEntries(), "/app/libs")
+                .addLayer(singletonList(project.compilation.layout.resolveClassDir()), "/app")
+                .setEntrypoint("java", "-cp", "/app/classes:/app/libs/*", springboot.getMainClass())
+                .containerize(containerizer);
+        JkLog.endTask();
     }
 
     private void jibQuietly() {

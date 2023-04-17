@@ -111,11 +111,8 @@ final class Engine {
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
         if (Environment.standardOptions.logRuntimeInformation) {
-            JkLog.info("Jeka Classpath : ");
-            computedClasspath.iterator().forEachRemaining(item -> JkLog.info("    " + item));
-            if (JkLog.isVerbose()) {
-                System.out.println("Classloader : " + JkClassLoader.ofCurrent());
-            }
+            System.out.println("Classloader : " + JkClassLoader.ofCurrent());
+            System.out.println();
         }
         if (!hasJekaDir) {
             JkLog.warn("You are not running Jeka inside a Jeka project.");

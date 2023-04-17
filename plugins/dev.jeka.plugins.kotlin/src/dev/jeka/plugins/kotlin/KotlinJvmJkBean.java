@@ -8,6 +8,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
@@ -169,10 +170,15 @@ public class KotlinJvmJkBean extends JkBean {
             JkLog.info("No source to compile in " + sources);
             return;
         }
+        JkJavaVersion targetVersion = javaProject.getJvmTargetVersion();
+        if (targetVersion == null) {
+            targetVersion = JkJavaVersion.of(
+                    getRuntime().getProperties().get("jeka.java.version"));
+        }
         JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
                 .setClasspath(compilation.resolveDependencies().getFiles())
                 .setOutputDir(compilation.layout.getOutputDir().resolve("classes"))
-                .setTargetVersion(javaProject.getJvmTargetVersion())
+                .setTargetVersion(targetVersion)
                 .setSources(sources);
         kotlinCompiler.compile(compileSpec);
     }

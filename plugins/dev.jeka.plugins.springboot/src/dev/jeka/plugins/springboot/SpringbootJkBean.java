@@ -124,7 +124,11 @@ public final class SpringbootJkBean extends JkBean {
         String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/Build.java"));
         String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
         code = code.replace("${dependencyDescription}", defClasspath);
-        code = code.replace("${springbootVersion}", latestSpringbootVersion(projectBean.getProject()));
+        String version = (DEFAULT_SPRINGBOOT_VERSION.equals(this.springbootVersion)
+                    || JkUtilsString.isBlank(springbootVersion))
+                ? latestSpringbootVersion(projectBean.getProject())
+                : springbootVersion;
+        code = code.replace("${springbootVersion}", springbootVersion);
         final String jkClassCode = code;
         if (this.projectBean.scaffold.template != ProjectJkBean.JkScaffoldOptions.Template.CODE_LESS) {
             scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
