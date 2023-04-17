@@ -1,5 +1,6 @@
 # 0.10.17
 - Fix JkProperties injection on nested objects.
+- Improve console output
 
 # 0.10.16
 - Introduce #methodName and #fieldName= syntax in command line to replace 'jeka methodName fieldName='.
