@@ -42,7 +42,7 @@ These steps typically include building, testing, publishing, and deploying the a
 This is quite straightforward with JeKa: you only have to code public methods in Java or Kotlin and you can invoke them simply from the command line without worrying about compilation (JeKa will take care of it behind the scenes).
 
 You can also use any library in your code by declaring its Maven coordinates in an annotation, 
-JeKa will take care of fetching and resolving dependencies for you.
+JeKa will fetch and resolve dependencies for you.
 
 Method execution can be parameterized using property files, OS environment variables, or command line arguments. 
 The parameters accept various types such as string, numbers, file paths, booleans, enumerations, and composite objects.
