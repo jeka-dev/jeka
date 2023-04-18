@@ -35,11 +35,9 @@ public final class IntellijJkBean extends JkBean {
             "(only a warning will be notified).")
     public boolean failOnDepsResolutionError = true;
 
-    /*
-    @JkDoc("When true, .iml file will be generated to considere JeKa folder as a specific module." +
+    @JkDoc("When true, .iml file will be generated assuming JeKa folder as a specific module. " +
             "This is useful for working with tool as Maven or Gradle that manage the intellij dependencies by their own.")
-    public boolean separateJekaModule;
-     */
+    public boolean dedicatedJekaModule;
 
     @JkDoc("The path where iml file must be generated. If null, Jeka will decide for a proper place. Mostly used by external tools.")
     public Path imlFile;
@@ -86,7 +84,9 @@ public final class IntellijJkBean extends JkBean {
         }
         imlGeneratorConfigurer.accept(imlGenerator);
         JkIml iml = imlGenerator.computeIml();
-        Path imlPath = Optional.ofNullable(this.imlFile).orElse(JkImlGenerator.getImlFilePath(basePath));
+        Path imlPath = Optional.ofNullable(this.imlFile).orElse(JkImlGenerator.getImlFilePath(basePath,
+                this.dedicatedJekaModule));
+
         JkPathFile.of(imlPath)
                 .deleteIfExist()
                 .createIfNotExist()
@@ -153,6 +153,7 @@ public final class IntellijJkBean extends JkBean {
                 .setDefImportedProjects(this.getRuntime().getImportedProjects())
                 .setIdeSupport(IdeSupport.getProjectIde(this))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
+                .setDedicatedJekaModule(this.dedicatedJekaModule)
                 .setUseVarPath(useVarPath);
         return imlGenerator;
     }

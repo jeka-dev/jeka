@@ -1,12 +1,16 @@
+# 0.10.18
+- Make Maven/Gradle works gracefully in conjunction with JeKa when working in IntelliJ  (documentation in FAQ).
+- Improve console output.
+
 # 0.10.17
 - Fix JkProperties injection on nested objects.
-- Improve console output
+- Improve console output.
 
 # 0.10.16
 - Introduce #methodName and #fieldName= syntax in command line to replace 'jeka methodName fieldName='.
 - Add JkPathTree#watch and JkPathTreeSet#wath methods for watching filesystem.
 - Add JkPathTree#checksum and JkPathTreeSet#checksum methods.
-- Add Kubernetes showcasing to Springboot sample project.
+- Add Kubernetes showcase in Springboot sample project.
 
 # 0.10.15
 - Improve help output
@@ -39,7 +43,6 @@
 - Add JkProjectFlatFacade#setMainArtifactJarType convenient method.
 - Add ProjectJkBean#cleanPack convenience method.
 - Add JkProjectFlatFacade#addSourceGenerator convenience method.
-
 
 # 0.10.6 
 - Bugfix : @JkInjectClasspath(file) was resolved on the working dir and not on the root dir of the project.

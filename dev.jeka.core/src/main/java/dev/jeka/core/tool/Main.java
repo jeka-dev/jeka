@@ -66,7 +66,7 @@ public final class Main {
             JkBusyIndicator.stop();
             JkLog.restoreToInitialState();
             if (e instanceof JkException && !shouldPrintExceptionDetails()) {
-                System.err.println(" \n" + e.getMessage());
+                System.err.println(e.getMessage());
             } else {
                 if (JkMemoryBufferLogDecorator.isActive()) {
                     JkMemoryBufferLogDecorator.flush();
