@@ -188,12 +188,12 @@ public final class JkProperties {
         }
         int maxKeyLength = keys.stream()
                 .max(Comparator.comparingInt(String::length))
-                .get().length();
+                .orElse("").length();
         int maxValueLength = keys.stream()
                 .filter(key -> systemLess.get(key) != null)
                 .map(this::get)
                 .max(Comparator.comparingInt(String::length))
-                .get().length();
+                .orElse("").length();
         for (String key : keys) {
             if (systemLess.get(key) == null) {
                 continue;
