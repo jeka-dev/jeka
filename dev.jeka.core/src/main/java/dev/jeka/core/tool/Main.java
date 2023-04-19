@@ -91,22 +91,28 @@ public final class Main {
     }
 
     private static void handleRegularException(Throwable e) {
-        System.err.println("\nAn error occurred during def class execution.");
-        System.err.println("It may come from user code/setting or a bug in Jeka.");
-        System.err.println("To investigate, relaunch command with options :");
-        System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");
-        System.err.println("    -lv to increase log verbosity.");
-        System.err.println("    -lst to log the full stacktrace of the thrown exception.");
-        System.err.println("If error reveals to coming from Jeka engine, please report to " +
-                ": https://github.com/jerkar/jeka/issues");
-        System.err.println();
+        System.err.println("");
+        System.err.println("=============================== Stack Trace =============================================");
         if (JkLog.isVerbose()
                 || Environment.standardOptions.logStyle == JkLog.Style.DEBUG
                 || Environment.standardOptions.logStackTrace) {
             e.printStackTrace(System.err);
         } else {
-            JkUtilsThrowable.printStackTrace(System.err, e, 3);
+            JkUtilsThrowable.printStackTrace(System.err, e, 5);
         }
+        System.err.println("=========================================================================================");
+        System.err.println("\nAn error occurred during execution.");
+        System.err.println("This could be caused by issues in the user code or settings, or potentially a bug in Jeka.");
+        System.err.println("To investigate, relaunch command with options :");
+        System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");
+        if (!JkLog.isVerbose()) {
+            System.err.println("    -lv to increase log verbosity.");
+            if (!Environment.standardOptions.logStackTrace) {
+                System.err.println("    -lst to log the full stacktrace of the thrown exception.");
+            }
+        }
+        System.err.println("If error reveals to coming from Jeka engine, please report it to " +
+                ": https://github.com/jerkar/jeka/issues");
     }
 
     /**
