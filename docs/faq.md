@@ -79,10 +79,7 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 public class Build extends JkBean {
     
     ...
-    project.getConstruction()
-            .getCompilation()
-                .getCompiler()
-                    .setCompilerTool(new EclipseCompiler());
+    project.compilation.compiler.setCompilerTool(new EclipseCompiler());
 }
 ```
 
