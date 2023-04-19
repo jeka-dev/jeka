@@ -1,6 +1,6 @@
 # 0.10.18
 - Make Maven/Gradle works gracefully in conjunction with JeKa when working in IntelliJ  (documentation in FAQ).
-- Improve console output.
+- Improve console output. 
 
 # 0.10.17
 - Fix JkProperties injection on nested objects.
