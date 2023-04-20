@@ -1,3 +1,7 @@
+# 0.10.19
+- Includes 'jeka.cmd._appendXXXX=' properties to add extra cmd line arguments
+- Add optional information on @JkDepSuggest annotation
+
 # 0.10.18
 - Make Maven/Gradle works gracefully in conjunction with JeKa when working in IntelliJ  (documentation in FAQ).
 - Improve console output. 
