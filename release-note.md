@@ -1,4 +1,4 @@
-# 0.10.18  
+# 0.10.18
 - Make Maven/Gradle works gracefully in conjunction with JeKa when working in IntelliJ  (documentation in FAQ).
 - Improve console output. 
 
