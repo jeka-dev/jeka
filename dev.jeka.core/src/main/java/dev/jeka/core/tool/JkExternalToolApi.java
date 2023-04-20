@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -79,7 +80,9 @@ public final class JkExternalToolApi {
     public static Map<String, String> getCmdShortcutsProperties(Path projectDir) {
         Map<String, String> result = JkRuntime.readProjectPropertiesRecursively(projectDir)
                 .getAllStartingWith(JkConstants.CMD_PROP_PREFIX, false);
-        result.remove(JkConstants.CMD_APPEND_PROP.substring(JkConstants.CMD_PROP_PREFIX.length()));
+        Set<String> keys = result.keySet();
+        keys.stream().filter(key -> key.startsWith(JkConstants.CMD_PROP_PREFIX))
+                        .forEach(key -> result.remove(key));
         return new TreeMap(result);
     }
 

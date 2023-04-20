@@ -45,6 +45,11 @@ public final class JkMavenPublication {
         return new JkMavenPublication();
     }
 
+    /**
+     * Configure the dependencies that will be exported with the published module.<br/>
+     * By default, JeKa computes it from the compile and runtime dependencies.
+     * This method allows to customize these dependencies by adding/removing or changing their transitivity.
+     */
     public JkMavenPublication configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependencies = dependencies.andThen(modifier);
         return this;

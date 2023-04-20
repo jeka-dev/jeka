@@ -1,5 +1,6 @@
 package dev.jeka.plugins.sonarqube;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -31,8 +32,10 @@ public class SonarqubeJkBean extends JkBean {
     @JkDoc("If true, the list of test dependency files will be provided to sonarqube")
     public boolean provideTestLibs = false;
 
-    @JkDoc("Version of the SonarQube client to run. It can be '+' for the latest one, at the price of a greater process time.\n" +
+    @JkDoc("Version of the SonarQube client to run. It can be '+' for the latest one (at the price of a greater process time). " +
+            "The version will be resolved against 'org.sonarsource.scanner.cli:sonar-scanner-cli' coordinate. " +
             "Use a blank string to use the client embedded in the plugin.")
+    @JkDepSuggest(versionOnly = true , hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:")
     public String scannerVersion = "4.6.2.2472";
 
     @JkDoc("If true, displays sonarqube output on console")

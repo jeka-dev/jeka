@@ -1,5 +1,6 @@
 package dev.jeka.plugins.jacoco;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -39,7 +40,9 @@ public class JacocoJkBean extends JkBean {
     @JkDoc("Exclusion patterns separated with ',' to exclude some class files from the XML report input. An example is 'META-INF/**/*.jar'.")
     public String classDirExcludes;
 
-    @JkDoc("Version of Jacoco to use both for agent and report.")
+    @JkDoc("Version of Jacoco to use both for agent and report. The version will be resolved against coordinate " +
+            "'org.jacoco:org.jacoco.agent:runtime'")
+    @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent:runtime")
     public String jacocoVersion = "0.8.7";
 
     private JkJacoco jacoco;

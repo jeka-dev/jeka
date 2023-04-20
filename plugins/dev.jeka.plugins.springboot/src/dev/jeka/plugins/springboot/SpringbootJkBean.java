@@ -1,9 +1,6 @@
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
-import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -50,6 +47,7 @@ public final class SpringbootJkBean extends JkBean {
     public static final String SPRING_BOOT_VERSION_MANIFEST_ENTRY = "Spring-Boot-Version";
 
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
+    @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
     private String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
 
     @JkDoc("If true, create a bootable jar artifact.")

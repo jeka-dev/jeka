@@ -1,15 +1,13 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static dev.jeka.core.tool.JkConstants.*;
 
@@ -29,9 +27,13 @@ class Environment {
         originalArgs = commandLineArgs;
         List<String> effectiveCommandLineArgs = new LinkedList<>(Arrays.asList(commandLineArgs));
 
-        // Add arguments contained in cmd.properties '_append'
+        // Add arguments contained in local.properties 'jeka.cmd._appendXXXX'
         JkProperties props = JkRuntime.readProjectPropertiesRecursively(Paths.get(""));
-        List<String> appendedArgs = Arrays.asList(JkUtilsString.translateCommandline(props.get(CMD_APPEND_PROP)));
+        List appendedArgs = props.getAllStartingWith(CMD_APPEND_PROP, true).keySet().stream()
+                .sorted()
+                .map(props::get)
+                .flatMap(value -> Arrays.stream(JkUtilsString.translateCommandline(value)))
+                .collect(Collectors.toList());
         effectiveCommandLineArgs.addAll(appendedArgs);
 
         // Interpolate arguments passed as $key to respective value
