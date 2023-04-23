@@ -8,10 +8,7 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Exported methods to integrate with external tool.
@@ -80,8 +77,8 @@ public final class JkExternalToolApi {
     public static Map<String, String> getCmdShortcutsProperties(Path projectDir) {
         Map<String, String> result = JkRuntime.readProjectPropertiesRecursively(projectDir)
                 .getAllStartingWith(JkConstants.CMD_PROP_PREFIX, false);
-        Set<String> keys = result.keySet();
-        keys.stream().filter(key -> key.startsWith(JkConstants.CMD_PROP_PREFIX))
+        List<String> keys = new LinkedList<>(result.keySet());
+        keys.stream().filter(key -> key.startsWith(JkConstants.CMD_APPEND_SUFFIX_PROP))
                         .forEach(key -> result.remove(key));
         return new TreeMap(result);
     }

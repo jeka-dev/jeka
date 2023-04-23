@@ -136,7 +136,7 @@ public class JkDependencySet {
         return and(null, others);
     }
 
-    public JkDependencySet and(Hint hint, String coordinate) {
+    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate) {
         return and(hint, JkCoordinate.of(coordinate));
     }
 
@@ -160,12 +160,12 @@ public class JkDependencySet {
         return and(null, coordinate);
     }
 
-    public JkDependencySet and(Hint hint, String moduleDescriptor, JkTransitivity transitivity) {
-        return and(hint, JkCoordinateDependency.of(moduleDescriptor).withTransitivity(transitivity));
+    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate, JkTransitivity transitivity) {
+        return and(hint, JkCoordinateDependency.of(coordinate).withTransitivity(transitivity));
     }
 
-    public JkDependencySet and(String moduleDescriptor, JkTransitivity transitivity) {
-        return and(null, moduleDescriptor, transitivity);
+    public JkDependencySet and(@JkDepSuggest String coordinate, JkTransitivity transitivity) {
+        return and(null, coordinate, transitivity);
     }
 
     public JkDependencySet andFiles(Hint hint, Iterable<Path> paths) {
@@ -211,11 +211,11 @@ public class JkDependencySet {
         return minus(JkCoordinateDependency.of(JkCoordinate.of(jkModuleId)));
     }
 
-    public JkDependencySet minus(String moduleId) {
+    public JkDependencySet minus(@JkDepSuggest String moduleId) {
         return minus(JkModuleId.of(moduleId));
     }
 
-    public JkDependencySet withMoving(Hint hint, String moduleId) {
+    public JkDependencySet withMoving(Hint hint, @JkDepSuggest String moduleId) {
         JkDependency dependency = getMatching(JkCoordinateDependency.of(moduleId));
         return minus(dependency).and(hint, dependency);
     }
@@ -234,13 +234,34 @@ public class JkDependencySet {
         return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
     }
 
-    public JkDependencySet withTransitivity(String moduleId, JkTransitivity newTransitivity) {
+    public JkDependencySet withTransitivity(@JkDepSuggest String moduleId, JkTransitivity newTransitivity) {
         final List<JkDependency> list = new LinkedList<>();
         for (JkDependency dep : this.entries) {
             if (dep instanceof JkCoordinateDependency) {
                 JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dep;
                 if (JkModuleId.of(moduleId).equals(coordinateDependency.getCoordinate().getModuleId())) {
                     dep = coordinateDependency.withTransitivity(newTransitivity);
+                }
+            }
+            list.add(dep);
+        }
+        return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
+    }
+
+    /**
+     * Add transitive dependency exclusions on the specified module.
+     * @param moduleId The module id where we want to add exclusions.
+     * @param excludedModules The modules to exclude from transitive dependencies.
+     */
+    public JkDependencySet withLocalExclusionsOn(@JkDepSuggest String moduleId,
+                                                 @JkDepSuggest String ... excludedModules) {
+
+        final List<JkDependency> list = new LinkedList<>();
+        for (JkDependency dep : this.entries) {
+            if (dep instanceof JkCoordinateDependency) {
+                JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dep;
+                if (JkModuleId.of(moduleId).equals(coordinateDependency.getCoordinate().getModuleId())) {
+                    dep = ((JkCoordinateDependency) dep).andExclusions(excludedModules);
                 }
             }
             list.add(dep);
@@ -289,11 +310,11 @@ public class JkDependencySet {
     }
 
     /**
-     * @param dependencyDescription Can be expressed as group:name::pom:version
+     * @param coordinate Can be expressed as group:name::pom:version
      * or group:name:version. In last case, it will be converted in the first expression
      */
-    public JkDependencySet andBom(String dependencyDescription) {
-        return withVersionProvider(this.versionProvider.andBom(dependencyDescription));
+    public JkDependencySet andBom(@JkDepSuggest String coordinate) {
+        return withVersionProvider(this.versionProvider.andBom(coordinate));
     }
 
     /**
@@ -333,7 +354,7 @@ public class JkDependencySet {
      * {@link JkModuleId}. Returns <code>null</code> if no dependency on this
      * module exists in this object.
      */
-    public JkCoordinateDependency get(String moduleId) {
+    public JkCoordinateDependency get(@JkDepSuggest String moduleId) {
         return moduleDeps()
                 .filter(dep -> dep.getCoordinate().getModuleId().toString().equals(moduleId))
                 .findFirst().orElse(null);
@@ -534,7 +555,7 @@ public class JkDependencySet {
      * @param moduleIds moduleIds to exclude (e.g. "a.group:a.name", "another.group:another.name", ...).
      * @See #withLocalExclusion
      */
-    public JkDependencySet withLocalExclusions(String... moduleIds) {
+    public JkDependencySet withLocalExclusions(@JkDepSuggest String... moduleIds) {
         JkDependencyExclusion[] excludes = Arrays.stream(moduleIds).map(JkDependencyExclusion::of)
                 .toArray(JkDependencyExclusion[]::new);
         return withLocalExclusions(excludes);
@@ -553,7 +574,7 @@ public class JkDependencySet {
         return new JkDependencySet(this.entries, depExclusion, this.versionProvider);
     }
 
-    public JkDependencySet andGlobalExclusion(String moduleId) {
+    public JkDependencySet andGlobalExclusion(@JkDepSuggest String moduleId) {
         JkDependencyExclusion depExclusion = JkDependencyExclusion.of(moduleId);
         return andGlobalExclusion(depExclusion);
     }
@@ -563,7 +584,7 @@ public class JkDependencySet {
         return new JkDependencySet(this.entries, Collections.unmodifiableSet(depExcludes), this.versionProvider);
     }
 
-    public JkDependencySet withGlobalExclusions(String ...moduleIds) {
+    public JkDependencySet withGlobalExclusions(@JkDepSuggest String ...moduleIds) {
         final Set<JkDependencyExclusion> depExcludes = Arrays.stream(moduleIds)
                 .map(JkModuleId::of)
                 .map(JkDependencyExclusion::of)

@@ -38,7 +38,7 @@ public final class JkModuleId implements Comparator<JkModuleId> {
      * If there is no '.' then the whole string will serve both for group and
      * name.
      */
-    public static JkModuleId of(String moduleId) {
+    public static JkModuleId of(@JkDepSuggest String moduleId) {
         if (moduleId.contains(":")) {
             final String group = JkUtilsString.substringBeforeLast(moduleId, ":").trim();
             final String name = JkUtilsString.substringAfterLast(moduleId, ":").trim();
@@ -92,7 +92,7 @@ public final class JkModuleId implements Comparator<JkModuleId> {
     /**
      * Creates a {@link JkCoordinate} from this moduleId with the specified version.
      */
-    public JkCoordinate toCoordinate(String version) {
+    public JkCoordinate toCoordinate(@JkDepSuggest String version) {
         return toCoordinate(JkVersion.of(version));
     }
 

@@ -41,7 +41,9 @@ public final class JkConstants {
 
     public static final String CMD_PROP_PREFIX = "jeka.cmd.";
 
-    public static final String CMD_APPEND_PROP = CMD_PROP_PREFIX + "_append";
+    public static final String CMD_APPEND_SUFFIX_PROP =  "_append";
+
+    public static final String CMD_APPEND_PROP = CMD_PROP_PREFIX + CMD_APPEND_SUFFIX_PROP;
 
     public static final String CMD_SUBSTITUTE_SYMBOL = ":";
 

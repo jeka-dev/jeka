@@ -1,3 +1,8 @@
+# 0.10.20
+- Improve springboot plugin README.MD
+- Fix JkExternalToolApi#getCmdShortcutsProperties 
+- Add JkDependencySet#withLocalExclusionsOn method
+
 # 0.10.19
 - Includes 'jeka.cmd._appendXXXX=' properties to add extra cmd line arguments
 - Add optional information on @JkDepSuggest annotation
