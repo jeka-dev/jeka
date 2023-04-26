@@ -5,7 +5,7 @@ Build classes (called *kbeans*) can either be defined as source files or provide
 ## Project Structure
 
 Every Jeka execution takes place in the context of a project. A Jeka project is a folder 
-strucure containing a _'jeka'_ directory at its root. Executions must be launched from a
+structure containing a _'jeka'_ directory at its root. Executions must be launched from the
 project root directory.
 
 All the following files or directories are optional except the _jeka_ directory.
