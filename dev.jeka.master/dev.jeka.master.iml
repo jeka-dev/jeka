@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager">
-    <output url="file://$MODULE_DIR$/.idea/output/production" />
-    <output-test url="file://$MODULE_DIR$/.idea/output/test" />
-    <exclude-output />
-    <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
-      <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
-      <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
-    </content>
-    <orderEntry type="inheritedJdk" />
-    <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="dev.jeka.core" exported="" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.jacoco" exported="" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" exported="" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.springboot" exported="" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.nodejs" exported="" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.kotlin" exported="" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.protobuf" exported="" />
-  </component>
+    <component inherit-compileRunner-output="false" name="NewModuleRootManager">
+        <output url="file://$MODULE_DIR$/.idea/output/production"/>
+        <output-test url="file://$MODULE_DIR$/.idea/output/test"/>
+        <exclude-output/>
+        <content url="file://$MODULE_DIR$">
+            <sourceFolder isTestSource="true" url="file://$MODULE_DIR$/jeka/def"/>
+            <excludeFolder url="file://$MODULE_DIR$/jeka/output"/>
+            <excludeFolder url="file://$MODULE_DIR$/jeka/.work"/>
+            <excludeFolder url="file://$MODULE_DIR$/.idea/output"/>
+        </content>
+        <orderEntry type="inheritedJdk"/>
+        <orderEntry forTests="false" type="sourceFolder"/>
+        <orderEntry exported="" module-name="dev.jeka.core" scope="TEST" type="module"/>
+        <orderEntry exported="" module-name="dev.jeka.plugins.jacoco"
+            scope="TEST" type="module"/>
+        <orderEntry exported="" module-name="dev.jeka.plugins.sonarqube"
+            scope="TEST" type="module"/>
+        <orderEntry exported=""
+            module-name="dev.jeka.plugins.springboot" scope="TEST" type="module"/>
+        <orderEntry exported="" module-name="dev.jeka.plugins.nodejs"
+            scope="TEST" type="module"/>
+        <orderEntry exported="" module-name="dev.jeka.plugins.kotlin"
+            scope="TEST" type="module"/>
+        <orderEntry exported="" module-name="dev.jeka.plugins.protobuf"
+            scope="TEST" type="module"/>
+    </component>
 </module>

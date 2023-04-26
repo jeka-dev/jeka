@@ -13,6 +13,9 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 import dev.jeka.plugins.jacoco.JacocoJkBean;
 import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
+import github.Github;
+
+import java.io.IOException;
 
 class MasterBuild extends JkBean {
 
@@ -21,6 +24,9 @@ class MasterBuild extends JkBean {
 
     @JkInjectProperty("OSSRH_PWD")
     public String ossrhPwd;
+
+    @JkInjectProperty("GITHUB_TOKEN")
+    public String githubToken;
 
     public boolean runSamples = true;
 
@@ -69,7 +75,7 @@ class MasterBuild extends JkBean {
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
-    public void make() {
+    public void make() throws IOException {
         JkLog.startTask("Building core and plugins");
         getImportedBeans().get(ProjectJkBean.class, false).forEach(bean -> {
             JkLog.startTask("Running KBean " + bean);
@@ -96,10 +102,16 @@ class MasterBuild extends JkBean {
         }
         String branch = JkGitProcess.of().getCurrentBranch();
         if (branch.equals("master") && ossrhUser != null) {
-            JkLog.startTask("Publishing");
+            JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publish);
             closeAndReleaseRepo();
             JkLog.endTask();
+            JkLog.startTask("Creating GitHub Release");
+            Github github = new Github();
+            github.ghToken =githubToken;
+            github.publishGhRelease();
+            JkLog.endTask();;
+
         }
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
             coreBuild.getBean(SonarqubeJkBean.class).run();
@@ -181,7 +193,7 @@ class MasterBuild extends JkBean {
         getImportedBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publishLocal);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         JkInit.instanceOf(MasterBuild.class, args).make();
     }
 

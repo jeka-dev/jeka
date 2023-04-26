@@ -57,6 +57,8 @@ present on the local drive.
 By adding annotations, pipeline code can provide context and explanations for its methods and fields, 
 which will be visible when calling the help command.
 
+See [Pipeline step to create a Github release](dev.jeka.master/jeka/def/github/Github.java)
+
 
 ## Build Projects
 JVM projects building includes tasks such as compiling, unit and integration testing, performing quality 

@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><module type="JAVA_MODULE" version="4">
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
     <component inherit-compileRunner-output="false" name="NewModuleRootManager">
         <output url="file://$MODULE_DIR$/.idea/output/production"/>
         <output-test url="file://$MODULE_DIR$/.idea/output/test"/>
@@ -17,19 +18,6 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.guava/guava/jars/guava-21.0.jar!/"/>
-                </CLASSES>
-                <JAVADOC>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.guava/guava/jars/guava-21.0-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.guava/guava/jars/guava-21.0-sources.jar!/"/>
-                </SOURCES>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
                     <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.protobuf/protobuf-java/jars/protobuf-java-3.21.12.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
@@ -39,11 +27,11 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/dev.jeka.core/jeka/output/distrib/dev.jeka.jeka-core.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/distributions/0.10.19/dev.jeka.jeka-core.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/dev.jeka.core/jeka/output/distrib/dev.jeka.jeka-core-sources.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/distributions/0.10.19/dev.jeka.jeka-core-sources.jar!/"/>
                 </SOURCES>
             </library>
         </orderEntry>

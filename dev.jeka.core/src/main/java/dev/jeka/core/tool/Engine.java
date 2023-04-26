@@ -22,6 +22,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import javax.tools.ToolProvider;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Supplier;
@@ -107,7 +108,7 @@ final class Engine {
         stopBusyIndicator();
         if (result != null && !result.compileFailedProjects.getEntries().isEmpty()) {
             JkLog.warn("Def compilation failed on projects " + result.compileFailedProjects.getEntries()
-                    .stream().map(path -> "'" + path + "'").collect(Collectors.toList()));
+                    .stream().map(path -> "'" + projectName(path) + "'").collect(Collectors.toList()));
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
         if (Environment.standardOptions.logRuntimeInformation) {
@@ -121,6 +122,13 @@ final class Engine {
             JkLog.warn("This command contains no actions. Execute 'jeka help' to know about available actions.");
         }
         runtime.run(resolvedCommands);
+    }
+    
+    private static String projectName(Path path) {
+        if (JkUtilsString.isBlank(path.getFileName().toString())) {
+            return Paths.get("").toAbsolutePath().getFileName().toString();
+        }
+        return path.toString();
     }
 
     private boolean isHelpCmd() {
