@@ -86,7 +86,7 @@ They provide tutorials on how to use these solutions with Maven, but it's possib
 
 Alternatively, you can use a tool such as *Pulumi* and integrate it into a Jeka pipeline using its command line interface.
 
-See [Project deployed on Kubernetes](https://github.com/jeka-dev/working-examples/tree/master/kubernetes
+See [Project deployed on Kubernetes](https://github.com/jeka-dev/working-examples/tree/master/kubernetes)
 
 # What makes JeKa User Friendly ?
 
