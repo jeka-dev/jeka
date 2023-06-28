@@ -212,9 +212,22 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         });
     }
 
-    public ProjectJkBean configure(Consumer<JkProject> projectConfigurator) {
+    /**
+     * Registers a {@link JkProject} consumer that will be invoked just before the first call of {@link #getProject()}.
+     *
+     * This is meant to configure project after that all properties has been initialised.
+     */
+    public ProjectJkBean lately(Consumer<JkProject> projectConfigurator) {
         this.projectConfigurators.append(projectConfigurator);
         return this;
+    }
+
+    /**
+     * Use {@link #lately(Consumer)} instead
+     */
+    @Deprecated
+    public ProjectJkBean configure(Consumer<JkProject> projectConfigurator) {
+        return lately(projectConfigurator);
     }
 
     // ------------------------------- command line methods -----------------------------

@@ -28,8 +28,7 @@ public class NexusJkBean extends JkBean {
         if (projectBean == null) {
             JkLog.warn("No project KBean present to configure repos for.");
         } else {
-            JkProject project = projectBean.getProject();
-            projectBean.configure(this::configureProject);
+            projectBean.lately(this::configureProject);
         }
     }
 

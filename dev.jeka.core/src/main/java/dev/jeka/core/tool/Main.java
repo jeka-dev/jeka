@@ -73,7 +73,6 @@ public final class Main {
                 }
                 handleRegularException(e);
             }
-
             if (Environment.standardOptions.logBanner) {
                 final int length = printAscii(true, "text-failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "

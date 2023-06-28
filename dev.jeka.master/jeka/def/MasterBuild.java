@@ -63,7 +63,7 @@ class MasterBuild extends JkBean {
     private JacocoJkBean coreJacocoBean;
 
     MasterBuild()  {
-        git.projectVersionSupplier.on = false;
+        git.configureProjectVersion = false;
         coreBuild.runIT = true;
         getImportedBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
@@ -161,13 +161,12 @@ class MasterBuild extends JkBean {
     }
 
     private void applyToSlave(ProjectJkBean projectJkBean) {
-        if (!git.projectVersionSupplier.version().isSnapshot()) {     // Produce javadoc only for release
+        if (!git.version().isSnapshot()) {     // Produce javadoc only for release
             projectJkBean.pack.javadoc = true;
         }
         projectJkBean.configure(project -> {
-                git.projectVersionSupplier.configure(project, false);
+                git.handleVersioning(project, false);
                 project.publication
-                    .setVersion(git.projectVersionSupplier::versionAsText)
                     .setRepos(this.publishRepo())
                     .maven
                         .pomMetadata
@@ -205,7 +204,7 @@ class MasterBuild extends JkBean {
 
     static class ShowVersion {
         public static void main(String[] args) {
-            System.out.println(JkInit.instanceOf(GitJkBean.class, args).projectVersionSupplier.version());
+            System.out.println(JkInit.instanceOf(GitJkBean.class, args).version());
         }
     }
 

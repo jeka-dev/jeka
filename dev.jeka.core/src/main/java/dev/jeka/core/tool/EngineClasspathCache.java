@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
@@ -29,9 +30,11 @@ class EngineClasspathCache {
     Result resolvedClasspath(JkDependencySet dependencySet) {
         boolean changed = compareAndStore(dependencySet);
         if (changed) {
-           JkPathSequence pathSequence = dependencyResolver.resolve(dependencySet).getFiles();
-           storeResolvedClasspath(pathSequence);
-           return new Result(true, pathSequence);
+            JkResolveResult resolveResult = dependencyResolver.resolve(dependencySet);
+            JkLog.info(resolveResult.getDependencyTree().toStringTree());
+            JkPathSequence pathSequence = resolveResult.getFiles();
+            storeResolvedClasspath(pathSequence);
+            return new Result(true, pathSequence);
         } else {
             if (Files.exists(resolvedClasspathCache())) {
                 JkPathSequence cachedPathSequence = readCachedResolvedClasspath();
@@ -76,7 +79,7 @@ class EngineClasspathCache {
                 .write(pathSequence.toPath().getBytes(StandardCharsets.UTF_8));
     }
 
-    private JkPathSequence readCachedResolvedClasspath() {
+    JkPathSequence readCachedResolvedClasspath() {
         return JkPathSequence.ofPathString(JkPathFile.of(resolvedClasspathCache()).readAsString());
     }
 

@@ -96,4 +96,8 @@ public final class JkExternalToolApi {
         return result;
     }
 
+    public static List<Path> getDefDependenciesClasspath(Path projectDir) {
+        return new EngineClasspathCache(projectDir, null).readCachedResolvedClasspath().getEntries();
+    }
+
 }
