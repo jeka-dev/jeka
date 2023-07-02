@@ -16,7 +16,7 @@ such as **building projects** with various technologies, creating **pipelines** 
 
 JeKa aims at bridging **dev** and **ops** by allowing the entire process to be implemented in a single language,
 for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, *testing*, 
-*deploying containers*, *provisioning platforms*.
+*deploying containers* and *provisioning platforms*.
 
 Generally, devOps tasks are implemented using scripts or configuration files with specific template languages around, 
 resulting in a proliferation of languages and technologies that increase cognitive load 
