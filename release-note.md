@@ -1,4 +1,4 @@
-# 0.10.21
+# 0.10.21 
 - Add dependencies autocompletion hints for external tools
 - Deprecate ProjectJkBean#configure in favor of ProjectJkBean#lately
 
