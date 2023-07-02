@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FULL BUILD skip test" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="MasterBuild" />
+    <module name="dev.jeka.master" />
+    <option name="PROGRAM_PARAMETERS" value="project#clean make publishLocal -lsu -lri -cw -Dproject#test.skip=true runSamples=false" />
+    <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
