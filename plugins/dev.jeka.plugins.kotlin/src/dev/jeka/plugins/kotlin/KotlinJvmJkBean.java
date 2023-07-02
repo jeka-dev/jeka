@@ -73,7 +73,7 @@ public class KotlinJvmJkBean extends JkBean {
         if (!this.configureProject) {
             return;
         }
-        projectJkBean.configure(this::configure);
+        projectJkBean.lately(this::configure);
     }
 
     public void configure(JkProject project) {

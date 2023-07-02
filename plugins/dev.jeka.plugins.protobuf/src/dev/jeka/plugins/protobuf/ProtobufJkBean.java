@@ -26,7 +26,7 @@ public class ProtobufJkBean extends JkBean {
     public String protobufVersion = "3.21.12";
 
     ProtobufJkBean() {
-        getBean(ProjectJkBean.class).configure(this::configure);
+        getBean(ProjectJkBean.class).lately(this::configure);
     }
 
     private void configure(JkProject project) {

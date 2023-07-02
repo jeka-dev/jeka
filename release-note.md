@@ -1,3 +1,7 @@
+# 0.10.21
+- Add dependencies autocompletion hints for external tools
+- Deprecate ProjectJkBean#configure in favor of ProjectJkBean#lately
+
 # 0.10.20
 - Improve springboot plugin README.MD
 - Fix JkExternalToolApi#getCmdShortcutsProperties 
