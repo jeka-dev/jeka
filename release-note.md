@@ -1,5 +1,5 @@
 # 0.10.22
-- Springboot : No jars are generated when 'createXxxJar' are all set to 'false'
+- Springboot : No jars are generated when 'createXxxJar' are all set to 'false' 
 
 # 0.10.21 
 - Add dependencies autocompletion hints for external tools
