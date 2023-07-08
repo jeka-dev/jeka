@@ -64,7 +64,7 @@ If code must be compiled on a another JDK version, you can specify JDK path for 
 Simply mention it as option, for example in your _[JEKA HOME]/options.properties_ file.
 
 ```
-jeka.jdk.9=/software/jdk9
+jeka.jdk.19=/software/jdk19
 ```
 
 This way, if one of your project source code is declared to be in a specific Java version, the relevant JDK version will be picked up automatically.
