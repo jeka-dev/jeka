@@ -33,6 +33,7 @@ Maven, Gradle and other build tools manage the intellij dependencies integration
 This means that JeKa can interfere with this tool by generating .iml files in the module supposed by this tool.
 
 The solution consist in creating an intellij module at [myproject]/jeka location. For this :
+
 - Add `intellij#dedicatedJekaModule=true` in file [myproject]/jeka/local.properties.
 - Run `jeka intellij#iml` in working dir [myproject] : this will generate a [myproject]/jeka/myproject-jeka.iml file
 - Go to menu **Project structure..."
