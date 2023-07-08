@@ -136,7 +136,16 @@ public class SonarqubeJkBean extends JkBean {
         return this;
     }
 
+    @Deprecated
     public SonarqubeJkBean configure(Consumer<JkSonarqube> sonarqubeConfigurer) {
+        return lately(sonarqubeConfigurer);
+    }
+
+    /**
+     * Adds a configurator for sonarqube that will be executed just before sonarqube analysis is run.
+     * This ensures that configurator will be executed after all properties are set.
+     */
+    public SonarqubeJkBean lately(Consumer<JkSonarqube> sonarqubeConfigurer) {
         this.sonarqubeConfigurer = sonarqubeConfigurer;
         return this;
     }

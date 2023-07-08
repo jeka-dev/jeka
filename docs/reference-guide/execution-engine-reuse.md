@@ -45,7 +45,7 @@ import dev.jeka.core.api.project.JkProject;
 
 class Build extends JkBean {
 
-    ProjectJkBean projectBean = getBean(ProjectJkean.class).configure(this::configure);
+    ProjectJkBean projectBean = getBean(ProjectJkean.class).lately(this::configure);
     
     private void configure(JkProject project) {
         

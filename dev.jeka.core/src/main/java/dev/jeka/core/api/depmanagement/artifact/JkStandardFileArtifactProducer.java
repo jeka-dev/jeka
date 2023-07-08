@@ -85,13 +85,18 @@ public class JkStandardFileArtifactProducer implements JkArtifactProducer {
     }
 
 
-    public JkStandardFileArtifactProducer removeArtifact(JkArtifactId artifactId) {
-        consumers.remove(artifactId);
+    public JkStandardFileArtifactProducer removeArtifact(String artifactName) {
+        for (JkArtifactId artifactId : consumers.keySet()) {
+            if (artifactName.equals(artifactId.getName())) {
+                consumers.remove(artifactId);
+            }
+        }
         return this;
     }
 
-    public JkStandardFileArtifactProducer removeArtifact(String name, String ext) {
-        return removeArtifact(JkArtifactId.of(name, ext));
+    public JkStandardFileArtifactProducer removeArtifact(JkArtifactId artifactId) {
+        consumers.remove(artifactId);
+        return this;
     }
 
     @Override

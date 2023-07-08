@@ -56,7 +56,7 @@ public class JacocoJkBean extends JkBean {
     }
 
     private JacocoJkBean() {
-        getRuntime().getBean(ProjectJkBean.class).configure(this::configureForDefaultProject);
+        getRuntime().getBean(ProjectJkBean.class).lately(this::configureForDefaultProject);
     }
 
     private void configureForDefaultProject(JkProject project) {

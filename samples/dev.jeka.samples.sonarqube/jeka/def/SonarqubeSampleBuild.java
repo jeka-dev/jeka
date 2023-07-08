@@ -22,7 +22,7 @@ class SonarqubeSampleBuild extends JkBean {
     private final SonarqubeJkBean sonarqubePlugin = getBean(SonarqubeJkBean.class);
 
     SonarqubeSampleBuild() {
-        projectPlugin.configure(project ->
+        projectPlugin.lately(project ->
             project.flatFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .configureCompileDependencies(deps -> deps

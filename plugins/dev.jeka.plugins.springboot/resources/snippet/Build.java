@@ -12,7 +12,7 @@ class Build extends JkBean {
 
     Build() {
         springbootBean.setSpringbootVersion("${springbootVersion}");
-        getBean(ProjectJkBean.class).configure(this::configure);
+        getBean(ProjectJkBean.class).lately(this::configure);
     }
 
     private void configure(JkProject project) {

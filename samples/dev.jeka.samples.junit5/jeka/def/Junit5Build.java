@@ -33,7 +33,7 @@ import java.nio.file.Path;
 @JkInjectClasspath("org.junit.platform:junit-platform-launcher:1.8.2")
 class Junit5Build extends JkBean {
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option

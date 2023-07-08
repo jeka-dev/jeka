@@ -55,7 +55,7 @@ class Build extends JkBean {
 
     Build() {
         springbootBean.springbootVersion = "3.0.5";
-        springbootBean.projectBean.configure(this::configure);
+        springbootBean.projectBean.lately(this::configure);
     }
 
     private void configure(JkProject project) {

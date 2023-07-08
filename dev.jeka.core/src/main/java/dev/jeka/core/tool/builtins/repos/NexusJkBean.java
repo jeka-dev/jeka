@@ -41,7 +41,10 @@ public class NexusJkBean extends JkBean {
         nexusRepos.closeAndRelease(profiles());
     }
 
-    public NexusJkBean configure(Consumer<JkNexusRepos> nexusReposConsumer) {
+    /**
+     * Adds a JkNexusRepos consumer that will be executed right before first use
+     */
+    public NexusJkBean lately(Consumer<JkNexusRepos> nexusReposConsumer) {
         this.nexusReposConfigurators.append(nexusReposConsumer);
         return this;
     }

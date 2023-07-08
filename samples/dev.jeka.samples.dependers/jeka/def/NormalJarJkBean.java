@@ -19,7 +19,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class NormalJarJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
 
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.

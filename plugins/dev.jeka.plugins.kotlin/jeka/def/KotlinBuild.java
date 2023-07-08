@@ -8,7 +8,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class KotlinBuild extends JkBean {
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     KotlinBuild() {
         IntellijJkBean intellij = getBean(IntellijJkBean.class);

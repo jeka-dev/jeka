@@ -32,7 +32,7 @@ class MasterBuild extends JkBean {
 
     public boolean useJacoco = false;
 
-    final NexusJkBean nexus = getBean(NexusJkBean.class).configure(this::configure);
+    final NexusJkBean nexus = getBean(NexusJkBean.class).lately(this::configure);
 
     final GitJkBean git = getBean(GitJkBean.class);
 
@@ -116,6 +116,7 @@ class MasterBuild extends JkBean {
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
             coreBuild.getBean(SonarqubeJkBean.class).run();
         }
+        publishLocal();;
     }
 
     @JkDoc("Convenient method to set Posix permission for all jekaw files on git.")
@@ -164,7 +165,7 @@ class MasterBuild extends JkBean {
         if (!git.version().isSnapshot()) {     // Produce javadoc only for release
             projectJkBean.pack.javadoc = true;
         }
-        projectJkBean.configure(project -> {
+        projectJkBean.lately(project -> {
                 git.handleVersioning(project, false);
                 project.publication
                     .setRepos(this.publishRepo())

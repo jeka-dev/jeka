@@ -65,10 +65,10 @@ public final class SpringbootJkBean extends JkBean {
     private boolean useSpringRepos = true;
 
     @JkDoc(hide = true, value = "")
-    public final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    public final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     SpringbootJkBean() {
-        getBean(ScaffoldJkBean.class).configure(this::configure);
+        getBean(ScaffoldJkBean.class).lately(this::configure);
     }
 
     public SpringbootJkBean setSpringbootVersion(String springbootVersion) {
@@ -108,13 +108,20 @@ public final class SpringbootJkBean extends JkBean {
         }
         if (this.createWarFile) {
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(path, project);
-            artifactProducer.putArtifact("", "war", warMaker);
+            artifactProducer.putArtifact(JkArtifactId.MAIN_ARTIFACT_NAME, "war", warMaker);
         }
 
         // add original jar artifact
         if (createOriginalJar) {
             Consumer<Path> makeBinJar = project.packaging::createBinJar;
             artifactProducer.putArtifact(ORIGINAL_ARTIFACT, makeBinJar);
+        }
+
+        // To deploy springboot app in a container, we don't need to create a jar
+        // This is more efficient to keep the structure exploded to have efficient image layering.
+        // In this case, just copy manifest in class dir is enough.
+        if (!createBootJar && !createOriginalJar && !createWarFile) {
+            artifactProducer.putMainArtifact(project.packaging::includeManifestInClassDir);
         }
     }
 

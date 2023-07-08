@@ -438,7 +438,9 @@
                     <root url="jar:///Users/jerome/IdeaProjects/jeka/dev.jeka.core/jeka/output/distrib/dev.jeka.jeka-core.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
-                <SOURCES/>
+                <SOURCES>
+                    <root url="jar:///Users/jerome/IdeaProjects/jeka/dev.jeka.core/jeka/output/distrib/dev.jeka.jeka-core-sources.jar!/"/>
+                </SOURCES>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="TEST" type="module-library">

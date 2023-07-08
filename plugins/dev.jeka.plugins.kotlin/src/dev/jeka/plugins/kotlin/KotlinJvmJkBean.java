@@ -121,7 +121,7 @@ public class KotlinJvmJkBean extends JkBean {
     /**
      * Register a configurator to be applied at the first call of {@link #getCompiler()}
      */
-    public KotlinJvmJkBean configureCompiler(Consumer<JkKotlinCompiler> compilerConsumer) {
+    public KotlinJvmJkBean latelyConfigureCompiler(Consumer<JkKotlinCompiler> compilerConsumer) {
         if (this.kotlinCompiler != null) {
             throw new IllegalStateException("The compiler has already been instantiated. " +
                     "Use this method in the constructor of your KBean in order to configure the kompiler " +

@@ -80,7 +80,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     private JkConsumers<JkProject> projectConfigurators = JkConsumers.of();
 
     public ProjectJkBean() {
-        getBean(ScaffoldJkBean.class).configure(this::configure);
+        getBean(ScaffoldJkBean.class).lately(this::configure);
     }
 
     private JkProject createProject() {

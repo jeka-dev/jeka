@@ -8,7 +8,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class ProtobufBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+    private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
 
     ProtobufBuild() {
         getBean(IntellijJkBean.class).jekaModuleName = "dev.jeka.core";

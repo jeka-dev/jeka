@@ -33,7 +33,7 @@ import java.util.function.UnaryOperator;
  */
 public class SignedArtifactsJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables

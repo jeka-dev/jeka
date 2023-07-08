@@ -22,7 +22,7 @@ public class SpringbootSampleBuild extends JkBean {
 
     SpringbootSampleBuild() {
         springboot.setSpringbootVersion("2.7.1");
-        springboot.projectBean.configure(this::configure);
+        springboot.projectBean.lately(this::configure);
         intellijJkBean.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
         intellijJkBean.configureIml(this::configure);
     }
