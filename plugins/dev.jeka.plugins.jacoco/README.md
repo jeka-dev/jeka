@@ -1,6 +1,3 @@
-![Build Status](https://github.com/jerkar/jacoco-plugin/actions/workflows/push-master.yml/badge.svg)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.jeka/jacoco-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.jeka/protobuf-plugin) <br/>
-
 # Jeka library/plugin for Jacoco
 
 Plugin to use the [Jacoco](https://www.eclemma.org/jacoco) coverage tool in your Java builds
