@@ -48,16 +48,18 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         ClassGraph classGraph = new ClassGraph()
                 .ignoreClassVisibility()
                 .enableClassInfo()
-                .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
+                .rejectPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
                         "org.commonmark", "io.github.classgraph");
         if (ignoreClassVisibility) {
             classGraph = classGraph.ignoreClassVisibility();
         }
-        final ScanResult scanResult = classGraph.scan();
-        final Set<Class<?>> result = new HashSet<>();
-        for (final ClassInfo classInfo : scanResult.getAllClasses()) {
-            if (predicate.test(classInfo)) {
-                result.add(classInfo.loadClass());
+        final Set<Class<?>> result;
+        try (ScanResult scanResult = classGraph.scan()) {
+            result = new HashSet<>();
+            for (final ClassInfo classInfo : scanResult.getAllClasses()) {
+                if (predicate.test(classInfo)) {
+                    result.add(classInfo.loadClass());
+                }
             }
         }
         return result;
@@ -70,17 +72,19 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
                 .enableMethodInfo()
                 .overrideClassLoaders(extraClassLoader)
                 .ignoreParentClassLoaders();
-        final ScanResult scanResult = classGraph.scan();
-        final List<String> result = new LinkedList<>();
-        for (final ClassInfo classInfo : scanResult.getAllClasses()) {
-            MethodInfoList methodInfoList = classInfo.getMethodInfo("main");
-            for (MethodInfo methodInfo : methodInfoList) {
-                if (methodInfo.isPublic() && methodInfo.isStatic() && methodInfo.getParameterInfo().length == 1) {
-                    MethodParameterInfo methodParameterInfo = methodInfo.getParameterInfo()[0];
-                    if (methodParameterInfo.getTypeDescriptor() instanceof ArrayTypeSignature) {
-                        ArrayTypeSignature arrayTypeSignature = (ArrayTypeSignature) methodParameterInfo.getTypeDescriptor();
-                        if ("java.lang.String[]".equals(arrayTypeSignature.toString())) {
-                            result.add(classInfo.getName());
+        final List<String> result;
+        try (ScanResult scanResult = classGraph.scan()) {
+            result = new LinkedList<>();
+            for (final ClassInfo classInfo : scanResult.getAllClasses()) {
+                MethodInfoList methodInfoList = classInfo.getMethodInfo("main");
+                for (MethodInfo methodInfo : methodInfoList) {
+                    if (methodInfo.isPublic() && methodInfo.isStatic() && methodInfo.getParameterInfo().length == 1) {
+                        MethodParameterInfo methodParameterInfo = methodInfo.getParameterInfo()[0];
+                        if (methodParameterInfo.getTypeDescriptor() instanceof ArrayTypeSignature) {
+                            ArrayTypeSignature arrayTypeSignature = (ArrayTypeSignature) methodParameterInfo.getTypeDescriptor();
+                            if ("java.lang.String[]".equals(arrayTypeSignature.toString())) {
+                                result.add(classInfo.getName());
+                            }
                         }
                     }
                 }
@@ -97,13 +101,15 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
                 .overrideClassLoaders(classloader)
                 .enableAnnotationInfo()
                 .ignoreParentClassLoaders();
-        final ScanResult scanResult = classGraph.scan();
-        final List<String> result = new LinkedList<>();
-        for (final ClassInfo classInfo : scanResult.getAllClasses()) {
-            AnnotationInfoList annotationInfoList = classInfo.getAnnotationInfo();
-            List<String> annotationNames = annotationInfoList.getNames();
-            if (annotationPredicate.test(annotationNames)) {
-                result.add(classInfo.getName());
+        final List<String> result;
+        try (ScanResult scanResult = classGraph.scan()) {
+            result = new LinkedList<>();
+            for (final ClassInfo classInfo : scanResult.getAllClasses()) {
+                AnnotationInfoList annotationInfoList = classInfo.getAnnotationInfo();
+                List<String> annotationNames = annotationInfoList.getNames();
+                if (annotationPredicate.test(annotationNames)) {
+                    result.add(classInfo.getName());
+                }
             }
         }
         return result;
@@ -115,11 +121,11 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
                                              boolean ignoreParentClassLoaders) {
         ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
-                .blacklistPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
+                .rejectPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
                         "org.commonmark", "io.github.classgraph")
                 .disableNestedJarScanning()
                 .disableModuleScanning()
-                .filterClasspathElements(classpathElementPath -> classpathElementFilter.test(classpathElementPath));
+                .filterClasspathElements(classpathElementFilter::test);
         if (ignoreParentClassLoaders) {
             classGraph
             .ignoreParentClassLoaders()
@@ -128,16 +134,20 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         if (ignoreVisibility) {
             classGraph = classGraph.ignoreClassVisibility();
         }
-        final ScanResult scanResult = classGraph.scan();
-        return scanResult.getAllClasses().stream()
-                .filter(classInfo -> !classInfo.isAbstract())
-                .filter(classInfo -> classInfo.extendsSuperclass(baseClass.getName()))
-                .map(classInfo -> classInfo.getName())
-                .collect(Collectors.toList());
+        try (ScanResult scanResult = classGraph.scan()) {
+            return scanResult.getAllClasses().stream()
+                    .filter(classInfo -> !classInfo.isAbstract())
+                    .filter(classInfo -> classInfo.extendsSuperclass(baseClass.getName()))
+                    .map(ClassInfo::getName)
+                    .collect(Collectors.toList());
+        }
     }
 
     public JkPathSequence getClasspath(ClassLoader classLoader) {
-        List<File> files = new ClassGraph().scan().getClasspathFiles();
+        List<File> files;
+        try (ScanResult scanResult = new ClassGraph().scan()) {
+            files = scanResult.getClasspathFiles();
+        }
         return JkPathSequence.of(JkUtilsPath.toPaths(files));
     }
 

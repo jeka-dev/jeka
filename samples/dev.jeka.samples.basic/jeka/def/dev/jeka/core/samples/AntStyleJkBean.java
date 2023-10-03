@@ -42,7 +42,7 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
     JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     JkDependencySet prodDependencies = JkDependencySet.of()
             .and("com.google.guava:guava:30.0-jre")
-            .and("org.hibernate:hibernate-entitymanager:5.4.2.Final");
+            .and("org.hibernate:hibernate-entitymanager:5.6.15.Final");
     JkDependencySet testDependencies = JkDependencySet.of()
             .and(SimpleProjectJkBean.JUNIT5);
     List<Path> depFiles = baseTree.andMatching(true,"libs/**/*.jar").getFiles();

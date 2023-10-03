@@ -30,7 +30,8 @@ public final class JkCoordinateFileProxy {
     }
 
     public static JkCoordinateFileProxy ofStandardRepos(JkProperties properties, String dependencyDescription) {
-        return of(JkRepoProperties.of(properties).getDownloadRepos().and(JkRepo.ofMavenCentral()), dependencyDescription);
+        JkRepoSet repos = JkRepoProperties.of(properties).getDownloadRepos();
+        return of(repos, dependencyDescription);
     }
 
     public Path get() {

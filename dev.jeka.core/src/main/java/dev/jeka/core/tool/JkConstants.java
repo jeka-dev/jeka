@@ -20,15 +20,12 @@ public final class JkConstants {
      */
     public static final String WORK_PATH = JEKA_DIR + "/.work";
 
-    public static final String GLOBAL_PROPERTIES = "global.properties";
-
     static final String DEF_BIN_DIR_NAME = "def-classes";
 
     static final String BOOT_DIR = JEKA_DIR + "/boot";
 
     /**
-     * Relative path to the project where the def classes will be
-     * compiled.
+     * Relative path to the project where the def classes will be compiled.
      */
     public static final String DEF_BIN_DIR = WORK_PATH + "/" + DEF_BIN_DIR_NAME;
 

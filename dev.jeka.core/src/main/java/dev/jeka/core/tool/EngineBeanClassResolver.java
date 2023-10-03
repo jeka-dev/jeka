@@ -54,7 +54,7 @@ final class EngineBeanClassResolver {
             List<String> beanClassNames = JkUtilsIterable.concatLists(defBeanClassNames(), globalBeanClassNames())
                     .stream().distinct().collect(Collectors.toList());
             List<String> matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
-            if (matchingClassNames.isEmpty()) {  // maybe the cache is stales -> rescan classpath
+            if (matchingClassNames.isEmpty()) {  // maybe the cache is staled -> rescan classpath
                 JkLog.trace("KBean '%s' does not match any class names on %s. Rescan classpath", beanName, beanClasses);
                 reloadGlobalBeanClassNames();
                 matchingClassNames = findClassesMatchingName(beanClassNames, beanName);

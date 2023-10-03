@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="FULL BUILD" type="Application" factoryName="Application">
+    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="MasterBuild" />
     <module name="dev.jeka.master" />
     <option name="PROGRAM_PARAMETERS" value="project#clean make publishLocal -lsu -lri -cw" />

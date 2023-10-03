@@ -21,12 +21,8 @@
                 <CLASSES>
                     <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.guava/guava/jars/guava-22.0.jar!/"/>
                 </CLASSES>
-                <JAVADOC>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.guava/guava/jars/guava-22.0-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.guava/guava/jars/guava-22.0-sources.jar!/"/>
-                </SOURCES>
+                <JAVADOC/>
+                <SOURCES/>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="COMPILE" type="module-library">
@@ -43,12 +39,8 @@
                 <CLASSES>
                     <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18.jar!/"/>
                 </CLASSES>
-                <JAVADOC>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.errorprone/error_prone_annotations/jars/error_prone_annotations-2.0.18-sources.jar!/"/>
-                </SOURCES>
+                <JAVADOC/>
+                <SOURCES/>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="COMPILE" type="module-library">
@@ -56,12 +48,8 @@
                 <CLASSES>
                     <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1.jar!/"/>
                 </CLASSES>
-                <JAVADOC>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.j2objc/j2objc-annotations/jars/j2objc-annotations-1.1-sources.jar!/"/>
-                </SOURCES>
+                <JAVADOC/>
+                <SOURCES/>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="COMPILE" type="module-library">
@@ -69,12 +57,8 @@
                 <CLASSES>
                     <root url="jar://$JEKA_CACHE_DIR$/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14.jar!/"/>
                 </CLASSES>
-                <JAVADOC>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.codehaus.mojo/animal-sniffer-annotations/jars/animal-sniffer-annotations-1.14-sources.jar!/"/>
-                </SOURCES>
+                <JAVADOC/>
+                <SOURCES/>
             </library>
         </orderEntry>
         <orderEntry exported="" module-name="dev.jeka.samples.basic"

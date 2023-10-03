@@ -4,6 +4,7 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,6 +66,14 @@ public final class JkProperties {
         return ofSystemProperties().withFallback(ENVIRONMENT_VARIABLES);
     }
 
+    public static JkProperties ofSysPropsThenEnvThenGlobalProperties() {
+        Path globalPropsFile = JkLocator.getGlobalPropertiesFile();
+        if (Files.exists(globalPropsFile)) {
+            return ofSysPropsThenEnv().withFallback(ofFile(globalPropsFile));
+        }
+        return ofSysPropsThenEnv();
+    }
+
     private static JkProperties ofEnvironmentVariables() {
         Map<String, String> props = new HashMap<>();
         for (String varName : System.getenv().keySet() ) {
@@ -75,7 +84,7 @@ public final class JkProperties {
         return new JkProperties(ENV_VARS_NAME, Collections.unmodifiableMap(props), null);
     }
 
-    // The system properties are likely to change suring the run, so we cannot cache it.
+    // The system properties are likely to change during the run, so we cannot cache it.
     private static JkProperties ofSystemProperties() {
         Map<String, String> props = new HashMap<>();
         for (String propName : System.getProperties().stringPropertyNames() ) {

@@ -2,6 +2,7 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,6 +22,8 @@ public final class JkLocator {
     private final static String JK_CACHE_PROP_NAME = "jeka.cache.dir";
 
     private static Path JEKA_JAR_FILE;
+
+    public static final String GLOBAL_PROPERTIES_FILENAME = "global.properties";
 
     /**
      * Returns the Jeka jar file currently used in the running process. Returns a folder if the classes
@@ -68,6 +71,10 @@ public final class JkLocator {
             result = Paths.get(System.getProperty("user.home")).resolve(".jeka");
         }
         return ensureCreated(result);
+    }
+
+    public static Path getGlobalPropertiesFile() {
+        return JkLocator.getJekaUserHomeDir().resolve(GLOBAL_PROPERTIES_FILENAME);
     }
 
     /**

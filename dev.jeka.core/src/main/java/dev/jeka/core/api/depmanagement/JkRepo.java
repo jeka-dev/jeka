@@ -167,7 +167,7 @@ public final class JkRepo {
     /**
      * Returns the url of this repository.
      */
-    public final URL getUrl() {
+    public URL getUrl() {
         return url;
     }
 

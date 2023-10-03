@@ -24,7 +24,8 @@ public final class JkGpg {
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
-    private static final JkInternalGpgDoer INTERNAL_GPG_DOER = JkInternalGpgDoer.of(JkProperties.ofSysPropsThenEnv());
+    private static final JkInternalGpgDoer INTERNAL_GPG_DOER =
+            JkInternalGpgDoer.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties());
 
     private final Path pubRing;
 

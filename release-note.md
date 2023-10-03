@@ -1,3 +1,7 @@
+# 0.10.23
+- Take global.properties in account for defining repos downloading core dependencies
+- upgrade classgraph version
+
 # 0.10.22
 - Springboot : No jars are generated when 'createXxxJar' are all set to 'false' 
 

@@ -39,12 +39,8 @@
                 <CLASSES>
                     <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0.jar!/"/>
                 </CLASSES>
-                <JAVADOC>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-sources.jar!/"/>
-                </SOURCES>
+                <JAVADOC/>
+                <SOURCES/>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="TEST" type="module-library">
@@ -61,12 +57,8 @@
                 <CLASSES>
                     <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2.jar!/"/>
                 </CLASSES>
-                <JAVADOC>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-sources.jar!/"/>
-                </SOURCES>
+                <JAVADOC/>
+                <SOURCES/>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="TEST" type="module-library">

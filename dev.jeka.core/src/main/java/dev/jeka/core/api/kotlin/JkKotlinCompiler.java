@@ -125,7 +125,7 @@ public final class JkKotlinCompiler {
     }
 
     public static JkKotlinCompiler ofJvm(JkRepoSet repos) {
-        JkProperties props = JkProperties.ofSysPropsThenEnv();
+        JkProperties props = JkProperties.ofSysPropsThenEnvThenGlobalProperties();
         String version = props.get(KOTLIN_VERSION_OPTION);
         if (version == null) {
             JkLog.info("No jeka.kotlin.version specified, try to resolce Kotlin compiler on local machine");

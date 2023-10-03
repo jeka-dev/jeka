@@ -78,7 +78,6 @@ public class PackageDependencyTest {
                 final JavaPackage pack = involvedPackages.get(i);
                 final JavaPackage nextPack = involvedPackages.get(i+1);
                 builder.append("\nInvolved classes of ").append(pack.getName()).append("\n");
-                builder.append("------------------------------------------\n");
                 for (final Object javaClassObject : pack.getClasses()) {
                     final JavaClass javaClass = (JavaClass) javaClassObject;
                     for (final Object importedPackageObject : javaClass.getImportedPackages()) {

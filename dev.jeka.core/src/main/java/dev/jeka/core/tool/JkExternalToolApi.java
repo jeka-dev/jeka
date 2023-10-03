@@ -88,12 +88,7 @@ public final class JkExternalToolApi {
     }
 
     public static JkProperties getGlobalProperties() {
-        JkProperties result = JkProperties.ofSysPropsThenEnv();
-        Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve(JkConstants.GLOBAL_PROPERTIES);
-        if (Files.exists(globalPropertiesFile)) {
-            result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));
-        }
-        return result;
+        return JkProperties.ofSysPropsThenEnvThenGlobalProperties();
     }
 
     public static List<Path> getDefDependenciesClasspath(Path projectDir) {

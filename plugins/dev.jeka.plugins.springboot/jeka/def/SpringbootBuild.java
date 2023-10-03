@@ -11,7 +11,12 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class SpringbootBuild extends JkBean {
 
-    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class).lately(this::configure);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
+
+    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+            .configureIml(jkIml -> {
+                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+            });
 
     private void configure(JkProject project) {
        project
