@@ -103,7 +103,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             ModuleRevisionId moduleRevisionId = moduleDescriptor.getModuleRevisionId();
             final JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(moduleRevisionId);
             JkVersion version = coordinate.getVersion();
-            if (!isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(version)) {
+            if (!isMaven(resolver) && publishRepo.publishConfig.getVersionFilter().test(version)) {
                 JkLog.startTask("Publish for repository " + resolver);
                 this.publishIvyArtifacts(resolver, publishedArtifacts, date, moduleDescriptor, ivySettings);
                 JkLog.endTask();
@@ -159,18 +159,18 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             ModuleRevisionId moduleRevisionId = moduleDescriptor.getModuleRevisionId();
             JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(moduleRevisionId);
             JkVersion version = coordinate.getVersion();
-            if (isMaven(resolver) && publishRepo.getPublishConfig().getVersionFilter().test(version)) {
+            if (isMaven(resolver) && publishRepo.publishConfig.getVersionFilter().test(version)) {
                 JkLog.startTask("Publish to " + publishRepo.getUrl());
-                boolean signatureRequired = publishRepo.getPublishConfig().isSignatureRequired();
-                UnaryOperator<Path> signer = publishRepo.getPublishConfig().getSigner();
+                boolean signatureRequired = publishRepo.publishConfig.isSignatureRequired();
+                UnaryOperator<Path> signer = publishRepo.publishConfig.getSigner();
                 if (signatureRequired && signer == null) {
                     throw new IllegalStateException("Repo " + publishRepo + " requires file signature but " +
                             "no signer has been defined on.");
                 }
                 IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
                     signer, resolver, descriptorOutputDir,
-                    publishRepo.getPublishConfig().isUniqueSnapshot(),
-                    publishRepo.getPublishConfig().getChecksumAlgos());
+                    publishRepo.publishConfig.isUniqueSnapshot(),
+                    publishRepo.publishConfig.getChecksumAlgos());
                 ivyPublisherForMaven.publish(moduleDescriptor, artifactLocator, pomMetadata);
                 count++;
                 JkLog.endTask();

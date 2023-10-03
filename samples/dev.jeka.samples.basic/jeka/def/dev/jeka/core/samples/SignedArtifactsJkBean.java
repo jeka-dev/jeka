@@ -82,10 +82,10 @@ public class SignedArtifactsJkBean extends JkBean {
     }
 
     private void configForLocalRepo(JkProjectPublication publication) {
-        JkRepo repo = JkRepo.of(dummyRepoPath)
-            .getPublishConfig()
+        JkRepo repo = JkRepo.of(dummyRepoPath);
+        repo.publishConfig
                 .setChecksumAlgos("sha1", "md5")
-                .setSignatureRequired(true).__;
+                .setSignatureRequired(true);
         publication.setRepos(repo.toSet());
     }
 

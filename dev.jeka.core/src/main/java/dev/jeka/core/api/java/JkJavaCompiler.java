@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -191,7 +190,7 @@ public final class JkJavaCompiler {
 
     private static boolean runOnTool(JkJavaCompileSpec compileSpec, JavaCompiler compiler, String[] toolOptions) {
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        List<File> files = JkUtilsPath.toFiles(compileSpec.getSources().withMatcher(JAVA_SOURCE_MATCHER).getFiles());
+        List<File> files = JkUtilsPath.toFiles(compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles());
         Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
         List<String> options = new LinkedList<>();
         options.addAll(Arrays.asList(toolOptions));
@@ -207,7 +206,6 @@ public final class JkJavaCompiler {
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
         JkLog.info("Compile using command " + process.getCommand());
-        Path workingDir = Optional.ofNullable(process.getWorkingDir()).orElse(Paths.get(""));
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> sourceFiles = compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles();
         sourceFiles.forEach(file -> sourcePaths.add(file.toString()));

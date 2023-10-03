@@ -150,14 +150,11 @@ class MasterBuild extends JkBean {
     private JkRepoSet publishRepo() {
         JkRepo snapshotRepo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(ossrhUser, ossrhPwd);
         JkGpg gpg = JkGpg.ofStandardProject(this.getBaseDir());
-        JkRepo releaseRepo =  JkRepo.ofMavenOssrhDeployRelease(ossrhUser, ossrhPwd,  gpg.getSigner(""))
-                .getPublishConfig()
-                    .setVersionFilter(jkVersion -> !jkVersion.isSnapshot()).__;
-                    //.setVersionFilter(jkVersion -> jkVersion.isDigitsOnly()).__;
-        JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka")
-                .getPublishConfig()
-                    .setVersionFilter(jkVersion -> !jkVersion.isSnapshot())
-                .__;
+        JkRepo releaseRepo =  JkRepo.ofMavenOssrhDeployRelease(ossrhUser, ossrhPwd,  gpg.getSigner(""));
+        releaseRepo.publishConfig
+                    .setVersionFilter(jkVersion -> !jkVersion.isSnapshot());
+        JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka");
+        githubRepo.publishConfig.setVersionFilter(jkVersion -> !jkVersion.isSnapshot());
         return  JkRepoSet.of(snapshotRepo, releaseRepo, githubRepo);
     }
 

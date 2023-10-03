@@ -129,10 +129,10 @@ public final class JkRepoSet {
     public JkRepoSet withDefaultSigner(UnaryOperator<Path> signer) {
         List<JkRepo> reposCopy = repos.stream()
                 .map(repo -> {
-                    if (repo.getPublishConfig().getSigner() == null
-                            && repo.getPublishConfig().isSignatureRequired()) {
+                    if (repo.publishConfig.getSigner() == null
+                            && repo.publishConfig.isSignatureRequired()) {
                         JkRepo repoCopy = repo.copy();
-                        repoCopy.getPublishConfig().setSigner(signer);
+                        repoCopy.publishConfig.setSigner(signer);
                         return repoCopy;
                     }
                     return repo;

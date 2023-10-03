@@ -116,7 +116,7 @@ public class JkProjectCompilation {
         }
     }
 
-    public void skipJavaCompiilation() {
+    public void skipJavaCompilation() {
         this.compileActions.remove(JAVA_SOURCES_COMPILE_ACTION);
     }
 

@@ -53,17 +53,30 @@ public final class JkRepo {
 
     private JkRepoCredentials credentials;
 
-    private JkRepoIvyConfig ivyConfig = new JkRepoIvyConfig(this);
+    /**
+     * Configuration specific to Ivy repository. Returns <code>null</code> if this configuration stands
+     * for a Maven repository.
+     */
+    public final JkRepoIvyConfig ivyConfig;
 
-    private JkPublishConfig publishConfig = new JkPublishConfig(this);
+    /**
+     * Configuration specific for repository for which, we want to publish on.
+     */
+    public final JkPublishConfig publishConfig;
 
     private Map<String, String> httpHeaders = new HashMap<>();
 
     public final boolean ivyRepo; // true if this repository is an Ivy one, false if it is a Maven one.
 
-    private JkRepo(URL url, boolean ivyRepo) {
+    private JkRepo(URL url, boolean ivyRepo, JkRepoIvyConfig ivyConfig, JkPublishConfig publishConfig) {
         this.url = url;
         this.ivyRepo = ivyRepo;
+        this.ivyConfig = ivyConfig;
+        this.publishConfig = publishConfig;
+    }
+
+    private JkRepo(URL url, boolean ivyRepo) {
+        this(url, ivyRepo, new JkRepoIvyConfig(), new JkPublishConfig());
     }
 
     /**
@@ -109,22 +122,22 @@ public final class JkRepo {
         } else {
             JkLog.trace("No Github token found to make credential on repo %s.", baseUrl);
         }
-        return of(baseUrl)
-                .setCredentials(JkRepoCredentials.of(username, pwd, "GitHub Package Registry"))
-                .getPublishConfig()
-                    .setUniqueSnapshot(false)
-                .__;
+        JkRepo repo = of(baseUrl)
+                .setCredentials(JkRepoCredentials.of(username, pwd, "GitHub Package Registry"));
+        repo.publishConfig.setUniqueSnapshot(false);
+        return repo;
     }
 
     /**
      * Creates an OSSRH repository for both deploying snapshot and download artifacts.
      */
     public static JkRepo ofMavenOssrhDownloadAndDeploySnapshot(String jiraId, String jiraPassword) {
-        return of(MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT)
-                .setCredentials(JkRepoCredentials.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"))
-                .getPublishConfig()
+        JkRepo repo = of(MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT)
+                .setCredentials(JkRepoCredentials.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"));
+        repo.publishConfig
                     .setUniqueSnapshot(false)
-                    .setVersionFilter(JkVersion::isSnapshot).__;
+                    .setVersionFilter(JkVersion::isSnapshot);
+        return repo;
     }
 
     /**
@@ -132,13 +145,14 @@ public final class JkRepo {
      */
     public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword,
                                                    UnaryOperator<Path> signer) {
-        return of(MAVEN_OSSRH_DEPLOY_RELEASE)
-                .setCredentials(jiraId, jiraPassword, "Sonatype Nexus Repository Manager")
-                .getPublishConfig()
-                    .setSignatureRequired(true)
-                    .setVersionFilter(version -> !version.isSnapshot())
-                    .setSigner(signer)
-                    .setChecksumAlgos("md5", "sha1").__;
+        JkRepo repo =  of(MAVEN_OSSRH_DEPLOY_RELEASE)
+                .setCredentials(jiraId, jiraPassword, "Sonatype Nexus Repository Manager");
+        repo.publishConfig
+                .setSignatureRequired(true)
+                .setVersionFilter(version -> !version.isSnapshot())
+                .setSigner(signer)
+                .setChecksumAlgos("md5", "sha1");
+        return repo;
     }
 
     /**
@@ -171,10 +185,7 @@ public final class JkRepo {
         return url;
     }
 
-    /**
-     * Returns configuration specific to Ivy repository. Returns <code>null</code> if this configuration stands
-     * for a Maven repository.
-     */
+
     public JkRepoIvyConfig getIvyConfig() {
         return this.ivyConfig;
     }
@@ -192,10 +203,6 @@ public final class JkRepo {
      */
     public JkRepoCredentials getCredentials() {
         return credentials;
-    }
-
-    public JkPublishConfig getPublishConfig() {
-        return publishConfig;
     }
 
     /**
@@ -260,10 +267,8 @@ public final class JkRepo {
     }
 
     public JkRepo copy() {
-        JkRepo result = new JkRepo(url, ivyRepo);
+        JkRepo result = new JkRepo(url, ivyRepo, ivyConfig.copy(), publishConfig.copy() );
         result.credentials = credentials;
-        result.ivyConfig = ivyConfig.copy(result);
-        result.publishConfig = publishConfig.copy(result);
         return result;
     }
 
@@ -346,14 +351,11 @@ public final class JkRepo {
 
         public static final String DEFAULT_IVY_IVY_PATTERN = "[organisation]/[module]/ivy-[revision].xml";
 
-        public final JkRepo __;
-
         private final List<String> artifactPatterns;
 
         private final List<String> ivyPatterns;
 
-        private JkRepoIvyConfig(JkRepo parent) {
-            this.__ = parent;
+        private JkRepoIvyConfig() {
             this.artifactPatterns = new LinkedList<>(JkUtilsIterable.listOf(DEFAULT_IVY_ARTIFACT_PATTERN));
             this.ivyPatterns = new LinkedList<>(JkUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN));
         }
@@ -386,8 +388,8 @@ public final class JkRepo {
             return this;
         }
 
-        private JkRepoIvyConfig copy(JkRepo parent) {
-            JkRepoIvyConfig result = new JkRepoIvyConfig(parent);
+        private JkRepoIvyConfig copy() {
+            JkRepoIvyConfig result = new JkRepoIvyConfig();
             result.artifactPatterns.clear();
             result.artifactPatterns.addAll(artifactPatterns);
             result.ivyPatterns.clear();
@@ -401,8 +403,6 @@ public final class JkRepo {
      */
     public static class JkPublishConfig {
 
-        public final JkRepo __;
-
         private Predicate<JkVersion> versionFilter = jkVersion -> true;
 
         private boolean signatureRequired;
@@ -412,10 +412,6 @@ public final class JkRepo {
         private Set<String> checksumAlgos = new HashSet<>();
 
         private UnaryOperator<Path> signer;
-
-        private JkPublishConfig(JkRepo parent) {
-            __ = parent;
-        }
 
         /**
          * Returns the filter used for this {@link JkPublishConfig}.
@@ -467,8 +463,8 @@ public final class JkRepo {
             return this;
         }
 
-        private JkPublishConfig copy(JkRepo parent) {
-            JkPublishConfig result = new JkPublishConfig(parent);
+        private JkPublishConfig copy() {
+            JkPublishConfig result = new JkPublishConfig();
             result.signer = signer;
             result.checksumAlgos = new HashSet<>(checksumAlgos);
             result.signatureRequired = signatureRequired;

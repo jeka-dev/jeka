@@ -107,12 +107,13 @@ public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 .putMainArtifact(jarFile, this::jar)
                 .putArtifact(JkProject.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
         artifactProducer.makeAllMissingArtifacts();
+        mavenRepo.publishConfig.setSigner(pgp.getSigner(""));
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)
                 .configureDependencies(deps -> prodDependencies)
                 .setModuleId(versionedModule.getCoordinate().getModuleId().toString())
                 .setVersion(versionedModule.getCoordinate().getVersion().getValue())
-                .addRepos(mavenRepo.getPublishConfig().setSigner(pgp.getSigner("")).__)
+                .addRepos(mavenRepo)
                 .publish();
         JkIvyPublication.of()
                 .setModuleId(versionedModule.getCoordinate().getModuleId().toString())

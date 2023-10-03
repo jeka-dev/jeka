@@ -17,56 +17,25 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/bcpg-jdk15on-1.70.jar!/"/>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/junit-platform-reporting-1.8.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/bcprov-jdk15on-1.70.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/classgraph-4.8.162.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/hamcrest-core-1.3.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/sources/hamcrest-core-1.3-sources.jar!/"/>
-                </SOURCES>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/ivy-2.5.0.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/sources/ivy-2.5.0-sources.jar!/"/>
-                </SOURCES>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
                     <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/junit-4.13.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
+        <orderEntry exported="" scope="COMPILE" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/bcpg-jdk15on-1.70.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -84,15 +53,6 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/junit-platform-engine-1.8.1.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
                     <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/junit-platform-launcher-1.8.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
@@ -102,7 +62,7 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/junit-platform-reporting-1.8.1.jar!/"/>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/junit-platform-engine-1.8.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -111,7 +71,38 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/project-libs/test/jdepend-2.9.1.jar!/"/>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/ivy-2.5.0.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/sources/ivy-2.5.0-sources.jar!/"/>
+                </SOURCES>
+            </library>
+        </orderEntry>
+        <orderEntry exported="" scope="COMPILE" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/hamcrest-core-1.3.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/sources/hamcrest-core-1.3-sources.jar!/"/>
+                </SOURCES>
+            </library>
+        </orderEntry>
+        <orderEntry exported="" scope="COMPILE" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/classgraph-4.8.162.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
+        <orderEntry exported="" scope="COMPILE" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/compile-only/bcprov-jdk15on-1.70.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -129,6 +120,15 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
+                    <root url="jar://$MODULE_DIR$/jeka/project-libs/test/jdepend-2.9.1.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
+        <orderEntry exported="" scope="COMPILE" type="module-library">
+            <library>
+                <CLASSES>
                     <root url="jar://$MODULE_DIR$/jeka/project-libs/test/opentest4j-1.2.0.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
@@ -138,7 +138,7 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/boot/commonmark-0.11.0.jar!/"/>
+                    <root url="jar://$MODULE_DIR$/jeka/boot/commons-compress-1.21.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -147,7 +147,7 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$MODULE_DIR$/jeka/boot/commons-compress-1.21.jar!/"/>
+                    <root url="jar://$MODULE_DIR$/jeka/boot/commonmark-0.11.0.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
