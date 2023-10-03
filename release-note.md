@@ -1,3 +1,6 @@
+# 0.10.24
+- Polish repo api
+
 # 0.10.23
 - Take global.properties in account for defining repos downloading core dependencies
 - upgrade classgraph version
