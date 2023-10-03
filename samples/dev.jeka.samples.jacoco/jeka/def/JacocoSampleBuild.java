@@ -20,7 +20,7 @@ public class JacocoSampleBuild extends JkBean {
 
     JacocoJkBean jacoco = getRuntime().getBean(JacocoJkBean.class).setHtmlReport(true);
 
-    IntellijJkBean intellij = getRuntime().getBean(IntellijJkBean.class);
+    final IntellijJkBean intellij = getBean(IntellijJkBean.class);
 
     protected JacocoSampleBuild() {
         jacoco.configureProject = true;
@@ -28,7 +28,7 @@ public class JacocoSampleBuild extends JkBean {
         jacoco.jacocoVersion = "0.8.7";
         intellij.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
         intellij.configureIml(this::configureIml);
-        intellij.jekaModuleName = "dev.jeka.core";
+
     }
 
     private void configure(JkProject project) {
@@ -47,6 +47,7 @@ public class JacocoSampleBuild extends JkBean {
     private void configureIml(JkIml iml) {
        iml.component
                .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco");
+        iml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
     }
 
     public static void main(String[] args) {

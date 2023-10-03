@@ -2,6 +2,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.samples.SimpleProjectJkBean;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectProject;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 /**
@@ -14,6 +15,11 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 public class FatJarJkBean extends JkBean {
 
     ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
+
+    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+            .configureIml(jkIml -> {
+                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+            });
     
     @JkInjectProject("../dev.jeka.samples.basic")
     private SimpleProjectJkBean sampleBuild;

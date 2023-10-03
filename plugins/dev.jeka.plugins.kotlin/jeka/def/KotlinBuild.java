@@ -10,10 +10,10 @@ class KotlinBuild extends JkBean {
 
     final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
-    KotlinBuild() {
-        IntellijJkBean intellij = getBean(IntellijJkBean.class);
-        intellij.jekaModuleName = "dev.jeka.core";
-    }
+    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+            .configureIml(jkIml -> {
+                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+            });
 
     private void configure(JkProject project) {
         project.flatFacade()

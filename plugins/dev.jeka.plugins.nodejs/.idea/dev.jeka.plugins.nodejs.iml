@@ -14,17 +14,7 @@
         </content>
         <orderEntry type="inheritedJdk"/>
         <orderEntry forTests="false" type="sourceFolder"/>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/distributions/0.10.22/dev.jeka.jeka-core.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/distributions/0.10.22/dev.jeka.jeka-core-sources.jar!/"/>
-                </SOURCES>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" module-name="dev.jeka.core" scope="TEST" type="module"/>
+        <orderEntry exported="" module-name="dev.jeka.core"
+            scope="COMPILE" type="module"/>
     </component>
 </module>

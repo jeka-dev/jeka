@@ -10,9 +10,10 @@ public class NodeJsBuild extends JkBean {
 
     private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
 
-    NodeJsBuild() {
-        getBean(IntellijJkBean.class).jekaModuleName = "dev.jeka.core";
-    }
+    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+            .configureIml(jkIml -> {
+                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+            });
 
     private void configure(JkProject project) {
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()

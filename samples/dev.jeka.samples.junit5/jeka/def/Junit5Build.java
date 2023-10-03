@@ -4,6 +4,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -34,6 +35,11 @@ import java.nio.file.Path;
 class Junit5Build extends JkBean {
 
     final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
+
+    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+            .configureIml(jkIml -> {
+                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+            });
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option

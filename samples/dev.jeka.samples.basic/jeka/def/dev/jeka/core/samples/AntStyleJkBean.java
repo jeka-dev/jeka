@@ -18,6 +18,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -32,6 +33,11 @@ import java.util.List;
  */
 @JkInjectClasspath("org.apache.httpcomponents:httpclient:4.5.6")
 public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
+
+    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+            .configureIml(jkIml -> {
+                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+            });
 
     Path src = getBaseDir().resolve("src/main/java");
     Path test = getBaseDir().resolve("src/test/java");

@@ -5,6 +5,7 @@ import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.plugins.sonarqube.JkSonarqube;
 import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
@@ -20,6 +21,11 @@ class SonarqubeSampleBuild extends JkBean {
     private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class);
 
     private final SonarqubeJkBean sonarqubePlugin = getBean(SonarqubeJkBean.class);
+
+    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+            .configureIml(jkIml -> {
+                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+            });
 
     SonarqubeSampleBuild() {
         projectPlugin.lately(project ->
