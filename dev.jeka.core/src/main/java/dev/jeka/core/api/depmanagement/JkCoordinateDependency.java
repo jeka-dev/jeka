@@ -5,6 +5,8 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A dependency on an external module supposed to be located in a binary repository. <p>
@@ -55,8 +57,8 @@ public final class JkCoordinateDependency implements JkTransitivityDependency {
         return of(JkModuleId.of(moduleId).toCoordinate(version));
     }
 
-    public static JkCoordinateDependency of(String description) {
-        return of(JkCoordinate.of(description));
+    public static JkCoordinateDependency of(String coordinate) {
+        return of(JkCoordinate.of(coordinate));
     }
 
     /**
@@ -96,6 +98,18 @@ public final class JkCoordinateDependency implements JkTransitivityDependency {
      */
     public JkCoordinateDependency andExclusion(String moduleId) {
         return andExclusions(JkDependencyExclusion.of(moduleId));
+    }
+
+
+    /**
+     * Returns a JkModuleDependency identical to this one but adding the
+     * specified exclusion.
+     */
+    public JkCoordinateDependency andExclusions(String...  moduleIds) {
+        List<JkDependencyExclusion> exclusions = Stream.of(moduleIds)
+                .map(JkDependencyExclusion::of)
+                .collect(Collectors.toList());
+        return andExclusions(exclusions);
     }
 
     /**

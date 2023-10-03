@@ -1,6 +1,3 @@
-![Build Status](https://github.com/jerkar/jacoco-plugin/actions/workflows/push-master.yml/badge.svg)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.jeka/jacoco-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.jeka/protobuf-plugin) <br/>
-
 # Jeka library/plugin for Jacoco
 
 Plugin to use the [Jacoco](https://www.eclemma.org/jacoco) coverage tool in your Java builds
@@ -10,7 +7,7 @@ Plugin to use the [Jacoco](https://www.eclemma.org/jacoco) coverage tool in your
 Just declare the plugin in your build class.
 
 ```java
-@JkDefClasspath("dev.jeka:jacoco-plugin")
+@JkImportClasspath("dev.jeka:jacoco-plugin")
 public class Build extends JkClass {
 
     JacocoJkBean jacoco = getPlugin(JacocoJkBean.class);

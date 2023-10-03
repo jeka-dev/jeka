@@ -83,7 +83,7 @@ public final class JkCoordinate {
      *
      * Version can be a '?' if it is unspecified or a '+' to take the highest existing version.
      */
-    public static JkCoordinate of(String description) {
+    public static JkCoordinate of(@JkDepSuggest String description) {
         final String[] strings = description.split( ":");
         final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of \n" +
                 "  group:name \n" +

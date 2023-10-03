@@ -23,7 +23,7 @@ import dev.jeka.core.api.project.JkProject;
 @JkDoc("A simple example to illustrate KBean concept.")
 public class SimpleJkBean extends JkBean {
 
-    ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     @JkDoc("Version of junit-jupiter to use for compiling and running tests")
     public String junitVersion = "5.8.1";

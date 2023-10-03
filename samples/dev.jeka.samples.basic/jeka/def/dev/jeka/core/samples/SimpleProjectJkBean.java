@@ -23,7 +23,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class SimpleProjectJkBean extends JkBean {
 
-    public final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+    public final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
 

@@ -57,7 +57,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     private String outputDir = "jeka/output";
 
-    private JkJavaVersion jvmTargetVersion = DEFAULT_JAVA_VERSION;
+    private JkJavaVersion jvmTargetVersion;
 
     private String sourceEncoding = DEFAULT_ENCODING;
 
@@ -199,7 +199,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
             .append("Production sources : " + compilation.layout.getInfo()).append("\n")
             .append("Test sources : " + testing.compilation.layout.getInfo()).append("\n")
-            .append("Java Source Version : " + jvmTargetVersion + "\n")
+            .append("Java Source Version : " + (jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )+ "\n")
             .append("Source Encoding : " + sourceEncoding + "\n")
             .append("Source file count : " + compilation.layout.resolveSources()
                     .count(Integer.MAX_VALUE, false) + "\n")

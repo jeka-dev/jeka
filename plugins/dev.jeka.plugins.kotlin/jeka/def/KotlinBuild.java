@@ -8,10 +8,11 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class KotlinBuild extends JkBean {
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     KotlinBuild() {
-        getBean(IntellijJkBean.class).jekaModuleName = "dev.jeka.core";
+        IntellijJkBean intellij = getBean(IntellijJkBean.class);
+        intellij.jekaModuleName = "dev.jeka.core";
     }
 
     private void configure(JkProject project) {

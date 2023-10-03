@@ -8,9 +8,7 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Exported methods to integrate with external tool.
@@ -69,13 +67,19 @@ public final class JkExternalToolApi {
     }
 
     public static Path getImlFile(Path moduleDir) {
-        return JkImlGenerator.getImlFilePath(moduleDir);
+        return getImlFile(moduleDir, false);
+    }
+
+    public static Path getImlFile(Path moduleDir, boolean inJekaSubDir) {
+        return JkImlGenerator.getImlFilePath(moduleDir, inJekaSubDir);
     }
 
     public static Map<String, String> getCmdShortcutsProperties(Path projectDir) {
         Map<String, String> result = JkRuntime.readProjectPropertiesRecursively(projectDir)
                 .getAllStartingWith(JkConstants.CMD_PROP_PREFIX, false);
-        result.remove(JkConstants.CMD_APPEND_PROP.substring(JkConstants.CMD_PROP_PREFIX.length()));
+        List<String> keys = new LinkedList<>(result.keySet());
+        keys.stream().filter(key -> key.startsWith(JkConstants.CMD_APPEND_SUFFIX_PROP))
+                        .forEach(key -> result.remove(key));
         return new TreeMap(result);
     }
 
@@ -90,6 +94,10 @@ public final class JkExternalToolApi {
             result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));
         }
         return result;
+    }
+
+    public static List<Path> getDefDependenciesClasspath(Path projectDir) {
+        return new EngineClasspathCache(projectDir, null).readCachedResolvedClasspath().getEntries();
     }
 
 }

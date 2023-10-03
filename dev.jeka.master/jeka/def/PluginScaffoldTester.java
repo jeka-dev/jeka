@@ -20,7 +20,8 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
     }
 
     void run() {
-        Path dir = scaffold("-lsu scaffold#run springboot#  springboot#scaffoldDefClasspath="
+        Path dir = scaffold("-lsu scaffold#run springboot# springboot#springbootVersion=2.7.7" +
+                        " springboot#scaffoldDefClasspath="
                         + sprinbootBluginJar + " @" + sprinbootBluginJar,
                 "project#pack -lsu", false);
         String jdk17 = properties.get("jeka.jdk.17");

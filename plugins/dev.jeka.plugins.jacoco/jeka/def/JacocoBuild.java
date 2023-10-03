@@ -8,7 +8,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class JacocoBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).configure(this::configure);
+    private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
 
     private void configure(JkProject project) {
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()

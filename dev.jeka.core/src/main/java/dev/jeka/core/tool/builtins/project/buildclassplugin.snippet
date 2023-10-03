@@ -7,7 +7,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class Build extends JkBean {
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     private void configure(JkProject project) {
         project.setJvmTargetVersion(JkJavaVersion.V8);

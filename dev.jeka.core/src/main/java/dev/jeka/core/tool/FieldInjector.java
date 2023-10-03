@@ -37,7 +37,7 @@ final class FieldInjector {
             if (injectProperty != null) {
                 String propertyName = injectProperty.value();
                 if (properties.get(propertyName) == null) {
-                    JkLog.warn("No property '%s' defined for injecting in field %s.", propertyName, field);
+                    JkLog.info("No property '%s' defined for injecting in field %s", propertyName, field);
                 }
                 String propertyValue = properties.get(propertyName);
                 final Class<?> type = field.getType();
@@ -49,6 +49,11 @@ final class FieldInjector {
                             + propertyValue + "' : " + e.getMessage());
                 }
                 JkUtilsReflect.setFieldValue(target, field, value);
+            } else {
+                Object fieldValue = JkUtilsReflect.getFieldValue(target, field);
+                if (fieldValue != null) {
+                    injectAnnotatedProperties(fieldValue, properties);
+                }
             }
         }
     }

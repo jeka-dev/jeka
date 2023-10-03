@@ -9,13 +9,15 @@ See [here](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-prop
 
 ### I'm behind a proxy, how should I configure Jeka ?
 
-JeKa just leverage the standard Java mechanism to handle proxy. For example, You can :
-* Set the `JAVA_TOOL_OPTIONS` environment variable as `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`
-* Or specify proxy properties to the jeka command line, as :  `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`
+JeKa just leverages the standard Java mechanism to handle proxy. For example, You can :
+
+- Set the `JAVA_TOOL_OPTIONS` environment variable as `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`
+- Or specify proxy properties to the jeka command line, as :  `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`
 
 See [here](https://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be-used-by-the-jvm) for more details on arguments.
 
 ### Can def classes be hosted in a separate project than the build code ?
+
 Yes. If you prefer for your Jeka code to lie in a distinct project, create a Jeka project in a sibling 
 folder and mention where is located to the build project.
 
@@ -25,9 +27,21 @@ Path projectPath = this.baseDir().resolve("../myProject");
 project.setBaseDir(projectPath);
       ...
 ```
- 
 
+### How can I use Maven or Gradle in conjunction with JeKa in Intellij ?
 
+Maven, Gradle and other build tools manage the intellij dependencies integration by their own.
+This means that JeKa can interfere with this tool by generating .iml files in the module supposed by this tool.
+
+The solution consist in creating an intellij module at [myproject]/jeka location. For this :
+
+- Add `intellij#dedicatedJekaModule=true` in file [myproject]/jeka/local.properties.
+- Run `jeka intellij#iml` in working dir [myproject] : this will generate a [myproject]/jeka/myproject-jeka.iml file
+- Go to menu **Project structure..."
+  - Edit [myproject] module to remove *jeka/def* from *Test Source Folders*
+  - Import new module by selecting [myproject]/jeka/myproject-jeka.iml
+
+That's it. You can now work with Jeka as usual, still using [myproject] as working dir.
 
 ### My JkClass does not compile, so I can't invoke any Jeka method as 'scaffold#run'. What can I do ?
 
@@ -51,7 +65,7 @@ If code must be compiled on a another JDK version, you can specify JDK path for 
 Simply mention it as option, for example in your _[JEKA HOME]/options.properties_ file.
 
 ```
-jeka.jdk.9=/software/jdk9
+jeka.jdk.19=/software/jdk19
 ```
 
 This way, if one of your project source code is declared to be in a specific Java version, the relevant JDK version will be picked up automatically.
@@ -67,10 +81,7 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 public class Build extends JkBean {
     
     ...
-    project.getConstruction()
-            .getCompilation()
-                .getCompiler()
-                    .setCompilerTool(new EclipseCompiler());
+    project.compilation.compiler.setCompilerTool(new EclipseCompiler());
 }
 ```
 

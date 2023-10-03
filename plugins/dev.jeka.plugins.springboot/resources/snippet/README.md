@@ -1,10 +1,17 @@
+# My project
 
-## Spring-Boot
+## Build
 
-*Springboot* KBean configures *project* KBean to produce a bootable jar on `project#pack`.
-The default artifact produced by *project* KBean is the bootable jar.
+This springboot project is built using [JeKa](https://jeka.dev) and its [Springboot plugin](https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.springboot).
+
+To create a bootable jar, execute :
+```shell
+./jekaw project#pack
+```
 
 To run the bootable jar built by `project#pack`, execute :
 ```shell
 ./jekaw project#runJar
 ```
+
+

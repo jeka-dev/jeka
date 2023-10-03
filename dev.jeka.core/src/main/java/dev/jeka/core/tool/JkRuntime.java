@@ -227,7 +227,7 @@ public final class JkRuntime {
         Path projectPropertiesFile = baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
         JkProperties result = JkProperties.EMPTY;
         if (Files.exists(projectPropertiesFile)) {
-            result = JkProperties.ofFile(projectPropertiesFile);
+            result = JkProperties.ofFile(JkUtilsPath.relativizeFromWorkingDir(projectPropertiesFile));
         }
         Path parentProject =baseDir.getParent();
         if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.JEKA_DIR))

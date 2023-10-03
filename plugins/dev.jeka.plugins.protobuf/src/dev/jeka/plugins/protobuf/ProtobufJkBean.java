@@ -1,5 +1,6 @@
 package dev.jeka.plugins.protobuf;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
@@ -19,11 +20,13 @@ public class ProtobufJkBean extends JkBean {
     public String extraProtocOptions = "";
 
     @JkDoc("The version of com.google.protobuf:protobuf-java to include in compile-time dependencies. If empty or null," +
-            " this dependencies won't be included automatically.")
+            " this dependencies won't be included automatically. " +
+            "The version will be resolved against coordinate 'com.google.protobuf:protobuf-java'")
+    @JkDepSuggest(versionOnly = true, hint = "com.google.protobuf:protobuf-java:")
     public String protobufVersion = "3.21.12";
 
     ProtobufJkBean() {
-        getBean(ProjectJkBean.class).configure(this::configure);
+        getBean(ProjectJkBean.class).lately(this::configure);
     }
 
     private void configure(JkProject project) {

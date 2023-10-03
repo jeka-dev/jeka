@@ -11,7 +11,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 public class SpringbootBuild extends JkBean {
 
-    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class).configure(this::configure);
+    final ProjectJkBean projectBean = getRuntime().getBean(ProjectJkBean.class).lately(this::configure);
 
     private void configure(JkProject project) {
        project

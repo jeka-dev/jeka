@@ -1,9 +1,6 @@
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
-import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -50,6 +47,7 @@ public final class SpringbootJkBean extends JkBean {
     public static final String SPRING_BOOT_VERSION_MANIFEST_ENTRY = "Spring-Boot-Version";
 
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
+    @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
     private String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
 
     @JkDoc("If true, create a bootable jar artifact.")
@@ -67,10 +65,10 @@ public final class SpringbootJkBean extends JkBean {
     private boolean useSpringRepos = true;
 
     @JkDoc(hide = true, value = "")
-    public final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    public final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     SpringbootJkBean() {
-        getBean(ScaffoldJkBean.class).configure(this::configure);
+        getBean(ScaffoldJkBean.class).lately(this::configure);
     }
 
     public SpringbootJkBean setSpringbootVersion(String springbootVersion) {
@@ -110,7 +108,7 @@ public final class SpringbootJkBean extends JkBean {
         }
         if (this.createWarFile) {
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(path, project);
-            artifactProducer.putArtifact("", "war", warMaker);
+            artifactProducer.putArtifact(JkArtifactId.MAIN_ARTIFACT_NAME, "war", warMaker);
         }
 
         // add original jar artifact
@@ -118,13 +116,24 @@ public final class SpringbootJkBean extends JkBean {
             Consumer<Path> makeBinJar = project.packaging::createBinJar;
             artifactProducer.putArtifact(ORIGINAL_ARTIFACT, makeBinJar);
         }
+
+        // To deploy springboot app in a container, we don't need to create a jar
+        // This is more efficient to keep the structure exploded to have efficient image layering.
+        // In this case, just copy manifest in class dir is enough.
+        if (!createBootJar && !createOriginalJar && !createWarFile) {
+            artifactProducer.putMainArtifact(project.packaging::includeManifestInClassDir);
+        }
     }
 
     private void configure (JkScaffolder scaffolder) {
         String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/Build.java"));
         String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
         code = code.replace("${dependencyDescription}", defClasspath);
-        code = code.replace("${springbootVersion}", latestSpringbootVersion(projectBean.getProject()));
+        String version = (DEFAULT_SPRINGBOOT_VERSION.equals(this.springbootVersion)
+                    || JkUtilsString.isBlank(springbootVersion))
+                ? latestSpringbootVersion(projectBean.getProject())
+                : springbootVersion;
+        code = code.replace("${springbootVersion}", springbootVersion);
         final String jkClassCode = code;
         if (this.projectBean.scaffold.template != ProjectJkBean.JkScaffoldOptions.Template.CODE_LESS) {
             scaffolder.setJekaClassCodeProvider(() -> jkClassCode);

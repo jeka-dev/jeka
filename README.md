@@ -16,7 +16,7 @@ such as **building projects** with various technologies, creating **pipelines** 
 
 JeKa aims at bridging **dev** and **ops** by allowing the entire process to be implemented in a single language,
 for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, *testing*, 
-*deploying containers*, *provisioning platforms*.
+*deploying containers* and *provisioning platforms*.
 
 Generally, devOps tasks are implemented using scripts or configuration files with specific template languages around, 
 resulting in a proliferation of languages and technologies that increase cognitive load 
@@ -42,7 +42,7 @@ These steps typically include building, testing, publishing, and deploying the a
 This is quite straightforward with JeKa: you only have to code public methods in Java or Kotlin and you can invoke them simply from the command line without worrying about compilation (JeKa will take care of it behind the scenes).
 
 You can also use any library in your code by declaring its Maven coordinates in an annotation, 
-JeKa will take care of fetching and resolving dependencies for you.
+JeKa will fetch and resolve dependencies for you.
 
 Method execution can be parameterized using property files, OS environment variables, or command line arguments. 
 The parameters accept various types such as string, numbers, file paths, booleans, enumerations, and composite objects.
@@ -56,6 +56,8 @@ present on the local drive.
 
 By adding annotations, pipeline code can provide context and explanations for its methods and fields, 
 which will be visible when calling the help command.
+
+See [Pipeline step to create a Github release](dev.jeka.master/jeka/def/github/Github.java)
 
 
 ## Build Projects
@@ -85,6 +87,8 @@ Some cloud platforms such as Azure or AWS propose solutions to implement Infrast
 They provide tutorials on how to use these solutions with Maven, but it's possible to use Jeka instead if you prefer to avoid using Maven.
 
 Alternatively, you can use a tool such as *Pulumi* and integrate it into a Jeka pipeline using its command line interface.
+
+See [Project deployed on Kubernetes](https://github.com/jeka-dev/working-examples/tree/master/kubernetes)
 
 # What makes JeKa User Friendly ?
 

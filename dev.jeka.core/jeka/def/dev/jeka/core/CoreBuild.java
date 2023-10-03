@@ -39,7 +39,7 @@ public class CoreBuild extends JkBean {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).configure(this::configure);
+    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     public boolean runIT;
 

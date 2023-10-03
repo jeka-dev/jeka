@@ -13,6 +13,9 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 import dev.jeka.plugins.jacoco.JacocoJkBean;
 import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
+import github.Github;
+
+import java.io.IOException;
 
 class MasterBuild extends JkBean {
 
@@ -22,11 +25,14 @@ class MasterBuild extends JkBean {
     @JkInjectProperty("OSSRH_PWD")
     public String ossrhPwd;
 
+    @JkInjectProperty("GITHUB_TOKEN")
+    public String githubToken;
+
     public boolean runSamples = true;
 
     public boolean useJacoco = false;
 
-    final NexusJkBean nexus = getBean(NexusJkBean.class).configure(this::configure);
+    final NexusJkBean nexus = getBean(NexusJkBean.class).lately(this::configure);
 
     final GitJkBean git = getBean(GitJkBean.class);
 
@@ -57,7 +63,7 @@ class MasterBuild extends JkBean {
     private JacocoJkBean coreJacocoBean;
 
     MasterBuild()  {
-        git.projectVersionSupplier.on = false;
+        git.configureProjectVersion = false;
         coreBuild.runIT = true;
         getImportedBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
@@ -69,7 +75,7 @@ class MasterBuild extends JkBean {
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
-    public void make() {
+    public void make() throws IOException {
         JkLog.startTask("Building core and plugins");
         getImportedBeans().get(ProjectJkBean.class, false).forEach(bean -> {
             JkLog.startTask("Running KBean " + bean);
@@ -96,14 +102,21 @@ class MasterBuild extends JkBean {
         }
         String branch = JkGitProcess.of().getCurrentBranch();
         if (branch.equals("master") && ossrhUser != null) {
-            JkLog.startTask("Publishing");
+            JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publish);
             closeAndReleaseRepo();
             JkLog.endTask();
+            JkLog.startTask("Creating GitHub Release");
+            Github github = new Github();
+            github.ghToken =githubToken;
+            github.publishGhRelease();
+            JkLog.endTask();;
+
         }
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
             coreBuild.getBean(SonarqubeJkBean.class).run();
         }
+        publishLocal();;
     }
 
     @JkDoc("Convenient method to set Posix permission for all jekaw files on git.")
@@ -149,13 +162,12 @@ class MasterBuild extends JkBean {
     }
 
     private void applyToSlave(ProjectJkBean projectJkBean) {
-        if (!git.projectVersionSupplier.version().isSnapshot()) {     // Produce javadoc only for release
+        if (!git.version().isSnapshot()) {     // Produce javadoc only for release
             projectJkBean.pack.javadoc = true;
         }
-        projectJkBean.configure(project -> {
-                git.projectVersionSupplier.configure(project, false);
+        projectJkBean.lately(project -> {
+                git.handleVersioning(project, false);
                 project.publication
-                    .setVersion(git.projectVersionSupplier::versionAsText)
                     .setRepos(this.publishRepo())
                     .maven
                         .pomMetadata
@@ -181,7 +193,7 @@ class MasterBuild extends JkBean {
         getImportedBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publishLocal);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         JkInit.instanceOf(MasterBuild.class, args).make();
     }
 
@@ -193,7 +205,7 @@ class MasterBuild extends JkBean {
 
     static class ShowVersion {
         public static void main(String[] args) {
-            System.out.println(JkInit.instanceOf(GitJkBean.class, args).projectVersionSupplier.version());
+            System.out.println(JkInit.instanceOf(GitJkBean.class, args).version());
         }
     }
 

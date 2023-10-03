@@ -176,6 +176,24 @@ public class JkProjectPackaging {
                 .makeJar(target);
     }
 
+    /**
+     * This method is meant to be consumed by an artifact producer that does not
+     * produce artifact file itself (that's why the <code>target</code> parameter is not used.
+     * It Just copies the manifest in the classDir director.
+     *
+     * @param target Not used. Just here co be used as a {@link Consumer<Path>}
+     */
+    public void includeManifestInClassDir(Path target) {
+        project.compilation.runIfNeeded();
+        project.testing.runIfNeeded();
+        Path classDir = project.compilation.layout.resolveClassDir();
+        if (!Files.exists(classDir)) {
+            JkLog.warn("No class dir found.");
+        }
+        addManifestDefaults();
+        manifest.writeToStandardLocation(project.compilation.layout.resolveClassDir());
+    }
+
     public void createFatJar(Path target) {
         project.compilation.runIfNeeded();
         project.testing.runIfNeeded();

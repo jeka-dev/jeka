@@ -1,5 +1,11 @@
 package dev.jeka.core.api.utils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Utility class for dealing with generic Object class instances.
  *
@@ -61,6 +67,40 @@ public final class JkUtilsObject {
         } catch (IllegalArgumentException | NullPointerException e) {
             return null;
         }
+    }
+
+    /**
+     * Copies non null public instance fields for specified overrider instance into the specified source one.
+     * The copy is recursive for fields which have themselves public instance fields.
+     */
+    public static <T> void copyNonNullPublicFieldsInto(T source, T overrider) {
+        List<Field> fields = getInstancePublicField(source.getClass());
+        for (Field field : fields) {
+            Object overriderValue = JkUtilsReflect.getFieldValue(overrider, field);
+            if (overriderValue != null) {
+                Object sourceFieldValue = JkUtilsReflect.getFieldValue(source, field);
+                if (sourceFieldValue == null) {
+                    JkUtilsReflect.setFieldValue(source, field, overriderValue);
+                    continue;
+                }
+                if (sourceFieldValue == null) {
+                    continue;
+                }
+                // both field values are not null
+                boolean isTerminal = getInstancePublicField(sourceFieldValue.getClass()).isEmpty();
+                if (isTerminal) {
+                    JkUtilsReflect.setFieldValue(source, field, overriderValue);
+                } else {
+                    copyNonNullPublicFieldsInto(sourceFieldValue, overriderValue);
+                }
+            }
+        }
+    }
+
+    private static List<Field> getInstancePublicField(Class clazz) {
+        return Arrays.stream(clazz.getFields())
+                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                .collect(Collectors.toList());
     }
 
 }

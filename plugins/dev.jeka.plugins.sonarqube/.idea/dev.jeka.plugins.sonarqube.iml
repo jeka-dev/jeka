@@ -7,13 +7,13 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/jeka/def" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/jeka/output/generated_sources/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="dev.jeka.core" exported="" />
+    <orderEntry type="module" module-name="dev.jeka.core" />
   </component>
 </module>

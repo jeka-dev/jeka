@@ -83,7 +83,7 @@ public class JkRepoPropertiesTest {
         map.put("java.home", "iiii");
         JkProperties props = JkProperties.ofSysPropsThenEnv()
                 .withFallback(JkProperties.ofMap("map", map));
-        System.out.println(props.toKeyValueString());
+        System.out.println(props.toKeyValueString(""));
     }
 
     @Test

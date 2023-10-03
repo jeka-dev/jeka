@@ -5,25 +5,31 @@
 
 [Jeka](https://jeka.dev) plugin to build Spring Boot applications with minimal effort. <br/>
 
-## Scaffold a Springboot project
+## Create a new Springboot project
 
-Execute command line : `jeka scaffold#run scaffold#wrapper @dev.jeka:springboot-plugin springboot#` 
+To create a new project from scratch, execute :
+Execute command line : 
+```shell
+jeka scaffold#run scaffold#wrapper @dev.jeka:springboot-plugin springboot#
+``` 
+!!!
+  Note: you need to have installed JeKa on your machine to execute this command line.
+  Alternatively, Jeka Ide for IntelliJ does not required to have Jeka installed£
 
-In Jeka IDE, you can just __right-click__ on module root folder, then __scaffold... | Springboot__
 
-## How to Use declaratively 
+## Configure declaratively 
 
 Add the following in your *local.properties* file
 
 ```properties
-jeka.cmd._append=@dev.jeka:jacoco-plugin springboot#
+jeka.cmd._append=@dev.jeka:springboot-plugin springboot#
 springboot#springbootVersion=3.0.1
 ```
 This will add *Springboot Plugin* to *Jeka* classpath, and instantiate *springboot* KBean.
 This has the effect to modify the *project* in such this produces a bootable jar or 
 deployable *war* archive.
 
-To add needed dependencies, edit the *dependencies.txt* file as follows :
+To add needed dependencies, edit the *project-dependencies.txt* file as follows :
 ```text
 ==== COMPILE ====
 org.springframework.boot:spring-boot-starter-web
@@ -32,7 +38,12 @@ org.springframework.boot:spring-boot-starter-web
 org.springframework.boot:spring-boot-starter-test
 ```
 
-## Writing the build class manually
+To display available options, execute :
+```shell
+./jekaw springboot#help
+```
+
+## Configure with build code
 
 Just declare the plugin in your Jeka class (in _[project Dir]/jeka/def_ ) as above :
 
@@ -43,8 +54,8 @@ class Build extends JkBean {
     SpringbootJkBean springbootBean = getJkBean(SpringbootJkBean.class);
 
     Build() {
-        springbootBean.springbootVersion = "3.0.1";
-        springbootBean.projectBean().configure(this::configure);
+        springbootBean.springbootVersion = "3.0.5";
+        springbootBean.projectBean.lately(this::configure);
     }
 
     private void configure(JkProject project) {
@@ -59,23 +70,17 @@ class Build extends JkBean {
 
 }
 ```
+Note : 
+  You don't need to repeat what has been configured declaratively. If you have declared, springboot plugin 
+  and dependencies in *local.properties* and *project-dependencies.txt*, you don't need to repeat it in the build code.
 
-
-Running the main method or executing `jeka project#pack` performs :
-
-* Compilation and tests run
+Execute`jeka project#pack` to make the bootable jar file. This command processes :
+* Compilation and tests
 * Generation of the original binary jar along its sources jar
-* Generation of the executable jar
+* Generation of the bootable jar
 
-This plugin reads the Springboot pom/bom for the specified version and enrich the _project_ plugin with dependency version provider according the pom. It also instructs java plugin to produce a workable springboot jar instead of the vanilla jar. 
+Springboot plugin also provides convenient class constants to declare usual dependencies used in springboot projects.
 
-Utility methods are provided if you want to construct your own springboot jar and dependency version provider without embracing the plugin mechanism.
-
-### Adding extra dependencies
- 
-Springboot plugin provides class constants to declare usual dependencies used in springboot projects. 
-It adds great comfort when picking some Spring dependencies.
- 
 ```java
     ...
     .configureCompileDeps(deps -> deps
@@ -88,3 +93,17 @@ It adds great comfort when picking some Spring dependencies.
     );    
 }
 ```
+
+## How does it work ?
+
+This plugin contains a KBean (`SpringbootJkBean`) that :
+  * Reads the Springboot pom/bom for the specified version. 
+    * Configure the _project_ KBean (`ProjectJkBean`) such as :
+        * The springboot _bom_ is added to project dependencies
+        * The produced jar is a bootable jar.
+
+Utility methods are also provided if you want to construct your own springboot jar and configure dependencies without 
+embracing the plugin mechanism.
+
+ 
+

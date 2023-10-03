@@ -16,7 +16,7 @@ import java.nio.file.Path;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
 public class JacocoSampleBuild extends JkBean {
 
-    ProjectJkBean project= getBean(ProjectJkBean.class).configure(this::configure);
+    ProjectJkBean project= getBean(ProjectJkBean.class).lately(this::configure);
 
     JacocoJkBean jacoco = getRuntime().getBean(JacocoJkBean.class).setHtmlReport(true);
 

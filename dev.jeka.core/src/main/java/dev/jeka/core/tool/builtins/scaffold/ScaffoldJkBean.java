@@ -59,9 +59,20 @@ public class ScaffoldJkBean extends JkBean {
         }
     }
 
-    public ScaffoldJkBean configure(Consumer<JkScaffolder> configurator) {
+    /**
+     * Adds a configurator that will be executed just before first use of underlying scaffolder.
+     */
+    public ScaffoldJkBean lately(Consumer<JkScaffolder> configurator) {
         this.configurators.append(configurator);
         return this;
+    }
+
+    /**
+     * @deprecated Use {@link ScaffoldJkBean#lately(Consumer)} instead
+     */
+    @Deprecated
+    public ScaffoldJkBean configure(Consumer<JkScaffolder> configurator) {
+        return lately(configurator);
     }
 
 }

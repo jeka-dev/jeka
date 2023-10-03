@@ -179,19 +179,30 @@ public final class JkProperties {
         return result.toString();
     }
 
-    public String toKeyValueString() {
+    public String toKeyValueString(String margin) {
         Set<String> keys = find("");
         StringBuilder sb = new StringBuilder();
         JkProperties systemLess = systemLess();
         if (systemLess == null) {
             return "";
         }
+        int maxKeyLength = keys.stream()
+                .max(Comparator.comparingInt(String::length))
+                .orElse("").length();
+        int maxValueLength = keys.stream()
+                .filter(key -> systemLess.get(key) != null)
+                .map(this::get)
+                .max(Comparator.comparingInt(String::length))
+                .orElse("").length();
         for (String key : keys) {
             if (systemLess.get(key) == null) {
                 continue;
             }
+            String value = get(key);
+            String keyLabel = JkUtilsString.padEnd(key, maxKeyLength + 1, ' ');
+            String valueLabel = JkUtilsString.padEnd(value, maxValueLength + 2, ' ');
             JkProperties declaringProps = getSourceDefining(key);
-            sb.append(key + "=" + get(key) + "   (from " + declaringProps.source + ")\n");
+            sb.append(margin + keyLabel + ":" + valueLabel + "[from " + declaringProps.source + "]\n");
         }
         return sb.toString();
     }

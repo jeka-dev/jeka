@@ -43,6 +43,8 @@ project1
     Example : `jeka.cmd.myBuild=${jeka.cmd.build} sonarqube#run jacoco#` allows you to simply execute `jeka :myBuild`.
 *  `jeka.cmd._append=` will append the argument to every Jeka execution command.
    Example : `jeka.cmd._append=@dev.jeka:springboot-plugin` will add springboot plugin to Jeka classpath for each execution.
+   This properties can be splitted when argument line becomes to long. In fact, every properties starting with `jeka.cmd._append` will 
+   be taken in account to assemble the extra command line arguments. For example, we can define `jeka.cmd._append.0=`, `jeka.cmd._append.1=`, and so on.
 
 !!! Note
     Command shorthands are a really powerful mechanism for getting rid of build classes.

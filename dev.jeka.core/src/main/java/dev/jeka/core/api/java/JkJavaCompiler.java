@@ -177,7 +177,7 @@ public final class JkJavaCompiler {
     private static String printableOptions(List<String> options) {
         StringBuilder sb = new StringBuilder();
         options.stream()
-                .flatMap(item -> Stream.of(item.split(";")))
+                .flatMap(item -> Stream.of(item.split(File.pathSeparator)))
                 .forEach(item -> sb.append(item + "\n"));
         return sb.toString();
     }

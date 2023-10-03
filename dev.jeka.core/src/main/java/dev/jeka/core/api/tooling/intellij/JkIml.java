@@ -139,11 +139,16 @@ public final class JkIml {
             return this;
         }
 
-        public Content addJekaStandards() {
+        /**
+         * Adds and parameters standard JeKa folders
+         * @param dedicatedJekaModule If true, assumes that JeKa folder is the root of the module.
+         */
+        public Content addJekaStandards(boolean dedicatedJekaModule) {
+            String prefix = dedicatedJekaModule ? "" : "jeka/";
             return this
-                    .addSourceFolder("jeka/def", true, null)
-                    .addExcludeFolder("jeka/output")
-                    .addExcludeFolder("jeka/.work")
+                    .addSourceFolder(prefix + "def", true, null)
+                    .addExcludeFolder(prefix + "output")
+                    .addExcludeFolder(prefix + ".work")
                     .addExcludeFolder(".idea/output");
         }
 

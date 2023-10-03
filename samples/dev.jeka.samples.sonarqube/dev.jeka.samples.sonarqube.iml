@@ -9,7 +9,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/jeka/output/generated_sources/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/output" />
       <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
@@ -21,8 +21,12 @@
         <CLASSES>
           <root url="jar://$JEKA_CACHE_DIR$/repo/com.github.djeang/vincer-dom/jars/vincer-dom-1.4.0.jar!/" />
         </CLASSES>
-        <JAVADOC />
-        <SOURCES />
+        <JAVADOC>
+          <root url="jar://$JEKA_CACHE_DIR$/repo/com.github.djeang/vincer-dom/jars/vincer-dom-1.4.0-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$JEKA_CACHE_DIR$/repo/com.github.djeang/vincer-dom/jars/vincer-dom-1.4.0-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="" scope="TEST">
@@ -48,7 +52,9 @@
         <CLASSES>
           <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0.jar!/" />
         </CLASSES>
-        <JAVADOC />
+        <JAVADOC>
+          <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-javadoc.jar!/" />
+        </JAVADOC>
         <SOURCES>
           <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-sources.jar!/" />
         </SOURCES>
@@ -68,7 +74,9 @@
         <CLASSES>
           <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2.jar!/" />
         </CLASSES>
-        <JAVADOC />
+        <JAVADOC>
+          <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-javadoc.jar!/" />
+        </JAVADOC>
         <SOURCES>
           <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-sources.jar!/" />
         </SOURCES>
@@ -101,6 +109,19 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" exported="" scope="TEST" />
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$MODULE_DIR$/../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module" module-name="dev.jeka.core" />
   </component>
 </module>
