@@ -50,7 +50,7 @@ public interface JkInternalClasspathScanner {
             if (clazz != null) {
                 return JkUtilsReflect.invokeStaticMethod(clazz, "of");
             }
-            JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos(properties, "io.github.classgraph:classgraph:4.8.41");
+            JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos(properties, "io.github.classgraph:classgraph:4.8.162");
             JkInternalEmbeddedClassloader internalClassloader = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(classgraphJar.get());
             CACHED_INSTANCE = internalClassloader
                     .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
