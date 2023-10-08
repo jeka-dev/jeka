@@ -1,4 +1,8 @@
-# 0.10.24
+# 0.10.26
+- Intellij Iml generation : minor bug fix
+- SpringBoot plugin : upgrade default version to 3.1.4
+
+# 0.10.25
 - Polish repo api
 
 # 0.10.23

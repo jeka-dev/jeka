@@ -6,10 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -130,6 +127,14 @@ public final class JkIml {
         }
 
         public Content addSourceFolder(Path path, boolean test, String type) {
+            for (ListIterator<SourceFolder> it = sourceFolders.listIterator(); it.hasNext();) {
+                SourceFolder sourceFolder = it.next();
+                if (sourceFolder.getUrl().equals(path)) {
+                    it.remove();
+                    it.add(SourceFolder.of(path, test, type));
+                    return this;
+                }
+            }
             sourceFolders.add(SourceFolder.of(path, test, type));
             return this;
         }

@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 @JkDoc("Configure project KBean in order to produce bootable springboot jar and war files.")
 public final class SpringbootJkBean extends JkBean {
 
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "2.7.7";
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.1.4";
 
     public static final JkArtifactId ORIGINAL_ARTIFACT = JkArtifactId.of("original", "jar");
 

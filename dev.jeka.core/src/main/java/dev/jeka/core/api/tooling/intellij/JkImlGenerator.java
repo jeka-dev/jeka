@@ -202,7 +202,7 @@ public final class JkImlGenerator {
         defClasspath.and(defImportedProjects).getEntries().stream()
                 .filter(path -> !importedClasspath.getEntries().contains(path))
                 .filter(path -> !excludeJekaLib || !JkLocator.getJekaJarPath().equals(path))
-                .filter(path -> !path.endsWith(Paths.get(JkConstants.DEF_BIN_DIR)))
+                .filter(path -> !path.equals(Paths.get(JkConstants.DEF_BIN_DIR)))
                 .forEach(path -> orderEntries.add(path, JkIml.Scope.TEST));
         return new LinkedList<>(orderEntries.orderEntries);
     }
