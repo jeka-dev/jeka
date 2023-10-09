@@ -139,7 +139,7 @@ same monorepo, which means that you don't need to specify their version as JeKa 
 
 ### Known Plugins Hosted outside this repo
 
-* [OpenAoi Plugin](https://github.com/jeka-dev/openapi-plugin)
+* [OpenApi Plugin](https://github.com/jeka-dev/openapi-plugin)
 
 # News
 
