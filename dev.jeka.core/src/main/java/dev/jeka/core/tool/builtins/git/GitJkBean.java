@@ -7,23 +7,21 @@ import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 import java.util.Optional;
 
-
+@JkDoc({"Manages versioning of project (coming from ProjectJkBean) by extracting Git information.",
+        "The version is inferred from git using following logic : ",
+        "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
+        "  - If last commit contains a message containing [commentKeyword]xxxxx, version values xxxxx",
+        "  - If last commit is tagged, version values [last tag on last commit]",
+        "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
+        "After, if last commit message specifies a version and this version differs from tag, " +
+                "last commit is tagged with specified version."})
 public class GitJkBean extends JkBean {
 
     public static final String TAG_TASK_NAME = "version-from-git-tag";
 
-    @JkDoc({"Manages versioning of project (coming from ProjectJkBean) by extracting Git information.",
-            "The version is inferred from git using following logic : ",
-            "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
-            "  - If last commit contains a message containing [commentKeyword]xxxxx, version values xxxxx",
-            "  - If last commit is tagged, version values [last tag on last commit]",
-            "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
-            "After, if last commit message specifies a version and this version differs from tag, " +
-                    "last commit is tagged with specified version."})
     public boolean configureProjectVersion = false;
 
     @JkDoc("The keyword to use in commit message to order a tag ('Release:1.0.2' will put a tag '1.0.2')")
@@ -38,13 +36,6 @@ public class GitJkBean extends JkBean {
 
     protected GitJkBean() {
         git = JkGitProcess.of(getBaseDir());
-        if (configureProjectVersion) {
-            ProjectJkBean projectPlugin = getRuntime().getBeanOptional(ProjectJkBean.class).orElse(null);
-            if (projectPlugin == null) {
-                return;
-            }
-            projectPlugin.lately(project -> this.handleVersioning(project, this.tagAfterPublish));
-        }
     }
 
     @JkDoc("Performs a dirty check first then put a tag at the HEAD and push it to remote.")

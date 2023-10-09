@@ -137,6 +137,9 @@ same monorepo, which means that you don't need to specify their version as JeKa 
 * [NodeJs Plugin](plugins/dev.jeka.plugins.nodejs)
 * [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
 
+### Known Plugins Hosted outside this repo
+
+* [OpenAoi Plugin](https://github.com/jeka-dev/openapi-plugin)
 
 # News
 
