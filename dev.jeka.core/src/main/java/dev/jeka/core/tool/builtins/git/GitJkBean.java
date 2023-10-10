@@ -80,14 +80,18 @@ public class GitJkBean extends JkBean {
     }
 
     /**
-     * Configures the specified project to use git version for publishing and tagging the repository.
+     * Configures the specified project to use git version for publishing and adds git info to the manifest..
      */
     public void handleVersioning(JkProject project) {
         String version = version();
         project.publication.setVersion(version);
-        project.packaging.manifest.addMainAttribute("Implementation-SCM-Revision", git.getCurrentCommit());
         project.packaging.manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
-        project.packaging.manifest.addMainAttribute("Implementation-SCM-Branch", git.getCurrentBranch());
+        String commit = git.getCurrentCommit();
+        if (git.isWorkspaceDirty()) {
+            commit = "dirty-" + commit;
+        }
+        project.packaging.manifest.addMainAttribute("Git-commit", commit);
+        project.packaging.manifest.addMainAttribute("Git-branch", git.getCurrentBranch());
     }
 
 }

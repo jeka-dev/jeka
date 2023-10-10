@@ -1,3 +1,6 @@
+# 0.10.27
+- Polish Git KBean
+
 # 0.10.26
 - Intellij Iml generation : minor bug fix
 - SpringBoot plugin : upgrade default version to 3.1.4
