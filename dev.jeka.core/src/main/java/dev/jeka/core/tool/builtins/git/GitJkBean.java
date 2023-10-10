@@ -1,36 +1,30 @@
 package dev.jeka.core.tool.builtins.git;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
-
-import java.util.Optional;
+import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 @JkDoc({"Manages versioning of project (coming from ProjectJkBean) by extracting Git information.",
         "The version is inferred from git using following logic : ",
         "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
         "  - If last commit contains a message containing [commentKeyword]xxxxx, version values xxxxx",
         "  - If last commit is tagged, version values [last tag on last commit]",
-        "The inferred version is applied to project.publication.maven.version and project.publication.ivy.publication.",
-        "After, if last commit message specifies a version and this version differs from tag, " +
-                "last commit is tagged with specified version."})
+        "The inferred version can be  applied to project.publication.maven.version and project.publication.ivy.publication, " +
+                "programmatically using 'handleVersioning' method."
+})
 public class GitJkBean extends JkBean {
 
-    public static final String TAG_TASK_NAME = "version-from-git-tag";
+    @JkDoc("Some like to tag versions using a prefix (e.g. using 'v1.3.1' for tagging version '1.3.1'. In this case " +
+            "you can set this value to 'v' or whatever prefix.")
+    public String versionTagPrefix = "";
 
-    public boolean configureProjectVersion = false;
-
-    @JkDoc("The keyword to use in commit message to order a tag ('Release:1.0.2' will put a tag '1.0.2')")
-    public String commentKeyword = "Release:";
-
-    @JkDoc("If true and 'on'=true, project will be configured to push tag after project.publication.publish() succeed.")
-    public boolean tagAfterPublish = true;
-
-    private transient JkVersion cachedVersion;
+    private transient String cachedVersion;
 
     private final JkGitProcess git;
 
@@ -38,7 +32,8 @@ public class GitJkBean extends JkBean {
         git = JkGitProcess.of(getBaseDir());
     }
 
-    @JkDoc("Performs a dirty check first then put a tag at the HEAD and push it to remote.")
+    @JkDoc("Performs a dirty check first, put a tag at the HEAD and push it to remote." +
+            " The user will be prompted to enter the tag name.")
     public void tagRemote() {
         JkGitProcess aGit = git.copy().setLogCommand(false).setLogOutput(false);
         JkLog.info("Existing tags on origin :");
@@ -58,59 +53,41 @@ public class GitJkBean extends JkBean {
 
     @JkDoc("Display version supplied to the project.")
     public void showVersion() {
-        if (!configureProjectVersion) {
-            JkLog.warn("The project is not configured to get its version from Git. Use git#projectVersionSupplier.on=true");
-        } else {
-            JkLog.info(version().toString());
-        }
+        JkLog.info(version());
     }
 
-    /**
-     * Tags git repository and push with the version specified in last git comment.
-     * If no version is specified or the specified version is equals to the current tag, no tag will be set.
-     */
-    public boolean tagIfDiffers() {
-        String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentKeyword);
-        if (commitCommentVersion == null) {
-            return false;
-        }
-        String currentTagVersion = git.getVersionFromTag("");
-        if (!commitCommentVersion.equals(currentTagVersion)) {
-            JkLog.info("Tagging git with " + commitCommentVersion);
-            git.tagAndPush(commitCommentVersion);
-            return true;
-        }
-        return false;
+    @JkDoc("Handle versioning of the project managed in the projectKBean. " +
+            "It is meant to be called from the property file cmd, prior other project#xxxxx commands. ")
+    public void handleProjectVersioning() {
+        getBean(ProjectJkBean.class).lately(this::handleVersioning);
     }
 
     /**
      * Gets the current version either from commit message if specified nor from git tag.
      */
-    public JkVersion version() {
+    public String version() {
         if (cachedVersion != null) {
             return cachedVersion;
         }
         boolean dirty = GitJkBean.this.git.isWorkspaceDirty();
         if (dirty) {
-            cachedVersion = JkVersion.of(git.getCurrentBranch()).toSnapshot();
+            cachedVersion = git.getCurrentBranch() + JkVersion.SNAPSHOT_SUFIX;
         } else {
-            String commitCommentVersion = git.extractSuffixFromLastCommitMessage(commentKeyword);
-            cachedVersion = JkVersion.of(Optional.ofNullable(commitCommentVersion)
-                    .orElseGet(() -> git.getVersionFromTag("")));
+            cachedVersion =  git.getVersionFromTag(versionTagPrefix);
         }
         JkLog.info("Version inferred from Git:" + cachedVersion);
         return cachedVersion;
     }
 
     /**
-     * Configure the specified project to use git version for publishing and tagging the repository.
-     * @param tag If true, the repository will be tagged right after the project.publication.publish()
+     * Configures the specified project to use git version for publishing and tagging the repository.
      */
-    public void handleVersioning(JkProject project, boolean tag) {
-        project.publication.setVersion(() -> version().toString());
-        if (tag) {
-            project.publication.postActions.append(TAG_TASK_NAME, this::tagIfDiffers);
-        }
+    public void handleVersioning(JkProject project) {
+        String version = version();
+        project.publication.setVersion(version);
+        project.packaging.manifest.addMainAttribute("Implementation-SCM-Revision", git.getCurrentCommit());
+        project.packaging.manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
+        project.packaging.manifest.addMainAttribute("Implementation-SCM-Branch", git.getCurrentBranch());
     }
 
 }

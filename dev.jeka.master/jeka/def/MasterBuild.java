@@ -2,6 +2,7 @@ import dev.jeka.core.CoreBuild;
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
@@ -63,7 +64,6 @@ class MasterBuild extends JkBean {
     private JacocoJkBean coreJacocoBean;
 
     MasterBuild()  {
-        git.configureProjectVersion = false;
         coreBuild.runIT = true;
         getImportedBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
@@ -159,11 +159,11 @@ class MasterBuild extends JkBean {
     }
 
     private void applyToSlave(ProjectJkBean projectJkBean) {
-        if (!git.version().isSnapshot()) {     // Produce javadoc only for release
+        if (!JkVersion.of(git.version()).isSnapshot()) {     // Produce javadoc only for release
             projectJkBean.pack.javadoc = true;
         }
         projectJkBean.lately(project -> {
-                git.handleVersioning(project, false);
+                git.handleVersioning(project);
                 project.publication
                     .setRepos(this.publishRepo())
                     .maven

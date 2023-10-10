@@ -1,6 +1,5 @@
 ![Build Status](https://github.com/jerkar/jeka/actions/workflows/push-master.yml/badge.svg)
-[![Maven Central](https://img.shields.io/maven-central/v/dev.jeka/jeka-core)](https://search.maven.org/search?q=g:%22dev.jeka%22%20AND%20a:%22jeka-core%22) 
-[![Gitter](https://badges.gitter.im/jeka-tool/community.svg)](https://gitter.im/jeka-tool/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.jeka/jeka-core)](https://search.maven.org/search?q=g:%22dev.jeka%22%20AND%20a:%22jeka-core%22)
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
 
@@ -226,12 +225,11 @@ You must install _Python_ and _Material for MkDocs_ on your computer (`pip insta
 The documentation is also supposed to be regenerated after each push/pull-request.
 
 
-## How to Release ?
+### How to release ?
 
-Release is done automatically by Github action on PUSH on *master*.
-If the last commit message title contains a word like 'Release:XXX' (case matters ) then a tag XXX is created and 
-the binaries will be published on Maven Central.
-Otherwise, the binary wll be simply pushed on OSSRH snapshot.
+Just use the [github release mechanism](https://github.com/jeka-dev/jeka/releases).
+Creating a release implies creating a tag. This will trigger a build and a publication on Maven Central.
+
 <p align="center">
     <img src="docs/images/mascot.png" width='420' height='420' />
 </p>

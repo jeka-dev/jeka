@@ -169,7 +169,7 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
         if (tags.isEmpty() || dirty) {
             return branch + "-SNAPSHOT";
         } else {
-            return tags.get(tags.size() - 1);
+            return tags.get(tags.size() - 1).substring(prefix.length());
         }
     }
 

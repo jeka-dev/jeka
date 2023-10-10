@@ -17,6 +17,8 @@ public final class JkVersion implements Comparable<JkVersion> {
     /** Mention that the version is unspecified */
     public static final JkVersion UNSPECIFIED = new JkVersion("UNSPECIFIED-SNAPSHOT");
 
+    public static final String SNAPSHOT_SUFIX = "-SNAPSHOT";
+
     public static final Comparator<String> VERSION_COMPARATOR = ComparableVersion.versionComparator();
 
     /**
@@ -57,7 +59,7 @@ public final class JkVersion implements Comparable<JkVersion> {
         if (this.isSnapshot()) {
             return this;
         }
-        return JkVersion.of(this.value + "-SNAPSHOT");
+        return JkVersion.of(this.value + SNAPSHOT_SUFIX);
     }
 
     @Override
