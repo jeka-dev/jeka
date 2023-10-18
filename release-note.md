@@ -1,3 +1,6 @@
+# 0.10.28
+- Polish Spring-Boot KBean
+
 # 0.10.27
 - Polish Git KBean
 
