@@ -50,6 +50,13 @@ public final class JkSpringbootProjectConfigurator {
 
     private boolean useSpringRepos = true;
 
+    private JkSpringbootProjectConfigurator() {
+    }
+
+    public static JkSpringbootProjectConfigurator of() {
+        return new JkSpringbootProjectConfigurator();
+    }
+
     /**
      *  If true, Spring Milestone or Snapshot Repository will be used to fetch non release version of spring modules.
      */
