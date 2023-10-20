@@ -234,8 +234,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     @JkDoc("Delete the content of jeka/output directory and might execute extra clean actions")
     public void clean() {
-        super.cleanOutput();
-        getProject().executeCleanExtraActions();
+        getProject().clean();
     }
 
     @JkDoc("Generate sources")

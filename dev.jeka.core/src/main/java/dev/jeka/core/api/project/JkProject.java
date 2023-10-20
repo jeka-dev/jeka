@@ -8,9 +8,11 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 import org.w3c.dom.Document;
@@ -19,6 +21,7 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
@@ -187,7 +190,12 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return "project " + getBaseDir().getFileName();
     }
 
-    public JkProject executeCleanExtraActions() {
+    public JkProject clean() {
+        Path output = getOutputDir();
+        JkLog.info("Clean output directory " + output.toAbsolutePath().normalize());
+        if (Files.exists(output)) {
+            JkPathTree.of(output).deleteContent();
+        }
         cleanExtraActions.run();
         return this;
     }
