@@ -107,7 +107,7 @@ class MasterBuild extends JkBean {
         String branch = JkGit.of().getCurrentBranch();
         JkLog.trace("Current build branch: %s", branch);
         JkLog.trace("current ossrhUser:  %s", ossrhUser);
-        if (JkUtilsIterable.listOf("HEAD", "master").equals(branch) && ossrhUser != null) {
+        if (JkUtilsIterable.listOf("HEAD", "master").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publish);
             closeAndReleaseRepo();
