@@ -53,7 +53,7 @@ public final class SpringbootJkBean extends JkBean {
     }
 
     private JkSpringbootProjectConfigurator projectConfigurator() {
-        return new JkSpringbootProjectConfigurator()
+        return JkSpringbootProjectConfigurator.of()
                 .setUseSpringRepos(this.useSpringRepos)
                 .setCreateBootJar(this.createBootJar)
                 .setSpringbootVersion(this.springbootVersion)
