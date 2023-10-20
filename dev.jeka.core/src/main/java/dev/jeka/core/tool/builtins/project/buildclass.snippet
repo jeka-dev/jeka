@@ -1,7 +1,7 @@
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
-import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.api.tooling.JkGit;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
@@ -33,7 +33,7 @@ class Build extends JkBean {
         // does not need this section at all.  In this case you can remove it.
         project.publication
             .setModuleId("your.group:your.project")
-            .setVersion(() -> JkGitProcess.of().getVersionFromTag());  // Version inferred from Git
+            .setVersion(() -> JkGit.of().getVersionFromTag());  // Version inferred from Git
     }
 
     public void cleanPack() {

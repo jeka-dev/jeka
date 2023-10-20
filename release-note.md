@@ -1,6 +1,6 @@
 # 0.10.28
 - Polish Spring-Boot KBean
-- JkGitProcess#currentBranch now handles detached HEAD
+- Rename JkGitProcess to JkGit
 
 # 0.10.27
 - Polish Git KBean

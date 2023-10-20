@@ -3,54 +3,42 @@ package dev.jeka.core.api.tooling;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Wrapper for Git command line interface. This class assumes Git is installed on the host machine.
  */
-public final class JkGitProcess extends JkProcess<JkGitProcess> {
+public final class JkGit extends JkProcess<JkGit> {
 
-    private JkGitProcess() {
+    private JkGit() {
         super("git");
     }
 
-    public static JkGitProcess of(Path dir) {
-        return new JkGitProcess().setWorkingDir(dir);
+    public static JkGit of(Path dir) {
+        return new JkGit().setWorkingDir(dir);
     }
 
-    public static JkGitProcess of(String dir) {
+    public static JkGit of(String dir) {
         return of(Paths.get(dir));
     }
 
-    public static JkGitProcess of() {
+    public static JkGit of() {
         return of("");
     }
 
-    private JkGitProcess(JkGitProcess other) {
+    private JkGit(JkGit other) {
         super(other);
     }
 
     public String getCurrentBranch() {
-        List<String> result = this.copy()
-                .addParams("branch", "--show-current")
+        return this.copy()
+                .addParams("rev-parse", "--abbrev-ref", "HEAD")
                 .setLogOutput(false)
-                .execAndReturnOutput();
-        if (!result.isEmpty()) {
-            return result.get(0);
-        }
-        // Detached Head case
-        String line = this.copy()
-                .addParams("show", "-s", "--pretty=%d", "HEAD")
                 .execAndReturnOutput().get(0);
-        List<String> allItems = Arrays.asList(line.split(","));
-        String branch = JkUtilsString.substringAfterFirst(allItems.get(0), "->").trim();
-        return branch;
     }
 
     public boolean isRemoteEqual() {
@@ -114,13 +102,13 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
         return null;
     }
 
-    public JkGitProcess tagAndPush(String name) {
+    public JkGit tagAndPush(String name) {
         tag(name);
         copy().addParams("push", "origin", name).exec();
         return this;
     }
 
-    public JkGitProcess tag(String name) {
+    public JkGit tag(String name) {
         copy().addParams("tag", name).exec();
         return this;
     }
@@ -193,8 +181,8 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
     }
 
     @Override
-    public JkGitProcess copy() {
-        return new JkGitProcess(this);
+    public JkGit copy() {
+        return new JkGit(this);
     }
 
 

@@ -7,7 +7,8 @@ import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.api.tooling.JkGit;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.git.GitJkBean;
 import dev.jeka.core.tool.builtins.git.JkVersionFromGit;
@@ -103,10 +104,10 @@ class MasterBuild extends JkBean {
         }
         getImportedBeans().get(ProjectJkBean.class, false).forEach(projectJkBean ->
                 JkVersionFromGit.of().handleVersioning(projectJkBean.getProject()));
-        String branch = JkGitProcess.of().getCurrentBranch();
-        JkLog.trace("Current build branch %s", branch);
-        JkLog.trace("current ossrhUser %s", ossrhUser);
-        if (branch.equals("master") && ossrhUser != null) {
+        String branch = JkGit.of().getCurrentBranch();
+        JkLog.trace("Current build branch: %s", branch);
+        JkLog.trace("current ossrhUser:  %s", ossrhUser);
+        if (JkUtilsIterable.listOf("HEAD", "master").equals(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publish);
             closeAndReleaseRepo();

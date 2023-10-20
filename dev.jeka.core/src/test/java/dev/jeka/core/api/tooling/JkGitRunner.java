@@ -8,7 +8,7 @@ import java.util.List;
 public class JkGitRunner {
 
     public static void main(String[] args) {
-        String line = JkGitProcess.of()
+        String line = JkGit.of()
                 .addParams("show", "-s", "--pretty=%d", "HEAD")
                 .execAndReturnOutput().get(0);
         System.out.println(line);

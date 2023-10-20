@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.api.tooling.JkGit;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,8 +53,8 @@ public class JkVersionFromGit  {
         if (cachedVersion != null) {
             return cachedVersion;
         }
-        JkGitProcess git = JkGitProcess.of(baseDir);
-        boolean dirty = JkGitProcess.of(this.baseDir).isWorkspaceDirty();
+        JkGit git = JkGit.of(baseDir);
+        boolean dirty = JkGit.of(this.baseDir).isWorkspaceDirty();
         if (dirty) {
             JkLog.trace("Git workspace is dirty. Use SNAPSHOT for version.");
             cachedVersion = git.getCurrentBranch() + JkVersion.SNAPSHOT_SUFIX;
@@ -72,7 +72,7 @@ public class JkVersionFromGit  {
         String version = version();
         project.publication.setVersion(version);
         project.packaging.manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
-        JkGitProcess git = JkGitProcess.of(project.getBaseDir());
+        JkGit git = JkGit.of(project.getBaseDir());
         String commit = git.getCurrentCommit();
         if (git.isWorkspaceDirty()) {
             commit = "dirty-" + commit;

@@ -2,7 +2,7 @@ package dev.jeka.core.tool.builtins.git;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkPrompt;
-import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.api.tooling.JkGit;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -21,18 +21,18 @@ public class GitJkBean extends JkBean {
             "you can set this value to 'v' or whatever prefix.")
     public String versionTagPrefix = "";
 
-    private final JkGitProcess git;
+    private final JkGit git;
 
     private transient JkVersionFromGit versionFromGit;
 
     protected GitJkBean() {
-        git = JkGitProcess.of(getBaseDir());
+        git = JkGit.of(getBaseDir());
     }
 
     @JkDoc("Performs a dirty check first, put a tag at the HEAD and push it to remote." +
             " The user will be prompted to enter the tag name.")
     public void tagRemote() {
-        JkGitProcess aGit = git.copy().setLogCommand(false).setLogOutput(false);
+        JkGit aGit = git.copy().setLogCommand(false).setLogOutput(false);
         JkLog.info("Existing tags on origin :");
         aGit.copy().setLogOutput(true).exec("ls-remote", "--tag", "--sort=creatordate", "origin");
         if (aGit.isWorkspaceDirty()) {

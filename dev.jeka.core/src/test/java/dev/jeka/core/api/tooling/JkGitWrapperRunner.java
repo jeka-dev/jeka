@@ -8,7 +8,7 @@ public class JkGitWrapperRunner {
 
     public static void main(String[] args) {
         JkLog.setDecorator(JkLog.Style.INDENT);
-        JkGitProcess git = JkGitProcess.of(Paths.get(""));
+        JkGit git = JkGit.of(Paths.get(""));
         System.out.println(git.getCurrentBranch());
         //git.exec("rev-parse --abbrev-ref HEAD");
         System.out.println(git.isWorkspaceDirty());

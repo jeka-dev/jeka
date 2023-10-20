@@ -1,6 +1,6 @@
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.api.tooling.JkGit;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
@@ -42,7 +42,7 @@ class SonarqubeSampleBuild extends JkBean {
         sonarqubePlugin.configure(sonarqube -> {
             sonarqube
                 .setProjectId("dev.jeka.samples.sonarqube", "myProjectNme",
-                        JkGitProcess.of().getVersionFromTag())
+                        JkGit.of().getVersionFromTag())
                 .setProperty(JkSonarqube.HOST_URL, "https://my.host.for.sonarqube.server:8080")
                 .setSkipDesign(true);
         });

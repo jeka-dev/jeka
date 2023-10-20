@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.JkGitProcess;
+import dev.jeka.core.api.tooling.JkGit;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -161,18 +161,18 @@ public class JkProjectFlatFacade {
 
     /**
      * The published version will be computed according the current git tag.
-     * @see JkGitProcess#getVersionFromTag()
+     * @see JkGit#getVersionFromTag()
      */
     public JkProjectFlatFacade setPublishedVersionFromGitTag() {
-        return setPublishedVersion(() -> JkGitProcess.of(getProject().getBaseDir()).getVersionFromTag());
+        return setPublishedVersion(() -> JkGit.of(getProject().getBaseDir()).getVersionFromTag());
     }
 
     /**
      * The published version will be computed according the git last commit message.
-     * @see JkGitProcess#getVersionFromCommitMessage(String)
+     * @see JkGit#getVersionFromCommitMessage(String)
      */
     public JkProjectFlatFacade setPublishedVersionFromGitTagCommitMessage(String suffixKeyword) {
-        return setPublishedVersion(() -> JkGitProcess.of(getProject().getBaseDir())
+        return setPublishedVersion(() -> JkGit.of(getProject().getBaseDir())
                 .getVersionFromCommitMessage(suffixKeyword));
     }
 
