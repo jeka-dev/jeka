@@ -35,10 +35,19 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
     }
 
     public String getCurrentBranch() {
-        return this.copy()
+        List<String> result = this.copy()
                 .addParams("branch", "--show-current")
                 .setLogOutput(false)
-                .execAndReturnOutput().get(0);
+                .execAndReturnOutput();
+        if (!result.isEmpty()) {
+            return result.get(0);
+        }
+        // Detached Head case
+        result = this.copy()
+                .addParams("for-each-ref", "--format='%(objectname) %(refname:short)'")
+                .addParams("refs/heads", "|", "awk", "\"/^$(git rev-parse HEAD)/",  "{print", "\\$2}\"")
+                .execAndReturnOutput();
+        return result.get(0);
     }
 
     public boolean isRemoteEqual() {
