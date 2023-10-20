@@ -57,6 +57,14 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
     }
 
     /**
+     * Creates a process launching the current JDK java command to execute the specified jar.
+     * This method assumes that a main method is specified in the jar manifest.
+     */
+    public static JkJavaProcess ofJavaJar(Path jar) {
+        return ofJavaJar(jar, null);
+    }
+
+    /**
      * Adds the specified agent to the command line.
      * @param agentOption Can be null
      */
