@@ -3,9 +3,11 @@ package dev.jeka.core.api.tooling;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,11 +45,12 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
             return result.get(0);
         }
         // Detached Head case
-        result = this.copy()
-                .addParams("for-each-ref", "--format='%(objectname) %(refname:short)'")
-                .addParams("refs/heads", "|", "awk", "\"/^$(git rev-parse HEAD)/",  "{print", "\\$2}\"")
-                .execAndReturnOutput();
-        return result.get(0);
+        String line = this.copy()
+                .addParams("show", "-s", "--pretty=%d", "HEAD")
+                .execAndReturnOutput().get(0);
+        List<String> allItems = Arrays.asList(line.split(","));
+        String branch = JkUtilsString.substringAfterFirst(allItems.get(0), "->").trim();
+        return branch;
     }
 
     public boolean isRemoteEqual() {
