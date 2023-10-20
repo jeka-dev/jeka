@@ -11,7 +11,6 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkConstants;
@@ -85,7 +84,6 @@ public class CoreBuild extends JkBean {
         project
             .publication
                 .setModuleId("dev.jeka:jeka-core")
-                .setVersion(JkGitProcess.of()::getVersionFromTag)
                 .maven
                     .pomMetadata
                         .setProjectName("jeka")

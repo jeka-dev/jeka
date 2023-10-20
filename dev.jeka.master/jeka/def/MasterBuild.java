@@ -10,6 +10,7 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.JkGitProcess;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.git.GitJkBean;
+import dev.jeka.core.tool.builtins.git.JkVersionFromGit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 import dev.jeka.plugins.jacoco.JacocoJkBean;
@@ -33,9 +34,9 @@ class MasterBuild extends JkBean {
 
     public boolean useJacoco = false;
 
-    final NexusJkBean nexus = getBean(NexusJkBean.class).lately(this::configure);
+    private final NexusJkBean nexus = getBean(NexusJkBean.class).lately(this::configure);
 
-    final GitJkBean git = getBean(GitJkBean.class);
+    private final JkVersionFromGit versionFromGit = JkVersionFromGit.of();
 
 
     // ------ Slave projects
@@ -100,6 +101,8 @@ class MasterBuild extends JkBean {
             }
             JkLog.endTask();
         }
+        getImportedBeans().get(ProjectJkBean.class, false).forEach(projectJkBean ->
+                JkVersionFromGit.of().handleVersioning(projectJkBean.getProject()));
         String branch = JkGitProcess.of().getCurrentBranch();
         JkLog.trace("Current build branch %s", branch);
         JkLog.trace("current ossrhUser %s", ossrhUser);
@@ -113,12 +116,14 @@ class MasterBuild extends JkBean {
             github.ghToken =githubToken;
             github.publishGhRelease();
             JkLog.endTask();;
-
+        } else {
+            JkLog.startTask("Publish locally");
+            publishLocal();
+            JkLog.endTask();
         }
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
             coreBuild.getBean(SonarqubeJkBean.class).run();
         }
-        publishLocal();;
     }
 
     @JkDoc("Convenient method to set Posix permission for all jekaw files on git.")
@@ -161,11 +166,11 @@ class MasterBuild extends JkBean {
     }
 
     private void applyToSlave(ProjectJkBean projectJkBean) {
-        if (!JkVersion.of(git.version()).isSnapshot()) {     // Produce javadoc only for release
+        if (!JkVersion.of(versionFromGit.version()).isSnapshot()) {     // Produce javadoc only for release
             projectJkBean.pack.javadoc = true;
         }
         projectJkBean.lately(project -> {
-                git.handleVersioning(project);
+                versionFromGit.handleVersioning(project);
                 project.publication
                     .setRepos(this.publishRepo())
                     .maven

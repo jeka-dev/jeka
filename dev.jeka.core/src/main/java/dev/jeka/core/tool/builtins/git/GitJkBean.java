@@ -1,8 +1,5 @@
 package dev.jeka.core.tool.builtins.git;
 
-import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.java.JkManifest;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.tooling.JkGitProcess;
@@ -24,9 +21,9 @@ public class GitJkBean extends JkBean {
             "you can set this value to 'v' or whatever prefix.")
     public String versionTagPrefix = "";
 
-    private transient String cachedVersion;
-
     private final JkGitProcess git;
+
+    private transient JkVersionFromGit versionFromGit;
 
     protected GitJkBean() {
         git = JkGitProcess.of(getBaseDir());
@@ -53,45 +50,27 @@ public class GitJkBean extends JkBean {
 
     @JkDoc("Display version supplied to the project.")
     public void showVersion() {
-        JkLog.info(version());
+        JkLog.info(versionFromGit().version());
     }
 
     @JkDoc("Handle versioning of the project managed in the projectKBean. " +
             "It is meant to be called from the property file cmd, prior other project#xxxxx commands. ")
     public void handleProjectVersioning() {
-        getBean(ProjectJkBean.class).lately(this::handleVersioning);
+        getBean(ProjectJkBean.class).lately(project -> versionFromGit().handleVersioning(project));
     }
 
     /**
      * Gets the current version either from commit message if specified nor from git tag.
      */
     public String version() {
-        if (cachedVersion != null) {
-            return cachedVersion;
-        }
-        boolean dirty = GitJkBean.this.git.isWorkspaceDirty();
-        if (dirty) {
-            cachedVersion = git.getCurrentBranch() + JkVersion.SNAPSHOT_SUFIX;
-        } else {
-            cachedVersion =  git.getVersionFromTag(versionTagPrefix);
-        }
-        JkLog.info("Version inferred from Git:" + cachedVersion);
-        return cachedVersion;
+        return versionFromGit().version();
     }
 
-    /**
-     * Configures the specified project to use git version for publishing and adds git info to the manifest..
-     */
-    public void handleVersioning(JkProject project) {
-        String version = version();
-        project.publication.setVersion(version);
-        project.packaging.manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
-        String commit = git.getCurrentCommit();
-        if (git.isWorkspaceDirty()) {
-            commit = "dirty-" + commit;
+    private JkVersionFromGit versionFromGit() {
+        if (versionFromGit == null) {
+            versionFromGit = JkVersionFromGit.of(getBaseDir(), versionTagPrefix);
         }
-        project.packaging.manifest.addMainAttribute("Git-commit", commit);
-        project.packaging.manifest.addMainAttribute("Git-branch", git.getCurrentBranch());
+        return versionFromGit;
     }
 
 }

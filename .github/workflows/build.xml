@@ -25,8 +25,6 @@
 		<mkdir dir="${bin}" />
 		<javac destdir="${bin}" encoding="UTF-8" includeantruntime="false">
 			<src path="dev.jeka.core/src/main/java" />
-			<src path="plugins/dev.jeka.plugins.jacoco" />
-			<src path="plugins/dev.jeka.plugins.sonarqube" />
 			<classpath>
 				<fileset refid="libs" />
 			</classpath>
