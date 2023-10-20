@@ -36,7 +36,7 @@ public final class JkGitProcess extends JkProcess<JkGitProcess> {
 
     public String getCurrentBranch() {
         return this.copy()
-                .addParams("rev-parse", "--abbrev-ref", "HEAD")
+                .addParams("branch", "--show-current")
                 .setLogOutput(false)
                 .execAndReturnOutput().get(0);
     }
