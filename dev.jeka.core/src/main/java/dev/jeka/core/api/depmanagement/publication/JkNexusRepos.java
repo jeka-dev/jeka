@@ -195,7 +195,7 @@ public class JkNexusRepos {
             JkLog.info("No staging repository to close.");
             return;
         }
-        JkLog.startTask("Closing repositories " + repositoryIds);
+        JkLog.startTask("Sending 'close' command for repositories : " + repositoryIds);
         URL url = new URL(baseUrl + "/service/local/staging/bulk/close");
         HttpURLConnection con = connection(url);
         con.setRequestMethod("POST");
