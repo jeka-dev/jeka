@@ -44,7 +44,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="project#clean make -lri -lsu -ls=BRACE -lst -lna -lv" />
+			<arg line="project#clean make -lri -lsu -ls=BRACE -lst -lna -lv=false" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

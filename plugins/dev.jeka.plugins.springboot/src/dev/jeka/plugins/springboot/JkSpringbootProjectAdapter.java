@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- *  Configurator for configuring a {@link JkProject}  to be a Spring-Boot project.
+ *  Configurator for {@link JkProject} to add Spring-Boot configuration.
  */
 public final class JkSpringbootProjectAdapter {
 

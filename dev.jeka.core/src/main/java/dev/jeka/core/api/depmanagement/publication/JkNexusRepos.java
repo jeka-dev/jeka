@@ -110,14 +110,13 @@ public class JkNexusRepos {
         if (profileNames.length != 0) {
             JkLog.info("Taking in account repositories with profile name in " + Arrays.asList(profileNames));
         }
-        JkLog.info("Repositories to close : " + openRepoIds);
+        JkLog.info("Sending 'close' command to repositories : " + openRepoIds);
         close(openRepoIds);
         List<String> closingRepoIds = findStagingRepositories().stream()
                 .filter(profileNameFilter(profileNames))
                 .filter(repo -> JkStagingRepo.Status.CLOSING == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
-        JkLog.info("Closing, before releasing, repositories " + closingRepoIds);
         closingRepoIds.forEach(this::waitForClosing);
         List<String> closedRepoIds = findStagingRepositories().stream()
                 .filter(profileNameFilter(profileNames))
@@ -234,7 +233,7 @@ public class JkNexusRepos {
 
     private void doWaitForClosing(String repositoryId) throws IOException {
         long startMillis = System.currentTimeMillis();
-        JkLog.startTask("Waiting for repository " + repositoryId + " been closed. It make take a while ...");
+        JkLog.startTask("Waiting for repository " + repositoryId + " to be closed. It make take a while ...");
         while (true) {
             if (System.currentTimeMillis() - startMillis > CLOSE_TIMEOUT_MILLIS) {
                 throw new IllegalStateException("Timeout waiting for repository close.");
