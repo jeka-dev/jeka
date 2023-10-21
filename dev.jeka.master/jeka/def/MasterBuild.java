@@ -35,8 +35,6 @@ class MasterBuild extends JkBean {
 
     public boolean useJacoco = false;
 
-    private final NexusJkBean nexus = getBean(NexusJkBean.class).lately(this::configure);
-
     private final JkVersionFromGit versionFromGit = JkVersionFromGit.of();
 
 
@@ -74,6 +72,7 @@ class MasterBuild extends JkBean {
         if (useJacoco) {
             coreJacocoBean = coreBuild.getBean(JacocoJkBean.class).setHtmlReport(true);
         }
+        getBean(NexusJkBean.class).lately(this::configureNexus);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -151,7 +150,7 @@ class MasterBuild extends JkBean {
         });
     }
 
-    private void configure(JkNexusRepos nexusRepos) {
+    private void configureNexus(JkNexusRepos nexusRepos) {
         nexusRepos.setReadTimeout(60*1000);
     }
 

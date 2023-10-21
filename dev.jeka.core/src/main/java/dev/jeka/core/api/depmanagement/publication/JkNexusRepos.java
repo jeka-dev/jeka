@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * A set of Nexus repos sharing the same base url and credentials.
+ */
 public class JkNexusRepos {
 
     private static final long CLOSE_TIMEOUT_MILLIS = 15 * 60 * 1000L;
@@ -114,7 +117,7 @@ public class JkNexusRepos {
                 .filter(repo -> JkStagingRepo.Status.CLOSING == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
-        JkLog.info("Closing repositories " + closingRepoIds);
+        JkLog.info("Closing, before releasing, repositories " + closingRepoIds);
         closingRepoIds.forEach(this::waitForClosing);
         List<String> closedRepoIds = findStagingRepositories().stream()
                 .filter(profileNameFilter(profileNames))
