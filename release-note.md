@@ -1,6 +1,6 @@
 # 0.10.29
 - Polish Spring-Boot package
-- Add JkProject#clean method
+- Add JkProject#clean method 
 
 # 0.10.28
 - Polish Spring-Boot KBean
