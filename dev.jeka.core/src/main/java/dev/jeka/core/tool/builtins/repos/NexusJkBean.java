@@ -34,7 +34,12 @@ public class NexusJkBean extends JkBean {
 
     @JkDoc("Closes and releases the nexus repositories used by project KBean to publish artifacts.")
     public void closeAndRelease() {
-        JkNexusRepos nexusRepos  = getJkNexusRepos();
+        Optional<ProjectJkBean> projectBean = getRuntime().getBeanOptional(ProjectJkBean.class);
+        if (!projectBean.isPresent()) {
+            JkLog.warn("No project plugin configured here.");
+            return;
+        }
+        JkNexusRepos nexusRepos  = getJkNexusRepos(projectBean.get().getProject());
         if (nexusRepos == null) {
             return;
         }
@@ -50,7 +55,7 @@ public class NexusJkBean extends JkBean {
     }
 
     private void configureProject(JkProject project) {
-        JkNexusRepos nexusRepos  = getJkNexusRepos();
+        JkNexusRepos nexusRepos  = getJkNexusRepos(project);
         if (nexusRepos == null) {
             return;
         }
@@ -63,13 +68,7 @@ public class NexusJkBean extends JkBean {
         return JkUtilsString.isBlank(profileNamesFilter) ? new String[0] : profileNamesFilter.split(",");
     }
 
-    private JkNexusRepos getJkNexusRepos() {
-        Optional<ProjectJkBean> projectBean = getRuntime().getBeanOptional(ProjectJkBean.class);
-        if (!projectBean.isPresent()) {
-            JkLog.warn("No project plugin configured here.");
-            return null;
-        }
-        JkProject project = projectBean.get().getProject();
+    private JkNexusRepos getJkNexusRepos(JkProject project) {
         JkRepo repo = project.publication.findFirstNonLocalRepo();
         if (repo == null) {
             JkLog.warn("No remote repository configured for publishing");
