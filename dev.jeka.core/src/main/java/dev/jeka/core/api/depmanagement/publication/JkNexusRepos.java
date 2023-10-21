@@ -110,7 +110,6 @@ public class JkNexusRepos {
         if (profileNames.length != 0) {
             JkLog.info("Taking in account repositories with profile name in " + Arrays.asList(profileNames));
         }
-        JkLog.info("Sending 'close' command to repositories : " + openRepoIds);
         close(openRepoIds);
         List<String> closingRepoIds = findStagingRepositories().stream()
                 .filter(profileNameFilter(profileNames))
@@ -167,13 +166,16 @@ public class JkNexusRepos {
         con.setRequestProperty("Accept", "application/xml");
         con.setReadTimeout(readTimeout);
         JkUtilsHttp.assertResponseOk(con, null);
+        JkLog.startTask("Finding staging repositories");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document doc = JkUtilsXml.documentFrom(in);
             Element data = JkUtilsXml.directChild(doc.getDocumentElement(), "data");
             List<Element> stagingReposEl = JkUtilsXml.directChildren(data, "stagingProfileRepository");
-            return stagingReposEl.stream()
+            List<JkStagingRepo> result = stagingReposEl.stream()
                     .map(JkStagingRepo::fromEl)
                     .collect(Collectors.toList());
+            JkLog.endTask("Found " + result);
+            return result;
         }
     }
 
@@ -195,7 +197,7 @@ public class JkNexusRepos {
             JkLog.info("No staging repository to close.");
             return;
         }
-        JkLog.startTask("Sending 'close' command for repositories : " + repositoryIds);
+        JkLog.startTask("Sending 'close' command to repositories : " + repositoryIds);
         URL url = new URL(baseUrl + "/service/local/staging/bulk/close");
         HttpURLConnection con = connection(url);
         con.setRequestMethod("POST");
