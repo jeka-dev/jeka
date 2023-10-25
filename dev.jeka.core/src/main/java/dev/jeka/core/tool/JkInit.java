@@ -89,6 +89,11 @@ public final class JkInit {
         return instanceOf(clazz, effectiveArgs);
     }
 
+    public static <T extends JkBean> T exec(Class<T> clazz, String ...args) {
+        T bean = instanceOf(clazz, args);
+        return bean;
+    }
+
     static void displayRuntimeInfo() {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));

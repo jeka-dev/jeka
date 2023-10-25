@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Provides convenient methods to deal with Jacoco agent and report tool.
@@ -27,6 +29,15 @@ import java.util.List;
  *
  */
 public final class JkJacoco {
+
+    /**
+     * Relative location to the output folder of the generated jacoco report file
+     */
+    public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
+
+    public static final String OUTPUT_XML_RELATIVE_PATH = "jacoco/jacoco.xml";
+
+    public static final String OUTPUT_HTML_RELATIVE_PATH = "jacoco/html";  // this is a folder
 
     private final RepoToolProvider toolProvider;
 
@@ -56,6 +67,27 @@ public final class JkJacoco {
 
     public static JkJacoco ofManaged(JkRepoSet repos, String version) {
         return ofManaged(JkDependencyResolver.of(repos), version);
+    }
+
+    public static JkJacoco configure(JkProject project, String jacocoVersion, boolean xmlReport, boolean htmlReport) {
+        JkJacoco jacoco = JkJacoco.ofManaged(project.dependencyResolver, jacocoVersion);
+        jacoco.setExecFile(project.getOutputDir().resolve(OUTPUT_RELATIVE_PATH))
+                .setClassDir(project.compilation.layout.getClassDirPath());
+        if (xmlReport) {
+            jacoco.addReportOptions("--xml",
+                    project.getOutputDir().resolve(OUTPUT_XML_RELATIVE_PATH).toString());
+        }
+        if (htmlReport) {
+            jacoco.addReportOptions("--html",
+                    project.getOutputDir().resolve(OUTPUT_HTML_RELATIVE_PATH).toString());
+        }
+        jacoco.configure(project.testing.testProcessor);
+        List<Path> sourceDirs =project.compilation
+                .layout.getSources().getRootDirsOrZipFiles().stream()
+                .map(path -> path.isAbsolute() ? path : project.getBaseDir().resolve(path))
+                .collect(Collectors.toList());
+        jacoco.setSources(sourceDirs);
+        return jacoco;
     }
 
     public static JkJacoco ofManaged(String version) {
@@ -217,4 +249,23 @@ public final class JkJacoco {
     }
 
 
+    public static class AgentJarAndReportFile {
+
+        private final Path agentPath;
+
+        private final Path reportFile;
+
+        AgentJarAndReportFile(Path agentPath, Path reportFile) {
+            this.agentPath = agentPath;
+            this.reportFile = reportFile;
+        }
+
+        public Path getAgentPath() {
+            return agentPath;
+        }
+
+        public Path getReportFile() {
+            return reportFile;
+        }
+    }
 }

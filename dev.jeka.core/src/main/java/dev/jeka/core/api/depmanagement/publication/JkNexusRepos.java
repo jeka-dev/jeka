@@ -166,7 +166,7 @@ public class JkNexusRepos {
         con.setRequestProperty("Accept", "application/xml");
         con.setReadTimeout(readTimeout);
         JkUtilsHttp.assertResponseOk(con, null);
-        JkLog.startTask("Finding staging repositories");
+        JkLog.startTask("Querying staging repositories");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document doc = JkUtilsXml.documentFrom(in);
             Element data = JkUtilsXml.directChild(doc.getDocumentElement(), "data");
@@ -174,7 +174,7 @@ public class JkNexusRepos {
             List<JkStagingRepo> result = stagingReposEl.stream()
                     .map(JkStagingRepo::fromEl)
                     .collect(Collectors.toList());
-            JkLog.endTask("Found " + result);
+            JkLog.endTask();
             return result;
         }
     }

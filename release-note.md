@@ -1,4 +1,7 @@
-# 0.10.29
+# 0.10.31
+- Rework and polish Jacoco and Sonarqube plugins
+
+# 0.10.30
 - Polish Spring-Boot package
 - Add JkProject#clean method 
 

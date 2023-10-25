@@ -15,6 +15,7 @@ import dev.jeka.core.tool.builtins.git.JkVersionFromGit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
 import dev.jeka.plugins.jacoco.JacocoJkBean;
+import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
 import github.Github;
 
@@ -90,7 +91,7 @@ class MasterBuild extends JkBean {
             SamplesTester samplesTester = new SamplesTester(this.getRuntime().getProperties());
             PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester(this.getRuntime().getProperties());
             if (coreJacocoBean != null) {
-                JacocoJkBean.AgentJarAndReportFile jacocoRunInfo = coreJacocoBean.getAgentAndReportFile();
+                JkJacoco.AgentJarAndReportFile jacocoRunInfo = coreJacocoBean.getAgentAndReportFile();
                 samplesTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
                 pluginScaffoldTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
             }

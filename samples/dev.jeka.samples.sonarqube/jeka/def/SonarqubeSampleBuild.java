@@ -39,7 +39,7 @@ class SonarqubeSampleBuild extends JkBean {
                 )
         );
         sonarqubePlugin.provideTestLibs = true;
-        sonarqubePlugin.configure(sonarqube -> {
+        sonarqubePlugin.lately(sonarqube -> {
             sonarqube
                 .setProjectId("dev.jeka.samples.sonarqube", "myProjectNme",
                         JkGit.of().getVersionFromTag())

@@ -9,21 +9,8 @@ import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
 public class JacocoJkBean extends JkBean {
-
-    /**
-     * Relative location to the output folder of the generated jacoco report file
-     */
-    public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
-
-    public static final String OUTPUT_XML_RELATIVE_PATH = "jacoco/jacoco.xml";
-
-    public static final String OUTPUT_HTML_RELATIVE_PATH = "jacoco/html";  // this is a folder
 
     @JkDoc("If true, project from ProjectJkBean will be configured with Jacoco automatically.")
     public boolean configureProject = true;
@@ -67,17 +54,7 @@ public class JacocoJkBean extends JkBean {
     }
 
     public void configure(JkProject project) {
-        jacoco = JkJacoco.ofManaged(project.dependencyResolver, jacocoVersion);
-        jacoco.setExecFile(project.getOutputDir().resolve(OUTPUT_RELATIVE_PATH))
-            .setClassDir(project.compilation.layout.getClassDirPath());
-        if (xmlReport) {
-            jacoco.addReportOptions("--xml",
-                    project.getOutputDir().resolve(OUTPUT_XML_RELATIVE_PATH).toString());
-        }
-        if (htmlReport) {
-            jacoco.addReportOptions("--html",
-                    project.getOutputDir().resolve(OUTPUT_HTML_RELATIVE_PATH).toString());
-        }
+        jacoco = JkJacoco.configure(project, jacocoVersion, xmlReport, htmlReport);
         if (!JkUtilsString.isBlank(classDirExcludes)) {
             JkPathMatcher pathMatcher = JkPathMatcher.of(false, classDirExcludes.split(","));
             jacoco.setClassDirFilter(pathMatcher);
@@ -85,12 +62,6 @@ public class JacocoJkBean extends JkBean {
         if (!JkUtilsString.isBlank(this.agentOptions)) {
             jacoco.addAgentOptions(agentOptions.split(","));
         }
-        jacoco.configure(project.testing.testProcessor);
-        List<Path> sourceDirs =project.compilation
-                .layout.getSources().getRootDirsOrZipFiles().stream()
-                    .map(path -> path.isAbsolute() ? path : project.getBaseDir().resolve(path))
-                    .collect(Collectors.toList());
-        jacoco.setSources(sourceDirs);
     }
 
     public JacocoJkBean setConfigureProject(boolean configureProject) {
@@ -118,30 +89,10 @@ public class JacocoJkBean extends JkBean {
         return this;
     }
 
-    public AgentJarAndReportFile getAgentAndReportFile() {
+    public JkJacoco.AgentJarAndReportFile getAgentAndReportFile() {
         JkUtilsAssert.state(jacoco != null,
                 "This method cannot be invoked when no project has been configured on.");
-        return new AgentJarAndReportFile(jacoco.getToolProvider().getAgentJar(), jacoco.getExecFile());
-    }
-
-    public static class AgentJarAndReportFile {
-
-        private final Path agentPath;
-
-        private final Path reportFile;
-
-        AgentJarAndReportFile(Path agentPath, Path reportFile) {
-            this.agentPath = agentPath;
-            this.reportFile = reportFile;
-        }
-
-        public Path getAgentPath() {
-            return agentPath;
-        }
-
-        public Path getReportFile() {
-            return reportFile;
-        }
+        return new JkJacoco.AgentJarAndReportFile(jacoco.getToolProvider().getAgentJar(), jacoco.getExecFile());
     }
 
 }

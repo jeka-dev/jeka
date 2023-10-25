@@ -4,13 +4,18 @@ package dev.jeka.plugins.sonarqube;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkCompileLayout;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -25,7 +30,6 @@ import java.util.*;
  * @author Jerome Angibaud
  */
 public final class JkSonarqube {
-
     public static final String PROJECT_KEY = "projectKey";
     public static final String PROJECT_NAME = "projectName";
     public static final String PROJECT_VERSION = "projectVersion";
@@ -67,21 +71,95 @@ public final class JkSonarqube {
 
     private boolean logOutput;
 
-    private JkSonarqube(JkRepoSet repos, String sonarScannerVersion) {
+    private JkSonarqube(JkRepoSet repos, String scannerVersion) {
         this.repos = repos;
-        this.sonnarScannerVersion = sonarScannerVersion;
+        this.sonnarScannerVersion = scannerVersion;
     }
 
+    /**
+     * Creates a {@link JkSonarqube} object using the the embedded scanner.
+     */
     public static JkSonarqube ofEmbedded() {
         return new JkSonarqube(null, null);
     }
 
-    public static JkSonarqube ofVersion(JkRepoSet repos, String version) {
-        return new JkSonarqube(repos, version);
+    /**
+     * Creates a {@link JkSonarqube} object configured for the supplied scanner version, fetched from the specified repos.
+     * @param scannerVersion The scanner version to use. If <code>null</code>, the embedded scanner version will
+     *                       be used.
+     */
+    public static JkSonarqube ofVersion(JkRepoSet repos, String scannerVersion) {
+        return new JkSonarqube(repos, scannerVersion);
     }
 
-    public static JkSonarqube ofVersion(String version) {
-        return ofVersion(JkRepo.ofMavenCentral().toSet(), version);
+    /**
+     * Creates a {@link JkSonarqube} object configured for the supplied scanner version, fetched from Maven central.
+     * @param scannerVersion The scanner version to use. If <code>null</code>, the embedded scanner version will
+     *                       be used.
+     */
+    public static JkSonarqube ofVersion(String scannerVersion) {
+        return ofVersion(JkRepo.ofMavenCentral().toSet(), scannerVersion);
+    }
+
+    /**
+     * Creates a {@link JkSonarqube} object configured for the supplied {@link JkProject}.
+     * @param scannerVersion The scanner version to use. If <code>null</code>, the embedded scanner version will
+     *                       be used.
+     * @param provideProdLibs If true, the list of production dependency files will be provided to sonarqube.
+     * @param provideTestLibs If true, the list of test dependency files will be provided to sonarqube.
+     */
+    public static JkSonarqube ofConfigured(JkProject project, String scannerVersion, boolean provideProdLibs,
+                                        boolean provideTestLibs) {
+        final JkCompileLayout prodLayout = project.compilation.layout;
+        final JkCompileLayout testLayout = project.testing.compilation.layout;
+        final Path baseDir = project.getBaseDir();
+        JkPathSequence libs = JkPathSequence.of();
+        if (provideProdLibs) {
+            JkDependencySet deps = project.compilation.getDependencies()
+                    .merge(project.packaging.getRuntimeDependencies()).getResult();
+            libs = project.dependencyResolver.resolve(deps).getFiles();
+        }
+        final Path testReportDir = project.testing.getReportDir();
+        JkModuleId jkModuleId = project.publication.getModuleId();
+        if (jkModuleId == null) {
+            String baseDirName = baseDir.getFileName().toString();
+            if (JkUtilsString.isBlank(baseDirName)) {
+                baseDirName = baseDir.toAbsolutePath().getFileName().toString();
+            }
+            jkModuleId = JkModuleId.of(baseDirName, baseDirName);
+        }
+        final String version = project.publication.getVersion().getValue();
+        final String fullName = jkModuleId.getDotNotation();
+        final String name = jkModuleId.getName();
+        final JkSonarqube sonarqube;
+        if (JkUtilsString.isBlank(scannerVersion)) {
+            sonarqube = JkSonarqube.ofEmbedded();
+        } else {
+            sonarqube = JkSonarqube.ofVersion(project.dependencyResolver.getRepos(),
+                    scannerVersion);
+        }
+        sonarqube
+                .setProjectId(fullName, name, version)
+                .setProjectBaseDir(baseDir)
+                .setBinaries(project.compilation.layout.resolveClassDir())
+                .setProperty(JkSonarqube.SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
+                .setProperty(JkSonarqube.TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
+                .setProperty(JkSonarqube.WORKING_DIRECTORY, baseDir.resolve(JkConstants.JEKA_DIR + "/.sonar").toString())
+                .setProperty(JkSonarqube.JUNIT_REPORTS_PATH,
+                        baseDir.relativize( testReportDir.resolve("junit")).toString())
+                .setProperty(JkSonarqube.SUREFIRE_REPORTS_PATH,
+                        baseDir.relativize(testReportDir.resolve("junit")).toString())
+                .setProperty(JkSonarqube.SOURCE_ENCODING, project.getSourceEncoding())
+                .setProperty(JkSonarqube.JACOCO_XML_REPORTS_PATHS,
+                        baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
+                .setProperty(JkSonarqube.JAVA_LIBRARIES, libs)
+                .setProperty(JkSonarqube.JAVA_TEST_BINARIES, testLayout.getClassDirPath());
+        if (provideTestLibs) {
+            JkDependencySet deps = project.testing.compilation.getDependencies();
+            JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
+            sonarqube.setProperty(JkSonarqube.JAVA_TEST_LIBRARIES, testLibs);
+        }
+        return sonarqube;
     }
 
 
