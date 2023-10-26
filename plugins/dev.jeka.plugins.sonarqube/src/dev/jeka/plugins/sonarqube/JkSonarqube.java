@@ -139,6 +139,7 @@ public final class JkSonarqube {
                     scannerVersion);
         }
         sonarqube
+                .setLogOutput(JkLog.isVerbose())
                 .setProjectId(fullName, name, version)
                 .setProjectBaseDir(baseDir)
                 .setBinaries(project.compilation.layout.resolveClassDir())
