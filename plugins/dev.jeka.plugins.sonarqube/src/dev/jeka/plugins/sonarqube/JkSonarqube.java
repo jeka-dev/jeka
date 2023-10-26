@@ -93,6 +93,13 @@ public final class JkSonarqube {
     }
 
     /**
+     * @see #ofVersion(JkRepoSet, String)
+     */
+    public static JkSonarqube ofVersion(JkDependencyResolver dependencyResolver, String scannerVersion) {
+        return new JkSonarqube(dependencyResolver.getRepos(), scannerVersion);
+    }
+
+    /**
      * Creates a {@link JkSonarqube} object configured for the supplied scanner version, fetched from Maven central.
      * @param scannerVersion The scanner version to use. If <code>null</code>, the embedded scanner version will
      *                       be used.
