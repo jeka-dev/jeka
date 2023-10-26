@@ -14,7 +14,6 @@ import dev.jeka.core.tool.builtins.git.GitJkBean;
 import dev.jeka.core.tool.builtins.git.JkVersionFromGit;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import dev.jeka.core.tool.builtins.repos.NexusJkBean;
-import dev.jeka.plugins.jacoco.JacocoJkBean;
 import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
 import github.Github;
@@ -62,7 +61,7 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.protobuf")
     ProtobufBuild protobufBuild;
 
-    private JacocoJkBean coreJacocoBean;
+    private JkJacoco jacocoForCore;
 
     MasterBuild()  {
         coreBuild.runIT = true;
@@ -71,7 +70,8 @@ class MasterBuild extends JkBean {
             useJacoco = true;
         }
         if (useJacoco) {
-            coreJacocoBean = coreBuild.getBean(JacocoJkBean.class).setHtmlReport(true);
+            jacocoForCore = JkJacoco.ofEmbedded();
+            coreBuild.getBean(ProjectJkBean.class).lately(jacocoForCore::configure);
         }
         getBean(NexusJkBean.class).lately(this::configureNexus);
     }
@@ -90,15 +90,14 @@ class MasterBuild extends JkBean {
             JkLog.startTask("Running samples");
             SamplesTester samplesTester = new SamplesTester(this.getRuntime().getProperties());
             PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester(this.getRuntime().getProperties());
-            if (coreJacocoBean != null) {
-                JkJacoco.AgentJarAndReportFile jacocoRunInfo = coreJacocoBean.getAgentAndReportFile();
-                samplesTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
-                pluginScaffoldTester.setJacoco(jacocoRunInfo.getAgentPath(), jacocoRunInfo.getReportFile());
+            if (jacocoForCore != null) {
+                samplesTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
+                pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
             }
             samplesTester.run();
             pluginScaffoldTester.run();
-            if (coreJacocoBean != null) {
-                coreJacocoBean.generateExport();
+            if (jacocoForCore != null) {
+                jacocoForCore.generateExport();
             }
             JkLog.endTask();
         }

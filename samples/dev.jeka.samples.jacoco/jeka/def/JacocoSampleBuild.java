@@ -16,19 +16,16 @@ import java.nio.file.Path;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
 public class JacocoSampleBuild extends JkBean {
 
-    ProjectJkBean project= getBean(ProjectJkBean.class).lately(this::configure);
+    ProjectJkBean projectKBean = getBean(ProjectJkBean.class).lately(this::configure);
 
-    JacocoJkBean jacoco = getRuntime().getBean(JacocoJkBean.class).setHtmlReport(true);
+    JacocoJkBean jacocoKBean = getRuntime().getBean(JacocoJkBean.class);
 
-    final IntellijJkBean intellij = getBean(IntellijJkBean.class);
+    final IntellijJkBean intellijKBean = getBean(IntellijJkBean.class);
 
     protected JacocoSampleBuild() {
-        jacoco.configureProject = true;
-        jacoco.xmlReport = true;
-        jacoco.jacocoVersion = "0.8.7";
-        intellij.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
-        intellij.configureIml(this::configureIml);
-
+        jacocoKBean.jacocoVersion = "0.8.7";
+        intellijKBean.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
+        intellijKBean.configureIml(this::configureIml);
     }
 
     private void configure(JkProject project) {
@@ -54,7 +51,7 @@ public class JacocoSampleBuild extends JkBean {
         JacocoSampleBuild build = JkInit.instanceOf(JacocoSampleBuild.class);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         build.cleanOutput();
-        build.project.test();
+        build.projectKBean.test();
     }
 
 

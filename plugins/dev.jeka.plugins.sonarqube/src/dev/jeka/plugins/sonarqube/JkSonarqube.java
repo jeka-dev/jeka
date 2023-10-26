@@ -67,17 +67,17 @@ public final class JkSonarqube {
 
     private final JkRepoSet repos;
 
-    private final String sonnarScannerVersion;
+    private final String scannerVersion;
 
     private boolean logOutput;
 
     private JkSonarqube(JkRepoSet repos, String scannerVersion) {
         this.repos = repos;
-        this.sonnarScannerVersion = scannerVersion;
+        this.scannerVersion = scannerVersion;
     }
 
     /**
-     * Creates a {@link JkSonarqube} object using the the embedded scanner.
+     * Creates a {@link JkSonarqube} object using the embedded scanner.
      */
     public static JkSonarqube ofEmbedded() {
         return new JkSonarqube(null, null);
@@ -102,14 +102,11 @@ public final class JkSonarqube {
     }
 
     /**
-     * Creates a {@link JkSonarqube} object configured for the supplied {@link JkProject}.
-     * @param scannerVersion The scanner version to use. If <code>null</code>, the embedded scanner version will
-     *                       be used.
+     * Configures Sonarqube for the supplied {@link JkProject}.
      * @param provideProdLibs If true, the list of production dependency files will be provided to sonarqube.
      * @param provideTestLibs If true, the list of test dependency files will be provided to sonarqube.
      */
-    public static JkSonarqube ofConfigured(JkProject project, String scannerVersion, boolean provideProdLibs,
-                                        boolean provideTestLibs) {
+    public JkSonarqube configureFor(JkProject project, boolean provideProdLibs, boolean provideTestLibs) {
         final JkCompileLayout prodLayout = project.compilation.layout;
         final JkCompileLayout testLayout = project.testing.compilation.layout;
         final Path baseDir = project.getBaseDir();
@@ -132,13 +129,7 @@ public final class JkSonarqube {
         final String fullName = jkModuleId.getDotNotation();
         final String name = jkModuleId.getName();
         final JkSonarqube sonarqube;
-        if (JkUtilsString.isBlank(scannerVersion)) {
-            sonarqube = JkSonarqube.ofEmbedded();
-        } else {
-            sonarqube = JkSonarqube.ofVersion(project.dependencyResolver.getRepos(),
-                    scannerVersion);
-        }
-        sonarqube
+        this
                 .setLogOutput(JkLog.isVerbose())
                 .setProjectId(fullName, name, version)
                 .setProjectBaseDir(baseDir)
@@ -158,9 +149,16 @@ public final class JkSonarqube {
         if (provideTestLibs) {
             JkDependencySet deps = project.testing.compilation.getDependencies();
             JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
-            sonarqube.setProperty(JkSonarqube.JAVA_TEST_LIBRARIES, testLibs);
+            this.setProperty(JkSonarqube.JAVA_TEST_LIBRARIES, testLibs);
         }
-        return sonarqube;
+        return this;
+    }
+
+    /**
+     * @see #configureFor(JkProject, boolean, boolean)
+     */
+    public JkSonarqube configureFor(JkProject project) {
+        return configureFor(project, true, false);
     }
 
 
@@ -288,13 +286,13 @@ public final class JkSonarqube {
         JkJavaVersion javaVersion = JkJavaVersion.of(System.getProperty("java.version"));
         JkUtilsAssert.state(javaVersion.compareTo(JkJavaVersion.V11) >= 0,
                 "Sonarqube has to run on JRE >= 11. You are running on version " + javaVersion);
-        if (this.sonnarScannerVersion == null) {
+        if (this.scannerVersion == null) {
             URL embeddedUrl = JkSonarqube.class.getResource(SCANNER_JAR_NAME_46);
             JkLog.info("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
             return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalEmbeddedClassloader.URL_CACHE_DIR);
         }
         JkCoordinate coordinate = JkCoordinate.of("org.sonarsource.scanner.cli", "sonar-scanner-cli",
-                this.sonnarScannerVersion);
+                this.scannerVersion);
         JkCoordinateDependency coordinateDependency = JkCoordinateDependency
                 .of(coordinate)
                 .withTransitivity(JkTransitivity.NONE);

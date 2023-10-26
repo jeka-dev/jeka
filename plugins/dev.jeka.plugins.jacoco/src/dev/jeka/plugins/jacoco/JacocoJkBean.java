@@ -1,9 +1,7 @@
 package dev.jeka.plugins.jacoco;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
-import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
@@ -19,7 +17,7 @@ public class JacocoJkBean extends JkBean {
     public boolean xmlReport = true;
 
     @JkDoc("If true, Jacoco will produce a standard HTML report .")
-    public boolean htmlReport = false;
+    public boolean htmlReport = true;
 
     @JkDoc("Options string, as '[option1]=[value1],[option2]=[value2]', to pass to agent as described here : https://www.jacoco.org/jacoco/trunk/doc/agent.html")
     public String agentOptions;
@@ -32,19 +30,11 @@ public class JacocoJkBean extends JkBean {
     @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent:runtime")
     public String jacocoVersion = "0.8.7";
 
-    private JkJacoco jacoco;
-
-    /**
-     * Generates XML and HTML export reports from the exec file
-     */
-    public JacocoJkBean generateExport() {
-        jacoco.generateExport();
-        return this;
-    }
 
     private JacocoJkBean() {
         getRuntime().getBean(ProjectJkBean.class).lately(this::configureForDefaultProject);
     }
+
 
     private void configureForDefaultProject(JkProject project) {
         if (!configureProject) {
@@ -53,46 +43,21 @@ public class JacocoJkBean extends JkBean {
         configure(project);
     }
 
-    public void configure(JkProject project) {
-        jacoco = JkJacoco.configure(project, jacocoVersion, xmlReport, htmlReport);
+    private void configure(JkProject project) {
+        JkJacoco jacoco = JkJacoco.ofVersion(project.dependencyResolver, jacocoVersion)
+                .setHtmlReport(htmlReport)
+                .setXmlReport(xmlReport);
         if (!JkUtilsString.isBlank(classDirExcludes)) {
-            JkPathMatcher pathMatcher = JkPathMatcher.of(false, classDirExcludes.split(","));
-            jacoco.setClassDirFilter(pathMatcher);
+            jacoco.setClassDirFilter(classDirExcludes);
         }
         if (!JkUtilsString.isBlank(this.agentOptions)) {
             jacoco.addAgentOptions(agentOptions.split(","));
         }
+        jacoco.configure(project);
     }
 
-    public JacocoJkBean setConfigureProject(boolean configureProject) {
-        this.configureProject = configureProject;
-        return this;
-    }
 
-    public JacocoJkBean setXmlReport(boolean xmlReport) {
-        this.xmlReport = xmlReport;
-        return this;
-    }
 
-    public JacocoJkBean setHtmlReport(boolean htmlReport) {
-        this.htmlReport = htmlReport;
-        return this;
-    }
 
-    public JacocoJkBean setClassDirExcludes(String classDirExcludes) {
-        this.classDirExcludes = classDirExcludes;
-        return this;
-    }
-
-    public JacocoJkBean setJacocoVersion(String jacocoVersion) {
-        this.jacocoVersion = jacocoVersion;
-        return this;
-    }
-
-    public JkJacoco.AgentJarAndReportFile getAgentAndReportFile() {
-        JkUtilsAssert.state(jacoco != null,
-                "This method cannot be invoked when no project has been configured on.");
-        return new JkJacoco.AgentJarAndReportFile(jacoco.getToolProvider().getAgentJar(), jacoco.getExecFile());
-    }
 
 }

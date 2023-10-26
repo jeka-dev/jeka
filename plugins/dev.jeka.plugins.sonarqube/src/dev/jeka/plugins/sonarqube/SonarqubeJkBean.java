@@ -3,6 +3,7 @@ package dev.jeka.plugins.sonarqube;
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -79,7 +80,15 @@ public class SonarqubeJkBean extends JkBean {
     }
 
     private JkSonarqube createConfiguredSonarqube(JkProject project) {
-        return JkSonarqube.ofConfigured(project, scannerVersion, provideProductionLibs, provideTestLibs)
+        final JkSonarqube sonarqube;
+        if (JkUtilsString.isBlank(scannerVersion)) {
+            sonarqube = JkSonarqube.ofEmbedded();
+        } else {
+            sonarqube = JkSonarqube.ofVersion(project.dependencyResolver.getRepos(),
+                    scannerVersion);
+        }
+        return sonarqube
+                .configureFor(project, provideProductionLibs, provideTestLibs)
                 .setLogOutput(logOutput)
                 .setProperties(getRuntime().getProperties().getAllStartingWith("sonar.", false));
     }

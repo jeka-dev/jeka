@@ -1,15 +1,19 @@
 package dev.jeka.plugins.jacoco;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.*;
 
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -39,7 +43,9 @@ public final class JkJacoco {
 
     public static final String OUTPUT_HTML_RELATIVE_PATH = "jacoco/html";  // this is a folder
 
-    private final RepoToolProvider toolProvider;
+    public static final String DEFAULT_VERSION = "0.8.8";
+
+    private final ToolProvider toolProvider;
 
     private Path execFile;
 
@@ -47,13 +53,17 @@ public final class JkJacoco {
 
     private JkPathMatcher classDirFilter;
 
+    private boolean htmlReport = true;
+
+    private boolean xmlReport = true;
+
     private List<Path> sourceDirs = new LinkedList<>();
 
     private final List<String> agentOptions = new LinkedList<>();
 
     private final List<String> reportOptions = new LinkedList<>();
 
-    private JkJacoco(RepoToolProvider toolProvider) {
+    private JkJacoco(ToolProvider toolProvider) {
         super();
         this.toolProvider = toolProvider;
     }
@@ -61,37 +71,68 @@ public final class JkJacoco {
     /**
      * Returns the {@link JkJacoco} object relying on jacoco-agent and jacoco-cli hosted on repository.
      */
-    public static JkJacoco ofManaged(JkDependencyResolver dependencyResolver, String version) {
+    public static JkJacoco ofVersion(JkDependencyResolver dependencyResolver, String version) {
         return new JkJacoco(new RepoToolProvider(dependencyResolver, version));
     }
 
-    public static JkJacoco ofManaged(JkRepoSet repos, String version) {
-        return ofManaged(JkDependencyResolver.of(repos), version);
+    /**
+     * @see #ofVersion(JkDependencyResolver, String)
+     */
+    public static JkJacoco ofVersion(JkRepoSet repos, String version) {
+        return ofVersion(JkDependencyResolver.of(repos), version);
     }
 
-    public static JkJacoco configure(JkProject project, String jacocoVersion, boolean xmlReport, boolean htmlReport) {
-        JkJacoco jacoco = JkJacoco.ofManaged(project.dependencyResolver, jacocoVersion);
-        jacoco.setExecFile(project.getOutputDir().resolve(OUTPUT_RELATIVE_PATH))
+    /**
+     * @see #ofVersion(JkDependencyResolver, String)
+     */
+    public static JkJacoco ofVersion(String version) {
+        return ofVersion(JkRepo.ofMavenCentral().toSet(), version);
+    }
+
+    /**
+     * Returns the {@link JkJacoco} object relying on jacoco-agent and jacoco-cli embedded in this plugin.
+     */
+    public static JkJacoco ofEmbedded() {
+        return new JkJacoco(new EmbeddedToolProvider());
+    }
+
+    /**
+     * Configures the specified project to produce Jacoco report when tests are run.
+     */
+    public JkJacoco configure(JkProject project) {
+        this.setExecFile(project.getOutputDir().resolve(OUTPUT_RELATIVE_PATH))
                 .setClassDir(project.compilation.layout.getClassDirPath());
         if (xmlReport) {
-            jacoco.addReportOptions("--xml",
+            this.addReportOptions("--xml",
                     project.getOutputDir().resolve(OUTPUT_XML_RELATIVE_PATH).toString());
         }
         if (htmlReport) {
-            jacoco.addReportOptions("--html",
+            this.addReportOptions("--html",
                     project.getOutputDir().resolve(OUTPUT_HTML_RELATIVE_PATH).toString());
         }
-        jacoco.configure(project.testing.testProcessor);
+        this.configure(project.testing.testProcessor);
         List<Path> sourceDirs =project.compilation
                 .layout.getSources().getRootDirsOrZipFiles().stream()
                 .map(path -> path.isAbsolute() ? path : project.getBaseDir().resolve(path))
                 .collect(Collectors.toList());
-        jacoco.setSources(sourceDirs);
-        return jacoco;
+        this.setSources(sourceDirs);
+        return this;
     }
 
-    public static JkJacoco ofManaged(String version) {
-        return ofManaged(JkRepo.ofMavenCentral().toSet(), version);
+    /**
+     *  @param htmlReport if true, produces an xml report.
+     */
+    public JkJacoco setHtmlReport(boolean htmlReport) {
+        this.htmlReport = htmlReport;
+        return this;
+    }
+
+    /**
+     *  @param xmlReport if true, produces an xml report.
+     */
+    public JkJacoco setXmlReport(boolean xmlReport) {
+        this.xmlReport = xmlReport;
+        return this;
     }
 
     public JkJacoco setExecFile(Path destFile) {
@@ -113,6 +154,12 @@ public final class JkJacoco {
     }
 
     public JkJacoco setClassDirFilter(JkPathMatcher pathMatcher) {
+        this.classDirFilter = pathMatcher;
+        return this;
+    }
+
+    public JkJacoco setClassDirFilter(String pathDirExcludes) {
+        JkPathMatcher pathMatcher = JkPathMatcher.of(false, pathDirExcludes.split(","));
         this.classDirFilter = pathMatcher;
         return this;
     }
@@ -147,30 +194,10 @@ public final class JkJacoco {
         });
     }
 
-    private JkPathTree pathTree() {
-        JkUtilsAssert.state(classDir != null, "Class dir has not been specified.");
-        JkPathTree result = JkPathTree.of(classDir);
-        if (classDirFilter != null) {
-            result = result.withMatcher(classDirFilter);
-        }
-        return result;
-    }
-
-    private String agentOptions() {
-        String result = String.join(",", agentOptions);
-        boolean hasDestFile = agentOptions.stream()
-                .filter(option -> option.startsWith("destfile="))
-                .findFirst().isPresent();
-        if (!hasDestFile) {
-            if (!JkUtilsString.isBlank(result)) {
-                result = result + ",";
-            }
-            result = result + "destfile=" + JkUtilsPath.relativizeFromWorkingDir(execFile);
-        }
-        return result;
-    }
-
-     public void generateExport() {
+    /**
+     * Generates XML and HTML export reports from the exec file
+     */
+    public void generateExport() {
         JkLog.info("Jacoco internal report created at " + execFile.toAbsolutePath().normalize());
         if (!reportOptions.isEmpty()) {
             if (classDir == null) {
@@ -198,8 +225,8 @@ public final class JkJacoco {
                 });
             }
             for (Path sourceRoot : sourceDirs) {
-               // args.add("--sourcefiles");
-               // args.add(sourceRoot.toString());
+                // args.add("--sourcefiles");
+                // args.add(sourceRoot.toString());
             }
             args.add("--encoding");
             args.add("utf-8");
@@ -217,15 +244,58 @@ public final class JkJacoco {
         }
     }
 
-    public RepoToolProvider getToolProvider() {
-        return toolProvider;
+    /**
+     * The agent jar path, used to instrument tests
+     */
+    public Path getAgentJar() {
+        return this.getToolProvider().getAgentJar();
     }
 
+    /**
+     * Exec file is the binary report file generated by Jacoco
+     */
     public Path getExecFile() {
         return execFile;
     }
 
-    public static class RepoToolProvider  {
+    private ToolProvider getToolProvider() {
+        return toolProvider;
+    }
+
+
+
+    private JkPathTree pathTree() {
+        JkUtilsAssert.state(classDir != null, "Class dir has not been specified.");
+        JkPathTree result = JkPathTree.of(classDir);
+        if (classDirFilter != null) {
+            result = result.withMatcher(classDirFilter);
+        }
+        return result;
+    }
+
+    private String agentOptions() {
+        String result = String.join(",", agentOptions);
+        boolean hasDestFile = agentOptions.stream()
+                .filter(option -> option.startsWith("destfile="))
+                .findFirst().isPresent();
+        if (!hasDestFile) {
+            if (!JkUtilsString.isBlank(result)) {
+                result = result + ",";
+            }
+            result = result + "destfile=" + JkUtilsPath.relativizeFromWorkingDir(execFile);
+        }
+        return result;
+    }
+
+    private interface ToolProvider {
+
+        Path getAgentJar();
+
+        Path getCmdLineJar();
+
+    }
+
+    public static class RepoToolProvider implements ToolProvider {
 
         JkDependencyResolver dependencyResolver;
 
@@ -245,27 +315,35 @@ public final class JkJacoco {
             return JkCoordinateFileProxy.of(dependencyResolver.getRepos(),
                     "org.jacoco:org.jacoco.cli:nodeps:" + version).get();
         }
+    }
 
+    private static class EmbeddedToolProvider implements ToolProvider {
+
+        private Path agentJarFile;
+
+        private Path cliJarFile;
+
+        EmbeddedToolProvider() {
+            final URL agentJarUrl = JacocoJkBean.class.getResource("org.jacoco.agent-0.8.7-runtime.jar");
+            agentJarFile = JkUtilsIO.copyUrlContentToCacheFile(agentJarUrl, System.out,
+                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
+            final URL cliJarUrl = JacocoJkBean.class.getResource("org.jacoco.cli-0.8.7-nodeps.jar");
+            cliJarFile = JkUtilsIO.copyUrlContentToCacheFile(cliJarUrl, System.out,
+                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
+        }
+
+        @Override
+        public Path getAgentJar() {
+            return agentJarFile;
+        }
+
+        @Override
+        public Path getCmdLineJar() {
+            return cliJarFile;
+        }
     }
 
 
-    public static class AgentJarAndReportFile {
 
-        private final Path agentPath;
 
-        private final Path reportFile;
-
-        AgentJarAndReportFile(Path agentPath, Path reportFile) {
-            this.agentPath = agentPath;
-            this.reportFile = reportFile;
-        }
-
-        public Path getAgentPath() {
-            return agentPath;
-        }
-
-        public Path getReportFile() {
-            return reportFile;
-        }
-    }
 }
