@@ -53,7 +53,7 @@ public class JacocoJkBean extends JkBean {
         if (!JkUtilsString.isBlank(this.agentOptions)) {
             jacoco.addAgentOptions(agentOptions.split(","));
         }
-        jacoco.configure(project);
+        jacoco.configureForAndApplyTo(project);
     }
 
 

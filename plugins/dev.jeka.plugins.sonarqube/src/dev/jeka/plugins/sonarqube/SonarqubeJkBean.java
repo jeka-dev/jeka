@@ -90,7 +90,7 @@ public class SonarqubeJkBean extends JkBean {
         return sonarqube
                 .configureFor(project, provideProductionLibs, provideTestLibs)
                 .setLogOutput(logOutput)
-                .setProperties(getRuntime().getProperties().getAllStartingWith("sonar.", false));
+                .setProperties(getRuntime().getProperties());
     }
 
 

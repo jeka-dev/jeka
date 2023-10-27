@@ -97,9 +97,10 @@ public final class JkJacoco {
     }
 
     /**
-     * Configures the specified project to produce Jacoco report when tests are run.
+     * Configures Jacoco settings in accordance to the specified project.
+     * It basically sets the report locations and instructs where source code is lying.
      */
-    public JkJacoco configure(JkProject project) {
+    public JkJacoco configureFor(JkProject project) {
         this.setExecFile(project.getOutputDir().resolve(OUTPUT_RELATIVE_PATH))
                 .setClassDir(project.compilation.layout.getClassDirPath());
         if (xmlReport) {
@@ -110,13 +111,38 @@ public final class JkJacoco {
             this.addReportOptions("--html",
                     project.getOutputDir().resolve(OUTPUT_HTML_RELATIVE_PATH).toString());
         }
-        this.configure(project.testing.testProcessor);
-        List<Path> sourceDirs =project.compilation
+        List<Path> sourceDirs = project.compilation
                 .layout.getSources().getRootDirsOrZipFiles().stream()
                 .map(path -> path.isAbsolute() ? path : project.getBaseDir().resolve(path))
                 .collect(Collectors.toList());
         this.setSources(sourceDirs);
         return this;
+    }
+
+    /**
+     * Concise method for configuring Jacoco based on the specified project and applying the settings to the designated
+     * project's testProcessor.
+     */
+    public JkJacoco configureForAndApplyTo(JkProject project) {
+        configureFor(project).applyTo(project.testing.testProcessor);
+        return this;
+    }
+
+    /**
+     * Applies this Jacoco settings to the specified {@link JkTestProcessor}, in order
+     * it runs with Jacoco.
+     */
+    public void applyTo(JkTestProcessor testProcessor) {
+        JkUtilsAssert.state(execFile != null, "The exec file has not been specified.");
+        testProcessor.preActions.append(() -> {
+            String agentOptions = agentOptions();
+            JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
+                    JkJavaProcess.ofJava(JkTestProcessor.class.getName()));
+            process.addAgent(toolProvider.getAgentJar(), agentOptions);
+            JkLog.info("Instrumenting tests with Jacoco agent options : " + agentOptions);
+            testProcessor.setForkingProcess(process);
+            testProcessor.postActions.append(this::generateExport);
+        });
     }
 
     /**
@@ -181,21 +207,8 @@ public final class JkJacoco {
         return reportOptions;
     }
 
-    public void configure(JkTestProcessor testProcessor) {
-        JkUtilsAssert.state(execFile != null, "The exec file has not been specified.");
-        testProcessor.preActions.append(() -> {
-            String agentOptions = agentOptions();
-            JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
-                    JkJavaProcess.ofJava(JkTestProcessor.class.getName()));
-            process.addAgent(toolProvider.getAgentJar(), agentOptions);
-            JkLog.info("Instrumenting tests with Jacoco agent options : " + agentOptions);
-            testProcessor.setForkingProcess(process);
-            testProcessor.postActions.append(this::generateExport);
-        });
-    }
-
     /**
-     * Generates XML and HTML export reports from the exec file
+     * Generates XML and HTML reports from the exec report file.
      */
     public void generateExport() {
         JkLog.info("Jacoco internal report created at " + execFile.toAbsolutePath().normalize());

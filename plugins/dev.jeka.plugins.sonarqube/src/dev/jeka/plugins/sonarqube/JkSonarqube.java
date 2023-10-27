@@ -11,6 +11,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -229,6 +230,15 @@ public final class JkSonarqube {
 
     public JkSonarqube setProperties(Map<String, String> props) {
         this.params.putAll(props);
+        return this;
+    }
+
+    /**
+     * Sets all properties stating with 'sonar." prefix from the specified {@link JkProperties object}.
+     * The 'sonar.' prefix is removed from the effective applied property names.
+     */
+    public JkSonarqube setProperties(JkProperties properties) {
+        this.setProperties(properties.getAllStartingWith("sonar.", false));
         return this;
     }
 

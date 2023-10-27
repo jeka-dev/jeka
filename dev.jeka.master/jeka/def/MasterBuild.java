@@ -71,7 +71,7 @@ class MasterBuild extends JkBean {
         }
         if (useJacoco) {
             jacocoForCore = JkJacoco.ofEmbedded();
-            coreBuild.getBean(ProjectJkBean.class).lately(jacocoForCore::configure);
+            coreBuild.getBean(ProjectJkBean.class).lately(jacocoForCore::configureForAndApplyTo);
         }
         getBean(NexusJkBean.class).lately(this::configureNexus);
     }
