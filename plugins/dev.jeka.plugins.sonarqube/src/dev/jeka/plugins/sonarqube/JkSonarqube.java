@@ -1,6 +1,5 @@
 package dev.jeka.plugins.sonarqube;
 
-
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
@@ -138,22 +137,22 @@ public final class JkSonarqube {
         final String name = jkModuleId.getName();
         final JkSonarqube sonarqube;
         this
-                .setLogOutput(JkLog.isVerbose())
-                .setProjectId(fullName, name, version)
-                .setProjectBaseDir(baseDir)
-                .setBinaries(project.compilation.layout.resolveClassDir())
-                .setProperty(JkSonarqube.SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(JkSonarqube.TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(JkSonarqube.WORKING_DIRECTORY, baseDir.resolve(JkConstants.JEKA_DIR + "/.sonar").toString())
-                .setProperty(JkSonarqube.JUNIT_REPORTS_PATH,
-                        baseDir.relativize( testReportDir.resolve("junit")).toString())
-                .setProperty(JkSonarqube.SUREFIRE_REPORTS_PATH,
-                        baseDir.relativize(testReportDir.resolve("junit")).toString())
-                .setProperty(JkSonarqube.SOURCE_ENCODING, project.getSourceEncoding())
-                .setProperty(JkSonarqube.JACOCO_XML_REPORTS_PATHS,
-                        baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
-                .setProperty(JkSonarqube.JAVA_LIBRARIES, libs)
-                .setProperty(JkSonarqube.JAVA_TEST_BINARIES, testLayout.getClassDirPath());
+            .setLogOutput(JkLog.isVerbose())
+            .setProjectId(fullName, name, version)
+            .setProjectBaseDir(baseDir)
+            .setBinaries(project.compilation.layout.resolveClassDir())
+            .setProperty(JkSonarqube.SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
+            .setProperty(JkSonarqube.TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
+            .setProperty(JkSonarqube.WORKING_DIRECTORY, baseDir.resolve(JkConstants.JEKA_DIR + "/.sonar").toString())
+            .setProperty(JkSonarqube.JUNIT_REPORTS_PATH,
+                    baseDir.relativize( testReportDir.resolve("junit")).toString())
+            .setProperty(JkSonarqube.SUREFIRE_REPORTS_PATH,
+                    baseDir.relativize(testReportDir.resolve("junit")).toString())
+            .setProperty(JkSonarqube.SOURCE_ENCODING, project.getSourceEncoding())
+            .setProperty(JkSonarqube.JACOCO_XML_REPORTS_PATHS,
+                    baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
+            .setProperty(JkSonarqube.JAVA_LIBRARIES, libs)
+            .setProperty(JkSonarqube.JAVA_TEST_BINARIES, testLayout.getClassDirPath());
         if (provideTestLibs) {
             JkDependencySet deps = project.testing.compilation.getDependencies();
             JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
@@ -202,32 +201,29 @@ public final class JkSonarqube {
         JkLog.endTask();
     }
 
-    private JkJavaProcess javaProcess(Path jar, String mainClassName) {
-        return JkJavaProcess.ofJava(mainClassName)
-                .setClasspath(jar)
-                .setFailOnError(true)
-                .addParams(toProperties())
-                .setLogCommand(JkLog.isVerbose() || logOutput)
-                .setLogOutput(JkLog.isVerbose() || logOutput);
-    }
-
-    private List<String> toProperties() {
-        final List<String> result = new LinkedList<>();
-        for (final Map.Entry<String, String> entry : this.params.entrySet()) {
-            result.add("-Dsonar." + entry.getKey() + "=" + entry.getValue());
-        }
-        return result;
-    }
-
+    /**
+     * Set a sonarqube property (aka analysis parameter) as listed <a href="https://docs.sonarsource.com/sonarqube/9.9/analyzing-source-code/analysis-parameters/">here</a>. <p/>
+     *
+     * Sonarqube properties all start with prefix 'sonar.' but you can omit it, as it will be
+     * prepended at launch time, if missing.
+     */
     public JkSonarqube setProperty(String key, String value) {
         this.params.put(key, value);
         return this;
     }
 
+    /**
+     * Convenient method to pass a list of path, as property value.
+     * @see #setProperty(String, String)
+     */
     public JkSonarqube setProperty(String key, Iterable<Path> value) {
         return setProperty(key, toPaths(value));
     }
 
+    /**
+     * Convenient method to pass a bulk of sonar properties..
+     * @see #setProperty(String, String)
+     */
     public JkSonarqube setProperties(Map<String, String> props) {
         this.params.putAll(props);
         return this;
@@ -235,7 +231,7 @@ public final class JkSonarqube {
 
     /**
      * Sets all properties stating with 'sonar." prefix from the specified {@link JkProperties object}.
-     * The 'sonar.' prefix is removed from the effective applied property names.
+     * @see #setProperty(String, String)
      */
     public JkSonarqube setProperties(JkProperties properties) {
         this.setProperties(properties.getAllStartingWith("sonar.", false));
@@ -273,6 +269,27 @@ public final class JkSonarqube {
 
     public JkSonarqube setJdbcPassword(String pwd) {
         return setProperty(JDBC_PASSWORD, pwd);
+    }
+
+    private JkJavaProcess javaProcess(Path jar, String mainClassName) {
+        return JkJavaProcess.ofJava(mainClassName)
+                .setClasspath(jar)
+                .setFailOnError(true)
+                .addParams(toProperties())
+                .setLogCommand(JkLog.isVerbose() || logOutput)
+                .setLogOutput(JkLog.isVerbose() || logOutput);
+    }
+
+    private List<String> toProperties() {
+        final List<String> result = new LinkedList<>();
+        for (final Map.Entry<String, String> entry : this.params.entrySet()) {
+            String key = entry.getKey();
+            if (!key.startsWith(SONAR_PREFIX)) {
+                key = SONAR_PREFIX + key;
+            }
+            result.add("-D" + key + "=" + entry.getValue());
+        }
+        return result;
     }
 
     private String toPaths(Iterable<Path> files) {
