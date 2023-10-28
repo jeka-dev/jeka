@@ -136,7 +136,6 @@ public final class JkSonarqube {
         final String version = project.publication.getVersion().getValue();
         final String fullName = jkModuleId.getDotNotation();
         final String name = jkModuleId.getName();
-        final JkSonarqube sonarqube;
         this
             .setLogOutput(JkLog.isVerbose())
             .setProjectId(fullName, name, version)
