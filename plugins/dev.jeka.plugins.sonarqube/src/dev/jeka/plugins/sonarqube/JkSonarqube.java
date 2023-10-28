@@ -36,6 +36,7 @@ public final class JkSonarqube {
     public static final String LANGUAGE = "language";
     public static final String PROFILE = "profile";
     public static final String BRANCH = "branch";
+    public static final String TOKEN = "token";
     public static final String SOURCE_ENCODING = "sourceEncoding";
     public static final String VERBOSE = "verbose";
     public static final String WORKING_DIRECTORY = "working.directory";

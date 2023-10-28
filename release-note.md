@@ -1,3 +1,6 @@
+# 0.10.35
+- Rework NodeJs plugin
+
 # 0.10.31
 - Rework and polish Jacoco and Sonarqube plugins
 
