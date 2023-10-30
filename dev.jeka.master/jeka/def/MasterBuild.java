@@ -66,13 +66,10 @@ class MasterBuild extends JkBean {
     MasterBuild()  {
         coreBuild.runIT = true;
         getImportedBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
-        if (getRuntime().getProperties().get("sonar.host.url") != null) {
-            useJacoco = true;
-        }
-        if (useJacoco) {
-            jacocoForCore = JkJacoco.ofEmbedded();
-            coreBuild.getBean(ProjectJkBean.class).lately(jacocoForCore::configureForAndApplyTo);
-        }
+
+        // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
+        jacocoForCore = JkJacoco.ofEmbedded();
+        coreBuild.getBean(ProjectJkBean.class).lately(jacocoForCore::configureForAndApplyTo);
         getBean(NexusJkBean.class).lately(this::configureNexus);
     }
 
@@ -171,6 +168,8 @@ class MasterBuild extends JkBean {
         }
         projectJkBean.lately(project -> {
                 versionFromGit.handleVersioning(project);
+                project.compilation
+                                .addJavaCompilerOptions("-g");
                 project.publication
                     .setRepos(this.publishRepo())
                     .maven
