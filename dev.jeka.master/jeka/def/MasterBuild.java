@@ -68,7 +68,7 @@ class MasterBuild extends JkBean {
         getImportedBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
-        jacocoForCore = JkJacoco.ofEmbedded();
+        jacocoForCore = JkJacoco.ofVersion(getRuntime().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
         coreBuild.getBean(ProjectJkBean.class).lately(jacocoForCore::configureForAndApplyTo);
         getBean(NexusJkBean.class).lately(this::configureNexus);
     }
