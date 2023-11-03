@@ -33,8 +33,6 @@ class MasterBuild extends JkBean {
 
     public boolean runSamples = true;
 
-    public boolean useJacoco = false;
-
     private final JkVersionFromGit versionFromGit = JkVersionFromGit.of();
 
 
@@ -61,7 +59,7 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.protobuf")
     ProtobufBuild protobufBuild;
 
-    private JkJacoco jacocoForCore;
+    private final JkJacoco jacocoForCore;
 
     MasterBuild()  {
         coreBuild.runIT = true;
@@ -112,7 +110,7 @@ class MasterBuild extends JkBean {
             Github github = new Github();
             github.ghToken =githubToken;
             github.publishGhRelease();
-            JkLog.endTask();;
+            JkLog.endTask();
         } else {
             JkLog.startTask("Publish locally");
             publishLocal();
