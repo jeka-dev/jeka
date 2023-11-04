@@ -1,7 +1,9 @@
 package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsHttp;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsXml;
@@ -24,6 +26,9 @@ import java.util.stream.Collectors;
  */
 public class JkNexusRepos {
 
+    private static final String TASK_NAME = "Closing and releasing repositories";
+
+
     private static final long CLOSE_TIMEOUT_MILLIS = 15 * 60 * 1000L;
 
     private static final long CLOSE_WAIT_INTERVAL_MILLIS = 10_000L;
@@ -33,6 +38,11 @@ public class JkNexusRepos {
     private final String basicCredential;
 
     private int readTimeout;
+
+    /**
+     * A filter to take in account only repositories having specified profile names. If empty, no filter applies.
+     */
+    private String[] profileNameFilters = new String[0];
 
     private JkNexusRepos(String baseUrl, String basicCredential) {
         this.baseUrl = baseUrl;
@@ -52,10 +62,32 @@ public class JkNexusRepos {
         JkRepo.JkRepoCredentials repoCredentials = repo.getCredentials();
         URL url = repo.getUrl();
         String baseUrl = url.getProtocol() + "://" + url.getHost();
-        if (repo.getCredentials() == null) {
+        if (repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
+            JkLog.warn("No remote repository configured for publishing");
             return new JkNexusRepos(baseUrl, null);
         }
         return JkNexusRepos.ofBasicCredentials(baseUrl, repoCredentials.getUserName(), repoCredentials.getPassword());
+    }
+
+    /**
+     * Convenient method for auto-closing publish repo of the specified
+     * project, right after publication.
+     *
+     * @param profileNames See {@link #setProfileNameFilters(String...)}
+     */
+    public static void handleAutoRelease(JkProject project, String... profileNames) {
+        JkNexusRepos.ofPublishRepo(project)
+                .setProfileNameFilters(profileNames)
+                .autoReleaseAfterPublication(project);
+    }
+
+    /**
+     * Creates a {@link JkNexusRepos} from the publishing repo of the specified {@link JkProject}
+     */
+    public static JkNexusRepos ofPublishRepo(JkProject project) {
+        JkRepo repo = project.publication.findFirstNonLocalRepo();
+        JkUtilsAssert.argument(repo != null, "No remote publish repo found on project " + project);
+        return JkNexusRepos.ofRepo(repo);
     }
 
     /**
@@ -67,23 +99,30 @@ public class JkNexusRepos {
     }
 
     /**
+     * Set filters to take in account only repositories having specified profile names. If empty, no filter applies.
+     */
+    public JkNexusRepos setProfileNameFilters(String... profileNames) {
+        this.profileNameFilters = profileNames;
+        return this;
+    }
+
+    /**
      * Closes then releases staging repositories in OPEN status.
      * Repositories not in OPEN status at time of invoking this method won't be released.
-     *
-     * @param profileNames a filter to take in account only repositories having specified profile names. If empty, no filter applies.
      */
-    public void closeAndReleaseOpenRepositories(String... profileNames) {
+    public void closeAndReleaseOpenRepositories() {
         JkLog.startTask("Closing and releasing staged repositories");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
         JkLog.info("Found staging repositories : ");
         stagingRepos.forEach(repo -> JkLog.info(repo.toString()));
         List<String> openRepoIds = stagingRepos.stream()
-                .filter(profileNameFilter(profileNames))
+                .filter(profileNameFilter(profileNameFilters))
                 .filter(repo -> JkStagingRepo.Status.OPEN == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
-        if (profileNames.length != 0) {
-            JkLog.info("Taking in account repositories with profile name in " + Arrays.asList(profileNames));
+        if (profileNameFilters.length != 0) {
+            JkLog.info("Taking in account repositories with profile name in "
+                    + Arrays.asList(profileNameFilters));
         }
         JkLog.info("Repositories to close and release : " + openRepoIds);
         close(openRepoIds);
@@ -93,32 +132,31 @@ public class JkNexusRepos {
     }
 
     /**
-     * Closes repositories in OPEN Status, waits for all repos are closed then releases all repositories.
-     *
-     * @param profileNames a filter to take in account only repositories having specified profile names. If empty, no filter applies.
+     * Closes repositories in OPEN Status, waits for all repos are closed then releases all repositories..
      */
-    public void closeAndRelease(String... profileNames) {
+    public void closeAndRelease() {
         JkLog.startTask("Closing and releasing staged repository");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
         JkLog.info("Found staging repositories : ");
         stagingRepos.forEach(repo -> JkLog.info(repo.toString()));
         List<String> openRepoIds = stagingRepos.stream()
-                .filter(profileNameFilter(profileNames))
+                .filter(profileNameFilter(profileNameFilters))
                 .filter(repo -> JkStagingRepo.Status.OPEN == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
-        if (profileNames.length != 0) {
-            JkLog.info("Taking in account repositories with profile name in " + Arrays.asList(profileNames));
+        if (profileNameFilters.length != 0) {
+            JkLog.info("Taking in account repositories with profile name in "
+                    + Arrays.asList(profileNameFilters));
         }
         close(openRepoIds);
         List<String> closingRepoIds = findStagingRepositories().stream()
-                .filter(profileNameFilter(profileNames))
+                .filter(profileNameFilter(profileNameFilters))
                 .filter(repo -> JkStagingRepo.Status.CLOSING == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
         closingRepoIds.forEach(this::waitForClosing);
         List<String> closedRepoIds = findStagingRepositories().stream()
-                .filter(profileNameFilter(profileNames))
+                .filter(profileNameFilter(profileNameFilters))
                 .filter(repo -> JkStagingRepo.Status.CLOSED == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
@@ -157,6 +195,10 @@ public class JkNexusRepos {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public void autoReleaseAfterPublication(JkProject project) {
+        project.publication.postActions.append(TASK_NAME, this::closeAndReleaseOpenRepositories);
     }
 
     private List<JkStagingRepo> doFindStagingRepositories() throws IOException {
@@ -205,7 +247,7 @@ public class JkNexusRepos {
         con.setDoOutput(true);
         String json = "{\"data\":{\"stagedRepositoryIds\":" + toJsonArray(repositoryIds) + "}}";
         try (OutputStream os = con.getOutputStream()) {
-            byte[] input = json.getBytes("utf-8");
+            byte[] input = json.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
         }
         JkUtilsHttp.assertResponseOk(con, json);
@@ -226,7 +268,7 @@ public class JkNexusRepos {
         String json = "{\"data\":{\"autoDropAfterRelease\":true,\"stagedRepositoryIds\":"
                 + toJsonArray(repositoryIds) + "}}";
         try (OutputStream os = con.getOutputStream()) {
-            byte[] input = json.getBytes("utf-8");
+            byte[] input = json.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
         }
         JkUtilsHttp.assertResponseOk(con, json);
@@ -263,8 +305,6 @@ public class JkNexusRepos {
         con.setInstanceFollowRedirects(true);
         return con;
     }
-
-
 
     private String toJsonArray(List<String> items) {
         StringBuilder sb = new StringBuilder("[");
@@ -354,9 +394,4 @@ public class JkNexusRepos {
         }
     }
 
-
-
 }
-
-
-

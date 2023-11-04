@@ -1,6 +1,5 @@
 package dev.jeka.core.tool.builtins.repos;
 
-import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkProject;
@@ -15,8 +14,6 @@ import java.util.function.Consumer;
 
 @JkDoc("Provides features to release Nexus repos (as OSSRH) after publication.")
 public class NexusJkBean extends JkBean {
-
-    private static final String TASK_NAME = "Closing and releasing repositories";
 
     @JkDoc("Comma separated filters for taking in account only repositories with specified profile names.")
     public String profileNamesFilter = "";
@@ -43,11 +40,11 @@ public class NexusJkBean extends JkBean {
         if (nexusRepos == null) {
             return;
         }
-        nexusRepos.closeAndRelease(profiles());
+        nexusRepos.closeAndRelease();
     }
 
     /**
-     * Adds a JkNexusRepos consumer that will be executed right before first use
+     * Adds a JkNexusRepos consumer that will be executed just in time.
      */
     public NexusJkBean lately(Consumer<JkNexusRepos> nexusReposConsumer) {
         this.nexusReposConfigurators.append(nexusReposConsumer);
@@ -56,12 +53,7 @@ public class NexusJkBean extends JkBean {
 
     private void configureProject(JkProject project) {
         JkNexusRepos nexusRepos  = getJkNexusRepos(project);
-        if (nexusRepos == null) {
-            return;
-        }
-        project.publication.postActions.append(TASK_NAME, () -> {
-            nexusRepos.closeAndReleaseOpenRepositories(profiles());
-        });
+        nexusRepos.autoReleaseAfterPublication(project);
     }
 
     private String[] profiles() {
@@ -69,15 +61,7 @@ public class NexusJkBean extends JkBean {
     }
 
     private JkNexusRepos getJkNexusRepos(JkProject project) {
-        JkRepo repo = project.publication.findFirstNonLocalRepo();
-        if (repo == null) {
-            JkLog.warn("No remote repository configured for publishing");
-            return null;
-        }
-        if (repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
-            JkLog.warn("No credentials found on repo " + repo);
-        }
-        JkNexusRepos result = JkNexusRepos.ofRepo(repo);
+        JkNexusRepos result = JkNexusRepos.ofPublishRepo(project).setProfileNameFilters(profiles());
         this.nexusReposConfigurators.accept(result);
         return result;
     }
