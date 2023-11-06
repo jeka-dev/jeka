@@ -9,6 +9,7 @@ import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.builtins.maven.MavenJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
@@ -23,6 +24,9 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class SimpleProjectJkBean extends JkBean {
 
+    @JkDoc("If true, skip execution of Integration tests.")
+    public boolean skipIT;
+
     public final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
@@ -31,15 +35,14 @@ public class SimpleProjectJkBean extends JkBean {
 
     private void configure(JkProject project) {
        project.flatFacade()
-               .configureCompileDependencies(deps -> deps
-                   .and("com.google.guava:guava:30.0-jre")
-                   .and("com.sun.jersey:jersey-server:1.19.4")
+               .addCompileDeps(
+                       "com.google.guava:guava:30.0-jre",
+                       "com.sun.jersey:jersey-server:1.19.4"
                )
-               .configureTestDependencies(deps -> deps
-                   .and(JUNIT5)
+               .addTestDeps(
+                       "org.junit.jupiter:junit-jupiter:5.10.1"
                )
-               .addTestExcludeFilterSuffixedBy("IT", false);
-
+               .addTestExcludeFilterSuffixedBy("IT", skipIT);
        project
            .setJvmTargetVersion(JkJavaVersion.V8)
            .compiler
