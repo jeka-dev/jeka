@@ -11,16 +11,15 @@ final class HelpDisplayer {
 
     static void help(List<Class<? extends JkBean>> localBeanClasses, List<Class> classpathBeanClasses,
                      boolean compilationFailed, Path baseDir) {
-        final StringBuilder introSb = new StringBuilder()
-                .append("\nPurpose:\n")
-                .append("  Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n")
-                .append("Usage:\n")
-                .append("  jeka (method | kbean#method ...) [property=<value> | kbean#property=<value> ...] ")
-                .append("[-option | -option=<value> ...] [@<module coordinates> ...] [@<path> ...] ")
-                .append("[-DsystemPropertyName=<value> ...]\n\n")
-                .append("Example:\n")
-                .append("  jeka project#clean project#pack project#pack.sources=true -ls=DEBUG -Dmy.prop=aValue @org.example:a-plugin:1.1.0\n\n")
-                .append(standardProperties());
+        String introSb = "\nPurpose:\n" +
+                "  Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n" +
+                "Usage:\n" +
+                "  jeka (method | kbean#method ...) [property=<value> | kbean#property=<value> ...] " +
+                "[-option | -option=<value> ...] [@<module coordinates> ...] [@<path> ...] " +
+                "[-DsystemPropertyName=<value> ...]\n\n" +
+                "Example:\n" +
+                "  jeka project#clean project#pack project#pack.sources=true -ls=DEBUG -Dmy.prop=aValue @org.example:a-plugin:1.1.0\n\n" +
+                standardProperties();
         System.out.println(introSb);
 
         final StringBuilder sb = new StringBuilder().append("Local KBeans:\n");
@@ -75,8 +74,8 @@ final class HelpDisplayer {
         items.add(option("log.runtime.info", "lri",  " log Jeka runtime information as Jeka version, JDK version, working dir, classpath ..."));
         items.add(option("log.banner", "lb",  " log intro and outro banners"));
         items.add(option("log.stacktrace", "lst",  " log the stacktrace when Jeka fail"));
-        items.add(option("log.setup", "lsu",  " log KBean setup process"));;
-        items.add(option("kbean", "kb",  " Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name"));
+        items.add(option("log.setup", "lsu",  " log KBean setup process"));
+        items.add(option("kbean", Environment.KB_KEYWORD, " Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name"));
         items.add(option("clean.work", "cw",  " Delete all files cached in jeka/.work"));
         items.add(option("no.help", "", "Does not display help if no method is invoked"));
         items.add(option("def.compile.ignore-failure", "dci",  " Try to compile def classes. If fail, ignore failure and continue"));

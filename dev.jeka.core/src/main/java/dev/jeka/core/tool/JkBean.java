@@ -18,7 +18,7 @@ public abstract class JkBean {
 
     private static final String CLASS_SUFFIX = JkBean.class.getSimpleName();
 
-    private JkRuntime runtime;
+    private final JkRuntime runtime;
 
     private final JkImportedJkBeans importedJkBeans;  // KBeans from other projects
 
@@ -58,19 +58,23 @@ public abstract class JkBean {
         return getBaseDir().resolve(JkConstants.OUTPUT_PATH);
     }
 
-    final String shortName() {
-        return name(this.getClass());
-    }
-
-    /**
-     * Cleans output directory.
-     */
-    protected void cleanOutput() {
-        Path output = getOutputDir();
-        JkLog.info("Clean output directory " + output.toAbsolutePath().normalize());
-        if (Files.exists(output)) {
-            JkPathTree.of(output).deleteContent();
+    static boolean nameMatches(String className, String nameCandidate) {
+        if (nameCandidate == null) {
+            return false;
         }
+        if (nameCandidate.equals(className)) {
+            return true;
+        }
+        String classSimpleName = className.contains(".") ? JkUtilsString.substringAfterLast(className, ".")
+                : className;
+        String uncapitalizedClassSimpleName = JkUtilsString.uncapitalize(classSimpleName);
+        if (JkUtilsString.uncapitalize(nameCandidate).equals(uncapitalizedClassSimpleName)) {
+            return true;
+        }
+        if (className.endsWith(JKBEAN_CLASS_SIMPLE_NAME)) {
+            return uncapitalizedClassSimpleName.equals(nameCandidate + JkBean.class.getSimpleName());
+        }
+        return false;
     }
 
     public JkImportedJkBeans getImportedBeans() {
@@ -83,6 +87,26 @@ public abstract class JkBean {
 
     public <T extends JkBean> T getBean(Class<T> beanClass) {
         return runtime.getBean(beanClass);
+    }
+
+    final String shortName() {
+        return name(this.getClass());
+    }
+
+    @Override
+    public String toString() {
+        return shortName() + " in project '" + JkUtilsPath.friendlyName(this.runtime.getProjectBaseDir()) + "'";
+    }
+
+    /**
+     * Cleans output directory.
+     */
+    protected void cleanOutput() {
+        Path output = getOutputDir();
+        JkLog.info("Clean output directory " + output.toAbsolutePath().normalize());
+        if (Files.exists(output)) {
+            JkPathTree.of(output).deleteContent();
+        }
     }
 
     static String name(String fullyQualifiedClassName) {
@@ -100,25 +124,10 @@ public abstract class JkBean {
         return name(jkBeanClass.getName());
     }
 
-    static boolean nameMatches(String className, String nameCandidate) {
-        if (nameCandidate.equals(className)) {
-            return true;
-        }
-        String classSimpleName = className.contains(".") ? JkUtilsString.substringAfterLast(className, ".")
-                : className;
-        String uncapitalizedClassSimpleName = JkUtilsString.uncapitalize(classSimpleName);
-        if (JkUtilsString.uncapitalize(nameCandidate).equals(uncapitalizedClassSimpleName)) {
-            return true;
-        }
-        if (className.endsWith(JKBEAN_CLASS_SIMPLE_NAME)) {
-            return uncapitalizedClassSimpleName.equals(nameCandidate + JkBean.class.getSimpleName());
-        }
-        return false;
+    final boolean isMatchingName(String candidateName) {
+        return nameMatches(this.getClass().getName(), candidateName);
     }
 
-    @Override
-    public String toString() {
-        return shortName() + " in project '" + JkUtilsPath.friendlyName(this.runtime.getProjectBaseDir()) + "'";
-    }
+
 }
 

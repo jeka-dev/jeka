@@ -63,7 +63,7 @@ public class JkNexusRepos {
         URL url = repo.getUrl();
         String baseUrl = url.getProtocol() + "://" + url.getHost();
         if (repo.getCredentials() == null || repo.getCredentials().isEmpty()) {
-            JkLog.warn("No remote repository configured for publishing");
+            JkLog.warn("No credentials set on publish repo " + repo);
             return new JkNexusRepos(baseUrl, null);
         }
         return JkNexusRepos.ofBasicCredentials(baseUrl, repoCredentials.getUserName(), repoCredentials.getPassword());

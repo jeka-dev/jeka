@@ -10,7 +10,10 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /*
@@ -22,13 +25,13 @@ final class CommandLine {
 
     private static final String AT_SYMBOL_CHAR = "@";
 
-    private Map<String, String> standardOptions = new HashMap<>();
+    private final Map<String, String> standardOptions = new HashMap<>();
 
-    private Map<String, String> systemProperties = new HashMap<>();
+    private final Map<String, String> systemProperties = new HashMap<>();
 
-    private List<JkBeanAction> beanActions = new LinkedList<>();
+    private final List<JkBeanAction> beanActions = new LinkedList<>();
 
-    private List<JkDependency> defDependencies = new LinkedList<>();
+    private final List<JkDependency> defDependencies = new LinkedList<>();
 
     private String[] rawArgs;
 
@@ -144,6 +147,14 @@ final class CommandLine {
             final String beanExpression;
             if (expression.contains(KBEAN_SYMBOL)) {
                 String before = JkUtilsString.substringBeforeFirst(expression, KBEAN_SYMBOL);
+
+                // Normally, if we want to refer to the default KBean, we can just mention '#someProperty'.
+                // However, if we want to refer to a such property from a property file, this won't work, as
+                // starting with a '#' will be interpreted as a comment.
+                // So we let the possibility of doing so, by using the 'kb#' member prefix in place of '#'.
+                if (Environment.KB_KEYWORD.equals(before)) {
+                    before = null;
+                }
                 this.beanName = JkUtilsString.isBlank(before) ? null : before;
                 beanExpression = JkUtilsString.substringAfterFirst(expression, KBEAN_SYMBOL);
             } else {

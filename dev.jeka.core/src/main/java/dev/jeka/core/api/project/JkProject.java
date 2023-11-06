@@ -87,11 +87,9 @@ public class JkProject implements JkIdeSupport.JkSupplier {
 
     public final JkProjectTesting testing;
 
-
     private boolean includeTextAndLocalDependencies = true;
 
     private LocalAndTxtDependencies cachedTextAndLocalDeps;
-
 
     private URL dependencyTxtUrl;
 
@@ -223,7 +221,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         JkMavenPublication mavenPublication = publication.maven;
         if (mavenPublication.getModuleId() != null) {
             builder
-                .append("Publish Maven repositories : " + mavenPublication.getPublishRepos()  + "\n")
+                    .append("\nPublish Maven repositories : " + mavenPublication.getPublishRepos() + "\n")
                 .append("Published Maven Module & version : " +
                         mavenPublication.getModuleId().toCoordinate(mavenPublication.getVersion()) + "\n")
                 .append("Published Maven Dependencies :");
@@ -232,7 +230,7 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         JkIvyPublication ivyPublication = publication.ivy;
         if (ivyPublication.getModuleId() != null) {
             builder
-                    .append("Publish Ivy repositories : " + ivyPublication.getRepos()  + "\n")
+                    .append("\nPublish Ivy repositories : " + ivyPublication.getRepos() + "\n")
                     .append("Published Ivy Module & version : " +
                             ivyPublication.getModuleId().toCoordinate(mavenPublication.getVersion()) + "\n")
                     .append("Published Ivy Dependencies :");

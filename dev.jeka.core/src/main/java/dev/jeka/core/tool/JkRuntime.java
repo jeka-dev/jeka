@@ -38,7 +38,7 @@ public final class JkRuntime {
 
     private List<EngineCommand> fieldInjections = Collections.emptyList();
 
-    private JkProperties properties;
+    private final JkProperties properties;
 
     private final Map<Class<? extends JkBean>, JkBean> beans = new LinkedHashMap<>();
 
@@ -181,7 +181,13 @@ public final class JkRuntime {
 
         // Inject properties having name matching with a bean field
         String beanName = JkBean.name(beanClass);
-        Map<String, String> props = properties.getAllStartingWith(beanName + "#", false);
+        Map<String, String> props = new HashMap<>();
+
+        // accept 'kb#' prefix if the beanClass is declared with '-kb=' options
+        if (bean.isMatchingName(Environment.standardOptions.kBeanName())) {
+            props.putAll(properties.getAllStartingWith(Environment.KB_KEYWORD + "#", false));
+        }
+        props.putAll(properties.getAllStartingWith(beanName + "#", false));
         FieldInjector.inject(bean, props);
 
         // Inject properties on fields with @JkInjectProperty

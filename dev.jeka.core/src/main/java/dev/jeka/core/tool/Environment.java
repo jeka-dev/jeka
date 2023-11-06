@@ -13,6 +13,8 @@ import static dev.jeka.core.tool.JkConstants.*;
 
 class Environment {
 
+    static final String KB_KEYWORD = "kb";
+
     private Environment() {
         // Can't be instantiated
     }
@@ -29,7 +31,7 @@ class Environment {
 
         // Add arguments contained in local.properties 'jeka.cmd._appendXXXX'
         JkProperties props = JkRuntime.readProjectPropertiesRecursively(Paths.get(""));
-        List appendedArgs = props.getAllStartingWith(CMD_APPEND_PROP, true).keySet().stream()
+        List<String> appendedArgs = props.getAllStartingWith(CMD_APPEND_PROP, true).keySet().stream()
                 .sorted()
                 .map(props::get)
                 .flatMap(value -> Arrays.stream(JkUtilsString.translateCommandline(value)))
@@ -93,9 +95,9 @@ class Environment {
 
         boolean ignoreCompileFail;
 
-        private String jkBeanName;
+        private final String jkBeanName;
 
-        private boolean cleanWork;
+        private final boolean cleanWork;
 
         boolean noHelp;
 
@@ -111,7 +113,7 @@ class Environment {
             this.logStackTrace = valueOf(boolean.class, map,false, "log.stacktrace", "lst");
             this.logRuntimeInformation = valueOf(boolean.class, map, false, "log.runtime.info", "lri");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
-            this.jkBeanName = valueOf(String.class, map, null, "kbean", "kb");
+            this.jkBeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
             this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
             this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");
             this.noHelp = valueOf(boolean.class, map, false, "no.help");
@@ -150,9 +152,7 @@ class Environment {
             }
             return defaultValue;
         }
-
     }
-
 
     static String originalCmdLineAsString() {
         return String.join(" ", originalArgs);
@@ -162,6 +162,5 @@ class Environment {
         return Environment.originalArgs.length == 1 &&
                 (Environment.originalArgs[0].equals("-help") || Environment.originalArgs[0].equals("-h"));
     }
-
 
 }

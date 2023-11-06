@@ -115,7 +115,7 @@ public class JkNodeJs {
                               String ...buildCommands) {
         Path baseDir = project.getBaseDir().resolve(clientBaseDir);
         Path buildDir = baseDir.resolve(clientBuildDir);
-        project.compilation.postCompileActions.append("Execute NodeJs", () -> {
+        project.compilation.postCompileActions.append("NodeJs", () -> {
             this.setWorkingDir(baseDir);
             Arrays.stream(buildCommands).forEach(this::exec);
             JkPathTree.of(buildDir).copyTo(project.compilation.layout.resolveClassDir().resolve("static"));
