@@ -3,6 +3,7 @@ package dev.jeka.core.api.tooling.intellij;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.marshalling.xml.JkDomElement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,12 +45,39 @@ public final class JkIml {
 
         private boolean excludeOutput = true;
 
+        private String jdkName;
+
         private Content content = new Content();
 
         private List<OrderEntry> orderEntries = new LinkedList<>();
 
         public Content getContent() {
             return content;
+        }
+
+        public Component setOutput(String output) {
+            this.output = output;
+            return this;
+        }
+
+        public Component setOutputTest(String outputTest) {
+            this.outputTest = outputTest;
+            return this;
+        }
+
+        public Component setExcludeOutput(boolean excludeOutput) {
+            this.excludeOutput = excludeOutput;
+            return this;
+        }
+
+        public Component setJdkName(String jdkName) {
+            this.jdkName = jdkName;
+            return this;
+        }
+
+        public Component setContent(Content content) {
+            this.content = content;
+            return this;
         }
 
         public List<OrderEntry> getOrderEntries() {
@@ -90,6 +118,7 @@ public final class JkIml {
         }
 
         void append(JkDomElement parent, PathUrlResolver pathUrlResolver) {
+            boolean inheritedJdk = JkUtilsString.isBlank(jdkName) || "inheritedJdk".equals(jdkName);
             parent.add("component")
                 .attr("name", "NewModuleRootManager")
                 .attr("inherit-compileRunner-output", "false")
@@ -99,7 +128,9 @@ public final class JkIml {
                             .attr("url", pathUrlResolver.ideaPath(moduleDir.resolve(outputTest))))
                     .applyIf(excludeOutput, el -> el.add("exclude-output"))
                     .apply(el -> content.append(el, pathUrlResolver))
-                    .add("orderEntry").attr("type", "inheritedJdk").__
+                    .add("orderEntry")
+                    .applyIf(inheritedJdk, e -> e.attr("type", "inheritedJdk"))
+                    .applyIf(!inheritedJdk, e -> e.attr("type", "jdk").attr("jdkType", "JavaSDK").attr("jdkName", jdkName)).__
                     .add("orderEntry")
                         .attr("forTests", "false")
                         .attr("type", "sourceFolder").__
@@ -341,9 +372,7 @@ public final class JkIml {
 
             ModuleLibraryOrderEntry that = (ModuleLibraryOrderEntry) o;
 
-            if (!classes.equals(that.classes)) return false;
-
-            return true;
+            return classes.equals(that.classes);
         }
 
         @Override
@@ -408,9 +437,7 @@ public final class JkIml {
 
             ModuleOrderEntry that = (ModuleOrderEntry) o;
 
-            if (!moduleName.equals(that.moduleName)) return false;
-
-            return true;
+            return moduleName.equals(that.moduleName);
         }
 
         @Override
@@ -432,7 +459,7 @@ public final class JkIml {
 
     public class PathUrlResolver {
 
-        private Map<String, Path> substitutes = new LinkedHashMap<>();
+        private final Map<String, Path> substitutes = new LinkedHashMap<>();
 
         void setPathSubstitute(Path jekaCacheDir) {
             substitutes.put("MODULE_DIR", JkIml.this.moduleDir);

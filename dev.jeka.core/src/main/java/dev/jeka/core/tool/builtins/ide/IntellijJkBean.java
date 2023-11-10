@@ -42,7 +42,13 @@ public final class IntellijJkBean extends JkBean {
     @JkDoc("The path where iml file must be generated. If null, Jeka will decide for a proper place. Mostly used by external tools.")
     public Path imlFile;
 
-    private LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
+    @JkDoc("If mentioned, and jdkName is null, the generated iml will specify this jdkName")
+    public String suggestedJdkName;
+
+    @JkDoc("If mentioned, the generated iml will specify this jdkName")
+    public String jdkName;
+
+    private final LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
 
     private Consumer<JkImlGenerator> imlGeneratorConfigurer = jkImlGenerator2 -> {};
 
@@ -81,6 +87,11 @@ public final class IntellijJkBean extends JkBean {
         JkImlGenerator imlGenerator = imlGenerator();
         if (!JkUtilsString.isBlank(this.jekaModuleName)) {
             useJekaDefinedInModule(this.jekaModuleName.trim());
+        }
+        if (!JkUtilsString.isBlank(jdkName)) {
+            imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));
+        } else if (!JkUtilsString.isBlank(suggestedJdkName)) {
+            imlGenerator.configureIml(iml -> iml.component.setJdkName(suggestedJdkName));
         }
         imlGeneratorConfigurer.accept(imlGenerator);
         JkIml iml = imlGenerator.computeIml();
