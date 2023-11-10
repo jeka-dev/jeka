@@ -9,7 +9,7 @@ import java.nio.file.Path;
 public class NodeJsJkBean extends JkBean {
 
     @JkDoc("The version of NodeJs to use")
-    public String version = "18.12.0";
+    public String version = JkNodeJs.V18_12_0;
 
     @JkDoc("The command line to execute with nodeJs#npm or nodeJs#npx (without command name.")
     public String cmdLine;

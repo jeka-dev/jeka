@@ -22,6 +22,8 @@ import java.util.Arrays;
 
 public class JkNodeJs {
 
+    public static final String V18_12_0 = "18.12.0";
+
     private static final String DOWNLOAD_BASE_URL = "https://nodejs.org/dist/";
 
     private Path installDir;
@@ -62,6 +64,14 @@ public class JkNodeJs {
     public JkNodeJs setWorkingDir(Path workingDir) {
         this.workingDir = workingDir;
         return this;
+    }
+
+    public Path getWorkingDir() {
+        return workingDir;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     /**
