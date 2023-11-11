@@ -22,6 +22,8 @@ import java.util.Arrays;
 
 public class JkNodeJs {
 
+    public static final String V20_9_0 = "20.9.0";
+
     public static final String V18_12_0 = "18.12.0";
 
     private static final String DOWNLOAD_BASE_URL = "https://nodejs.org/dist/";
