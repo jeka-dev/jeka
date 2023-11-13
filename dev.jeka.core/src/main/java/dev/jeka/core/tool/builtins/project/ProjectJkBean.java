@@ -11,10 +11,7 @@ import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkJdks;
-import dev.jeka.core.api.project.JkCompileLayout;
-import dev.jeka.core.api.project.JkIdeSupport;
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectPackaging;
+import dev.jeka.core.api.project.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
@@ -46,7 +43,7 @@ import java.util.function.Consumer;
  * and a decoration for scaffolding.
  */
 @JkDoc("Provides a configured JkProject instance for building JVM based projects.")
-public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
+public class ProjectJkBean extends JkBean implements JkIdeSupportSupplier {
 
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
@@ -187,6 +184,8 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
                 snippet = "buildclass.snippet";
             } else if (scaffold.template == JkScaffoldOptions.Template.PLUGIN) {
                 snippet = "buildclassplugin.snippet";
+            } else if (scaffold.template == JkScaffoldOptions.Template.PURE_API) {
+                snippet = "buildclasspureapi.snippet";
             } else {
                 snippet = "buildclassfacade.snippet";
             }
@@ -418,17 +417,15 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     public static class JkScaffoldOptions {
 
-        public enum Template {
-
-            NORMAL, SIMPLE_FACADE, PLUGIN, CODE_LESS
-
-        }
+        @JkDoc("Generate jeka/project-libs sub-folders for hosting local libraries")
+        public boolean generateLocalLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")
         public Template template = Template.SIMPLE_FACADE;
 
-        @JkDoc("Generate jeka/project-libs sub-folders for hosting local libraries")
-        public boolean generateLocalLibsFolders = true;
+        public enum Template {
+            NORMAL, SIMPLE_FACADE, PLUGIN, CODE_LESS, PURE_API
+        }
 
         public final DependenciesTxt dependenciesTxt = new DependenciesTxt();
 

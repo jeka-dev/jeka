@@ -5,6 +5,7 @@ import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.project.JkIdeSupport;
+import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.tool.JkBean;
 
 import java.net.URLClassLoader;
@@ -18,13 +19,13 @@ final class IdeSupport {
     }
 
     static JkIdeSupport getProjectIde(JkBean jkBean) {
-        if (jkBean instanceof JkIdeSupport.JkSupplier) {
-            JkIdeSupport.JkSupplier supplier = (JkIdeSupport.JkSupplier) jkBean;
+        if (jkBean instanceof JkIdeSupportSupplier) {
+            JkIdeSupportSupplier supplier = (JkIdeSupportSupplier) jkBean;
             return supplier.getJavaIdeSupport();
         }
-        List<JkIdeSupport.JkSupplier> suppliers = jkBean.getRuntime().getBeans().stream()
-                .filter(JkIdeSupport.JkSupplier.class::isInstance)
-                .map(JkIdeSupport.JkSupplier.class::cast)
+        List<JkIdeSupportSupplier> suppliers = jkBean.getRuntime().getBeans().stream()
+                .filter(JkIdeSupportSupplier.class::isInstance)
+                .map(JkIdeSupportSupplier.class::cast)
                 .collect(Collectors.toList());
         return suppliers.stream()
                 .filter(supplier -> supplier != null)

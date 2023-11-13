@@ -46,7 +46,7 @@ import java.util.function.Function;
  * <p>
  * {@link JkProject} defines <i>base</i> and <i>output</i> directories as they are shared with the 3 parts.
  */
-public class JkProject implements JkIdeSupport.JkSupplier {
+public class JkProject implements JkIdeSupportSupplier {
 
     public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
 

@@ -34,38 +34,16 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
     /** Stands for Java version 8 */
     public static final JkJavaVersion V8 = JkJavaVersion.of("8");
 
-    /** Stands for Java version 9 */
-    public static final JkJavaVersion V9 = JkJavaVersion.of("9");
-
-    /** Stands for Java Version  10 */
-    public static final JkJavaVersion V10 = JkJavaVersion.of("10");
-
     /** Stands for Java Version  11 */
     public static final JkJavaVersion V11 = JkJavaVersion.of("11");
-
-    /** Stands for Java Version  12 */
-    public static final JkJavaVersion V12 = JkJavaVersion.of("12");
-
-    /** Stands for Java Version  13 */
-    public static final JkJavaVersion V13 = JkJavaVersion.of("13");
-
-    /** Stands for Java Version  14 */
-    public static final JkJavaVersion V14 = JkJavaVersion.of("14");
-
-    /** Stands for Java Version  15 */
-    public static final JkJavaVersion V15 = JkJavaVersion.of("15");
-
-    /** Stands for Java Version  16 */
-    public static final JkJavaVersion V16 = JkJavaVersion.of("16");
 
     /** Stands for Java Version  17 */
     public static final JkJavaVersion V17 = JkJavaVersion.of("17");
 
-    /** Stands for Java Version  18 */
-    public static final JkJavaVersion V18 = JkJavaVersion.of("18");
-
-    /** Stands for Java Version  19 */
-    public static final JkJavaVersion V19 = JkJavaVersion.of("19");
+    /**
+     * Stands for Java Version  21
+     */
+    public static final JkJavaVersion V21 = JkJavaVersion.of("21");
 
     private final int value;
 

@@ -15,14 +15,6 @@ import java.util.List;
  */
 public class JkIdeSupport {
 
-
-
-    public interface JkSupplier {
-
-        JkIdeSupport getJavaIdeSupport();
-
-    }
-
     private JkCompileLayout prodLayout;
 
     private JkCompileLayout testLayout;
@@ -43,7 +35,7 @@ public class JkIdeSupport {
                 .setBaseDir(baseDir);
         this.dependencies = JkQualifiedDependencySet.of();
         this.sourceVersion = JkJavaVersion.V8;
-        this.dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());;
+        this.dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
     }
 
     public static JkIdeSupport of(Path baseDir) {

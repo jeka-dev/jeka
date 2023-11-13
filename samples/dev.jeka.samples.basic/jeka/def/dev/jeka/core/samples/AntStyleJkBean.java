@@ -14,6 +14,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkIdeSupport;
+import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
@@ -32,7 +33,7 @@ import java.util.List;
  * @author Jerome Angibaud
  */
 @JkInjectClasspath("org.apache.httpcomponents:httpclient:4.5.6")
-public class AntStyleJkBean extends JkBean implements JkIdeSupport.JkSupplier {
+public class AntStyleJkBean extends JkBean implements JkIdeSupportSupplier {
 
     final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
             .configureIml(jkIml -> {
