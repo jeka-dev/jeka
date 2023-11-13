@@ -2,13 +2,15 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Exported methods to integrate with external tool.
@@ -60,10 +62,7 @@ public final class JkExternalToolApi {
         if (Files.isRegularFile(candidate.resolve("jekaw"))) {
             return true;
         }
-        if ((Files.isRegularFile(candidate.resolve("jekaw.bat")))) {
-            return true;
-        }
-        return false;
+        return Files.isRegularFile(candidate.resolve("jekaw.bat"));
     }
 
     public static Path getImlFile(Path moduleDir) {
@@ -95,4 +94,7 @@ public final class JkExternalToolApi {
         return new EngineClasspathCache(projectDir, null).readCachedResolvedClasspath().getEntries();
     }
 
+    public static boolean kbeanNameMatches(String className, String candidate) {
+        return JkBean.nameMatches(className, candidate);
+    }
 }

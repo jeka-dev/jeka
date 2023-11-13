@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
@@ -72,7 +73,9 @@ final class Engine {
     void execute(CommandLine commandLine) {
         JkLog.startTask("Compile def and initialise KBeans");
         JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getDefDependencies());
-        JkLog.trace("Inject classpath from command line : " + commandLineDependencies);
+        JkLog.trace("Dependencies injected in classpath from command line : " + commandLineDependencies);
+        JkDependencySet localPropDependencies = dependenciesFromLocalProps();
+        JkLog.trace("IDependencies injected in classpath from local.properties : " + localPropDependencies);
         final JkPathSequence computedClasspath;
         final CompilationResult result;
         boolean hasJekaDir = Files.exists(projectBaseDir.resolve(JkConstants.JEKA_DIR))
@@ -87,7 +90,8 @@ final class Engine {
             AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
             beanClassesResolver.setClasspath(computedClasspath, result.classpathChanged);
         } else {
-            computedClasspath = dependencyResolver.resolve(commandLineDependencies).getFiles();
+            computedClasspath = dependencyResolver.resolve(commandLineDependencies.and(localPropDependencies))
+                    .getFiles();
             result = null;
         }
         if (isHelpCmd()) {
@@ -146,8 +150,11 @@ final class Engine {
         JkLog.traceStartTask("Parse source code of " + sourceFiles);
         final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
-        JkDependencySet parsedDependencies = parser.dependencies().and(Environment.commandLine.getDefDependencies());
-        EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(parsedDependencies);
+        JkDependencySet defDependencies = JkDependencySet.of()
+                .and(Environment.commandLine.getDefDependencies())
+                .and(parser.dependencies())
+                .and(dependenciesFromLocalProps());
+        EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(defDependencies);
         JkLog.traceEndTask();
         return new CompilationContext(
                 jekaClasspath().and(cacheResult.resolvedClasspath),
@@ -414,6 +421,25 @@ final class Engine {
             this.extraClasspath = extraClasspath;
         }
 
+    }
+
+    private JkDependencySet dependenciesFromLocalProps() {
+        Path localPropFile = projectBaseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
+        if (!Files.exists(localPropFile)) {
+            return JkDependencySet.of();
+        }
+        String depsString = JkProperties.ofFile(localPropFile).get(JkConstants.CLASSPATH_INJECT_PROP);
+        if (depsString == null) {
+            return JkDependencySet.of();
+        }
+        List<JkDependency> dependencies = new LinkedList<>();
+        for (String depString : depsString.split(" ")) {
+            if (depString.trim().isEmpty()) {
+                continue;
+            }
+            dependencies.add(CommandLine.toDependency(projectBaseDir, depString.trim()));
+        }
+        return JkDependencySet.of(dependencies);
     }
 
 }

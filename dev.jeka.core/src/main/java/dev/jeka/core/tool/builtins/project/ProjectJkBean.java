@@ -1,13 +1,10 @@
 package dev.jeka.core.tool.builtins.project;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
-import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJavaCompiler;
@@ -77,7 +74,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
 
     private JkProject project;
 
-    private JkConsumers<JkProject> projectConfigurators = JkConsumers.of();
+    private final JkConsumers<JkProject> projectConfigurators = JkConsumers.of();
 
     public ProjectJkBean() {
         getBean(ScaffoldJkBean.class).lately(this::configure);
@@ -264,23 +261,9 @@ public class ProjectJkBean extends JkBean implements JkIdeSupport.JkSupplier {
         pack();
     }
 
-    /**
-     * Displays the resolved dependency tree on the console.
-     */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        showDependencies("compile", getProject().compilation.getDependencies());
-        showDependencies("runtime", getProject().packaging.getRuntimeDependencies());
-        showDependencies("test", getProject().testing.compilation.getDependencies());
-    }
-
-    private void showDependencies(String purpose, JkDependencySet deps) {
-        JkLog.info("\nDependencies for " + purpose + " : ");
-        final JkResolveResult resolveResult = this.getProject().dependencyResolver.resolve(deps);
-        final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
-        JkLog.info("------------------------------");
-        JkLog.info(String.join("\n", tree.toStrings()));
-        JkLog.info("");
+        getProject().displayDependencyTree();
     }
 
     @JkDoc("Displays resolved dependency tree in xml")

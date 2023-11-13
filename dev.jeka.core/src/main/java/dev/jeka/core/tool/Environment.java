@@ -57,7 +57,14 @@ class Environment {
         // Parse command line
         final CommandLine commandLine = CommandLine.parse(effectiveCommandLineArgs.toArray(new String[0]));
 
-        final StandardOptions standardOptions = new StandardOptions(commandLine.getStandardOptions());
+        final Map<String, String> optionProps = commandLine.getStandardOptions();
+
+        // Set defaultKBean from properties if it has not bean defined in cmd line
+        if (!StandardOptions.isDefaultKBeanDefined(optionProps)) {
+            optionProps.put(KB_KEYWORD, props.get(DEFAULT_KBEAN_PROP));
+        }
+
+        final StandardOptions standardOptions = new StandardOptions(optionProps);
         if (standardOptions.logVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
@@ -66,6 +73,8 @@ class Environment {
         }
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;
+
+
     }
 
     /**
@@ -117,6 +126,10 @@ class Environment {
             this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
             this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");
             this.noHelp = valueOf(boolean.class, map, false, "no.help");
+        }
+
+        private static boolean isDefaultKBeanDefined(Map<String, String> map) {
+            return map.containsKey(KB_KEYWORD) || map.containsKey("kbean");
         }
 
         String kBeanName() {

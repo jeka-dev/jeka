@@ -36,6 +36,13 @@ project1
   project JVM target version differs from Jeka running version.
 * `jeka.kotlin.version` : Version of Kotlin used to compile both _def_ and Kotlin project sources.
 * `jeka.java.version` :  Target JVM version for compiled files.
+* `jeka.classpath.inject`: Additional dependencies that will be added to the JeKa classpath. 
+   We can specify many dependencies separated by `<space>`.
+   It can be either Maven coordinates or file paths. If a file path is relative, it is resolved 
+   upon project base dir (could be distinct from working dir).
+   Example : `jeka.classpath.inject=dev.jeka:springboot-plugin  com.google.guava:guava:31.1-jre ../other-project/jeka/output/other-project.jar`
+* `jeka.default.kbean`: The KBean to use when omitting mentioning KBean prefix (or using `kb#` prefix) in command or field assignment.
+   Example: declaring `jeka.default.kbean=myBean`, makes the following expressions equivalent : `myBean#run`, `#run`, and `kb#run`.
 
 ### Command shorthands
 

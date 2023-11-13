@@ -1,6 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Interface standing for a dependency. It can be either :
@@ -37,6 +38,17 @@ public interface JkDependency {
      */
     default boolean matches(JkDependency other) {
         return this.equals(other);
+    }
+
+    /**
+     * Returns either a {@link JkCoordinateDependency} or a {@link JkFileSystemDependency}
+     * depending on the specified parameter stands for a path or a coordinate.
+     */
+    static JkDependency of(String pathOrCoordinate) {
+        if (pathOrCoordinate.contains(":")) {
+            return JkCoordinateDependency.of(pathOrCoordinate.trim());
+        }
+        return JkFileSystemDependency.of(Paths.get(pathOrCoordinate));
     }
 
 

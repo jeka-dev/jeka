@@ -239,6 +239,24 @@ public class JkProject implements JkIdeSupport.JkSupplier {
         return builder.toString();
     }
 
+    /**
+     * Displays the resolved dependency tree on the console.
+     */
+    public void displayDependencyTree() {
+        displayDependencyTree("compile", compilation.getDependencies());
+        displayDependencyTree("runtime", packaging.getRuntimeDependencies());
+        displayDependencyTree("test", testing.compilation.getDependencies());
+    }
+
+    private void displayDependencyTree(String purpose, JkDependencySet deps) {
+        JkLog.info("\nDependencies for " + purpose + " : ");
+        final JkResolveResult resolveResult = dependencyResolver.resolve(deps);
+        final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        JkLog.info("------------------------------");
+        JkLog.info(String.join("\n", tree.toStrings()));
+        JkLog.info("");
+    }
+
     @Override
     public JkIdeSupport getJavaIdeSupport() {
         JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
