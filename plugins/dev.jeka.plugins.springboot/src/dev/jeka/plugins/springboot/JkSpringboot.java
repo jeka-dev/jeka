@@ -25,9 +25,9 @@ import java.util.function.Consumer;
 /**
  *  Configurator for {@link JkProject} to add Spring-Boot configuration.
  */
-public final class JkSpringbootProjectAdapter {
+public final class JkSpringboot {
 
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.1.4";
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.1.5";
 
     public static final JkArtifactId ORIGINAL_ARTIFACT = JkArtifactId.of("original", "jar");
 
@@ -50,38 +50,40 @@ public final class JkSpringbootProjectAdapter {
 
     private boolean useSpringRepos = true;
 
-    private JkSpringbootProjectAdapter() {
+    private JkSpringboot() {
     }
 
-    public static JkSpringbootProjectAdapter of() {
-        return new JkSpringbootProjectAdapter();
+    public static JkSpringboot of() {
+        return new JkSpringboot();
+    }
+
+    /**
+     * Returns fully qualified name of springboot main class. This method should be invoked only after compilation.
+     */
+    public static String getMainClass(JkProject project) {
+        return JkSpringboot.findMainClassName(project.compilation.layout.resolveClassDir());
     }
 
     /**
      *  If true, Spring Milestone or Snapshot Repository will be used to fetch non release version of spring modules.
      */
-    public JkSpringbootProjectAdapter setUseSpringRepos(boolean useSpringRepos) {
+    public JkSpringboot setUseSpringRepos(boolean useSpringRepos) {
         this.useSpringRepos = useSpringRepos;
         return this;
     }
 
-    public JkSpringbootProjectAdapter setSpringbootVersion(String springbootVersion) {
+    public JkSpringboot setSpringbootVersion(String springbootVersion) {
         this.springbootVersion = springbootVersion;
         return this;
     }
 
-    public JkSpringbootProjectAdapter setCreateBootJar(boolean createBootJar) {
+    public JkSpringboot setCreateBootJar(boolean createBootJar) {
         this.createBootJar = createBootJar;
         return this;
     }
 
-    public JkSpringbootProjectAdapter setCreateOriginalJar(boolean createOriginalJar) {
+    public JkSpringboot setCreateOriginalJar(boolean createOriginalJar) {
         this.createOriginalJar = createOriginalJar;
-        return this;
-    }
-
-    public JkSpringbootProjectAdapter setCreateWarFile(boolean createWarFile) {
-        this.createWarFile = createWarFile;
         return this;
     }
 
@@ -238,11 +240,9 @@ public final class JkSpringbootProjectAdapter {
 
     }
 
-    /**
-     * Returns fully qualified name of springboot main class. This method should be invoked only after compilation.
-     */
-    public static String getMainClass(JkProject project) {
-        return JkSpringbootProjectAdapter.findMainClassName(project.compilation.layout.resolveClassDir());
+    public JkSpringboot setCreateWarFile(boolean createWarFile) {
+        this.createWarFile = createWarFile;
+        return this;
     }
 
 }
