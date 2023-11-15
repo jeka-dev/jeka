@@ -170,16 +170,15 @@ using `project.getTesing().getCompilation().configureDependencies()`
 
 An entire project dependency set can be declared with full text description.
 
-For this, just pass a string argument to `JkDependencySet#ofTextDescription` describing
-the module dependencies.
-
-When using `ProjectJkBean`, the content of the file *jeka/libs/dependencies.txt* is
-automatically added to the project dependencies, though it can be modified programmatically.
+By default, if a file named `project-dependencies.txt` is present in *[PROJECT_DIR]/jeka*, this content is taken 
+in account to specify project dependencies.
 
 Dependencies have to be declared with the format `group:module:[classifier]:[type]:[version]` where *classifier*, *type* and *version' are optional.  
 See `JkCoordinate.of(String description)* for details.
 
-To import *bill-of-materials* (aka BOMs) just declare a dependency as '*group:module::pom:version'
+To import *bill-of-materials* (aka *BOM*) just declare a dependency as 'group:module::pom:version'
+
+Symbols `@` and `@@` can be used to mention dependency exclusions.
 
 !!! example
 
