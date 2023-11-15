@@ -59,6 +59,17 @@ public class GitJkBean extends JkBean {
         getBean(ProjectJkBean.class).lately(project -> versionFromGit().handleVersioning(project));
     }
 
+    @JkDoc("Display last git tag in current branch")
+    public void lastTag() {
+        System.out.println(JkGit.of(getBaseDir()).setLogOutput(false).getLatestTag());
+    }
+
+    @JkDoc("Display all commit messages since last tag")
+    public void lastCommitMessages() {
+        JkGit.of(getBaseDir()).setLogOutput(false)
+                .getCommitMessagesSinceLastTag().forEach(msg -> System.out.println("- " + msg));
+    }
+
     /**
      * Gets the current version either from commit message if specified nor from git tag.
      */

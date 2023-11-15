@@ -17,5 +17,8 @@ public class JkGitRunner {
         String result = JkUtilsString.substringAfterFirst(allItems.get(0), "->").trim();
         System.out.println("*" + result + "*");
 
+        System.out.println("--------");
+        System.out.println(JkGit.of().getCommitMessagesSinceLastTag());
+
     }
 }

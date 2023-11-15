@@ -120,7 +120,7 @@ final class Engine {
             System.out.println();
         }
         if (!hasJekaDir) {
-            JkLog.warn("You are not running Jeka inside a Jeka project.");
+            JkLog.trace("You are not running Jeka inside a Jeka project.");
         }
         if (!commandLine.hasMethodInvokations() && !Environment.standardOptions.logRuntimeInformation) {
             JkLog.warn("This command contains no actions. Execute 'jeka help' to know about available actions.");

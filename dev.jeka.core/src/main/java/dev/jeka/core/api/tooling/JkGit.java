@@ -3,9 +3,11 @@ package dev.jeka.core.api.tooling;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -140,6 +142,27 @@ public final class JkGit extends JkProcess<JkGit> {
     public String getVersionFromTag() {
         return getVersionFromTag("");
     }
+
+    /**
+     * Returns the distincts last commit messages since last tag in the current branch.
+     */
+    public List<String> getCommitMessagesSinceLastTag() {
+        List<String> rawTesults = execAndReturnOutput("log", "--oneline", getLatestTag() + "..HEAD");
+        List<String> result = new LinkedList<>();
+        for (String line : rawTesults) {
+            String cleaned = JkUtilsString.substringAfterFirst(line, " "); // remove commit hash
+            if (cleaned.startsWith("(")) {
+                cleaned = JkUtilsString.substringAfterFirst(cleaned, ") ");
+            }
+            result.add(cleaned);
+        }
+        return result.stream().distinct().collect(Collectors.toList());
+    }
+
+    public String getLatestTag() {
+        return this.execAndReturnOutput("describe", "--tags", "--abbrev=0").get(0);
+    }
+
 
 
     /**
