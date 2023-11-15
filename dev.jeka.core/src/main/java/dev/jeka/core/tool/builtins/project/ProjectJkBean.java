@@ -476,17 +476,17 @@ public class ProjectJkBean extends JkBean implements JkIdeSupportSupplier {
             StringBuilder sb = new StringBuilder();
             for (String line : lines) {
                 sb.append(line).append("\n");
-                if (line.startsWith("==== COMPILE") && !JkUtilsString.isBlank(this.dependenciesTxt.compile)) {
+                if (line.startsWith("== COMPILE") && !JkUtilsString.isBlank(this.dependenciesTxt.compile)) {
                     Arrays.stream(this.dependenciesTxt.compile.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("==== RUNTIME") && !JkUtilsString.isBlank(this.dependenciesTxt.runtime)) {
+                if (line.startsWith("== RUNTIME") && !JkUtilsString.isBlank(this.dependenciesTxt.runtime)) {
                     Arrays.stream(this.dependenciesTxt.runtime.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
                 }
-                if (line.startsWith("==== TEST") && !JkUtilsString.isBlank(this.dependenciesTxt.test)) {
+                if (line.startsWith("== TEST") && !JkUtilsString.isBlank(this.dependenciesTxt.test)) {
                     Arrays.stream(this.dependenciesTxt.test.split(",")).forEach(extraDep ->
                             sb.append(extraDep.trim()).append("\n")
                     );
