@@ -59,9 +59,9 @@ class Environment {
 
         final Map<String, String> optionProps = commandLine.getStandardOptions();
 
-        // Set defaultKBean from properties if it has not bean defined in cmd line
+        // Set defaultKBean from properties if it has not been defined in cmd line
         if (!StandardOptions.isDefaultKBeanDefined(optionProps)) {
-            optionProps.put(KB_KEYWORD, props.get(DEFAULT_KBEAN_PROP));
+            optionProps.put(KB_KEYWORD, JkUtilsString.blankToNull(props.get(DEFAULT_KBEAN_PROP)));
         }
 
         final StandardOptions standardOptions = new StandardOptions(optionProps);
