@@ -1,9 +1,6 @@
 package dev.jeka.plugins.protobuf;
 
-import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
@@ -36,7 +33,7 @@ public class JkProtoc {
     public static final String PROTOC_JAR_VERSION = "3.11.4";
 
     // options to be passed to the protoc compiler. see https://manpages.ubuntu.com/manpages/xenial/man1/protoc.1.html
-    private List<String> protocOptions = new LinkedList<>();
+    private final List<String> protocOptions = new LinkedList<>();
 
     // The version of the Java implementation for the protoc compiler
     private String protocJarVersion = PROTOC_JAR_VERSION;
@@ -127,7 +124,7 @@ public class JkProtoc {
     /**
      * Sets the version of the Java implementation for the protoc compiler.
      */
-    public JkProtoc setProtocJarVersion(String protocJarVersion) {
+    public JkProtoc setProtocJarVersion(@JkDepSuggest(versionOnly = true, hint = "com.google.protobuf:protobuf-java:") String protocJarVersion) {
         this.protocJarVersion = protocJarVersion;
         return this;
     }

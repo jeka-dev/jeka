@@ -1,9 +1,6 @@
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
-import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -72,7 +69,7 @@ public final class JkSpringboot {
         return this;
     }
 
-    public JkSpringboot setSpringbootVersion(String springbootVersion) {
+    public JkSpringboot setSpringbootVersion(@JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:") String springbootVersion) {
         this.springbootVersion = springbootVersion;
         return this;
     }

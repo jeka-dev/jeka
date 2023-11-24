@@ -47,7 +47,7 @@ public final class SpringbootJkBean extends JkBean {
         getBean(ScaffoldJkBean.class).lately(this::configure);
     }
 
-    public SpringbootJkBean setSpringbootVersion(String springbootVersion) {
+    public SpringbootJkBean setSpringbootVersion(@JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:") String springbootVersion) {
         this.springbootVersion = springbootVersion;
         return this;
     }

@@ -30,6 +30,9 @@ import java.util.*;
  * @author Jerome Angibaud
  */
 public final class JkSonarqube {
+
+    public static final String DEFAULT_SCANNER__VERSION = "4.6.2.2472";
+
     public static final String PROJECT_KEY = "projectKey";
     public static final String PROJECT_NAME = "projectName";
     public static final String PROJECT_VERSION = "projectVersion";
@@ -72,7 +75,8 @@ public final class JkSonarqube {
 
     private boolean logOutput;
 
-    private JkSonarqube(JkRepoSet repos, String scannerVersion) {
+    private JkSonarqube(JkRepoSet repos,
+                        @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         this.repos = repos;
         this.scannerVersion = scannerVersion;
         params.put(WORKING_DIRECTORY, workDir(Paths.get("")));
@@ -90,14 +94,16 @@ public final class JkSonarqube {
      * @param scannerVersion The scanner version to use. If <code>null</code>, the embedded scanner version will
      *                       be used.
      */
-    public static JkSonarqube ofVersion(JkRepoSet repos, String scannerVersion) {
+    public static JkSonarqube ofVersion(JkRepoSet repos,
+                                        @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         return new JkSonarqube(repos, scannerVersion);
     }
 
     /**
      * @see #ofVersion(JkRepoSet, String)
      */
-    public static JkSonarqube ofVersion(JkDependencyResolver dependencyResolver, String scannerVersion) {
+    public static JkSonarqube ofVersion(JkDependencyResolver dependencyResolver,
+                                        @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         return new JkSonarqube(dependencyResolver.getRepos(), scannerVersion);
     }
 
@@ -106,7 +112,7 @@ public final class JkSonarqube {
      * @param scannerVersion The scanner version to use. If <code>null</code>, the embedded scanner version will
      *                       be used.
      */
-    public static JkSonarqube ofVersion(String scannerVersion) {
+    public static JkSonarqube ofVersion(@JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         return ofVersion(JkRepo.ofMavenCentral().toSet(), scannerVersion);
     }
 

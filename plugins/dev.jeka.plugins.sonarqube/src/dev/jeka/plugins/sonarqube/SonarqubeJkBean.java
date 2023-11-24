@@ -8,7 +8,9 @@ import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -28,7 +30,7 @@ public class SonarqubeJkBean extends JkBean {
             "The version will be resolved against 'org.sonarsource.scanner.cli:sonar-scanner-cli' coordinate. " +
             "Use a blank string to use the client embedded in the plugin.")
     @JkDepSuggest(versionOnly = true , hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:")
-    public String scannerVersion = "4.6.2.2472";
+    public String scannerVersion = JkSonarqube.DEFAULT_SCANNER__VERSION;
 
     @JkDoc("If true, displays sonarqube output on console")
     public boolean logOutput = true;

@@ -1,6 +1,7 @@
 package dev.jeka.plugins.jacoco;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -71,21 +72,23 @@ public final class JkJacoco {
     /**
      * Returns the {@link JkJacoco} object relying on jacoco-agent and jacoco-cli hosted on repository.
      */
-    public static JkJacoco ofVersion(JkDependencyResolver dependencyResolver, String version) {
+    public static JkJacoco ofVersion(JkDependencyResolver dependencyResolver,
+                                     @JkDepSuggest(versionOnly = true, hint = "dev.jeka:jacoco-plugin") String version) {
         return new JkJacoco(new RepoToolProvider(dependencyResolver, version));
     }
 
     /**
      * @see #ofVersion(JkDependencyResolver, String)
      */
-    public static JkJacoco ofVersion(JkRepoSet repos, String version) {
+    public static JkJacoco ofVersion(JkRepoSet repos,
+                                     @JkDepSuggest(versionOnly = true, hint = "dev.jeka:jacoco-plugin") String version) {
         return ofVersion(JkDependencyResolver.of(repos), version);
     }
 
     /**
      * @see #ofVersion(JkDependencyResolver, String)
      */
-    public static JkJacoco ofVersion(String version) {
+    public static JkJacoco ofVersion(@JkDepSuggest(versionOnly = true, hint = "dev.jeka:jacoco-plugin") String version) {
         return ofVersion(JkRepo.ofMavenCentral().toSet(), version);
     }
 
@@ -332,9 +335,9 @@ public final class JkJacoco {
 
     private static class EmbeddedToolProvider implements ToolProvider {
 
-        private Path agentJarFile;
+        private final Path agentJarFile;
 
-        private Path cliJarFile;
+        private final Path cliJarFile;
 
         EmbeddedToolProvider() {
             final URL agentJarUrl = JkJacoco.class.getResource("org.jacoco.agent-0.8.7-runtime.jar");
