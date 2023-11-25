@@ -19,11 +19,11 @@ import java.nio.file.StandardOpenOption;
 @JkDoc("Configure project KBean in order to produce bootable springboot jar and war files.")
 public final class SpringbootJkBean extends JkBean {
 
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.1.4";
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.0";
 
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
     @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
-    private String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
+    public String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
 
     @JkDoc("If true, create a bootable jar artifact.")
     public boolean createBootJar = true;
