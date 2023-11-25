@@ -73,7 +73,7 @@ public final class JkJacoco {
      * Returns the {@link JkJacoco} object relying on jacoco-agent and jacoco-cli hosted on repository.
      */
     public static JkJacoco ofVersion(JkDependencyResolver dependencyResolver,
-                                     @JkDepSuggest(versionOnly = true, hint = "dev.jeka:jacoco-plugin") String version) {
+                                     @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent") String version) {
         return new JkJacoco(new RepoToolProvider(dependencyResolver, version));
     }
 
@@ -81,14 +81,14 @@ public final class JkJacoco {
      * @see #ofVersion(JkDependencyResolver, String)
      */
     public static JkJacoco ofVersion(JkRepoSet repos,
-                                     @JkDepSuggest(versionOnly = true, hint = "dev.jeka:jacoco-plugin") String version) {
+                                     @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent") String version) {
         return ofVersion(JkDependencyResolver.of(repos), version);
     }
 
     /**
      * @see #ofVersion(JkDependencyResolver, String)
      */
-    public static JkJacoco ofVersion(@JkDepSuggest(versionOnly = true, hint = "dev.jeka:jacoco-plugin") String version) {
+    public static JkJacoco ofVersion(@JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent") String version) {
         return ofVersion(JkRepo.ofMavenCentral().toSet(), version);
     }
 

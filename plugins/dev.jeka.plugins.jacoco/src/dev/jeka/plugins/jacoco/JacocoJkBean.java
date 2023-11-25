@@ -26,8 +26,8 @@ public class JacocoJkBean extends JkBean {
     public String classDirExcludes;
 
     @JkDoc("Version of Jacoco to use both for agent and report. The version will be resolved against coordinate " +
-            "'org.jacoco:org.jacoco.agent:runtime'")
-    @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent:runtime")
+            "'org.jacoco:org.jacoco.agent'")
+    @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent")
     public String jacocoVersion = "0.8.7";
 
 
