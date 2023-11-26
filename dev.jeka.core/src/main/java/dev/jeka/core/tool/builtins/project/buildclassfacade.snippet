@@ -14,20 +14,16 @@ class Build extends JkBean {
     private void configure(JkProject project) {
         project.flatFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
-            .configureCompileDependencies(deps -> deps
-                    .and("com.google.guava:guava:21.0")
+                .addCompileDeps(
+                        "com.google.guava:guava:21.0"
             )
-            .configureTestDependencies(deps -> deps
-                    .and("org.junit.jupiter:junit-jupiter:5.9.2")
+                .addTestDeps(
+                        "org.junit.jupiter:junit-jupiter:5.9.2"
             )
 
             // Only necessary if your project is published in a binary repository.
             .setPublishedModuleId("your.group:your.project")
             .setPublishedVersionFromGitTag();  // Version inferred from Git
-    }
-
-    public void cleanPack() {
-        cleanOutput(); projectBean.pack();
     }
 
 }

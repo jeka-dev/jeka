@@ -41,7 +41,6 @@ class Build extends JkBean implements JkIdeSupportSupplier {
                 .configure(project);
         project.flatFacade()
                 .addCompileDeps(
-                        //   "other:librarries:1.O",
                         "org.springframework.boot:spring-boot-starter-web"
                 )
                 .addCompileOnlyDeps(

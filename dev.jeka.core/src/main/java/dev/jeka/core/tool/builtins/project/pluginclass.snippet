@@ -4,14 +4,13 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkBean;
 
 /**
- * A Jeka plugin cain contains zero, one or many KBeans.
- * If your plugin does not require one, fell free to delete this class.
+ * A Jeka plugin can contains zero, one or many KBeans.
+ * If your plugin does not require KBean, you can delete this class.
  */
-@JkDoc("Explain here what your plugin is doing.\n" +
-    "No need to list methods or options here has you are supposed to annotate them directly.")
+@JkDoc("Explain here what your plugin is doing")
 public class XxxxxJkBean extends JkBean {
 
-    @JkDoc("All public fields will be exposed as KBean . Rewrite this comment to document it.")
+    @JkDoc("All public fields will be exposed as KBean . Rewrite this comment to document it")
     public String yourParam = "aDefaultValue";
 
     @JkDoc("All public no-args methods returning void will be exposed as plugin method. \n"

@@ -8,27 +8,21 @@ import dev.jeka.plugins.springboot.SpringbootJkBean;
 @JkInjectClasspath("${dependencyDescription}")
 class Build extends JkBean {
 
-    final SpringbootJkBean springbootBean = getBean(SpringbootJkBean.class);
+    final SpringbootJkBean springbootKBean = getBean(SpringbootJkBean.class);
 
     Build() {
-        springbootBean.setSpringbootVersion("${springbootVersion}");
-        getBean(ProjectJkBean.class).lately(this::configure);
+        springbootKBean.setSpringbootVersion("${springbootVersion}");
+        springbootKBean.projectBean.lately(this::configure);
     }
 
     private void configure(JkProject project) {
         project.flatFacade()
-            .configureCompileDependencies(deps -> deps
-                    .and("org.springframework.boot:spring-boot-starter-web")
-                    // Add dependencies here
+            .addCompileDeps(
+                    "org.springframework.boot:spring-boot-starter-web"
             )
-            .configureTestDependencies(deps -> deps
-                    .and("org.springframework.boot:spring-boot-starter-test")
+            .addTestDeps(
+                    "org.springframework.boot:spring-boot-starter-test"
             );
-    }
-
-    @JkDoc("Cleans, tests and creates bootable jar.")
-    public void cleanPack() {
-        cleanOutput(); springbootBean.projectBean.pack();
     }
 
 }

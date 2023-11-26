@@ -19,8 +19,8 @@ class Build extends JkBean {
                 .and("com.google.guava:guava:21.0")
         );
 
-        // this testing setup is almost default setting, this is here for illustration purpose
-        // If default is ok for you, you can remove it.
+        // This testing setup is almost default. It is included here for illustrative purposes.
+        // If the default is acceptable to you, you can remove it.
         project.testing.testSelection.addIncludeStandardPatterns();
         project.testing.testProcessor.setForkingProcess(true);
         project.testing.testProcessor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
@@ -28,16 +28,10 @@ class Build extends JkBean {
                 .and("org.junit.jupiter:junit-jupiter:5.9.2")
         );
 
-        // Publication is only necessary if your project is being deployed on a binary repository.
-        // Many projects as jee war jar, springboot application, tools, Graphical application
-        // does not need this section at all.  In this case you can remove it.
+        // Publication is only necessary if your project is being deployed to a binary repository.
         project.publication
             .setModuleId("your.group:your.project")
-            .setVersion(() -> JkGit.of().getVersionFromTag());  // Version inferred from Git
-    }
-
-    public void cleanPack() {
-        cleanOutput(); projectBean.pack();
+                .setVersion(JkGit.of()::getVersionFromTag);  // Version inferred from Git
     }
 
 }
