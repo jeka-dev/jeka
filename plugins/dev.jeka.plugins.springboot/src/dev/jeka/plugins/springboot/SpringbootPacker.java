@@ -1,5 +1,6 @@
 package dev.jeka.plugins.springboot;
 
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkManifest;
@@ -14,6 +15,10 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 class SpringbootPacker {
+
+    private static final String LAUNCHER_CLASS_LEGACY = "org.springframework.boot.loader.JarLauncher";
+
+    private static final String LAUNCHER_CLASS_320 = "org.springframework.boot.loader.launch.JarLauncher";
 
     private final JkPathSequence nestedLibs;
 
@@ -36,15 +41,20 @@ class SpringbootPacker {
         return new SpringbootPacker(nestedLibs, loader, mainClassName, null);
     }
 
-    public void makeExecJar(Path original, Path target) {
+    public static String getJarLauncherClass(String springbootVersion) {
+        return JkVersion.VERSION_COMPARATOR.compare(springbootVersion, "3.2.0") < 0 ?
+                LAUNCHER_CLASS_LEGACY : LAUNCHER_CLASS_320;
+    }
+
+    public void makeExecJar(Path original, Path target, String springbootVersion) {
         try {
-            makeBootJarChecked(original, target);
+            makeBootJarChecked(original, target, springbootVersion);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private void makeBootJarChecked(Path original, Path target) throws IOException {
+    private void makeBootJarChecked(Path original, Path target, String springbootVersion) throws IOException {
 
         JarWriter jarWriter = new JarWriter(target);
 
@@ -52,7 +62,7 @@ class SpringbootPacker {
         try (JkZipTree zipTree = JkZipTree.of(original)) {
             Path path = zipTree.goTo("META-INF").get("MANIFEST.MF");
             final JkManifest manifest = Files.exists(path) ? JkManifest.of().loadFromFile(path) : JkManifest.of();
-            jarWriter.writeManifest(createManifest(manifest, mainClassName).getManifest());
+            jarWriter.writeManifest(createManifest(manifest, mainClassName, springbootVersion).getManifest());
         }
 
         // Add nested jars
@@ -78,7 +88,7 @@ class SpringbootPacker {
                 .filter(path -> !path.toString().endsWith("/"))
                 .filter(path -> !Files.isDirectory(path))
                 .forEach(path -> {
-                    String entryName = "BOOT-INF/classes" + path.toString();
+                    String entryName = "BOOT-INF/classes" + path;
                     try (InputStream inputStream = Files.newInputStream(path)){
                         jarWriter.writeEntry(entryName, inputStream);
                     } catch (IOException e) {
@@ -87,9 +97,10 @@ class SpringbootPacker {
                 });
     }
 
-    private JkManifest createManifest(JkManifest original, String startClassName) {
+    private JkManifest createManifest(JkManifest original, String startClassName, String springbootVersion) {
+        String launcherJarClass = getJarLauncherClass(springbootVersion);
         JkManifest result = JkUtilsObject.firstNonNull(original, JkManifest.of())
-            .addMainClass("org.springframework.boot.loader.JarLauncher")
+                .addMainClass(launcherJarClass)
             .addMainAttribute("Start-Class", startClassName)
             .addMainAttribute("Spring-Boot-Classes", "BOOT-INF/classes/")
             .addMainAttribute("Spring-Boot-Lib", "BOOT-INF/lib/");

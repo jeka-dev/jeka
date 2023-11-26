@@ -209,7 +209,7 @@ public final class JkSpringboot {
         String mainClassName = findMainClassName(original);
 
         SpringbootPacker.of(libsToInclude, bootLoaderJar, mainClassName,
-                springbootVersion).makeExecJar(original, targetJar);
+                springbootVersion).makeExecJar(original, targetJar, springbootVersion);
     }
 
     private static String findMainClassName(Iterable<Path> jarOrFolder) {
