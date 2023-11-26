@@ -208,6 +208,11 @@ public final class JkProperties {
                 continue;
             }
             String value = get(key);
+            if (key.toLowerCase().contains("password")
+                    || key.toLowerCase().contains("secret")
+                    || key.toLowerCase().contains("pwd")) {
+                value = "***";
+            }
             String keyLabel = JkUtilsString.padEnd(key, maxKeyLength + 1, ' ');
             String valueLabel = JkUtilsString.padEnd(value, maxValueLength + 2, ' ');
             JkProperties declaringProps = getSourceDefining(key);
