@@ -399,19 +399,16 @@ public class ProjectJkBean extends JkBean implements JkIdeSupportSupplier {
             if (!Files.exists(jarPath)) {
                 ProjectJkBean.this.getProject().artifactProducer.makeMainArtifact();
             }
-            JkJavaProcess javaProcess  = JkJavaProcess.ofJavaJar(jarPath, null).setLogCommand(JkLog.isVerbose())
+            JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(jarPath, null)
+                    .setLogCommand(JkLog.isVerbose())
+                    .setDestroyAtJvmShutdown(true)
                     .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
                     .addParams(JkUtilsString.translateCommandline(programArgs));
             if (useRuntimeDepsForClasspath) {
                 javaProcess
                         .setClasspath(ProjectJkBean.this.getProject().packaging.resolveRuntimeDependencies().getFiles());
             }
-            Consumer<Process> processConsumer = process ->
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    JkLog.info("Destroy process " + process);
-                    process.destroyForcibly();
-                }));
-            javaProcess.exec(processConsumer);
+            javaProcess.exec();
         }
     }
 
