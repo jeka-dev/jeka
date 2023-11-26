@@ -3,9 +3,10 @@ import dev.jeka.core.tool.JkDoc;
 
 class Build extends JkBean {
 
+    @JkDoc("Person to whom the greeting is intended")
     public String name = "World";
 
-    @JkDoc("Print greetings on console.")
+    @JkDoc("Print greeting on console")
     public void hello() {
         String greetings = "Hello " + name;
         System.out.println(greetings);
