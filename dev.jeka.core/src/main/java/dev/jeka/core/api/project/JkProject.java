@@ -8,12 +8,15 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -369,6 +372,39 @@ public class JkProject implements JkIdeSupportSupplier {
         root.appendChild(xmlDeps(document, "runtime", packaging.getRuntimeDependencies()));
         root.appendChild(xmlDeps(document, "test", testing.compilation.getDependencies()));
         return document;
+    }
+
+    /**
+     * Executes the jar having the specified artifact name. This method assumes that the jar is already built.
+     *
+     * @param artifactName       The name of the artifact to run. In a project producing a side 'fat' jar, you can use
+     *                           'fat' as artifact name. If you want to run the main artifact, just use '' as artifact name.
+     * @param includeRuntimeDeps if <code>true</code>, the runtime dependencies will be added to the classpath. This should
+     *                           values <code>false</code> in case of <i>fat</i> jar.
+     * @param javaOptions        options to be passed to the jvm, as <code>-Dxxx=1 -Dzzzz=abbc -Xmx=256m</code>.
+     * @param args               program arguments to be passed in command line, as <code>--print --verbose myArg</code>
+     */
+    public void runJar(String artifactName, boolean includeRuntimeDeps, String javaOptions, String args) {
+        JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactProducer.getArtifactPath(JkArtifactId.of(artifactName, "jar")))
+                .setDestroyAtJvmShutdown(true)
+                .setLogCommand(true)
+                .setLogOutput(true)
+                .addJavaOptions(JkUtilsString.translateCommandline(javaOptions))
+                .addParams(JkUtilsString.translateCommandline(args));
+        if (includeRuntimeDeps) {
+            JkPathSequence pathSequence = packaging.resolveRuntimeDependencies().getFiles();
+            javaProcess.setClasspath(pathSequence.getEntries());
+        }
+        javaProcess.exec();
+    }
+
+    /**
+     * Same as {@link #runJar(String, boolean, String, String)} but specific for the main artefact.
+     *
+     * @see #runJar(String, boolean, String, String)
+     */
+    public void runMainJar(boolean includeRuntimeDeps, String javaOptions, String args) {
+        runJar(JkArtifactId.MAIN_ARTIFACT_NAME, includeRuntimeDeps, javaOptions, args);
     }
 
     private Element xmlDeps(Document document, String purpose, JkDependencySet deps) {
