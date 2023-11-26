@@ -21,6 +21,9 @@ public final class SpringbootJkBean extends JkBean {
 
     private static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.0";
 
+    @JkDoc("Kind of build class to be scaffolded")
+    public ScaffoldBuildKind scaffoldBuildKind = ScaffoldBuildKind.KBEAN;
+
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
     @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
     public String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
@@ -36,6 +39,25 @@ public final class SpringbootJkBean extends JkBean {
 
     @JkDoc(hide = true, value = "For internal test purpose : if not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
     public String scaffoldDefClasspath;
+
+    private void configure (JkScaffolder scaffolder) {
+        String buildClassSource = this.scaffoldBuildKind == ScaffoldBuildKind.KBEAN ?
+                "Build.java" : "BuildPureApi.java";
+        String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/" + buildClassSource));
+        String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
+        code = code.replace("${dependencyDescription}", defClasspath);
+        code = code.replace("${springbootVersion}", springbootVersion);
+        final String jkClassCode = code;
+        if (this.projectBean.scaffold.template != ProjectJkBean.JkScaffoldOptions.Template.CODE_LESS) {
+            scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
+        }
+        scaffolder.extraActions.append(this::scaffoldSample);
+        String readmeContent = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/README.md"));
+        scaffolder.extraActions.append(() -> {
+            JkPathFile readmeFile = JkPathFile.of(getBaseDir().resolve("README.md")).createIfNotExist();
+            readmeFile.write(readmeContent.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        });
+    }
 
     @JkDoc("If true, download spring artifacts from Spring Maven repositories.")
     public boolean useSpringRepos = true;
@@ -65,21 +87,9 @@ public final class SpringbootJkBean extends JkBean {
         projectConfigurator().configure(project);
     }
 
-    private void configure (JkScaffolder scaffolder) {
-        String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/Build.java"));
-        String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
-        code = code.replace("${dependencyDescription}", defClasspath);
-        code = code.replace("${springbootVersion}", springbootVersion);
-        final String jkClassCode = code;
-        if (this.projectBean.scaffold.template != ProjectJkBean.JkScaffoldOptions.Template.CODE_LESS) {
-            scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
-        }
-        scaffolder.extraActions.append(this::scaffoldSample);
-        String readmeContent = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/README.md"));
-        scaffolder.extraActions.append(() -> {
-            JkPathFile readmeFile = JkPathFile.of(getBaseDir().resolve("README.md")).createIfNotExist();
-            readmeFile.write(readmeContent.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-        });
+    public enum ScaffoldBuildKind {
+        PURE_API,
+        KBEAN
     }
 
     @JkDoc("Scaffold a basic example application in package org.example")
