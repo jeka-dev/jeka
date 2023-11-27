@@ -176,6 +176,24 @@ public class JkProjectTest {
     }
 
     @Test
+    public void runDisplayDependencies() {
+        //JkLog.setDecorator(JkLog.Style.INDENT);
+        JkProject project = JkProject.of().flatFacade()
+                .configureCompileDependencies(deps -> deps
+                        .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
+                        .and("javax.servlet:javax.servlet-api:4.0.1"))
+                .configureRuntimeDependencies(deps -> deps
+                        .and("org.postgresql:postgresql:42.2.19")
+                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
+                        .minus("javax.servlet:javax.servlet-api"))
+                .configureCompileDependencies(deps -> deps
+                        .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
+                        .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
+                ).getProject();
+        project.displayDependencyTree();
+    }
+
+    @Test
     public void addCompileOnlyDependency_ok() {
         JkProject project = JkProject.of();
         project.flatFacade()
