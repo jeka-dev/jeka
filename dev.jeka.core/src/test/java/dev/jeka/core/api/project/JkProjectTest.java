@@ -4,9 +4,6 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -176,6 +173,16 @@ public class JkProjectTest {
         System.out.println(project.compilation.getDependencies());
         JkQualifiedDependencySet publishDeps = project.publication.ivy.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
+    }
+
+    @Test
+    public void addCompileOnlyDependency_ok() {
+        JkProject project = JkProject.of();
+        project.flatFacade()
+                .addCompileOnlyDeps(
+                        "org.projectlombok:lombok:1.18.30"
+                );
+        Assert.assertTrue(project.packaging.getRuntimeDependencies().getEntries().isEmpty());
     }
 
     @Test

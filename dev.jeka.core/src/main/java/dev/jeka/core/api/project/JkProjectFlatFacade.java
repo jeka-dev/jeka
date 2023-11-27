@@ -1,5 +1,6 @@
 package dev.jeka.core.api.project;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.project.JkCompileLayout.Concern.PROD;
 import static dev.jeka.core.api.project.JkCompileLayout.Concern.TEST;
@@ -124,7 +126,12 @@ public class JkProjectFlatFacade {
     public JkProjectFlatFacade addCompileOnlyDeps(@JkDepSuggest String... moduleDescriptors) {
         UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
         configureCompileDependencies(addFun);
-        UnaryOperator<JkDependencySet> minusFun = deps -> minus(deps, moduleDescriptors);
+        String[] groupAndNames = Arrays.stream(moduleDescriptors)
+                .map(JkCoordinate::of)
+                .map(coodinate -> coodinate.getModuleId().getColonNotation())
+                .collect(Collectors.toList())
+                .toArray(new String[0]);
+        UnaryOperator<JkDependencySet> minusFun = deps -> minus(deps, groupAndNames);
         return configureRuntimeDependencies(minusFun);
     }
 
