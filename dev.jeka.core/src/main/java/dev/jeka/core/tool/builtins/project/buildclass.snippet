@@ -1,7 +1,5 @@
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
-import dev.jeka.core.api.tooling.JkGit;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
@@ -14,7 +12,6 @@ class Build extends JkBean {
      * fields have already been injected from command line.
      */
     private void configure(JkProject project) {
-        project.setJvmTargetVersion(JkJavaVersion.V8);
         project.compilation.configureDependencies(deps -> deps
                 .and("com.google.guava:guava:21.0")
         );
@@ -30,8 +27,8 @@ class Build extends JkBean {
 
         // Publication is only necessary if your project is being deployed to a binary repository.
         project.publication
-            .setModuleId("your.group:your.project")
-                .setVersion(JkGit.of()::getVersionFromTag);  // Version inferred from Git
+                .setModuleId("your.org:project-name")
+                .setVersion("0.0.1-SNAPSHOT");  // Version inferred from Git
     }
 
 }

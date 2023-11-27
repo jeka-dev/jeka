@@ -1,4 +1,3 @@
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkBean;
@@ -10,7 +9,6 @@ class Build extends JkBean {
     final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
 
     private void configure(JkProject project) {
-        project.setJvmTargetVersion(JkJavaVersion.V8);
         project.compilation.configureDependencies(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
         );

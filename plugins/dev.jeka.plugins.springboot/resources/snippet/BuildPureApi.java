@@ -44,11 +44,12 @@ class Build extends JkBean implements JkIdeSupportSupplier {
                         "org.springframework.boot:spring-boot-starter-web"
                 )
                 .addCompileOnlyDeps(
-                        "org.projectlombok:lombok"
+                        "org.projectlombok:lombok:1.18.30"
                 )
                 .addTestDeps(
                         "org.springframework.boot:spring-boot-starter-test"
-                );
+                )
+                .setPublishedVersionFromGitTag();  // Infer version from Git
         return project;
     }
 

@@ -17,12 +17,16 @@ class Build extends JkBean {
 
     private void configure(JkProject project) {
         project.flatFacade()
-            .addCompileDeps(
-                    "org.springframework.boot:spring-boot-starter-web"
-            )
-            .addTestDeps(
-                    "org.springframework.boot:spring-boot-starter-test"
-            );
+                .addCompileDeps(
+                        "org.springframework.boot:spring-boot-starter-web"
+                )
+                .addCompileOnlyDeps(
+                        "org.projectlombok:lombok:1.18.30"
+                )
+                .addTestDeps(
+                        "org.springframework.boot:spring-boot-starter-test"
+                )
+                .setPublishedVersionFromGitTag();  // Infer version from Git
     }
 
 }
