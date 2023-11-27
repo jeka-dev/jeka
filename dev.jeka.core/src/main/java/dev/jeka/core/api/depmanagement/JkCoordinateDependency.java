@@ -57,7 +57,7 @@ public final class JkCoordinateDependency implements JkTransitivityDependency {
         return of(JkModuleId.of(moduleId).toCoordinate(version));
     }
 
-    public static JkCoordinateDependency of(String coordinate) {
+    public static JkCoordinateDependency of(@JkDepSuggest String coordinate) {
         return of(JkCoordinate.of(coordinate));
     }
 
@@ -96,7 +96,7 @@ public final class JkCoordinateDependency implements JkTransitivityDependency {
      * Returns a JkModuleDependency identical to this one but adding the
      * specified exclusion.
      */
-    public JkCoordinateDependency andExclusion(String moduleId) {
+    public JkCoordinateDependency andExclusion(@JkDepSuggest String moduleId) {
         return andExclusions(JkDependencyExclusion.of(moduleId));
     }
 
@@ -105,7 +105,7 @@ public final class JkCoordinateDependency implements JkTransitivityDependency {
      * Returns a JkModuleDependency identical to this one but adding the
      * specified exclusion.
      */
-    public JkCoordinateDependency andExclusions(String...  moduleIds) {
+    public JkCoordinateDependency andExclusions(@JkDepSuggest String...  moduleIds) {
         List<JkDependencyExclusion> exclusions = Stream.of(moduleIds)
                 .map(JkDependencyExclusion::of)
                 .collect(Collectors.toList());
@@ -188,12 +188,9 @@ public final class JkCoordinateDependency implements JkTransitivityDependency {
         JkCoordinateDependency that = (JkCoordinateDependency) o;
 
         if (!coordinate.equals(that.coordinate)) return false;
-        if (transitivity != null ? !transitivity.equals(that.transitivity) : that.transitivity != null) return false;
+        if (!Objects.equals(transitivity, that.transitivity)) return false;
         if (!exclusions.equals(that.exclusions)) return false;
-        if (ideProjectDir != null ? !ideProjectDir.equals(that.ideProjectDir) : that.ideProjectDir != null)
-            return false;
-
-        return true;
+        return Objects.equals(ideProjectDir, that.ideProjectDir);
     }
 
     @Override
