@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Minimal information necessary to generate metadata project file for IDE.
+ * Information necessary to generate metadata project file for IDE.
  */
 public class JkIdeSupport {
 

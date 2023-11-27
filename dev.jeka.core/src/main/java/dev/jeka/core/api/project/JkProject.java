@@ -108,6 +108,9 @@ public class JkProject implements JkIdeSupportSupplier {
         publication = new JkProjectPublication(this);
     }
 
+    /**
+     * Creates a new project having the current working directory as base dir.
+     */
     public static JkProject of() {
         return new JkProject();
     }
@@ -117,25 +120,37 @@ public class JkProject implements JkIdeSupportSupplier {
         return this;
     }
 
+    /**
+     * Returns a convenient facade for configuring the project.
+     */
     public JkProjectFlatFacade flatFacade() {
         return new JkProjectFlatFacade(this);
     }
 
     // ---------------------------- Getters / setters --------------------------------------------
 
+    /**
+     * Returns the base directory from where are resolved all relative path concerning this
+     * project (source folder, ...)
+     */
     public Path getBaseDir() {
         return this.baseDir;
     }
 
+    /**
+     * Sets the base directory for this project.
+     *
+     * @see #getBaseDir()
+     */
+    public JkProject setBaseDir(Path baseDir) {
+        this.baseDir = JkUtilsPath.relativizeFromWorkingDir(baseDir);
+        return this;
+    }
 
     public JkRunnables getCleanExtraActions() {
         return cleanExtraActions;
     }
 
-    public JkProject setBaseDir(Path baseDir) {
-        this.baseDir = JkUtilsPath.relativizeFromWorkingDir(baseDir);
-        return this;
-    }
 
     /**
      * Returns path of the directory under which are produced build files
@@ -157,28 +172,50 @@ public class JkProject implements JkIdeSupportSupplier {
         return this;
     }
 
+    /**
+     * Returns the Java JVM version that will be used to compile sources and
+     * generate bytecode.
+     */
     public JkJavaVersion getJvmTargetVersion() {
         return jvmTargetVersion;
     }
 
+    /**
+     * Sets the Java JVM version that will be used to compile sources and
+     * generate bytecode.
+     */
     public JkProject setJvmTargetVersion(JkJavaVersion jvmTargetVersion) {
         this.jvmTargetVersion = jvmTargetVersion;
         return this;
     }
 
+    /**
+     * Returns the source encoding of source files.
+     */
     public String getSourceEncoding() {
         return sourceEncoding;
     }
 
+    /**
+     * Sets the source encoding of source files.
+     */
     public JkProject setSourceEncoding(String sourceEncoding) {
         this.sourceEncoding = sourceEncoding;
         return this;
     }
 
+    /**
+     * Returns the strategy to use when twi dependencies with distinct versions
+     * are declared in the project dependencies.
+     */
     public JkCoordinate.ConflictStrategy getDuplicateConflictStrategy() {
         return duplicateConflictStrategy;
     }
 
+    /**
+     * Sets the strategy to use when twi dependencies with distinct versions
+     * are declared in the project dependencies.
+     */
     public JkProject setDuplicateConflictStrategy(JkCoordinate.ConflictStrategy duplicateConflictStrategy) {
         this.duplicateConflictStrategy = duplicateConflictStrategy;
         return this;
@@ -191,6 +228,10 @@ public class JkProject implements JkIdeSupportSupplier {
         return "project " + getBaseDir().getFileName();
     }
 
+    /**
+     * Cleans directories where are generated files output by the project builds
+     * (jars, generated sources, classes, reports, ...)
+     */
     public JkProject clean() {
         Path output = getOutputDir();
         JkLog.info("Clean output directory " + output.toAbsolutePath().normalize());
@@ -201,6 +242,10 @@ public class JkProject implements JkIdeSupportSupplier {
         return this;
     }
 
+    /**
+     * Returns a human-readable text that mentions various settings for this project
+     * (source locations, file count, declared dependencies, ...).
+     */
     public String getInfo() {
         JkDependencySet compileDependencies = compilation.getDependencies();
         JkDependencySet runtimeDependencies = packaging.getRuntimeDependencies();
@@ -269,6 +314,9 @@ public class JkProject implements JkIdeSupportSupplier {
         JkLog.info("");
     }
 
+    /**
+     * Returns an ideSupport for this project.
+     */
     @Override
     public JkIdeSupport getJavaIdeSupport() {
         JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
@@ -286,18 +334,32 @@ public class JkProject implements JkIdeSupportSupplier {
         return ideSupportModifier.apply(ideSupport);
     }
 
+    /**
+     * Modifies the IdeSupport for this project.
+     */
     public void setJavaIdeSupport(Function<JkIdeSupport, JkIdeSupport> ideSupport) {
         this.ideSupportModifier = ideSupportModifier.andThen(ideSupport);
     }
 
+    /**
+     * Creates a dependency o the main artifact created by this project.
+     */
     public JkLocalProjectDependency toDependency() {
         return toDependency(artifactProducer.getMainArtifactId(), null);
     }
 
+    /**
+     * Creates a dependency o the main artifact created by this project, with the specified transitivity.
+     * @see #toDependency(JkArtifactId, JkTransitivity)
+     */
     public JkLocalProjectDependency toDependency(JkTransitivity transitivity) {
         return toDependency(artifactProducer.getMainArtifactId(), transitivity);
     }
 
+    /**
+     * Creates a dependency on an artifact created by this project. The created dependency
+     * is meant to be consumed by an external project.
+     */
     public JkLocalProjectDependency toDependency(JkArtifactId artifactId, JkTransitivity transitivity) {
        Runnable maker = () -> artifactProducer.makeArtifact(artifactId);
        Path artifactPath = artifactProducer.getArtifactPath(artifactId);
@@ -344,10 +406,17 @@ public class JkProject implements JkIdeSupportSupplier {
         return this;
     }
 
+    /**
+     * Returns if the project dependencies include those mentioned in <i>jeka/project-dependencies.txt</i> flat file.
+     */
     public boolean isIncludeTextAndLocalDependencies() {
         return includeTextAndLocalDependencies;
     }
 
+    /**
+     * Specifies if the project dependencies should include those mentioned in <i>jeka/project-dependencies.txt</i> flat file.
+     * Values <code>true</code> by default.
+     */
     public JkProject setIncludeTextAndLocalDependencies(boolean includeTextAndLocalDependencies) {
         this.includeTextAndLocalDependencies = includeTextAndLocalDependencies;
         return this;
@@ -367,7 +436,10 @@ public class JkProject implements JkIdeSupportSupplier {
         return cachedTextAndLocalDeps;
     }
 
-
+    /**
+     * Returns an XML document containing the dependency trees of this project.
+     * Mainly intended for 3rd party tools.
+     */
     public Document getDependenciesAsXml()  {
         Document document;
         try {
@@ -384,7 +456,8 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Executes the jar having the specified artifact name. This method assumes that the jar is already built.
+     * Executes the jar having the specified artifact name. This method assumes that the jar is already built and
+     * declare a main method in its manifest.
      *
      * @param artifactName       The name of the artifact to run. In a project producing a side 'fat' jar, you can use
      *                           'fat' as artifact name. If you want to run the main artifact, just use '' as artifact name.
@@ -394,7 +467,8 @@ public class JkProject implements JkIdeSupportSupplier {
      * @param args               program arguments to be passed in command line, as <code>--print --verbose myArg</code>
      */
     public void runJar(String artifactName, boolean includeRuntimeDeps, String javaOptions, String args) {
-        JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactProducer.getArtifactPath(JkArtifactId.of(artifactName, "jar")))
+        Path artifactPath = artifactProducer.getArtifactPath(JkArtifactId.of(artifactName, "jar"));
+        JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 .setLogOutput(true)
@@ -414,6 +488,14 @@ public class JkProject implements JkIdeSupportSupplier {
      */
     public void runMainJar(boolean includeRuntimeDeps, String javaOptions, String args) {
         runJar(JkArtifactId.MAIN_ARTIFACT_NAME, includeRuntimeDeps, javaOptions, args);
+    }
+
+    /**
+     * Convenient method to get the path of the main built artifact (generally the
+     * jar file containing the java classes of the application/library).
+     */
+    public Path getMainArtifactPath() {
+        return artifactProducer.getMainArtifactPath();
     }
 
     private Element xmlDeps(Document document, String purpose, JkDependencySet deps) {
