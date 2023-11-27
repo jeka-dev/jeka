@@ -250,7 +250,7 @@ public class JkProject implements JkIdeSupportSupplier {
         JkDependencySet compileDependencies = compilation.getDependencies();
         JkDependencySet runtimeDependencies = packaging.getRuntimeDependencies();
         JkDependencySet testDependencies = testing.compilation.getDependencies();
-        StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir() + "\n")
+        StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir().toAbsolutePath().normalize() + "\n")
             .append("Production sources : " + compilation.layout.getInfo()).append("\n")
             .append("Test sources : " + testing.compilation.layout.getInfo()).append("\n")
             .append("Java Source Version : " + (jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )+ "\n")
@@ -267,6 +267,9 @@ public class JkProject implements JkIdeSupportSupplier {
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
         builder.append("Defined Artifacts : " + artifactProducer.getArtifactIds());
         JkMavenPublication mavenPublication = publication.maven;
+        builder
+                .append("Published ModuleId  " + publication.getModuleId())
+                .append("Published Version : " + publication.getVersion());
         if (mavenPublication.getModuleId() != null) {
             builder
                     .append("\nPublish Maven repositories : " + mavenPublication.getPublishRepos() + "\n")
