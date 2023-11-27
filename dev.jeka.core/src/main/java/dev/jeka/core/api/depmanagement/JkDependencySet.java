@@ -78,10 +78,10 @@ public class JkDependencySet {
             result.addAll(others);
             return new JkDependencySet(result, globalExclusions, versionProvider);
         }
-        if (hint.condition == false) {
+        if (!hint.condition) {
             return this;
         }
-        if (hint.first == true) {
+        if (hint.first) {
             result.addAll(0, others);
             return new JkDependencySet(result, globalExclusions, versionProvider);
         }
@@ -653,6 +653,15 @@ public class JkDependencySet {
             return new Hint(dependency, true, false);
         }
 
+        /**
+         * Mention the a dependency shoud be inserted before the specified one.
+         * @param moduleIdCoordinate coordinate of the dependency we want to insert before.
+         *                           Use only moduleId as <i>my.group:my-module</i>
+         */
+        public static Hint before(@JkDepSuggest String moduleIdCoordinate) {
+            return before(JkCoordinateDependency.of(moduleIdCoordinate));
+        }
+
         public static Hint firstAndIf(boolean condition) {
             return new Hint(null, condition, true);
         }
@@ -669,6 +678,13 @@ public class JkDependencySet {
             return new Hint(dependency, condition, false);
         }
 
+        /**
+         * @see #before(String)
+         */
+        public static Hint beforeAndIf(String moduleIdCoordinate, boolean condition) {
+            return beforeAndIf(JkCoordinateDependency.of(moduleIdCoordinate), condition);
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -678,7 +694,7 @@ public class JkDependencySet {
 
             if (condition != hint.condition) return false;
             if (first != hint.first) return false;
-            return before != null ? before.equals(hint.before) : hint.before == null;
+            return Objects.equals(before, hint.before);
         }
 
         @Override
