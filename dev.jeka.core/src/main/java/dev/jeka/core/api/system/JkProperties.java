@@ -208,9 +208,10 @@ public final class JkProperties {
                 continue;
             }
             String value = get(key);
-            if (key.toLowerCase().contains("password")
-                    || key.toLowerCase().contains("secret")
-                    || key.toLowerCase().contains("pwd")) {
+            if (key.toLowerCase().endsWith("password")
+                    || key.toLowerCase().endsWith("secret")
+                    || key.toLowerCase().endsWith("token")
+                    || key.toLowerCase().endsWith("pwd")) {
                 value = "***";
             }
             String keyLabel = JkUtilsString.padEnd(key, maxKeyLength + 1, ' ');
