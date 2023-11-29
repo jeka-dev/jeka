@@ -17,12 +17,22 @@ complete software delivery pipelines, and project building.
 
 These objectives can be achieved programmatically or by configuring properties for the reusable components.
 
-Thanks to the component model, plugins exist to seamlessly integrate technologies such as  *Spring-Boot*, *OpenApi*, 
+Thanks to the component model, plugins are available to seamlessly integrate technologies such as  *Spring-Boot*, *OpenApi*, 
 *NodeJs*, *Protobuf*, *SonarQube* and more.
 
-# Why JeKa
+# Why JeKa ?
 
-JeKa aims at bridging **dev** and **ops** by allowing the entire process to be implemented in a single language,
+## Short Answer
+
+To provide an alternative to mainstream Java build tools, for individuals frustrated with technologies they perceive 
+as old, heavy, rigid or bloated.
+
+JeKA introduces a breath of fresh air in this domain by offering a kit allowing to build projects with various technologies,
+or create custom build framework with their preferred language.
+
+## Longer One
+
+JeKa fills the gap between **dev** and **ops** by allowing the entire process to be implemented in a single language,
 for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, *testing*, 
 *deploying containers* and *provisioning platforms*.
 
