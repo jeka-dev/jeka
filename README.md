@@ -3,15 +3,24 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
 
-#  Why JeKa ?
+#  What is JeKa ?
 
 <img src="./docs/images/knight-color-logo.svg" width="100" align="left" hspace="15"  />
 
-Basically, <strong>JeKa</strong> is an automation tool that allows users to execute **Java / Kotlin** source code directly
-from the command line.
+Essentially, <strong>JeKa</strong> is an automation tool that enables users to execute Java / Kotlin source code 
+directly from the command line.
 
-It comes with a variety of plugins and utilities to make common **devOps** tasks easy to implement, 
-such as **building projects** with various technologies, creating **pipelines** and performing **quality checks**.
+It comes bundled with a library and a component model that cater to the requirements of building Java projects.
+
+These three elements can be used in isolation or in combination according to the needs: from simple scripts to 
+complete software delivery pipelines, and project building.
+
+These objectives can be achieved programmatically or by configuring properties for the reusable components.
+
+Thanks to the component model, plugins exist to seamlessly integrate technologies such as  *Spring-Boot*, *OpenApi*, 
+*NodeJs*, *Protobuf*, *SonarQube* and more.
+
+# Why JeKa
 
 JeKa aims at bridging **dev** and **ops** by allowing the entire process to be implemented in a single language,
 for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, *testing*, 

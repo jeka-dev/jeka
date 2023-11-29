@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module type="JAVA_MODULE" version="4">
+<?xml version="1.0" encoding="UTF-8"?><module type="JAVA_MODULE" version="4">
     <component inherit-compileRunner-output="false" name="NewModuleRootManager">
         <output url="file://$MODULE_DIR$/.idea/output/production"/>
         <output-test url="file://$MODULE_DIR$/.idea/output/test"/>
@@ -14,7 +13,7 @@
             <excludeFolder url="file://$MODULE_DIR$/jeka/.work"/>
             <excludeFolder url="file://$MODULE_DIR$/.idea/output"/>
         </content>
-        <orderEntry type="inheritedJdk"/>
+        <orderEntry jdkName="11" jdkType="JavaSDK" type="jdk"/>
         <orderEntry forTests="false" type="sourceFolder"/>
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>

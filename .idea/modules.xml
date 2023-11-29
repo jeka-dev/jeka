@@ -17,6 +17,8 @@
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.protobuf/.idea/dev.jeka.samples.protobuf.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.protobuf/.idea/dev.jeka.samples.protobuf.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.sonarqube/dev.jeka.samples.sonarqube.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.sonarqube/dev.jeka.samples.sonarqube.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.springboot/dev.jeka.samples.springboot.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.springboot/dev.jeka.samples.springboot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.project-api/.idea/dev.jeka.samples.project-api.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.springboot/.idea/dev.jeka.samples.project-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.project-flat-facade-api/.idea/dev.jeka.samples.project-flat-facade-api.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.springboot/.idea/dev.jeka.samples.project-flat-facade-api.iml" />
     </modules>
   </component>
 </project>
