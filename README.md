@@ -48,64 +48,11 @@ by ops with basic Java knowledge.
 Nevertheless, JeKa is very flexible and allows users to pick only the parts they are interested in by integrating 
 with any tool providing a command-line interface (such as Maven, Gradle, Skaffold, Helm, Terraform, etc.).
 
-# What Can You Do with JeKa ?
+# Few Examples
 
-## Implement Pipelines
-
-Here, by "implementing pipelines" we mean implementing the specific steps that the CI/CD pipeline will execute 
-to move the application from source code to delivery. 
-These steps typically include building, testing, publishing, and deploying the application.
-
-This is quite straightforward with JeKa: you only have to code public methods in Java or Kotlin and you can invoke them simply from the command line without worrying about compilation (JeKa will take care of it behind the scenes).
-
-You can also use any library in your code by declaring its Maven coordinates in an annotation, 
-JeKa will fetch and resolve dependencies for you.
-
-Method execution can be parameterized using property files, OS environment variables, or command line arguments. 
-The parameters accept various types such as string, numbers, file paths, booleans, enumerations, and composite objects.
-
-JeKa offers many utilities out-of-the-box for dealing with common devOps tasks such as handling files/file-trees/zips, 
-working with Git, interacting with command-line tools, launching Java programs, running tests, and managing interactions with Maven repositories.
-
-Pipeline code, like any Java code, can be shared on a Maven repository. 
-When shared, pipelines can be invoked simply by mentioning their Maven coordinates without the need for it to be 
-present on the local drive.
-
-By adding annotations, pipeline code can provide context and explanations for its methods and fields, 
-which will be visible when calling the help command.
-
-See [Pipeline step to create a Github release](dev.jeka.master/jeka/def/github/Github.java)
-
-
-## Build Projects
-JVM projects building includes tasks such as compiling, unit and integration testing, performing quality 
-checks, packaging artifacts (such as jar, sources, and container images), and publishing them. JeKa provides a powerful 
-and flexible build tool out-of-the-box to achieve these tasks.
-
-If you're not a fan of traditional build tools for JVM projects, JeKa's build tool is definitely worth checking out. 
-It is quite concise and flexible. It currently supports out-of-the-box projects using technologies such as Java, Kotlin-JVM, 
-Spring-Boot, Sonarqube, Jacoco, Node.js, and Protocol Buffer.
-
-For other technologies, it is possible to directly use their Java API or command-line interface to integrate them into 
-your builds. This is quite straightforward thanks to JeKa's simple design and rich utilities. 
-
-See [examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
-
-## Define Infrastructure as Code
-
-For containerized applications, *packaging/deploying* generally means to deploy the application in a Kubernetes cluster. 
-Kubernetes provides a Java client library that allows to define an application deployment 
-using *Infrastructure as Code* (IaC), and install/uninstall it.
-
-You can use this library directly in JeKa to define Kubernetes manifests using plain Java objects and manage the 
-installation and uninstallation of the application, similar to how *Helm* operates.
-
-Some cloud platforms such as Azure or AWS propose solutions to implement Infrastructure as Code using Java. 
-They provide tutorials on how to use these solutions with Maven, but it's possible to use Jeka instead if you prefer to avoid using Maven.
-
-Alternatively, you can use a tool such as *Pulumi* and integrate it into a Jeka pipeline using its command line interface.
-
-See [Project deployed on Kubernetes](https://github.com/jeka-dev/working-examples/tree/master/kubernetes)
+- [Pipeline step to create a Github release](dev.jeka.master/jeka/def/github/Github.java)
+- [examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
+- [Project deployed on Kubernetes](https://github.com/jeka-dev/working-examples/tree/master/kubernetes)
 
 # What makes JeKa User Friendly ?
 
@@ -147,7 +94,6 @@ same monorepo, which means that you don't need to specify their version as JeKa 
 
 ### Plugins Hosted in JeKa Monorepo
 
-
 * [Springboot Plugin](plugins/dev.jeka.plugins.springboot)
 * [Sonarqube Plugin](plugins/dev.jeka.plugins.sonarqube)
 * [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
@@ -158,10 +104,6 @@ same monorepo, which means that you don't need to specify their version as JeKa 
 
 * [OpenApi Plugin](https://github.com/jeka-dev/openapi-plugin)
 
-# News
-
-* Out-of-the-box support for Kotlin-JVM. See [sample using springboot-kotlin-nodejs toghether](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
-* Version 0.10.0 is out ! This is major product improvement.
 
 # Roadmap/Ideas
 
@@ -169,9 +111,7 @@ We hope the 0.10.xx series to be the last prior 1.0.0.
 0.10.xx series is a considerable improvement from 0.9.xx.
 We expect our users to give feedbacks to finalise the product.
 
-* Provides a concrete example of a complete pipeline delivering to a Kubernetes cluster.
 * Stabilize the API based on user feedback. The API is functional now, but it can be improved with user input.
-* Improve [plugin for Intellij](https://github.com/jerkar/jeka-ide-intellij)
 * Improve Kotlin integration
 * Provide a plugin for Android
 
