@@ -12,8 +12,7 @@ directly from the command line.
 
 It comes bundled with a library and a component model that cater to the requirements of building Java projects.
 
-These three elements can be used in isolation or in combination according to the needs: from simple scripts to 
-complete software delivery pipelines, and project building.
+These elements can be utilized independently or in combination, tailored to specific needs from basic scripts to sophisticated software build and delivery pipelines.
 
 These objectives can be achieved programmatically or by configuring properties for the reusable components.
 
@@ -24,11 +23,11 @@ Thanks to the component model, plugins are available to seamlessly integrate tec
 
 ## Short Answer
 
-To provide an alternative to mainstream Java build tools, for individuals frustrated with technologies they perceive 
+JeKa provides an alternative to mainstream Java build tools, for individuals frustrated with technologies they perceive 
 as old, heavy, rigid or bloated.
 
-JeKA introduces a breath of fresh air in this domain by offering a kit allowing to build projects with various technologies,
-or create custom build framework with their preferred language.
+It introduces a breath of fresh air in this domain by offering a light and versatile solution for 
+building projects and delivery pipelines using your preferred language.
 
 ## Longer One
 
