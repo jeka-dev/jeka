@@ -50,9 +50,9 @@ with any tool providing a command-line interface (such as Maven, Gradle, Skaffol
 
 # Few Examples
 
-- [Pipeline step to create a Github release](dev.jeka.master/jeka/def/github/Github.java)
-- [examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
-- [Project deployed on Kubernetes](https://github.com/jeka-dev/working-examples/tree/master/kubernetes)
+- [Build for a Java Library](samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/demo/JkProjectApiSimple.java)
+- [Build for a Spring-Boot application](https://github.com/jeka-dev/working-examples/blob/master/springboot-api/jeka/def/Build.java)
+- [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
 # What makes JeKa User Friendly ?
 
