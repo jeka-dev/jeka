@@ -29,7 +29,7 @@ as old, heavy, rigid or bloated.
 It introduces a breath of fresh air in this domain by offering a light and versatile solution for 
 building projects and delivery pipelines using your preferred language.
 
-## Longer One
+## But also ...
 
 JeKa fills the gap between **dev** and **ops** by allowing the entire process to be implemented in a single language,
 for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, *testing*, 
