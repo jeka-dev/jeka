@@ -48,7 +48,7 @@ by ops with basic Java knowledge.
 Nevertheless, JeKa is very flexible and allows users to pick only the parts they are interested in by integrating 
 with any tool providing a command-line interface (such as Maven, Gradle, Skaffold, Helm, Terraform, etc.).
 
-# Few Examples
+# Examples
 
 - [Build for a Java Library](samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/demo/JkProjectApiSimple.java)
 - [Build for a Spring-Boot application](https://github.com/jeka-dev/working-examples/blob/master/springboot-api/jeka/def/Build.java)
