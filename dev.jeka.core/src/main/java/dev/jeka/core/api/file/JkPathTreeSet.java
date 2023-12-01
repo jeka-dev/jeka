@@ -8,7 +8,6 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -86,7 +85,7 @@ public final class JkPathTreeSet implements Closeable {
      * {@link JkPathTreeSet} and the {@link JkPathTree} array passed as
      * parameter.
      */
-    public final JkPathTreeSet and(JkPathTree... trees) {
+    public JkPathTreeSet and(JkPathTree... trees) {
         final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         list.addAll(Arrays.asList(trees));
         return new JkPathTreeSet(list);
@@ -96,7 +95,7 @@ public final class JkPathTreeSet implements Closeable {
      * Creates a {@link JkPathTreeSet} which is a concatenation of this
      * {@link JkPathTreeSet} and zip files passed as parameter.
      */
-    public final JkPathTreeSet andZips(Iterable<Path> zipFiles) {
+    public JkPathTreeSet andZips(Iterable<Path> zipFiles) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(zipFiles);
         final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         paths.forEach(zipFile -> list.add(JkZipTree.of(zipFile)));
@@ -106,7 +105,7 @@ public final class JkPathTreeSet implements Closeable {
     /**
      * @see #andZips(Iterable)
      */
-    public final JkPathTreeSet andZip(Path... zips) {
+    public JkPathTreeSet andZip(Path... zips) {
         return andZips(Arrays.asList(zips));
     }
 
@@ -114,7 +113,7 @@ public final class JkPathTreeSet implements Closeable {
      * Creates a {@link JkPathTreeSet} which is a concatenation of this
      * {@link JkPathTreeSet} and the folder array passed as parameter.
      */
-    public final JkPathTreeSet and(Path... folders) {
+    public JkPathTreeSet and(Path... folders) {
         final List<JkPathTree> dirs = new ArrayList<>(folders.length);
         for (final Path folder : folders) {
             dirs.add(JkPathTree.of(folder));
@@ -127,7 +126,7 @@ public final class JkPathTreeSet implements Closeable {
      * {@link JkPathTreeSet} and the {@link JkPathTreeSet} array passed as
      * parameter.
      */
-    public final JkPathTreeSet and(JkPathTreeSet... otherDirSets) {
+    public JkPathTreeSet and(JkPathTreeSet... otherDirSets) {
         final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         for (final JkPathTreeSet otherDirSet : otherDirSets) {
             list.addAll(otherDirSet.pathTrees);
@@ -396,6 +395,6 @@ public final class JkPathTreeSet implements Closeable {
             throw new RuntimeException(e);
         }
         this.pathTrees.forEach(pathTree -> pathTree.updateDigest(digest));
-        return new String(digest.digest(), StandardCharsets.UTF_8);
+        return Base64.getEncoder().encodeToString(digest.digest());
     }
 }
