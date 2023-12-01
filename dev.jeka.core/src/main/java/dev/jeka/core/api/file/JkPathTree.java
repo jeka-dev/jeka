@@ -11,10 +11,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -340,7 +337,7 @@ public class JkPathTree<T extends JkPathTree> {
             JkUtilsPath.createDirectories(destinationDir);
         }
         Path source = get(sourcePath);
-        Path dest = destinationDir.getFileSystem().getPath(destinationDir.toString() + "/" + source.getFileName());
+        Path dest = destinationDir.getFileSystem().getPath(destinationDir + "/" + source.getFileName());
         JkUtilsPath.copy(source, dest, copyOptions);
     }
 
@@ -426,7 +423,6 @@ public class JkPathTree<T extends JkPathTree> {
             List<WatchKey> watchKeys = getWatchKeys(watchService);
             while (run.get()) {
                 JkUtilsSystem.sleep(millis);
-                ;
                 List<FileChange> fileChanges = getFileChanges(watchService, watchKeys);
                 if (!fileChanges.isEmpty()) {
                     JkLog.trace("File change detected : " + fileChanges);
@@ -505,7 +501,7 @@ public class JkPathTree<T extends JkPathTree> {
             throw new RuntimeException(e);
         }
         updateDigest(digest);
-        return new String(digest.digest(), StandardCharsets.UTF_8);
+        return Base64.getEncoder().encodeToString(digest.digest());
     }
 
     public static class FileChange {

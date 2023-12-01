@@ -27,7 +27,7 @@ JeKa provides an alternative to mainstream Java build tools, for individuals fru
 as old, heavy, rigid or bloated.
 
 It introduces a breath of fresh air in this domain by offering a light and versatile solution for 
-building projects and delivery pipelines using your preferred language.
+building projects and automate tasks using Java language.
 
 ## But also ...
 
@@ -46,7 +46,7 @@ One other good thing is that Jeka works only with familiar Java structure making
 by ops with basic Java knowledge.
 
 Nevertheless, JeKa is very flexible and allows users to pick only the parts they are interested in by integrating 
-with any tool providing a command-line interface (such as Maven, Gradle, Skaffold, Helm, Terraform, etc.).
+with any tool providing a command-line interface (such as Maven, Gradle, Kubectl, Helm, Terraform, etc.).
 
 # Examples
 
