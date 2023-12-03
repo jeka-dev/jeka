@@ -1,5 +1,6 @@
 package dev.jeka.plugins.nodejs;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
@@ -22,15 +23,13 @@ import java.util.Arrays;
 
 public class JkNodeJs {
 
-    public static final String V20_9_0 = "20.9.0";
-
-    public static final String V18_12_0 = "18.12.0";
+    public static final String DEFAULT_NODE_VERSION = "20.10.0";
 
     private static final String DOWNLOAD_BASE_URL = "https://nodejs.org/dist/";
 
     private Path installDir;
 
-    private String version;
+    private String version = DEFAULT_NODE_VERSION;
 
     private Path workingDir = Paths.get("");
 
@@ -54,10 +53,19 @@ public class JkNodeJs {
      *
      * @param version Version of nodeJs to use.
      */
+    @JkDepSuggest(versionOnly = true, hint = "20.10.0,18.19.0,16.20.2")
     public static JkNodeJs ofVersion(String version) {
         JkNodeJs result = of(null);
         result.version = version;
         return result;
+    }
+
+    /**
+     * Creates a {@link JkNodeJs} wrapping the default version.
+     * @see #ofVersion(String) 
+     */
+    public static JkNodeJs ofDefaultVersion() {
+        return ofVersion(DEFAULT_NODE_VERSION);
     }
 
     /**

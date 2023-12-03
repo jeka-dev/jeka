@@ -1,5 +1,6 @@
 package dev.jeka.plugins.nodejs;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 
@@ -9,7 +10,8 @@ import java.nio.file.Path;
 public class NodeJsJkBean extends JkBean {
 
     @JkDoc("The version of NodeJs to use")
-    public String version = JkNodeJs.V20_9_0;
+    @JkDepSuggest(versionOnly = true, hint = "20.10.0,18.19.0,16.20.2")
+    public String version = JkNodeJs.DEFAULT_NODE_VERSION;
 
     @JkDoc("The command line to execute with nodeJs#npm or nodeJs#npx (without command name.")
     public String cmdLine;
