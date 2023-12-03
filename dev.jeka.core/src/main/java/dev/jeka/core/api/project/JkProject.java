@@ -268,8 +268,8 @@ public class JkProject implements JkIdeSupportSupplier {
         builder.append("Defined Artifacts : " + artifactProducer.getArtifactIds());
         JkMavenPublication mavenPublication = publication.maven;
         builder
-                .append("Published ModuleId  " + publication.getModuleId())
-                .append("Published Version : " + publication.getVersion());
+                .append("\nPublished ModuleId  " + publication.getModuleId())
+                .append("\nPublished Version : " + publication.getVersion());
         if (mavenPublication.getModuleId() != null) {
             builder
                     .append("\nPublish Maven repositories : " + mavenPublication.getPublishRepos() + "\n")
