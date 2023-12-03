@@ -53,8 +53,8 @@ public class JkNodeJs {
      *
      * @param version Version of nodeJs to use.
      */
-    @JkDepSuggest(versionOnly = true, hint = "20.10.0,18.19.0,16.20.2")
-    public static JkNodeJs ofVersion(String version) {
+    public static JkNodeJs ofVersion(
+            @JkDepSuggest(versionOnly = true, hint = "20.10.0,18.19.0,16.20.2") String version) {
         JkNodeJs result = of(null);
         result.version = version;
         return result;
