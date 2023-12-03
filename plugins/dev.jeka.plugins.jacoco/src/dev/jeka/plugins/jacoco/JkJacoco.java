@@ -44,7 +44,7 @@ public final class JkJacoco {
 
     public static final String OUTPUT_HTML_RELATIVE_PATH = "jacoco/html";  // this is a folder
 
-    public static final String DEFAULT_VERSION = "0.8.8";
+    public static final String DEFAULT_VERSION = "0.8.11";
 
     private final ToolProvider toolProvider;
 
