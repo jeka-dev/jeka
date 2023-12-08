@@ -12,6 +12,24 @@
         </content>
         <orderEntry type="inheritedJdk"/>
         <orderEntry forTests="false" type="sourceFolder"/>
+        <orderEntry exported="" scope="TEST" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="file://$MODULE_DIR$/../plugins/dev.jeka.plugins.sonarqube/jeka/output/classes"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
+        <orderEntry exported="" scope="TEST" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="file://$MODULE_DIR$/../plugins/dev.jeka.plugins.jacoco/jeka/output/classes"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
         <orderEntry exported="" module-name="dev.jeka.core" scope="TEST" type="module"/>
         <orderEntry exported="" module-name="dev.jeka.plugins.jacoco"
             scope="TEST" type="module"/>

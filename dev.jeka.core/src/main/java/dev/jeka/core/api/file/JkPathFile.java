@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.MessageDigest;
 import java.util.List;
@@ -34,7 +35,7 @@ public final class JkPathFile {
     }
 
     /**
-     * Creates a {@link JkPathFile instance from the specified path.}
+     * Creates a {@link JkPathFile} instance from the specified path.
      */
     public static JkPathFile of(Path path) {
         if (Files.isDirectory(path)) {
@@ -43,6 +44,9 @@ public final class JkPathFile {
         return new JkPathFile(path);
     }
 
+    /**
+     * @see #of(Path)
+     */
     public static JkPathFile of(String path) {
         return of(Paths.get(path));
     }
@@ -56,11 +60,20 @@ public final class JkPathFile {
     }
 
     /**
+     * Creates a temp file wrapped by a JkPathFile.
+     */
+    public static JkPathFile ofTemp(String prefix, String extension, FileAttribute... fileAttributes) {
+        Path tempFile = JkUtilsPath.createTempFile(prefix, extension, fileAttributes);
+        return of(tempFile);
+    }
+
+    /**
      * Returns the underlying path.
      */
     public Path get() {
         return path;
     }
+
 
     /**
      * Creates a file at this location if such file does not exist yet.
@@ -107,17 +120,22 @@ public final class JkPathFile {
         return this;
     }
 
+    /**
+     * Moves this file to the specified file location
+     * @param to The destination file path. This is not the parent directory destination.
+     */
     public JkPathFile move(Path to, CopyOption ... options) {
         try {
             Files.move(path, to, options);
+            return JkPathFile.of(to);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        return this;
     }
 
     /**
      * Copies the content of the specified url into this file, replacing the previous content.
+     * A file is created silently if not already exists.
      */
     public JkPathFile fetchContentFrom(URL url) {
         createIfNotExist();
@@ -125,6 +143,11 @@ public final class JkPathFile {
         return this;
     }
 
+    /**
+     * Gets the contents of the specified url, and write it to this file.
+     * A file is created silently if not already exists.
+     * @see #fetchContentFrom(URL)
+     */
     public JkPathFile fetchContentFrom(String urlString) {
         return fetchContentFrom(JkUtilsIO.toUrl(urlString));
     }
@@ -163,19 +186,6 @@ public final class JkPathFile {
         }
     }
 
-    void updateDigest(MessageDigest messageDigest) {
-        assertExist();
-        try (final InputStream is = Files.newInputStream(path)) {;
-            final byte[] buf = new byte[2048];
-            int len;
-            while ((len = is.read(buf)) != -1) {
-                messageDigest.update(buf, 0, len);
-            }
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
     /**
      * Shorthand for {@link Files#write(Path, byte[], OpenOption...)}
      */
@@ -188,12 +198,18 @@ public final class JkPathFile {
         return this;
     }
 
+    /**
+     * Writes the specified UTF-8 encoded String to this file.
+     */
     public JkPathFile write(String contentUtf8, OpenOption ... options) {
         return write(contentUtf8.getBytes(StandardCharsets.UTF_8), options);
     }
 
+    /**
+     * Returns the content of this file as a String encoded in UTF-8
+     */
     public String readAsString() {
-        return new String(JkUtilsPath.readAllBytes(path));
+        return new String(JkUtilsPath.readAllBytes(path), StandardCharsets.UTF_8);
     }
 
     /**
@@ -205,7 +221,7 @@ public final class JkPathFile {
         for (String algorithm : algorithms) {
             final String fileName = this.path.getFileName().toString() + "." + algorithm.toLowerCase();
             JkPathFile.of(path.resolveSibling(fileName)).deleteIfExist().write(
-                    this.getChecksum(algorithm).getBytes(Charset.forName("ASCII")));
+                    this.getChecksum(algorithm).getBytes(StandardCharsets.US_ASCII));
         }
         return this;
     }
@@ -232,6 +248,19 @@ public final class JkPathFile {
 
     public JkPathFile setPosixExecPermissions() {
         return setPosixExecPermissions(true, true, true);
+    }
+
+    void updateDigest(MessageDigest messageDigest) {
+        assertExist();
+        try (final InputStream is = Files.newInputStream(path)) {
+            final byte[] buf = new byte[2048];
+            int len;
+            while ((len = is.read(buf)) != -1) {
+                messageDigest.update(buf, 0, len);
+            }
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private static String interpolated(String original, Map<String, String> tokenValues) {

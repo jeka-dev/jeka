@@ -20,6 +20,8 @@ import github.Github;
 
 import java.io.IOException;
 
+@JkInjectClasspath("../plugins/dev.jeka.plugins.sonarqube/jeka/output/classes")
+@JkInjectClasspath("../plugins/dev.jeka.plugins.jacoco/jeka/output/classes")
 class MasterBuild extends JkBean {
 
     @JkInjectProperty("OSSRH_USER")
