@@ -56,7 +56,7 @@ with any tool providing a command-line interface (such as Maven, Gradle, Kubectl
 
 # See in Action
 
-<iframe src="https://www.youtube.com/embed/rUmhMhYRdr0?si=CYPAu21LdY-40xCy" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[<img src="https://i9.ytimg.com/vi_webp/rUmhMhYRdr0/mq1.webp?sqp=CNTZzqsG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGFogWihaMA8=&rs=AOn4CLC2q5cFAi5TKU3hTIHMiGsnx__6NA" width="50%">](https://www.youtube.com/embed/rUmhMhYRdr0?si=CYPAu21LdY-40xCy "Jeka in Action")
 
 
 # What makes JeKa User Friendly ?
