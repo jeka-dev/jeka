@@ -3,12 +3,14 @@ package dev.jeka.core.tool.builtins.scaffold;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
 /**
@@ -25,10 +27,17 @@ public class ScaffoldJkBean extends JkBean {
     @JkDoc("Set the Jeka version to fetch for the wrapper. If null, it will use the same Jeka version than the running one.")
     public String wrapperJekaVersion;
 
-    @JkDoc("Add extra content at the end of the template local.properties file.")
+    /**
+     * In windows, we cannot pass arguments with breaking lines.
+     * Uses
+     */
+    @JkDoc("Deprecated - Add extra content at the end of the template local.properties file.")
     public String localPropsExtraContent = "";
 
-    private JkConsumers<JkScaffolder> configurators = JkConsumers.of();
+    @JkDoc("Add extra content at the end of the template local.properties file.")
+    public Path localPropsExtraContentPath;
+
+    private final JkConsumers<JkScaffolder> configurators = JkConsumers.of();
 
     private JkScaffolder scaffolder() {
         if (scaffolder != null) {
@@ -41,6 +50,10 @@ public class ScaffoldJkBean extends JkBean {
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
         this.scaffolder.setDependencyResolver(dependencyResolver);
         this.scaffolder.addProjectPropsFileContent(this.localPropsExtraContent);
+        if (this.localPropsExtraContentPath != null) {
+            String content = JkPathFile.of(localPropsExtraContentPath).readAsString();
+            this.scaffolder.addProjectPropsFileContent(content);
+        }
         configurators.accept(scaffolder);
         return scaffolder;
     }
