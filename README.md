@@ -54,6 +54,11 @@ with any tool providing a command-line interface (such as Maven, Gradle, Kubectl
 - [Build for a Spring-Boot application](https://github.com/jeka-dev/working-examples/blob/master/springboot-api/jeka/def/Build.java)
 - [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
+# See in Action
+
+<iframe src="https://www.youtube.com/embed/rUmhMhYRdr0?si=CYPAu21LdY-40xCy" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+
 # What makes JeKa User Friendly ?
 
 Thanks to its wrapper and the [Plugin for IntelliJ](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine to run Jeka. You only need a JDK 8 or higher.
