@@ -56,12 +56,14 @@ with any tool providing a command-line interface (such as Maven, Gradle, Kubectl
 
 # See in Action
 
-[<img src="media/getting-started.png" width="50%" alt="Video" align="center">](https://www.youtube.com/embed/hUFvbmFggUY?si=ogamIIU_YYir4vH "Jeka in Action")
-Write scripts in Java, and execute it from command line
+Click images to see videos.
+
+[<img src="media/getting-started.png" width="30%" alt="Video" align="center">](https://www.youtube.com/embed/hUFvbmFggUY?si=ogamIIU_YYir4vH "Jeka in Action")
+&nbsp;&nbsp;&nbsp;Write scripts in Java, and execute it from command line
 
 
-[<img src="media/springboot-prog.png" width="50%"  alt="Video" align="center">](https://www.youtube.com/embed/rUmhMhYRdr0?si=CYPAu21LdY-40xCy "Jeka in Action")
-Build a Spring-Boot project and programmatically
+[<img src="media/springboot-prog.png" width="30%"  alt="Video" align="center">](https://www.youtube.com/embed/rUmhMhYRdr0?si=CYPAu21LdY-40xCy "Jeka in Action")
+&nbsp;&nbsp;&nbsp;Build a Spring-Boot project and programmatically
 
 # What makes JeKa User Friendly ?
 
