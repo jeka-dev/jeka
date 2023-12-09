@@ -65,7 +65,7 @@ Click images to see videos.
 [<img src="media/springboot-prog.png" width="30%"  alt="Video" align="center">](https://www.youtube.com/embed/rUmhMhYRdr0?si=CYPAu21LdY-40xCy "Jeka in Action")
 &nbsp;&nbsp;&nbsp;Build a Spring-Boot project and programmatically
 
-# What makes JeKa User Friendly ?
+# What Makes JeKa User Friendly ?
 
 Thanks to its wrapper and the [Plugin for IntelliJ](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine to run Jeka. You only need a JDK 8 or higher.
 
@@ -85,7 +85,7 @@ handle distribution installation for you. Anyway you can get the binary distribu
 
 The distribution is the file named jeka-core-x.x.x-distrib.zip. 
 
-# How to use JeKa ?
+# How to Use JeKa ?
 
 Visit following pages according your expectation :
 
@@ -147,7 +147,7 @@ JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
 
 # Developer Notes
 
-## How is organized this repo ?
+## How is Organized this Repo ?
 
 This repository is organized as a _monorepo_. It contains The JeKa core project along plugins and samples for 
 automation testing.
@@ -172,7 +172,7 @@ JeKa builds itself. To build JeKa full distribution from sources, the simpler is
 > [See here](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu)
 
 
-## Build JeKa from command line
+## Build JeKa from Command Line
 
 JeKa builds itself, but we need to compile the JeKa sources prior to execute it. 
 Fot this, a small _Ant_ script bootstraps the build process by compiling JeKa first then launch 
@@ -184,7 +184,7 @@ To build the project including Sonarqube and test coverage  : `ant -f .github\wo
 Cause of Sonarqube scanner, this command has to be run with a JDK >= 11.
 
 
-## How to edit documentation ?
+## How to Edit Documentation ?
 
 Documentation is generated with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). Documentation sources are located (here)[docs].
 
@@ -194,7 +194,7 @@ You must install _Python_ and _Material for MkDocs_ on your computer (`pip insta
 The documentation is also supposed to be regenerated after each push/pull-request.
 
 
-### How to release ?
+### How to Release ?
 
 Just use the [github release mechanism](https://github.com/jeka-dev/jeka/releases).
 Creating a release implies creating a tag. This will trigger a build and a publication on Maven Central.
