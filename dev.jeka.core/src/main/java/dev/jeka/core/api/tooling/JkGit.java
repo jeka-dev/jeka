@@ -3,6 +3,7 @@ package dev.jeka.core.api.tooling;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
@@ -152,6 +153,8 @@ public final class JkGit extends JkProcess<JkGit> {
      * Returns the distincts last commit messages since last tag in the current branch.
      */
     public List<String> getCommitMessagesSinceLastTag() {
+        String latestTag = getLatestTag();
+        JkUtilsAssert.state(latestTag != null, "Latest tag not found");
         List<String> rawTesults = execAndReturnOutput("log", "--oneline", getLatestTag() + "..HEAD");
         List<String> result = new LinkedList<>();
         for (String line : rawTesults) {
@@ -165,7 +168,8 @@ public final class JkGit extends JkProcess<JkGit> {
     }
 
     public String getLatestTag() {
-        return this.execAndReturnOutput("describe", "--tags", "--abbrev=0").get(0);
+        List<String> tags = this.execAndReturnOutput("describe", "--tags", "--abbrev=0");
+        return tags.isEmpty() ? null : tags.get(0);
     }
 
 

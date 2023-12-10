@@ -376,7 +376,10 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         // set in place in JkLog
         JkUtilsIO.JkStreamGobbler outputStreamGobbler = null;
         JkUtilsIO.JkStreamGobbler errorStreamGobbler = null;
-        if (logOutputWithLogDecorator) {
+
+        // TODO find a better criteria to turn off the globber
+        // Apparently, the globber is needed to return result
+        if (!inheritIO) {
             OutputStream consoleOutputStream = logOutputWithLogDecorator ? JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
             OutputStream consoleErrStream = logOutputWithLogDecorator ? JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
             outputStreamGobbler = JkUtilsIO.newStreamGobbler(process.getInputStream(), consoleOutputStream, collectOs);
@@ -391,7 +394,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
             throw new RuntimeException(e);
         }
         
-        if (logOutputWithLogDecorator) {
+        if (!inheritIO) {
             outputStreamGobbler.join();
             errorStreamGobbler.join();
         }
