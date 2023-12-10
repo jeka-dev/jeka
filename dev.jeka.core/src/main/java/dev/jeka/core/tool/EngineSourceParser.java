@@ -33,10 +33,10 @@ final class EngineSourceParser {
 
     static EngineSourceParser of(Path baseDir, URL codeUrl) {
         try (final InputStream inputStream = JkUtilsIO.inputStream(codeUrl)) {
-            final String unco4mmentedCode = removeComments(inputStream);
-            final JkDependencySet deps = dependencies(unco4mmentedCode, baseDir, codeUrl);
-            final LinkedHashSet<Path> projects = projects(unco4mmentedCode, baseDir, codeUrl);
-            final List<String> compileOptions = compileOptions(unco4mmentedCode, codeUrl);
+            final String uncommentedCode = removeComments(inputStream);
+            final JkDependencySet deps = dependencies(uncommentedCode, baseDir, codeUrl);
+            final LinkedHashSet<Path> projects = projects(uncommentedCode, baseDir, codeUrl);
+            final List<String> compileOptions = compileOptions(uncommentedCode, codeUrl);
             return new EngineSourceParser(deps, projects, compileOptions);
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
@@ -99,17 +99,6 @@ final class EngineSourceParser {
                 result = result.and(dep);
         }
         return result;
-    }
-
-    /**
-     * Returns <code>true</code> if the candidate string is a valid module dependency description.
-     */
-    private static boolean isModuleDependencyDescription(String candidate) {
-        if (candidate.contains("/") || candidate.contains("\\")) {
-            return false;
-        }
-        final int colonCount = JkUtilsString.countOccurrence(candidate, ':');
-        return colonCount >= 1;
     }
 
     private static LinkedHashSet<Path>  projectDependencies(Path baseDir, List<String> deps) {
@@ -263,7 +252,7 @@ final class EngineSourceParser {
             }
         }
         throw new IllegalStateException("No matching " + delimiter + " found" + context + " in "
-                + url + ". " + all.toString());
+                + url + ". " + all);
     }
 
     private static String removeQuotes(String line) {

@@ -120,15 +120,11 @@ final class CommandLine {
         } else {
             JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of(depDescription);
             boolean specifiedVersion = !coordinateDependency.getCoordinate().hasUnspecifiedVersion();
-            if (specifiedVersion) {
-                return coordinateDependency;
-            } else if (coordinateDependency.getCoordinate().getModuleId().getGroup().equals("dev.jeka")) {
+            if (!specifiedVersion && coordinateDependency.getCoordinate().getModuleId().getGroup().equals("dev.jeka")) {
                 coordinateDependency = coordinateDependency.withVersion(JkVersion.of(JkInfo.getJekaVersion()));
                 return coordinateDependency;
             } else {
-                throw new JkException("Command line argument "
-                        + depDescription + " does not mention a version. " +
-                        "Use description as groupId:artefactId:version. Version can be '+' for taking the latest.");
+                return coordinateDependency;
             }
         }
     }

@@ -109,7 +109,7 @@ public final class JkSpringboot {
 
         // resolve dependency versions upon springboot provided ones
         project.compilation.configureDependencies(deps -> deps
-            .andBom(BOM_COORDINATE + springbootVersion));
+            .and(BOM_COORDINATE + springbootVersion));
 
         // define bootable jar as main artifact
         JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;

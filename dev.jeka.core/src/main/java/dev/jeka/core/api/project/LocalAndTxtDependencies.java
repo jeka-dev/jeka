@@ -1,6 +1,6 @@
 package dev.jeka.core.api.project;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -212,12 +212,6 @@ class LocalAndTxtDependencies {
                 return current.withGlobalExclusions(coordinate);
             }
             else {
-                JkCoordinate coordinate = JkCoordinate.of(line);
-                JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
-                if (spec.getClassifier() == null && "pom".equals(spec.getType())) {
-                    JkVersionProvider versionProvider = current.getVersionProvider().andBom(coordinate);
-                    return current.withVersionProvider(versionProvider);
-                }
                 return current.and(line);
             }
         }

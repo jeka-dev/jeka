@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -31,7 +30,7 @@ public final class JkDependencyResolver  {
 
     private boolean useCache;
 
-    private boolean includeLocalRepo = true;
+    private final boolean includeLocalRepo = true;
 
     private JkDependencyResolver() {
         parameters = JkResolutionParameters.of();
@@ -144,8 +143,9 @@ public final class JkDependencyResolver  {
                 return result;
             }
         }
-        List<JkDependency> allDependencies = qualifiedDependencies.getDependencies();
-        JkQualifiedDependencySet moduleQualifiedDependencies = qualifiedDependencies
+        JkQualifiedDependencySet bomResolvedDependencies = replacePomDependencyByVersionProvider(qualifiedDependencies);
+        List<JkDependency> allDependencies = bomResolvedDependencies.getDependencies();
+        JkQualifiedDependencySet moduleQualifiedDependencies = bomResolvedDependencies
                 .withModuleDependenciesOnly()
                 .withResolvedBoms(effectiveRepos())
                 .assertNoUnspecifiedVersion()
@@ -155,9 +155,9 @@ public final class JkDependencyResolver  {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
         JkInternalDependencyResolver internalDepResolver = JkInternalDependencyResolver.of(effectiveRepos());
-        String message = qualifiedDependencies.getEntries().size() == 1 ?
-                "Resolve " + qualifiedDependencies.getDependencies().get(0).toString()
-                : "Resolve " + qualifiedDependencies.getEntries().size() + " declared dependencies";
+        String message = bomResolvedDependencies.getEntries().size() == 1 ?
+                "Resolve " + bomResolvedDependencies.getDependencies().get(0).toString()
+                : "Resolve " + bomResolvedDependencies.getEntries().size() + " declared dependencies";
         JkLog.startTask(message);
         JkResolveResult resolveResult;
         if (hasModule) {
@@ -179,14 +179,14 @@ public final class JkDependencyResolver  {
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {
             if (params.isFailOnDependencyResolutionError()) {
-                String msg = report.toString() + " \nRepositories = " + effectiveRepos();
+                String msg = report + " \nRepositories = " + effectiveRepos();
                 throw new IllegalStateException(msg);
             }
             JkLog.warn(report.toString());
         }
         JkLog.endTask();
         if (useCache) {
-            this.cachedResults.put(qualifiedDependencies, resolveResult);
+            this.cachedResults.put(bomResolvedDependencies, resolveResult);
         }
         return resolveResult;
     }
@@ -232,6 +232,29 @@ public final class JkDependencyResolver  {
 
     private JkRepoSet effectiveRepos() {
         return includeLocalRepo ? repos.and(JkRepo.ofLocal()) : repos;
+    }
+
+    private JkQualifiedDependencySet replacePomDependencyByVersionProvider(JkQualifiedDependencySet dependencySet) {
+        List<JkQualifiedDependency> dependencies = dependencySet.getEntries();
+        JkQualifiedDependencySet result = dependencySet;
+        for (JkQualifiedDependency qualifiedDependency : dependencies) {
+            JkDependency dependency = qualifiedDependency.getDependency();
+            if (dependency instanceof JkCoordinateDependency) {
+                JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
+                JkCoordinate coordinate = coordinateDependency.getCoordinate();
+                JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
+
+                // This is dependency on a pom, meaning that we are supposed to use this as a BOM
+                // Therefore, we transform the dependency to such an entry in version provider
+                if (spec.getClassifier() == null && "pom".equals(spec.getType())) {
+                    JkVersionProvider versionProvider = result.getVersionProvider().andBom(coordinate);
+                    result = result.withVersionProvider(versionProvider);
+                    result = result.remove(qualifiedDependency);
+                }
+            }
+        }
+        JkVersionProvider versionProvider = result.getVersionProvider();
+        return result.withVersionProvider(versionProvider.withResolvedBoms(this.repos));
     }
 
 

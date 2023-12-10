@@ -306,15 +306,20 @@ public class JkDependencySet {
      * Returns a clone of this object but using this version provider with bom resolved.
      */
     public JkDependencySet withResolvedBoms(JkRepoSet repos) {
-        return withVersionProvider(this.versionProvider.withResolvedBoms(repos));
-    }
-
-    /**
-     * @param coordinate Can be expressed as group:name::pom:version
-     * or group:name:version. In last case, it will be converted in the first expression
-     */
-    public JkDependencySet andBom(@JkDepSuggest String coordinate) {
-        return withVersionProvider(this.versionProvider.andBom(coordinate));
+        JkDependencySet result = this;
+        for (JkDependency dependency : entries) {
+            if (dependency instanceof JkCoordinateDependency) {
+                JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
+                JkCoordinate coordinate = coordinateDependency.getCoordinate();
+                JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
+                if ("pom".equals(spec.getType())) {
+                    result = result
+                            .minus(dependency)
+                            .andVersionProvider(JkVersionProvider.of().andBom(coordinate));
+                }
+            }
+        }
+        return result.withVersionProvider(result.versionProvider.withResolvedBoms(repos));
     }
 
     /**
