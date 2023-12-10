@@ -37,10 +37,14 @@ public final class JkGit extends JkProcess<JkGit> {
     }
 
     public String getCurrentBranch() {
-        return this.copy()
+        List<String> branches = this.copy()
                 .addParams("rev-parse", "--abbrev-ref", "HEAD")
                 .setLogOutput(false)
-                .execAndReturnOutput().get(0);
+                .execAndReturnOutput();
+        if (branches.isEmpty()) {
+            return null;
+        }
+        return branches.get(0);
     }
 
     public boolean isRemoteEqual() {
@@ -57,10 +61,11 @@ public final class JkGit extends JkProcess<JkGit> {
     }
 
     public String getCurrentCommit() {
-        return copy()
+        List<String> commits =  copy()
                 .addParams("rev-parse", "HEAD")
                 .setLogOutput(false)
-                .execAndReturnOutput().get(0);
+                .execAndReturnOutput();
+        return commits.isEmpty() ? null : commits.get(0);
     }
 
     public List<String> getTagsOfCurrentCommit() {

@@ -54,9 +54,14 @@ public class JkProcess<T extends JkProcess> implements Runnable {
 
     private boolean logCommand;
 
-    private boolean logOutput = true;
+    private boolean logOutputWithLogDecorator = true;
 
     private boolean destroyAtJvmShutdown;
+
+    private boolean redirectErrorStream = true;
+    
+    // By default, streams are redirected with gobbler mechanism to not bypass JkLog decorator.
+    private boolean inheritIO = false;
 
     protected JkProcess() {}
 
@@ -71,7 +76,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         this.env = new HashMap(other.env);
         this.failOnError = other.failOnError;
         this.logCommand = other.logCommand;
-        this.logOutput = other.logOutput;
+        this.logOutputWithLogDecorator = other.logOutputWithLogDecorator;
         this.workingDir = other.workingDir;
         this.destroyAtJvmShutdown = other.destroyAtJvmShutdown;
     }
@@ -144,7 +149,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
      * Adds specified parameters to the command line
      */
     public T addParams(String... parameters) {
-        return (T) addParams(Arrays.asList(parameters));
+        return addParams(Arrays.asList(parameters));
     }
 
     /**
@@ -224,10 +229,37 @@ public class JkProcess<T extends JkProcess> implements Runnable {
     }
 
     /**
-     * If logOutput parameter is <code>true</code>, the process output will be redirected to JkLog.
+     * Set if the output streams of the process must bbe logged keeping the JkLog decorator.
+     * <p>
+     * This is generally desirable, as the output will honor the indentation and visibility
+     * set by JeKa log decorator. <br/>
+     * This implies a small extra resource costs that is acceptable in most of the situations.
+     * <br/>
+     * Nevertheless, if you want bypass this mechanism, you can specify to not log using this mechanism.
+     * In this case, you may set up explicitly a mean to get the output streams. One solution
+     * consists in invoking <code>setInheritIO(true)</code>
+     *
+     * Initial value is <code>true</code>..
+     *
      */
-    public  T setLogOutput(boolean logOutput) {
-        this.logOutput = logOutput;
+    public  T setLogOutput(boolean logOutputWithLogDecorator) {
+        this.logOutputWithLogDecorator = logOutputWithLogDecorator;
+        return (T) this;
+    }
+
+    /**
+     * Makes the process use the same streams as its parent. <p>
+     * This can not be used in conjunction of {@link #logOutputWithLogDecorator}, so this one is disabled forcibly when invoking this method.
+     * <br/>
+     * Initial value is <code>false</code>
+     *
+     * @see  {@link ProcessBuilder#inheritIO()}.
+     */
+    public T setInheritIO(boolean value) {
+        if (value) {
+            this.logOutputWithLogDecorator = false;
+        }
+        this.inheritIO = value;
         return (T) this;
     }
 
@@ -244,6 +276,15 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         if(!JkLog.isAcceptAnimation()) {
             addParams("-lna");
         }
+        return (T) this;
+    }
+
+    /**
+     * Same as {@link ProcessBuilder#redirectErrorStream(boolean)}. The difference is that the initial
+     * value is <code>true</code> for {@link JkProcess}
+     */
+    public T redirectErrorStream(boolean value) {
+        this.redirectErrorStream = value;
         return (T) this;
     }
 
@@ -307,7 +348,7 @@ public class JkProcess<T extends JkProcess> implements Runnable {
         }
         Result out = new Result();
         out.exitCode = exitCode;
-        out.output = collectOutput ? new String(byteArrayOutputStream.toByteArray()) : null;
+        out.output = collectOutput ? byteArrayOutputStream.toString() : null;
         return out;
     }
 
@@ -330,12 +371,18 @@ public class JkProcess<T extends JkProcess> implements Runnable {
             }));
         }
         processConsumer.accept(process);
-        OutputStream consoleOutputStream = logOutput ? JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
-        OutputStream consoleErrStream = logOutput ? JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
-        final JkUtilsIO.JkStreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                process.getInputStream(), consoleOutputStream, collectOs);
-        final JkUtilsIO.JkStreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                process.getErrorStream(), consoleErrStream, collectOs);
+
+        // Initialize stream globber so output stream of subprocess does not bybass decorators 
+        // set in place in JkLog
+        JkUtilsIO.JkStreamGobbler outputStreamGobbler = null;
+        JkUtilsIO.JkStreamGobbler errorStreamGobbler = null;
+        if (logOutputWithLogDecorator) {
+            OutputStream consoleOutputStream = logOutputWithLogDecorator ? JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
+            OutputStream consoleErrStream = logOutputWithLogDecorator ? JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
+            outputStreamGobbler = JkUtilsIO.newStreamGobbler(process.getInputStream(), consoleOutputStream, collectOs);
+            errorStreamGobbler = JkUtilsIO.newStreamGobbler(process.getErrorStream(), consoleErrStream, collectOs);
+        }
+
         int exitCode;
         try {
             exitCode = process.waitFor();
@@ -343,8 +390,11 @@ public class JkProcess<T extends JkProcess> implements Runnable {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
-        outputStreamGobbler.join();
-        errorStreamGobbler.join();
+        
+        if (logOutputWithLogDecorator) {
+            outputStreamGobbler.join();
+            errorStreamGobbler.join();
+        }
         if (exitCode != 0 && failOnError) {
             throw new IllegalStateException("Process " + String.join(" ", ellipsed(commands))
                     + "\nhas returned with error code " + exitCode);
@@ -367,8 +417,15 @@ public class JkProcess<T extends JkProcess> implements Runnable {
     }
 
     private ProcessBuilder processBuilder(List<String> command) {
+        if (inheritIO && logOutputWithLogDecorator) {
+            throw new IllegalStateException("inheritIO and logOutput can not be used in conjunction. " +
+                    "You have to choose between one of them.");
+        }
         final ProcessBuilder builder = new ProcessBuilder(command);
-        builder.redirectErrorStream(true);
+        builder.redirectErrorStream(redirectErrorStream);
+        if (inheritIO) {
+            builder.inheritIO();
+        }
         builder.environment().putAll(env);
         if (this.workingDir != null) {
             builder.directory(workingDir.toAbsolutePath().normalize().toFile());
