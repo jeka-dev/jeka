@@ -137,7 +137,7 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         try (ScanResult scanResult = classGraph.scan()) {
             return scanResult.getAllClasses().stream()
                     .filter(classInfo -> !classInfo.isAbstract())
-                    .filter(classInfo -> classInfo.extendsSuperclass(baseClass.getName()))
+                    .filter(classInfo -> inheritOf(classInfo, baseClass.getName()))
                     .map(ClassInfo::getName)
                     .collect(Collectors.toList());
         }
@@ -149,6 +149,11 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
             files = scanResult.getClasspathFiles();
         }
         return JkPathSequence.of(JkUtilsPath.toPaths(files));
+    }
+
+    private static boolean inheritOf(ClassInfo classInfo, String parentClassName) {
+        return classInfo.getSuperclasses().stream()
+                .anyMatch(parentClassInfo -> parentClassInfo.getName().equals(parentClassName));
     }
 
 
