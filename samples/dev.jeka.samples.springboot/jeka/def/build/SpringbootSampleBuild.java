@@ -16,15 +16,15 @@ public class SpringbootSampleBuild extends JkBean {
 
     public String aa;
 
-    private final SpringbootJkBean springboot = getBean(SpringbootJkBean.class);
+    private final SpringbootJkBean springbootKBean = load(SpringbootJkBean.class);
 
-    private final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class);
+    private final IntellijJkBean intellijKBean = load(IntellijJkBean.class);
 
     SpringbootSampleBuild() {
-        springboot.setSpringbootVersion("2.7.16");
-        springboot.projectBean.configure(this::configure);
-        intellijJkBean.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
-        intellijJkBean.configureIml(this::configure);
+        springbootKBean.setSpringbootVersion("2.7.16");
+        springbootKBean.projectKBean.lazily(this::configure);
+        intellijKBean.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
+        intellijKBean.configureIml(this::configure);
     }
 
     private void configure(JkProject project) {
@@ -53,13 +53,13 @@ public class SpringbootSampleBuild extends JkBean {
     }
 
     public void cleanPack() {
-        springboot.projectBean.cleanPack();
+        springbootKBean.projectKBean.cleanPack();
     }
 
     public void testRun() {
         System.out.println(this.aa);
         cleanPack();
-        springboot.getBean(ProjectJkBean.class).runJar();
+        springbootKBean.load(ProjectJkBean.class).runJar();
     }
 
     // Clean, compile, test and generate springboot application jar
@@ -67,14 +67,14 @@ public class SpringbootSampleBuild extends JkBean {
         SpringbootSampleBuild build = JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb");
         //build.getBean(SpringbootJkBean.class).createWar = true;
         build.cleanPack();
-        build.getBean(ProjectJkBean.class).publishLocal();
+        build.load(ProjectJkBean.class).publishLocal();
     }
 
     // debug purpose
     static class Iml {
         public static void main(String[] args) {
             JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb")
-                    .getRuntime().getBean(IntellijJkBean.class).iml();
+                    .getRuntime().load(IntellijJkBean.class).iml();
         }
     }
 

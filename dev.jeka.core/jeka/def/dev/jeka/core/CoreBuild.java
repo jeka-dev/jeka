@@ -22,6 +22,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -38,7 +39,7 @@ public class CoreBuild extends JkBean {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
+    final ProjectJkBean projectBean = load(ProjectJkBean.class).lazily(this::configure);
 
     public boolean runIT;
 
@@ -192,7 +193,7 @@ public class CoreBuild extends JkBean {
         jarTree.goTo("META-INF").importFile(embeddedJar, embeddedFinalName);
         Path embeddedNaneFile = jarTree.get("META-INF/jeka-embedded-name");
         JkUtilsPath.deleteIfExists(embeddedNaneFile);
-        JkPathFile.of(embeddedNaneFile).write(embeddedFinalName.getBytes(Charset.forName("utf-8")));
+        JkPathFile.of(embeddedNaneFile).write(embeddedFinalName.getBytes(StandardCharsets.UTF_8));
         jarTree.andMatching( "**/embedded/**").deleteContent();
         jarTree.close();
 

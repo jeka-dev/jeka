@@ -33,7 +33,7 @@ import java.util.function.UnaryOperator;
  */
 public class SignedArtifactsJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
+    ProjectJkBean projectPlugin = load(ProjectJkBean.class).lazily(this::configure);
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
@@ -42,13 +42,13 @@ public class SignedArtifactsJkBean extends JkBean {
     public String ossrhPwd;
 
     // A dummy local repository for repeatable run purpose
-    private Path dummyRepoPath = getOutputDir().resolve("test-output/maven-repo");
+    private final Path dummyRepoPath = getOutputDir().resolve("test-output/maven-repo");
 
     // The key name to use from the keyStore bellow
     private final String keyName = "jeka-dummy";
 
     // The secret key file is stored in the project but protected with the password below.
-    private Path secringPath = getBaseDir().resolve("jeka/jekadummy-secring.gpg");
+    private final Path secringPath = getBaseDir().resolve("jeka/jekadummy-secring.gpg");
 
     public String secringPassword = "jeka-pwd";  // Normally injected from command line
 

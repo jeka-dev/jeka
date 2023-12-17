@@ -37,10 +37,55 @@ public final class SpringbootJkBean extends JkBean {
     @JkDoc("If true, create a .war filed.")
     public boolean createWarFile;
 
-    @JkDoc(hide = true, value = "For internal test purpose : if not null, scaffolded build class will reference this classpath for springboot plugin dependency.")
+    @JkDoc(hide = true, value = "For internal test purpose : if not null, scaffolded build class will reference this classpath for <i>dev.jeka:springboot-plugin</i> dependency.")
     public String scaffoldDefClasspath;
 
-    private void configure (JkScaffolder scaffolder) {
+    @JkDoc("If true, download spring artifacts from Spring Maven repositories.")
+    public boolean useSpringRepos = true;
+
+    @JkDoc(hide = true, value = "")
+    public final ProjectJkBean projectKBean = load(ProjectJkBean.class).lazily(this::configure);
+
+    /**
+     * Use {@link #projectKBean} instead.
+     */
+    @JkDoc(hide = true, value = "")
+    @Deprecated
+    public final ProjectJkBean projectBean = projectKBean;
+
+
+    SpringbootJkBean() {
+        load(ScaffoldJkBean.class).lazily(this::configure);
+    }
+
+    @JkDoc("Scaffold a basic example application in package org.example")
+    public void scaffoldSample() {
+        String basePackage = "your/basepackage";
+        Path sourceDir = projectKBean.getProject().compilation.layout
+                .getSources().getRootDirsOrZipFiles().get(0);
+        Path pack = sourceDir.resolve(basePackage);
+        URL url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Application.java");
+        JkPathFile.of(pack.resolve("Application.java")).createIfNotExist().fetchContentFrom(url);
+        url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Controller.java");
+        JkPathFile.of(pack.resolve("Controller.java")).createIfNotExist().fetchContentFrom(url);
+        Path testSourceDir = projectKBean.getProject().testing.compilation.layout
+                .getSources().getRootDirsOrZipFiles().get(0);
+        pack = testSourceDir.resolve(basePackage);
+        url = SpringbootJkBean.class.getClassLoader().getResource("snippet/ControllerIT.java");
+        JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
+        JkPathFile.of(projectKBean.getProject().compilation.layout.getResources()
+                .getRootDirsOrZipFiles().get(0).resolve("application.properties")).createIfNotExist();
+    }
+
+    @JkDoc("Provides info about this plugin configuration")
+    public void info() {
+        JkLog.info("Springboot version : " + springbootVersion);
+        JkLog.info("Create Bootable Jar : " + this.createBootJar);
+        JkLog.info("Create original Jar : " + this.createOriginalJar);
+        JkLog.info("Create .war file : " + this.createWarFile);
+    }
+
+    private void configure(JkScaffolder scaffolder) {
         String buildClassSource = this.scaffoldBuildKind == ScaffoldBuildKind.KBEAN ?
                 "Build.java" : "BuildPureApi.java";
         String code = JkUtilsIO.read(SpringbootJkBean.class.getClassLoader().getResource("snippet/" + buildClassSource));
@@ -48,7 +93,7 @@ public final class SpringbootJkBean extends JkBean {
         code = code.replace("${dependencyDescription}", defClasspath);
         code = code.replace("${springbootVersion}", springbootVersion);
         final String jkClassCode = code;
-        if (this.projectBean.scaffold.template != ProjectJkBean.JkScaffoldOptions.Template.CODE_LESS) {
+        if (this.projectKBean.scaffold.template != ProjectJkBean.JkScaffoldOptions.Template.CODE_LESS) {
             scaffolder.setJekaClassCodeProvider(() -> jkClassCode);
         }
         scaffolder.extraActions.append(this::scaffoldSample);
@@ -57,16 +102,6 @@ public final class SpringbootJkBean extends JkBean {
             JkPathFile readmeFile = JkPathFile.of(getBaseDir().resolve("README.md")).createIfNotExist();
             readmeFile.write(readmeContent.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         });
-    }
-
-    @JkDoc("If true, download spring artifacts from Spring Maven repositories.")
-    public boolean useSpringRepos = true;
-
-    @JkDoc(hide = true, value = "")
-    public final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
-
-    SpringbootJkBean() {
-        getBean(ScaffoldJkBean.class).lately(this::configure);
     }
 
     public SpringbootJkBean setSpringbootVersion(@JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:") String springbootVersion) {
@@ -92,31 +127,6 @@ public final class SpringbootJkBean extends JkBean {
         KBEAN
     }
 
-    @JkDoc("Scaffold a basic example application in package org.example")
-    public void scaffoldSample() {
-        String basePackage = "your/basepackage";
-        Path sourceDir = projectBean.getProject().compilation.layout
-                .getSources().getRootDirsOrZipFiles().get(0);
-        Path pack = sourceDir.resolve(basePackage);
-        URL url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Application.java");
-        JkPathFile.of(pack.resolve("Application.java")).createIfNotExist().fetchContentFrom(url);
-        url = SpringbootJkBean.class.getClassLoader().getResource("snippet/Controller.java");
-        JkPathFile.of(pack.resolve("Controller.java")).createIfNotExist().fetchContentFrom(url);
-        Path testSourceDir = projectBean.getProject().testing.compilation.layout
-                .getSources().getRootDirsOrZipFiles().get(0);
-        pack = testSourceDir.resolve(basePackage);
-        url = SpringbootJkBean.class.getClassLoader().getResource("snippet/ControllerIT.java");
-        JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
-        JkPathFile.of(projectBean.getProject().compilation.layout.getResources()
-                .getRootDirsOrZipFiles().get(0).resolve("application.properties")).createIfNotExist();
-    }
 
-    @JkDoc("Provides info about this plugin configuration")
-    public void info() {
-        JkLog.info("Springboot version : " + springbootVersion);
-        JkLog.info("Create Bootable Jar : " + this.createBootJar);
-        JkLog.info("Create original Jar : " + this.createOriginalJar);
-        JkLog.info("Create .war file : " + this.createWarFile);
-    }
 
 }

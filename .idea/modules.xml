@@ -14,11 +14,12 @@
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.dependers/dev.jeka.samples.dependers.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.dependers/dev.jeka.samples.dependers.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.jacoco/.idea/dev.jeka.samples.jacoco.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.jacoco/.idea/dev.jeka.samples.jacoco.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.junit5/dev.jeka.samples.junit5.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.junit5/dev.jeka.samples.junit5.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.project-api/.idea/dev.jeka.samples.project-api.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.project-api/.idea/dev.jeka.samples.project-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.project-flat-facade-api/.idea/dev.jeka.samples.project-flat-facade-api.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.project-flat-facade-api/.idea/dev.jeka.samples.project-flat-facade-api.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.protobuf/.idea/dev.jeka.samples.protobuf.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.protobuf/.idea/dev.jeka.samples.protobuf.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.selfapp/.idea/dev.jeka.samples.selfapp.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.selfapp/.idea/dev.jeka.samples.selfapp.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.sonarqube/dev.jeka.samples.sonarqube.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.sonarqube/dev.jeka.samples.sonarqube.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.springboot/dev.jeka.samples.springboot.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.springboot/dev.jeka.samples.springboot.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.project-api/.idea/dev.jeka.samples.project-api.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.springboot/.idea/dev.jeka.samples.project-api.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/dev.jeka.samples.project-flat-facade-api/.idea/dev.jeka.samples.project-flat-facade-api.iml" filepath="$PROJECT_DIR$/samples/dev.jeka.samples.springboot/.idea/dev.jeka.samples.project-flat-facade-api.iml" />
     </modules>
   </component>
 </project>

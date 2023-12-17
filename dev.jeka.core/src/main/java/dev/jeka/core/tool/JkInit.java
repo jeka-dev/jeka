@@ -53,7 +53,7 @@ public final class JkInit {
             EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get(""));
             List<EngineCommand> commands = new LinkedList<>();
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, clazz, null, null));
-            commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, JkBean.name(clazz)));
+            commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, JkBean.name(clazz), false));
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.setImportedProjects(getImportedProjects(clazz));
             JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
@@ -63,7 +63,7 @@ public final class JkInit {
             jkRuntime.setDependencyResolver(dependencyResolver);
             jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
             jkRuntime.init(commands);
-            final T jkBean = jkRuntime.getBean(clazz);
+            final T jkBean = jkRuntime.load(clazz);
             JkLog.info(jkBean + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();

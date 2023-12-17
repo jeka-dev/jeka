@@ -35,7 +35,7 @@ import java.util.List;
 @JkInjectClasspath("org.apache.httpcomponents:httpclient:4.5.6")
 public class AntStyleJkBean extends JkBean implements JkIdeSupportSupplier {
 
-    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+    final IntellijJkBean intellijJkBean = load(IntellijJkBean.class)
             .configureIml(jkIml -> {
                 jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
             });

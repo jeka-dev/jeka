@@ -98,6 +98,11 @@ public final class JkIml {
             return this;
         }
 
+        /**
+         * Replaces the specified library with the specified module. The library is specified
+         * by the end of its path. For example, '-foo.bar'  will replace 'mylibs/core-foo.jar'
+         * by the specified module. Only the first matching lib is replaced.
+         */
         public Component replaceLibByModule(String libPathEndsWithFilter, String moduleName) {
             List<OrderEntry> result = orderEntries.stream()
                     .map(orderEntry -> {
@@ -116,6 +121,33 @@ public final class JkIml {
             this.orderEntries = result;
             return this;
         }
+
+        /**
+         * Sets the <i>scope</i> and <i>exported</i> attribute to the specified module.
+         * @param moduleName The module to set attributes on.
+         * @param scope If null, scope remains unchanged.
+         * @param exported If null, scope remains unchanged.
+         * @return This object for  chaining.
+         */
+        public Component setModuleAttributes(String moduleName, Scope scope, Boolean exported) {
+            orderEntries.forEach(orderEntry -> {
+                        if (orderEntry instanceof ModuleOrderEntry) {
+                            ModuleOrderEntry entry = (ModuleOrderEntry) orderEntry;
+                            if (entry.moduleName.equals(moduleName)) {
+                                if (scope != null) {
+                                    entry.scope = scope;
+                                }
+                                if (exported != null) {
+                                    entry.exported = exported;
+                                }
+                            }
+                        }
+
+                    });
+            return this;
+        }
+
+
 
         void append(JkDomElement parent, PathUrlResolver pathUrlResolver) {
             boolean inheritedJdk = JkUtilsString.isBlank(jdkName) || "inheritedJdk".equals(jdkName);

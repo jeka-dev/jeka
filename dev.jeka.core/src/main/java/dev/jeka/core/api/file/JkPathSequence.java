@@ -185,6 +185,10 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         return String.join(File.pathSeparator, entries.stream().map(Path::toString).collect(Collectors.toList()));
     }
 
+    public String toPathMultiLine(String margin) {
+        return String.join("\n", entries.stream().map(path -> margin + path.toString()).collect(Collectors.toList()));
+    }
+
     public Set<Path> toSet() {
         return new LinkedHashSet<>(this.entries);
     }

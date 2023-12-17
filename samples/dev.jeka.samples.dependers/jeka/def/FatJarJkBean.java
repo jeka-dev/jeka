@@ -14,12 +14,10 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class FatJarJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
+    ProjectJkBean projectPlugin = load(ProjectJkBean.class).lately(this::configure);
 
-    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
-            .configureIml(jkIml -> {
-                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-            });
+    final IntellijJkBean intellijJkBean = load(IntellijJkBean.class)
+            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
     
     @JkInjectProject("../dev.jeka.samples.basic")
     private SimpleProjectJkBean sampleBuild;

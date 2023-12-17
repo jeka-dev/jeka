@@ -101,8 +101,14 @@ final class Engine {
         JkLog.startTask("Setting up runtime");
         JkRuntime runtime = JkRuntime.get(projectBaseDir);
         runtime.setClasspath(computedClasspath);
+
+        // If def compilation failed, we ignore the defaultBeanClass cause it may be absent
+        // from the classpath.
+        boolean ignoreDefaultBeanNotFound = !result.compileFailedProjects.getEntries().isEmpty()
+                && Environment.standardOptions.ignoreCompileFail;
+
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
-                Environment.standardOptions.kBeanName());
+                Environment.standardOptions.kBeanName(), ignoreDefaultBeanNotFound);
         JkLog.startTask("Init runtime");
         runtime.init(resolvedCommands);
         JkLog.endTask();
@@ -208,7 +214,7 @@ final class Engine {
                 JkLog.trace("Some binary files seem missing.");
             }
             if (outdated || missingBinayFiles) {
-                JkLog.trace("Compile classpath : " + classpath);
+                JkLog.trace("Compile classpath : \n" + classpath.toPathMultiLine("  "));
                 SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
                 if (!result.success) {
                     failedProjects.add(projectBaseDir);

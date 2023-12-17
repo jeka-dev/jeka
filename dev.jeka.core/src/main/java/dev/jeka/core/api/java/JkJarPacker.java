@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -33,6 +34,10 @@ public final class JkJarPacker {
     public static JkJarPacker of(JkPathTreeSet classTrees) {
         JkUtilsAssert.argument(!classTrees.toList().isEmpty(), "Nothing to create jar from : " + classTrees);
         return new JkJarPacker(classTrees, null, null);
+    }
+
+    public static JkJarPacker of(JkPathTree<?> classTree) {
+        return of(classTree.toSet());
     }
 
     public static JkJarPacker of(Path classDir) {

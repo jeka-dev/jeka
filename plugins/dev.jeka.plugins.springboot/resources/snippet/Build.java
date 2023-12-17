@@ -6,11 +6,11 @@ import dev.jeka.plugins.springboot.SpringbootJkBean;
 @JkInjectClasspath("${dependencyDescription}")
 class Build extends JkBean {
 
-    final SpringbootJkBean springbootKBean = getBean(SpringbootJkBean.class);
+    final SpringbootJkBean springbootKBean = load(SpringbootJkBean.class);
 
     Build() {
         springbootKBean.setSpringbootVersion("${springbootVersion}");
-        springbootKBean.projectBean.lately(this::configure);
+        springbootKBean.projectKBean.lazily(this::configure);
     }
 
     private void configure(JkProject project) {

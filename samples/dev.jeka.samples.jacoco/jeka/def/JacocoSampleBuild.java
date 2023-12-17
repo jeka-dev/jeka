@@ -16,11 +16,11 @@ import java.nio.file.Path;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
 public class JacocoSampleBuild extends JkBean {
 
-    ProjectJkBean projectKBean = getBean(ProjectJkBean.class).lately(this::configure);
+    ProjectJkBean projectKBean = load(ProjectJkBean.class).lazily(this::configure);
 
-    JacocoJkBean jacocoKBean = getRuntime().getBean(JacocoJkBean.class);
+    JacocoJkBean jacocoKBean = getRuntime().load(JacocoJkBean.class);
 
-    final IntellijJkBean intellijKBean = getBean(IntellijJkBean.class);
+    final IntellijJkBean intellijKBean = load(IntellijJkBean.class);
 
     protected JacocoSampleBuild() {
         jacocoKBean.jacocoVersion = "0.8.7";

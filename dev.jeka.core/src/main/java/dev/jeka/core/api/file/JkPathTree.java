@@ -30,6 +30,8 @@ import static java.nio.file.StandardWatchEventKinds.*;
  * files contained in its root directory or subdirectories, matching positively
  * the filter defined on it.
  *
+ * @param <T> for self returning keeping the actual type.
+ *
  * @author Jerome Angibaud
  */
 public class JkPathTree<T extends JkPathTree> {

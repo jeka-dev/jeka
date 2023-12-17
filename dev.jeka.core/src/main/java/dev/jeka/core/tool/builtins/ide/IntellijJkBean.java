@@ -81,6 +81,24 @@ public final class IntellijJkBean extends JkBean {
         return configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
     }
 
+    /**
+     * Replaces the specified library with the specified module. The library is specified
+     * by the end of its path. For example, '-foo.bar'  will replace 'mylibs/core-foo.jar'
+     * by the specified module. Only the first matching lib is replaced.
+     * @see JkIml.Component#replaceLibByModule(String, String) 
+     */
+    public IntellijJkBean replaceLibByModule(String libName, String moduleName) {
+        return configureIml(iml -> iml.component.replaceLibByModule(libName, moduleName));
+    }
+
+    /**
+     * Sets the <i>scope</i> and <i>exported</i> attribute to the specified module.
+     * @see JkIml.Component#setModuleAttributes(String, JkIml.Scope, Boolean) 
+     */
+    public IntellijJkBean setModuleAttributes(String moduleName, JkIml.Scope scope, Boolean exported) {
+        return configureIml(iml -> iml.component.setModuleAttributes(moduleName, scope, exported));
+    }
+
     @JkDoc("Generates IntelliJ [my-module].iml file.")
     public void iml() {
         Path basePath = getBaseDir();

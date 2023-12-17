@@ -25,7 +25,7 @@ public class NexusJkBean extends JkBean {
         if (projectBean == null) {
             JkLog.warn("No project KBean present to configure repos for.");
         } else {
-            projectBean.lately(this::configureProject);
+            projectBean.lazily(this::configureProject);
         }
     }
 
@@ -46,9 +46,17 @@ public class NexusJkBean extends JkBean {
     /**
      * Adds a JkNexusRepos consumer that will be executed just in time.
      */
-    public NexusJkBean lately(Consumer<JkNexusRepos> nexusReposConsumer) {
-        this.nexusReposConfigurators.append(nexusReposConsumer);
+    public NexusJkBean lazily(Consumer<JkNexusRepos> nexusReposConfigurator) {
+        this.nexusReposConfigurators.append(nexusReposConfigurator);
         return this;
+    }
+
+    /**
+     * Use {@link #lazily(Consumer)} instead
+     */
+    @Deprecated
+    public NexusJkBean lately(Consumer<JkNexusRepos> nexusReposConfigurator) {
+        return this.lazily(nexusReposConfigurator);
     }
 
     private void configureProject(JkProject project) {

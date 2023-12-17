@@ -49,10 +49,10 @@ public final class JkImportedJkBeans {
     /**
      * Returns KBeans found in imported projects having the specified type.
      */
-    public <T extends JkBean> List<T> get(Class<T> jkBeanClass, boolean includeTransitives) {
+    public <T extends JkBean> List<T> get(Class<T> beanClass, boolean includeTransitives) {
         return get(includeTransitives).stream()
                 .map(JkBean::getRuntime)
-                .map(runtime -> runtime.getBeanOptional(jkBeanClass))
+                .map(runtime -> runtime.getBeanOptional(beanClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -94,7 +94,7 @@ public final class JkImportedJkBeans {
                 while (!Files.exists(currentClassBaseDir.resolve(JkConstants.DEF_DIR)) && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParent();
                 }
-                if (currentClassBaseDir == null || !Files.exists(currentClassBaseDir)) {
+                if (!Files.exists(currentClassBaseDir)) {
                     throw new IllegalStateException("Can't inject imported run instance of type "
                             + importedJkClass.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
@@ -123,9 +123,12 @@ public final class JkImportedJkBeans {
     private static <T extends JkBean> T createImportedJkBean(Class<T> importedBeanClass, String relativePath, Path holderBaseDir) {
         final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
         JkLog.startTask("Import bean " + importedBeanClass + " from " + importedProjectDir);
-        JkRuntime runtime = JkRuntime.get(importedProjectDir);
+
+        // Not sure it is necessary. Is so, explain why.
+        JkRuntime.get(importedProjectDir);
+
         JkRuntime.setBaseDirContext(importedProjectDir);
-        final T result = JkRuntime.get(importedProjectDir).getBean(importedBeanClass);
+        final T result = JkRuntime.get(importedProjectDir).load(importedBeanClass);
         JkRuntime.setBaseDirContext(Paths.get(""));
         JkLog.endTask();
         return result;

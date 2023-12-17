@@ -18,17 +18,13 @@ import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
 class SonarqubeSampleBuild extends JkBean {
 
-    private final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class);
+    private final ProjectJkBean projectPlugin = load(ProjectJkBean.class);
 
-    private final SonarqubeJkBean sonarqubePlugin = getBean(SonarqubeJkBean.class);
+    private final SonarqubeJkBean sonarqubePlugin = load(SonarqubeJkBean.class);
 
-    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
-            .configureIml(jkIml -> {
-                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-            });
 
     SonarqubeSampleBuild() {
-        projectPlugin.lately(project ->
+        projectPlugin.lazily(project ->
             project.flatFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .configureCompileDependencies(deps -> deps
@@ -39,17 +35,17 @@ class SonarqubeSampleBuild extends JkBean {
                 )
         );
         sonarqubePlugin.provideTestLibs = true;
-        sonarqubePlugin.lately(sonarqube -> {
+        sonarqubePlugin.lazily(sonarqube -> {
             sonarqube
                 .setProjectId("dev.jeka.samples.sonarqube", "myProjectNme",
                         JkGit.of().getVersionFromTag())
                 .setProperty(JkSonarqube.HOST_URL, "https://my.host.for.sonarqube.server:8080")
                 .setSkipDesign(true);
         });
-    }
 
-    public void cleanPack() {
-        cleanOutput(); projectPlugin.pack();
+        // Use intellij module dependency instead of ja dependency
+        load(IntellijJkBean.class)
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
     }
 
     @JkDoc("Cleans, tests and creates bootable jar.")
@@ -57,6 +53,10 @@ class SonarqubeSampleBuild extends JkBean {
         cleanOutput();
         projectPlugin.test();
         sonarqubePlugin.run();
+    }
+
+    public void cleanPack() {
+        cleanOutput(); projectPlugin.pack();
     }
 
     // Clean, compile, test and generate springboot application jar

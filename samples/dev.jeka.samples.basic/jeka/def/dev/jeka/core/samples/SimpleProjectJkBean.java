@@ -27,7 +27,7 @@ public class SimpleProjectJkBean extends JkBean {
     @JkDoc("If true, skip execution of Integration tests.")
     public boolean skipIT;
 
-    public final ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
+    public final ProjectJkBean projectPlugin = load(ProjectJkBean.class).lazily(this::configure);
 
     static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
 
@@ -92,7 +92,7 @@ public class SimpleProjectJkBean extends JkBean {
     }
 
     public void printMvn() {
-        MavenJkBean pluginPom = getRuntime().getBean(MavenJkBean.class);
+        MavenJkBean pluginPom = getRuntime().load(MavenJkBean.class);
         pluginPom.migrateToCode();
     }
 

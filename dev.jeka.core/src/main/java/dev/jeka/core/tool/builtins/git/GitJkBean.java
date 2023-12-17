@@ -56,7 +56,7 @@ public class GitJkBean extends JkBean {
     @JkDoc("Handle versioning of the project managed in the projectKBean. " +
             "It is meant to be called from the property file cmd, prior other project#xxxxx commands. ")
     public void handleProjectVersioning() {
-        getBean(ProjectJkBean.class).lately(project -> versionFromGit().handleVersioning(project));
+        load(ProjectJkBean.class).lazily(project -> versionFromGit().handleVersioning(project));
     }
 
     @JkDoc("Display last git tag in current branch")

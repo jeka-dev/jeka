@@ -15,6 +15,7 @@ import dev.jeka.core.tool.Main;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldJkBean;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -37,10 +38,8 @@ public final class EclipseJkBean extends JkBean {
 
     private final Map<JkDependency, Properties> accessRules = new HashMap<>();
 
-    private final ScaffoldJkBean scaffold;
-
-    protected EclipseJkBean() {
-        this.scaffold = getRuntime().getBean(ScaffoldJkBean.class);
+    private EclipseJkBean() {
+        getRuntime().load(ScaffoldJkBean.class);
     }
 
     // ------------------------- setters ----------------------------
@@ -80,7 +79,7 @@ public final class EclipseJkBean extends JkBean {
             });
             final String result = classpathGenerator.generate();
             final Path dotClasspath = getBaseDir().resolve(".classpath");
-            JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
+            JkUtilsPath.write(dotClasspath, result.getBytes(StandardCharsets.UTF_8));
             JkLog.info("File " + dotClasspath + " generated.");
 
             if (!Files.exists(dotProject)) {
@@ -117,7 +116,7 @@ public final class EclipseJkBean extends JkBean {
     /**
      * For the specified dependency, specify a child attribute tag to add to the mapping classpathentry tag.
      * @param dependency The dependency paired to the classpathentry we want generate `<attributes></attributes>` children
-     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkModuleDependency} or a
+     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkCoordinateDependency} or a
      *                   {@link dev.jeka.core.api.depmanagement.JkFileSystemDependency}.
      *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
      *                   is relevant.
@@ -131,7 +130,7 @@ public final class EclipseJkBean extends JkBean {
     /**
      * For the specified dependency, specify a child accessrule tag to add to the mapping classpathentry tag.
      * @param dependency The dependency paired to the classpathentry we want generate `<attributes></attributes>` children
-     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkModuleDependency} or a
+     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkCoordinateDependency} or a
      *                   {@link dev.jeka.core.api.depmanagement.JkFileSystemDependency}.
      *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
      *                   is relevant.

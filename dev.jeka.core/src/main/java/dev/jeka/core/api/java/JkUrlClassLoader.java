@@ -261,7 +261,7 @@ public final class JkUrlClassLoader {
         return toJkClassLoader().toString();
     }
 
-    public void addEntries(Iterable<Path> paths) {
+    public JkUrlClassLoader addEntries(Iterable<Path> paths) {
         try {
             final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
             for (final Path path : JkUtilsPath.disambiguate(paths)) {
@@ -270,13 +270,14 @@ public final class JkUrlClassLoader {
         } catch (RuntimeException e) {
             throw new RuntimeException("Error while adding urls on classloader " + this, e);
         }
+        return this;
     }
 
     /**
      * Reloads all J2SE service providers. It can be necessary if adding
      * dynamically some service providers to the classpath.
      */
-    public void loadAllServices() {
+    public JkUrlClassLoader loadAllServices() {
         final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final Path file : this.getFullClasspath()) {
             if (Files.isRegularFile(file)) {
@@ -317,6 +318,7 @@ public final class JkUrlClassLoader {
             JkLog.trace("Reload service providers for : " + serviceClass.getName());
             ServiceLoader.loadInstalled(serviceClass).reload();
         }
+        return this;
     }
 
 }

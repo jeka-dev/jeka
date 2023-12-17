@@ -257,5 +257,4 @@ public final class JkDependencyResolver  {
         return result.withVersionProvider(versionProvider.withResolvedBoms(this.repos));
     }
 
-
 }

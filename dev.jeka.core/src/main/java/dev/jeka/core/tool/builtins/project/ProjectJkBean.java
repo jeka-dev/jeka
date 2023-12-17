@@ -74,7 +74,7 @@ public class ProjectJkBean extends JkBean implements JkIdeSupportSupplier {
     private final JkConsumers<JkProject> projectConfigurators = JkConsumers.of();
 
     public ProjectJkBean() {
-        getBean(ScaffoldJkBean.class).lately(this::configure);
+        load(ScaffoldJkBean.class).lazily(this::configure);
     }
 
     private JkProject createProject() {
@@ -209,21 +209,20 @@ public class ProjectJkBean extends JkBean implements JkIdeSupportSupplier {
     }
 
     /**
-     * Registers a {@link JkProject} consumer that will be invoked just before the first call of {@link #getProject()}.
-     *
-     * This is meant to configure project after that all properties has been initialised.
+     * Use {@link #lazily(Consumer)} instead.
      */
+    @Deprecated
     public ProjectJkBean lately(Consumer<JkProject> projectConfigurator) {
-        this.projectConfigurators.append(projectConfigurator);
-        return this;
+        return this.lazily(projectConfigurator);
     }
 
     /**
-     * Use {@link #lately(Consumer)} instead
+     * Registers the specified {@link JkProject} consumer to be invoked just before the first call of {@link #getProject()}.
+     * This is meant to configure project after that all properties has been initialised.
      */
-    @Deprecated
-    public ProjectJkBean configure(Consumer<JkProject> projectConfigurator) {
-        return lately(projectConfigurator);
+    public ProjectJkBean lazily(Consumer<JkProject> projectConfigurator) {
+        this.projectConfigurators.append(projectConfigurator);
+        return this;
     }
 
     // ------------------------------- command line methods -----------------------------
@@ -455,10 +454,10 @@ public class ProjectJkBean extends JkBean implements JkIdeSupportSupplier {
 
             // This is special scaffolding for project pretending to be plugins for Jeka
             if (this.template == Template.PLUGIN) {
-                Path breakinkChangeFile = configuredProject.getBaseDir().resolve("breaking_versions.txt");
+                Path breakingChangeFile = configuredProject.getBaseDir().resolve("breaking_versions.txt");
                 String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
                         "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
-                JkPathFile.of(breakinkChangeFile).write(text);
+                JkPathFile.of(breakingChangeFile).write(text);
                 Path sourceDir =
                         configuredProject.compilation.layout.getSources().toList().get(0).getRoot();
                 String pluginCode = JkUtilsIO.read(ProjectJkBean.class.getResource("pluginclass.snippet"));

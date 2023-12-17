@@ -25,7 +25,7 @@ public class SimpleWarJkBean extends JkBean {
 
     public String jettyRunnerVersion = "9.4.28.v20200408";
 
-    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
+    ProjectJkBean projectPlugin = load(ProjectJkBean.class).lazily(this::configure);
 
     private void configure(JkProject project) {
        project.flatFacade()

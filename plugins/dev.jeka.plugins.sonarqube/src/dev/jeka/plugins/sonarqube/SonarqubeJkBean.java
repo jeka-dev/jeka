@@ -48,7 +48,7 @@ public class SonarqubeJkBean extends JkBean {
             return;
         }
         List<JkProject> projects = projectsSupplier == null
-                ? Collections.singletonList(getRuntime().getBean(ProjectJkBean.class).getProject())
+                ? Collections.singletonList(getRuntime().load(ProjectJkBean.class).getProject())
                 : projectsSupplier.get();
         for (JkProject project : projects) {
             JkSonarqube sonarqube = createConfiguredSonarqube(project);
@@ -76,9 +76,17 @@ public class SonarqubeJkBean extends JkBean {
      * Adds a configurator for sonarqube that will be executed just before sonarqube analysis is run.
      * This ensures that configurator will be executed after all properties are set.
      */
-    public SonarqubeJkBean lately(Consumer<JkSonarqube> sonarqubeConfigurer) {
+    public SonarqubeJkBean lazily(Consumer<JkSonarqube> sonarqubeConfigurer) {
         this.sonarqubeConfigurer = sonarqubeConfigurer;
         return this;
+    }
+
+    /**
+     * Use {@link #lazily(Consumer)}
+     */
+    @Deprecated
+    public SonarqubeJkBean lately(Consumer<JkSonarqube> sonarqubeConfigurator) {
+        return this.lazily(sonarqubeConfigurator);
     }
 
     private JkSonarqube createConfiguredSonarqube(JkProject project) {

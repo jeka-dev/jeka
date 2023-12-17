@@ -8,12 +8,10 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class KotlinBuild extends JkBean {
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
+    final ProjectJkBean projectBean = load(ProjectJkBean.class).lazily(this::configure);
 
-    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
-            .configureIml(jkIml -> {
-                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-            });
+    final IntellijJkBean intellijJkBean = load(IntellijJkBean.class)
+            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
 
     private void configure(JkProject project) {
         project.flatFacade()

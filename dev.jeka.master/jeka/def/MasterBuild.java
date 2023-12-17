@@ -69,8 +69,8 @@ class MasterBuild extends JkBean {
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
         jacocoForCore = JkJacoco.ofVersion(getRuntime().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
-        coreBuild.getBean(ProjectJkBean.class).lately(jacocoForCore::configureForAndApplyTo);
-        getBean(NexusJkBean.class).lately(this::configureNexus);
+        coreBuild.load(ProjectJkBean.class).lazily(jacocoForCore::configureForAndApplyTo);
+        load(NexusJkBean.class).lazily(this::configureNexus);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -119,7 +119,7 @@ class MasterBuild extends JkBean {
             JkLog.endTask();
         }
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
-            coreBuild.getBean(SonarqubeJkBean.class).run();
+            coreBuild.load(SonarqubeJkBean.class).run();
         }
     }
 
@@ -166,7 +166,7 @@ class MasterBuild extends JkBean {
         if (!JkVersion.of(versionFromGit.version()).isSnapshot()) {     // Produce javadoc only for release
             projectJkBean.pack.javadoc = true;
         }
-        projectJkBean.lately(project -> {
+        projectJkBean.lazily(project -> {
                 versionFromGit.handleVersioning(project);
                 project.compilation
                                 .addJavaCompilerOptions("-g");

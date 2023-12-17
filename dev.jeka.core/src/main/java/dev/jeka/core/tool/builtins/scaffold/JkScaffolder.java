@@ -11,7 +11,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,7 +78,7 @@ public final class JkScaffolder {
                 final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
                 code = code.replace("${jekaVersion}", version);
             }
-            JkUtilsPath.write(buildClass, code.getBytes(Charset.forName("UTF-8")));
+            JkUtilsPath.write(buildClass, code.getBytes(StandardCharsets.UTF_8));
         }
         JkPathFile projectPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE))
                 .fetchContentFrom(JkScaffolder.class.getResource(JkConstants.PROPERTIES_FILE));
@@ -117,7 +116,7 @@ public final class JkScaffolder {
             JkPathFile.of(tempProps)
                     .fetchContentFrom(JkScaffolder.class.getResource("wrapper.properties"))
                     .copyReplacingTokens(jekaPropertiesPath,
-                            JkUtilsIterable.mapOf("${version}", version), Charset.forName("utf-8"))
+                            JkUtilsIterable.mapOf("${version}", version), StandardCharsets.UTF_8)
                     .deleteIfExist();
         }
     }
@@ -131,14 +130,14 @@ public final class JkScaffolder {
         } else {
             String content = delegateFolder + "\\jekaw %*";
             content = content.replace('/', '\\');
-            newBatFile.deleteIfExist().createIfNotExist().write(content.getBytes(Charset.forName("utf8")));
+            newBatFile.deleteIfExist().createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
         }
         Path shellDelegate = baseDir.resolve(delegateFolder).resolve("jekaw");
         if (!Files.exists(shellDelegate) && !JkUtilsSystem.IS_WINDOWS) {
             throw new IllegalStateException("Cannot find file " + batDelegate);
         } else {
             String content ="#!/bin/sh\n\n" + delegateFolder.replace('\\', '/') + "/jekaw $@";
-            newShellFile.deleteIfExist().createIfNotExist().write(content.getBytes(Charset.forName("utf8")))
+            newShellFile.deleteIfExist().createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8))
                     .setPosixExecPermissions(true, true, true);
         }
         JkLog.info("Shell scripts generated.");

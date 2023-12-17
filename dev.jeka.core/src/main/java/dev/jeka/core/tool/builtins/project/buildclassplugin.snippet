@@ -6,7 +6,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 class Build extends JkBean {
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
+    final ProjectJkBean projectBean = load(ProjectJkBean.class).lazily(this::configure);
 
     private void configure(JkProject project) {
         project.compilation.configureDependencies(deps -> deps

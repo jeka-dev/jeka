@@ -166,6 +166,7 @@ JeKa builds itself. To build JeKa full distribution from sources, the simpler is
 * Make sure the project is configured with a JDK8 or higher.
 * Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
 * Run 'FAST BUILD' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
+* Set environment variable `JEKA_HOME` = *[JeKa project location]/dev.jeka.core/jeka/output/distrib* and add it to `PATH` environment.
 
 > For debugging the project, you may have to set up Intellij in order to workaround with an Intellij issue :
 > Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.

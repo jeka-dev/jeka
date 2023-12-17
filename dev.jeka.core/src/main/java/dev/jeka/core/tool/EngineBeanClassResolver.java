@@ -47,7 +47,7 @@ final class EngineBeanClassResolver {
         this.defClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
     }
 
-    List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanName) {
+    List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanName, boolean ignoreDefaultBeanNotFound) {
         JkLog.startTask("Resolve KBean classes");
         Map<String, Class<? extends JkBean>> beanClasses = new HashMap<>();
         for (String beanName : commandLine.involvedBeanNames()) {
@@ -59,16 +59,17 @@ final class EngineBeanClassResolver {
                 reloadGlobalBeanClassNames();
                 matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
                 if (matchingClassNames.isEmpty()) {
-                    JkLog.trace("KBean '%s' does not match any class names on %s. Fail.", beanName, beanClasses);
+                    JkLog.trace("KBean '%s' does not match any class namecs on %s. Fail.", beanName, beanClasses);
                 }
             }
-            Class<? extends JkBean> selected = loadUniqueClassOrFail(matchingClassNames, beanName);
+            Class<? extends JkBean> selected = loadUniqueClass(matchingClassNames, beanName,
+                    !ignoreDefaultBeanNotFound);
             beanClasses.put(JkBean.name(selected), selected);
         }
-        Class<? extends JkBean> defaultBeanClass = defaultBeanClass(defaultBeanName);
+        Class<? extends JkBean> defaultBeanClass = defaultBeanClass(defaultBeanName, !ignoreDefaultBeanNotFound);
         List<EngineCommand> result = new LinkedList<>();
         List<CommandLine.JkBeanAction> defaultBeanActions = commandLine.getDefaultBeanActions();
-        if (defaultBeanClass == null && !defaultBeanActions.isEmpty()) {
+        if (defaultBeanClass == null && !defaultBeanActions.isEmpty() && !ignoreDefaultBeanNotFound) {
             String suggest = "help".equals(Environment.originalCmdLineAsString()) ? " ( You mean '-help' ? )" : "";
             throw new JkException("No default KBean has bean has been selected. "
                     + "One is necessary to define "
@@ -84,6 +85,7 @@ final class EngineBeanClassResolver {
         commandLine.getBeanActions().stream()
                 .map(action -> toEngineCommand(action, beanClasses)).forEach(result::add);
         JkLog.endTask();
+        JkLog.info("Default KBean : " + defaultBeanClass);
         return Collections.unmodifiableList(result);
     }
 
@@ -92,7 +94,7 @@ final class EngineBeanClassResolver {
         this.useStoredCache = !classpathChanged;
     }
 
-    private Class<? extends JkBean> defaultBeanClass(String defaultBeanName) {
+    private Class<? extends JkBean> defaultBeanClass(String defaultBeanName, boolean failIfNotFound) {
         if (defaultBeanName == null) {
             if (defBeanClassNames().isEmpty()) {
                 return null;
@@ -103,12 +105,16 @@ final class EngineBeanClassResolver {
         if (matchingclassNames.isEmpty()) {
             matchingclassNames = findClassesMatchingName(globalBeanClassNames(), defaultBeanName);
         }
-        return loadUniqueClassOrFail(matchingclassNames, defaultBeanName);
+        return loadUniqueClass(matchingclassNames, defaultBeanName, failIfNotFound);
     }
 
-    private Class<? extends JkBean> loadUniqueClassOrFail(List<String> matchingBeanClasses, String beanName) {
+    private Class<? extends JkBean> loadUniqueClass(List<String> matchingBeanClasses, String beanName,
+                                                    boolean failedIfNotFound) {
         if (matchingBeanClasses.isEmpty()) {
-            throw beanClassNotFound(beanName);
+            if (failedIfNotFound) {
+                throw beanClassNotFound(beanName);
+            }
+            return null;
         } else if (matchingBeanClasses.size() > 1) {
             throw new JkException("Several classes matches default bean name '" + beanName + "' : "
                     + matchingBeanClasses + ". Please precise the fully qualified class name of the default bean " +
@@ -161,7 +167,7 @@ final class EngineBeanClassResolver {
             ignoreParent = true;
         }
         cachedGlobalBeanClassName = JkInternalClasspathScanner.of()
-                .findClassedExtending(classLoader, JkBean.class, path -> true, true, false);
+                .findClassedExtending(classLoader, JkBean.class, path -> true, true, ignoreParent);
         if (JkLog.isVerbose()) {
             JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
             cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
@@ -196,12 +202,15 @@ final class EngineBeanClassResolver {
             ClassLoader classLoader = JkClassLoader.ofCurrent().get();
             boolean ignoreParent = false;
             if (classpath != null) {
+
                 // If classpath is set, then sources has been compiled in work dir
                 classLoader = new URLClassLoader(JkPathSequence.of().and(this.defClassDir).toUrls());
                 ignoreParent = true;
+                //classLoader = new URLClassLoader(JkPathSequence.of().and(this.defClassDir).toUrls(),  classLoader);
+                //ignoreParent = false;
             }
             cachedDefBeanClassNames = JkInternalClasspathScanner.of().findClassedExtending(classLoader,
-                    JkBean.class, EngineBeanClassResolver::scan, true, ignoreParent);
+                    JkBean.class, EngineBeanClassResolver::shouldScan, true, ignoreParent);
             if (JkLog.isVerbose()) {
                 JkLog.trace("Def JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
                 cachedDefBeanClassNames.forEach(className -> JkLog.trace("  " + className ));
@@ -210,7 +219,7 @@ final class EngineBeanClassResolver {
         return cachedDefBeanClassNames;
     }
 
-    private static boolean scan(String pathElement) {
+    private static boolean shouldScan(String pathElement) {
         return !pathElement.startsWith(JAVA_HOME);  // Don't scan jre classes
         //return true;
     }

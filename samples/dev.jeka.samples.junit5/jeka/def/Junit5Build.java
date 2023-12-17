@@ -2,8 +2,8 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -34,9 +34,9 @@ import java.nio.file.Path;
 @JkInjectClasspath("org.junit.platform:junit-platform-launcher:1.8.2")
 class Junit5Build extends JkBean {
 
-    final ProjectJkBean projectBean = getBean(ProjectJkBean.class).lately(this::configure);
+    final ProjectJkBean projectBean = load(ProjectJkBean.class).lazily(this::configure);
 
-    final IntellijJkBean intellijJkBean = getBean(IntellijJkBean.class)
+    final IntellijJkBean intellijJkBean = load(IntellijJkBean.class)
             .configureIml(jkIml -> {
                 jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
             });

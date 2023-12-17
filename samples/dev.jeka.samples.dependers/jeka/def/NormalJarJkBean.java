@@ -1,8 +1,8 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.samples.SimpleProjectJkBean;
 import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.JkInjectProject;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkInjectProject;
 import dev.jeka.core.tool.builtins.project.ProjectJkBean;
 
 /**
@@ -19,7 +19,7 @@ import dev.jeka.core.tool.builtins.project.ProjectJkBean;
  */
 public class NormalJarJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getBean(ProjectJkBean.class).lately(this::configure);
+    ProjectJkBean projectPlugin = load(ProjectJkBean.class).lazily(this::configure);
 
     /*
      *  Creates a sample build instance of the 'dev.jeka.samples' project.

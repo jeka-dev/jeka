@@ -24,7 +24,7 @@ import static dev.jeka.core.api.depmanagement.JkPopularLibs.*;
 @JkInjectClasspath("com.google.guava:guava:21.0")
 public class ThirdPartyDependenciesJkBean extends JkBean {
 
-    ProjectJkBean projectPlugin = getRuntime().getBean(ProjectJkBean.class).lately(this::configure);
+    ProjectJkBean projectPlugin = getRuntime().load(ProjectJkBean.class).lazily(this::configure);
 
     private void configure(JkProject project) {
         project.flatFacade()

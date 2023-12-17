@@ -44,9 +44,7 @@ public final class JkUtilsIterable {
         ArrayList<T> result = new ArrayList<>(others.length + 2);
         result.add(item1);
         result.add(item2);
-        for (int i = 0; i < others.length; i++) {
-            result.add(others[i]);
-        }
+        Collections.addAll(result, others);
         return result;
     }
 
@@ -57,9 +55,7 @@ public final class JkUtilsIterable {
     public static <T> List<T> listOf1orMore(T item1, T... others) {
         ArrayList<T> result = new ArrayList<>(others.length + 1);
         result.add(item1);
-        for (int i = 0; i < others.length; i++) {
-            result.add(others[i]);
-        }
+        Collections.addAll(result, others);
         return result;
     }
 
@@ -250,6 +246,18 @@ public final class JkUtilsIterable {
         System.arraycopy(b, 0, c, aLen, bLen);
 
         return c;
+    }
+
+    public static String toMultiLineString(Iterable<?> items, String margin) {
+        StringBuilder sb = new StringBuilder();
+        for (Iterator<?> it = items.iterator(); it.hasNext();) {
+            Object item = it.next();
+            sb.append(margin + item);
+            if (it.hasNext()) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 
 }

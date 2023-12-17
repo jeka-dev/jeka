@@ -104,11 +104,16 @@ final class FieldInjector {
             String fieldPrefix = name + ".";
             Object value = JkUtilsReflect.getFieldValue(target, field);
             if (value == null) {
-                value = JkUtilsReflect.newInstance(field.getType());
                 if (Modifier.isFinal(field.getModifiers())) {
                     throw new JkException("Can not set value on final " + field.getDeclaringClass().getName()
-                            + "#" + field.getName() + " field.");
+                            + "#" + field.getName() + " field. \n"
+                            + "Field is : " + field + "\n"
+                            + "Field Value is : " + value +  "\n"
+                            + "Props is : " + props + "\n"
+                            + "Prefix is : " + prefix + "\n"
+                    );
                 }
+                value = JkUtilsReflect.newInstance(field.getType());
                 JkUtilsReflect.setFieldValue(target, field, value);
             }
             final Map<String, String> subProps = extractKeyStartingWith(fieldPrefix, props);

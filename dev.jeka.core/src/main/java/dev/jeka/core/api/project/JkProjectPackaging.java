@@ -29,11 +29,11 @@ public class JkProjectPackaging {
 
     private final JkProject project;
 
-    public final JkManifest<JkProjectPackaging> manifest;
+    public final JkManifest manifest;
 
     private JkPathTreeSet fatJarExtraContent = JkPathTreeSet.ofEmpty();
 
-    private PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
+    private final PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
     public final JkJavadocProcessor javadocProcessor;
 

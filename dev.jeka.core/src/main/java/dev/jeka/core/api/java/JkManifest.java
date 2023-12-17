@@ -25,7 +25,7 @@ import java.util.jar.Manifest;
  *
  * @author Jerome Angibaud
  */
-public final class JkManifest<T> {
+public final class JkManifest{
 
     /**
      * The path where generally belongs all manifest past (relative to archive root)

@@ -33,8 +33,12 @@ public abstract class JkBean {
         this.importedJkBeans = new JkImportedJkBeans(this);
     }
 
-    protected JkBean() {
+    private JkBean() {
         this(JkRuntime.getCurrentContextBaseDir());
+    }
+
+    protected void init() {
+
     }
 
     @JkDoc("Displays help about this KBean")
@@ -85,9 +89,27 @@ public abstract class JkBean {
         return runtime;
     }
 
+
+    /**
+     * Use {@link #load(Class)} instead.
+     */
+    @Deprecated
     public <T extends JkBean> T getBean(Class<T> beanClass) {
-        return runtime.getBean(beanClass);
+        return this.load(beanClass);
     }
+
+    /**
+     * Instantiates the specified KBean into the current runtime, if it is not already present. <p>
+     * As KBeans are singleton within a runtime, this method has no effect if the bean is already loaded.
+     * @param beanClass The class of the KBean to load.
+     * @return This object for call chaining.
+     * @see JkRuntime#load(Class)
+     */
+    public <T extends JkBean> T load(Class<T> beanClass) {
+        return runtime.load(beanClass);
+    }
+
+
 
     final String shortName() {
         return name(this.getClass());

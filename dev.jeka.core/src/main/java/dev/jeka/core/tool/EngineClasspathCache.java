@@ -38,7 +38,7 @@ class EngineClasspathCache {
         } else {
             if (Files.exists(resolvedClasspathCache())) {
                 JkPathSequence cachedPathSequence = readCachedResolvedClasspath();
-                JkLog.trace("Cached resolved-classpath : " + cachedPathSequence.toPath());
+                JkLog.trace("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
                 if (cachedPathSequence.hasNonExisting()) {
                     JkLog.trace("Cached classpath contains some non-existing element -> need resolve.");
                     dependencyResolver.resolve(dependencySet);

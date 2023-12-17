@@ -5,26 +5,31 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkJarPacker;
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  *  Configurator for {@link JkProject} to add Spring-Boot configuration.
  */
 public final class JkSpringboot {
 
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.1.5";
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.0";
 
     public static final JkArtifactId ORIGINAL_ARTIFACT = JkArtifactId.of("original", "jar");
 
@@ -155,7 +160,6 @@ public final class JkSpringboot {
             project.packaging.createBinJar(originalJarPath);
         }
         JkLog.startTask("Packaging bootable jar");
-        JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
         JkDependencyResolver dependencyResolver = project.dependencyResolver;
         JkCoordinateFileProxy loaderProxy = JkCoordinateFileProxy.of(dependencyResolver.getRepos(),
                 LOADER_COORDINATE + springbootVersion);
@@ -203,13 +207,45 @@ public final class JkSpringboot {
         return JkPom.of(pomFile);
     }
 
-    public static void createBootJar(Path original, JkPathSequence libsToInclude, Path bootLoaderJar, Path targetJar,
+    /**
+     * Creates a bootable jar from the original jar (the one without Springboot dependencies).
+     */
+    public static void createBootJar(Path originalJar, JkPathSequence libsToInclude, Path bootLoaderJar, Path targetJar,
                                      String springbootVersion) {
-        JkUtilsAssert.argument(Files.exists(original), "Original jar not found at " + original);
-        String mainClassName = findMainClassName(original);
+        JkUtilsAssert.argument(Files.exists(originalJar), "Original jar not found at " + originalJar);
+        String mainClassName = findMainClassName(originalJar);
 
         SpringbootPacker.of(libsToInclude, bootLoaderJar, mainClassName,
-                springbootVersion).makeExecJar(original, targetJar, springbootVersion);
+                springbootVersion).makeExecJar(originalJar, targetJar, springbootVersion);
+    }
+
+    /**
+     * Experimental
+     *
+     * Creates a bootable jar, using {@link #DEFAULT_SPRINGBOOT_VERSION} to get spring-Boot loader jar.
+     */
+    public static void createBootJar(JkRepoSet downloadRepo,
+                                     JkManifest manifest,
+                                     JkPathTree<?> classTree,
+                                     List<Path> libsToInclude,
+                                     Path targetJar) {
+        Path tempJar = JkUtilsPath.createTempFile("jk-springboot-", ".jar");
+        JkUtilsPath.deleteFile(tempJar);
+        JkJarPacker.of(classTree.toSet()).withManifest(manifest).makeJar(tempJar);
+        JkCoordinateFileProxy loaderProxy = JkCoordinateFileProxy.of(downloadRepo,
+                LOADER_COORDINATE + DEFAULT_SPRINGBOOT_VERSION);
+        List<Path> sanitizedLibs = libsToInclude.stream()
+                        .filter(path -> {
+                            if (!Files.exists(path)) {
+                                JkLog.warn("File %s does not exist. skip.", path);
+                                return false;
+                            } else if (Files.isDirectory(path)) {
+                                JkLog.warn("%s is a directory. Won't include it in boot jar", path);
+                                return false;
+                            }
+                            return true;
+                        }).collect(Collectors.toList());
+        createBootJar(tempJar, JkPathSequence.of(sanitizedLibs), loaderProxy.get(), targetJar, DEFAULT_SPRINGBOOT_VERSION);
     }
 
     private static String findMainClassName(Iterable<Path> jarOrFolder) {
@@ -234,7 +270,6 @@ public final class JkSpringboot {
             }
         }
         throw new IllegalStateException("No class annotated with @SpringBootApplication found.");
-
     }
 
     public JkSpringboot setCreateWarFile(boolean createWarFile) {

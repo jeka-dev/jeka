@@ -19,12 +19,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Container where is registered the KBeans for a given project.
- * In multi-project builds, there is one <code>JkRuntime</code> per project.
+ * Container where are registered the KBeans.
+ * There is one <code>JkRuntime</code> per project root.*<p>
+ * In multi-project (aka multi-module project) there is one runtime per sub-project.
  */
 public final class JkRuntime {
 
-    private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();   //NOSONAR
+    private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
     private static final Map<Path, JkRuntime> RUNTIMES = new LinkedHashMap<>();
 
@@ -93,26 +94,36 @@ public final class JkRuntime {
     }
 
     /**
-     * Returns the plugin instance of the specified class loaded in the holding JkClass instance. If it does not hold
-     * a plugin of the specified class at call time, the plugin is loaded then returned.
+     * Instantiates the specified KBean into this runtime, if it is not already present. <p>
+     * As KBeans are singleton within a runtime, this method has no effect if the bean is already loaded.
+     * @param beanClass The class of the KBean to load.
+     * @return This object for call chaining.
      */
-    public <T extends JkBean> T getBean(Class<T> jkBeanClass) {
-        JkUtilsAssert.argument(jkBeanClass != null, "KBean class cannot be null.");
-        JkBean result = beans.get(jkBeanClass);
+    public <T extends JkBean> T load(Class<T> beanClass) {
+        JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
+        JkBean result = beans.get(beanClass);
         if (result == null) {
-            JkLog.startTask("Instantiate KBean " + jkBeanClass + " in project '" + projectBaseDir + "'");
+            JkLog.startTask("Instantiate KBean " + beanClass + " in project '" + projectBaseDir + "'");
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(projectBaseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
-            result = this.instantiate(jkBeanClass);
+            result = this.instantiate(beanClass);
             BASE_DIR_CONTEXT.set(previousProject);
             JkLog.endTask();
-            beans.put(jkBeanClass, result);
+            beans.put(beanClass, result);
         }
         return (T) result;
     }
 
-    public <T extends JkBean> Optional<T> getBeanOptional(Class<T> jkBeanClass) {
-        return (Optional<T>) Optional.ofNullable(beans.get(jkBeanClass));
+    /**
+     * Use {@link #load(Class)} instead
+     */
+    @Deprecated
+    public <T extends JkBean> T getBean(Class<T> beanClass) {
+        return load(beanClass);
+    }
+
+    public <T extends JkBean> Optional<T> getBeanOptional(Class<T> beanClass) {
+        return (Optional<T>) Optional.ofNullable(beans.get(beanClass));
     }
 
     /**
@@ -140,7 +151,7 @@ public final class JkRuntime {
     }
 
     void init(List<EngineCommand> commands) {
-        JkLog.trace("Initialize JkRuntime with " + commands);
+        JkLog.trace("Initialize JkRuntime with \n" + JkUtilsIterable.toMultiLineString(commands, "  "));
         this.fieldInjections = commands.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
                 .collect(Collectors.toList());
@@ -151,14 +162,14 @@ public final class JkRuntime {
                 //.filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
                 .map(EngineCommand::getBeanClass)
                 .distinct()
-                .map(this::getBean)
+                .map(this::load)
                 .collect(Collectors.toList());
         JkLog.endTask();
     }
 
     void run(List<EngineCommand> commands) {
         for (EngineCommand engineCommand : commands) {
-            JkBean bean = getBean(engineCommand.getBeanClass());
+            JkBean bean = load(engineCommand.getBeanClass());
             if (engineCommand.getAction() == EngineCommand.Action.METHOD_INVOKE) {
                 Method method;
                 try {
@@ -177,10 +188,20 @@ public final class JkRuntime {
             throw new JkException("KBean class " + beanClass + " in " + this.projectBaseDir
                     + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
         }
+
         JkBean bean = JkUtilsReflect.newInstance(beanClass);
 
+        // We must inject fields after instance creation cause if we do this in the Jkean
+        // constructor, fields of child classes are not yet initialized
+        injectFieldValues(bean);
+
+        return bean;
+    }
+
+    // inject values in fields from command-line and properties.
+    void injectFieldValues(JkBean bean) {
         // Inject properties having name matching with a bean field
-        String beanName = JkBean.name(beanClass);
+        String beanName = JkBean.name(bean.getClass());
         Map<String, String> props = new HashMap<>();
 
         // accept 'kb#' prefix if the beanClass is declared with '-kb=' options
@@ -193,7 +214,7 @@ public final class JkRuntime {
         // Inject properties on fields with @JkInjectProperty
         FieldInjector.injectAnnotatedProperties(bean, properties);
 
-        // Inject from command name
+        // Inject from command line
         fieldInjections.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
                 .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
@@ -204,8 +225,6 @@ public final class JkRuntime {
                         throw new JkException("Field %s do not exist in KBean %s", action.getMember(), bean.getClass().getName());
                     }
                 });
-
-        return bean;
     }
 
     static JkProperties constructProperties(Path baseDir) {

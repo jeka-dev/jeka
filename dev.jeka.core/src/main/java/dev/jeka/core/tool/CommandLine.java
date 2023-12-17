@@ -105,8 +105,8 @@ final class CommandLine {
     }
 
     static JkDependency toDependency(Path baseDir, String depDescription) {
-        boolean hasDoubleDotes = JkCoordinate.isCoordinateDescription(depDescription);
-        if (!hasDoubleDotes || (JkUtilsSystem.IS_WINDOWS &&
+        boolean hasColon = JkCoordinate.isCoordinateDescription(depDescription);
+        if (!hasColon || (JkUtilsSystem.IS_WINDOWS &&
                 (depDescription.startsWith(":\\", 1)) || depDescription.startsWith(":/", 1) )) {
             Path candidatePath = baseDir.resolve(depDescription);
             if (Files.exists(candidatePath)) {

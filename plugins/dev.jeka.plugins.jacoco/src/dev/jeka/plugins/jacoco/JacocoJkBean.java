@@ -32,7 +32,7 @@ public class JacocoJkBean extends JkBean {
 
 
     private JacocoJkBean() {
-        getRuntime().getBean(ProjectJkBean.class).lately(this::configureForDefaultProject);
+        getRuntime().load(ProjectJkBean.class).lazily(this::configureForDefaultProject);
     }
 
 
