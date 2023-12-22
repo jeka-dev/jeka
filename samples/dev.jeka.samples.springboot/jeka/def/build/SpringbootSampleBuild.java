@@ -1,81 +1,71 @@
 package build;
 
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.tooling.intellij.JkIml;
-import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
-import dev.jeka.plugins.springboot.JkSpringModules.Boot;
-import dev.jeka.plugins.springboot.SpringbootJkBean;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.plugins.springboot.JkSpringboot;
+import dev.jeka.plugins.springboot.SpringbootKBean;
 
 
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
-public class SpringbootSampleBuild extends JkBean {
+public class SpringbootSampleBuild extends KBean {
 
     public String aa;
 
-    private final SpringbootJkBean springbootKBean = load(SpringbootJkBean.class);
+    ProjectKBean projectKBean = load(ProjectKBean.class);
 
-    private final IntellijJkBean intellijKBean = load(IntellijJkBean.class);
+    SpringbootKBean springbootKBean = load(SpringbootKBean.class);
 
     SpringbootSampleBuild() {
-        springbootKBean.setSpringbootVersion("2.7.16");
-        springbootKBean.projectKBean.lazily(this::configure);
-        intellijKBean.configureImlGenerator(imlGenerator -> imlGenerator.setExcludeJekaLib(true));
-        intellijKBean.configureIml(this::configure);
+        /*
+        load(IntellijKBean.class)
+                .replaceLibByModule("dev.jeka.springboot-plugin.jar", "dev.jeka.plugins.springboot")
+                .setModuleAttributes("dev.jeka.plugins.springboot", JkIml.Scope.COMPILE, null)
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
+                .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
+
+         */
     }
 
-    private void configure(JkProject project) {
-        project.flatFacade()
-                .configureCompileDependencies(deps -> deps
-                    .and(Boot.STARTER_WEB)  // Same as .and("org.springframework.boot:spring-boot-starter-web")
-                    .and(Boot.STARTER_DATA_JPA)
-                    .and(Boot.STARTER_DATA_REST)
-                    .and("com.google.guava:guava:30.0-jre")
-                        .and("io.fabric8:kubernetes-client-api:6.5.1")
+    @Override
+    protected void init() {
+        projectKBean.project.flatFacade()
+                .setJvmTargetVersion(JkJavaVersion.V17)
+                .addCompileDeps(
+                        "org.springframework.boot:spring-boot-starter-web",
+                        "org.springframework.boot:spring-boot-starter-data-jpa"
                 )
-                .configureRuntimeDependencies(deps -> deps
-                    .and("com.h2database:h2:1.4.200")
+                .addRuntimeDeps(
+                        "com.h2database:h2:1.4.200"
                 )
-                .configureTestDependencies(deps -> deps
-                    .and(Boot.STARTER_TEST.toCoordinate())
+                .addTestDeps(
+                        "org.springframework.boot:spring-boot-starter-test"
                 )
                 .setPublishedModuleId("dev.jeka:samples-springboot")
                 .setPublishedVersion("1.0-SNAPSHOT");
-
+        JkSpringboot.of()
+                .setSpringbootVersion("3.2.0")
+                .configure(projectKBean.project);
     }
 
-    private void configure(JkIml iml) {
-        iml.component.replaceLibByModule("dev.jeka.springboot-plugin.jar",
-                "dev.jeka.plugins.springboot");
-    }
 
     public void cleanPack() {
-        springbootKBean.projectKBean.cleanPack();
+        projectKBean.cleanPack();
     }
 
     public void testRun() {
         System.out.println(this.aa);
         cleanPack();
-        springbootKBean.load(ProjectJkBean.class).runJar();
+        springbootKBean.load(ProjectKBean.class).runJar();
     }
 
     // Clean, compile, test and generate springboot application jar
     public static void main(String[] args) {
         SpringbootSampleBuild build = JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb");
-        //build.getBean(SpringbootJkBean.class).createWar = true;
         build.cleanPack();
-        build.load(ProjectJkBean.class).publishLocal();
-    }
-
-    // debug purpose
-    static class Iml {
-        public static void main(String[] args) {
-            JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb")
-                    .getRuntime().load(IntellijJkBean.class).iml();
-        }
+        //build.load(ProjectKBean.class).publishLocal();
     }
 
 }

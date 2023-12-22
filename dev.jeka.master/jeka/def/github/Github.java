@@ -3,19 +3,20 @@ package github;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.KBean;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-public class Github extends JkBean {
+public class Github extends KBean {
 
     @JkDoc("Github token injected bby the pipeline")
     public String ghToken;
@@ -47,7 +48,7 @@ public class Github extends JkBean {
         con.setRequestProperty("X-GitHub-Api-Version",  "2022-11-28" );
         String body = postBBody(releaseNumber, extractReleaseNote(releaseNumber));
         try(OutputStream os = con.getOutputStream()) {
-            byte[] input = body.getBytes("utf-8");
+            byte[] input = body.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
         }
         int status = con.getResponseCode();

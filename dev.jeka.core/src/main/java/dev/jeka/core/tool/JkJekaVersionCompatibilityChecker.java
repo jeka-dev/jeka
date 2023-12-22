@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -140,7 +141,7 @@ public final class JkJekaVersionCompatibilityChecker {
 
         private final Path cachePath;
 
-        CompatibilityCache(Class<JkBean> pluginClass) {
+        CompatibilityCache(Class<KBean> pluginClass) {
             cachePath = JkLocator.getJekaHomeDir().resolve("plugins-compatibility")
                     .resolve(pluginClass.getName() + "-compatibility.txt");
         }
@@ -181,7 +182,7 @@ public final class JkJekaVersionCompatibilityChecker {
             if (breakingVersions != null) {
                 line = line + " : " + breakingVersions.pluginVersion + " : " + breakingVersions.jekaVersion + "\n";
             }
-            JkUtilsPath.write(cachePath, line.getBytes(Charset.forName("UTF-8")), StandardOpenOption.APPEND);
+            JkUtilsPath.write(cachePath, line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }
     }
 
@@ -255,9 +256,9 @@ public final class JkJekaVersionCompatibilityChecker {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             PluginAndJekaVersion that = (PluginAndJekaVersion) o;
-            if (pluginVersion != null ? !pluginVersion.equals(that.pluginVersion) : that.pluginVersion != null)
+            if (!Objects.equals(pluginVersion, that.pluginVersion))
                 return false;
-            return jekaVersion != null ? jekaVersion.equals(that.jekaVersion) : that.jekaVersion == null;
+            return Objects.equals(jekaVersion, that.jekaVersion);
         }
 
         @Override

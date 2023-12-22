@@ -35,13 +35,13 @@ public final class JkRuntime {
 
     private JkPathSequence classpath;
 
-    private JkPathSequence importedProjects;
+    private JkPathSequence importedProjects = JkPathSequence.of();
 
     private List<EngineCommand> fieldInjections = Collections.emptyList();
 
     private final JkProperties properties;
 
-    private final Map<Class<? extends JkBean>, JkBean> beans = new LinkedHashMap<>();
+    private final Map<Class<? extends KBean>, KBean> beans = new LinkedHashMap<>();
 
     private JkRuntime(Path projectBaseDir) {
         this.projectBaseDir = projectBaseDir;
@@ -99,11 +99,14 @@ public final class JkRuntime {
      * @param beanClass The class of the KBean to load.
      * @return This object for call chaining.
      */
-    public <T extends JkBean> T load(Class<T> beanClass) {
+    public <T extends KBean> T load(Class<T> beanClass) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
-        JkBean result = beans.get(beanClass);
+        KBean result = beans.get(beanClass);
         if (result == null) {
-            JkLog.startTask("Instantiate KBean " + beanClass + " in project '" + projectBaseDir + "'");
+            String projectDisplayName = projectBaseDir.toString().isEmpty() ?
+                    projectBaseDir.toAbsolutePath().getFileName().toString()
+                    : projectBaseDir.toString();
+            JkLog.startTask("Instantiate KBean %s in project '%s'", beanClass, projectDisplayName);
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(projectBaseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiate(beanClass);
@@ -118,11 +121,11 @@ public final class JkRuntime {
      * Use {@link #load(Class)} instead
      */
     @Deprecated
-    public <T extends JkBean> T getBean(Class<T> beanClass) {
+    public <T extends KBean> T getBean(Class<T> beanClass) {
         return load(beanClass);
     }
 
-    public <T extends JkBean> Optional<T> getBeanOptional(Class<T> beanClass) {
+    public <T extends KBean> Optional<T> getOptionalKBean(Class<T> beanClass) {
         return (Optional<T>) Optional.ofNullable(beans.get(beanClass));
     }
 
@@ -130,7 +133,7 @@ public final class JkRuntime {
      * Returns the list of registered KBeans. A KBean is registered when it has been identified as the default KBean or
      * when {@link #getBean(Class)} is invoked.
      */
-    public List<JkBean> getBeans() {
+    public List<KBean> getBeans() {
         return new LinkedList<>(beans.values());
     }
 
@@ -158,7 +161,7 @@ public final class JkRuntime {
 
         // Instantiate & register beans
         JkLog.startTask("Register KBeans");
-        List<? extends JkBean> beans = commands.stream()
+        List<? extends KBean> beans = commands.stream()
                 //.filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
                 .map(EngineCommand::getBeanClass)
                 .distinct()
@@ -169,7 +172,7 @@ public final class JkRuntime {
 
     void run(List<EngineCommand> commands) {
         for (EngineCommand engineCommand : commands) {
-            JkBean bean = load(engineCommand.getBeanClass());
+            KBean bean = load(engineCommand.getBeanClass());
             if (engineCommand.getAction() == EngineCommand.Action.METHOD_INVOKE) {
                 Method method;
                 try {
@@ -183,25 +186,27 @@ public final class JkRuntime {
         }
     }
 
-    private JkBean instantiate(Class<? extends JkBean> beanClass) {
+    private KBean instantiate(Class<? extends KBean> beanClass) {
         if (Modifier.isAbstract(beanClass.getModifiers())) {
             throw new JkException("KBean class " + beanClass + " in " + this.projectBaseDir
                     + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
         }
 
-        JkBean bean = JkUtilsReflect.newInstance(beanClass);
+        KBean bean = JkUtilsReflect.newInstance(beanClass);
 
         // We must inject fields after instance creation cause if we do this in the Jkean
         // constructor, fields of child classes are not yet initialized
         injectFieldValues(bean);
 
+        bean.init();
+
         return bean;
     }
 
     // inject values in fields from command-line and properties.
-    void injectFieldValues(JkBean bean) {
+    void injectFieldValues(KBean bean) {
         // Inject properties having name matching with a bean field
-        String beanName = JkBean.name(bean.getClass());
+        String beanName = KBean.name(bean.getClass());
         Map<String, String> props = new HashMap<>();
 
         // accept 'kb#' prefix if the beanClass is declared with '-kb=' options

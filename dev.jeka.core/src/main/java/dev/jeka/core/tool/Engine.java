@@ -387,7 +387,7 @@ final class Engine {
     private void help() {
         JkLog.endTask();
         stopBusyIndicator();
-        List<Class<? extends JkBean>> localBeanClasses = beanClassesResolver.defBeanClasses();
+        List<Class<? extends KBean>> localBeanClasses = beanClassesResolver.defBeanClasses();
         List<Class> globalBeanClasses = beanClassesResolver.globalBeanClassNames().stream()
                 .map(className -> JkClassLoader.ofCurrent().loadIfExist(className))
                 .filter(Objects::nonNull)   // due to cache, some classNames may not be in classpath

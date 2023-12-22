@@ -40,8 +40,9 @@ public final class JkModuleId implements Comparator<JkModuleId> {
      */
     public static JkModuleId of(@JkDepSuggest String moduleId) {
         if (moduleId.contains(":")) {
-            final String group = JkUtilsString.substringBeforeLast(moduleId, ":").trim();
-            final String name = JkUtilsString.substringAfterLast(moduleId, ":").trim();
+            String[] items = moduleId.split(":");
+            final String group = items[0].trim();
+            final String name = items[1].trim();
             return JkModuleId.of(group, name);
         }
         if (moduleId.contains(".")) {
@@ -123,9 +124,7 @@ public final class JkModuleId implements Comparator<JkModuleId> {
         JkModuleId that = (JkModuleId) o;
 
         if (!group.equals(that.group)) return false;
-        if (!name.equals(that.name)) return false;
-
-        return true;
+        return name.equals(that.name);
     }
 
     @Override

@@ -175,10 +175,7 @@ public final class JkLog implements Serializable {
         if (Verbosity.MUTE == verbosity()) {
             return false;
         }
-        if (Verbosity.WARN_AND_ERRORS == verbosity() && (type != Type.ERROR && type != Type.WARN)) {
-            return false;
-        }
-        return true;
+        return Verbosity.WARN_AND_ERRORS != verbosity() || (type == Type.ERROR || type == Type.WARN);
     }
 
     /**
@@ -192,6 +189,9 @@ public final class JkLog implements Serializable {
         }
     }
 
+    /**
+     * Logs the start of the current task. !!!  Should be closed by {@link #traceEndTask()}.
+     */
     public static void traceStartTask(String message, Object ... params) {
         if (verbosity.isVerbose()) {
             startTask(message, params);
@@ -212,10 +212,10 @@ public final class JkLog implements Serializable {
                     System.err.println(ste);
                 }
                 throw new IllegalStateException("No start task found matching with this endTask. Check that you don't have " +
-                        "used an 'endTask' one too many in your code.");
+                        "used an 'endTask' without matching #startTaskMethod.");
 
             }
-            Long durationMillis = JkUtilsTime.durationInMillis(startTime);
+            long durationMillis = JkUtilsTime.durationInMillis(startTime);
             consume(JkLogEvent.ofEndTask(Type.END_TASK, message, durationMillis));
         }
     }
@@ -256,7 +256,7 @@ public final class JkLog implements Serializable {
                 throw new RuntimeException(e);
             }
         } else {
-            decorator.handle((JkLogEvent) event);
+            decorator.handle(event);
         }
     }
 
@@ -305,7 +305,7 @@ public final class JkLog implements Serializable {
 
     public static abstract class JkLogDecorator implements Serializable {
 
-        private boolean acceptAnimation = true;
+        private final boolean acceptAnimation = true;
 
         private PrintStream targetOut;
 

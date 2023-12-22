@@ -1,10 +1,10 @@
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.KBean;
 
-class Build extends JkBean implements JkIdeSupportSupplier {
+class Build extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("Clean output directory then compile, test and create jar")
     public void cleanPack() {

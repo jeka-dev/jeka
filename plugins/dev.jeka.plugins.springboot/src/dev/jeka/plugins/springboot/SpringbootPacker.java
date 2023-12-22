@@ -1,10 +1,11 @@
 package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
 
 import java.io.IOException;
@@ -12,7 +13,8 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 class SpringbootPacker {
 
@@ -20,7 +22,7 @@ class SpringbootPacker {
 
     private static final String LAUNCHER_CLASS_320 = "org.springframework.boot.loader.launch.JarLauncher";
 
-    private final JkPathSequence nestedLibs;
+    private final List<Path> nestedLibs;
 
     private final Path bootLoaderJar;
 
@@ -28,16 +30,27 @@ class SpringbootPacker {
 
     private final String mainClassName;
 
-    private SpringbootPacker(JkPathSequence nestedLibs, Path loader, String mainClassNeme, JkManifest manifestToMerge) {
+    private SpringbootPacker(List<Path> nestedLibs, Path loader, String mainClassNeme, JkManifest manifestToMerge) {
         super();
-        this.nestedLibs = nestedLibs;
+        this.nestedLibs = nestedLibs.stream()  // sanitize
+                .filter(path -> {
+                    if (!Files.exists(path)) {
+                        JkLog.warn("File %s does not exist. skip.", path);
+                        return false;
+                    } else if (Files.isDirectory(path)) {
+                        JkLog.warn("%s is a directory. Won't include it in boot jar", path);
+                        return false;
+                    }
+                    return true;
+                })
+                .distinct()
+                .collect(Collectors.toList());
         this.bootLoaderJar = loader;
         this.manifestToMerge = manifestToMerge;
         this.mainClassName = mainClassNeme;
     }
 
-    public static final SpringbootPacker of(JkPathSequence nestedLibs, Path loader, String mainClassName,
-                                            String springbootVersion) {
+    public static final SpringbootPacker of(List<Path> nestedLibs, Path loader, String mainClassName) {
         return new SpringbootPacker(nestedLibs, loader, mainClassName, null);
     }
 
@@ -46,49 +59,55 @@ class SpringbootPacker {
                 LAUNCHER_CLASS_LEGACY : LAUNCHER_CLASS_320;
     }
 
-    public void makeExecJar(Path original, Path target, String springbootVersion) {
+    public void makeExecJar(JkPathTree classTree, Path target, String springbootVersion) {
         try {
-            makeBootJarChecked(original, target, springbootVersion);
+            makeBootJarChecked(classTree, target, springbootVersion);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private void makeBootJarChecked(Path original, Path target, String springbootVersion) throws IOException {
+    private void makeBootJarChecked(JkPathTree<?> classTree, Path target, String springbootVersion) throws IOException {
 
         JarWriter jarWriter = new JarWriter(target);
 
         // Manifest
-        try (JkZipTree zipTree = JkZipTree.of(original)) {
-            Path path = zipTree.goTo("META-INF").get("MANIFEST.MF");
-            final JkManifest manifest = Files.exists(path) ? JkManifest.of().loadFromFile(path) : JkManifest.of();
-            jarWriter.writeManifest(createManifest(manifest, mainClassName, springbootVersion).getManifest());
-        }
+        Path path = classTree.getRoot().resolve("META-INF/MANIFEST.MF");
+        final JkManifest manifest = Files.exists(path) ? JkManifest.of().loadFromFile(path) : JkManifest.of();
+        jarWriter.writeManifest(createManifest(manifest, mainClassName, springbootVersion).getManifest());
+
 
         // Add nested jars
-        for (Path nestedJar : this.nestedLibs.withoutDuplicates()) {
+        for (Path nestedJar : this.nestedLibs) {
             jarWriter.writeNestedLibrary("BOOT-INF/lib/", nestedJar);
+        }
+
+        // write service
+        Path fsProviderFile = JkPathFile.ofTemp("jk-", "")
+                .write("org.springframework.boot.loader.nio.file.NestedFileSystemProvider")
+                .get();
+        try (InputStream inputStream = JkUtilsIO.inputStream(fsProviderFile.toFile())){
+            jarWriter.writeEntry("META-INF/services/java.nio.file.spi.FileSystemProvider", inputStream);
         }
 
         // Add loader
         jarWriter.writeLoaderClasses(bootLoaderJar.toUri().toURL());
 
-        // Add original jar
-        writeClasses(original, jarWriter);
+        // Add project classes and resources
+        writeClasses(classTree, jarWriter);
 
         jarWriter.close();
         jarWriter.setExecutableFilePermission(target);
         JkLog.info("Bootable jar created at " + target);
     }
 
-    private void writeClasses(Path original, JarWriter jarWriter) {
-        JkZipTree originalJar = JkZipTree.of(original);
-        Stream<Path> stream = originalJar.stream();
-        stream
+    private void writeClasses(JkPathTree<?> classTree, JarWriter jarWriter) {
+        classTree.stream()
                 .filter(path -> !path.toString().endsWith("/"))
                 .filter(path -> !Files.isDirectory(path))
                 .forEach(path -> {
-                    String entryName = "BOOT-INF/classes" + path;
+                    Path relPath = classTree.getRoot().relativize(path);
+                    String entryName = "BOOT-INF/classes/" + relPath;
                     try (InputStream inputStream = Files.newInputStream(path)){
                         jarWriter.writeEntry(entryName, inputStream);
                     } catch (IOException e) {

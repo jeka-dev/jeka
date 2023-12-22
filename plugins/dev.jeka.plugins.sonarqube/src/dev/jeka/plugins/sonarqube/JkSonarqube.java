@@ -69,9 +69,9 @@ public final class JkSonarqube {
 
     private final Map<String, String> params = new HashMap<>();
 
-    private final JkRepoSet repos;
+    private JkRepoSet repos;
 
-    private final String scannerVersion;
+    private String scannerVersion;
 
     private boolean logOutput;
 
@@ -114,6 +114,12 @@ public final class JkSonarqube {
      */
     public static JkSonarqube ofVersion(@JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         return ofVersion(JkRepo.ofMavenCentral().toSet(), scannerVersion);
+    }
+
+    public JkSonarqube setVersion(JkRepoSet downloadRepos, @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
+        this.repos = downloadRepos;
+        this.scannerVersion = scannerVersion;
+        return this;
     }
 
     private static String workDir(Path baseDir) {

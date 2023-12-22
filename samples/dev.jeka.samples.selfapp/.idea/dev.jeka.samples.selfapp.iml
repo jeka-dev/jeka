@@ -593,6 +593,14 @@
                 <SOURCES/>
             </library>
         </orderEntry>
-        <orderEntry exported="" module-name="dev.jeka.plugins.springboot" scope="COMPILE" type="module"/>
+        <orderEntry exported="" scope="TEST" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/dev.jeka/springboot-plugin/jars/springboot-plugin-0.11.x-SNAPSHOT.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
     </component>
 </module>

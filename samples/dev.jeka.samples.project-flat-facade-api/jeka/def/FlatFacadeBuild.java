@@ -4,9 +4,10 @@ import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.*;
-import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 
 /**
  * This build illustrate partially what is doable to configure through the project flat facade.
@@ -15,7 +16,11 @@ import dev.jeka.core.tool.JkInjectClasspath;
  * the project.
  */
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")
-class FlatFacadeBuild extends JkBean implements JkIdeSupportSupplier {
+class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
+
+    IntellijKBean intelliKBean = load(IntellijKBean.class)
+            .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco")
+            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
 
     @JkDoc("Tell if the Integration Tests should be run.")
     public boolean runIT = true;

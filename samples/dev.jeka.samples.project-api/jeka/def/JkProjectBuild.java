@@ -9,8 +9,9 @@ import dev.jeka.core.api.project.JkSourceGenerator;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 import java.nio.charset.StandardCharsets;
@@ -21,9 +22,12 @@ import java.time.LocalDateTime;
  * A pretty exhaustive usage of {@link JkProject} api.
  */
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")
-
 @JkInjectClasspath("org.eclipse.jdt:ecj:3.25.0")  // Inject Eclipse compiler that we are using in this build
-class JkProjectBuild extends JkBean implements JkIdeSupportSupplier {
+class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
+
+    IntellijKBean intelliKBean = load(IntellijKBean.class)
+            .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco")
+            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option

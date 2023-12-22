@@ -2,18 +2,23 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.api.tooling.intellij.JkIml;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
-class KotlinBuild extends JkBean {
+class KotlinBuild extends KBean {
 
-    final ProjectJkBean projectBean = load(ProjectJkBean.class).lazily(this::configure);
+    final ProjectKBean projectKBean = load(ProjectKBean.class);
 
-    final IntellijJkBean intellijJkBean = load(IntellijJkBean.class)
-            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    KotlinBuild() {
+        load(IntellijKBean.class)
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
+                .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
+    }
 
-    private void configure(JkProject project) {
+    protected void init() {
+        JkProject project = projectKBean.project;
         project.flatFacade()
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
@@ -32,7 +37,7 @@ class KotlinBuild extends JkBean {
     }
 
     public void cleanPack() {
-        cleanOutput(); projectBean.pack();
+        cleanOutput(); projectKBean.pack();
     }
 
 }

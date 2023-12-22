@@ -2,20 +2,24 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.tool.JkBean;
-import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.api.tooling.intellij.JkIml;
+import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
-class SonarqubeBuild extends JkBean {
+class SonarqubeBuild extends KBean {
 
-    private final ProjectJkBean projectPlugin = load(ProjectJkBean.class).lazily(this::configure);
+    private final ProjectKBean projectKBean = load(ProjectKBean.class);
 
     SonarqubeBuild() {
-        load(IntellijJkBean.class)
-                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+        load(IntellijKBean.class)
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
+                .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
     }
 
-    private void configure(JkProject project) {
+    protected void init() {
+        JkProject project = projectKBean.project;
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
                 .mixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
@@ -32,7 +36,13 @@ class SonarqubeBuild extends JkBean {
     }
 
     public void cleanPack() {
-        cleanOutput(); projectPlugin.pack();
+        projectKBean.cleanPack();
+    }
+
+    public static void main(String[] args) {
+        SonarqubeBuild build = JkInit.instanceOf(SonarqubeBuild.class);
+        build.cleanPack();
+        build.projectKBean.publishLocal();
     }
 
 

@@ -2,19 +2,25 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
-public class JacocoBuild extends JkBean {
+public class JacocoBuild extends KBean {
 
-    private final ProjectJkBean projectPlugin = load(ProjectJkBean.class).lazily(this::configure);
+    private final ProjectKBean projectKBean = load(ProjectKBean.class);
 
-    final IntellijJkBean intellijJkBean = load(IntellijJkBean.class)
-            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    JacocoBuild() {
+        load(IntellijKBean.class)
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
+                .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
+    }
 
-    private void configure(JkProject project) {
+    @Override
+    protected void init() {
+        JkProject project = projectKBean.project;
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps
@@ -30,11 +36,13 @@ public class JacocoBuild extends JkBean {
     }
 
     public void cleanPack() {
-        cleanOutput(); projectPlugin.pack();
+        cleanOutput(); projectKBean.pack();
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(JacocoBuild.class, args).cleanPack();
+        JacocoBuild jacocoBuild = JkInit.instanceOf(JacocoBuild.class, args);
+        jacocoBuild.cleanPack();
+        jacocoBuild.projectKBean.publishLocal();
     }
 
 }

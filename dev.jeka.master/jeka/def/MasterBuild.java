@@ -5,24 +5,25 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.JkGit;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.tool.builtins.git.GitJkBean;
+import dev.jeka.core.tool.builtins.git.GitKBean;
 import dev.jeka.core.tool.builtins.git.JkVersionFromGit;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
-import dev.jeka.core.tool.builtins.repos.NexusJkBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.repos.NexusKBean;
 import dev.jeka.plugins.jacoco.JkJacoco;
-import dev.jeka.plugins.sonarqube.SonarqubeJkBean;
+import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 import github.Github;
 
 import java.io.IOException;
 
 @JkInjectClasspath("../plugins/dev.jeka.plugins.sonarqube/jeka/output/classes")
 @JkInjectClasspath("../plugins/dev.jeka.plugins.jacoco/jeka/output/classes")
-class MasterBuild extends JkBean {
+class MasterBuild extends KBean {
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;
@@ -61,22 +62,25 @@ class MasterBuild extends JkBean {
     @JkInjectProject("../plugins/dev.jeka.plugins.protobuf")
     ProtobufBuild protobufBuild;
 
-    private final JkJacoco jacocoForCore;
+    private JkJacoco jacocoForCore;
 
-    MasterBuild()  {
+    @Override
+    protected void init()  {
+
         coreBuild.runIT = true;
-        getImportedBeans().get(ProjectJkBean.class, false).forEach(this::applyToSlave);
+        getImportedKBeans().get(ProjectKBean.class, false).forEach(this::applyToSlave);
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
         jacocoForCore = JkJacoco.ofVersion(getRuntime().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
-        coreBuild.load(ProjectJkBean.class).lazily(jacocoForCore::configureForAndApplyTo);
-        load(NexusJkBean.class).lazily(this::configureNexus);
+        jacocoForCore.configureForAndApplyTo(coreBuild.load(ProjectKBean.class).project);
+
+        load(NexusKBean.class).lazily(this::configureNexus);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() throws IOException {
         JkLog.startTask("Building core and plugins");
-        getImportedBeans().get(ProjectJkBean.class, false).forEach(bean -> {
+        getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
             JkLog.startTask("Running KBean " + bean);
             bean.clean();
             bean.pack();
@@ -98,14 +102,14 @@ class MasterBuild extends JkBean {
             }
             JkLog.endTask();
         }
-        getImportedBeans().get(ProjectJkBean.class, false).forEach(projectJkBean ->
-                JkVersionFromGit.of().handleVersioning(projectJkBean.getProject()));
+        getImportedKBeans().get(ProjectKBean.class, false).forEach(projectJkBean ->
+                JkVersionFromGit.of().handleVersioning(projectJkBean.project));
         String branch = JkGit.of().getCurrentBranch();
         JkLog.trace("Current build branch: %s", branch);
         JkLog.trace("current ossrhUser:  %s", ossrhUser);
         if (JkUtilsIterable.listOf("HEAD", "master").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
-            getImportedBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publish);
+            getImportedKBeans().get(ProjectKBean.class, false).forEach(ProjectKBean::publish);
             closeAndReleaseRepo();
             JkLog.endTask();
             JkLog.startTask("Creating GitHub Release");
@@ -119,7 +123,7 @@ class MasterBuild extends JkBean {
             JkLog.endTask();
         }
         if (getRuntime().getProperties().get("sonar.host.url") != null) {
-            coreBuild.load(SonarqubeJkBean.class).run();
+            coreBuild.load(SonarqubeKBean.class).run();
         }
     }
 
@@ -139,11 +143,11 @@ class MasterBuild extends JkBean {
 
     @JkDoc("Clean build of core + plugins bypassing tests.")
     public void buildFast() {
-        getImportedBeans().get(ProjectJkBean.class, false).forEach(bean -> {
-            bean.getProject().flatFacade().skipTests(true);
-            bean.getProject().includeJavadocAndSources(false, false);
+        getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
+            bean.project.flatFacade().skipTests(true);
+            bean.project.includeJavadocAndSources(false, false);
             bean.clean();
-            bean.getProject().pack();
+            bean.project.pack();
         });
     }
 
@@ -162,22 +166,21 @@ class MasterBuild extends JkBean {
         return  JkRepoSet.of(snapshotRepo, releaseRepo, githubRepo);
     }
 
-    private void applyToSlave(ProjectJkBean projectJkBean) {
+    private void applyToSlave(ProjectKBean projectKBean) {
         if (!JkVersion.of(versionFromGit.version()).isSnapshot()) {     // Produce javadoc only for release
-            projectJkBean.pack.javadoc = true;
+            projectKBean.pack.javadoc = true;
         }
-        projectJkBean.lazily(project -> {
-                versionFromGit.handleVersioning(project);
-                project.compilation
-                                .addJavaCompilerOptions("-g");
-                project.publication
-                    .setRepos(this.publishRepo())
-                    .maven
-                        .pomMetadata
-                            .setProjectUrl("https://jeka.dev")
-                            .setScmUrl("https://github.com/jerkar/jeka.git")
-                            .addApache2License();
-        });
+        JkProject project = projectKBean.project;
+        versionFromGit.handleVersioning(project);
+        project.compilation
+                        .addJavaCompilerOptions("-g");
+        project.publication
+            .setRepos(this.publishRepo())
+            .maven
+                .pomMetadata
+                    .setProjectUrl("https://jeka.dev")
+                    .setScmUrl("https://github.com/jerkar/jeka.git")
+                    .addApache2License();
     }
 
     public void buildCore() {
@@ -193,7 +196,7 @@ class MasterBuild extends JkBean {
     }
 
     public void publishLocal() {
-        getImportedBeans().get(ProjectJkBean.class, false).forEach(ProjectJkBean::publishLocal);
+        getImportedKBeans().get(ProjectKBean.class, false).forEach(ProjectKBean::publishLocal);
     }
 
     public static void main(String[] args) throws Exception {
@@ -208,7 +211,7 @@ class MasterBuild extends JkBean {
 
     static class ShowVersion {
         public static void main(String[] args) {
-            System.out.println(JkInit.instanceOf(GitJkBean.class, args).version());
+            System.out.println(JkInit.instanceOf(GitKBean.class, args).version());
         }
     }
 

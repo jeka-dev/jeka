@@ -1,14 +1,16 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkJekaVersionCompatibilityChecker;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
-class Build extends JkBean {
+class Build extends KBean {
 
-    final ProjectJkBean projectBean = load(ProjectJkBean.class).lazily(this::configure);
+    final ProjectKBean projectKBean = load(ProjectKBean.class);
 
-    private void configure(JkProject project) {
+    @Override
+    protected void init() {
+        JkProject project = projectKBean.project;
         project.compilation.configureDependencies(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
         );

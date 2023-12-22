@@ -31,6 +31,9 @@ public final class JkUtilsThrowable {
         if (e instanceof RuntimeException) {
             return (RuntimeException) e;
         }
+        if (e instanceof RuntimeException) {
+            return (RuntimeException) e;
+        }
         return new RuntimeException(message, e);
     }
 

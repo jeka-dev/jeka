@@ -213,11 +213,11 @@ public class JkNexusRepos {
             Document doc = JkUtilsXml.documentFrom(in);
             Element data = JkUtilsXml.directChild(doc.getDocumentElement(), "data");
             List<Element> stagingReposEl = JkUtilsXml.directChildren(data, "stagingProfileRepository");
-            List<JkStagingRepo> result = stagingReposEl.stream()
+            return stagingReposEl.stream()
                     .map(JkStagingRepo::fromEl)
                     .collect(Collectors.toList());
+        } finally {
             JkLog.endTask();
-            return result;
         }
     }
 

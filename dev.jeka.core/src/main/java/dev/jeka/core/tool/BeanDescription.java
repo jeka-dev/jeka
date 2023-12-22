@@ -8,7 +8,9 @@ import dev.jeka.core.tool.HelpDisplayer.RenderItem;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /*
@@ -22,9 +24,9 @@ final class BeanDescription {
 
     private final List<BeanField> beanFields;
 
-    private final Class<? extends JkBean> beanClass;
+    private final Class<? extends KBean> beanClass;
 
-    private BeanDescription(Class<? extends JkBean> beanClass, List<BeanMethod> beanMethods,
+    private BeanDescription(Class<? extends KBean> beanClass, List<BeanMethod> beanMethods,
                             List<BeanField> beanFields) {
         super();
         this.beanClass = beanClass;
@@ -32,7 +34,7 @@ final class BeanDescription {
         this.beanFields = Collections.unmodifiableList(beanFields);
     }
 
-    static BeanDescription renderItem(Class<? extends JkBean> beanClass) {
+    static BeanDescription renderItem(Class<? extends KBean> beanClass) {
         final List<BeanMethod> methods = new LinkedList<>();
         for (final Method method : executableMethods(beanClass)) {
             methods.add(BeanMethod.of(method));
@@ -208,7 +210,7 @@ final class BeanDescription {
             this.injectedPropertyName = injectedPropertyName;
         }
 
-        static BeanField of(Class<? extends JkBean> beanClass, Field field, String name, Class<?> rootDeclaringClass) {
+        static BeanField of(Class<? extends KBean> beanClass, Field field, String name, Class<?> rootDeclaringClass) {
             final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
             final String descr;
             if (jkDoc != null) {

@@ -21,7 +21,7 @@ public final class JkExternalToolApi {
     }
 
     public static String getBeanName(String fullyQualifiedClassName) {
-        return JkBean.name(fullyQualifiedClassName);
+        return KBean.name(fullyQualifiedClassName);
     }
 
     public static List<String> getCachedBeanClassNames(Path projectRoot) {
@@ -95,6 +95,6 @@ public final class JkExternalToolApi {
     }
 
     public static boolean kbeanNameMatches(String className, String candidate) {
-        return JkBean.nameMatches(className, candidate);
+        return KBean.nameMatches(className, candidate);
     }
 }

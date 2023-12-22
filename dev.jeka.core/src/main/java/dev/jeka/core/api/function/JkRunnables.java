@@ -76,12 +76,13 @@ public class JkRunnables implements Runnable {
 
     @Override
     public void run() {
+        final boolean doLog = log;
         entries.forEach(entry -> {
-            if (log) {
+            if (doLog) {
                 JkLog.startTask("running " + entry.name);
             }
             entry.runnable.run();
-            if (log) {
+            if (doLog) {
                 JkLog.endTask();
             }
         });
@@ -112,7 +113,7 @@ public class JkRunnables implements Runnable {
         }
 
         enum Where {
-            BEFORE, AFTER;
+            BEFORE, AFTER
         }
 
         Entry(String name, Runnable runnable, RelativePlace relativePlace) {

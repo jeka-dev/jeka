@@ -1,19 +1,19 @@
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.plugins.springboot.SpringbootJkBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.plugins.springboot.JkSpringbootProject;
 
 @JkInjectClasspath("${dependencyDescription}")
-class Build extends JkBean {
+class Build extends KBean {
 
-    final SpringbootJkBean springbootKBean = load(SpringbootJkBean.class);
+    final ProjectKBean projectKBean = load(ProjectKBean.class);
 
-    Build() {
-        springbootKBean.setSpringbootVersion("${springbootVersion}");
-        springbootKBean.projectKBean.lazily(this::configure);
-    }
-
-    private void configure(JkProject project) {
+    protected void init() {
+        JkProject project = projectKBean.project;
+        JJkSpringbootProject.of(project)
+                .setSpringbootVersion("${springbootVersion}")
+                .configure();
         project.flatFacade()
                 .addCompileDeps(
                         "org.springframework.boot:spring-boot-starter-web"

@@ -10,6 +10,7 @@ import java.lang.annotation.*;
 @Inherited
 public @interface JkInjectProperty {
 
-    String value();
+    String value() default "";
+
 
 }

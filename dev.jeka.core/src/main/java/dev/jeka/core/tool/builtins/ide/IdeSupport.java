@@ -6,11 +6,13 @@ import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
-import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.tool.KBean;
 
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 final class IdeSupport {
@@ -18,19 +20,20 @@ final class IdeSupport {
     private IdeSupport() {
     }
 
-    static JkIdeSupport getProjectIde(JkBean jkBean) {
-        if (jkBean instanceof JkIdeSupportSupplier) {
-            JkIdeSupportSupplier supplier = (JkIdeSupportSupplier) jkBean;
-            return supplier.getJavaIdeSupport();
-        }
-        List<JkIdeSupportSupplier> suppliers = jkBean.getRuntime().getBeans().stream()
+    static JkIdeSupport getProjectIde(KBean kBean) {
+        List<JkIdeSupportSupplier> suppliers = kBean.getRuntime().getBeans().stream()
                 .filter(JkIdeSupportSupplier.class::isInstance)
                 .map(JkIdeSupportSupplier.class::cast)
                 .collect(Collectors.toList());
         return suppliers.stream()
-                .filter(supplier -> supplier != null)
-                .map(supplier -> supplier.getJavaIdeSupport())
-                .filter(projectIde -> projectIde != null)
+                .map(supplier -> {
+                    JkIdeSupport ideSupport = supplier.getJavaIdeSupport();
+                    if (ideSupport != null) {
+                        JkLog.info("Use %s class as IDE support supplier.", supplier.getClass().getName());
+                    }
+                    return ideSupport;
+                })
+                .filter(Objects::nonNull)
                 .findFirst().orElse(null);
     }
 

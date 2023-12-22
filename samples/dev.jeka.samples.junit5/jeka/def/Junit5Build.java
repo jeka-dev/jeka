@@ -1,11 +1,11 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.core.tool.builtins.ide.IntellijJkBean;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
@@ -32,20 +32,20 @@ import java.nio.file.Path;
  * {@link org.junit.platform.launcher.LauncherDiscoveryRequest}.
  */
 @JkInjectClasspath("org.junit.platform:junit-platform-launcher:1.8.2")
-class Junit5Build extends JkBean {
+class Junit5Build extends KBean {
 
-    final ProjectJkBean projectBean = load(ProjectJkBean.class).lazily(this::configure);
+    final ProjectKBean projectKBean = load(ProjectKBean.class);
 
-    final IntellijJkBean intellijJkBean = load(IntellijJkBean.class)
-            .configureIml(jkIml -> {
-                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-            });
+    final IntellijKBean intellijKBean = load(IntellijKBean.class)
+            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
      * fields have already been injected from command line.
      */
-    private void configure(JkProject project) {
+    @Override
+    protected void init() {
+        JkProject project = projectKBean.project;
         project
             .testing
                 .compilation
@@ -84,7 +84,7 @@ class Junit5Build extends JkBean {
     }
 
     public void cleanPack() {
-        cleanOutput(); projectBean.pack();
+        cleanOutput(); projectKBean.pack();
     }
 
     public void checkReportGenerated() {

@@ -8,15 +8,15 @@ class EngineCommand {
         PROPERTY_INJECT, METHOD_INVOKE, BEAN_INSTANTIATION
     }
 
-    private Action action;
+    private final Action action;
 
-    private Class<? extends JkBean> beanClass;
+    private final Class<? extends KBean> beanClass;
 
-    private String member;
+    private final String member;
 
-    private String value;  // for properties only
+    private final String value;  // for properties only
 
-    EngineCommand(Action action, Class<? extends JkBean> beanClass, String valueOrMethod, String value) {
+    EngineCommand(Action action, Class<? extends KBean> beanClass, String valueOrMethod, String value) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
         this.action = action;
         this.beanClass = beanClass;
@@ -28,7 +28,7 @@ class EngineCommand {
         return action;
     }
 
-    public Class<? extends JkBean> getBeanClass() {
+    public Class<? extends KBean> getBeanClass() {
         return beanClass;
     }
 

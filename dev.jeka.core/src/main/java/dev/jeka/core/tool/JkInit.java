@@ -29,7 +29,7 @@ public final class JkInit {
     /**
      * Creates an instance of the specified Jeka class and displays information about this class andPrepending environment.
      */
-    public static <T extends JkBean> T instanceOf(Class<T> clazz, String... args) {
+    public static <T extends KBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
         Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
         if (!Files.isDirectory(Paths.get("jeka")) ) {
@@ -53,7 +53,7 @@ public final class JkInit {
             EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get(""));
             List<EngineCommand> commands = new LinkedList<>();
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, clazz, null, null));
-            commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, JkBean.name(clazz), false));
+            commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, KBean.name(clazz), false));
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.setImportedProjects(getImportedProjects(clazz));
             JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
@@ -83,13 +83,13 @@ public final class JkInit {
      * Convenient method to let the user add extra arguments.
      * @see #instanceOf(Class, String...)
      */
-    public static <T extends JkBean> T instanceOf(Class<T> clazz, String[] args, String extraArg, String ...extraArgs) {
+    public static <T extends KBean> T instanceOf(Class<T> clazz, String[] args, String extraArg, String ...extraArgs) {
         String[] allExtraArgs = JkUtilsIterable.concat(new String[] {extraArg}, extraArgs);
         String[] effectiveArgs = JkUtilsIterable.concat(allExtraArgs, args);
         return instanceOf(clazz, effectiveArgs);
     }
 
-    public static <T extends JkBean> T exec(Class<T> clazz, String ...args) {
+    public static <T extends KBean> T exec(Class<T> clazz, String ...args) {
         T bean = instanceOf(clazz, args);
         return bean;
     }

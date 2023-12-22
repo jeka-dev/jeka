@@ -124,12 +124,12 @@ public class JkPathTree<T extends JkPathTree> {
      * If this method is called for a zip tree instance, then it should be closed or called within
      * <i>try-with-resources</i> statement in order to avoid resource leaks.
      */
-    public Stream stream(FileVisitOption ...options) {
+    public Stream<Path> stream(FileVisitOption ...options) {
         if(!exists()) {
-            return new LinkedList<Path>().stream();
+            return Stream.of();
         }
         final JkPathMatcher matcher = JkPathMatcher.of(this.matcher);
-        Path root = getRoot().toString().equals("") ? Paths.get(".") : getRoot();
+        Path root = getRoot().toString().isEmpty() ? Paths.get(".") : getRoot();
         return JkUtilsPath.walk(root, options)
                 .filter(path -> matcher.matches(root.relativize(path)));
     }

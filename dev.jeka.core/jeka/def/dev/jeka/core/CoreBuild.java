@@ -12,16 +12,15 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkBean;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.builtins.project.ProjectJkBean;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,17 +32,18 @@ import static dev.jeka.core.api.project.JkProject.SOURCES_ARTIFACT_ID;
  * Run main method to create full distrib.
  * For publishing in OSSRH the following options must be set : -ossrhPwd=Xxxxxx -pgp#secretKeyPassword=Xxxxxxx
  */
-public class CoreBuild extends JkBean {
+public class CoreBuild extends KBean {
 
     private static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final ProjectJkBean projectBean = load(ProjectJkBean.class).lazily(this::configure);
+    final ProjectKBean projectKBean = load(ProjectKBean.class);
 
     public boolean runIT;
 
-    private void configure(JkProject project)  {
+    protected void init()  {
+        JkProject project = projectKBean.project;
         project
             .setJvmTargetVersion(JkJavaVersion.V8)
             .artifactProducer
@@ -94,18 +94,18 @@ public class CoreBuild extends JkBean {
     }
 
     private Path distribFolder() {
-        return projectBean.getProject().getOutputDir().resolve("distrib");
+        return projectKBean.project.getOutputDir().resolve("distrib");
     }
 
     private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = projectBean.getProject().artifactProducer;
+        final JkArtifactProducer artifactProducer = projectKBean.project.artifactProducer;
         if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
                     SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
         } else {
             artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), WRAPPER_ARTIFACT_ID);
         }
-        final JkPathTree distrib = JkPathTree.of(distribFolder());
+        final JkPathTree<?> distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
         distrib
@@ -123,7 +123,7 @@ public class CoreBuild extends JkBean {
         }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("wrapper/jekaw")).setPosixExecPermissions();
-        if (!projectBean.getProject().testing.isSkipped() && runIT) {
+        if (!projectKBean.project.testing.isSkipped() && runIT) {
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
@@ -174,7 +174,7 @@ public class CoreBuild extends JkBean {
     private void doPackWithEmbeddedJar(Path targetJar) {
 
         // Main jar
-        JkProject project = this.projectBean.getProject();
+        JkProject project = projectKBean.project;
         project.packaging.createBinJar(targetJar);
         JkZipTree jarTree = JkZipTree.of(targetJar);
 
@@ -202,13 +202,13 @@ public class CoreBuild extends JkBean {
     }
 
     private void doWrapper(Path wrapperJar) {
-        projectBean.getProject().compilation.runIfNeeded();
-        JkPathTree.of(projectBean.getProject().compilation.layout
+        projectKBean.project.compilation.runIfNeeded();
+        JkPathTree.of(projectKBean.project.compilation.layout
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void cleanPack() {
-        cleanOutput(); projectBean.pack();
+        cleanOutput(); projectKBean.pack();
     }
 
     // This method has to be run in dev.jeka.core (this module root) working directory
@@ -219,7 +219,7 @@ public class CoreBuild extends JkBean {
     public static class RunBuildAndIT {
         public static void main(String[] args) {
             CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args, "-runIT");
-            coreBuild.projectBean.pack();
+            coreBuild.projectKBean.pack();
         }
     }
 

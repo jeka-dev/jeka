@@ -26,18 +26,18 @@ class BeanDoc implements Comparable<BeanDoc> {
 
     private final String fullName;
 
-    private final Class<? extends JkBean> clazz;
+    private final Class<? extends KBean> clazz;
 
-    BeanDoc(Class<? extends JkBean> clazz) {
+    BeanDoc(Class<? extends KBean> clazz) {
         super();
-        this.shortName = JkBean.name(clazz);
+        this.shortName = KBean.name(clazz);
         this.fullName = longName(clazz);
         this.clazz = clazz;
     }
 
     public List<String> pluginDependencies() {
         return JkUtilsReflect.getAllDeclaredFields(clazz, false).stream()
-                .filter(field -> JkBean.class.isAssignableFrom(field.getType()))
+                .filter(field -> KBean.class.isAssignableFrom(field.getType()))
                 .map(Field::getType)
                 .map(Class::getName)
                 .collect(Collectors.toList());
@@ -51,7 +51,7 @@ class BeanDoc implements Comparable<BeanDoc> {
         return this.fullName;
     }
 
-    public Class<? extends JkBean> beanClass() {
+    public Class<? extends KBean> beanClass() {
         return clazz;
     }
 
@@ -78,7 +78,7 @@ class BeanDoc implements Comparable<BeanDoc> {
 
     boolean isDecoratedBeanDefined() {
         Method decorateRun = JkUtilsReflect.findMethodMethodDeclaration(clazz, "activate");
-        return decorateRun != null && !decorateRun.getDeclaringClass().equals(JkBean.class);
+        return decorateRun != null && !decorateRun.getDeclaringClass().equals(KBean.class);
     }
 
     @Override

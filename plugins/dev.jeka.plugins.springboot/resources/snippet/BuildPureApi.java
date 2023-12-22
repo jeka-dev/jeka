@@ -1,13 +1,13 @@
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.JkBean;
+import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.plugins.springboot.JkSpringboot;
+import dev.jeka.plugins.springboot.JkSpringbootProject;
 
 @JkInjectClasspath("dev.jeka:springboot-plugin")
-class Build extends JkBean implements JkIdeSupportSupplier {
+class Build extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("Clean output directory then compile, test and create jar")
     public void cleanPack() {
@@ -36,9 +36,9 @@ class Build extends JkBean implements JkIdeSupportSupplier {
 
     private JkProject project() {
         JkProject project = JkProject.of();
-        JkSpringboot.of()
+        JkSpringbootProject.of(project)
                 .setSpringbootVersion("${springbootVersion}")
-                .configure(project);
+                .configure();
         project.flatFacade()
                 .addCompileDeps(
                         "org.springframework.boot:spring-boot-starter-web"

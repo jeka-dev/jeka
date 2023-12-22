@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 final class HelpDisplayer {
 
-    static void help(List<Class<? extends JkBean>> localBeanClasses, List<Class> classpathBeanClasses,
+    static void help(List<Class<? extends KBean>> localBeanClasses, List<Class> classpathBeanClasses,
                      boolean compilationFailed, Path baseDir) {
         String introSb = "\nPurpose:\n" +
                 "  Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n" +
@@ -45,7 +45,7 @@ final class HelpDisplayer {
     }
 
     private static RenderItem bean(Class beanClass, boolean isDefault) {
-        String shortName = JkBean.name(beanClass);
+        String shortName = KBean.name(beanClass);
         if (isDefault) {
             shortName = shortName + " (default)";
         }
@@ -106,9 +106,9 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    static void helpJkBean(JkBean jkBean) {
-        BeanDoc beanDescription = new BeanDoc(jkBean.getClass());
-        JkLog.info(helpBeanDescription(beanDescription, jkBean.getRuntime()));
+    static void helpJkBean(KBean kBean) {
+        BeanDoc beanDescription = new BeanDoc(kBean.getClass());
+        JkLog.info(helpBeanDescription(beanDescription, kBean.getRuntime()));
         JkLog.info("Execute 'jeka -help' to get global help.\n");
     }
 

@@ -11,7 +11,10 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -46,13 +49,13 @@ public final class JkKotlinCompiler {
 
     private final List<String> jvmOptions = new LinkedList<>();
 
-    private List<String> options = new LinkedList<>();
+    private final List<String> options = new LinkedList<>();
 
     private JkRepoSet repos = JkRepoSet.of(JkRepo.ofMavenCentral());
 
-    private List<Plugin> plugins = new LinkedList<>();
+    private final List<Plugin> plugins = new LinkedList<>();
 
-    private JkPathSequence extraClasspath = JkPathSequence.of();
+    private final JkPathSequence extraClasspath = JkPathSequence.of();
 
     private final String command;
 
@@ -290,11 +293,9 @@ public final class JkKotlinCompiler {
         if (JkLog.verbosity().isVerbose()) {
             message = message + " to " + outputDir + " using options : " + String.join(" ", effectiveOptions);
         }
-        long start = System.nanoTime();
         JkLog.startTask(message);
-
         final Result result = run(compileSpec);
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        JkLog.endTask();
         if (!result.success) {
             if (failOnError) {
                 throw new IllegalStateException("Kotlin compiler failed " + result.params);
@@ -335,7 +336,7 @@ public final class JkKotlinCompiler {
             JkLog.warn("No Kotlin source found in " + compileSpec.getSources());
             return new Result(true, Collections.emptyList());
         }
-        JkLog.info("" + sourcePaths.size() + " files to compile.");
+        JkLog.info(sourcePaths.size() + " files to compile.");
         JkLog.info("Kotlin version : " + getVersion() + ", Target JVM : " + compileSpec.getTargetVersion() );
         JkProcess kotlincProcess;
         List<String> loggedOptions = new LinkedList<>(this.options);
