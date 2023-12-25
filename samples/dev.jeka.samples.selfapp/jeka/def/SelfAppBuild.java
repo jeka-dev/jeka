@@ -2,7 +2,7 @@ import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.self.SelfAppKBean;
-import dev.jeka.plugins.springbootta.JkSpringboot;
+import dev.jeka.plugins.springboot.JkSpringbootJars;
 
 @JkInjectClasspath("dev.jeka:springboot-plugin")
 class SelfAppBuild extends SelfAppKBean {
@@ -20,11 +20,10 @@ class SelfAppBuild extends SelfAppKBean {
 
     @Override
     public void packJar() {
-        JkSpringboot.createBootJar(
-                getRuntime().getDependencyResolver().getRepos(),
-                manifest(),
+        JkSpringbootJars.createBootJar(
                 classTree(),
                 libs(),
+                getRuntime().getDependencyResolver().getRepos(),
                 jarPath());
     }
 

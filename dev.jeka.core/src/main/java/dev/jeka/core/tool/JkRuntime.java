@@ -198,8 +198,8 @@ public final class JkRuntime {
         T bean = JkUtilsReflect.newInstance(beanClass);
         beans.put(beanClass, bean);
 
-        // We must inject fields after instance creation cause if we do this in the Jkean
-        // constructor, fields of child classes are not yet initialized
+        // We must inject fields after instance creation cause in the KBean
+        // constructor, fields of child classes are not yet initialized.
         injectFieldValues(bean);
         bean.init();
         return bean;
