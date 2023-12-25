@@ -37,8 +37,8 @@ class Build extends KBean implements JkIdeSupportSupplier {
     private JkProject project() {
         JkProject project = JkProject.of();
         JkSpringbootProject.of(project)
-                .setSpringbootVersion("${springbootVersion}")
-                .configure();
+                .configure()
+                .includeParentBom("${springbootVersion}");
         project.flatFacade()
                 .addCompileDeps(
                         "org.springframework.boot:spring-boot-starter-web"

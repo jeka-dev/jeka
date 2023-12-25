@@ -62,7 +62,7 @@ public final class IntellijKBean extends KBean {
                 .setBaseDir(this.getBaseDir())
                 .setDefClasspath(this.getRuntime().getClasspath())
                 .setDefImportedProjects(this.getRuntime().getImportedProjects())
-                .setIdeSupport(IdeSupport.getProjectIde(this))
+                .setIdeSupport(() -> IdeSupport.getProjectIde(getRuntime()))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
                 .setDedicatedJekaModule(this.dedicatedJekaModule)
                 .setUseVarPath(useVarPath);

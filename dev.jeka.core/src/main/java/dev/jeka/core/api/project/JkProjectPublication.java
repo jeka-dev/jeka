@@ -46,7 +46,8 @@ public class JkProjectPublication {
                 .addArtifacts(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
                         project.compilation.getDependencies(),
-                        project.packaging.getRuntimeDependencies(), project.getDuplicateConflictStrategy()));
+                        project.packaging.getRuntimeDependencies(),
+                        project.getDuplicateConflictStrategy()));
         this.preActions = JkRunnables.of();
         this.postActions = JkRunnables.of();
     }

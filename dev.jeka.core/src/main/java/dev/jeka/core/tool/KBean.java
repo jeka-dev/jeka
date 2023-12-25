@@ -5,6 +5,8 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -124,7 +126,7 @@ public abstract class KBean {
 
     @Override
     public String toString() {
-        return shortName() + " in project '" + JkUtilsPath.friendlyName(this.runtime.getProjectBaseDir()) + "'";
+        return "KBean '" + shortName() + "' [from project '" + JkUtilsPath.friendlyName(this.runtime.getProjectBaseDir()) + "']";
     }
 
     /**
@@ -157,6 +159,15 @@ public abstract class KBean {
         return nameMatches(this.getClass().getName(), candidateName);
     }
 
+    static boolean isPropertyField(Field field) {
+        if (Modifier.isStatic(field.getModifiers())) {
+            return false;
+        }
+        if (Modifier.isPublic(field.getModifiers())) {
+            return true;
+        }
+        return field.getAnnotation(JkDoc.class) != null;
+    }
 
 }
 

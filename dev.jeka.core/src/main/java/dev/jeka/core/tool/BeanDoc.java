@@ -4,7 +4,6 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -74,11 +73,6 @@ class BeanDoc implements Comparable<BeanDoc> {
     public List<String> activationEffect() {
         JkDoc doc = JkUtilsReflect.getInheritedAnnotation(clazz, JkDoc.class, "activate");
         return doc == null ? Collections.emptyList() : Arrays.asList(doc.value());
-    }
-
-    boolean isDecoratedBeanDefined() {
-        Method decorateRun = JkUtilsReflect.findMethodMethodDeclaration(clazz, "activate");
-        return decorateRun != null && !decorateRun.getDeclaringClass().equals(KBean.class);
     }
 
     @Override

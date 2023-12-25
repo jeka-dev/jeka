@@ -12,7 +12,7 @@ import java.nio.file.Paths;
  */
 class PluginScaffoldTester extends JekaCommandLineExecutor {
 
-    private String sprinbootBluginJar = Paths.get("../plugins/dev.jeka.plugins.springboot/jeka/"
+    private final String sprinbootBluginJar = Paths.get("../plugins/dev.jeka.plugins.springboot/jeka/"
             + "output/dev.jeka.springboot-plugin.jar").toAbsolutePath().normalize().toString();
 
     PluginScaffoldTester(JkProperties properties) {
@@ -20,13 +20,14 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
     }
 
     void run() {
-        Path dir = scaffold("-lsu scaffold#run springboot# springboot#springbootVersion=2.7.7" +
-                        " springboot#scaffoldDefClasspath="
-                        + sprinbootBluginJar + " @" + sprinbootBluginJar,
+        Path dir = scaffold(
+                "-lsu scaffold#run springboot# " +
+                "springboot#scaffoldDefClasspath=" + sprinbootBluginJar +
+                " @" + sprinbootBluginJar,
                 "project#pack -lsu", false);
         String jdk17 = properties.get("jeka.jdk.17");
         if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
-            runJeka(dir.toString(), "intellij#iml");
+            runJeka(dir.toString(), "intellij#iml", jdk17);
         }
     }
 
@@ -35,7 +36,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
         runJeka(path.toString(), scaffoldCmdLine);
         String jdk17 = properties.get("jeka.jdk.17");
         if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
-            runJeka(checkWithWrapper, path.toString(), checkCommandLine);
+            runJeka(checkWithWrapper, path.toString(), checkCommandLine, jdk17);
         }
         return path;
     }

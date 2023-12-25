@@ -38,7 +38,7 @@ public final class JkScaffold {
 
     private String cachedJekaVersion;
 
-    private String projectExtraContent = "";
+    private String localPropsExtraContent = "";
 
     JkScaffold(Path baseDir) {
         super();
@@ -57,8 +57,8 @@ public final class JkScaffold {
         return this;
     }
 
-    public JkScaffold addProjectPropsFileContent(String extraContent) {
-        this.projectExtraContent += extraContent;
+    public JkScaffold addLocalPropsFileContent(String extraContent) {
+        this.localPropsExtraContent += extraContent;
         return this;
     }
 
@@ -81,8 +81,8 @@ public final class JkScaffold {
         }
         JkPathFile projectPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE))
                 .fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
-        if (!JkUtilsString.isBlank(this.projectExtraContent)) {
-            String content = projectExtraContent.replace("\\n", "\n");
+        if (!JkUtilsString.isBlank(this.localPropsExtraContent)) {
+            String content = localPropsExtraContent.replace("\\n", "\n");
             projectPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }
         JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(".gitignore"))

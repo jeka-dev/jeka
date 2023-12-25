@@ -69,7 +69,8 @@ public final class JkRepoSet {
     public JkRepoSet and(JkRepoSet other) {
         final List<JkRepo> list = new LinkedList<>(this.repos);
         list.addAll(other.repos);
-        return new JkRepoSet(list);
+        List<JkRepo> distinctRepos = list.stream().distinct().collect(Collectors.toList());
+        return new JkRepoSet(distinctRepos);
     }
 
     public static JkRepoSet ofLocal() {

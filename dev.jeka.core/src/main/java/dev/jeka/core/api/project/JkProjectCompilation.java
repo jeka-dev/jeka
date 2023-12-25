@@ -53,7 +53,7 @@ public class JkProjectCompilation {
 
     private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
 
-    private List<JkSourceGenerator> sourceGenerators = new LinkedList<>();
+    private final List<JkSourceGenerator> sourceGenerators = new LinkedList<>();
 
     private boolean done;
 
@@ -170,7 +170,7 @@ public class JkProjectCompilation {
     }
 
     private void compileJava() {
-        boolean success = project.compiler.compile(compileSpec());
+        boolean success = project.compiler.setJdkVersion(project.getJvmTargetVersion() ).compile(compileSpec());
         if (!success) {
             throw new IllegalStateException("Compilation of Java sources failed.");
         }

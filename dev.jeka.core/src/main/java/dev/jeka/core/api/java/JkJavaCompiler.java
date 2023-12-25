@@ -43,7 +43,7 @@ public final class JkJavaCompiler {
 
     private String[] toolParams = new String[0];
 
-    private GuessHints guessHints = GuessHints.ofDefault();
+    private JdkHints jdkHints = JdkHints.ofDefault();
 
     private JkJavaCompiler() {
     }
@@ -92,15 +92,23 @@ public final class JkJavaCompiler {
         return this;
     }
 
-    public JkJavaCompiler setGuessHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
-        GuessHints guessHints = new GuessHints(jdks, javaVersion, preferTool);
-        this.guessHints = guessHints;
+    public JkJavaCompiler setJdkHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
+        JdkHints jdkHints = new JdkHints(jdks, javaVersion, preferTool);
+        this.jdkHints = jdkHints;
+        return this;
+    }
+
+    // TODO version of JDK for compiling may not be part of this class.
+    // May this class has to be understood as a compilerToolchain.
+    public JkJavaCompiler setJdkVersion(JkJavaVersion javaVersion) {
+        JdkHints jdkHints = new JdkHints(this.jdkHints.jdks, javaVersion, this.jdkHints.preferTool);
+        this.jdkHints = jdkHints;
         return this;
     }
 
     private ToolOrProcess guess() {
-        if (guessHints.javaVersion == null) {
-            if (guessHints.preferTool && ToolProvider.getSystemJavaCompiler() != null) {
+        if (jdkHints.javaVersion == null) {
+            if (jdkHints.preferTool && ToolProvider.getSystemJavaCompiler() != null) {
                 JkLog.trace("Use current JDK tool to compile.");
                 return new ToolOrProcess(compileToolOrFail());
             }
@@ -113,20 +121,20 @@ public final class JkJavaCompiler {
         }
         Path currentJavaHome = Paths.get(System.getProperty("java.home"));
         boolean hasJavac = Files.exists(currentJavaHome.resolve("bin/java"));
-        boolean currentVersionMatch = guessHints.javaVersion.equals(JkJavaVersion.ofCurrent());
+        boolean currentVersionMatch = jdkHints.javaVersion.equals(JkJavaVersion.ofCurrent());
         if (currentVersionMatch) {
-            if (guessHints.preferTool || !hasJavac) {
+            if (jdkHints.preferTool || !hasJavac) {
                 return new ToolOrProcess(compileToolOrFail());
             }
             return new ToolOrProcess(currentJavaHome);
         }
-        Path specificJavaHome = guessHints.jdks.getHome(guessHints.javaVersion);
+        Path specificJavaHome = jdkHints.jdks.getHome(jdkHints.javaVersion);
         if (specificJavaHome != null) {
-            JkLog.info("Use JDK %s to compile for JVM %s", specificJavaHome, guessHints.javaVersion);
+            JkLog.info("Use JDK %s to compile for JVM %s", specificJavaHome, jdkHints.javaVersion);
             return new ToolOrProcess(specificJavaHome);
         }
         JkLog.warn("No JDK path defined for version %s. Will use embedded compiler %s",
-                guessHints.javaVersion, JkJavaVersion.ofCurrent());
+                jdkHints.javaVersion, JkJavaVersion.ofCurrent());
         return new ToolOrProcess(compileToolOrFail());
     }
 
@@ -210,7 +218,7 @@ public final class JkJavaCompiler {
         List<Path> sourceFiles = compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles();
         sourceFiles.forEach(file -> sourcePaths.add(file.toString()));
         process.addParams(compileSpec.getOptions()).addParams(sourcePaths);
-        JkLog.info("" + sourcePaths.size() + " files to compile.");
+        JkLog.info(sourcePaths.size() + " files to compile.");
         final int result = process.exec();
         return (result == 0);
     }
@@ -260,19 +268,19 @@ public final class JkJavaCompiler {
         }
     }
 
-    private static class GuessHints {
+    private static class JdkHints {
         final JkJdks jdks;
         final JkJavaVersion javaVersion;
         final boolean preferTool;
 
-        GuessHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
+        JdkHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
             this.jdks = jdks;
             this.javaVersion = javaVersion;
             this.preferTool = preferTool;
         }
 
-        static GuessHints ofDefault() {
-            return new GuessHints(JkJdks.of(), null, true);
+        static JdkHints ofDefault() {
+            return new JdkHints(JkJdks.of(), null, true);
         }
     }
 
@@ -309,7 +317,7 @@ public final class JkJavaCompiler {
              } else if (compileProcess != null) {
                  return runOnProcess(compileSpec, compileProcess);
              } else {
-                 throw new IllegalStateException("Neither compilatoin tool or process has been specified.");
+                 throw new IllegalStateException("Neither compilation tool or process has been specified.");
              }
          }
     }

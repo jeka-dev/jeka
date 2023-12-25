@@ -1,8 +1,5 @@
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
-import dev.jeka.core.api.depmanagement.JkDepSuggest;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
@@ -11,14 +8,10 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
-import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectBuildClassTemplate;
+import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffold;
 
 import java.net.URL;
@@ -38,81 +31,32 @@ public final class JkSpringbootProject {
         KBEAN
     }
 
-    static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.0";
-
     public static final JkArtifactId ORIGINAL_ARTIFACT = JkArtifactId.of("original", "jar");
 
-    private static final String SPRINGBOOT_APPLICATION_ANNOTATION_NAME =
-            "org.springframework.boot.autoconfigure.SpringBootApplication";
     static final String BOM_COORDINATE = "org.springframework.boot:spring-boot-dependencies::pom:";
-
-    private static final String LOADER_COORDINATE = "org.springframework.boot:spring-boot-loader:";
-
-    public static final String SPRING_BOOT_VERSION_MANIFEST_ENTRY = "Spring-Boot-Version";
-
-    private String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
 
     private final JkProject project;
 
-    private boolean createBootJar = true;
-
-    private boolean createOriginalJar;
-
-    private boolean createWarFile;
-
-    private boolean useSpringRepos = true;
 
     private JkSpringbootProject(JkProject project) {
         this.project = project;
     }
 
+    /**
+     * Creates a {@link JkSpringbootProject} from the specified {@link JkProject}.
+     */
     public static JkSpringbootProject of(JkProject project) {
         return new JkSpringbootProject(project);
     }
 
     /**
-     * Sets if the project build should create a .war artifact. Initial value is <code>false</code>.
+     * Configures the underlying project for Spring-Boot.
+     * @param createBootJar       Should create or not, a bootable jar file. The bootable jar file will be set as the default artifact.
+     * @param createWarFile       Should create or not, a .war file to be deployed in application server
+     * @param createOriginalJar   Should create or not, the original jar, meaning the jar containing the application classes, without dependencies.
      */
-    public JkSpringbootProject setCreateWarFile(boolean createWarFile) {
-        this.createWarFile = createWarFile;
-        return this;
-    }
-
-    /**
-     *  If true, Spring Milestone or Snapshot Repository will be used to fetch non release version of spring modules.
-     */
-    public JkSpringbootProject setUseSpringRepos(boolean useSpringRepos) {
-        this.useSpringRepos = useSpringRepos;
-        return this;
-    }
-
-    public JkSpringbootProject setSpringbootVersion(@JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:") String springbootVersion) {
-        this.springbootVersion = springbootVersion;
-        return this;
-    }
-
-    public JkSpringbootProject setCreateBootJar(boolean createBootJar) {
-        this.createBootJar = createBootJar;
-        return this;
-    }
-
-    public JkSpringbootProject setCreateOriginalJar(boolean createOriginalJar) {
-        this.createOriginalJar = createOriginalJar;
-        return this;
-    }
-
-    /**
-     * Configures the specified project for being a Spring-Boot project.
-     */
-    public void configure() {
-
-        // Add spring snapshot or milestone repos if necessary
-        JkDependencyResolver dependencyResolver = project.dependencyResolver;
-        JkVersion version = JkVersion.of(springbootVersion);
-        if (useSpringRepos && version.hasBlockAt(3)) {
-            JkRepoSet repos = JkSpringRepos.getRepoForVersion(version.getBlock(3));
-            dependencyResolver.addRepos(repos);
-        }
+    public JkSpringbootProject configure(boolean createBootJar, boolean createWarFile,
+                          boolean createOriginalJar) {
 
         // run tests in forked mode
         project.testing.testProcessor.setForkingProcess(true);
@@ -120,26 +64,17 @@ public final class JkSpringbootProject {
         // Do not publish javadoc and sources
         project.includeJavadocAndSources(false, false);
 
-        // Add spring-Boot version to Manifest
-        project.packaging.manifest.addMainAttribute(SPRING_BOOT_VERSION_MANIFEST_ENTRY,
-                this.springbootVersion);
-
-        // resolve dependency versions upon springboot provided ones
-        project.compilation.configureDependencies(deps -> deps
-            .and(BOM_COORDINATE + springbootVersion));
+        JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
 
         // define bootable jar as main artifact
-        JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
-        if (this.createBootJar) {
+        if (createBootJar) {
             Consumer<Path> bootJarMaker = path -> this.createBootJar(path);
             artifactProducer.putMainArtifact(bootJarMaker);
         }
-        if (this.createWarFile) {
+        if (createWarFile) {
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(path, project);
             artifactProducer.putArtifact(JkArtifactId.MAIN_ARTIFACT_NAME, "war", warMaker);
         }
-
-        // add original jar artifact
         if (createOriginalJar) {
             Consumer<Path> makeBinJar = project.packaging::createBinJar;
             artifactProducer.putArtifact(ORIGINAL_ARTIFACT, makeBinJar);
@@ -151,6 +86,38 @@ public final class JkSpringbootProject {
         if (!createBootJar && !createOriginalJar && !createWarFile) {
             artifactProducer.putMainArtifact(project.packaging::includeManifestInClassDir);
         }
+
+        return this;
+    }
+
+    /**
+     * Configures the underlying project for Spring-Boot usinf sensitive default
+     * @see #configure(boolean, boolean, boolean)
+     */
+    public JkSpringbootProject configure() {
+        return configure(true, false, false);
+    }
+
+    /**
+     * Includes org.springframework.boot:spring-boot-dependencies BOM in project dependencies.
+     * This is the version that determines the effective Spring-Boot version to use.
+     * @param version The Spring-Boot version to use.
+     * @return This oject for chaining.
+     */
+    public JkSpringbootProject includeParentBom(String version) {
+        project.compilation.configureDependencies(deps -> deps
+                .and(BOM_COORDINATE + version));
+        return this;
+    }
+
+    /**
+     * Adds the specified Spring repository to the download repo. It may be necessary
+     * to use pre-release versions.
+     */
+    public JkSpringbootProject addSpringRepo(JkSpringRepo springRepo) {
+        JkDependencyResolver dependencyResolver = project.dependencyResolver;
+        dependencyResolver.addRepos(springRepo.get());
+        return this;
     }
 
     /**
@@ -170,6 +137,7 @@ public final class JkSpringbootProject {
     public void createBootJar(Path target) {
         JkPathTree<?> classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
         if (!classTree.exists()) {
+            project.compilation.runIfNeeded();
             project.testing.runIfNeeded();
         }
         JkLog.startTask("Packaging bootable jar");
@@ -177,7 +145,7 @@ public final class JkSpringbootProject {
         final JkPathSequence embeddedJars = dependencyResolver.resolve(
                 project.packaging.getRuntimeDependencies().normalised(project.getDuplicateConflictStrategy()))
                 .getFiles();
-        createBootJar(classTree, embeddedJars.getEntries(), dependencyResolver.getRepos(), target, springbootVersion);
+        JkSpringbootJars.createBootJar(classTree, embeddedJars.getEntries(), dependencyResolver.getRepos(), target);
         JkLog.endTask();
     }
 
@@ -200,23 +168,22 @@ public final class JkSpringbootProject {
         JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
         JkPathFile.of(project.compilation.layout.getResources()
                 .getRootDirsOrZipFiles().get(0).resolve("application.properties")).createIfNotExist();
-
     }
 
     void configureScaffold(
             JkScaffold scaffold,
             ScaffoldBuildKind scaffoldBuildKind,
             String scaffoldDefClasspath,  // nullable
-            JkProjectBuildClassTemplate projectBuildClassTemplate) {
+            JkProjectScaffold.BuildClassTemplate projectBuildClassTemplate) {
 
         String buildClassSource = scaffoldBuildKind == ScaffoldBuildKind.KBEAN ?
-                "Build.java" : "BuildPureApi.java";
+                "BuildKBean.java" : "BuildPureApi.java";
         String code = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/" + buildClassSource));
         String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
         code = code.replace("${dependencyDescription}", defClasspath);
-        code = code.replace("${springbootVersion}", springbootVersion);
+        code = code.replace("${springbootVersion}", latestSpringbootVersion());
         final String jkClassCode = code;
-        if (projectBuildClassTemplate != JkProjectBuildClassTemplate.CODE_LESS) {
+        if (projectBuildClassTemplate != JkProjectScaffold.BuildClassTemplate.CODE_LESS) {
             scaffold.setJekaClassCodeProvider(() -> jkClassCode);
         }
         scaffold.extraActions.append(this::scaffoldSample);
@@ -225,49 +192,26 @@ public final class JkSpringbootProject {
             JkPathFile readmeFile = JkPathFile.of(project.getBaseDir().resolve("README.md")).createIfNotExist();
             readmeFile.write(readmeContent.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         });
-
+        if (scaffoldBuildKind == ScaffoldBuildKind.KBEAN) {
+            scaffold.addLocalPropsFileContent("springboot#springbootVersion=" + latestSpringbootVersion());
+        }
     }
 
     /**
-     * Creates a bootable jar from the original jar (the one without Springboot dependencies).
+     * Returns the latest GA Spring-Boot version
      */
-    public static void createBootJar(JkPathTree<?> classTree, List<Path> libsToInclude, JkRepoSet downloadRepo,
-                                     Path targetJar,
-                                     String springbootVersion) {
-        JkUtilsAssert.argument(classTree.exists(), "class dir not found " + classTree.getRoot());
-        String mainClassName = findMainClassName(classTree.getRoot());
-        JkCoordinateFileProxy loaderProxy = JkCoordinateFileProxy.of(downloadRepo,
-                LOADER_COORDINATE + DEFAULT_SPRINGBOOT_VERSION);
-
-        SpringbootPacker.of(libsToInclude, loaderProxy.get(), mainClassName)
-                .makeExecJar(classTree, targetJar, springbootVersion);
-    }
-
-
-    private static String findMainClassName(Iterable<Path> jarOrFolder) {
-        JkClassLoader classLoader = JkUrlClassLoader.of(jarOrFolder, ClassLoader.getSystemClassLoader().getParent())
-                .toJkClassLoader();
-        List<String> mainClasses = classLoader.findClassesHavingMainMethod();
-        List<String> classWithSpringbootAppAnnotation = classLoader.findClassesMatchingAnnotations(
-                annotationNames -> annotationNames.contains(SPRINGBOOT_APPLICATION_ANNOTATION_NAME));
-        for (String name : mainClasses) {
-            if (classWithSpringbootAppAnnotation.contains(name)) {
-                return name;
-            }
+    private String latestSpringbootVersion() {
+        try {
+            List<String> springbootVersions = project.dependencyResolver
+                    .searchVersions(JkSpringModules.Boot.STARTER_PARENT);
+            return springbootVersions.stream()
+                    .sorted(JkVersion.VERSION_COMPARATOR.reversed())
+                    .findFirst().get();
+        } catch (Exception e) {
+            JkLog.warn(e.getMessage());
+            JkLog.warn("Cannot find latest springboot version, choose default : " + JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
+            return JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION;
         }
-
-        // Kotlin adds a special [mainClass]Kt class to host main method
-        for (String name : mainClasses) {
-            if (name.endsWith("Kt")) {
-                String originalName = JkUtilsString.substringBeforeLast(name, "Kt");
-                if (classWithSpringbootAppAnnotation.contains(originalName)) {
-                    return name;
-                }
-            }
-        }
-        throw new IllegalStateException("No class annotated with @SpringBootApplication found.");
     }
-
-
 
 }

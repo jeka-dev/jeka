@@ -53,14 +53,25 @@ public abstract class JekaCommandLineExecutor {
         runJeka(false, projectDir, cmdLine);
     }
 
+    protected void runJeka(String projectDir, String cmdLine, String jekaJdkHome) {
+        runJeka(false, projectDir, cmdLine, jekaJdkHome);
+    }
+
     protected void runJeka(boolean useWrapper, String projectDir, String cmdLine) {
+        runJeka(useWrapper, projectDir, cmdLine, null);
+    }
+
+    protected void runJeka(boolean useWrapper, String projectDir, String cmdLine, String jekaJdkHome) {
+        String jdkHome = jekaJdkHome == null ?
+                JkJavaProcess.CURRENT_JAVA_HOME.normalize().toString()
+                        : jekaJdkHome;
         Path dir = this.samplesRootDir.resolve(projectDir);
         String command = useWrapper ? cmdLine + " -Djeka.distrib.location=" + jekaDir.toAbsolutePath().normalize() : cmdLine;
         process(dir, useWrapper)
                 .addParams(JkUtilsString.translateCommandline(command))
                 .inheritJkLogOptions()
                 .addParams("-dcf", "-lst", "-cw", "-lsu", "-lri")
-                .setEnv("JEKA_JDK", JkJavaProcess.CURRENT_JAVA_HOME.normalize().toString())
+                .setEnv("JEKA_JDK", jdkHome)
                 .run();
     }
 

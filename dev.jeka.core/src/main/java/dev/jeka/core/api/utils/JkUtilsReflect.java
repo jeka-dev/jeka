@@ -409,8 +409,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Returns all fields declared in the class passed as argument or andAccept its
-     * super classes.
+     * Returns all fields declared in the class passed as argument or and its super classes.
      */
     public static List<Field> getAllDeclaredFields(Class<?> clazz, boolean includeSuperClass) {
         final List<Field> result = new LinkedList<>();

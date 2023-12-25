@@ -88,7 +88,7 @@ public class SimpleProjectKBean extends KBean {
 
     // For debugging purpose
     public void printIml() {
-        JkImlGenerator imlGenerator = JkImlGenerator.of().setIdeSupport(this.projectKBean.getJavaIdeSupport());
+        JkImlGenerator imlGenerator = JkImlGenerator.of().setIdeSupport(projectKBean::getJavaIdeSupport);
         String iml = imlGenerator.computeIml().toDoc().toXml();
         System.out.println(iml);
     }

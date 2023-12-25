@@ -6,34 +6,27 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompiler;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkJdks;
+import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.project.*;
+import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.scaffold.JkScaffold;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -55,14 +48,23 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     public final JkRunOptions run = new JkRunOptions();
 
     /**
-     * Options for the testing tasks. These options are injectable from command line.
+     * Options for configuring testing tasks.
      */
-    public final JkTestOptions test = new JkTestOptions();
+    public final JkTestOptions tests = new JkTestOptions();
 
+    /**
+     * Options for configuring scaffold.
+     */
     public final JkScaffoldOptions scaffold = new JkScaffoldOptions();
 
+    /**
+     * Options for configuring directory layout.
+     */
     public final JkLayoutOptions layout = new JkLayoutOptions();
 
+    /**
+     * Options for configuring compilation.
+     */
     public final JkCompilationOptions compilation = new JkCompilationOptions();
 
     @JkDoc("The output file for the xml dependency description.")
@@ -75,8 +77,25 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         configureProject();
 
         // configure ScaffoldKBean
-        getRuntime().getOptionalKBean(ScaffoldKBean.class).ifPresent(scaffoldKBean ->
-                configureScaffold(scaffoldKBean.scaffold));
+        getRuntime().getOptionalKBean(ScaffoldKBean.class).ifPresent(scaffoldKBean -> {
+
+            // Scaffold project structure including build class
+            JkScaffoldOptions scaffoldOptions = this.scaffold;
+            JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffoldKBean.scaffold);
+            projectScaffold.configureScaffold(scaffoldOptions.template);
+
+            // Create 'project-dependencies.txt' file if needed
+            JkScaffoldOptions.DependenciesTxt dependenciesTxt = scaffoldOptions.dependenciesTxt;
+            List<String> compileDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.compile);
+            List<String> runtimeDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.runtime);
+            List<String> testDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.test);
+            projectScaffold.createProjectDependenciesTxt(compileDeps, runtimeDeps, testDeps);
+
+            // Create local lib folder structure if needed
+            if (scaffoldOptions.generateLocalLibsFolders) {
+                projectScaffold.generateLocalLibsFolders();
+            }
+        });
     }
 
     // ------------------------------- command line methods -----------------------------
@@ -120,31 +139,12 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("Displays resolved dependency tree in xml")
     public void showDependenciesXml() {
-        final Transformer transformer;
-        try {
-            transformer = TransformerFactory.newInstance().newTransformer();  //NOSONAR
-        } catch (TransformerConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        Writer out;
-        if (outputFile == null) {
-            out = new PrintWriter(JkLog.getOutPrintStream());
-        } else {
-            try {
-                JkPathFile.of(outputFile).createIfNotExist();
-                out = new FileWriter(outputFile.toFile());
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
         Document document = project.getDependenciesAsXml();
-        try {
-            transformer.transform(new DOMSource(document), new StreamResult(out));
-        } catch (TransformerException e) {
-            throw new RuntimeException(e);
+        String xml = JkDomDocument.of(document).toXml();
+        if (outputFile == null) {
+           JkLog.info(xml);
+        } else {
+            JkPathFile.of(outputFile).createIfNotExist().write(xml);
         }
     }
 
@@ -169,7 +169,6 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     public void publishLocal() {
         project.publication.publishLocal();
     }
-
 
     @Override
     public JkIdeSupport getJavaIdeSupport() {
@@ -272,75 +271,9 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         public boolean generateLocalLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")
-        public JkProjectBuildClassTemplate template = JkProjectBuildClassTemplate.SIMPLE_FACADE;
+        public JkProjectScaffold.BuildClassTemplate template = JkProjectScaffold.BuildClassTemplate.SIMPLE_FACADE;
 
         public final DependenciesTxt dependenciesTxt = new DependenciesTxt();
-
-        private void scaffoldProjectStructure(JkProject configuredProject) {
-            JkLog.info("Create source directories.");
-            JkCompileLayout prodLayout = configuredProject.compilation.layout;
-            prodLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
-            prodLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);
-            JkCompileLayout testLayout = configuredProject.testing.compilation.layout;
-            testLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
-            testLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);
-
-            // Create specific files and folders
-            String dependenciesTxtContent = dependenciesTxtContent();
-            JkPathFile.of(configuredProject.getBaseDir().resolve(JkConstants.JEKA_DIR)
-                            .resolve(JkConstants.PROJECT_DEPENDENCIES_TXT_FILE))
-                    .createIfNotExist()
-                    .write(dependenciesTxtContent.getBytes(StandardCharsets.UTF_8));
-            Path libs = configuredProject.getBaseDir().resolve(JkConstants.JEKA_DIR)
-                    .resolve(JkConstants.PROJECT_LIBS_DIR);
-            if (generateLocalLibsFolders) {
-                JkPathFile.of(libs.resolve("readme.txt"))
-                        .fetchContentFrom(ProjectKBean.class.getResource("libs-readme.txt"));
-                JkUtilsPath.createDirectories(libs.resolve("regular"));
-                JkUtilsPath.createDirectories(libs.resolve("compile-only"));
-                JkUtilsPath.createDirectories(libs.resolve("runtime-only"));
-                JkUtilsPath.createDirectories(libs.resolve("test"));
-                JkUtilsPath.createDirectories(libs.resolve("sources"));
-            }
-
-            // This is special scaffolding for project pretending to be plugins for Jeka
-            if (this.template == JkProjectBuildClassTemplate.PLUGIN) {
-                Path breakingChangeFile = configuredProject.getBaseDir().resolve("breaking_versions.txt");
-                String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
-                        "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
-                JkPathFile.of(breakingChangeFile).write(text);
-                Path sourceDir =
-                        configuredProject.compilation.layout.getSources().toList().get(0).getRoot();
-                String pluginCode = JkUtilsIO.read(ProjectKBean.class.getResource("pluginclass.snippet"));
-                JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxJkBean.java"))
-                        .createIfNotExist()
-                        .write(pluginCode.getBytes(StandardCharsets.UTF_8));
-            }
-        }
-
-        private String dependenciesTxtContent() {
-            List<String> lines = JkUtilsIO.readAsLines(ProjectKBean.class.getResourceAsStream("dependencies.txt"));
-            StringBuilder sb = new StringBuilder();
-            for (String line : lines) {
-                sb.append(line).append("\n");
-                if (line.startsWith("== COMPILE") && !JkUtilsString.isBlank(this.dependenciesTxt.compile)) {
-                    Arrays.stream(this.dependenciesTxt.compile.split(",")).forEach(extraDep ->
-                            sb.append(extraDep.trim()).append("\n")
-                    );
-                }
-                if (line.startsWith("== RUNTIME") && !JkUtilsString.isBlank(this.dependenciesTxt.runtime)) {
-                    Arrays.stream(this.dependenciesTxt.runtime.split(",")).forEach(extraDep ->
-                            sb.append(extraDep.trim()).append("\n")
-                    );
-                }
-                if (line.startsWith("== TEST") && !JkUtilsString.isBlank(this.dependenciesTxt.test)) {
-                    Arrays.stream(this.dependenciesTxt.test.split(",")).forEach(extraDep ->
-                            sb.append(extraDep.trim()).append("\n")
-                    );
-                }
-            }
-            return sb.toString();
-        }
 
         public static class DependenciesTxt {
 
@@ -353,7 +286,16 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             @JkDoc("Comma separated dependencies to include in project-dependencies.txt TEST section")
             public String test;
 
+            static List<String> toList(String description) {
+                if (description == null) {
+                    return Collections.emptyList();
+                }
+                return Arrays.asList(description.split(","));
+            }
+
         }
+
+
 
     }
 
@@ -402,7 +344,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         JkJavaCompiler compiler = project.compiler;
         if (!compiler.isToolOrProcessSpecified()) {
-            compiler.setGuessHints(jdks(), project.getJvmTargetVersion(), true);
+            compiler.setJdkHints(jdks(), project.getJvmTargetVersion(), true);
         }
         final JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
         JkArtifactId sources = JkProject.SOURCES_ARTIFACT_ID;
@@ -424,9 +366,9 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         JkTestProcessor testProcessor = project.testing.testProcessor;
         testProcessor.setJvmHints(jdks(), project.getJvmTargetVersion());
-        if (test.fork != null && test.fork && testProcessor.getForkingProcess() == null) {
+        if (tests.fork != null && tests.fork && testProcessor.getForkingProcess() == null) {
             final JkJavaProcess javaProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName())
-                    .addJavaOptions(this.test.jvmOptions);
+                    .addJavaOptions(this.tests.jvmOptions);
             if (project.getJvmTargetVersion() != null &&
                     !JkJavaVersion.ofCurrent().equals(project.getJvmTargetVersion())) {
                 Path javaHome = jdks().getHome(project.getJvmTargetVersion());
@@ -436,11 +378,11 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
                 }
             }
             testProcessor.setForkingProcess(javaProcess);
-        } else if (test.fork != null && !test.fork) {
+        } else if (tests.fork != null && !tests.fork) {
             testProcessor.setForkingProcess(false);
         }
-        if (test.skip != null) {
-            project.testing.setSkipped(test.skip);
+        if (tests.skip != null) {
+            project.testing.setSkipped(tests.skip);
         }
         if (compilation.compilerExtraArgs != null) {
             project.compilation.addJavaCompilerOptions(
@@ -448,27 +390,6 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
     }
 
-    private void configureScaffold(JkScaffold scaffold) {
-        scaffold.setJekaClassCodeProvider( () -> {
-            final String snippet;
-            if (this.scaffold.template == JkProjectBuildClassTemplate.CODE_LESS) {
-                return null;
-            }
-            if (this.scaffold.template == JkProjectBuildClassTemplate.NORMAL) {
-                snippet = "buildclass.snippet";
-            } else if (this.scaffold.template == JkProjectBuildClassTemplate.PLUGIN) {
-                snippet = "buildclassplugin.snippet";
-            } else if (this.scaffold.template == JkProjectBuildClassTemplate.PURE_API) {
-                snippet = "buildclasspureapi.snippet";
-            } else {
-                snippet = "buildclassfacade.snippet";
-            }
-            String template = JkUtilsIO.read(ProjectKBean.class.getResource(snippet));
-            String baseDirName = getBaseDir().getFileName().toString();
-            return template.replace("${group}", baseDirName).replace("${name}", baseDirName);
-        });
-        scaffold.setClassFilename("Build.java");
-        scaffold.extraActions.append( () -> this.scaffold.scaffoldProjectStructure(project));
-    }
+
 
 }

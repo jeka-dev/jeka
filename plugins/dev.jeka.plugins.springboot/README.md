@@ -1,30 +1,75 @@
 ![Build Status](https://github.com/jerkar/springboot-plugin/actions/workflows/push-master.yml/badge.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.jeka/springboot-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22dev.jeka22%20AND%20a:%22springboot-plugin%22)
 
-# Springboot plugin for Jeka
+# Spring-Boot plugin for Jeka
 
-[Jeka](https://jeka.dev) plugin to build Spring Boot applications with minimal effort. <br/>
+[Jeka](https://jeka.dev) plugin to build Spring-Boot applications with minimal effort. <br/>
 
-## Create a new Springboot project
+This plugin contains a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) and a library to handle the build of Spring-Boot applications, and specially 
+the creation of a bootable jar.
+
+## Create a new Spring-Boot Project from Scratch
 
 To create a new project from scratch, execute :
-Execute command line : 
+
 ```shell
 jeka scaffold#run scaffold#wrapper @dev.jeka:springboot-plugin springboot#
 ``` 
+This will download this plugin, and scaffold a Spring-Boot project for you in the working dir.
 !!!
   Note: you need to have installed JeKa on your machine to execute this command line.
-  Alternatively, Jeka Ide for IntelliJ does not required to have Jeka installed£
+  Alternatively, Jeka Ide for IntelliJ does not required to have Jeka installed.
 
 
-## Configure declaratively 
+## Configure a Project using Spring-Boot KBean 
 
-Add the following in your *local.properties* file
+[SpringbootKBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) is designed to auto-configure
+*ProjectKBean*, *SelfAppKBean* and *ScaffoldKBean* when present in runtime.
+
+It configures following KBeans when it is loaded in the runtime :
+- `ProjectKBean` : 
+  - Adds Spring-Boot bom to dependencies of the project.
+  - Instructs project to create bootable jar. War file and original artifacts can be generated as well
+  - Sets sensitive default as not producing javadoc or source artifacts.
+- `SelfAppKBean` : Instructs app to create bootable jar.
+- `ScaffoldKBean` : Creates specific build class and simple Spring-Boot app template code.
+
+### Instantiate Spring-Boot KBean
+
+As all KBean, this can be instantiated both using *property file* or *programmatically*.
+
+Using Properties:
+```properties
+jeka.cmd._append=@dev.jeka:springboot-plugin springboot#
+```
+
+Programmatically:
+
+```java
+import dev.jeka.plugins.springboot.SpringbootKBean;
+
+@JkInjectClasspath("dev.jeka:springboot-plugin")
+class MyBuild extends KBean {
+
+    MyBuild() {
+      load(SpringbootKBean.class);  // initializes the KBean and configures related KBeans (see above)
+    }
+  
+}
+```
+
+### Configuration
+
+This KBean can only be configured by properties.
+
 
 ```properties
 jeka.cmd._append=@dev.jeka:springboot-plugin springboot#
 springboot#springbootVersion=3.0.1
 ```
+jeka.cmd._append=@dev.jeka:springboot-plugin springboot#
+springboot#springbootVersion=3.0.1
+
 This will add *Springboot Plugin* to *Jeka* classpath, and instantiate *springboot* KBean.
 This has the effect to modify the *project* in such this produces a bootable jar or 
 deployable *war* archive.

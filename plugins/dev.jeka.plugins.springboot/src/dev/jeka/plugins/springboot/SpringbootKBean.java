@@ -8,6 +8,7 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffold;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
+import dev.jeka.core.tool.builtins.self.SelfAppKBean;
 
 import java.util.Optional;
 
@@ -22,34 +23,47 @@ public final class SpringbootKBean extends KBean {
 
     private static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.0";
 
-
-
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
     @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
-    public String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
+    private final String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
 
     @JkDoc("If true, create a bootable jar artifact.")
-    public boolean createBootJar = true;
+    private final boolean createBootJar = true;
 
     @JkDoc("If true, create original jar artifact for publication (jar without embedded dependencies")
-    public boolean createOriginalJar;
+    private boolean createOriginalJar;
 
     @JkDoc("If true, create a .war filed.")
-    public boolean createWarFile;
+    private boolean createWarFile;
 
-    @JkDoc("If true, download spring artifacts from Spring Maven repositories.")
-    public boolean useSpringRepos = true;
+    @JkDoc("Specific Spring repo where to download spring artifacts. Not needed if you use official release.")
+    private JkSpringRepo springRepo;
 
     @JkDoc(hide = true, value = "For internal test purpose : if not null, scaffolded build class will reference this classpath for <i>dev.jeka:springboot-plugin</i> dependency.")
-    public String scaffoldDefClasspath;
+    private String scaffoldDefClasspath;
 
     @JkDoc("Kind of build class to be scaffolded")
-    public JkSpringbootProject.ScaffoldBuildKind scaffoldBuildKind = JkSpringbootProject.ScaffoldBuildKind.KBEAN;
+    private final JkSpringbootProject.ScaffoldBuildKind scaffoldBuildKind = JkSpringbootProject.ScaffoldBuildKind.KBEAN;
 
-
+    @JkDoc("Scaffold a basic example application in package org.example")
+    public void scaffoldSample() {
+        getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean ->
+                JkSpringbootProject.of(projectKBean.project).scaffoldSample());
+    }
 
     @Override
     protected void init() {
+
+        // Spring-Boot KBean is intended to enhance either ProjectKBean nor SelfAppKBean.
+        // If none is present yet in the runtime, we assume that ProjectKBean should be instantiated implicitly
+        Optional<SelfAppKBean> optionalSelfAppKBean = getRuntime().getOptionalKBean(SelfAppKBean.class);
+        if (!optionalSelfAppKBean.isPresent()) {
+            JkLog.trace("No SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring JkProject.");
+            load(ProjectKBean.class);
+        } else {
+            JkLog.trace("SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring SelfApp. ");
+        }
+
         Optional<ProjectKBean> optionalProjectKBean = getRuntime().getOptionalKBean(ProjectKBean.class);
         optionalProjectKBean.ifPresent(projectKBean ->
                 configure(projectKBean.project));
@@ -57,40 +71,33 @@ public final class SpringbootKBean extends KBean {
                 configureScaffold(scaffoldKBean.scaffold));
     }
 
-    @JkDoc("Scaffold a basic example application in package org.example")
-    public void scaffoldSample() {
-        if (getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean -> {
-            JkSpringbootProject.of(projectKBean.project).scaffoldSample();
-        });
-    }
-
     @JkDoc("Provides info about this plugin configuration")
     public void info() {
-        JkLog.info("Springboot version : " + springbootVersion);
+        JkLog.info("Spring-Boot version : " + springbootVersion);
         JkLog.info("Create Bootable Jar : " + this.createBootJar);
         JkLog.info("Create original Jar : " + this.createOriginalJar);
         JkLog.info("Create .war file : " + this.createWarFile);
     }
 
     private void configureScaffold(JkScaffold scaffold) {
-        if (getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean -> {
+        getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean ->
             JkSpringbootProject.of(projectKBean.project)
                     .configureScaffold(
                             scaffold,
                             scaffoldBuildKind,
                             scaffoldDefClasspath,
-                            projectKBean.scaffold.template);
-        });
+                            projectKBean.scaffold.template));
     }
 
     private void configure(JkProject project) {
-        JkSpringbootProject.of(project)
-                .setUseSpringRepos(this.useSpringRepos)
-                .setCreateBootJar(this.createBootJar)
-                .setSpringbootVersion(this.springbootVersion)
-                .setCreateWarFile(this.createWarFile)
-                .setCreateOriginalJar(this.createOriginalJar)
-                .configure();
+        JkSpringbootProject springbootProject = JkSpringbootProject.of(project)
+                .configure(this.createBootJar, this.createWarFile, this.createOriginalJar);
+        if (springbootVersion != null) {
+            springbootProject.includeParentBom(springbootVersion);
+        }
+        if (springRepo != null) {
+            springbootProject.addSpringRepo(springRepo);
+        }
     }
 
 }

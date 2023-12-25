@@ -36,8 +36,10 @@ class Junit5Build extends KBean {
 
     final ProjectKBean projectKBean = load(ProjectKBean.class);
 
-    final IntellijKBean intellijKBean = load(IntellijKBean.class)
-            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    Junit5Build() {
+        load(IntellijKBean.class)
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    }
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option

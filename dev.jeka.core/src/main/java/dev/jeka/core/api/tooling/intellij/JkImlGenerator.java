@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Provides method to generate and read Eclipse metadata files.
@@ -34,7 +35,7 @@ public final class JkImlGenerator {
 
     private Path explicitJekaHome;
 
-    private JkIdeSupport ideSupport;
+    private Supplier<JkIdeSupport> ideSupportSupplier;
 
     // Only used if ideSupport is <code>null</code>
     private Path baseDir;
@@ -127,11 +128,16 @@ public final class JkImlGenerator {
     }
 
     public JkIdeSupport getIdeSupport() {
-        return ideSupport;
+        return ideSupportSupplier.get();
+    }
+
+    public JkImlGenerator setIdeSupport(Supplier<JkIdeSupport> ideSupportSupplier) {
+        this.ideSupportSupplier = ideSupportSupplier;
+        return this;
     }
 
     public JkImlGenerator setIdeSupport(JkIdeSupport ideSupport) {
-        this.ideSupport = ideSupport;
+        this.ideSupportSupplier = () -> ideSupport;
         return this;
     }
 
@@ -146,6 +152,7 @@ public final class JkImlGenerator {
     }
 
     public JkIml computeIml() {
+        JkIdeSupport ideSupport = ideSupportSupplier == null ? null : ideSupportSupplier.get();
         Path dir = ideSupport == null ? baseDir : ideSupport.getProdLayout().getBaseDir();
         JkIml iml = JkIml.of().setModuleDir(dir);
         JkLog.trace("Compute iml def classpath : " + defClasspath);
@@ -187,7 +194,7 @@ public final class JkImlGenerator {
     }
 
     private Path baseDir() {
-        return ideSupport == null ? baseDir : ideSupport.getProdLayout().getBaseDir();
+        return ideSupportSupplier == null ? baseDir : ideSupportSupplier.get().getProdLayout().getBaseDir();
     }
 
     // For def, we have computed classpath from runtime
@@ -209,9 +216,9 @@ public final class JkImlGenerator {
 
     private class OrderEntries {
 
-        private LinkedHashSet<JkIml.OrderEntry> orderEntries = new LinkedHashSet<>();
+        private final LinkedHashSet<JkIml.OrderEntry> orderEntries = new LinkedHashSet<>();
 
-        private Map<Path, JkIml.ModuleLibraryOrderEntry> cache = new HashMap<>();
+        private final Map<Path, JkIml.ModuleLibraryOrderEntry> cache = new HashMap<>();
 
         void add(Path entry, JkIml.Scope scope) {
             JkIml.OrderEntry orderEntry;

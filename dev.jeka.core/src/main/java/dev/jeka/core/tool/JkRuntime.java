@@ -61,6 +61,11 @@ public final class JkRuntime {
         BASE_DIR_CONTEXT.set(baseDir);
     }
 
+    /// TODO experimental
+    static void initAll() {
+        RUNTIMES.values().forEach(JkRuntime::injectFieldsThenInit);
+    }
+
     private static Path getBaseDirContext() {
         return Optional.ofNullable(BASE_DIR_CONTEXT.get()).orElseGet(() -> {
             setBaseDirContext(Paths.get(""));
@@ -101,7 +106,7 @@ public final class JkRuntime {
      */
     public <T extends KBean> T load(Class<T> beanClass) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
-        KBean result = beans.get(beanClass);
+        T result = (T) beans.get(beanClass);
         if (result == null) {
             String projectDisplayName = projectBaseDir.toString().isEmpty() ?
                     projectBaseDir.toAbsolutePath().getFileName().toString()
@@ -112,9 +117,8 @@ public final class JkRuntime {
             result = this.instantiate(beanClass);
             BASE_DIR_CONTEXT.set(previousProject);
             JkLog.endTask();
-            beans.put(beanClass, result);
         }
-        return (T) result;
+        return result;
     }
 
     /**
@@ -186,21 +190,31 @@ public final class JkRuntime {
         }
     }
 
-    private KBean instantiate(Class<? extends KBean> beanClass) {
+    private <T extends KBean> T instantiate(Class<T> beanClass) {
         if (Modifier.isAbstract(beanClass.getModifiers())) {
             throw new JkException("KBean class " + beanClass + " in " + this.projectBaseDir
                     + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
         }
-
-        KBean bean = JkUtilsReflect.newInstance(beanClass);
+        T bean = JkUtilsReflect.newInstance(beanClass);
+        beans.put(beanClass, bean);
 
         // We must inject fields after instance creation cause if we do this in the Jkean
         // constructor, fields of child classes are not yet initialized
         injectFieldValues(bean);
-
         bean.init();
-
         return bean;
+    }
+
+    private void injectFieldsThenInit() {
+        for (KBean kBean : this.getBeans()) {
+            JkLog.info("Inject field values in %s", kBean);
+            injectFieldValues(kBean);
+        }
+        for (KBean kBean : this.getBeans()) {
+            JkLog.startTask("Invoke init() on %s", kBean);
+            kBean.init();
+            JkLog.endTask();
+        }
     }
 
     // inject values in fields from command-line and properties.

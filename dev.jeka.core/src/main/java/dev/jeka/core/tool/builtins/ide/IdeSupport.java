@@ -7,7 +7,7 @@ import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.JkRuntime;
 
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -20,8 +20,8 @@ final class IdeSupport {
     private IdeSupport() {
     }
 
-    static JkIdeSupport getProjectIde(KBean kBean) {
-        List<JkIdeSupportSupplier> suppliers = kBean.getRuntime().getBeans().stream()
+    static JkIdeSupport getProjectIde(JkRuntime runtime) {
+        List<JkIdeSupportSupplier> suppliers = runtime.getBeans().stream()
                 .filter(JkIdeSupportSupplier.class::isInstance)
                 .map(JkIdeSupportSupplier.class::cast)
                 .collect(Collectors.toList());

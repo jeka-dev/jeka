@@ -42,10 +42,10 @@ public class ScaffoldKBean extends KBean {
         JkRepoSet repos = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos();
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
         this.scaffold.setDependencyResolver(dependencyResolver);
-        this.scaffold.addProjectPropsFileContent(this.localPropsExtraContent);
+        this.scaffold.addLocalPropsFileContent(this.localPropsExtraContent);
         if (this.localPropsExtraContentPath != null) {
             String content = JkPathFile.of(localPropsExtraContentPath).readAsString();
-            this.scaffold.addProjectPropsFileContent(content);
+            this.scaffold.addLocalPropsFileContent(content);
         }
     }
 

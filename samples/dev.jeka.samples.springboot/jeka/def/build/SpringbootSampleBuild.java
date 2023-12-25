@@ -1,11 +1,13 @@
 package build;
 
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.plugins.springboot.JkSpringboot;
+import dev.jeka.plugins.springboot.JkSpringbootProject;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
 
@@ -19,14 +21,11 @@ public class SpringbootSampleBuild extends KBean {
     SpringbootKBean springbootKBean = load(SpringbootKBean.class);
 
     SpringbootSampleBuild() {
-        /*
         load(IntellijKBean.class)
                 .replaceLibByModule("dev.jeka.springboot-plugin.jar", "dev.jeka.plugins.springboot")
                 .setModuleAttributes("dev.jeka.plugins.springboot", JkIml.Scope.COMPILE, null)
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
                 .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
-
-         */
     }
 
     @Override
@@ -45,9 +44,11 @@ public class SpringbootSampleBuild extends KBean {
                 )
                 .setPublishedModuleId("dev.jeka:samples-springboot")
                 .setPublishedVersion("1.0-SNAPSHOT");
-        JkSpringboot.of()
-                .setSpringbootVersion("3.2.0")
-                .configure(projectKBean.project);
+        JkSpringbootProject.of(projectKBean.project)
+                .configure()
+                .includeParentBom("3.2.0");
+        System.out.println("-----------------");
+        System.out.println(projectKBean.project.compilation.getExtraJavaCompilerOptions());
     }
 
 
@@ -63,7 +64,7 @@ public class SpringbootSampleBuild extends KBean {
 
     // Clean, compile, test and generate springboot application jar
     public static void main(String[] args) {
-        SpringbootSampleBuild build = JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE", "-lb");
+        SpringbootSampleBuild build = JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE");
         build.cleanPack();
         //build.load(ProjectKBean.class).publishLocal();
     }

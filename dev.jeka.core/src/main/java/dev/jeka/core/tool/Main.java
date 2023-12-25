@@ -6,7 +6,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsThrowable;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.InputStream;
@@ -90,15 +89,9 @@ public final class Main {
     }
 
     private static void handleRegularException(Throwable e) {
-        System.err.println("");
+        System.err.println();
         System.err.println("=============================== Stack Trace =============================================");
-        if (JkLog.isVerbose()
-                || Environment.standardOptions.logStyle == JkLog.Style.DEBUG
-                || Environment.standardOptions.logStackTrace) {
-            e.printStackTrace(System.err);
-        } else {
-            JkUtilsThrowable.printStackTrace(System.err, e, 5);
-        }
+        e.printStackTrace(System.err);
         System.err.println("=========================================================================================");
         System.err.println("\nAn error occurred during execution.");
         System.err.println("This could be caused by issues in the user code or settings, or potentially a bug in Jeka.");

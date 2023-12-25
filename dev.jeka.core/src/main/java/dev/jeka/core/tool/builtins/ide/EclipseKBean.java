@@ -56,7 +56,7 @@ public final class EclipseKBean extends KBean {
             "dependencies and source layout.")
     public void files() {
         final Path dotProject = getBaseDir().resolve(".project");
-        JkIdeSupport projectIde = IdeSupport.getProjectIde(this);
+        JkIdeSupport projectIde = IdeSupport.getProjectIde(getRuntime());
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
             for (final KBean importedKBean : getImportedKBeans().get(false)) {

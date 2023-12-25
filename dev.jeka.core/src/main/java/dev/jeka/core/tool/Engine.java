@@ -114,6 +114,7 @@ final class Engine {
         JkLog.endTask();
         JkLog.endTask();
         JkLog.endTask();
+        //JkRuntime.initAll();
         JkLog.info("KBeans are ready to run.");
         stopBusyIndicator();
         if (result != null && !result.compileFailedProjects.getEntries().isEmpty()) {

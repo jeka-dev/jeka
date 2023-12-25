@@ -7,7 +7,6 @@ import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,7 +31,7 @@ final class FieldInjector {
     }
 
     static void injectAnnotatedProperties(Object target, JkProperties properties) {
-        JkLog.traceStartTask("Injecting field values in object %s", target);
+        JkLog.traceStartTask("Injecting field values into %s", target);
         for (final Field field : getPropertyFields(target.getClass())) {
             JkLog.trace("Looking for value to inject in field %s", field);
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
@@ -71,22 +70,11 @@ final class FieldInjector {
 
     static List<Field> getPropertyFields(Class<?> clazz) {
         return JkUtilsReflect.getAllDeclaredFields(clazz,true).stream()
-                .filter(FieldInjector::isPropertyField)
+                .filter(KBean::isPropertyField)
                 .collect(Collectors.toList());
     }
 
-    private static boolean isPropertyField(Field field) {
-        if (Modifier.isStatic(field.getModifiers())) {
-            return false;
-        }
-        if (Modifier.isPublic(field.getModifiers())) {
-            return true;
-        }
-        String setterName = "set" + JkUtilsString.capitalize(field.getName());
-        return Arrays.asList(field.getDeclaringClass().getMethods()).stream()
-                .map(Method::getName)
-                .anyMatch(name -> name.equals(setterName));
-    }
+
 
     private static Set<String> inject(Object target, Field field, Map<String, String> props, String prefix) {
         final String name = field.getName();
