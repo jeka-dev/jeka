@@ -27,6 +27,10 @@ public abstract class KBean {
     private KBean(JkRuntime runtime) {
         this.runtime = runtime;
         this.importedKBeans = new JkImportedKBeans(this);
+
+        // This way KBeans are registered in the order they have been requested for instantiation,
+        // and not the order they have finished to be instantiated.
+        this.runtime.putKBean(this.getClass(), this);
     }
 
     /**

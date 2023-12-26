@@ -121,13 +121,6 @@ public final class JkRuntime {
         return result;
     }
 
-    /**
-     * Use {@link #load(Class)} instead
-     */
-    @Deprecated
-    public <T extends KBean> T getBean(Class<T> beanClass) {
-        return load(beanClass);
-    }
 
     public <T extends KBean> Optional<T> getOptionalKBean(Class<T> beanClass) {
         return (Optional<T>) Optional.ofNullable(beans.get(beanClass));
@@ -135,7 +128,7 @@ public final class JkRuntime {
 
     /**
      * Returns the list of registered KBeans. A KBean is registered when it has been identified as the default KBean or
-     * when {@link #getBean(Class)} is invoked.
+     * when {@link #load(Class)} is invoked.
      */
     public List<KBean> getBeans() {
         return new LinkedList<>(beans.values());
@@ -190,13 +183,16 @@ public final class JkRuntime {
         }
     }
 
+    void putKBean(Class<? extends KBean> kbeanClass, KBean kbean) {
+        beans.put(kbeanClass, kbean);
+    }
+
     private <T extends KBean> T instantiate(Class<T> beanClass) {
         if (Modifier.isAbstract(beanClass.getModifiers())) {
             throw new JkException("KBean class " + beanClass + " in " + this.projectBaseDir
                     + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
         }
         T bean = JkUtilsReflect.newInstance(beanClass);
-        beans.put(beanClass, bean);
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.
