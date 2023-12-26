@@ -2,7 +2,6 @@ package dev.jeka.plugins.protobuf;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -28,15 +27,12 @@ public class ProtobufKBean extends KBean {
     @Deprecated
     protected void init() {
         JkProject project = load(ProjectKBean.class).project;
-        JkProtocSourceGenerator sourceGenerator = JkProtocSourceGenerator.of(project.dependencyResolver.getRepos(),
-                protoPath)
-                .setExtraProtocOptions(extraProtocOptions)
-                .setProtocJarVersion(protocVersion);
-        project.compilation.addSourceGenerator(sourceGenerator);
-        if (!JkUtilsString.isBlank(protobufVersion)) {
-            project.compilation.configureDependencies(deps -> deps
-                    .and("com.google.protobuf:protobuf-java:" + protobufVersion));
-        }
+        JkProtobuf.of()
+                .setProtoPath(this.protoPath)
+                .setExtraProtocOptions(this.extraProtocOptions)
+                .setProtocVersion(this.protocVersion)
+                .setProtobufVersion(this.protobufVersion)
+                .configure(project);
     }
 
 }
