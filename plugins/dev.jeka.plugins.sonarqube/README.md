@@ -1,4 +1,4 @@
-# Sonarqube Plugin for Jeka
+# Sonarqube Plugin for JeKa
 
 This plugin provides utility classes and KBean to perform Sonarqube code analysis.
 

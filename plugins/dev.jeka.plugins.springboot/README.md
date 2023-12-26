@@ -1,4 +1,4 @@
-# Spring-Boot plugin for Jeka
+# Spring-Boot Plugin for JeKa
 
 [Jeka](https://jeka.dev) plugin to build Spring-Boot applications with minimal effort. <br/>
 

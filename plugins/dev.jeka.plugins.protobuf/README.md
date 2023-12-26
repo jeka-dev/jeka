@@ -1,4 +1,4 @@
-# Protobuf Plugin for Jeka
+# Protobuf Plugin for JeKa
 
 This plugin provides utility classes and KBean to compile Google ProtoBuffer .proto files.
 
@@ -40,8 +40,7 @@ public class Build extends JkClass {
     @Override
     protected void init() {
         JkProject project = ...
-        JkProtobuf.of().configure(project);
-        // ...
+        JkProtobuf.of().configure(project); // Adds the default protobuf source generator to the project.
     }
 }
 
