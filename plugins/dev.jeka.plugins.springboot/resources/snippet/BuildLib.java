@@ -4,38 +4,17 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
 
 @JkInjectClasspath("dev.jeka:springboot-plugin")
-class Build extends KBean implements JkIdeSupportSupplier {
+class Build extends KBean {
 
-    @JkDoc("Clean output directory then compile, test and create jar")
-    public void cleanPack() {
-        project().clean().pack();
-    }
-
-    @JkDoc("Runs the built bootable jar")
-    public void runJar() {
-        project().runMainJar(false, "", "");
-    }
-
-    @JkDoc("Display project info on console")
-    public void info() {
-        System.out.println(project().getInfo());
-    }
-
-    @JkDoc("Display dependency tree on console")
-    public void depTree() {
-        project().displayDependencyTree();
-    }
+    ProjectKBean projectKBean = load(ProjectKBean.class);
 
     @Override
-    public JkIdeSupport getJavaIdeSupport() {
-        return project().getJavaIdeSupport();
-    }
-
-    private JkProject project() {
-        JkProject project = JkProject.of();
+    protected void init() {
+        JkProject project = projectKBean.project;
         JkSpringbootProject.of(project)
                 .configure()
                 .includeParentBom("${springbootVersion}");
@@ -50,7 +29,6 @@ class Build extends KBean implements JkIdeSupportSupplier {
                         "org.springframework.boot:spring-boot-starter-test"
                 )
                 .setPublishedVersionFromGitTag();  // Infer version from Git
-        return project;
     }
 
 }

@@ -21,11 +21,9 @@ import java.util.Optional;
 )
 public final class SpringbootKBean extends KBean {
 
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.0";
-
     @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
     @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
-    private final String springbootVersion = DEFAULT_SPRINGBOOT_VERSION;
+    private String springbootVersion;
 
     @JkDoc("If true, create a bootable jar artifact.")
     private final boolean createBootJar = true;
@@ -43,7 +41,7 @@ public final class SpringbootKBean extends KBean {
     private String scaffoldDefClasspath;
 
     @JkDoc("Kind of build class to be scaffolded")
-    private final JkSpringbootProject.ScaffoldBuildKind scaffoldBuildKind = JkSpringbootProject.ScaffoldBuildKind.KBEAN;
+    private final JkSpringbootProject.ScaffoldBuildKind scaffoldKind = JkSpringbootProject.ScaffoldBuildKind.LIB;
 
     @JkDoc("Scaffold a basic example application in package org.example")
     public void scaffoldSample() {
@@ -84,7 +82,7 @@ public final class SpringbootKBean extends KBean {
             JkSpringbootProject.of(projectKBean.project)
                     .configureScaffold(
                             scaffold,
-                            scaffoldBuildKind,
+                            scaffoldKind,
                             scaffoldDefClasspath,
                             projectKBean.scaffold.template));
     }

@@ -8,28 +8,30 @@ import dev.jeka.core.tool.KBean;
 
 class Build extends KBean implements JkIdeSupportSupplier {
 
+    private final JkProject project = JkProject.of();
+
     @JkDoc("Clean output directory then compile, test and create jar")
     public void cleanPack() {
-        project().clean().pack();
+        project.clean().pack();
     }
 
     @JkDoc("Display project info on console")
     public void info() {
-        System.out.println(project().getInfo());
+        System.out.println(project.getInfo());
     }
 
     @JkDoc("Display dependency tree on console")
     public void depTree() {
-        project().displayDependencyTree();
+        project.displayDependencyTree();
     }
 
     @Override
     public JkIdeSupport getJavaIdeSupport() {
-        return project().getJavaIdeSupport();
+        return project.getJavaIdeSupport();
     }
 
-    private JkProject project() {
-        JkProject project = JkProject.of();
+    @Override
+    protected init() {
         project.flatFacade()
                 .addCompileDeps(
                         "com.google.guava:guava:32.1.3-jre",
@@ -45,8 +47,6 @@ class Build extends KBean implements JkIdeSupportSupplier {
                 // Only necessary if your project is published in a binary repository.
                 .setPublishedModuleId("your.org:project-name")
                 .setPublishedVersion("0.0.1-SNAPSHOT");
-
-        return project;
     }
 
 }

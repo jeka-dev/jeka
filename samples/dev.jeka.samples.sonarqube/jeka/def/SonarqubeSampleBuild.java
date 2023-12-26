@@ -8,7 +8,6 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.plugins.sonarqube.JkSonarqube;
-import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 
 /**
  * As there we have no embedded sonar server, this sample cannot be run automatically.
@@ -18,13 +17,17 @@ import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
 class SonarqubeSampleBuild extends KBean {
 
-    IntellijKBean intelliKBean = load(IntellijKBean.class)
-            .replaceLibByModule("dev.jeka.sonarqubbe-plugin.jar", "dev.jeka.plugins.sonarqube")
-            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    SonarqubeSampleBuild() {
+
+        // Use intellij source dependencies to ease plugin development.
+        load(IntellijKBean.class)
+                .replaceLibByModule("dev.jeka.sonarqubbe-plugin.jar", "dev.jeka.plugins.sonarqube")
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    }
 
     private final ProjectKBean projectKBean = load(ProjectKBean.class);
 
-    private final SonarqubeKBean sonarqubeKBean = load(SonarqubeKBean.class);
+    private JkSonarqube sonarqube;
 
     @Override
     protected void init() {
@@ -36,23 +39,19 @@ class SonarqubeSampleBuild extends KBean {
                 .configureTestDependencies(deps -> deps
                     .and(JkPopularLibs.JUNIT_5 + ":5.8.2")
                 );
-        sonarqubeKBean.provideTestLibs = true;
-        sonarqubeKBean.sonarqube
+        sonarqube = JkSonarqube.ofEmbedded()
                 .setProjectId("dev.jeka.samples.sonarqube", "myProjectNme",
                         JkGit.of().getVersionFromTag())
                 .setProperty(JkSonarqube.HOST_URL, "https://my.host.for.sonarqube.server:8080")
-                .setSkipDesign(true);
-
-        // Use intellij module dependency instead of ja dependency
-        load(IntellijKBean.class)
-                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+                .setSkipDesign(true)
+                .configureFor(projectKBean.project);
     }
 
     @JkDoc("Cleans, tests and creates bootable jar.")
-    public void cleanSonar() {
+    public void sonar() {
         cleanOutput();
         projectKBean.test();
-        sonarqubeKBean.run();
+        sonarqube.run();
     }
 
     public void cleanPack() {

@@ -12,12 +12,14 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffold;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -27,8 +29,8 @@ import java.util.function.Consumer;
 public final class JkSpringbootProject {
 
     public enum ScaffoldBuildKind {
-        PURE_API,
-        KBEAN
+        LIB,
+        PROPS
     }
 
     public static final JkArtifactId ORIGINAL_ARTIFACT = JkArtifactId.of("original", "jar");
@@ -68,7 +70,7 @@ public final class JkSpringbootProject {
 
         // define bootable jar as main artifact
         if (createBootJar) {
-            Consumer<Path> bootJarMaker = path -> this.createBootJar(path);
+            Consumer<Path> bootJarMaker = this::createBootJar;
             artifactProducer.putMainArtifact(bootJarMaker);
         }
         if (createWarFile) {
@@ -176,15 +178,27 @@ public final class JkSpringbootProject {
             String scaffoldDefClasspath,  // nullable
             JkProjectScaffold.BuildClassTemplate projectBuildClassTemplate) {
 
-        String buildClassSource = scaffoldBuildKind == ScaffoldBuildKind.KBEAN ?
-                "BuildKBean.java" : "BuildPureApi.java";
-        String code = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/" + buildClassSource));
-        String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
-        code = code.replace("${dependencyDescription}", defClasspath);
-        code = code.replace("${springbootVersion}", latestSpringbootVersion());
-        final String jkClassCode = code;
-        if (projectBuildClassTemplate != JkProjectScaffold.BuildClassTemplate.CODE_LESS) {
-            scaffold.setJekaClassCodeProvider(() -> jkClassCode);
+        if (scaffoldBuildKind == ScaffoldBuildKind.LIB) {
+            String buildClassSource = "BuildLib.java";
+            String code = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/" + buildClassSource));
+            String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
+            code = code.replace("${dependencyDescription}", defClasspath);
+            code = code.replace("${springbootVersion}", latestSpringbootVersion());
+            final String jkClassCode = code;
+            if (projectBuildClassTemplate != JkProjectScaffold.BuildClassTemplate.CODE_LESS) {
+                scaffold.setJekaClassCodeProvider(() -> jkClassCode);
+            }
+        } else if (scaffoldBuildKind == ScaffoldBuildKind.PROPS) {
+            String propsContent =
+                    JkConstants.CLASSPATH_INJECT_PROP + "=" + "dev.jeka:springboot-plugin\n" +
+                    JkConstants.DEFAULT_KBEAN_PROP + "=" + SpringbootKBean.class.getName() + "\n\n" +
+                    "springboot#springbootVersion=" + latestSpringbootVersion();
+            scaffold.addLocalPropsFileContent(propsContent);
+            JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffold);
+            projectScaffold.createProjectDependenciesTxt(
+                    Collections.singletonList("org.springframework.boot:spring-boot-starter-web"),
+                    Collections.emptyList(),
+                    Collections.singletonList("org.springframework.boot:spring-boot-starter-test"));
         }
         scaffold.extraActions.append(this::scaffoldSample);
         String readmeContent = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/README.md"));
@@ -192,9 +206,7 @@ public final class JkSpringbootProject {
             JkPathFile readmeFile = JkPathFile.of(project.getBaseDir().resolve("README.md")).createIfNotExist();
             readmeFile.write(readmeContent.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         });
-        if (scaffoldBuildKind == ScaffoldBuildKind.KBEAN) {
-            scaffold.addLocalPropsFileContent("springboot#springbootVersion=" + latestSpringbootVersion());
-        }
+
     }
 
     /**
